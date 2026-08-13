@@ -11,24 +11,24 @@ status: Done
 publish: true
 ---
 
-Trajectory evaluation scores the whole path an agent took — the ordered sequence of tool calls, observations, and reasoning steps from task to result — rather than any single step or the final answer alone. It exists because two agents can reach the same correct end state by very different routes: one in four clean steps, the other after wandering through six wrong tool calls and recovering by luck. Outcome scoring rates them equally; [[Tool-Call Evaluation|tool-call scoring]] rates each call in isolation; only trajectory evaluation answers "was the *path* reasonable."
+Trajectory evaluation scores the path from task to result: tool calls, observations, and intermediate decisions in order. Outcome scoring cannot distinguish a four-step solve from a lucky recovery after six wrong calls. [[Tool-Call Evaluation|tool-call scoring]] can flag individual mistakes, but it does not explain whether the sequence as a whole was sensible.
 
-Two families do this, and they trade off precision against coverage. **Reference-trajectory match** compares the agent's path against a known-good one. **LLM-as-judge over the trace** reads the whole transcript and rates it against a rubric. The judge machinery is the general [[LLM-as-a-Judge]] applied to a trajectory; the modes below are agent-specific.
+Two scorer families cover that gap. Reference matching compares the trace with a known-good path. A trace judge reads the transcript against a rubric. The second approach reuses [[LLM-as-a-Judge]] machinery, but feeds it agent decisions instead of a final answer.
 
 # Reference-trajectory Match
 
-You curate a reference path — the tool sequence a correct solve should take — and score how the agent's actual path compares. The comparison mode decides how strict that is:
+A reference path records the calls a correct solve should contain. The comparison mode defines how much variation remains valid:
 
-- **Strict** — same tools, same arguments, same order. Use only when exactly one correct path exists; otherwise it rejects valid solutions.
-- **Unordered** — same set of tool calls, order ignored. Use when the steps are independent (fetch two unrelated facts in either order).
-- **Subset** — the agent's calls all appear in the reference set (agent ⊆ reference); no out-of-scope tools. Use to assert "stayed in bounds," e.g. never called a write tool on a read-only task.
-- **Superset** — every reference step appears in the agent's path, extra steps allowed (agent ⊇ reference). Use to assert "did the required work," tolerating exploration.
+- **Strict** requires the same tools, arguments, and order. It fits a task with one valid procedure.
+- **Unordered** requires the same calls but ignores order. It fits independent reads.
+- **Subset** requires every agent call to belong to the allowed reference set (`agent ⊆ reference`). It is useful for safety boundaries, such as proving a read-only task never invoked a write tool.
+- **Superset** requires every reference step to appear in the trace (`agent ⊇ reference`) while allowing exploration. It proves that required work happened.
 
-Reference matching is precise and cheap to run, but brittle: it can only credit paths you anticipated, and for open-ended tasks the space of valid paths is too large to enumerate. It also says nothing about *quality* within an allowed path — a superset match passes a bloated trajectory as long as it contains the required steps.
+Reference matching is cheap and objective once the paths exist. Its coverage is narrow. An unanticipated but correct solution fails, while a bloated superset trace passes as long as the required calls appear somewhere.
 
 # LLM-as-judge over the Trace
 
-When no single path is correct, give a judge the full transcript and a rubric: did the agent form a sensible plan, choose appropriate tools, avoid needless steps, and recover when a tool failed? The judge handles the open-ended "reasonableness" that reference matching cannot, at the cost of a model call per trajectory and the judge's biases — amplified here because a trajectory is long.
+When many paths can work, a judge can score the transcript against a rubric covering plan quality, tool choice, wasted work, and recovery. This captures reasoning that no fixed path can enumerate. It costs a model call per trajectory, and long traces amplify the judge's position and verbosity biases.
 
 ```mermaid
 flowchart LR
@@ -41,7 +41,9 @@ flowchart LR
 
 # Step-level Vs Episode-level
 
-Decide what a "score" attaches to. **Episode-level** rates the trajectory as a whole (one pass/fail or one rubric score per run) — cheap, but a failure tells you the run was bad, not where. **Step-level** scores each decision point (was *this* the right next action given the state so far) — far more diagnostic for finding where a long agent derailed, but it costs a judgment per step and needs per-step ground truth or a judge with the running context. Start episode-level for release gating; add step-level only on the trajectories that fail, to localize the break.
+Episode-level scoring assigns one verdict to the run. It is cheap enough for a release gate, but a failure only says the path was bad.
+
+Step-level scoring asks whether each next action made sense given the state at that point. It localizes the first bad decision and the recovery that followed. The price is one judgment per step plus enough running context to judge it. A practical setup gates every run at episode level, then expands failed or high-risk traces into step-level analysis.
 
 # Example
 
@@ -69,37 +71,26 @@ Same outcome, same superset verdict; the judge separates the clean path from the
 | Reference match (subset/superset) | Missing required work / out-of-bounds actions | Low | Path quality within bounds (bloat, detours) |
 | LLM judge over the trace | Plan quality, redundancy, recovery | High — judge call per run, long context | Traces exceed the judge's reliable context window |
 
-Decision rule: use reference matching where the task has a small, knowable set of correct paths and you want a cheap, objective gate — subset mode is especially good as a *safety* check (never touched a forbidden tool). Switch to a judge for open-ended tasks, and pair it with the cheap outcome and efficiency metrics from [[Home/AI & ML/LLM/Agents/Evaluation/Evaluation|Agent Evaluation]] so a high judge score on a failed task is impossible to miss.
+Use reference matching when the valid procedures are few and knowable. Subset mode is especially effective as a hard safety gate because forbidden tools fail deterministically. Use a judge when decomposition is open-ended. In either case, keep outcome and efficiency metrics from [[Home/AI & ML/LLM/Agents/Evaluation/Evaluation|Agent Evaluation]] beside the path score. A polished trajectory that missed the task is still a failure.
 
 # Pitfalls
 
 ## Reference Brittleness Penalizes Valid Alternate Paths
 
-A strict reference match marks a correct solve wrong because it used `search` then `filter` instead of a single `query` call. The metric is now measuring conformance to your guessed path, not task quality, and will rank a rigid agent above a smarter flexible one. Loosen to a more permissive mode (unordered or superset), or move to a judge, whenever more than one path is genuinely correct.
+A strict match can reject a correct solve because it used `search` followed by `filter` instead of one `query`. At that point the metric measures conformity to the author’s path. Unordered or superset matching fits bounded alternatives. A judge fits tasks where valid decompositions cannot be listed.
 
 ## Judge Degrades on Long Traces
 
-LLM judges lose reliability as the transcript grows — they skim the middle, anchor on the first and last steps, and reward verbosity. A 40-step trajectory is exactly where you most need step localization and least trust a single episode-level judgment. Mitigation: summarize or chunk the trace, score key decision points step-level, and validate judge scores against human labels on long runs specifically.
+Long transcripts make trace judges less reliable. Middle steps receive less attention, first and last actions become anchors, and verbose agents can look more deliberate than concise ones. Chunk or switch to step-level scoring when trace length passes the range where the judge has been validated against human labels. Agreement on short traces does not establish that boundary.
 
 ## Outcome Leakage Inflates Path Scores
 
-If the judge can see that the task succeeded, it rationalizes the path as good regardless of how messy it was. Withhold the outcome from the trajectory judge, or score path and outcome with separate calls, so a lucky success through a bad path is not laundered into a high path score.
+Visible task success can make a judge rationalize a messy path. Hide the outcome from the trajectory scorer or evaluate path and outcome in separate calls. Otherwise a lucky recovery becomes evidence of good process.
 
 # Questions
 
-> [!QUESTION]- When do you use reference-trajectory matching versus an LLM judge over the trace?
-> - Reference matching fits tasks with a small, knowable set of correct paths; it is cheap, objective, and can assert hard constraints (subset = stayed in bounds, superset = required work done)
-> - It breaks when many paths are valid — strict matching then penalizes correct alternate solutions and measures conformance, not quality
-> - A judge handles open-ended tasks and rates plan quality, redundancy, and recovery that matching cannot see, at the cost of a model call per run and long-context bias
-> - Common setup: subset match as a cheap safety gate (no out-of-scope tools) plus a judge for path quality, backed by outcome and efficiency metrics
-> - Matching is cheap but brittle and quality-blind; judging is flexible but expensive and biased — choose by how enumerable the correct paths are
-
-> [!QUESTION]- Why can a high trajectory-judge score be misleading, and how do you guard against it?
-> - If the judge sees the task succeeded, outcome leakage makes it rationalize a messy path as good
-> - On long traces the judge skims the middle and rewards verbosity, so a bloated trajectory can outscore a clean one
-> - Guard by withholding the outcome from the path judge (or scoring path and outcome separately) and by validating against human labels on long runs
-> - Pair the judge with objective efficiency counters (steps, cost, redundant calls) that a biased judge cannot launder
-> - Separate, calibrated, step-localized judging costs more calls, so spend it on the long, high-stakes trajectories where path quality actually matters
+> [!QUESTION]- When is reference matching a better trajectory scorer than an LLM judge?
+> Reference matching fits tasks with a small set of knowable procedures. It is cheap, objective, and can enforce hard boundaries: subset mode proves the agent stayed within an allowed tool set, while superset mode proves required calls occurred. A judge becomes necessary when valid decompositions are too numerous to enumerate, but it adds cost and long-context bias.
 
 # References
 

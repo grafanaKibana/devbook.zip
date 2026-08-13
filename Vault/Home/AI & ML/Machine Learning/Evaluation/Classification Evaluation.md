@@ -11,25 +11,25 @@ status: Done
 publish: true
 ---
 
-Classification evaluation is how you measure whether a model assigns the right label (or set of labels) for an input. In software terms: you want to quantify the failure modes (false alarms vs misses), pick an operating point (threshold), and prevent regressions when data/model changes.
+Classification evaluation turns model errors into operating costs. The confusion matrix shows which mistakes occur. The threshold decides how many of each kind the system accepts. A release decision then compares models at the same constraint, such as maximizing precision while keeping recall above 0.95.
 
-# Precision, Recall, and F1
+# Binary Classification
 
-## Confusion Matrix First
+## Start with the Confusion Matrix
 
-Everything starts from four counts:
+A binary classifier produces four counts at a chosen threshold:
 
 | | Actual positive | Actual negative |
 |---|---:|---:|
 | Predicted positive | TP | FP |
 | Predicted negative | FN | TN |
 
-- `TP`: you flagged positive and it really was positive.
-- `FP`: false alarm.
-- `FN`: miss.
-- `TN`: correctly ignored.
+- `TP`: predicted positive, actually positive.
+- `FP`: predicted positive, actually negative. A false alarm.
+- `FN`: predicted negative, actually positive. A miss.
+- `TN`: predicted negative, actually negative.
 
-## The Three Formulas to Remember
+## Precision, Recall, and F1
 
 ```text
 precision = TP / (TP + FP)
@@ -37,16 +37,11 @@ recall    = TP / (TP + FN)
 F1        = 2 * (precision * recall) / (precision + recall)
 ```
 
-- Precision: from predicted positives, how many are truly positive.
-- Recall: from real positives, how many you found.
-- F1: one score that is high only when both precision and recall are high.
+- **Precision** answers how many predicted positives were correct. False positives pull it down.
+- **Recall** answers how many real positives were found. False negatives pull it down.
+- **F1** is their harmonic mean. It is useful as a compact comparison only when false alarms and misses deserve similar weight.
 
-Memory hook:
-
-- Precision is hurt by `FP` false alarms.
-- Recall is hurt by `FN` misses.
-
-## Threshold Tradeoff
+## The Threshold Moves the Cost
 
 ```mermaid
 flowchart LR
@@ -58,21 +53,15 @@ flowchart LR
   F --> P2[Precision usually up]
 ```
 
-## Real World Examples
+Lowering the threshold usually finds more positives and creates more false alarms. Raising it does the reverse. The exact movement depends on the score distribution. The diagram describes the usual direction, not a guarantee for every finite sample.
 
-Content moderation:
+## Content Moderation and Fraud Detection
 
-- Low threshold catches more unsafe posts, but blocks more safe posts.
-- High threshold blocks fewer safe posts, but lets more unsafe posts pass.
-
-Fraud detection:
-
-- High recall means fewer fraud cases slip through.
-- High precision means fewer legit users get flagged.
+In content moderation, a lower threshold catches more unsafe posts but blocks more safe ones. Fraud detection has the same mechanics with different costs: recall protects against missed fraud, while precision keeps legitimate customers out of the review queue.
 
 ## Worked Example
 
-Binary classifier on 100 cases:
+For 100 cases, suppose the threshold produces:
 
 ```text
 TP = 32
@@ -87,7 +76,7 @@ recall    = 32 / (32 + 10) = 0.76
 F1        = 2 * (0.80 * 0.76) / (0.80 + 0.76) = 0.78
 ```
 
-Same model family at two thresholds:
+The same scoring model can report very different metrics at two thresholds:
 
 | Threshold | TP | FP | FN | Precision | Recall |
 |---|---:|---:|---:|---:|---:|
@@ -96,37 +85,37 @@ Same model family at two thresholds:
 
 # Multi-class Averaging
 
-When extending precision/recall to multi-class problems, the averaging method changes the number you see:
+Multi-class metrics require a choice about whose errors count most:
 
 | Method | Formula | When to Use |
 | --- | --- | --- |
-| **Macro** | Average metric across classes equally | All classes are equally important regardless of size (e.g., rare disease detection) |
-| **Micro** | Aggregate TP/FP/FN globally, then compute | Overall correctness matters most, classes are roughly balanced |
-| **Weighted** | Average weighted by class support (count) | Classes have different sizes and you want proportional representation |
+| **Macro** | Average the per-class metric equally | Minority classes must count as much as common classes |
+| **Micro** | Aggregate TP/FP/FN globally, then compute | Overall instance-level performance matters. Frequent classes may dominate |
+| **Weighted** | Average per-class metrics by support | A per-class view is wanted, but class frequency should determine influence |
 
-**Decision rule**: use macro-average when minority classes matter (medical, safety). Use micro-average for balanced datasets or when you want a single aggregate number. Use weighted-average for reporting to stakeholders who think in terms of "percentage of all predictions correct."
+Macro averaging exposes weak minority-class performance. Micro averaging emphasizes total decisions and, for single-label multi-class classification, micro precision and recall equal accuracy. Weighted averaging can still hide a bad rare class because support controls its influence. Report the per-class values whenever one class carries disproportionate risk.
 
 # Pitfalls
 
-**F1 hides asymmetric failures** — an F1 of 0.78 could be precision 0.95 / recall 0.66 or precision 0.66 / recall 0.95. These have completely different operational impact: a fraud model with recall 0.66 silently misses a third of fraud cases, while one with precision 0.66 floods reviewers with false alarms. Always report precision and recall separately alongside F1.
+**F1 hides asymmetric failures.** An F1 near 0.78 can come from high precision with weak recall or the reverse. Those systems have different queues and losses. Keep precision and recall beside F1, and use an explicit cost constraint when one error matters more.
 
-**Comparing models at different thresholds** — if Model A runs at threshold 0.3 and Model B at 0.7, comparing their precision/recall is meaningless. Fix the threshold policy first (e.g., "recall ≥ 0.95"), then compare precision at that fixed operating point. Better yet, compare PR-AUC or ROC-AUC for threshold-invariant comparison.
+**Comparing arbitrary thresholds.** Precision at 0.3 for one model and at 0.7 for another says little. Compare both under the same policy, for example precision at recall ≥ 0.95. PR-AUC or ROC-AUC can compare ranking across thresholds, but neither chooses the production operating point.
 
-**Optimizing a single metric** — a spam filter optimized purely for precision (blocking only obvious spam) lets a large share of spam through. The same filter optimized purely for recall starts blocking legitimate emails. Neither is deployable. Always optimize under a constraint: "maximize precision subject to recall ≥ X" (or vice versa).
+**Optimizing one metric without a constraint.** A spam filter can raise precision by flagging only obvious cases, leaving most spam untouched. Pushing recall alone blocks legitimate mail. The deployable objective includes both the benefit and the limit, such as maximizing recall while keeping the false-positive rate below 1%.
 
-**Class imbalance distortion** — accuracy is misleading on imbalanced datasets. A model that always predicts "not fraud" on a dataset with 0.1% fraud rate achieves 99.9% accuracy but catches zero fraud. Use precision/recall/F1 (which ignore TN) or balanced accuracy. In production, track per-class metrics separately.
+**Class imbalance distorts accuracy.** Always predicting "not fraud" yields 99.9% accuracy when fraud prevalence is 0.1%, with zero useful detections. Precision, recall, PR-AUC, balanced accuracy, and per-class results reveal different parts of that failure.
 
 # Questions
 
-> [!QUESTION]- When should you optimize precision vs recall, and how do you operationalize the choice?
-> Optimize precision when false positives are expensive: blocking legitimate users (and churning them), flooding a manual review queue with false alarms, or triggering expensive downstream actions (automated account lockouts). Optimize recall when misses are dangerous: fraud slipping through, safety violations in content moderation (regulatory exposure), or medical screening (missed diagnosis). Operationalize by setting a hard constraint on the priority metric (e.g., "recall ≥ 0.95"), then maximizing the other. Freeze the threshold and monitor both metrics daily with alerting on ≥5% drift.
+> [!QUESTION]- When should a system prioritize precision over recall, and how is that choice made operational?
+> Give priority to precision when false positives consume scarce review capacity or trigger costly actions. Give priority to recall when a missed positive carries the larger loss. Express the choice as a constraint, such as maximizing precision at recall ≥ 0.95, select the threshold on validation data, and track both metrics by important cohort after release.
 
-> [!QUESTION]- How do you pick a classification threshold in practice?
-> 1. Define the business constraint: "recall must be ≥ 0.95" or "FP rate must be ≤ 0.02." 2. Plot the precision-recall curve on a held-out validation set. 3. Find the threshold that satisfies your constraint while maximizing the complementary metric. 4. Validate on a separate golden test set (not the validation set used for selection). 5. Freeze the threshold in production config (not hardcoded). 6. Set up monitoring: if the metric drops ≥5% on weekly golden-set runs, trigger re-evaluation. A static threshold degrades as the data distribution shifts, so schedule quarterly threshold reviews or move to dynamic thresholding with confidence calibration.
+> [!QUESTION]- How is a classification threshold chosen in practice?
+> Start with the cost or capacity constraint. Sweep thresholds on a validation set, choose the point that satisfies it, then report the frozen policy on a separate test set. Production monitoring must include the realized error rates and score distribution because a threshold selected on old data can age as prevalence or calibration changes.
 
 # References
 
-- [Scikit-learn: Classification metrics](https://scikit-learn.org/stable/modules/model_evaluation.html#classification-metrics) — comprehensive reference for precision, recall, F1, confusion matrix, ROC, and multi-class variants with code examples.
+- [Scikit-learn: Classification metrics](https://scikit-learn.org/stable/modules/model_evaluation.html#classification-metrics) — defines confusion-matrix metrics and the macro, micro, weighted, and sample averaging modes.
 - [Google ML Crash Course: Accuracy, precision, recall](https://developers.google.com/machine-learning/crash-course/classification/accuracy-precision-recall) — interactive tutorial with threshold visualization and worked examples.
-- [Precision-recall tradeoff in production ML (Eugene Yan)](https://eugeneyan.com/writing/simplicity/) — practitioner perspective on choosing operating points, monitoring metric drift, and when simpler models with better-understood failure modes beat complex ones.
+- [Simplicity is an advantage but sadly complexity sells better (Eugene Yan)](https://eugeneyan.com/writing/simplicity/) — argues for strong simple baselines and measurable gains before accepting model complexity.
 - [Beyond Accuracy: Behavioral Testing of NLP Models (Ribeiro et al., ACL 2020)](https://aclanthology.org/2020.acl-main.442/) — introduces CheckList methodology for testing classification models beyond aggregate metrics, with per-capability precision/recall analysis.

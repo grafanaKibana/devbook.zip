@@ -12,9 +12,11 @@ status: Done
 publish: true
 ---
 
-Context engineering is the practice of deliberately deciding what goes into the model's context window — instructions, examples, retrieved evidence, conversation history, tool definitions, and tool results — and in what order, to maximize useful signal within a finite, attention-limited budget. It is the discipline [[Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering|Prompting]] grows into once a system involves retrieval, tools, and memory: the prompt is no longer a single authored string but an assembled payload, and assembling it well is what separates a reliable agent from a flaky one. On the [[Home/AI & ML/LLM/LLM|engineering ladder]] it is the second rung: prompt engineering shapes the single instruction, context engineering decides what the model *sees*, [[Home/AI & ML/LLM/Harness Engineering/Harness Engineering|Harness Engineering]] decides what it *can do*, and [[Home/AI & ML/LLM/Loop Engineering/Loop Engineering|Loop Engineering]] decides how it behaves over time.
+Context engineering decides what the model sees and where it appears in the context window. Instructions compete with examples, retrieved evidence, conversation history, and tool traffic for the same finite budget. Once a system gains retrieval or memory, [[Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering|Prompting]] is only one part of an assembled payload.
 
-The core constraint is that the context window is finite and attention across it is uneven. More context is not better. Two findings drive the whole discipline: models attend most to the beginning and end of the context and least to the middle ("lost in the middle", Liu et al. 2023), and answer quality degrades as the input grows even when the extra tokens are relevant — the model's attention dilutes across the material (often called context rot). The engineering goal is therefore the smallest, highest-signal, best-ordered context that answers the task.
+On the [[Home/AI & ML/LLM/LLM|engineering ladder]], context engineering sits between the instruction and the runtime around it. [[Home/AI & ML/LLM/Harness Engineering/Harness Engineering|Harness Engineering]] controls what the model can do. [[Home/AI & ML/LLM/Loop Engineering/Loop Engineering|Loop Engineering]] controls repeated behavior. Context engineering controls the material available for each decision.
+
+The hard constraint is uneven attention inside a limited window. Models tend to use evidence near the beginning and end better than evidence buried in the middle. And answer quality can decline as otherwise relevant input grows, often called context rot. More context is therefore a poor default. The target is the smallest well-ordered context that still contains the evidence needed for the task.
 
 ```mermaid
 flowchart TD
@@ -31,7 +33,7 @@ flowchart TD
     TS --> M
 ```
 
-The largest mechanism for filling the window with evidence — retrieval — lives in this folder as [[Home/AI & ML/LLM/Context Engineering/RAG/RAG|RAG]]: the pipeline that selects, ranks, and bounds what enters the context from a corpus.
+Retrieval is the main way external evidence enters the window. [[Home/AI & ML/LLM/Context Engineering/RAG/RAG|RAG]] selects and ranks that evidence, then bounds how much of it reaches generation.
 
 ```datacorejsx
 const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
@@ -40,90 +42,83 @@ return FolderStructureMap;
 
 # The Context Budget
 
-Everything competes for the same window: the system prompt, the running conversation history, retrieved documents, tool schemas, tool results, and the space reserved for the output all draw from one token budget. Treat it like a memory budget — account for each component, and when the total approaches the limit, decide what to cut rather than letting the runtime truncate arbitrarily (which usually drops the oldest, and often most important, instructions).
+The system prompt, conversation history, retrieved documents, tool schemas, tool results, and reserved output space all draw from one token budget. Account for them like memory allocations. When the total approaches the limit, choose what to remove before the runtime truncates an old instruction by accident.
 
-Practical accounting:
+Three costs are easy to miss:
 
-- Reserve headroom for the output. A response cannot exceed what is left after the input; budget `max_tokens` (see [[Generation]]) against the remaining space.
-- Tool schemas are not free. Each connected tool's name, description, and parameter schema is sent every request; large toolsets consume thousands of tokens before any work happens (see [[Tools]] on context degradation from large toolsets).
-- History grows unboundedly. Every turn appends the model's reasoning, tool calls, and results — without management this is the component that silently fills the window in long [[Agent Loop|agent loops]].
+- Output needs headroom. Budget `max_tokens` against what remains after the input. [[Generation]] cannot produce tokens that the context limit has already consumed.
+- Tool schemas are sent as input. Names, descriptions, and parameter definitions can consume thousands of tokens before the first call. [[Tools]] covers the accuracy cost of oversized toolsets.
+- History grows every turn. Reasoning, calls, and results quietly fill the window during long [[Agent Loop|agent loops]] unless the runtime compacts them.
 
 # Techniques
 
-**Ordering and positioning.** Place the most important evidence at the start and end of the context to exploit primacy and recency; bury nothing critical in the middle. For ranked retrieval, put the highest-ranked chunks first. This is the context-assembly guidance from [[Generation]] applied as a deliberate lever.
+**Ordering and positioning.** Put the strongest instructions and evidence where the model is most likely to use them, usually near the start or end. Ranked retrieval should place its best chunk first. This is the context-assembly side of [[Generation]].
 
-**Selection over stuffing.** Retrieve few high-signal chunks rather than many partial ones — noise dilutes signal. [[Re-ranking|Reranking]] and tight [[Retrieval]] exist precisely to bound what enters the window. Prefer a complete, relevant chunk over fragments of many.
+**Selection over stuffing.** A few complete, relevant chunks usually beat a pile of fragments. [[Retrieval]] keeps the candidate set focused, while [[Re-ranking|Reranking]] spends extra work to choose what actually enters the prompt.
 
-**Compaction.** Summarize or prune older history before it crowds out the task. In long sessions, periodically replace verbose past turns with a compact summary of what matters. Keep tool results minimal — return only the fields the model needs, not entire API payloads (see [[Tools]] on return-value minimalism). Deciding *when* to compact in a running agent is a [[Home/AI & ML/LLM/Loop Engineering/Loop Engineering|Loop Engineering]] concern.
+**Compaction.** Replace old turns with a short record of decisions, constraints, and pending work before history crowds out the task. Tool results should return only fields used by the next decision. [[Tools]] shows how oversized API payloads consume context without improving the next decision. [[Home/AI & ML/LLM/Loop Engineering/Loop Engineering|Loop Engineering]] turns token pressure into an explicit compact-or-stop condition.
 
-**Structure.** Use clear delimiters and sections so the model can tell instructions from data from evidence — this also hardens against [[Guardrails|prompt injection]] by keeping trusted and untrusted content visibly separate. See [[Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering|prompt anatomy]] for the building blocks.
+**Structure.** Separate trusted instructions from untrusted data with explicit sections. That makes the payload easier to interpret and supports [[Guardrails|prompt injection]] defenses. [[Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering|prompt anatomy]] supplies the smaller building blocks.
 
-**Offloading.** Move state out of the window into external storage and pass lightweight references back — a scratchpad, a filesystem, or a store the agent reads on demand. Multi-agent systems use this as the filesystem-artifact pattern (see [[Multi-Agentic Systems]]); it keeps the working context compact while preserving access to detail.
+**Offloading.** Store bulky intermediate state outside the window and pass back a lightweight reference. A scratchpad or file can hold detail that is needed later but not on every turn. [[Multi-Agentic Systems]] uses the same idea for shared artifacts.
 
-**Isolation.** Give separate concerns separate contexts. Splitting work across sub-agents along context boundaries (not problem boundaries) keeps each window focused — the context-centric decomposition principle from [[Multi-Agentic Systems]].
+**Isolation.** Separate work when two concerns need conflicting instructions or large, unrelated toolsets. The context-centric decomposition in [[Multi-Agentic Systems]] keeps each worker's window focused, though coordination adds cost.
 
-**Caching stable prefixes.** When a long prefix (system prompt, tool definitions, fixed context) repeats across requests, prompt caching makes it cheap and fast to re-send rather than re-engineer it away. See [[Home/AI & ML/LLM/Context Engineering/RAG/Caching|Caching]].
+**Caching stable prefixes.** A repeated system prompt or fixed tool definition can stay logically present without paying full processing cost each time. [[Home/AI & ML/LLM/Context Engineering/RAG/Caching|Caching]] covers the key boundaries and invalidation risks.
 
 # Pitfalls
 
 ## More Context, Worse Answers
 
-**What goes wrong**: a team adds more retrieved documents or a longer system prompt expecting better answers, and quality drops or latency spikes for no visible reason.
+**What goes wrong:** more retrieved documents or a longer system prompt lowers answer quality and raises latency.
 
-**Why it happens**: attention dilutes across a larger window (context rot), and critical evidence lands in the low-attention middle (lost in the middle). Irrelevant tokens actively compete with relevant ones.
+**Why it happens:** useful evidence is diluted across the larger input, and some of it lands in the weakly attended middle. Irrelevant tokens still compete for attention.
 
-**How to avoid it**: optimize for signal density, not volume. Rerank and filter to fewer, higher-quality chunks; order by relevance; measure answer quality as you vary context size rather than assuming more is better.
+**How to avoid it:** filter and rerank to a smaller set, then measure quality as context size changes. Stop adding tokens when they no longer improve the result.
 
 ## Unbounded History Growth
 
-**What goes wrong**: a long conversation or agent run keeps appending turns until the window fills, then the runtime truncates the oldest messages — often the original instructions — and behavior degrades or the request is rejected.
+**What goes wrong:** a long run fills the window, after which the runtime drops old messages or rejects the request. The original instruction is often among the first things lost.
 
-**Why it happens**: tool results and reasoning traces are appended verbatim every iteration with no compaction.
+**Why it happens:** each iteration appends reasoning and raw tool output without compaction.
 
-**How to avoid it**: summarize or prune older turns, cap tool-result size, and track cumulative tokens per iteration — terminate or compact before the limit (see [[Agent Loop]] on token explosion).
+**How to avoid it:** cap tool-result size and track cumulative tokens per iteration. Compact or stop before the limit. [[Agent Loop]] traces how repeated oversized results become token explosion across iterations.
 
 ## Context Poisoning
 
-**What goes wrong**: a hallucinated fact or an injected instruction enters the history once and persists, getting treated as trusted context on every subsequent turn and compounding.
+**What goes wrong:** one hallucinated fact or injected instruction enters history and is replayed as trusted context on later turns.
 
-**Why it happens**: history is replayed as if all of it were equally valid; natural-language errors carry no error signal.
+**Why it happens:** the runtime replays history without a trust label, and natural-language errors carry no automatic warning.
 
-**How to avoid it**: validate tool results and model claims before they re-enter context, keep untrusted retrieved/tool content structurally separated from instructions, and enforce critical controls in code rather than relying on the prompt (see [[Guardrails]]).
+**How to avoid it:** validate claims before storing them, keep untrusted content separate from instructions, and enforce controls in code. [[Guardrails]] should not depend on a poisoned prompt obeying itself.
 
 ## Tool-Schema Bloat
 
-**What goes wrong**: connecting many tools "for flexibility" inflates every request's token count and measurably lowers task accuracy as the model sifts dozens of irrelevant schemas.
+**What goes wrong:** attaching many tools inflates every request and makes selection less reliable.
 
-**Why it happens**: most clients inject all connected tool schemas on every request regardless of relevance.
+**Why it happens:** many clients send every connected schema on every request, even when the task needs only one.
 
-**How to avoid it**: expose only the tools the current task needs, use on-demand tool search or filtering, and consolidate related operations (see [[Tools]] on large-toolset degradation).
+**How to avoid it:** expose only the tools needed for the current task, or use tool search to load them on demand. [[Tools]] covers the degradation seen with large toolsets.
 
 # Tradeoffs
 
 | Lever | What it buys | What it costs | Best when |
 | --- | --- | --- | --- |
-| Larger context window | Fewer hard truncation limits | Higher cost/latency, attention dilution, lost-in-the-middle | The task genuinely needs broad simultaneous context |
-| Retrieval + reranking | High signal density, traceable evidence | Retrieval infra and tuning | Knowledge-heavy tasks over a large corpus |
-| History compaction | Bounded window over long sessions | Summarization cost, risk of dropping detail | Long conversations and agent runs |
-| Context offloading | Compact working context, full detail on demand | Orchestration complexity, extra reads | Multi-step agents producing large intermediate state |
-| Context isolation (sub-agents) | Each window stays focused | Coordination overhead, more tokens overall | Conflicting modes or 20+ tools degrading selection |
+| Larger context window | More room before truncation | Higher cost, weaker attention, more latency | The task truly needs broad material at once |
+| Retrieval + reranking | Dense and traceable evidence | Retrieval infrastructure and tuning | Knowledge-heavy tasks over a large corpus |
+| History compaction | A bounded window over long sessions | Summary cost and possible detail loss | Long conversations and agent runs |
+| Context offloading | Small working context with detail on demand | Extra reads and coordination | Multi-step work with bulky intermediate state |
+| Context isolation (sub-agents) | A focused window for each concern | Coordination overhead and more total tokens | Conflicting instructions or oversized toolsets |
 
-**Decision rule**: default to the smallest context that answers the task. Bound what enters with retrieval and reranking, keep the window clean with compaction and minimal tool results, exploit ordering for the evidence that must be there, and reach for offloading or isolation only when a single focused window genuinely cannot hold the work. Validate by measuring quality against context size — if adding context does not measurably help, it is hurting.
+The smallest context that answers the task is the starting point. Retrieval and reranking control what enters, and compaction frees space before more capacity is added. Offloading or isolation becomes worthwhile only when one focused window cannot hold the work. Once extra context stops improving measured quality, it has become overhead.
 
 # Questions
 
 > [!QUESTION]- Why does adding more context often make answers worse, not better?
-> - Model attention is uneven: it concentrates on the start and end of the window and underweights the middle ("lost in the middle"), so critical evidence placed there is effectively ignored
-> - Overall quality degrades as input grows even when the added tokens are relevant — attention dilutes across more material (context rot)
-> - Irrelevant tokens actively compete with relevant ones for finite attention, and larger contexts cost more and add latency
-> - The fix is signal density: fewer, higher-quality, well-ordered chunks beat a larger but noisier window — measure quality as you vary context size rather than assuming more helps
+> Attention is uneven across a long window, so evidence buried in the middle may be underused. Added tokens also compete with the evidence already present, even when they are loosely relevant. Larger inputs cost more and take longer. The fix is signal density: keep fewer complete chunks, order them deliberately, and measure whether each increase in context improves the answer.
 
 > [!QUESTION]- What are the main techniques for keeping a long-running agent's context under control?
-> - Compaction: summarize or prune older turns before they crowd out the task; cap tool-result size to only the fields needed
-> - Offloading: move large intermediate state to a scratchpad or filesystem and pass lightweight references back into the window
-> - Isolation: split work across sub-agents along context boundaries so each window stays focused
-> - Selection and ordering: retrieve few high-signal chunks and place the most important evidence at the start and end
-> - Accounting: track cumulative tokens per iteration and compact or terminate before the window fills, rather than letting the runtime truncate the oldest (often most important) messages
+> Track the token budget on every iteration. Select a small set of strong evidence and put the best material where the model will use it. Compact old turns, trim tool results to the fields needed next, and offload bulky state behind references. Isolation helps when concerns need conflicting context, but it adds coordination cost. The runtime should compact or stop before arbitrary truncation decides what disappears.
 
 # References
 

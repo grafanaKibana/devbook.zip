@@ -12,9 +12,9 @@ priority: High
 status: Creation
 ---
 
-A large language model (LLM) is a neural language model with enough capacity and training data to support broad language tasks. Modern LLM systems are usually built on transformers, but “LLM” does not identify one architecture or objective: decoder-only models generate causally, encoder-decoder models generate from an encoded input, and encoder-only models produce contextual representations rather than autoregressive text.
+A large language model (LLM) is a neural language model trained at enough scale to handle a broad range of language tasks. The name says little about the exact architecture. Decoder-only models continue text causally, encoder-decoder models generate from an encoded source, and encoder-only models produce contextual representations instead of open-ended text.
 
-For system design, model output is probabilistic and untrusted. Prompts condition behavior; context supplies current evidence; the harness exposes tools; the loop decides how to iterate and stop; evaluation measures whether the assembled system works. Treat fluent output as a candidate result that still needs grounding, validation, and release evidence.
+Model output is probabilistic and untrusted from a system-design perspective. A prompt conditions behavior, context supplies current evidence, and the harness exposes actions. The loop controls iteration and stopping. Evaluation then measures whether those pieces work together. Fluent output remains a candidate result until grounding and validation support it.
 
 ```datacorejsx
 const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
@@ -23,7 +23,7 @@ return FolderStructureMap;
 
 # Engineering Routes
 
-Four inference-time disciplines wrap one another:
+Four inference-time disciplines form the runtime around a model call:
 
 ```mermaid
 flowchart LR
@@ -43,17 +43,17 @@ flowchart LR
 
 # Transformer Foundations and Training
 
-An LLM checkpoint is the output of a particular architecture, tokenizer, objective, and training pipeline. The weights are not a self-describing program that any inference runtime can load. To reproduce the model, the runtime must build the compatible computation graph, interpret every tensor correctly, tokenize text with the matching vocabulary and special-token rules, and implement the operators used by that architecture and quantization scheme.
+An LLM checkpoint comes from one architecture, tokenizer, objective, and training pipeline. Its weights are not a self-describing program. A compatible runtime must rebuild the expected computation graph, interpret the stored tensors correctly, apply the matching tokenization rules, and provide every operator required by the architecture and quantization scheme.
 
 ## Transformer Families
 
 | Family | Training and attention boundary | Output path | Typical use |
 | --- | --- | --- | --- |
-| Encoder-only | Bidirectional contextual encoding; BERT pretrains with masked-token prediction and sentence-level objectives | One contextual vector per input token or a pooled representation | Classification, extraction, reranking, embeddings |
-| Encoder-decoder | Encoder reads the source bidirectionally; decoder generates target tokens autoregressively while attending to encoder output | Generated target sequence | Translation, summarization, text-to-text tasks |
+| Encoder-only | Bidirectional contextual encoding. BERT pretrains with masked-token prediction and sentence-level objectives | One contextual vector per input token or a pooled representation | Classification, extraction, reranking, embeddings |
+| Encoder-decoder | Encoder reads the source bidirectionally. Decoder generates target tokens autoregressively while attending to encoder output | Generated target sequence | Translation, summarization, text-to-text tasks |
 | Decoder-only | Causal attention exposes only earlier tokens during next-token prediction | Generated continuation | Chat, code, completion, tool-call generation |
 
-**BERT** is encoder-only. It predicts masked tokens during pretraining and exposes contextual representations to a task head; it has no autoregressive decoder for open-ended generation.
+**BERT** is encoder-only. It predicts masked tokens during pretraining and exposes contextual representations to a task head. It has no autoregressive decoder for open-ended generation.
 
 **T5** is a generative encoder-decoder. It pretrains with a span-corruption text-to-text objective: the encoder consumes corrupted input, and the decoder autoregressively generates missing target spans.
 
@@ -61,17 +61,17 @@ An LLM checkpoint is the output of a particular architecture, tokenizer, objecti
 
 ## Checkpoint is More than Weights
 
-Loading succeeds only when these contracts agree:
+Loading is trustworthy only when several contracts agree:
 
-- **Architecture and configuration** — layer count, hidden size, attention heads, positional encoding, normalization, activation, vocabulary size, and expert layout.
-- **Tensor contract** — parameter names, shapes, axis layout, serialization format, numerical type, sharding, and fused or transposed representations.
-- **Tokenizer contract** — vocabulary, normalization, pre-tokenization, merge rules, byte fallback, and identifiers for beginning, end, padding, unknown, and chat-control tokens.
-- **Adaptation and quantization metadata** — adapter targets, ranks, scaling, quantization groups, scales, zero points, and calibration assumptions.
-- **Runtime operators** — compatible attention, position logic, expert routing, normalization, quantized matrix operations, and cache layout on the target hardware.
+- **Architecture and configuration** define the layer count, hidden size, attention layout, positional encoding, normalization, activation, vocabulary size, and expert topology.
+- **Tensor contract** covers parameter names, shapes, axis layout, serialization, numerical type, sharding, and any fused or transposed representation.
+- **Tokenizer contract** includes the vocabulary, normalization, splitting and merge rules, byte fallback, and special-token identifiers.
+- **Adaptation and quantization metadata** record adapter targets and scaling alongside quantization groups, scales, zero points, and calibration assumptions.
+- **Runtime operators** must implement compatible attention, position logic, expert routing, normalization, quantized matrix work, and cache layout on the target hardware.
 
-A `.safetensors` file defines a safe tensor container; it does not identify the model class or tokenizer. Loading Llama-shaped tensors into a GPT-2 graph fails on names and shapes. Using the wrong tokenizer can preserve tensor dimensions while mapping the same text to different IDs and silently corrupt behavior.
+A `.safetensors` file provides a safe tensor container, not a model class or tokenizer. Llama-shaped tensors do not fit a GPT-2 graph. A wrong tokenizer is harder to spot: tensor dimensions still match while the same text maps to different IDs, silently changing behavior.
 
-Portable graph formats such as ONNX make operators and tensor interfaces explicit, but the runtime must still support the graph’s operator versions, data types, custom operators, and hardware kernels. A successful file parse is weaker evidence than a known-answer inference test against the source runtime.
+Portable graph formats such as ONNX make operators and tensor interfaces explicit. The target runtime still needs the graph's operator versions, data types, custom operators, and hardware kernels. Parsing the file proves less than a known-answer inference test against the source runtime.
 
 ## Training Pipeline
 
@@ -87,7 +87,7 @@ deployable artifact = model bundle + runtime + release evaluation
 2. **Supervised fine-tuning (SFT)** trains on instruction-response or task examples. [[Home/AI & ML/LLM/Fine-tuning|Fine-tuning]] covers full and parameter-efficient updates, data contracts, preference alignment, GRPO, and evaluation.
 3. **Preference or reward optimization** uses comparisons or verifiable rewards to favor some outputs over others. It remains a separate training stage even when documented in the same canonical note as fine-tuning.
 
-Training provenance matters at deployment. Record the base revision, data version, tokenizer files, configuration, adapters, quantization recipe, runtime version, and evaluation result. A model name without those versions is not enough to reproduce output or investigate a regression.
+Deployment depends on training provenance. The release record needs the base revision, data version, tokenizer files, configuration, adapters, quantization recipe, runtime version, and evaluation result. A model name alone cannot reproduce an output or explain a regression.
 
 ## Failure Modes
 
@@ -98,7 +98,7 @@ Training provenance matters at deployment. Record the base revision, data versio
 
 # Mixture-of-experts
 
-A sparse mixture-of-experts (MoE) model replaces some dense feed-forward layers with several expert networks and a learned router. For each token, the router activates only a small subset of experts and combines their outputs. This increases total parameter capacity without evaluating every expert for every token. It is internal model architecture, not the application-level decision to send a request to one model or another in [[Home/AI & ML/LLM/Model Selection and Routing|model selection and routing]].
+A sparse mixture-of-experts (MoE) model replaces some dense feed-forward layers with expert networks and a learned router. The router activates only a small subset for each token, then combines their outputs. This adds total parameter capacity without evaluating every expert on every token. It is an internal architecture choice, separate from application-level [[Home/AI & ML/LLM/Model Selection and Routing|model selection and routing]].
 
 ## Token Routing
 
@@ -110,11 +110,11 @@ token hidden state
     → combine weighted expert outputs
 ```
 
-If many tokens choose the same expert, that device becomes a bottleneck while other experts sit idle. Implementations use capacity limits, load-balancing objectives or biases, token dropping or rerouting policies, and careful expert placement.
+When too many tokens choose one expert, its device becomes a bottleneck while others sit idle. Implementations counter this with capacity limits, balancing objectives or biases, token rerouting, and deliberate expert placement.
 
 ## What Sparse Activation Saves
 
-Sparse activation reduces feed-forward arithmetic relative to evaluating every expert. It does not remove the rest of the transformer, and it does not make total parameters disappear from deployment.
+Sparse activation saves feed-forward arithmetic compared with evaluating every expert. The rest of the transformer still runs, and the full parameter set still affects deployment.
 
 Distinguish three measurements:
 
@@ -122,39 +122,28 @@ Distinguish three measurements:
 - **Active parameters per token** approximate part of the arithmetic executed for a token.
 - **Measured throughput and latency** include router work, token dispatch, all-to-all communication, batching, precision, kernels, and load imbalance.
 
-A dense model can outperform a sparse model with a similar advertised active count when expert traffic is communication-bound. A well-placed MoE can deliver more learned capacity at manageable per-token compute. Neither conclusion follows from parameter counts alone.
+A dense model can beat a sparse model with a similar advertised active count when expert traffic is communication-bound. Careful expert placement can give an MoE more learned capacity at manageable per-token compute. Parameter counts alone cannot predict either result.
 
 ## Capacity and Communication
 
-An expert capacity factor reserves room for more than the average token share. Too little capacity can drop or reroute tokens; too much wastes memory and compute. During distributed training or serving, tokens cross device boundaries to reach experts, making interconnect topology and expert placement part of model latency.
+An expert capacity factor reserves headroom above the average token share. Too little capacity drops or reroutes tokens. Too much wastes memory and compute. In distributed training or serving, tokens cross device boundaries to reach experts, so interconnect topology and placement become part of model latency.
 
-Batch shape matters. A large batch can distribute tokens more efficiently across experts, while low-latency small batches expose imbalance and communication overhead. Measure the exact serving regime rather than extrapolating from training throughput.
+Batch shape changes that tradeoff. Large batches can spread tokens across experts efficiently, while small low-latency batches expose imbalance and communication overhead. Training throughput is not a substitute for measurement on the intended serving workload.
 
-## DeepSeek Architecture Boundary
+## Routed and Shared Experts in DeepSeek-V3
 
-The DeepSeek-V3 report describes routed experts, shared experts, and an auxiliary-loss-free load-balancing strategy. DeepSeek-R1 uses that base architecture, while [[Home/AI & ML/LLM/Fine-tuning#GRPO|GRPO]] belongs to post-training. Token routing and policy optimization solve different problems.
-
-Use the primary technical report for architecture claims. Undated prices, hardware totals, and benchmark tables from secondary comparisons mix hardware, precision, prompts, and model versions and do not establish an MoE design tradeoff.
+The DeepSeek-V3 report describes routed experts, shared experts, and an auxiliary-loss-free load-balancing strategy. DeepSeek-R1 uses that base architecture, while [[Home/AI & ML/LLM/Fine-tuning#GRPO|GRPO]] belongs to post-training. Token routing and policy optimization solve different problems. Price, hardware, and benchmark comparisons are meaningful only when hardware, precision, prompts, and model versions match.
 
 # Minimal Vocabulary
 
 - **Token** — the integer-id unit produced by a specific tokenizer. Tokenizer choice affects sequence length and must match the checkpoint.
 - **Context window** — the token budget visible to one model invocation, including instructions, history, evidence, tool results, and output allowance.
-- **Inference** — executing a trained model to produce representations or generated tokens; [[Home/AI & ML/LLM/Generation|generation]] covers sampling controls for generative models.
-- **Embedding** — a vector representation used for similarity or downstream prediction; covered in [[Home/AI & ML/LLM/Embeddings|embeddings]].
+- **Inference** — executing a trained model to produce representations or generated tokens. [[Home/AI & ML/LLM/Generation|generation]] covers sampling controls for generative models.
+- **Embedding** — a vector representation used for similarity or downstream prediction. Covered in [[Home/AI & ML/LLM/Embeddings|embeddings]].
 
 # Questions
 
-> [!QUESTION]- Why does architecture matter when someone says “LLM”?
-> Encoder-only, encoder-decoder, and decoder-only transformers expose different inputs, objectives, and output paths. A BERT checkpoint is not a causal text generator, while T5 generates through an autoregressive decoder conditioned on encoder output.
-
-> [!QUESTION]- What must match besides checkpoint tensor bytes?
-> The architecture and configuration, tensor names and layouts, tokenizer and special-token IDs, adaptation or quantization metadata, and runtime operator implementations must agree. Verify the bundle with known-answer inference, not only a successful file parse.
-
-> [!QUESTION]- Why is active parameter count not an inference-cost measurement?
-> It omits dense layers, memory traffic, token dispatch, interconnect communication, batching, and expert imbalance. Measure throughput and latency on the target serving stack.
-
-> [!QUESTION]- How do you choose between prompting, RAG, and fine-tuning?
+> [!QUESTION]- How should an engineering team choose between prompting, RAG, and fine-tuning?
 > Start with prompting. Add RAG when the gap is current, private, or attributable knowledge. Fine-tune when a measured behavior gap remains—format, policy, style, or a narrow task that prompting cannot stabilize.
 
 # References
@@ -168,4 +157,4 @@ Use the primary technical report for architecture claims. Undated prices, hardwa
 - [GShard](https://arxiv.org/abs/2006.16668) — primary MoE distributed scaling architecture.
 - [DeepSeek-V3 Technical Report](https://arxiv.org/abs/2412.19437) — primary report for routed and shared experts and its load-balancing design.
 - [ONNX concepts](https://onnx.ai/onnx/intro/concepts.html) — the normative model format and operator model.
-- [ByteByteGo source snapshot: DeepSeek one-pager](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/deepseek-1-pager.md) — the pinned secondary summary reconciled here by separating sparse architecture from GRPO and excluding incomparable product claims.
+- [ByteByteGo: DeepSeek one-pager](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/deepseek-1-pager.md) — provides a secondary summary; this note separates sparse architecture from GRPO and omits incomparable product claims.

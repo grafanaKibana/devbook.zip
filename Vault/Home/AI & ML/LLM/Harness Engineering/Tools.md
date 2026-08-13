@@ -12,9 +12,9 @@ status: Done
 publish: true
 ---
 
-Tools are the interface between an LLM's reasoning and the external world — they let the model read data, perform computations, and trigger side effects that text generation alone cannot accomplish. In agentic systems, tools determine what the agent can actually *do*: without well-designed tools, even a strong model with perfect reasoning produces useless output. Anthropic's SWE-bench agent team found that tool quality had more impact on task success than prompt quality — switching from relative to absolute file paths in one tool eliminated an entire class of failures.
+Tools turn model output into operations. They let an agent read current data, run a calculation, or request a side effect that text generation cannot perform on its own. A capable model still fails when its tools are ambiguous or brittle. Anthropic's SWE-bench agent work found a small interface detail with a large effect: switching one tool from relative to absolute file paths removed a recurring failure mode.
 
-The mechanism is function calling: the model receives JSON schemas describing available tools (name, description, parameters), and when it decides a tool is needed, it emits a structured call instead of text. The runtime executes the function, returns the result, and the model continues reasoning. This cycle repeats inside the [[Agent Loop]] until the model produces a final answer.
+Function calling is the usual mechanism. The runtime sends the model JSON schemas describing the available tools. The model may return a structured call containing a tool name and arguments. After validating the request, the runtime executes the function and appends its result to the conversation. The [[Agent Loop]] repeats until the model answers or the runtime stops it.
 
 ```mermaid
 sequenceDiagram
@@ -33,23 +33,23 @@ sequenceDiagram
     R->>U: Answer
 ```
 
-The model never executes tools directly — it only predicts *which* tool to call and *what arguments* to pass. The runtime handles execution, validation, and error propagation. This separation is a security boundary: the model cannot bypass schema validation or invoke tools not in its provided schema.
+The model requests an operation. It does not execute the function. Execution authority stays in the runtime, which must validate arguments and enforce permissions before crossing a side-effect boundary. A schema guides generation, but it does not provide security on its own.
 
-For how tools are standardized across clients via a shared protocol, see [[Model Context Protocol]]. For how the model selects and calls tools within a reasoning loop, see [[Agent Loop]].
+[[Model Context Protocol]] standardizes how clients discover external capabilities. [[Agent Loop]] covers repeated selection, execution, and observation inside one run.
 
 # Tool Design Principles
 
-Tool design is API design for an LLM consumer. The same principles that make an API easy for a junior developer apply — but with tighter constraints, because the model cannot read source code, ask clarifying questions, or debug at runtime.
+Tool design is API design for a probabilistic caller that sees only the supplied schema and conversation. It cannot inspect an implementation while choosing arguments. Ambiguity that a developer would resolve by reading code becomes another model guess.
 
-**Naming.** Use specific, self-documenting function names that signal exactly what the tool does. `search_company_directory` beats `search`. `get_weather_forecast` beats `get_data`. The model picks tools by matching names and descriptions to its current subgoal — ambiguous names cause wrong tool selection.
+**Naming.** The name should identify the operation and its domain. `search_company_directory` carries more selection signal than `search`. `get_weather_forecast` is clearer than `get_data`. Generic names make unrelated tools look interchangeable.
 
-**Descriptions.** Write tool descriptions for the model, not for humans. Include: what the tool does, when to use it, what it returns, and when *not* to use it. Anthropic recommends including boundary conditions: "Use this to search for employees by name or department. Do not use this for contractor lookup — use search_contractor_database instead."
+**Descriptions.** State the operation, its output, and the boundary where another tool is appropriate. For example: "Search employees by name or department. Contractor records are in `search_contractor_database`." The negative boundary matters when two tools have overlapping vocabulary.
 
-**Parameters.** Keep schemas flat and simple. Nested objects degrade argument accuracy. Use enums to constrain values where possible — `{"type": "string", "enum": ["celsius", "fahrenheit"]}` prevents the model from inventing units. Mark required versus optional fields explicitly. Every parameter needs a description that explains both format and purpose.
+**Parameters.** Prefer a small, flat schema. Use an enum such as `{"type": "string", "enum": ["celsius", "fahrenheit"]}` when the implementation accepts a closed set. Required fields and formats need explicit descriptions. Deeply nested inputs and overlapping optional fields create more ways to produce a syntactically valid but meaningless call.
 
-**Return values.** Return only the fields the model needs for its next reasoning step. Returning a full database row when the model only needs one field wastes context tokens and dilutes attention. Structure returns consistently across tools — if all tools return `{"result": ..., "error": ...}`, the model learns the pattern quickly.
+**Return values.** Send the fields needed for the next decision, not an entire database record by default. Stable result shapes reduce parsing work across tools. Keep identifiers that a later call may need, even if they are not part of the final answer.
 
-**Error messages as teaching signals.** When a tool call fails, return a structured error that tells the model what went wrong and how to fix it: `{"error": "invalid_date_format", "message": "Expected YYYY-MM-DD, got '12/25/2024'", "hint": "Reformat as 2024-12-25"}`. The model can self-correct on the next [[Agent Loop|loop iteration]] if the error is specific. Silent failures or generic "internal error" messages leave the model stuck.
+**Errors.** Return a machine-readable code plus enough detail to recover. `{"error": "invalid_date_format", "message": "Expected YYYY-MM-DD, got '12/25/2024'", "hint": "Reformat as 2024-12-25"}` gives the next [[Agent Loop|loop iteration]] a concrete repair. Internal details and secrets stay in server logs. The model receives a safe explanation.
 
 In the Microsoft Agent Framework (.NET), a well-designed tool looks like this:
 
@@ -60,13 +60,15 @@ In the Microsoft Agent Framework (.NET), a well-designed tool looks like this:
     "Get current weather for a city. Returns temperature, conditions, " +
     "and humidity. Use when the user asks about weather or outdoor plans. " +
     "Do not use for historical weather data.")]
-static async Task<WeatherResult> GetCurrentWeather(
+static Task<WeatherResult> GetCurrentWeather(
     [Description("City name, e.g. 'Seattle' or 'London'")] string city,
     [Description("Temperature unit")] TemperatureUnit unit = TemperatureUnit.Celsius)
 {
-    // Validate input, call weather API, return compact result
+    throw new NotImplementedException(
+        "Validate input, call the weather API, and return a compact result.");
 }
 
+record WeatherResult(double Temperature, string Conditions, int HumidityPercent);
 enum TemperatureUnit { Celsius, Fahrenheit }
 
 // Register the tool on the agent via ChatOptions.Tools
@@ -81,117 +83,101 @@ AIAgent agent = new ChatClientAgent(chatClient, new ChatClientAgentOptions
 });
 ```
 
-The `Description` attributes become the tool schema the model reads to decide whether and how to call this function. Investing time in descriptions pays more dividends than prompt engineering.
+The `Description` attributes feed the schema used for tool selection and argument generation. A precise contract fixes failures at the shared boundary instead of compensating for them in every prompt.
 
 # Versatility
 
-A versatile tool handles varied inputs gracefully rather than failing on anything outside the happy path. In agentic systems, the model generates inputs — you cannot predict the exact format or phrasing it will use. Design tools to accept reasonable variations and normalize internally.
+Model-generated arguments will vary. A tool can normalize harmless representation differences before validation. Normalization changes representation, not trust: every caller still passes syntax checks, authorization, and business invariants before execution.
 
-Concrete patterns:
+Useful patterns include:
 
-- **Flexible input parsing.** A date parameter should accept "2024-12-25", "December 25, 2024", and "tomorrow" — normalize to a canonical format inside the tool, not by expecting the model to get the format right every time.
-- **Reasonable defaults.** If a parameter is optional, provide a sensible default rather than requiring the model to always specify it. A search tool with `limit` defaulting to 10 prevents the model from sometimes passing 10, sometimes 100, sometimes nothing.
-- **Graceful boundary handling.** If the model asks for page 999 of a 10-page result set, return an empty result with a message ("No results — only 10 pages available"), not an exception.
+- **Canonical parsing.** Accept equivalent unambiguous formats, then convert them to one internal representation. Relative dates such as "tomorrow" require an explicit time zone and reference clock. Otherwise they should be rejected or resolved by the host first.
+- **Defaults.** An optional search `limit` can default to 10. Defaults should be visible in the schema and safe for cost or side effects.
+- **Boundary responses.** A request for page 999 of a 10-page result set can return an empty page with the valid range instead of an opaque exception.
 
-The principle: the more rigid a tool's interface, the more likely the model misuses it. Each failure costs a loop iteration, tokens, latency, and sometimes a cascading series of wrong decisions. Validation should correct, not just reject.
+Normalization should remove representational friction without guessing intent. Validation then rejects malformed, unsafe, or unauthorized requests regardless of whether the input was normalized. Recovery guidance belongs in the error so a correct retry does not depend on guesswork.
 
 # Fault Tolerance
 
-Tools in agentic systems run inside a loop where failures compound — one failed tool call can derail an entire multi-step plan. Design tools to degrade gracefully, never silently.
+Tool failures become model input and can redirect the rest of a run. Failure must be explicit, bounded, and safe to reason about.
 
-**Structured error returns.** Every tool should have a consistent error contract. The model cannot handle exceptions — it only sees the serialized return value. Return typed errors with actionable context: what failed, why, and what the model should do differently.
+**Structured errors.** The runtime must translate exceptions into a stable result because the model sees only serialized messages. Include the failed operation and whether retrying can help. Avoid stack traces or sensitive backend details.
 
-**Retry-safe design.** If a tool call might be retried (network timeout, transient failure), the tool must be idempotent — calling it twice with the same arguments should not create duplicate records, send duplicate emails, or charge twice. Use idempotency keys for state-mutating operations.
+**Retry safety.** A timeout leaves the caller unsure whether a side effect happened. State-changing tools should accept an idempotency key or use another deduplication mechanism so a retry cannot create a second record, email, or charge.
 
-**Timeout handling.** Long-running tools (API calls, database queries) need timeouts with partial result support. Rather than hanging indefinitely, return what you have: `{"status": "partial", "results": [...], "message": "Query timed out after 5s, returning first 50 results"}`. The model can decide whether to proceed with partial data or retry.
+**Timeouts.** Every external call needs a deadline. Partial results are valid only when the contract labels them clearly, for example `{"status": "partial", "results": [...], "message": "Query timed out after 5s, returning first 50 results"}`. For writes, an unknown outcome is different from failure and must be reported as such.
 
-**Input validation before execution.** Validate tool arguments *before* performing any side effect. A tool that sends an email should validate the address format before making the API call, not after. Return validation errors as structured feedback so the model can fix and retry.
+**Validation before execution.** Check syntax, authorization, and business invariants before performing a side effect. A valid email address is not enough. The caller may also need permission to contact that recipient.
 
 # Caching
 
-Caching reduces latency, cost, and token waste in agent loops. There are two layers to consider:
+Caching applies at two different boundaries: tool results and model-input prefixes.
 
-**Tool result caching.** When the same tool is called with the same arguments within a session, cache the result instead of re-executing. This is especially valuable for read-only tools (database lookups, search queries, API fetches) that the model calls repeatedly. A common production pattern: hash the function name + arguments as a cache key with a short TTL (30s–5min depending on data freshness requirements). In the [[Agent Loop]], this prevents the infinite-loop pitfall where the model calls the same search repeatedly without making progress.
+**Tool results.** A read-only call may be cached by function name, normalized arguments, caller scope, and any other input that affects visibility. The TTL follows the source's freshness requirement. In the [[Agent Loop]], caching can avoid repeated I/O, but loop detection should still stop a model that keeps making the same call without progress.
 
-**Prompt caching for tool schemas.** When tool schemas are large (many tools, detailed descriptions), they consume significant input tokens on every request. Anthropic's prompt caching feature caches the system prompt and tool definitions across requests, reducing input token cost by up to 90% and latency by up to 85% for subsequent calls. OpenAI's API also supports automatic prompt caching for tool definitions that remain stable across requests.
+**Prompt prefixes.** Stable system instructions and tool definitions are good candidates for provider prompt caching. This can reduce billed input and latency on repeated prefixes, though the exact savings depend on provider rules and cache hits. Tool order and schema text need to remain stable for the prefix to match.
 
-**Staleness trade-off.** Cache read-only tools aggressively. Caching state-mutating tools is dangerous — if the model calls `create_ticket` and gets a cached "success" response, no ticket was actually created. Only cache tools whose results are deterministic for the given arguments within the cache TTL.
+Do not cache a mutation as if it were a read. A repeated `create_ticket` call needs idempotent execution semantics, not a cached success message. For reads, the cache key must include tenant and authorization context or it can leak data between callers.
 
 # Pitfalls
 
 ## Over-Parameterized Tools
 
-A tool with 15 parameters gives the model 15 opportunities to hallucinate an argument. Each optional parameter increases the surface area for errors. Prefer multiple focused tools over one Swiss-army-knife tool. A `search_by_name(name)` and `search_by_department(dept)` pair is more reliable than `search(name?, dept?, role?, location?, start_date?, ...)`.
+A tool with 15 loosely related parameters is hard to call correctly. Split it when different operations need different descriptions or permission checks. Do not split mechanically: hundreds of tiny tools create a selection problem of their own.
 
 ## Poor Descriptions That Mislead the Model
 
-Vague descriptions like "Processes data" or "Handles requests" give the model no basis for deciding when to use the tool. The model selects tools by matching descriptions to its current subgoal — if the description does not clearly state what the tool does, when to use it, and what it returns, the model will either skip it when needed or misuse it.
+Descriptions such as "Processes data" provide no selection signal. A useful description names the operation, expected output, and important exclusion. If two tools sound interchangeable, the model will sometimes choose the wrong one.
 
 ## Tools with Hidden Side Effects
 
-A tool named `get_user_profile` that also logs an analytics event and updates a "last accessed" timestamp has hidden side effects the model cannot reason about. If the model calls it exploratively during planning, the side effects fire unintentionally. Keep read tools read-only. Separate queries from commands — this is [[CQRS]] applied to tool design.
+A `get_user_profile` tool that also updates "last accessed" is not a read, despite its name. The model may call it while gathering context and trigger an unintended write. Keep query tools free of business side effects. The separation mirrors [[CQRS]].
 
 ## Context Degradation from Large Toolsets
 
-Adding more tools does not just cost tokens — it actively degrades accuracy. MCPGauge (Song et al., 2025) tested 6 commercial LLMs with 30 MCP tool suites and measured an average **9.5% accuracy drop** when tools were present, with code generation worst-hit at −17%. Token overhead ranged from 3.25× to 236.5× input tokens. A single GitHub MCP server (26 tools) consumes over 4,600 tokens in schema definitions alone; the full MCP ecosystem (2,797 tools) would consume 248K tokens.
+Large tool sets consume context and make selection harder. MCPGauge (Song et al., 2025) tested six commercial models across 30 MCP tool suites and reported an average **9.5% accuracy drop** with tool context present. Code generation saw the largest drop at 17%. Input-token overhead ranged from 3.25× to 236.5× in the benchmark. These are workload-specific measurements, not universal constants, but they make indiscriminate schema injection hard to justify.
 
-Three mechanisms compound:
+Several mechanisms contribute:
 
-- **Attention dilution.** Each schema token competes with task-relevant tokens for finite attention. The "Lost in the Middle" effect (Liu et al., 2023) means schemas in the middle of the prompt receive the least model attention.
-- **Conflicting signal injection.** Retrieved tool context actively conflicts with the model's parametric knowledge — the model cannot reliably adjudicate between its training-time knowledge and injected text, breaking reasoning chains.
-- **Passive selector overhead.** When all tools are pre-injected, the model scans thousands of schema tokens to find the 1–2 relevant tools, distributing ~1/n attention per tool.
+- **Context competition.** Schema tokens occupy space and attention that could carry task evidence. "Lost in the Middle" shows that models do not use every position in a long context equally well.
+- **Conflicting descriptions.** Similar names and overlapping instructions make the correct tool harder to distinguish.
+- **Passive selection.** Preloading every schema forces the model to choose from options unrelated to the current step.
 
 **Mitigations:**
 
 | Technique | How it works | Best for |
 |---|---|---|
-| **On-demand tool search** | Tools register with deferred loading; a search tool retrieves 3–5 relevant definitions per query (Anthropic's native `tool_search_tool`). 85%+ context reduction. | 50–10,000 tools |
-| **RAG over tool descriptions** | Embed tool descriptions in a vector index; retrieve top-k by semantic similarity per query. You control the retrieval pipeline. | 500+ tools, custom retrieval |
-| **Middleware filtering** | Rule-based layer injects only relevant tools based on conversation state, user role, or stage. Zero retrieval overhead. | 10–50 tools, deterministic routing |
-| **Tool consolidation** | Group related operations under one tool with an `action` enum (e.g., `github_pr` with `create\|review\|merge`). Directly reduces schema count. | Related operations, any scale |
-| **Two-stage routing** | Stage 1 classifies query into a tool category; Stage 2 shows only that category's tools. Can use a small classifier or the tool search itself. | Multi-domain, any scale |
-| **Code generation** | Replace N tool schemas with a single `execute_code` tool + API docs. The model writes code that calls your APIs. | Open-ended data/code tasks |
-| **Structured output routing** | Model returns a structured action JSON; your code dispatches. No tool schemas needed. | Fixed action types |
+| **On-demand tool search** | Register tools for deferred loading, then retrieve a relevant subset per request. Anthropic reports an 85% reduction in one published example, not a general guarantee. | Evaluate when the catalog reaches roughly 10 tools, schema definitions exceed about 10K tokens, or selection errors appear. Measure retrieval recall and added latency. |
+| **RAG over tool descriptions** | Embed descriptions and retrieve top-k by semantic similarity. | Large or changing catalogs where retrieval quality can be evaluated against labeled tool-selection cases. |
+| **Middleware filtering** | Inject tools from conversation state, user role, or workflow stage. | Deterministic policy boundaries. Measure false exclusions and rule-maintenance cost. |
+| **Tool consolidation** | Group closely related operations under one tool with an `action` enum (e.g., `github_pr` with `create\|review\|merge`). | Operations that share context and permissions without creating a wide optional-parameter schema. |
+| **Two-stage routing** | Classify the request into a tool category, then expose only that category. | Separable domains where router recall and routing latency clear the task gate. |
+| **Code generation** | Replace N tool schemas with a single `execute_code` tool + API docs. The model writes code that calls the available APIs. | Open-ended data/code tasks |
+| **Structured output routing** | Model returns a structured action JSON. Application code dispatches it. No tool schemas needed. | Fixed action types |
 
 # Tradeoffs
 
 | Design choice | Option A | Option B | Decision criteria |
 |---|---|---|---|
-| **Tool granularity** | Few broad tools with many parameters | Many narrow tools with focused purpose | Narrow tools are more reliable per-call (fewer hallucinated args) but increase selection confusion as count grows. Split when use cases need genuinely different descriptions; keep together when they share context. |
-| **Input handling** | Strict validation — reject malformed input | Flexible normalization — accept variations, convert internally | Normalization reduces loop failures and retries at the cost of implementation complexity. Prefer normalization for agent-facing tools; strict validation for human-facing APIs. |
-| **Caching strategy** | Aggressive — cache all tool results with TTL | Conservative — execute every call fresh | Aggressive caching cuts latency and cost but risks stale data. Cache read-only tools with short TTLs; never cache state-mutating tools. |
+| **Tool granularity** | Few broad tools with many parameters | Many narrow tools with focused purpose | Narrow tools are more reliable per-call (fewer hallucinated args) but increase selection confusion as count grows. Split when use cases need genuinely different descriptions. Keep together when they share context. |
+| **Representation normalization** | Accept only a canonical form | Accept safe, unambiguous variants and convert them | Choose based on ambiguity and maintenance cost. Every caller still passes syntax, authorization, and business-invariant validation before execution. |
+| **Caching strategy** | Aggressive — cache all tool results with TTL | Conservative — execute every call fresh | Aggressive caching cuts latency and cost but risks stale data. Cache read-only tools with short TTLs. Never cache state-mutating tools. |
 | **Return verbosity** | Full result payload | Minimal fields needed for next step | Minimal returns save context tokens and reduce attention dilution. Full returns are only justified when the model needs to branch on fields that are hard to predict upfront. |
 
 # Questions
 
 > [!QUESTION]- Why is tool design often more impactful than prompt engineering in agentic systems?
-> - In a single LLM call, the prompt is the entire interface — prompt quality is everything
-> - In an agentic system, the model interacts with tools across multiple loop iterations — each tool call is a decision point where errors compound
-> - Wrong tool selection, malformed arguments, or unhelpful error messages cascade across steps
-> - Anthropic's SWE-bench team spent more time improving tool interfaces than prompts, because tool quality directly determined task success rate
-> - Tradeoff: tool design effort is amortized across all agent runs; prompt tweaks are fragile and session-specific
+> A tool contract is reused at every call site and every loop iteration. Ambiguous selection, malformed arguments, or an opaque error can redirect all later steps. Fixing the interface removes that failure mode across prompts, while a prompt workaround depends on the model remembering an exception each time.
 
 > [!QUESTION]- How would you decide between one broad tool and many narrow tools?
-> - Narrow tools reduce parameter count and ambiguity — fewer hallucinated arguments per call
-> - Too many tools degrades selection accuracy — MCPGauge measured 9.5% accuracy drop from irrelevant tool presence alone
-> - Split when a tool serves genuinely different use cases needing different descriptions and parameters
-> - Keep together when operations share context and the model would naturally chain them
-> - As tool count grows and selection confusion appears, apply routing or tool filtering to keep the active set focused
-> - Tradeoff: per-call reliability (narrow) versus selection accuracy (fewer options)
-
-> [!QUESTION]- What makes a tool safe for caching in an agent loop versus unsafe?
-> - Cache-safe: read-only (no side effects), deterministic output for same inputs within TTL, acceptable staleness
-> - Examples: database lookups, weather API calls, search queries — all safe with short TTLs
-> - Cache-unsafe: mutates state (create/update/delete), result depends on rapidly changing context, caching would mask failures
-> - Critical failure mode: caching a write operation returns cached "success" without executing — silent data inconsistency
-> - Tradeoff: cache hit rate and latency savings versus freshness and correctness guarantees
+> Split operations that need different descriptions, schemas, or permissions. Keep closely related actions together when one contract expresses them without a bag of optional parameters. Then control the active set with routing or filtering. Narrow tools help argument generation only while the model can still select the right one.
 
 # References
 
-- [Tool use overview — Anthropic](https://docs.anthropic.com/en/docs/build-with-claude/tool-use/overview)
+- [Tool use overview — Anthropic](https://docs.anthropic.com/en/docs/build-with-claude/tool-use/overview) — defines provider tool schemas, model-selected tool calls, and returned tool results.
 - [Tool use best practices — Anthropic](https://docs.anthropic.com/en/docs/build-with-claude/tool-use/best-practices)
 - [Function calling guide — OpenAI](https://platform.openai.com/docs/guides/function-calling)
-- [Using function tools with an agent — Microsoft Agent Framework (Microsoft Learn)](https://learn.microsoft.com/en-us/agent-framework/agents/tools/function-tools)
+- [Using function tools with an agent — Microsoft Agent Framework (Microsoft Learn)](https://learn.microsoft.com/en-us/agent-framework/agents/tools/function-tools) — documents the C# function-tool registration and invocation mechanism used by the examples.
 - [Building Effective Agents — Anthropic Engineering](https://www.anthropic.com/engineering/building-effective-agents)
 - [Prompt caching with tool use — Anthropic](https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching#prompt-caching-with-tool-use)
 - [Key Elements of Agent Tools — DeepLearning.AI / CrewAI course](https://learn.deeplearning.ai/courses/multi-ai-agent-systems-with-crewai/lesson/c4j19/key-elements-of-agent-tools)

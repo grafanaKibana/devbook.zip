@@ -12,7 +12,9 @@ publish: true
 priority: Medium
 ---
 
-Prompt engineering is the practice of turning a vague user intention into a precise model task. It matters because LLMs are probabilistic generators: small wording and setting changes can shift correctness, style, and reliability. In production, a prompt is part of your system interface, so you should treat it like code: explicit, testable, and versioned. This hub covers the foundations, while child pages in this folder go deeper into in-context learning, reasoning, prompt composition, and automated optimization.
+Prompt engineering turns an intention into a task the model can execute and the system can test. Small changes in wording or generation settings can shift output quality because an LLM samples from a probability distribution rather than following a fixed program.
+
+In production, the prompt is part of the system interface. It needs explicit behavior, version control, and evaluation like any other executable contract. This hub covers the basic mechanics. Its child notes handle in-context learning, reasoning, prompt composition, and automated optimization in more depth.
 
 ```datacorejsx
 const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
@@ -21,14 +23,14 @@ return FolderStructureMap;
 
 # Prompt Anatomy
 
-Most effective prompts combine four elements:
+Four elements cover most prompt contracts:
 
-- **Instruction**: the exact task to perform.
-- **Context**: domain facts, constraints, or audience details.
-- **Input data**: the concrete content to process now.
-- **Output indicator**: the required structure for the answer.
+- **Instruction** names the exact task.
+- **Context** supplies domain facts or constraints.
+- **Input data** contains the material to process now.
+- **Output indicator** defines the required answer shape.
 
-Example with all four elements:
+The following prompt uses all four:
 
 ```text
 Instruction: Extract security risks from the incident note.
@@ -37,18 +39,18 @@ Input data: "API keys were stored in plain text logs for 3 days in staging."
 Output indicator: Return JSON with fields risk, impact, mitigation.
 ```
 
-Mechanically, each element removes uncertainty: instruction narrows behavior, context biases interpretation, input anchors the specific case, and output indicator constrains format.
+Each element removes a different ambiguity. The instruction narrows behavior, context guides interpretation, input anchors the current case, and the output indicator constrains the result.
 
 # LLM Settings
 
-Prompt text controls intent, while generation settings control sampling behavior and output boundaries.
+Prompt text describes the task. Generation settings control sampling and output limits.
 
-- **Temperature**: higher values increase randomness; lower values make outputs more deterministic.
-- **Top-p**: limits candidate tokens to a probability mass (nucleus); lower values are more conservative.
-- **Max tokens**: hard cap on generated length, useful for cost and latency control.
-- **Stop sequences**: explicit strings that terminate output, useful for schemas and multi-part protocols.
+- **Temperature** raises or lowers sampling randomness.
+- **Top-p** restricts candidate tokens to a cumulative probability mass. Lower values narrow the set.
+- **Max tokens** caps generated length and therefore limits part of the cost and latency.
+- **Stop sequences** terminate output when the model emits a specified string.
 
-Starting ranges below are heuristics, not universal defaults. Validate them with task-specific evals for your chosen model before using them in production.
+These starting ranges are heuristics. Production values need task-specific evaluation on the chosen model.
 
 | Task type | Temperature | Top-p | Max tokens | Stop sequences |
 |---|---:|---:|---:|---|
@@ -56,17 +58,17 @@ Starting ranges below are heuristics, not universal defaults. Validate them with
 | Classification | 0.0-0.2 | 0.1-0.4 | 20-80 | Label boundary, newline |
 | Code generation | 0.1-0.3 | 0.8-1.0 | 200-800 | ``` or custom delimiter |
 
-Practical rule: tune `temperature` first, keep `top-p` near default unless you have a measured reason to change both.
+A simple starting policy is to tune `temperature` first and leave `top-p` near its default until an evaluation shows that both need adjustment.
 
 # Instruction Prompting
 
-Instruction prompting is direct natural-language control: tell the model exactly what to do, how to do it, and how to format the result. It works best when instructions are specific, observable, and testable.
+Instruction prompting states the task and result format directly. It works when the requested behavior is specific enough to observe and test.
 
-Good instruction pattern:
+A useful instruction usually contains:
 
-- Task verb first: classify, extract, summarize, transform.
-- Explicit format: JSON schema, bullet count, table columns, or label set.
-- Constraints: length, forbidden content, confidence threshold, tone.
+- A task verb such as classify, extract, summarize, or transform.
+- An explicit format such as a JSON schema, table columns, or a fixed label set.
+- Relevant constraints on length, forbidden content, confidence, or tone.
 
 Example 1 (name normalization):
 
@@ -86,15 +88,15 @@ Return only redacted text.
 Input: "Hi John, call me at 410-805-2345."
 ```
 
-If outputs drift, tighten the output indicator before adding complexity.
+When outputs drift, tightening the output indicator is usually cheaper than adding another prompting technique.
 
 # Role Prompting
 
-Role prompting assigns a perspective that shapes style, depth, and framing. It does not replace task instructions; it modifies how the model executes them.
+Role prompting supplies a perspective that changes style, depth, or framing. The role modifies task execution. It does not replace the task.
 
-- Use role prompting when voice or audience matters.
-- Pair role with boundaries so style does not override accuracy.
-- Prefer concrete roles over vague ones.
+- It fits tasks where voice or audience matters.
+- Accuracy boundaries still need to be explicit.
+- Concrete roles work better than vague personas.
 
 Illustrative contrast:
 
@@ -103,37 +105,37 @@ Standard: Write a review of this pizza place.
 Role-based: You are a food critic writing for a city newspaper. Write a review of this pizza place in 120-150 words, focusing on crust texture, sauce balance, and service.
 ```
 
-The role-based version typically yields richer domain vocabulary and better evaluative structure because the model has a clearer perspective prior.
+The second version gives the model a concrete perspective and observable review criteria. The role alone would not provide those constraints.
 
 # Choosing a Technique
 
-Use this quick decision flow for first-pass prompt design:
+This flow is a useful first pass:
 
 ```mermaid
 flowchart TD
     A[Start with task goal] --> B{Simple direct task}
     B -->|Yes| C[Use instruction or zero shot]
     B -->|No| D{Need strict output shape}
-    D -->|Yes| E[Use few shot examples]
+    D -->|Yes| E[Use structured output or schema; add examples for semantics]
     D -->|No| F{Needs deeper reasoning}
     F -->|Yes| G[Use reasoning scaffolding plus verification]
     F -->|No| H{Multiple dependent steps}
     H -->|Yes| I[Use prompt chaining]
     H -->|No| J[Use role plus instruction]
-    C --> K[Iterate with meta prompting]
+    C --> K[Evaluate and iterate]
     E --> K
     G --> K
     I --> K
     J --> K
 ```
 
-For deeper implementation patterns, use targeted follow-ups such as [[In-Context Learning]] when format consistency is weak and [[Prompt Composition]] when one prompt is not enough. Prefer verifiable outputs over eliciting hidden reasoning traces.
+Strict output shape needs structured output or schema validation. Examples can clarify semantics that the schema cannot express. A task that cannot fit one instruction may need [[Prompt Composition]]. In both cases, representative evaluation matters more than eliciting hidden reasoning traces; meta prompting is only one way to generate candidate instructions.
 
 # Pitfalls
 
-- **Indirect prompt injection from retrieved content**: if documents, web pages, or tool results include malicious instructions, the model may treat them as higher-priority guidance and perform unsafe actions. This happens when instruction and data channels are mixed. Mitigate by isolating trusted instructions, treating retrieved text as untrusted input, and enforcing tool allowlists and output validation.
-- **Valid-looking but wrong structured output**: an answer can match your JSON or table format while containing incorrect fields or invented values. This happens because structure constraints do not guarantee factual correctness. Mitigate with schema validation plus semantic checks (required fields, value ranges, and source-grounded assertions).
-- **Token budget collapse in multi-step prompts**: long context plus verbose generations can truncate critical instructions or examples, causing silent quality drops. This happens when `max tokens` and context size are not managed together. Mitigate by trimming context, using stop sequences, and monitoring completion length and truncation rate.
+- **Indirect prompt injection from retrieved content.** A document, web page, or tool result may contain malicious instructions that the model mistakes for trusted guidance. Keep trusted instructions separate from untrusted data, restrict tools by policy, and validate outputs.
+- **Correct shape, wrong content.** JSON can pass schema validation while carrying invented values. Add semantic checks for ranges, required relationships, and source-grounded claims.
+- **Token budget collapse.** Long context and verbose generations can crowd out critical instructions or examples. Control the input and output budgets together, then monitor truncation rather than assuming the model saw everything.
 
 # Questions
 
@@ -143,25 +145,25 @@ For deeper implementation patterns, use targeted follow-ups such as [[In-Context
 > - Conservative settings can still produce poor output if instructions are ambiguous.
 > - Reliable systems tune both and evaluate with task-specific metrics.
 
-> [!QUESTION]- When should you prefer few-shot prompting over pure instruction prompting?
-> - When output format is strict or hard to describe in words.
+> [!QUESTION]- When is few-shot prompting a better fit than pure instruction prompting?
+> - When acceptable semantics or an output convention is hard to describe in words.
 > - When label boundaries are subtle and examples clarify decision edges.
 > - When consistency matters more than novelty.
-> - Start with minimal examples, then add edge cases.
+> - Use a schema for strict shape; start with minimal examples, then add edge cases.
 
-> [!QUESTION]- How would you debug a prompt that is accurate but too verbose and expensive?
+> [!QUESTION]- How can an accurate but verbose and expensive prompt be tightened?
 > - Tighten output indicator with length limits and schema.
 > - Lower `max tokens` and add stop sequences.
-> - Keep `temperature` low for deterministic concise tasks.
+> - Keep `temperature` low for lower-variance concise tasks.
 > - Evaluate token usage and failure rate after each change.
 
 # References
 
-- [Prompt Engineering Guide - Basics](https://www.promptingguide.ai/introduction/basics)
-- [Prompt Engineering Guide - Prompt Elements](https://www.promptingguide.ai/introduction/elements)
-- [Prompt Engineering Guide - Model Settings](https://www.promptingguide.ai/introduction/settings)
-- [OpenAI Prompt Engineering Guide](https://platform.openai.com/docs/guides/prompt-engineering)
-- [Anthropic Prompt Engineering Overview](https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/overview)
-- [OWASP Top 10 for LLM Applications](https://owasp.org/www-project-top-10-for-large-language-model-applications/)
-- [OWASP LLM Prompt Injection Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/LLM_Prompt_Injection_Prevention_Cheat_Sheet.html)
-- [Simon Willison - Delimiters won't save you from prompt injection](https://simonwillison.net/2023/May/11/delimiters-wont-save-you/)
+- [Prompt Engineering Guide - Basics](https://www.promptingguide.ai/introduction/basics) — a compact introduction to instructions, context, input data, and output indicators.
+- [Prompt Engineering Guide - Prompt Elements](https://www.promptingguide.ai/introduction/elements) — examples of the elements that make a prompt contract explicit.
+- [Prompt Engineering Guide - Model Settings](https://www.promptingguide.ai/introduction/settings) — background on temperature, top-p, length limits, and stop sequences.
+- [OpenAI Prompt Engineering Guide](https://platform.openai.com/docs/guides/prompt-engineering) — official guidance on writing and evaluating prompts for OpenAI models.
+- [Anthropic Prompt Engineering Overview](https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/overview) — official workflow guidance for defining success criteria and testing prompt changes.
+- [OWASP Top 10 for LLM Applications](https://owasp.org/www-project-top-10-for-large-language-model-applications/) — the primary threat taxonomy behind the prompt-injection boundary.
+- [OWASP LLM Prompt Injection Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/LLM_Prompt_Injection_Prevention_Cheat_Sheet.html) — layered mitigations for trusted-instruction and untrusted-data handling.
+- [Simon Willison - Delimiters won't save you from prompt injection](https://simonwillison.net/2023/May/11/delimiters-wont-save-you/) — a concrete explanation of why prompt delimiters are not a security boundary.

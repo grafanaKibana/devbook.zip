@@ -12,9 +12,9 @@ status: Done
 priority: High
 ---
 
-Evaluation measures whether an LLM application satisfies product, grounding, safety, and operational requirements. Because open-ended output has several valid forms, one assertion cannot cover the system. A useful evaluation combines a versioned regression corpus, exact predicates, semantic rubrics, human calibration, and production outcomes.
+Evaluation checks whether an LLM application behaves well enough to ship. Open-ended output may have several valid forms, so one assertion cannot represent the whole product contract. The practical system combines exact checks with rubric-based scoring, then compares both against a versioned set of cases and production outcomes.
 
-The corpus and the scoring techniques are different things. A [[Golden Test Set and Regression Runs|golden test set]] is the versioned dataset that supplies inputs, expected facts or invariants, rubrics, and slice metadata. [[Deterministic Checks]] and [[LLM-as-a-Judge|judges]] score candidate outputs produced from those cases. Regression logic then compares the candidate with a pinned baseline or threshold.
+Keep the cases separate from the scorers. A [[Golden Test Set and Regression Runs|golden test set]] contains inputs, expected facts or invariants, rubrics, and slice metadata. [[Deterministic Checks]] and [[LLM-as-a-Judge|judges]] score outputs produced from those cases. The regression gate compares the result with a pinned baseline or threshold.
 
 ```datacorejsx
 const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
@@ -39,22 +39,22 @@ flowchart TD
     T -->|new dataset version| G
 ```
 
-Exact checks can run before an expensive judge for one candidate output, but the golden corpus is not a downstream stage after the judge. It is the common input and comparison boundary for every scorer.
+Cheap exact checks can reject a candidate before an expensive judge runs. The corpus itself is not a later pipeline stage. Every scorer starts from its cases and expectations.
 
-Use deterministic code where the predicate is exact:
+Use deterministic code for predicates with one mechanical answer:
 
 - JSON parses against a pinned schema.
 - A required field exists and has the expected type.
 - A tool name belongs to an allowed set.
 - A numeric value stays inside a declared range.
 
-Those checks have no classification error when the predicate and implementation match the product contract. The guarantee does not extend to every rule implemented in code. Regex-based PII detection, keyword safety filters, toxicity classifiers, and unsupported-claim heuristics are repeatable but imperfect: they can produce both false positives and false negatives. Calibrate them on labeled examples and treat uncertain content as a scored signal or review path rather than an infallible hard gate.
+Such checks have no classification error when the implementation matches the product contract. But deterministic execution does not make every rule exact. A regex for PII or a keyword safety filter is repeatable and still wrong on some inputs. Calibrate heuristic detectors on labeled cases, record false positives and false negatives, and send uncertain results to a score or review path instead of treating them as infallible gates.
 
-Semantic dimensions such as correctness, groundedness, and actionability need a rubric. An LLM judge scales that rubric, while blinded human samples measure judge agreement and reveal systematic bias. Keep judge model, prompt, rubric, and sampling settings versioned with the result.
+Correctness and groundedness need a rubric when several answers are acceptable. An LLM judge applies that rubric at scale. Blinded human samples then show whether the judge agrees with the intended standard or carries a systematic bias. Version the judge model and prompt with the rubric and sampling settings. Otherwise two score files may not mean the same thing.
 
 # Example
 
-One customer-support case can carry both exact and semantic expectations:
+One support case can carry exact predicates alongside a semantic rubric:
 
 ```text
 case_id: damaged-refund-45-days
@@ -75,24 +75,16 @@ heuristic signals:
 - possible unsupported promise
 ```
 
-A schema failure is exact. “Possible payment-card number” remains a detector result until its precision and recall are established for this traffic.
+A schema either matches or it does not. “Possible payment-card number” remains a detector signal until its precision and recall are known for this traffic.
 
 # Dataset Lifecycle and Overfitting
 
-Give every corpus version immutable case identifiers, provenance, expected behavior, slice labels, and a reason for inclusion. New production failures enter through triage, not by silently editing an existing case. Keep a development set for iteration and a frozen holdout for release decisions.
+Give each case an immutable identifier, provenance, expected behavior, slice labels, and a reason for inclusion. Add production failures through triage rather than silently rewriting an old expectation. A development set supports iteration. A frozen holdout decides whether a release regressed.
 
-Repeatedly tuning prompts or judge rubrics against the holdout turns it into training data. A rising holdout score with flat [[Online Evaluation and AB Tests|online outcomes]] is evidence of evaluation overfitting. Rotate or add independently sourced cases, inspect slice-level effects, and retain human review for disputed decisions.
+Repeated prompt or rubric tuning against the holdout turns it into training data. If that score rises while [[Online Evaluation and AB Tests|online outcomes]] stay flat, the evaluation has probably been overfit. Add independently sourced cases and inspect results by slice. Human review remains necessary where the automated signals disagree.
 
 # Questions
 
-> [!QUESTION]- Is a golden test set a scoring stage?
-> No. It is a versioned regression dataset. Exact predicates, semantic judges, and human raters score outputs generated from its cases; the regression gate compares those results with a pinned baseline or threshold.
-
-> [!QUESTION]- When does a deterministic check have zero classification error?
-> Only when it evaluates an exact product predicate, such as schema validity or membership in an allowed set, and the implementation matches that contract. Deterministic PII, toxicity, and content heuristics still have false positives and false negatives.
-
-> [!QUESTION]- Why is a strong offline score insufficient to ship?
-> A fixed corpus cannot reproduce every traffic shift, multi-turn interaction, or user outcome. Use offline regression as a release gate, then estimate production impact with monitoring and controlled online experiments.
 
 # References
 

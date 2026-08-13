@@ -12,7 +12,7 @@ level:
 status: Done
 ---
 
-Evaluation is how you measure whether a model actually solves the problem it was built for, under the conditions it will face in production. The gap between offline metrics and real-world usefulness is where most ML projects fail silently. A senior engineer needs to pick the right metric for the decision, understand what each curve and score hides, and connect evaluation to business outcomes and deployment gates. This hub orients the family of metrics; the dedicated pages — [[Classification Evaluation]], [[ROC-AUC and PR-AUC]], and [[Calibration]] — carry the depth.
+Evaluation asks a plain question: does the model solve the problem it was built for under production conditions? An offline score is only a proxy for that answer. The work is choosing a metric that matches the decision, knowing what the score hides, and setting a release gate that reflects the cost of mistakes. The dedicated pages on [[Classification Evaluation]], [[ROC-AUC and PR-AUC]], and [[Calibration]] cover the individual metric families in more depth.
 
 ```datacorejsx
 const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
@@ -21,53 +21,53 @@ return FolderStructureMap;
 
 # The Evaluation Discipline
 
-Four decisions matter more than the choice of metric itself:
+Metric choice comes after four decisions:
 
-- **Derive the metric from the decision.** Start from the business cost of each error type, then map it to a technical metric — not the reverse. Accuracy on a 0.1% fraud problem is meaningless; the decision (block vs allow, at what cost) dictates whether precision, recall, or expected value is the target.
-- **Evaluate on data the model has never seen, split to simulate the future.** Random splits are fine for IID data; use time-based or group-based splits when records are temporally or session correlated, or the metric will be optimistic in a way that only surfaces in production. Keep a true holdout you never tune against.
-- **Report multiple metrics.** A single number hides the tradeoff between precision and recall, between ranking and calibration. Pair a threshold metric with a ranking metric, and add calibration whenever probabilities are consumed downstream.
-- **Slice by segments that matter operationally.** Aggregate scores average over cohorts, time windows, and edge cases — the exact places regressions hide. Slice by user cohort, geography, device, and time, and treat a degraded slice as a defect even when the aggregate looks healthy.
+- **Start with the decision cost.** A metric should represent what a wrong answer costs. Accuracy says little on a fraud dataset with a 0.1% positive rate. The choice to block or allow a transaction, and the cost of each error, determines whether precision, recall, or expected value matters.
+- **Make the split resemble the future.** Random splits suit independent, identically distributed records. Time-based or group-based splits are safer when events share a user, session, or time window. Keep a holdout set outside the tuning loop.
+- **Use enough metrics to expose the tradeoff.** A single score can hide the operating threshold or poor probability estimates. Pair threshold and ranking metrics, then check calibration when downstream logic consumes probabilities.
+- **Inspect operational slices.** Aggregate results smooth over the cohorts and time windows where regressions tend to appear. A weak critical slice is still a defect when the global score looks healthy.
 
-The recurring failure across all four is the **offline–online gap**: a metric that improves on a static test set but does not move (or reverses) on real traffic. Treat offline metrics as a gate, not as proof — confirm with production monitoring and, where possible, a controlled experiment.
+All four decisions feed the same risk: the **offline-online gap**. A change can improve a frozen test score while doing nothing for live traffic, or even making the outcome worse. Offline evaluation can block a bad release. Production monitoring and controlled experiments establish whether the release was actually better.
 
 # Metric Families
 
-Pick the family from the decision, not from habit: threshold metrics (precision, recall, F1) for a fixed operating point, ranking metrics (ROC-AUC, PR-AUC) for comparing models before a threshold exists, and calibration metrics (Brier, ECE) when downstream logic consumes probabilities rather than labels. For ranking items within a retrieved list (NDCG, MAP, MRR), see [[Home/AI & ML/LLM/Context Engineering/RAG/Monitoring#Retrieval Quality Metrics\|RAG Monitoring]]. Regression targets get their own family, covered below.
+Threshold metrics such as precision, recall, and F1 describe a chosen operating point. ROC-AUC and PR-AUC compare ranking quality across thresholds. Brier score and expected calibration error test whether predicted probabilities deserve their numerical meaning. Retrieval ranking has a separate set of measures, including NDCG, MAP, and MRR, covered in [[Home/AI & ML/LLM/Context Engineering/RAG/Monitoring#Retrieval Quality Metrics\|RAG Monitoring]].
 
 ## Regression Metrics
 
-For continuous targets:
+Continuous targets need a different family:
 
-- **RMSE** (root mean squared error) penalizes large errors quadratically — use it when big misses are disproportionately costly and errors are roughly Gaussian. Sensitive to outliers.
-- **MAE** (mean absolute error) penalizes errors linearly and is robust to outliers — use it when all errors scale equally and a few large ones should not dominate.
-- **MAPE** (mean absolute percentage error) expresses error as a fraction of the true value — readable for stakeholders, but undefined at zero and biased toward under-prediction. Avoid it when targets span zero or vary by orders of magnitude.
-- **Quantile (pinball) loss** targets a specific quantile rather than the mean — use it when you need prediction intervals or asymmetric over/under-prediction costs (forecasting safety stock, capacity planning).
+- **RMSE** squares each error before averaging, so a few large misses dominate the result. It fits decisions where a large miss is much more expensive than several small ones.
+- **MAE** weights error linearly. It is easier to interpret and less sensitive to outliers.
+- **MAPE** expresses error relative to the true value. It breaks at zero and behaves poorly when targets span several orders of magnitude.
+- **Quantile loss** estimates a chosen conditional quantile. It fits prediction intervals and decisions with different costs for overprediction and underprediction.
 
-Decision rule: default to RMSE when large errors hurt most and MAE when they should not dominate; report both, since a large gap between them signals heavy-tailed errors. Use MAPE only for stakeholder communication on strictly positive targets, and quantile loss when the product needs intervals, not point estimates.
+RMSE and MAE are worth reporting together. A wide gap between them often points to a heavy-tailed error distribution. MAPE is useful only for strictly positive targets where percentage error is meaningful. Quantile loss belongs in systems that need a range or an asymmetric decision, rather than one point estimate.
 
 # Pitfalls
 
-**Optimizing the metric instead of the outcome.** A metric is a proxy. Driving a single offline number up can degrade the real objective — a recommender tuned purely for click-through can surface clickbait that lowers retention. Pair every optimization target with a guardrail metric for the outcome it is supposed to serve.
+**Optimizing the proxy.** A recommender tuned only for click-through rate can learn to surface clickbait and reduce retention. Guardrail metrics need to cover the outcome the optimization target can damage.
 
-**Leakage inflating every metric at once.** When a feature encodes the label (a post-event timestamp, an ID that correlates with the target), all metrics look excellent offline and collapse in production. Suspect leakage when results are too good; audit features for information unavailable at inference time, especially in time-based joins.
+**Leakage making every score look excellent.** A post-event timestamp or label-correlated identifier can reveal the answer during training. That information disappears at inference time. Suspiciously strong results call for an audit of feature availability, especially around time-based joins.
 
-**Threshold chosen on the same data it is reported on.** Selecting the operating point and reporting precision/recall on the same split overstates performance. Choose the threshold on a validation split, then report on a separate test split.
+**Choosing and reporting a threshold on the same data.** This makes precision and recall optimistic. Select the operating point on validation data, then report it once on the untouched test set.
 
 # Questions
 
-> [!QUESTION]- When should you distrust a single evaluation metric?
-> - When the metric does not encode the cost asymmetry of the decision, for example accuracy on imbalanced classes
-> - When the test set does not represent production traffic, for example a random split on time-dependent data
-> - When the metric looks good overall but fails on critical slices or cohorts
-> - When the metric is a ranking metric but you need calibrated probabilities for downstream logic
+> [!QUESTION]- When is a single evaluation metric insufficient for a release decision?
+> - The metric ignores the cost difference between false positives and false negatives
+> - The test split does not represent production traffic or the order in which data arrives
+> - An aggregate score hides a regression in a critical cohort
+> - A ranking score looks strong while downstream logic depends on calibrated probabilities
 
-> [!QUESTION]- Why is the offline–online gap the central risk in ML evaluation?
-> - Offline metrics are computed on a frozen sample; production traffic shifts in distribution, user behavior, and edge-case mix that the sample never captured
-> - A change can improve the offline number while leaving real outcomes flat — or reverse them — because the offline set rewards patterns that do not generalize
-> - Leakage, non-representative splits, and metric-proxy mismatch all widen the gap silently
-> - The mitigation is layered: offline metrics as a release gate, production monitoring to catch drift, and controlled experiments to confirm a real effect before trusting it
+> [!QUESTION]- Why can an offline improvement fail to produce a better production outcome?
+> - The frozen test sample can miss shifts in traffic, behavior, or rare cases
+> - Leakage and an unrealistic split can reward patterns that are unavailable in production
+> - The chosen metric may be only loosely connected to the business decision
+> - Offline metrics should gate the release. Monitoring and controlled experiments verify the live effect
 
 # References
 
-- [scikit-learn model evaluation](https://scikit-learn.org/stable/modules/model_evaluation.html)
-- [ML.NET model evaluation metrics](https://learn.microsoft.com/dotnet/machine-learning/resources/metrics)
+- [scikit-learn model evaluation](https://scikit-learn.org/stable/modules/model_evaluation.html) — Official guide to scoring APIs, classification and regression metrics, calibration, and model-selection caveats.
+- [ML.NET model evaluation metrics](https://learn.microsoft.com/dotnet/machine-learning/resources/metrics) — Microsoft reference for interpreting the metrics exposed by ML.NET evaluators.

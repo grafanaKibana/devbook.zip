@@ -12,9 +12,9 @@ publish: true
 status: Done
 ---
 
-RAG evaluation decomposes into three layers: retrieval quality, generation quality, and end-to-end usefulness. Without this decomposition, teams observe "quality dropped" but cannot isolate whether chunking, embedding, retrieval ranking, prompt assembly, or model behavior caused the regression.
+RAG can fail before generation starts. It can also retrieve the right evidence and still produce a bad answer. Evaluation therefore separates retrieval from generation, then checks the finished system against the user's task. One blended quality score cannot show which part needs repair.
 
-The mechanism: each layer has its own metrics, its own failure modes, and its own fix. Retrieval metrics measure whether the right evidence reaches the generator. Generation metrics measure whether the output is faithful to that evidence and actually answers the question. End-to-end metrics measure whether the user's task got solved. A pipeline can have perfect retrieval but poor generation (model ignores context), or perfect generation but poor retrieval (model faithfully summarizes irrelevant documents).
+Retrieval metrics ask whether relevant chunks reached the model and whether they were ranked well. Generation metrics check that the answer uses those chunks faithfully. End-to-end evaluation looks at the actual outcome. The distinction matters because prompt changes cannot recover a document that retrieval never found, while another embedding model will not fix a generator that ignores clear evidence already in context.
 
 ```mermaid
 flowchart LR
@@ -26,7 +26,7 @@ flowchart LR
     EM --> D3[Did the user task get solved]
 ```
 
-Example: a support bot returns the correct policy document (retrieval passes) but the model misreads a date constraint and answers with the wrong deadline (generation fails). Without layer separation, the team would chase retrieval improvements that cannot fix a generation problem.
+A support bot may retrieve the correct policy and still misread its date constraint. Retrieval passes. Generation fails. Without separate scores, that defect looks like a search problem and sends work toward the wrong component.
 
 ```datacorejsx
 const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
@@ -36,12 +36,12 @@ return FolderStructureMap;
 # Questions
 
 > [!QUESTION]- Why decompose RAG evaluation into separate retrieval, generation, and end-to-end layers?
-> Because a single "quality" score tells you something broke but not where, and the fix is completely different per layer. Retrieval metrics ask whether the right evidence even reached the generator; generation metrics ask whether the answer is faithful to that evidence and actually addresses the question; end-to-end asks whether the user's task got solved. The decomposition is what separates the two failures that look identical from outside: perfect retrieval with a model that ignores the context, and flawless generation over irrelevant documents the retriever never should have returned. Without it you chase retrieval tuning that can't fix a generation bug — and burn a sprint doing it.
+> The layers fail for different reasons and need different fixes. Retrieval scoring shows whether relevant evidence arrived. Generation scoring checks whether the answer follows that evidence, while the end-to-end score records whether the task was solved. This separates a model that ignores a good context from one that faithfully summarizes irrelevant chunks. A single score makes both failures look the same.
 
 > [!QUESTION]- What belongs in RAG evaluation specifically versus general LLM evaluation?
-> RAG reuses the whole general eval stack — LLM-as-a-judge, deterministic checks, golden sets, synthetic generation, the online/A-B loop — and adds only what's genuinely RAG-shaped on top. That specific part is three things: retrieval-quality metrics (did the right chunks arrive, ranked well), faithfulness/groundedness (is the answer supported by the retrieved evidence rather than the model's parametric memory), and the labeling problem of which chunks count as relevant when a query maps to several. Everything else is inherited. Keeping that line clean is what stops the eval system from being rebuilt per domain — the general machinery lives once, and RAG, agents, and plain prompts each specialize it.
+> RAG adds retrieval relevance, ranking quality, and faithfulness to the evidence placed in context. It also needs labels for queries with several acceptable chunks. Golden sets, deterministic checks, semantic judges, and online experiments remain general LLM evaluation machinery. Reusing that shared layer prevents every RAG pipeline from inventing its own evaluation system.
 
 # References
 
-- [RAGAS metrics reference -- faithfulness, context precision, answer correctness (RAGAS docs)](https://docs.ragas.io/en/stable/concepts/metrics/available_metrics/)
-- [RAG evaluators -- groundedness, relevance, completeness (Azure AI Foundry)](https://learn.microsoft.com/en-us/azure/ai-foundry/concepts/evaluation-evaluators/rag-evaluators)
+- [RAGAS metrics reference](https://docs.ragas.io/en/stable/concepts/metrics/available_metrics/) — definitions and implementations for faithfulness, context precision, and answer correctness.
+- [RAG evaluators in Azure AI Foundry](https://learn.microsoft.com/en-us/azure/ai-foundry/concepts/evaluation-evaluators/rag-evaluators) — provider documentation for groundedness, relevance, and response completeness evaluators.

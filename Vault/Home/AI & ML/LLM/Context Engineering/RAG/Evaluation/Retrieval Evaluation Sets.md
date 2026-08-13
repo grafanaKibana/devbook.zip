@@ -3,7 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
-summary: "Pairs queries with their relevant chunks; the hard part is labeling which chunks count."
+summary: "Pairs queries with their relevant chunks. The hard part is labeling which chunks count."
 level:
   - "2"
 priority: High
@@ -11,19 +11,19 @@ status: Done
 publish: true
 ---
 
-A retrieval eval set is the labeled data the [[Evaluation Metrics|retrieval metrics]] run against: a set of queries, each with its known-relevant chunks. The general machinery for building any eval set — example structure, LLM-driven synthetic generation, golden-set curation, sizing for statistical power — lives in [[Building an Evaluation Set]]. This page covers only the two parts that are specific to retrieval and have no analogue in a single-shot LLM or agent eval: how you label *which* chunks count as relevant, and how chunk-anchored synthetic generation distorts retrieval scores.
+A retrieval evaluation set pairs queries with chunks judged relevant to them so [[Evaluation Metrics|retrieval metrics]] have ground truth. [[Building an Evaluation Set]] covers general dataset construction. This note focuses on the retrieval-specific part: deciding which chunks count, then avoiding distortions introduced by chunk-anchored synthetic questions.
 
-Both come down to one fact: a query rarely maps to exactly one chunk. Get the labeling wrong and the metric punishes a correct retriever or passes a broken one, regardless of how clean the rest of the eval harness is.
+A query rarely maps cleanly to one chunk. Bad labels can punish a correct retriever or pass an incomplete one even when the evaluation harness is sound.
 
-# Multiple Relevant Chunks per Query
+# When One Query Has Several Relevant Chunks
 
-The simplest eval labels one relevant chunk per query, but most real queries have several, and how you label and score them depends on *why* multiple chunks are relevant. Conflating the two cases below produces metrics that punish a correct retriever or pass a broken one.
+Single-chunk labels are cheap, but many real queries have several relevant chunks. The right metric depends on why those chunks matter.
 
-**Substitutable relevance — "any of these is good."** Several chunks each independently and fully answer the query: the same policy duplicated across documents, multiple FAQ entries covering one topic. Retrieving any single one of them is success. Label all of them relevant and score with **HitRate@k** (did at least one relevant chunk arrive) as the primary metric and **MRR** to reward ranking a hit early. Do not use strict recall or MAP here — they penalize the retriever for "missing" redundant copies it never needed to find, which is not a real failure.
+**Substitutable relevance: any one is enough.** Several chunks independently answer the query, perhaps because a policy is duplicated or multiple FAQ entries cover it. Label every valid answer and use **HitRate@k** for success, with **MRR** when early rank matters. Strict recall and MAP would penalize missing redundant copies that the generator never needed.
 
-**Complementary relevance — "all of these are needed."** The answer requires combining evidence spread across chunks: multi-hop reasoning, comparisons ("how do plans A and B differ on refunds"), or aggregation. Missing any one chunk yields an incomplete answer. Score with **Recall@k** — the fraction of *required* chunks retrieved — and RAGAS **Context Recall**. HitRate is actively misleading here: retrieving one of three required chunks looks like a pass but produces a wrong answer. For synthetic generation of this case, give the LLM 2-3 chunks at once and ask for a question that needs *all* of them, recording the whole set as ground truth.
+**Complementary relevance: the answer needs the set.** Comparisons and multi-hop questions combine evidence across chunks. Missing one can make the answer incomplete. Use **Recall@k** and RAGAS **Context Recall** because HitRate would pass after the first hit. Synthetic questions for this case should be generated from the full required set and retain every source chunk as ground truth.
 
-**Graded relevance — "some are better than others."** When chunks differ in usefulness (one directly answers, another is supporting context), binary labels throw away signal. Label with graded scores — `2` = directly answers, `1` = useful supporting context, `0` = irrelevant — and score with **nDCG@k**, the one common metric that consumes graded labels and rewards placing the most-relevant chunk highest.
+**Graded relevance: usefulness differs.** Binary labels lose information when one chunk answers directly and another only supports it. Scores such as `2` for direct evidence, `1` for supporting context, and `0` for irrelevant content feed **nDCG@k**, which rewards ranking stronger evidence first.
 
 | Ground-truth shape | Question it answers | Primary metric | Avoid |
 | --- | --- | --- | --- |
@@ -31,11 +31,15 @@ The simplest eval labels one relevant chunk per query, but most real queries hav
 | Complementary (all-of) | Did every required chunk arrive | Recall@k, Context Recall | HitRate — one hit hides the misses |
 | Graded (some better) | Are the best chunks ranked highest | nDCG@k | Binary recall / precision — discards the grades |
 
-**Set k from what the generator actually consumes**, not a borrowed default. If the prompt packs the top 5 chunks into context, evaluate at k=5. For the substitutable case a small k (HitRate@3) is enough. For the complementary case, k must be at least the number of required chunks, or recall is capped below 1.0 by construction and the metric measures the eval design rather than the retriever. See [[Monitoring#Retrieval Quality Metrics|Monitoring — Retrieval Quality Metrics]] for the full metric definitions.
+The label shape changes the verdict even when the retrieved list stays fixed. Suppose the query is “How do plans A and B differ on refunds?” and the answer requires one policy chunk for each plan. A result containing only plan A has `HitRate@5 = 1`, but complementary recall is `1/2`; the first metric calls the retrieval successful while the generator is missing half the comparison. If two chunks instead repeat the complete plan A policy, retrieving either one is enough. Strict recall would again report `1/2`, this time punishing a result that already contains the whole answer.
 
-# Chunk-anchored Synthetic Generation
+**Set k from the generator's real input.** If generation receives five chunks, evaluate at k=5. Complementary cases need a cutoff at least as large as the required set. Otherwise the evaluation itself caps recall below 1.0. [[Monitoring#Retrieval Quality Metrics|Monitoring — Retrieval Quality Metrics]] gives the complete definitions.
 
-The general synthetic-generation technique — prompt an LLM to write the questions a passage answers — is covered in [[Building an Evaluation Set]]. Applied to retrieval it has a specific shape: sample N chunks, and for each, prompt the model for the questions a real user would ask that this chunk answers. The chunk becomes the ground-truth relevant document for every query it produced — inverting the expensive direction of labeling. One batch yields thousands of `(query, relevant_chunk)` pairs with no human in the loop for the first pass.
+The annotation cost should follow the answer path. Simple lookup questions can stay binary and substitutable. Comparisons, aggregation, and multi-hop questions need the full required set, while graded labels earn their cost only when rank among differently useful chunks changes what the generator can answer.
+
+# How Synthetic Questions Distort Labels
+
+Synthetic generation, introduced in [[Building an Evaluation Set]], reverses the labeling direction. Sample a chunk, ask a model for questions that the chunk answers, and record that chunk as relevant to each question. This quickly produces `(query, relevant_chunk)` pairs, though the first-pass label is only a hypothesis until other valid chunks are checked.
 
 ```text
 for chunk in sample(corpus, n=2000):
@@ -49,30 +53,20 @@ for chunk in sample(corpus, n=2000):
         eval_set.append({"query": q, "relevant_chunk_ids": [chunk.id]})
 ```
 
-This produces exactly the structure the retrieval metrics consume: the query is the eval input, the source chunk is the expected result, and Recall@k / MRR / nDCG@k are computed by checking where that chunk lands in the retrieved list. Two failure modes are specific to *retrieval* labeling — distinct from the general distributional-homogeneity risk that applies to any synthetic set:
+The structure fits retrieval metrics directly: a query goes in, and the source chunk is expected among the ranked results. Two labeling failures matter in particular.
 
-- **False negatives in ground truth.** The synthesized query is frequently answerable by *other* chunks you never labeled — duplicated policy text, an overview paragraph, a near-identical FAQ entry. The retriever returns a genuinely relevant chunk, but because only the source chunk is marked relevant, Precision@k and MRR penalize it as a miss. This deflates scores and can rank a *better* retriever lower than a worse one. Mitigation: after generation, run a second pass (the retriever itself, or an LLM judge over the top-k) to find other chunks that also answer the query and either label them relevant too or drop ambiguous queries. This is the single most common reason synthetic retrieval numbers look worse than production reality.
-- **Lexical leakage.** LLMs lift exact phrasing from the source chunk, producing queries that share rare tokens with the answer. These favor BM25 and exact match, overstating retrieval quality on a query distribution real users never type. Mitigation: instruct the model to paraphrase and to ask realistically underspecified questions; spot-check token overlap between query and source.
+- **False negatives in ground truth.** Another chunk may answer the synthetic query just as well because of duplicated policy text or an overview section. If only the source is labeled, a correct result becomes a false miss. Run a second retrieval pass and judge the top candidates, then add other valid chunks or drop the ambiguous query.
+- **Lexical leakage.** A generated question may copy rare source phrases, making keyword retrieval look stronger than it will on real queries. Require paraphrases, ask for realistically incomplete wording, and inspect token overlap.
 
 # Questions
 
-> [!QUESTION]- When several chunks are relevant to one query, how do you decide which retrieval metric to score with?
-> - First classify *why* they are relevant — substitutable (any one fully answers) versus complementary (the answer needs all of them combined)
-> - Substitutable: score HitRate@k and MRR — success is one good chunk arriving early; strict recall or MAP wrongly penalizes not retrieving redundant copies
-> - Complementary: score Recall@k and Context Recall — every required chunk must arrive; HitRate is misleading because one-of-three looks like a pass but yields an incomplete answer
-> - When chunks differ in usefulness rather than count, use graded labels (0/1/2) and nDCG@k, the only common metric that consumes grades and rewards ranking the best chunk first
-> - Set k from how many chunks the generator actually consumes; for complementary cases k must be at least the number of required chunks or recall is capped below 1 by construction
-> - Graded multi-chunk labels cost far more annotation effort than single-chunk binary labels — invest only where the generator genuinely fuses multiple sources (multi-hop, comparison), and keep single-label binary sets for simple lookup queries
+> [!QUESTION]- When several chunks are relevant to one query, how should the retrieval metric be chosen?
+> Classify the evidence relationship first. Substitutable chunks need HitRate@k and often MRR because any early hit succeeds. Complementary chunks need Recall@k or Context Recall because the whole required set matters. If usefulness varies, graded labels and nDCG@k preserve that distinction. The cutoff must match what generation consumes and cannot be smaller than a complementary ground-truth set.
 
 > [!QUESTION]- Why do synthetically generated retrieval eval sets often report worse recall than the system delivers in production?
-> - Chunk-anchored generation labels only the source chunk as relevant, but the synthesized query is frequently answerable by other unlabeled chunks (duplicated text, overview paragraphs, near-identical FAQ entries)
-> - The retriever returns a genuinely relevant chunk, but because it is not in the ground truth, Precision@k and MRR score it as a miss — a false negative in the labels, not a retrieval failure
-> - This deflates absolute numbers and, worse, can rank a better retriever below a worse one, corrupting model-selection decisions
-> - Fix: after generation, run a second pass (the retriever plus an LLM judge over top-k) to label additional chunks that also answer the query, or discard ambiguous queries
-> - Secondary cause: lexical leakage — the LLM copies rare phrasing from the source chunk, inflating exact-match and BM25 scores on queries no real user would type
-> - The dedup/judge pass does add LLM cost per query and some noise of its own, but without it synthetic retrieval metrics are systematically pessimistic and unreliable for ranking pipelines
+> Chunk-anchored generation initially labels only its source, even when duplicated or summary chunks also answer the question. Retrieval can return valid evidence that the labels call wrong, depressing the score and even reversing model rankings. Retrieve a candidate set, judge other valid answers, and expand the qrels or discard ambiguous cases. Lexical leakage creates the opposite bias by copying rare source terms and making exact match unrealistically easy.
 
 # References
 
-- [RAGAS synthetic test data generation -- chunk-to-query generation, query types, and labeling (RAGAS docs)](https://docs.ragas.io/en/stable/concepts/test_data_generation/rag/)
-- [BEIR -- heterogeneous zero-shot retrieval benchmark with qrels-style relevance judgments (NeurIPS 2021)](https://arxiv.org/abs/2104.08663)
+- [RAGAS synthetic test data generation](https://docs.ragas.io/en/stable/concepts/test_data_generation/rag/) — documents chunk-to-query generation, query types, and the framework's test-set construction workflow.
+- [BEIR: A Heterogeneous Benchmark for Zero-shot Evaluation of Information Retrieval Models](https://arxiv.org/abs/2104.08663) — introduces the benchmark's qrels-style relevance judgments and evaluation across heterogeneous retrieval tasks.

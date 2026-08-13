@@ -3,7 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - Machine Learning
-summary: "The AI field enabling computers to understand and generate human language, now dominated by transformers."
+summary: "Turning language into machine-usable representations for extraction, classification, search, and generation. Transformers are now common."
 level:
   - "1"
 priority: Low
@@ -11,70 +11,74 @@ status: Done
 publish: true
 ---
 
-Natural Language Processing (NLP) is the field of AI concerned with enabling computers to understand, interpret, and generate human language. NLP powers search engines, chatbots, translation, sentiment analysis, document classification, and the large language models (LLMs) that underpin modern AI assistants. The transformer architecture (2017) fundamentally changed NLP — most modern NLP tasks are now solved by fine-tuning or prompting pre-trained transformer models rather than building task-specific pipelines from scratch. The practical shift: a hand-tuned regex + TF-IDF classification pipeline that takes months of rule engineering is now routinely outperformed by a small fine-tuned transformer (such as DistilBERT) trained on a few thousand labeled examples — and unlike the rules, the model generalizes to inputs the rules never anticipated.
+Natural language processing (NLP) turns text or speech into representations a machine can use, then maps those representations to a task such as search, classification, extraction, translation, or generation. The machine does not "understand" language in the human sense. It learns statistical structure that can be useful enough to operate on language.
+
+Transformers changed the default implementation path. Many systems now start with a pretrained model and adapt it through prompting or fine-tuning. Rules and sparse features still win when the pattern is narrow, stable, and easy to audit. A larger model earns its cost when the input varies enough that hand-written cases become the real maintenance burden.
 
 # Core NLP Tasks
 
 ## Tokenization
 
-Breaking text into units (tokens) that a model can process. Tokens are not always words — modern tokenizers (BPE, WordPiece) split words into subword units to handle rare words and multiple languages.
+Tokenization converts text into the integer units accepted by a model. Tokens are not words. BPE and WordPiece vocabularies often split an unfamiliar word into reusable subword pieces, while punctuation and whitespace can become separate units.
 
 ```text
 Input:  "Unbelievable performance!"
 Tokens: ["Un", "##believ", "##able", " performance", "!"]
 ```
 
-Tokenization is the first step in every NLP pipeline. Token count determines model input length and cost for API-based LLMs.
+The token list is illustrative rather than the output of one specific tokenizer: WordPiece uses `##` continuation markers, while byte-level BPE token displays often preserve leading spaces. Exact segmentation comes from the tokenizer shipped with the model.
+
+For transformer models, token count controls context usage and often API cost. The count depends on the exact tokenizer, so character or word counts are only rough estimates.
 
 ## Named Entity Recognition (NER)
 
-Identifying and classifying named entities in text: people, organizations, locations, dates, monetary values.
+Named entity recognition locates spans and assigns labels such as person, organization, date, or monetary value.
 
 ```text
 Input:  "Microsoft acquired GitHub for $7.5 billion in 2018."
 Output: Microsoft [ORG], GitHub [ORG], $7.5 billion [MONEY], 2018 [DATE]
 ```
 
-NER is used in document processing, information extraction, and compliance systems (detecting PII).
+NER supports document indexing and structured extraction. A generic NER label set is not automatically a PII detector. Production compliance work usually needs domain-specific labels, policy rules, and evaluation on the actual documents.
 
 ## Sentiment Analysis
 
-Classifying the emotional tone of text: positive, negative, neutral (or more granular scales).
+Sentiment analysis assigns a polarity or score to text. Whole-document sentiment is often too coarse when one sentence praises delivery and criticizes product quality.
 
 ```text
 "The delivery was fast but the product quality was disappointing."
 → Mixed sentiment: positive (delivery), negative (quality)
 ```
 
-Aspect-based sentiment analysis identifies sentiment per aspect rather than for the whole text.
+Aspect-based models attach sentiment to the thing being discussed, preserving that distinction.
 
 ## Text Classification
 
-Assigning predefined categories to text: spam detection, topic classification, intent detection in chatbots.
+Text classification maps a document to one or more predefined labels. Spam detection, routing, and intent recognition are common cases. The label policy and ambiguous examples usually matter more than the choice between two similar model architectures.
 
 ## Machine Translation
 
-Translating text between languages. Modern translation uses encoder-decoder transformer models (e.g., Helsinki-NLP models on Hugging Face, Google Translate's neural MT).
+Machine translation maps text between languages while trying to preserve meaning and register. Encoder-decoder transformers are common, but proper nouns, domain terminology, and low-resource languages still need focused evaluation.
 
 ## Question Answering and Summarization
 
-Extracting answers from a context passage (extractive QA) or generating answers (generative QA). Summarization condenses long documents into shorter versions. Both are now dominated by LLMs.
+Extractive question answering selects an answer span from supplied context. Generative QA writes an answer and can introduce claims absent from that context. Summarization has the same split between compression and generation. Evaluation must therefore cover factual support, not only fluent wording.
 
-# The Transformer Impact
+# What Transformers Changed
 
-Before transformers (2017), NLP tasks required separate models for each task (LSTM for translation, CNN for classification, CRF for NER). Transformers enabled **transfer learning**: pre-train a large model on massive text corpora, then fine-tune on a small task-specific dataset.
+Earlier NLP stacks commonly paired task-specific features with recurrent networks, convolutional models, or conditional random fields. Transformers made large-scale pretraining reusable across tasks. The same base representation can be fine-tuned for classification, extraction, or generation.
 
-The result: BERT (2018) achieved state-of-the-art on 11 NLP benchmarks simultaneously. GPT-3/4 showed that large enough models can perform NLP tasks with zero or few examples (zero-shot, few-shot prompting).
+That reuse reduced the amount of labeled data needed for many tasks. It did not remove task design. Prompted and fine-tuned models still inherit the limits of their training data, context window, label definition, and evaluation set.
 
-For embeddings — the dense vector representations that power semantic search and RAG — see [[Embeddings]].
+Dense vector representations used by semantic search and RAG are covered in [[Embeddings]].
 
 # NLP in .NET
 
-For production NLP in .NET, the primary options are:
+The .NET implementation choice depends on latency, data policy, and how narrow the task is:
 
-- **Azure AI Language** (cloud): sentiment analysis, NER, key phrase extraction, language detection via REST API.
-- **ML.NET**: on-device text classification and sentiment analysis using pre-trained models.
-- **Microsoft Agent Framework / Azure OpenAI**: LLM-based NLP for complex tasks (summarization, QA, classification via prompting).
+- **Azure AI Language** exposes managed classification and extraction features through a service API.
+- **ML.NET** can train or consume local text-classification pipelines when data and inference need to remain inside the application boundary.
+- **Microsoft Agent Framework with an LLM provider** fits multi-step language workflows, though simple classification rarely needs an agent loop.
 
 ```csharp
 // Azure AI Language: sentiment analysis
@@ -86,21 +90,15 @@ Console.WriteLine($"Confidence: {result.Value.ConfidenceScores.Positive:P}");
 
 # Pitfalls
 
-## Treating Token Count as Word Count
+## Estimating Tokens from Words
 
-**What goes wrong**: estimating LLM costs or context window usage based on word count. A 1,000-word English document may be 1,200–1,500 tokens depending on vocabulary, but the same content in Japanese or Korean can require 2–3× more tokens because CJK characters split into more subword units. A cost budget estimated from English token counts can therefore be off by a factor of 2–3 once multilingual traffic arrives.
+Word counts hide tokenizer and language effects. A budget derived from English prose can fail on code, identifiers, or another language because the same visible length may produce many more tokens.
 
-**Why it happens**: "token" and "word" are used interchangeably in casual conversation.
-
-**Mitigation**: use the model's tokenizer to count tokens before sending to the API. OpenAI's `tiktoken` library and Azure's token counting APIs provide exact counts. For multilingual applications, benchmark token counts per language during cost estimation.
+Count with the tokenizer for the deployed model. Cost and truncation tests should include the actual language mix and representative long inputs.
 
 ## Language Bias in Pre-Trained Models
 
-**What goes wrong**: a model trained primarily on English performs poorly on other languages — lower accuracy, higher hallucination rate, worse NER.
-
-**Why it happens**: most large pre-trained models are English-dominant. Multilingual models (mBERT, XLM-R) exist but have lower per-language performance than monolingual models.
-
-**Mitigation**: use language-specific models for non-English tasks when accuracy matters. Evaluate on your target language explicitly.
+Multilingual support in a model card does not guarantee equal quality. Training mix, tokenizer coverage, and benchmark availability vary by language. Evaluate each supported language and the code-switching patterns seen in production. A language-specific model may be the better fit when one language carries most of the traffic or the task is high stakes.
 
 # Tradeoffs
 
@@ -108,41 +106,33 @@ Console.WriteLine($"Confidence: {result.Value.ConfidenceScores.Positive:P}");
 
 | Approach | Accuracy | Cost | Latency | Customization | Use when |
 |----------|---------|------|---------|--------------|----------|
-| Rule-based (regex, keyword) | Low | Near zero | Microseconds | High | Simple extraction with known patterns; no training data needed |
-| Fine-tuned small model (BERT, DistilBERT) | High | Medium (training) | Low (on-device) | High | Production NLP at scale; latency-sensitive; data available |
-| LLM via prompting (GPT-4, Claude) | Very high | High (per-call) | High (seconds) | Low | Complex tasks; no training data; rapid prototyping |
-| Azure AI Language (managed) | High | Medium (per-call) | Medium | Low | Standard tasks (sentiment, NER, key phrases) without ML expertise |
+| Rule-based (regex, keyword) | Narrow but predictable | Near zero | Usually lowest | Direct | Stable formats and explicit patterns |
+| Fine-tuned small model (BERT, DistilBERT) | Task-dependent | Training + hosting | Often low | Training data and model | Repeated classification or extraction at scale |
+| LLM via prompting | Task-dependent | Per call | Usually highest | Prompt, tools, retrieval | Variable inputs and generative work |
+| Azure AI Language (managed) | Task-dependent | Per call | Network-bound | Service configuration | Standard managed language features |
 
-**Decision rule**: use rule-based approaches for simple, high-volume extraction where patterns are stable. Use fine-tuned small models for production NLP tasks where latency and cost matter. Use LLMs for complex tasks (summarization, QA, multi-step reasoning) or when you lack training data. Use managed services (Azure AI Language) when you need standard NLP tasks without ML infrastructure.
+Start with rules when the pattern is explicit. A small fine-tuned model suits a stable, repeated task once labeled data exists and unit cost matters. Prompted LLMs are useful for variable or generative work, but they bring network latency and a broader failure surface. Managed language APIs trade model control for less infrastructure.
 
 ## Monolingual Vs Multilingual Models
 
 | Model type | Per-language accuracy | Languages | Model size | Use when |
 |-----------|---------------------|-----------|-----------|----------|
-| Monolingual (e.g., English BERT) | Highest | 1 | Smaller | Single-language product; accuracy is critical |
-| Multilingual (mBERT, XLM-R) | Lower per language | 100+ | Larger | Multi-language product; training data per language is scarce |
-| LLM (GPT-4, Claude) | High across languages | Many | Very large | Complex tasks; language coverage matters more than latency |
+| Monolingual (e.g., English BERT) | Often strongest in its language | 1 | Usually smaller | One-language product with enough data |
+| Multilingual (mBERT, XLM-R) | Varies by language | Many | Usually larger | Shared model across several languages |
+| General-purpose LLM | Varies by model and language | Many | Hosted or very large | Generative tasks where broad coverage offsets cost |
 
-**Decision rule**: use monolingual models when your product serves one language and accuracy is critical. Use multilingual models when you need coverage across many languages and per-language accuracy can be slightly lower. Use LLMs when the task complexity outweighs the cost of per-call API pricing.
+Benchmark the actual languages before choosing. A multilingual model simplifies operations, while separate monolingual models can improve quality at the cost of several training and deployment paths. General-purpose LLMs add broad coverage, but their latency and data boundary may decide the issue before benchmark accuracy does.
 
 # Questions
 
-> [!QUESTION]- When should you fine-tune a small model instead of prompting an LLM for an NLP task?
-> - Fine-tune when you have labeled training data and the task is well-defined (classification, NER, sentiment).
-> - Fine-tuned small models (BERT, DistilBERT) run at millisecond latency on-device vs seconds for LLM API calls.
-> - Per-request cost is near zero for on-device inference vs $0.01–$0.10+ per LLM call at scale.
-> - LLMs win when the task is complex (multi-step reasoning, summarization), training data is scarce, or rapid iteration matters more than unit cost.
-> - Fine-tuning costs you labeled data and training effort upfront, then pays it back as millisecond latency and near-zero per-request cost at scale; prototype with an LLM, then check whether production volume justifies the fine-tune.
+> [!QUESTION]- When is fine-tuning a small model preferable to prompting an LLM for an NLP task?
+> Fine-tuning fits a stable label space, enough representative examples, and volume that rewards predictable local inference. Prompting avoids an up-front training set and handles generative or changing tasks more easily. A fixed estimate such as $0.01–$0.10+ ages quickly. The comparison needs current provider pricing, representative token counts, and the full cost of local training and hosting.
 
-> [!QUESTION]- Why do multilingual NLP models underperform monolingual ones, and when is that acceptable?
-> - Multilingual models split their capacity across 100+ languages, so per-language representation quality is lower.
-> - Monolingual models concentrate all parameters on one language, achieving higher accuracy on that language's benchmarks.
-> - Multilingual models are acceptable when you need coverage across many languages and per-language accuracy can be slightly lower.
-> - For high-stakes tasks (medical NER, legal classification), the accuracy gap may be unacceptable — use language-specific models.
-> - Multilingual models trade per-language accuracy for breadth of coverage; accept that when you serve many languages on limited ML infrastructure, but validate explicitly on the languages you actually care about.
+> [!QUESTION]- Why might a multilingual NLP model underperform a monolingual one, and when is that acceptable?
+> A multilingual model shares vocabulary and capacity across languages whose training coverage can differ sharply. That may reduce per-language quality, though it can also help related low-resource languages through transfer. The shared model is attractive when one deployment must cover many languages. High-stakes extraction still needs per-language evidence, and a language-specific model may be justified where the shared model misses material cases.
 
 # References
 
-- [Hugging Face NLP Course](https://huggingface.co/learn/nlp-course/chapter1/1) — free, comprehensive course covering tokenization, transformers, fine-tuning, and all major NLP tasks with code examples.
-- [Attention Is All You Need (Vaswani et al., 2017)](https://arxiv.org/abs/1706.03762) — the original transformer paper; introduced the self-attention mechanism that replaced RNNs and enabled modern NLP.
+- [Hugging Face NLP Course](https://huggingface.co/learn/nlp-course/chapter1/1) — explains tokenization, transformer models, fine-tuning, and common NLP task pipelines with executable examples.
+- [Attention Is All You Need (Vaswani et al., 2017)](https://arxiv.org/abs/1706.03762) — introduces the Transformer architecture built around attention rather than recurrence or convolution.
 - [Azure AI Language documentation (Microsoft Learn)](https://learn.microsoft.com/en-us/azure/ai-services/language-service/) — official docs for Azure's managed NLP services: sentiment analysis, NER, key phrase extraction, and custom text classification.

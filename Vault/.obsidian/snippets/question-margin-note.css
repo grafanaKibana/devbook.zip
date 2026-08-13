@@ -1,0 +1,79 @@
+/* Questions are FAQ disclosures, not callout cards. Keep Obsidian's native
+ * folding behavior while borrowing its divider and text tokens. */
+.callout[data-callout="question"] {
+  --callout-color: var(--interactive-accent-rgb);
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
+}
+
+.callout[data-callout="question"]:has(+ .callout[data-callout="question"]),
+.el-div:has(.callout[data-callout="question"]):has(
+    + .el-div .callout[data-callout="question"]
+  )
+  .callout[data-callout="question"],
+.el-blockquote:has(.callout[data-callout="question"]):has(
+    + .el-blockquote .callout[data-callout="question"]
+  )
+  .callout[data-callout="question"],
+.markdown-source-view.is-live-preview
+  .cm-callout:has(.callout[data-callout="question"]):has(
+    + .cm-callout .callout[data-callout="question"]
+  )
+  .callout[data-callout="question"],
+.dc-questions-index
+  > span:has(+ span > .callout[data-callout="question"])
+  > .callout[data-callout="question"] {
+  border-block-end: 1px solid var(--background-modifier-border) !important;
+}
+
+.callout[data-callout="question"] > .callout-title {
+  min-block-size: 3rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 2.75rem;
+  align-items: center;
+  column-gap: 1rem;
+  padding: 0.5rem;
+  color: var(--text-normal);
+}
+
+.callout[data-callout="question"] > .callout-title::after {
+  grid-column: 2;
+  min-inline-size: 2.75rem;
+  min-block-size: 2.75rem;
+  display: grid;
+  place-items: center;
+  color: var(--interactive-accent);
+  font-size: 1.35rem;
+  font-weight: var(--font-semibold);
+  line-height: 1;
+  content: "\2212";
+}
+
+.callout[data-callout="question"].is-collapsed > .callout-title::after {
+  content: "+";
+}
+
+.callout[data-callout="question"] > .callout-title > .callout-icon,
+.callout[data-callout="question"] > .callout-title > .callout-fold {
+  display: none;
+}
+
+.callout[data-callout="question"] .callout-title-inner {
+  grid-column: 1;
+  color: var(--text-normal);
+  font-weight: var(--font-semibold);
+}
+
+.callout[data-callout="question"] > .callout-content {
+  margin: 0;
+  padding: 0 1.25rem 1.25rem;
+  color: var(--text-normal);
+}
+
+.callout[data-callout="question"].is-collapsed > .callout-content {
+  padding-block: 0;
+}

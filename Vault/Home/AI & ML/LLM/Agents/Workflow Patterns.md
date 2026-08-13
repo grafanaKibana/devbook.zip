@@ -11,9 +11,9 @@ status: Creation
 publish: true
 ---
 
-Between a single [[Home/AI & ML/LLM/Agents/Agents|augmented LLM]] and a fully autonomous agent sit five reusable workflow patterns. In a workflow, the developer controls the sequence through predefined code paths and the LLM handles individual steps — so these patterns are the vocabulary for the middle of the [[Home/AI & ML/LLM/Agents/Agents|agentic]] spectrum: more capable than one prompt, more predictable than a loop that decides its own steps.
+Five workflow patterns cover the space between one [[Home/AI & ML/LLM/Agents/Agents|augmented LLM]] call and an autonomous loop. Application code still owns the outer control flow. The model handles bounded decisions inside it. This middle of the [[Home/AI & ML/LLM/Agents/Agents|agentic]] spectrum is usually easier to test and operate because the allowed paths remain visible.
 
-They form a progression of increasing complexity, from a fixed sequential pipeline to runtime-determined delegation. The guiding rule is the same one that governs agent design overall: **start with the simplest pattern that solves the problem**, and add structure only when a simpler pattern demonstrably falls short.
+The patterns differ in where the next step is chosen. Prompt chaining fixes every stage in code. Routing chooses among predefined branches. Parallelization fixes the work but runs it concurrently. Orchestrator-workers lets a model decide the decomposition at runtime, while evaluator-optimizer adds a feedback loop. The smallest pattern that solves the task is normally the most reliable one.
 
 ## Prompt Chaining
 
@@ -22,9 +22,9 @@ flowchart LR
     In[Input] --> S1[Step 1 LLM] --> G1{Gate} --> S2[Step 2 LLM] --> G2{Gate} --> Out[Output]
 ```
 
-Break a task into sequential steps where each LLM call processes the output of the previous one. Add programmatic checks (gates) between steps to verify the process stays on track.
+Prompt chaining passes one model output into the next fixed stage. Programmatic gates between calls reject a bad intermediate result before it contaminates later work.
 
-When to use: tasks that decompose cleanly into fixed subtasks. Example: generate marketing copy then translate it, or write an outline, validate it meets criteria, then write the document.
+It fits tasks with a stable sequence, such as drafting an outline, validating required sections, and expanding the accepted outline. Chaining adds latency, so it earns its place only when narrower calls or early gates improve reliability.
 
 ## Routing
 
@@ -36,9 +36,9 @@ flowchart TD
     R --> P3[Prompt or Model C]
 ```
 
-Classify the input and direct it to a specialized prompt or model. This lets you optimize each downstream path independently — a change to handle refund requests will not degrade general question answering. The same idea applied to model choice is [[Home/AI & ML/LLM/Model Selection and Routing|model routing]].
+Routing classifies the input and sends it to one predefined path. Each branch can use a different prompt, tool set, or model. A refund path can become stricter without changing general question answering. Applying the same decision to model choice produces [[Home/AI & ML/LLM/Model Selection and Routing|model routing]].
 
-When to use: distinct input categories that need different handling. Example: route customer queries to a small fast model for general questions, a larger model for complex technical issues, a constrained workflow for refund requests.
+It fits distinct categories with different handling. General questions might use a small model, technical cases a larger one, and refunds a constrained workflow with explicit policy checks. The router now becomes a failure boundary: a perfect specialist cannot recover a request sent to the wrong branch.
 
 ## Parallelization
 
@@ -51,9 +51,9 @@ flowchart TD
     Agg --> Out[Output]
 ```
 
-Run multiple LLMs simultaneously and aggregate results. Two variants: **sectioning** splits independent subtasks across parallel calls; **voting** runs the same task through multiple calls for higher confidence.
+Parallelization starts several model calls together and combines their outputs. Sectioning assigns independent pieces of work to different calls. Voting runs the same decision more than once and aggregates the answers.
 
-When to use: independent subtasks that benefit from speed, or tasks where multiple perspectives improve reliability — running guardrails in parallel with the main response, multi-aspect code review, content moderation with vote thresholds.
+It reduces wall-clock time when subtasks are independent, for example separate code-review concerns. Voting can reduce variance when disagreement is meaningful. Both variants spend more tokens, and sectioning fails when workers silently depend on shared intermediate state.
 
 ## Orchestrator-Workers
 
@@ -67,7 +67,9 @@ flowchart TD
     S --> Out[Output]
 ```
 
-A central LLM dynamically decomposes the task, delegates subtasks to worker LLMs, and synthesizes results. The subtasks are not predefined — the orchestrator determines them based on the input. Topologically similar to parallelization, but the key difference is flexibility: workers and their tasks are determined at runtime. Anthropic's Research system uses this pattern — a lead agent spawning 3–5 subagents in parallel — and reports a 90.2% improvement over single-agent on their internal research eval. The dominant production pattern for complex coding and research tasks, and the bridge into [[Multi-Agentic Systems]].
+An orchestrator reads the task, decides how to decompose it, delegates the pieces, and synthesizes the results. The worker count and assignments do not exist until runtime. That is the boundary from parallelization, where application code defines every branch in advance.
+
+Anthropic reports this design in its Research system: a lead agent starts three to five subagents in parallel and improved an internal research evaluation by 90.2% over a single-agent setup. The number belongs to that system and evaluation, not to the pattern in general. Runtime decomposition makes orchestrator-workers useful for complex coding or research, and it is the simplest pattern here that crosses into [[Multi-Agentic Systems]].
 
 ## Evaluator-Optimizer
 
@@ -80,26 +82,17 @@ flowchart TD
     E -->|Accepted| Out[Final Output]
 ```
 
-One LLM generates a response; another evaluates it against criteria and provides feedback. The loop continues until the evaluator approves or an iteration cap is hit. Two indicators of good fit: LLM responses demonstrably improve when given human-like feedback, and the LLM can provide such feedback.
+One model produces a draft and another evaluates it against explicit criteria. Rejected drafts return to the generator with feedback. Approval or an iteration cap ends the loop.
 
-When to use: tasks with clear evaluation criteria — literary translation with nuance, complex search requiring multiple rounds, code review, compliance checking.
+This pattern fits work where feedback improves the output and the evaluator can recognize improvement. Code review and policy checking often qualify. A vague rubric produces a confident loop with no stable stopping condition, so both criteria and the cap are part of the design.
 
 # Questions
 
-> [!QUESTION]- How do the five patterns form a progression, and how do you choose among them?
-> They climb in complexity and in how much control moves from the developer to the model:
-> - **Prompt chaining** — fixed sequence, developer owns every step. Use when the task splits into predictable stages.
-> - **Routing** — one classification decision fans out to specialized paths. Use for distinct input categories that need different handling.
-> - **Parallelization** — independent calls run concurrently and aggregate. Use for speed (sectioning) or reliability (voting).
-> - **Orchestrator-workers** — the subtasks themselves are decided at runtime. Use when you can't enumerate the steps in advance.
-> - **Evaluator-optimizer** — a generate/critique loop refines toward criteria. Use when there is a clear quality signal and feedback improves the output.
-> The rule is to start at the top and move down only when a simpler pattern demonstrably fails. Every step down buys flexibility at the cost of predictability, latency, and debuggability.
+> [!QUESTION]- Which control-flow decision separates the five workflow patterns?
+> Prompt chaining fixes a sequence. Routing selects one predefined branch. Parallelization runs predefined work concurrently. Orchestrator-workers lets the model decide the tasks and worker count at runtime. Evaluator-optimizer repeats generation against an explicit acceptance test. The right choice is the first pattern whose control boundary matches the task. Extra model-owned decisions add latency and make failures harder to reproduce.
 
-> [!QUESTION]- What separates orchestrator-workers from parallelization when the diagrams look nearly identical?
-> Both fan work out to several LLM calls and aggregate the results, so the topology is similar. The difference is *when the subtasks are known*. In parallelization the subtasks are fixed by the developer up front — you decide there are three sections or three votes before any call runs. In orchestrator-workers a central LLM reads the input and *decides at runtime* how to decompose it, how many workers to spawn, and what each should do. That runtime decision is what makes orchestrator-workers the bridge into [[Multi-Agentic Systems]]: it is the simplest pattern where the model, not the code path, controls the shape of the work.
-
-> [!QUESTION]- Why add gates between steps in prompt chaining instead of a single prompt?
-> Chaining trades one hard call for several easier ones, and the gates are where that trade pays off. Each step does a narrower job, so it is more reliable and easier to prompt than asking one call to do everything at once. The programmatic gates between steps — a length check, a schema validation, a "does this outline meet the criteria" test — catch failures early, before a bad intermediate result propagates and compounds downstream. The cost is added latency and more moving parts, so chaining is worth it only when the task genuinely decomposes into fixed subtasks; if it doesn't, a single well-prompted call is simpler and cheaper.
+> [!QUESTION]- Why are orchestrator-workers harder to operate than ordinary parallelization even when their diagrams look similar?
+> Parallelization starts a known set of calls, so coverage, cost, and aggregation can be tested ahead of time. An orchestrator chooses the decomposition and worker count from the input. That flexibility creates variable cost and new failure modes: missing work, overlapping assignments, or a synthesis that cannot reconcile the results. It also makes the pattern a bridge into [[Multi-Agentic Systems]], because the model controls the shape of the work.
 
 # References
 

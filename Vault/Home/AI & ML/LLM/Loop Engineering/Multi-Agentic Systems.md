@@ -11,33 +11,33 @@ status: Done
 publish: true
 ---
 
-A multi-agentic system coordinates two or more LLM agents — each with its own context window, tools, and instructions — to solve a task that a single agent handles poorly. The [[Home/AI & ML/LLM/Agents/Agents|Agents]] page covers what agents are, the augmented LLM building block, and autonomous agent design, and the [[Home/AI & ML/LLM/Agents/Workflow Patterns|Workflow Patterns]] note catalogs the five single-orchestrator patterns (prompt chaining through orchestrator-workers). This page covers what changes when multiple agents must coordinate: communication patterns, coordination structures, and the failure modes specific to multi-agent systems.
+A multi-agent system gives separate LLM agents their own context and tools, then coordinates their work. [[Home/AI & ML/LLM/Agents/Agents|An individual agent]] already has its own tool loop, while [[Home/AI & ML/LLM/Agents/Workflow Patterns|workflow patterns]] arrange bounded calls under one control flow. Adding other agents creates a different problem: handoffs, shared state, and failures that cross several traces.
 
-Multi-agent typically uses 3–10× more tokens than single-agent for equivalent tasks, driven by context duplication and coordination messages. That cost is justified under three specific conditions:
+Anthropic reports that its multi-agent research system used about 15 times as many tokens as ordinary chat interactions. That number belongs to one workload. The general direction still matters: separate contexts and coordination messages are expensive. The cost can make sense when at least one of these conditions holds:
 
-1. **Context pollution** — a subtask generates over 1,000 tokens of irrelevant context that degrades the main agent's reasoning quality.
-2. **Parallelization** — independent work paths can run concurrently, and sequential execution is unacceptably slow.
-3. **Specialization** — the agent has 20+ tools and selection accuracy drops, or the task requires conflicting behavioral modes (empathetic support vs. precise code review in the same session).
+1. **Context isolation.** A large subtask would fill the main context with material the coordinator does not need.
+2. **Parallel work.** Independent paths can run at the same time, and latency matters.
+3. **Specialization.** One agent has too many similar tools or must follow instructions that conflict with another part of the task.
 
-If none of these apply, a single well-prompted agent with good [[Tools]] outperforms multi-agent on cost, latency, and debuggability. Anthropic reports that teams have invested months building multi-agent architectures only to discover that improved prompting on a single agent achieved equivalent results.
+Without one of those pressures, a single agent with well-defined [[Tools]] is usually cheaper and easier to diagnose. Anthropic's engineering guidance recommends starting with the simplest design that meets the task and adding complexity only when it produces a measurable improvement.
 
-The key design principle is **context-centric decomposition**: split agents along context boundaries, not problem boundaries. An agent handling a feature should also handle its tests — it already has the context. Only introduce a new agent when one genuinely cannot hold the relevant context in its window. Problem-centric splits (one agent writes code, another writes tests, a third reviews) force constant coordination and lose information at each handoff — a "telephone game" where fidelity drops with every transfer.
+The useful unit of decomposition is context. An agent that implements a feature often has enough local knowledge to test it as well. Splitting implementation and tests across agents creates another lossy handoff without buying context isolation. A new agent should own a bounded body of context that can be summarized back as an artifact or decision.
 
 # Communication Patterns
 
-Agents must share context to coordinate. Three mechanisms dominate production systems, each with a different fidelity-cost tradeoff.
+Coordination depends on how much state crosses an agent boundary.
 
-**Full history passthrough.** The receiving agent gets the entire prior conversation. OpenAI Agents SDK does this by default on handoff. Simple to implement, but context grows unboundedly — after 10+ handoffs the receiving agent's window fills with irrelevant history, and reasoning quality degrades from "lost in the middle" effects.
+**Full history passthrough.** The receiving agent gets the prior conversation. OpenAI Agents SDK supports this default handoff behavior. It is easy to wire up, but every transfer carries more irrelevant history and weakens the receiving agent's focus.
 
-**Scoped context (filtered handoff).** The orchestrator decides what each downstream agent needs and passes only that subset. Anthropic's Research system uses this: subagents write outputs to a filesystem store and pass lightweight references back to the coordinator, preventing information loss while keeping context compact. OpenAI's SDK provides `input_filter` callbacks and built-in filters like `remove_all_tools` (strips tool call history from handoff context). This is the production-recommended approach.
+**Scoped context.** The orchestrator passes only the material needed for the assigned task. Anthropic's Research subagents return condensed findings, while the lead persists its plan before context truncation. OpenAI's SDK offers `input_filter` callbacks, including filters that remove prior tool calls. This approach makes the handoff contract explicit.
 
-**Shared external state (blackboard).** A central store — vector database, Redis, filesystem — holds system state. Agents read and write independently without direct messaging. The blackboard pattern works best for non-linear problems where the step sequence is unknown upfront. Agents don't know about each other, only the shared state. The tradeoff: race conditions on concurrent writes and no built-in ordering guarantees.
+**Shared external state.** Agents read and write a common store rather than talking directly. A filesystem, database, or queue can act as the blackboard. This works for non-linear tasks, but concurrent writes need ownership or version checks because the store provides no coordination by itself.
 
 # Multi-Agent Coordination
 
-Beyond the [[Home/AI & ML/LLM/Agents/Workflow Patterns|workflow patterns]] — of which orchestrator-workers is the dominant multi-agent topology — multi-agent systems use three structural patterns for organizing agent interactions.
+The [[Home/AI & ML/LLM/Agents/Workflow Patterns|workflow patterns]] describe several ways to arrange these interactions. Three structures recur in multi-agent systems.
 
-**Handoff / triage.** One active agent at a time. The current agent decides dynamically when to transfer control to a specialist. In Microsoft Agent Framework, `AgentWorkflowBuilder` declares a handoff routing graph where each agent receives transfer targets as tool definitions:
+**Handoff or triage.** One agent is active. It can transfer control to a specialist, often through a handoff tool. Microsoft Agent Framework declares the allowed routing graph with `AgentWorkflowBuilder`:
 
 ```csharp
 using Microsoft.Agents.AI;
@@ -79,88 +79,77 @@ foreach (WorkflowEvent evt in result.NewEvents)
 }
 ```
 
-When an agent calls a handoff tool, control transfers with the conversation history. The routing decision is LLM-driven — each agent decides when to transfer based on its instructions, not a rule engine. Specialists can transfer back to triage if the issue is outside their scope.
+Calling a handoff tool transfers control along an allowed edge. The model chooses when to transfer, while the workflow restricts where it may go. A specialist can route the task back when it falls outside its scope.
 
-**Group chat / debate.** Multiple agents in a shared conversation thread with a chat manager controlling turn order. When to use: consensus-building, brainstorming, compliance review. Keep to 3 or fewer agents — beyond that, coordination cost dominates.
+**Group chat or debate.** Several agents share a thread while a manager controls turn order and termination. It can expose competing analyses, but each extra participant adds another history and another chance to repeat earlier work.
 
-**Swarm (peer-to-peer).** Agents communicate directly without central control. Each agent independently decides when and where to transfer. Rarely used in production — the lack of central coordination makes debugging and error recovery significantly harder. Most teams eventually add a supervisor.
+**Swarm.** Peers transfer work without a central owner. The topology is flexible, but no single trace explains the run and recovery becomes difficult. In practice, a supervisor often reappears because someone must own budgets and completion.
 
 # Pitfalls
 
 ## Context Loss at Handoffs
 
-Information clear to Agent A gets compressed, omitted, or distorted when passed to Agent B. Sequential chains are worst — earlier messages get compressed at each hop, eroding fidelity progressively.
+Information can be omitted or distorted at a handoff. Sequential chains compound the loss because each agent summarizes a summary.
 
-**Why it happens**: the "Goldilocks dilemma" — pass full context and instruction density drops (agent loses focus); summarize and edge cases vanish. Natural language handoffs lack schema enforcement, so semantic errors pass silently without raising runtime exceptions.
+Passing the full history preserves detail but dilutes the assignment. A short summary protects focus but may erase an edge case. Natural-language handoffs also accept semantic mistakes without raising a schema error.
 
-**Mitigation**: use the filesystem artifact pattern — agents write structured outputs to external storage and pass lightweight references. Define explicit output schemas for inter-agent communication. Validate agent output before passing to the next agent — reject low-confidence or malformed responses.
+Durable artifacts reduce this tradeoff. The next agent receives a small assignment plus references to exact source material, and structured outputs can be validated before another agent depends on them.
 
 ## Coordination Cost Explosion
 
-Interaction complexity scales as n(n−1)/2: 2 agents = 1 interaction, 4 = 6, 10 = 45. A task costing $0.10 for a single agent may cost $1.50 for multi-agent after coordination overhead and context duplication. Multi-agent systems use roughly 15× more tokens than equivalent chat interactions.
+Potential pairwise relationships scale as n(n−1)/2. A task costing $0.10 for a single agent may cost $1.50 for multi-agent after coordination overhead and context duplication. The exact multiplier depends on the topology, but every handoff consumes tokens without directly completing the task.
 
-**Why it happens**: every handoff duplicates context. Coordination messages consume tokens without advancing the task. A known anti-pattern is the "politeness loop" — two agents enter a cycle of thanking each other, burning tokens without advancing the task. Free-form conversation between agents has no built-in termination guarantee, and without `max_turns` caps these loops can run for hours before detection.
+Free-form conversations can also produce politeness loops in which agents acknowledge one another without changing shared state. Nothing in natural language guarantees termination.
 
-**Mitigation**: use structured output types between agents instead of free-form conversation. Set `max_turns` on every agent. Monitor per-run token usage and alert on outliers. Add agents only when you can demonstrate measurable improvement over fewer.
+Bound every conversation with `max_turns`, a token budget, and a completion signal the runtime can check. Structured results are preferable to open-ended messages when the receiver needs data rather than discussion.
 
 ## Deadlocks and Infinite Loops
 
-Circular dependencies — A waits on B, B waits on C, C waits on A — hang silently, burning budgets without crashing. Maker-checker loops without iteration caps refine indefinitely.
+Circular waits can hang without producing an error. Evaluator loops have a similar problem when the reviewer can always request one more revision.
 
-**Why it happens**: natural language coordination has no built-in timeout or deadlock detection. Unlike distributed systems with formal protocols, there is no heartbeat or lease mechanism by default.
+Agent frameworks do not automatically provide the lease and timeout semantics expected in distributed coordination.
 
-**Mitigation**: lease-lock patterns with TTL on agent-to-agent waiting. Single orchestrator owning state transitions. Explicit iteration caps on every loop with fallback behavior — escalate to human or return best result with a quality warning. Circuit breaker patterns for agent dependencies.
+A central owner can make state transitions and enforce deadlines. Waiting on another agent needs a timeout, and every revision loop needs an iteration cap with a defined fallback.
 
 ## Cascading Errors
 
-An error in one agent propagates through the system, amplified at each step. A hallucinated fact from Agent A becomes trusted input for Agent B, which builds further conclusions on it. If those conclusions reach persistent memory, they contaminate future runs.
+One agent's unsupported claim can become the next agent's premise. Once written to persistent state, the error may survive beyond the run that created it.
 
-**Why it happens**: semantic opacity — natural language errors pass as "valid" data. Agents trust upstream output by default, and there is no schema validation for factual correctness. Parallelization amplifies the problem — one faulty planning step spawns dozens of workers propagating the same error.
+Schemas can validate shape, not truth. Parallel execution increases the blast radius when many workers consume the same faulty plan.
 
-**Mitigation**: validate outputs at each agent boundary before passing downstream. Use independent verification agents for high-stakes decisions. Enforce guardrails at the infrastructure layer (network egress, filesystem permissions, execution budgets) rather than the prompt layer — agents can reason around app-level restrictions but cannot bypass environment-level enforcement.
+Validate at the boundary where an output becomes an input. High-stakes conclusions need independent evidence, and permissions should be enforced by the runtime so a propagated mistake cannot exceed its assigned scope.
 
 # Tradeoffs
 
 | Factor | Single Agent | Multi-Agent |
 |---|---|---|
-| Token cost | 1× baseline | 3–10× overhead |
+| Token cost | 1× baseline | Workload-dependent, usually much higher |
 | Latency | Sequential tool calls | Parallelizable, but coordination adds overhead |
 | Debuggability | Single linear trace | Multiple interleaving traces |
 | Context window | Limited by one window | Each agent gets a fresh window |
-| Tool management | All tools loaded (degrades at 20+) | Specialized toolsets per agent |
+| Tool management | Selection depends on model, schema quality, and eval results | Specialized toolsets per agent |
 | Failure surface | Agent-level only | Agent + coordination failures |
 
-The "bitter lesson" of multi-agent: elaborate coordination architectures built to work around current model limitations risk obsolescence. A 10-agent system may be outperformed by a single next-generation model with a larger context window. Build multi-agent only when the coordination cost is justified by measurable improvement today — not as speculative architecture for tomorrow's problems.
+Multi-agent architecture should solve a measured limit in the current system. If one model can hold the relevant context and choose the right tools, more agents mostly add messages and failure modes. The smallest team that produces a verified improvement is enough.
 
 # Questions
 
 > [!QUESTION]- When is multi-agent coordination justified over a single agent with more tools?
-> - Justified under three conditions: context pollution (subtask degrades main agent reasoning), parallelization (independent paths need concurrent execution), specialization (20+ tools degrade selection accuracy, or conflicting behavioral modes needed)
-> - If none apply, single agent wins: 3–10× fewer tokens, lower latency, single linear trace for debugging
-> - Many teams investing months in multi-agent discover equivalent results from better prompting on one agent
-> - Key tradeoff: multi-agent buys context isolation and parallelism at the cost of coordination overhead and debugging complexity
+> It is justified when separate contexts protect reasoning quality, independent work materially reduces latency, or specialists need incompatible tools or instructions. The comparison should be empirical: the multi-agent design must improve a relevant quality or latency measure enough to pay for extra tokens and a harder trace.
 
 > [!QUESTION]- Why does context-centric decomposition outperform problem-centric decomposition?
-> - Problem-centric (code agent + test agent + review agent) forces constant coordination — each agent needs context from the others, creating lossy handoffs
-> - Context-centric splits along natural context boundaries — agent handling a feature also handles its tests because it already has the context
-> - Introduce a new agent only when context genuinely cannot fit in one window
-> - Reduces handoff count, cuts token overhead, prevents compounding information loss at each transfer
-> - Key tradeoff: context-centric may produce broader agents (more tools per agent), but avoids the "telephone game" of multi-hop handoffs
+> Context-centric ownership keeps tightly related evidence and decisions in one working window. A problem-centric split often forces agents to reconstruct the same local context at every handoff. The benefit is fewer transfers and less information loss. The cost is a broader responsibility for each agent.
 
 > [!QUESTION]- What makes multi-agent failures harder to diagnose than single-agent failures?
-> - Semantic opacity: natural language errors pass as "valid" data between agents — no schema violations, no exceptions raised. A hallucinated fact from Agent A becomes trusted input for Agent B
-> - Non-linear traces: multiple interleaving reasoning chains with handoffs instead of one sequential trace, making root cause analysis harder
-> - Emergent behavior: agent interactions produce outcomes no single agent's instructions predict
-> - Known anti-pattern: two agents entering a politeness loop, each thanking the other, consuming budget without task progress — correct behavior per agent, catastrophic in combination
-> - Key tradeoff: multi-agent gains specialization but loses the single-trace debuggability that makes single-agent failures straightforward to fix
+> The failure may cross several traces before it becomes visible. Natural language can carry a false claim while remaining structurally valid, and parallel workers can amplify the same bad premise. Diagnosis therefore needs handoff records, artifact provenance, and budgets tied to a run rather than isolated agent logs.
 
 # References
 
-- [Multi-Agent Research System — Engineering (Anthropic)](https://www.anthropic.com/engineering/multi-agent-research-system)
-- [Building Effective Agents (Anthropic Engineering)](https://www.anthropic.com/engineering/building-effective-agents)
-- [OpenAI Agents SDK — Handoffs](https://openai.github.io/openai-agents-python/handoffs/)
-- [AI Agent Design Patterns — Orchestration (Microsoft)](https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/ai-agent-design-patterns)
-- [Microsoft Agent Framework — Workflows Documentation (Microsoft Learn)](https://learn.microsoft.com/en-us/agent-framework/workflows/)
-- [Why Multi-Agent Systems Fail (Galileo)](https://galileo.ai/blog/why-multi-agent-systems-fail)
-- [OWASP Top 10 for LLM Applications — Agentic Security (OWASP)](https://genai.owasp.org/resource/owasp-top-10-for-llm-applications-2025/)
-- [MAS-FIRE: A Fault Injection Framework for Multi-Agent Systems (arxiv)](https://arxiv.org/abs/2602.19843)
+- [Multi-Agent Research System — Engineering (Anthropic)](https://www.anthropic.com/engineering/multi-agent-research-system) — production account of coordinator-subagent architecture, token cost, parallel search, and persistent planning memory.
+- [Building Effective Agents (Anthropic Engineering)](https://www.anthropic.com/engineering/building-effective-agents) — practical guidance for choosing the simplest workflow that meets the task.
+- [OpenAI Agents SDK — Handoffs](https://openai.github.io/openai-agents-python/handoffs/) — official handoff semantics and context-filtering hooks.
+- [AI Agent Design Patterns — Orchestration (Microsoft)](https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/ai-agent-design-patterns) — official architecture guidance for sequential, concurrent, group-chat, handoff, and magentic orchestration.
+- [Microsoft Agent Framework — Workflows Documentation (Microsoft Learn)](https://learn.microsoft.com/en-us/agent-framework/workflows/) — official workflow model used by the handoff example.
+- [Why Multi-Agent Systems Fail (Galileo)](https://galileo.ai/blog/why-multi-agent-systems-fail) — practitioner analysis of coordination and cascading-error failures.
+- [OWASP Top 10 for LLM Applications — Agentic Security (OWASP)](https://genai.owasp.org/resource/owasp-top-10-for-llm-applications-2025/) — security boundaries for excessive agency and unsafe downstream actions.
+- [MAS-FIRE: A Fault Injection Framework for Multi-Agent Systems (arxiv)](https://arxiv.org/abs/2602.19843) — research framework for injecting and measuring failures across multi-agent interactions.

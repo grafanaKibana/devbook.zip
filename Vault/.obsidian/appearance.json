@@ -12,7 +12,8 @@
   "enabledCssSnippets": [
     "markdown-max-width",
     "hide-components",
-    "paper-page"
+    "paper-page",
+    "question-margin-note"
   ],
   "monospaceFontFamily": "JetBrains Mono"
 }

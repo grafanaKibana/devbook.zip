@@ -14,7 +14,7 @@ priority: High
 status: Creation
 ---
 
-AI & ML covers how learning systems are built, evaluated, and operated — from classic supervised models through large language models to the agent tooling that turns models into day-to-day engineering leverage. The unifying theme across all three branches: the model is rarely the hard part. Data quality, evaluation discipline, guardrails, and monitoring decide whether a system works in production, and that engineering work looks remarkably similar whether the model is a gradient-boosted tree or a frontier LLM.
+AI & ML covers the engineering around systems that learn from data or use trained models. The section moves from classic machine learning to LLM applications and the tooling used to build them. Model choice matters, but production results usually turn on the data and on how the system is evaluated and operated. A gradient-boosted tree and an LLM can fail for the same reason: an impressive model cannot rescue weak evidence or missing monitoring.
 
 ```datacorejsx
 const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
@@ -24,16 +24,9 @@ return FolderStructureMap;
 # Questions
 
 > [!QUESTION]- When should you reach for classic ML instead of an LLM API?
-> - Classic ML wins when the task is a well-defined prediction with labeled data: classification, regression, ranking — millisecond latency and near-zero per-request cost at scale
-> - LLMs win when the task involves open-ended language understanding or generation, training data is scarce, or iteration speed matters more than unit cost
-> - A common production pattern: prototype with an LLM to validate the product, then distill the stable, high-volume part into a small fine-tuned model
-> - Key tradeoff: classic ML trades upfront data and training effort for cheap, fast, predictable inference; LLMs trade per-call cost and latency for flexibility and zero training
-
-> [!QUESTION]- Why does evaluation discipline matter more than model choice?
-> - Without held-out evaluation, every model swap, prompt change, or retraining run is a guess — improvements cannot be distinguished from noise or regressions
-> - Production failures are dominated by data and distribution problems (drift, leakage, segment regressions), which only evaluation and monitoring catch — not by raw model capability
-> - A weaker model with solid evaluation and a feedback loop improves over time; a stronger model without them silently degrades
-> - This is why every branch of this section has its own evaluation pages: [[Home/AI & ML/Machine Learning/Evaluation/Evaluation|ML Evaluation]] and the general [[Home/AI & ML/LLM/Evaluation/Evaluation|LLM Evaluation]], which RAG and agents specialize in [[Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation|RAG Evaluation]] and [[Home/AI & ML/LLM/Agents/Evaluation/Evaluation|Agent Evaluation]]
+> Classic ML fits a well-defined prediction with representative labeled data, such as classification, regression, or ranking. It usually gives lower latency, lower unit cost, and more predictable behavior at scale.
+>
+> An LLM API fits open-ended language tasks or early product discovery, especially when a prompt can express the task before a training set exists. The choice changes when volume, latency, or output variability becomes the dominant constraint. A rule-based system or smaller trained model may then be the better fit.
 
 # References
 

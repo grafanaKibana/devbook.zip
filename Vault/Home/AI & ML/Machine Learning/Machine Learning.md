@@ -3,7 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - Machine Learning
-summary: "Training models to learn input-output mappings from data; the real work is the pipeline."
+summary: "Training models to learn input-output mappings from data. The real work is the pipeline."
 tags: [FolderNote]
 publish: true
 status: Done
@@ -12,7 +12,9 @@ level:
   - "3"
 ---
 
-Machine learning is the practice of training models to map inputs to outputs from data rather than encoding the behavior as explicit rules. It matters for a senior engineer because most of the real work is not the algorithm, it is building a reliable pipeline that is testable, deployable, and monitorable. Reach for ML when the decision boundary is fuzzy, the signal is distributed across many weak features, or the rules would be brittle and expensive to maintain. Prefer rules or heuristics when requirements are stable, the logic is auditable, and the error cost is asymmetric and must be tightly controlled; see also [[Spectrum Of Automations]].
+Machine learning fits problems where useful behavior can be learned from examples more cheaply than it can be expressed as rules. The model is only one part of the system. Data collection, evaluation, serving, and monitoring usually carry more operational risk than the training algorithm itself.
+
+ML earns its cost when the decision boundary is hard to write down or the signal is spread across many weak features. Rules remain the better tool when the logic is stable, must be audited exactly, or needs predictable behavior around expensive errors. [[Spectrum Of Automations]] places those choices on the same continuum.
 
 ```datacorejsx
 const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
@@ -41,65 +43,65 @@ flowchart TD
 ## Pipeline Stages
 
 ### Data Collection and Labeling
-Define the prediction target first, then collect inputs that are available at inference time and representative of production traffic. Labeling is usually the bottleneck: decide who labels, what counts as ground truth, and how you measure label quality and consistency. Common tools include SQL, Spark, event logs, data warehouses, plus labeling tooling like Label Studio or in product human review queues.
+Define the prediction target before collecting features. Every input must be available at inference time and should resemble production traffic. Labeling often becomes the bottleneck because ground truth needs an owner, a written definition, and a way to measure disagreement. Collection may start with SQL or event logs and grow into distributed processing only when the volume requires it.
 
 ### Data Cleaning and Preprocessing
-Make the raw data usable: handle missing values, outliers, duplicates, schema drift, and text normalization, while keeping transformations deterministic. Key decisions are what to impute, what to drop, and how to encode time and joins without leaking future information. Typical tooling is pandas, PySpark, Great Expectations, and feature preprocessing via scikit learn transformers.
+Preprocessing turns raw records into deterministic model inputs. Missing values, duplicates, outliers, and schema changes need explicit handling. Time and join logic deserve extra scrutiny: a feature built with future information can make every offline result look convincing while guaranteeing a production failure. The same transformations must run during training and inference.
 
 ### Feature Engineering and Selection
-Turn raw columns into signals the model can learn, such as aggregates, time windows, text features, or embeddings, depending on the problem type ([[Home/AI & ML/Machine Learning/Types/Types|Types]], [[Natural Language Processing]]). Decide between simple, stable features and complex features that improve accuracy but increase operational risk. For selection, use domain constraints first, then model based importance and ablation tests; consider a feature store if many teams share features.
+Feature engineering turns raw columns into signals the model can use: aggregates, time windows, text representations, or embeddings, depending on the problem described in [[Home/AI & ML/Machine Learning/Types/Types|Types]] and [[Natural Language Processing]]. Simple features are easier to reproduce and diagnose. A more expensive feature needs enough measurable gain to pay for its serving and maintenance cost. Domain constraints and ablation tests are stronger evidence than feature importance alone.
 
 ### Train Test Validation Split
-Split data to simulate the future: random splits work for IID data, but time based or group based splits are safer for temporal, user, or session correlated data. Keep a true holdout test set you do not touch until the end to estimate generalization. Tools include scikit learn splitters, plus custom splits for time series and leakage resistant grouping.
+The split should simulate the model's next real prediction. Random splits work for independent, identically distributed records. Time-based or group-based splits are safer when rows share a user, session, or time window. Keep one holdout set outside model and threshold tuning. Repeated inspection quietly turns a test set into another validation set.
 
 ### Model Selection and Training
-Start with a strong baseline that is easy to debug, then scale up complexity only if it buys material business value. Pick algorithms that match constraints: linear and tree models for tabular data, gradient boosting for strong tabular baselines, deep learning for unstructured signals. Tooling spans scikit learn, XGBoost, LightGBM, PyTorch, TensorFlow, plus distributed training when data or models grow.
+Start with a baseline that is easy to explain and reproduce. Linear models and trees cover many tabular problems. Gradient boosting is often the next serious baseline. Deep learning is justified by unstructured inputs or a measured advantage large enough to cover its extra cost. Distributed training solves a scale problem, not a modeling problem.
 
 ### Evaluation Metrics
-Choose metrics that match the decision and the cost of mistakes. Accuracy works when classes are balanced and errors are symmetric; precision and recall matter when false positives and false negatives have different costs; F1 is a single number when you need a balance. AUC ROC is useful for ranking quality across thresholds, but can look good even when the operating point is poor; for regression, RMSE penalizes large errors and is appropriate when big misses are costly and errors are roughly Gaussian.
+Metrics must match the decision and the cost of a mistake. Accuracy is useful only when class balance and error costs make it meaningful. Precision and recall expose different failure modes. A ranking metric can compare models before an operating threshold is fixed. For regression, RMSE makes large misses dominate the score. No metric repairs a test set that does not represent production.
 
 ### Hyperparameter Tuning
-Treat tuning as budgeted search: define the search space, metric, and stopping rules, and keep the test set untouched. Grid search is simple but expensive, random search is often a better first pass, and Bayesian optimization helps when evaluations are costly and the space is continuous. Common tooling: scikit learn search CV, Optuna, Ray Tune, and Weights and Biases sweeps.
+Treat tuning as a budgeted experiment. Fix the search space, target metric, and stopping rule before running it. Random search is a sensible first pass because only a few parameters usually matter. Bayesian optimization becomes useful when each training run is expensive. The holdout set stays untouched throughout.
 
 ### Model Registry and Versioning
-Store models as artifacts with immutable versions, and log the full lineage: code, data snapshot identifiers, features, hyperparameters, and metrics. This is what makes rollbacks, audits, and reproducibility possible. Typical tools are MLflow Model Registry and Weights and Biases artifacts, backed by object storage.
+Store each model as an immutable artifact with enough lineage to rebuild it: code revision, data snapshot, feature definition, parameters, and evaluation results. Promotion changes the stage of an existing version rather than overwriting the artifact. That makes rollback and audit work mechanical instead of forensic.
 
 ### Deployment
-Decide serving mode based on product needs: batch for offline scoring, real time for user facing decisions, and streaming for event driven scoring. Containerize the runtime to make it consistent, and release with canary or A B tests to control risk and measure uplift. Common stacks include Docker, Kubernetes, serverless jobs, and CI CD orchestration for model promotion.
+Serving mode follows the product's time budget. Batch scoring covers decisions that can wait. Request-time inference pays for low latency. Streaming reacts as events arrive. Release the model behind a canary or controlled experiment, with a fallback for overload and model errors. Packaging must keep the runtime and preprocessing consistent with training.
 
 ### Inference Endpoint
-An endpoint is a production service with an SLO: define a latency budget, throughput target, and availability goals, then size compute and caching accordingly. Keep preprocessing consistent with training by packaging it with the model and versioning the schema. Serving frameworks include FastAPI, BentoML, KServe, Seldon, TorchServe, and TensorFlow Serving.
+An inference endpoint is a production service with an SLO. Its latency budget includes feature lookup and preprocessing, not just the model call. Capacity planning should use tail latency and expected concurrency. Version the request schema and model together so an otherwise valid deployment cannot receive inputs shaped for another version.
 
 ### Monitoring and Retraining
-Monitor both system health and model health: latency, error rate, and saturation, plus data quality, drift, and performance over time. Plan for feedback loops and delayed labels, and set retraining triggers that are measurable and cost aware; see [[Data Drift]] for drift concepts. A good pipeline makes retraining boring: automated, repeatable, and gated by evaluation.
+Monitoring has two clocks. Service health appears immediately through latency, errors, and saturation. Model quality may arrive days later when labels become available. Track input quality and [[Data Drift]] while waiting, but do not confuse drift with proof that predictions became worse. Retraining should follow a measurable trigger and pass the same evaluation gate as the original model.
 
 # Questions
 
-> [!QUESTION]- How should an ML pipeline be designed to ship weekly batch churn scoring now while preserving a path to real-time scoring later?
-> - Start with batch to ship value, but define a stable feature contract and a single preprocessing implementation shared by batch and online
-> - Store features and predictions with versioned schema so you can backtest and replay later
-> - Use a model registry with stage promotion and rollback, and keep training code runnable in CI
-> - Plan the online boundary now: which features are available at request time and which require async enrichment
-> - Add monitoring from day one so you have drift and label delay visibility before moving to real time
+> [!QUESTION]- How can a weekly batch churn model leave a safe path to request-time scoring?
+> - Define one versioned feature contract and share preprocessing between batch and online paths
+> - Persist predictions and feature versions so earlier decisions can be replayed
+> - Identify which features exist at request time and move slow enrichment outside that boundary
+> - Promote immutable model versions through a registry with rollback support
+> - Measure drift and label delay before a real-time rollout adds more moving parts
 
-> [!QUESTION]- What should be checked first when a binary classifier shows 98 percent accuracy but support tickets rise, and which metric should be optimized next?
-> - Check class balance and the confusion matrix; high accuracy can hide poor recall on the minority class
-> - Inspect label quality and leakage sources, especially time based joins and post event signals
-> - Pick metrics based on cost: optimize precision if false positives are expensive, recall if misses are expensive, or use PR AUC for heavy imbalance
-> - Tune the decision threshold using a cost curve or expected value, not the default 0.5
-> - Run slice based evaluation to find the segments where the model fails and decide whether to collect more data or add features
+> [!QUESTION]- A classifier reports 98% accuracy while support tickets rise. What should be checked before retraining it?
+> - Inspect class balance and the confusion matrix. Accuracy may hide failures on the minority class
+> - Audit label quality and time-based joins for leakage
+> - Find the failing cohorts instead of relying on the aggregate score
+> - Choose precision, recall, or expected cost from the business impact of each error
+> - Tune the threshold on validation data rather than accepting 0.5 by default
 
-> [!QUESTION]- What tradeoffs and rollout plan are appropriate when the best model exceeds a strict API latency budget?
-> - Measure end to end latency budget including preprocessing, network, and tail latencies, then decide if you can meet SLO with scaling or caching
-> - Consider a smaller model, distillation, quantization, or a two stage setup where a cheap model gates the expensive one
-> - Use canary or A B rollout with guardrails on latency and key business metrics, plus automated rollback
-> - Keep a safe fallback decision path, such as a baseline model or rules, for overload and error conditions
-> - Align evaluation with production: test on representative traffic and monitor training serving skew after launch
+> [!QUESTION]- What is a defensible rollout when the most accurate model exceeds the API latency budget?
+> - Measure end-to-end tail latency, including feature lookup and preprocessing
+> - Compare the measured quality loss of a smaller model with the operational cost of the larger one
+> - Consider a two-stage path only when the cheap first stage rejects enough work to justify the added complexity
+> - Canary the release with latency and business guardrails plus automatic rollback
+> - Keep a baseline model or deterministic rule as the overload path
 
 # References
 
-- [Machine Learning Crash Course (Google for Developers)](https://developers.google.com/machine-learning/crash-course)
-- [Machine Learning for Beginners (Microsoft)](https://microsoft.github.io/ML-For-Beginners/#/)
-- [Rules of Machine Learning (Google for Developers)](https://developers.google.com/machine-learning/guides/rules-of-ml)
-- [scikit-learn user guide](https://scikit-learn.org/stable/user_guide.html)
-- [Hidden Technical Debt in Machine Learning Systems (NeurIPS 2015)](https://papers.nips.cc/paper_files/paper/2015/hash/86df7dcfd896fcaf2674f757a2463eba-Abstract.html)
+- [Machine Learning Crash Course (Google for Developers)](https://developers.google.com/machine-learning/crash-course) — Google's practical introduction to model development, data handling, and evaluation.
+- [Machine Learning for Beginners (Microsoft)](https://microsoft.github.io/ML-For-Beginners/#/) — Microsoft's curriculum of worked examples across common ML problem types.
+- [Rules of Machine Learning (Google for Developers)](https://developers.google.com/machine-learning/guides/rules-of-ml) — Google's engineering guidance on baselines, pipelines, features, and production feedback loops.
+- [scikit-learn user guide](https://scikit-learn.org/stable/user_guide.html) — Official reference for classical estimators, preprocessing, model selection, and metrics.
+- [Hidden Technical Debt in Machine Learning Systems (NeurIPS 2015)](https://papers.nips.cc/paper_files/paper/2015/hash/86df7dcfd896fcaf2674f757a2463eba-Abstract.html) — Primary paper describing the maintenance burden created by data dependencies and ML system glue.
