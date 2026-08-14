@@ -276,9 +276,9 @@
 }
 
 .steptrace .steptrace__dp td[data-roles~="target"] {
-  --_target-ring-color: var(--_blue);
-  background: color-mix(in srgb, var(--_blue) 15%, var(--_matrix-cell));
-  color: var(--_blue);
+  --_target-ring-color: var(--_violet);
+  background: color-mix(in srgb, var(--_violet) 15%, var(--_matrix-cell));
+  color: var(--_violet);
 }
 
 .steptrace .steptrace__dp--guided td[data-roles~="target"]::before {
@@ -292,20 +292,18 @@
 }
 
 .steptrace .steptrace__dp td[data-roles~="target"][data-decision="improve"] {
-  --_target-ring-color: var(--_green);
   background: color-mix(in srgb, var(--_green) 18%, var(--_matrix-cell));
   color: var(--_green);
 }
 
 .steptrace .steptrace__dp td[data-roles~="target"][data-decision="keep"] {
-  --_target-ring-color: var(--_muted);
   background: color-mix(in srgb, var(--_matrix-text) 7%, var(--_matrix-cell));
   color: var(--_matrix-text);
 }
 
 .steptrace .steptrace__dp td[data-roles~="negative-cycle"] {
-  color: var(--_amber);
-  background: color-mix(in srgb, var(--_amber) 14%, var(--_matrix-cell));
+  color: var(--_red);
+  background: color-mix(in srgb, var(--_red) 14%, var(--_matrix-cell));
 }
 
 .steptrace
@@ -342,11 +340,11 @@
 }
 
 .steptrace .steptrace__matrix-role-badge[data-role="target"] {
-  color: var(--_blue);
+  color: var(--_violet);
 }
 
 .steptrace .steptrace__matrix-role-badge[data-role="write"] {
-  color: var(--_green);
+  color: var(--_blue);
 }
 
 .steptrace .steptrace__matrix-role-badge[data-role="keep"] {

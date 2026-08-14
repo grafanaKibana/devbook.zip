@@ -118,8 +118,8 @@
 }
 
 .steptrace .steptrace__coin[data-state="selected"] {
-  border-color: var(--_amber);
-  background: color-mix(in srgb, var(--_amber) 13%, var(--_story-cell));
+  border-color: var(--_blue);
+  background: color-mix(in srgb, var(--_blue) 13%, var(--_story-cell));
 }
 
 .steptrace .steptrace__coin-attempts {
@@ -194,7 +194,7 @@
 }
 
 .steptrace .steptrace__coin-memo-row[data-state="stored"] {
-  background: color-mix(in srgb, var(--_violet) 8%, var(--_story-cell));
+  background: color-mix(in srgb, var(--_green) 8%, var(--_story-cell));
 }
 
 .steptrace .steptrace__coin-memo-row[data-state="hit"] {
@@ -213,6 +213,7 @@
 }
 
 .steptrace .steptrace__amount-cell {
+  position: relative;
   display: grid;
   min-height: 4rem;
   place-content: center;
@@ -221,6 +222,20 @@
   transition:
     background-color var(--_tween) ease,
     color var(--_tween) ease;
+}
+
+.steptrace .steptrace__dp-story-success {
+  position: absolute;
+  inset-block-start: 0.25rem;
+  inset-inline-end: 0.25rem;
+  display: none;
+  inline-size: 0.78rem;
+  block-size: 0.78rem;
+}
+
+.steptrace .steptrace__amount-cell[data-state="best"] .steptrace__dp-story-success,
+.steptrace .steptrace__warehouse-matrix td[data-state="best"] .steptrace__dp-story-success {
+  display: block;
 }
 
 .steptrace .steptrace__amount-cell + .steptrace__amount-cell {
@@ -247,7 +262,7 @@
 }
 
 .steptrace .steptrace__amount-cell[data-state="stored"] {
-  background: color-mix(in srgb, var(--_violet) 7%, var(--_story-cell));
+  background: color-mix(in srgb, var(--_green) 7%, var(--_story-cell));
 }
 
 .steptrace .steptrace__amount-cell[data-state="best"] {
@@ -328,7 +343,7 @@
 .steptrace .steptrace__warehouse-cell-stored {
   display: block;
   margin-top: 0.25rem;
-  color: var(--_violet);
+  color: var(--_green);
   font: 600 0.6875rem/1 var(--_font-mono);
 }
 
@@ -344,7 +359,7 @@
 }
 
 .steptrace .steptrace__warehouse-matrix td[data-state="path"] {
-  background-color: color-mix(in srgb, var(--_amber) 12%, var(--_story-cell)) !important;
+  background-color: color-mix(in srgb, var(--_blue) 12%, var(--_story-cell)) !important;
 }
 
 .steptrace .steptrace__warehouse-matrix td[data-state="repeated"] {
@@ -357,7 +372,7 @@
 }
 
 .steptrace .steptrace__warehouse-matrix td[data-state="stored"] {
-  background-color: color-mix(in srgb, var(--_violet) 7%, var(--_story-cell)) !important;
+  background-color: color-mix(in srgb, var(--_green) 7%, var(--_story-cell)) !important;
 }
 
 .steptrace .steptrace__warehouse-matrix td[data-state="best"] {
@@ -389,7 +404,7 @@
 
 .steptrace .steptrace__dp-story-swatch[data-state="selected"],
 .steptrace .steptrace__dp-story-swatch[data-state="path"] {
-  background: var(--_amber);
+  background: var(--_blue);
 }
 
 .steptrace .steptrace__dp-story-swatch[data-state="repeated"] {
@@ -397,7 +412,7 @@
 }
 
 .steptrace .steptrace__dp-story-swatch[data-state="stored"] {
-  background: var(--_violet);
+  background: var(--_green);
 }
 
 .steptrace .steptrace__dp-story-swatch[data-state="dependency"] {

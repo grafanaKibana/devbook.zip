@@ -82,8 +82,8 @@
 }
 
 .steptrace__hash-token[data-motion="success"] {
-  border-color: var(--_green);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--_green) 18%, transparent);
+  border-color: var(--_blue);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--_blue) 18%, transparent);
 }
 
 .steptrace__hash-token[data-motion="extract"] {
@@ -174,16 +174,16 @@
 }
 
 .steptrace__hash-chain-slot[data-path="1"] {
-  border-color: var(--_blue);
+  border-color: var(--_green);
 }
 
 .steptrace__hash-chain-slot[data-selected="1"] {
-  box-shadow: inset 0 0 0 1px var(--_amber);
+  box-shadow: inset 0 0 0 1px var(--_blue);
 }
 
 .steptrace__hash-chain-slot[data-result="success"] {
-  border-color: var(--_green);
-  box-shadow: inset 0 0 0 1px var(--_green);
+  border-color: var(--_blue);
+  box-shadow: inset 0 0 0 1px var(--_blue);
 }
 
 .steptrace__hash-chain-slot[data-result="remove"] {
@@ -249,11 +249,11 @@
 }
 
 .steptrace__hash-cell[data-probe="visited"] {
-  background: color-mix(in srgb, var(--_blue) 9%, transparent);
+  background: color-mix(in srgb, var(--_green) 9%, transparent);
 }
 
 .steptrace__hash-cell[data-probe="current"] {
-  box-shadow: inset 0 0 0 2px var(--_amber);
+  box-shadow: inset 0 0 0 2px var(--_blue);
 }
 
 .steptrace__hash-cell[data-probe="collision"] {
@@ -262,8 +262,8 @@
 }
 
 .steptrace__hash-cell[data-result="success"] {
-  background: color-mix(in srgb, var(--_green) 12%, transparent);
-  box-shadow: inset 0 0 0 2px var(--_green);
+  background: color-mix(in srgb, var(--_blue) 12%, transparent);
+  box-shadow: inset 0 0 0 2px var(--_blue);
 }
 
 .steptrace__hash-cell[data-result="remove"] {

@@ -86,7 +86,14 @@ export interface GraphStateOperations {
 
 const SVG_NS = "http://www.w3.org/2000/svg"
 let graphStateViewId = 0
-const GRAPH_STATE_MARKER_ROLES = ["neutral", "active", "selected", "cut"] as const
+const GRAPH_STATE_MARKER_ROLES = [
+  "neutral",
+  "active",
+  "candidate",
+  "accepted",
+  "rejected",
+  "cut",
+] as const
 type GraphStateMarkerRole = (typeof GRAPH_STATE_MARKER_ROLES)[number]
 
 function invalid(message: string): never {
@@ -102,10 +109,7 @@ function distance(a: Pick<GraphStateNode, "x" | "y">, b: Pick<GraphStateNode, "x
 }
 
 function graphStateMarkerRole(role: GraphStateEdgeRole): GraphStateMarkerRole {
-  if (role === "accepted") return "selected"
-  if (role === "cut") return "cut"
-  if (role === "active" || role === "candidate" || role === "residual") return "active"
-  return "neutral"
+  return role === "residual" ? "candidate" : role
 }
 
 export function graphStateAdjacency(config: GraphStateConfig) {
@@ -880,14 +884,14 @@ function graphStateLegend(kind: GraphStateDetail["kind"]) {
         ["active edge", "current"],
         ["candidate", "open"],
         ["tree", "closed"],
-        ["rejected", "goal"],
+        ["rejected", "rejected"],
       ] as const
     case "path-backtrack":
       return [
         ["current", "current"],
         ["candidate", "open"],
         ["path", "closed"],
-        ["rejected", "goal"],
+        ["rejected", "rejected"],
       ] as const
     case "residual-flow":
       return [
@@ -1081,6 +1085,7 @@ export function makeGraphStateView(
     }
     for (const { edge, line, label } of edgeElements) {
       const role = frame.edgeState[`${edge.from}|${edge.to}`] || "neutral"
+      line.dataset.state = role
       line.dataset.active = String(role === "active" || role === "candidate" || role === "residual")
       line.dataset.selected = String(role === "accepted")
       line.dataset.cut = String(role === "cut")
@@ -1174,7 +1179,7 @@ export function makeGraphStateView(
             hint: distanceWatch,
           },
           { k: "pass", v: String(frame.detail.pass), sw: "var(--_violet)" },
-          { k: "edge", v: frame.detail.edge?.join(" → ") || "—", sw: "var(--_amber)" },
+          { k: "edge", v: frame.detail.edge?.join(" → ") || "—", sw: "var(--_blue)" },
           {
             k: "change",
             v: frame.detail.changed ? "updated" : "kept",
@@ -1206,7 +1211,7 @@ export function makeGraphStateView(
           {
             k: "bridges",
             v: frame.detail.bridges.map(([from, to]) => `${from}—${to}`).join(" · ") || "—",
-            sw: "var(--_green)",
+            sw: "var(--_violet)",
           },
         )
         break
@@ -1246,7 +1251,7 @@ export function makeGraphStateView(
         rows.push(
           { k: "path", v: frame.detail.path.join(" → ") || "—", sw: "var(--_green)" },
           { k: "candidates", v: frame.detail.candidates.join(" · ") || "—", sw: "var(--_amber)" },
-          { k: "rejected", v: frame.detail.rejected.join(" · ") || "—", sw: "var(--_violet)" },
+          { k: "rejected", v: frame.detail.rejected.join(" · ") || "—", sw: "var(--_red)" },
         )
         break
       case "residual-flow":

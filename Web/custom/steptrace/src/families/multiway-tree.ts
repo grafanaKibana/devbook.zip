@@ -1,4 +1,5 @@
 import type { MountHandle, StepTraceConfig } from "../types"
+import { successMarker } from "../render"
 import { createStructureShell, onEnter } from "./interactive-structure"
 
 export interface MultiwayTreeConfig {
@@ -295,6 +296,16 @@ export function mountMultiwayTree(
   svg.setAttribute("role", "img")
   shell.stage.append(svg)
   let renderedWidth = VIEW_WIDTH
+  let renderedTopology = ""
+  const renderedEdges: Array<{ line: SVGElement; parentId: string; childId: string }> = []
+  const renderedLinks: Array<{ path: SVGElement; fromId: string; toId: string }> = []
+  const renderedNodes: Array<{ group: SVGElement; nodeId: string }> = []
+  const renderedKeys: Array<{
+    cell: SVGElement
+    marker: SVGElement
+    nodeId: string
+    key: number | null
+  }> = []
 
   const keyInput = shell.input(`${label} key`, "Key", 8)
   keyInput.type = "number"
@@ -323,22 +334,6 @@ export function mountMultiwayTree(
   shell.controls.append(reset)
 
   function paintTree() {
-    svg.replaceChildren()
-    const marker = svgEl("marker", "steptrace__multiway-tree-arrow")
-    marker.id = `${kind}-next-arrow`
-    marker.setAttribute("viewBox", "0 0 10 10")
-    marker.setAttribute("refX", "8")
-    marker.setAttribute("refY", "5")
-    marker.setAttribute("markerWidth", "5")
-    marker.setAttribute("markerHeight", "5")
-    marker.setAttribute("orient", "auto-start-reverse")
-    const arrow = svgEl("path", "")
-    arrow.setAttribute("d", "M 0 0 L 10 5 L 0 10 z")
-    marker.append(arrow)
-    const defs = svgEl("defs", "")
-    defs.append(marker)
-    svg.append(defs)
-
     const levels: MultiwayNode[][] = []
     const visit = (current: MultiwayNode, depth: number) => {
       ;(levels[depth] ??= []).push(current)
@@ -374,89 +369,131 @@ export function mountMultiwayTree(
         cursor += width + NODE_GAP
       })
     })
+    const topology = JSON.stringify([
+      renderedWidth,
+      viewWidth,
+      levels.map((nodes) =>
+        nodes.map((node) => [node.id, node.keys, node.children.map((child) => child.id)]),
+      ),
+    ])
+    if (topology !== renderedTopology) {
+      renderedTopology = topology
+      renderedEdges.length = 0
+      renderedLinks.length = 0
+      renderedNodes.length = 0
+      renderedKeys.length = 0
+      svg.replaceChildren()
+      const arrowMarker = svgEl("marker", "steptrace__multiway-tree-arrow")
+      arrowMarker.id = `${kind}-next-arrow`
+      arrowMarker.setAttribute("viewBox", "0 0 10 10")
+      arrowMarker.setAttribute("refX", "8")
+      arrowMarker.setAttribute("refY", "5")
+      arrowMarker.setAttribute("markerWidth", "5")
+      arrowMarker.setAttribute("markerHeight", "5")
+      arrowMarker.setAttribute("orient", "auto-start-reverse")
+      const arrow = svgEl("path", "")
+      arrow.setAttribute("d", "M 0 0 L 10 5 L 0 10 z")
+      arrowMarker.append(arrow)
+      const defs = svgEl("defs", "")
+      defs.append(arrowMarker)
+      svg.append(defs)
 
-    for (const nodes of levels) {
-      for (const parent of nodes) {
-        const from = positions.get(parent.id)!
-        for (const child of parent.children) {
-          const to = positions.get(child.id)!
-          const line = svgEl("line", "steptrace__edge steptrace__multiway-tree-edge")
-          line.setAttribute("x1", String(from.x))
-          line.setAttribute("y1", String(from.y + NODE_HEIGHT / 2))
-          line.setAttribute("x2", String(to.x))
-          line.setAttribute("y2", String(to.y - NODE_HEIGHT / 2))
-          line.dataset.state =
-            state.path.has(parent.id) && state.path.has(child.id) ? "path" : "neutral"
-          svg.append(line)
+      for (const nodes of levels) {
+        for (const parent of nodes) {
+          const from = positions.get(parent.id)!
+          for (const child of parent.children) {
+            const to = positions.get(child.id)!
+            const line = svgEl("line", "steptrace__edge steptrace__multiway-tree-edge")
+            line.setAttribute("x1", String(from.x))
+            line.setAttribute("y1", String(from.y + NODE_HEIGHT / 2))
+            line.setAttribute("x2", String(to.x))
+            line.setAttribute("y2", String(to.y - NODE_HEIGHT / 2))
+            svg.append(line)
+            renderedEdges.push({ line, parentId: parent.id, childId: child.id })
+          }
+        }
+      }
+
+      const leaves = levels.at(-1) ?? []
+      if (kind === "b-plus-tree") {
+        leaves.slice(0, -1).forEach((leaf, index) => {
+          const next = leaves[index + 1]
+          const from = positions.get(leaf.id)!
+          const to = positions.get(next.id)!
+          const path = svgEl("path", "steptrace__multiway-tree-link")
+          path.setAttribute(
+            "d",
+            `M ${from.x + from.width / 2} ${from.y + NODE_HEIGHT / 2} V 248 H ${to.x - to.width / 2} V ${to.y + NODE_HEIGHT / 2 + 5}`,
+          )
+          path.setAttribute("marker-end", `url(#${kind}-next-arrow)`)
+          path.dataset.from = leaf.id
+          path.dataset.to = next.id
+          svg.append(path)
+          renderedLinks.push({ path, fromId: leaf.id, toId: next.id })
+        })
+      }
+
+      for (const nodes of levels) {
+        for (const node of nodes) {
+          const position = positions.get(node.id)!
+          const group = svgEl("g", "steptrace__multiway-tree-node")
+          group.setAttribute(
+            "transform",
+            `translate(${position.x - position.width / 2} ${position.y - NODE_HEIGHT / 2})`,
+          )
+          group.dataset.nodeId = node.id
+          group.dataset.role = node.children.length ? "internal" : "leaf"
+          group.setAttribute(
+            "aria-label",
+            `${node.children.length ? "Internal node" : "Leaf"} ${node.id}, keys ${node.keys.join(", ") || "empty"}`,
+          )
+          renderedNodes.push({ group, nodeId: node.id })
+          const keys = node.keys.length ? node.keys : [null]
+          keys.forEach((key, index) => {
+            const cell = svgEl("rect", "steptrace__multiway-tree-cell")
+            cell.setAttribute("x", String(index * CELL_WIDTH))
+            cell.setAttribute("width", String(CELL_WIDTH))
+            cell.setAttribute("height", String(NODE_HEIGHT))
+            cell.setAttribute("rx", "4")
+            cell.dataset.key = key == null ? "" : String(key)
+            const text = svgEl("text", "steptrace__multiway-tree-key")
+            text.setAttribute("x", String(index * CELL_WIDTH + CELL_WIDTH / 2))
+            text.setAttribute("y", String(NODE_HEIGHT / 2))
+            text.setAttribute("text-anchor", "middle")
+            text.setAttribute("dominant-baseline", "central")
+            text.textContent = key == null ? "·" : String(key)
+            const marker = successMarker("steptrace__multiway-tree-success")
+            marker.setAttribute("x", String(index * CELL_WIDTH + CELL_WIDTH - 12))
+            marker.setAttribute("y", "1")
+            marker.setAttribute("width", "11")
+            marker.setAttribute("height", "11")
+            group.append(cell, text, marker)
+            renderedKeys.push({ cell, marker, nodeId: node.id, key })
+          })
+          const id = svgEl("text", "steptrace__multiway-tree-id")
+          id.setAttribute("x", String(position.width / 2))
+          id.setAttribute("y", "-6")
+          id.setAttribute("text-anchor", "middle")
+          id.textContent = node.id
+          group.append(id)
+          svg.append(group)
         }
       }
     }
 
-    const leaves = levels.at(-1) ?? []
-    if (kind === "b-plus-tree") {
-      leaves.slice(0, -1).forEach((leaf, index) => {
-        const next = leaves[index + 1]
-        const from = positions.get(leaf.id)!
-        const to = positions.get(next.id)!
-        const path = svgEl("path", "steptrace__multiway-tree-link")
-        path.setAttribute(
-          "d",
-          `M ${from.x + from.width / 2} ${from.y + NODE_HEIGHT / 2} V 248 H ${to.x - to.width / 2} V ${to.y + NODE_HEIGHT / 2 + 5}`,
-        )
-        path.setAttribute("marker-end", `url(#${kind}-next-arrow)`)
-        path.dataset.from = leaf.id
-        path.dataset.to = next.id
-        path.dataset.state = state.links.has(`${leaf.id}->${next.id}`) ? "active" : "neutral"
-        svg.append(path)
-      })
+    for (const { line, parentId, childId } of renderedEdges)
+      line.dataset.state =
+        state.path.has(parentId) && state.path.has(childId) ? "path" : "neutral"
+    for (const { path, fromId, toId } of renderedLinks)
+      path.dataset.state = state.links.has(`${fromId}->${toId}`) ? "active" : "neutral"
+    for (const { group, nodeId } of renderedNodes) {
+      group.dataset.path = state.path.has(nodeId) ? "1" : "0"
+      group.dataset.affected = state.affected.has(nodeId) ? "1" : "0"
     }
-
-    for (const nodes of levels) {
-      for (const node of nodes) {
-        const position = positions.get(node.id)!
-        const group = svgEl("g", "steptrace__multiway-tree-node")
-        group.setAttribute(
-          "transform",
-          `translate(${position.x - position.width / 2} ${position.y - NODE_HEIGHT / 2})`,
-        )
-        group.dataset.path = state.path.has(node.id) ? "1" : "0"
-        group.dataset.affected = state.affected.has(node.id) ? "1" : "0"
-        group.dataset.nodeId = node.id
-        group.dataset.role = node.children.length ? "internal" : "leaf"
-        group.setAttribute(
-          "aria-label",
-          `${node.children.length ? "Internal node" : "Leaf"} ${node.id}, keys ${node.keys.join(", ") || "empty"}`,
-        )
-        const keys = node.keys.length ? node.keys : [null]
-        keys.forEach((key, index) => {
-          const cell = svgEl("rect", "steptrace__multiway-tree-cell")
-          cell.setAttribute("x", String(index * CELL_WIDTH))
-          cell.setAttribute("width", String(CELL_WIDTH))
-          cell.setAttribute("height", String(NODE_HEIGHT))
-          cell.setAttribute("rx", "4")
-          cell.dataset.key = key == null ? "" : String(key)
-          cell.dataset.state =
-            key != null && state.found.has(`${node.id}:${key}`)
-              ? "found"
-              : key === state.special
-                ? "special"
-                : "neutral"
-          const text = svgEl("text", "steptrace__multiway-tree-key")
-          text.setAttribute("x", String(index * CELL_WIDTH + CELL_WIDTH / 2))
-          text.setAttribute("y", String(NODE_HEIGHT / 2))
-          text.setAttribute("text-anchor", "middle")
-          text.setAttribute("dominant-baseline", "central")
-          text.textContent = key == null ? "·" : String(key)
-          group.append(cell, text)
-        })
-        const id = svgEl("text", "steptrace__multiway-tree-id")
-        id.setAttribute("x", String(position.width / 2))
-        id.setAttribute("y", "-6")
-        id.setAttribute("text-anchor", "middle")
-        id.textContent = node.id
-        group.append(id)
-        svg.append(group)
-      }
+    for (const { cell, marker, nodeId, key } of renderedKeys) {
+      const found = key != null && state.found.has(`${nodeId}:${key}`)
+      cell.dataset.state = found ? "found" : key === state.special ? "special" : "neutral"
+      marker.dataset.state = found ? "found" : "neutral"
     }
     svg.setAttribute(
       "aria-label",

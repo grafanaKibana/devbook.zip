@@ -109,7 +109,7 @@
 }
 
 .steptrace__distribution-bars--output .steptrace__bar[data-target="1"] .steptrace__fill {
-  outline: 2px solid var(--_green);
+  outline: 2px solid var(--_violet);
   outline-offset: 2px;
 }
 
@@ -311,8 +311,8 @@
 }
 
 .steptrace__distribution-token[data-compare="1"] {
-  border-color: var(--_amber);
-  background: color-mix(in srgb, var(--_amber) 12%, var(--_surface));
+  border-color: var(--_blue);
+  background: color-mix(in srgb, var(--_blue) 12%, var(--_surface));
 }
 
 .steptrace__distribution-token[data-gather="1"] {

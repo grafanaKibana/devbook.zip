@@ -2,13 +2,21 @@ import assert from "node:assert/strict"
 import { createHash } from "node:crypto"
 import { EventEmitter } from "node:events"
 import { existsSync, readFileSync, readdirSync } from "node:fs"
-import { dirname, join } from "node:path"
+import { dirname, join, relative } from "node:path"
 import { setTimeout as delay } from "node:timers/promises"
 import test from "node:test"
 import { fileURLToPath } from "node:url"
-import { buildSync } from "esbuild"
+import { build, buildSync } from "esbuild"
 
 import { verifyArtifacts } from "./build.mjs"
+import {
+  characterizedMismatches,
+  expectedRoleBySentinel,
+  semanticInventory,
+  semanticSourceSentinels,
+  semanticSentinelSnapshot,
+  structuralExclusions,
+} from "./steptrace.semantic-inventory.mjs"
 import { startWatcher } from "./watch.mjs"
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -152,6 +160,36 @@ function loadStepTraceModule(...segments) {
   return module.exports
 }
 
+async function loadInstrumentedStepTraceModule(...segments) {
+  const result = await build({
+    entryPoints: [join(here, ...segments)],
+    bundle: true,
+    format: "cjs",
+    platform: "node",
+    write: false,
+    plugins: [
+      {
+        name: "steptrace-semantic-signal-observer",
+        setup(buildApi) {
+          buildApi.onLoad(
+            { filter: /custom\/steptrace\/src\/(?:render\.ts|families\/[^/]+\.ts)$/ },
+            ({ path }) => ({
+              contents: instrumentDynamicAssignments(
+                relative(repoRoot, path),
+                readFileSync(path, "utf8"),
+              ),
+              loader: "ts",
+            }),
+          )
+        },
+      },
+    ],
+  })
+  const module = { exports: {} }
+  new Function("module", "exports", result.outputFiles[0].text)(module, module.exports)
+  return module.exports
+}
+
 function parseAuthoredStepTraceTabs(note) {
   const { parseTabs } = loadStepTraceModule(
     "..",
@@ -230,6 +268,7 @@ function withFakeDocument(run) {
       this.attributes = new Map()
       this.dataset = {}
       this.className = ""
+      this.hidden = false
       this.style = { setProperty() {} }
       this.classList = {
         add: (...names) => {
@@ -237,10 +276,22 @@ function withFakeDocument(run) {
             ...new Set([...this.className.split(/\s+/).filter(Boolean), ...names]),
           ].join(" ")
         },
+        contains: (name) => this.className.split(/\s+/).includes(name),
+        toggle: (name, force) => {
+          const present = this.className.split(/\s+/).includes(name)
+          if ((force ?? !present) && !present) this.classList.add(name)
+          return force ?? !present
+        },
       }
     }
     append(...children) {
       this.children.push(...children)
+    }
+    prepend(...children) {
+      this.children.unshift(...children)
+    }
+    replaceChildren(...children) {
+      this.children = [...children]
     }
     setAttribute(key, value) {
       this.attributes.set(key, String(value))
@@ -271,6 +322,381 @@ function withFakeDocument(run) {
     globalThis.document = previousDocument
   }
 }
+
+const normalizeSemanticSource = (value) =>
+  value.replace(/\/\*[\s\S]*?\*\//g, " ").replace(/\s+/g, " ").trim()
+
+const semanticDatasetAssignment =
+  /([A-Za-z_$][\w$]*(?:\[[^\]]+\])?)\.dataset\.(state|roles|role|result|target|current|active|selected|found|matched|visited|success|decision)\s*=\s*/g
+
+function dynamicAssignmentSites(owner, source) {
+  const sites = []
+  const occurrences = new Map()
+  for (const match of source.matchAll(semanticDatasetAssignment)) {
+    const primitive = `${match[1]}.dataset.${match[2]}`
+    const occurrence = (occurrences.get(primitive) ?? 0) + 1
+    occurrences.set(primitive, occurrence)
+    let end = match.index + match[0].length
+    let quote = ""
+    let depth = 0
+    for (; end < source.length; end++) {
+      const char = source[end]
+      const previous = source[end - 1]
+      if (quote) {
+        if (char === quote && previous !== "\\") quote = ""
+        continue
+      }
+      if (char === '"' || char === "'" || char === "`") quote = char
+      else if (char === "(" || char === "[" || char === "{") depth++
+      else if (char === ")" || char === "]" || char === "}") depth--
+      else if (char === ";" && depth === 0) break
+      else if (char === "\n" && depth === 0) {
+        const expression = source.slice(match.index + match[0].length, end).trimEnd()
+        const next = source.slice(end + 1).match(/^\s*([^\s])/s)?.[1] ?? ""
+        if (
+          expression &&
+          !/[?:.,=(|&]$/.test(expression) &&
+          !["?", ":", ".", ",", "|", "&"].includes(next)
+        )
+          break
+      }
+    }
+    assert.ok(end < source.length, `unterminated semantic assignment: ${owner}:${primitive}`)
+    sites.push({
+      owner,
+      primitive,
+      occurrence,
+      start: match.index,
+      valueStart: match.index + match[0].length,
+      valueEnd: end,
+      expression: normalizeSemanticSource(
+        source.slice(match.index + match[0].length, end),
+      ),
+      siteId: `${owner}::${primitive}#${occurrence}`,
+    })
+  }
+  return sites
+}
+
+function assertInventoryDynamicObservations(observations) {
+  const familyRoot = join(here, "src", "families")
+  const sites = [
+    join(here, "src", "render.ts"),
+    ...readdirSync(familyRoot)
+      .filter((entry) => entry.endsWith(".ts"))
+      .map((entry) => join(familyRoot, entry)),
+  ].flatMap((path) =>
+    dynamicAssignmentSites(relative(repoRoot, path), readFileSync(path, "utf8")),
+  )
+  const dynamicCarriers = semanticInventory
+    .flatMap(({ carriers }) => carriers)
+    .filter(({ carrierKind }) => carrierKind === "dynamic-assignment")
+  const sitesById = new Map(sites.map((site) => [site.siteId, site]))
+  const expectedBySite = new Map()
+  const missingEvidence = []
+  for (const carrier of dynamicCarriers) {
+    const siteId = carrier.carrierKey.split("::").slice(0, -1).join("::")
+    const site = sitesById.get(siteId)
+    assert.ok(site, `no source assignment site for ${carrier.carrierKey}`)
+    const expected = expectedBySite.get(site.siteId) ?? new Set()
+    expected.add(carrier.allowedSignals[0])
+    expectedBySite.set(site.siteId, expected)
+    if (!observations.get(site.siteId)?.has(carrier.allowedSignals[0]))
+      missingEvidence.push(`${carrier.carrierKey} -> ${site.siteId}`)
+  }
+  const domainDrift = [...expectedBySite].flatMap(([siteId, expected]) => {
+    const actual = observations.get(siteId) ?? new Set()
+    const diagnostics = exactSetDiagnostics([...expected].sort(), [...actual].sort())
+    return diagnostics.missing.length || diagnostics.extra.length
+      ? [`${siteId} ${JSON.stringify(diagnostics)}`]
+      : []
+  })
+  assert.deepEqual(missingEvidence, [], "unobserved exact site+signal evidence")
+  assert.deepEqual(domainDrift, [], "runtime signal-domain drift")
+  assert.deepEqual(
+    exactSetDiagnostics(
+      sites.map(({ siteId }) => siteId).sort(),
+      [...expectedBySite.keys()].sort(),
+    ),
+    { missing: [], extra: [], duplicates: [] },
+    "every bounded semantic assignment site must map to inventory carriers",
+  )
+  assert.deepEqual(
+    sites.filter(({ siteId }) => !(observations.get(siteId)?.size)).map(({ siteId }) => siteId),
+    [],
+    "every bounded semantic assignment site must execute",
+  )
+  assert.equal(
+    dynamicCarriers.length,
+    [...expectedBySite.values()].reduce((count, signals) => count + signals.size, 0),
+    "each dynamic carrier must identify one unique exact site+signal",
+  )
+}
+
+function instrumentDynamicAssignments(owner, source) {
+  const sites = dynamicAssignmentSites(owner, source)
+  for (const site of sites.slice().reverse()) {
+    source =
+      source.slice(0, site.valueStart) +
+      `globalThis.__steptraceSignal(${JSON.stringify(site.siteId)}, (` +
+      source.slice(site.valueStart, site.valueEnd) +
+      "))" +
+      source.slice(site.valueEnd)
+  }
+  return source
+}
+
+function expandObservedDynamicSites(sites, observations, allowUnexercised = false) {
+  const unexercised = sites.filter((site) => !(observations.get(site.siteId)?.size))
+  if (!allowUnexercised)
+    assert.deepEqual(
+      unexercised.map(({ siteId }) => siteId),
+      [],
+      "unexercised semantic assignment sites",
+    )
+  return sites.filter((site) => observations.get(site.siteId)?.size).flatMap((site) => {
+    const values = [...(observations.get(site.siteId) ?? [])].sort()
+    return values.map((signal) => ({
+      category: "dynamic-assignment",
+      carrierKey: `${site.siteId}::${signal || "<empty>"}`,
+    }))
+  })
+}
+
+async function collectFrameDynamicObservations() {
+  const observations = new Map()
+  const previousObserver = globalThis.__steptraceSignal
+  const previousResizeObserver = globalThis.ResizeObserver
+  globalThis.__steptraceSignal = (siteId, value) => {
+    const values = observations.get(siteId) ?? new Set()
+    values.add(String(value))
+    observations.set(siteId, values)
+    return value
+  }
+  globalThis.ResizeObserver = class {
+    observe() {}
+    disconnect() {}
+  }
+  try {
+    const [{ steptrace: api }, render, { builtInAlgorithms }] = await Promise.all([
+      loadInstrumentedStepTraceModule("src", "engine.ts"),
+      loadInstrumentedStepTraceModule("src", "render.ts"),
+      loadInstrumentedStepTraceModule("src", "algorithms", "index.ts"),
+    ])
+    const legacyViews = {
+      sort: render.makeSortView,
+      search: render.makeSearchView,
+      graph: render.makeGraphView,
+      string: render.makeMatchView,
+      pointers: render.makePointerView,
+      dp: render.makeDPView,
+      unionfind: render.makeUnionFindView,
+      bits: render.makeBitsView,
+      backtrack: render.makeBacktrackView,
+      rectree: render.makeRecTreeView,
+    }
+    withFakeDocument(() => {
+      assert.match(render.makeUnionFindView.toString(), /__steptraceSignal/)
+      for (const algorithm of builtInAlgorithms) {
+        if (!api.kindOf(algorithm.id)) continue
+        const result = api.buildFrames({
+          ...(algorithmsWithoutCommonConfig.has(algorithm.id) ? {} : commonConfig),
+          algorithm: algorithm.id,
+          ...headlessFixtureOverrides[algorithm.id],
+          ...(algorithm.id === "kernighan-popcount" ? { value: 29 } : {}),
+        })
+        const view = result.family
+          ? result.family.createView(result.frames)
+          : result.kind === "graph"
+            ? legacyViews.graph(result.frames, result.graph, result.frontierLabel)
+            : legacyViews[result.kind](result.frames)
+        for (let index = 0; index < result.frames.length; index++)
+          view.paint(result.frames[index], index, result.frames.length)
+        view.destroy?.()
+      }
+      const unionFrames = [
+        {
+          n: 2,
+          parent: [0, 0],
+          roots: [0, 0],
+          highlight: [],
+          activeEdge: null,
+          message: "idle",
+        },
+        {
+          n: 2,
+          parent: [0, 0],
+          roots: [0, 0],
+          highlight: [],
+          activeEdge: [1, 0],
+          message: "active",
+        },
+      ]
+      const unionView = render.makeUnionFindView(unionFrames)
+      unionFrames.forEach((frame, index) => unionView.paint(frame, index, unionFrames.length))
+      assert.deepEqual(
+        [...(observations.get("Web/custom/steptrace/src/render.ts::arc.dataset.active#1") ?? [])].sort(),
+        ["false", "true"],
+        "legacy union-find fixture must exercise both arc activity signals",
+      )
+    })
+  } finally {
+    globalThis.__steptraceSignal = previousObserver
+    globalThis.ResizeObserver = previousResizeObserver
+  }
+  return observations
+}
+
+let frameDynamicObservationsPromise
+const frameDynamicObservations = () =>
+  (frameDynamicObservationsPromise ??= collectFrameDynamicObservations())
+
+function discoverSemanticSentinels(
+  overrides = new Map(),
+  observations = null,
+  allowUnexercised = false,
+) {
+  const sentinels = []
+  const dynamicSites = []
+  const occurrences = new Map()
+  const add = (category, owner, primitive, signal) => {
+    const normalizedPrimitive = normalizeSemanticSource(primitive)
+    const normalizedSignal = normalizeSemanticSource(signal) || "<empty>"
+    const baseKey = `${owner}::${normalizedPrimitive}::${normalizedSignal}`
+    const occurrence = (occurrences.get(baseKey) ?? 0) + 1
+    occurrences.set(baseKey, occurrence)
+    sentinels.push({
+      category,
+      carrierKey:
+        occurrence === 1
+          ? baseKey
+          : `${owner}::${normalizedPrimitive} [occurrence ${occurrence}]::${normalizedSignal}`,
+    })
+  }
+  const sourceFor = (path) => overrides.get(path) ?? readFileSync(join(repoRoot, path), "utf8")
+  const styleRoot = join(here, "src", "styles")
+  for (const name of readdirSync(styleRoot).filter((entry) => entry.endsWith(".scss"))) {
+    const path = join(styleRoot, name)
+    const owner = relative(repoRoot, path)
+    const source = sourceFor(owner)
+    for (const match of source.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+      const selector = normalizeSemanticSource(match[1])
+      const body = match[2]
+      const semanticSelector =
+        /(?:data-(?:state|role|roles|result|target|current|active|selected|found|matched|visited|success|decision)|--(?:current|candidate|accepted|visited|success|sorted|found|match|rejected|invalid|active|open|closed|path|stored|selected|winner|output|terminal|created|scan|retained|popped|resolved)|success-marker|__check)/.test(
+          selector,
+        )
+      for (const token of new Set([...body.matchAll(/var\(--_(blue|amber|green|violet|red|neutral)\)/g)].map((item) => item[1])))
+        add("semantic-token-selector", owner, selector, token)
+      if (
+        semanticSelector &&
+        /box-shadow:\s*inset\s+0\s+-|text-decoration:\s*underline|border-(?:block-)?bottom\s*:/.test(body)
+      )
+        add("semantic-underline", owner, selector, "underline")
+    }
+  }
+
+  const familyRoot = join(here, "src", "families")
+  const typeScriptPaths = [
+    join(here, "src", "mount.ts"),
+    join(here, "src", "render.ts"),
+    ...readdirSync(familyRoot)
+      .filter((entry) => entry.endsWith(".ts"))
+      .map((entry) => join(familyRoot, entry)),
+  ]
+  for (const path of typeScriptPaths) {
+    const owner = relative(repoRoot, path)
+    const source = sourceFor(owner)
+    dynamicSites.push(...dynamicAssignmentSites(owner, source))
+    for (const line of source.split("\n")) {
+      const trimmed = normalizeSemanticSource(line)
+      if (
+        /successMarker\(/.test(trimmed) &&
+        !/^export function successMarker/.test(trimmed) &&
+        !/^import /.test(trimmed)
+      )
+        add(
+          "success-marker-site",
+          owner,
+          trimmed.replace(/successMarker\([^)]*\)/, "successMarker()"),
+          "final-success",
+        )
+      const swatch = trimmed.match(/swatchClass:\s*["'`]([^"'`]+)["'`]/)
+      if (swatch) add("legend-marker", owner, `swatchClass:${swatch[1]}`, "legend")
+    }
+  }
+  assert.ok(observations, "dynamic semantic discovery requires executed source observations")
+  return [
+    ...sentinels,
+    ...expandObservedDynamicSites(dynamicSites, observations, allowUnexercised),
+  ]
+    .sort((left, right) => left.carrierKey.localeCompare(right.carrierKey))
+}
+
+function exactSetDiagnostics(expected, actual) {
+  const duplicates = actual.filter((value, index) => actual.indexOf(value) !== index)
+  const expectedSet = new Set(expected)
+  const actualSet = new Set(actual)
+  return {
+    missing: expected.filter((value) => !actualSet.has(value)),
+    extra: actual.filter((value) => !expectedSet.has(value)),
+    duplicates: [...new Set(duplicates)],
+  }
+}
+
+function assertSemanticSentinelReconciliation(observations) {
+  const sentinels = discoverSemanticSentinels(new Map(), observations, false)
+  const counts = Object.fromEntries(
+    [...new Set(sentinels.map(({ category }) => category))]
+      .sort()
+      .map((category) => [category, sentinels.filter((item) => item.category === category).length]),
+  )
+  const sha256 = createHash("sha256")
+    .update(sentinels.map(({ category, carrierKey }) => `${category}:${carrierKey}`).join("\n"))
+    .digest("hex")
+  assert.deepEqual({ total: sentinels.length, counts, sha256 }, semanticSentinelSnapshot)
+  assert.deepEqual(sentinels, semanticSourceSentinels)
+  const mapped = semanticInventory.flatMap(({ carriers }) =>
+    carriers.flatMap(({ sourceSentinels }) => sourceSentinels),
+  )
+  const excluded = structuralExclusions.map(({ carrierKey }) => carrierKey)
+  const reconciliation = exactSetDiagnostics(
+    sentinels.map(({ carrierKey }) => carrierKey),
+    [...mapped, ...excluded],
+  )
+  assert.deepEqual(
+    reconciliation,
+    { missing: [], extra: [], duplicates: [] },
+    `semantic carrier reconciliation: ${JSON.stringify(reconciliation)}`,
+  )
+}
+
+function hasCompleteGeometryException(item) {
+  const exception = item.geometryException
+  return Boolean(
+    exception?.finalPrimitive &&
+      exception?.primitiveInfeasibility &&
+      exception?.associatedResultInfeasibility &&
+      exception?.sharedEquivalentCue &&
+      exception?.automatedAssertionId &&
+      exception?.visualEvidenceCase,
+  )
+}
+
+const semanticCueViolation = (item) =>
+  item.role.value === "accepted-visited" && item.secondaryCue === "shared checkmark"
+    ? "accepted-marker"
+    : item.role.value === "final-success" &&
+        item.carrierKind === "success-marker-site" &&
+        item.secondaryCue !== "shared checkmark" &&
+        item.classification !== "geometry-exception"
+      ? "final-marker"
+      : null
+
+const rawSemanticColorViolation = (source) =>
+  /(?:data-(?:state|role|roles|result|target|current|active|found|visited|success)[^{}]*\{[^{}]*)(?:#[0-9a-f]{3,8}|rgba?\(|hsla?\()/i.test(
+    source,
+  )
 
 const buildAbstractDivideAndConquer = () => buildAlgorithm("divide-and-conquer", "divideAndConquer")
 
@@ -323,6 +749,639 @@ test("the public API stays stable", () => {
     "adjacency",
     "mount",
   ])
+})
+
+test("ST-INV-001 and ST-INV-002 exactly cover the live StepTrace catalogs", () => {
+  const { builtInAlgorithms, interactiveStructures } = loadStepTraceModule(
+    "src",
+    "algorithms",
+    "index.ts",
+  )
+  const frameIds = semanticInventory
+    .filter(({ executionPath }) => !executionPath.startsWith("direct:"))
+    .flatMap(({ catalogIds }) => catalogIds)
+  const directIds = semanticInventory
+    .filter(({ executionPath }) => executionPath.startsWith("direct:"))
+    .flatMap(({ catalogIds }) => catalogIds)
+  for (const [label, expected, actual] of [
+    ["frame", builtInAlgorithms.map(({ id }) => id), frameIds],
+    ["direct", interactiveStructures.map(({ id }) => id), directIds],
+  ]) {
+    const diagnostics = exactSetDiagnostics(expected, actual)
+    assert.deepEqual(
+      diagnostics,
+      { missing: [], extra: [], duplicates: [] },
+      `${label} catalog reconciliation: ${JSON.stringify(diagnostics)}`,
+    )
+    assert.deepEqual([...actual].sort(), [...expected].sort())
+    assert.deepEqual(exactSetDiagnostics(expected, actual.slice(1)).missing, [actual[0]])
+    assert.deepEqual(
+      exactSetDiagnostics(expected, [...actual, actual[0]]).duplicates,
+      [actual[0]],
+    )
+  }
+})
+
+test("ST-INV-003 and ST-INV-004 enforce semantic inventory schema and routing", () => {
+  const { builtInAlgorithms, interactiveStructures } = loadStepTraceModule(
+    "src",
+    "algorithms",
+    "index.ts",
+  )
+  const routes = new Map([
+    ...builtInAlgorithms.map((descriptor) => [
+      descriptor.id,
+      descriptor.family ? `family:${descriptor.family.id}` : `legacy:${descriptor.kind}`,
+    ]),
+    ...interactiveStructures.map((descriptor) => [descriptor.id, `direct:${descriptor.family}`]),
+  ])
+  const primaryRoles = new Set([
+    "active-current",
+    "candidate-frontier",
+    "accepted-visited",
+    "final-success",
+    "rejected-invalid",
+    "neutral-context",
+  ])
+  const overlayRoles = new Set(["goal-target", "range-match"])
+  const classifications = new Set([
+    "compliant",
+    "ambiguous",
+    "mismatch",
+    "duplicate",
+    "geometry-exception",
+  ])
+  const carriers = semanticInventory.flatMap(({ carriers }) => carriers)
+  const carrierKeys = carriers.map(({ carrierKey }) => carrierKey)
+  assert.equal(new Set(carrierKeys).size, carrierKeys.length, "carrier keys must be globally unique")
+
+  for (const entry of semanticInventory) {
+    assert.ok(entry.cohort)
+    assert.ok(entry.catalogIds.length)
+    assert.match(entry.executionPath, /^(?:family|legacy|direct):[a-z0-9-]+$/)
+    assert.ok(entry.sourceOwners.length)
+    assert.ok(entry.carriers.length)
+    assert.ok(entry.evidenceCase?.config?.algorithm)
+    for (const id of entry.catalogIds) assert.equal(routes.get(id), entry.executionPath, id)
+    for (const owner of entry.sourceOwners) assert.equal(existsSync(join(repoRoot, owner)), true, owner)
+  }
+
+  for (const item of carriers) {
+    assert.match(item.carrierKey, /^Web\/custom\/steptrace\/src\/.+::.+::.+$/)
+    assert.ok(item.carrierKind)
+    assert.ok(item.sourceSentinels.length, item.carrierKey)
+    assert.equal(
+      item.role.kind === "primary"
+        ? primaryRoles.has(item.role.value)
+        : item.role.kind === "overlay" && overlayRoles.has(item.role.value),
+      true,
+      item.carrierKey,
+    )
+    assert.ok(item.primaryToken)
+    assert.ok(item.secondaryCue)
+    assert.ok(item.cueOwner)
+    assert.ok(item.compositionRule)
+    assert.equal(classifications.has(item.classification), true)
+    assert.ok(item.visualEvidenceKey)
+    assert.deepEqual(item.role, expectedRoleBySentinel[item.carrierKey], item.carrierKey)
+    if (item.actualToken && item.primaryToken !== "semantic-owner-token") {
+      const tokenMismatch = item.actualToken !== item.primaryToken
+      assert.equal(
+        tokenMismatch,
+        item.classification === "mismatch" && /^Actual .* contradicts expected /.test(item.notes),
+        `token/classification drift: ${item.carrierKey}`,
+      )
+    }
+    if (item.carrierKind === "dynamic-assignment") {
+      assert.ok(item.allowedSignals.length, item.carrierKey)
+      assert.equal(item.signalEvidenceCases.length, item.allowedSignals.length, item.carrierKey)
+      assert.deepEqual(
+        item.signalEvidenceCases.map(({ allowedSignal }) => allowedSignal).sort(),
+        [...item.allowedSignals].sort(),
+        item.carrierKey,
+      )
+      assert.equal(item.allowedSignals.some((signal) => signal.startsWith("dynamic:")), false)
+      for (const evidence of item.signalEvidenceCases) {
+        assert.ok(evidence.evidenceCase?.config?.algorithm, item.carrierKey)
+        assert.equal(evidence.sourceSentinel, item.carrierKey, item.carrierKey)
+        assert.equal(item.allowedSignals.includes(evidence.allowedSignal), true, item.carrierKey)
+        if (evidence.evidenceKind === "boolean-string-expression") {
+          assert.equal(
+            [String(false), String(true)].includes(evidence.expectedRuntimeValue),
+            true,
+            item.carrierKey,
+          )
+        } else {
+          assert.equal(evidence.evidenceKind, "source-literal", item.carrierKey)
+        }
+        assert.equal(evidence.expectedRuntimeValue, evidence.allowedSignal, item.carrierKey)
+      }
+      const discoveredSignal = item.carrierKey.split("::").at(-1)
+      const normalizedSignal = discoveredSignal === "<empty>" ? "" : discoveredSignal
+      assert.deepEqual(item.allowedSignals, [normalizedSignal], item.carrierKey)
+      assert.equal(
+        item.signalEvidenceCases.every(({ assignmentExpression }) => assignmentExpression.length > 0),
+        true,
+        item.carrierKey,
+      )
+    }
+    if (item.classification === "geometry-exception")
+      assert.equal(hasCompleteGeometryException(item), true, item.carrierKey)
+    if (item.role.value === "final-success") {
+      assert.ok(item.successAssociation, item.carrierKey)
+      if (item.successAssociation.status === "present") {
+        assert.ok(carrierKeys.includes(item.successAssociation.markerSite), item.carrierKey)
+        assert.equal(
+          carriers.find(({ carrierKey }) => carrierKey === item.successAssociation.markerSite)
+            ?.carrierKind,
+          "success-marker-site",
+          item.carrierKey,
+        )
+      } else {
+        assert.equal(item.successAssociation.status, "missing", item.carrierKey)
+        assert.equal(item.successAssociation.markerSite, null, item.carrierKey)
+        assert.equal(item.classification, "mismatch", item.carrierKey)
+        assert.match(item.notes, /missing the canonical shared marker/i, item.carrierKey)
+      }
+    } else assert.equal(item.successAssociation, undefined, item.carrierKey)
+    for (const composed of item.composesWith ?? []) {
+      assert.equal(carrierKeys.includes(composed), true)
+      const other = carriers.find(({ carrierKey }) => carrierKey === composed)
+      assert.notEqual(item.role.kind, other.role.kind, `${item.carrierKey} must compose primary + overlay`)
+    }
+    if (/::(?:success|found|best|path|stored|visited)(?:\b|\s)/i.test(item.carrierKey))
+      assert.ok(item.ambiguousTermRationale, item.carrierKey)
+    if (item.carrierKind === "semantic-underline") {
+      if (/data-state="probe"/.test(item.carrierKey)) {
+        assert.deepEqual(item.role, { kind: "primary", value: "active-current" })
+        assert.equal(item.classification, "mismatch")
+        assert.equal(item.extentEvidence, undefined)
+      } else if (/data-state="copy-target"/.test(item.carrierKey)) {
+        assert.deepEqual(item.role, { kind: "overlay", value: "goal-target" })
+        assert.equal(item.classification, "mismatch")
+        assert.equal(item.extentEvidence, undefined)
+      } else {
+        assert.deepEqual(item.role, { kind: "overlay", value: "range-match" })
+        assert.ok(item.extentEvidence?.start)
+        assert.ok(item.extentEvidence?.end)
+        assert.equal(item.extentEvidence?.paintAssertionId, "ST-INV-008")
+      }
+    }
+  }
+  assert.ok(
+    carriers.some(({ carrierKind }) => carrierKind === "dynamic-assignment"),
+    "the inventory must retain dynamic semantic carriers",
+  )
+  assert.equal(
+    hasCompleteGeometryException({
+      classification: "geometry-exception",
+      geometryException: { finalPrimitive: "cell" },
+    }),
+    false,
+    "a partial geometry exception must fail the conditional schema",
+  )
+  assert.ok(carriers.some(({ composesWith }) => composesWith?.length), "composition must be explicit")
+  const staticCarrierGroups = new Map()
+  for (const carrier of carriers) {
+    if (!new Set(["semantic-token-selector", "semantic-underline"]).has(carrier.carrierKind))
+      continue
+    const primitive = carrier.carrierKey.split("::").slice(0, -1).join("::")
+    const group = staticCarrierGroups.get(primitive) ?? []
+    group.push(carrier)
+    staticCarrierGroups.set(primitive, group)
+  }
+  for (const [primitive, group] of [...staticCarrierGroups].filter(([, group]) => group.length > 1)) {
+    const roleKinds = new Set(group.map(({ role }) => role.kind))
+    if (roleKinds.has("primary") && roleKinds.has("overlay")) {
+      for (const carrier of group) {
+        const opposite = group.filter(({ role }) => role.kind !== carrier.role.kind)
+        assert.deepEqual(
+          opposite.filter(({ carrierKey }) => !(carrier.composesWith ?? []).includes(carrierKey)),
+          [],
+          `${primitive} must reciprocally compose its primary and overlay carriers`,
+        )
+      }
+      continue
+    }
+    assert.equal(
+      new Set(group.map(({ role }) => JSON.stringify(role))).size,
+      1,
+      `${primitive} must be one explicitly owned combined semantic carrier`,
+    )
+    assert.deepEqual(
+      [...new Set(group.map(({ cueOwner }) => cueOwner))],
+      [primitive.split("::").at(-1)],
+      `${primitive} must explicitly own all cues in its combined semantic carrier`,
+    )
+    assert.equal(
+      group.every(({ classification }) => classification !== "ambiguous"),
+      true,
+      `${primitive} combined semantics must be explicitly resolved`,
+    )
+  }
+  assert.equal(
+    carriers.filter(({ classification }) => classification === "ambiguous").length,
+    0,
+    "G002 cannot close with unresolved semantic ambiguity",
+  )
+  const underlines = carriers.filter(({ carrierKind }) => carrierKind === "semantic-underline")
+  assert.equal(underlines.length, 4)
+  assert.equal(underlines.filter(({ role }) => role.value === "range-match").length, 4)
+  for (const fragment of [
+    '[data-state="suffix"]',
+    '.steptrace__match:not(.steptrace__z) .steptrace__cell[data-state="found"]',
+    '.steptrace__z .steptrace__cell[data-state="match"]',
+  ])
+    assert.ok(underlines.some(({ carrierKey }) => carrierKey.includes(fragment)), fragment)
+
+  const assertLocalMeaning = (expectedRole, fragments) => {
+    const related = fragments.map((fragment) => {
+      const found = carriers.find(({ carrierKey }) => carrierKey.includes(fragment))
+      assert.ok(found, fragment)
+      return found
+    })
+    for (const item of related) assert.deepEqual(item.role, expectedRole, item.carrierKey)
+  }
+  assertLocalMeaning({ kind: "primary", value: "active-current" }, [
+    "render.ts::bar.dataset.state#1::swap",
+    'bars.scss::.steptrace__bar[data-state="swap"]',
+  ])
+  assertLocalMeaning({ kind: "primary", value: "accepted-visited" }, [
+    "render.ts::group.dataset.state#2::store",
+    'rectree.scss::.steptrace .steptrace__rtnode[data-state="combine"]',
+  ])
+  assertLocalMeaning({ kind: "overlay", value: "range-match" }, [
+    "range-aggregate.ts::block.dataset.role#1::prefix-left",
+    'range-aggregate.scss::.steptrace__range-block[data-role="prefix-left"]',
+  ])
+})
+
+let productionSignalObservations
+const testSemanticSourceReconciliation = async () => {
+  const inventorySource = readFileSync(join(here, "steptrace.semantic-inventory.mjs"), "utf8")
+  assert.match(inventorySource, /export const semanticSourceSentinels = \[\n/)
+  assert.doesNotMatch(
+    inventorySource,
+    /readFileSync|readdirSync|discoverSemanticSentinels|dynamicAllowedSignals/,
+  )
+  assert.ok(productionSignalObservations, "production mount observations must run first")
+  const observations = productionSignalObservations
+  const sentinels = discoverSemanticSentinels(new Map(), observations, false)
+  const counts = Object.fromEntries(
+    [...new Set(sentinels.map(({ category }) => category))]
+      .sort()
+      .map((category) => [category, sentinels.filter((item) => item.category === category).length]),
+  )
+  const sha256 = createHash("sha256")
+    .update(sentinels.map(({ category, carrierKey }) => `${category}:${carrierKey}`).join("\n"))
+    .digest("hex")
+  assert.deepEqual({ total: sentinels.length, counts, sha256 }, semanticSentinelSnapshot)
+  assert.deepEqual(sentinels, semanticSourceSentinels)
+  const mapped = semanticInventory.flatMap(({ carriers }) =>
+    carriers.flatMap(({ sourceSentinels }) => sourceSentinels),
+  )
+  const excluded = structuralExclusions.map(({ carrierKey }) => carrierKey)
+  const discovered = sentinels.map(({ carrierKey }) => carrierKey)
+  const reconciliation = exactSetDiagnostics(discovered, [...mapped, ...excluded])
+  assert.deepEqual(
+    reconciliation,
+    { missing: [], extra: [], duplicates: [] },
+    `semantic carrier reconciliation: ${JSON.stringify(reconciliation)}`,
+  )
+  assert.equal(new Set(mapped).size, mapped.length, "a source sentinel may map to only one carrier")
+  assert.equal(new Set(structuralExclusions.map(({ carrierKey }) => carrierKey)).size, structuralExclusions.length)
+  for (const exclusion of structuralExclusions) {
+    assert.ok(exclusion.category)
+    assert.ok(exclusion.rationale)
+  }
+
+  const renderOwner = "Web/custom/steptrace/src/render.ts"
+  const renderSource = readFileSync(join(repoRoot, renderOwner), "utf8")
+  const newSiteSource = `${renderSource}\nprobe.dataset.state = "sentinel-new-site";`
+  const newSiteObservations = new Map(observations)
+  const addedSite = dynamicAssignmentSites(renderOwner, newSiteSource).at(-1)
+  newSiteObservations.set(addedSite.siteId, new Set(["sentinel-new-site"]))
+  const newSite = discoverSemanticSentinels(
+    new Map([[renderOwner, newSiteSource]]),
+    newSiteObservations,
+    true,
+  )
+  const newSiteKey = "Web/custom/steptrace/src/render.ts::probe.dataset.state#1::sentinel-new-site"
+  assert.equal(newSite.some(({ carrierKey }) => carrierKey === newSiteKey), true)
+  assert.equal(semanticSourceSentinels.some(({ carrierKey }) => carrierKey === newSiteKey), false)
+
+  assert.match(renderSource, /cell\.dataset\.state = "found"/)
+  const changedSource = renderSource.replace(
+    'cell.dataset.state = "found"',
+    'cell.dataset.state = "found-next"',
+  )
+  const changedSite = dynamicAssignmentSites(renderOwner, changedSource).find(
+    ({ primitive, valueStart, valueEnd }) =>
+      primitive === "cell.dataset.state" &&
+      changedSource.slice(valueStart, valueEnd).trim() === '"found-next"',
+  )
+  const newSignalObservations = new Map(observations)
+  newSignalObservations.set(changedSite.siteId, new Set(["found-next"]))
+  const newSignal = discoverSemanticSentinels(
+    new Map([[renderOwner, changedSource]]),
+    newSignalObservations,
+    true,
+  )
+  const originalKeys = new Set(sentinels.map(({ carrierKey }) => carrierKey))
+  const changedKeys = new Set(newSignal.map(({ carrierKey }) => carrierKey))
+  assert.equal([...originalKeys].filter((key) => !changedKeys.has(key)).length, 1)
+  assert.equal([...changedKeys].filter((key) => !originalKeys.has(key)).length, 1)
+  assert.equal([...changedKeys].some((key) => key.endsWith("::found-next")), true)
+  assert.equal(
+    semanticSourceSentinels.some(({ carrierKey }) => carrierKey.endsWith("::found-next")),
+    false,
+    "a new signal at an existing site must be unmapped",
+  )
+  assert.equal(
+    exactSetDiagnostics(discovered, [...mapped, ...excluded.slice(1)]).missing.length,
+    1,
+    "removing a structural exclusion must fail exact reconciliation",
+  )
+}
+
+test("ST-INV negative probes reject marker, raw-color, and underline drift", async () => {
+  const carriers = semanticInventory.flatMap(({ carriers }) => carriers)
+  const accepted = carriers.find(
+    ({ role, secondaryCue }) =>
+      role.value === "accepted-visited" && secondaryCue !== "shared checkmark",
+  )
+  assert.equal(semanticCueViolation({ ...accepted, secondaryCue: "shared checkmark" }), "accepted-marker")
+
+  const finalMarker = carriers.find(
+    ({ role, carrierKind }) => role.value === "final-success" && carrierKind === "success-marker-site",
+  )
+  assert.equal(semanticCueViolation({ ...finalMarker, secondaryCue: "none" }), "final-marker")
+  assert.equal(
+    rawSemanticColorViolation('.steptrace__cell[data-state="current"] { color: #00ff00; }'),
+    true,
+  )
+
+  const stringOwner = "Web/custom/steptrace/src/styles/string.scss"
+  const stringSource = readFileSync(join(repoRoot, stringOwner), "utf8")
+  const mutated = discoverSemanticSentinels(
+    new Map([
+      [
+        stringOwner,
+        `${stringSource}\n.steptrace__cell[data-state="unallowlisted"] { box-shadow: inset 0 -2px var(--_green); }`,
+      ],
+    ]),
+    await frameDynamicObservations(),
+    true,
+  )
+  const mapped = carriers.flatMap(({ sourceSentinels }) => sourceSentinels)
+  const excluded = structuralExclusions.map(({ carrierKey }) => carrierKey)
+  const missing = exactSetDiagnostics(
+    mutated.map(({ carrierKey }) => carrierKey),
+    [...mapped, ...excluded],
+  ).missing
+  assert.equal(missing.some((key) => key.includes('[data-state="unallowlisted"]::underline')), true)
+})
+
+test("ST-INV-007 characterizes accepted, final, transient, and ambiguous carriers", () => {
+  const carriers = semanticInventory.flatMap(({ carriers }) => carriers)
+  const hashSuccess = carriers.find(({ carrierKey }) =>
+    carrierKey.includes("hash-index.ts::cell.dataset.result#1::success"),
+  )
+  assert.deepEqual(hashSuccess.role, { kind: "primary", value: "active-current" })
+  assert.match(hashSuccess.ambiguousTermRationale, /transient operation/i)
+
+  const accepted = carriers.filter(({ role }) => role.value === "accepted-visited")
+  assert.ok(accepted.length)
+  assert.equal(
+    accepted
+      .filter(({ classification }) => classification === "compliant")
+      .every(({ secondaryCue }) => secondaryCue !== "shared checkmark"),
+    true,
+  )
+  const finals = carriers.filter(({ role }) => role.value === "final-success")
+  assert.ok(finals.length)
+  assert.ok(finals.some(({ secondaryCue }) => secondaryCue === "shared checkmark"))
+  assert.equal(
+    carriers.filter(
+      ({ role, actualToken }) =>
+        role.value === "rejected-invalid" && actualToken != null && actualToken !== "var(--_red)",
+    ).length,
+    0,
+  )
+})
+
+test("ST-INV-008 paints independent process and overlay carriers on graph and DP cells", () => {
+  const carriers = semanticInventory.flatMap(({ carriers }) => carriers)
+  const carrier = (fragment) => {
+    const found = carriers.find(({ carrierKey }) => carrierKey.includes(fragment))
+    assert.ok(found, fragment)
+    return found
+  }
+  const graphPrimary = carrier('.steptrace__gs-node[data-state="current"] .steptrace__gs-node-circle::blue')
+  const graphOverlay = carrier("graph-state.ts::group.dataset.target#1::true")
+  const graphOverlayToken = carrier("graph-state.scss::.steptrace .steptrace__gs-target::violet")
+  assert.deepEqual(graphPrimary.role, { kind: "primary", value: "active-current" })
+  assert.equal(graphPrimary.primaryToken, "var(--_blue)")
+  assert.equal(graphPrimary.actualToken, "var(--_blue)")
+  assert.equal(graphPrimary.classification, "compliant")
+  assert.deepEqual(graphOverlay.role, { kind: "overlay", value: "goal-target" })
+  assert.equal(graphOverlay.primaryToken, "var(--_violet)")
+  assert.equal(graphOverlayToken.actualToken, "var(--_violet)")
+  assert.notEqual(graphPrimary.cueOwner, graphOverlay.cueOwner)
+  assert.deepEqual(graphPrimary.composesWith, [graphOverlay.carrierKey])
+  assert.deepEqual(graphOverlay.composesWith, [graphPrimary.carrierKey])
+  assert.match(graphOverlay.compositionRule, /overlay.*precedence/i)
+
+  const dpOverlay = carrier('dp td[data-roles~="target"]::violet')
+  const dpPrimary = carrier('dp td[data-roles~="target"][data-decision="improve"]::green')
+  assert.deepEqual(dpOverlay.role, { kind: "overlay", value: "goal-target" })
+  assert.equal(dpOverlay.primaryToken, "var(--_violet)")
+  assert.equal(dpOverlay.actualToken, "var(--_violet)")
+  assert.equal(dpOverlay.classification, "compliant")
+  assert.deepEqual(dpPrimary.role, { kind: "primary", value: "accepted-visited" })
+  assert.equal(dpPrimary.primaryToken, "var(--_green)")
+  assert.equal(dpPrimary.actualToken, "var(--_green)")
+  assert.equal(dpPrimary.classification, "compliant")
+  assert.notEqual(dpPrimary.cueOwner, dpOverlay.cueOwner)
+  assert.deepEqual(dpPrimary.composesWith, [dpOverlay.carrierKey])
+  assert.deepEqual(dpOverlay.composesWith, [dpPrimary.carrierKey])
+  assert.match(dpOverlay.compositionRule, /overlay.*precedence/i)
+
+  const stringFound = carrier('.steptrace__cell[data-state="found"]::green')
+  const stringFoundRange = carrier(
+    '.steptrace__match:not(.steptrace__z) .steptrace__cell[data-state="found"]::underline',
+  )
+  assert.deepEqual(stringFound.role, { kind: "primary", value: "final-success" })
+  assert.deepEqual(stringFoundRange.role, { kind: "overlay", value: "range-match" })
+  assert.equal(stringFound.primaryToken, "var(--_green)")
+  assert.equal(stringFound.actualToken, "var(--_green)")
+  assert.equal(stringFoundRange.primaryToken, "semantic-owner-token")
+  assert.equal(stringFoundRange.actualToken, null)
+  assert.notEqual(stringFound.cueOwner, stringFoundRange.cueOwner)
+  assert.ok(stringFound.composesWith.includes(stringFoundRange.carrierKey))
+  assert.ok(stringFoundRange.composesWith.includes(stringFound.carrierKey))
+  assert.match(stringFoundRange.compositionRule, /overlay.*precedence/i)
+
+  const descendants = (node) => [node, ...(node.children ?? []).flatMap(descendants)]
+  withFakeDocument(() => {
+    const graph = buildAlgorithm("dijkstra", "dijkstra", canonicalDijkstraConfig)
+    const graphView = graph.family.createView(graph.frames)
+    const graphFrame = graph.frames.find(({ target }) => target)
+    const target = graphFrame.target
+    graphView.paint({
+      ...graphFrame,
+      nodeState: { ...graphFrame.nodeState, [target]: "active" },
+    })
+    const graphTarget = graphView.nodes
+      .flatMap(descendants)
+      .find(
+        (node) =>
+          /\bsteptrace__gs-node\b/.test(node.className || node.getAttribute?.("class") || "") &&
+          node.dataset.target === "true" &&
+          node.dataset.state === "current",
+      )
+    assert.ok(graphTarget, "graph target overlay must survive the current process state")
+
+    const matrix = buildAlgorithm("floyd-warshall", "floydWarshall", {
+      nodes: [0, 1, 2, 3],
+      edges: [
+        [0, 1, 3],
+        [0, 3, 7],
+        [1, 2, 2],
+        [2, 3, 1],
+        [3, 0, 2],
+      ],
+    })
+    const matrixFrame = matrix.frames.find(
+      ({ type, decision }) => type === "relax" && decision === "improve",
+    )
+    const matrixView = matrix.family.createView(matrix.frames)
+    matrixView.paint(matrixFrame, matrix.frames.indexOf(matrixFrame), matrix.frames.length)
+    const matrixTarget = matrixView.nodes
+      .flatMap(descendants)
+      .find(
+        (node) =>
+          node.tagName === "td" &&
+          node.dataset.roles?.split(" ").includes("target") &&
+          node.dataset.decision === "improve",
+    )
+    assert.ok(matrixTarget, "DP target overlay must survive the improve process decision")
+
+    const frames = buildSourceFrames({
+      algorithm: "kmp",
+      text: "ABAC",
+      pattern: "ABAC",
+    }).frames
+    const matchView = loadStepTraceModule("src", "render.ts").makeMatchView(frames)
+    matchView.paint(frames.at(-1), frames.length - 1, frames.length)
+    const textCells = matchView.nodes[0].children[1].children
+    assert.equal(textCells.length, 4)
+    assert.equal(textCells[0].dataset.state, "found")
+    assert.equal(textCells.at(-1).dataset.state, "found")
+    assert.equal(textCells.every(({ dataset }) => dataset.state === "found"), true)
+    const foundUnderline = carrier(
+      '.steptrace__match:not(.steptrace__z) .steptrace__cell[data-state="found"]::underline',
+    )
+    assert.deepEqual(foundUnderline.role, { kind: "overlay", value: "range-match" })
+    assert.ok(foundUnderline.extentEvidence.start)
+    assert.ok(foundUnderline.extentEvidence.end)
+    matchView.destroy()
+
+    const compareFrame = frames.find(({ cmpResult }) => cmpResult === "match")
+    const compareView = loadStepTraceModule("src", "render.ts").makeMatchView(frames)
+    compareView.paint(compareFrame, frames.indexOf(compareFrame), frames.length)
+    const comparePatternCells = compareView.nodes[0].children[0].children
+    const compareTextCells = compareView.nodes[0].children[1].children
+    assert.equal(comparePatternCells[compareFrame.cmpP].dataset.state, "match")
+    assert.equal(compareTextCells[compareFrame.cmpT].dataset.state, "match")
+    assert.equal(compareFrame.cmpT - compareFrame.shift, compareFrame.cmpP)
+    carrier('.steptrace__cell[data-state="match"]::underline')
+    compareView.destroy()
+
+    const boyerFrames = buildSourceFrames({
+      algorithm: "boyer-moore",
+      text: "ABABACABA",
+      pattern: "ABAC",
+    }).frames
+    const suffixFrame = boyerFrames.find(
+      ({ matchedFrom, cmpResult }) => matchedFrom <= 1 && cmpResult === "match",
+    )
+    assert.ok(suffixFrame, "Boyer-Moore fixture must expose a multi-cell matched suffix")
+    const boyerView = loadStepTraceModule("src", "render.ts").makeMatchView(boyerFrames)
+    boyerView.paint(suffixFrame, boyerFrames.indexOf(suffixFrame), boyerFrames.length)
+    const boyerBoard = boyerView.nodes[0].children[0].children[0]
+    const suffixPattern = boyerBoard.children[0].children
+    const suffixText = boyerBoard.children[1].children
+    const paintedPatternSuffix = suffixPattern
+      .map(({ dataset }, index) => dataset.state === "suffix" ? index : null)
+      .filter((index) => index != null)
+    const paintedTextSuffix = suffixText
+      .map(({ dataset }, index) => dataset.state === "suffix" ? index : null)
+      .filter((index) => index != null)
+    assert.ok(paintedPatternSuffix.length >= 2)
+    assert.deepEqual(paintedTextSuffix, paintedPatternSuffix.map((index) => suffixFrame.shift + index))
+    assert.ok(paintedPatternSuffix[0] < paintedPatternSuffix.at(-1))
+    carrier('.steptrace__bm .steptrace__cell[data-state="suffix"]::underline')
+
+    const boyerFoundFrame = boyerFrames.findLast(({ found }) => found.length > 0)
+    assert.ok(boyerFoundFrame, "Boyer-Moore fixture must expose a final found extent")
+    boyerView.paint(boyerFoundFrame, boyerFrames.indexOf(boyerFoundFrame), boyerFrames.length)
+    const foundTextCells = boyerBoard.children[1].children.filter(
+      ({ dataset }) => dataset.state === "found",
+    )
+    assert.equal(foundTextCells.length, 4)
+    carrier('.steptrace__match:not(.steptrace__z) .steptrace__cell[data-state="found"]::underline')
+    boyerView.destroy()
+
+    const zFrames = buildSourceFrames({ algorithm: "z-algorithm", text: "aaaaa" }).frames
+    const zMatchFrame = zFrames.find(({ compare }) => compare?.result === "match")
+    assert.ok(zMatchFrame, "Z fixture must expose a prefix/candidate match")
+    const zView = loadStepTraceModule("src", "render.ts").makeMatchView(zFrames)
+    zView.paint(zMatchFrame, zFrames.indexOf(zMatchFrame), zFrames.length)
+    const zBoard = zView.nodes[0].children[0].children[0]
+    const zPrefixCells = zBoard.children[0].children[1].children[0].children
+    const zStringCells = zBoard.children[1].children[1].children
+    assert.equal(zPrefixCells[zMatchFrame.compare.prefix].dataset.state, "match")
+    assert.equal(zStringCells[zMatchFrame.compare.candidate].dataset.state, "match")
+    assert.ok(zMatchFrame.compare.prefix < zMatchFrame.compare.candidate)
+    carrier('.steptrace__z .steptrace__cell[data-state="match"]')
+
+    const zCommitFrame = zFrames.find(({ type, i }) => type === "commit" && i != null)
+    assert.ok(zCommitFrame, "Z fixture must expose a committed value")
+    zView.paint(zCommitFrame, zFrames.indexOf(zCommitFrame), zFrames.length)
+    const zValueCells = zBoard.children[2].children[1].children
+    const committedCell = zValueCells[zCommitFrame.i]
+    assert.equal(committedCell.dataset.state, "found")
+    assert.ok(
+      descendants(committedCell).some((node) =>
+        /\bsteptrace__cell-success\b/.test(node.className || node.getAttribute?.("class") || ""),
+      ),
+      "Z committed value must retain its final success marker",
+    )
+    const stringStyles = readFileSync(join(here, "src", "styles", "string.scss"), "utf8")
+    assert.doesNotMatch(
+      stringStyles,
+      /\.steptrace__z \.steptrace__cell\[data-state="found"\]/,
+      "Z committed values must not inherit a single-cell range underline",
+    )
+    assert.match(
+      stringStyles,
+      /\.steptrace__match:not\(\.steptrace__z\) \.steptrace__cell\[data-state="found"\] \{\s*box-shadow:/,
+      "non-Z final match extents must retain their range underline",
+    )
+    zView.destroy()
+  })
+})
+
+test("ST-CHAR-001 closes every characterized semantic mismatch", () => {
+  const carriers = semanticInventory.flatMap(({ carriers }) => carriers)
+  const mismatches = carriers.filter(({ classification }) => classification === "mismatch")
+  assert.deepEqual(
+    characterizedMismatches.map(({ carrierKey }) => carrierKey).sort(),
+    mismatches.map(({ carrierKey }) => carrierKey).sort(),
+  )
+  assert.deepEqual(characterizedMismatches, [])
+  assert.equal(mismatches.length, 0)
 })
 
 test("the Obsidian bundle registers complexity and keeps invalid source local", () => {
@@ -625,16 +1684,12 @@ test("Boyer-Moore reuses stable non-scrolling string strips with shell-matched e
     assert.equal(textRow.children.length, 10)
     const compareCue = textRow.children[0].children[1]
     assert.equal(compareCue.attributes.get("aria-hidden"), "true")
-    assert.equal(
-      compareCue.children[0].children[0].attributes.get("class"),
-      "steptrace__success-marker",
-    )
-    assert.match(compareCue.children[0].children[0].innerHTML, /<circle/)
-    assert.match(compareCue.children[1].innerHTML, /<svg/)
-    assert.doesNotMatch(
-      compareCue.children[0].children[0].innerHTML + compareCue.children[1].innerHTML,
-      /✓|×/,
-    )
+    assert.equal(compareCue.children.length, 1)
+    assert.match(compareCue.children[0].innerHTML, /<svg/)
+    assert.doesNotMatch(compareCue.children[0].innerHTML, /✓|×/)
+    assert.match(textRow.children[0].children[2].attributes.get("class"), /\bsteptrace__success-marker\b/)
+    assert.match(textRow.children[0].children[2].attributes.get("class"), /\bsteptrace__cell-success\b/)
+    assert.match(textRow.children[0].children[2].innerHTML, /<circle/)
     assert.match(ICON.x, /<svg/)
     view.paint(frames.at(-1), frames.length - 1, frames.length)
     assert.equal(patternRow.style.transform, "translateX(240.00px)")
@@ -928,8 +1983,9 @@ test("the Z-array profile paints every frame into one stable measured-strip DOM"
     )
     assert.match(
       styles,
-      /\.steptrace__z \.steptrace__cell\[data-state="match"\],[\s\S]*box-shadow: inset 0 -2px 0 var\(--_green\);/,
+      /\.steptrace__z \.steptrace__cell\[data-state="match"\] \{\s*box-shadow: inset 0 -2px 0 var\(--_green\);/,
     )
+    assert.doesNotMatch(styles, /\.steptrace__z \.steptrace__cell\[data-state="found"\][^{]*\{[^}]*box-shadow:/)
     assert.match(styles, /\.steptrace__z-string \{\s*position: relative;\s*\}/)
     assert.doesNotMatch(styles, /steptrace__z-legend|steptrace__z-copy/)
     assert.match(
@@ -1347,7 +2403,8 @@ test("shared legends and success badges use the canonical render helpers", () =>
   )
   assert.doesNotMatch(renderSource, /document\.createElement\("svg"\)/)
   assert.match(renderSource, /check\.append\(successMarker\(\)\)/)
-  assert.match(renderSource, /matchIcon\.append\(successMarker\(\)\)/)
+  assert.doesNotMatch(renderSource, /matchIcon\.append\(successMarker\(\)\)/)
+  assert.match(renderSource, /cell\.append\(value, cue, successMarker\("steptrace__cell-success"\)\)/)
   assert.match(renderSource, /descriptor\.badge === "success"/)
   assert.doesNotMatch(renderSource, /ICON\.check|✓|✔/)
   assert.doesNotMatch(renderSource, /function makeStoryLegend|function makeMatrixRoleLegend/)
@@ -3196,7 +4253,7 @@ test("heap-selection reuses shared strips, tree tokens, and host artifacts", () 
   assert.match(familySource, /observeFixedSvgNodes/)
   assert.match(familySource, /trimGraphEdge/)
   assert.match(familySource, /destroy: geometry\.destroy/)
-  assert.match(familySource, /successMarker\(\)/)
+  assert.doesNotMatch(familySource, /successMarker\(/)
   assert.match(familySource, /ICON\.x/)
   assert.match(familySource, /stableStage: true/)
   assert.match(familySource, /stageLayout: "fill"/)
@@ -3687,25 +4744,22 @@ test("graph renderers share one fixed node geometry and visual token contract", 
   assert.match(graphNodeStyles, /--_graph-node-font: 600 0\.66rem\/1 var\(--_font-head\)/)
 })
 
-test("legacy graph visited markers reuse the shared success badge", () => {
+test("legacy graph visited nodes use accepted green without a success badge", () => {
   const renderSource = readFileSync(join(here, "src", "render.ts"), "utf8")
   const styles = readFileSync(join(here, "src", "styles", "graph.scss"), "utf8")
 
   assert.match(renderSource, /export function successMarker/)
-  assert.match(renderSource, /successMarker\("steptrace__nmark-success"\)/)
-  assert.match(
+  assert.doesNotMatch(renderSource, /successMarker\("steptrace__nmark-success"\)/)
+  assert.doesNotMatch(renderSource, /const visitedMark = successMarker/)
+  assert.doesNotMatch(
     renderSource,
-    /visitedMark\.setAttribute\("x", String\(p\.x \+ GRAPH_NODE_RADIUS_PX - 8\)\)/,
+    /label: "visited"[\s\S]{0,160}marker: successMarker\(\)/,
   )
-  assert.match(
-    renderSource,
-    /visitedMark\.setAttribute\("y", String\(p\.y - GRAPH_NODE_RADIUS_PX - 4\)\)/,
-  )
-  assert.match(renderSource, /marker: successMarker\(\)/)
   assert.doesNotMatch(renderSource, /data-state-icon="visited"/)
+  assert.doesNotMatch(styles, /\.steptrace__nmark-success/)
   assert.match(
     styles,
-    /\.steptrace__node\[data-state="visited"\] \.steptrace__nmark-success \{[^}]*display: block;/s,
+    /\.steptrace__node\[data-state="visited"\] \.steptrace__ncirc \{[^}]*var\(--_green\)/s,
   )
   assert.match(styles, /\.steptrace__swatch--visited \{[^}]*border: 0;/s)
 })
@@ -3737,10 +4791,9 @@ test("graph-state labels every edge when the graph carries weighted meaning", ()
   assert.match(familySource, /GRAPH_STATE_MARKER_ROLES\.map\(\(role\) =>/)
   assert.match(familySource, /markerIds\.get\(graphStateMarkerRole\(role\)\)/)
   assert.match(styles, /\.steptrace \.steptrace__gs-arrow \{[^}]*fill: var\(--_neutral\);/s)
-  assert.match(
-    styles,
-    /\.steptrace__gs-arrow\[data-role="selected"\]\s*\{[^}]*fill: var\(--_green\);/s,
-  )
+  assert.match(styles, /\.steptrace \.steptrace__gs-arrow\[data-role="active"\] \{[^}]*var\(--_blue\)/s)
+  assert.match(styles, /\.steptrace \.steptrace__gs-arrow\[data-role="accepted"\] \{[^}]*var\(--_green\)/s)
+  assert.match(styles, /\.steptrace \.steptrace__gs-arrow\[data-role="rejected"\] \{[^}]*var\(--_red\)/s)
   assert.doesNotMatch(styles, /context-stroke/)
 })
 
@@ -5066,6 +6119,7 @@ test("dynamic-programming story views expose accessible coin and warehouse struc
   const previousDocument = globalThis.document
   globalThis.document = {
     createElement: (tagName) => new FakeNode(tagName),
+    createElementNS: (_namespace, tagName) => new FakeNode(tagName),
     createTextNode: (value) => new FakeNode("#text", value),
   }
   try {
@@ -7409,7 +8463,9 @@ test("prefix-character renderer keeps stable accessible topology and compact Wat
   }
 })
 
-test("production mount verifies compact rail, persistent structures, binary ordered trees, and Trie summary", () => {
+test("ST-INV-009 production mount exercises every direct semantic signal", async () => {
+  const signalObservations = await frameDynamicObservations()
+  const previousSignalObserver = globalThis.__steptraceSignal
   class FakeNode {
     constructor(tagName, text = "") {
       this.tagName = tagName
@@ -8215,7 +9271,13 @@ test("production mount verifies compact rail, persistent structures, binary orde
     globalThis.setTimeout = previous.setTimeout
     globalThis.clearTimeout = previous.clearTimeout
 
-    const api = loadEngine(readFileSync(join(here, "generated", "engine.js"), "utf8"))
+    globalThis.__steptraceSignal = (siteId, value) => {
+      const values = signalObservations.get(siteId) ?? new Set()
+      values.add(String(value))
+      signalObservations.set(siteId, values)
+      return value
+    }
+    const api = (await loadInstrumentedStepTraceModule("src", "engine.ts")).steptrace
     for (const [file, algorithm] of [
       ["Exponential Search.md", "exponential-search"],
       ["Interpolation Search.md", "interpolation-search"],
@@ -9063,6 +10125,9 @@ test("production mount verifies compact rail, persistent structures, binary orde
       findAllByClass(bPlusRoot, "steptrace__structure-input").map((input) => input.placeholder),
       ["Key", "From", "To"],
     )
+    const preInsertCell = findAllMultiway(bPlusRoot, "steptrace__multiway-tree-cell").find(
+      (cell) => cell.dataset.key === "21",
+    )
     click(multiwayButton(bPlusRoot, "Insert"))
     assert.deepEqual(multiwayKeys(multiwayNodes(bPlusRoot, "internal")[0]), [12, 21, 33])
     assert.deepEqual(multiwayNodes(bPlusRoot, "leaf").map(multiwayKeys), [
@@ -9077,6 +10142,17 @@ test("production mount verifies compact rail, persistent structures, binary orde
         .map((cell) => cell.dataset.key),
       ["21", "21"],
     )
+    const postInsertCells = findAllMultiway(bPlusRoot, "steptrace__multiway-tree-cell")
+    assert.notStrictEqual(
+      postInsertCells.find((cell) => cell.dataset.key === "21"),
+      preInsertCell,
+      "topology changes may rebuild tree cells",
+    )
+    const stableCell = postInsertCells.filter((cell) => cell.dataset.key === "21").at(-1)
+    const stableMarker = stableCell.parentNode.children.find((child) =>
+      /\bsteptrace__multiway-tree-success\b/.test(child.attributes?.get("class") || ""),
+    )
+    assert.ok(stableMarker, "the found-capable cell owns a permanent success-marker node")
     const bPlusKey = findByAttribute(bPlusRoot, "aria-label", "B+ tree key")
     bPlusKey.value = "21"
     click(multiwayButton(bPlusRoot, "Search"))
@@ -9093,6 +10169,14 @@ test("production mount verifies compact rail, persistent structures, binary orde
         .filter((cell) => cell.dataset.state === "found")
         .map((cell) => cell.dataset.key),
       ["21"],
+    )
+    assert.ok(findAllMultiway(bPlusRoot, "steptrace__multiway-tree-cell").includes(stableCell))
+    assert.strictEqual(
+      stableCell.parentNode.children.find((child) =>
+        /\bsteptrace__multiway-tree-success\b/.test(child.attributes?.get("class") || ""),
+      ),
+      stableMarker,
+      "state-only search preserves the permanent success-marker node",
     )
     click(multiwayButton(bPlusRoot, "Range scan"))
     assert.equal(
@@ -10376,7 +11460,11 @@ test("production mount verifies compact rail, persistent structures, binary orde
         ),
       )
     }
+    assertInventoryDynamicObservations(signalObservations)
+    assertSemanticSentinelReconciliation(signalObservations)
+    productionSignalObservations = signalObservations
   } finally {
+    globalThis.__steptraceSignal = previousSignalObserver
     globalThis.document = previous.document
     globalThis.matchMedia = previous.matchMedia
     globalThis.getComputedStyle = previous.getComputedStyle
@@ -10388,6 +11476,8 @@ test("production mount verifies compact rail, persistent structures, binary orde
     globalThis.MutationObserver = previous.MutationObserver
   }
 })
+
+test("ST-INV-006 independently reconciles semantic source sentinels", testSemanticSourceReconciliation)
 
 test("contiguous structures share one persistent direct-operation contract in both hosts", () => {
   const family = readFileSync(join(here, "src", "families", "contiguous-storage.ts"), "utf8")
@@ -10824,7 +11914,7 @@ test("LRU Cache keeps one map and address-linked MRU-to-LRU chain in both hosts"
   assert.match(styles, /\.steptrace \.steptrace__lru-cache \{[^}]*min-block-size: 15rem;/s)
   assert.match(
     styles,
-    /\.steptrace__lru-map \.steptrace__contiguous-cell\[data-active="1"\] \{[^}]*--steptrace-array-outline: var\(--_green\);[^}]*var\(--_green\) 16%/s,
+    /\.steptrace__lru-map \.steptrace__contiguous-cell\[data-active="1"\] \{[^}]*--steptrace-array-outline: var\(--_blue\);[^}]*var\(--_blue\) 16%/s,
   )
   assert.match(styles, /\[data-moved="1"\][\s\S]*border: 2px solid var\(--_green\)/)
   assert.match(note, /```steptrace\n\{"algorithm":"lru-cache"\}\n```/)
@@ -11663,6 +12753,11 @@ test("B-tree and B+ Tree register one direct responsive multiway-tree contract i
   assert.match(family, /right\.next = current\.next/)
   assert.match(family, /current\.next = right/)
   assert.match(family, /group\.dataset\.role = node\.children\.length \? "internal" : "leaf"/)
+  assert.match(family, /if \(topology !== renderedTopology\)/)
+  assert.match(
+    family,
+    /levels\.map\(\(nodes\) =>[\s\S]*node\.children\.map\(\(child\) => child\.id\)/,
+  )
   assert.match(family, /path\.dataset\.from = leaf\.id/)
   assert.match(family, /path\.dataset\.to = next\.id/)
   assert.match(family, /svg\.setAttribute\("viewBox", `0 0 \$\{VIEW_WIDTH\} \$\{VIEW_HEIGHT\}`\)/)

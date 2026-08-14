@@ -464,6 +464,7 @@ export function makePrefixCharacterView(
         state: "terminal",
         label: "terminal key",
         swatchClass: "steptrace__swatch steptrace__prefix-swatch",
+        marker: successMarker(),
       },
     ],
     "Prefix character state legend",

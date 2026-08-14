@@ -44,12 +44,12 @@
 }
 
 .steptrace .steptrace__binary-tree-edge[data-state="path"] {
-  stroke: var(--_blue);
+  stroke: var(--_green);
   stroke-width: 2.4;
 }
 
 .steptrace .steptrace__binary-tree-edge[data-state="rotation"] {
-  stroke: var(--_violet);
+  stroke: var(--_blue);
   stroke-width: 2.6;
 }
 
@@ -73,8 +73,8 @@
 }
 
 .steptrace .steptrace__binary-tree-node[data-state="path"] .steptrace__ncirc {
-  fill: color-mix(in srgb, var(--_blue) 18%, var(--_surface));
-  stroke: var(--_blue);
+  fill: color-mix(in srgb, var(--_green) 18%, var(--_surface));
+  stroke: var(--_green);
 }
 
 .steptrace .steptrace__binary-tree-node[data-state="changed"] .steptrace__ncirc {
@@ -83,8 +83,8 @@
 }
 
 .steptrace .steptrace__binary-tree-node[data-state="rotation"] .steptrace__ncirc {
-  fill: color-mix(in srgb, var(--_violet) 20%, var(--_surface));
-  stroke: var(--_violet);
+  fill: color-mix(in srgb, var(--_blue) 20%, var(--_surface));
+  stroke: var(--_blue);
   stroke-width: 2.4;
 }
 

@@ -46,8 +46,8 @@
 }
 
 .steptrace .steptrace__heap-stream .steptrace__pcell[data-state="rejected"] {
-  color: var(--_muted);
-  background: color-mix(in srgb, var(--_violet) 8%, transparent);
+  color: var(--_red);
+  background: color-mix(in srgb, var(--_red) 8%, transparent);
 }
 
 .steptrace .steptrace__heap-stream .steptrace__pcell[data-state="seen"] {
@@ -110,8 +110,12 @@
 }
 
 .steptrace .steptrace__heap-edge[data-path="1"] {
-  stroke: var(--_blue);
+  stroke: var(--_green);
   stroke-width: 2.4;
+}
+
+.steptrace .steptrace__heap-variant .steptrace__heap-edge[data-path="1"] {
+  stroke: var(--_blue);
 }
 
 .steptrace .steptrace__heap-array-label {
@@ -166,13 +170,33 @@
 }
 
 .steptrace .steptrace__heap-node[data-state="settled"] .steptrace__ncirc {
+  fill: color-mix(in srgb, var(--_neutral) 16%, var(--_surface));
+  stroke: var(--_neutral);
+}
+
+.steptrace .steptrace__heap-node[data-state="swap"] .steptrace__ncirc {
+  fill: color-mix(in srgb, var(--_blue) 20%, var(--_surface));
+  stroke: var(--_blue);
+}
+
+.steptrace[data-structure="heap"] .steptrace__heap-node[data-state="settled"] .steptrace__ncirc,
+.steptrace[data-structure="binomial-queue"]
+  .steptrace__heap-node[data-state="settled"]
+  .steptrace__ncirc {
+  fill: color-mix(in srgb, var(--_green) 18%, var(--_surface));
+  stroke: var(--_green);
+}
+
+.steptrace[data-structure="fibonacci-heap"]
+  .steptrace__heap-node[data-state="settled"]
+  .steptrace__ncirc {
   fill: color-mix(in srgb, var(--_amber) 20%, var(--_surface));
   stroke: var(--_amber);
 }
 
-.steptrace .steptrace__heap-node[data-state="swap"] .steptrace__ncirc {
-  fill: color-mix(in srgb, var(--_violet) 20%, var(--_surface));
-  stroke: var(--_violet);
+.steptrace .steptrace__merge-heap .steptrace__heap-node[data-state="settled"] .steptrace__ncirc {
+  fill: color-mix(in srgb, var(--_blue) 20%, var(--_surface));
+  stroke: var(--_blue);
 }
 
 .steptrace .steptrace__heap-node,
@@ -190,8 +214,12 @@
 }
 
 .steptrace .steptrace__heap-root-label {
-  fill: var(--_amber);
+  fill: var(--_muted);
   font: 600 0.52rem/1 var(--_font-head);
+}
+
+.steptrace .steptrace__heap-selection:not(.steptrace__two-heaps) .steptrace__heap-root-label {
+  fill: var(--_amber);
 }
 
 .steptrace .steptrace__heap-swatch {
@@ -234,8 +262,8 @@
 }
 
 .steptrace .steptrace__heap-swatch--rejected {
-  border-color: var(--_violet);
-  color: var(--_violet);
+  border-color: var(--_red);
+  color: var(--_red);
 }
 
 @container steptrace-heap-selection (max-width: 36rem) {

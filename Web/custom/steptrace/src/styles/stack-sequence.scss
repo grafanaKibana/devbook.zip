@@ -86,13 +86,13 @@
   background: color-mix(in srgb, var(--_amber) 12%, var(--_surface));
 }
 
-.steptrace .steptrace__stack-sequence-scan .steptrace__pcell[data-state="popped"],
 .steptrace .steptrace__stack-sequence-scan .steptrace__pcell[data-state="resolved"] {
-  background: color-mix(in srgb, var(--_violet) 10%, var(--_surface));
+  background: color-mix(in srgb, var(--_green) 10%, var(--_surface));
 }
 
 .steptrace .steptrace__stack-sequence-scan .steptrace__pcell[data-state="popped"] {
-  outline-color: var(--_violet);
+  background: color-mix(in srgb, var(--_blue) 10%, var(--_surface));
+  outline-color: var(--_blue);
   animation: steptrace-stack-sequence-pop var(--_dur-move) var(--_spring-snappy) both;
 }
 
@@ -157,7 +157,7 @@
 }
 
 .steptrace .steptrace__stack-sequence-swatch--popped {
-  background: var(--_violet);
+  background: var(--_green);
 }
 
 @keyframes steptrace-stack-sequence-pop {

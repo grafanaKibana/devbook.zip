@@ -132,13 +132,13 @@
   font-weight: 600;
 }
 /* Three states only (source-ordered AFTER the data-bit rule so they win on set
-   cells). die = the lowest 1 being cleared (amber); borrow = the zeros it flips
+   cells). die = the lowest 1 being cleared (blue); borrow = the zeros it flips
    up to 1 (blue); gone = the region AND wipes, struck through so it reads
    "deleted" without a competing tint. */
 .steptrace__bcell[data-state="die"] {
-  background: color-mix(in srgb, var(--_amber) 26%, transparent);
-  box-shadow: inset 0 0 0 2px var(--_amber);
-  color: var(--_amber);
+  background: color-mix(in srgb, var(--_blue) 26%, transparent);
+  box-shadow: inset 0 0 0 2px var(--_blue);
+  color: var(--_blue);
   font-weight: 700;
 }
 .steptrace__bcell[data-state="borrow"] {

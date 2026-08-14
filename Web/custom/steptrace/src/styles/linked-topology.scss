@@ -380,8 +380,8 @@
 }
 
 .steptrace .steptrace__lru-map .steptrace__contiguous-cell[data-active="1"] {
-  --steptrace-array-outline: var(--_green);
-  background: color-mix(in srgb, var(--_green) 16%, transparent);
+  --steptrace-array-outline: var(--_blue);
+  background: color-mix(in srgb, var(--_blue) 16%, transparent);
 }
 
 .steptrace .steptrace__lru-chain .steptrace__linked-list-board {

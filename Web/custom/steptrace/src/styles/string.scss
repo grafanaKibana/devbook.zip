@@ -22,6 +22,7 @@
   transition: transform var(--_tween) var(--_spring);
 }
 .steptrace__cell {
+  position: relative;
   flex: 1 1 0; /* text cells stretch to fill; same sizing as the pointers strip */
   min-width: 0;
   height: 44px;
@@ -55,17 +56,31 @@
   box-shadow: inset 0 -3px 0 var(--_green);
 }
 .steptrace__cell[data-state="mismatch"] {
-  background: color-mix(in srgb, var(--_amber) 22%, transparent);
-  box-shadow: inset 0 0 0 2px var(--_amber);
+  background: color-mix(in srgb, var(--_red) 22%, transparent);
+  box-shadow: inset 0 0 0 2px var(--_red);
 }
 .steptrace__cell[data-state="probe"] {
   background: color-mix(in srgb, var(--_blue) 18%, transparent);
-  box-shadow: inset 0 -3px 0 var(--_blue);
+  box-shadow: inset 0 0 0 2px var(--_blue);
 }
 .steptrace__cell[data-state="found"] {
   background: color-mix(in srgb, var(--_green) 22%, transparent);
   color: var(--_green);
+}
+.steptrace__match:not(.steptrace__z) .steptrace__cell[data-state="found"] {
   box-shadow: inset 0 -3px 0 var(--_green);
+}
+.steptrace__cell-success {
+  position: absolute;
+  inset-block-start: 0.2rem;
+  inset-inline-end: 0.2rem;
+  display: none !important;
+  inline-size: 0.78rem !important;
+  block-size: 0.78rem !important;
+  pointer-events: none;
+}
+.steptrace__cell[data-state="found"] > .steptrace__cell-success {
+  display: block !important;
 }
 
 /* Full Boyer-Moore reuses canonical string strips inside one measured viewport;
@@ -129,7 +144,6 @@
   inline-size: 100%;
   block-size: 100%;
 }
-.steptrace__bm-cell[data-state="match"] .steptrace__bm-icon--match,
 .steptrace__bm-cell[data-state="mismatch"] .steptrace__bm-icon--mismatch {
   opacity: 1;
 }
@@ -262,13 +276,12 @@
   box-shadow: inset 0 0 0 2px var(--_amber);
 }
 .steptrace__z-cell[data-state="copy-target"] {
-  color: var(--_blue);
+  color: var(--_violet);
   font-weight: 700;
-  background: color-mix(in srgb, var(--_blue) 10%, transparent);
-  box-shadow: inset 0 -2px 0 var(--_blue);
+  background: color-mix(in srgb, var(--_violet) 10%, transparent);
+  box-shadow: inset 0 0 0 2px var(--_violet);
 }
-.steptrace__z .steptrace__cell[data-state="match"],
-.steptrace__z .steptrace__cell[data-state="found"] {
+.steptrace__z .steptrace__cell[data-state="match"] {
   box-shadow: inset 0 -2px 0 var(--_green);
 }
 .steptrace__z-cursor,

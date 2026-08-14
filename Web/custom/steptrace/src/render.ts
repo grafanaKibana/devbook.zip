@@ -632,7 +632,9 @@ export function makeBoundarySearchView(frames, descriptor: BoundarySearchViewDes
     const tick = el("div", "steptrace__boundary-tick")
     tick.setAttribute("role", "listitem")
     tick.dataset.value = String(value)
-    tick.textContent = String(value)
+    const label = el("span", "steptrace__boundary-tick-label")
+    label.textContent = String(value)
+    tick.append(label, successMarker("steptrace__boundary-answer-marker"))
     tickList.append(tick)
     return { value, tick }
   })
@@ -791,7 +793,9 @@ export function makeMatchView(frames) {
   const tcells = []
   for (let k = 0; k < text.length; k++) {
     const c = el("div", "steptrace__cell")
-    c.textContent = text[k]
+    const value = el("span", "steptrace__cell-value")
+    value.textContent = text[k]
+    c.append(value, successMarker("steptrace__cell-success"))
     textRow.append(c)
     tcells.push(c)
   }
@@ -874,14 +878,11 @@ function makeBoyerMooreView(frames) {
     value.textContent = character
     const cue = el("span", "steptrace__bm-compare-icon")
     cue.setAttribute("aria-hidden", "true")
-    const matchIcon = el("span", "steptrace__bm-icon steptrace__bm-icon--match")
-    matchIcon.append(successMarker())
-    matchIcon.setAttribute("aria-hidden", "true")
     const mismatchIcon = el("span", "steptrace__bm-icon steptrace__bm-icon--mismatch")
     mismatchIcon.innerHTML = ICON.x
     mismatchIcon.setAttribute("aria-hidden", "true")
-    cue.append(matchIcon, mismatchIcon)
-    cell.append(value, cue)
+    cue.append(mismatchIcon)
+    cell.append(value, cue, successMarker("steptrace__cell-success"))
     return cell
   }
 
@@ -1063,11 +1064,15 @@ function makeZArrayView(frames) {
   const zRail = makeRail("Z array")
   const zRow = el("div", "steptrace__cells steptrace__z-values")
   const zCells = []
+  const zValueTexts = []
   for (let k = 0; k < text.length; k++) {
     const cell = el("div", "steptrace__cell steptrace__z-cell steptrace__z-cell--value")
-    cell.textContent = "·"
+    const value = el("span", "steptrace__z-value-text")
+    value.textContent = "·"
+    cell.append(value, successMarker("steptrace__cell-success"))
     zRow.append(cell)
     zCells.push(cell)
+    zValueTexts.push(value)
   }
   zRail.append(zRow)
 
@@ -1139,7 +1144,7 @@ function makeZArrayView(frames) {
       prefixCells[k].dataset.state = ""
       stringCells[k].dataset.state = ""
       zCells[k].dataset.state = ""
-      zCells[k].textContent = frame.z[k] == null ? "·" : String(frame.z[k])
+      zValueTexts[k].textContent = frame.z[k] == null ? "·" : String(frame.z[k])
       if (frame.box && k >= frame.box[0] && k <= frame.box[1]) stringCells[k].dataset.box = "1"
       else delete stringCells[k].dataset.box
     }
@@ -1473,7 +1478,7 @@ function makeCoinChangeStoryView(frames) {
       const value = el("span", "steptrace__amount-value")
       label.textContent = `${amount}¢`
       value.textContent = "—"
-      cell.append(label, value)
+      cell.append(label, value, successMarker("steptrace__dp-story-success"))
       amountBoard.append(cell)
       amountCells.push({ cell, value, amount })
     }
@@ -1506,6 +1511,7 @@ function makeCoinChangeStoryView(frames) {
       state,
       label,
       swatchClass: "steptrace__swatch steptrace__dp-story-swatch",
+      marker: state === "best" ? successMarker() : undefined,
     })),
     "Dynamic-programming state legend",
   )
@@ -1534,6 +1540,7 @@ function makeCoinChangeStoryView(frames) {
       const value = el("span", "steptrace__coin-attempt-value")
       label.textContent = attempt.label
       value.textContent = attempt.value
+      value.append(successMarker("steptrace__row-success"))
       row.append(label, value)
       attempts.append(row)
     }
@@ -1738,7 +1745,7 @@ function makeGridPathStoryView(frames) {
             ? "GOAL"
             : `R${row + 1}C${column + 1}`
       cost.textContent = `cost ${first.costs[row][column]}`
-      cell.append(place, cost, stored)
+      cell.append(place, cost, stored, successMarker("steptrace__dp-story-success"))
       tableRow.append(cell)
       rowCells.push({ cell, stored })
     }
@@ -1785,6 +1792,7 @@ function makeGridPathStoryView(frames) {
       state,
       label,
       swatchClass: "steptrace__swatch steptrace__dp-story-swatch",
+      marker: state === "best" ? successMarker() : undefined,
     })),
     "Dynamic-programming state legend",
   )
@@ -2272,7 +2280,7 @@ export function makeBitsView(frames) {
         v: `${frame.value} = 0b${frame.value.toString(2).padStart(frame.width, "0")}`,
         sw: "var(--_accent)",
       },
-      { k: "lowest 1", v: frame.low >= 0 ? `bit ${frame.low}` : "—", sw: "var(--_amber)" },
+      { k: "lowest 1", v: frame.low >= 0 ? `bit ${frame.low}` : "—", sw: "var(--_blue)" },
       { k: "1s cleared", v: `${frame.pop} / ${frame.total}`, sw: "var(--_violet)" },
     ]
   }
@@ -2308,7 +2316,7 @@ export function makeBacktrackView(frames) {
       const glyph = el("div", "steptrace__btqueen")
       glyph.innerHTML = ICON.chessQueen
       glyph.setAttribute("aria-hidden", "true")
-      cell.append(glyph)
+      cell.append(glyph, successMarker("steptrace__bt-success"))
       board.append(cell)
       rowCells.push(cell)
     }
@@ -3424,12 +3432,7 @@ export function makeGraphView(frames, graph, frontierLabel) {
     mark.innerHTML =
       '<rect data-state-icon="current" x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/>' +
       '<path data-state-icon="frontier" d="m12 3 9 9-9 9-9-9Z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/>'
-    const visitedMark = successMarker("steptrace__nmark-success")
-    visitedMark.setAttribute("x", String(p.x + GRAPH_NODE_RADIUS_PX - 8))
-    visitedMark.setAttribute("y", String(p.y - GRAPH_NODE_RADIUS_PX - 4))
-    visitedMark.setAttribute("width", "12")
-    visitedMark.setAttribute("height", "12")
-    g.append(back, circle, id, dist, mark, visitedMark)
+    g.append(back, circle, id, dist, mark)
     svg.append(g)
     nodeEls[n.id] = { g, dist, mark }
   }
@@ -3441,11 +3444,7 @@ export function makeGraphView(frames, graph, frontierLabel) {
     [
       { label: "current", swatchClass: "steptrace__swatch steptrace__swatch--current" },
       { label: "frontier", swatchClass: "steptrace__swatch steptrace__swatch--frontier" },
-      {
-        label: "visited",
-        swatchClass: "steptrace__swatch steptrace__swatch--visited",
-        marker: successMarker(),
-      },
+      { label: "visited", swatchClass: "steptrace__swatch steptrace__swatch--visited" },
     ],
     "Graph state legend",
   )
