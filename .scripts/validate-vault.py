@@ -21,7 +21,7 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable
-from urllib.parse import unquote
+from urllib.parse import unquote, urlsplit
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -78,6 +78,27 @@ ATTACHMENT_SUFFIXES = frozenset(
         ".xlsx",
         ".zip",
     }
+)
+IMAGE_SUFFIXES = frozenset(
+    {
+        ".avif",
+        ".bmp",
+        ".gif",
+        ".ico",
+        ".jpeg",
+        ".jpg",
+        ".png",
+        ".svg",
+        ".tif",
+        ".tiff",
+        ".webp",
+    }
+)
+REFERENCE_LINK_RE = re.compile(
+    r"^- \[(?P<title>[^\]\n]+)\]\((?P<url>https?://(?:(?:\\.)|[^()\s]|\([^()\n]*\))+)\)$"
+)
+REFERENCE_LINK_WITH_TAIL_RE = re.compile(
+    r"^- \[[^\]\n]+\]\(https?://(?:(?:\\.)|[^()\s]|\([^()\n]*\))+\)(?P<tail>\s+\S.*)$"
 )
 TEMPLATE_RESIDUE = (
     "Quick introduction to the concept",
@@ -389,15 +410,6 @@ def validate_published(note: Note) -> list[Issue]:
                 "`publish: true` requires substantive body content and a Markdown heading",
             )
         )
-    if not re.search(r"https?://", note.body):
-        issues.append(
-            Issue(
-                "publish.reference",
-                note.rel,
-                note.body_start_line,
-                "`publish: true` requires at least one real external reference URL",
-            )
-        )
     example_signal = (
         re.search(r"```", note.body)
         or re.search(r"(?m)^\s*[-*+]\s+", note.body)
@@ -414,6 +426,103 @@ def validate_published(note: Note) -> list[Issue]:
                 "`publish: true` needs a concrete signal such as code, a table, a list, or a numeric example",
             )
         )
+    return issues
+
+
+def is_reference_note(note: Note) -> bool:
+    if note.rel in SPECIAL_PUBLISHED_PAGES or note.rel in GENERATED_PAGES:
+        return False
+    return note.is_folder_note or any(
+        field in note.frontmatter for field in CONCEPT_FIELDS
+    )
+
+
+def is_direct_image_url(url: str) -> bool:
+    # Mechanical boundary only: explicit Markdown images and URLs whose parsed
+    # path ends in a known image suffix are rejected. Extensionless image
+    # endpoints and HTML pages containing images need editorial review; guessing
+    # from providers or response content would make this validator semantic.
+    return Path(unquote(urlsplit(url).path)).suffix.casefold() in IMAGE_SUFFIXES
+
+
+def validate_references(note: Note) -> list[Issue]:
+    if not is_reference_note(note):
+        return []
+
+    lines = note.body.splitlines()
+    visible_lines = strip_non_link_markdown(
+        note.body, preserve_inline_code=True
+    ).splitlines()
+    headings = [
+        index for index, line in enumerate(visible_lines) if line == "# References"
+    ]
+    if not headings:
+        return []
+    if len(headings) > 1:
+        return [
+            Issue(
+                "references.heading",
+                note.rel,
+                note.body_start_line + headings[1],
+                "concept and FolderNote pages may contain at most one literal `# References` heading",
+            )
+        ]
+
+    issues: list[Issue] = []
+    start = headings[0] + 1
+    end = next(
+        (
+            index
+            for index in range(start, len(visible_lines))
+            if re.match(r"^#\s+", visible_lines[index])
+        ),
+        len(lines),
+    )
+    for index in range(start, end):
+        line = lines[index]
+        if not line.strip():
+            continue
+        line_number = note.body_start_line + index
+        link = REFERENCE_LINK_RE.fullmatch(line)
+        urls = re.findall(r"https?://[^\s)>]+(?:\([^()\n]*\))?[^\s)>]*", line)
+        if line.startswith("- ![") or (link and is_direct_image_url(link.group("url"))):
+            issues.append(
+                Issue(
+                    "references.image",
+                    note.rel,
+                    line_number,
+                    "References must not contain Markdown images or direct image-file URLs",
+                )
+            )
+        elif link:
+            continue
+        elif REFERENCE_LINK_WITH_TAIL_RE.fullmatch(line):
+            issues.append(
+                Issue(
+                    "references.trailing-text",
+                    note.rel,
+                    line_number,
+                    "reference entries must end after the Markdown link; remove trailing explanation",
+                )
+            )
+        elif any(is_direct_image_url(url) for url in urls):
+            issues.append(
+                Issue(
+                    "references.image",
+                    note.rel,
+                    line_number,
+                    "References must not contain Markdown images or direct image-file URLs",
+                )
+            )
+        else:
+            issues.append(
+                Issue(
+                    "references.format",
+                    note.rel,
+                    line_number,
+                    "reference entries must be bare `- [descriptive title](https://...)` bullets",
+                )
+            )
     return issues
 
 
@@ -925,6 +1034,7 @@ def validate(repo_root: Path, mode: str, use_baseline: bool = True) -> tuple[lis
         issues.extend(validate_frontmatter(note))
         issues.extend(validate_folder_note(note, home_root))
         issues.extend(validate_published(note))
+        issues.extend(validate_references(note))
         issues.extend(validate_residue(note))
         issues.extend(validate_code_fences(note))
 

@@ -279,7 +279,7 @@ publish: "true"
         issues = validate_vault.validate_attachment_locations(root / "Vault", [good, bad])
         self.assertEqual(["Vault/Home/Topic/image.png"], [issue.path for issue in issues])
 
-    def test_published_note_needs_content_reference_and_example_signal(self) -> None:
+    def test_published_note_needs_content_and_example_signal(self) -> None:
         temp, root = self.make_repo()
         self.addCleanup(temp.cleanup)
         note = self.write_note(
@@ -288,9 +288,131 @@ publish: "true"
             VALID_FRONTMATTER.replace("publish: false", "publish: true") + "# Intro\nToo short.\n",
         )
         self.assertEqual(
-            {"publish.content", "publish.reference", "publish.example"},
+            {"publish.content", "publish.example"},
             {issue.code for issue in validate_vault.validate_published(note)},
         )
+
+    def test_concept_notes_allow_no_references_heading(self) -> None:
+        temp, root = self.make_repo()
+        self.addCleanup(temp.cleanup)
+        note = self.write_note(
+            root,
+            "Vault/Home/Topic/Concept.md",
+            VALID_FRONTMATTER + "# Questions\n",
+        )
+
+        issues = validate_vault.validate_references(note)
+
+        self.assertEqual([], issues)
+
+    def test_concept_notes_ignore_references_heading_in_fenced_example(self) -> None:
+        temp, root = self.make_repo()
+        self.addCleanup(temp.cleanup)
+        note = self.write_note(
+            root,
+            "Vault/Home/Topic/Concept.md",
+            VALID_FRONTMATTER
+            + "# Example\n\n```markdown\n# References\n\nNot a live section.\n```\n",
+        )
+
+        self.assertEqual([], validate_vault.validate_references(note))
+
+    def test_live_references_validate_fenced_content_as_entries(self) -> None:
+        temp, root = self.make_repo()
+        self.addCleanup(temp.cleanup)
+        note = self.write_note(
+            root,
+            "Vault/Home/Topic/Concept.md",
+            VALID_FRONTMATTER
+            + "# References\n\n```markdown\n# Not a live boundary\nNot a link.\n```\n# Next\n",
+        )
+
+        issues = validate_vault.validate_references(note)
+
+        self.assertEqual(
+            ["references.format"] * 4,
+            [issue.code for issue in issues],
+        )
+
+    def test_folder_notes_allow_no_references_heading(self) -> None:
+        temp, root = self.make_repo()
+        self.addCleanup(temp.cleanup)
+        note = self.write_note(
+            root,
+            "Vault/Home/Topic/Topic.md",
+            "---\ntags: [FolderNote]\npublish: false\n---\n# Intro\n",
+        )
+
+        self.assertEqual([], validate_vault.validate_references(note))
+
+    def test_concept_notes_reject_duplicate_references_headings(self) -> None:
+        temp, root = self.make_repo()
+        self.addCleanup(temp.cleanup)
+        note = self.write_note(
+            root,
+            "Vault/Home/Topic/Concept.md",
+            VALID_FRONTMATTER + "# References\n\n# References\n",
+        )
+
+        issues = validate_vault.validate_references(note)
+
+        self.assertEqual(["references.heading"], [issue.code for issue in issues])
+
+    def test_reference_checker_excludes_special_root_pages(self) -> None:
+        temp, root = self.make_repo()
+        self.addCleanup(temp.cleanup)
+        for name in ("index.md", "Questions.md", "About.md", "Changelog.md"):
+            note = self.write_note(root, f"Vault/Home/{name}", "# No concept headings\n")
+            with self.subTest(name=name):
+                self.assertEqual([], validate_vault.validate_references(note))
+
+    def test_reference_entries_reject_trailing_prose(self) -> None:
+        temp, root = self.make_repo()
+        self.addCleanup(temp.cleanup)
+        note = self.write_note(
+            root,
+            "Vault/Home/Topic/Concept.md",
+            VALID_FRONTMATTER
+            + "# References\n\n- [Official guide](https://example.com/guide) — explanation\n",
+        )
+
+        issues = validate_vault.validate_references(note)
+
+        self.assertEqual(["references.trailing-text"], [issue.code for issue in issues])
+
+    def test_reference_entries_reject_direct_image_patterns(self) -> None:
+        temp, root = self.make_repo()
+        self.addCleanup(temp.cleanup)
+        note = self.write_note(
+            root,
+            "Vault/Home/Topic/Concept.md",
+            VALID_FRONTMATTER
+            + "# References\n\n"
+            + "- [Cheatsheet](https://example.com/cheatsheet.PNG?raw=1)\n"
+            + "- ![Diagram](https://example.com/diagram.svg)\n"
+            + "https://example.com/raw-image.webp\n",
+        )
+
+        issues = validate_vault.validate_references(note)
+
+        self.assertEqual(
+            ["references.image", "references.image", "references.image"],
+            [issue.code for issue in issues],
+        )
+
+    def test_reference_entries_allow_arxiv_and_balanced_url_parentheses(self) -> None:
+        temp, root = self.make_repo()
+        self.addCleanup(temp.cleanup)
+        note = self.write_note(
+            root,
+            "Vault/Home/Topic/Concept.md",
+            VALID_FRONTMATTER
+            + "# References\n\n"
+            + "- [Research paper](https://arxiv.org/abs/2307.03172)\n"
+            + "- [Implementation](https://example.com/source_(code))\n",
+        )
+
+        self.assertEqual([], validate_vault.validate_references(note))
 
     def test_dataview_blocks_are_not_forbidden_by_this_validator(self) -> None:
         temp, root = self.make_repo()
