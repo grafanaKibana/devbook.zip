@@ -609,7 +609,9 @@ function makeBoundarySearchView(frames, descriptor) {
     const tick = el("div", "steptrace__boundary-tick");
     tick.setAttribute("role", "listitem");
     tick.dataset.value = String(value);
-    tick.textContent = String(value);
+    const label = el("span", "steptrace__boundary-tick-label");
+    label.textContent = String(value);
+    tick.append(label, successMarker("steptrace__boundary-answer-marker"));
     tickList.append(tick);
     return { value, tick };
   });
@@ -739,7 +741,9 @@ function makeMatchView(frames) {
   const tcells = [];
   for (let k = 0; k < text.length; k++) {
     const c = el("div", "steptrace__cell");
-    c.textContent = text[k];
+    const value = el("span", "steptrace__cell-value");
+    value.textContent = text[k];
+    c.append(value, successMarker("steptrace__cell-success"));
     textRow.append(c);
     tcells.push(c);
   }
@@ -807,14 +811,11 @@ function makeBoyerMooreView(frames) {
     value.textContent = character;
     const cue = el("span", "steptrace__bm-compare-icon");
     cue.setAttribute("aria-hidden", "true");
-    const matchIcon = el("span", "steptrace__bm-icon steptrace__bm-icon--match");
-    matchIcon.append(successMarker());
-    matchIcon.setAttribute("aria-hidden", "true");
     const mismatchIcon = el("span", "steptrace__bm-icon steptrace__bm-icon--mismatch");
     mismatchIcon.innerHTML = ICON.x;
     mismatchIcon.setAttribute("aria-hidden", "true");
-    cue.append(matchIcon, mismatchIcon);
-    cell.append(value, cue);
+    cue.append(mismatchIcon);
+    cell.append(value, cue, successMarker("steptrace__cell-success"));
     return cell;
   };
   const patternRow = el("div", "steptrace__cells steptrace__cells--pat steptrace__bm-pattern");
@@ -951,11 +952,15 @@ function makeZArrayView(frames) {
   const zRail = makeRail("Z array");
   const zRow = el("div", "steptrace__cells steptrace__z-values");
   const zCells = [];
+  const zValueTexts = [];
   for (let k = 0; k < text.length; k++) {
     const cell = el("div", "steptrace__cell steptrace__z-cell steptrace__z-cell--value");
-    cell.textContent = "·";
+    const value = el("span", "steptrace__z-value-text");
+    value.textContent = "·";
+    cell.append(value, successMarker("steptrace__cell-success"));
     zRow.append(cell);
     zCells.push(cell);
+    zValueTexts.push(value);
   }
   zRail.append(zRow);
   board.append(prefixRail, stringRail, zRail);
@@ -1024,7 +1029,7 @@ function makeZArrayView(frames) {
       prefixCells[k].dataset.state = "";
       stringCells[k].dataset.state = "";
       zCells[k].dataset.state = "";
-      zCells[k].textContent = frame.z[k] == null ? "·" : String(frame.z[k]);
+      zValueTexts[k].textContent = frame.z[k] == null ? "·" : String(frame.z[k]);
       if (frame.box && k >= frame.box[0] && k <= frame.box[1]) stringCells[k].dataset.box = "1";
       else delete stringCells[k].dataset.box;
     }
@@ -1252,7 +1257,7 @@ function makeCoinChangeStoryView(frames) {
       const value = el("span", "steptrace__amount-value");
       label.textContent = `${amount}¢`;
       value.textContent = "—";
-      cell.append(label, value);
+      cell.append(label, value, successMarker("steptrace__dp-story-success"));
       amountBoard.append(cell);
       amountCells.push({ cell, value, amount });
     }
@@ -1278,7 +1283,8 @@ function makeCoinChangeStoryView(frames) {
     legendItems.map(([state, label]) => ({
       state,
       label,
-      swatchClass: "steptrace__swatch steptrace__dp-story-swatch"
+      swatchClass: "steptrace__swatch steptrace__dp-story-swatch",
+      marker: state === "best" ? successMarker() : void 0
     })),
     "Dynamic-programming state legend"
   );
@@ -1305,6 +1311,7 @@ function makeCoinChangeStoryView(frames) {
       const value = el("span", "steptrace__coin-attempt-value");
       label.textContent = attempt.label;
       value.textContent = attempt.value;
+      value.append(successMarker("steptrace__row-success"));
       row.append(label, value);
       attempts.append(row);
     }
@@ -1475,7 +1482,7 @@ function makeGridPathStoryView(frames) {
       const stored = el("span", "steptrace__warehouse-cell-stored");
       place.textContent = row === 0 && column === 0 ? "START" : row === first.costs.length - 1 && column === first.costs[row].length - 1 ? "GOAL" : `R${row + 1}C${column + 1}`;
       cost.textContent = `cost ${first.costs[row][column]}`;
-      cell.append(place, cost, stored);
+      cell.append(place, cost, stored, successMarker("steptrace__dp-story-success"));
       tableRow.append(cell);
       rowCells.push({ cell, stored });
     }
@@ -1516,7 +1523,8 @@ function makeGridPathStoryView(frames) {
     legendItems.map(([state, label]) => ({
       state,
       label,
-      swatchClass: "steptrace__swatch steptrace__dp-story-swatch"
+      swatchClass: "steptrace__swatch steptrace__dp-story-swatch",
+      marker: state === "best" ? successMarker() : void 0
     })),
     "Dynamic-programming state legend"
   );
@@ -1931,7 +1939,7 @@ function makeBitsView(frames) {
         v: `${frame.value} = 0b${frame.value.toString(2).padStart(frame.width, "0")}`,
         sw: "var(--_accent)"
       },
-      { k: "lowest 1", v: frame.low >= 0 ? `bit ${frame.low}` : "—", sw: "var(--_amber)" },
+      { k: "lowest 1", v: frame.low >= 0 ? `bit ${frame.low}` : "—", sw: "var(--_blue)" },
       { k: "1s cleared", v: `${frame.pop} / ${frame.total}`, sw: "var(--_violet)" }
     ];
   }
@@ -1958,7 +1966,7 @@ function makeBacktrackView(frames) {
       const glyph = el("div", "steptrace__btqueen");
       glyph.innerHTML = ICON.chessQueen;
       glyph.setAttribute("aria-hidden", "true");
-      cell.append(glyph);
+      cell.append(glyph, successMarker("steptrace__bt-success"));
       board.append(cell);
       rowCells.push(cell);
     }
@@ -2874,12 +2882,7 @@ function makeGraphView(frames, graph, frontierLabel) {
     mark.setAttribute("viewBox", "0 0 24 24");
     mark.setAttribute("aria-hidden", "true");
     mark.innerHTML = '<rect data-state-icon="current" x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/><path data-state-icon="frontier" d="m12 3 9 9-9 9-9-9Z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/>';
-    const visitedMark = successMarker("steptrace__nmark-success");
-    visitedMark.setAttribute("x", String(p.x + GRAPH_NODE_RADIUS_PX - 8));
-    visitedMark.setAttribute("y", String(p.y - GRAPH_NODE_RADIUS_PX - 4));
-    visitedMark.setAttribute("width", "12");
-    visitedMark.setAttribute("height", "12");
-    g.append(back, circle, id, dist, mark, visitedMark);
+    g.append(back, circle, id, dist, mark);
     svg.append(g);
     nodeEls[n.id] = { g, dist, mark };
   }
@@ -2887,11 +2890,7 @@ function makeGraphView(frames, graph, frontierLabel) {
     [
       { label: "current", swatchClass: "steptrace__swatch steptrace__swatch--current" },
       { label: "frontier", swatchClass: "steptrace__swatch steptrace__swatch--frontier" },
-      {
-        label: "visited",
-        swatchClass: "steptrace__swatch steptrace__swatch--visited",
-        marker: successMarker()
-      }
+      { label: "visited", swatchClass: "steptrace__swatch steptrace__swatch--visited" }
     ],
     "Graph state legend"
   );
@@ -4965,10 +4964,7 @@ function distance(a, b) {
   return Math.hypot(b.x - a.x, b.y - a.y);
 }
 function graphStateMarkerRole(role) {
-  if (role === "accepted") return "selected";
-  if (role === "cut") return "cut";
-  if (role === "active" || role === "candidate" || role === "residual") return "active";
-  return "neutral";
+  return role === "residual" ? "candidate" : role;
 }
 function graphStateAdjacency(config) {
   const result = new Map(
@@ -5500,14 +5496,14 @@ function graphStateLegend(kind) {
         ["active edge", "current"],
         ["candidate", "open"],
         ["tree", "closed"],
-        ["rejected", "goal"]
+        ["rejected", "rejected"]
       ];
     case "path-backtrack":
       return [
         ["current", "current"],
         ["candidate", "open"],
         ["path", "closed"],
-        ["rejected", "goal"]
+        ["rejected", "rejected"]
       ];
     case "residual-flow":
       return [
@@ -5674,6 +5670,7 @@ function makeGraphStateView(frames) {
     }
     for (const { edge, line, label } of edgeElements) {
       const role = frame.edgeState[`${edge.from}|${edge.to}`] || "neutral";
+      line.dataset.state = role;
       line.dataset.active = String(role === "active" || role === "candidate" || role === "residual");
       line.dataset.selected = String(role === "accepted");
       line.dataset.cut = String(role === "cut");
@@ -5752,7 +5749,7 @@ function makeGraphStateView(frames) {
             hint: distanceWatch
           },
           { k: "pass", v: String(frame.detail.pass), sw: "var(--_violet)" },
-          { k: "edge", v: frame.detail.edge?.join(" → ") || "—", sw: "var(--_amber)" },
+          { k: "edge", v: frame.detail.edge?.join(" → ") || "—", sw: "var(--_blue)" },
           {
             k: "change",
             v: frame.detail.changed ? "updated" : "kept",
@@ -5784,7 +5781,7 @@ function makeGraphStateView(frames) {
           {
             k: "bridges",
             v: frame.detail.bridges.map(([from, to]) => `${from}—${to}`).join(" · ") || "—",
-            sw: "var(--_green)"
+            sw: "var(--_violet)"
           }
         );
         break;
@@ -5824,7 +5821,7 @@ function makeGraphStateView(frames) {
         rows.push(
           { k: "path", v: frame.detail.path.join(" → ") || "—", sw: "var(--_green)" },
           { k: "candidates", v: frame.detail.candidates.join(" · ") || "—", sw: "var(--_amber)" },
-          { k: "rejected", v: frame.detail.rejected.join(" · ") || "—", sw: "var(--_violet)" }
+          { k: "rejected", v: frame.detail.rejected.join(" · ") || "—", sw: "var(--_red)" }
         );
         break;
       case "residual-flow":
@@ -5860,7 +5857,14 @@ var init_graph_state = __esm({
     init_graph_node();
     SVG_NS3 = "http://www.w3.org/2000/svg";
     graphStateViewId = 0;
-    GRAPH_STATE_MARKER_ROLES = ["neutral", "active", "selected", "cut"];
+    GRAPH_STATE_MARKER_ROLES = [
+      "neutral",
+      "active",
+      "candidate",
+      "accepted",
+      "rejected",
+      "cut"
+    ];
     CITY_DATA = [
       ["Vinnytsia", 49.2331, 28.4682],
       ["Lutsk", 50.7472, 25.3254],
@@ -6319,7 +6323,8 @@ function makePrefixCharacterView(frames) {
       {
         state: "terminal",
         label: "terminal key",
-        swatchClass: "steptrace__swatch steptrace__prefix-swatch"
+        swatchClass: "steptrace__swatch steptrace__prefix-swatch",
+        marker: successMarker()
       }
     ],
     "Prefix character state legend"
@@ -8517,7 +8522,7 @@ var init_monotone_boundary = __esm({
           {
             k: "verdict",
             v: evaluation ? evaluation.feasible ? "feasible" : "too small" : "—",
-            sw: evaluation?.feasible ? "var(--_green)" : "var(--_amber)",
+            sw: evaluation?.feasible ? "var(--_green)" : "var(--_red)",
             hint: "Whether this candidate satisfies the day limit."
           }
         ];
@@ -8892,6 +8897,11 @@ function mountMultiwayTree(rootElement, config, kind) {
   svg.setAttribute("role", "img");
   shell.stage.append(svg);
   let renderedWidth = VIEW_WIDTH2;
+  let renderedTopology = "";
+  const renderedEdges = [];
+  const renderedLinks = [];
+  const renderedNodes = [];
+  const renderedKeys = [];
   const keyInput = shell.input(`${label} key`, "Key", 8);
   keyInput.type = "number";
   keyInput.step = "1";
@@ -8917,21 +8927,6 @@ function mountMultiwayTree(rootElement, config, kind) {
   }
   shell.controls.append(reset);
   function paintTree() {
-    svg.replaceChildren();
-    const marker2 = svgEl2("marker", "steptrace__multiway-tree-arrow");
-    marker2.id = `${kind}-next-arrow`;
-    marker2.setAttribute("viewBox", "0 0 10 10");
-    marker2.setAttribute("refX", "8");
-    marker2.setAttribute("refY", "5");
-    marker2.setAttribute("markerWidth", "5");
-    marker2.setAttribute("markerHeight", "5");
-    marker2.setAttribute("orient", "auto-start-reverse");
-    const arrow = svgEl2("path", "");
-    arrow.setAttribute("d", "M 0 0 L 10 5 L 0 10 z");
-    marker2.append(arrow);
-    const defs = svgEl2("defs", "");
-    defs.append(marker2);
-    svg.append(defs);
     const levels = [];
     const visit = (current, depth) => {
       ;
@@ -8964,80 +8959,126 @@ function mountMultiwayTree(rootElement, config, kind) {
         cursor += width + NODE_GAP;
       });
     });
-    for (const nodes5 of levels) {
-      for (const parent of nodes5) {
-        const from = positions.get(parent.id);
-        for (const child of parent.children) {
-          const to = positions.get(child.id);
-          const line = svgEl2("line", "steptrace__edge steptrace__multiway-tree-edge");
-          line.setAttribute("x1", String(from.x));
-          line.setAttribute("y1", String(from.y + NODE_HEIGHT / 2));
-          line.setAttribute("x2", String(to.x));
-          line.setAttribute("y2", String(to.y - NODE_HEIGHT / 2));
-          line.dataset.state = state.path.has(parent.id) && state.path.has(child.id) ? "path" : "neutral";
-          svg.append(line);
+    const topology2 = JSON.stringify([
+      renderedWidth,
+      viewWidth,
+      levels.map(
+        (nodes5) => nodes5.map((node2) => [node2.id, node2.keys, node2.children.map((child) => child.id)])
+      )
+    ]);
+    if (topology2 !== renderedTopology) {
+      renderedTopology = topology2;
+      renderedEdges.length = 0;
+      renderedLinks.length = 0;
+      renderedNodes.length = 0;
+      renderedKeys.length = 0;
+      svg.replaceChildren();
+      const arrowMarker = svgEl2("marker", "steptrace__multiway-tree-arrow");
+      arrowMarker.id = `${kind}-next-arrow`;
+      arrowMarker.setAttribute("viewBox", "0 0 10 10");
+      arrowMarker.setAttribute("refX", "8");
+      arrowMarker.setAttribute("refY", "5");
+      arrowMarker.setAttribute("markerWidth", "5");
+      arrowMarker.setAttribute("markerHeight", "5");
+      arrowMarker.setAttribute("orient", "auto-start-reverse");
+      const arrow = svgEl2("path", "");
+      arrow.setAttribute("d", "M 0 0 L 10 5 L 0 10 z");
+      arrowMarker.append(arrow);
+      const defs = svgEl2("defs", "");
+      defs.append(arrowMarker);
+      svg.append(defs);
+      for (const nodes5 of levels) {
+        for (const parent of nodes5) {
+          const from = positions.get(parent.id);
+          for (const child of parent.children) {
+            const to = positions.get(child.id);
+            const line = svgEl2("line", "steptrace__edge steptrace__multiway-tree-edge");
+            line.setAttribute("x1", String(from.x));
+            line.setAttribute("y1", String(from.y + NODE_HEIGHT / 2));
+            line.setAttribute("x2", String(to.x));
+            line.setAttribute("y2", String(to.y - NODE_HEIGHT / 2));
+            svg.append(line);
+            renderedEdges.push({ line, parentId: parent.id, childId: child.id });
+          }
+        }
+      }
+      const leaves = levels.at(-1) ?? [];
+      if (kind === "b-plus-tree") {
+        leaves.slice(0, -1).forEach((leaf, index) => {
+          const next = leaves[index + 1];
+          const from = positions.get(leaf.id);
+          const to = positions.get(next.id);
+          const path = svgEl2("path", "steptrace__multiway-tree-link");
+          path.setAttribute(
+            "d",
+            `M ${from.x + from.width / 2} ${from.y + NODE_HEIGHT / 2} V 248 H ${to.x - to.width / 2} V ${to.y + NODE_HEIGHT / 2 + 5}`
+          );
+          path.setAttribute("marker-end", `url(#${kind}-next-arrow)`);
+          path.dataset.from = leaf.id;
+          path.dataset.to = next.id;
+          svg.append(path);
+          renderedLinks.push({ path, fromId: leaf.id, toId: next.id });
+        });
+      }
+      for (const nodes5 of levels) {
+        for (const node2 of nodes5) {
+          const position = positions.get(node2.id);
+          const group = svgEl2("g", "steptrace__multiway-tree-node");
+          group.setAttribute(
+            "transform",
+            `translate(${position.x - position.width / 2} ${position.y - NODE_HEIGHT / 2})`
+          );
+          group.dataset.nodeId = node2.id;
+          group.dataset.role = node2.children.length ? "internal" : "leaf";
+          group.setAttribute(
+            "aria-label",
+            `${node2.children.length ? "Internal node" : "Leaf"} ${node2.id}, keys ${node2.keys.join(", ") || "empty"}`
+          );
+          renderedNodes.push({ group, nodeId: node2.id });
+          const keys = node2.keys.length ? node2.keys : [null];
+          keys.forEach((key4, index) => {
+            const cell = svgEl2("rect", "steptrace__multiway-tree-cell");
+            cell.setAttribute("x", String(index * CELL_WIDTH));
+            cell.setAttribute("width", String(CELL_WIDTH));
+            cell.setAttribute("height", String(NODE_HEIGHT));
+            cell.setAttribute("rx", "4");
+            cell.dataset.key = key4 == null ? "" : String(key4);
+            const text = svgEl2("text", "steptrace__multiway-tree-key");
+            text.setAttribute("x", String(index * CELL_WIDTH + CELL_WIDTH / 2));
+            text.setAttribute("y", String(NODE_HEIGHT / 2));
+            text.setAttribute("text-anchor", "middle");
+            text.setAttribute("dominant-baseline", "central");
+            text.textContent = key4 == null ? "·" : String(key4);
+            const marker2 = successMarker("steptrace__multiway-tree-success");
+            marker2.setAttribute("x", String(index * CELL_WIDTH + CELL_WIDTH - 12));
+            marker2.setAttribute("y", "1");
+            marker2.setAttribute("width", "11");
+            marker2.setAttribute("height", "11");
+            group.append(cell, text, marker2);
+            renderedKeys.push({ cell, marker: marker2, nodeId: node2.id, key: key4 });
+          });
+          const id = svgEl2("text", "steptrace__multiway-tree-id");
+          id.setAttribute("x", String(position.width / 2));
+          id.setAttribute("y", "-6");
+          id.setAttribute("text-anchor", "middle");
+          id.textContent = node2.id;
+          group.append(id);
+          svg.append(group);
         }
       }
     }
-    const leaves = levels.at(-1) ?? [];
-    if (kind === "b-plus-tree") {
-      leaves.slice(0, -1).forEach((leaf, index) => {
-        const next = leaves[index + 1];
-        const from = positions.get(leaf.id);
-        const to = positions.get(next.id);
-        const path = svgEl2("path", "steptrace__multiway-tree-link");
-        path.setAttribute(
-          "d",
-          `M ${from.x + from.width / 2} ${from.y + NODE_HEIGHT / 2} V 248 H ${to.x - to.width / 2} V ${to.y + NODE_HEIGHT / 2 + 5}`
-        );
-        path.setAttribute("marker-end", `url(#${kind}-next-arrow)`);
-        path.dataset.from = leaf.id;
-        path.dataset.to = next.id;
-        path.dataset.state = state.links.has(`${leaf.id}->${next.id}`) ? "active" : "neutral";
-        svg.append(path);
-      });
+    for (const { line, parentId, childId } of renderedEdges)
+      line.dataset.state = state.path.has(parentId) && state.path.has(childId) ? "path" : "neutral";
+    for (const { path, fromId, toId } of renderedLinks)
+      path.dataset.state = state.links.has(`${fromId}->${toId}`) ? "active" : "neutral";
+    for (const { group, nodeId } of renderedNodes) {
+      group.dataset.path = state.path.has(nodeId) ? "1" : "0";
+      group.dataset.affected = state.affected.has(nodeId) ? "1" : "0";
     }
-    for (const nodes5 of levels) {
-      for (const node2 of nodes5) {
-        const position = positions.get(node2.id);
-        const group = svgEl2("g", "steptrace__multiway-tree-node");
-        group.setAttribute(
-          "transform",
-          `translate(${position.x - position.width / 2} ${position.y - NODE_HEIGHT / 2})`
-        );
-        group.dataset.path = state.path.has(node2.id) ? "1" : "0";
-        group.dataset.affected = state.affected.has(node2.id) ? "1" : "0";
-        group.dataset.nodeId = node2.id;
-        group.dataset.role = node2.children.length ? "internal" : "leaf";
-        group.setAttribute(
-          "aria-label",
-          `${node2.children.length ? "Internal node" : "Leaf"} ${node2.id}, keys ${node2.keys.join(", ") || "empty"}`
-        );
-        const keys = node2.keys.length ? node2.keys : [null];
-        keys.forEach((key4, index) => {
-          const cell = svgEl2("rect", "steptrace__multiway-tree-cell");
-          cell.setAttribute("x", String(index * CELL_WIDTH));
-          cell.setAttribute("width", String(CELL_WIDTH));
-          cell.setAttribute("height", String(NODE_HEIGHT));
-          cell.setAttribute("rx", "4");
-          cell.dataset.key = key4 == null ? "" : String(key4);
-          cell.dataset.state = key4 != null && state.found.has(`${node2.id}:${key4}`) ? "found" : key4 === state.special ? "special" : "neutral";
-          const text = svgEl2("text", "steptrace__multiway-tree-key");
-          text.setAttribute("x", String(index * CELL_WIDTH + CELL_WIDTH / 2));
-          text.setAttribute("y", String(NODE_HEIGHT / 2));
-          text.setAttribute("text-anchor", "middle");
-          text.setAttribute("dominant-baseline", "central");
-          text.textContent = key4 == null ? "·" : String(key4);
-          group.append(cell, text);
-        });
-        const id = svgEl2("text", "steptrace__multiway-tree-id");
-        id.setAttribute("x", String(position.width / 2));
-        id.setAttribute("y", "-6");
-        id.setAttribute("text-anchor", "middle");
-        id.textContent = node2.id;
-        group.append(id);
-        svg.append(group);
-      }
+    for (const { cell, marker: marker2, nodeId, key: key4 } of renderedKeys) {
+      const found = key4 != null && state.found.has(`${nodeId}:${key4}`);
+      cell.dataset.state = found ? "found" : key4 === state.special ? "special" : "neutral";
+      marker2.dataset.state = found ? "found" : "neutral";
     }
     svg.setAttribute(
       "aria-label",
@@ -9122,6 +9163,7 @@ function mountMultiwayTree(rootElement, config, kind) {
 var SVG_NS4, VIEW_WIDTH2, VIEW_HEIGHT2, MAX_KEYS, MAX_VALUES2, CELL_WIDTH, NODE_HEIGHT, NODE_GAP, VIEW_PADDING, mountBTree, mountBPlusTree;
 var init_multiway_tree = __esm({
   "custom/steptrace/src/families/multiway-tree.ts"() {
+    init_render();
     init_interactive_structure();
     SVG_NS4 = "http://www.w3.org/2000/svg";
     VIEW_WIDTH2 = 620;
@@ -10403,8 +10445,7 @@ function makeHeapSelectionView(frames) {
       { label: "incoming", swatchClass: "steptrace__heap-swatch steptrace__heap-swatch--current" },
       {
         label: "retained winner",
-        swatchClass: "steptrace__heap-swatch steptrace__heap-swatch--winner",
-        marker: successMarker()
+        swatchClass: "steptrace__heap-swatch steptrace__heap-swatch--winner"
       },
       {
         label: "weakest root",
@@ -13141,7 +13182,7 @@ function makeBucketDistributionView(frames) {
   const legend = makeLegend(
     [
       { label: "active bucket", color: "var(--_blue)" },
-      { label: "local comparison", color: "var(--_amber)" },
+      { label: "local comparison", color: "var(--_blue)" },
       { label: "gathered output", color: "var(--_green)" }
     ],
     "Distribution state legend",
@@ -22760,7 +22801,7 @@ function createMount(registry2, structures = []) {
     const insightLabel = el("span", "steptrace__insight-label");
     insightLabel.textContent = "Result";
     const insightText = el("span", "steptrace__insight-text");
-    insight.append(insightLabel, insightText);
+    insight.append(successMarker("steptrace__insight-marker"), insightLabel, insightText);
     log.append(insight);
     traceWrap.append(traceLabel, log);
     const watchWrap = el("div", "steptrace__watch-wrap");

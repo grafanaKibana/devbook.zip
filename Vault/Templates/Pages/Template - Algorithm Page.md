@@ -89,10 +89,10 @@ tab: Complexity
 
 # Questions
 
-<!-- Keep only distinct recall targets. Remove this section when the prose already makes them obvious. -->
+<!-- Optional: keep only distinct recall targets. Delete this section when the prose already makes them obvious. -->
 
 # References
 
-<!-- Keep at least one annotated primary source before setting publish: true. -->
+<!-- Optional: add when there is at least one annotated primary source. -->
 
-- [Source title](https://example.com) — What this source establishes or documents.
+- [Source title](https://example.com).
