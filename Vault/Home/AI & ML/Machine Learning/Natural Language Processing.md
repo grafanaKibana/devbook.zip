@@ -123,16 +123,8 @@ Start with rules when the pattern is explicit. A small fine-tuned model suits a 
 
 Benchmark the actual languages before choosing. A multilingual model simplifies operations, while separate monolingual models can improve quality at the cost of several training and deployment paths. General-purpose LLMs add broad coverage, but their latency and data boundary may decide the issue before benchmark accuracy does.
 
-# Questions
-
-> [!QUESTION]- When is fine-tuning a small model preferable to prompting an LLM for an NLP task?
-> Fine-tuning fits a stable label space, enough representative examples, and volume that rewards predictable local inference. Prompting avoids an up-front training set and handles generative or changing tasks more easily. A fixed estimate such as $0.01–$0.10+ ages quickly. The comparison needs current provider pricing, representative token counts, and the full cost of local training and hosting.
-
-> [!QUESTION]- Why might a multilingual NLP model underperform a monolingual one, and when is that acceptable?
-> A multilingual model shares vocabulary and capacity across languages whose training coverage can differ sharply. That may reduce per-language quality, though it can also help related low-resource languages through transfer. The shared model is attractive when one deployment must cover many languages. High-stakes extraction still needs per-language evidence, and a language-specific model may be justified where the shared model misses material cases.
-
 # References
 
-- [Hugging Face NLP Course](https://huggingface.co/learn/nlp-course/chapter1/1) — explains tokenization, transformer models, fine-tuning, and common NLP task pipelines with executable examples.
-- [Attention Is All You Need (Vaswani et al., 2017)](https://arxiv.org/abs/1706.03762) — introduces the Transformer architecture built around attention rather than recurrence or convolution.
-- [Azure AI Language documentation (Microsoft Learn)](https://learn.microsoft.com/en-us/azure/ai-services/language-service/) — official docs for Azure's managed NLP services: sentiment analysis, NER, key phrase extraction, and custom text classification.
+- [Hugging Face NLP Course](https://huggingface.co/learn/nlp-course/chapter1/1)
+- [Attention Is All You Need (Vaswani et al., 2017)](https://arxiv.org/abs/1706.03762)
+- [Azure AI Language documentation (Microsoft Learn)](https://learn.microsoft.com/en-us/azure/ai-services/language-service/)

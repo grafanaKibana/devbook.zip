@@ -3,7 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
-summary: "The interface between an LLM's reasoning and the external world via function calling."
+summary: "Designing callable operations that models can select, execute, and recover from reliably."
 level:
   - "3"
 priority: Low
@@ -12,7 +12,7 @@ status: Done
 publish: true
 ---
 
-Tools turn model output into operations. They let an agent read current data, run a calculation, or request a side effect that text generation cannot perform on its own. A capable model still fails when its tools are ambiguous or brittle. Anthropic's SWE-bench agent work found a small interface detail with a large effect: switching one tool from relative to absolute file paths removed a recurring failure mode.
+Tool design turns model output into reliable operations. A tool lets an agent read current data, run a calculation, or request a side effect that text generation cannot perform on its own. A capable model still fails when its callable interfaces are ambiguous or brittle. Anthropic's SWE-bench agent work found a small interface detail with a large effect: switching one tool from relative to absolute file paths removed a recurring failure mode.
 
 Function calling is the usual mechanism. The runtime sends the model JSON schemas describing the available tools. The model may return a structured call containing a tool name and arguments. After validating the request, the runtime executes the function and appends its result to the conversation. The [[Agent Loop]] repeats until the model answers or the runtime stops it.
 
@@ -169,19 +169,12 @@ Several mechanisms contribute:
 > [!QUESTION]- Why is tool design often more impactful than prompt engineering in agentic systems?
 > A tool contract is reused at every call site and every loop iteration. Ambiguous selection, malformed arguments, or an opaque error can redirect all later steps. Fixing the interface removes that failure mode across prompts, while a prompt workaround depends on the model remembering an exception each time.
 
-> [!QUESTION]- How would you decide between one broad tool and many narrow tools?
+> [!QUESTION]- How to decide between one broad tool and many narrow tools?
 > Split operations that need different descriptions, schemas, or permissions. Keep closely related actions together when one contract expresses them without a bag of optional parameters. Then control the active set with routing or filtering. Narrow tools help argument generation only while the model can still select the right one.
 
 # References
 
-- [Tool use overview — Anthropic](https://docs.anthropic.com/en/docs/build-with-claude/tool-use/overview) — defines provider tool schemas, model-selected tool calls, and returned tool results.
-- [Tool use best practices — Anthropic](https://docs.anthropic.com/en/docs/build-with-claude/tool-use/best-practices)
 - [Function calling guide — OpenAI](https://platform.openai.com/docs/guides/function-calling)
-- [Using function tools with an agent — Microsoft Agent Framework (Microsoft Learn)](https://learn.microsoft.com/en-us/agent-framework/agents/tools/function-tools) — documents the C# function-tool registration and invocation mechanism used by the examples.
-- [Building Effective Agents — Anthropic Engineering](https://www.anthropic.com/engineering/building-effective-agents)
-- [Prompt caching with tool use — Anthropic](https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching#prompt-caching-with-tool-use)
-- [Key Elements of Agent Tools — DeepLearning.AI / CrewAI course](https://learn.deeplearning.ai/courses/multi-ai-agent-systems-with-crewai/lesson/c4j19/key-elements-of-agent-tools)
-- [MCPGauge — benchmarking token overhead and accuracy impact of MCP tool schemas (arXiv 2508.12566)](https://arxiv.org/abs/2508.12566)
+- [Using function tools with an agent — Microsoft Agent Framework (Microsoft Learn)](https://learn.microsoft.com/en-us/agent-framework/agents/tools/function-tools)
 - [Tool search tool — deferred loading for large toolsets (Anthropic)](https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/tool-search-tool)
 - [MCP-Zero: Active Tool Discovery — 98% token reduction via on-demand retrieval (arXiv 2506.01056)](https://arxiv.org/abs/2506.01056)
-- [Lost in the Middle — how LLMs use long contexts (Liu et al., Stanford 2023)](https://arxiv.org/abs/2307.03172)

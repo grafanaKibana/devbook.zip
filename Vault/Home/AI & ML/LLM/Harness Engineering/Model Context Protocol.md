@@ -118,13 +118,7 @@ MCP earns its overhead when several clients need the same integration or when ca
 
 # References
 
-- [MCP Architecture — host, client, server model and capability negotiation (Official)](https://modelcontextprotocol.io/docs/learn/architecture) — defines the host/client/server topology, one-client-per-server connection model, and capability negotiation used above.
-- [MCP Server Concepts — tools, resources, prompts, and transport mechanisms (Official)](https://modelcontextprotocol.io/docs/learn/server-concepts)
-- [MCP SDK Tiers — official and community SDK support levels (Official)](https://modelcontextprotocol.io/community/sdk-tiers)
+- [MCP Architecture — host, client, server model and capability negotiation (Official)](https://modelcontextprotocol.io/docs/learn/architecture)
 - [MCPGauge — benchmarking token overhead and accuracy impact of MCP tool schemas (arXiv 2508.12566)](https://arxiv.org/abs/2508.12566)
 - [Invariant Labs — MCP security analysis and tool poisoning attack surface](https://invariantlabs.ai/blog/mcp-security-notification-tool-poisoning-attacks)
-- [MCP vs Function Calling — decision framework from production experience (Kevin Tan)](https://blog.jztan.com/mcp-vs-function-calling-ai-agents/)
-- [MCP One Year Later — practitioner retrospective on protocol maturity (Chris Groves)](https://notchrisgroves.com/mcp-protocol/)
-- [The MCP Security Survival Guide — vulnerabilities, incidents, and mitigations (Towards Data Science)](https://towardsdatascience.com/the-mcp-security-survival-guide-best-practices-pitfalls-and-real-world-lessons/)
-- [8 Vulnerabilities I Found in MCP Servers — SQL injection, path traversal, and tenant isolation (Kevin Tan)](https://blog.jztan.com/mcp-server-security-8-vulnerabilities/)
 - [Using MCP tools with an agent — Microsoft Agent Framework (Microsoft Learn)](https://learn.microsoft.com/en-us/agent-framework/agents/tools/local-mcp-tools)

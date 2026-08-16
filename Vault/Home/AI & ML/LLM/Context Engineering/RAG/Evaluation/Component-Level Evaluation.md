@@ -55,20 +55,7 @@ Ground truth is established by running brute-force (exact) search over the full 
 - shard load skew exposes hot partitions caused by semantically clustered traffic or data.
 - KL divergence over pairwise-distance distributions exposes embedding-space movement.
 
-# Questions
-
-> [!QUESTION]- Why can latency monitoring miss an ANN recall regression after the corpus changes?
-> Latency cannot establish ANN recall. It measures the cost of the configured search, not whether the returned neighbors match exact search.
->
-> Corpus growth or distribution shift can invalidate an earlier recall-versus-latency operating point without producing a distinctive latency signal. Fixed `nprobe` still visits the same number of IVF lists but may scan more vectors per list, while HNSW behavior depends on the graph and data distribution. Compare ANN results with brute-force ground truth, then retune from the measured curve.
-
-> [!QUESTION]- Why is token-level IoU more informative than Recall@k when comparing chunking strategies?
-> Token-level IoU is more informative when context efficiency matters because it measures both evidence coverage and retrieved noise. Recall@k records only whether a relevant chunk appeared, even if most of that chunk is irrelevant.
->
-> IoU requires `(query, gold_span)` labels, so it earns the extra annotation cost only when context usage affects cost or answer quality. Otherwise, compare chunking strategies with a fixed token budget and measure retrieval recall and faithfulness.
-
 # References
 
-- [Evaluating chunking strategies for retrieval -- token-level IoU methodology and benchmark (Chroma Research)](https://research.trychroma.com/evaluating-chunking) — primary report for the token-IoU experiment and the 800/400 versus semantic-chunking measurements cited above.
+- [Evaluating chunking strategies for retrieval -- token-level IoU methodology and benchmark (Chroma Research)](https://research.trychroma.com/evaluating-chunking)
 - [A practical guide to selecting HNSW hyperparameters -- portfolio learning across 15 datasets (OpenSearch)](https://opensearch.org/blog/a-practical-guide-to-selecting-hnsw-hyperparameters/)
-- [BEIR -- heterogeneous zero-shot retrieval benchmark across 18 datasets (NeurIPS 2021)](https://arxiv.org/abs/2104.08663)

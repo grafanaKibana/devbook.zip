@@ -114,12 +114,6 @@ Meta prompting keeps a person in the revision loop. [[Automated Prompt Optimizat
 > - Step-level observability must be worth the added latency and token cost.
 > - Keep one prompt for simple work whose intermediate state does not need independent control.
 
-> [!QUESTION]- What is the main risk of generated knowledge prompting, and how do you mitigate it?
-> - Generated facts may be wrong even when the final answer follows them faithfully.
-> - Treat them as untrusted intermediate output, not retrieved evidence.
-> - Check material claims against trusted context and reject inconsistent inputs.
-> - Constraining the final call to generated facts limits drift. It does not make those facts true.
-
 > [!QUESTION]- What is a practical meta prompting workflow for improving a weak prompt?
 > - Collect real failures and group them by cause.
 > - Ask for a revision that addresses those causes with a clear output contract.
@@ -128,10 +122,5 @@ Meta prompting keeps a person in the revision loop. [[Automated Prompt Optimizat
 
 # References
 
-- [Prompt Chaining - Prompt Engineering Guide](https://www.promptingguide.ai/techniques/prompt_chaining) — practitioner overview of decomposing a task into dependent prompt calls.
-- [Generated Knowledge Prompting - Prompt Engineering Guide](https://www.promptingguide.ai/techniques/knowledge) — worked examples of generating background statements before answering.
-- [Meta Prompting - Prompt Engineering Guide](https://www.promptingguide.ai/techniques/meta-prompting) — practitioner introduction to using models to construct and refine prompts.
-- [Generated Knowledge Prompting for Commonsense Reasoning (Liu et al., 2022)](https://arxiv.org/abs/2110.08387) — primary paper evaluating generated knowledge as intermediate context for commonsense tasks.
-- [Prompt Chaining for Complex Workflows - Anthropic Documentation](https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/chain-prompts) — vendor guidance on chain structure, gates, and common workflow shapes.
-- [OpenAI Prompt Engineering Guide](https://platform.openai.com/docs/guides/prompt-engineering) — official guidance on prompt instructions, examples, and evaluation-oriented iteration.
-- [Prompt Injection Attacks Against GPT 3 - Simon Willison](https://simonwillison.net/2022/Sep/12/prompt-injection/) — early practitioner account of the control-data confusion behind prompt injection.
+- [Prompt Chaining - Prompt Engineering Guide](https://www.promptingguide.ai/techniques/prompt_chaining)
+- [Generated Knowledge Prompting for Commonsense Reasoning (Liu et al., 2022)](https://arxiv.org/abs/2110.08387)

@@ -111,18 +111,9 @@ Start with the simplest model that establishes a credible recall baseline. Fine-
 > [!QUESTION]- Why can switching to a higher-scoring embedding model cause recall to drop on existing queries?
 > Each model defines its own vector space. Comparing a query from the new model with stored vectors from the old one produces meaningless distances and broken rankings. Build the new corpus index before switching query traffic, and include the model name and version in embedding-cache keys.
 
-> [!QUESTION]- When is domain-finetuning the embedding model justified over improving chunking or retrieval?
-> Fine-tuning is justified when failed queries and relevant documents express the same domain concept yet rank far apart. Split logical units point to chunking. Missing filters or ambiguous queries belong elsewhere in the retrieval pipeline. Inspect the top-k results first. If intact, relevant chunks exist but consistently rank low, the embedding model is a credible bottleneck.
-
 # References
 
-- [Embeddings guide — text-embedding-3 models and MRL (OpenAI)](https://platform.openai.com/docs/guides/embeddings) — provider documentation for dimensions, normalization, and model behavior.
-- [MTEB leaderboard — filter by Retrieval task (Hugging Face)](https://huggingface.co/spaces/mteb/leaderboard) — benchmark explorer for comparing retrieval results rather than aggregate rank.
-- [Pretrained models and MTEB caveats (Sentence Transformers)](https://sbert.net/docs/sentence_transformer/pretrained_models.html) — upstream model catalog with dimensions and intended uses.
-- [Matryoshka Representation Learning — original MRL paper (arXiv)](https://arxiv.org/abs/2205.13147) — primary paper describing useful nested vector prefixes.
-- [Matryoshka embeddings training with MatryoshkaLoss (SBERT)](https://sbert.net/examples/sentence_transformer/training/matryoshka/README.html) — upstream example of training nested embedding dimensions with Matryoshka loss.
-- [Domain adaptation — GPL and adaptive pre-training (SBERT)](https://sbert.net/examples/sentence_transformer/domain_adaptation/README.html) — upstream techniques for adapting embeddings when domain text differs from general training data.
-- [Improving retrieval with embedding finetuning — FinanceBench experiment (Databricks)](https://www.databricks.com/blog/improving-retrieval-and-rag-embedding-model-finetuning) — reports the cited FinanceBench recall comparison and its synthetic training procedure.
-- [Fine-tuning embeddings for enterprise RAG — Glean lessons (Jason Liu / Glean)](https://jxnl.co/writing/2025/03/06/fine-tuning-embedding-models-for-enterprise-rag-lessons-from-glean/) — practitioner account of evaluation-set construction and hard-negative mining for enterprise retrieval.
-- [Introducing Embed v3 — input_type and compression-aware training (Cohere)](https://cohere.com/blog/introducing-embed-v3) — provider description of asymmetric input types and multilingual embedding behavior.
-- [Azure OpenAI embeddings — deployment and SDK usage (Microsoft Learn)](https://learn.microsoft.com/en-us/azure/ai-foundry/openai/how-to/embeddings) — Microsoft guidance for deploying and calling OpenAI embedding models through Azure.
+- [Embeddings guide — text-embedding-3 models and MRL (OpenAI)](https://platform.openai.com/docs/guides/embeddings)
+- [MTEB leaderboard — filter by Retrieval task (Hugging Face)](https://huggingface.co/spaces/mteb/leaderboard)
+- [Matryoshka Representation Learning — original MRL paper (arXiv)](https://arxiv.org/abs/2205.13147)
+- [Azure OpenAI embeddings — deployment and SDK usage (Microsoft Learn)](https://learn.microsoft.com/en-us/azure/ai-foundry/openai/how-to/embeddings)

@@ -88,22 +88,16 @@ For evidence-backed answers, start with retrieval and claim-to-context checks. S
 # Questions
 
 > [!QUESTION]- Why can RAG-grounded systems still hallucinate significantly?
-  > RAG only supplies context. The corpus can be incomplete, retrieval can return the wrong passages, and generation can still add unsupported details. Diagnose those stages separately before changing the model.
+> RAG only supplies context. The corpus can be incomplete, retrieval can return the wrong passages, and generation can still add unsupported details. Diagnose those stages separately before changing the model.
 
 > [!QUESTION]- How can preference tuning improve perceived quality while weakening factual behavior?
-  > The reward may favor agreement, confidence, or style without checking evidence. A model can therefore become more satisfying to read while accepting a false premise. Factual evaluation and calibration tests must remain separate from preference scores.
-
-> [!QUESTION]- How do you separate retrieval failure from generation hallucination in a RAG pipeline?
-  > Check whether the corpus contains the evidence, whether retrieval returned it, and whether each answer claim follows from the returned passages. Missing evidence in the result set is a retrieval problem. Evidence present but ignored, contradicted, or embellished points to generation or verification.
+> The reward may favor agreement, confidence, or style without checking evidence. A model can therefore become more satisfying to read while accepting a false premise. Factual evaluation and calibration tests must remain separate from preference scores.
 
 # References
 
-- [Survey of hallucination in natural language generation: intrinsic and extrinsic taxonomy (Ji et al., ACM Computing Surveys 2022)](https://arxiv.org/abs/2202.03629) - The survey used here for the source-relative taxonomy and the limits of common detectors.
-- [FActScore: atomic evaluation of factual precision (Min et al., EMNLP 2023)](https://arxiv.org/abs/2305.14251) - Introduces claim-level factual precision instead of one score for an entire answer.
-- [SelfCheckGPT: black-box hallucination detection (Manakul et al., EMNLP 2023)](https://aclanthology.org/2023.emnlp-main.557/) - Primary paper for detecting unstable claims through repeated sampling without an external database.
-- [Towards understanding sycophancy in language models (Sharma et al., Anthropic, ICLR 2024)](https://www.anthropic.com/news/towards-understanding-sycophancy-in-language-models) - Evidence that preference signals can reward agreement with a user's stated view.
-- [Groundedness detection (Azure AI Content Safety)](https://learn.microsoft.com/azure/ai-services/content-safety/concepts/groundedness) - Official description of Microsoft's claim-to-source groundedness service.
-- [Reduce hallucinations (Anthropic Docs)](https://docs.anthropic.com/en/docs/test-and-evaluate/strengthen-guardrails/reduce-hallucinations) - Vendor guidance for quotations, citations, and evidence-aware abstention.
-- [Chain-of-Verification reduces hallucination in LLMs (Dhuliawala et al., Meta AI 2023)](https://arxiv.org/abs/2309.11495) - Primary paper for separating draft generation from verification questions and revision.
-- [Hallucination in RAG-based legal AI tools (Magesh et al., JELS 2025)](https://law.stanford.edu/wp-content/uploads/2024/05/Legal_RAG_Hallucinations.pdf) - Domain study showing that retrieval grounding reduced neither tool to zero hallucinations.
-- [Extrinsic hallucinations in LLMs (Lilian Weng, July 2024)](https://lilianweng.github.io/posts/2024-07-07-hallucination/) - Practitioner synthesis of causes, evaluation methods, and mitigation research.
+- [Survey of hallucination in natural language generation: intrinsic and extrinsic taxonomy (Ji et al., ACM Computing Surveys 2022)](https://arxiv.org/abs/2202.03629)
+- [FActScore: atomic evaluation of factual precision (Min et al., EMNLP 2023)](https://arxiv.org/abs/2305.14251)
+- [SelfCheckGPT: black-box hallucination detection (Manakul et al., EMNLP 2023)](https://aclanthology.org/2023.emnlp-main.557/)
+- [Reduce hallucinations (Anthropic Docs)](https://docs.anthropic.com/en/docs/test-and-evaluate/strengthen-guardrails/reduce-hallucinations)
+- [Chain-of-Verification reduces hallucination in LLMs (Dhuliawala et al., Meta AI 2023)](https://arxiv.org/abs/2309.11495)
+- [Hallucination in RAG-based legal AI tools (Magesh et al., JELS 2025)](https://law.stanford.edu/wp-content/uploads/2024/05/Legal_RAG_Hallucinations.pdf)

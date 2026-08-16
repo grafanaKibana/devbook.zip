@@ -105,17 +105,8 @@ Macro averaging exposes weak minority-class performance. Micro averaging emphasi
 
 **Class imbalance distorts accuracy.** Always predicting "not fraud" yields 99.9% accuracy when fraud prevalence is 0.1%, with zero useful detections. Precision, recall, PR-AUC, balanced accuracy, and per-class results reveal different parts of that failure.
 
-# Questions
-
-> [!QUESTION]- When should a system prioritize precision over recall, and how is that choice made operational?
-> Give priority to precision when false positives consume scarce review capacity or trigger costly actions. Give priority to recall when a missed positive carries the larger loss. Express the choice as a constraint, such as maximizing precision at recall ≥ 0.95, select the threshold on validation data, and track both metrics by important cohort after release.
-
-> [!QUESTION]- How is a classification threshold chosen in practice?
-> Start with the cost or capacity constraint. Sweep thresholds on a validation set, choose the point that satisfies it, then report the frozen policy on a separate test set. Production monitoring must include the realized error rates and score distribution because a threshold selected on old data can age as prevalence or calibration changes.
-
 # References
 
-- [Scikit-learn: Classification metrics](https://scikit-learn.org/stable/modules/model_evaluation.html#classification-metrics) — defines confusion-matrix metrics and the macro, micro, weighted, and sample averaging modes.
-- [Google ML Crash Course: Accuracy, precision, recall](https://developers.google.com/machine-learning/crash-course/classification/accuracy-precision-recall) — interactive tutorial with threshold visualization and worked examples.
-- [Simplicity is an advantage but sadly complexity sells better (Eugene Yan)](https://eugeneyan.com/writing/simplicity/) — argues for strong simple baselines and measurable gains before accepting model complexity.
-- [Beyond Accuracy: Behavioral Testing of NLP Models (Ribeiro et al., ACL 2020)](https://aclanthology.org/2020.acl-main.442/) — introduces CheckList methodology for testing classification models beyond aggregate metrics, with per-capability precision/recall analysis.
+- [Scikit-learn: Classification metrics](https://scikit-learn.org/stable/modules/model_evaluation.html#classification-metrics)
+- [Google ML Crash Course: Accuracy, precision, recall](https://developers.google.com/machine-learning/crash-course/classification/accuracy-precision-recall)
+- [Beyond Accuracy: Behavioral Testing of NLP Models (Ribeiro et al., ACL 2020)](https://aclanthology.org/2020.acl-main.442/)

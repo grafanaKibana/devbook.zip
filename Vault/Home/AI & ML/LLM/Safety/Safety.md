@@ -52,6 +52,4 @@ Perfection is the wrong target. The practical target is a system where failures 
 
 # References
 
-- [OWASP Top 10 for LLM Applications](https://owasp.org/www-project-top-10-for-large-language-model-applications/) — the canonical threat taxonomy for LLM systems. The source for the [[OWASP vulnerabilities on AI LLM|OWASP LLM Top 10]] child.
-- [OWASP LLM Prompt Injection Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/LLM_Prompt_Injection_Prevention_Cheat_Sheet.html) — practical, layered controls for the top-ranked risk.
-- [Azure AI Content Safety (Microsoft Learn)](https://learn.microsoft.com/en-us/azure/ai-services/content-safety/overview) — a managed service implementing several input/output guardrails out of the box.
+- [OWASP Top 10 for LLM Applications](https://owasp.org/www-project-top-10-for-large-language-model-applications/)

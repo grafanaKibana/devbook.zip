@@ -19,7 +19,7 @@ Anthropic reports that its multi-agent research system used about 15 times as ma
 2. **Parallel work.** Independent paths can run at the same time, and latency matters.
 3. **Specialization.** One agent has too many similar tools or must follow instructions that conflict with another part of the task.
 
-Without one of those pressures, a single agent with well-defined [[Tools]] is usually cheaper and easier to diagnose. Anthropic's engineering guidance recommends starting with the simplest design that meets the task and adding complexity only when it produces a measurable improvement.
+Without one of those pressures, a single agent with well-defined [[Tool Design|tools]] is usually cheaper and easier to diagnose. Anthropic's engineering guidance recommends starting with the simplest design that meets the task and adding complexity only when it produces a measurable improvement.
 
 The useful unit of decomposition is context. An agent that implements a feature often has enough local knowledge to test it as well. Splitting implementation and tests across agents creates another lossy handoff without buying context isolation. A new agent should own a bounded body of context that can be summarized back as an artifact or decision.
 
@@ -145,11 +145,7 @@ Multi-agent architecture should solve a measured limit in the current system. If
 
 # References
 
-- [Multi-Agent Research System — Engineering (Anthropic)](https://www.anthropic.com/engineering/multi-agent-research-system) — production account of coordinator-subagent architecture, token cost, parallel search, and persistent planning memory.
-- [Building Effective Agents (Anthropic Engineering)](https://www.anthropic.com/engineering/building-effective-agents) — practical guidance for choosing the simplest workflow that meets the task.
-- [OpenAI Agents SDK — Handoffs](https://openai.github.io/openai-agents-python/handoffs/) — official handoff semantics and context-filtering hooks.
-- [AI Agent Design Patterns — Orchestration (Microsoft)](https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/ai-agent-design-patterns) — official architecture guidance for sequential, concurrent, group-chat, handoff, and magentic orchestration.
-- [Microsoft Agent Framework — Workflows Documentation (Microsoft Learn)](https://learn.microsoft.com/en-us/agent-framework/workflows/) — official workflow model used by the handoff example.
-- [Why Multi-Agent Systems Fail (Galileo)](https://galileo.ai/blog/why-multi-agent-systems-fail) — practitioner analysis of coordination and cascading-error failures.
-- [OWASP Top 10 for LLM Applications — Agentic Security (OWASP)](https://genai.owasp.org/resource/owasp-top-10-for-llm-applications-2025/) — security boundaries for excessive agency and unsafe downstream actions.
-- [MAS-FIRE: A Fault Injection Framework for Multi-Agent Systems (arxiv)](https://arxiv.org/abs/2602.19843) — research framework for injecting and measuring failures across multi-agent interactions.
+- [Multi-Agent Research System — Engineering (Anthropic)](https://www.anthropic.com/engineering/multi-agent-research-system)
+- [OpenAI Agents SDK — Handoffs](https://openai.github.io/openai-agents-python/handoffs/)
+- [AI Agent Design Patterns — Orchestration (Microsoft)](https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/ai-agent-design-patterns)
+- [MAS-FIRE: A Fault Injection Framework for Multi-Agent Systems (arxiv)](https://arxiv.org/abs/2602.19843)

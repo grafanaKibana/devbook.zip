@@ -118,20 +118,13 @@ HNSW is a practical starting point for a typical text corpus. IVF or IVF-PQ beco
 # Questions
 
 > [!QUESTION]- Why do vector databases use approximate nearest-neighbor search instead of exact search?
-> Exact search compares the query with every vector, which costs O(N) per request. ANN indexes search only a promising part of the collection and return most true neighbors much faster. The missed neighbors produce no error, so `ef_search` or `nprobe` must be tuned against brute-force ground truth for the corpus and SLA.
-
-> [!QUESTION]- When does pgvector or an existing search engine fit better than a dedicated vector database?
-> An existing database is the simpler choice when it already owns the source data and the collection fits its vector index. pgvector also keeps transactions and joins beside the embeddings. A dedicated system becomes useful after measured limits appear in scale, selective-filter recall, or index support such as IVF-PQ and DiskANN.
-
-> [!QUESTION]- How can an HNSW operating point regress after the corpus changes, and how is the loss detected?
-> HNSW follows graph links and bounds exploration with parameters such as `ef_search`. Corpus or distribution changes can make an earlier setting miss more exact neighbors, but the effect on recall and latency depends on the graph, filters, and implementation. Scheduled Recall@k checks against brute-force results reveal the loss. A new sweep determines whether raising `ef_search`, rebuilding, or changing another index parameter is the appropriate response.
+> Exact search compares the query with every vector, which costs O(N) per request. ANN indexes search only a promising part of the collection and return most true neighbors much faster..
 
 # References
 
-- [Efficient and robust approximate nearest neighbor search using HNSW graphs (Malkov & Yashunin, 2016)](https://arxiv.org/abs/1603.09320) — the HNSW algorithm behind most vector databases.
-- [Product Quantization for Nearest Neighbor Search (Jégou et al., 2011)](https://hal.inria.fr/inria-00514462/document) — the compression technique behind IVF-PQ.
-- [DiskANN: Fast Accurate Billion-point Nearest Neighbor Search on a Single Node (Subramanya et al., 2019)](https://proceedings.neurips.cc/paper/2019/hash/09853c7fb1d3f8ee67a61b6bf4a7f8e6-Abstract.html) — disk-resident graphs for billion-scale search.
-- [Faiss: A Library for Efficient Similarity Search (Meta AI)](https://github.com/facebookresearch/faiss) — the foundational ANN library. Index types and tradeoffs.
-- [ANN-Benchmarks — recall vs latency across ANN implementations](https://ann-benchmarks.com/) — empirical comparison of index types and libraries.
-- [pgvector — open-source vector similarity search for Postgres](https://github.com/pgvector/pgvector) — vectors alongside relational data with HNSW and IVF-Flat indexes.
-- [Vector search concepts (Azure AI Search)](https://learn.microsoft.com/en-us/azure/search/vector-search-overview) — managed vector search, filtering, and index configuration in production.
+- [Efficient and robust approximate nearest neighbor search using HNSW graphs (Malkov & Yashunin, 2016)](https://arxiv.org/abs/1603.09320)
+- [Product Quantization for Nearest Neighbor Search (Jégou et al., 2011)](https://pubmed.ncbi.nlm.nih.gov/21088323/)
+- [DiskANN: Fast Accurate Billion-point Nearest Neighbor Search on a Single Node (Subramanya et al., 2019)](https://proceedings.neurips.cc/paper/2019/hash/09853c7fb1d3f8ee67a61b6bf4a7f8e6-Abstract.html)
+- [ANN-Benchmarks — recall vs latency across ANN implementations](https://ann-benchmarks.com/)
+- [pgvector — open-source vector similarity search for Postgres](https://github.com/pgvector/pgvector)
+- [Vector search concepts (Azure AI Search)](https://learn.microsoft.com/en-us/azure/search/vector-search-overview)

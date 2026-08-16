@@ -140,27 +140,15 @@ Direct retrieval provides the control. Multi-query or RAG-Fusion earns its cost 
 
 > [!QUESTION]- Why does query translation often improve recall but sometimes hurt precision, and how do you detect the tradeoff?
 > Query translation raises recall by searching more phrasings, but it lowers precision when a rewrite adds concepts or changes constraints.
->
 > Measure Recall@k and Precision@k before and after translation, split by query type. If Recall@20 rises while Precision@5 falls, coverage improved but the generator receives worse evidence. Keep the original query in the candidate set and reject variants that change material constraints.
 
 > [!QUESTION]- When is decomposition a better choice than multi-query, and when does it hurt?
 > Decomposition fits distinct sub-problems that need different evidence, such as a comparison or a timeline assembled from several sources. Multi-query fits one intent expressed with uncertain vocabulary.
->
 > Decomposition hurts when the split removes the constraints connecting the pieces. It fits only when each sub-question can be answered independently and those answers can support the original request. It also adds a synthesis call, while multi-query adds only retrieval work.
-
-> [!QUESTION]- Why can HyDE outperform direct query embedding for vague questions but fail on specific factual queries?
-> HyDE can improve a vague query by supplying the vocabulary of a plausible answer, which moves its embedding closer to real documents. It can fail on a specific factual query when that draft invents the wrong version or identifier and steers retrieval toward evidence for the mistake.
->
-> Direct retrieval preserves exact tokens that [[Retrieval#Sparse Retrieval — Keyword Search (BM25)|keyword search]] can match. Compare both methods by query class because HyDE failures are easy to miss when the returned documents remain topically relevant.
 
 # References
 
-- [Precise Zero-Shot Dense Retrieval without Relevance Labels — the original HyDE paper (Gao et al., ACL 2023)](https://arxiv.org/abs/2212.10496) — introduces retrieval through a generated hypothetical document and evaluates it without relevance labels.
-- [Take a Step Back: Evoking Reasoning via Abstraction in Large Language Models (Zheng et al., ICLR 2024)](https://arxiv.org/abs/2310.06117) — primary paper for deriving a broader question before answering the original one.
-- [RAG-Fusion: a New Take on Retrieval-Augmented Generation (Rackauckas, IJNLC 2024)](https://arxiv.org/abs/2402.03367) — describes multi-query generation followed by reciprocal-rank fusion.
-- [Query Rewriting for Retrieval-Augmented Large Language Models — Rewrite-Retrieve-Read framework (Ma et al., EMNLP 2023)](https://arxiv.org/abs/2305.14283) — primary evaluation of model-generated retrieval rewrites before answer generation.
-- [Query Transformations — practitioner overview of multi-query, RAG-Fusion, step-back, and HyDE with real prompts (LangChain Engineering)](https://blog.langchain.dev/query-transformations/)
-- [Retrieval-Augmented Generation for Large Language Models: A Survey — query transformation taxonomy within Advanced RAG (Gao et al., 2024)](https://arxiv.org/abs/2312.10997)
-- [MultiQueryRetriever — multi-query implementation and usage patterns (LangChain)](https://python.langchain.com/docs/how_to/MultiQueryRetriever/)
-- [Query Transform Cookbook — HyDE, step-back, and decomposition implementations (LlamaIndex)](https://docs.llamaindex.ai/en/stable/examples/query_transformations/query_transform_cookbook/)
-- [Deconstructing RAG — retrieval patterns and query strategy evaluation (LangChain Engineering)](https://blog.langchain.com/deconstructing-rag/)
+- [Precise Zero-Shot Dense Retrieval without Relevance Labels — the original HyDE paper (Gao et al., ACL 2023)](https://arxiv.org/abs/2212.10496)
+- [Take a Step Back: Evoking Reasoning via Abstraction in Large Language Models (Zheng et al., ICLR 2024)](https://arxiv.org/abs/2310.06117)
+- [RAG-Fusion: a New Take on Retrieval-Augmented Generation (Rackauckas, IJNLC 2024)](https://arxiv.org/abs/2402.03367)
+- [Query Rewriting for Retrieval-Augmented Large Language Models — Rewrite-Retrieve-Read framework (Ma et al., EMNLP 2023)](https://arxiv.org/abs/2305.14283)

@@ -53,21 +53,7 @@ RMSE and MAE are worth reporting together. A wide gap between them often points 
 
 **Choosing and reporting a threshold on the same data.** This makes precision and recall optimistic. Select the operating point on validation data, then report it once on the untouched test set.
 
-# Questions
-
-> [!QUESTION]- When is a single evaluation metric insufficient for a release decision?
-> - The metric ignores the cost difference between false positives and false negatives
-> - The test split does not represent production traffic or the order in which data arrives
-> - An aggregate score hides a regression in a critical cohort
-> - A ranking score looks strong while downstream logic depends on calibrated probabilities
-
-> [!QUESTION]- Why can an offline improvement fail to produce a better production outcome?
-> - The frozen test sample can miss shifts in traffic, behavior, or rare cases
-> - Leakage and an unrealistic split can reward patterns that are unavailable in production
-> - The chosen metric may be only loosely connected to the business decision
-> - Offline metrics should gate the release. Monitoring and controlled experiments verify the live effect
-
 # References
 
-- [scikit-learn model evaluation](https://scikit-learn.org/stable/modules/model_evaluation.html) — Official guide to scoring APIs, classification and regression metrics, calibration, and model-selection caveats.
-- [ML.NET model evaluation metrics](https://learn.microsoft.com/dotnet/machine-learning/resources/metrics) — Microsoft reference for interpreting the metrics exposed by ML.NET evaluators.
+- [scikit-learn model evaluation](https://scikit-learn.org/stable/modules/model_evaluation.html)
+- [ML.NET model evaluation metrics](https://learn.microsoft.com/dotnet/machine-learning/resources/metrics)

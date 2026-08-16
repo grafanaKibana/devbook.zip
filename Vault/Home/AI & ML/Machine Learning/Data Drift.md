@@ -132,12 +132,8 @@ Scheduled retraining is predictable when labels arrive on a regular cadence and 
 > [!QUESTION]- What is the difference between data drift and concept drift?
 > Data drift changes P(X), such as a new language appearing in support traffic. Concept drift changes P(Y|X), such as yesterday's fraud cues becoming normal behavior. The first can leave the model useful. The second means its learned mapping no longer describes current outcomes. Recent labeled performance separates a harmless input shift from a model that needs updating.
 
-> [!QUESTION]- How can drift be investigated when labels are delayed?
-> Monitor input distributions, score distributions, escalation rates, and other product proxies as early signals. Compare them by meaningful cohort and check the data pipeline before blaming the model. Once labels arrive, recompute the real performance metrics. The proxies only prioritized where to look.
-
 # References
 
-- [Data drift in machine learning models (Evidently AI)](https://www.evidentlyai.com/ml-in-production/data-drift) — distinguishes feature, prediction, and target drift and shows how production monitoring uses reference and current datasets.
-- [Population Stability Index (PSI) explained](https://www.listendata.com/2015/05/population-stability-index.html) — walks through the PSI calculation and the conventional thresholds used in credit risk work.
-- [Monitoring ML models in production (Google MLOps)](https://cloud.google.com/architecture/mlops-continuous-delivery-and-automation-pipelines-in-machine-learning) — places data validation, model validation, deployment, and retraining inside one production pipeline.
-- [Failing Loudly: An Empirical Study of Methods for Detecting Dataset Shift (Rabanser et al., 2019)](https://arxiv.org/abs/1810.11953) — empirical comparison of drift detection methods across different shift types and dataset sizes.
+- [Data drift in machine learning models (Evidently AI)](https://www.evidentlyai.com/ml-in-production/data-drift)
+- [Monitoring ML models in production (Google MLOps)](https://cloud.google.com/architecture/mlops-continuous-delivery-and-automation-pipelines-in-machine-learning)
+- [Failing Loudly: An Empirical Study of Methods for Detecting Dataset Shift (Rabanser et al., 2019)](https://arxiv.org/abs/1810.11953)

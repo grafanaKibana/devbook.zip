@@ -225,22 +225,12 @@ The practical default is deterministic metrics on all traffic, asynchronous judg
 
 # Questions
 
-> [!QUESTION]- Why is sampled LLM-as-judge scoring preferred over scoring every response in production?
-> Full scoring adds a model call per request and may add user-visible latency if it runs inline. Asynchronous sampling covers the quality distribution at a fraction of the cost. The sample must be stratified so rare query classes are represented. Lower rates save money but increase the chance of missing a regression in a small segment. The rate should fall only after coverage has been measured.
-
-> [!QUESTION]- Why should RAG alerting use relative regression thresholds instead of absolute quality targets?
-> Corpus size, model behavior, and query mix all move over time, so a launch-day threshold becomes stale. A rolling segment baseline catches sudden regressions against the current system. After an intentional change, compare the candidate with the old control and promote a new baseline only after acceptance. Relative thresholds can absorb slow deterioration, which is why a periodic absolute quality floor is still needed.
-
 > [!QUESTION]- How does monitoring differ from evaluation in a RAG system, and why are both needed?
 > Evaluation gates a candidate pipeline against a controlled dataset before release. Monitoring observes live traffic after release, where query distribution and source data keep changing. Production failures found through monitoring should become new evaluation cases. Without that loop, evaluation misses new incidents and monitoring keeps rediscovering old ones.
 
 # References
 
-- [OpenTelemetry GenAI semantic conventions — metrics, spans, and events for LLM operations (OpenTelemetry)](https://opentelemetry.io/docs/specs/semconv/gen-ai/) — defines the operation, token-usage, model, and tracing attributes used in the instrumentation model above.
-- [RAGAS metrics reference — faithfulness, context precision, answer relevancy formulas (RAGAS docs)](https://docs.ragas.io/en/stable/concepts/metrics/available_metrics/)
-- [RAG evaluators — groundedness, relevance, completeness scoring (Azure AI Foundry)](https://learn.microsoft.com/en-us/azure/ai-foundry/concepts/evaluation-evaluators/rag-evaluators)
+- [OpenTelemetry GenAI semantic conventions — metrics, spans, and events for LLM operations (OpenTelemetry)](https://opentelemetry.io/docs/specs/semconv/gen-ai/)
 - [LangSmith evaluation concepts — offline vs. online evaluation architecture and production trace scoring (LangSmith docs)](https://docs.smith.langchain.com/evaluation/concepts)
 - [Phoenix LLM tracing — OpenTelemetry-native observability for RAG pipelines (Arize AI)](https://docs.arize.com/phoenix/tracing/llm-traces)
 - [Embedding drift detection methods — statistical approaches for retrieval distribution monitoring (Evidently AI)](https://www.evidentlyai.com/blog/embedding-drift-detection)
-- [Creating a LLM-as-a-judge that drives business results — binary pass/fail, critique shadowing, and calibration (Hamel Husain)](https://hamel.dev/blog/posts/llm-judge/)
-- [What we learned from a year of building with LLMs — eval strategy, monitoring, and production judge reliability (Applied LLMs)](https://applied-llms.org/)

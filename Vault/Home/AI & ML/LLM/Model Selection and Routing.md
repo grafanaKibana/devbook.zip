@@ -105,4 +105,4 @@ Versions should be pinned where the provider allows it. A model change behind an
 
 # References
 
-- [LiteLLM](https://docs.litellm.ai/) — practical gateway reference for provider abstraction, fallback, and routing configuration.
+- [LiteLLM](https://docs.litellm.ai/)

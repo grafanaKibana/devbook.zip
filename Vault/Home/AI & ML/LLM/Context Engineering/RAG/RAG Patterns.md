@@ -266,16 +266,10 @@ This family fits high-risk systems that can calibrate evidence evaluators or tra
 > [!QUESTION]- When is GraphRAG a better fit than plain vector retrieval?
 > GraphRAG earns its cost when answers depend on explicit entity relations or paths across many documents. Compliance tracing and architecture impact analysis are examples. Plain vector retrieval remains better for independent fact lookup because it avoids a graph extraction pipeline.
 
-> [!QUESTION]- Why is hybrid search plus reranking usually added before GraphRAG or agentic RAG?
-> It fixes the common case first: evidence is missing from dense search or buried below weak chunks. The existing corpus and search path remain intact. GraphRAG needs a new index. Agentic RAG needs tool control and execution limits. Those costs make sense only after evaluation shows that relationships or multi-tool work are the real bottleneck.
-
 # References
 
-- [Hybrid search in Azure AI Search](https://learn.microsoft.com/en-us/azure/search/hybrid-search-overview) — explains why modern search stacks combine keyword and vector retrieval rather than relying on dense vectors alone.
-- [Semantic ranking in Azure AI Search](https://learn.microsoft.com/en-us/azure/search/semantic-search-overview) — documents reranking as a second-stage relevance step after the initial candidate set is retrieved.
-- [Contextual Retrieval](https://www.anthropic.com/news/contextual-retrieval) — Anthropic's 2024 write-up on enriching chunks with document-aware context before indexing.
-- [Advanced retrieval strategies in LlamaIndex](https://developers.llamaindex.ai/python/framework/module_guides/querying/retriever/retrievers/) — framework documentation covering practical retriever variants such as hybrid, recursive, and auto-retrieval patterns.
-- [Multimodal search in Azure AI Search](https://learn.microsoft.com/en-us/azure/search/multimodal-search-overview) — production guidance for retrieving over mixed text and image content.
-- [From Local to Global: A Graph RAG Approach to Query-Focused Summarization](https://arxiv.org/abs/2404.16130) — Microsoft Research paper behind GraphRAG. Use it for relationship-heavy and global-synthesis workloads, not as a default RAG baseline.
-- [Self-RAG: Learning to Retrieve, Generate, and Critique Through Self-Reflection](https://arxiv.org/abs/2310.11511) — research source for reflection-token-based retrieval and critique. Included to explain why Self-RAG is powerful but rarely plug-and-play.
-- [Corrective Retrieval Augmented Generation](https://arxiv.org/abs/2401.15884) — research source for evaluator-driven correction and web-search fallback. Useful when studying corrective RAG but not a first production pattern.
+- [Hybrid search in Azure AI Search](https://learn.microsoft.com/en-us/azure/search/hybrid-search-overview)
+- [Contextual Retrieval](https://www.anthropic.com/news/contextual-retrieval)
+- [From Local to Global: A Graph RAG Approach to Query-Focused Summarization](https://arxiv.org/abs/2404.16130)
+- [Self-RAG: Learning to Retrieve, Generate, and Critique Through Self-Reflection](https://arxiv.org/abs/2310.11511)
+- [Corrective Retrieval Augmented Generation](https://arxiv.org/abs/2401.15884)

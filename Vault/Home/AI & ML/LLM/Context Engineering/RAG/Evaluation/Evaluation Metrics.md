@@ -115,8 +115,5 @@ Binary judgments often calibrate more reliably than broad numeric scales. Check 
 
 # References
 
-- [RAGAS metrics reference -- faithfulness, context precision, answer correctness (RAGAS docs)](https://docs.ragas.io/en/stable/concepts/metrics/available_metrics/) — current metric catalog and required inputs for the available Context Precision variants.
-- [RAG evaluators -- groundedness, relevance, completeness (Azure AI Foundry)](https://learn.microsoft.com/en-us/azure/ai-foundry/concepts/evaluation-evaluators/rag-evaluators) — Microsoft definitions and input contracts for evaluating retrieval and grounded generation.
-- [RAGAS -- automated evaluation of RAG pipelines (EACL 2024)](https://arxiv.org/abs/2309.15217) — original paper describing the framework's reference-free and reference-based RAG evaluation approach.
-- [Creating a LLM-as-a-judge that drives business results (Hamel Husain)](https://hamel.dev/blog/posts/llm-judge/) — practitioner guidance on building task-specific judges and validating them against human labels.
-- [Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena -- positional and verbosity bias (NeurIPS 2023)](https://arxiv.org/abs/2306.05685) — primary evaluation of judge-model agreement and systematic bias.
+- [RAGAS -- automated evaluation of RAG pipelines (EACL 2024)](https://arxiv.org/abs/2309.15217)
+- [Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena -- positional and verbosity bias (NeurIPS 2023)](https://arxiv.org/abs/2306.05685)

@@ -47,7 +47,7 @@ The system prompt, conversation history, retrieved documents, tool schemas, tool
 Three costs are easy to miss:
 
 - Output needs headroom. Budget `max_tokens` against what remains after the input. [[Generation]] cannot produce tokens that the context limit has already consumed.
-- Tool schemas are sent as input. Names, descriptions, and parameter definitions can consume thousands of tokens before the first call. [[Tools]] covers the accuracy cost of oversized toolsets.
+- Tool schemas are sent as input. Names, descriptions, and parameter definitions can consume thousands of tokens before the first call. [[Tool Design]] covers the accuracy cost of oversized toolsets.
 - History grows every turn. Reasoning, calls, and results quietly fill the window during long [[Agent Loop|agent loops]] unless the runtime compacts them.
 
 # Techniques
@@ -56,7 +56,7 @@ Three costs are easy to miss:
 
 **Selection over stuffing.** A few complete, relevant chunks usually beat a pile of fragments. [[Retrieval]] keeps the candidate set focused, while [[Re-ranking|Reranking]] spends extra work to choose what actually enters the prompt.
 
-**Compaction.** Replace old turns with a short record of decisions, constraints, and pending work before history crowds out the task. Tool results should return only fields used by the next decision. [[Tools]] shows how oversized API payloads consume context without improving the next decision. [[Home/AI & ML/LLM/Loop Engineering/Loop Engineering|Loop Engineering]] turns token pressure into an explicit compact-or-stop condition.
+**Compaction.** Replace old turns with a short record of decisions, constraints, and pending work before history crowds out the task. Tool results should return only fields used by the next decision. [[Tool Design]] shows how oversized API payloads consume context without improving the next decision. [[Home/AI & ML/LLM/Loop Engineering/Loop Engineering|Loop Engineering]] turns token pressure into an explicit compact-or-stop condition.
 
 **Structure.** Separate trusted instructions from untrusted data with explicit sections. That makes the payload easier to interpret and supports [[Guardrails|prompt injection]] defenses. [[Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering|prompt anatomy]] supplies the smaller building blocks.
 
@@ -98,7 +98,7 @@ Three costs are easy to miss:
 
 **Why it happens:** many clients send every connected schema on every request, even when the task needs only one.
 
-**How to avoid it:** expose only the tools needed for the current task, or use tool search to load them on demand. [[Tools]] covers the degradation seen with large toolsets.
+**How to avoid it:** expose only the tools needed for the current task, or use tool search to load them on demand. [[Tool Design]] covers the degradation seen with large toolsets.
 
 # Tradeoffs
 
@@ -118,12 +118,9 @@ The smallest context that answers the task is the starting point. Retrieval and 
 > Attention is uneven across a long window, so evidence buried in the middle may be underused. Added tokens also compete with the evidence already present, even when they are loosely relevant. Larger inputs cost more and take longer. The fix is signal density: keep fewer complete chunks, order them deliberately, and measure whether each increase in context improves the answer.
 
 > [!QUESTION]- What are the main techniques for keeping a long-running agent's context under control?
-> Track the token budget on every iteration. Select a small set of strong evidence and put the best material where the model will use it. Compact old turns, trim tool results to the fields needed next, and offload bulky state behind references. Isolation helps when concerns need conflicting context, but it adds coordination cost. The runtime should compact or stop before arbitrary truncation decides what disappears.
-
+> Track the token budget on every iteration. Select a small set of strong evidence and put the best material where the model will use it. Compact old turns, trim tool results to the fields needed next, and offload bulky state behind references.
 # References
 
-- [Lost in the Middle: How Language Models Use Long Contexts (Liu et al., 2023)](https://arxiv.org/abs/2307.03172) — the U-shaped attention finding that motivates ordering and selection.
-- [Effective context engineering for AI agents (Anthropic Engineering)](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents) — practitioner guidance on context as a managed, finite resource for agents.
-- [Context Rot: How Increasing Input Tokens Impacts LLM Performance (Chroma Research)](https://research.trychroma.com/context-rot) — empirical study showing quality degradation as context length grows.
-- [Prompt caching (Anthropic Docs)](https://platform.claude.com/docs/en/build-with-claude/prompt-caching) — making stable context prefixes cheap to re-send.
-- [Prompt engineering overview (Anthropic Docs)](https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/overview) — the prompt-level building blocks that context engineering assembles.
+- [Lost in the Middle: How Language Models Use Long Contexts (Liu et al., 2023)](https://arxiv.org/abs/2307.03172)
+- [Effective context engineering for AI agents (Anthropic Engineering)](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents)
+- [Context Rot: How Increasing Input Tokens Impacts LLM Performance (Chroma Research)](https://research.trychroma.com/context-rot)

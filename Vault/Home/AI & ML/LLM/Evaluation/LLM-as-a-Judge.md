@@ -119,15 +119,11 @@ Calibrate on labeled cases before trusting the aggregate. Inspect disagreements,
 # Questions
 
 > [!QUESTION]- When does LLM-as-a-judge fit better than a deterministic metric, and what evidence makes the judge trustworthy?
-> Use a judge when acceptance depends on meaning that fixed rules cannot capture. Keep exact constraints in deterministic checks. Trust comes from measured agreement with representative human labels, stability under answer-order swaps, and repeated calibration after the judge changes.
+> Use a judge when acceptance depends on meaning that fixed rules cannot capture. Keep exact constraints in deterministic checks. Trust comes from measured agreement with human labels, stability under answer-order swaps, and repeated calibration after the judge changes.
 
 # References
 
-- [Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena (Zheng et al., NeurIPS 2023)](https://arxiv.org/abs/2306.05685): primary evidence on position, verbosity, and self-enhancement biases in model judges.
-- [LLM-as-a-judge evals guide (OpenAI API Docs)](https://developers.openai.com/api/docs/guides/evals): practical judge configuration and evaluation workflow.
-- [Evaluation best practices (OpenAI API Docs)](https://developers.openai.com/api/docs/guides/evaluation-best-practices): guidance on pairwise comparison, classification, and continuous evaluation.
-- [Define your success criteria (Anthropic Docs)](https://docs.anthropic.com/en/docs/test-and-evaluate/define-success): criteria and rubric design before evaluation begins.
-- [Evaluating LLM outputs in production (Eugene Yan)](https://eugeneyan.com/writing/llm-evaluations/): practitioner analysis of evaluation methods and judge calibration.
-- [Microsoft.Extensions.AI.Evaluation docs (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/ai/conceptual/evaluation-libraries): .NET evaluators, reporting, and quality metrics.
-- [MEAI evaluation samples (dotnet/ai-samples)](https://github.com/dotnet/ai-samples/tree/main/src/microsoft-extensions-ai-evaluation): runnable examples for the Microsoft evaluation libraries.
-- [AI Risk Management Framework (NIST)](https://www.nist.gov/itl/ai-risk-management-framework): vendor-neutral governance context for measurement and validation.
+- [Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena (Zheng et al., NeurIPS 2023)](https://arxiv.org/abs/2306.05685)
+- [LLM-as-a-judge evals guide (OpenAI API Docs)](https://developers.openai.com/api/docs/guides/evals)
+- [Microsoft.Extensions.AI.Evaluation docs (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/ai/conceptual/evaluation-libraries)
+- [MEAI evaluation samples (dotnet/ai-samples)](https://github.com/dotnet/ai-samples/tree/main/src/microsoft-extensions-ai-evaluation)

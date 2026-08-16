@@ -94,6 +94,5 @@ Visible task success can make a judge rationalize a messy path. Hide the outcome
 
 # References
 
-- [Trajectory evaluations -- reference-match modes and LLM-judge scoring of agent trajectories (LangSmith docs)](https://docs.langchain.com/langsmith/trajectory-evals) — practitioner how-to for both families, including the strict/unordered/subset/superset match modes.
-- [AgentBench -- evaluating LLMs as agents across eight interactive environments (Liu et al., 2023)](https://arxiv.org/abs/2308.03688) — multi-environment agent benchmark and a reference point for trajectory-level success measurement.
-- [tau-bench -- tool-agent-user interaction with policy-grounded trajectories (Yao et al., Sierra, 2024)](https://arxiv.org/abs/2406.12045) — supplies reference end states and rules that make trajectory ground truth tractable.
+- [Trajectory evaluations -- reference-match modes and LLM-judge scoring of agent trajectories (LangSmith docs)](https://docs.langchain.com/langsmith/trajectory-evals)
+- [AgentBench -- evaluating LLMs as agents across eight interactive environments (Liu et al., 2023)](https://arxiv.org/abs/2308.03688)

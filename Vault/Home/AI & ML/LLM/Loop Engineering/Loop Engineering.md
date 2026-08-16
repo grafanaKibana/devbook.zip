@@ -62,7 +62,4 @@ Each iteration adds calls and results to the history. Without intervention, cont
 
 # References
 
-- [Building Effective Agents (Anthropic Engineering)](https://www.anthropic.com/engineering/building-effective-agents) — the loop as "LLM using tools in a loop", plus the simplicity/transparency/feedback principles that motivate gates and stop criteria.
-- [Multi-Agent Research System — Engineering (Anthropic)](https://www.anthropic.com/engineering/multi-agent-research-system) — production lessons on budgets, artifact offloading, and coordinating many loops.
-- [Effective context engineering for AI agents (Anthropic Engineering)](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents) — compaction, note-taking, and sub-agent isolation as long-horizon loop techniques.
-- [Claude Agent SDK — overview (Anthropic)](https://platform.claude.com/docs/en/agent-sdk/overview) — a production harness whose runtime implements the loop: automatic context compaction, permission gates, and session state.
+- [Claude Agent SDK — overview (Anthropic)](https://platform.claude.com/docs/en/agent-sdk/overview)

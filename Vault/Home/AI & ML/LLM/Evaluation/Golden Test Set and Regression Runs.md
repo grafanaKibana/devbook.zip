@@ -94,12 +94,6 @@ Retain hard pass/fail checks where the contract is exact. For semantic dimension
 
 Use the golden set to compare normal behavior across changes. Run targeted suites on the boundaries they protect. A calibrated judge can scale semantic scoring, while human review remains the reference for ambiguous or high-cost decisions.
 
-# Questions
-
-
 # References
 
-- [Evaluation best practices (OpenAI API Docs)](https://developers.openai.com/api/docs/guides/evaluation-best-practices): guidance on representative datasets, pairwise comparison, and continuous evaluation.
-- [Define your success criteria (Anthropic Docs)](https://docs.anthropic.com/en/docs/test-and-evaluate/define-success): a framework for turning product requirements into measurable evaluation criteria.
-- [OWASP LLM Prompt Injection Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/LLM_Prompt_Injection_Prevention_Cheat_Sheet.html): attack patterns and controls that can seed targeted security suites.
-- [Groundedness in Azure AI Content Safety](https://learn.microsoft.com/azure/ai-services/content-safety/concepts/groundedness): Microsoft's definition of groundedness and the boundary of its detection approach.
+- [Evaluation best practices (OpenAI API Docs)](https://developers.openai.com/api/docs/guides/evaluation-best-practices)

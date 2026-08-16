@@ -154,8 +154,7 @@ The parser rejects anything outside this schema. The dispatcher must still map t
 
 # References
 
-- [OWASP Top 10 for LLM Applications](https://genai.owasp.org/llm-top-10/) — OWASP's risk catalog for LLM applications, including prompt injection, improper output handling, and excessive agency.
-- [OWASP LLM Prompt Injection Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/LLM_Prompt_Injection_Prevention_Cheat_Sheet.html) — implementation guidance for direct and indirect injection, least privilege, and output validation.
-- [Mitigate jailbreaks and prompt injections (Anthropic Docs)](https://docs.anthropic.com/en/docs/test-and-evaluate/strengthen-guardrails/mitigate-jailbreaks) — vendor guidance on input screening and repeated red-team evaluation.
-- [Azure AI Content Safety overview (Microsoft Learn)](https://learn.microsoft.com/en-us/azure/ai-services/content-safety/overview) — official documentation for Microsoft's managed content-safety and prompt-shield features.
-- [Llama Guard (Meta)](https://ai.meta.com/research/publications/llama-guard-llm-based-input-output-safeguard-for-human-ai-conversations/) — the primary paper for Meta's input/output safety classifier and its intended policy-filtering role.
+- [OWASP LLM Prompt Injection Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/LLM_Prompt_Injection_Prevention_Cheat_Sheet.html)
+- [Mitigate jailbreaks and prompt injections (Anthropic Docs)](https://docs.anthropic.com/en/docs/test-and-evaluate/strengthen-guardrails/mitigate-jailbreaks)
+- [Azure AI Content Safety overview (Microsoft Learn)](https://learn.microsoft.com/en-us/azure/ai-services/content-safety/overview)
+- [Llama Guard (Meta)](https://ai.meta.com/research/publications/llama-guard-llm-based-input-output-safeguard-for-human-ai-conversations/)

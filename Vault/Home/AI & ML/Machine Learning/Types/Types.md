@@ -94,22 +94,8 @@ Reinforcement learning is the narrow branch. It needs an environment or simulato
 > [!QUESTION]- What learning signal distinguishes supervised, self-supervised, and reinforcement learning even when all three use a neural network?
 > Supervised learning receives an external target for each example. Self-supervised learning derives a proxy target from the input itself, such as a hidden or next token. Reinforcement learning receives rewards from actions in an environment and optimizes return across a trajectory. The architecture does not determine which learning problem is being solved.
 
-> [!QUESTION]- A clustering run produces stable, well-separated groups. What evidence is still needed before those groups should affect a business rule?
-> The groups need an external validation tied to the decision: different outcomes, costs, or responses to an intervention on held-out data. Stability only shows that the algorithm repeatedly finds the same geometry. It does not show that the geometry represents a useful business distinction.
-
-> [!QUESTION]- When can pseudo-labeling make a semi-supervised model worse than its supervised baseline, and which validation slices would reveal the damage?
-> A weak or miscalibrated baseline can assign confident wrong labels, then reinforce them during retraining. Majority classes usually contribute more pseudo-labels, so overall accuracy may rise while minority recall falls. Compare the semi-supervised model with the supervised baseline by class, confidence band, cohort, and source of labeled versus pseudo-labeled data.
-
-> [!QUESTION]- A team proposes reinforcement learning for a one-step routing decision with historical outcome labels. Which property of the problem should decide whether RL is justified?
-> RL is justified only when actions change later state and the objective depends on consequences across several steps. If each routing decision has an independent historical target, supervised learning provides a simpler and more directly testable formulation.
-
-> [!QUESTION]- Why can a falling self-supervised pretraining loss fail to improve the downstream task?
-> The proxy objective may reward distinctions that the downstream task does not use. More next-token accuracy, for example, does not guarantee a better fraud or retrieval representation. Transfer must be measured on the downstream task with held-out data. Pretraining loss is evidence only about the proxy objective.
-
 # References
 
-- [Google ML Intro — What is ML?](https://developers.google.com/machine-learning/intro-to-ml/what-is-ml) — Defines supervised, unsupervised, and reinforcement learning through the data and feedback each one receives.
-- [scikit-learn — Supervised learning](https://scikit-learn.org/stable/supervised_learning.html) — Documents the estimators and fitting assumptions behind practical supervised learning.
-- [Hugging Face — Self-supervised learning](https://huggingface.co/blog/self-supervised-learning) — Explains how proxy targets create training signal from unlabeled language or image data.
-- [OpenAI Spinning Up in Deep RL](https://spinningup.openai.com/en/latest/spinningup/rl_intro.html) — Introduces policies, trajectories, return, and the delayed-reward formulation used in reinforcement learning.
-- [Rules of ML](https://developers.google.com/machine-learning/guides/rules-of-ml) — Grounds model choice in measurable product objectives, data pipelines, and simple baselines.
+- [Google ML Intro — What is ML?](https://developers.google.com/machine-learning/intro-to-ml/what-is-ml)
+- [scikit-learn — Supervised learning](https://scikit-learn.org/stable/supervised_learning.html)
+- [OpenAI Spinning Up in Deep RL](https://spinningup.openai.com/en/latest/spinningup/rl_intro.html)

@@ -143,22 +143,13 @@ Privilege separation is the baseline because it limits harm even when the model 
 # Questions
 
 > [!QUESTION]- Why is prompt injection fundamentally harder to prevent than SQL injection?
-  > Parameterized SQL gives the database a deterministic split between code and data. A language model interprets both through the same learned behavior, so a delimiter cannot provide the same guarantee. The practical defense contains successful injections with narrow permissions and validated downstream operations.
-
-> [!QUESTION]- How does Excessive Agency (LLM06) compound with Prompt Injection (LLM01)?
-  > Injection supplies influence. Excessive agency supplies authority. Together they let attacker-controlled content steer real tool calls. Reducing injection success helps, but task-scoped tools and approval for high-impact writes are what bound the damage.
+> Parameterized SQL gives the database a deterministic split between code and data. A language model interprets both through the same learned behavior, so a delimiter cannot provide the same guarantee. The practical defense contains successful injections with narrow permissions and validated downstream operations.
 
 > [!QUESTION]- Why should system prompts be treated as public rather than secret?
-  > Prompt extraction cannot be ruled out, so secrecy is an unsafe dependency. A disclosed prompt should reveal no credential and grant no permission. RBAC and tool authorization remain effective even when every instruction is known.
+> Prompt extraction cannot be ruled out, so secrecy is an unsafe dependency. A disclosed prompt should reveal no credential and grant no permission. RBAC and tool authorization remain effective even when every instruction is known.
 
 # References
 
-- [OWASP Top 10 for LLM Applications 2025: official risk descriptions (OWASP Foundation)](https://genai.owasp.org/resource/owasp-top-10-for-llm-applications-2025/) - Primary catalog for the identifiers and risk boundaries used in this note.
-- [Not what you have signed up for: indirect prompt injection (Greshake et al., 2023)](https://arxiv.org/abs/2302.12173) - Early paper demonstrating attacks carried through data retrieved by LLM-integrated applications.
-- [Prompt injection and jailbreaking (OWASP LLM01 entry)](https://genai.owasp.org/llmrisk/llm01-prompt-injection/) - OWASP's attack scenarios and mitigation guidance for direct, indirect, and multimodal injection.
-- [Mitigating Skeleton Key jailbreaks (Microsoft)](https://www.microsoft.com/en-us/security/blog/2024/06/26/mitigating-skeleton-key-a-new-type-of-generative-ai-jailbreak-technique/) - Microsoft's description of a jailbreak technique and its defense-in-depth recommendations.
-- [Embrace the Red: lessons from testing more than 100 generative AI products (Microsoft AI Red Team)](https://www.microsoft.com/en-us/security/blog/2025/02/04/embrace-the-red-top-10-lessons-from-red-teaming-over-100-generative-ai-products-at-microsoft/) - Production red-team observations about recurring failure modes and system-level testing.
-- [LLM AI Security and Governance Checklist (OWASP)](https://genai.owasp.org/resource/llm-ai-security-governance-checklist/) - Operational checklist for ownership, data handling, deployment, and incident response.
-- [Samsung restricts generative AI after internal data disclosure (TechCrunch, 2023)](https://techcrunch.com/2023/05/02/samsung-bans-use-of-generative-ai-tools-like-chatgpt-after-internal-data-leak/) - Secondary reporting for the enterprise disclosure example discussed under LLM02.
-- [AI supply chain security risks (OWASP LLM03 entry)](https://genai.owasp.org/llmrisk/llm03-supply-chain/) - OWASP guidance on model, data, and component provenance.
-- [Reduce hallucinations (Anthropic Docs)](https://docs.anthropic.com/en/docs/test-and-evaluate/strengthen-guardrails/reduce-hallucinations) - Vendor guidance for evidence-backed output and abstention, relevant to LLM09.
+- [OWASP Top 10 for LLM Applications 2025: official risk descriptions (OWASP Foundation)](https://genai.owasp.org/resource/owasp-top-10-for-llm-applications-2025/)
+- [Not what you have signed up for: indirect prompt injection (Greshake et al., 2023)](https://arxiv.org/abs/2302.12173)
+- [Lessons From Red Teaming 100 Generative AI Products (Microsoft Research)](https://www.microsoft.com/en-us/research/publication/lessons-from-red-teaming-100-generative-ai-products/)

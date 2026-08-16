@@ -227,9 +227,7 @@ The table describes steady-state behavior. A practical rollout starts with recur
 
 # References
 
-- [Chunking and integrated vectorization (Azure AI Search)](https://learn.microsoft.com/en-us/azure/search/vector-search-how-to-chunk-documents) — official guidance on token limits, overlap, and index-time chunking.
-- [Text splitters (LangChain docs)](https://python.langchain.com/docs/concepts/text_splitters/) — upstream overview of recursive and structure-aware splitters.
-- [Chunking strategies for RAG (Pinecone)](https://www.pinecone.io/learn/chunking-strategies/) — practitioner overview of fixed, content-aware, and semantic boundaries and their retrieval tradeoffs.
-- [Chunking Strategies for RAG Systems: A Practical Engineering Guide](https://zenvanriel.com/ai-engineer-blog/chunking-strategies-for-rag-systems/) — engineering comparison of splitter choices, overlap, and evaluation considerations.
-- [5 Levels of Text Splitting (Greg Kamradt)](https://github.com/FullStackRetrieval-com/RetrievalTutorials/blob/main/tutorials/LevelsOfTextSplitting/5_Levels_Of_Text_Splitting.ipynb) — executable progression from character splitting to model-assisted semantic boundaries.
-- [Unstructured: Document preprocessing and chunking](https://docs.unstructured.io/open-source/core-functionality/chunking) — upstream contract for preserving document elements while enforcing chunk-size limits.
+- [Chunking and integrated vectorization (Azure AI Search)](https://learn.microsoft.com/en-us/azure/search/vector-search-how-to-chunk-documents)
+- [Chunking strategies for RAG (Pinecone)](https://www.pinecone.io/learn/chunking-strategies/)
+- [5 Levels of Text Splitting (Greg Kamradt)](https://github.com/FullStackRetrieval-com/RetrievalTutorials/blob/main/tutorials/LevelsOfTextSplitting/5_Levels_Of_Text_Splitting.ipynb)
+- [Unstructured: Document preprocessing and chunking](https://docs.unstructured.io/open-source/core-functionality/chunking)

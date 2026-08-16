@@ -159,11 +159,6 @@ Strict output shape needs structured output or schema validation. Examples can c
 
 # References
 
-- [Prompt Engineering Guide - Basics](https://www.promptingguide.ai/introduction/basics) — a compact introduction to instructions, context, input data, and output indicators.
-- [Prompt Engineering Guide - Prompt Elements](https://www.promptingguide.ai/introduction/elements) — examples of the elements that make a prompt contract explicit.
-- [Prompt Engineering Guide - Model Settings](https://www.promptingguide.ai/introduction/settings) — background on temperature, top-p, length limits, and stop sequences.
-- [OpenAI Prompt Engineering Guide](https://platform.openai.com/docs/guides/prompt-engineering) — official guidance on writing and evaluating prompts for OpenAI models.
-- [Anthropic Prompt Engineering Overview](https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/overview) — official workflow guidance for defining success criteria and testing prompt changes.
-- [OWASP Top 10 for LLM Applications](https://owasp.org/www-project-top-10-for-large-language-model-applications/) — the primary threat taxonomy behind the prompt-injection boundary.
-- [OWASP LLM Prompt Injection Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/LLM_Prompt_Injection_Prevention_Cheat_Sheet.html) — layered mitigations for trusted-instruction and untrusted-data handling.
-- [Simon Willison - Delimiters won't save you from prompt injection](https://simonwillison.net/2023/May/11/delimiters-wont-save-you/) — a concrete explanation of why prompt delimiters are not a security boundary.
+- [Prompt Engineering Guide](https://www.promptingguide.ai/)
+- [OpenAI Prompt Engineering Guide](https://platform.openai.com/docs/guides/prompt-engineering)
+- [Anthropic Prompt Engineering Overview](https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/overview)

@@ -137,13 +137,8 @@ Mitigation: validate semantic content in addition to schema compliance. For crit
 
 # References
 
-- [Chat Completions API — generation parameters reference (OpenAI)](https://platform.openai.com/docs/api-reference/chat/create) — official parameter contract for chat generation.
-- [Messages API — temperature, top_p, top_k, stop_sequences (Anthropic)](https://docs.anthropic.com/en/api/messages) — official request schema for Anthropic generation controls.
-- [REST API reference — generation parameters for Azure OpenAI (Microsoft Learn)](https://learn.microsoft.com/azure/ai-foundry/openai/reference) — official Azure OpenAI parameter reference.
-- [Structured Outputs — JSON schema enforcement and constrained decoding (OpenAI)](https://platform.openai.com/docs/guides/structured-outputs) — provider documentation for schema-constrained generation.
-- [Citations API — source-grounded responses with citation objects (Anthropic)](https://docs.anthropic.com/en/docs/build-with-claude/citations) — provider documentation for structured citation objects.
-- [Groundedness detection — NLI-based claim verification (Azure AI Content Safety)](https://learn.microsoft.com/azure/ai-services/content-safety/concepts/groundedness) — managed groundedness-checking contract and limitations.
-- [Lost in the Middle — how language models use long contexts (Liu et al. 2023)](https://arxiv.org/abs/2307.03172) — primary experiments on information position within long contexts.
-- [MiniCheck — efficient fact-checking of LLMs on grounding documents (EMNLP 2024)](https://aclanthology.org/2024.emnlp-main.499) — primary evaluation of a compact claim-verification model.
-- [Using logprobs for debugging and confidence estimation (OpenAI Cookbook)](https://cookbook.openai.com/examples/using_logprobs) — provider examples for interpreting token probabilities.
-- [Evaluating LLM temperature — systematic methodology for production tuning (Promptfoo)](https://www.promptfoo.dev/docs/guides/evaluate-llm-temperature/) — a practical secondary guide for task-specific parameter evaluation.
+- [Chat Completions API reference (OpenAI)](https://developers.openai.com/api/reference/resources/chat)
+- [Citations API — source-grounded responses with citation objects (Anthropic)](https://docs.anthropic.com/en/docs/build-with-claude/citations)
+- [Groundedness detection — NLI-based claim verification (Azure AI Content Safety)](https://learn.microsoft.com/azure/ai-services/content-safety/concepts/groundedness)
+- [Lost in the Middle — how language models use long contexts (Liu et al. 2023)](https://arxiv.org/abs/2307.03172)
+- [MiniCheck — efficient fact-checking of LLMs on grounding documents (EMNLP 2024)](https://aclanthology.org/2024.emnlp-main.499)

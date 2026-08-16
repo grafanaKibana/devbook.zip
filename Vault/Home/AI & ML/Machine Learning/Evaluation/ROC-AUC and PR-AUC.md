@@ -139,13 +139,8 @@ Threshold selection needs a constraint rather than a visually appealing knee. A 
 > [!QUESTION]- When is PR-AUC more useful than ROC-AUC?
 > PR-AUC is more revealing when positives are rare and the quality of positive predictions drives cost, as in fraud alerts or anomaly review. False positives directly reduce precision. The score must be interpreted against the dataset's prevalence.
 
-> [!QUESTION]- Why can high accuracy be misleading on imbalanced data?
-> A classifier can predict the majority negative class almost every time and still look accurate. Precision and recall expose its positive-class behavior. PR-AUC shows how that tradeoff changes across thresholds.
-
 # References
 
-- [ML.NET BinaryClassificationMetrics](https://learn.microsoft.com/dotnet/api/microsoft.ml.data.binaryclassificationmetrics) — API reference for .NET binary classification evaluation metrics including AUC, accuracy, and F1.
-- [ML.NET evaluate binary classification model](https://learn.microsoft.com/dotnet/machine-learning/resources/metrics#evaluation-metrics-for-binary-classification) — guide to interpreting binary classification metrics in ML.NET with threshold selection guidance.
-- [ML.NET tutorial binary classification](https://learn.microsoft.com/dotnet/machine-learning/tutorials/sentiment-analysis) — end-to-end sentiment analysis tutorial showing model training, evaluation, and metric interpretation.
-- [The Relationship Between Precision Recall and ROC Curves](https://dl.acm.org/doi/10.1145/1143844.1143874) — derives the mathematical relationship between ROC and PR spaces and compares dominance in the two views.
-- [Precision Recall Plot is More Informative than the ROC Plot when Evaluating Binary Classifiers on Imbalanced Datasets](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4349800/) — compares ROC and PR plots on imbalanced bioinformatics datasets and shows how ROC can obscure poor positive-class performance.
+- [ML.NET evaluate binary classification model](https://learn.microsoft.com/dotnet/machine-learning/resources/metrics#evaluation-metrics-for-binary-classification)
+- [The Relationship Between Precision Recall and ROC Curves](https://dl.acm.org/doi/10.1145/1143844.1143874)
+- [Precision Recall Plot is More Informative than the ROC Plot when Evaluating Binary Classifiers on Imbalanced Datasets](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4349800/)

@@ -72,15 +72,10 @@ The two techniques can work together. Fine-tuning can stabilize format or refusa
 > [!QUESTION]- Why should advanced RAG patterns be introduced incrementally instead of all at once?
 > Every added stage creates another place for quality, latency, or cost to regress. Introduce one pattern against a measured baseline, then keep it only if it fixes a frequent failure. Shipping several together makes attribution difficult and often leaves expensive machinery with no proven benefit.
 
-> [!QUESTION]- When does fine-tuning beat adding more retrieval sophistication?
-> Fine-tuning fits a behavioral failure. If the right evidence is present but the model repeatedly violates a format or policy, another retrieval stage attacks the wrong problem. Missing or stale evidence remains a retrieval failure because training only creates another aging snapshot. Use faithfulness and retrieval traces to identify which side failed before changing either one.
-
 > [!QUESTION]- When a RAG answer is wrong, how do you tell whether retrieval or generation is at fault?
 > Inspect the context sent to generation. Missing relevant evidence points to retrieval, where chunking or ranking may need work. Evidence that is present but ignored or contradicted points to generation and faithfulness. Separate metrics matter because the repairs go in opposite directions. One end-to-end score cannot locate the fault.
 
 # References
 
-- [Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks](https://arxiv.org/abs/2005.11401) — the original RAG paper. Useful for understanding the baseline retrieve-then-generate formulation before modern production extensions.
-- [RAG techniques in Azure AI Search](https://learn.microsoft.com/en-us/azure/search/retrieval-augmented-generation-overview) — Microsoft's current production-oriented overview of classic RAG, chunking, indexing, retrieval, and answer generation.
-- [Retrieval-Augmented Generation for Large Language Models: A Survey (Gao et al., 2024)](https://arxiv.org/abs/2312.10997) — maps naive, advanced, and modular RAG architectures.
-- [Fine-tuning guide (OpenAI)](https://platform.openai.com/docs/guides/fine-tuning) — provider guidance on when fine-tuning is and is not the right tool, complementing the decision rules above.
+- [Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks](https://arxiv.org/abs/2005.11401)
+- [Retrieval-Augmented Generation for Large Language Models: A Survey (Gao et al., 2024)](https://arxiv.org/abs/2312.10997)

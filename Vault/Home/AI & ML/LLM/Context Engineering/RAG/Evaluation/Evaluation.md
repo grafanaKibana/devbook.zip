@@ -43,5 +43,5 @@ return FolderStructureMap;
 
 # References
 
-- [RAGAS metrics reference](https://docs.ragas.io/en/stable/concepts/metrics/available_metrics/) — definitions and implementations for faithfulness, context precision, and answer correctness.
-- [RAG evaluators in Azure AI Foundry](https://learn.microsoft.com/en-us/azure/ai-foundry/concepts/evaluation-evaluators/rag-evaluators) — provider documentation for groundedness, relevance, and response completeness evaluators.
+- [RAGAS metrics reference](https://docs.ragas.io/en/stable/concepts/metrics/available_metrics/)
+- [RAG evaluators in Azure AI Foundry](https://learn.microsoft.com/en-us/azure/ai-foundry/concepts/evaluation-evaluators/rag-evaluators)

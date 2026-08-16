@@ -129,16 +129,6 @@ The release gate needs measurable quality by important cohort, an owner for aler
 
 More authority can reduce queue work while increasing how far one bad policy or drift event spreads. Error cost, reversibility, production evidence, and operational ownership decide the level. Team confidence is not evidence.
 
-# Questions
-
-> [!QUESTION]- When is Shadow Mode the right starting point?
-> Shadow mode can test production inputs and the inference path without changing decisions. It is especially useful when offline data may not represent live traffic. It is not mandatory for every low-risk feature, and it still needs privacy and capacity controls. The real requirement is production-shaped evidence before authority expands.
-
-> [!QUESTION]- What signals indicate it is safe to move from Partial to Full Automation?
-> The automated slice must meet its error-cost constraint across important cohorts and traffic cycles. Cases outside the training distribution need an explicit policy. Monitoring, ownership, and a tested rollback must already work. Full automation is justified only when the remaining mistakes are recoverable across the entire declared scope.
-
 # References
 
-- [ML deployment strategies (Chip Huyen, Designing Machine Learning Systems)](https://www.oreilly.com/library/view/designing-machine-learning/9781098107956/) — Chapter 9 compares shadow, canary, and experiment-based model deployment patterns.
-- [Human-in-the-loop ML (Hugging Face)](https://huggingface.co/blog/human-in-the-loop) — practical discussion of when and how to keep humans in the loop for AI-assisted workflows.
-- [Shadow mode deployment (Martin Fowler)](https://martinfowler.com/bliki/ShadowDeployment.html) — defines shadow deployment as processing production traffic without letting the new path affect the response.
+- [ML deployment strategies (Chip Huyen, Designing Machine Learning Systems)](https://www.oreilly.com/library/view/designing-machine-learning/9781098107956/)

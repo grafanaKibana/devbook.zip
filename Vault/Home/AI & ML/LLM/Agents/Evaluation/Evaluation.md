@@ -76,10 +76,6 @@ Reliability: solved on 5/5 runs  (pass^5 = 1.0)
 
 Gate releases on **verifiable task success plus efficiency limits**. Both are cheap and objective. Add trajectory judgment when many routes are valid and the outcome cannot separate a clean solve from a lucky one. Hand-built reference traces belong only on narrow, high-stakes tasks. Maintaining them across a broad suite becomes its own project.
 
-# Questions
-
 # References
 
-- [tau-bench -- a benchmark for tool-agent-user interaction with pass^k reliability (Yao et al., Sierra, 2024)](https://arxiv.org/abs/2406.12045) — defines repeated-run `pass^k` reliability for tool-agent-user interactions.
-- [Building Effective Agents -- measurement and the simplest-pattern principle (Anthropic Engineering)](https://www.anthropic.com/engineering/building-effective-agents)
 - [Trajectory evaluations -- reference-match and LLM-judge scoring of agent trajectories (LangSmith docs)](https://docs.langchain.com/langsmith/trajectory-evals)

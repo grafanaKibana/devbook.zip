@@ -8,11 +8,11 @@ tags: [FolderNote]
 publish: true
 level:
   - "3"
-priority: Low
+priority: Medium
 status: Done
 ---
 
-Harness engineering designs the boundary between a model's structured output and the systems that act on it. The boundary includes the available tools in [[Tools]], the client wiring defined by [[Model Context Protocol]], and the execution environment that controls permissions and filesystem access. The model proposes a call. The harness decides what that call can reach and what happens when it runs.
+Harness engineering designs the boundary between a model's structured output and the systems that act on it. The boundary includes the callable operations in [[Tool Design]], the developer-facing extension surfaces in [[Tooling]], the client wiring defined by [[Model Context Protocol]], and the execution environment that controls permissions and filesystem access. The model proposes a call. The harness decides what that call can reach and what happens when it runs.
 
 This puts harness engineering in the middle of the runtime stack. [[Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering|Prompt Engineering]] shapes one instruction, while [[Home/AI & ML/LLM/Context Engineering/Context Engineering|Context Engineering]] decides what the model sees. Harness engineering sets what it can do. [[Home/AI & ML/LLM/Loop Engineering/Loop Engineering|Loop Engineering]] controls how the work continues over time.
 
@@ -27,10 +27,10 @@ return FolderStructureMap;
 
 The tool surface is an API for a consumer that cannot inspect its implementation. A model chooses among tools from their names, descriptions, and schemas, then interprets whatever each call returns. That makes a few surface-wide decisions especially important:
 
-- **Keep the surface small.** Expose only what the current task needs. Every connected schema competes for attention on every request. Large toolsets cost tokens and reduce selection accuracy, as the MCPGauge results in [[Tools]] show. [[Home/AI & ML/LLM/Context Engineering/Context Engineering|Context Engineering]] manages that token cost. The harness decides which tools exist.
-- **Make the contracts consistent.** Shared naming, return shapes, and error conventions let the model reuse what it learned from one tool when it calls another. [[Tools]] covers the lower-level naming and consolidation patterns.
+- **Keep the surface small.** Expose only what the current task needs. Every connected schema competes for attention on every request. Large toolsets cost tokens and reduce selection accuracy, as the MCPGauge results in [[Tool Design]] show. [[Home/AI & ML/LLM/Context Engineering/Context Engineering|Context Engineering]] manages that token cost. The harness decides which tools exist.
+- **Make the contracts consistent.** Shared naming, return shapes, and error conventions let the model reuse what it learned from one tool when it calls another. [[Tool Design]] covers the lower-level naming and consolidation patterns.
 
-Individual descriptions, parameters, compact results, and failure behavior belong in [[Tools]].
+Individual descriptions, parameters, compact results, and failure behavior belong in [[Tool Design]]. Skills, plugins, hooks, coding agents, and repository instructions live together under [[Tooling]].
 
 # The Execution Environment
 
@@ -46,7 +46,7 @@ These are the deterministic controls described by [[Guardrails]]. A prompt can r
 
 A weak harness can waste a strong model. Agents reuse the same surface across many [[Agent Loop]] iterations, so one ambiguous name or vague error can send a run down the wrong path and keep it there. Those failures often look like model failures even though the interface caused them.
 
-The "tool quality" principle in the [[Home/AI & ML/LLM/Agents/Agents|Agents]] hub gives harness work the same weight as prompt work. One repaired tool contract improves every run that shares it. [[Tools]] covers that amortization argument and the SWE-bench case study behind it.
+The "tool quality" principle in the [[Home/AI & ML/LLM/Agents/Agents|Agents]] hub gives harness work the same weight as prompt work. One repaired tool contract improves every run that shares it. [[Tool Design]] covers that amortization argument and the SWE-bench case study behind it.
 
 # Questions
 
@@ -58,7 +58,5 @@ The "tool quality" principle in the [[Home/AI & ML/LLM/Agents/Agents|Agents]] hu
 
 # References
 
-- [Writing effective tools for agents (Anthropic Engineering)](https://www.anthropic.com/engineering/writing-tools-for-agents) — practitioner guidance on designing, consolidating, and evaluating agent tool surfaces.
-- [Building Effective Agents (Anthropic Engineering)](https://www.anthropic.com/engineering/building-effective-agents) — source of the tool-quality principle and the treat-tools-as-API-design framing.
-- [Model Context Protocol (Official docs)](https://modelcontextprotocol.io/) — the open standard for wiring tools and data sources to LLM clients.
-- [Effective context engineering for AI agents (Anthropic Engineering)](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents) — the neighboring discipline. Covers why tool schemas count against the context budget.
+- [Writing effective tools for agents (Anthropic Engineering)](https://www.anthropic.com/engineering/writing-tools-for-agents)
+- [Model Context Protocol (Official docs)](https://modelcontextprotocol.io/)

@@ -1912,49 +1912,6 @@ body.tabsdown-right-personality-separator .tabsdown--right > .tabsdown__tablist 
 	}
 }
 
-@media (any-pointer: coarse) {
-	body.tabsdown-personality-rail .tabsdown__tablist,
-	body.tabsdown-top-personality-rail .tabsdown--top > .tabsdown__tablist,
-	body.tabsdown-bottom-personality-rail .tabsdown--bottom > .tabsdown__tablist,
-	body.tabsdown-left-personality-rail .tabsdown--left > .tabsdown__tablist,
-	body.tabsdown-right-personality-rail .tabsdown--right > .tabsdown__tablist {
-		--tabsdown-tab-min-block-size: 44px;
-	}
-
-	body:is(
-		.tabsdown-top-personality-button,
-		.tabsdown-top-personality-underline,
-		.tabsdown-top-personality-separator
-	) .tabsdown--top > .tabsdown__tablist,
-	body:is(
-		.tabsdown-bottom-personality-button,
-		.tabsdown-bottom-personality-underline,
-		.tabsdown-bottom-personality-separator
-	) .tabsdown--bottom > .tabsdown__tablist,
-	body:is(
-		.tabsdown-left-personality-button,
-		.tabsdown-left-personality-underline,
-		.tabsdown-left-personality-separator
-	) .tabsdown--left > .tabsdown__tablist,
-	body:is(
-		.tabsdown-right-personality-button,
-		.tabsdown-right-personality-underline,
-		.tabsdown-right-personality-separator
-	) .tabsdown--right > .tabsdown__tablist {
-		--tabsdown-tab-min-block-size: var(--tabsdown-tab-min-size);
-	}
-}
-
-/* Side tabs always share the full list width; alignment settings only position
-   the list itself. */
-.tabsdown--left > .tabsdown__tablist > .tabsdown__tab,
-.tabsdown--right > .tabsdown__tablist > .tabsdown__tab {
-	flex: 0 0 auto;
-	inline-size: 100%;
-	min-inline-size: 0;
-	white-space: normal;
-}
-
 /* Too narrow for a side list: move the list above the panels and restore the
    inline-axis alignment cascade in global -> explicit reset order. */
 @container (max-width: 28rem) {
@@ -1971,14 +1928,6 @@ body.tabsdown-right-personality-separator .tabsdown--right > .tabsdown__tablist 
 		max-inline-size: 100%;
 		overflow-x: auto;
 		overflow-y: hidden;
-	}
-
-	body .tabsdown.tabsdown--left > .tabsdown__tablist > .tabsdown__tab.tabsdown__tab,
-	body .tabsdown.tabsdown--right > .tabsdown__tablist > .tabsdown__tab.tabsdown__tab {
-		flex: 1 1 0;
-		inline-size: 0;
-		min-inline-size: var(--tabsdown-tab-min-size);
-		white-space: normal;
 	}
 
 	body:where(.tabsdown-overflow-wrap).tabsdown-alignment-equal-width:not(.tabsdown-left-alignment-start):not(.tabsdown-left-alignment-center) .tabsdown--left:where(:not(.tabsdown--inline-overflow)) > .tabsdown__tablist > .tabsdown__tab,
@@ -2064,5 +2013,261 @@ body.tabsdown-right-personality-separator .tabsdown--right > .tabsdown__tablist 
 		border-block-end-color: color-mix(in srgb, var(--tabsdown-underline-block-end-color) 55%, transparent);
 		border-inline-start-color: color-mix(in srgb, var(--tabsdown-underline-inline-start-color) 55%, transparent);
 		color: var(--text-normal);
+	}
+}
+
+/* Authored block settings close the cascade after global and position choices.
+   Every selector stops at the root's direct tab list so nested and mounted tabs
+   keep resolving their own settings. */
+body .tabsdown.tabsdown--palette-primary {
+	--tabsdown-tab-background: var(--interactive-normal);
+	--tabsdown-tab-border: var(--background-modifier-border);
+	--tabsdown-tab-color: var(--text-muted);
+	--tabsdown-tab-hover-background: var(--interactive-hover);
+	--tabsdown-tab-hover-border: var(--background-modifier-border-hover);
+	--tabsdown-tab-selected-background: var(--tabsdown-accent);
+	--tabsdown-tab-selected-border: var(--tabsdown-accent);
+	--tabsdown-tab-selected-color: var(--text-on-accent);
+	--tabsdown-tab-underline-color: var(--tabsdown-accent);
+	--tabsdown-rail-selected-background: var(--tabsdown-accent);
+}
+
+body .tabsdown.tabsdown--palette-secondary {
+	--tabsdown-tab-background: var(--background-secondary-alt);
+	--tabsdown-tab-border: var(--background-modifier-border);
+	--tabsdown-tab-color: var(--text-muted);
+	--tabsdown-tab-hover-background: var(--background-secondary);
+	--tabsdown-tab-hover-border: var(--background-modifier-border-hover);
+	--tabsdown-tab-selected-background: var(--background-secondary);
+	--tabsdown-tab-selected-border: var(--background-modifier-border-hover);
+	--tabsdown-tab-selected-color: var(--text-normal);
+	--tabsdown-tab-underline-color: var(--text-normal);
+	--tabsdown-rail-selected-background: var(--background-primary);
+}
+
+/* Repeating the root class keeps authored settings above global and position
+   fallbacks without important declarations. */
+body .tabsdown.tabsdown--personality-button.tabsdown.tabsdown.tabsdown.tabsdown > .tabsdown__tablist,
+body .tabsdown.tabsdown--personality-underline.tabsdown.tabsdown.tabsdown.tabsdown > .tabsdown__tablist,
+body .tabsdown.tabsdown--personality-separator.tabsdown.tabsdown.tabsdown.tabsdown > .tabsdown__tablist {
+	--tabsdown-tab-min-block-size: var(--tabsdown-tab-min-size);
+	padding: var(--border-width);
+	border-radius: 0;
+	background-color: transparent;
+}
+
+body .tabsdown.tabsdown--personality-button.tabsdown.tabsdown.tabsdown.tabsdown > .tabsdown__tablist > .tabsdown__tab {
+	padding-block: var(--tabsdown-tab-padding-block);
+	border-width: var(--border-width);
+	border-style: solid;
+	border-color: var(--tabsdown-tab-border);
+	border-radius: var(--tabsdown-radius, var(--radius-s));
+	background-color: var(--tabsdown-tab-background);
+	color: var(--tabsdown-tab-color);
+}
+
+body .tabsdown.tabsdown--personality-button.tabsdown.tabsdown.tabsdown.tabsdown > .tabsdown__tablist > .tabsdown__tab[aria-selected="true"],
+body .tabsdown.tabsdown--personality-button.tabsdown.tabsdown.tabsdown.tabsdown > .tabsdown__tablist > .tabsdown__tab[aria-expanded="true"] {
+	border-color: var(--tabsdown-tab-selected-border);
+	background-color: var(--tabsdown-tab-selected-background);
+	color: var(--tabsdown-tab-selected-color);
+}
+
+body .tabsdown.tabsdown--personality-underline.tabsdown.tabsdown.tabsdown.tabsdown > .tabsdown__tablist > .tabsdown__tab {
+	padding-block: var(--tabsdown-tab-padding-block);
+	border-width: var(--border-width);
+	border-style: solid;
+	border-block-start-width: var(--tabsdown-underline-block-start-width);
+	border-inline-end-width: var(--tabsdown-underline-inline-end-width);
+	border-block-end-width: var(--tabsdown-underline-block-end-width);
+	border-inline-start-width: var(--tabsdown-underline-inline-start-width);
+	border-color: transparent;
+	border-radius: 0;
+	background-color: transparent;
+	color: var(--tabsdown-tab-color);
+}
+
+body .tabsdown.tabsdown--personality-underline.tabsdown.tabsdown.tabsdown.tabsdown > .tabsdown__tablist > .tabsdown__tab[aria-selected="true"],
+body .tabsdown.tabsdown--personality-underline.tabsdown.tabsdown.tabsdown.tabsdown > .tabsdown__tablist > .tabsdown__tab[aria-expanded="true"] {
+	border-block-start-color: var(--tabsdown-underline-block-start-color);
+	border-inline-end-color: var(--tabsdown-underline-inline-end-color);
+	border-block-end-color: var(--tabsdown-underline-block-end-color);
+	border-inline-start-color: var(--tabsdown-underline-inline-start-color);
+	background-color: transparent;
+	color: var(--text-normal);
+}
+
+body .tabsdown.tabsdown--personality-separator.tabsdown.tabsdown.tabsdown.tabsdown > .tabsdown__tablist > .tabsdown__tab,
+body .tabsdown.tabsdown--personality-rail.tabsdown.tabsdown.tabsdown.tabsdown > .tabsdown__tablist > .tabsdown__tab {
+	border-width: var(--border-width);
+	border-style: solid;
+	border-color: transparent;
+	border-radius: 0;
+	background-color: transparent;
+	color: var(--text-muted);
+}
+
+body .tabsdown.tabsdown--personality-separator.tabsdown.tabsdown.tabsdown.tabsdown > .tabsdown__tablist > .tabsdown__tab {
+	padding-block: var(--tabsdown-tab-padding-block);
+}
+
+body .tabsdown.tabsdown--personality-separator.tabsdown.tabsdown.tabsdown.tabsdown > .tabsdown__tablist > .tabsdown__tab[aria-selected="true"],
+body .tabsdown.tabsdown--personality-separator.tabsdown.tabsdown.tabsdown.tabsdown > .tabsdown__tablist > .tabsdown__tab[aria-expanded="true"] {
+	border-color: transparent;
+	background-color: transparent;
+	color: var(--tabsdown-tab-underline-color);
+}
+
+body .tabsdown.tabsdown--personality-separator.tabsdown.tabsdown.tabsdown.tabsdown > .tabsdown__tablist > .tabsdown__tab > .tabsdown__separator:not([hidden]) {
+	display: block;
+}
+
+body .tabsdown.tabsdown--personality-button.tabsdown.tabsdown.tabsdown.tabsdown > .tabsdown__tablist > .tabsdown__tab > .tabsdown__separator,
+body .tabsdown.tabsdown--personality-underline.tabsdown.tabsdown.tabsdown.tabsdown > .tabsdown__tablist > .tabsdown__tab > .tabsdown__separator,
+body .tabsdown.tabsdown--personality-rail.tabsdown.tabsdown.tabsdown.tabsdown > .tabsdown__tablist > .tabsdown__tab > .tabsdown__separator {
+	display: none;
+}
+
+body .tabsdown.tabsdown--personality-rail.tabsdown.tabsdown.tabsdown.tabsdown > .tabsdown__tablist {
+	--tabsdown-tab-min-block-size: 36px;
+	padding: 0.375rem;
+	border-radius: var(--tabsdown-radius, var(--radius-s));
+	background-color: var(--background-secondary);
+}
+
+body .tabsdown.tabsdown--personality-rail.tabsdown.tabsdown.tabsdown.tabsdown > .tabsdown__tablist > .tabsdown__tab {
+	padding-block: 0.125rem;
+}
+
+body .tabsdown.tabsdown--personality-rail.tabsdown.tabsdown.tabsdown.tabsdown > .tabsdown__tablist > .tabsdown__tab[aria-selected="true"],
+body .tabsdown.tabsdown--personality-rail.tabsdown.tabsdown.tabsdown.tabsdown > .tabsdown__tablist > .tabsdown__tab[aria-expanded="true"] {
+	border-color: transparent;
+	border-radius: var(--tabsdown-radius, var(--radius-s));
+	background-color: var(--tabsdown-rail-selected-background);
+	color: var(--tabsdown-tab-selected-color);
+}
+
+@media (hover: hover) {
+	body .tabsdown.tabsdown--personality-button.tabsdown.tabsdown.tabsdown.tabsdown > .tabsdown__tablist > .tabsdown__tab:hover {
+		border-color: var(--tabsdown-tab-hover-border);
+		background-color: var(--tabsdown-tab-hover-background);
+		color: var(--text-normal);
+	}
+
+	body .tabsdown.tabsdown--personality-button.tabsdown.tabsdown.tabsdown.tabsdown > .tabsdown__tablist > .tabsdown__tab:is([aria-selected="true"], [aria-expanded="true"]):hover {
+		border-color: var(--tabsdown-tab-selected-border);
+		background-color: var(--tabsdown-tab-selected-background);
+		color: var(--tabsdown-tab-selected-color);
+	}
+
+	body .tabsdown.tabsdown--personality-underline.tabsdown.tabsdown.tabsdown.tabsdown > .tabsdown__tablist > .tabsdown__tab:not([aria-selected="true"]):not([aria-expanded="true"]):hover {
+		border-block-start-color: color-mix(in srgb, var(--tabsdown-underline-block-start-color) 55%, transparent);
+		border-inline-end-color: color-mix(in srgb, var(--tabsdown-underline-inline-end-color) 55%, transparent);
+		border-block-end-color: color-mix(in srgb, var(--tabsdown-underline-block-end-color) 55%, transparent);
+		border-inline-start-color: color-mix(in srgb, var(--tabsdown-underline-inline-start-color) 55%, transparent);
+		background-color: transparent;
+		color: var(--text-normal);
+	}
+
+	body .tabsdown.tabsdown--personality-separator.tabsdown.tabsdown.tabsdown.tabsdown > .tabsdown__tablist > .tabsdown__tab:hover,
+	body .tabsdown.tabsdown--personality-rail.tabsdown.tabsdown.tabsdown.tabsdown > .tabsdown__tablist > .tabsdown__tab:hover {
+		border-color: transparent;
+		background-color: transparent;
+		color: var(--text-normal);
+	}
+
+	body .tabsdown.tabsdown--personality-separator.tabsdown.tabsdown.tabsdown.tabsdown > .tabsdown__tablist > .tabsdown__tab:is([aria-selected="true"], [aria-expanded="true"]):hover {
+		color: var(--tabsdown-tab-underline-color);
+	}
+
+	body .tabsdown.tabsdown--personality-rail.tabsdown.tabsdown.tabsdown.tabsdown > .tabsdown__tablist > .tabsdown__tab:is([aria-selected="true"], [aria-expanded="true"]):hover {
+		background-color: var(--tabsdown-rail-selected-background);
+		color: var(--tabsdown-tab-selected-color);
+	}
+}
+
+body .tabsdown.tabsdown--alignment-start > .tabsdown__tablist {
+	justify-content: flex-start;
+}
+
+body .tabsdown.tabsdown--alignment-center > .tabsdown__tablist {
+	justify-content: safe center;
+}
+
+body .tabsdown.tabsdown--alignment-equal-width > .tabsdown__tablist {
+	justify-content: flex-start;
+}
+
+body .tabsdown.tabsdown--alignment-start > .tabsdown__tablist > .tabsdown__tab.tabsdown__tab,
+body .tabsdown.tabsdown--alignment-center > .tabsdown__tablist > .tabsdown__tab.tabsdown__tab {
+	flex: 0 0 auto;
+	inline-size: auto;
+	min-inline-size: var(--tabsdown-tab-min-size);
+	white-space: normal;
+}
+
+body .tabsdown.tabsdown--alignment-equal-width > .tabsdown__tablist > .tabsdown__tab.tabsdown__tab {
+	flex: 1 0 0;
+	inline-size: auto;
+	min-inline-size: max-content;
+	white-space: nowrap;
+}
+
+body.tabsdown-overflow-wrap .tabsdown.tabsdown--alignment-equal-width:where(:not(.tabsdown--inline-overflow)) > .tabsdown__tablist > .tabsdown__tab,
+body .tabsdown.tabsdown--alignment-equal-width:where(.tabsdown--inline-overflow.tabsdown--multi) > .tabsdown__tablist > .tabsdown__tab.tabsdown__tab {
+	flex: 1 1 var(--tabsdown-equal-wrap-basis);
+	min-inline-size: 0;
+	white-space: normal;
+}
+
+/* Side-list geometry is structural: authored alignment positions the list but
+   cannot change the width of its direct tabs. */
+body .tabsdown.tabsdown--left > .tabsdown__tablist > .tabsdown__tab.tabsdown__tab,
+body .tabsdown.tabsdown--right > .tabsdown__tablist > .tabsdown__tab.tabsdown__tab {
+	flex: 0 0 auto;
+	inline-size: 100%;
+	min-inline-size: 0;
+	white-space: normal;
+}
+
+@container (max-width: 28rem) {
+	.tabsdown:not(.tabsdown--mounted):not(.tabsdown--density-default):not(.tabsdown--density-compact) > .tabsdown__tablist {
+		--tabsdown-tab-min-size: 32px;
+		--tabsdown-tab-padding-block: 0.375rem;
+		--tabsdown-tab-padding-inline: var(--tabsdown-horizontal-padding, 12px);
+	}
+
+	body .tabsdown.tabsdown--left > .tabsdown__tablist > .tabsdown__tab.tabsdown__tab,
+	body .tabsdown.tabsdown--right > .tabsdown__tablist > .tabsdown__tab.tabsdown__tab {
+		flex: 1 1 0;
+		inline-size: 0;
+		min-inline-size: var(--tabsdown-tab-min-size);
+		white-space: normal;
+	}
+}
+
+body.is-mobile .tabsdown:not(.tabsdown--mounted):not(.tabsdown--density-default):not(.tabsdown--density-compact) > .tabsdown__tablist {
+	--tabsdown-tab-min-size: 32px;
+	--tabsdown-tab-padding-block: 0.375rem;
+	--tabsdown-tab-padding-inline: var(--tabsdown-horizontal-padding, 12px);
+}
+
+/* Explicit density remains authoritative on both sides of the container query. */
+.tabsdown.tabsdown--density-default > .tabsdown__tablist {
+	--tabsdown-tab-min-size: 44px;
+	--tabsdown-tab-padding-block: 0.5rem;
+	--tabsdown-tab-padding-inline: var(--tabsdown-horizontal-padding, 36px);
+}
+
+.tabsdown.tabsdown--density-compact > .tabsdown__tablist {
+	--tabsdown-tab-min-size: 32px;
+	--tabsdown-tab-padding-block: 0.375rem;
+	--tabsdown-tab-padding-inline: var(--tabsdown-horizontal-padding, 12px);
+}
+
+@media (any-pointer: coarse) {
+	body .tabsdown.tabsdown.tabsdown.tabsdown.tabsdown.tabsdown > .tabsdown__tablist {
+		--tabsdown-tab-min-size: 44px;
+		--tabsdown-tab-min-block-size: 44px;
 	}
 }

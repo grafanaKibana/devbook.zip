@@ -149,15 +149,10 @@ During training, validation loss and early stopping detect memorization, but shi
 
 # References
 
-- [LoRA: Low-Rank Adaptation of Large Language Models](https://arxiv.org/abs/2106.09685) — the primary paper defining frozen base weights and trainable low-rank updates.
-- [QLoRA: Efficient Finetuning of Quantized LLMs](https://arxiv.org/abs/2305.14314) — the primary 4-bit fine-tuning method and the hardware/configuration evidence behind its memory claims.
-- [ZeRO: Memory Optimizations Toward Training Trillion Parameter Models](https://arxiv.org/abs/1910.02054) — primary decomposition of model-state memory and distributed partitioning.
-- [DeepSeekMath](https://arxiv.org/abs/2402.03300) — the primary paper introducing GRPO and its objective.
-- [DeepSeek-R1](https://arxiv.org/abs/2501.12948) — primary report for a GRPO-based reasoning post-training pipeline and its stated evaluation setup.
-- [Proximal Policy Optimization Algorithms](https://arxiv.org/abs/1707.06347) — the primary clipped-policy optimization work that provides the comparison point for GRPO.
-- [Direct Preference Optimization](https://arxiv.org/abs/2305.18290) — the primary derivation and evaluation of preference training without a separate reward model.
-- [Training language models to follow instructions with human feedback](https://arxiv.org/abs/2203.02155) — the primary InstructGPT SFT, reward-model, and RLHF pipeline.
-- [Discovering Language Model Behaviors with Model-Written Evaluations](https://arxiv.org/abs/2212.09251) — primary evidence on behavioral evaluation and risks such as sycophancy that alignment must measure explicitly.
-- [Fine-tuning guide](https://platform.openai.com/docs/guides/fine-tuning) — provider guidance on data preparation, supervised tuning, and evaluation.
-- [Fine-tuning considerations](https://learn.microsoft.com/en-us/azure/ai-foundry/concepts/fine-tuning-considerations) — production decision framing for fine-tuning versus retrieval and prompting.
-- [ByteByteGo: DeepSeek one-pager](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/deepseek-1-pager.md) — provides a secondary summary; this note retains the GRPO mechanism and omits volatile cost, hardware, and benchmark comparisons.
+- [LoRA: Low-Rank Adaptation of Large Language Models](https://arxiv.org/abs/2106.09685)
+- [QLoRA: Efficient Finetuning of Quantized LLMs](https://arxiv.org/abs/2305.14314)
+- [DeepSeekMath](https://arxiv.org/abs/2402.03300)
+- [Proximal Policy Optimization Algorithms](https://arxiv.org/abs/1707.06347)
+- [Direct Preference Optimization](https://arxiv.org/abs/2305.18290)
+- [Training language models to follow instructions with human feedback](https://arxiv.org/abs/2203.02155)
+- [Fine-tuning guide](https://platform.openai.com/docs/guides/fine-tuning)

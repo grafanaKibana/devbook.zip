@@ -75,33 +75,10 @@ An inference endpoint is a production service with an SLO. Its latency budget in
 ### Monitoring and Retraining
 Monitoring has two clocks. Service health appears immediately through latency, errors, and saturation. Model quality may arrive days later when labels become available. Track input quality and [[Data Drift]] while waiting, but do not confuse drift with proof that predictions became worse. Retraining should follow a measurable trigger and pass the same evaluation gate as the original model.
 
-# Questions
-
-> [!QUESTION]- How can a weekly batch churn model leave a safe path to request-time scoring?
-> - Define one versioned feature contract and share preprocessing between batch and online paths
-> - Persist predictions and feature versions so earlier decisions can be replayed
-> - Identify which features exist at request time and move slow enrichment outside that boundary
-> - Promote immutable model versions through a registry with rollback support
-> - Measure drift and label delay before a real-time rollout adds more moving parts
-
-> [!QUESTION]- A classifier reports 98% accuracy while support tickets rise. What should be checked before retraining it?
-> - Inspect class balance and the confusion matrix. Accuracy may hide failures on the minority class
-> - Audit label quality and time-based joins for leakage
-> - Find the failing cohorts instead of relying on the aggregate score
-> - Choose precision, recall, or expected cost from the business impact of each error
-> - Tune the threshold on validation data rather than accepting 0.5 by default
-
-> [!QUESTION]- What is a defensible rollout when the most accurate model exceeds the API latency budget?
-> - Measure end-to-end tail latency, including feature lookup and preprocessing
-> - Compare the measured quality loss of a smaller model with the operational cost of the larger one
-> - Consider a two-stage path only when the cheap first stage rejects enough work to justify the added complexity
-> - Canary the release with latency and business guardrails plus automatic rollback
-> - Keep a baseline model or deterministic rule as the overload path
-
 # References
 
-- [Machine Learning Crash Course (Google for Developers)](https://developers.google.com/machine-learning/crash-course) — Google's practical introduction to model development, data handling, and evaluation.
-- [Machine Learning for Beginners (Microsoft)](https://microsoft.github.io/ML-For-Beginners/#/) — Microsoft's curriculum of worked examples across common ML problem types.
-- [Rules of Machine Learning (Google for Developers)](https://developers.google.com/machine-learning/guides/rules-of-ml) — Google's engineering guidance on baselines, pipelines, features, and production feedback loops.
-- [scikit-learn user guide](https://scikit-learn.org/stable/user_guide.html) — Official reference for classical estimators, preprocessing, model selection, and metrics.
-- [Hidden Technical Debt in Machine Learning Systems (NeurIPS 2015)](https://papers.nips.cc/paper_files/paper/2015/hash/86df7dcfd896fcaf2674f757a2463eba-Abstract.html) — Primary paper describing the maintenance burden created by data dependencies and ML system glue.
+- [Machine Learning Crash Course (Google for Developers)](https://developers.google.com/machine-learning/crash-course)
+- [Machine Learning for Beginners (Microsoft)](https://microsoft.github.io/ML-For-Beginners/#/)
+- [Rules of Machine Learning (Google for Developers)](https://developers.google.com/machine-learning/guides/rules-of-ml)
+- [scikit-learn user guide](https://scikit-learn.org/stable/user_guide.html)
+- [Hidden Technical Debt in Machine Learning Systems (NeurIPS 2015)](https://papers.nips.cc/paper_files/paper/2015/hash/86df7dcfd896fcaf2674f757a2463eba-Abstract.html)

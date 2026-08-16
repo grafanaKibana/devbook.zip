@@ -143,13 +143,6 @@ Start zero-shot. Add one example for a stubborn output contract, then add only t
 > - Keep the smallest set that wins on a representative evaluation set.
 > Every example adds cost and another artifact that can drift.
 
-> [!QUESTION]- What makes a good few-shot example set?
-> - Input and output structure stay consistent across the set.
-> - Examples cover the production distribution and confusing boundaries.
-> - Each example adds information instead of repeating an easy case.
-> - Ordering has been tested rather than assumed harmless.
-> Demonstration selection usually matters more than raw count.
-
 > [!QUESTION]- What are the main failure modes of few-shot prompting?
 > - Sensitivity to ordering, formatting, and model changes.
 > - Context pressure from long demonstrations.
@@ -159,9 +152,6 @@ Start zero-shot. Add one example for a stubborn output contract, then add only t
 
 # References
 
-- [Prompt Engineering Guide - Zero-Shot Prompting](https://www.promptingguide.ai/techniques/zeroshot) — practitioner guide to zero-shot patterns and when they work.
-- [Prompt Engineering Guide - Few-Shot Prompting](https://www.promptingguide.ai/techniques/fewshot) — practitioner guide to few-shot design, example selection, and common failure modes.
-- [Brown et al. 2020 - Language Models are Few-Shot Learners](https://arxiv.org/abs/2005.14165) — GPT-3 paper that introduced few-shot prompting as a capability. Foundational reading.
-- [Min et al. 2022 - Rethinking the Role of Demonstrations](https://arxiv.org/abs/2202.12837) — shows that demonstration format and label space matter more than per-example label correctness.
-- [Anthropic Prompt Engineering Overview](https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/overview) — Anthropic's practical guide to prompt design including zero-shot and few-shot patterns for Claude.
-- [Prompt Engineering for Large Language Models (Eugene Yan)](https://eugeneyan.com/writing/prompting/) — practitioner deep-dive covering shot selection, formatting, and evaluation of prompting strategies.
+- [Brown et al. 2020 - Language Models are Few-Shot Learners](https://arxiv.org/abs/2005.14165)
+- [Min et al. 2022 - Rethinking the Role of Demonstrations](https://arxiv.org/abs/2202.12837)
+- [Prompt Engineering for Large Language Models (Eugene Yan)](https://eugeneyan.com/writing/prompting/)

@@ -138,24 +138,12 @@ Start with hybrid retrieval using RRF and a conservative top-k, often 5–20. Th
 
 # Questions
 
-> [!QUESTION]- Why can vector-only retrieval underperform on technical support workloads?
-> Technical support queries often contain literal identifiers such as error codes or API paths. Embeddings capture meaning better than exact tokens, so "error E4392 in v2.3" may retrieve general error-handling material instead of the matching code. Those chunks look plausible, which makes the miss dangerous. BM25 gives the rare identifier a high weight and can pull the exact document into a hybrid candidate set.
-
 > [!QUESTION]- When does hybrid retrieval perform worse than single-mode retrieval?
 > It loses when the weaker path adds more noise than useful evidence. A homogeneous scientific corpus may already suit vector search, while keyword results pull marginal matches into the fused list. The extra system earns its cost only if it beats both single-mode baselines on real queries.
-
-> [!QUESTION]- Why can ordinary latency and error dashboards miss an HNSW recall regression after the corpus changes?
-> HNSW returns approximate neighbors without an error when it misses an exact neighbor. Corpus or distribution changes can invalidate an earlier `ef_search` operating point, but recall and latency depend on the graph, filters, implementation, and workload. Only an explicit [[Monitoring#Retrieval Quality Metrics|Recall@k]] comparison against exact-search ground truth measures the loss.
 
 # References
 
 - [RAG techniques — retrieval and ranking overview (Azure AI Search)](https://learn.microsoft.com/en-us/azure/search/retrieval-augmented-generation-overview)
-- [Reciprocal Rank Fusion outperforms Condorcet and individual rank learning methods (SIGIR 2009)](https://plg.uwaterloo.ca/~gvcormac/cormacksigir09-rrf.pdf) — defines RRF as reciprocal-rank score summation over multiple result lists.
 - [Introducing Contextual Retrieval — hybrid retrieval gains measured (Anthropic Engineering)](https://anthropic.com/engineering/contextual-retrieval)
-- [HNSW at scale — why recall degrades as the vector database grows (Towards Data Science)](https://towardsdatascience.com/hnsw-at-scale-why-your-rag-system-gets-worse-as-the-vector-database-grows/)
 - [When good models go bad — embedding model migration and MTEB limitations (Weaviate)](https://weaviate.io/blog/when-good-models-go-bad)
-- [BM25 vs dense retrieval — what actually breaks in production (Ranjan Kumar)](https://ranjankumar.in/bm25-vs-dense-retrieval-for-rag-engineers)
-- [Evaluate your own RAG — why best practices failed on scientific documents (Hugging Face)](https://huggingface.co/blog/charles-azam/rag)
-- [How to systematically improve RAG — segmentation and failure taxonomy (Jason Liu)](https://jxnl.co/writing/2025/01/24/systematically-improving-rag-applications/)
-- [Deconstructing RAG — retrieval patterns and evaluation (LangChain Engineering)](https://blog.langchain.com/deconstructing-rag/)
 - [MTEB leaderboard — retrieval task benchmarks (Hugging Face)](https://huggingface.co/spaces/mteb/leaderboard)

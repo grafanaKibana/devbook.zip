@@ -89,21 +89,9 @@ Token-level [[Generation|logprobs]] are sometimes treated as LLM confidence. The
 
 Start with the curve and a proper scoring rule on held-out data. Ranking-only systems may not need calibrated probabilities. When a formula or person acts on the number, choose the smallest correction that matches the observed shape: temperature scaling for a global logit error, Platt for a sigmoid-shaped distortion, or isotonic with enough data for a more irregular monotonic mapping. Recheck after model or distribution changes.
 
-# Questions
-
-> [!QUESTION]- Why can a model with high ROC-AUC still produce unusable probabilities?
-> ROC-AUC depends on score order, not score magnitude. A monotonic transform can preserve every ranking while pushing most scores toward 0.9. Any expected-value rule using those numbers then makes the wrong tradeoff. A reliability diagram and a proper scoring rule test the probability scale that AUC ignores.
-
-> [!QUESTION]- When does calibration not matter, and when is it essential?
-> Calibration can be unnecessary when only the order or top-k results are consumed. It becomes essential when a threshold, expected-value calculation, ensemble, or human decision uses the probability itself. Comparing scores across models or time periods also assumes a common probability scale.
-
-> [!QUESTION]- Why is temperature scaling the default calibration method for neural networks?
-> It fits one scalar that rescales logits and leaves the argmax unchanged. That is a cheap, low-variance correction for global overconfidence, which Guo et al. found common in modern neural networks. The limitation follows from the same simplicity: one temperature cannot repair class-specific or region-specific errors.
-
 # References
 
-- [On Calibration of Modern Neural Networks (Guo et al., ICML 2017)](https://arxiv.org/abs/1706.04599) — measures neural-network miscalibration and evaluates temperature scaling as a one-parameter correction.
-- [Predicting Good Probabilities With Supervised Learning (Niculescu-Mizil & Caruana, ICML 2005)](https://www.cs.cornell.edu/~alexn/papers/calibration.icml05.crc.rev3.pdf) — compares Platt scaling and isotonic regression across several classifier families.
-- [Probability calibration (scikit-learn user guide)](https://scikit-learn.org/stable/modules/calibration.html) — `CalibratedClassifierCV`, `calibration_curve`, and `brier_score_loss` with worked examples.
-- [Calibrators in ML.NET (Microsoft Learn)](https://learn.microsoft.com/dotnet/api/microsoft.ml.calibratorscatalog) — Platt, naive, and isotonic calibrators for .NET binary classification pipelines.
-- [Verification of Forecasts Expressed in Terms of Probability (Brier, 1950)](https://journals.ametsoc.org/view/journals/mwre/78/1/1520-0493_1950_078_0001_vofeit_2_0_co_2.xml) — the original Brier score.
+- [On Calibration of Modern Neural Networks (Guo et al., ICML 2017)](https://arxiv.org/abs/1706.04599)
+- [Probability calibration (scikit-learn user guide)](https://scikit-learn.org/stable/modules/calibration.html)
+- [ML.NET calibrators namespace (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/microsoft.ml.calibrators?view=ml-dotnet-preview)
+- [Verification of Forecasts Expressed in Terms of Probability (Brier, 1950)](https://journals.ametsoc.org/view/journals/mwre/78/1/1520-0493_1950_078_0001_vofeit_2_0_co_2.xml)

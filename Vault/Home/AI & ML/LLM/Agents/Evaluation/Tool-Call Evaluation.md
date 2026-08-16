@@ -98,11 +98,10 @@ The riskiest call may be perfectly valid: real tool, valid schema, wrong account
 
 # Questions
 
-> [!QUESTION]- Why must tool selection and argument accuracy remain separate metrics?
+> [!QUESTION]- Why tool selection and argument accuracy remain separate metrics?
 > They fail for different reasons. A wrong tool suggests routing or description problems. A correct tool with a wrong value suggests grounding or schema problems. A blended score can hide a 95%/70% split and send engineering effort toward the healthy axis. Structured fields can use exact references, while free text usually needs a semantic scorer.
 
 # References
 
-- [Berkeley Function-Calling Leaderboard -- AST and executable accuracy for tool/function calls, including irrelevance detection (Gorilla, UC Berkeley)](https://gorilla.cs.berkeley.edu/blogs/8_berkeley_function_calling_leaderboard.html) — the standard methodology for scoring tool selection and arguments, and a live leaderboard of model performance.
-- [Tool use (function calling) overview (Anthropic Docs)](https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview) — how tool schemas, calls, and results are structured, which defines what a deterministic validity check enforces.
-- [tau-bench -- tool-agent-user interaction with rule-grounded ground truth (Yao et al., Sierra, 2024)](https://arxiv.org/abs/2406.12045) — a benchmark whose tasks supply reference end states and policies, a practical source of tool-call ground truth.
+- [Berkeley Function-Calling Leaderboard -- AST and executable accuracy for tool/function calls, including irrelevance detection (Gorilla, UC Berkeley)](https://gorilla.cs.berkeley.edu/blogs/8_berkeley_function_calling_leaderboard.html)
+- [Tool use (function calling) overview (Anthropic Docs)](https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview)

@@ -148,13 +148,10 @@ The DeepSeek-V3 report describes routed experts, shared experts, and an auxiliar
 
 # References
 
-- [Attention Is All You Need](https://arxiv.org/abs/1706.03762) — the primary transformer architecture paper and attention mechanism.
-- [BERT](https://arxiv.org/abs/1810.04805) — the primary encoder-only masked-language-model pretraining paper.
-- [Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer](https://arxiv.org/abs/1910.10683) — the primary encoder-decoder architecture and span-corruption text-to-text objective.
-- [Language Models are Few-Shot Learners](https://arxiv.org/abs/2005.14165) — the primary GPT-style causal-language-model report.
-- [Training language models to follow instructions with human feedback](https://arxiv.org/abs/2203.02155) — the primary SFT, reward model, and RLHF pipeline context.
-- [Switch Transformers](https://jmlr.org/papers/v23/21-0998.html) — sparse-expert routing and load-balancing tradeoffs.
-- [GShard](https://arxiv.org/abs/2006.16668) — primary MoE distributed scaling architecture.
-- [DeepSeek-V3 Technical Report](https://arxiv.org/abs/2412.19437) — primary report for routed and shared experts and its load-balancing design.
-- [ONNX concepts](https://onnx.ai/onnx/intro/concepts.html) — the normative model format and operator model.
-- [ByteByteGo: DeepSeek one-pager](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/deepseek-1-pager.md) — provides a secondary summary; this note separates sparse architecture from GRPO and omits incomparable product claims.
+- [Attention Is All You Need](https://arxiv.org/abs/1706.03762)
+- [BERT](https://arxiv.org/abs/1810.04805)
+- [Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer](https://arxiv.org/abs/1910.10683)
+- [Language Models are Few-Shot Learners](https://arxiv.org/abs/2005.14165)
+- [Training language models to follow instructions with human feedback](https://arxiv.org/abs/2203.02155)
+- [Switch Transformers](https://jmlr.org/papers/v23/21-0998.html)
+- [DeepSeek-V3 Technical Report](https://arxiv.org/abs/2412.19437)

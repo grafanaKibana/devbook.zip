@@ -103,6 +103,4 @@ Apply permission and argument checks at the tool boundary, before execution. Out
 
 # References
 
-- [OWASP Top 10 for LLM Applications](https://genai.owasp.org/llm-top-10/): risk categories that motivate input, output, and tool-boundary controls.
-- [OWASP LLM Prompt Injection Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/LLM_Prompt_Injection_Prevention_Cheat_Sheet.html): concrete guidance on input validation, output handling, and least privilege.
-- [Judging LLM-as-a-Judge (Zheng et al., 2023)](https://arxiv.org/abs/2306.05685): evidence on model-based semantic evaluation and its biases, clarifying where fixed rules stop being enough.
+- [JSON Schema Core specification](https://json-schema.org/draft/2020-12/json-schema-core)

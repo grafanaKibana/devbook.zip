@@ -18,7 +18,7 @@ ReAct (Reasoning + Acting), introduced by Yao et al., is the familiar form of th
 The loop works in four steps:
 
 1. **Think.** The model receives the conversation history, including earlier tool results, and decides what is missing.
-2. **Act.** It emits a structured tool call: a function name and arguments chosen from the available [[Tools]].
+2. **Act.** It emits a structured tool call: a function name and arguments chosen from the available [[Tool Design|tools]].
 3. **Observe.** The runtime executes the tool and appends its result as a tool message.
 4. **Repeat or stop.** The updated history returns to the model. Another tool call continues the loop. A final response ends it.
 
@@ -120,7 +120,7 @@ An agent can spend heavily without getting closer to a complete result. In a pro
 
 The model has no reliable sense of diminishing returns. As tool results accumulate, earlier attempts also become easier to miss.
 
-The runtime needs a hard iteration cap. Agent Framework exposes `HarnessAgentOptions.MaximumIterationsPerRequest`. LangGraph exposes `recursion_limit`. Repeated calls with identical arguments can trigger an earlier stop, and per-run tool counts make unusual behavior visible.
+The runtime needs a hard iteration cap. Agent Framework's `FunctionInvokingChatClient` exposes `MaximumIterationsPerRequest`. Outer workflow agents use their own loop controls, such as `LoopAgentOptions.MaxIterations`. LangGraph exposes `recursion_limit`. Repeated calls with identical arguments can trigger an earlier stop, and per-run tool counts make unusual behavior visible.
 
 ## Token Explosion
 
@@ -146,16 +146,8 @@ Validate the function name and arguments before execution, then return a precise
 > [!QUESTION]- Which safeguards must be enforced outside the model, and what failure does each contain?
 > A per-request iteration cap contains non-terminating behavior. Token and cost budgets stop context growth before it becomes an outage or an unexpected bill. Tool validation blocks unknown functions and malformed arguments before they reach a side-effecting boundary. Prompt instructions can help, but none of these controls can depend on the model obeying them.
 
-> [!QUESTION]- When is a simple prompt chain preferable to an agent loop?
-> A prompt chain fits a known sequence with fixed validation points. It is cheaper to run and easier to debug because the control flow is explicit. An agent loop becomes useful when an observation determines which tool or step should come next.
-
 # References
 
-- [ReAct: Synergizing Reasoning and Acting in Language Models — Yao et al. ICLR 2023](https://arxiv.org/abs/2210.03629) — primary paper defining ReAct and reporting the ALFWorld and HotpotQA evaluations.
-- [Using function tools with an agent — Microsoft Agent Framework (Microsoft Learn)](https://learn.microsoft.com/en-us/agent-framework/agents/tools/function-tools) — official .NET documentation for registering functions, automatic invocation, and the harness iteration limit.
-- [Microsoft Agent Framework overview — agents, the run loop, and automatic tool invocation (Microsoft Learn)](https://learn.microsoft.com/en-us/agent-framework/overview/) — official overview of the agent abstraction and its execution model.
-- [Function calling guide — OpenAI](https://platform.openai.com/docs/guides/function-calling) — official request and response contract for tool calls.
-- [Building Effective Agents — Anthropic Engineering](https://www.anthropic.com/engineering/building-effective-agents) — engineering guidance on when an agentic loop is justified and when a fixed workflow is simpler.
-- [ReAct Agent Pattern with production safeguards — Agent Patterns](https://www.agentpatterns.tech/en/agent-patterns/react-agent) — worked description of a ReAct loop with termination controls.
-- [The 100th Tool Call Problem — production failure analysis (Hugo Nogueira)](https://www.hugo.im/posts/100th-tool-call-problem) — long-run incident showing context-limit and checkpoint degradation.
-- [ReAct agent from scratch — LangGraph](https://langchain-ai.github.io/langgraph/how-tos/react-agent-from-scratch-functional/) — framework example that exposes the loop's state transitions directly.
+- [ReAct: Synergizing Reasoning and Acting in Language Models — Yao et al. ICLR 2023](https://arxiv.org/abs/2210.03629)
+- [The 100th Tool Call Problem — production failure analysis (Hugo Nogueira)](https://www.hugo.im/posts/100th-tool-call-problem)
+- [ReAct agent from scratch — LangGraph](https://langchain-ai.github.io/langgraph/how-tos/react-agent-from-scratch-functional/)

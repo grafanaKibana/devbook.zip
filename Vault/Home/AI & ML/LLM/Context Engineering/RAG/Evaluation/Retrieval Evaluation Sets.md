@@ -68,5 +68,5 @@ The structure fits retrieval metrics directly: a query goes in, and the source c
 
 # References
 
-- [RAGAS synthetic test data generation](https://docs.ragas.io/en/stable/concepts/test_data_generation/rag/) — documents chunk-to-query generation, query types, and the framework's test-set construction workflow.
-- [BEIR: A Heterogeneous Benchmark for Zero-shot Evaluation of Information Retrieval Models](https://arxiv.org/abs/2104.08663) — introduces the benchmark's qrels-style relevance judgments and evaluation across heterogeneous retrieval tasks.
+- [RAGAS synthetic test data generation](https://docs.ragas.io/en/stable/concepts/test_data_generation/rag/)
+- [BEIR: A Heterogeneous Benchmark for Zero-shot Evaluation of Information Retrieval Models](https://arxiv.org/abs/2104.08663)

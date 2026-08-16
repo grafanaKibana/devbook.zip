@@ -159,18 +159,11 @@ Start without a reranker and measure the failures. BM25 or RRF helps when lexica
 > [!QUESTION]- When does reranking hurt retrieval quality instead of helping?
 > A reranker trained on short web passages may misjudge long technical documents or unfamiliar terminology, then demote the relevant evidence. A small candidate set creates a different failure: low first-stage recall leaves only noise to reorder. Compare [[Monitoring#Retrieval Quality Metrics|recall and precision]] before and after reranking on domain queries.
 
-> [!QUESTION]- Why is ColBERT faster than a cross-encoder at query time despite also using token-level scoring?
-> ColBERT stores document-token embeddings at index time. A request encodes the query once and uses MaxSim over those stored vectors. Cross-encoders instead run a full transformer pass for each query-document pair. ColBERT saves inference time by paying for multi-vector storage and a compatible index.
-
 # References
 
 - [Retrieve and rerank pipeline — bi-encoder retrieval plus cross-encoder reranking (SBERT)](https://sbert.net/examples/applications/retrieve_rerank/README.html)
-- [Pretrained cross-encoder models — speed and quality benchmarks (SBERT)](https://sbert.net/docs/cross_encoder/pretrained_models.html)
-- [ColBERT — efficient and effective passage search via contextualized late interaction (SIGIR 2020)](https://arxiv.org/abs/2004.12832) — introduces late interaction through query/document token embeddings and the MaxSim operator, trading multi-vector storage for cheaper query-time interaction than a cross-encoder.
 - [ColBERTv2 — residual compression and denoised supervision (NAACL 2022)](https://arxiv.org/abs/2112.01488)
-- [Reciprocal Rank Fusion outperforms Condorcet and individual rank learning methods (SIGIR 2009)](https://plg.uwaterloo.ca/~gvcormac/cormacksigir09-rrf.pdf)
 - [The Probabilistic Relevance Framework BM25 and beyond — lexical ranking model background (Foundations and Trends in Information Retrieval)](https://www.staff.city.ac.uk/~sbrp622/papers/foundations_bm25_review.pdf)
 - [The use of MMR, diversity-based reranking for reordering documents and producing summaries (SIGIR 1998)](https://dl.acm.org/doi/10.1145/290941.291025)
-- [Semantic ranking in Azure AI Search — L2 reranking with language understanding (Microsoft Learn)](https://learn.microsoft.com/azure/search/semantic-search-overview)
-- [Rerank API — models and semi-structured data support (Cohere)](https://docs.cohere.com/docs/rerank)
 - [RankGPT — LLM-based passage reranking with permutation generation (arXiv)](https://arxiv.org/abs/2304.09542)
+- [Reciprocal Rank Fusion outperforms Condorcet and individual rank learning methods (SIGIR 2009)](https://plg.uwaterloo.ca/~gvcormac/cormacksigir09-rrf.pdf)

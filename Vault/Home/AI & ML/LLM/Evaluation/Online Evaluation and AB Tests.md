@@ -119,14 +119,8 @@ The result should include an effect estimate, confidence interval, sample counts
 
 Centralization adds schema governance and launch ceremony. It pays off when several teams run experiments or decisions affect safety, revenue, or policy. A small product can start with versioned configuration, stable hashing, an exposure table, and a reviewed analysis notebook. Those contracts still need one owner.
 
-# Questions
-
-
 # References
 
-- [Practical Guide to Controlled Experiments on the Web](https://exp-platform.com/Documents/GuideControlledExperiments.pdf) — Kohavi and colleagues’ primary guide to randomization, metrics, power, and trustworthy analysis.
-- [Online Experimentation at Microsoft](https://www.microsoft.com/en-us/research/publication/online-experimentation-at-microsoft/) — primary account of large-scale experimentation infrastructure and organizational practice.
-- [Diagnosing sample-ratio mismatch in online controlled experiments](https://www.microsoft.com/en-us/research/publication/diagnosing-sample-ratio-mismatch-in-online-controlled-experiments-a-taxonomy-and-rules-of-thumb-for-practitioners/) — Microsoft Research’s primary taxonomy of SRM causes and investigation rules.
-- [The ASA statement on p-values](https://doi.org/10.1080/00031305.2016.1154108) — primary statistical guidance explaining why a threshold alone does not measure effect size or practical importance.
-- [Beyond Power Calculations](https://doi.org/10.1177/1745691614551642) — Gelman and Carlin’s primary treatment of Type S errors and exaggerated Type M estimates under low-power designs.
-- [ByteByteGo: possible experiment platform architecture](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/possible-experiment-platform-architecture.md) — illustrates the platform; this note adds deterministic assignment, actual-exposure logging, immutable versions, and analysis gates.
+- [Practical Guide to Controlled Experiments on the Web](https://exp-platform.com/Documents/GuideControlledExperiments.pdf)
+- [Diagnosing sample-ratio mismatch in online controlled experiments](https://www.microsoft.com/en-us/research/publication/diagnosing-sample-ratio-mismatch-in-online-controlled-experiments-a-taxonomy-and-rules-of-thumb-for-practitioners/)
+- [The ASA statement on p-values](https://doi.org/10.1080/00031305.2016.1154108)

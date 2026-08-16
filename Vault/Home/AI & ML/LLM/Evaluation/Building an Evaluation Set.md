@@ -61,14 +61,10 @@ Calibrate thresholds against human labels and product outcomes from the workload
 
 # Questions
 
-> [!QUESTION]- Why are relative regression thresholds preferable to absolute quality targets for release gates?
-> Relative thresholds compare a candidate with a measured local baseline, so they are useful for detecting change on a stable set. Absolute thresholds still matter for safety and policy requirements. A release gate often needs both: no meaningful regression from baseline and no violation of a fixed minimum.
-
 > [!QUESTION]- When should a team invest in a human-annotated golden set versus relying on synthetic generation?
 > Synthetic cases are enough to bootstrap breadth and test the harness. Human annotation becomes necessary when labels require domain judgment, the failure cost is high, or synthetic phrasing no longer matches production traffic. A practical set combines generated coverage with reviewed incidents and a curated regression subset in [[Golden Test Set and Regression Runs]].
 
 # References
 
-- [A statistical approach to model evaluations (Anthropic)](https://www.anthropic.com/research/statistical-approach-to-model-evals): confidence intervals, paired comparisons, and sample-size reasoning for model evaluations.
-- [ARES (Stanford)](https://arxiv.org/abs/2311.09476): automated RAG evaluation using synthetic data, human labels, and prediction-powered inference.
-- [RAGAS synthetic test data generation](https://docs.ragas.io/en/stable/concepts/test_data_generation/rag/): corpus-driven generation of question, answer, and context cases.
+- [A statistical approach to model evaluations (Anthropic)](https://www.anthropic.com/research/statistical-approach-to-model-evals)
+- [ARES (Stanford)](https://arxiv.org/abs/2311.09476)

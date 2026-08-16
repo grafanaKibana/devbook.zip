@@ -73,24 +73,10 @@ Responsible AI works best as a release discipline rather than a final review:
 
 A control without evidence is an intention. A metric without an owner is telemetry. The loop connects both to a decision.
 
-# Questions
-
-> [!QUESTION]- What evidence would support a responsible release of a high-impact AI system?
-> The release record should connect the intended use and impact assessment to approved risk limits, representative evaluation results, failure and abuse tests, control owners, rollback criteria, and an appeal path. Each artifact needs a version so a production decision can be traced to the model, data, policy, and evidence that governed it.
-
-> [!QUESTION]- Why is aggregate accuracy insufficient evidence that a system is fair?
-> The average can be dominated by the largest group and hide a serious error pattern in a smaller one. Slice-based evaluation exposes that pattern, but the metric still needs context: why the slice matters, whether the sample is large enough, which fairness criterion fits the decision, and what level of disparity is unacceptable.
-
-> [!QUESTION]- When does human review fail as a safety control?
-> Review fails when the person lacks context, time, independence, or authority to reject the model's recommendation. It also fails when the interface encourages automation bias by presenting the output as settled fact. A useful review gate shows the evidence and uncertainty, records the decision, and gives the reviewer a practical alternative.
-
-> [!QUESTION]- How should privacy and security responsibilities be divided between the model and application?
-> The application owns authorization, data minimization, tool permissions, side-effect checks, retention, and audit policy. The model can help classify or redact content, but its output remains untrusted. Sensitive data that never enters the context and an action the model cannot authorize are stronger controls than a prompt asking the model to behave safely.
-
 # References
 
-- [Microsoft Responsible AI](https://www.microsoft.com/en-us/ai/responsible-ai) — Microsoft's six-principle framework and its account of how those principles guide AI governance and engineering.
-- [AI Risk Management Framework (NIST)](https://www.nist.gov/itl/ai-risk-management-framework) — NIST's voluntary framework for governing, mapping, measuring, and managing AI risk across the lifecycle.
-- [Model Cards for Model Reporting (Mitchell et al., 2019)](https://arxiv.org/abs/1810.03993) — the primary paper proposing model documentation organized around intended use, evaluation context, performance, and ethical considerations.
-- [Datasheets for Datasets (Gebru et al., 2021)](https://arxiv.org/abs/1803.09010) — the primary paper proposing documented motivation, composition, collection, and maintenance for datasets.
-- [Fairness and Machine Learning (Barocas, Hardt, Narayanan)](https://fairmlbook.org/) — an open technical text explaining why fairness definitions conflict and how measurement choices depend on the decision context.
+- [Microsoft Responsible AI](https://www.microsoft.com/en-us/ai/responsible-ai)
+- [AI Risk Management Framework (NIST)](https://www.nist.gov/itl/ai-risk-management-framework)
+- [Model Cards for Model Reporting (Mitchell et al., 2019)](https://arxiv.org/abs/1810.03993)
+- [Datasheets for Datasets (Gebru et al., 2021)](https://arxiv.org/abs/1803.09010)
+- [Fairness and Machine Learning (Barocas, Hardt, Narayanan)](https://fairmlbook.org/)
