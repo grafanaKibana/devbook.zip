@@ -14,7 +14,7 @@ level:
 status: Creation
 ---
 
-Data persistence is how software survives a restart: storing, retrieving, and protecting state across processes and machines. The choice between SQL, NoSQL, and caching layers shapes every system's consistency guarantees, latency profile, and operational cost. Example: picking the wrong isolation level can silently corrupt data under concurrency, while an unnecessary cache adds a stale-read failure mode that did not exist before.
+Data persistence is the part of a system that must survive process and machine restarts. A storage choice fixes more than where bytes live: it sets the available consistency guarantees, the shape of efficient queries, and much of the operating cost. A weak isolation choice can corrupt business state under concurrency. An unnecessary cache creates a stale-read path that the original system never had.
 
 ```datacorejsx
 const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
@@ -23,40 +23,40 @@ return FolderStructureMap;
 
 # Storage Options at a Glance
 
-Different stores optimize for different access patterns. Default to relational storage because constraints, transactions, joins, and ad-hoc queries preserve options while a service is still changing. Add or replace it only when a measured access pattern earns a narrower contract:
+Each store makes a different access pattern cheap. Relational storage is the practical default because constraints and transactions keep invariants close to the data, while joins and ad-hoc queries leave room for the service to change. A narrower store earns its place when a measured workload needs its contract.
 
 | Store type | Access pattern that earns it | Guarantee or cost to verify | Examples |
 | --- | --- | --- | --- |
-| Relational (SQL) | Default for changing business data, joins, constraints, and multi-row transactions | Index and query-plan discipline; a single writer eventually becomes a scaling boundary | PostgreSQL, SQL Server |
+| Relational (SQL) | Default for changing business data, joins, constraints, and multi-row transactions | Index and query-plan discipline. A single writer eventually becomes a scaling boundary | PostgreSQL, SQL Server |
 | Document | One aggregate is normally read and replaced as a whole and its fields evolve independently | Cross-document constraints and joins move into application code or explicit transactions | MongoDB, Cosmos DB |
-| Key-value | Nearly every request knows one key and needs predictable low latency | Secondary access paths require another index or duplicated record; hot keys can concentrate load | Redis, DynamoDB |
+| Key-value | Nearly every request knows one key and needs predictable low latency | Secondary access paths require another index or duplicated record. Hot keys can concentrate load | Redis, DynamoDB |
 | Wide-column | Writes and range reads follow a stable partition plus clustering key at very large scale | Query-first denormalization, repair, compaction, and partition balance become design work | Cassandra, Bigtable |
 | Graph | The result comes from multi-hop traversal through relationships | Bulk aggregates and high-volume property scans are not its strength | Neo4j, Neptune |
 | Time-series | Appends and time-window aggregates dominate, with explicit retention/downsampling | Late data, cardinality, and corrections need product-specific handling | Prometheus, InfluxDB |
 
-Most systems combine a relational system of record with a cache, search index, or specialized read store on one proven hot path. That polyglot design adds synchronization, backup, security, and operational work for every extra store, so the specialized store should have a named workload and success metric.
+Many systems keep a relational source of truth and add one specialized read path, such as a cache or search index. Every extra store needs synchronization and recovery work. Its workload and success metric should be named before it enters the design.
 
 # Block, File, and Object Storage by Access Contract
 
-These storage types differ by the unit an application controls. The provider name matters less than the access contract exposed to the workload:
+Block, file, and object storage differ in the unit the application controls. The workload depends on that contract, not the provider label.
 
 | Concern | Block storage | File storage | [[Home/Data Persistence/Object Storage|Object Storage]] |
 | --- | --- | --- | --- |
 | Access unit | Addressed blocks presented as a volume | Files and directories through a filesystem protocol | Whole objects addressed by bucket/container and key |
-| Namespace owner | Attached host or storage-aware application formats and manages it | Filesystem manages hierarchical paths, permissions, and locks | Service manages a flat keyspace; clients emulate folders with prefixes |
-| Sharing | Commonly attached to one writer; multi-attach needs filesystem coordination | Designed for concurrent clients through NFS/SMB or a managed equivalent | Many clients use HTTP APIs; no shared POSIX edit/lock contract |
-| Update shape | Low-latency random reads and overwrites | File and byte-range operations | Put/replace an object; multipart upload handles large values |
-| Consistency boundary | Volume and filesystem determine ordering and crash behavior | Protocol and service define visibility and locking | Provider defines single-key and listing behavior; multi-object transactions are application work |
+| Namespace owner | Attached host or storage-aware application formats and manages it | Filesystem manages hierarchical paths, permissions, and locks | Service manages a flat keyspace. Clients emulate folders with prefixes |
+| Sharing | Commonly attached to one writer. Multi-attach needs filesystem coordination | Designed for concurrent clients through NFS/SMB or a managed equivalent | Many clients use HTTP APIs. No shared POSIX edit/lock contract |
+| Update shape | Low-latency random reads and overwrites | File and byte-range operations | Put/replace an object. Multipart upload handles large values |
+| Consistency boundary | Volume and filesystem determine ordering and crash behavior | Protocol and service define visibility and locking | Provider defines single-key and listing behavior. Multi-object transactions are application work |
 | Application responsibility | Filesystem, snapshots, replication, and recovery | Path/permission design, lock behavior, and shared throughput | Keys, metadata, checksums, lifecycle, versioning, and multi-object publication protocol |
 | Typical fit | Database pages, VM disks, transactional logs | Shared home directories, content tooling, lift-and-shift applications | Media, backups, artifacts, data lakes, immutable large values |
 
 ![[Data Persistence/Data Persistence-Data Persistence-18120000-1.png]]
 
-A database volume needs low-latency random I/O and crash ordering, so block storage normally wins. A render farm that opens and locks shared project files needs file semantics. A service that writes immutable 500 MiB videos and serves them through a CDN needs object scale and lifecycle controls. Calling all cloud storage "object storage" hides the failure boundary the application actually depends on.
+A database volume normally needs block storage for low-latency random I/O and crash ordering. A render farm needs file semantics because workers open and lock shared project files. Immutable 500 MiB videos served through a CDN fit object storage and its lifecycle controls. Calling all cloud storage "object storage" hides the failure boundary the application relies on.
 
 # Database Performance Diagnosis before Scaling
 
-Start with the slow request and follow its time, not a list of fashionable remedies. Suppose `GET /orders/42` regresses from 80 ms to 600 ms at p95:
+Start with the slow request and account for its time. Suppose `GET /orders/42` regresses from 80 ms to 600 ms at p95:
 
 1. Split request time into pool wait, query execution, lock wait, network, serialization, and downstream calls. Correlate the same interval with CPU, memory, IOPS, connection count, cache hit rate, rows scanned, and replication lag.
 2. Capture the actual SQL and representative parameters. Use the engine's plan tooling, such as PostgreSQL `EXPLAIN (ANALYZE, BUFFERS)`, to compare estimated rows, actual rows, scans, joins, spills, and I/O.
@@ -67,60 +67,45 @@ Start with the slow request and follow its time, not a list of fashionable remed
 
 ![[Data Persistence/Data Persistence-Data Persistence-18120000-2.png]]
 
-This order preserves evidence. Jumping directly to cache, replicas, or shards can reduce one graph while adding stale reads, duplicated writes, and failure modes that obscure the original defect.
+This sequence keeps the diagnosis tied to evidence. Jumping to cache, replicas, or shards may improve one graph while adding stale reads or duplicated writes that hide the original defect.
 
 # Database Scaling Escalation Ladder
 
-Move down the ladder only when the previous step no longer meets a concrete load, latency, or recovery target:
+Move down this ladder only when the previous step still misses a concrete load, latency, or recovery target.
 
 | Step | Diagnostic trigger | What it buys | Cost introduced |
 | --- | --- | --- | --- |
-| Query and access-path repair | High rows scanned, bad estimates, N+1 calls, lock waits, or unnecessary payload | More capacity from the existing system without changing its consistency model | Indexes add write/storage cost; query/schema changes need regression tests |
+| Query and access-path repair | High rows scanned, bad estimates, N+1 calls, lock waits, or unnecessary payload | More capacity from the existing system without changing its consistency model | Indexes add write/storage cost. Query/schema changes need regression tests |
 | Materialized view or denormalized read model | Stable expensive join/aggregate dominates reads | Precomputed reads with predictable shape | Refresh logic, duplicate data, and a freshness boundary |
 | Vertical scaling | CPU, RAM, or storage throughput is saturated after query repair | Same data model and transaction boundary on a larger node | Higher failure concentration, finite ceiling, and larger restart/recovery events |
 | [[Home/Data Persistence/Caching|Caching]] | Repeated reads tolerate staleness and origin load is the bottleneck | Lower read latency and fewer origin requests | Invalidation, stampedes, eviction, and stale answers |
-| [[Home/Data Persistence/SQL/Replication|Read replicas]] | Reads dominate; primary writes are healthy | More read capacity and additional failover options | Replication lag, read-your-writes routing, promotion, and replica cost |
+| [[Home/Data Persistence/SQL/Replication|Read replicas]] | Reads dominate. Primary writes are healthy | More read capacity and additional failover options | Replication lag, read-your-writes routing, promotion, and replica cost |
 | [[Home/Data Persistence/SQL/Sharding|Sharding]] | One writer or data set exceeds the largest acceptable node | Horizontal write/storage distribution | Shard-key constraints, resharding, hot shards, and cross-shard transaction/query work |
 
-Combining steps is normal, but their guarantees do not compose for free. A cached read from a lagging replica now has two freshness delays; a denormalized view across shards needs an explicit delivery and replay protocol.
+Several steps may be necessary, but their guarantees accumulate. A cached read from a lagging replica has two freshness delays. A denormalized view across shards needs an explicit delivery and replay protocol.
 
 # Data Management Pattern Map
 
 | Need | Pattern | Mechanism | Cost to accept |
 | --- | --- | --- | --- |
-| Lower latency for repeated reads | [[Home/Data Persistence/Caching|Cache-aside]] | Read cache first; load from the source on miss; invalidate after source writes | Staleness window, miss storms, eviction, and another failure mode |
+| Lower latency for repeated reads | [[Home/Data Persistence/Caching|Cache-aside]] | Read cache first. Load from the source on miss. Invalidate after source writes | Staleness window, miss storms, eviction, and another failure mode |
 | Precompute expensive derived reads | Materialized view | Store a query result or projection and refresh it on a schedule or change | Refresh lag, extra storage, and failed/duplicate update handling |
-| Separate read and write models | [[Home/Software Architecture/Patterns/Architectural Patterns/CQRS|CQRS]] | Commands update a write model; queries use an independently shaped read model | Synchronization, messaging, and consistency boundaries |
+| Separate read and write models | [[Home/Software Architecture/Patterns/Architectural Patterns/CQRS|CQRS]] | Commands update a write model. Queries use an independently shaped read model | Synchronization, messaging, and consistency boundaries |
 | Keep historical source of truth | [[Home/Software Architecture/Patterns/Architectural Patterns/Event Sourcing|Event Sourcing]] | Append events and rebuild current state by replay or snapshots | Schema evolution, replay cost, idempotency, and irreversible event history |
-| Support an alternate lookup | [[Home/Data Persistence/SQL/Indexes|Index table or secondary index]] | Maintain another key-to-record path for a known query | Every write must update it; rebuilds and uniqueness need a protocol |
+| Support an alternate lookup | [[Home/Data Persistence/SQL/Indexes|Index table or secondary index]] | Maintain another key-to-record path for a known query | Every write must update it. Rebuilds and uniqueness need a protocol |
 | Distribute data and write load | [[Home/Data Persistence/SQL/Sharding|Sharding]] | Route each partition key to one shard | Cross-shard work, resharding, skew, and hot keys |
 
 ![[Data Persistence/Data Persistence-Data Persistence-18120000.png]]
 
-The categories overlap: CQRS can use materialized views, event sourcing can feed them, and shards can each maintain local indexes. Name the problem first. Event sourcing is not a cache strategy, and a secondary index is not a substitute for partitioning a write bottleneck.
+The categories overlap. CQRS may use materialized views, event sourcing may feed them, and each shard may maintain local indexes. The design still starts with the problem. Event sourcing does not replace a cache, and a secondary index does not partition a write bottleneck.
 
 # Questions
 
 > [!QUESTION]- How should you choose between SQL and NoSQL for a new service?
-> - Default to a relational database: mature tooling, ACID transactions, flexible ad-hoc queries, and joins cover the majority of workloads and let the schema enforce invariants
-> - Reach for NoSQL when a specific access pattern dominates and relational cost is real: key-value or document stores for simple high-throughput lookups, wide-column for massive write volume, graph stores for relationship-heavy traversal
-> - The honest driver is usually the data model and query pattern, not scale — most services never outgrow a well-indexed relational database, and "web-scale" is rarely the actual constraint
-> - Combining them is common and often better than committing everything to one model: a relational system of record with a document or cache layer for a hot read path
+> Start with a relational database when the service needs constraints, transactions, joins, or changing query patterns. Choose a specialized store only after one access pattern dominates and the relational cost is measured. Scale by itself is not the reason: a well-indexed relational database handles more load than most services ever reach. A relational source of truth plus one specialized hot path is often safer than forcing every workload into one model.
 
 # References
 
-- [Designing Data-Intensive Applications (Martin Kleppmann)](https://dataintensive.net/) — the definitive book on storage engines, replication, partitioning, and consistency tradeoffs.
-- [Use The Index, Luke (Markus Winand)](https://use-the-index-luke.com/) — practical, database-agnostic guide to SQL indexing and query performance.
-- [Jepsen analyses (Kyle Kingsbury)](https://jepsen.io/analyses) — evidence-based safety and consistency testing of real databases; grounds the SQL-versus-NoSQL tradeoffs.
-- [EF Core performance guidance (Microsoft Learn)](https://learn.microsoft.com/en-us/ef/core/performance/) — practical guidance on ORM query performance: avoiding N+1, batching, and when to drop to raw SQL.
-- [Using `EXPLAIN` (PostgreSQL)](https://www.postgresql.org/docs/current/using-explain.html) — primary plan-inspection reference for estimated cost, actual execution, buffer use, and row-count mistakes.
-- [What is Amazon EBS?](https://docs.aws.amazon.com/ebs/latest/userguide/what-is-ebs.html) — official block-volume attachment, performance, durability, and snapshot contract.
-- [What is Amazon EFS?](https://docs.aws.amazon.com/efs/latest/ug/whatisefs.html) — official shared NFS, file-locking, consistency, scaling, and failure-domain contract.
-- [Cache-Aside pattern (Azure Architecture Center)](https://learn.microsoft.com/en-us/azure/architecture/patterns/cache-aside) — application/source/cache request flow and its staleness and invalidation costs.
-- [CQRS pattern (Azure Architecture Center)](https://learn.microsoft.com/en-us/azure/architecture/patterns/cqrs) — read/write model separation, synchronization boundary, and operational costs.
-- [Event Sourcing pattern (Azure Architecture Center)](https://learn.microsoft.com/en-us/azure/architecture/patterns/event-sourcing) — append-only state history, projections, snapshots, replay, and consistency concerns.
-- [How to decide which type of database to use (ByteByteGo, pinned source)](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/how-do-you-decide-which-type-of-database-to-use.md) — editorial store inventory; its diagram is excluded because it conflates document databases with object storage and turns examples into selection rules.
-- [Storage systems overview (ByteByteGo, pinned source)](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/storage-systems-overview.md) — source block/file/object comparison and imported diagram, corrected here for network block, shared file, object consistency, and workload absolutes.
-- [Database performance cheatsheet (ByteByteGo, pinned source)](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/a-cheatsheet-on-database-performance.md) — source optimization inventory and imported diagram, organized here as a measurement-first diagnosis order.
-- [Seven database scaling strategies (ByteByteGo, pinned source)](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/7-must-know-strategies-to-scale-your-database.md) — source escalation mechanisms and imported diagram, with diagnostic triggers and consistency/operational costs made explicit.
-- [Top six data management patterns (ByteByteGo, pinned source)](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/how-do-we-manage-data.md) — source pattern map and imported diagram, separated by latency, projection, history, alternate lookup, and partitioning purpose.
+- [Designing Data-Intensive Applications](https://dataintensive.net/)
+- [Use The Index, Luke](https://use-the-index-luke.com/)
+- [Jepsen analyses](https://jepsen.io/analyses)
