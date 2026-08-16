@@ -501,21 +501,11 @@
       "color": "1"
     },
     {
-      "id": "n_f4c58f9fd1",
-      "type": "text",
-      "text": "# [[Home/Programming/NET/Other/Other|Other]]",
-      "x": 840,
-      "y": 4640,
-      "width": 340,
-      "height": 80,
-      "color": "1"
-    },
-    {
       "id": "n_158b3542d7",
       "type": "text",
       "text": "# [[Home/Programming/NET/Runtime/Runtime|Runtime]]",
       "x": 840,
-      "y": 4760,
+      "y": 4640,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -525,7 +515,7 @@
       "type": "text",
       "text": "# [[Home/Security/Security|Security]]",
       "x": 0,
-      "y": 5040,
+      "y": 4920,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -535,7 +525,7 @@
       "type": "text",
       "text": "# [[Home/Security/Authentication/Authentication|Authentication]]",
       "x": 420,
-      "y": 5040,
+      "y": 4920,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -545,7 +535,7 @@
       "type": "text",
       "text": "# [[Home/Software Architecture/Software Architecture|Software Architecture]]",
       "x": 0,
-      "y": 5320,
+      "y": 5200,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -555,7 +545,7 @@
       "type": "text",
       "text": "# [[Home/Software Architecture/Application Architecture/Application Architecture|Application Architecture]]",
       "x": 420,
-      "y": 5320,
+      "y": 5200,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -565,7 +555,7 @@
       "type": "text",
       "text": "# [[Home/Software Architecture/Distributed Systems/Distributed Systems|Distributed Systems]]",
       "x": -420,
-      "y": 5320,
+      "y": 5200,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -575,7 +565,7 @@
       "type": "text",
       "text": "# [[Home/Software Architecture/Distributed Systems/Message Queues/Message Queues|Message Queues]]",
       "x": -840,
-      "y": 5440,
+      "y": 5320,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -585,7 +575,7 @@
       "type": "text",
       "text": "# [[Home/Software Architecture/Distributed Systems/Scalability Patterns/Scalability Patterns|Scalability Patterns]]",
       "x": -840,
-      "y": 5560,
+      "y": 5440,
       "width": 340,
       "height": 80,
       "color": "2"
@@ -595,7 +585,7 @@
       "type": "text",
       "text": "# [[Home/Software Architecture/Patterns/Patterns|Patterns]]",
       "x": 420,
-      "y": 5440,
+      "y": 5320,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -605,7 +595,7 @@
       "type": "text",
       "text": "# [[Home/Software Architecture/Patterns/Architectural Patterns/Architectural Patterns|Architectural Patterns]]",
       "x": 840,
-      "y": 5560,
+      "y": 5440,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -615,7 +605,7 @@
       "type": "text",
       "text": "# [[Home/Software Architecture/Patterns/Design Patterns/Design Patterns|Design Patterns]]",
       "x": 840,
-      "y": 5680,
+      "y": 5560,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -625,7 +615,7 @@
       "type": "text",
       "text": "# [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Behavioral|Behavioral]]",
       "x": 1260,
-      "y": 5800,
+      "y": 5680,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -635,7 +625,7 @@
       "type": "text",
       "text": "# [[Home/Software Architecture/Patterns/Design Patterns/Creational/Creational|Creational]]",
       "x": 1260,
-      "y": 5920,
+      "y": 5800,
       "width": 340,
       "height": 80,
       "color": "4"
@@ -645,7 +635,7 @@
       "type": "text",
       "text": "# [[Home/Software Architecture/Patterns/Design Patterns/Structural/Structural|Structural]]",
       "x": 1260,
-      "y": 6040,
+      "y": 5920,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -655,7 +645,7 @@
       "type": "text",
       "text": "# [[Home/Software Architecture/Patterns/Resilience Patterns/Resilience Patterns|Resilience Patterns]]",
       "x": 840,
-      "y": 6160,
+      "y": 6040,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -665,7 +655,7 @@
       "type": "text",
       "text": "# [[Home/Software Architecture/System Architecture/System Architecture|System Architecture]]",
       "x": -420,
-      "y": 5680,
+      "y": 5560,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -675,7 +665,7 @@
       "type": "text",
       "text": "# [[Home/Software Design/Software Design|Software Design]]",
       "x": 0,
-      "y": 6440,
+      "y": 6320,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -685,7 +675,7 @@
       "type": "text",
       "text": "# [[Home/Software Design/Paradigms/Paradigms|Paradigms]]",
       "x": 420,
-      "y": 6440,
+      "y": 6320,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -695,7 +685,7 @@
       "type": "text",
       "text": "# [[Home/Software Design/Principles/Principles|Principles]]",
       "x": -420,
-      "y": 6440,
+      "y": 6320,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -705,7 +695,7 @@
       "type": "text",
       "text": "# [[Home/Software Design/Testing/Testing|Testing]]",
       "x": 420,
-      "y": 6560,
+      "y": 6440,
       "width": 340,
       "height": 80,
       "color": "1"
@@ -722,7 +712,7 @@
     {
       "id": "n_b0ac2236f9",
       "type": "text",
-      "text": "#### Roadmap legend\n**Generated:** Aug 16 2026 | 11:15AM",
+      "text": "#### Roadmap legend\n**Generated:** Aug 16 2026 | 06:18PM",
       "x": -1860,
       "y": 0,
       "width": 500,
@@ -731,7 +721,7 @@
     {
       "id": "n_4a66490dd9",
       "type": "text",
-      "text": "Not-Started: 40",
+      "text": "Not-Started: 39",
       "x": -1800,
       "y": 126,
       "width": 380,
@@ -1120,13 +1110,6 @@
       "fromNode": "n_6cafba7b0e",
       "fromSide": "right",
       "toNode": "n_45cda74957",
-      "toSide": "left"
-    },
-    {
-      "id": "e_b41ef0e6bf",
-      "fromNode": "n_94165b6a1a",
-      "fromSide": "right",
-      "toNode": "n_f4c58f9fd1",
       "toSide": "left"
     },
     {

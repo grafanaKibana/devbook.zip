@@ -83,8 +83,6 @@ app.Map("/ws", async context =>
 
 The echo sketch exits when it receives a close frame but does not send the required close response. A production handler must call `CloseAsync` with the received close status and description before disposal, while respecting request cancellation and a bounded close timeout.
 
-Most .NET applications can use **[[SignalR]]** instead of owning raw frames. SignalR adds a hub/RPC model, groups, and fallback transports. Automatic reconnect is available but opt-in in ASP.NET Core SignalR clients, and durable resume still belongs to the application.
-
 # Pitfalls
 
 - **Reconnect loses session continuity.** WebSocket does not reconnect or replay missed messages. A client needs backoff and a resume cursor. The server needs bounded replay retention and idempotent resubscription. SignalR can perform reconnect attempts when configured, but it does not invent durable application state.

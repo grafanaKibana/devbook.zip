@@ -11,34 +11,32 @@ status: Ready to Repeat
 publish: true
 ---
 
-.NET Standard is a specification that defines a set of .NET APIs that multiple .NET runtimes agree to implement.
-Historically, it was the compatibility bridge between .NET Framework, .NET Core, Mono, and Xamarin.
-Today, most new code targets modern .NET (for example net8.0), and .NET Standard is mainly relevant when you need broad compatibility.
+.NET Standard is a versioned API specification implemented by several .NET runtimes. It was the compatibility bridge among .NET Framework, .NET Core, Mono, and Xamarin. Modern libraries normally target the current .NET TFM directly. `netstandard2.0` remains useful when a library must also serve .NET Framework or older consumers.
 
 # How It Works
 
-- Targeting `netstandard2.0` means "I only use APIs that all runtimes implementing netstandard2.0 provide"
-- Targeting `net8.0` means "I can use the full .NET 8 API surface"
-- Multi targeting lets one library support multiple targets with conditional code
+- Targeting `netstandard2.0` selects that contract as the compile-time reference surface.
+- Targeting a modern `netX.0` TFM selects the APIs and runtime assumptions for that .NET release.
+- Multi-targeting lets one package compile separate assemblies for consumers with different capabilities.
 
-This target choice constrains the baseline reference API surface; you can still add APIs via NuGet packages, but runtime compatibility then depends on those package requirements too.
+This target choice constrains the baseline reference API surface. NuGet packages can add APIs, but runtime compatibility then depends on those package requirements too.
 
 Key mechanics to remember:
 
 - .NET Standard is a versioned API contract, not a runtime.
 - `netstandard2.0` is the highest .NET Standard version that .NET Framework can consume.
 - `netstandard2.1` adds APIs, but .NET Framework does not implement it.
-- .NET 5+ unified platform development; no new .NET Standard versions are planned after 2.1.
+- .NET 5+ unified platform development. No new .NET Standard versions are planned after 2.1.
 
 ## How the Contract Resolves at Runtime
 
-A `netstandard2.0` library references a single façade assembly, `netstandard.dll`, that contains no real implementation — just **type forwards**. At load time each type resolves (forwards) to the concrete implementation in whatever runtime is hosting the library (.NET Framework's `mscorlib`, or modern .NET's `System.Private.CoreLib`). That indirection is exactly what lets one compiled DLL run on multiple runtimes.
+Compilation uses .NET Standard reference assemblies, including `netstandard.dll`, to constrain which contract members are available. At runtime, assembly unification and type forwarding bind those references to implementations supplied by the host. Compatibility therefore has two tests: the host must implement the target standard, and every additional package must support that host.
 
-The **2.0 → 2.1 gap** is the practical fault line: APIs like `Span<T>`, `IAsyncEnumerable<T>`, and `Math.Clamp` are *native* in `netstandard2.1`, but on `netstandard2.0` you get them only by adding the **`System.Memory` / `Microsoft.Bcl.AsyncInterfaces`** NuGet polyfills. Other useful packages: `Microsoft.Bcl.*` for backported BCL surface, and **`PolySharp`** for compiler-feature shims (records, `init`, `required`) — note that **`<LangVersion>` is independent of the TFM**, so you can use modern C# syntax targeting `netstandard2.0` as long as the required runtime types are polyfilled.
+The 2.0-to-2.1 gap is the practical fault line. Some APIs associated with newer contracts can be supplied to a `netstandard2.0` target by packages such as `System.Memory` or `Microsoft.Bcl.AsyncInterfaces`, but a package is not proof that every runtime behavior is equivalent. Language version is a separate choice from TFM. Modern syntax can compile for an older target only when its required runtime types and members are available, sometimes through small compiler-support shims.
 
 ## Why it Ended
 
-.NET 5 unified the runtimes, so a single TFM family (`net5.0`, `net8.0`, …) now means "this exact platform," with OS-specific variants (`net8.0-android`, `net8.0-ios`, `net8.0-windows`) replacing the abstract-contract approach. .NET Standard stopped at 2.1 and exists today only as a compatibility bridge to .NET Framework.
+.NET 5 introduced the unified `netX.0` TFM family, with platform-specific variants for APIs tied to an operating system or application model. No .NET Standard version is planned after 2.1. The older contract remains a compatibility tool rather than the default target for new code.
 
 ## Example
 
@@ -80,20 +78,16 @@ var buffer = new byte[256];
 
 # Tradeoffs
 
-- `netstandard` maximizes compatibility but limits API usage
-- `netX` maximizes features and performance but narrows supported runtimes
-- `net8.0;netstandard2.0` is often the pragmatic compromise for shared libraries: modern fast path plus broad reach
+- **`netstandard2.0` only:** one broad asset, but no modern target-specific surface or optimization opportunities.
+- **Modern `netX.0` only:** simpler testing and access to the current platform, but older consumers cannot load it.
+- **Multi-targeted:** a modern implementation plus a compatibility asset, paid for with more builds, tests, conditionals, and package metadata.
 
 # Questions
 
 > [!QUESTION]- When should you still target netstandard?
-> - Target `netstandard2.0` when you must support .NET Framework or older ecosystem consumers that cannot load modern `netX` assemblies.
-> - Prefer adding it as part of multi-targeting (`net8.0;netstandard2.0`) instead of making it your only target for new libraries.
-> - If all known consumers are modern .NET, target modern `netX` directly.
+> Target `netstandard2.0` when a documented consumer requirement includes .NET Framework or another runtime that cannot consume a modern `netX.0` asset. Multi-targeting preserves a modern implementation while serving that compatibility requirement. If every supported consumer runs current .NET, the modern TFM is the smaller and more capable contract.
 
 # References
 
-- [.NET Standard](https://learn.microsoft.com/dotnet/standard/net-standard) - Official contract model, version support matrix, and current guidance.
-- [Cross-platform targeting for .NET libraries](https://learn.microsoft.com/dotnet/standard/library-guidance/cross-platform-targeting) - Practical targeting and multi-targeting decision rules.
-- [Target frameworks in SDK-style projects](https://learn.microsoft.com/dotnet/standard/frameworks) - TFM syntax and compatibility basics.
-- [The future of .NET Standard (.NET Blog)](https://devblogs.microsoft.com/dotnet/the-future-of-net-standard/) - Official rationale for the post-2.1 direction.
+- [.NET Standard](https://learn.microsoft.com/dotnet/standard/net-standard)
+- [The future of .NET Standard](https://devblogs.microsoft.com/dotnet/the-future-of-net-standard/)

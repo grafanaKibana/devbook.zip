@@ -12,19 +12,17 @@ status: Ready to Repeat
 publish: true
 ---
 
-In garbage-collected environments, "memory leak" means objects that are no longer useful but remain reachable from GC roots — so the collector never reclaims them. The process RSS grows monotonically until an `OutOfMemoryException` crashes the service or the container hits its memory limit and gets OOM-killed. In production, this typically manifests as a slow climb in memory usage over days, with periodic restarts masking the underlying issue until traffic increases and the leak accelerates.
+In managed code, a memory leak is usually a lifetime bug: an object has stopped being useful, but a path from a GC root still reaches it. The collector is working correctly. It cannot infer that a reachable object is logically dead. Native allocations and operating-system handles form a second category because the GC does not release them directly.
 
-There are two categories. **Managed leaks**: objects held alive by forgotten references (event subscriptions, static caches, closures capturing `this`). The GC works correctly — it just can't collect objects that are technically still reachable. **Unmanaged leaks**: native memory allocated via `Marshal.AllocHGlobal`, P/Invoke, or wrapped OS handles that are never freed, because the GC doesn't manage memory outside the managed heap.
+A leak often appears as retained memory that rises across comparable workload cycles, but process RSS alone is not proof. Heap expansion, allocator high-water marks, caches, JIT data, and native libraries can keep committed memory high without an ever-growing set of useless objects. A container kill or `OutOfMemoryException` is a possible end state, not part of the definition.
 
-The diagnostic workflow: capture a memory dump (`dotnet-dump collect`), load it in Visual Studio or `dotnet-dump analyze`, and run `dumpheap -stat` to find the largest retained types. For event-related leaks, `gcroot <address>` traces the reference chain from a leaked object back to its GC root — the root is where the fix goes.
-
-Below are 8 of the most common causes. The first 6 are managed leaks; the remaining 2 are unmanaged.
+Diagnosis starts by separating managed retention from native or handle growth. For managed memory, compare heap snapshots under similar load, identify types whose retained count or size grows, and inspect a representative instance with `gcroot <address>`. The useful result is not merely the largest type. It is the reference path that explains why an unwanted instance remains reachable.
 
 # Event Handlers
 
-Events in .NET are notorious for causing memory leaks. The reason is simple: after you subscribe to an event on some object, it will keep a reference to your class where the handler is defined (unless you used an anonymous method that does not capture any members of the class).
+A .NET event normally stores its subscribers as delegates. An instance-method delegate references its target object, so a long-lived publisher can retain a subscriber beyond the subscriber's intended lifetime.
 
-Look at this example:
+The following subscription creates that reference path:
 
 ```csharp
 public class MyClass
@@ -41,21 +39,13 @@ public class MyClass
 }
 ```
 
-So if `wifiManager` is defined outside of `MyClass`, you have a memory leak. `wifiManager` references the `MyClass` instance, which now will never be collected by the garbage collector.
+This becomes a leak when `wiFiManager` outlives the useful lifetime of `MyClass` and the subscription remains installed. If both objects have the same lifetime, the reference is harmless. The mechanism and several mitigation choices are illustrated in [5 Techniques to Avoid Memory Leaks When Using Events in C# .NET That You Should Know](https://michaelscodingspot.com/5-techniques-to-avoid-memory-leaks-by-events-in-c-net-you-should-know/).
 
-Events really can be dangerous, and there is a dedicated article about this: [5 Techniques to Avoid Memory Leaks When Using Events in C# .NET That You Should Know](https://michaelscodingspot.com/5-techniques-to-avoid-memory-leaks-by-events-in-c-net-you-should-know/).
-
-What can you do in this situation? The [article](https://michaelscodingspot.com/5-techniques-to-avoid-memory-leaks-by-events-in-c-net-you-should-know/) above describes several good practices to avoid memory leaks. Without going into details, here are some of them:
-
-1. Always unsubscribe from events.
-2. Use weak event patterns ([Weak Event Pattern](https://docs.microsoft.com/en-us/dotnet/desktop/wpf/advanced/weak-event-patterns?view=netframeworkdesktop-4.8)).
-3. If possible, subscribe using anonymous methods that do not capture other members of the class.
+The preferred fix is explicit lifetime ownership: the code that subscribes also unsubscribes at a deterministic boundary. The [mitigation catalog](https://michaelscodingspot.com/5-techniques-to-avoid-memory-leaks-by-events-in-c-net-you-should-know/) includes self-removing handlers for deliberately one-shot subscriptions. A [weak event pattern](https://docs.microsoft.com/en-us/dotnet/desktop/wpf/advanced/weak-event-patterns?view=netframeworkdesktop-4.8) is useful when publisher and subscriber lifetimes cannot be coordinated, especially in UI infrastructure. A capture-free static or anonymous handler avoids retaining a target object, but an anonymous handler is difficult to remove unless its delegate is stored.
 
 # Capturing Class Members in Anonymous Methods
 
-It is fairly obvious that using an instance method as an event handler creates a reference from the handler to the object that owns the method. What is much less obvious is that the same thing happens when a class member is captured in an anonymous method.
-
-Here is an example:
+Closures create a similar reference path outside events. When a lambda reads an instance member, the compiler-generated delegate usually reaches the containing instance.
 
 ```csharp
 public class MyClass
@@ -79,9 +69,9 @@ public class MyClass
 }
 ```
 
-In this example, the class member `_id` is **captured** by the anonymous method and, as a result, the class instance ends up holding a reference to itself. This means that as long as `_jobQueue` exists and references the anonymous delegate, it [`_jobQueue`] also references the `MyClass` instance.
+Here the queue retains the delegate, and the delegate retains the `MyClass` instance because `_id` is accessed through `this`. If the queued job lives longer than the logical operation, the whole instance remains reachable.
 
-The fix here is simple: use a local variable instead:
+Capturing a value snapshot can narrow that graph:
 
 ```csharp
 public class MyClass
@@ -106,23 +96,15 @@ public class MyClass
 }
 ```
 
-If you copy the value into a local variable, the class member will not be captured and you will prevent the leak.
-
-***Note:** if the root cause of the leak in this case is not entirely clear, take a look at [this comment](https://habr.com/ru/post/589005/#comment_23709379).*
+Because `localId` is an `int`, this version captures only the value. The change is not purely mechanical: it records `_id` at enqueue time rather than reading its later value at execution time. Copying a reference-type member may still retain a large object graph. [This discussion](https://habr.com/ru/post/589005/#comment_23709379) shows the original retention issue in context.
 
 # Static Variables
 
-Some developers consider static variables to be a bad practice. Nevertheless, when talking about memory leaks, they are important to mention.
+Static state is not inherently a leak, but it often gives an accidental reference application-wide lifetime. The collector begins with GC roots and marks everything reachable from them. Unreachable objects can then be reclaimed. [This GC walkthrough](https://habr.com/ru/post/590475/) gives a visual account of that traversal.
 
-Before getting to the point of this section, let's briefly talk about how the .NET garbage collector works. The basic idea is that the GC walks all **root objects** (**GC Roots**, **roots**) and marks them as objects that will **not** be collected. Then it walks all objects referenced by those roots and marks them as well, and so on. Eventually, the GC collects everything that remains unmarked ([a great article about the garbage collector](https://habr.com/ru/post/590475/)).
+Representative roots include references in thread stacks and registers, static fields, GC handles, finalization infrastructure, and interop roots such as managed objects exposed through [COM interop](https://docs.microsoft.com/en-us/dotnet/standard/native-interop/cominterop). The exact root set is a runtime implementation detail, but the diagnostic question is stable: which root owns the path to the unwanted object?
 
-What is considered a **root object**?
-
-1. The stacks of executing threads.
-2. Static variables.
-3. Managed objects passed to COM objects via [Interop](https://docs.microsoft.com/en-us/dotnet/standard/native-interop/cominterop).
-
-This means that static variables, and everything they reference, will never be reclaimed by the garbage collector. Here is an example:
+A static collection can retain every object ever added to it:
 
 ```csharp
 public class MyClass
@@ -135,13 +117,11 @@ public class MyClass
 }
 ```
 
-If you write the code above for some reason, any `MyClass` instance will remain in memory forever, causing a leak.
+Each `MyClass` instance remains reachable while the static field and its containing load context remain alive, unless an entry is removed or the collection is cleared. The problem is the unbounded ownership policy, not the `static` keyword by itself.
 
 # Caching
 
-Developers love caching. After all, why perform an operation twice if you can do it once and store the result, right?
-
-That is true, but if you cache without bounds, you will eventually exhaust all available memory. Look at this example:
+A cache deliberately retains data, so the dividing line between optimization and leak is its admission and eviction policy. A cache keyed by unbounded input can grow with every distinct request:
 
 ```csharp
 public class ProfilePicExtractor
@@ -167,19 +147,15 @@ public class ProfilePicExtractor
 }
 ```
 
-Caching in this example helps reduce expensive database calls, but the cost is memory bloat.
+The example trades database calls for retained image buffers and supplies no limit. A production cache needs a bound derived from memory budget, an eviction rule, and usually expiry for stale data. Concurrency and duplicate-load behavior also need an explicit policy.
 
-To address this, you can use the following practices:
-
-1. Remove items from the cache that have not been used for some time.
-2. Limit the cache size.
-3. Use `WeakReference` to store cached objects. `WeakReference` allows the garbage collector to clean up the cache on its own, which in some cases may not be a bad idea. The GC will promote objects that are still in use to older generations so they stay in memory longer. This means frequently used objects will remain in the cache longer, while unused ones will be collected without your explicit involvement.
+`WeakReference<T>` is not a general eviction strategy: collection depends on GC pressure rather than business freshness or a capacity target. It can suit optional, cheaply recomputed data where disappearance at any collection is acceptable. Most service caches need deterministic size and lifetime controls instead.
 
 # Incorrect Data Binding in WPF
 
-Data binding in WPF can also cause memory leaks. The main rule to prevent leaks is to always use `DependencyObject` or `INotifyPropertyChanged`. If you do not, WPF creates a so-called strong reference to the object, causing a memory leak ([more detailed explanation](https://stackoverflow.com/a/18543350/1229063)).
+WPF binding can extend a source object's lifetime when change tracking falls back to mechanisms that retain the source strongly. For a changing CLR property, implementing `INotifyPropertyChanged` is the normal notification path. Dependency properties provide the framework-native alternative. The exact retention path depends on the binding source, property descriptor, binding mode, and lifetime of the target. [This investigation](https://stackoverflow.com/a/18543350/1229063) demonstrates one such path.
 
-Example:
+The snippets below focus on the notification shape and omit surrounding view-model boilerplate:
 
 ```xml
 <UserControl x:Class="WpfApp.MyControl"
@@ -189,7 +165,7 @@ Example:
 </UserControl>
 ```
 
-The class below will remain in memory forever:
+A plain CLR property provides no `INotifyPropertyChanged` notification path:
 
 ```csharp
 public class MyViewModel
@@ -204,7 +180,7 @@ public class MyViewModel
 }
 ```
 
-But this class will not cause a leak:
+Implementing `INotifyPropertyChanged` lets WPF subscribe through the intended notification mechanism:
 
 ```csharp
 public class MyViewModel : INotifyPropertyChanged
@@ -223,17 +199,13 @@ public string SomeText
 }
 ```
 
-In fact, it does not even matter whether you raise `PropertyChanged` or not; the key point is that the class implements `INotifyPropertyChanged`. This tells the WPF infrastructure not to create a strong reference.
+The interface controls how WPF observes source changes. Raising `PropertyChanged` remains necessary for correct updates. `OneTime` binding avoids ongoing source-change observation after initialization, while `OneWay` and `TwoWay` require a suitable source notification mechanism. This is a lifetime-sensitive rule, not a promise that every non-notifying property leaks or every notifying source is leak-free.
 
-*Memory leaks occur only when the binding mode is* `OneWay` *or* `TwoWay`*. If the binding uses* `OneTime` *or* `OneWayToSource`*, there is no problem.*
+Dynamic collection views have a related contract. A collection that changes after binding should implement `INotifyCollectionChanged`. `ObservableCollection<T>` is the standard implementation. That requirement primarily governs update semantics. Any leak claim still needs a root path showing which binding component retains which source.
 
-Memory leaks in WPF can also happen when binding collections. If the collection does not implement `INotifyCollectionChanged`, you will get a memory leak. You can avoid the problem by using `ObservableCollection`, which implements this interface.
+# Long-Lived Threads and Timers
 
-# Threads that Never Stop
-
-We already discussed how the garbage collector works and what GC roots are. I mentioned that a thread stack is considered a root. A thread stack includes all local variables as well as call stack frames.
-
-If you create an infinite thread that does nothing but keeps references to objects, you will get a memory leak. One way this can happen easily is incorrect use of the `Timer` class. Look at this code:
+An active thread can keep objects reachable through its stack, and scheduled callbacks can retain their delegate targets. Timers are a common example:
 
 ```csharp
 public class MyClass
@@ -244,17 +216,17 @@ public class MyClass
 		timer.Change(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(5));
 	}
 
-	private void HandleTick(object state) => // do something
+	private void HandleTick(object? state) { /* ... */ }
 }
 ```
 
-If you do not stop the timer, it will keep running indefinitely on a separate thread, holding a reference to `MyClass` and preventing it from being collected.
+A live `System.Threading.Timer` schedules callbacks on thread-pool threads. It does not own a dedicated thread. The local-only timer in this sample is not a stable leak because an active timer does not keep itself alive. Once no reference reaches the timer, the GC may collect it and callbacks may stop.
+
+A retention leak needs a longer-lived root that reaches the timer, whose callback delegate then reaches `MyClass`. Keeping the timer in a field supports reliable operation and deterministic disposal, but the field alone is not proof of a leak: an otherwise unreachable owner-timer cycle is still collectible. The actual fault is a timer retained beyond the owner's intended lifetime without cancellation or disposal.
 
 # Unreleased Unmanaged Memory
 
-So far, we have only talked about managed memory, which is reclaimed by the garbage collector. Unmanaged memory is a different story. Instead of just avoiding references to unneeded objects, you must explicitly free the memory.
-
-Here is a simple example:
+Native memory and operating-system handles have explicit ownership rules. Losing the last managed wrapper does not necessarily release the underlying resource unless that wrapper implements reliable cleanup.
 
 ```csharp
 public class SomeClass
@@ -270,9 +242,9 @@ public class SomeClass
 }
 ```
 
-In this example we used `Marshal.AllocHGlobal` to allocate a block of unmanaged memory ([see the MSDN documentation](https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.marshal.allochglobal?view=net-5.0)). If you do not explicitly free the memory via `Marshal.FreeHGlobal`, it will remain allocated in the process heap, causing a leak even after `SomeClass` is collected by the GC.
+`Marshal.AllocHGlobal` allocates native memory ([API documentation](https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.marshal.allochglobal?view=net-5.0)). The matching ownership operation is `Marshal.FreeHGlobal`. Without it, collection of `SomeClass` does not free the native block.
 
-To prevent such issues, you can add a `Dispose` method to your class to clean up unmanaged resources. For example:
+An `IDisposable` boundary makes cleanup explicit. The next snippet shows the basic idea, not a complete production implementation:
 
 ```csharp
 public class SomeClass : IDisposable
@@ -289,13 +261,11 @@ public class SomeClass : IDisposable
 }
 ```
 
-*Unmanaged memory leaks can be even worse than managed leaks due to [fragmentation](https://stackoverflow.com/questions/3770457/what-is-memory-fragmentation). The GC can defragment managed memory by moving surviving objects next to each other to free space for new allocations. Unmanaged memory, on the other hand, stays tied to the location where it was allocated.*
+The sample is not idempotent: calling `Dispose` twice can free the same pointer twice. A real owner must guard repeated disposal, clear the pointer, and normally wrap operating-system handles in `SafeHandle`. Native allocators can also suffer [fragmentation](https://stackoverflow.com/questions/3770457/what-is-memory-fragmentation). Unlike compacting managed generations, native allocations generally cannot be relocated transparently while callers hold raw addresses.
 
 # Dispose Not Called
 
-In the previous example we added a `Dispose` method to release unmanaged resources when they are no longer needed. That is great, but what happens if someone uses the class and never calls `Dispose`?
-
-What you can do is use the C# `using` construct:
+Implementing `IDisposable` defines a cleanup operation. It does not schedule that operation. C# `using` ties disposal to a lexical scope:
 
 ```csharp
 using (var instance = new MyClass())
@@ -304,7 +274,7 @@ using (var instance = new MyClass())
 }
 ```
 
-The construct from the example works for classes that implement `IDisposable` and is compiled into the following code:
+Semantically, `using` guarantees a `finally`-based disposal path. The following code shows the essential shape. Exact lowering varies with the declaration form and value type:
 
 ```csharp
 MyClass instance = new MyClass();
@@ -321,9 +291,9 @@ if (instance != null)
 }
 ```
 
-This is convenient because even if an exception is thrown, `Dispose` will still be called.
+Normal control flow and exceptions both pass through the cleanup path. Abrupt process termination remains outside that guarantee.
 
-For maximum reliability, MSDN suggests the [Dispose implementation pattern](https://docs.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose). Here is an example of how it can be used:
+Types that own disposable fields or native resources follow the [Dispose implementation pattern](https://docs.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose). The example below demonstrates the traditional form for direct native-memory ownership:
 
 ```csharp
 public class MyClass : IDisposable
@@ -365,66 +335,57 @@ public class MyClass : IDisposable
 }
 ```
 
-Using this pattern helps ensure that even if `Dispose` is not called explicitly, it will still be called by the finalizer when the garbage collector decides to collect the object. If `Dispose` is called manually, the object's finalizer is suppressed and will not run. Suppressing finalization is important because running a finalizer is [relatively expensive](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/finalizers) and can cause performance issues.
+When an unreachable instance reaches finalization, its finalizer can release the native buffer if explicit disposal was missed. Finalization is delayed, carries GC cost, and is not a process-shutdown guarantee. The [finalizer guidance](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/finalizers) therefore recommends avoiding custom finalizers when `SafeHandle` can own the resource. Explicit disposal suppresses the now-unneeded finalizer.
 
-But keep in mind that Microsoft's `Dispose` pattern is not a silver bullet. If you do not call `Dispose` manually and the object is not collected because of a managed leak, the unmanaged resources will not be released either.
+A finalizer cannot repair a managed retention bug. If a root still reaches the object, it never becomes eligible for finalization, so its native resource remains open as well.
 
-# More Modern Leak Sources (ASP.NET Core Era)
+# Modern Lifetime Traps
 
-The classic eight above predate today's stacks. The leaks (and pseudo-leaks) most teams actually hit now:
+Current .NET applications add several lifetime traps that may present as memory growth or adjacent resource exhaustion:
 
-- **`HttpClient` socket exhaustion** — `new HttpClient()` per request doesn't leak managed memory, but it leaks **sockets**: each disposed client leaves a connection in `TIME_WAIT`, eventually exhausting ports (`SocketException`). Use `IHttpClientFactory` (or a single long-lived static client) so connections are pooled.
-- **DI captive dependencies** — injecting a *scoped* (or transient `IDisposable`) service into a **singleton** pins the shorter-lived object for the app's lifetime. Equivalent to a static reference. Enable scope validation and resolve scoped services via `IServiceScopeFactory` from singletons. See [[Home/Programming/NET/ASP.NET Web API/Dependency Injection|Dependency Injection]].
-- **Pooled buffers never returned** — renting from `ArrayPool<T>.Shared` / `MemoryPool<T>` and not returning (or returning then continuing to use) the buffer defeats the pool and grows retained memory.
-- **`AsyncLocal<T>` / `ThreadLocal<T>` retention** — values stored in ambient state flow into captured contexts and can outlive their intended scope, keeping large graphs alive. Clear them at the end of the logical operation.
-- **Tasks that never complete** — an `await`ed `TaskCompletionSource` that is never `SetResult`/`SetCanceled` keeps the entire async state machine (and everything it captured) alive forever. Always complete or time out every TCS.
-- **`ConditionalWeakTable<TKey,TValue>`** is the right tool when you must attach state to an object *without* keeping it alive — the value is collected once the key is unreachable (also how weak-event patterns avoid the event-handler leak above).
+- **`HttpClient` connection exhaustion** — creating and disposing a client for every request can churn connection pools and exhaust ephemeral ports because underlying TCP connections are not released immediately. This is resource exhaustion rather than a managed-memory leak. Use a correctly configured `IHttpClientFactory` client or a long-lived client with an appropriate handler lifetime.
+- **DI captive dependencies** — a singleton that captures a scoped service extends that service to singleton lifetime. The built-in container can reject this when scope validation is enabled. Disposable transient or scoped services resolved from the root container are also retained for later disposal. Create an explicit scope with `IServiceScopeFactory` when a singleton must perform scoped work. See [[Home/Programming/NET/ASP.NET Web API/Dependency Injection|Dependency Injection]].
+- **Pooled-buffer ownership errors** — a rented `ArrayPool<T>` or `MemoryPool<T>` buffer must be returned or disposed according to its pool contract. Failing to return it defeats reuse and increases allocation pressure. Continuing to use it after return violates ownership and can corrupt another operation's data.
+- **Ambient-state retention** — `AsyncLocal<T>` values flow with `ExecutionContext`, so a captured context can retain a value beyond one logical operation. `ThreadLocal<T>` values are tied to participating threads and should be disposed with their owner. Large graphs should not be stored in either without a clear lifetime boundary.
+- **Incomplete asynchronous operations** — an incomplete `TaskCompletionSource` does not root itself, but any long-lived owner that retains its task, continuations, or captured state can keep the entire operation graph alive. Cancellation and timeout paths must complete the ownership protocol.
+- **`ConditionalWeakTable<TKey,TValue>`** — this is designed for metadata whose lifetime follows its key without keeping that key alive. Its ephemeron semantics also handle a value that refers back to the key. It is a specialized association mechanism, not a replacement for explicit cache bounds.
 
 # Diagnosing in Production
 
-- **`dotnet-gcdump collect`** captures a managed heap graph cheaply (no full process dump). The high-signal workflow is a **two-snapshot delta**: take one gcdump, apply load, take a second, and compare retained-type counts — the types that grew are your leak.
-- **`dotnet-counters monitor System.Runtime`** to watch `gc-heap-size`, `gen-2-gc-count`, and GC-handle counts climb in real time; alert before OOM.
-- **`dotnet-trace`** for allocation/event tracing when you need to find *where* the allocations originate, then `gcroot <address>` (in `dotnet-dump analyze`) to trace a leaked instance back to the root that holds it — the root is where the fix goes.
+- **`dotnet-gcdump collect`** induces a generation 2 collection and reconstructs a managed heap graph from GC events. It is lighter than a full process dump but still adds target-process work and may need substantial buffers. Compare snapshots taken at equivalent workload points. Growth is a lead, not proof, until a root path explains it.
+- **`dotnet-counters monitor System.Runtime`** provides a low-overhead trend view of selected runtime memory, GC, and handle counters. Counter names vary across tool/runtime generations, so select them from the installed runtime's published list and alert on workload-adjusted trends rather than one universal threshold.
+- **`dotnet-trace`** records allocation and runtime events when the question is where pressure originates. `gcroot <address>` in `dotnet-dump analyze` answers the different question of why a particular managed instance is still reachable.
 
 # Tradeoffs
 
 | Decision | Option A | Option B | When A | When B |
 | --- | --- | --- | --- | --- |
-| **Event subscription model** | Strong events (standard C# events) | Weak events (`WeakEventManager`, `ConditionalWeakTable`) | Short-lived subscribers with deterministic unsubscription (e.g., `using` scope) | Long-lived publishers with many transient subscribers (UI frameworks, plugin systems) |
-| **Caching strategy** | Unbounded `Dictionary` cache | `MemoryCache` with size limits and eviction | Never — unbounded caches always leak eventually | Always for any cache that grows proportionally with input; set `SizeLimit` and `AbsoluteExpirationRelativeToNow` |
-| **Unmanaged resource cleanup** | `IDisposable` only (deterministic, no finalizer) | `IDisposable` plus finalizer safety net | When all callers reliably use `using`/`await using` (internal code, DI-managed lifetimes) | When the type is exposed to external consumers who may forget `Dispose()` — the finalizer catches the leak at the cost of one extra GC cycle |
-| **Leak detection approach** | Periodic memory dumps plus manual analysis | Continuous monitoring with `dotnet-counters` / `EventPipe` | Post-incident investigation, deep root-cause analysis | Production monitoring — alert on Gen 2 heap size or GC handle count crossing thresholds before OOM |
+| **Event subscription model** | Strong events (standard C# events) | Weak events (`WeakEventManager`) | Publisher and subscriber share a lifetime, or ownership guarantees unsubscription | A long-lived publisher serves transient subscribers whose disposal cannot be coordinated reliably |
+| **Caching strategy** | Simple dictionary with a proven finite keyspace | Cache with capacity and eviction | The keyspace and retained value size have a defensible hard bound | Input can grow, entries become stale, or memory budget must be enforced |
+| **Native resource cleanup** | `IDisposable` over a `SafeHandle` or other finalizable wrapper | Custom finalizer plus `IDisposable` | A suitable wrapper already owns the native handle. This is the normal choice | The type directly owns a native resource for which no safe wrapper is available |
+| **Leak detection approach** | Heap snapshots and root analysis | Continuous counters and traces | Explaining which objects are retained and by what root | Detecting trends, correlating growth with workload, and choosing when to capture deeper evidence |
 
-**Decision rule**: treat every `IDisposable` as a potential leak. Use `using` statements for all disposable objects. For caches, always set size limits and TTLs — unbounded caches are the number one managed leak pattern in production .NET services.
+The governing rule is ownership, not syntax. Each subscription, cache entry, timer, pooled buffer, task, disposable object, and native handle needs an owner and an end-of-life action. `using` is appropriate when the current scope owns a disposable instance. DI-managed and shared objects follow the lifetime of their actual owner. Cache limits should control the dimension that can grow, while expiry is added only when staleness is part of the policy.
 
 # Questions
 
 > [!QUESTION]- What is a memory leak? Is it possible in .NET? How?
-> A memory leak is memory that is no longer needed but cannot be reclaimed, so the process keeps growing over time.
+> A memory leak is memory that is no longer useful but remains allocated or reachable beyond its intended lifetime. Sustained process growth is evidence to investigate, not part of the definition.
 > Yes, it is possible in .NET:
 > - Managed leaks: objects stay reachable (for example via static caches, event subscriptions, long-lived collections), so GC cannot collect them.
 > - Unmanaged leaks: native memory/handles are allocated (directly or indirectly) and not released (for example, missing `Dispose()` / `using`).
 
-> [!QUESTION]- What is the call stack? Can it overflow? What happens then?
-> The call stack is a per-thread LIFO memory region that stores stack frames for active method calls (return address, parameters, locals, etc.).
-> It can overflow (for example, due to deep or infinite recursion or very large stack allocations). In .NET this typically results in `StackOverflowException`, and the process is terminated (it cannot be reliably handled).
-
 > [!QUESTION]- Why do we need `using {}` if there is a GC?
 > `using` provides deterministic cleanup for resources that are not just managed memory (file handles, sockets, OS handles, unmanaged buffers). GC runs non-deterministically and does not guarantee timely release of such resources.
-> The `using` statement compiles to `try/finally` so `Dispose()` is called even when exceptions occur.
+> The `using` statement provides `try/finally` cleanup semantics, so `Dispose()` is called when control leaves the scope, including through an exception.
 
 > [!QUESTION]- What are `IDisposable` and `Finalize`?
 > `IDisposable` is an interface for explicit, deterministic cleanup via `Dispose()`.
-> `Finalize` (a finalizer, written as `~TypeName()` in C#) is called by the GC for objects that have a finalizer, but it is non-deterministic and adds overhead. Finalizers should only be used to release unmanaged resources, and `Dispose()` typically calls `GC.SuppressFinalize(this)`.
+> `Finalize` (a finalizer, written as `~TypeName()` in C#) is scheduled after a finalizable object becomes unreachable, but its timing is non-deterministic and execution is not guaranteed during abrupt process termination. A custom finalizer is reserved for directly owned unmanaged resources when no suitable `SafeHandle` exists. `Dispose()` normally calls `GC.SuppressFinalize(this)` after successful cleanup.
 
 > [!QUESTION]- What is the disposable (dispose) pattern?
-> A standard way to implement `IDisposable` so both explicit cleanup (`Dispose()`) and (optionally) finalization are supported.
-> Typical shape: `Dispose()` calls `Dispose(true)` and then `GC.SuppressFinalize(this)`; a finalizer (if needed) calls `Dispose(false)`; `Dispose(bool disposing)` releases unmanaged resources and, when `disposing` is true, also disposes managed fields.
+> A standard way to make resource ownership explicit and cleanup idempotent. `Dispose()` releases owned disposable state and suppresses finalization when a finalizer exists. The extensible form uses `Dispose(bool disposing)`. A finalizer is added only for direct unmanaged ownership that cannot be delegated to a safe wrapper.
 
 # References
 
-- [Garbage collection fundamentals (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/fundamentals) — explains GC roots, reachability, and why managed leaks are possible despite automatic memory management.
-- [Implementing a Dispose method (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose) — official pattern for deterministic cleanup of managed and unmanaged resources.
-- [Weak event patterns in WPF (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/advanced/weak-event-patterns) — how to subscribe to events without creating strong references that prevent GC.
-- [8 Ways You Can Cause Memory Leaks in .NET (Michael's Coding Spot)](https://michaelscodingspot.com/memory-leaks-dotnet/) — practitioner walkthrough of the 8 most common .NET leak patterns with code examples and fixes.
-- [5 Techniques to Avoid Memory Leaks by Events in C# .NET (Michael's Coding Spot)](https://michaelscodingspot.com/5-techniques-to-avoid-memory-leaks-by-events-in-c-net-you-should-know/) — event-specific leak patterns and mitigation strategies including weak event and anonymous handler approaches.
+- [Diagnose memory leaks in .NET](https://learn.microsoft.com/en-us/dotnet/core/diagnostics/debug-memory-leak)

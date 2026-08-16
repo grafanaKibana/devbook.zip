@@ -11,7 +11,7 @@ status: Creation
 publish: true
 ---
 
-`lock` is the default in-process mutual-exclusion primitive: one thread in the critical section at a time. Reach for it first for a short **synchronous** critical section — incrementing a shared counter, mutating a `Dictionary` several threads touch, publishing a computed value. It protects in-memory state inside one process, and nothing more. It's the wrong tool when the section must `await` (use [[Semaphore]]), when coordination crosses process boundaries (use [[Mutex]]), or when you want N concurrent holders instead of one (use [[Semaphore]]).
+`lock` gives one thread at a time access to a synchronous critical section. It fits small in-process state changes such as updating a counter or taking a snapshot of a shared dictionary. Awaited I/O should normally happen outside that mutation and publish its result inside a short lock. When an invariant genuinely must span asynchronous work, `SemaphoreSlim.WaitAsync` can gate that bounded span; cross-process coordination needs [[Mutex]], and N concurrent holders need [[Semaphore]] rather than mutual exclusion.
 
 # How It Works
 
@@ -33,11 +33,11 @@ finally
 }
 ```
 
-The `lockTaken` flag exists so that if `Monitor.Enter` throws before the lock is taken, the `finally` doesn't call `Monitor.Exit` on a lock it never held.
+`lockTaken` records whether `Monitor.Enter` succeeded. If acquisition throws, the `finally` block does not attempt to release a monitor the thread never owned.
 
-**`Monitor`/`lock` is reentrant.** The owning thread can re-acquire the same lock without blocking itself; ownership is reference-counted and must be exited the same number of times. (`SemaphoreSlim` is not — a recursive acquire of a 1-permit [[Semaphore|semaphore]] self-deadlocks.)
+**`Monitor`/`lock` is reentrant.** Its owning thread can acquire the same monitor again. Each acquisition increments a recursion count, so the thread must exit the same number of times. A one-permit [[Semaphore|semaphore]] has no such ownership model and self-deadlocks on a nested wait.
 
-**`System.Threading.Lock` (.NET 9+)** is a dedicated type for this. Declare the field as `Lock` and the `lock` statement recognizes it, calling `Lock.EnterScope()` — which returns a `ref struct` scope disposed at the closing brace — instead of `Monitor.Enter`:
+**`System.Threading.Lock` (.NET 9+)** makes this intent explicit. When the operand has type `Lock`, the statement uses `Lock.EnterScope()` and disposes its `ref struct` scope at the closing brace instead of lowering to `Monitor.Enter`:
 
 ```csharp
 private readonly Lock _gate = new();   // .NET 9+
@@ -45,7 +45,7 @@ private readonly Lock _gate = new();   // .NET 9+
 lock (_gate) { _count++; }             // compiler calls _gate.EnterScope()
 ```
 
-Prefer it over locking on a plain `object`: it's purpose-built (you can't accidentally lock on a boxed value, a `string`, or `this`), the API makes intent explicit, and it's slightly faster. **What to lock on** either way is a `private readonly object _gate = new();` (or `private readonly Lock _gate = new();`). Never `lock(this)`, `lock(typeof(X))`, or an interned `string` — those are visible to other code, which creates [[Deadlocks|lock-ordering cycles]] you can't see.
+A dedicated `Lock` field is harder to misuse than a general `object`. With either type, the gate stays `private readonly`. Locking on `this`, a `Type`, or an interned string exposes the monitor to unrelated code and can create invisible [[Deadlocks|lock-ordering cycles]].
 
 # Example
 
@@ -72,40 +72,37 @@ public sealed class MetricsBuffer
 }
 ```
 
-Readers and writers take the same `_gate`. `Snapshot` copies inside the lock so callers iterate a private copy while writers keep mutating the live dictionary.
+Both reads and writes use `_gate`. `Snapshot` copies the dictionary while protected, then returns data that callers can enumerate after the live lock has been released.
 
 # Pitfalls
 
-- **Cannot span `await`.** `Monitor` has **thread affinity** — the releasing thread must be the acquiring thread — but a continuation after `await` can resume on a different thread and call `Monitor.Exit` as a non-owner. The compiler rejects `await` inside a `lock` block (CS1996). For async mutual exclusion, reach for a [[Semaphore|semaphore]]'s `WaitAsync`.
-- **Don't hold a lock across I/O or a blocking call.** It serializes every other thread behind the slowest operation and invites lock convoys and [[Deadlocks|deadlocks]]. Do the work outside the lock; take it only to swap the result in.
-- **Locking on the wrong object** — `this`, a `Type`, or a `string` — leaks the lock to unrelated code and forms cross-component cycles.
-- **`Monitor.TryEnter(obj, timeout)`** bounds the wait instead of blocking forever, useful when acquiring in an order you can't fully control (the ordering mechanics are in [[Deadlocks]]).
+- **A monitor cannot span `await`.** Monitor ownership has thread affinity, while a continuation may resume on another thread. The compiler reports CS1996. Async mutual exclusion uses a [[Semaphore|semaphore]] and `WaitAsync`.
+- **I/O inside a lock turns latency into contention.** Every waiter queues behind the slow operation, increasing the chance of convoys and [[Deadlocks|deadlocks]]. Compute or fetch outside the lock, then protect only the shared-state update.
+- **A public gate leaks synchronization.** `this`, a `Type`, and interned strings can all be locked by unrelated code.
+- **`Monitor.TryEnter(obj, timeout)` bounds acquisition.** It is useful when an external lock order cannot be fully controlled. [[Deadlocks]] covers the ordering mechanics.
 
 # Tradeoffs
 
-- **`lock`/`Monitor`** — in-process, synchronous, one owner. User-mode spin before escalating to the kernel; ~20-50 ns uncontended. Reentrant.
-- **`SemaphoreSlim`** — in-process, supports `await` via `WaitAsync`, allows N permits. No thread affinity, not reentrant.
-- **`Mutex`** — one owner across processes via a named kernel object. ~1-5 µs per acquire from the kernel transition.
+- **`lock`/`Monitor`** is synchronous, in-process, reentrant mutual exclusion. Its fast path stays in user mode.
+- **`SemaphoreSlim`** is in-process, supports `WaitAsync`, and can expose more than one permit. It has no thread ownership or reentrancy.
+- **`Mutex`** supplies thread-owned mutual exclusion through an operating-system object and can coordinate named participants across processes.
 
-Use `lock` in-process by default. Switch to `SemaphoreSlim` the moment the critical section must `await` — the compiler forces the issue anyway. Reach for `Mutex` only when the boundary is genuinely cross-process (single-instance guard, shared file), and accept the kernel cost. If you need N concurrent entrants rather than one, that's a [[Semaphore]] regardless of sync versus async.
+For short synchronous state changes inside one process, `lock` is the smallest correct primitive. Restructure ordinary async flows so awaited I/O completes before the protected mutation. Use `SemaphoreSlim` only when the invariant must remain gated across asynchronous work, and keep that span bounded because remote latency becomes contention. A real process boundary justifies `Mutex`. N concurrent entrants make the problem a [[Semaphore]] problem regardless of whether callers wait synchronously or asynchronously.
 
 # Questions
 
 > [!QUESTION]- What does `lock (obj) { ... }` compile to?
-> `Monitor.Enter(obj, ref lockTaken)` followed by `try { ... } finally { if (lockTaken) Monitor.Exit(obj); }`. The `lockTaken` flag ensures `Exit` runs only if the lock was actually acquired, even if `Enter` throws.
+> `Monitor.Enter(obj, ref lockTaken)` surrounds the body with a `try/finally`, and the `finally` calls `Monitor.Exit` only when `lockTaken` is true. This preserves release on every normal or exceptional exit without releasing an unowned monitor.
 
 > [!QUESTION]- Why can't a `lock` block contain `await`?
-> `Monitor` has thread affinity: the thread that releases must be the one that acquired. A continuation after `await` can resume on a different thread, which would exit a lock it doesn't own. The compiler rejects it (CS1996); use `SemaphoreSlim.WaitAsync` for async mutual exclusion.
+> `Monitor` ownership belongs to the acquiring thread. Since an async continuation may resume elsewhere, the compiler rejects `await` in a `lock` block with CS1996. `SemaphoreSlim.WaitAsync` models asynchronous waiting without monitor ownership.
 
 > [!QUESTION]- Why prefer `System.Threading.Lock` over locking on a plain `object` in .NET 9+?
-> It's purpose-built: you can't accidentally lock on a `string`, a boxed value, or `this`; `EnterScope` makes intent explicit; and it's slightly faster. The `lock` statement recognizes a `Lock`-typed operand and calls the new API for you.
+> A dedicated type exposes the field's purpose and prevents several accidental operands. The compiler recognizes a `Lock`-typed operand and uses its scoped acquisition API directly.
 
 > [!QUESTION]- Is `lock`/`Monitor` reentrant, and is `SemaphoreSlim`?
-> `lock`/`Monitor` is reentrant — the owning thread can re-acquire and must exit the same number of times. `SemaphoreSlim` is not; a recursive acquire of a 1-permit [[Semaphore|semaphore]] self-deadlocks.
+> `lock`/`Monitor` tracks the owning thread and a recursion count, so nested acquisition by that thread succeeds. `SemaphoreSlim` does not. Waiting twice on a one-permit [[Semaphore|semaphore]] blocks the second wait.
 
 # References
 
-- [lock statement (C# reference) — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/lock) — the lowering to `Monitor.Enter`/`Exit`, and how the statement dispatches to `System.Threading.Lock` when the operand is that type.
-- [Monitor class — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.threading.monitor) — `Enter`/`Exit`/`TryEnter` semantics, ownership, and reentrancy.
-- [System.Threading.Lock class — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.threading.lock) — the .NET 9+ type and `EnterScope`'s disposable `ref struct` scope.
-- [Threading in C#: Locking and thread safety (Joe Albahari)](https://www.albahari.com/threading/part2.aspx) — `lock` versus other primitives, and why you lock on a private object.
+- [lock statement](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/lock)

@@ -12,32 +12,33 @@ level:
   - "4"
 ---
 
-A C# type defines shape, behavior, and assignment semantics.
-A common source of bugs is value semantics versus reference semantics: value types copy the value, while reference types copy object references.
-That nuance matters for correctness, allocations, and API design, especially when code crosses boundaries such as collections, interfaces, and async flows.
+A C# type defines what values exist, which operations are valid, and what assignment copies. Value types copy their contained value. Reference types copy a reference to one object. That distinction controls aliasing and equality long before stack-versus-heap details matter.
+
+The folder separates the main forms. Classes and record classes are reference types. Structs and record structs are value types. Strings, delegates, and events add specialized behavior on top of the same type system.
 
 ```datacorejsx
 const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
 return FolderStructureMap;
 ```
 
-# How It Works
+# Copy and Storage Boundaries
 
-- **Assignment:** assigning a value type copies the value (including any reference-type fields, which remain shared references); assigning a reference type copies a pointer-like reference to the same object.
-- **Parameter passing default:** C# passes arguments by value unless you use `ref`, `out`, or `in`. For reference types, the copied value is still the reference, so object mutation is visible to both callers.
-- **Storage model:** "stack vs heap" is a runtime placement detail. Value types can live inside heap objects, and references can be stored in stack frames.
-- **Boxing boundary:** converting a value type to `object` or an interface boxes it (heap allocation + copy). Repeated boxing in hot paths can create avoidable GC pressure.
+- **Assignment:** a value-type assignment copies every field. Reference fields inside that value still point to the same objects. A reference-type assignment copies the object reference, so both variables can observe mutations to one instance.
+- **Arguments:** parameters are passed by value unless marked `ref`, `out`, or `in`. Passing a reference type by value copies the reference, not the object.
+- **Storage:** value types may live inline inside heap objects and arrays. References may be local variables. Declaration kind does not dictate one physical location.
+- **Boxing:** conversion from a value type to `object` or an interface value copies it into a box. Constrained generic calls can often avoid that allocation.
 
 # Pitfalls
 
-- Assuming reference types are always safe to pass around can create hidden shared-mutation bugs. This happens when multiple aliases point to one mutable object. Mitigate by preferring immutability for shared models or cloning at ownership boundaries.
-- Using large or mutable structs can hurt both performance and correctness. A common failure mode is mutating a struct returned from a property or in a `foreach`, because you often mutate a copy, not the original value. Mitigate by keeping structs small and immutable (`readonly struct` where possible), and by avoiding APIs that expose mutable struct state through copying boundaries.
+- **Hidden aliases.** Several references can point at one mutable object. Ownership must be clear. Shared models are easier to reason about when immutable.
+- **Mutable value copies.** A property, indexer, or `foreach` variable usually exposes a struct copy. Mutation may be rejected by the compiler or affect only the copy. Readonly structs and whole-value replacement keep that boundary visible.
+- **Equality chosen by accident.** Classes use reference equality unless they define another contract. Record classes and record structs synthesize value equality, while ordinary structs inherit field-based default equality. Domain identity should decide, not syntax convenience.
 
 # Tradeoffs
 
-- **`class` vs `struct`:** `class` avoids large copy costs and supports inheritance; `struct` can reduce allocations for small value-like data but is sensitive to copy/boxing overhead.
-- **`record class` vs `class`:** records improve value-based equality and concise modeling, but default equality semantics may be wrong for identity-based domain entities.
-- **Interface abstraction with value types:** interfaces improve design flexibility, but passing structs through interface-typed APIs may introduce boxing unless generic constraints keep calls strongly typed.
+- **Class or struct:** a class makes shared identity and inheritance available. A struct gives value-copy semantics and can avoid a separate allocation, but large copies and boxing may cost more.
+- **Record class or conventional class:** records fit data whose contents define equality. Identity-rich entities usually need conventional class semantics.
+- **Interface or constrained generic:** an interface value gives runtime polymorphism but boxes a struct. A constrained generic can preserve static typing and avoid the box.
 
 # Examples
 
@@ -66,33 +67,19 @@ h.Counter = c;
 Console.WriteLine(h.Counter.Value); // 1
 ```
 
+The direct `h.Counter.Inc()` call compiles, but it mutates the temporary value returned by the property and then discards that copy. A direct field assignment such as `h.Counter.Value = 1` is rejected with CS1612. Reading the value into `c`, mutating it, and assigning it back persists the change.
+
 # Questions
 
 > [!QUESTION]- Why can updating a value-type item inside `foreach` fail to persist, and what are safe fixes?
-> - The loop variable was a copy of a value type, so mutations were applied to the copy.
-> - The same issue appears when mutating structs returned by properties, because property access often returns a copy.
-> - Fix by making the struct immutable and replacing whole values, or by redesigning to avoid mutable structs in those paths.
-> - If mutation is required, use APIs with explicit `ref` semantics very carefully.
+> The loop variable is normally a value copy, so changing it cannot update the collection element. Properties and ordinary indexers have the same copy boundary. Prefer immutable values and replace the whole element. A ref-returning API is appropriate only when in-place mutation is a deliberate part of the collection contract.
 
 > [!QUESTION]- Where does boxing usually sneak in, and what is the practical mitigation in production code?
-> - Boxing happens when a value type is converted to `object` or interface-typed APIs.
-> - Each boxing operation allocates and can increase GC pressure in hot paths.
-> - Prefer generic APIs (`List<T>`, `EqualityComparer<T>`, generic interfaces) so calls stay strongly typed.
-> - Verify with profiling before optimizing, then remove high-frequency boxing boundaries.
+> Boxing usually appears at conversions to `object`, interface-typed variables, non-generic collections, and `params object[]`. Each box allocates and copies the value. Generic APIs such as `List<T>` and constrained calls keep values strongly typed. Profiling should identify whether that boundary is frequent enough to matter.
 
 > [!QUESTION]- What criteria should drive choosing between `struct`, `class`, and `record class`?
-> - Use `struct` for tiny immutable value objects when copy semantics are desired and boxing is controlled.
-> - Use `class` for identity-rich entities where reference identity and lifecycle matter.
-> - Use `record class` for data-centric models where value-based equality improves correctness.
-> - Validate the choice against mutation rules, size/copy costs, and equality requirements.
+> Start with semantics. A struct fits a small logical value when copying is expected and boxing is controlled. A conventional class fits an entity whose identity survives state changes. A record class fits reference-typed data whose contents define equality. Size, mutation, and measured allocation behavior can then reject an otherwise plausible choice.
 
 # References
 
-- [C# type system overview](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/types/) — Microsoft's overview of value and reference types, conversions, generics, nullable types, and compile-time type safety.
-- [Value types (C# reference)](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/value-types)
-- [Reference types (C# reference)](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/reference-types)
-- [Boxing and unboxing (C# guide)](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/types/boxing-and-unboxing)
-- [C# language specification: Types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/types)
-- [Choosing between class and struct](https://learn.microsoft.com/en-us/dotnet/standard/design-guidelines/choosing-between-class-and-struct)
-- [Writing large responsive .NET apps: common allocations](https://learn.microsoft.com/en-us/dotnet/framework/performance/writing-large-responsive-apps#common-allocations-and-examples)
-- [Mutating readonly structs (Eric Lippert)](https://ericlippert.com/2008/05/14/mutating-readonly-structs/)
+- [C# type system](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/types/)

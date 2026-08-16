@@ -11,21 +11,11 @@ status: Ready to Repeat
 publish: true
 ---
 
-`foreach` is the most common way to iterate a sequence in C#. It works with types that provide an enumerator (typically via `IEnumerable` / `IEnumerable<T>`), and the compiler rewrites the loop into an enumerator-based pattern.
+`foreach` asks a source for one item at a time. Most sources implement `IEnumerable<T>`, but the compiler also accepts types that expose the required enumerator pattern without implementing the interface. This is why arrays, collections, spans, and custom stack-only enumerators can all use the same loop syntax.
 
-You can use `foreach` with:
+The source must provide either an enumerable interface or a suitable `GetEnumerator()` method. The returned enumerator exposes `Current` and a parameterless `MoveNext()` returning `bool`.
 
-- Any type that implements `System.Collections.IEnumerable` or `System.Collections.Generic.IEnumerable<T>`
-- Or any type that satisfies the enumerator pattern:
-  - A public parameterless `GetEnumerator()` method (instance or extension)
-  - The returned enumerator has a public `Current` property and a public parameterless `MoveNext()` method returning `bool`
-
-Internals (compiler lowering):
-
-- For many built-in collections, the compiler emits code that calls `GetEnumerator()`, then loops while `MoveNext()` returns `true` and reads `Current`.
-- For some cases (for example, arrays), the compiler can optimize into an index-based loop.
-
-Under the hood, foreach compiles into:
+For a normal enumerable, the lowering is roughly:
 
 ```csharp
 var enumerator = collection.GetEnumerator();
@@ -39,25 +29,26 @@ try
 }
 finally
 {
-    // If the enumerator is IDisposable, foreach disposes it — even on early break/exception.
-    (enumerator as IDisposable)?.Dispose();
+    // Conceptually: if this enumerator requires disposal, dispose it here.
+    // The exact pattern depends on its static type and may avoid boxing a struct.
 }
 ```
 
-The `finally`/`Dispose` is the part people forget: it's what runs the `finally` block inside an iterator method (and disposes a `DbDataReader`, file enumerator, etc.) when you `break` out of a loop early. Hand-rolling the `while (MoveNext())` form skips this cleanup.
+The exact lowering depends on the source type. Arrays receive specialized index-based handling. Other enumerators are disposed when required, including after `break` or an exception. A hand-written `while (MoveNext())` loop must preserve that cleanup itself.
 
-**Struct enumerators and boxing.** `List<T>`, arrays, and `Span<T>` expose a **struct** enumerator, so `foreach` over them allocates nothing (the JIT also elides bounds checks on `Span<T>`/arrays). But if you access the collection through `IEnumerable<T>`, `GetEnumerator()` returns the enumerator **boxed** to the interface — reintroducing the allocation. Iterate the concrete type on hot paths.
+Concrete collections can expose struct enumerators, avoiding a heap allocation for the enumerator. Upcasting such a collection to `IEnumerable<T>` may box that enumerator. This matters only on measured hot paths. The interface is often the better boundary elsewhere.
 
 # Iterators and Yield
 
-`yield return` and `yield break` let you write iterator methods: methods that produce a sequence lazily, one element at a time.
+`yield return` lets a method describe a sequence without building the whole result first. The compiler turns the method into a state machine that resumes at the next statement each time the consumer asks for another element. `yield break` ends the sequence.
 
-An iterator method returns `IEnumerable<T>` / `IEnumerable` (or in async scenarios `IAsyncEnumerable<T>`), but it doesn't execute immediately:
+An iterator returning `IEnumerable<T>` normally starts work during enumeration, not when the method is called:
 
-- Calling the method creates an iterator object.
-- Iteration starts when the consumer begins enumerating (often via `foreach`).
-- Each `yield return` produces the next element and suspends execution until the next element is requested.
-- `yield break` ends the sequence early.
+- Calling the method obtains the enumerable state machine.
+- `MoveNext()` runs the body until it reaches a `yield return` or finishes.
+- Disposing the enumerator runs pending `finally` blocks.
+
+Async iterators apply the same idea through `IAsyncEnumerable<T>` and `await foreach`.
 
 Example:
 
@@ -76,22 +67,24 @@ foreach (var number in CountNumbers(1, 5))
 }
 ```
 
-Two iterator gotchas:
+Two boundaries are easy to miss:
 
-- **Deferred execution moves exceptions.** Because the body doesn't run until enumeration starts, an argument check inside an iterator method throws *when the caller starts iterating*, not at the call site. For eager validation, split a public wrapper (validate, then return) from a private iterator (`yield`).
-- **`yield` can't live inside a `try` with a `catch`** (only `try`/`finally` is allowed), and not inside a `lock`/`unsafe` block. If you need catch semantics around yielded work, wrap the consumption, not the production.
+- **Deferred execution moves failures.** Validation inside the iterator body throws when enumeration begins. A non-iterator wrapper can validate immediately and return a private iterator.
+- **`yield return` has placement restrictions.** It cannot appear in a `catch` or `finally`, or in a `try` that has a `catch`. A `try` with only `finally` is allowed so the state machine can preserve cleanup.
 
 # Pitfalls
 
-**Modifying the collection during iteration**: Mutating a `List<T>` or `Dictionary<TKey,TValue>` inside a `foreach` over it throws `InvalidOperationException`. The enumerator tracks an internal version counter and detects the change. Fix by iterating a snapshot (`collection.ToList()`) or collecting mutations in a separate list and applying them after the loop.
+**Changing the source during enumeration.** Many mutable collections, including `List<T>` and `Dictionary<TKey,TValue>`, invalidate active enumerators after structural changes and throw `InvalidOperationException`. Apply changes after the loop or iterate an intentional snapshot.
 
-**Closure variable capture**: Lambdas created inside `foreach` capture the loop variable by reference unless you shadow it into a local. Before C# 5, all lambdas in a `foreach` could close over the same `item` variable and see only the last value. Best practice: always copy to a local inside the lambda body if lifetimes extend beyond the iteration: `var current = item; tasks.Add(() => Process(current));`.
+**Deferred work captures more than the item.** Since C# 5, each `foreach` iteration has its own iteration variable, so lambdas do not all observe the final item. Captured mutable state outside the loop is still shared, and closures can outlive resources used during enumeration.
+
+**Multiple enumeration.** An `IEnumerable<T>` may repeat I/O, database work, or side effects every time it is enumerated. Materialize only when a stable snapshot or repeated traversal is actually needed.
 
 # Tradeoffs
 
-- **`foreach` vs `for`**: `foreach` is idiomatic and works on any enumerable. `for` is faster on arrays and `List<T>` because the JIT can eliminate bounds checks when iterating from 0 to `Count`. Use `for` in tight inner loops over known-length collections; `foreach` everywhere else.
-- **`foreach` vs LINQ**: LINQ chains are composable and readable but allocate per-operator. `foreach` over the source directly allocates less. Use LINQ for readability on non-hot paths; `foreach` (or `Span<T>`) for hot paths where allocation matters.
-- **`foreach` vs `Span<T>` iteration**: for CPU-bound loops over memory you own, iterating a `Span<T>` or `ReadOnlySpan<T>` eliminates enumerator overhead and enables bounds-check elimination. Typical microbenchmark improvement is 20–30% on large arrays.
+- `foreach` expresses sequential traversal without exposing indexes. Use `for` when the index itself is part of the algorithm or the collection must be updated by position.
+- LINQ expresses a transformation pipeline. A loop is easier to step through and can avoid iterator or delegate overhead, but performance depends on the source and operators.
+- `Span<T>` provides a stack-only view over contiguous memory. It helps APIs avoid copies and allocations. It is not an automatic reason to replace every collection loop.
 
 # Questions
 
@@ -99,19 +92,14 @@ Two iterator gotchas:
 > Any type that implements `IEnumerable` / `IEnumerable<T>`, or any type that provides the enumerator pattern (`GetEnumerator()` + `Current` + `MoveNext()`).
 
 > [!QUESTION]- How is `foreach` implemented under the hood?
-> The compiler lowers it to enumerator code: call `GetEnumerator()`, loop `MoveNext()`, read `Current`.
+> The compiler chooses a lowering for the source type. The general form calls `GetEnumerator()`, loops through `MoveNext()` and `Current`, then disposes the enumerator when required. Arrays receive specialized handling.
 
 > [!QUESTION]- What is `yield` and how does it work?
-> It creates an iterator: each `yield return` produces a value and pauses the method; the method resumes on the next iteration request.
+> It creates an iterator: each `yield return` produces a value and pauses the method. The method resumes on the next iteration request.
 
 > [!QUESTION]- Why and when should you use `yield return` instead of returning a materialized collection like `List<T>`?
 > Use `yield return` for deferred execution and streaming when consumers may stop early or the sequence is large, because it lowers peak memory usage. Materialize (`ToList()` / `ToArray()`) when you need a snapshot, random access or `Count`, or repeated enumeration without rerunning expensive or side-effectful generation logic.
 
 # References
 
-- [Iteration statements (foreach)](https://learn.microsoft.com/dotnet/csharp/language-reference/statements/iteration-statements#the-foreach-statement) — language reference for `foreach` syntax, duck-typing pattern, and async enumeration.
-- [C# language specification: iteration statements](https://learn.microsoft.com/dotnet/csharp/language-reference/language-specification/statements#139-iteration-statements) — formal spec defining the enumerator pattern the compiler targets.
-- [yield statement (yield return / yield break)](https://learn.microsoft.com/dotnet/csharp/language-reference/statements/yield) — reference for iterator methods, state machine semantics, and async iterators.
-- [Iterators (overview)](https://learn.microsoft.com/dotnet/csharp/iterators) — conceptual guide covering lazy evaluation, deferred execution, and `IAsyncEnumerable<T>`.
-- [How is foreach implemented in C#? (StackOverflow)](https://stackoverflow.com/questions/11179156/how-is-foreach-implemented-in-c) — community explanation of compiler lowering with IL examples.
-- [Yield: what, where, and why (Habr)](https://habr.com/ru/post/311094/) — Russian-language practitioner deep-dive into iterator state machines.
+- [C# iteration statements](https://learn.microsoft.com/dotnet/csharp/language-reference/statements/iteration-statements#the-foreach-statement)
