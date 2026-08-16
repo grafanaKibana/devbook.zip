@@ -11,9 +11,11 @@ status: Creation
 publish: true
 ---
 
-To find the shortest route to one destination on a road graph, [[Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]] settles nodes in expanding rings of cost-from-source: reaching a target 10 km east, it settles every node with path cost below 10 km in all directions and may settle equal-cost nodes before the target, depending on tie-breaking. Almost none of that work touches the optimal path. A* keeps the same cost accounting but reorders the frontier by an estimate of _total_ path cost, `f(n) = g(n) + h(n)` — `g(n)` is the exact cost already paid to reach `n`, and `h(n)` is a heuristic estimate of the cost still remaining to the goal. Popping the smallest-`f` node first pulls the search toward the target, collapsing that settled disc into a narrow corridor.
+To find the shortest route to one destination on a road graph, [[Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]] settles nodes in expanding rings of cost-from-source. For a target 10 km east, it settles every node with path cost below 10 km in all directions and may also settle equal-cost nodes before the target, depending on tie-breaking. Almost none of that work touches the optimal path.
 
-With nonnegative edge costs, the optimality guarantee holds when `0 ≤ h(n) ≤ h*(n)`, which also forces `h(goal) = 0`. Such an admissible heuristic keeps A* honest when the search reopens a state after finding a cheaper path; consistency adds the stronger condition needed to close each state after its first expansion. An overestimate can delay a node on the optimal path until a more expensive route reaches the goal first, returning a longer path with no error raised. [[Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]] is the degenerate case `h ≡ 0` — no goal information, uniform rings, still optimal.
+A* keeps the same cost accounting but estimates _total_ path cost as `f(n) = g(n) + h(n)`. Here, `g(n)` is the exact cost already paid to reach `n`, while `h(n)` estimates the cost still remaining to the goal. Popping the smallest-`f` node first pulls the search toward the target, collapsing the settled disc into a narrow corridor.
+
+With nonnegative edge costs, the optimality guarantee holds when `0 ≤ h(n) ≤ h*(n)`, which also forces `h(goal) = 0`. Such an admissible heuristic keeps A* honest when the search reopens a state after finding a cheaper path. Consistency adds the stronger condition needed to close each state after its first expansion. An overestimate can delay a node on the optimal path until a more expensive route reaches the goal first, returning a longer path with no error raised. [[Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]] is the degenerate case `h ≡ 0`: it has no goal information and searches in uniform rings, but remains optimal.
 
 **Core condition:** single target + nonnegative edge costs + `0 ≤ h(n) ≤ h*(n)` + reopen a state when its `g` improves → order the frontier by `f = g + h` → an optimal path, often after expanding fewer nodes than Dijkstra. If `h` is consistent, each state may instead be closed after its first expansion.
 
@@ -168,11 +170,11 @@ The exponential bounds describe implicit state spaces with unit or uniform posit
 
 # When the Heuristic Breaks the Guarantee
 
-An **overestimating** `h` exceeds the remaining cost for at least one node somewhere in the graph. That overestimate is harmless where it lands off the optimal path and never wins a pop. Optimality breaks only when an inflated `f` pre-empts the true optimal path — a node on that path (or one whose `f` should have been popped before the goal) is delayed, so A* pops the goal through a cheaper-looking detour first. It returns _a_ path, just not the cheapest, and signals nothing. Weighted A* makes exactly this trade deliberately: `f = g + ε·h` with `ε > 1` scales an admissible base heuristic up. Under standard goal-pop termination, its factor-`ε` bound holds with reopening; it also holds without reopening when the base heuristic is consistent. `ε = 1` is exact A*; `ε → ∞` approaches greedy behavior.
+An **overestimating** `h` exceeds the remaining cost for at least one node somewhere in the graph. That overestimate is harmless when it lands off the optimal path and never wins a pop. Optimality breaks when an inflated `f` delays a node that should have been popped before the goal. A* reaches the goal through a cheaper-looking detour first, returns a valid but more expensive path, and signals nothing. Weighted A* makes this trade deliberately: `f = g + ε·h` with `ε > 1` scales an admissible base heuristic up. Under standard goal-pop termination, its factor-`ε` bound holds with reopening. It also holds without reopening when the base heuristic is consistent. `ε = 1` is exact A*. `ε → ∞` approaches greedy behavior.
 
-An admissible but **inconsistent** `h` keeps optimality for the tree-search form but breaks the single-expansion property. Because `f` can dip along a path, a shorter `g` to an already-closed node can surface later. Graph-search A* that refuses to revisit closed nodes then finalizes that node with a non-optimal `g`, corrupting every path routed through it. The remedy is reopening — pulling the node back onto the frontier when a cheaper `g` appears — which restores optimality at the cost of the re-expansions consistency would have avoided.
+An admissible but **inconsistent** `h` keeps optimality for the tree-search form but breaks the single-expansion property. Because `f` can dip along a path, a shorter `g` to an already-closed node can surface later. Graph-search A* that refuses to revisit closed nodes then finalizes that node with a non-optimal `g`, corrupting every path routed through it. Reopening the node when a cheaper `g` appears restores optimality, at the cost of the re-expansions that consistency would have avoided.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Control flow
 >
@@ -245,20 +247,8 @@ An admissible but **inconsistent** `h` keeps optimality for the tree-search form
 >     }
 > }
 > ```
->
-> This implementation assumes a consistent heuristic, so a node's first pop has its optimal `g` and the `closed` guard may reject later stale copies. .NET's `PriorityQueue<TElement, TPriority>` has no decrease-key, so an improved node is enqueued again rather than updated. With an admissible but inconsistent heuristic, the search must instead reopen a closed node when its `g` improves and use a termination rule compatible with those re-expansions.
-
-# Questions
-
-> [!QUESTION]- What does admissibility guarantee, and what does consistency add on top?
-> Admissibility (`0 ≤ h(n) ≤ h*(n)`) makes A* optimal when a cheaper path can reopen a state. Before a suboptimal goal could be popped, the frontier contains a node on an optimal path discovered with its optimal `g`, and that node has `f` no greater than the optimal solution cost. Consistency (`h(n) ≤ cost(n, n') + h(n')`) additionally forces `f` to be non-decreasing along a path, so a node's first pop is already optimal — graph-search A* can close it and never reopen it, expanding each node at most once.
-
-> [!QUESTION]- How can an overestimating heuristic return a longer path with no error?
-> Overestimating the remaining cost for a node on the true optimal path inflates that node's `f`. A* then pops the goal through a cheaper-looking detour before it expands the node on the real shortest path. The search still terminates and returns a valid path — just not the minimum-cost one — because the inflated `f` reordered the frontier against the optimum. Weighted A* (`f = g + ε·h`, `ε > 1`) makes this trade deliberately. With an admissible base `h` and standard goal-pop termination, its factor-`ε` bound holds with reopening, or without reopening when the base heuristic is consistent.
 
 # References
 
-- [A* search algorithm (Wikipedia)](https://en.wikipedia.org/wiki/A*_search_algorithm) — formal definition, the admissibility and consistency proofs, and weighted and memory-bounded variants.
-- [Amit's A* Pages (Stanford, Amit Patel)](https://theory.stanford.edu/~amitp/GameProgramming/) — the practical reference for grid heuristics (Manhattan, Chebyshev, octile, Euclidean) and matching `h` to the movement model.
-- [Introduction to A* (Red Blob Games)](https://www.redblobgames.com/pathfinding/a-star/introduction.html) — interactive walkthrough of Dijkstra, Greedy Best-First, and A* on the same map, showing the corridor-versus-disc difference.
-- [A Formal Basis for the Heuristic Determination of Minimum Cost Paths (Hart, Nilsson, Raphael 1968)](https://ieeexplore.ieee.org/document/4082128) — the original paper introducing A* and proving optimality under an admissible heuristic.
+- [Amit's A* Pages (Stanford, Amit Patel)](https://theory.stanford.edu/~amitp/GameProgramming/)
+- [A Formal Basis for the Heuristic Determination of Minimum Cost Paths (Hart, Nilsson, Raphael 1968)](https://ieeexplore.ieee.org/document/4082128)

@@ -11,13 +11,13 @@ status: Done
 publish: true
 ---
 
-A sequence needs frequent insertions and removals in its interior, and the code already holds a reference to the element next to each edit. A linked list drops contiguity: each element lives in its own separately allocated node, and the structure stores only the links between nodes. In a doubly linked list, splicing around a held node rewires a constant number of adjacent pointers and touches no other element.
+Linked lists trade direct addressing for cheap local rewiring. When code already holds the node beside an edit, a doubly linked list inserts or removes by changing a fixed number of pointers. No neighboring value moves.
 
-The cost of that freedom is addressing. Because nodes are scattered across the heap rather than laid out in one block, there is no arithmetic that maps an index to an address. Reaching the *k*-th element means starting at a head reference and following *k* `next` pointers. A node holds a value plus `Next` (singly linked) or both forward and backward links (doubly linked); .NET's doubly linked `LinkedListNode<T>` exposes those as `Next` and `Previous`. The list keeps `First`/`Last` handles and a count, and many implementations wrap the ends with a sentinel node so the head and tail cases need no branch.
+Each value lives in a separately allocated node rather than a contiguous block. That layout removes the arithmetic that turns an array index into an address: reaching the *k*-th element requires following *k* links from the head. A singly linked node stores `Next`. A doubly linked node also stores `Previous`. .NET's `LinkedList<T>` keeps `First`, `Last`, and `Count`, while sentinel-based implementations may wrap the ends to remove head and tail branches.
 
-**Core shape:** scattered nodes → each stores value + next/prev links → head/tail references
+**Core shape:** scattered nodes → value plus links in each node → head and tail references
 
-Append a value below and watch the old tail's `next` field change from `null` to the new node's address while the new cell appears at the end. The doubly linked variant also writes the old tail's address into the new node's `prev` field. No existing value shifts.
+Appending below rewires the old tail's `next` field from `null` to the new node. The doubly linked form also points the new node's `prev` field back to the old tail. The existing values stay where they are.
 
 ~~~~~tabsdown
 tab: Visualization
@@ -279,9 +279,9 @@ tab: Complexity
 
 # Reverse in place
 
-Pointer-only reversal changes links, not nodes. Three references carry the operation: `previous` is the already-reversed prefix, `current` is the node being processed, and `next` saves the unprocessed suffix before `current.Next` is overwritten. After each iteration, every node in `previous` points toward the old head, while every node reachable from `current` remains available through the saved suffix.
+Pointer reversal changes links while keeping every node and value intact. `previous` holds the reversed prefix, `current` marks the node under repair, and `next` saves the untouched suffix before `current.Next` is overwritten. After each iteration, the prefix points toward the old head and the suffix is still reachable.
 
-When the scan ends, `previous` is the new head. The former head was processed first and received `Next = null`, so the reversed chain terminates correctly. Empty and single-node lists already satisfy the reversed shape and return unchanged. Node address/value identity is stable throughout; only traversal order and `next` fields change.
+At the end, `previous` is the new head. The former head was processed first and now has `Next = null`, which terminates the chain. Empty and single-node lists need no special mutation.
 
 > [!EXAMPLE]- C# iterative reversal
 >
@@ -313,13 +313,13 @@ When the scan ends, `previous` is the new head. The former head was processed fi
 
 # When the Layout Stops Paying
 
-Random access is the hard boundary. A workload that looks index-light on paper can hide this cost inside a `foreach` that repeatedly searches before it edits.
+Random access is the hard boundary. A workload that appears index-light can still hide repeated scans before each edit.
 
-Cache behaviour is the boundary that surprises people. Because consecutive nodes may sit at unrelated heap addresses, traversal performs dependent pointer-chasing loads that hardware prefetchers handle less reliably than a sequential array. A contiguous [[Home/Computer Science/Data Structures/Linear Structures/Dynamic Array|dynamic array]] usually streams through cache lines more predictably, while linked-list traversal may incur more cache misses.
+Traversal also fights the cache. Consecutive nodes may occupy unrelated heap addresses, so each link can trigger a dependent load that hardware prefetchers handle poorly. A contiguous [[Home/Computer Science/Data Structures/Linear Structures/Dynamic Array|dynamic array]] usually streams through cache lines with fewer misses.
 
-Per-node allocation is the third boundary. Inserting a value allocates a node object, although reinserting a detached `LinkedListNode<T>` can reuse that allocation. After removal, the node is eligible for collection only when no references still reach it. Detached or foreign nodes are also invalid anchors: passing a `LinkedListNode<T>` that belongs to another list (or was already removed) to `AddAfter`/`Remove` throws, because node identity is scoped to its owning list.
+Every inserted value normally brings a node allocation. A detached `LinkedListNode<T>` can be reinserted without allocating another node, but it remains alive while any reference reaches it. For `AddAfter(existingNode, newNode)`, `existingNode` must belong to the target list and `newNode` must be detached. `Remove(node)` likewise requires `node` to belong to that list.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Doubly linked chain with head and tail
 >
@@ -351,20 +351,7 @@ Per-node allocation is the third boundary. Inserting a value allocates a node ob
 > ```
 > A node from another list passed to `AddAfter`/`Remove` throws: node identity is scoped to its owning list.
 
-# Questions
-
-> [!QUESTION]- Why does the `Prev` ↔ `Next` invariant matter during a removal?
-> Adjacency is stored twice: `a.Next == b` must agree with `b.Prev == a`. A removal must re-point both directions across the gap. Updating only one leaves a half-linked chain where forward and backward traversal disagree about membership, corrupting the list.
-
-> [!QUESTION]- Which state must be saved before reversing `current.Next`, and why?
-> The original `current.Next` must be saved as `next`. Overwriting the field first would sever the only path to the unprocessed suffix and lose the rest of the list.
-
-> [!QUESTION]- What changes during in-place reversal, and what remains identical?
-> The `Next` links, head, tail, and traversal order change. Every node object and its stored value remain identical; the former head becomes the tail and points to null.
-
 # References
 
-- [`LinkedList<T>` class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.linkedlist-1) — .NET's doubly linked list: node-based `AddBefore`/`AddAfter`/`Remove` contracts, `First`/`Last` handles, and the rule that a node belongs to exactly one list.
-- [`LinkedListNode<T>` class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.linkedlistnode-1) — source for the structure and its analysis.
-- [Selecting a collection class](https://learn.microsoft.com/en-us/dotnet/standard/collections/selecting-a-collection-class) — Microsoft's guidance on when a linked list is appropriate versus array-backed collections.
-- [What is Data Locality and How does it help performance?](https://gameprogrammingpatterns.com/data-locality.html) — Nystrom's account of why pointer-chasing across scattered nodes stalls the CPU cache and why contiguous layouts win in practice.
+- [`LinkedList<T>` class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.linkedlist-1)
+- [What is Data Locality and How does it help performance?](https://gameprogrammingpatterns.com/data-locality.html)

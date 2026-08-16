@@ -11,9 +11,9 @@ status: Ready to Repeat
 publish: true
 ---
 
-A mutable array of one million latency samples must answer "maximum value in `a[l..r]`" while new samples keep overwriting old slots.
+A mutable array of one million latency samples must answer "maximum value in `a[l..r]`" while new samples overwrite old slots.
 
-A segment tree keeps the array's index order but overlays a binary hierarchy of **intervals** on top of it. Each node owns a contiguous range `[l, r]` and stores one aggregate over that range; a parent's value is `merge(leftChild, rightChild)` for any associative `merge` — sum, min, max, gcd. Because a parent already summarizes its whole subtree, an arbitrary query range splits into a handful of already-computed nodes instead of touching every leaf. A scalar aggregate may discard provenance: a maximum node does not reveal which index produced it unless the stored value is enriched to `(maximum, index)`, and an average needs `(sum, count)` rather than one number.
+A segment tree keeps the array's index order but overlays a binary hierarchy of **intervals** on top of it. Each node owns a contiguous range `[l, r]` and stores one aggregate over that range. A parent's value is `merge(leftChild, rightChild)` for any associative `merge` — sum, min, max, gcd. Because a parent already summarizes its whole subtree, an arbitrary query range splits into a handful of already-computed nodes instead of touching every leaf. A scalar aggregate may discard provenance: a maximum node does not reveal which index produced it unless the stored value is enriched to `(maximum, index)`, and an average needs `(sum, count)` rather than one number.
 
 **Core shape:** array indices → binary interval tree → each node holds `merge` over its `[l, r]`
 
@@ -32,11 +32,10 @@ Source updates persist until reset; the latest operation's marks remain until th
 
 The tree has exactly `2n - 1` real nodes for `n` leaves. A common recursive implementation stores them heap-style in a flat array: the root is at index `1`, and node `i` has children `2i` and `2i + 1`. For a non-power-of-two `n`, that numbering leaves unused holes between real nodes, so allocating `4 * n` slots is a simple safe bound. A power-of-two `n` occupies indices `1` through `2n - 1` and therefore fits in an array of length `2n`.
 
-Each node covers a fixed range decided at build time. The root covers `[0, n-1]`; a node covering `[lo, hi]` splits at `mid = (lo + hi) / 2` into `[lo, mid]` and `[mid+1, hi]`; leaves cover single elements and hold the source values directly. Three facts hold in every valid state:
+Each node covers a fixed range decided at build time. The root covers `[0, n-1]`; a node covering `[lo, hi]` splits at `mid = (lo + hi) / 2` into `[lo, mid]` and `[mid+1, hi]`; leaves cover single elements and hold the source values directly. Two facts hold in every valid state:
 
 1. A node's stored value equals `merge` over its entire range — for a leaf, the element itself.
 2. `merge` must be **associative**, so parentheses may change while the left-to-right order stays fixed. Canonical nodes are therefore merged in array order; string concatenation and matrix multiplication remain valid even though they are not commutative. An identity element (`0` for sum, `+∞` for min) stands in for ranges that fall entirely outside a query.
-3.
 
 Lazy propagation adds a pending tag only when the update can transform a node's aggregate in constant time and tags compose correctly. For a sum tree with range-add, applying `delta` to a node of length `len` changes its aggregate by `delta * len`; multiple add tags compose by addition. Other pairs need different laws: range-add does not automatically work with every aggregate.
 
@@ -166,13 +165,13 @@ tab: Complexity
 
 # When the Structure Stops Fitting
 
-The range is fixed at build. Because every node's `[lo, hi]` is decided during construction, the structure is not a resizable array — appending an element past `n` means rebuilding. A dynamic (implicit) segment tree that allocates nodes on demand over a huge or sparse coordinate space exists, but it trades the flat array for pointer nodes and more memory per used range.
+The range is fixed at build. Every node's `[lo, hi]` is decided during construction, so appending an element past `n` means rebuilding. A dynamic (implicit) segment tree can allocate nodes on demand over a huge or sparse coordinate space, at the cost of pointer nodes and more memory per represented range.
 
-Lazy propagation is where correctness slips. The deferred-tag machinery has to compose two pending operations, push a tag before reading children, and clear it after — and the composition rule is operation-specific (adds accumulate; assignments overwrite; a "set" tag interacts differently with an "add" tag). A missed push-down returns a stale aggregate that reads plausibly, so the bug surfaces as a wrong sum rather than a crash. This is the intricate part of the structure and the reason a plainer alternative wins when range updates aren't actually needed.
+Lazy propagation is where correctness slips. Pending operations must compose in the right order, and a tag must be pushed before its children are read. The rule depends on the update: adds accumulate, assignments overwrite, and a set interacts differently with an add. A missed push-down returns a plausible but stale aggregate. When range updates are unnecessary, this machinery buys nothing.
 
-Memory is the standing cost. The `4n` reserved slots and, for lazy trees, a parallel tag array can exceed a Fenwick implementation for additive workloads. Fenwick trees can support range-add/point-query with one tree and range-add/range-sum with two; segment trees earn their larger footprint by supporting broader associative aggregates and compatible lazy actions.
+Memory is the standing cost. The `4n` reserved slots and, for lazy trees, a parallel tag array can exceed a Fenwick implementation for additive workloads. Fenwick trees can support range-add/point-query with one tree and range-add/range-sum with two. Segment trees earn their larger footprint by supporting broader associative aggregates and compatible lazy actions.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Interval tree for `[3, 4, 1, 7, 2, 6]` (range sum)
 >
@@ -253,19 +252,7 @@ Memory is the standing cost. The `4n` reserved slots and, for lazy trees, a para
 > ```
 > Swapping the three `// merge` sites and the outside-identity for `Math.Min`/`long.MaxValue` turns this into a range-min tree with no structural change. Range updates require a parallel `_lazy[]` array plus a push-down step before each descent — the deferred-tag layer omitted here.
 
-# Questions
-
-> [!QUESTION]- How is a segment tree laid out in memory, and why `4n` slots?
-> The tree has `2n - 1` real nodes. A flat recursive layout indexes them heap-style: the root at `1`, node `i`'s children at `2i` and `2i + 1`. Non-power-of-two ranges leave holes in that numbering, so `4n` is a convenient safe allocation rather than a count of constructed nodes; a power-of-two `n` fits in `2n` slots.
-
-> [!QUESTION]- What does lazy propagation defer, and how does that failure show up?
-> A compatible range update stores a composable pending tag on each covering node instead of rewriting its whole subtree; the tag is pushed to children only when a later operation descends past that node. Forgetting a push-down returns a stale aggregate — a plausibly wrong number, not a crash.
-
 # References
 
-- [Segment tree](https://cp-algorithms.com/data_structures/segment_tree.html) — recursive construction, range query, point and lazy range updates, and the `4n` sizing argument.
-- [AtCoder Library: Segment Tree](https://atcoder.github.io/ac-library/production/document_en/segtree.html) — the monoid contract: associativity, identity, and order-preserving aggregation.
-- [AtCoder Library: Lazy Segment Tree](https://atcoder.github.io/ac-library/production/document_en/lazysegtree.html) — the mapping and composition laws required for deferred range updates.
-- [Efficient and easy segment trees (Codeforces, Al.Cash)](https://codeforces.com/blog/entry/18051) — the iterative bottom-up variant that stores exactly `2n` slots for point-update trees.
-- [Fenwick tree range operations](https://cp-algorithms.com/data_structures/fenwick.html#range-operations) — one- and two-tree transformations for additive range updates and queries.
-- [Sparse Table](https://cp-algorithms.com/data_structures/sparse-table.html) — source for the structure and its analysis.
+- [Segment tree](https://cp-algorithms.com/data_structures/segment_tree.html)
+- [AtCoder Library: Segment Tree](https://atcoder.github.io/ac-library/production/document_en/segtree.html)

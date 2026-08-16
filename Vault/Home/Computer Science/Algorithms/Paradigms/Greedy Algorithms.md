@@ -3,7 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
-summary: "Builds a solution by repeatedly making the locally best choice and never reconsidering; exact only when a proof connects the rule to the optimum."
+summary: "Builds a solution by repeatedly making the locally best choice and never reconsidering. Exact only when a proof connects the rule to the optimum."
 level:
   - "4"
 priority: High
@@ -13,7 +13,7 @@ publish: true
 
 To schedule the most non-overlapping meetings into one room, sort the meetings by finish time, then walk the list once, accepting each meeting whose start is at or after the last accepted finish. The scan produces a maximum-size schedule without enumerating subsets or reconsidering an accepted meeting.
 
-Greedy algorithms build the answer incrementally: at each step, commit to the option that ranks best under a fixed local rule and never revisit it. For an exact algorithm, that commitment is valid only when the local rule provably composes into a global optimum — most plausible-looking rules do not, and the paradigm gives no signal when a rule is wrong. The same pattern also appears in approximation algorithms, where the proof guarantees a bound rather than an exact optimum.
+Greedy algorithms build the answer through a sequence of commitments. Each step takes the option ranked best by a fixed local rule and never revisits it. An exact greedy algorithm needs proof that these local commitments compose into a global optimum. A plausible rule is not enough, and a wrong one usually fails without warning. Approximation algorithms use the same pattern but prove a bound instead of exact optimality.
 
 **Exactness condition:** a fixed local rule + the greedy-choice property + optimal substructure → the committed choices form a global optimum.
 
@@ -87,24 +87,24 @@ tab: Complexity
 
 Two properties decide whether committing to a local choice is safe.
 
-- **Greedy-choice property** — some globally optimal solution contains the choice the local rule makes first, so committing to it never forecloses optimality. This is the property that fails most often and the one that must be proven.
-- **Optimal substructure** — after the committed choice is removed, the remainder is the same problem on a smaller input, so the same argument applies again by induction.
+- **Greedy-choice property.** Some globally optimal solution contains the choice the local rule makes first, so committing to it never forecloses optimality. This is the property that fails most often and the one that must be proven.
+- **Optimal substructure.** After the committed choice is removed, the remainder is the same problem on a smaller input. The argument can then continue by induction.
 
-Correctness is established by an **exchange argument**: take any optimal solution, show one of its choices can be replaced by the greedy choice without reducing quality, then repeat the swap until the optimal solution becomes the greedy one. Because no swap makes the solution worse, greedy is at least as good as any optimum. For a hereditary independence system, the Rado–Edmonds theorem gives a sharper characterization: the standard weight-ordered greedy algorithm succeeds for every weight assignment exactly when the system is a matroid. It does not validate an arbitrary local rule.
+An **exchange argument** proves correctness by starting with any optimal solution and replacing one of its choices with the greedy choice without reducing quality. Repeating that exchange turns an optimum into the greedy solution without making it worse. For a hereditary independence system, the Rado–Edmonds theorem gives a sharper characterization: the standard weight-ordered greedy algorithm succeeds for every weight assignment exactly when the system is a matroid. The theorem does not validate an arbitrary local rule.
 
-For activity selection, each accepted meeting extends a partial schedule and makes its overlapping candidates impossible; the invariant is that the partial schedule can still be extended to an optimum. Other greedy algorithms need their own invariant. [[Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]] finalizes the shortest distance of each settled vertex, while Prim and Kruskal accept only edges justified by the cut or cycle properties of a [[Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree|Minimum Spanning Tree]].
+For activity selection, each accepted meeting extends a partial schedule and makes its overlapping candidates impossible. The invariant is that the partial schedule can still be extended to an optimum. Other greedy algorithms need their own invariant. [[Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]] finalizes the shortest distance of each settled vertex, while Prim and Kruskal accept only edges justified by the cut or cycle properties of a [[Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree|Minimum Spanning Tree]].
 
 # Where the Greedy-choice Property Fails
 
-Coin change with denominations `{1, 3, 4}` making `6` exposes the failure directly. The largest-coin rule takes `4`, then `1`, then `1` — three coins — while `3 + 3` uses two. The rule is locally optimal at every step, yet its first commitment (the `4`) appears in no optimal solution, so the greedy-choice property does not hold and there is nothing to patch in the loop: the rule itself is wrong for this denomination set. Canonical currencies like `{1, 5, 10, 25}` are constructed so the property does hold, which is why greedy is optimal there and nowhere guarantees it in general.
+Coin change with denominations `{1, 3, 4}` making `6` exposes the failure directly. The largest-coin rule takes `4 + 1 + 1`, while `3 + 3` uses only two coins. The first commitment, `4`, appears in no optimal solution. Nothing in the loop can repair that choice. The local rule is wrong for this denomination set. Systems such as `{1, 5, 10, 25}` are canonical because the largest-coin rule is optimal for every amount, but coin systems do not have this property in general.
 
-The 0/1 knapsack breaks the same greedy-choice property under a different local rule: value-per-weight. With capacity `50` and items `(value 60, weight 10)`, `(100, 20)`, `(120, 30)` — ratios `6`, `5`, `4` — greedy commits to the highest-ratio item first and ends with items 1 and 2 for weight `30` and value `160`, unable to fit the third. The only optimal packing is `(100, 20)` with `(120, 30)`, weight `50` and value `220`, and it excludes the highest-ratio item entirely — so the first local commitment is already outside every optimum. Fractional knapsack, where the highest-ratio item can be cut to fill the capacity, always admits that item into an optimal solution, restoring the greedy-choice property and making greedy-by-ratio optimal.
+The 0/1 knapsack breaks the same property under a different local rule: value per unit of weight. With capacity `50`, consider items `(value 60, weight 10)`, `(100, 20)`, and `(120, 30)`, whose ratios are `6`, `5`, and `4`. Greedy takes the first two items for value `160`. The third no longer fits. The optimal packing takes the second and third items for value `220`, excluding the highest-ratio item entirely. Fractional knapsack changes the boundary. An item may be split to fill the remaining capacity, so the highest-ratio item always belongs to an optimal solution and the ratio rule becomes exact.
 
 [[Home/Computer Science/Algorithms/Paradigms/Dynamic Programming|Dynamic programming]] handles the indivisible case by keeping both take and skip branches instead of committing to the local ratio winner.
 
-The common thread: both are the greedy-choice property failing under a different local rule — fewest coins via the largest denomination, most value via the highest ratio — and in each case the locally best first choice belongs to no optimal solution. The failure is silent — the code runs and returns a plausible, suboptimal result — so the difficult part of applying greedy is proving the property holds, not writing the scan.
+Both examples fail for the same reason: the locally best first choice belongs to no optimal solution. The code still runs and returns a plausible answer. The hard part of a greedy algorithm is therefore the proof, not the scan.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Greedy template
 >
@@ -140,18 +140,7 @@ The common thread: both are the greedy-choice property failing under a different
 > }
 > ```
 
-
-# Questions
-
-> [!QUESTION]- Why does greedy solve coin change for `{1, 5, 10, 25}` but not `{1, 3, 4}`?
-> Standard denominations are constructed so the largest coin not exceeding the remainder always belongs to some optimal solution — the greedy-choice property holds, and an exchange argument confirms it. For `{1, 3, 4}` making `6`, the largest-coin rule yields `4 + 1 + 1` (three coins) while `3 + 3` (two coins) is optimal, so the first greedy commitment is in no optimal solution and the property fails. The loop is identical in both cases; only the denomination set decides correctness.
-
-> [!QUESTION]- What does an exchange argument establish?
-> That the greedy first choice is contained in some optimal solution. Starting from an arbitrary optimal solution, one of its choices is swapped for the greedy choice and shown not to reduce quality; repeating the swap transforms it into the greedy solution without ever getting worse, so greedy is at least as good as any optimum. Combined with optimal substructure, induction extends the result to the entire run.
-
 # References
 
-- [Greedy algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Greedy_algorithm) — a compact overview of greedy construction, exact solutions, and approximation uses.
-- [Algorithms (Jeff Erickson)](https://jeffe.cs.illinois.edu/teaching/algorithms/) — the greedy chapter gives exchange-argument proofs for scheduling and Huffman codes, and the failure modes of plausible-but-wrong greedy rules.
-- [Matroids and the greedy algorithm (Jack Edmonds)](https://link.springer.com/article/10.1007/BF01584082) — the original characterization of matroids through weight-ordered greedy optimization over hereditary independence systems.
-- [Greedy approximation algorithms (University of Wisconsin notes)](https://pages.cs.wisc.edu/~dieter/Courses/2004F-CS787/Scribes/greedy-approx.pdf) — examples where the greedy commitment is analyzed by an approximation bound rather than exact optimality.
+- [Algorithms (Jeff Erickson)](https://jeffe.cs.illinois.edu/teaching/algorithms/)
+- [Matroids and the greedy algorithm (Jack Edmonds)](https://link.springer.com/article/10.1007/BF01584082)

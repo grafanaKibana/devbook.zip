@@ -11,9 +11,9 @@ status: Creation
 publish: true
 ---
 
-A signature engine scans a byte stream — packets, log lines, a file — against a fixed dictionary of `k` non-empty patterns and must report every occurrence of every pattern.
+A signature engine may scan one byte stream against thousands of fixed, non-empty patterns. Running a separate matcher for each pattern repeats the same prefix work.
 
-The patterns share structure. Any two that begin `sh…` walk the same first edges, and a shorter pattern can be a suffix of the state a longer one reaches. Aho-Corasick compiles the whole dictionary once into a single finite automaton — a trie of all patterns carrying **failure links** and **output links** — then drives the text through it one character at a time without ever rewinding. Shared transitions avoid running one matcher per pattern; reporting still visits every occurrence emitted through the output chain.
+Aho-Corasick compiles the dictionary into one trie augmented with **failure links** and **output links**. Each text character advances a single automaton state. Shared trie paths reuse common prefixes, failure links recover the longest viable suffix after a miss, and output links enumerate every pattern ending at the current position. The scan never rewinds the text.
 
 
 
@@ -143,11 +143,11 @@ The build rows distinguish a sparse transition map from a dense alphabet-wide ta
 
 
 
-**Overlapping and nested matches.** The automaton reports every occurrence of every pattern, including matches that overlap (`aa` in `aaa` at offsets 0 and 1) and matches nested inside a longer one (`he` ending inside `she`). Those extra matches surface only through the output-link walk. Reporting a pattern only when the current node itself ends one leaves the scan correctly positioned but silently drops the nested cases: on `{ he, she, hers }` over `ushers` it reports `she` and `hers` and loses `he`. The defect is invisible on any dictionary where no pattern is a suffix of another, which is what makes it easy to ship.
+**Overlapping and nested matches.** The automaton reports every occurrence, including `aa` at offsets 0 and 1 in `aaa`, and `he` ending inside `she`. Nested matches surface through the output chain. Emitting only the pattern attached to the current trie node leaves the scan correctly positioned but loses suffix matches: `{ he, she, hers }` over `ushers` would report `she` and `hers`, but not `he`. Dictionaries without suffix-related patterns hide this defect.
 
-**A fixed dictionary.** Failure and output links are global properties of the whole pattern set, resolved by the single construction BFS. Adding a pattern changes suffix relationships throughout the trie, so the links must be recomputed — an insertion after construction means rebuilding the automaton, or maintaining a more complex dynamic variant.
+**A fixed dictionary.** Failure and output links depend on the complete pattern set. Adding a pattern can change suffix relationships across the trie, so a conventional implementation rebuilds the links. Frequently changing dictionaries need a dynamic variant or a different design.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Construction and search control flow
 >
@@ -258,24 +258,9 @@ The build rows distinguish a sparse transition map from a dense alphabet-wide ta
 >     }
 > }
 > ```
-> `Build` runs once after the final `Add`. `Search` yields `(endIndex, patternId)` for every occurrence; the inner `for` walks the output chain, so overlapping and nested matches are all emitted. A dense `char`-indexed array could replace `Dictionary<char, int>` to trade memory for a faster transition.
-
-# Questions
-
-> [!QUESTION]- How does the shared trie avoid scanning every pattern separately?
-> Common prefixes collapse into shared paths, so each text character drives one automaton transition rather than one comparison per pattern. Output links then enumerate every pattern ending at the reached state.
-
-> [!QUESTION]- What does a failure link point to, and what invariant holds after reading `i` characters?
-> A state's failure link points to the state for the longest proper suffix of its string that is still a prefix of some pattern — KMP's longest-prefix-suffix relation lifted onto the trie. That link maintains the invariant that after `i` characters the automaton sits at the state whose string is the longest suffix of the first `i` characters that is a prefix of some pattern, which is precisely the state from which every match ending at `i` can be read.
-
-> [!QUESTION]- What do output links add, and what fails silently without them?
-> A single state can complete several patterns when a shorter one is a suffix of a longer one, such as `he` ending inside `she`. Output links chain each state to the nearest shorter pattern that also ends there, and walking the chain enumerates every simultaneous match. Without them the scan is still correctly positioned but reports only the pattern the current node ends, silently dropping the nested ones — the classic loss of `he` when matching `{ he, she, hers }` in `ushers`.
-
-> [!QUESTION]- Why does adding a pattern after construction force a rebuild?
-> Failure and output links encode suffix relationships across the entire pattern set and are resolved together by the single construction BFS. A new pattern can change the longest-suffix target of many existing states, so the links are no longer valid and must be recomputed. That is why the automaton fits a dictionary built once and reused across texts rather than one that changes per query. Empty patterns are rejected here: otherwise they match at every boundary and need a separately defined `n + 1`-position result contract.
+> `Build` runs once after the final `Add`. `Search` yields `(endIndex, patternId)` for every occurrence. The inner `for` walks the output chain, so overlapping and nested matches are all emitted. A dense `char`-indexed array could replace `Dictionary<char, int>` to trade memory for a faster transition.
 
 # References
 
-- [Aho and Corasick, "Efficient String Matching: An Aid to Bibliographic Search" (1975)](https://dl.acm.org/doi/10.1145/360825.360855) — the original paper introducing the goto, failure, and output functions.
-- [Aho-Corasick algorithm (cp-algorithms)](https://cp-algorithms.com/string/aho_corasick.html) — trie plus suffix (failure) links, the BFS construction, the dictionary-link walk, and a reference implementation with complexity discussion.
-- [Aho–Corasick algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Aho%E2%80%93Corasick_algorithm) — worked automaton example, the relationship to KMP, and applications in intrusion detection and `fgrep`.
+- [Aho and Corasick, "Efficient String Matching: An Aid to Bibliographic Search" (1975)](https://dl.acm.org/doi/10.1145/360825.360855)
+- [Aho-Corasick algorithm (cp-algorithms)](https://cp-algorithms.com/string/aho_corasick.html)

@@ -11,9 +11,9 @@ status: Creation
 publish: true
 ---
 
-An array holds `n` integers that are a permutation of `1..n`.
+Cyclic Sort exploits a narrow input contract: an array of `n` integers is a permutation of `1..n`, so every value names its final index.
 
-Cyclic Sort walks the array and, at each position, swaps whatever value sits there into its home index, repeating until the value that belongs at the current position arrives. Problems that ask for a missing or duplicate value use a guarded variant: values still map to `1..n`, but collisions and empty homes are allowed, and a final mismatch scan exposes them.
+At each position, the algorithm swaps the resident value into that home and repeats until the correct value arrives. Missing-value and duplicate-value problems use a guarded variant. Values still map to `1..n`, but collisions or absent homes are allowed. A final mismatch scan exposes them. This range-mapped interview pattern is distinct from the comparison-based Cycle Sort that minimizes writes on arbitrary comparable values.
 
 
 
@@ -84,26 +84,26 @@ tab: Complexity
 
 # Why Each Swap Finalises an Element
 
-The placement rule at index `i` is a single decision. Let `v = a[i]` and `home = v − 1`:
+At index `i`, let `v = a[i]` and `home = v − 1`:
 
-- If `v` is in range and `a[home] != v`, the slot `home` does not yet hold `v`, so swapping `a[i]` with `a[home]` drops `v` into its home permanently. The value that swaps back into `i` is unplaced, so `i` does not advance — the same position is re-examined with its new value.
-- Otherwise `v` is already home, out of range, or `home` already holds an equal value; nothing more can be done at `i`, so `i` advances.
+- If `v` is in range and `a[home] != v`, swapping `a[i]` with `a[home]` puts `v` in its final position. The displaced value at `i` still needs inspection, so the index stays put.
+- Otherwise `v` is already home, out of range, or `home` already holds an equal value. Nothing more can be done at `i`, so `i` advances.
 
-The inner loop can re-process a single index several times, but a swap only fires when it moves a value into a home that did not previously hold it, and a value never leaves its home once placed. There are `n` values and each is finalised at most once, so at most `n − 1` swaps happen across the entire run.
+One index may be processed several times. Still, each swap fills a home that was previously unsatisfied, and a placed value never moves again. At most `n − 1` swaps occur across the whole run.
 
-The comparison inside the guard is against the *value* at `home`, not the index. `a[home] != v` stops the moment a duplicate would swap into a slot already holding its equal — that is both the termination guard and the mechanism that surfaces a duplicate.
+The guard compares values, not indices. `a[home] != v` stops when a duplicate reaches a slot already holding the same value. That check prevents an infinite swap and leaves the duplicate visible to the final scan.
 
 # Guarded Anomaly Variants
 
-Duplicates and out-of-range values break the pure sorting contract, but not the guarded placement accounting. Each successful swap still fills an unsatisfied in-range home; values with no valid home, or whose home already contains an equal value, are skipped.
+Duplicates and out-of-range values break the pure permutation contract. The guarded variant can still place every value with an unsatisfied in-range home. Values with no valid home, or whose home already contains an equal value, are skipped.
 
-Out-of-range values have no home. On `[3, 4, -1, 1]` (a *First Missing Positive* input), the value `-1` and any value `> n` cannot be placed; the guard must skip them (`v < 1 || v > n`) and advance. Dropping that check computes `home = -2` and indexes out of bounds.
+Out-of-range values have no home. On `[3, 4, -1, 1]` (a *First Missing Positive* input), the value `-1` and any value `> n` cannot be placed. The guard must skip them (`v < 1 || v > n`) and advance. Dropping that check computes `home = -2` and indexes out of bounds.
 
-Duplicates share a home. On `[1, 3, 3, 4]`, once `3` sits at index 2 the second `3` also wants index 2. Guarding on `i != home` instead of `a[home] != v` never sees the slot as satisfied, so the two equal values swap forever — an infinite loop. Comparing the values (`a[home] != v`) treats "the home already holds my value" as done, which both terminates and marks the duplicate.
+Duplicates share a home. On `[1, 3, 3, 4]`, both copies of `3` want index 2. Once one arrives, a guard based on `i != home` keeps swapping the equal values forever. The value check `a[home] != v` recognizes that the home is already satisfied and stops.
 
-Neither case is a general sort. Cyclic Sort cannot order arbitrary integers, floats, or keys with no index correspondence; strip the value-equals-index mapping and the swap target is undefined.
+This is not a general sort. Arbitrary integers, floating-point values, and keys without an index mapping do not identify a swap target.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Placement decision at index `i`
 >
@@ -175,27 +175,13 @@ Neither case is a general sort. Cyclic Sort cannot order arbitrary integers, flo
 
 | Strategy | Required input | Stronger case | Weaker case |
 | --- | --- | --- | --- |
-| Cyclic Sort | Values mapped to a contiguous range; uniqueness for the pure sort | Place a permutation, or find a missing/duplicate in `1..n`, while mutating the array directly | Wide or non-contiguous ranges; read-only input |
+| Cyclic Sort | Values mapped to a contiguous range. Uniqueness for the pure sort | Place a permutation, or find a missing/duplicate in `1..n`, while mutating the array directly | Wide or non-contiguous ranges. Read-only input |
 | [[Home/Computer Science/Algorithms/Sorting Algorithms/Counting Sort\|Counting Sort]] | Small integer range `k` | Small integer ranges that need counts or stable order | Large `k` inflates the count buffer |
 | General comparison sort | Comparable keys | Arbitrary keys with no index mapping | Cannot exploit values that already identify their destination |
 | Hash set / boolean array | Hashable values | Detecting missing or duplicate values over an arbitrary domain | Allocates a separate lookup structure |
 
-For the narrower read-only contract of `n + 1` values drawn from `1..n`, [[Home/Computer Science/Algorithms/Patterns/Fast and Slow Pointers|Fast and Slow Pointers]] can recover the duplicate by treating the array as a functional graph; it is not a general replacement for other read-only missing-value inputs.
-
-# Questions
-
-> [!QUESTION]- Why does the outer index sometimes stay in place after a swap?
-> A swap moves one value into its home, but the replacement value at the current index may still be misplaced. The index advances only after the current slot is correct or a guarded anomaly prevents another placement.
-
-> [!QUESTION]- What precondition does the method require, and why does it fail on arbitrary arrays?
-> Pure Cyclic Sort requires a permutation of `1..n`: every value is in range and unique, so each has exactly one home. Guarded anomaly variants relax uniqueness, and sometimes range membership, by checking collisions or invalid homes before a final mismatch scan. Arbitrary integers have no defined index mapping, so the swap target is undefined.
-
-> [!QUESTION]- What makes the guard `a[home] != v` rather than `i != home`?
-> When a duplicate exists its home already holds an equal value. Comparing values recognises that slot as satisfied, which both terminates the loop and marks the duplicate. Comparing indices never sees the slot as done, so the two equal values swap forever.
+For the read-only contract of `n + 1` values drawn from `1..n`, [[Home/Computer Science/Algorithms/Patterns/Fast and Slow Pointers|Fast and Slow Pointers]] can recover the duplicate by treating the array as a functional graph. That method does not cover arbitrary read-only missing-value inputs.
 
 # References
 
-- [B. K. Haddon, "Cycle-Sort: A Linear Sorting Method" (1990)](https://doi.org/10.1093/comjnl/33.4.365) — the primary paper derives the restricted permutation placement method from decomposition into permutation cycles.
-- [Find All Numbers Disappeared in an Array (LeetCode #448)](https://leetcode.com/problems/find-all-numbers-disappeared-in-an-array/) — the canonical cyclic-sort application; every slot should hold `index + 1`.
-- [First Missing Positive (LeetCode #41)](https://leetcode.com/problems/first-missing-positive/) — cyclic sort with out-of-range values guarded and skipped.
-- [Find the Duplicate Number (LeetCode #287)](https://leetcode.com/problems/find-the-duplicate-number/) — contrasts the mutating placement approach with the read-only pointer method.
+- [Find All Numbers Disappeared in an Array (LeetCode #448)](https://leetcode.com/problems/find-all-numbers-disappeared-in-an-array/)

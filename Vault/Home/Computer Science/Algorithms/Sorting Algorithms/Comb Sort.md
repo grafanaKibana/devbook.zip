@@ -11,11 +11,9 @@ status: Creation
 publish: true
 ---
 
-[[Home/Computer Science/Algorithms/Sorting Algorithms/Bubble Sort|Bubble Sort]] compares adjacent elements and swaps the inverted ones, sweeping until a pass makes no swap. A small value stranded near the end — a *turtle* — moves left at most one position per pass, while a large value near the front can race right through a full pass. Comb sort targets that asymmetry.
+[[Home/Computer Science/Algorithms/Sorting Algorithms/Bubble Sort|Bubble Sort]] swaps adjacent inversions until a pass makes no swap. A small value near the end, called a *turtle*, can move left by only one position per pass. Comb sort gives it a faster route.
 
-Comb sort keeps the compare-and-swap but widens the distance between the two compared elements. It starts with a gap of about `n / 1.3` instead of `1`, compares `a[i]` against `a[i + gap]` across the array, then divides the gap by roughly `1.3` on each pass until it reaches `1`. A wide gap carries a turtle up to `gap` positions toward the front in one swap instead of one step at a time; the shrinking gap resolves the increasingly local disorder that remains, and the final `gap == 1` pass is an ordinary bubble sort over a nearly sorted array. Comb sort is to [[Home/Computer Science/Algorithms/Sorting Algorithms/Bubble Sort|Bubble Sort]] what [[Home/Computer Science/Algorithms/Sorting Algorithms/Shell Sort|Shell Sort]] is to [[Home/Computer Science/Algorithms/Sorting Algorithms/Insertion Sort|Insertion Sort]] — the same gapped-pass idea layered onto a different base comparison.
-
-**Core condition:** comparison-based swaps → each pass compares elements a shrinking gap apart → wide early gaps move turtles toward the front before the final adjacent pass.
+Comb sort keeps compare-and-swap but widens the distance between the elements. It starts with a gap near `n / 1.3`, compares `a[i]` with `a[i + gap]`, and divides the gap by roughly `1.3` after each pass until it reaches `1`. Early wide gaps move turtles several positions at once. The final gap-1 phase runs over a much less disordered array. Comb sort applies to [[Home/Computer Science/Algorithms/Sorting Algorithms/Bubble Sort|Bubble Sort]] the same gapped-pass idea that [[Home/Computer Science/Algorithms/Sorting Algorithms/Shell Sort|Shell Sort]] applies to [[Home/Computer Science/Algorithms/Sorting Algorithms/Insertion Sort|Insertion Sort]].
 
 ~~~~~tabsdown
 tab: Visualization
@@ -121,9 +119,9 @@ tab: Complexity
 The performance rests on an empirical constant. `1.3` is not derived from a convergence proof; it is the factor that minimized comparisons in the original experiments. Some gap values also interact badly with real inputs: when the shrink sequence passes through a gap of `9` or `10`, a residual pattern survives that the next pass fails to clear, so the "combsort11" variant forces those gaps to `11`. A hand-tuned special case is a symptom that the sub-quadratic behavior is measured rather than guaranteed — an adversary can still drive the algorithm to `Θ(n²)`.
 ~~~~~
 
-Gapped swaps can reorder equal keys when a wide-gap swap lifts one past the other, and no later pass restores their input order. Bubble sort keeps equal keys in place because it swaps only strictly inverted adjacent pairs; widening the gap removes that guarantee.
+A wide-gap swap can carry one equal key past another, and later passes do not restore their original order. Bubble Sort avoids this because it swaps only strictly inverted adjacent pairs. Comb sort is therefore unstable.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Pass structure
 >
@@ -165,16 +163,8 @@ Gapped swaps can reorder equal keys when a wide-gap swap lifts one past the othe
 > }
 > ```
 >
-> The loop condition `gap > 1 || swapped` keeps the gap-1 phase running until one sweep makes no swap. That no-swap pass is the sorted certificate; removing it can leave adjacent inversions the wide passes never inspected.
-
-# Questions
-
-> [!QUESTION]- Why must comb sort keep running after the gap first reaches `1`?
-> Wide-gap passes only reduce disorder; they do not prove the array is sorted. The algorithm needs a complete gap-1 pass with no swaps, because the absence of adjacent inversions is the certificate that the final order is sorted.
+> The condition `gap > 1 || swapped` keeps the gap-1 phase running until a full sweep makes no swap. That final sweep proves the array is sorted. Stopping when the gap first reaches `1` can leave adjacent inversions behind.
 
 # References
 
-- [Comb sort — Wikipedia](https://en.wikipedia.org/wiki/Comb_sort) — origin (Włodzimierz Dobosiewicz, 1980; popularized by Lacey and Box, *BYTE*, 1991), the `1.3` shrink factor, the combsort11 gap fix, and the turtle/rabbit framing.
-- [Lacey and Box, “A Fast, Easy Sort,” *BYTE*, April 1991](https://www.worldradiohistory.com/Archive-Byte/90s/1991/Byte-1991-04.pdf) — original Comb Sort article; the experiments on pages 315–318 motivate the `1.3` shrink factor by comparison count.
-- [Dobosiewicz, "An efficient variation of bubble sort," *Information Processing Letters* 11(1), 1980](https://doi.org/10.1016/0020-0190%2880%2990022-8) — the original analysis of shrinking-gap bubble variants that comb sort's shrink factor descends from.
-- [Big-O Cheat Sheet](https://www.bigocheatsheet.com/) — comb sort's time and space bounds tabulated against the standard comparison sorts.
+- [Dobosiewicz, "An efficient variation of bubble sort," *Information Processing Letters* 11(1), 1980](https://doi.org/10.1016/0020-0190%2880%2990022-8)

@@ -12,9 +12,9 @@ level:
 status: Creation
 ---
 
-String matching finds occurrences of a pattern inside a text without the naive `O(n·m)` rescan that re-examines characters after every mismatch. The whole family exists to reuse the work a mismatch reveals: once you know a suffix of what you scanned equals a prefix of the pattern, you can shift by more than one character and never look back.
+String matching finds occurrences of a pattern inside a text. A naive scan costs `O(n·m)` because it may restart the comparison after every mismatch. Faster methods keep the useful part of that failed comparison and avoid checking characters whose relationship is already known.
 
-Two axes separate the members. The first is **how many patterns** you search for at once — one pattern ([[KMP (Knuth-Morris-Pratt) Algorithm|KMP]], [[Z-Algorithm]], [[Boyer-Moore]]) versus a whole set in a single pass ([[Aho-Corasick]]). The second is **what you preprocess**: most methods preprocess the *pattern* into a failure function or shift table, while [[Rabin Karp Search|Rabin–Karp]] preprocesses nothing structural and instead fingerprints the *text* with a rolling hash. That hashing angle is what lets Rabin–Karp scale to many equal-length patterns or extend to 2-D matching where the automaton methods do not.
+Pattern count is the first dividing line. [[KMP (Knuth-Morris-Pratt) Algorithm|KMP]], [[Z-Algorithm]], and [[Boyer-Moore]] handle one pattern, while [[Aho-Corasick]] scans for a whole set. Preprocessing is the other distinction. Most methods turn the pattern into a failure function or shift table. [[Rabin Karp Search|Rabin–Karp]] instead fingerprints consecutive text windows, which also works for many equal-length patterns and two-dimensional matching.
 
 ```datacorejsx
 const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
@@ -26,44 +26,30 @@ return FolderStructureMap;
 ```mermaid
 flowchart TD
   A[Match pattern in text] --> B{How many patterns}
-  B -->|Many at once| C[Aho-Corasick]
+  B -->|Many at once| C{Pattern set shape}
+  C -->|General dictionary| C1[Aho-Corasick]
+  C -->|Equal-length, 2-D, or rolling fingerprints| I[Rabin-Karp]
   B -->|One| D{Large alphabet, long pattern}
   D -->|Yes, want sublinear scans| E[Boyer-Moore]
   D -->|No| F{Need guaranteed linear worst case}
   F -->|Prefix-structure problems| G[Z-Algorithm]
   F -->|Streaming or classic linear scan| H[KMP]
-  B -->|Many equal-length, or 2-D, or rolling| I[Rabin-Karp]
 ```
 
 # The Family
 
 | Algorithm | Patterns | Preprocesses | Time | Worst case | Aux space | Weaker case | Reach for it when |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [[KMP (Knuth-Morris-Pratt) Algorithm\|KMP]] | one | pattern → prefix (failure) function | O(n + m) | O(n + m) | Θ(m) | Large alphabets, where skipping would pay | Guaranteed linear scan; never backs up in the text (streaming) |
-| [[Z-Algorithm]] | one | pattern → Z-array | O(n + m) | O(n + m) | Θ(n + m) | Large text under tight memory | Prefix-structure problems; often the simpler linear method to reason about |
-| [[Boyer-Moore]] | one | pattern → bad-character + good-suffix tables | O(n / m) best | O(n) with Galil rule | O(m + \|Σ\|) | Small alphabets, adversarial repeats | Long patterns over large alphabets — sublinear in practice; powers `grep` |
-| [[Rabin Karp Search\|Rabin–Karp]] | one or many | text → rolling hash | O(n + m) avg | O(n·m) on hash collisions | Θ(m) hash / O(1) scan | Collisions or adversarial text → O(n·m) | Many equal-length patterns, plagiarism/fingerprinting, 2-D matching |
-| [[Aho-Corasick]] | many | pattern set → trie + failure links | O(n + Σmᵢ + matches) | same | Θ(M·σ) dense / Θ(M) sparse | A single pattern; memory-tight dense alphabets | Scanning once for a whole dictionary of patterns |
+| [[KMP (Knuth-Morris-Pratt) Algorithm\|KMP]] | one | pattern → prefix (failure) function | O(n + m) | O(n + m) | Θ(m) | Large alphabets, where longer skips may help | A guaranteed linear scan that never backs up in the text |
+| [[Z-Algorithm]] | one | pattern → Z-array | O(n + m) | O(n + m) | Θ(n + m) | Large text under tight memory | Prefix-overlap problems and a direct linear scan |
+| [[Boyer-Moore]] | one | pattern → bad-character + good-suffix tables | O(m + \|Σ\| + n/m) best | O(m + \|Σ\| + n) with Galil rule | O(m + \|Σ\|) | Small alphabets or adversarial repeats | Long patterns over large alphabets, where large shifts are common |
+| [[Rabin Karp Search\|Rabin–Karp]] | one or `k` equal-length patterns | text → rolling hash | Expected: O(n + m + V) for one. O(n + k·m + V) for `k` | Verification worst case: O(n·m) for one. O(n·k·m) for `k` | Θ(1) for one pattern. Θ(k) for `k` pattern hashes | Collisions or genuine matches at many windows trigger repeated verification | Many equal-length patterns, fingerprints, or 2-D matching |
+| [[Aho-Corasick]] | many | pattern set → trie + failure links | O(n + Σmᵢ + matches) | same | Θ(M·σ) dense / Θ(M) sparse | A single pattern or a memory-tight dense alphabet | One scan for a dictionary of patterns |
 
-The two linear single-pattern methods, [[KMP (Knuth-Morris-Pratt) Algorithm|KMP]] and [[Z-Algorithm]], are two views of the same prefix structure: both preprocess the pattern in `O(m)`, guarantee `O(n)` scans, and are interconvertible. [[Boyer-Moore]] gives up the worst-case simplicity to win the *average* case by skipping ahead — the longer the pattern and the larger the alphabet, the bigger its shifts. [[Aho-Corasick]] is KMP generalised from one pattern to a set: the trie holds every pattern and the failure links are the multi-pattern equivalent of KMP's failure function. [[Rabin Karp Search|Rabin–Karp]] stands apart — it never builds an automaton, so it stays correct only up to hash collisions, which is exactly why it generalises to problems the automaton methods can't reach cheaply.
+[[KMP (Knuth-Morris-Pratt) Algorithm|KMP]] and [[Z-Algorithm]] encode the same prefix-overlap information in different arrays. Both preprocess the pattern in `O(m)` and then scan in `O(n)`. [[Boyer-Moore]] takes another route: it uses mismatch information to jump forward, often by several characters when the pattern is long and the alphabet is large. Its table reports total cost, including `O(m + |Σ|)` preprocessing. The scan contributes `O(n/m)` in the best case or `O(n)` with the Galil rule.
 
-# Questions
-
-> [!QUESTION]- Why does KMP never re-examine a text character after a mismatch?
-> Its prefix (failure) function records, for every pattern position, the length of the longest proper prefix that is also a suffix. On a mismatch the pattern shifts so that this already-matched prefix aligns, so the text pointer only ever advances. That is what turns the naive `O(n·m)` scan into `O(n + m)`.
-
-> [!QUESTION]- When is Boyer-Moore's `O(n/m)` best case actually realised, and when does it degrade?
-> Sublinear scanning appears with long patterns over large alphabets, where a mismatched character usually isn't in the pattern at all and the bad-character rule shifts by nearly the full pattern length. It degrades toward `O(n·m)` on small alphabets or highly repetitive text; the Galil rule caps the worst case at `O(n)`.
-
-> [!QUESTION]- Why choose Rabin–Karp over a linear automaton method?
-> Because it fingerprints windows of the text with a rolling hash rather than building an automaton, it extends naturally where the automaton methods don't: matching many equal-length patterns at once (compare each window's hash against a set), plagiarism detection, and 2-D pattern matching. The price is that a hash collision forces a character-by-character verification, so its worst case is `O(n·m)`.
-
-> [!QUESTION]- How is Aho-Corasick related to KMP?
-> It is KMP lifted from a single pattern to a set. The patterns are stored in a trie, and each node's failure link points to the longest proper suffix that is a prefix of some pattern — the multi-pattern analogue of KMP's failure function. One pass over the text then reports every occurrence of every pattern in `O(n + Σmᵢ + matches)`.
+[[Aho-Corasick]] extends the failure-link idea from one pattern to a trie of patterns. [[Rabin Karp Search|Rabin–Karp]] builds no automaton at all. Its rolling hash filters candidate windows, followed by direct comparison of only the patterns in the matching hash bucket. A one-pattern scan keeps only a fixed number of hash values, so its auxiliary space is `Θ(1)`. Matching `k` equal-length patterns with hash buckets takes `Θ(k)`. Let `V` be the actual character work spent verifying hash-matched candidates. Including pattern hashing, expected time is `O(n + m + V)` for one pattern and `O(n + k·m + V)` for `k`. These reduce to `O(n + m)` and `O(n + k·m)` only when `V` is bounded by those terms. If all `k` patterns share the candidate hash and every window enters that bucket, verification reaches `O(n·k·m)`; ordinary windows do not compare against every pattern.
 
 # References
 
-- [String-searching algorithm (Wikipedia)](https://en.wikipedia.org/wiki/String-searching_algorithm) — taxonomy of single- and multi-pattern methods and their complexity.
-- [Prefix function (CP-Algorithms)](https://cp-algorithms.com/string/prefix-function.html) — KMP's prefix function and its matching applications with implementations.
-- [Aho–Corasick algorithm (CP-Algorithms)](https://cp-algorithms.com/string/aho_corasick.html) — trie plus failure links for multi-pattern search.
-- [Boyer–Moore string-search algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Boyer%E2%80%93Moore_string-search_algorithm) — bad-character and good-suffix heuristics behind sublinear scanning.
+- [Algorithms on Strings, Trees, and Sequences](https://doi.org/10.1017/CBO9780511574931)

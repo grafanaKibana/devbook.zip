@@ -11,9 +11,9 @@ status: Ready to Repeat
 publish: true
 ---
 
-A service checks whether a key exists before running an expensive lookup — a disk read, a database round trip, a network call. Most of those keys are absent, so most of the expensive work is wasted. Holding the full key set in a [[Home/Computer Science/Data Structures/Hash-based Structures/Hash Set|Hash Set]] answers the question exactly but costs storage proportional to the keys themselves, which is the memory the caller was trying to avoid touching.
+A service checks whether a key exists before an expensive disk, database, or network lookup. Most queried keys are absent, so the system spends much of its time confirming misses. A [[Home/Computer Science/Data Structures/Hash-based Structures/Hash Set|Hash Set]] answers membership exactly but must retain every key. That may cost more memory than the lookup guard can justify.
 
-A Bloom filter keeps only an *m*-bit array and *k* hash-derived positions. Adding an element sets the *k* bits `h₁(x)..hₖ(x)` to 1; querying an element reports "possibly present" only if all *k* of those bits are 1, and "definitely absent" the moment any one of them is 0. The elements themselves are never stored — the structure discards identity and retains a fixed-width fingerprint of the whole set. That discard is what makes it small, and it is also why the filter cannot enumerate its members, return a stored value, or (in the standard form) delete. Two distinct elements can set overlapping bits, so a query can report "possibly present" for something never added: a false positive. A 0 bit, by contrast, can only exist for an element that was never added, so a false negative is impossible.
+A Bloom filter retains an *m*-bit array and derives *k* positions for each element. Adding an element sets the bits `h₁(x)..hₖ(x)`. A query returns "possibly present" when all *k* bits are 1, and "definitely absent" as soon as one bit is 0. The elements themselves are gone. This compressed state cannot enumerate members, return associated data, or support safe deletion in the standard form. Overlapping bit patterns can make an element that was never added appear present. A zero bit still proves absence, so the standard add-only filter has false positives but no false negatives.
 
 **Core shape:** elements → *k* hash bits set in an *m*-bit array → all-ones means probably present, any-zero means definitely absent
 
@@ -191,15 +191,15 @@ tab: Complexity
 
 # When the Structure Stops Fitting
 
-Deletion is the hard boundary. The standard filter cannot remove an element, because no bit is owned by a single element; clearing the bits for one key can strip a bit that another present key relies on, and the next query for that key would return "definitely absent" — a false negative the structure is defined never to produce. A **counting Bloom filter** replaces each bit with a small counter that increments on add and decrements on remove, which supports deletion at several times the space of a plain bit array — but only when each removal corresponds to a known insertion and adds/removes remain balanced. Removing an absent element or decrementing at zero corrupts shared counts; overflow or saturation can lose increments and produce a later false negative after decrements, so implementations must reject underflow/overflow or use counters wide enough for the expected load.
+Deletion is the sharp boundary. A standard filter cannot clear an element's bits because other elements may depend on the same positions. A **counting Bloom filter** replaces bits with small counters and decrements them on removal. That costs several times more space and is safe only when removals correspond to known insertions. Underflow corrupts shared counts. Overflow or saturation can lose increments and later create false negatives, so the implementation must prevent those states or size counters for the expected load.
 
-Counting and enumeration are unavailable for the same reason. The filter holds no elements, so it cannot list what it contains, and it holds no per-element counts, so it cannot report multiplicity. A "possibly present" answer names no element; it only licenses the authoritative lookup that does.
+Enumeration and per-element counts are unavailable for the same reason. The filter holds no elements and cannot reconstruct them from shared bits. A "possibly present" result only permits the authoritative lookup to continue.
 
-Over-filling degrades the guarantee gradually rather than failing loudly. The rate `p ≈ (1 − e^(−kn/m))^k` was fixed for a design capacity *n*; pushing past it drives more bits to 1, and "possibly present" trends toward "always present" until the filter stops eliminating any work. Sizing *m* and *k* for the real peak *n* keeps *p* at its target; a **scalable Bloom filter** instead chains larger filters as capacity is exceeded.
+Over-filling raises the false-positive rate without a clear failure event. The rate `p ≈ (1 − e^(−kn/m))^k` assumes a design capacity *n*. Inserting beyond it drives more bits to 1 until "possibly present" stops filtering useful work. Fixed filters need *m* and *k* sized for the actual peak *n*. A **scalable Bloom filter** grows by adding larger filters.
 
-Every one of these boundaries traces back to the same design choice: no elements are stored. The filter answers membership cheaply precisely because it threw away everything except the bits.
+All of these limits come from one choice: the filter keeps bits and discards elements.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Add and query over the bit array
 >
@@ -276,22 +276,9 @@ Every one of these boundaries traces back to the same design choice: no elements
 > }
 > ```
 >
-> `MightContain` does not mutate state; `Add` only ever sets bits. There is no `Remove` — the counting-filter variant would replace `BitArray` with a counter array and reject unbalanced removal, overflow, and underflow.
-
-# Questions
-
-> [!QUESTION]- Why can a Bloom filter produce false positives but never false negatives?
-> `Add` only ever sets bits to 1 and never clears them, so every bit a present element touched is still 1 and that element always passes its query — no false negatives. A queried element's *k* bits can all have been set to 1 by other elements, though, which makes a never-added element report "possibly present": a false positive.
-
-> [!QUESTION]- Why does the standard filter forbid deletion, and what changes to allow it?
-> No bit belongs to a single element; bits are shared across everything that hashed to them. Clearing an element's bits could clear one another present element depends on, turning its next query into a false "definitely absent". A counting Bloom filter stores a small counter per slot instead of one bit, so a remove decrements rather than clears, at several times the space. Removal is safe only for known inserted elements with balanced adds/removes; underflow corrupts the counts, while overflow or saturation can lose increments and later produce false negatives.
-
-> [!QUESTION]- What do *m* and *k* control, and what is the optimal *k*?
-> *m* is the bit-array size and *k* the number of hash functions. The false-positive rate is `p ≈ (1 − e^(−kn/m))^k` for *n* inserted elements. For a fixed `m/n`, `k = (m/n)·ln 2` minimises *p*, driving about half the bits to 1; larger *m* lowers *p* by adding room, while *k* balances too few probes against filling the bits too fast.
+> `MightContain` does not mutate state. `Add` only ever sets bits. There is no `Remove` — the counting-filter variant would replace `BitArray` with a counter array and reject unbalanced removal, overflow, and underflow.
 
 # References
 
-- [Space/time trade-offs in hash coding with allowable errors (Bloom, 1970)](https://dl.acm.org/doi/10.1145/362686.362692) — the original paper introducing the bit-array membership filter and its error trade-off.
-- [Bloom filter (Wikipedia)](https://en.wikipedia.org/wiki/Bloom_filter) — derivation of the false-positive formula, the optimal *k*, and the counting and scalable variants.
-- [Less hashing, same performance (Kirsch & Mitzenmacher)](https://www.eecs.harvard.edu/~michaelm/postscripts/rsa2008.pdf) — the double-hashing construction used to derive *k* indices from two base hashes.
-- [Cuckoo filter: practically better than Bloom (Fan et al.)](https://www.cs.cmu.edu/~dga/papers/cuckoo-conext2014.pdf) — a deletable filter that can use less space at moderate false-positive targets in lookup-heavy workloads; the advantage depends on load factor, target rate, and insertion behavior.
+- [Space/time trade-offs in hash coding with allowable errors (Bloom, 1970)](https://dl.acm.org/doi/10.1145/362686.362692)
+- [Less hashing, same performance (Kirsch & Mitzenmacher)](https://www.eecs.harvard.edu/~michaelm/postscripts/rsa2008.pdf)

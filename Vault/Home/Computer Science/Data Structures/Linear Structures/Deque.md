@@ -11,9 +11,9 @@ status: Ready to Repeat
 publish: true
 ---
 
-An algorithm maintains a sequence that grows and shrinks at *both* ends: a sliding window that admits new elements at the back while expiring old ones at the front, or a scheduler where the owner takes work from one end and thieves take it from the other.
+A deque serves sequences that grow and shrink at *both* ends. A sliding window admits new elements at the back and expires old ones at the front. A work-stealing scheduler lets the owner take from one end while other threads steal from the other.
 
-The structure generalizes two narrower ones. A [[Home/Computer Science/Data Structures/Linear Structures/Stack|Stack]] mutates a single end; a [[Home/Computer Science/Data Structures/Linear Structures/Queue|Queue]] inserts at one end and removes at the opposite end.
+It generalizes two narrower structures. A [[Home/Computer Science/Data Structures/Linear Structures/Stack|Stack]] mutates one end. A [[Home/Computer Science/Data Structures/Linear Structures/Queue|Queue]] inserts at one end and removes from the other.
 
 **Core shape:** elements → a ring buffer tracking a `head` index and a `count` (the back position derived mod capacity) → no efficient middle mutation
 
@@ -26,7 +26,7 @@ tab: Visualization
 {"algorithm":"deque"}
 ```
 
-The salient state is a `head` index and a `count`; the back position is derived as `(head + count - 1) % capacity` rather than stored. Representation below owns the index mechanics.
+The salient state is a `head` index and a `count`; the back position is derived as `(head + count - 1) % capacity` rather than stored. The implementation below shows how each operation wraps those indices.
 
 #### Representation and Invariants
 
@@ -121,7 +121,13 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best/Amortized",
+              "role": "Best",
+              "formula": "O(1)",
+              "curveId": "constant"
+            },
+            {
+              "kind": "curve",
+              "role": "Average",
               "formula": "O(n)",
               "curveId": "linear"
             },
@@ -225,13 +231,13 @@ tab: Complexity
 
 # When the Structure Stops Fitting
 
-The middle is the hard boundary, and it follows directly from the both-ends design. Both backings optimize the two ends: the ring buffer keeps only `head` and `count`, and the linked list caches only head and tail. A workload dominated by middle splices at positions it already holds wants a plain doubly-[[Home/Computer Science/Data Structures/Linear Structures/LinkedList|linked list]] with retained node references, or a balanced tree; a deque has thrown that information away.
+The middle is the hard boundary. Both backings optimize the ends: the ring stores `head` and `count`, while the linked form caches its first and last nodes. Repeated middle splices at positions already held fit a plain doubly-[[Home/Computer Science/Data Structures/Linear Structures/LinkedList|linked list]] with retained node references, or a balanced tree. A deque does not preserve that access path.
 
-The ring buffer's resize is a latency boundary rather than a throughput one. The push that overflows a full buffer allocates a larger array and copies every live element before returning. In a real-time or per-frame loop that pause can miss a deadline, which is a reason to pre-size the buffer or choose the linked backing when one long operation is unacceptable.
+Ring-buffer resize is a latency boundary. The push that overflows capacity allocates a larger array and copies every live element before it returns. That pause can miss a real-time or per-frame deadline. Pre-sizing removes known growth points. A linked backing avoids bulk copies when even one long operation is unacceptable.
 
-Sliding-window *maximum* is a common target, but a raw deque does not provide it — the technique is a **monotonic** deque, covered in [[Home/Computer Science/Algorithms/Patterns/Monotonic Stack and Queue|Monotonic Stack and Queue]]. The deque holds candidate indices whose values stay ordered because each push removes dominated values from the back, while indices that fall outside the window expire from the front. The ordering invariant lives in the algorithm, not the container.
+A raw deque does not produce a sliding-window *maximum*. That algorithm needs a **monotonic** deque, covered in [[Home/Computer Science/Algorithms/Patterns/Monotonic Stack and Queue|Monotonic Stack and Queue]]. Each push removes dominated candidates from the back, and expired indices leave from the front. The ordering invariant belongs to the algorithm, not the container.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Ring-buffer layout
 >
@@ -305,16 +311,8 @@ Sliding-window *maximum* is a common target, but a raw deque does not provide it
 >     }
 > }
 > ```
-> The BCL ships no `Deque<T>`. `Queue<T>` is already a ring buffer but exposes only one end for insertion; `LinkedList<T>` supplies `AddFirst`/`AddLast`/`RemoveFirst`/`RemoveLast` as a ready doubly-linked deque at the cost of a node per element.
-
-# Questions
-
-> [!QUESTION]- When does a linked backing fit better than a growable ring buffer for a deque?
-> A ring buffer is the default when locality, compact storage, and constant-time indexing matter. A linked backing trades those properties and a node allocation per element for end operations without the ring buffer's occasional `O(n)` resize pause.
+> The BCL ships no `Deque<T>`. `Queue<T>` is already a ring buffer but exposes only one end for insertion. `LinkedList<T>` supplies `AddFirst`/`AddLast`/`RemoveFirst`/`RemoveLast` as a ready doubly-linked deque at the cost of a node per element.
 
 # References
 
-- [Double-ended queue (Wikipedia)](https://en.wikipedia.org/wiki/Double-ended_queue) — operation set and the ring-buffer versus linked-list implementations with their complexity summary.
-- [`collections.deque` (Python docs)](https://docs.python.org/3/library/collections.html#collections.deque) — documents the two-ended operation contract without making its implementation part of the API contract.
-- [`LinkedList<T>` class (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.linkedlist-1) — the BCL's doubly-linked list, usable as a deque via `AddFirst`/`AddLast`/`RemoveFirst`/`RemoveLast`; note the per-node allocation.
-- [ThreadPool work-stealing queues (dotnet/runtime source)](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Threading/ThreadPoolWorkQueue.cs) — the real work-stealing deque behind `ThreadPool`: owner pushes/pops LIFO on one end, thieves steal FIFO from the other.
+- [ThreadPool work-stealing queues (dotnet/runtime source)](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Threading/ThreadPoolWorkQueue.cs)

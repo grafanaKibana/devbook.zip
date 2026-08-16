@@ -11,9 +11,9 @@ status: Creation
 publish: true
 ---
 
-Sorting a million elements, multiplying two large integers, and locating a value in a sorted array share a structure: split the input into smaller instances of the same problem, solve those instances, and assemble their answers. Divide-and-conquer is the control structure for that shape.
+Sorting a million elements and multiplying two large integers can both be split into smaller instances, solved recursively, and assembled from the partial answers. Divide-and-conquer names that shape. Binary search follows only one side of the split, the close variant usually called decrease-and-conquer.
 
-Its subproblems are **independent** when each can be solved without another subproblem's result. They do not have to occupy disjoint storage: two calls may read the same immutable input or operate on different regions of one array. What matters to the paradigm is the dependency graph, not the memory layout. Repeated states reachable from multiple branches are overlapping subproblems instead; caching those states is the territory of [[Home/Computer Science/Algorithms/Paradigms/Dynamic Programming|dynamic programming]].
+Subproblems are **independent** when each can be solved without another subproblem's result. They need not occupy separate storage: two calls may read the same immutable input or work on different regions of one array. The dependency graph matters here, not the memory layout. A state reached from multiple branches is an overlapping subproblem instead. [[Home/Computer Science/Algorithms/Paradigms/Dynamic Programming|Dynamic programming]] caches those repeated states and reasons over the resulting dependency graph.
 
 **Core shape:** divide into independent subproblems → recurse to a base case → combine their results.
 
@@ -97,12 +97,12 @@ The live stack follows the longest branch. Balanced shrinkage keeps it shallow; 
 
 # Boundaries and Implementation Costs
 
-Overlapping subproblems are repeated states that can be reached from more than one branch. Naive Fibonacci exposes the failure: both `fib(n-1)` and `fib(n-2)` reach `fib(n-3)`, so plain recursion recomputes the same state. Memoisation helps because the state repeats, not because the calls share storage. Merge sort's range states do not repeat, so caching them adds overhead without removing work.
+Overlapping subproblems are repeated states reached from more than one branch. In naive Fibonacci, both `fib(n-1)` and `fib(n-2)` reach `fib(n-3)`, so plain recursion solves the same state again. Memoisation helps because the state repeats, not because calls share storage. Merge sort's range states are unique. Caching them adds overhead without removing work.
 
 
-A small-range cutoff solves a different problem. Once a partition is tiny, recursive calls and partitioning can cost more than a tight [[Home/Computer Science/Algorithms/Sorting Algorithms/Insertion Sort|insertion-sort]] loop. [[Home/Computer Science/Algorithms/Sorting Algorithms/Introsort|Introsort]] uses that cutoff for small partitions, but uses a separate recursion-depth budget and falls back to heapsort when quicksort consumes it. The insertion-sort cutoff reduces call overhead; the depth guard limits adversarial partition chains.
+A small-range cutoff addresses call overhead. Once a partition is tiny, another recursive split can cost more than a tight [[Home/Computer Science/Algorithms/Sorting Algorithms/Insertion Sort|insertion-sort]] loop. [[Home/Computer Science/Algorithms/Sorting Algorithms/Introsort|Introsort]] also tracks recursion depth and falls back to heapsort when quicksort exhausts that budget. These are separate controls: the cutoff speeds up small partitions, while the depth guard limits adversarial partition chains.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Recursion structure
 >
@@ -138,23 +138,9 @@ A small-range cutoff solves a different problem. Once a partition is tiny, recur
 > }
 > ```
 >
-> The loop expresses logical independence only. Running it concurrently is safe when the implementation prevents data races and waits for every result consumed by `Combine`; it is profitable only when each subproblem is large enough to cover scheduling and synchronization costs.
-
-# Questions
-
-
-> [!QUESTION]- What does independence mean, and what extra conditions does parallel execution require?
-> Independence means each subproblem can be solved without another subproblem's result; it does not require disjoint storage. Parallel execution additionally requires safe access to shared data, synchronization before `Combine`, and enough work per task to repay scheduling overhead.
-
-> [!QUESTION]- Why do production divide-and-conquer sorts stop recursing above the base case?
-> Small-range cutoffs reduce call and partition overhead by handing tiny ranges to insertion sort. They do not prevent stack overflow from large, repeatedly unbalanced partitions. Introsort treats that separately: it tracks partition depth and switches to heapsort when its depth budget is exhausted.
-
-> [!QUESTION]- How do overlapping subproblems differ from shared storage?
-> Overlap means the same logical state is reachable from multiple recursion branches and would be solved repeatedly without caching. Shared storage is an implementation detail: independent subproblems may safely read the same immutable data, while overlapping states may be represented in separate allocations.
+> The loop expresses logical independence only. Concurrent execution still needs race-free data access and a wait for every result consumed by `Combine`. It pays off only when each subproblem is large enough to cover scheduling and synchronization costs.
 
 # References
 
-- [Bentley, Haken, and Saxe, “A General Method for Solving Divide-and-Conquer Recurrences” (1980)](https://doi.org/10.1145/1008861.1008865) — the original paper develops a general method for deriving asymptotic bounds from divide-and-conquer recurrences.
-- [Akra and Bazzi, “On the Solution of Linear Recurrence Equations” (1998)](https://doi.org/10.1023/A:1018373005182) — the primary source for the Akra–Bazzi method, including recurrences with fixed unequal subproblem sizes that fall outside the classical Master Theorem.
-- [`.NET` `ArraySortHelper<T>` source](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Collections/Generic/ArraySortHelper.cs) — the official Introsort implementation shows the small-partition insertion-sort cutoff and the separate depth-limit fallback to heapsort.
-- [Cormen et al., _Introduction to Algorithms_, 4th ed.](https://mitpress.mit.edu/9780262046305/introduction-to-algorithms/) — the authoritative textbook treatment of divide-and-conquer, recurrence solving, and the Master Theorem cases used here.
+- [Bentley, Haken, and Saxe, “A General Method for Solving Divide-and-Conquer Recurrences” (1980)](https://doi.org/10.1145/1008861.1008865)
+- [Akra and Bazzi, “On the Solution of Linear Recurrence Equations” (1998)](https://doi.org/10.1023/A:1018373005182)

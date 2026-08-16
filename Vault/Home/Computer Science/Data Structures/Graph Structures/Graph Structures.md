@@ -12,16 +12,16 @@ status: Done
 publish: true
 ---
 
-Graph structures model relationships between entities — service dependencies, social edges, road networks — where trees are too restrictive: cycles exist, multiple paths connect the same pair, and there's no root. .NET has no `Graph<T>` type; you compose one from primitives, and the composition depends on which relationship question must be cheap. A `Dictionary<TNode, List<TNode>>` adjacency list makes neighbor traversal cheap; a `bool[,]` matrix makes edge-existence O(1); two `int[]` arrays (a disjoint set) make "are these connected?" near-O(1) without storing edges at all.
+Graph structures model relationships that do not fit a tree. Service dependencies can form cycles, roads may offer several routes between two places, and neither system needs a root. .NET has no general `Graph<T>` type, so the representation is assembled from collection primitives around the query that must stay cheap. A `Dictionary<TNode, List<TNode>>` makes neighbor traversal cheap. A `bool[,]` matrix makes an edge test O(1). Two `int[]` arrays can answer whether two vertices share a component in near-O(1) time without storing the edges at all.
 
-That last option is the reason this folder splits into three notes. [[Graph]] is the explicit representation — you keep vertices and edges and run traversals (BFS, DFS, Dijkstra) over them. [[Disjoint Set]] keeps no edges: it collapses the graph into "which component is this vertex in?", trading every other question away for near-constant connectivity queries and merges. [[Union-Find]] is the companion to Disjoint Set — the two heuristics (union by rank, path compression) that keep that forest shallow, and the amortized `O(α(n))` analysis that proves the near-constant bound.
+This folder separates the full relationship from its component summary. [[Graph]] stores vertices and edges so traversals such as BFS, DFS, and Dijkstra can inspect the topology. [[Disjoint Set]] discards those edges and retains only the partition into connected components. [[Union-Find]] explains the rank and path-compression heuristics that keep the disjoint-set forest shallow, along with the amortized `O(α(n))` bound.
 
 ```datacorejsx
 const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
 return FolderStructureMap;
 ```
 
-# Which Note You Need
+# Graph or Disjoint Set
 
 ```mermaid
 flowchart TD
@@ -30,15 +30,8 @@ flowchart TD
     A -->|Both, canonical case Kruskal MST| D[Graph plus Disjoint Set]
 ```
 
-The decision hinges on whether connectivity is **static or dynamic**. One-off "is B reachable from A?" on a fixed graph — a single BFS is simpler and answers directionality too. Edges arriving incrementally with connectivity queries interleaved — re-running BFS per query is O(V + E) each time, while a disjoint set amortizes to near-constant. The cost of the disjoint set: it only handles *undirected* connectivity and can never un-merge (no edge deletion).
-
-# Questions
-
-> [!QUESTION]- When does a disjoint set beat BFS for connectivity, and what do you give up?
-> When edges arrive over time and connectivity queries interleave with insertions: each union/find is O(α(n)) ≈ O(1), versus O(V + E) to re-traverse per query. You give up everything except component identity — no paths, no distances, no directed reachability, and merges are irreversible (no edge deletion).
+The useful dividing line is how the graph changes. For a one-off reachability question on a fixed graph, one BFS is simpler and preserves direction. When undirected edges arrive between queries, repeating BFS costs O(V + E) each time. A disjoint set updates and checks connectivity in near-constant time. It cannot recover a path or undo a merge.
 
 # References
 
-- [Graph theory (Wikipedia)](https://en.wikipedia.org/wiki/Graph_theory) — vocabulary for vertices, edges, directed vs undirected, and connectivity; the shared language both child notes assume.
-- [Disjoint-set data structure (Wikipedia)](https://en.wikipedia.org/wiki/Disjoint-set_data_structure) — the operations, the forest representation, and the O(α(n)) analysis.
-- [PriorityQueue<TElement, TPriority> class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.priorityqueue-2) — the one .NET primitive built specifically for weighted-graph algorithms (Dijkstra, Prim).
+- [Graph theory (Wikipedia)](https://en.wikipedia.org/wiki/Graph_theory)

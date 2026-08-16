@@ -11,13 +11,13 @@ status: Ready to Repeat
 publish: true
 ---
 
-A cache holds 50K active sessions and repeatedly looks up one session by its ID. Storing the pairs in a list forces each lookup to scan entries until it finds the matching ID. A hash map instead derives a bucket index directly from the key, so the lookup jumps to the one bucket that could hold it and compares only the entries there.
+A cache holds 50K active sessions and repeatedly looks up one session by ID. In a list, each lookup scans until it reaches the matching pair. A hash map derives a bucket index from the key and jumps directly to the small set of entries that could match.
 
-The structure remembers a mapping from key to value and nothing else. It does not retain insertion order, sort order, or the sequence in which resizes moved entries around. Two keys that hash to the same bucket coexist there, distinguished only by an equality check.
+The structure retains key-to-value associations. Order is outside its contract, whether insertion order, sort order, or the accidental order left by resizing. Two keys may share a bucket. Equality selects the matching entry.
 
 **Core shape:** key → `hash(key) % capacity` → bucket → chain or probe resolves collisions → resize when the load factor crosses its threshold.
 
-The three tabs keep the same 12-cell table while changing only collision policy. **Closed Addressing** uses separate chaining (also called open hashing): each bucket points to its own external key/value chain. **Open Addressing** uses linear probing (also called closed hashing) and leaves tombstones after removal. **Bucket Hashing** groups the array into four contiguous 3-cell buckets, then advances bucket by bucket with wraparound when the home group is full. This prototype fixes capacity at 12 to compare collision policies; production maps usually resize or rebuild after crossing a load threshold.
+The three tabs keep the same 12-cell table while changing only collision policy. **Closed Addressing** uses separate chaining (also called open hashing): each bucket points to its own external key/value chain. **Open Addressing** uses linear probing (also called closed hashing) and leaves tombstones after removal. **Bucket Hashing** groups the array into four contiguous 3-cell buckets, then advances bucket by bucket with wraparound when the home group is full. This prototype fixes capacity at 12 to compare collision policies. Production maps usually resize or rebuild after crossing a load threshold.
 
 ~~~~~tabsdown
 tab: Visualization
@@ -251,19 +251,19 @@ Bounds are relative to the entry count and assume constant-cost hashing and equa
 
 # Where the representation breaks
 
-Each boundary traces back to the bucket-and-hash mechanism.
+Every failure mode traces back to the bucket-and-hash mechanism.
 
-**A weak or adversarial hash collapses a bucket.** A `GetHashCode` that returns a constant puts every entry in one bucket, so each operation must walk the resulting chain. When keys come from untrusted input (HTTP query keys, JSON property names), an attacker who can predict the hash forces mass collisions on purpose — algorithmic-complexity denial of service, "hash flooding." For string keys, current .NET `Dictionary` can switch from its fast non-randomized comparer to randomized hashing after excessive collisions; a custom key type with a weak hash stays exposed.
+**A weak or adversarial hash collapses a bucket.** A `GetHashCode` that returns a constant puts every entry in one chain, turning each operation into a scan. With untrusted keys such as HTTP query names, predictable hashes let an attacker force those collisions deliberately. This is hash-flooding denial of service. Current .NET `Dictionary` can switch string keys from its fast non-randomized comparer to randomized hashing after excessive collisions. A custom key type with a weak hash remains exposed.
 
-**A mutated key may become unreachable.** Insert a key, then mutate a field used by `GetHashCode` or `Equals`, and invariant 1 breaks. The entry keeps its insertion-time hash but still references the mutated key object; lookup recomputes the candidate hash and equality from current state, so a changed full hash can miss even if it still maps to the same bucket. Immutable key types (`string`, `int`, records with `init` properties) avoid this; a mutable key must never change after insertion.
+**A mutated key may become unreachable.** The entry keeps its insertion-time hash while still referencing the mutable key object. If a field used by `GetHashCode` or `Equals` changes, lookup works from different state than insertion did. Even when the new full hash reduces to the same bucket, it no longer matches the stored hash. Immutable key types avoid this problem. A mutable key must keep all hash- and equality-participating state fixed after insertion.
 
-**Iteration order is unspecified.** Current .NET `Dictionary` enumerates its entries array and often appears insertion-ordered, but the API contract does not guarantee that behavior. Removal, slot reuse, or a runtime implementation change can alter the observed order, so code that depends on it is relying on an implementation artifact.
+**Iteration order is unspecified.** Current .NET `Dictionary` enumerates its entries array and often looks insertion-ordered. The API makes no such promise. Removal, slot reuse, or a runtime change may alter the observed order, so depending on it binds code to an implementation accident.
 
-**A resize is a latency spike.** One threshold-crossing insert must allocate a new array and rehash every existing entry before it returns. For a real-time or low-latency path, that single stall matters; pre-sizing or a resize-free structure avoids it.
+**A resize is a latency spike.** The insert that crosses the load threshold allocates a new array and rehashes every existing entry before returning. That one stall matters on a latency-sensitive path. Pre-sizing can move it out of the hot path. Workloads that cannot tolerate any rebuild need a different structure.
 
-**Open addressing adds clustering and tombstones.** Probe sequences pile entries into runs (primary clustering) that lengthen every probe, and a delete cannot simply empty a slot — that would truncate a probe chain — so it leaves a tombstone. Lookups skip tombstones, later inserts may reuse them, and a rehash removes any that remain.
+**Open addressing adds clustering and deletion state.** Probe sequences can pile entries into runs that lengthen later probes. Deletion cannot blindly clear a slot because lookup might stop before reaching displaced keys. Tombstones keep the path open. Later inserts can reuse them, and a rebuild clears the remainder.
 
-# Reference drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Bucket array with chaining
 > ```mermaid
@@ -293,20 +293,9 @@ Each boundary traces back to the bucket-and-hash mechanism.
 >     Console.WriteLine(name);
 > }
 > ```
-> `Dictionary<TKey, TValue>` is the default map in modern .NET. Concurrent writes are unsupported and may throw or corrupt its state; synchronize access or use `ConcurrentDictionary`. `FrozenDictionary` optimizes build-once/read-many hot paths, while `SortedDictionary` keeps keys ordered. Passing an initial `capacity` pre-sizes the array and skips the grow-and-rehash cycles.
-
-# Questions
-
-> [!QUESTION]- What happens to an entry whose key is mutated after insertion?
-> The entry retains its insertion-time hash but still references the mutated key object. If mutation changes anything used by `GetHashCode` or `Equals`, lookup can miss the still-resident entry; even a changed full hash that reduces to the same bucket no longer matches the stored hash. Keys must be immutable, or at least never change hash- or equality-participating state after insertion.
-
-> [!QUESTION]- When is a balanced tree preferable to a hash map?
-> When the workload needs ordered iteration, range queries, or nearest-key lookups. A hash map lacks ordered navigation, so these operations require at least a full scan, plus sorting when the result itself must be ordered; a balanced tree retains key order as part of its representation.
+> `Dictionary<TKey, TValue>` is the default map in modern .NET. Concurrent writes are unsupported and may throw or corrupt its state. Synchronize access or use `ConcurrentDictionary`. `FrozenDictionary` optimizes build-once/read-many hot paths, while `SortedDictionary` keeps keys ordered. Passing an initial `capacity` pre-sizes the array and skips the grow-and-rehash cycles.
 
 # References
 
-- [`Dictionary<TKey, TValue>` class (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.dictionary-2) — API reference for the primary .NET hash map, with the hash-contract requirements and capacity semantics.
-- [`Dictionary.cs` in dotnet/runtime](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Collections/Generic/Dictionary.cs) — runtime source showing the `buckets[]`/`entries[]` chaining layout, prime-based resize, and per-entry `next` indices.
-- [Selecting a collection class (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/standard/collections/selecting-a-collection-class) — decision guidance between hash-based and sorted collections.
-- [Anatomy of the .NET Dictionary](https://dunnhq.com/posts/2024/anatomy-of-the-dotnet-dictionary/) — bucket layout, collision handling, and resize behavior walked through the source.
-- [Denial of Service via Algorithmic Complexity Attacks](https://www.usenix.org/legacy/event/sec03/tech/full_papers/crosby/crosby.pdf) — Crosby and Wallach's paper establishing hash-flooding as a practical DoS vector and the motivation for randomized seeds.
+- [`Dictionary.cs` in dotnet/runtime](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Collections/Generic/Dictionary.cs)
+- [Denial of Service via Algorithmic Complexity Attacks](https://www.usenix.org/legacy/event/sec03/tech/full_papers/crosby/crosby.pdf)

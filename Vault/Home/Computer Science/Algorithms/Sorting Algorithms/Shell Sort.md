@@ -11,9 +11,9 @@ status: Creation
 publish: true
 ---
 
-A reverse-sorted array exposes insertion sort's movement problem: it only shifts across adjacent slots, so an element that belongs `k` positions away needs `k` one-slot shifts to get there. Across a fully inverted array, the total shift work equals the number of inversions.
+A reverse-sorted array exposes insertion sort's movement cost. An element that belongs `k` positions away needs `k` one-slot shifts to get there. Across a fully inverted array, the total shift work equals the number of inversions.
 
-Shell sort attacks that distance before it attacks the order. It runs an insertion sort over elements `h` positions apart (an `h`-sort) for a decreasing sequence of gaps ending at `h = 1`. A move inside an `h`-spaced subsequence relocates an element by `h` slots at once, so a far-out-of-place element can cover much of its journey during the coarse passes. The final `h = 1` pass is a plain insertion sort; earlier passes reduce its remaining displacement on favorable inputs, but the gap sequence determines how much they help.
+Shell sort reduces that long-distance disorder first. It runs insertion sort over elements `h` positions apart, then repeats with smaller gaps until `h = 1`. A move within an `h`-spaced subsequence relocates an element by `h` slots at once, so coarse passes can move badly placed values much closer to their destinations. The final pass is ordinary insertion sort. How much work remains for it depends on the gap sequence.
 
 **Core condition:** a decreasing gap sequence ending at `h = 1` → each pass `h`-sorts interleaved subsequences → the final adjacent pass completes the ordering.
 
@@ -125,9 +125,9 @@ There is also no way to buy a proven bound and top speed at once. Pratt's 3-smoo
 
 ~~~~~
 
-The `h`-stride can lift one equal key over another, so Shell sort is not suitable as a stable secondary sort.
+The `h`-stride can lift one equal key over another. Shell sort is therefore a poor fit when a secondary sort must preserve the earlier ordering of equal keys.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Pass structure
 >
@@ -170,16 +170,8 @@ The `h`-stride can lift one equal key over another, so Shell sort is not suitabl
 >     }
 > }
 > ```
-> The inner loop is line-for-line an insertion sort with stride `gap` in place of `1`. Fixed gaps still sort any input length because the final gap is `1`, but a scalable implementation extends the sequence from `n` to preserve useful coarse passes.
-
-# Questions
-
-> [!QUESTION]- Why is Shell sort unstable?
-> A shift relocates an element by a whole gap `h`, so it can carry a key past an equal key that lies between them. No later pass records or restores their original relative order, so records that compare equal can emerge reversed.
+> The inner loop is insertion sort with `gap` as its stride instead of `1`. The final gap still sorts any input length, but a scalable implementation extends the sequence from `n` so large arrays receive useful coarse passes.
 
 # References
 
-- [Shellsort (Wikipedia)](https://en.wikipedia.org/wiki/Shellsort) — gap sequences, proven and empirical bounds, and the open problem of the optimal sequence.
-- [Best Increments for the Average Case of Shellsort (Marcin Ciura, 2001)](https://web.archive.org/web/20180923235211/http://sun.aei.polsl.pl/~mciura/publikacje/shellsort.pdf) — the paper deriving the `1, 4, 10, 23, 57, 132, 301, 701` sequence and its measured behaviour.
-- [Shellsort and Sorting Networks (Donald E. Knuth, TAOCP Vol. 3, §5.2.1)](https://cs.stanford.edu/~knuth/taocp.html) — the `h`-sorting theorem that a `k`-sorted array stays `k`-sorted after later `h`-sorting.
-- [Shellsort (Princeton Algorithms)](https://algs4.cs.princeton.edu/21elementary/) — Sedgewick's treatment with `h`-sorting intuition and gap-sequence experiments.
+- [Best Increments for the Average Case of Shellsort (Marcin Ciura, 2001)](https://web.archive.org/web/20180923235211/http://sun.aei.polsl.pl/~mciura/publikacje/shellsort.pdf)

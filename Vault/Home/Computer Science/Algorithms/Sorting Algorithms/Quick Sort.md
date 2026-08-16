@@ -11,11 +11,11 @@ status: Ready to Repeat
 publish: true
 ---
 
-Quick sort picks one element as a pivot and rearranges the array so everything not greater than the pivot sits to its left and everything greater sits to its right. That single pass — the partition — drops the pivot onto the index it will hold in the finished array and cleaves the rest into two runs that share no element's final destination. Each run is then sorted the same way.
+Quick sort chooses a pivot and partitions the active range around it. Values not greater than the pivot move left. Greater values move right. The partition places the pivot at its final index, leaving two independent ranges that can be sorted by the same procedure.
 
-The pivot position decides the recursion shape. A pivot near the median splits the remaining work evenly; a pivot that is always the smallest or largest element peels off one element per pass and leaves the recursion maximally unbalanced.
+The pivot position determines the recursion tree. A pivot near the median divides the work roughly in half. Repeatedly choosing an extreme value removes only one element per partition and turns the recursion into a chain.
 
-**Core shape:** partition around a pivot → pivot fixed at its final index, smaller-left / larger-right → recursively sort two independent subarrays.
+**Operating idea:** each partition fixes one pivot permanently, then recursion continues on the disjoint ranges beside it.
 
 ~~~~~tabsdown
 tab: Visualization
@@ -101,12 +101,12 @@ tab: Complexity
 }
 ```
 
-A first- or last-element pivot turns the expected case into the worst on the most ordinary inputs. On already-sorted or reverse-sorted data every pivot is an extreme value: one partition holds `n − 1` elements, the other holds none, and the recursion becomes a linear chain of `n` frames. That is `O(n²)` comparisons and, because the given code recurses before returning, `O(n)` stack depth — a stack overflow on a large array rather than a slow-but-correct sort. With distinct keys, choosing each pivot uniformly at random gives expected `O(n log n)` for any fixed input. Median-of-three improves ordinary ordered inputs but remains deterministic: a constructed input can still force extreme partitions and `O(n²)`.
+A deterministic first- or last-element pivot makes already sorted and reverse-sorted input a worst case. On already-sorted or reverse-sorted data every pivot is an extreme value: one partition holds `n − 1` elements, the other holds none, and the recursion becomes a linear chain of `n` frames. That is `O(n²)` comparisons and, because the given code recurses before returning, `O(n)` stack depth — a stack overflow on a large array rather than a slow-but-correct sort. With distinct keys, choosing each pivot uniformly at random gives expected `O(n log n)` for any fixed input. Median-of-three improves ordinary ordered inputs but remains deterministic: a constructed input can still force extreme partitions and `O(n²)`.
 
 Many equal keys break the two-way scheme for a different reason. Lomuto sends every element `≤ pivot` to the left partition, so an array that is mostly one repeated value piles almost everything on one side of each pivot — the same unbalanced split, now driven by duplicates instead of order. Three-way partitioning (the Dutch national flag) splits into `< pivot`, `= pivot`, and `> pivot`; the entire equal block is placed at once and dropped from both recursive calls, so an array of identical keys finishes in `O(n)`.
 ~~~~~
 
-# Reference drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Recursion structure
 > ```mermaid
@@ -156,14 +156,7 @@ Many equal keys break the two-way scheme for a different reason. Lomuto sends ev
 > }
 > ```
 
-# Questions
-
-> [!QUESTION]- Why can the two sides of a partition be sorted without ever combining them?
-> Partitioning places the pivot at its final sorted index and guarantees every element to its left is not greater and every element to its right is greater. No element on one side belongs on the other, so the two subranges are independent sorting problems. Correct placement of each pivot is the only merge step quick sort performs.
-
 # References
 
-- [Quicksort](https://doi.org/10.1093/comjnl/5.1.10) — C. A. R. Hoare's 1962 paper in *The Computer Journal* introducing partition-based sorting and the two-pointer partition.
-- [`ArraySortHelper<T>` in dotnet/runtime](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Collections/Generic/ArraySortHelper.cs) — the introspective sort behind `Array.Sort`: quick sort with a median-of-three pivot and a heap-sort fallback past a depth limit.
-- [Quicksort](https://algs4.cs.princeton.edu/23quicksort/) — Sedgewick & Wayne: the partitioning invariant and 3-way (Dutch national flag) partitioning for duplicate-heavy input.
-- [Introsort (Wikipedia)](https://en.wikipedia.org/wiki/Introsort) — the quicksort/heap-sort hybrid used to cap repeated pivot degeneration in production sort implementations.
+- [Quicksort](https://doi.org/10.1093/comjnl/5.1.10)
+- [Quicksort](https://algs4.cs.princeton.edu/23quicksort/)

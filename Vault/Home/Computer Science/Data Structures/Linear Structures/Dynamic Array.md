@@ -11,9 +11,9 @@ status: Done
 publish: true
 ---
 
-A dynamic array keeps the contiguous backing buffer but over-allocates it, so most appends write into spare room already reserved and only an occasional append pays for growth.
+A dynamic array keeps array-style indexing while making append practical. It reserves more contiguous slots than it currently uses, so most appends write into spare capacity. Only the append that fills the buffer pays for growth.
 
-The representation is a backing array plus two counters: a `count` of live elements and a `capacity` of allocated slots. What it gives up relative to a raw array is a stable buffer address — a growth event moves every element to a new allocation — and cheap edits away from the tail, since keeping the elements contiguous forces a shift on any front or middle insert.
+The representation is a backing array plus `count` and `capacity`. Compared with a raw array, it gives up a stable buffer address because growth moves every element to a new allocation. Front and middle edits remain expensive: contiguity forces the tail to shift.
 
 **Core shape:** backing array + `count` + `capacity` → append writes at `count` while `count < capacity` → overflow doubles the buffer and copies
 
@@ -183,7 +183,7 @@ tab: Complexity
 ```
 ~~~~~
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Append with overflow
 >
@@ -258,16 +258,8 @@ tab: Complexity
 > }
 > ```
 >
-> The `Append` fast path is a single store; the grow branch runs only when `Count == Capacity`.
-
-# Questions
-
-> [!QUESTION]- What invalidates backing-buffer references versus versioned enumerators?
-> A resize replaces the backing array, so references, spans, and pointers into the old buffer no longer refer to the dynamic array's current storage. A versioned enumerator follows a separate rule: mutations that change the collection version invalidate it even without a resize, so `MoveNext` or `Reset` throws rather than continuing over changed state.
+> The `Append` fast path is a single store. The grow branch runs only when `Count == Capacity`.
 
 # References
 
-- [`List<T>` class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1) — .NET's dynamic array, with remarks separating `Count` from `Capacity` and describing capacity-doubling on growth.
-- [`List<T>` source in dotnet/runtime](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Collections/Generic/List.cs) — the `EnsureCapacity`/`Grow` logic showing the doubling factor and the array copy on resize.
-- [When to use generic collections](https://learn.microsoft.com/en-us/dotnet/standard/collections/when-to-use-generic-collections) — where `List<T>` fits relative to linked lists, queues, and other collection shapes.
-- [Sequence analysis (CLRS, Chapter 17)](https://mitpress.mit.edu/9780262046305/introduction-to-algorithms/) — aggregate and accounting methods for table doubling.
+- [`List<T>` source in dotnet/runtime](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Collections/Generic/List.cs)

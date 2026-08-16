@@ -114,11 +114,11 @@ The expected row assumes uniformly distributed keys. Skewed values can repeatedl
 
 Non-uniform data breaks the relationship between value ratios and index ratios. When one maximum dominates the value span, estimates cluster near `lo` even while the target remains near the far end by index. Clustered timestamps and Zipfian frequency tables can mislead the probe in the same way.
 
-The probe also requires keys with meaningful arithmetic. `(target - a[lo]) * (hi - lo) / (a[hi] - a[lo])` needs subtraction and a ratio, not just an ordering. Strings under a custom comparator, GUIDs, or opaque records support comparison but not a numeric offset, so the position cannot be estimated at all; those inputs are restricted to comparison-based search such as Binary Search.
+The probe also requires keys with meaningful arithmetic. `(target - a[lo]) * (hi - lo) / (a[hi] - a[lo])` needs subtraction and a ratio, not just an ordering. Strings under a custom comparator, GUIDs, or opaque records support comparison but not a numeric offset, so the position cannot be estimated at all. Those inputs are restricted to comparison-based search such as Binary Search.
 
-The denominator fails when `a[hi] == a[lo]`. A run of equal values, or a range that has collapsed to one element, makes the value span zero. An unguarded integer implementation throws `DivideByZeroException`; floating-point variants produce a non-finite estimate that cannot be used as an index. The C# implementation below detects the flat block before division and resolves it with a direct equality check — the same category of defensive guard as computing a midpoint that cannot overflow.
+The denominator fails when `a[hi] == a[lo]`. A run of equal values, or a range that has collapsed to one element, makes the value span zero. An unguarded integer implementation throws `DivideByZeroException`. Floating-point variants produce a non-finite estimate that cannot be used as an index. The C# implementation below detects the flat block before division and resolves it with a direct equality check — the same category of defensive guard as computing a midpoint that cannot overflow.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Control flow
 >
@@ -180,12 +180,6 @@ The denominator fails when `a[hi] == a[lo]`. A run of equal values, or a range t
 >
 > The `target >= values[lo] && target <= values[hi]` guard doubles as the absence check: once the target leaves the range's value window, no interpolated position can be valid.
 
-# Questions
-
-> [!QUESTION]- Why can it not run on arbitrary comparable keys?
-> The probe computes `(target - a[lo]) * (hi - lo) / (a[hi] - a[lo])`, which needs subtraction and a ratio with numeric meaning. Ordering-only types such as strings under a custom comparator support comparison but not that arithmetic, so no position can be estimated and only comparison-based search applies.
-
 # References
 
-- [Interpolation search](https://en.wikipedia.org/wiki/Interpolation_search)
-- [Perl, Itai & Avni, "Interpolation Search" (1978)](https://dl.acm.org/doi/10.1145/359545.359557) — the primary source for interpolation search under uniformly distributed keys.
+- [Perl, Itai & Avni, "Interpolation Search" (1978)](https://dl.acm.org/doi/10.1145/359545.359557)

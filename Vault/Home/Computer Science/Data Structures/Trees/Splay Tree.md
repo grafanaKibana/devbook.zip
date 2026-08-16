@@ -13,9 +13,9 @@ publish: true
 
 An ordered dictionary may receive a strongly uneven access stream: a small working set is touched repeatedly while most keys stay cold.
 
-A splay tree is a binary search tree that moves the last accessed node to the root. Search first follows the ordinary BST ordering; then **splaying** rotates the accessed node upward. The tree stores no height, color, or balance factor.
+A splay tree is a binary search tree that moves the last accessed node to the root. Search first follows ordinary BST ordering. Then **splaying** rotates the accessed node upward. The tree stores no height, color, or balance factor.
 
-The structure retains key order and parent-child topology, but not a fixed balance bound. Recent and repeated accesses reshape that topology so frequently used keys tend to remain near the root.
+The structure retains key order, but it promises no fixed height bound. Recent accesses reshape the topology, so a repeatedly used key tends to remain near the root.
 
 Press **Search** with the prefilled `60`: the path `100 → 50 → 75 → 60` performs zig-zag then zig and leaves `60` at the root.
 
@@ -244,14 +244,8 @@ tab: Complexity
 
 Read operations mutate the tree. A lookup cannot safely run under a shared read lock because it rewrites parent and child pointers on the search path. Common iterators that retain an ancestor stack or cached path become stale after another access splays a node, and versioned enumerators may reject the mutation even though the key set did not change. An iterator anchored to stable node identities and advancing by live successor links is not inherently invalidated by splaying.
 
-The missing height guarantee matters for latency-sensitive code.
-
-# Questions
-
-> [!QUESTION]- Why must a splay-tree lookup use exclusive synchronization even when it does not change the key set?
-> A lookup splays the accessed node, or the last node reached on a miss, by rotating it toward the root. Those rotations rewrite parent and child pointers, so concurrent readers can observe or interfere with a structural mutation even though no key was inserted or removed.
+The missing height guarantee matters for latency-sensitive code. One operation may still walk and rotate through all `n` nodes. The sequence-level guarantee does not cap an individual request.
 
 # References
 
-- [Self-Adjusting Binary Search Trees](https://www.cs.cmu.edu/~sleator/papers/self-adjusting.pdf) — source for the structure and its analysis.
-- [Self-Adjusting Binary Search Trees: What Makes Them Tick?](https://arxiv.org/abs/1503.03105) — a later analysis of the structural properties behind the access lemma.
+- [Self-Adjusting Binary Search Trees](https://www.cs.cmu.edu/~sleator/papers/self-adjusting.pdf)

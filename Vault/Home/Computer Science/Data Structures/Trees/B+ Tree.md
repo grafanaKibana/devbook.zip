@@ -11,17 +11,17 @@ status: Ready to Repeat
 publish: true
 ---
 
-A database index must support both a point lookup for one ordered key and a range scan such as every key from `15` through `40`. A page-oriented tree can route the point lookup through separator keys, but the range scan also needs an efficient way to continue from one leaf page to the next.
+A database index serves point lookups and ordered ranges such as every key from `15` through `40`. Separator keys route a lookup down the tree. A range scan has another requirement: once it reaches the first matching leaf, it needs a cheap path to the next one.
 
-The catch is locality. Crossing a subtree boundary revisits ancestor pages before descending again, while a B+ tree keeps the scan moving directly from one logical leaf page to the next.
+Revisiting ancestors at every subtree boundary wastes page reads. A B+ tree instead moves directly from one logical leaf page to the next.
 
-The B+ tree is the [[Home/Computer Science/Data Structures/Trees/B-tree|B-tree]] variant that reshapes the node layout for exactly that second query. Every `(key, value)` pair moves down to the leaves; internal nodes keep only keys, acting as a routing index whose separators point to the child subtree that owns a range. A separator can equal a key still living in a leaf — it is a signpost, not the record. Then the leaves are chained into a linked list (next, usually also previous), so once a descent lands on the first matching leaf, the scan walks the chain in key order without touching an internal node again.
+The B+ tree is the [[Home/Computer Science/Data Structures/Trees/B-tree|B-tree]] variant built around that scan. Every `(key, value)` pair lives in a leaf. Internal nodes keep only routing keys whose separators point to child ranges. A separator may duplicate a leaf key, but it is only a signpost. The leaves form a linked list (next, and usually previous), so a scan descends once and then follows the chain in key order.
 
-Because internal nodes carry no values, each routing page can pack more separators than a leaf packs records. The resulting tree can be equally shallow or shallower than a B-tree over the same data, and the routing levels tend to stay cached in the buffer pool. Many ordered RDBMS indexes use this leaf-oriented shape; filesystems use related B-tree variants whose record placement varies.
+Internal nodes carry no values, so each routing page packs more separators than a leaf packs records. This can make the tree as shallow as, or shallower than, a B-tree over the same data. The upper routing levels also tend to remain in the buffer pool. Many ordered RDBMS indexes use this leaf-oriented shape, while filesystem variants differ in where records live.
 
 **Core shape:** all `(key, value)` pairs in the leaves → internal nodes are a routing key index → leaves linked in sorted order → one descent then a sequential leaf walk answers a range
 
-Press **Insert** with the prefilled `25` to split a leaf: the first key in the right leaf is copied into the parent and remains in the leaf. Then press **Range scan** for `[15, 40]`; the highlighted path reaches the first matching leaf and the green links carry the scan across the remaining leaves.
+Inserting the prefilled `25` splits a leaf. The first key in the new right leaf is copied into the parent and remains in the leaf. A **Range scan** for `[15, 40]` then descends to the first match and follows the green links across the remaining leaves.
 
 ~~~~~tabsdown
 tab: Visualization
@@ -223,13 +223,13 @@ tab: Complexity
 
 # Boundaries
 
-A point lookup **always** reaches a leaf. A plain [[Home/Computer Science/Data Structures/Trees/B-tree|B-tree]] can sometimes find its value in an internal node and stop early; the B+ tree gives up that possible early hit because internal nodes hold no values. Its worst-case path is not inherently deeper: a B-tree lookup may also reach a leaf, while the B+ tree's smaller internal entries raise fan-out enough to make it equally shallow or shallower. Cached ancestor pages further reduce the physical-I/O difference.
+A point lookup **always** reaches a leaf. A plain [[Home/Computer Science/Data Structures/Trees/B-tree|B-tree]] can sometimes stop at an internal value. The B+ tree gives up that early hit. Its worst-case path is not inherently deeper, because smaller internal entries raise fan-out and may offset the leaf-only placement. Cached ancestor pages reduce the physical-I/O difference further.
 
-Leaf-link maintenance rides on top of the ordinary split and merge logic. When a leaf splits, the new leaf must be stitched into the chain: the original leaf's `next` is repointed at the new leaf, and the new leaf's `next` inherits the old target (and the reverse pointers updated when the list is doubly linked). A merge does the mirror — the survivor absorbs the neighbor's entries and relinks past the removed node. Getting this relinking wrong corrupts ordered iteration without breaking point lookups, so the defect can hide until a range scan skips or repeats a run of keys.
+Leaf links add another invariant to ordinary split and merge logic. On split, the original leaf's `next` points to the new leaf, while the new leaf's `next` inherits the old target. A doubly linked layout updates reverse pointers too. A merge relinks past the removed page. Broken links may leave point lookups correct while range scans skip or repeat keys.
 
-The same page-sizing constraint as a [[Home/Computer Science/Data Structures/Trees/B-tree|B-tree]] applies: node capacity is chosen so a node fills one storage page. Oversized keys or values lower fan-out, raise the tree, and erode the shallow-tree advantage. Variable-length keys and prefix compression in real implementations exist to keep separators small and fan-out high.
+As with a [[Home/Computer Science/Data Structures/Trees/B-tree|B-tree]], node capacity is chosen around one storage page. Large keys or values lower fan-out and raise the tree. Real implementations use techniques such as prefix compression to keep separators small.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Routing index over a linked leaf list
 >
@@ -243,7 +243,7 @@ The same page-sizing constraint as a [[Home/Computer Science/Data Structures/Tre
 >   L2 -. next .-> L3
 >   L3 -. next .-> NIL[null]
 > ```
-> Separators `17` and `40` route descents only; the values `17` and `40` also live in leaves. A scan for `[15, 45]` descends to the `17` leaf, then follows `next` links.
+> Separators `17` and `40` route descents only. The values `17` and `40` also live in leaves. A scan for `[15, 45]` descends to the `17` leaf, then follows `next` links.
 
 > [!EXAMPLE]- C# search and range scan
 >
@@ -303,20 +303,9 @@ The same page-sizing constraint as a [[Home/Computer Science/Data Structures/Tre
 >     }
 > }
 > ```
-> Insert and delete (leaf overflow splits, underflow merges, and the `Next` relinking each performs) are omitted; `Range` shows the invariant that makes the structure worthwhile — after `DescendToLeaf` it never returns to an internal node.
-
-# Questions
-
-> [!QUESTION]- What two structural changes turn a B-tree into a B+ tree, and which query do they serve?
-> All `(key, value)` pairs move to the leaves, leaving internal nodes as a pure routing key index, and the leaves are chained into a sorted linked list. Both changes serve the range scan: after one descent, matching keys are read by walking the leaf chain in order instead of re-ascending into internal nodes.
-
-> [!QUESTION]- Why does removing internal values raise fan-out, and why does that help on disk?
-> A separator is just a key and a child pointer, far smaller than a full record, so a routing page packs many more entries. Higher fan-out means fewer levels, and the small routing levels tend to stay in the buffer pool, so a lookup often costs a single physical read of the leaf.
+> Insert and delete (leaf overflow splits, underflow merges, and the `Next` relinking each performs) are omitted. `Range` shows the invariant that makes the structure worthwhile — after `DescendToLeaf` it never returns to an internal node.
 
 # References
 
-- Comer, [The Ubiquitous B-Tree (1979)](https://doi.org/10.1145/356770.356776) — the survey that canonically defines the B+ variant, its leaf-only data placement, and the leaf-chain design.
-- [MySQL InnoDB Index Types](https://dev.mysql.com/doc/refman/8.4/en/innodb-index-types.html) — clustered primary-key and secondary index behavior, with rows stored in the clustered leaf level.
-- [SQL Server clustered and nonclustered index architecture](https://learn.microsoft.com/en-us/sql/relational-databases/sql-server-index-design-guide) — page-level B-tree layout, doubly linked leaf pages, and the clustered-vs-nonclustered leaf contents.
-- [PostgreSQL B-Tree indexes](https://www.postgresql.org/docs/current/btree.html) — the Lehman–Yao access method with right-sibling links on every level that lets it scan ranges like a B+ tree.
-- [Use the Index, Luke — Anatomy of an SQL Index](https://use-the-index-luke.com/sql/anatomy) — a database-agnostic walkthrough of leaf chains and why range scans read sequentially.
+- [The Ubiquitous B-Tree (1979)](https://doi.org/10.1145/356770.356776)
+- [MySQL InnoDB Index Types](https://dev.mysql.com/doc/refman/8.4/en/innodb-index-types.html)
