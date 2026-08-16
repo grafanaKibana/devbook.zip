@@ -12,47 +12,49 @@ status: Done
 publish: true
 ---
 
-The Circuit Breaker pattern stops your service from repeatedly calling a dependency that is already failing, so your system fails fast instead of failing slowly. It matters in distributed systems because it prevents cascading failures: without a breaker, threads, sockets, and retries pile up until healthy parts of the system also degrade. You reach for it when calling external services such as payment providers, LLM APIs, and remote databases where latency spikes and partial outages are normal. In senior .NET systems, a circuit breaker is usually part of a resilience stack with [[Home/Software Architecture/Patterns/Resilience Patterns/Retry and Timeout Patterns|retry and timeout]] and fallback, not a standalone feature.
+A circuit breaker stops calls to a dependency after recent failures cross a threshold. While open, it rejects work immediately instead of spending caller capacity on requests that are likely to time out. This contains sustained failure and gives the dependency time to recover.
 
-# Mechanism
+The breaker belongs at a remote-call boundary where latency spikes and partial outages are expected. It normally works with [[Home/Software Architecture/Patterns/Resilience Patterns/Retry and Timeout Patterns|retry and timeout]] policies. Retries handle brief faults. The breaker handles evidence that the fault is lasting.
+
+# How the Breaker Opens and Recovers
 
 ## State Model
 
-- `Closed`: normal mode; calls flow through and failures are measured over a sampling window.
-- `Open`: fast-fail mode; calls are rejected immediately for a break duration.
-- `Half-Open`: probe mode; a probe call is allowed to test whether the dependency has recovered.
+- `Closed`: normal mode. Calls flow through and failures are measured over a sampling window.
+- `Open`: fast-fail mode. Calls are rejected during the break duration.
+- `Half-Open`: after that duration, the next execution becomes a recovery probe.
 
 ```mermaid
 stateDiagram-v2
     [*] --> Closed
     Closed --> Open: Failure ratio over threshold\nwithin sampling duration
-    Open --> HalfOpen: Break duration elapsed
+    Open --> HalfOpen: Break duration elapsed\nand next execution arrives
     HalfOpen --> Closed: Probe succeeds
-    HalfOpen --> Open: Probe fails or\nfailure ratio still high
+    HalfOpen --> Open: Probe fails
 ```
 
 ## How Transitions Are Decided
 
-- The breaker evaluates a rolling or fixed sampling window.
-- It opens only after `MinimumThroughput` is met, which avoids opening on tiny traffic samples.
-- It compares observed failures against `FailureRatio` (for example `0.25` means 25 percent failures).
-- Once open, it stays open for `BreakDuration`, then transitions to half-open for controlled probes.
+- The breaker evaluates failures within a sampling window.
+- `MinimumThroughput` prevents a tiny sample from opening the circuit.
+- `FailureRatio` sets the failure threshold. `0.25` means 25 percent.
+- After `BreakDuration`, the next execution enters half-open as a controlled probe. Success closes the circuit. Failure opens it again.
 
-If you set thresholds too low, the breaker chatters (opens and closes too often). If you set them too high, you discover failures too late and still waste resources on doomed calls.
+Thresholds set the balance. A low threshold chatters and rejects healthy traffic. A high threshold reacts late, after failed calls have already consumed capacity.
 
 ## What Should Count as a Failure
 
-For interview depth, explicitly separate expected client errors from server-side dependency failure:
+The failure predicate should represent dependency health:
 
-- Usually count: timeouts, network exceptions, HTTP `5xx`, and throttling (`429`) when your client cannot absorb it safely.
-- Usually do not count: business/validation `4xx` like `400` or `404`, because these are often caller mistakes, not provider instability.
-- Make this explicit via `ShouldHandle` so the breaker reflects dependency health, not consumer input quality.
+- Usually count timeouts, network exceptions, HTTP `5xx`, and throttling (`429`) that the caller cannot absorb safely.
+- Usually exclude validation and business `4xx` responses such as `400` or `404`. They describe the request rather than provider stability.
+- Encode the boundary in `ShouldHandle`. Otherwise bad input can open a circuit around a healthy dependency.
 
 # C# Example with Polly V8 in ASP.NET Core
 
 ## Register an ASP.NET Core HttpClient Resilience Handler
 
-This example uses the .NET HTTP resilience handler (`AddResilienceHandler`) with Polly v8 strategy options and tracks breaker state changes for telemetry.
+This `AddResilienceHandler` pipeline uses Polly v8 options and records breaker state changes for telemetry.
 
 ```csharp
 using Microsoft.Extensions.DependencyInjection;
@@ -82,14 +84,14 @@ builder.Services.AddHttpClient<LlmGateway>(client =>
             .Handle<BrokenCircuitException>()
             .HandleResult(r => (int)r.StatusCode >= 500),
         FallbackAction = _ => Outcome.FromResultAsValueTask(
-            new HttpResponseMessage(System.Net.HttpStatusCode.OK)
+            new HttpResponseMessage(System.Net.HttpStatusCode.ServiceUnavailable)
             {
-                Content = new StringContent("{\"answer\":\"Provider unavailable. Serving cached response.\"}")
+                Content = new StringContent("{\"error\":\"Provider unavailable.\"}")
             })
     });
 
-    // Retry wraps the breaker so retry attempts still flow through breaker checks.
-    pipelineBuilder.AddRetry(new RetryStrategyOptions<HttpResponseMessage>
+    // Retry wraps the breaker so safe retry attempts still flow through breaker checks.
+    var retryOptions = new HttpRetryStrategyOptions
     {
         MaxRetryAttempts = 2,
         Delay = TimeSpan.FromMilliseconds(250),
@@ -99,7 +101,9 @@ builder.Services.AddHttpClient<LlmGateway>(client =>
             .Handle<HttpRequestException>()
             .Handle<TimeoutRejectedException>()
             .HandleResult(r => (int)r.StatusCode == 429 || (int)r.StatusCode >= 500)
-    });
+    };
+    retryOptions.DisableForUnsafeHttpMethods();
+    pipelineBuilder.AddRetry(retryOptions);
 
     // Breaker trips on sustained dependency instability.
     pipelineBuilder.AddCircuitBreaker(new CircuitBreakerStrategyOptions<HttpResponseMessage>
@@ -164,42 +168,36 @@ public sealed class LlmGateway
 
 # Integration with Other Resilience Patterns
 
-For real production systems and AI provider calls, stack strategies deliberately:
+Pipeline order changes which failures each strategy observes. From outermost to innermost:
 
-Apply stack order as outermost to innermost:
-
-1. `Fallback` outermost: final degraded path after inner strategies fail.
+1. `Fallback` outermost: normalize an open circuit or final `5xx` response to `503`.
 2. `Retry` next: absorb short transient failures.
 3. `Circuit Breaker` next: fast-fail when sustained instability is detected.
 4. `Timeout` innermost: bound each attempt.
 
-Interview nuance: teams often say "retry inside breaker" to mean retries must contribute to breaker decisions. In Polly's outer-to-inner execution model, that behavior is achieved by placing retry outside and breaker inside, so every retry attempt still passes through breaker evaluation.
+Placing retry outside the breaker makes every attempt pass through breaker evaluation. The retry predicate must exclude `BrokenCircuitException`. An open circuit is a stop signal, not a transient failure worth retrying.
+
+The fallback is deliberately narrow. It converts `BrokenCircuitException` and final `5xx` responses to `503 Service Unavailable`. Exhausted transport and timeout exceptions still propagate.
+
+The HTTP retry options exclude `POST`, `PATCH`, `PUT`, `DELETE`, and `CONNECT`. A completion `POST` is retried only when the provider offers a server-enforced idempotency or deduplication key and the client supplies it; the breaker can still observe a failed unsafe request without automatically replaying it.
 
 # Pitfalls
 
-## 1) Breaking Too Aggressively on Expected Errors
+## Breaking on Expected Errors
 
-- What goes wrong: breaker opens on user-caused `4xx` responses and blocks healthy dependency traffic.
-- Why it happens: failure predicates are too broad and treat all non-success status codes as infrastructure failures.
-- Mitigation: define `ShouldHandle` around transient/infrastructure failure classes only, and review real response distribution in telemetry.
+Broad failure predicates count user-caused `4xx` responses and block healthy dependency traffic. `ShouldHandle` should cover only agreed dependency-failure classes, backed by the real response distribution in telemetry.
 
-## 2) Not Distinguishing Transient Vs Permanent Failures
+## Treating Permanent Failures as Transient
 
-- What goes wrong: permanent failures keep being retried and sampled as if they were recoverable.
-- Why it happens: no taxonomy for failure types and no contract for retryability.
-- Mitigation: classify errors by retryability and idempotency; retry only transient classes and let permanent failures fail fast.
+Permanent failures waste retry attempts and distort breaker samples. Error contracts need explicit retryability, and unsafe operations need an idempotency guarantee before any retry.
 
-## 3) Assuming One Instance Protects the Whole Fleet
+## Confusing One Breaker with Fleet Protection
 
-- What goes wrong: one pod opens its breaker but other pods continue hammering the same unhealthy dependency.
-- Why it happens: breaker state is process-local by default.
-- Mitigation: combine per-instance breakers with global controls such as rate limits, bulkheads, provider-side quotas, and fleet-level monitoring.
+Breaker state is normally process-local. One pod can open while every other pod keeps calling the same dependency. Fleet protection still needs shared limits or provider-side quotas, plus fleet-level telemetry.
 
-## 4) Half-open Allows Too Many Probes
+## Releasing Too Many Half-Open Probes
 
-- What goes wrong: when break duration expires, many instances probe at once and create a thundering herd.
-- Why it happens: synchronized timers and unconstrained probe concurrency.
-- Mitigation: keep probe traffic low, jitter recovery timing, and cap downstream concurrency.
+Synchronized instances can all probe when their break durations expire. Low probe concurrency and jittered recovery timing reduce that thundering herd.
 
 # Tradeoffs
 
@@ -210,33 +208,7 @@ Interview nuance: teams often say "retry inside breaker" to mean retries must co
 | Per-instance breakers only | Simple implementation | No fleet-wide coordination | Small deployments and low concurrency |
 | Add centralized protection layers | Better global control | More operational complexity | High-scale multi-instance services |
 
-# Questions
-
-> [!QUESTION]- Why is retry placement relative to circuit breaker important?
-> - Retry should execute inside the same resilience pipeline before breaker decisions.
-> - Outer retries around an already open breaker create extra pressure and useless attempts.
-> - Proper ordering gives cleaner failure accounting and earlier protection.
-> - In Polly's outer-to-inner model this means placing retry *outside* the breaker, so each failed retry still passes through breaker evaluation and counts toward tripping it.
-
-> [!QUESTION]- How do you avoid a half-open thundering herd in Kubernetes-scale deployments?
-> - Limit probe concurrency and keep half-open trial volume small.
-> - Add jitter to retry and recovery timing.
-> - Use global controls (rate limits, queueing, bulkheads) so per-pod recovery does not synchronize spikes.
-> - Watch fleet-wide metrics, not only single-instance breaker events.
-> - The core trap: breaker state is process-local, so per-pod recovery must be coordinated with fleet-level controls or every pod probes in lockstep.
-
-> [!QUESTION]- Which failures should trip the breaker, and which should not?
-> - Trip on dependency-health signals: timeouts, connection failures, HTTP `5xx`, and `429` when the client cannot absorb it.
-> - Do not trip on caller-side `4xx` like `400`/`404` — those reflect bad input, not an unhealthy dependency.
-> - Encode this in `ShouldHandle` so the breaker measures the dependency, not your users' mistakes.
-> - Get it wrong and the breaker opens on validation errors, blocking healthy traffic to a perfectly good dependency.
-
 # References
 
-- [Polly docs - Circuit breaker strategy (v8)](https://www.pollydocs.org/strategies/circuit-breaker.html) — authoritative state-machine behavior, sampling controls, break durations, callbacks, and telemetry for Polly's circuit breaker.
-- [Polly docs - Resilience pipelines](https://www.pollydocs.org/pipelines/index.html)
-- [Microsoft Learn - Build resilient apps with .NET and Polly](https://learn.microsoft.com/dotnet/architecture/microservices/implement-resilient-applications/implement-http-call-retries-exponential-backoff-polly)
-- [Microsoft Learn - .NET HTTP resilience](https://learn.microsoft.com/dotnet/core/resilience/http-resilience)
-- [Martin Fowler - Circuit Breaker pattern](https://martinfowler.com/bliki/CircuitBreaker.html)
-- [Release It! by Michael T. Nygard](https://pragprog.com/titles/mnee2/release-it-second-edition/)
-- [Netflix Tech Blog - Hystrix introducing latency and fault tolerance](https://netflixtechblog.com/announcing-hystrix-for-resilience-engineering-6c1234ec73f)
+- [Polly circuit breaker strategy](https://www.pollydocs.org/strategies/circuit-breaker.html)
+- [Circuit Breaker pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/circuit-breaker)

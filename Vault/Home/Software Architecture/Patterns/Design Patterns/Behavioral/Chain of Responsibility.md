@@ -11,9 +11,9 @@ status: Ready to Repeat
 publish: true
 ---
 
-Airport security is a Chain of Responsibility. Your bag passes through ID verification, then X-ray scanning, then manual inspection, then customs. Each checkpoint either clears you or pulls you aside. Adding a new check — say, a bomb-sniffing dog — means inserting a new station in the line. No existing checkpoint changes. The passenger doesn’t decide which checks to go through; the chain decides.
+Airport security behaves like a Chain of Responsibility. A bag moves through a fixed sequence of checkpoints. Each one clears it, rejects it, or passes it forward. A new check can be inserted without rewriting the existing stations, and the passenger has no reason to know which checkpoint will stop the process.
 
-The Chain of Responsibility pattern passes a request along a chain of handlers, where each handler decides whether to process the request or forward it to the next one. Handlers implement a common interface with a `Handle()` method and hold a reference to their successor. A handler either processes the request and stops the chain, or calls `next.Handle()` to continue. The sender doesn’t know which handler will process the request — or even how many handlers exist. In ASP.NET Core, **the middleware pipeline is this exact pattern**: `app.UseAuthentication()` → `app.UseAuthorization()` → `app.UseRateLimiting()` → your endpoint.
+The pattern sends a request through ordered handlers. A handler can finish the request, reject it, or call the next handler. The sender sees one entry point and stays independent of the handler count. ASP.NET Core middleware follows this shape: `app.UseAuthentication()` → `app.UseAuthorization()` → `app.UseRateLimiting()` → endpoint.
 
 ```mermaid
 sequenceDiagram
@@ -31,7 +31,7 @@ sequenceDiagram
 
 # Problem
 
-`OrderValidator` has one massive `Validate()` method checking stock, fraud, credit, and address — all in sequence with nested if/else:
+`OrderValidator` owns every check in one `Validate()` method. Stock, fraud, credit, and address rules now change together:
 
 ```csharp
 public class OrderValidator
@@ -74,11 +74,11 @@ public class OrderValidator
 }
 ```
 
-Here's what breaks when requirements change: adding a sanctions list check requires editing `ValidateAsync` — touching all existing validation logic and risking regressions.
+A sanctions-list requirement forces another edit to `ValidateAsync`. Unrelated validation logic shares the same change surface.
 
 # Solution
 
-Each validation becomes a handler in a chain. Handlers are composable and independently testable:
+Each validation rule becomes a handler. The composition root fixes their order, while each class owns one decision:
 
 ```csharp
 public record ValidationContext(Order Order, List<string> Errors);
@@ -201,25 +201,25 @@ public class OrderValidationPipeline(
 }
 ```
 
-Adding a sanctions check now means one new `SanctionsCheckHandler` class — existing handlers never change.
+The sanctions check is added as one handler and one composition change. Existing rule implementations stay closed.
 
-# You Already Use This
+# Middleware and Handler Pipelines
 
-**ASP.NET Core Middleware pipeline** — the canonical .NET Chain of Responsibility. `app.UseAuthentication()`, `app.UseAuthorization()`, `app.UseRateLimiting()` each register a handler. Each middleware calls `await next(context)` to continue the chain or returns early to short-circuit. The pipeline is built at startup; the chain runs on every request.
+**ASP.NET Core Middleware pipeline** is the clearest .NET example. Each middleware calls `await next(context)` or returns early. Startup builds the chain once, then every request traverses it.
 
-**`DelegatingHandler` in `HttpClient`** — each handler in the `HttpClient` pipeline is a chain link. Retry handlers, auth handlers, and circuit breakers each call `base.SendAsync(request, cancellationToken)` to continue or return early to short-circuit.
+**`DelegatingHandler` in `HttpClient`** forms another chain. Authentication and resilience handlers continue through `base.SendAsync(request, cancellationToken)` or stop with their own response.
 
-**MediatR `IPipelineBehavior<TRequest, TResponse>`** — MediatR's pipeline is a Chain of Responsibility. Each behavior calls `next()` to continue or returns early. Validation, logging, and caching behaviors compose into a pipeline around the handler.
+**MediatR `IPipelineBehavior<TRequest, TResponse>`** wraps a request handler in ordered behaviors. Calling `next()` continues. Returning directly short-circuits.
 
-**Polly `ResiliencePipeline`** — Polly's resilience strategies (retry, circuit breaker, timeout, rate limiter) compose into a pipeline. Each strategy handles the request or passes it to the next strategy.
+**Polly `ResiliencePipeline`** composes resilience strategies around an operation. The same chain shape appears, although the handlers govern execution attempts rather than business ownership.
 
 # Pitfalls
 
-**Chain ordering bugs** — the order of handlers is a business rule. Running fraud check before stock check means fraudulent orders consume inventory reservation time. Running credit check before fraud check means you query credit for fraudulent orders. Document the intended order and enforce it in the composition root, not scattered across handler registrations.
+**Chain ordering bugs.** Handler order is a business rule. A credit lookup before fraud screening performs needless work on a request that may be rejected. Keep the order visible in one composition root.
 
-**Requests reaching no handler** — if all handlers pass the request along and the chain ends without processing, the request is silently ignored. Always have a terminal handler or a default behavior at the end of the chain. In validation pipelines, the absence of a rejection means success — make this explicit.
+**Requests reaching no handler.** A request may fall off the end and disappear. A terminal handler should define that outcome. Validation pipelines often treat the absence of a rejection as success, which must be an explicit contract.
 
-**Swallowed errors in async chains** — if a handler catches an exception and returns `false` instead of rethrowing, the caller loses the exception context. Decide upfront: does the chain use return values (validation) or exceptions (processing)? Don't mix both.
+**Swallowed errors in async chains.** Converting every exception into `false` destroys failure context. A chain should use result values for expected rejection and reserve exceptions for failed processing. Mixing the two makes diagnosis guesswork.
 
 # Tradeoffs
 
@@ -231,22 +231,13 @@ Adding a sanctions check now means one new `SanctionsCheckHandler` class — exi
 | Testability | Each handler tested independently | Must test all checks together |
 | Tracing a request | Follow the chain | Single method, easier to trace |
 
-**Decision rule**: Use Chain of Responsibility when you have 3+ handlers that may process a request, the set of handlers changes over time, or handlers need to be independently testable. For 1-2 fixed checks, a simple method is less overhead. The signal is when you find yourself adding `else if` blocks to a validation or processing method.
+Chain of Responsibility pays off when several ordered handlers can accept or reject the same request and the set changes independently. One or two fixed checks belong in a plain method. A growing run of `else if` branches is usually the first useful warning.
 
 # Questions
 
 > [!QUESTION]- How does ASP.NET Core Middleware differ from a classical Chain of Responsibility?
-> Classical CoR uses a linked list of handlers where each holds a reference to the next. ASP.NET Core Middleware uses a delegate pipeline: each middleware is a `Func<RequestDelegate, RequestDelegate>` that wraps the next `RequestDelegate`. The pipeline is compiled at startup into a single delegate chain. The difference: ASP.NET Core's pipeline is immutable after build (no dynamic handler insertion); classical CoR can be modified at runtime. ASP.NET Core's approach is more performant (no virtual dispatch per handler) but less flexible. The tradeoff: startup-time composition vs runtime flexibility.
-
-> [!QUESTION]- When should a handler stop the chain vs pass the request along?
-> Stop the chain when the handler has definitively handled the request — either successfully (order approved) or with a terminal failure (fraud detected, stop processing). Pass along when the handler's check passes and subsequent handlers may still reject. The key question: is this handler's decision final? Fraud detection is final (don't process fraudulent orders regardless of other checks). Stock check is final for that item but not for the order (other items may still be available). Design each handler to be authoritative about its own domain and ignorant of others.
-
-> [!QUESTION]- How do you handle a request that should be processed by multiple handlers (not just the first one)?
-> Change the chain to not short-circuit — every handler processes the request and the results are aggregated. This is the "collect all errors" variant of validation: instead of stopping at the first failure, all handlers run and all errors are collected. The tradeoff: short-circuiting is faster (stops at first failure) but gives less feedback; full traversal is slower but gives complete error information. For user-facing validation, full traversal is usually better UX. For security checks (fraud, sanctions), short-circuit immediately — don't reveal which check failed.
+> Classical CoR usually links handler objects directly. ASP.NET Core composes middleware delegates into one request pipeline at startup. That pipeline is fixed after the application is built, while a conventional object chain may be rearranged at runtime. The practical boundary is startup composition versus runtime mutation.
 
 # References
 
-- [Chain of Responsibility — refactoring.guru](https://refactoring.guru/design-patterns/chain-of-responsibility) — canonical pattern description with linked handler diagram and C# example
-- [ASP.NET Core Middleware — Microsoft Learn](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/middleware/) — Chain of Responsibility in the ASP.NET Core request pipeline
-- [MediatR Pipeline Behaviors — GitHub](https://github.com/jbogard/MediatR/wiki/Behaviors) — Chain of Responsibility for CQRS command/query pipelines
-- [Polly ResiliencePipeline — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/core/resilience/) — resilience strategies as a chain of responsibility
+- [Chain of Responsibility pattern](https://refactoring.guru/design-patterns/chain-of-responsibility)

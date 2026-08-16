@@ -11,9 +11,9 @@ status: Ready to Repeat
 publish: true
 ---
 
-A military command structure is a natural Composite. A general gives an order to a division, which passes it to brigades, which pass it to battalions, down to individual soldiers. Whether you command one soldier or an entire army, the interface is the same: "execute this order." The hierarchy handles the recursion — the general doesn’t need to know whether a unit is a single person or ten thousand.
+A military command tree illustrates Composite. An order sent to a division flows through its child units until it reaches individual soldiers. The caller uses the same command operation at every level and leaves recursion to the hierarchy.
 
-The Composite pattern composes objects into tree structures and lets clients treat individual objects and compositions uniformly through a shared interface. Leaf nodes (single items) implement the interface directly. Composite nodes (containers) implement the same interface but delegate to their children recursively. In an e-commerce system, a `SingleProduct` has a price. A `ProductBundle` also has a price — calculated by summing its children, which can themselves be products or nested bundles. The client calls `GetPrice()` on either without knowing or caring which type it holds.
+The Composite pattern represents part-whole trees through one component interface. A leaf performs an operation directly. A composite implements the same operation by delegating to its children, which may be leaves or more composites. In a catalog, both `SingleProduct` and `ProductBundle` can expose `GetPrice()`. A bundle calculates its price from the components below it, while the caller works with either object in the same way.
 
 ```mermaid
 classDiagram
@@ -77,11 +77,11 @@ public class PricingService
 }
 ```
 
-Here's what breaks when requirements change: adding a `SubscriptionProduct` type requires editing every method that type-checks items — `GetBundlePrice`, `GetCartTotal`, and any future pricing methods.
+Adding `SubscriptionProduct` requires editing every method that branches on concrete item types. That list grows with each new pricing operation.
 
 # Solution
 
-Define `IOrderComponent` — both `SingleProduct` and `ProductBundle` implement it. Pricing is recursive and uniform:
+Define `IOrderComponent` for both `SingleProduct` and `ProductBundle`. Pricing then follows the tree through ordinary polymorphic calls:
 
 ```csharp
 // Component interface — the uniform contract
@@ -163,25 +163,25 @@ Console.WriteLine($"Total: {workstationBundle.GetPrice():C}");
 Console.WriteLine($"Items: {workstationBundle.GetItemCount()}");
 ```
 
-Adding a `SubscriptionProduct` now means one new class implementing `IOrderComponent` — `ProductBundle` and `PricingService` never change.
+`SubscriptionProduct` now needs only an `IOrderComponent` implementation. Neither `ProductBundle` nor `PricingService` changes.
 
-# You Already Use This
+# Common .NET Examples
 
-**`IConfiguration` with multiple providers** — `IConfiguration` is a Composite. The root configuration is a tree of `IConfigurationSection` nodes. JSON file, environment variables, and user secrets are leaf providers; the root `IConfigurationRoot` is the composite that merges them. `configuration["ConnectionStrings:Default"]` traverses the tree uniformly.
+**`IConfiguration`** exposes hierarchical configuration through `IConfigurationSection` nodes. Callers traverse the merged tree without handling each provider separately.
 
-**`CompositeFileProvider`** — composes multiple `IFileProvider` instances (physical disk, embedded resources, manifest) into one. `fileProvider.GetFileInfo("wwwroot/app.js")` searches all providers uniformly.
+**`CompositeFileProvider`** presents several `IFileProvider` instances as one provider. `GetFileInfo()` searches the composed sources through a single contract.
 
-**`CancellationTokenSource.CreateLinkedTokenSource()`** — creates a composite cancellation token that fires when ANY of the linked tokens is cancelled. The composite token behaves like a single token to callers.
+**`CancellationTokenSource.CreateLinkedTokenSource()`** creates one cancellation source driven by any linked token. Callers observe a single token.
 
-**Blazor component tree** — every Blazor component is a composite. `RenderFragment` children are composed into a tree; the renderer traverses it uniformly without knowing whether a node is a leaf component or a layout with children.
+**A Blazor component tree** lets the renderer traverse leaf components and components with `RenderFragment` children through the same rendering model.
 
 # Pitfalls
 
-**Treating all components uniformly when some operations only apply to composites** — `IOrderComponent` doesn't expose `Add()`/`Remove()` because leaves don't support children. If you add these to the interface, leaves must throw `NotSupportedException` — a violation of the Liskov Substitution Principle. Keep the component interface to operations that make sense for both leaves and composites. Expose child management only on the `ProductBundle` class directly.
+**Composite-only operations in the shared interface.** `Add()` and `Remove()` do not make sense for leaves. Putting them on `IOrderComponent` forces leaf implementations to reject valid-looking calls. Keep the shared contract limited to operations supported by every node, and expose child management on `ProductBundle`.
 
-**Infinite recursion from circular references** — if a bundle accidentally contains itself (directly or through a chain), `GetPrice()` will stack overflow. Guard against cycles when building the tree: check that a component isn't already an ancestor before adding it.
+**Cycles.** A bundle that contains itself, directly or through descendants, makes recursive operations overflow the stack. Enforce acyclic structure when attaching children.
 
-**Performance on deep trees** — `GetPrice()` traverses the entire tree on every call. For large catalogs with deep nesting, cache the computed price and invalidate when the tree changes. EF Core's `IConfiguration` tree is read-only after build for this reason.
+**Repeated traversal.** `GetPrice()` walks the tree on every call. Large or frequently read trees may need cached aggregates with explicit invalidation. That optimization also makes mutation harder, so it belongs behind measurements.
 
 # Tradeoffs
 
@@ -193,20 +193,18 @@ Adding a `SubscriptionProduct` now means one new class implementing `IOrderCompo
 | Leaf-only operations | Must be excluded from interface | Can be called directly on concrete type |
 | Complexity | Tree structure, recursive calls | Flat logic, easier to trace |
 
-**Decision rule**: Use Composite when you have a genuine part-whole hierarchy where clients need to treat leaves and composites uniformly, and you expect new leaf types to be added. If the hierarchy is fixed (always just products and bundles, never new types), the extra abstraction may not be worth it. The signal is when you find yourself writing `if (item is X) ... else if (item is Y)` in multiple places.
+Composite fits a genuine part-whole tree when callers need the same operation on leaves and groups. Repeated `if (item is X)` branches across several operations are a useful signal. A fixed two-type model may be clearer without the extra abstraction.
 
 # Questions
 
 > [!QUESTION]- How does Composite relate to the Visitor pattern?
-> They're complementary. Composite defines the tree structure and uniform traversal. Visitor adds new operations to the tree without modifying the node classes. Example: `TaxVisitor`, `ShippingVisitor`, and `DiscountVisitor` can each traverse the same `IOrderComponent` tree without adding methods to `SingleProduct` or `ProductBundle`. Use Composite when the structure varies; use Visitor when the operations vary. Together, they handle both dimensions of variation.
+> Composite defines a uniform tree. Visitor can add operations to that tree without adding methods to every node type. Composite helps when the hierarchy varies. Visitor helps when operations vary more often than the nodes.
 
 > [!QUESTION]- When does a Composite tree become a performance problem?
-> When the tree is large, deep, or frequently traversed. `GetPrice()` on a bundle with 10,000 SKUs traverses all 10,000 nodes on every call. Mitigations: (1) cache computed values and invalidate on mutation, (2) use lazy evaluation (compute only when accessed), (3) denormalize — store the precomputed total and update it incrementally. The signal: profiling shows `GetPrice()` appearing in hot paths. The cost of caching: stale values if the tree is mutated without invalidation.
+> Cost grows with the number of visited nodes. A bundle containing 10,000 SKUs makes `GetPrice()` visit those nodes on each uncached call. Profiling should decide whether to cache totals or update an aggregate during mutation. Either choice introduces an invalidation rule.
 
 # References
 
-- [Composite Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=EWDmWbJ4wRA&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc&index=14) — video walkthrough of the Composite pattern with OOP examples
-- [Composite — refactoring.guru](https://refactoring.guru/design-patterns/composite) — canonical pattern description with tree structure diagram and C# example
-- [IConfiguration — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.configuration.iconfiguration) — .NET's built-in Composite for layered configuration
-- [CompositeFileProvider — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.fileproviders.compositefileprovider) — composing multiple file providers uniformly
-- [Design Patterns: Elements of Reusable Object-Oriented Software — GoF](https://www.amazon.com/Design-Patterns-Elements-Reusable-Object-Oriented/dp/0201633612) — original Composite pattern with transparency vs safety tradeoff discussion
+- [Composite pattern](https://refactoring.guru/design-patterns/composite)
+- [Composite Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=EWDmWbJ4wRA&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc&index=14)
+- [IConfiguration — .NET's built-in Composite for layered configuration](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.configuration.iconfiguration)

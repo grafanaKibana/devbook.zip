@@ -11,9 +11,9 @@ status: Ready to Repeat
 publish: true
 ---
 
-A calculator is an Interpreter. You type `2 + 3 * 4` and the calculator parses it into a tree — multiply first, then add — and evaluates the result by walking the tree. Each operator node knows how to compute itself. LINQ Expression Trees work the same way: your C# lambda `o => o.Total > 100` becomes an abstract syntax tree that EF Core interprets into SQL at runtime, without you writing any SQL.
+A calculator interprets `2 + 3 * 4` by parsing the expression into a tree and walking that tree according to precedence rules. Each node represents a grammar construct. LINQ providers use the same broad mechanism: a lambda supplied as an expression tree becomes data that a provider can inspect and translate.
 
-The Interpreter pattern defines a grammar for a language and provides an interpreter that evaluates sentences in that grammar. Each grammar rule becomes a class implementing an `IExpression` interface with an `Interpret(context)` method. Complex expressions are composed from simpler ones — `AndExpression` holds two child expressions, `ComparisonExpression` evaluates a single condition. This is the Composite pattern applied to a grammar. In .NET, **LINQ Expression Trees + EF Core `IQueryable<T>` are the canonical production Interpreter**: the LINQ provider traverses the expression tree and translates each node into the target language (SQL, MongoDB queries, Elasticsearch DSL).
+The Interpreter pattern gives a small language an executable representation. Grammar rules become expression types, and an interpreter evaluates those expressions against a context. Composite expressions build larger rules from smaller nodes: `AndExpression` contains two children, while `ComparisonExpression` evaluates one condition. In .NET, expression trees and `IQueryable<T>` are the production form most engineers meet. A provider walks the tree and translates the nodes into its target query language.
 
 ```mermaid
 flowchart TD
@@ -29,7 +29,7 @@ flowchart TD
 
 # Problem
 
-`DiscountService` has hardcoded if/else chains for discount rules — every new promotion requires code changes and deployment:
+`DiscountService` hardcodes every promotion rule. Even a new combination of existing conditions requires code and deployment:
 
 ```csharp
 public class DiscountService
@@ -62,11 +62,11 @@ public class DiscountService
 }
 ```
 
-Here's what breaks when requirements change: the marketing team wants to configure promotions without engineering involvement — impossible with hardcoded rules.
+Marketing cannot configure a promotion because the rules exist only as branches in compiled code.
 
 # Solution
 
-A discount rule DSL where rules are stored as strings and evaluated at runtime:
+A small discount language moves conditions into expression objects evaluated at runtime:
 
 ```csharp
 // Evaluation context — the data available to expressions
@@ -136,7 +136,7 @@ public class DiscountRuleEngine(IEnumerable<DiscountRule> rules)
     }
 }
 
-// Rules configured at startup (or loaded from DB/config)
+// Developers compose the rule set in startup code
 var rules = new[]
 {
     new DiscountRule
@@ -148,7 +148,7 @@ var rules = new[]
     new DiscountRule
     {
         Name = "20% off for Silver members on weekend orders over $200",
-        // ✅ Compose expressions — no code change needed for new rule combinations
+        // ✅ Compose existing expression types into a new rule
         Condition = new AndExpression(
             new AndExpression(
                 new CustomerTierEquals(CustomerTier.Silver),
@@ -160,54 +160,51 @@ var rules = new[]
     }
 };
 
-// ✅ Marketing adds new rules by composing existing expressions — no deployment
+// Deployment-free rules require a serializable AST or parser plus allowlisted actions
 ```
 
-# You Already Use This
+As written, developers compose these expression objects in startup code, so changing the rule set still requires deployment. Deployment-free rules need a serializable AST or parser plus an allowlist of available fields and discount actions. The example demonstrates interpretation and composition only.
 
-**LINQ Expression Trees + EF Core `IQueryable<T>`** — the canonical production .NET Interpreter. `dbContext.Orders.Where(o => o.Total > 100 && o.Customer.Tier == CustomerTier.Gold)` builds an expression tree (an AST). EF Core's query translator is an `ExpressionVisitor` that interprets this AST into SQL: `WHERE Total > 100 AND CustomerTier = 2`. The expression tree is the grammar; EF Core is the interpreter. This is why EF Core can translate LINQ to SQL but throws for expressions it can't interpret — the interpreter doesn't know that grammar rule.
+# Expression Trees and Runtime Expression Engines
 
-**`Regex`** — a compiled regex is an interpreter for a regular expression grammar. The regex engine interprets the pattern (grammar) against the input string. `Regex.IsMatch(input, pattern)` evaluates the pattern expression against the context (input).
+**LINQ Expression Trees with EF Core `IQueryable<T>`** provide a familiar .NET example. `dbContext.Orders.Where(o => o.Total > 100 && o.Customer.Tier == CustomerTier.Gold)` records the predicate as an expression tree. EF Core visits the supported nodes and emits SQL such as `WHERE Total > 100 AND CustomerTier = 2`. A custom method fails translation when the provider has no rule for that node.
 
-**Roslyn scripting API (`CSharpScript.EvaluateAsync`)** — interprets C# code at runtime. `await CSharpScript.EvaluateAsync<decimal>("order.Total * 0.10m", globals: new { order })` compiles and executes C# expressions dynamically.
+**`Regex`** evaluates a regular-expression language against an input string. `Regex.IsMatch(input, pattern)` supplies the sentence and the evaluation context in one call.
 
-**NCalc / DynamicExpresso** — .NET libraries that implement the Interpreter pattern for mathematical and logical expressions. `new Expression("order.Total > 100 AND customer.Tier == 'Gold'").Evaluate(parameters)` interprets a string expression at runtime.
+**Roslyn scripting (`CSharpScript.EvaluateAsync`)** accepts C# text at runtime, compiles it, and executes it against supplied globals. Its language and attack surface are far broader than a purpose-built rule DSL.
+
+**NCalc / DynamicExpresso** evaluate mathematical or C#-like expressions from strings. They remove parser work but still require a deliberate policy for which operations and values are exposed.
 
 # Pitfalls
 
-**Performance of recursive interpretation** — evaluating a deep expression tree on every request is slower than compiled code. For high-frequency evaluation (every HTTP request), compile the expression tree to a delegate: `Expression.Lambda<Func<DiscountContext, bool>>(tree).Compile()`. The compiled delegate runs at near-native speed. Cache the compiled delegate — compilation is expensive; evaluation is fast.
+**Repeated tree walking.** Interpreting the same deep expression for every request adds per-call overhead. When profiling shows it matters, compile the tree to a delegate and cache that delegate. Compilation moves cost to setup and uses more memory.
 
-**Grammar complexity** — the Interpreter pattern works well for simple grammars (boolean logic, comparisons). For complex grammars (full DSLs, query languages), use a proper parser (ANTLR, Sprache) that produces an AST, then interpret the AST. Don't hand-write a parser for complex grammars.
+**Grammar growth.** A few boolean and comparison rules stay manageable. Once precedence, diagnostics, and richer syntax appear, use a parser that produces an AST. A hand-written chain of string splits will collapse under edge cases.
 
-**Security of runtime-evaluated expressions** — if expressions come from user input, they can be used for injection attacks. Validate and sanitize expressions before evaluation. Prefer a restricted DSL (only predefined expression types) over general-purpose scripting (Roslyn) for user-provided rules.
+**Untrusted expressions.** General-purpose scripting turns configuration into code execution. User-authored rules should use a restricted grammar with an allowlist of operations and fields. Input sanitization alone is not a security boundary.
 
 # Tradeoffs
 
 | Concern | Interpreter | Hardcoded rules | External rules engine (NCalc, Drools) |
 |---|---|---|---|
-| Adding a new rule | New expression composition, no deployment | Code change + deployment | Configure in rules engine UI |
+| Adding a new rule | Developer composes existing expression types | Code change + deployment | Configure through the engine's supported format |
 | Performance | Slower (tree traversal) | Fastest (compiled) | Depends on engine |
 | Rule complexity | Limited by grammar | Unlimited | Depends on engine |
 | Debugging | Hard (runtime evaluation) | Easy (debugger) | Engine-specific tooling |
 | Dependencies | None | None | External library/service |
 
-**Decision rule**: Use Interpreter when rules change frequently and you want to avoid deployments, the grammar is simple (boolean logic, comparisons), and performance is not critical. Use hardcoded rules when rules are stable and performance matters. Use an external rules engine (NCalc, DynamicExpresso) when you need a richer expression language without building your own parser.
+Interpreter fits a small language represented as data. Stable rules are clearer as ordinary code. Rules can change independently of application releases only when their AST and allowed actions can be stored and loaded safely. Otherwise developers still compose them in code.
 
 # Questions
 
 > [!QUESTION]- How does EF Core use LINQ Expression Trees as an Interpreter?
-> When you write `dbContext.Orders.Where(o => o.Total > 100)`, the C# compiler doesn't compile the lambda to IL — it compiles it to an `Expression<Func<Order, bool>>` (an expression tree, an AST). EF Core's query translator walks this AST using `ExpressionVisitor`: `VisitBinary` for `o.Total > 100` emits `Total > @p0`; `VisitMember` for `o.Total` emits the column name. The final SQL is assembled from the visited nodes. This is the Interpreter pattern: the expression tree is the grammar; EF Core is the interpreter; SQL is the output. The cost: EF Core can only interpret expressions it knows — calling a custom method in a LINQ query throws `InvalidOperationException` because the interpreter doesn't have a rule for that method.
-
-> [!QUESTION]- When should you compile an expression tree to a delegate instead of interpreting it?
-> When the same expression is evaluated many times (e.g., a discount rule evaluated on every order in a batch). `Expression.Lambda<Func<DiscountContext, bool>>(tree).Compile()` converts the expression tree to IL and returns a delegate that runs at near-native speed. The compilation itself is expensive (milliseconds); cache the compiled delegate. The tradeoff: compilation adds startup cost and memory; interpretation adds per-evaluation cost. Break-even is roughly 100+ evaluations of the same expression. EF Core compiles and caches query expressions for this reason.
+> The `Queryable.Where` overload accepts an `Expression<Func<Order, bool>>`, so the compiler represents the lambda as a tree instead of only emitting an executable delegate. EF Core examines supported nodes, builds a database query, and parameterizes captured values. A custom method fails when no translator handles its expression node.
 
 > [!QUESTION]- What's the difference between Interpreter and Strategy for runtime rule selection?
-> Strategy selects a pre-written algorithm at runtime. Interpreter evaluates a rule defined as data at runtime. With Strategy, the algorithms are written in code and selected by name or type. With Interpreter, the rule is a data structure (expression tree, string) that the interpreter evaluates. Interpreter is more flexible (rules can be composed from primitives without code changes) but more complex (requires a grammar and interpreter). Strategy is simpler (just inject the right implementation) but requires a code change for each new algorithm. Use Strategy when the set of algorithms is known at compile time; use Interpreter when rules are defined by non-developers or change without deployment.
+> Strategy selects among algorithms already written in code. Interpreter evaluates a rule represented as data. Strategy suits a closed set of implementations. Interpreter suits combinations that must be authored or changed without compiling a new strategy class.
 
 # References
 
-- [Interpreter — GoF Design Patterns](https://www.amazon.com/Design-Patterns-Elements-Reusable-Object-Oriented/dp/0201633612) — original pattern definition (not covered by refactoring.guru)
-- [Expression Trees — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/csharp/advanced-topics/expression-trees/) — LINQ expression trees as the canonical .NET Interpreter
-- [How EF Core translates LINQ to SQL — Microsoft Learn](https://learn.microsoft.com/en-us/ef/core/querying/how-query-works) — EF Core's ExpressionVisitor-based Interpreter in production
-- [NCalc — GitHub](https://github.com/ncalc/ncalc) — .NET expression evaluator library implementing the Interpreter pattern
-- [DynamicExpresso — GitHub](https://github.com/dynamicexpresso/DynamicExpresso) — .NET runtime expression interpreter with C#-like syntax
+- [Interpreter — original pattern definition](https://www.amazon.com/Design-Patterns-Elements-Reusable-Object-Oriented/dp/0201633612)
+- [Expression trees](https://learn.microsoft.com/en-us/dotnet/csharp/advanced-topics/expression-trees/)
+- [How EF Core translates LINQ to SQL — Microsoft Learn](https://learn.microsoft.com/en-us/ef/core/querying/how-query-works)

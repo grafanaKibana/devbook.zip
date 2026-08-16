@@ -11,9 +11,9 @@ status: Ready to Repeat
 publish: true
 ---
 
-Making tea and making coffee follow the same recipe: boil water, brew the drink, pour into a cup, add condiments. The steps are identical; only the brewing and condiment details differ — tea steeps leaves and adds lemon, coffee uses grounds and adds sugar. The recipe template is fixed; specific steps are customized.
+Tea and coffee can share a preparation sequence while varying the brewing step. The sequence belongs in one place. Subclasses fill the deliberate gaps.
 
-The Template Method pattern defines the skeleton of an algorithm in a base class, letting subclasses override specific steps without changing the overall structure. The base class declares a template method that calls a fixed sequence of steps — some concrete (shared by all subclasses), some abstract or virtual (customized by each subclass). In an e-commerce system, `ReportGenerator.Generate()` always follows fetch data → validate → format → write. The PDF, CSV, and Excel subclasses override only `FormatReport()` and `WriteOutput()` while sharing the orchestration logic.
+Template Method puts an algorithm's control flow in a base class. Its public method calls shared steps plus a small set of abstract or virtual hooks. `ReportGenerator.GenerateAsync()` can own fetching, validation, auditing, and result assembly while subclasses provide only the output format. The base class controls when each hook runs, so the extension points form a protocol rather than a collection of unrelated overrides.
 
 ```mermaid
 sequenceDiagram
@@ -68,11 +68,11 @@ public class CsvReportGenerator
 // ⚠️ Adding ExcelReportGenerator = copy-paste the fetch/validate/audit block again
 ```
 
-Here's what breaks when requirements change: adding a new audit field to the report generation lifecycle requires editing every generator class.
+Adding an audit field now requires the same edit in every generator, and one missed copy produces a different workflow for that format.
 
 # Solution
 
-`ReportGenerator` base class defines the algorithm skeleton; subclasses override only the format-specific steps:
+`ReportGenerator` base class defines the algorithm skeleton. Subclasses override only the format-specific steps:
 
 ```csharp
 // Abstract base — defines the template method
@@ -89,19 +89,19 @@ public abstract class ReportGenerator
     {
         var order = await FetchDataAsync(orderId);    // step 1: always the same
         ValidateData(order);                           // step 2: always the same
-        await RecordAuditAsync(orderId);               // step 3: always the same
-        var content = await FormatReportAsync(order);  // step 4: subclass-specific
+        var content = await FormatReportAsync(order);  // step 3: subclass-specific
+        await RecordAuditAsync(orderId);               // step 4: record successful formatting
         return new Report(GetContentType(), content);  // step 5: uses subclass value
     }
 
     // Fixed steps — shared implementation
-    protected virtual async Task<Order> FetchDataAsync(Guid orderId)
+    private async Task<Order> FetchDataAsync(Guid orderId)
     {
         var order = await Repository.GetAsync(orderId);
         return order ?? throw new NotFoundException(orderId);
     }
 
-    protected virtual void ValidateData(Order order)
+    private void ValidateData(Order order)
     {
         if (order.Items.Count == 0)
             throw new InvalidOperationException("Cannot generate report for empty order");
@@ -167,38 +167,40 @@ public class ExcelReportGenerator(IOrderRepository repository, IAuditLog auditLo
 }
 ```
 
-Adding an Excel generator now means one new subclass — the fetch, validate, and audit logic is inherited automatically.
+`GenerateAsync()` is non-virtual, so subclasses cannot override the control flow. The inline "sealed" comment describes that intent. `sealed` is not a modifier on this method.
 
-# You Already Use This
+An Excel generator supplies only the format-specific hooks. Fetching, validation, and auditing still follow the base algorithm.
 
-**`BackgroundService.ExecuteAsync()`** — the template method for hosted services. `BackgroundService` defines the lifecycle: start → execute → stop. `ExecuteAsync(CancellationToken)` is the abstract step you override. The base class handles registration, cancellation, and error handling.
+# Framework examples
 
-**`Stream` abstract class** — `Read()`, `Write()`, `Seek()` are abstract steps. `CopyToAsync()` is a template method that calls `ReadAsync()` and `WriteAsync()` in a loop — the algorithm is fixed; the I/O implementation varies per stream type.
+**`BackgroundService.ExecuteAsync()`** is the required hook invoked by the base service lifecycle. The host owns registration and calls `StartAsync()` and `StopAsync()`. The derived service supplies its long-running operation and must honor cancellation.
 
-**`DbContext.OnModelCreating()`** — EF Core's template method for model configuration. The base `DbContext` calls `OnModelCreating()` during model building; you override it to configure entities. The overall model-building algorithm is fixed; your configuration is the variable step.
+**`Stream`** fixes high-level copying behavior while derived streams provide their supported I/O operations. Capability flags such as `CanRead` and `CanSeek` are part of the contract because not every stream supports every hook.
 
-**`AuthenticationHandler<T>.HandleAuthenticateAsync()`** — ASP.NET Core authentication handlers use Template Method. The base class handles scheme registration, result caching, and challenge/forbid responses. `HandleAuthenticateAsync()` is the abstract step you implement.
+**`DbContext.OnModelCreating()`** is a hook inside EF Core's model-building process. A derived context contributes mappings without owning when the model is initialized or cached.
+
+**`AuthenticationHandler<T>.HandleAuthenticateAsync()`** supplies scheme-specific authentication inside a base handler that coordinates the surrounding authentication operation.
 
 # Tradeoffs
 
-**Use it when**: several variants share one fixed algorithm skeleton and differ only in a few steps, and you want the shared orchestration in exactly one place. It's an inversion-of-control mechanism — the base class calls *down* to your overridden steps (the "Hollywood Principle," see [[Home/Software Design/Principles/DRY, IoC, and YAGNI#Inversion of Control (IoC)|IoC]]).
+Template Method fits variants that share a stable algorithm and differ at a few intentional hooks. It is an inversion-of-control mechanism: the base class calls overridden steps at times chosen by the base algorithm (see [[Home/Software Design/Principles/DRY, IoC, and YAGNI#Inversion of Control (IoC)|IoC]]).
 
-**Don't reach for it when**: the varying steps need to change **at runtime**, or you'd be forcing an inheritance hierarchy just to share code — Template Method locks each variant into a single base class and is vulnerable to the **fragile base class** problem.
+It fits poorly when behavior must change at runtime or when inheritance exists only to reuse a few lines. A base-class change can affect every subtype through undocumented hook order, shared state, or new assumptions.
 
-**vs Strategy**: this is the key comparison. **Template Method = inheritance** (compile-time; subclasses *override* steps within a fixed skeleton). **[[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Strategy]] = composition** (runtime; *inject* the varying behavior as an interface/delegate). Prefer Strategy when you want to swap behavior at runtime or follow "composition over inheritance"; prefer Template Method when the base genuinely owns most of the algorithm and variants only fill gaps. If two dimensions vary independently, that's **[[Home/Software Architecture/Patterns/Design Patterns/Structural/Bridge]]**, not a deepening inheritance tree.
+**[[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Strategy]]** moves variation into composed objects or delegates, which allows runtime replacement and avoids consuming the single base-class slot. Template Method is smaller when the base genuinely owns most of the workflow. When two dimensions vary independently, [[Home/Software Architecture/Patterns/Design Patterns/Structural/Bridge]] can keep them from turning into a cross-product of subclasses.
 
 # Questions
 
 > [!QUESTION]- When should you use Template Method vs Strategy for algorithm variation?
-> Template Method uses inheritance — the variation is in a subclass. Strategy uses composition — the variation is in an injected object. Use Template Method when: the algorithm skeleton is stable, the variations are tightly coupled to the base class, and you don't need to swap algorithms at runtime. Use Strategy when: you need to swap algorithms at runtime, the algorithm is independent of the class using it, or you want to avoid inheritance. The tradeoff: Template Method is simpler (no extra interface) but creates tight inheritance coupling; Strategy is more flexible but requires an extra interface and injection.
+> Template Method suits a stable workflow whose hooks are meaningful only inside one base abstraction. Strategy suits an independently useful algorithm or behavior that must be replaced at runtime. The cost of Template Method is inheritance coupling. The cost of Strategy is another composed dependency and a selection policy.
 
 > [!QUESTION]- What's the "Hollywood Principle" and how does Template Method implement it?
-> "Don't call us, we'll call you." The base class calls the subclass's methods (abstract steps), not the other way around. The subclass doesn't control when its methods are called — the template method does. This inverts the typical inheritance relationship: instead of the subclass calling `super.method()`, the base class calls `this.abstractStep()`. The benefit: the algorithm's structure is controlled by the base class; subclasses can't accidentally skip steps or change the order. The cost: subclasses are tightly coupled to the base class's algorithm structure.
+> The phrase describes framework-controlled flow: application code provides hooks, and the framework calls them. Template Method applies this at class level. The base method fixes the order and invokes subclass hooks, which protects the sequence but couples every subtype to that calling protocol.
 
 # References
 
-- [Template Method Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=7ocpwK9uesw&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc&index=13) — video walkthrough of the Template Method pattern with OOP examples
-- [Template Method — refactoring.guru](https://refactoring.guru/design-patterns/template-method) — canonical pattern description with base/subclass diagram and C# example
-- [BackgroundService — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.hosting.backgroundservice) — Template Method for hosted background services
-- [Stream abstract class — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.io.stream) — Template Method in the .NET I/O hierarchy
-- [`AuthenticationHandler<T>` — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.authentication.authenticationhandler-1) — Template Method for ASP.NET Core authentication schemes
+- [Template Method pattern](https://refactoring.guru/design-patterns/template-method)
+- [Template Method Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=7ocpwK9uesw&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc&index=13)
+- [BackgroundService — Template Method for hosted background services](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.hosting.backgroundservice)
+- [Stream abstract class — Template Method in the .NET I/O hierarchy](https://learn.microsoft.com/en-us/dotnet/api/system.io.stream)
+

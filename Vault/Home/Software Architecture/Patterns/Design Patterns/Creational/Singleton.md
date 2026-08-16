@@ -3,7 +3,7 @@ topic:
   - Software Architecture
 subtopic:
   - Patterns
-summary: "Ensures a class has only one instance and provides a global access point to it; in modern .NET, AddSingleton is the correct form."
+summary: "Uses a container-managed singleton lifetime when one shared, thread-safe instance should serve a provider boundary."
 level:
   - "2"
 priority: High
@@ -11,9 +11,9 @@ status: Done
 publish: true
 ---
 
-A country has exactly one president at a time. Everyone refers to "the president" — there’s a single instance that serves the entire nation. You don’t create a new president when you need one; you access the existing one through a well-known entry point. If two departments tried to independently elect their own president, you’d have chaos.
+Singleton combines two decisions: keep one instance within a defined boundary and provide access to it. The boundary is easy to miss. A classical static implementation owns a process-level access point, while `.AddSingleton<T>()` reuses one instance for subsequent resolutions from a particular root service provider and registration. A second provider or direct construction can still create another instance.
 
-The Singleton pattern ensures a class has only one instance and provides a global access point to it. In modern .NET, **`services.AddSingleton<T>()`** is the correct implementation — it’s testable, injectable, and lifetime-controlled by the DI container. The classical form (static instance, private constructor, double-checked locking) is largely obsolete in DI-based applications: it creates hidden global state, makes testing difficult, and introduces captive dependency bugs when a singleton captures a scoped service. Understand the classical form to recognize it in legacy code; use DI-managed singletons for all new work.
+Application services normally need container-managed lifetime rather than global static access. Constructor injection keeps the dependency visible, lets the container dispose it, and exposes lifetime mistakes during validation. The classical form remains relevant when a library genuinely owns a single access point without a DI container.
 
 ```mermaid
 flowchart TD
@@ -31,7 +31,7 @@ flowchart TD
 
 # Problem
 
-Multiple `AppConfig` instances read the same config file independently, wasting resources and risking inconsistent state:
+The classical form below enforces access through `AppConfig.Instance`, but it also hides the dependency from every consumer:
 
 ```csharp
 // Classical Singleton — the pattern most tutorials show
@@ -80,15 +80,21 @@ public class OrderService
 }
 ```
 
-Here's what breaks when requirements change: unit testing `OrderService` requires the real `AppConfig` (which reads environment variables), making tests environment-dependent. You can't inject a test double.
+`OrderService` can no longer declare or replace the configuration it uses. Tests inherit environment access and shared state, and lifetime policy is fixed inside the dependency instead of at the composition root.
 
 # Solution
 
-Use DI-managed singleton — the container controls the lifetime, and the dependency is explicit:
+Register a normal service with singleton lifetime and inject it. The container controls creation and disposal. The consumer only knows its contract.
 
 ```csharp
 // ✅ Plain class — no static members, no private constructor
-public class AppConfig
+public interface IAppConfig
+{
+    string ConnectionString { get; }
+    int MaxOrdersPerHour { get; }
+}
+
+public class AppConfig : IAppConfig
 {
     public string ConnectionString { get; init; }
     public int MaxOrdersPerHour { get; init; }
@@ -101,9 +107,7 @@ public class AppConfig
     }
 }
 
-// ✅ Register as singleton in DI — one instance for the application lifetime
-builder.Services.AddSingleton<AppConfig>();
-// Or with an interface for better testability:
+// ✅ Register as singleton in DI — one instance for this service contract
 builder.Services.AddSingleton<IAppConfig, AppConfig>();
 
 // ✅ OrderService declares its dependency explicitly
@@ -144,41 +148,33 @@ public class ExpensiveConnectionPool
 }
 ```
 
-# You Already Use This
+# Singleton Lifetime in .NET
 
-**`services.AddSingleton<T>()`** — the DI container creates one instance per application lifetime and injects it wherever the type is requested. This is the recommended Singleton in modern .NET: testable, injectable, and lifetime-managed.
+**`services.AddSingleton<T>()`** caches one service instance in the root provider and returns it for later resolutions. This is a lifetime rule, not proof that no other instance can exist.
 
-**`Lazy<T>`** — thread-safe lazy initialization without manual locking. `new Lazy<T>(() => new T())` creates the instance on first access. Use when initialization is expensive and the instance may not always be needed.
+**`Lazy<T>`** supplies thread-safe deferred initialization for a classical implementation. It removes hand-written double-checked locking, but it does not remove global state or hidden dependencies.
 
-**`IHttpClientFactory`** — manages `HttpMessageHandler` instances as singletons (pooled), while `HttpClient` instances are transient. This solves the classic `HttpClient` socket exhaustion problem — the handler pool is the singleton.
-
-**`IMemoryCache`** — registered as a singleton by `services.AddMemoryCache()`. One cache instance shared across all requests in the application.
-
-**`IConfiguration`** — the configuration root is a singleton. All `IOptions<T>` instances derive from it.
+Singleton services may be stateless or hold shared state. Either way, their implementations and any mutable dependencies must be safe for concurrent callers.
 
 # Pitfalls
 
-**Captive dependency** — the most common production failure. A singleton that depends on a scoped service (e.g., `DbContext`) captures the scoped instance for the application's lifetime, causing stale data, connection leaks, and concurrency bugs. The DI container throws `InvalidOperationException` at startup if you try to inject a scoped service into a singleton — but only if you use `ValidateScopes = true` (enabled by default in development, not always in production). Always validate scopes in all environments.
+**Captive dependency.** A singleton that constructor-injects a scoped service keeps that instance beyond its intended scope. Scope validation rejects this graph. When work genuinely needs scoped state, create and dispose an explicit scope for the operation or move the operation to a scoped service.
 
-**Hidden global state in classical Singleton** — `AppConfig.Instance` is a hidden dependency. It doesn't appear in the constructor, so callers can't see what the class needs. This makes the class hard to test and hard to reason about. Every classical Singleton is a candidate for refactoring to DI-managed singleton.
+**Shared mutable state.** One instance may serve concurrent requests. The container makes resolution thread-safe. It does not make the service's fields or dependencies thread-safe.
 
-**Thread safety in classical form** — double-checked locking is subtle and easy to get wrong. `Lazy<T>` with `LazyThreadSafetyMode.ExecutionAndPublication` (the default) is the correct thread-safe lazy initialization pattern. Don't write double-checked locking manually.
+**Oversized lifetime.** A singleton retains its dependency graph until the provider is disposed. Large caches, failed state, or request-specific data can then survive far longer than intended.
+
+**Multiple roots.** Calling `BuildServiceProvider` during registration creates another container and therefore another singleton set. Keep one composition root and avoid static service locators.
 
 # Questions
 
-> [!QUESTION]- Why is the classical Singleton considered an anti-pattern in DI-based applications?
-> Three reasons: (1) **Hidden dependency** — `AppConfig.Instance` doesn't appear in the constructor, so the dependency is invisible to callers and can't be mocked. (2) **Testability** — tests can't inject a different implementation; they're forced to use the real singleton, making tests environment-dependent. (3) **Lifetime control** — the class controls its own lifetime, bypassing the DI container's lifetime management. The DI-managed singleton solves all three: the dependency is explicit, injectable, and mockable. The tradeoff: DI-managed singletons require a DI container; classical singletons work without one (useful in library code or console apps without a host).
+> [!QUESTION]- How does a DI singleton differ from the classical Singleton pattern?
+> A classical Singleton type controls construction and exposes a global access point. A DI singleton is a container lifetime: one root provider reuses one registered instance, while consumers receive it through declared dependencies. Other providers or direct construction can still produce more instances.
 
-> [!QUESTION]- What is a captive dependency and how do you detect it?
-> A captive dependency occurs when a longer-lived service holds a reference to a shorter-lived service. Example: a singleton `OrderService` injected with a scoped `DbContext` — the `DbContext` is captured for the application's lifetime, not the request's lifetime. This causes stale EF Core change tracking, connection pool exhaustion, and concurrency bugs across requests. Detection: enable `ValidateScopes = true` in `AddSingleton` options (default in development). The container throws at startup if a singleton depends on a scoped service. In production, also enable `ValidateOnBuild = true`. The fix: inject `IServiceScopeFactory` and create a scope per operation, or redesign the dependency to be singleton-safe.
-
-> [!QUESTION]- When is the classical Singleton still appropriate?
-> In library code without a DI container, or when you need a truly global, immutable resource that must be accessible without injection (e.g., a logging sink initialized before the DI container starts). `Lazy<T>` is the correct implementation in these cases. Also appropriate for value objects that are expensive to construct and inherently stateless (e.g., a compiled `Regex` pattern). The signal: if the singleton holds mutable state or has dependencies, use DI. If it's an immutable, stateless resource, classical form is acceptable.
+> [!QUESTION]- What must be true before choosing singleton lifetime for mutable state?
+> The state must be intentionally shared across all callers in that provider, safe under concurrent access, bounded in memory, and independent of scoped data. If any condition fails, a scoped or transient lifetime is usually safer.
 
 # References
 
-- [Singleton Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=hUE_j6q0LTQ&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc&index=6) — video walkthrough of the Singleton pattern with OOP examples
-- [Singleton — refactoring.guru](https://refactoring.guru/design-patterns/singleton) — canonical pattern description with thread-safety discussion and C# examples
-- [Dependency injection in .NET — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection) — `AddSingleton<T>()` and service lifetime management
-- [Dependency injection guidelines — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection-guidelines) — captive dependency detection and `ValidateScopes`
-- [`Lazy<T>` — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.lazy-1) — thread-safe lazy initialization without manual locking
+- [Singleton pattern](https://refactoring.guru/design-patterns/singleton)
+- [Singleton Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=hUE_j6q0LTQ&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc&index=6)

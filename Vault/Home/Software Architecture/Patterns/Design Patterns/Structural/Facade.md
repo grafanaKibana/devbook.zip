@@ -11,9 +11,9 @@ status: Ready to Repeat
 publish: true
 ---
 
-A hotel concierge is a Facade. You walk up and say "I need a restaurant reservation, a taxi, and theater tickets." Behind the scenes, the concierge calls the restaurant, the taxi company, and the box office. You interact with one person instead of three separate services, each with its own phone number, hold music, and booking protocol. The concierge doesn’t add new capabilities — they simplify access to existing ones.
+A hotel concierge gives guests one contact for services that still run independently behind the desk. The concierge adds no new capability. The value is a simpler entry point and knowledge of the required sequence.
 
-The Facade pattern provides a simplified interface to a complex subsystem. The facade class holds references to subsystem components (inventory, payment, shipping, notification) and exposes high-level methods that coordinate them. The client calls `OrderFacade.PlaceOrderAsync(order)` instead of manually orchestrating five services in the right sequence with the right error handling. The subsystems remain fully accessible for clients that need fine-grained control — the facade is a convenience, not a prison.
+The Facade pattern presents a high-level interface over a complex subsystem. A facade holds the participating components and coordinates them through operations such as `OrderFacade.PlaceOrderAsync(order)`. Clients avoid duplicating the workflow or depending on the subsystem's internal shape. Lower-level components may remain available when fine control is legitimate. The facade is an entry point, not a mandatory gate.
 
 ```mermaid
 flowchart LR
@@ -26,7 +26,7 @@ flowchart LR
 ```
 
 > [!NOTE] Facade vs Adapter
-> **Facade** creates a **new simplified interface** for your convenience — it's about reducing complexity. [[Home/Software Architecture/Patterns/Design Patterns/Structural/Adapter]] makes an **existing incompatible interface** fit a target interface — it's about compatibility. Facade is optional (you could call the subsystems directly); Adapter is required (the interfaces are incompatible without it).
+> Facade creates a simpler interface over an existing subsystem. [[Home/Software Architecture/Patterns/Design Patterns/Structural/Adapter]] converts an incompatible interface into a required target contract. Direct subsystem access remains possible without a Facade. Incompatible interfaces cannot collaborate without an Adapter or equivalent translation.
 
 # Problem
 
@@ -77,11 +77,11 @@ public class CheckoutController(
 }
 ```
 
-Here's what breaks when requirements change: adding fraud detection requires editing the controller. Every endpoint that places orders (web, mobile API, B2B API) duplicates this orchestration.
+Adding fraud detection requires editing the controller. Other order-entry endpoints also duplicate the workflow and can drift into different sequencing or error handling.
 
 # Solution
 
-`OrderFacade` encapsulates the checkout workflow. The controller has one dependency:
+`OrderFacade` owns the checkout orchestration. The controller depends on that single entry point:
 
 ```csharp
 public record CheckoutResult(Guid OrderId, string TrackingNumber, decimal Total);
@@ -118,8 +118,8 @@ public class OrderFacade(
 
         await orderRepository.ConfirmAsync(order.Id, paymentResult.TransactionId, shipment.TrackingNumber);
 
-        // ✅ Fire-and-forget side effects — controller doesn't need to know about these
-        _ = Task.WhenAll(
+        // The Facade owns completion and failure propagation for these request-scoped operations.
+        await Task.WhenAll(
             notification.SendOrderConfirmationAsync(order, shipment.TrackingNumber),
             analytics.TrackOrderPlacedAsync(order));
 
@@ -149,38 +149,37 @@ public class CheckoutController(OrderFacade orderFacade) : ControllerBase
 builder.Services.AddScoped<OrderFacade>();
 ```
 
-Adding fraud detection now means editing `OrderFacade.PlaceOrderAsync` in one place — all callers (web, mobile, B2B) get the update automatically.
+The sample awaits request-scoped side effects so their failures and lifetimes remain owned by the Facade. When completion should not delay the response or must survive process failure, write durable work to an outbox or an owned background queue instead of discarding a task. That delivery concern is separate from the Facade structure.
 
-# You Already Use This
+Fraud detection can now be inserted once in `OrderFacade.PlaceOrderAsync`, and every caller follows the same workflow.
 
-**`File` static class** — a facade over `FileStream`, `StreamReader`, `StreamWriter`, and `Path`. `File.ReadAllTextAsync("data.json")` hides stream creation, buffering, encoding, and disposal. You could do it manually; `File` makes it one line.
+# Common .NET Examples
 
-**`HttpClient`** — a facade over `HttpMessageHandler`, `HttpRequestMessage`, `HttpResponseMessage`, connection pooling, and DNS resolution. `client.GetStringAsync(url)` hides the entire HTTP machinery.
+**The `File` static class** provides high-level operations over streams and path handling. `File.ReadAllTextAsync("data.json")` hides stream construction and disposal.
 
-**`DbContext` (EF Core)** — a facade over `DbConnection`, `DbCommand`, change tracking, identity map, and SQL generation. `context.Orders.Where(o => o.Status == OrderStatus.Pending).ToListAsync()` hides all of it.
+**`HttpClient`** exposes convenient request methods while its handler pipeline manages lower-level HTTP work.
 
-**`WebApplication` minimal APIs** — a facade over `IApplicationBuilder`, `IEndpointRouteBuilder`, `IServiceProvider`, and the hosting infrastructure. `app.MapGet("/orders", handler)` hides the routing pipeline setup.
+**`DbContext` in EF Core** offers unit-of-work and query operations over database connections, change tracking, and SQL generation.
+
+**`WebApplication` minimal APIs** combine hosting and routing facilities behind operations such as `app.MapGet("/orders", handler)`.
 
 # Tradeoffs
 
-**Use it when**: a complex subsystem (several collaborating classes, a tricky call sequence) is used the same way by many clients — wrap it in one high-level entry point so callers (and the rest of your code) don't depend on the subsystem's shape. It also decouples clients from churn inside the subsystem.
+**Use it when:** several clients repeat the same subsystem workflow or need protection from changes inside that subsystem. One high-level operation should express a meaningful use case.
 
-**Don't reach for it when**: there's no real complexity to hide (one class behind one class is just indirection), or the facade starts **accreting business rules** and becomes a god object — a facade should *orchestrate/simplify*, not *own* domain logic. Keep the subsystem directly accessible for callers that need fine control; a facade is a convenience, not a gatekeeper.
+**Skip it when:** one class merely forwards to another, or the proposed interface hides no meaningful sequence. A facade should coordinate domain services, not absorb their rules and state into a god object.
 
-**vs related**: **[[Home/Software Architecture/Patterns/Design Patterns/Structural/Adapter]]** changes an interface to make things *compatible* (required); Facade *simplifies* an interface for convenience (optional) — see the note above. A **[[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Mediator]]** coordinates peers bidirectionally; a Facade is a one-way front door. At the network boundary, an **[[Home/Software Architecture/Distributed Systems/API Gateway]]** is essentially a Facade over many microservices.
+**Related patterns:** [[Home/Software Architecture/Patterns/Design Patterns/Structural/Adapter]] translates an incompatible interface. [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Mediator]] coordinates peers, while a Facade gives clients a one-way front door. At a network boundary, [[Home/Software Architecture/Distributed Systems/API Gateway]] can play a facade-like role over several services.
 
 # Questions
 
 > [!QUESTION]- When does a Facade become a "god class" anti-pattern?
-> When it starts containing business logic instead of just orchestrating subsystems. A Facade should be a thin coordinator — it calls subsystems in the right order but doesn't make business decisions. If `OrderFacade` starts calculating discounts, validating business rules, or managing state, it's accumulating responsibilities it shouldn't have. The signal: the facade has more than 200-300 lines, or it's the hardest class to test. The fix: extract business logic into domain services; keep the facade as a pure orchestrator. The tradeoff: a thin facade is easy to test (mock all subsystems); a fat facade is hard to test and hard to change.
-
-> [!QUESTION]- Should a Facade expose the subsystems it wraps, or hide them completely?
-> Hide them. If callers can access `orderFacade.Payment.ChargeAsync()` directly, they bypass the facade's orchestration and the workflow guarantee breaks. The facade's value is the guaranteed sequence: check stock → charge → reserve → ship → notify. Exposing subsystems lets callers skip steps. The tradeoff: hiding subsystems means callers can't do advanced operations that the facade doesn't expose. In that case, add a new method to the facade rather than exposing the subsystem — the facade's interface should grow to cover legitimate use cases.
+> The shift happens when orchestration becomes ownership of business rules or mutable domain state. `OrderFacade` may call pricing and validation services in sequence. It should not become the place where those rules are implemented. Difficulty testing the facade without reproducing the whole domain is a stronger signal than a line-count threshold.
 
 # References
 
-- [Facade Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=K4FkHVO5iac&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc&index=9) — video walkthrough of the Facade pattern with OOP examples
-- [Facade — refactoring.guru](https://refactoring.guru/design-patterns/facade) — canonical pattern description with subsystem diagram and C# example
-- [File class — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.io.file) — .NET's built-in Facade for file I/O operations
-- [HttpClient — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.net.http.httpclient) — Facade over the HTTP message handler pipeline
-- [DbContext — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/microsoft.entityframeworkcore.dbcontext) — EF Core's Facade over database operations and change tracking
+- [Facade pattern](https://refactoring.guru/design-patterns/facade)
+- [Facade Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=K4FkHVO5iac&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc&index=9)
+- [File class — .NET's built-in Facade for file I/O operations](https://learn.microsoft.com/en-us/dotnet/api/system.io.file)
+- [HttpClient — Facade over the HTTP message handler pipeline](https://learn.microsoft.com/en-us/dotnet/api/system.net.http.httpclient)
+- [DbContext — EF Core's Facade over database operations and change tracking](https://learn.microsoft.com/en-us/dotnet/api/microsoft.entityframeworkcore.dbcontext)

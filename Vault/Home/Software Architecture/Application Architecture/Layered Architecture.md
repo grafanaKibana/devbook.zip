@@ -11,11 +11,11 @@ status: Ready to Repeat
 publish: true
 ---
 
-Layered architecture structures an application into layers with clear responsibilities and strict dependency directions. Each layer only depends on the layer directly below it (traditional) or on inner layers (onion/clean). The goal is to isolate business rules from infrastructure details — so you can swap databases, frameworks, or delivery mechanisms without touching domain logic.
+Layered architecture groups code by responsibility and defines which groups may depend on which. Traditional layering points dependencies downward, usually from presentation through business logic to data access. Onion and Clean variants reverse selected edges so infrastructure depends on inner policy. The useful part is the boundary: business rules stop drifting into controllers and persistence code.
 
 # Layer Responsibilities
 
-A typical four-layer structure:
+A common four-layer split looks like this:
 
 | Layer | Responsibility | Examples |
 |-------|---------------|---------|
@@ -26,7 +26,7 @@ A typical four-layer structure:
 
 # Dependency Rule
 
-**All dependencies point inward.** The Domain knows nothing about databases, frameworks, or UI. Infrastructure implements interfaces defined by inner layers.
+In an inward-facing layered design, the Domain knows nothing about databases, frameworks, or UI. Infrastructure implements interfaces owned by inner layers. Traditional N Layer uses a different rule, shown in the next comparison: dependencies move down the stack, often including a business-layer dependency on data access.
 
 ```mermaid
 graph TD
@@ -55,7 +55,8 @@ graph TD
     DB -.->|implements| IPORT
     EXT -.->|implements| OPORT
     IPORT --> ENT
-    OPORT --> UC
+    UC --> IPORT
+    UC --> OPORT
 ```
 
 # Traditional Vs Onion/Clean
@@ -77,18 +78,18 @@ graph LR
     end
 ```
 
-In traditional layered architecture, changing the database affects everything above it. In Onion/Clean Architecture, the dependency is **inverted**: Infrastructure depends on the Domain through interfaces, so you can swap databases without touching business rules.
+Traditional layering makes the business layer a client of the data-access layer. A change to that lower layer's public contract can therefore ripple upward, even when the database engine itself remains hidden. Onion and Clean designs invert ownership of the boundary: an inner layer defines the persistence capability it needs, and Infrastructure implements it. Database-specific changes can then stay behind the adapter.
 
-# One Family: Layered, Hexagonal, Onion, Clean
+# Layered, Hexagonal, Onion, and Clean
 
-These names get used interchangeably, but they're variations on one idea — *protect the domain by pointing dependencies inward*:
+These names overlap, but they are not synonyms. Layered architecture is the broad structure. Hexagonal, Onion, and Clean describe stronger ways to protect policy from outer details.
 
-- **Traditional layered (n-tier)** — strict top-down: UI → Business → Data. Simple, but the domain still depends on data access.
-- **Hexagonal (Ports & Adapters, Alistair Cockburn)** — the domain defines **ports** (interfaces); the outside world plugs in **adapters** (a DB adapter, an HTTP adapter, a test adapter). The `IOrderRepository`/`IEmailSender` interfaces in the diagrams above *are* ports. There's no "up/down," just "inside the hexagon" (domain) vs "outside" (adapters).
-- **Onion (Jeffrey Palermo)** — concentric rings with the domain at the center; same inward rule, drawn as circles.
-- **Clean (Robert C. Martin)** — the same again with named rings (Entities → Use Cases → Interface Adapters → Frameworks) and the explicit **Dependency Rule**.
+- **Traditional layered (N Layer)** uses a top-down chain: UI → Business → Data. It is easy to read, but the business layer remains a client of data access.
+- **Hexagonal (Ports and Adapters, Alistair Cockburn)** separates the application from outside actors. The application exposes or consumes **ports**, and adapters connect HTTP, persistence, tests, or other technologies. The `IOrderRepository` and `IEmailSender` interfaces in the diagrams are ports.
+- **Onion (Jeffrey Palermo)** draws dependencies as concentric rings with the domain model at the center. Outer infrastructure depends on inner interfaces.
+- **Clean (Robert C. Martin)** names the rings Entities, Use Cases, Interface Adapters, and Frameworks, then applies the Dependency Rule across every boundary.
 
-The takeaway: don't agonize over the name — they all enforce the same Dependency Rule, differing mostly in vocabulary and diagram shape. See [[Home/Software Architecture/Application Architecture/Clean Architecture]] for the most prescriptive variant; the same boundary discipline scales up to the [[Home/Software Architecture/System Architecture/Modular Monolith]] and microservices.
+The choice is less about diagram shape than the dependency contract the code actually enforces. [[Home/Software Architecture/Application Architecture/Clean Architecture]] covers the most explicit inward rule. The same module-boundary discipline also matters inside a [[Home/Software Architecture/System Architecture/Modular Monolith]], where compile-time references determine whether modules remain independent.
 
 # .NET Example
 
@@ -97,7 +98,7 @@ The takeaway: don't agonize over the name — they all enforce the same Dependen
 public class Order
 {
     public int Id { get; private set; }
-    public Money Total { get; private set; }
+    public Money Total { get; private set; } = Money.Zero;
 
     public void AddItem(Product product, int quantity)
     {
@@ -108,54 +109,43 @@ public class Order
 }
 
 // Application layer — depends on domain + abstractions
-public class PlaceOrderHandler
+public class PlaceOrderHandler(IOrderRepository orders, IEmailSender email)
 {
-    private readonly IOrderRepository _orders;
-    private readonly IEmailSender _email;
-
     public async Task HandleAsync(PlaceOrderCommand cmd, CancellationToken ct)
     {
         var order = new Order();
         foreach (var item in cmd.Items)
             order.AddItem(item.Product, item.Quantity);
 
-        await _orders.SaveAsync(order, ct);
-        await _email.SendConfirmationAsync(cmd.CustomerEmail, order, ct);
+        await orders.SaveAsync(order, ct);
+        await email.SendConfirmationAsync(cmd.CustomerEmail, order, ct);
     }
 }
 
-// Infrastructure layer — implements domain abstractions
-public class EfOrderRepository : IOrderRepository
+// Infrastructure layer — implements application abstractions
+public class EfOrderRepository(AppDbContext db) : IOrderRepository
 {
-    private readonly AppDbContext _db;
     public async Task SaveAsync(Order order, CancellationToken ct)
-        => await _db.Orders.AddAsync(order, ct);
+        => await db.Orders.AddAsync(order, ct);
 }
 ```
 
+This sketch only stages the entity in EF Core. A complete transaction or Unit of Work must call `SaveChangesAsync(ct)` before sending the external confirmation. Otherwise the email can describe an order that was never committed.
+
 # Pitfalls
 
-**Anemic domain model**
-Business logic leaks into the Application layer (service classes do everything) while the Domain layer contains only data bags. The layers exist but the dependency rule is violated in spirit — the Domain has no behavior to protect.
+**Anemic domain model.** Service classes accumulate the rules while Domain objects become data bags. The project references may be correct, yet there is little policy at the center for the architecture to protect.
 
-**Layer bypass**
-Controllers calling repositories directly, skipping the Application layer. Breaks the single-responsibility of each layer and makes the codebase harder to test.
+**Layer bypass.** A controller that calls repositories directly now coordinates application behavior at the HTTP boundary. Either route the operation through an application use case or remove the unused layer. A ceremonial boundary is worse than an honest, smaller structure.
 
-**Over-engineering small apps**
-Four layers with interfaces and DI for a 3-endpoint CRUD API adds ceremony without benefit. Apply layered architecture when the domain has real complexity worth protecting.
+**Over-engineering small apps.** Four projects and an interface for every class add ceremony to a three-endpoint CRUD API. A thin structure is enough until behavior becomes complex enough to need isolation.
 
 # Questions
 
-> [!QUESTION]- What is the Dependency Rule and why does it matter?
-> All source code dependencies must point inward — toward higher-level policies (domain). Outer layers (infrastructure, UI) depend on inner layers; inner layers never depend on outer layers. This means you can change databases, frameworks, or delivery mechanisms without touching business rules.
-> Cost: requires defining interfaces in inner layers and wiring implementations in outer layers — more upfront structure.
-
 > [!QUESTION]- What is the difference between traditional layered and Onion/Clean Architecture?
-> Traditional layered: UI → Business Logic → Data Access → Database. Changing the DB affects everything above. Onion/Clean: Infrastructure → Application → Domain. The Domain has zero dependencies; Infrastructure implements Domain interfaces. The key difference is dependency inversion at the data access boundary.
+> Traditional layering points from UI to Business Logic to Data Access, so the business layer consumes the lower data API. Onion and Clean move the persistence contract inward and make Infrastructure implement it. Both separate responsibilities. Only the inward form prevents source dependencies from pulling infrastructure types into policy.
 
 # References
 
-- [Multitier architecture (Wikipedia)](https://en.wikipedia.org/wiki/Multitier_architecture) — overview of n-tier patterns, layer responsibilities, and historical context.
-- [The Clean Architecture (Robert C. Martin)](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html) — the canonical article defining the dependency rule and how Clean Architecture relates to Onion and Hexagonal.
-- [Onion Architecture (Jeffrey Palermo)](https://jeffreypalermo.com/2008/07/the-onion-architecture-part-1/) — original blog post introducing Onion Architecture with the inward-dependency model.
-- [ASP.NET Core architecture guidance (Microsoft)](https://learn.microsoft.com/en-us/dotnet/architecture/modern-web-apps-azure/common-web-application-architectures) — Microsoft's guidance on layered, clean, and modular architectures for ASP.NET Core applications.
+- [Common web application architectures](https://learn.microsoft.com/en-us/dotnet/architecture/modern-web-apps-azure/common-web-application-architectures)
+- [Onion Architecture](https://jeffreypalermo.com/2008/07/the-onion-architecture-part-1/)

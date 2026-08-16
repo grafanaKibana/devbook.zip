@@ -11,9 +11,9 @@ status: Done
 publish: true
 ---
 
-A navigation app uses the Strategy pattern every time you pick a route. Same destination, different algorithms — fastest, shortest, avoid tolls, scenic. You choose the strategy before you start driving; the app uses it to calculate the route. Swap the strategy mid-trip and the app recalculates without changing the navigation engine itself.
+A route planner can optimize the same trip for time, distance, or toll cost. The navigation workflow stays put while the routing algorithm changes.
 
-The Strategy pattern defines a family of algorithms, encapsulates each one behind a common interface, and makes them interchangeable at runtime. A **context** holds a reference to a strategy interface and delegates the algorithm to it. The **client** injects the desired strategy — `FlatRateStrategy`, `WeightBasedStrategy`, or `ZoneBasedStrategy` — and the context executes it without knowing which variant it received. Adding a new algorithm means adding a new strategy class, not editing a growing switch statement.
+Strategy puts replaceable algorithms behind one contract. A context delegates the variable step to that contract, and a client or selection policy supplies the implementation. The context knows how to use an `IShippingCostStrategy`. It does not need the pricing rules for flat-rate or zone-based shipping. This boundary is useful when algorithms change independently of the workflow around them.
 
 ```mermaid
 classDiagram
@@ -41,7 +41,7 @@ classDiagram
 ```
 
 > [!NOTE] Strategy vs State vs Command
-> **Strategy** selection is **driven by the client** — the caller injects which algorithm to use. [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/State]] transitions are **driven by the object** — the object changes its own behavior. [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Command]] encapsulates a **request** with context — what to do and when. If the caller decides the algorithm, it's Strategy. If the object decides, it's State.
+> Strategy varies an algorithm chosen for a context. [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/State]] models behavior that follows an internal mode and transition rules. [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Command]] packages a request so it can be queued, logged, or invoked later.
 
 # Problem
 
@@ -77,7 +77,7 @@ public class ShippingService
 }
 ```
 
-Here's what breaks when requirements change: adding same-day delivery requires editing `ShippingService` — touching code that already works for flat rate, weight-based, and zone-based strategies.
+Adding same-day delivery changes the same branch that already carries every other pricing rule. Each new variant raises the chance of disturbing an existing one.
 
 # Solution
 
@@ -87,6 +87,7 @@ Each algorithm becomes a strategy class. The context selects the strategy via DI
 // Strategy interface
 public interface IShippingCostStrategy
 {
+    int Priority { get; }
     decimal Calculate(Order order);
     bool AppliesTo(Order order); // ✅ strategy knows when it's applicable
 }
@@ -94,6 +95,7 @@ public interface IShippingCostStrategy
 // Concrete strategies
 public class FlatRateStrategy : IShippingCostStrategy
 {
+    public int Priority => 0;
     public decimal Calculate(Order order) => 9.99m;
     public bool AppliesTo(Order order) => true; // always applicable as fallback
 }
@@ -101,6 +103,7 @@ public class FlatRateStrategy : IShippingCostStrategy
 public class WeightBasedStrategy : IShippingCostStrategy
 {
     private const decimal RatePerKg = 2.50m;
+    public int Priority => 100;
 
     public decimal Calculate(Order order)
     {
@@ -116,6 +119,7 @@ public class ZoneBasedStrategy(IZoneCalculator zoneCalc) : IShippingCostStrategy
 {
     private static readonly Dictionary<int, decimal> ZoneRates = new()
         { [1] = 5.99m, [2] = 9.99m, [3] = 14.99m };
+    public int Priority => 200;
 
     public decimal Calculate(Order order)
     {
@@ -128,6 +132,7 @@ public class ZoneBasedStrategy(IZoneCalculator zoneCalc) : IShippingCostStrategy
 
 public class FreeShippingStrategy : IShippingCostStrategy
 {
+    public int Priority => 400;
     public decimal Calculate(Order order) => 0m;
     public bool AppliesTo(Order order) =>
         order.Customer.Tier == CustomerTier.Gold || order.Total >= 100m;
@@ -136,9 +141,12 @@ public class FreeShippingStrategy : IShippingCostStrategy
 // ✅ Adding same-day delivery = new class, zero changes to existing strategies
 public class SameDayDeliveryStrategy : IShippingCostStrategy
 {
+    public int Priority => 300;
     public decimal Calculate(Order order) => 24.99m;
     public bool AppliesTo(Order order) =>
-        order.ShippingAddress.City == order.WarehouseCity && DateTime.UtcNow.Hour < 14;
+        order.ShippingAddress is { } address &&
+        address.City == order.WarehouseCity &&
+        DateTime.UtcNow.Hour < 14;
 }
 
 // Context — selects and applies the strategy
@@ -147,10 +155,16 @@ public class ShippingService(IEnumerable<IShippingCostStrategy> strategies)
     public decimal CalculateCost(Order order)
     {
         // ✅ Strategy selection via priority — no if/else
-        var strategy = strategies
+        var candidates = strategies
             .Where(s => s.AppliesTo(order))
-            .OrderByDescending(s => s is FreeShippingStrategy) // free shipping wins
-            .First();
+            .OrderByDescending(s => s.Priority)
+            .ToArray();
+
+        var strategy = candidates.FirstOrDefault()
+            ?? throw new InvalidOperationException("No shipping strategy applies");
+
+        if (candidates.Skip(1).FirstOrDefault()?.Priority == strategy.Priority)
+            throw new InvalidOperationException($"Multiple shipping strategies have priority {strategy.Priority}");
 
         return strategy.Calculate(order);
     }
@@ -164,30 +178,30 @@ builder.Services.AddScoped<IShippingCostStrategy, WeightBasedStrategy>();
 builder.Services.AddScoped<IShippingCostStrategy, FlatRateStrategy>(); // fallback
 ```
 
-Adding same-day delivery now means one new class and one DI registration — `ShippingService` never changes.
+The algorithm now lives in its own class. The selection policy still needs a deterministic precedence rule when several strategies apply. Extracting the calculations does not make that product decision disappear.
 
-# You Already Use This
+# Familiar strategies
 
-**`IComparer<T>` / `IComparable<T>`** — comparison strategies. `orders.Sort(new OrderByTotalDescending())` injects a comparison strategy. LINQ's `OrderBy(o => o.Total)` uses a `Func<T, TKey>` as an inline strategy.
+**`IComparer<T>`** supplies ordering behavior to sorting APIs. `IComparable<T>` is different: it places the default comparison on the value itself rather than injecting a separate strategy.
 
-**LINQ `Func<T, bool>` predicates** — `orders.Where(o => o.Total > 100)` injects a filtering strategy as a delegate. The predicate is a Strategy implemented as a lambda.
+**LINQ predicates** pass filtering behavior as a delegate. A one-method strategy often needs no class at all.
 
-**`JsonConverter<T>`** — serialization strategy. `[JsonConverter(typeof(OrderStatusConverter))]` injects a custom serialization strategy for a type. The converter decides how to serialize/deserialize.
+**`JsonConverter<T>`** replaces the serialization behavior for a type while `JsonSerializer` keeps the surrounding pipeline.
 
-**`IPasswordHasher<T>`** — hashing strategy. ASP.NET Core Identity uses `IPasswordHasher<TUser>` to hash passwords. Swapping the hasher (e.g., from PBKDF2 to Argon2) is a strategy swap.
+**`IPasswordHasher<T>`** lets ASP.NET Core Identity depend on a password-hashing contract instead of one implementation.
 
 # Questions
 
 > [!QUESTION]- When should you use a Strategy interface vs a `Func<T, TResult>` delegate?
-> Use a `Func<T, TResult>` delegate when the strategy is simple (one method, no state, no dependencies). `Func<Order, decimal>` is a perfectly valid shipping cost strategy for simple cases. Use an interface when: the strategy has multiple methods, needs DI-injected dependencies, needs to be registered in a DI container, or needs to carry state. The tradeoff: delegates are simpler and more flexible; interfaces are more explicit and support DI. Start with delegates; introduce an interface when the strategy grows beyond a single expression.
+> A delegate is enough for one operation whose inputs capture everything it needs. An interface becomes useful when the algorithm needs several related operations, lifecycle semantics, or dependencies that should be explicit in DI. Stateful behavior alone does not force an interface because a delegate may close over state, though that can hide ownership and lifetime.
 
 > [!QUESTION]- How do you handle strategy selection when multiple strategies apply?
-> Define a priority or exclusivity rule. Options: (1) **First-match wins** — strategies are ordered by priority; the first applicable one is used. (2) **Explicit selection** — the caller specifies the strategy by name or type. (3) **Composite strategy** — all applicable strategies run and results are combined (e.g., sum all applicable discounts). The tradeoff: first-match is simple but order-dependent; explicit selection is clear but requires the caller to know strategy names; composite is flexible but may produce unexpected combinations.
+> Make precedence part of the contract. A first-match registry needs stable ordering, explicit selection needs a validated key, and a composite must define how results combine. Ambiguous selection is a domain bug, not something DI registration order should decide accidentally.
 
 # References
 
-- [Strategy Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=v9ejT8FO-7I&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc&index=1) — video walkthrough of the Strategy pattern with OOP examples
-- [Strategy — refactoring.guru](https://refactoring.guru/design-patterns/strategy) — canonical pattern description with context/strategy diagram and C# example
-- [`IComparer<T>` — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.icomparer-1) — .NET's built-in Strategy for comparison algorithms
-- [`JsonConverter<T>` — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.text.json.serialization.jsonconverter-1) — Strategy pattern for JSON serialization
-- [`IPasswordHasher<T>` — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.identity.ipasswordhasher-1) — Strategy pattern for password hashing in ASP.NET Core Identity
+- [Strategy pattern](https://refactoring.guru/design-patterns/strategy)
+- [Strategy Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=v9ejT8FO-7I&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc&index=1)
+- [`IComparer<T>` — .NET's built-in Strategy for comparison algorithms](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.icomparer-1)
+- [`JsonConverter<T>` — Strategy pattern for JSON serialization](https://learn.microsoft.com/en-us/dotnet/api/system.text.json.serialization.jsonconverter-1)
+

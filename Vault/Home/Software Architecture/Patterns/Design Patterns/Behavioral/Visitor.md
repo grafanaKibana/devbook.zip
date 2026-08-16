@@ -11,9 +11,9 @@ status: Ready to Repeat
 publish: true
 ---
 
-A museum audio guide is a Visitor. The exhibits (element hierarchy) stay the same, but you can load different tours — art history, architecture, kids’ tour. Each tour visits the same exhibits but tells different stories. Adding a new tour doesn’t require changing any exhibit; adding a new exhibit requires updating every tour. That trade-off — easy to add operations, hard to add elements — is the Visitor’s defining characteristic.
+A museum can keep the same exhibits while offering a new audio tour. Each tour performs a different operation over the fixed exhibit set. Adding a tour is cheap. Adding an exhibit forces every tour to decide what to do with it.
 
-The Visitor pattern lets you add new operations to an object hierarchy without modifying the classes in that hierarchy. Each element implements `Accept(IVisitor visitor)`, which calls `visitor.Visit(this)` — this **double dispatch** ensures the correct `Visit` overload runs for the concrete element type. The visitor carries the operation and any accumulated state. In an e-commerce cart, `PhysicalProduct`, `DigitalProduct`, and `SubscriptionProduct` each accept visitors like `TaxVisitor`, `ShippingVisitor`, or `DiscountVisitor` — adding a new calculation means adding a new visitor class, not editing the product hierarchy.
+Visitor moves operations out of a stable object hierarchy. Each element implements `Accept(IVisitor)`, then calls the overload for its concrete type with `visitor.Visit(this)`. That second call supplies the concrete element type that ordinary interface dispatch would otherwise lose. A visitor can also accumulate state while traversing several elements. The tradeoff is structural: new operations become new visitors, while a new element type changes the visitor contract and every implementation.
 
 ```mermaid
 classDiagram
@@ -46,7 +46,7 @@ classDiagram
     ICartItem ..> ICartItemVisitor : accepts
 ```
 
-**Modern C# note**: For simple type-dispatch scenarios, C# pattern matching (`switch` expressions with type patterns) can replace Visitor with less ceremony. Visitor earns its complexity when: the element hierarchy is stable and large, new operations are frequent, or you need the visitor to carry state across elements. For 2-3 element types with 1-2 operations, use pattern matching.
+Modern C# pattern matching handles small type-dispatch problems with less machinery. Visitor becomes useful when the hierarchy is deliberately closed or stable, operations are added more often than element types, and traversal state belongs with the operation.
 
 # Problem
 
@@ -83,11 +83,11 @@ public class CartService
 }
 ```
 
-Here's what breaks when requirements change: adding a `GiftCard` item type requires editing `CalculateTax`, `CalculateShipping`, and `CalculateDiscount` — three separate methods.
+A new `GiftCard` type must be handled in every calculation. The compiler cannot prove that separate switches remain aligned when the hierarchy is open and each switch has a fallback.
 
 # Solution
 
-**Pattern matching approach** (modern C# — use for simple cases):
+**Pattern matching approach** for a small hierarchy:
 
 ```csharp
 // ✅ Pattern matching — no Visitor ceremony for simple type dispatch
@@ -111,7 +111,7 @@ public static class CartCalculations
 }
 ```
 
-**Visitor approach** (use when operations are frequent and element hierarchy is stable):
+**Visitor approach** for a stable hierarchy with frequent new operations:
 
 ```csharp
 // Element interface — accepts a visitor
@@ -189,21 +189,21 @@ foreach (var item in cart.Items)
 Console.WriteLine($"Total tax: {taxVisitor.TotalTax:C}");
 ```
 
-Adding a `DiscountCalculatorVisitor` now means one new class — element classes never change.
+The new discount operation is isolated in one visitor. Adding an element type would have the opposite cost: the visitor interface and every visitor would change.
 
-# You Already Use This
+# Framework examples
 
-**`ExpressionVisitor` (LINQ)** — the canonical .NET Visitor. `ExpressionVisitor` traverses a LINQ expression tree, visiting each node type (`BinaryExpression`, `MethodCallExpression`, `ParameterExpression`). EF Core's query translator is an `ExpressionVisitor` that converts LINQ expressions into SQL. Override `VisitBinary()`, `VisitMethodCall()` etc. to transform or analyze expressions.
+**`ExpressionVisitor`** traverses or rewrites expression trees through node-specific visit methods. LINQ providers, including EF Core, use several expression visitors during query preprocessing and translation rather than one visitor that simply emits SQL node by node.
 
-**Roslyn `CSharpSyntaxWalker` / `CSharpSyntaxRewriter`** — Roslyn's Visitor for C# syntax trees. `CSharpSyntaxWalker` visits every node; `CSharpSyntaxRewriter` visits and can replace nodes. Code analyzers and refactoring tools use these to traverse and transform C# code.
+**Roslyn `CSharpSyntaxWalker` and `CSharpSyntaxRewriter`** walk syntax trees with type-specific callbacks. The rewriter can return replacement nodes, which makes the traversal operation reusable without adding methods to Roslyn syntax node classes.
 
-**`JsonConverter<T>`** — a visitor over the JSON token stream. `Read()` visits JSON tokens; `Write()` emits tokens. Each converter handles a specific type, implementing the Visitor's type-specific behavior.
+`JsonConverter<T>` is better classified as a serialization strategy than a Visitor: it replaces conversion for one target type and does not provide double dispatch over a stable hierarchy.
 
 # Pitfalls
 
-**Adding a new element type breaks all visitors** — if you add `GiftCard` to `ICartItem`, you must add `Visit(GiftCard)` to `ICartItemVisitor` and implement it in every concrete visitor. This is the fundamental Visitor tradeoff: easy to add operations, hard to add element types. If your hierarchy changes frequently, use pattern matching instead.
+**New element types touch every visitor.** Adding `GiftCard` requires a new visit method and an implementation in each visitor. A frequently changing hierarchy points toward pattern matching, virtual methods, or another design where element changes remain local.
 
-**Double dispatch complexity** — `item.Accept(visitor)` → `visitor.Visit(this)` is two virtual calls. Developers unfamiliar with the pattern find it confusing. Document the double dispatch mechanism explicitly. For teams that find it confusing, pattern matching is a clearer alternative.
+**Double dispatch is easy to obscure.** The `Accept` call exists solely to reach the overload for the concrete element type. If that mechanism does not buy meaningful operation extensibility, a switch is clearer.
 
 # Tradeoffs
 
@@ -215,22 +215,22 @@ Adding a `DiscountCalculatorVisitor` now means one new class — element classes
 | Carrying state across elements | Natural (visitor fields) | Awkward | Awkward |
 | Readability | Double dispatch is non-obvious | Explicit and readable | Natural OOP |
 
-**Decision rule**: Use Visitor when the element hierarchy is stable (rarely new types) and operations are frequent (new calculations added regularly). Use pattern matching when the hierarchy is small (2-4 types) or changes frequently. Use virtual methods (polymorphism) when each element type knows best how to perform the operation.
+Visitor fits a stable element set that receives new cross-cutting operations. Pattern matching keeps a small or changing hierarchy visible in one function. Virtual methods fit behavior that belongs naturally to each element rather than to an external operation.
 
 # Questions
 
 > [!QUESTION]- What is double dispatch and why does Visitor need it?
-> Single dispatch: the method called depends on the runtime type of ONE object (the receiver). Double dispatch: the method called depends on the runtime types of TWO objects (the element AND the visitor). Without double dispatch, `visitor.Visit(item)` would call the `Visit(ICartItem)` overload — the compiler resolves overloads at compile time based on the declared type. `item.Accept(visitor)` → `visitor.Visit(this)` forces the compiler to resolve the overload based on `this`'s concrete type at runtime. The cost: two virtual calls instead of one; the pattern is non-obvious to developers unfamiliar with it.
+> Normal virtual dispatch selects a method from the runtime type of the receiver. Overload resolution still uses the argument's compile-time type. `Accept` first dispatches to the concrete element, where `this` has that concrete type. `visitor.Visit(this)` can then select the corresponding overload and dispatch to the concrete visitor implementation. The two calls encode both dimensions.
 
 > [!QUESTION]- When does EF Core use ExpressionVisitor, and what does it do?
-> EF Core's query translator is an `ExpressionVisitor` that walks the LINQ expression tree and converts it to SQL. `dbContext.Orders.Where(o => o.Total > 100).Select(o => o.Id)` builds an expression tree; EF Core visits each node: `VisitMethodCall` for `Where` and `Select`, `VisitBinary` for `o.Total > 100`, `VisitMember` for `o.Total` and `o.Id`. Each visit emits SQL fragments. The final SQL is assembled from the visited nodes. This is why EF Core can translate LINQ to SQL but throws `InvalidOperationException` for expressions it can't translate — the visitor doesn't know how to visit that node type.
+> EF Core receives a LINQ expression tree and passes it through multiple visitor-based phases that normalize, expand, translate, and shape the query. A method or member fails translation when the provider has no supported server-side mapping for that expression in its current context. The failure is broader than a missing `Visit` overload because providers often visit the node successfully but cannot translate its semantics.
 
 > [!QUESTION]- When should you use pattern matching instead of Visitor?
-> When the element hierarchy is small (2-4 types), changes frequently (new types added regularly), or the operations are simple (one-liners per type). Pattern matching is more readable, requires no `Accept()` method on elements, and handles new element types with a compiler warning (exhaustiveness checking with `_` catch-all). Visitor earns its complexity when: you have 5+ element types, 5+ operations, and the hierarchy is stable. The signal: if adding a new element type requires editing more than 3 visitor classes, the hierarchy is too unstable for Visitor.
+> Pattern matching is usually clearer for a small hierarchy or a short operation because it needs no `Accept` method. Exhaustiveness depends on the type shape. An interface hierarchy plus a discard arm does not warn when a new implementation appears. Visitor is worth the ceremony when compile-time pressure to update every operation is part of the design.
 
 # References
 
-- [Visitor — refactoring.guru](https://refactoring.guru/design-patterns/visitor) — canonical pattern description with double dispatch diagram and C# example
-- [ExpressionVisitor — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.linq.expressions.expressionvisitor) — .NET's built-in Visitor for LINQ expression trees
-- [CSharpSyntaxWalker — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/microsoft.codeanalysis.csharp.csharpsyntaxwalker) — Roslyn's Visitor for C# syntax trees
-- [Pattern matching — C# reference — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/operators/patterns) — modern C# alternative to Visitor for type dispatch
+- [Visitor pattern](https://refactoring.guru/design-patterns/visitor)
+- [ExpressionVisitor — .NET's built-in Visitor for LINQ expression trees](https://learn.microsoft.com/en-us/dotnet/api/system.linq.expressions.expressionvisitor)
+- [CSharpSyntaxWalker — Roslyn's Visitor for C# syntax trees](https://learn.microsoft.com/en-us/dotnet/api/microsoft.codeanalysis.csharp.csharpsyntaxwalker)
+- [Pattern matching — modern C# alternative to Visitor for type dispatch](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/operators/patterns)

@@ -11,9 +11,9 @@ status: Done
 publish: true
 ---
 
-A restaurant kitchen has one menu, but different stations prepare the same dish their own way — the Italian station makes pasta, the French station makes a soufflé. The customer orders "the special" without knowing which station handles it. The ordering process is the same; the creation varies by station.
+Sometimes a base workflow knows when it needs a collaborator but cannot choose the concrete implementation. A notification workflow can save an order and send a confirmation while a subtype decides whether the sender uses email or SMS.
 
-The Factory Method pattern works the same way: it defines an interface for creating an object but lets subclasses decide which class to instantiate. A creator class declares an abstract or virtual factory method that returns a product interface. Each concrete creator overrides this method to produce its specific product. The client code calls the factory method through the creator interface, never touching `new` directly — so adding a new product type means adding a new creator subclass, not editing existing code.
+Factory Method puts that creation decision in an overridable method. The creator owns the surrounding algorithm and works with the returned product interface. Concrete creators override the factory method to supply one product implementation. This is the pattern's defining boundary: product selection varies through creator inheritance, while the rest of the creator workflow stays shared.
 
 ```mermaid
 flowchart LR
@@ -33,21 +33,21 @@ flowchart LR
 ```
 
 > [!NOTE] Factory Method vs Abstract Factory
-> Factory Method creates **one product** via inheritance — the subclass decides. [[Home/Software Architecture/Patterns/Design Patterns/Creational/Abstract Factory]] creates a **family of related products** via composition. If you only need one object type, Factory Method is simpler.
+> Factory Method varies one creation step through a creator subtype. [[Home/Software Architecture/Patterns/Design Patterns/Creational/Abstract Factory]] is a composed object that supplies a family of related products. A standalone factory function may be smaller than either when no creator workflow or product family exists.
 
 # Problem
 
-An `OrderService` needs to send notifications after order events. The naive approach hardcodes channel creation inline:
+A deployment selects one notification channel at startup, but `OrderService` still owns the channel switch and concrete construction:
 
 ```csharp
-public class OrderService
+public class OrderService(string notificationChannel)
 {
     public async Task PlaceOrderAsync(Order order)
     {
         await SaveOrderAsync(order);
 
-        // ⚠️ Switch on type — every new channel requires editing this method
-        var channel = order.Customer.PreferredChannel;
+        // ⚠️ Deployment-fixed selection still leaks into the order workflow
+        var channel = notificationChannel;
         if (channel == "email")
         {
             var emailSender = new SmtpEmailSender("smtp.example.com", 587); // ⚠️ hardcoded config
@@ -69,11 +69,11 @@ public class OrderService
 }
 ```
 
-Here's what breaks when requirements change: adding a Slack notification for B2B customers requires editing `OrderService`, touching production code that already works, and risking regressions in email/SMS paths.
+Supporting Slack changes the order workflow even though one creator could be selected once for the whole deployment.
 
 # Solution
 
-Extract notification creation into a factory method. Each channel gets its own creator:
+Extract notification construction into a creator hierarchy, then register one concrete creator for the deployment:
 
 ```csharp
 // Product interface
@@ -138,6 +138,9 @@ public class SmsNotificationCreator(TwilioSmsSender twilio) : NotificationCreato
     public override INotificationSender CreateSender() => new SmsNotificationSender(twilio);
 }
 
+// Composition root selects one channel for this deployment
+builder.Services.AddSingleton<NotificationCreator, EmailNotificationCreator>();
+
 // OrderService now depends on the abstraction
 public class OrderService(NotificationCreator notificationCreator)
 {
@@ -149,27 +152,26 @@ public class OrderService(NotificationCreator notificationCreator)
 }
 ```
 
-Adding a Slack channel now means a new `SlackNotificationCreator` class — zero changes to `OrderService` or any existing creator.
+Slack can be added as another creator subtype without changing the order workflow. The composition root selects the deployment's creator at startup.
 
-# You Already Use This
+# Related .NET factory APIs
 
-**`ILoggerFactory.CreateLogger<T>()`** — `ILoggerFactory` is the creator; `CreateLogger<T>()` is the factory method. The concrete factory (`LoggerFactory`) decides which `ILogger` implementation to return based on registered providers (Console, Serilog, Application Insights).
+**`ILoggerFactory.CreateLogger()`** is a factory API that returns an `ILogger` for a category. It illustrates construction behind an interface, but it is not the textbook inheritance form because consumers do not subclass the creator to override the method.
 
-**`DbProviderFactory`** — ADO.NET's abstract factory method base. `SqlClientFactory.Instance.CreateConnection()` returns a `SqlConnection`; `NpgsqlFactory.Instance.CreateConnection()` returns a `NpgsqlConnection`. The caller works against `DbConnection` without knowing the provider.
+**`DbProviderFactory`** exposes several creation methods for one database-provider family, making it a closer example of Abstract Factory. Individual methods such as `CreateConnection()` still demonstrate returning a product abstraction without naming its concrete class.
 
-**`Task.FromResult<T>()`** — a factory method that creates a completed `Task<T>` without allocating a state machine. The static method decides the concrete `Task` subtype based on the value.
+**`Task.FromResult<T>()`** is a static factory function, not the GoF Factory Method pattern. It is useful terminology to distinguish: many APIs called "factory methods" do not involve an overridable creator hierarchy.
 
 # Questions
 
 > [!QUESTION]- When does Factory Method become the wrong choice?
-> When you need to create a **family of related objects** that must stay compatible — use Abstract Factory instead. Factory Method creates one product type; if `PaymentProcessor` and `ReceiptGenerator` must always come from the same provider (Stripe or PayPal), a single factory method can't enforce that constraint. Also avoid Factory Method when the creation logic is trivial and unlikely to vary — the extra abstraction adds indirection without benefit.
+> It is the wrong fit when no creator algorithm needs an overridable construction hook. A static factory or DI registration is smaller for simple selection. When several product types must vary together, an Abstract Factory makes that family boundary explicit.
 
 > [!QUESTION]- How does Factory Method support the Open/Closed Principle?
-> The creator class is closed for modification: its `NotifyOrderConfirmedAsync` algorithm never changes. It's open for extension: adding a new channel means a new subclass of `NotificationCreator`, not an edit to existing code. The tradeoff is class proliferation — each new product type requires a new creator subclass. For many variants, Abstract Factory or a registry-based approach scales better.
+> The shared creator algorithm can remain unchanged while a new subtype supplies another product. This protects only the creation variation anticipated by the abstraction. A change to the workflow or product contract still modifies existing code. If subtypes exist solely to return different constructors, a registry or DI registration may express the variation with fewer classes.
 
 # References
 
-- [Factory Method Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=EcFVTgRHJLM&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc&index=4) — video walkthrough of the Factory Method pattern with OOP examples
-- [Factory Method — refactoring.guru](https://refactoring.guru/design-patterns/factory-method) — canonical pattern description with structure diagram and C# example
-- [ILoggerFactory interface — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.logging.iloggerfactory) — .NET logging factory method in production use
-- [DbProviderFactory — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.data.common.dbproviderfactory) — ADO.NET abstract factory method for database providers
+- [Factory Method pattern](https://refactoring.guru/design-patterns/factory-method)
+- [Factory Method Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=EcFVTgRHJLM&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc&index=4)
+- [ILoggerFactory interface — .NET logging factory method in production use](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.logging.iloggerfactory)
