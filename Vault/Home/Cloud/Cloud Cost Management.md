@@ -2,7 +2,7 @@
 topic:
   - Cloud
 subtopic: []
-summary: "Connects cloud spend to workload behavior and unit economics, then reduces waste without sacrificing reliability."
+summary: "Designing application behavior so cloud cost stays attributable, measurable, and proportional to useful work."
 level:
   - "2"
 priority: High
@@ -10,68 +10,43 @@ status: Ready to Repeat
 publish: true
 ---
 
-Cloud cost management ties a bill back to the workload behavior that produced it, then changes that behavior without breaking reliability. The useful unit is rarely the monthly total. A team running an image pipeline should track cost per 1,000 successfully processed images: compute, storage, requests, network transfer, observability, and support divided by successful output. If the bill rises 20% while successful output rises 40%, the system became cheaper per unit even though the invoice grew.
+Cloud cost is partly an application behavior. A request can consume compute time, database operations, queue deliveries, object storage, network transfer, and telemetry. The monthly bill shows the total; architecture explains why the work happened.
 
-# Where the Bill Comes From
+A useful measure connects spend to successful output. If an image pipeline costs more because it processes more images, the total alone cannot distinguish growth from waste. Cost per 1,000 successful images can.
 
-Cloud services combine several meters. A resource can be idle and still accrue fixed time-based charges, while an active request can add usage charges elsewhere.
+# Cost Surfaces Developers Influence
 
-| Cost surface | Mechanism | Failure mode to look for |
+| Application behavior | Cost it can create | Design question |
 | --- | --- | --- |
-| Provisioned capacity | Instances, database tiers, disks, load balancers, and reserved throughput accrue charges while allocated | A stopped experiment leaves disks, snapshots, IP addresses, or minimum-capacity services behind |
-| Per-operation work | API calls, queue requests, database reads/writes, log ingestion, and object retrieval are metered | A retry storm multiplies requests even though useful throughput is flat |
-| Stored data | Primary data, replicas, backups, snapshots, logs, and incomplete uploads accumulate separately | Retention and lifecycle policies cover the primary object but not derived or orphaned copies |
-| Network paths | Cross-zone, cross-region, internet egress, gateways, and private endpoints can have distinct meters | A chatty service boundary moves the same payload repeatedly |
-| Commercial commitments | Reservations and savings plans discount an agreed baseline | A commitment is sized from a temporary peak and remains underused after demand falls |
+| Request fan-out and retries | API calls, queue operations, database reads/writes, and compute duration | Is work duplicated, retried without bounds, or repeated instead of cached or batched? |
+| Data shape and retention | Primary storage, replicas, indexes, backups, logs, and retrieval charges | Which copies are required, and when can derived or temporary data expire? |
+| Service boundaries | Cross-zone, cross-region, gateway, and internet transfer | Does this boundary need a network call, and can the payload or call frequency shrink? |
+| Capacity model | Always-on instances, reserved throughput, minimum replicas, or scale-to-zero startup cost | Is demand steady, bursty, latency-sensitive, or schedulable? |
+| Observability | Log, metric, trace, indexing, and retention volume | Which signals support a decision, and which fields or sampling rates only add volume? |
 
-Do not copy prices into design assumptions. Provider prices, free tiers, regions, and billing dimensions change. Link the exact pricing page in the architecture decision and recalculate it for the deployment region.
+Prices change by service, region, tier, and date. Architecture records should link to the current pricing page and state the workload assumptions rather than copy a price as if it were permanent.
 
-# The Operating Loop
+# Unit Economics
 
-1. **Allocate and measure.** Map accounts, subscriptions, projects, and resource tags to a product and owner. Include shared platform costs through a documented allocation rule instead of hiding them in a central account.
-2. **Remove waste.** Delete idle resources and their dependents: unattached disks, old snapshots, abandoned IP addresses, stale logs, incomplete multipart uploads, and test environments with no owner.
-3. **Right-size from evidence.** Change capacity only after comparing utilization, throttling, latency, and failure-rate data. A cheaper instance that violates the latency objective is not an optimization.
-4. **Schedule variable demand.** Scale or stop non-production and batch capacity when the workload permits it. Keep the recovery path tested before relying on scale-to-zero.
-5. **Commit the stable baseline.** Buy reservations or savings plans only for demand that remains after waste removal and right-sizing. Keep burst capacity elastic.
-6. **Repeat.** Budgets and anomaly alerts detect drift; unit-cost trends show whether the change improved the product rather than merely shifting a charge.
-
-# Allocation, Guardrails, and Unit Economics
-
-An allocation record needs enough information to answer three questions: who owns the resource, which product or flow benefits, and how a shared cost is divided. Tags are one input, not the whole model; account hierarchy, subscription, Kubernetes labels, and telemetry can supply missing ownership.
-
-Budgets are thresholds, not hard caps. Alert the owner early enough to act and attach the alert to a runbook: confirm whether demand changed, isolate the meter and region, compare unit cost, then remove waste or revise the forecast. An anomaly alert without an accountable owner becomes inbox noise.
-
-Use one business-facing denominator per important flow:
+Choose one denominator that represents useful work and keep its quality definition stable:
 
 ```text
-cost_per_1_000_jobs =
+cost_per_1_000_successful_jobs =
   (compute + storage + requests + network + observability + allocated_shared_cost)
   / successful_jobs * 1_000
 ```
 
-Track the numerator and denominator separately. A falling unit cost caused by dropping failed jobs is not an improvement if customer-visible success also fell.
+Track attempted jobs beside successful jobs. Otherwise a system can appear cheaper by rejecting hard work early or counting degraded output as success. Latency, error rate, and recovery requirements remain guardrails: lowering cost by violating them is not an optimization.
 
-# Tradeoffs
+# Design Responses
 
-- **Redundancy costs money on purpose.** Remove duplicated capacity only after proving it is not required for the recovery objective.
-- **Compression trades compute for storage and transfer.** It helps when bytes dominate and hurts when CPU or latency is the tighter constraint.
-- **Managed services trade operational labor for provider rates and lock-in.** Compare the fully loaded cost of operating an alternative, not only its infrastructure line item.
-- **Commitments trade a lower rate for demand risk.** Apply them to the measured floor, never to the forecast peak.
-
-# Questions
-
-> [!QUESTION]- A workload's monthly bill rises by 20% while successful output rises by 40%. Did its cost efficiency improve?
-> Yes, if reliability and output quality stayed comparable. Unit cost changed from `cost / output` to `1.2 × cost / 1.4 × output`, about 14% less per successful unit. The larger invoice alone does not show regression.
-
-> [!QUESTION]- Why should reservations or savings plans be sized only after waste removal and right-sizing?
-> A commitment discounts a fixed demand baseline but converts forecast error into unused spend. Removing idle resources and right-sizing first reveals the stable floor worth committing; variable or uncertain demand should remain elastic.
+- Cache only when freshness and authorization allow it; include tenant or access scope in the key.
+- Batch operations when added latency and partial-failure behavior remain acceptable.
+- Use asynchronous work to absorb bursts, then bound retries and dead-letter handling so failures do not multiply cost indefinitely.
+- Expire temporary data, incomplete uploads, verbose logs, and derived artifacts according to explicit retention rules.
+- Match the compute model to demand. Serverless can reduce idle capacity, while a steady workload may be cheaper and more predictable on reserved or continuously running capacity.
+- Preserve redundancy required by [[Disaster Recovery]]. Recovery capacity is intentional cost, not waste.
 
 # References
 
-- [FinOps Framework — Allocation](https://www.finops.org/framework/capabilities/allocation/) — defines ownership, tagging, hierarchy, and shared-cost allocation practices.
-- [FinOps Framework — Unit Economics](https://www.finops.org/framework/capabilities/unit-economics/) — connects technology spend to product and business output metrics.
-- [FinOps Framework — Anomaly Management](https://www.finops.org/framework/capabilities/anomaly-management/) — defines detection, ownership, alerting, and resolution of unexpected spend.
-- [AWS Well-Architected — Cost Optimization](https://docs.aws.amazon.com/wellarchitected/latest/cost-optimization-pillar/welcome.html) — AWS guidance for expenditure awareness, resource efficiency, and rate optimization.
-- [Amazon VPC pricing](https://aws.amazon.com/vpc/pricing/) — current meters for public IPv4 addresses, NAT gateways, IPAM, and other VPC features.
-- [Azure Well-Architected — Cost Optimization](https://learn.microsoft.com/en-us/azure/well-architected/cost-optimization/) — Azure guidance for financial targets, usage optimization, rates, and continuous monitoring.
-- [System Design 101 — Hidden Costs of the Cloud](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/hidden-costs-of-the-cloud.md) — editorial checklist that prompted the cost-surface audit; its obsolete Elastic IP visual is intentionally not embedded.
+- [FinOps Framework: Unit Economics](https://www.finops.org/framework/capabilities/unit-economics/)
