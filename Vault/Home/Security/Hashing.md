@@ -11,18 +11,20 @@ status: Ready to Repeat
 publish: true
 ---
 
-A cryptographic hash function maps data of any size to a fixed-size value (a *digest*) in a way that is **one-way** (you cannot recover the input from the digest) and **collision-resistant** (you can't feasibly find two inputs with the same digest). Hashing is the workhorse behind integrity checks, digital signatures, password storage, deduplication, and content addressing. The defining contrast with [[Encryption]]: encryption is *reversible* with a key; hashing is *deliberately irreversible* and keyless.
+A cryptographic hash maps an arbitrary-length byte string to a fixed-length digest. A secure general-purpose hash is designed to resist finding an input for a chosen digest and finding two inputs with the same digest. There is no decryption key. Inputs from a small or predictable domain can still be guessed and hashed, which is why a digest is not a way to hide passwords or identifiers.
+
+Hash functions support fingerprints, signatures, content addressing, HMAC, and password-hashing constructions. [[Encryption]] solves a different problem: authorized key holders must be able to recover the plaintext.
 
 # Properties of a Cryptographic Hash
 
-A function like SHA-256 is built to guarantee:
+A function such as SHA-256 is designed to provide:
 
-- **Deterministic** — the same input always yields the same digest.
-- **One-way (preimage resistance)** — given a digest, you can't find an input that produces it (short of brute force).
-- **Collision resistance** — you can't find two different inputs with the same digest.
-- **Avalanche effect** — flipping one input bit changes ~half the output bits, so digests reveal nothing about input similarity.
+- **Determinism:** the same byte sequence yields the same digest.
+- **Preimage resistance:** a digest does not give a practical shortcut to an input that produces it.
+- **Second-preimage resistance:** given one input, finding a different input with the same digest should be infeasible.
+- **Collision resistance:** finding any two different inputs with one digest should be infeasible.
 
-`MD5` and `SHA-1` are **broken** for security use — practical collisions exist — and must not be used for signatures or integrity against an adversary (MD5 lingers only as a non-security checksum). Use the **SHA-2** family (SHA-256/512) or **SHA-3**.
+Good hash designs also diffuse small input changes across the output, but an avalanche observation is not a proof of these resistance properties. MD5 and SHA-1 have practical collision attacks and do not belong in new collision-dependent designs such as signatures or attacker-facing file identities. Current designs normally use an approved SHA-2 or SHA-3 profile chosen by the surrounding protocol.
 
 ```csharp
 // SHA-256 of a byte payload (integrity / fingerprint)
@@ -32,7 +34,7 @@ string hex = Convert.ToHexString(digest);   // 64 hex chars, 256 bits
 
 # Hashing Vs Encryption Vs Encoding
 
-The three are constantly confused; pick by *intent*:
+The operation follows the required property:
 
 | | Reversible? | Needs a key? | Purpose |
 |---|---|---|---|
@@ -40,15 +42,15 @@ The three are constantly confused; pick by *intent*:
 | **Encryption** | Yes (decrypt) | Yes | Confidentiality |
 | **Encoding** (Base64) | Yes (trivially) | No | Transport/representation — **zero** security |
 
-Base64 "looks scrambled" but provides no protection — it's reversible by anyone. If you need secrecy, encrypt; if you need a tamper-evident fingerprint, hash.
+Base64 changes representation and provides no secrecy. Encryption protects confidentiality. A hash supplies a fingerprint, but that fingerprint detects adversarial tampering only when the expected digest arrives through an authenticated channel.
 
 # Integrity: Plain Hash Vs HMAC Vs Signature
 
-To prove data wasn't altered, the mechanism depends on *who you're defending against*:
+Integrity depends on who can replace the expected value:
 
-- **Plain hash** — detects *accidental* corruption (a download checksum). Useless against a deliberate attacker, who can change the data *and* recompute the hash.
-- **HMAC (keyed hash)** — combines the message with a **shared secret key**, so only parties holding the key can produce or verify the tag. Proves integrity *and* authenticity between two trusted parties (e.g. signing a [[JWT Bearer|JWT]] with HS256, or webhook signatures).
-- **[[Digital Signature]]** — hashes the data then signs the digest with a **private key**; anyone with the public key can verify. Adds **non-repudiation** (only the key holder could have signed it) that HMAC can't, since HMAC's secret is shared.
+- **Plain hash:** detects accidental corruption when the expected digest is trusted. An attacker who can replace both file and digest can recompute it.
+- **HMAC:** combines the message with a shared secret. Holders can produce and verify the tag, so it authenticates membership in that shared-key boundary rather than one specific sender. HS256 [[JWT Bearer|JWT]] tokens and many webhook schemes use this model.
+- **[[Digital Signature]]:** a private signer creates a signature that public-key holders can verify. This separates signing from verification, though identity and non-repudiation still depend on key provenance and operational evidence.
 
 ```csharp
 // HMAC-SHA256: integrity + authenticity with a shared key
@@ -59,11 +61,11 @@ bool ok = CryptographicOperations.FixedTimeEquals(tag, receivedTag);
 
 # Password Hashing Is a Special Case
 
-Storing passwords is the most common hashing task — and a plain SHA-256 is the **wrong** tool. General-purpose hashes are designed to be *fast*, so an attacker with a stolen database can try billions of guesses per second. Password hashing needs the opposite: deliberate slowness plus a per-user salt.
+A plain SHA-256 digest is the wrong password verifier. General-purpose hashes are intentionally fast, so an attacker with a copied database can test guesses cheaply and offline. Password hashing uses an adaptive, preferably memory-hard construction plus a unique random salt for each stored credential.
 
-- **Salt** — a unique random value per password, stored alongside the hash. Defeats **rainbow tables** (precomputed digest lookups) and ensures two users with the same password get different hashes.
-- **Slow / memory-hard KDF** — use a purpose-built algorithm: **Argon2id** (preferred today), **bcrypt**, **scrypt**, or **PBKDF2**. A *work factor* sets how expensive each guess is, tunable upward as hardware improves.
-- **Pepper** (optional) — a secret added to all passwords, kept in a [[Secrets Management|secret store]] separate from the database, so a DB-only leak isn't enough.
+- **Salt:** a random value stored with one password verifier. It prevents precomputation across the database and hides which accounts share a password.
+- **Adaptive password hash:** Argon2id is the normal choice where available. Scrypt and correctly configured PBKDF2 serve other platform or compliance constraints. Parameters are measured on production hardware and upgraded over time. Bcrypt remains mainly for compatible legacy deployments.
+- **Pepper:** optional secret material held outside the password database in a [[Secrets Management|secret store]]. It adds a second compromise boundary, but rotation normally requires knowledge of the password or a post-hash construction designed for rotation.
 
 ```csharp
 // ASP.NET Core Identity's PasswordHasher uses salted PBKDF2 by default and is fine;
@@ -71,41 +73,41 @@ Storing passwords is the most common hashing task — and a plain SHA-256 is the
 // NEVER: store SHA256(password) — far too fast, and unsalted = rainbow-table-able.
 ```
 
+The comment names one .NET Argon2 library as an example, not a repository recommendation. Package maintenance, platform support, and the deployed parameter set still require independent review.
+
 # Pitfalls
 
-- **Using MD5/SHA-1 for security** — both have practical collisions; only acceptable as non-adversarial checksums.
-- **Using a fast hash for passwords** — SHA-256(password) is brute-forceable at billions/sec; use Argon2/bcrypt/PBKDF2 with a salt.
-- **No salt / global salt** — enables rainbow tables and reveals duplicate passwords. Salt must be unique per user.
-- **Non-constant-time comparison** — comparing hashes/HMACs with `==` or `SequenceEqual` can leak via timing; use `CryptographicOperations.FixedTimeEquals`.
-- **Confusing a plain hash with authentication** — a bare hash sent alongside data proves nothing against an attacker; use HMAC or a signature.
-- **Hashing to "encrypt"** — hashing is one-way; if you need the value back, you need encryption, not hashing.
+- **Collision-broken algorithms:** MD5 and SHA-1 cannot protect collision-sensitive artifacts from an adversary.
+- **Fast password digests:** SHA-256 makes offline guessing cheap. A password-specific construction and measured parameters are required.
+- **Reused salt:** one salt across many credentials restores cross-account precomputation and reveals equality. Each stored credential needs its own salt.
+- **Variable-time comparison:** secret-derived tags use `CryptographicOperations.FixedTimeEquals`. Ordinary public file digests do not always carry the same timing boundary.
+- **Unauthenticated expected hash:** a digest delivered beside a compromised file can be replaced with it. The expected value needs a signature, MAC, or trusted channel.
+- **Lost original value:** hashing has no recovery operation. Data that must be read later belongs behind encryption or tokenization.
 
 # Tradeoffs
 
 | Need | Use | Why |
 |---|---|---|
 | File/download integrity (accidental) | SHA-256 | Fast, sufficient for non-adversarial checks |
-| Integrity + auth (shared secret) | HMAC-SHA256 | Keyed; attacker can't forge without the key |
-| Integrity + auth + non-repudiation | Digital signature | Public-key verification, signer can't deny |
+| Integrity + auth (shared secret) | HMAC-SHA256 | Keyed. Attacker can't forge without the key |
+| Integrity + public verification | Digital signature | Only the private-key holder signs. Identity and evidentiary meaning come from the trust system |
 | Password storage | Argon2id / bcrypt / PBKDF2 | Slow + salted defeats offline brute force |
 
-**Decision rule**: reach for SHA-256 for fingerprints/integrity, an **HMAC** when a shared secret should gate verification, a **digital signature** when you need public verification and non-repudiation, and a **slow salted KDF (Argon2id)** — never a general-purpose hash — for passwords. Compare secret-derived values in constant time.
+SHA-256 is a common fingerprint when the protocol permits it. HMAC fits a shared-secret trust boundary, while a digital signature supports public verification. Passwords use a salted adaptive password hash, never a fast digest. Secret-derived authentication values are compared in constant time.
 
 # Questions
 
 > [!QUESTION]- Why can't you use SHA-256 directly to store passwords?
-> SHA-256 is engineered to be *fast*, which is exactly wrong for passwords: an attacker who steals the hash database can compute billions of guesses per second and crack weak/common passwords quickly, and without a salt they can use precomputed rainbow tables. Password hashing needs a **slow, memory-hard, salted** function (Argon2id, bcrypt, scrypt, PBKDF2) with a tunable work factor so each guess is expensive and every user's hash is unique.
+> SHA-256 is fast and gives an offline attacker a cheap guess test. Password verifiers need a unique salt and an adaptive password-hashing function whose CPU and memory costs are tuned for the deployment and raised as hardware improves.
 
 > [!QUESTION]- What's the difference between a hash, an HMAC, and a digital signature?
-> A **hash** is keyless and only detects accidental change — an attacker can alter data and recompute it. An **HMAC** mixes in a shared secret key, so it proves integrity *and* authenticity between parties who both hold the key. A **digital signature** hashes then signs with a *private* key, so anyone with the public key can verify, adding **non-repudiation** (the signer can't deny it) that HMAC lacks because its key is shared. Escalating from hash → HMAC → signature trades simplicity for stronger guarantees.
+> A hash is keyless. Adversarial integrity depends on authenticating the expected digest. HMAC authenticates within a shared-secret group, where every verifier can also create tags. A digital signature gives one private-key holder the signing capability while allowing public verification, provided the verification key is trusted.
 
 > [!QUESTION]- What does a salt protect against, and why must it be unique per user?
-> A salt is a per-password random value stored with the hash. It defeats **rainbow tables** (precomputed digest→password lookups can't be built without knowing each salt) and ensures that two users who pick the same password produce *different* stored hashes, so a cracker can't crack many accounts at once or spot shared passwords. A single global salt would still let one rainbow table target the whole database — uniqueness per user is what forces the attacker to attack each hash individually.
+> A salt prevents one precomputed table or one computed guess from being reused across many stored verifiers. It is public and stored with the verifier. Each credential needs a distinct random salt so equal passwords do not produce equal stored values.
 
 # References
 
-- [Cryptographic hashing in .NET (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/standard/security/ensuring-data-integrity-with-hash-codes) — SHA family and integrity verification.
-- [OWASP Password Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html) — Argon2/bcrypt/PBKDF2 selection, salting, peppering, work factors.
-- [NIST SHA-3 / hash standards](https://csrc.nist.gov/projects/hash-functions) — current approved hash algorithms.
-- [RFC 2104 — HMAC](https://www.rfc-editor.org/rfc/rfc2104) — the keyed-hash construction.
-- [CryptographicOperations.FixedTimeEquals (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/system.security.cryptography.cryptographicoperations.fixedtimeequals) — constant-time comparison to avoid timing attacks.
+- [Cryptographic hashing in .NET](https://learn.microsoft.com/dotnet/standard/security/ensuring-data-integrity-with-hash-codes)
+- [NIST hash functions](https://csrc.nist.gov/projects/hash-functions)
+- [HMAC: Keyed-Hashing for Message Authentication](https://www.rfc-editor.org/rfc/rfc2104)

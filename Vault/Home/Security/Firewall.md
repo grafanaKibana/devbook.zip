@@ -11,7 +11,7 @@ status: Ready to Repeat
 publish: true
 ---
 
-A firewall permits or denies traffic at a defined boundary. It reduces reachable attack surface and limits lateral movement; it does not authenticate users, repair a vulnerable service, or make an allowed connection trustworthy. The design question is therefore not “do we have a firewall?” but “which identity, protocol, direction, and zone transition is allowed at each boundary?”
+A firewall permits or denies traffic at a defined boundary. It constrains which services can communicate and supplies evidence about rejected paths. It does not authenticate an application user, repair a vulnerable service, or make an allowed connection trustworthy. The useful question is which source, destination, protocol, direction, and zone transition a named workload requires.
 
 # Where the Control Sits
 
@@ -24,7 +24,7 @@ A firewall permits or denies traffic at a defined boundary. It reduces reachable
 
 ![[Security/Security-Firewall-18120000.jpg]]
 
-Use layers. An Internet-facing reverse proxy may accept TLS on 443, a network policy may allow only the proxy identity to reach the API, and the API host may accept the application port only on its private interface. A direct request to the private API address is then denied even if DNS or routing information leaks.
+Layer the boundaries around the intended flow. An Internet-facing reverse proxy may accept TLS on 443, a network policy may allow only the proxy identity to reach the API, and the API host may accept the application port only on its private interface. A direct request to the private API address is then denied even if DNS or routing information leaks. Egress rules matter as well: a compromised workload should not gain unrestricted access to internal control planes or arbitrary Internet destinations.
 
 # Rule and Inspection Models
 
@@ -43,11 +43,11 @@ allow orders-api -> payments-api tcp/8443 in workload-zone
 deny  *          -> payments-api *        log=sampled
 ```
 
-Specify direction and source/destination zones; “allow 8443” is incomplete. Give rules owners and expiry dates, test both the intended path and nearby denied paths, and alert on meaningful denial changes rather than logging every dropped Internet packet. For encrypted traffic, choose deliberately between metadata-only filtering, termination at a controlled proxy, and end-to-end encryption. A firewall that cannot decrypt TLS cannot validate the HTTP body; a firewall that terminates TLS now holds keys and sees sensitive data.
+Specify direction and source/destination zones. “allow 8443” is incomplete. Give rules owners and expiry dates, test both the intended path and nearby denied paths, and alert on meaningful denial changes rather than logging every dropped Internet packet. For encrypted traffic, choose deliberately between metadata-only filtering, termination at a controlled proxy, and end-to-end encryption. A firewall that cannot decrypt TLS cannot validate the HTTP body. A firewall that terminates TLS now holds keys and sees sensitive data.
+
+Address translation is not an access-control policy. NAT can hide internal addresses or map endpoints, but only explicit filtering determines which traffic is allowed. Likewise, a zero-trust design does not remove firewalls. It stops treating network location as sufficient authority and combines segmentation with identity- and resource-specific decisions.
 
 # References
 
-- [ByteByteGo — Firewall Explained](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/firewall-explained-to-kids-and-adults.md) — the pinned source for firewall placement and inspection types.
-- [ByteByteGo — Top 6 Firewall Use Cases](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/top-6-firewall-use-cases.md) — the pinned source for tuple, time, state, and application rule examples.
-- [NIST SP 800-41 Rev. 1 — Guidelines on Firewalls and Firewall Policy](https://csrc.nist.gov/pubs/sp/800/41/r1/final) — firewall technology, policy, selection, configuration, testing, deployment, and management guidance.
-- [NIST SP 800-207 — Zero Trust Architecture](https://csrc.nist.gov/pubs/sp/800/207/final) — why network location alone does not establish trust and access remains resource-specific.
+- [NIST SP 800-41 Rev. 1: Guidelines on Firewalls and Firewall Policy](https://csrc.nist.gov/pubs/sp/800/41/r1/final)
+- [NIST SP 800-207: Zero Trust Architecture](https://csrc.nist.gov/pubs/sp/800/207/final)

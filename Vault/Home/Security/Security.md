@@ -14,7 +14,7 @@ level:
 status: Done
 ---
 
-Security is a production feature: protecting users, data, and systems against realistic threats and mistakes. These notes focus on practical engineering security: authn/authz, cryptography basics, and common vulnerability classes. Example: most incidents start with a small gap like weak password handling, missing rate limits, or overly-permissive access checks.
+Security keeps a system's promised behavior intact when people, software, and infrastructure fail or act maliciously. It is an engineering property of the whole service: identities, authorization, data handling, dependencies, deployment, detection, and recovery all contribute to the result.
 
 ```datacorejsx
 const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
@@ -23,14 +23,14 @@ return FolderStructureMap;
 
 # The Shape of the Problem
 
-Most security work reduces to a few recurring goals defended in layers. The classic frame is the **CIA triad** — Confidentiality (only the right people see data), Integrity (data isn't tampered with), Availability (the system stays up) — pursued through **defense in depth**: no single control is trusted, so a failure at one layer is caught by the next.
+The CIA triad names three recurring goals: confidentiality limits disclosure, integrity limits unauthorized change, and availability keeps required operations usable. A real threat model adds the assets, actors, trust boundaries, abuse paths, and impact that make those goals concrete. Defense in depth then places independent controls along an abuse path so one failed control does not decide the outcome.
 
 Two distinctions run through everything below:
 
-- **Authentication vs authorization** — authn proves *who* you are (passwords, tokens, MFA); authz decides *what* you may do (roles, scopes, ownership checks). Conflating them is a common source of access bugs.
-- **Encoding, password hashing, integrity, and encryption** — encoding is reversible and not secret; passwords need a slow, salted password-hashing function; a plain hash can detect accidental change but cannot prove integrity against an attacker who can replace both data and digest; active-attack integrity needs a MAC or digital signature; encryption is reversible *with a key* and protects confidentiality. Using the wrong primitive — encrypting a password, for example — is itself a vulnerability class.
+- **Authentication and authorization:** authentication establishes a principal with some assurance. Authorization decides whether that principal may perform this operation on this resource now. A valid session never replaces the resource decision.
+- **Encoding, password hashing, integrity, and encryption:** encoding changes representation. Password hashing creates an expensive verifier. A MAC or signature authenticates data within a defined trust model. Encryption protects confidentiality for key holders. None substitutes for the others.
 
-Most incidents start small: a missing authorization check, a secret in a log, weak password handling, or a missing rate limit. The specifics live in the notes above.
+Small omissions often open the path: one missing ownership check, one reusable credential in telemetry, one unbounded recovery endpoint, or one dependency deployed past its supported lifetime. The surrounding notes isolate those mechanisms. This page keeps their shared design process visible.
 
 # Secure System Design Checklist
 
@@ -42,30 +42,19 @@ Start with one abuse case, not a catalog of controls. For a payroll export, iden
 4. **Secure defaults:** expose only required endpoints and methods, close unused ports, reject unknown input, and make a missing policy fail closed. See [[Home/Security/Firewall|Firewall]], [[Home/Security/OWASP|OWASP]], and [[Home/Security/Web Vulnerabilities|Web Vulnerabilities]].
 5. **Secrets and keys:** keep credentials out of code and telemetry, use managed key storage, separate key and data administration, and test rotation. See [[Home/Security/Secrets Management|Secrets Management]] and [[Home/Security/Encryption|Encryption]].
 6. **Dependencies and delivery:** pin and verify build inputs, scan deployed artifacts, protect CI identities, and keep a current inventory of components and public APIs.
-7. **Detection:** record authentication, authorization, administrative, and sensitive-data events with safe metadata; alert on an attack pattern rather than one expected denial.
+7. **Detection:** record authentication, authorization, administrative, and sensitive-data events with safe metadata. Alert on an attack pattern rather than one expected denial.
 8. **Response and recovery:** assign incident owners, preserve evidence, revoke compromised access, communicate under the applicable obligations, and restore from a tested recovery path.
 
 ![[Security/Security-Security-18120000.png]]
 
-A checklist is complete only when its failure paths have been exercised. Test that the payroll export rejects another tenant, a missing policy, a revoked job identity, a stale signing key, a logging outage, and a restore whose backup predates the incident.
+A checklist becomes evidence only when its failure paths are exercised. The payroll export should reject another tenant, a missing policy, a revoked job identity, and a stale signing key. Operations should also know what happens when audit delivery fails or the only clean backup predates the incident.
 
 # Questions
 
-> [!QUESTION]- What is the practical difference between authentication and authorization, and why do bugs cluster at the boundary?
-> - Authentication establishes identity (who); authorization enforces permission (what) — a system can authenticate perfectly and still leak data through a missing authz check
-> - The classic failure is the insecure direct object reference: a valid, logged-in user changes an ID in a URL and reads someone else's record because the code checked authn but not ownership
-> - Authorization must be enforced server-side on every request, close to the data — never in the UI, never assumed from a prior step
-> - Tokens (JWTs, sessions) carry both concerns, so validating a token is necessary but not sufficient; you still authorize the specific action
-
-> [!QUESTION]- How should secrets and cryptography be handled so they don't become the incident?
-> - Never hand-roll crypto: use vetted libraries and standard algorithms — the failures are almost always in usage (nonce reuse, ECB mode, weak KDFs), not the primitives
-> - Hash passwords with a slow, salted password hash (bcrypt/argon2/PBKDF2), never a plain hash; encrypt data in transit and at rest with managed keys
-> - Keep secrets out of source, logs, and config: use a secrets manager, rotate them, and scope them narrowly
-> - Assume any secret that reaches a log or an error message is compromised — design so it never does
+> [!QUESTION]- What is the difference between authentication and authorization?
+> Authentication establishes a principal. Authorization evaluates that principal's proposed action against the target resource and current context.
 
 # References
 
-- [ByteByteGo — How to Design a Secure System](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/how-do-we-design-a-secure-system.md) — the pinned checklist source, reorganized here around threats, boundaries, and testable failure paths.
-- [OWASP Top 10](https://owasp.org/www-project-top-ten/) — the standard reference for the most critical web application security risks.
-- [OWASP Cheat Sheet Series](https://cheatsheetseries.owasp.org/) — practical, task-focused guidance on authentication, authorization, cryptographic storage, and input handling.
-- [NIST Digital Identity Guidelines (SP 800-63-4)](https://pages.nist.gov/800-63-4/) — current authoritative guidance on authentication, authenticators, federation, and identity proofing.
+- [NIST Cybersecurity Framework](https://www.nist.gov/cyberframework)
+- [OWASP Cheat Sheet Series](https://cheatsheetseries.owasp.org/)
