@@ -11,7 +11,7 @@ status: Ready to Repeat
 publish: true
 ---
 
-A proxy terminates one connection and opens another on behalf of a represented party. A **forward proxy** represents egress clients; a **reverse proxy** represents origins for inbound traffic.
+A proxy receives traffic on one connection and sends it onward through another. A **forward proxy** sits on the client side of the trust boundary and controls egress. A **reverse proxy** sits in front of origins and controls ingress.
 
 For concrete implementation patterns and configuration tradeoffs, see [[Nginx]].
 
@@ -19,28 +19,25 @@ For concrete implementation patterns and configuration tradeoffs, see [[Nginx]].
 
 # Trust and Scope
 
-Choose proxy type by ownership and failure boundary:
+The represented side determines the proxy type:
 
 - Forward proxy: policy-controlled client path to external services.
-- Reverse proxy: public entry point for service traffic, plus routing, TLS edge, and buffering.
+- Reverse proxy: entry point for service traffic, often responsible for routing, TLS termination, and buffering.
 
-Neither is automatically secure. Identity and trust are defined by configuration controls: authentication, rewritten headers, certificate handling, and bypass policy.
+Neither role creates a security boundary by itself. Authentication, header rewriting, certificate validation, and bypass routes determine what the intermediary can assert and what the next hop may trust.
 
-If you use an enterprise forward proxy with interception, TLS is terminated at the proxy and headers are policy-bound. If you use a non-intercepting tunnel, encryption remains end-to-end to the upstream endpoint.
+An intercepting enterprise proxy terminates TLS and establishes a second protected connection, so the proxy can inspect plaintext and must be trusted as a certificate issuer. A non-intercepting `CONNECT` tunnel carries encrypted bytes without terminating the upstream TLS session.
 
 # Example
 
-- Forward proxy: `Browser -> enterprise forward proxy CONNECT api.example.com:443 -> target` normally makes the target observe the proxy's network address. The proxy still sees the client, and authentication or forwarding metadata can expose client identity, so it remains a trusted observer that needs strict allowlists and tunnel policy.
-- Reverse proxy: `Internet client -> reverse proxy (TLS terminate) -> app service` centralizes ingress rules. If the reverse proxy drops or rewrites `X-Forwarded-For` incorrectly, downstream systems can record the proxy IP instead of the real client.
+- Forward proxy: `Browser -> enterprise forward proxy CONNECT api.example.com:443 -> target` normally makes the target observe the proxy's network address. The proxy still knows which client opened the tunnel. Authentication and forwarding metadata may expose more identity, so destination policy and audit controls remain necessary.
+- Reverse proxy: `Internet client -> reverse proxy (TLS terminate) -> app service` centralizes ingress policy. Downstream code must accept forwarding metadata only from known proxies. Otherwise a client can spoof identity-bearing headers.
 
 # Shared Failure Pattern
 
-Proxy centralization concentrates outage risk. Redundant instances reduce single-path blast radius, and `502/504` class failures usually indicate upstream/proxy boundary issues before application logic.
+Proxy centralization concentrates outage risk. Redundant instances remove one process or host from the critical path, but shared configuration, name resolution, or upstream dependencies can still fail every instance. A `502` or `504` points first to the proxy-to-upstream boundary, not necessarily to application code.
 
 # References
 
-- [Proxy vs Reverse Proxy (ByteByteGo snapshot)](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/proxy-vs-reverse-proxy.md) — source distinction and request flow.
-- [HTTP Semantics: CONNECT (RFC 9110 §9.3.6)](https://www.rfc-editor.org/rfc/rfc9110.html#name-connect) — tunnel request behavior.
-- [HTTP Caching (RFC 9111)](https://www.rfc-editor.org/rfc/rfc9111) — shared cache behavior and freshness rules.
-- [Forwarded HTTP Extension (RFC 7239)](https://www.rfc-editor.org/rfc/rfc7239) — proxy metadata and security expectations.
-- [TLS 1.3 (RFC 8446)](https://www.rfc-editor.org/rfc/rfc8446) — the handshake and authentication boundary that tunneling preserves and interception terminates.
+- [HTTP Semantics: CONNECT](https://www.rfc-editor.org/rfc/rfc9110.html#name-connect)
+- [Forwarded HTTP Extension](https://www.rfc-editor.org/rfc/rfc7239)
