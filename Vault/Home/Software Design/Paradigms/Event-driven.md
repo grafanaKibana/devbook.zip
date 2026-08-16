@@ -11,31 +11,33 @@ status: Ready to Repeat
 publish: true
 ---
 
-Event-driven development builds systems around *events* — immutable facts that something happened — and reactions to those events. Producers publish events without knowing who will consume them; consumers subscribe and handle events independently. This decouples components: the order service doesn't call the inventory service directly, it publishes `OrderPlaced` and the inventory service reacts on its own schedule.
+Event-driven systems move work forward by representing that something happened and letting handlers react. An order service can publish `OrderPlaced` without calling inventory directly. Inventory handles the event under its own delivery and retry rules. The event should be treated as an immutable fact once published, even if its serialized payload is technically mutable.
 
-The pattern appears at two scales: **in-process** (domain events within a single application, dispatched via MediatR or a simple in-memory bus) and **distributed** (events published to a message broker like RabbitMQ, Azure Service Bus, or Kafka, consumed by separate services).
+The same control model appears inside one process and across services. In-process dispatch keeps handlers in the application's failure boundary and may run them synchronously. Distributed delivery crosses a durable broker, so acknowledgement, redelivery, ordering, and schema evolution become part of the design.
 
-# Events Vs Commands
+# Events vs. Commands
 
-A distinction "event-driven" tends to blur:
+A command asks for a state change. An event reports a state change that already happened.
 
-- A **command** is an instruction to *one* handler to *do* something — imperative, present tense (`ReserveStock`); the sender expects it carried out, and it **can be rejected**.
-- An **event** is a notification that something *already happened* — a past-tense immutable fact (`OrderPlaced`), broadcast to *zero-to-many* subscribers who each decide how to react. It can't be rejected — it's history.
+- A **command** targets one logical handler and can be refused because its preconditions do not hold. `ReserveStock` is a request, not a fact.
+- An **event** is named in the past tense, such as `OrderPlaced`, and can have zero or many interested handlers. A consumer may reject a malformed message, but it cannot undo the fact represented by a valid event.
 
-Routing a command to one handler is the [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Mediator]] pattern; fanning an event out to many is an [[Home/Software Architecture/Patterns/Event Bus]] over a [[Home/Software Architecture/Distributed Systems/Message Queues/Message Queues|message broker]].
+Routing a command to one handler fits the [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Mediator]] pattern. Fan-out uses an [[Home/Software Architecture/Patterns/Event Bus]] and, across services, commonly relies on a [[Home/Software Architecture/Distributed Systems/Message Queues/Message Queues|message broker]].
 
 # Four Styles of "Event-Driven" (Fowler)
 
-The term covers four distinct patterns that are often conflated — naming which one you mean avoids a lot of confusion:
+The label covers several designs with different consistency and ownership rules:
 
-1. **Event Notification** — the event carries just an ID/reference ("order 42 placed"); consumers call *back* to the source for details. Lowest coupling, but chatty and the source must stay available.
-2. **Event-Carried State Transfer** — the event carries *all* the data a consumer needs ("order 42: items, total, address"), so consumers keep a local copy and never call back. More decoupled and resilient, at the cost of data duplication and eventual consistency.
-3. **Event Sourcing** — events are the **source of truth**; current state is *derived* by replaying the log. See [[Home/Software Architecture/Patterns/Architectural Patterns/Event Sourcing]].
-4. **CQRS** — separate the write model (commands) from read models (queries), often kept in sync via events. See [[Home/Software Architecture/Patterns/Architectural Patterns/CQRS]].
+1. **Event Notification** carries a reference such as an order ID. A consumer fetches current details from the source, which keeps the event small but adds a runtime dependency on that source.
+2. **Event-Carried State Transfer** includes the data needed to update a local projection. Consumers avoid a callback, at the cost of duplicated data and eventual consistency.
+3. **[[Home/Software Architecture/Patterns/Architectural Patterns/Event Sourcing|Event Sourcing]]** stores events as the source of truth and reconstructs current state from them.
+4. **[[Home/Software Architecture/Patterns/Architectural Patterns/CQRS]]** separates the write model from one or more read models, which are often updated from events.
 
-The first two are *communication* styles (how services talk); the last two are *architectural* patterns (how you store and model state). Most systems use event notification or state transfer **without** event sourcing.
+The first two describe message content between components. Event sourcing and CQRS change how state is modeled. They can be combined, but neither is required for ordinary event publication.
 
 # In-Process Domain Events
+
+An in-process event separates the publisher from its handlers, but it does not create a durability boundary. If the process stops before a handler finishes, the event and the unfinished work disappear unless they were persisted elsewhere. The following example also publishes after the repository call without making the state change and publication atomic. It demonstrates dispatch shape, not reliable integration delivery.
 
 ```csharp
 // Event: an immutable fact
@@ -65,9 +67,9 @@ public sealed class InventoryHandler : IEventHandler<OrderPlaced>
 
 # Distributed Events and the Outbox Pattern
 
-Publishing to a message broker after a database write introduces a reliability gap: the DB write succeeds but the broker publish fails, leaving the event lost.
+A database commit and a broker publish are two separate operations. If the commit succeeds and publication fails, downstream consumers never see the change.
 
-The **Outbox pattern** solves this by writing the event to an `OutboxMessages` table in the same database transaction as the domain change. A background worker then reads the outbox and publishes to the broker, retrying until acknowledged:
+The **Outbox pattern** stores an outgoing message in the same local transaction as the domain change. A relay reads committed outbox rows and publishes them. This closes the lost-message gap, though the relay can publish more than once when it crashes between broker acknowledgement and marking a row complete. Consumers still need idempotency.
 
 ```csharp
 // In the same transaction: save order + write outbox entry
@@ -87,43 +89,26 @@ await tx.CommitAsync(ct);
 
 ## Publishing Before Persisting
 
-**What goes wrong**: the event is published to the broker before the database transaction commits. If the commit fails, consumers react to an event that never happened.
+Publishing near the end of an application flow can still happen before the database confirms the transaction. If the event reaches the broker and the commit fails, consumers react to a state change that is absent from the source system.
 
-**Why it happens**: publishing feels like a natural "last step" after business logic, but it happens before the DB confirms success.
-
-**Mitigation**: always publish events *after* a successful commit, or use the Outbox pattern for guaranteed delivery.
+Publish only facts backed by committed state. When the database update and broker publish must form one reliable handoff, persist an outbox record in the database transaction and relay it afterward.
 
 ## Ignoring Consumer Idempotency
 
-**What goes wrong**: the broker delivers the same event twice (at-least-once delivery is the default for most brokers). The consumer processes it twice, double-charging a customer or double-reserving stock.
+Common queue and broker configurations provide at-least-once delivery across failures. If processing succeeds but acknowledgement is lost, the next delivery can repeat a charge or reservation. An outbox relay creates the same possibility on the publishing side.
 
-**Why it happens**: most message brokers guarantee at-least-once delivery, not exactly-once.
-
-**Mitigation**: make consumers idempotent. Track processed event IDs in a `ProcessedEvents` table and skip duplicates. Design operations to be naturally idempotent where possible (e.g., `SET stock = X` instead of `stock -= Y`).
+Make the consumer's state change idempotent. A processed-message record must commit atomically with that change, or the deduplication check has its own failure gap. Naturally idempotent operations, such as setting a versioned value, can avoid a separate record.
 
 # Tradeoffs
 
 | Approach | Strengths | Weaknesses | When to use |
 |---|---|---|---|
-| In-process events (MediatR) | Simple, no infrastructure, synchronous option | Lost on process crash, no cross-service delivery | Domain events within one bounded context |
-| Distributed broker (Service Bus, Kafka) | Durable, cross-service, scalable | Operational complexity, at-least-once delivery, ordering challenges | Cross-service workflows, audit trails, high-throughput pipelines |
+| In-process events (MediatR) | No broker. Handlers share the application boundary | No durable handoff. A slow handler can delay the publisher | Domain reactions that belong to one application boundary |
+| Distributed broker (Service Bus, Kafka) | Durable handoff and independent consumers | Redelivery, partial ordering, schema evolution, and broker operations | Cross-service workflows or fan-out that must survive restarts |
 
-**Decision rule**: start with in-process events for domain logic within a single service. Move to a distributed broker when you need cross-service communication, durability across restarts, or fan-out to multiple consumers. Always pair distributed events with the Outbox pattern for reliability.
-
-# Questions
-
-> [!QUESTION]- How does event-driven architecture differ from event sourcing?
-> Event-driven architecture is a communication style: components publish events and others react asynchronously. Event sourcing is a persistence pattern: the state of an entity is derived by replaying its event history rather than storing current state. You can use event-driven communication without event sourcing (most systems do). Event sourcing requires event-driven communication but adds the constraint that events are the source of truth for state.
-
-> [!QUESTION]- How do you guarantee ordering of events in a distributed event-driven system?
-> Most message brokers guarantee ordering only within a partition or queue. Kafka guarantees ordering within a partition (use a consistent partition key, e.g., order ID). Azure Service Bus sessions guarantee ordering within a session. Cross-partition ordering is not guaranteed — design consumers to be idempotent and handle out-of-order delivery. If strict global ordering is required, use a single partition (which limits throughput) or a sequencer service.
-
-> [!QUESTION]- Why must event consumers be idempotent in an at-least-once delivery system?
-> Most message brokers guarantee at-least-once delivery: a message may be delivered more than once if the consumer crashes after processing but before acknowledging. Without idempotency, duplicate delivery causes double-charging, double-reserving, or duplicate records. Mitigation: track processed event IDs in a `ProcessedEvents` table and skip duplicates, or design operations to be naturally idempotent (SET stock = X instead of stock -= Y).
+Keep an event in-process when its handlers share the publisher's deployment and failure boundary. Use a broker when the handoff must survive restarts or cross service ownership. Add an outbox when a local database commit and broker publication must remain consistent. Systems that publish from an already durable log may use that log as the handoff instead.
 
 # References
 
-- [Event-driven architecture style (Azure Architecture Center)](https://learn.microsoft.com/en-us/azure/architecture/guide/architecture-styles/event-driven) — Microsoft's overview of event-driven patterns, broker topologies, and when to apply them in distributed systems.
-- [Outbox pattern (Microsoft Learn)](https://learn.microsoft.com/en-us/azure/architecture/best-practices/transactional-outbox-cosmos) — detailed explanation of the Outbox pattern for reliable event publishing with transactional guarantees.
-- [MediatR (GitHub)](https://github.com/jbogard/MediatR) — the standard .NET in-process mediator library used for domain events, commands, and queries; supports both synchronous and asynchronous handlers.
-- [Event-Driven Architecture (Martin Fowler)](https://martinfowler.com/articles/201701-event-driven.html) — practitioner article distinguishing event notification, event-carried state transfer, event sourcing, and CQRS — four patterns often confused under the "event-driven" label.
+- [What do you mean by Event-Driven?](https://martinfowler.com/articles/201701-event-driven.html)
+- [MediatR](https://github.com/jbogard/MediatR)

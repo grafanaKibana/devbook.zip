@@ -285,12 +285,22 @@ publish: "true"
         note = self.write_note(
             root,
             "Vault/Home/Topic/Published.md",
-            VALID_FRONTMATTER.replace("publish: false", "publish: true") + "# Intro\nToo short.\n",
+            VALID_FRONTMATTER.replace("publish: false", "publish: true") + "Too short.\n",
         )
         self.assertEqual(
             {"publish.content", "publish.example"},
             {issue.code for issue in validate_vault.validate_published(note)},
         )
+
+    def test_published_note_does_not_require_a_heading(self) -> None:
+        temp, root = self.make_repo()
+        self.addCleanup(temp.cleanup)
+        note = self.write_note(
+            root,
+            "Vault/Home/Topic/Published.md",
+            VALID_FRONTMATTER.replace("publish: false", "publish: true") + ("Content " * 30) + "`example`\n",
+        )
+        self.assertEqual([], validate_vault.validate_published(note))
 
     def test_concept_notes_allow_no_references_heading(self) -> None:
         temp, root = self.make_repo()

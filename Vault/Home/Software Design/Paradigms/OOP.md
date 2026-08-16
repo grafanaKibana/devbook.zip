@@ -11,11 +11,11 @@ status: Ready to Repeat
 publish: true
 ---
 
-Object-oriented programming models a system as objects that own state and expose behavior. Its main value is not class syntax or inheritance: it is putting each invariant beside the operations allowed to change it. Interfaces define capabilities, composition assembles independently varying behavior, and runtime dispatch lets callers use a contract without knowing the concrete type. Inheritance is optional and earns its place only when a genuine subtype shares stable invariants and implementation.
+Object-oriented programming places state beside the operations allowed to change it. The useful boundary is an object that owns an invariant, not a class that merely groups fields. Interfaces name capabilities, composition assembles behavior that can vary independently, and runtime dispatch lets a caller depend on a contract instead of a concrete implementation. Inheritance is optional. It earns its place only when a genuine subtype can preserve the base contract.
 
 # Abstraction and Invariants
 
-An object should make invalid transitions difficult to express. A bank account exposes `Deposit` and `Withdraw`; it does not expose a public balance setter that any caller can bypass.
+An object should make invalid transitions difficult to express. A bank account exposes `Deposit` and `Withdraw` rather than a public balance setter that lets any caller bypass its rules.
 
 ```csharp
 public sealed class BankAccount
@@ -38,7 +38,7 @@ public sealed class BankAccount
 }
 ```
 
-The private setter is not sufficient by itself; the methods enforce the invariant. Encapsulation is control over state transitions, not merely wrapping fields in a class.
+The private setter only limits access. The methods establish what counts as a legal transition. Encapsulation is control over those transitions, not the mechanical act of wrapping fields in a class.
 
 Abstraction exposes only the contract a caller needs:
 
@@ -59,11 +59,11 @@ public sealed class CheckoutService(IPaymentGateway gateway)
 }
 ```
 
-The caller depends on a payment capability, while a Stripe or bank implementation owns protocol details. C# interfaces can include default members, but a default must have semantics valid for every implementer. A meaningless fallback signals that the interface has grown beyond one coherent capability.
+The caller depends on the ability to charge a payment. An implementation owns the remote protocol and credentials. C# interfaces can provide default members, but the default still needs semantics that make sense for every implementer. A fallback that exists only to avoid changing implementations usually means the interface contains more than one coherent capability.
 
 # Inheritance and Composition
 
-Inheritance binds a derived type to a base type’s contract and implementation. Composition binds an object to a collaborator’s contract and delegates work to it. Use inheritance when the relationship is a genuine subtype with stable shared invariants; use composition when behavior varies independently or may change at runtime. Reuse alone is not enough to justify a type hierarchy.
+Inheritance binds a derived type to both a base contract and part of its implementation. Composition binds an object to a collaborator's contract and delegates a capability. A real subtype shares stable expectations with its base. A composed behavior can vary on its own or at runtime. Borrowing code is not, by itself, a reason to publish a subtype relationship.
 
 ```csharp
 public interface IMovementStrategy
@@ -86,7 +86,7 @@ public sealed class WaiterRobot(IMovementStrategy movement) : Robot(movement)
 }
 ```
 
-`WaiterRobot` is a `Robot`: callers can rely on the robot lifecycle and every subtype shares its invariants. Movement is composed because A*, waypoints, or direct movement can vary without creating `AStarWaiterRobot`, `WaypointWaiterRobot`, and every other cross-product subtype.
+`WaiterRobot` is a `Robot` only if callers can rely on the same robot lifecycle and invariants for every subtype. Movement is composed because A*, waypoints, and direct movement vary independently. Encoding both dimensions in inheritance would create a class for every combination.
 
 | Signal | Prefer inheritance | Prefer composition |
 | --- | --- | --- |
@@ -96,13 +96,13 @@ public sealed class WaiterRobot(IMovementStrategy movement) : Robot(movement)
 | Change cost | Base changes are safe for every subtype | Implementations should evolve independently |
 | Reuse | Consequence of the hierarchy | Explicit delegation is the intended reuse |
 
-A derived class can depend on undocumented call order, protected state, or a virtual method invoked from a constructor. A later base-class change can compile cleanly and still break the subtype. Keep extension points small, document their preconditions and postconditions, and prefer `sealed` when a class was not designed for derivation.
+A derived class can quietly depend on call order, protected state, or a virtual method invoked during construction. A later base-class change may compile cleanly and still break that dependency. Keep extension points small, document their preconditions and postconditions, and seal classes that were not designed and tested for derivation.
 
-Deep hierarchies multiply this risk. If an override suppresses base behavior, throws for a supported operation, or needs knowledge of base internals, the subtype is probably false. Flatten the hierarchy into capability interfaces and composed policies.
+Deep hierarchies multiply the risk. An override that suppresses required base behavior, rejects a supported operation, or needs knowledge of base internals is evidence of a false subtype. Capability interfaces and composed policies usually expose the real variation more directly.
 
 # Subtyping and Polymorphism
 
-Inheritance or interface implementation creates a type-system subtype in C#. Sound design additionally requires behavioral substitutability: a value used through the base contract must preserve the expectations of callers that know only that contract.
+Inheritance and interface implementation create assignability relationships in C#. Sound design also requires behavioral substitutability: a value used through the base contract must preserve the expectations available to callers that know only that contract.
 
 ```csharp
 public abstract class Account
@@ -117,7 +117,7 @@ public sealed class FixedTermAccount : Account
 }
 ```
 
-The code is assignable, but `FixedTermAccount` strengthens the precondition of `Withdraw`: the operation is not generally supported. Model the real capabilities instead.
+The code is assignable, but `FixedTermAccount` makes `Withdraw` unavailable for an otherwise valid account. That is a stronger precondition than the base contract advertises. The model should expose the real capabilities instead.
 
 ```csharp
 public interface IAccount
@@ -131,7 +131,7 @@ public interface IWithdrawableAccount : IAccount
 }
 ```
 
-A reporting service accepts `IAccount`; a transfer service requires `IWithdrawableAccount`. Neither must discover capability failure at runtime.
+A reporting service accepts `IAccount`. A transfer service requires `IWithdrawableAccount`. Neither must discover capability failure at runtime.
 
 The substitution rule can be read operationally:
 
@@ -151,17 +151,17 @@ public interface IDiscountPolicy
 decimal discount = policy.Calculate(order);
 ```
 
-The CLR resolves an interface call through the concrete type’s interface map; virtual class calls use virtual slots. The JIT can devirtualize a call when it proves the concrete type, so choose the design for contract value rather than assumed dispatch overhead.
+At runtime, an interface call is resolved against the concrete type's implementation, while virtual class methods dispatch through the type's virtual method table. The JIT can devirtualize calls when it proves the target. Contract clarity is therefore a better design criterion than assumed dispatch overhead. Performance-sensitive paths still need measurement.
 
-Overloading is different: the compiler selects an overload from static argument types. It is sometimes called compile-time polymorphism, but it does not provide runtime substitution.
+Overloading is different. The compiler selects an overload from the static argument types, so it does not provide runtime substitution behind one contract.
 
-Polymorphism helps when each implementation owns coherent behavior and new implementations arrive independently. A closed `switch` over three states can be clearer when the cases form one finite workflow. Splitting a small closed decision across types can hide the state machine without adding useful extensibility.
+Polymorphism pays off when each implementation owns coherent behavior and implementations evolve independently. A closed `switch` can be clearer when the cases form one finite workflow. Spreading a small, closed decision across several types can hide the state machine without creating useful extensibility.
 
 # Pitfalls
 
-**Anemic domain model** — a type with public setters while all rules live in services is procedural code wearing class syntax. A public `Order.Status` setter lets any caller skip payment checks; an `Order.Ship()` method can reject an illegal transition at the mutation boundary.
+**Anemic domain model** — a type with public setters while every rule lives in services is procedural code wearing class syntax. A public `Order.Status` setter lets any caller skip payment checks. An `Order.Ship()` method can reject an illegal transition where the state changes.
 
-**Interfaces for every class** — a one-to-one `IThing`/`Thing` pair adds navigation and mocking ceremony without creating a useful boundary. Introduce an interface for multiple implementations, a capability consumed across a boundary, or a dependency tests must replace.
+**Interfaces for every class** — a one-to-one `IThing`/`Thing` pair adds navigation and mocking ceremony without defining a useful boundary. An interface is justified when it names a capability across an architectural boundary, supports meaningful alternatives, or isolates an external dependency that tests must replace.
 
 **Inheritance for reuse alone** — deriving `EmailNotifier` from `SmtpClient` exposes the wrong public contract and couples notification behavior to transport internals. Inject an SMTP collaborator instead.
 
@@ -178,26 +178,9 @@ Polymorphism helps when each implementation owns coherent behavior and new imple
 | Inheritance | Base-class coupling and fragile extension points | A genuine subtype shares a stable lifecycle and invariant |
 | Composition | Constructor wiring and delegation | Capabilities vary independently or at runtime |
 
-Most production C# systems mix styles: objects protect domain invariants, while records, LINQ, and pure functions handle transformations. Use the smallest boundary that makes ownership and failure modes clearer.
-
-# Questions
-
-> [!QUESTION]- Why is “composition over inheritance” a preference rather than a ban?
-> Framework base classes and genuine domain taxonomies can provide stable lifecycle and invariants. The rule rejects inheritance used only to borrow implementation, because that creates a public subtype contract the design did not intend.
-
-> [!QUESTION]- Why can a subtype compile and still violate its base contract?
-> The type system proves member shape and assignability, not behavioral promises. Throwing for an operation that the base presents as generally supported satisfies the signature while breaking callers’ expectations.
-
-> [!QUESTION]- When does polymorphism beat a conditional?
-> Use it when behavior varies behind a stable capability and new implementations are expected. Keep a conditional when the cases are closed, local, and easier to inspect together than through several types.
+Most production C# systems mix styles. Objects protect identity and legal state transitions. Records, LINQ, and pure functions express transformations. The right boundary is the smallest one that makes state ownership, substitution, and failure behavior obvious.
 
 # References
 
-- [C# object-oriented programming](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/tutorials/oop) — Microsoft’s overview of encapsulation, inheritance, and polymorphism in C#.
-- [Inheritance in C#](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/object-oriented/inheritance) — official mechanics for base classes, overrides, sealing, and constructor behavior.
-- [Interfaces in C#](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/types/interfaces) — official interface semantics, multiple implementation, and default interface members.
-- [C# language specification: interfaces](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/interfaces) — normative interface inheritance, implementation, and member rules.
-- [C# language specification: classes](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/classes) — normative rules for classes, members, inheritance, and dispatch.
-- [A behavioral notion of subtyping](https://www.cs.cmu.edu/~wing/publications/LiskovWing94.pdf) — Liskov and Wing’s primary paper defining behavioral substitutability.
-- [Prefer composition over inheritance](https://learn.microsoft.com/en-us/dotnet/architecture/modern-web-apps-azure/architectural-principles#prefer-composition-over-inheritance) — Microsoft guidance on the coupling behind the recommendation.
-- [ByteByteGo source snapshot: the fundamental pillars of object-oriented programming](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/the-fundamental-pillars-of-object-oriented-programming.md) — the source overview reconciled with explicit invariant, composition, subtyping, and dispatch boundaries.
+- [C# object-oriented programming](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/tutorials/oop)
+- [A Behavioral Notion of Subtyping](https://www.cs.cmu.edu/~wing/publications/LiskovWing94.pdf)

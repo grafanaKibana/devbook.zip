@@ -14,23 +14,13 @@ level:
 priority: High
 ---
 
-Software design is how code is structured at the module and class scale — the counterpart to system-scale architecture. It rests on three families: **principles** (SOLID, DRY, KISS, YAGNI — heuristics that keep code understandable), **paradigms** (OOP, functional, event-driven — the mental models you build within), and **testing** (unit, integration, TDD — the discipline that verifies behaviour and pressures the design toward decoupling). Example: applying single responsibility to split a fat service into focused classes is a design decision, and the fact that those classes are now trivial to unit-test is the feedback loop confirming it.
+Software design determines how far a code change travels. If adding a payment method requires edits in checkout, invoicing, and unrelated tests, the code has put behavior or dependencies in the wrong places. A useful design gives each change a clear home, keeps state close to the rules that use it, and makes collaboration and failure visible in the code.
+
+The subject has four complementary views. **Principles** such as SOLID, DRY, KISS, and YAGNI are heuristics for judging a decision. **Paradigms** such as object-oriented, functional, and event-driven programming provide different models for state and collaboration. **Testing** exposes coupling and verifies behaviour, but testability is evidence rather than proof of good design. **UML class diagrams** make selected static relationships discussable before or alongside code.
+
+Splitting an overloaded service helps when the pieces change for different reasons. Smaller classes and easier tests may show that coupling fell, but neither property is the goal. A fragmented model with behavior in the wrong class can be small and testable while still forcing one change through many files.
 
 ```datacorejsx
 const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
 return FolderStructureMap;
 ```
-
-# Questions
-
-> [!QUESTION]- Where does software design end and architecture begin?
-> - Software design operates at the module and class scale: naming, responsibilities, coupling, and the contracts between objects — decisions you can refactor cheaply
-> - Architecture operates at the system scale: service boundaries, data ownership, and communication styles — decisions that are expensive to reverse once other teams depend on them
-> - The line is fuzzy and shifts with scope: a class boundary in a monolith becomes a service boundary once it is extracted, so good design habits (clear responsibilities, low coupling) are what make that promotion possible
-> - Principles, paradigms, and testing are the levers of design; they show up in architecture too, but the blast radius of getting them wrong grows with the scale
-
-# References
-
-- [The Pragmatic Programmer (Hunt & Thomas)](https://pragprog.com/titles/tpp20/the-pragmatic-programmer-20th-anniversary-edition/) — practitioner guide to the design sensibilities and habits that keep code understandable and changeable.
-- [Is Design Dead? (Martin Fowler)](https://martinfowler.com/articles/designDead.html) — how principles, refactoring, and tests turn design into a continuous, evolutionary discipline rather than an up-front phase.
-- [Refactoring (Martin Fowler)](https://refactoring.com/) — improving the internal design of existing code safely, in small steps backed by tests.

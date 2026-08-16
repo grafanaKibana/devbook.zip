@@ -401,13 +401,13 @@ def validate_published(note: Note) -> list[Issue]:
     issues: list[Issue] = []
     body_without_fences = re.sub(r"```.*?```", "", note.body, flags=re.DOTALL)
     compact = re.sub(r"\s+", "", body_without_fences)
-    if len(compact) < 200 or not re.search(r"(?m)^#{1,6}\s+\S", note.body):
+    if len(compact) < 200:
         issues.append(
             Issue(
                 "publish.content",
                 note.rel,
                 note.body_start_line,
-                "`publish: true` requires substantive body content and a Markdown heading",
+                "`publish: true` requires substantive body content",
             )
         )
     example_signal = (
