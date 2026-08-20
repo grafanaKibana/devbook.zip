@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T14:02:44.178Z
-modified: 2026-07-25T13:51:15.250Z
-published: 2026-07-25T13:51:15.250Z
+created: 2026-08-20T20:41:15.696Z
+modified: 2026-08-20T20:41:15.696Z
+published: 2026-08-20T20:41:15.696Z
 topic:
   - Software Architecture
 subtopic:
@@ -14,9 +14,9 @@ priority: High
 status: Ready to Repeat
 ---
 
-Think of remote controls and TVs. Any remote — basic, smart, universal — can operate any TV — Samsung, LG, Sony. The remote is the abstraction (what you want to do: power, volume, channel), the TV is the implementation (how it actually gets done). Adding a new TV brand doesn’t require redesigning any remote. Adding a new remote type doesn’t require changing any TV. The two hierarchies vary independently because they’re connected by a bridge, not welded together by inheritance.
+A remote control defines operations such as power and volume. A television brand supplies the hardware-specific implementation. Connecting the two through a stable device interface allows either side to change without rebuilding the other hierarchy.
 
-The Bridge pattern decouples an abstraction from its implementation so they can evolve independently. The abstraction holds a reference to an implementation interface (the "bridge") rather than inheriting from a concrete class. In an e-commerce system, payment types (single charge, subscription, refund) are the abstraction dimension, and payment providers (Stripe, PayPal, BankTransfer) are the implementation dimension. Without Bridge, you’d need `StripeCharge`, `StripeSubscription`, `StripeRefund`, `PayPalCharge`, `PayPalSubscription`... — a combinatorial explosion. With Bridge, each abstraction delegates to whichever provider implementation it received.
+The Bridge pattern separates an abstraction from its implementation so both can evolve independently. The abstraction holds an implementation interface instead of inheriting from a concrete implementation. For payments, operation types such as charges or refunds form one dimension, while providers form another. Combining both dimensions through inheritance produces classes such as `StripeCharge` and `PayPalRefund`. A bridge keeps the two sets separate and joins them through delegation.
 
 ```mermaid
 classDiagram
@@ -48,7 +48,7 @@ classDiagram
 ```
 
 > [!NOTE] Bridge vs Adapter
-> [[Software Architecture/Patterns/Design Patterns/Structural/Adapter]] is a **retrofit** — you adapt an existing interface you can't change. Bridge is **designed upfront** — you plan the abstraction/implementation split from the start. If you're integrating a legacy system, use Adapter. If you're designing a new system with multiple dimensions of variation, use Bridge.
+> [[Software Architecture/Patterns/Design Patterns/Structural/Adapter]] retrofits an interface that cannot be changed. Bridge is designed around two independent dimensions from the start. Legacy integration points toward Adapter. A new model with independently growing abstractions and implementations points toward Bridge.
 
 # Problem
 
@@ -72,11 +72,11 @@ public class PaymentService
 }
 ```
 
-Here's what breaks when requirements change: adding a "partial refund" payment type requires implementing it for every provider. Adding a new provider requires implementing every payment type. The two dimensions are locked together.
+A partial refund must be implemented once per provider, and every new provider needs its own version of every payment operation. The two dimensions are locked together.
 
 # Solution
 
-Separate the payment type abstraction from the provider implementation:
+Separate payment operations from provider implementations:
 
 ```csharp
 // Implementation interface — the "bridge"
@@ -170,51 +170,49 @@ var paypalGateway = new PayPalGateway(paypalOptions);
 var paypalCharge = new SingleChargePayment(paypalGateway);
 ```
 
-Adding a new payment type now means one new `PaymentOperation` subclass that works with all existing gateways. Adding a new provider means one new `IPaymentGateway` implementation that works with all existing payment types.
+A new payment-operation variant expressible through the existing gateway primitives needs one `PaymentOperation` subclass. A new provider needs one `IPaymentGateway` implementation. Adding a genuinely new primitive changes `IPaymentGateway` and every provider implementation; Bridge prevents a provider-by-operation subclass cross-product, not evolution of the shared implementor contract.
 
-# You Already Use This
+# Related .NET Abstractions
 
-**ADO.NET `DbConnection` / `DbCommand`** — the canonical .NET Bridge. `DbConnection` is the abstraction; `SqlConnection`, `NpgsqlConnection`, `MySqlConnection` are the implementations. `DbCommand` is another abstraction; `SqlCommand`, `NpgsqlCommand` are implementations. You can write provider-agnostic data access code against `DbConnection`/`DbCommand`.
+**ADO.NET `DbConnection` / `DbCommand`** provide base types for database-specific implementations such as `SqlConnection`. This is provider polymorphism, not a clear Bridge by itself: application code still varies along one provider dimension unless a separate abstraction hierarchy composes with it.
 
-**`ILogger<T>` + providers** — `ILogger<T>` is the abstraction; Console, Serilog, Application Insights, and NLog are implementations. The logging abstraction varies independently of the logging destination.
+**`ILogger<T>` and logging providers** separate logging calls from destinations. That boundary is closer to Strategy or ordinary interface polymorphism because the consumer has no second abstraction hierarchy that varies independently.
 
-**`IDistributedCache`** — the abstraction for distributed caching. `StackExchangeRedisCache`, `SqlServerCache`, and `MemoryDistributedCache` are implementations. Application code depends on `IDistributedCache`; the provider is swapped via DI registration.
+**`IDistributedCache`** follows the same shape. DI selects one cache implementation behind one application-facing interface. It becomes Bridge-like only when another independently changing abstraction composes with that provider contract.
 
 # Pitfalls
 
-**Premature abstraction when only one implementation exists** — if you only have Stripe today and no concrete plans for PayPal, the Bridge adds two class hierarchies for no current benefit. Start with a direct implementation; introduce Bridge when the second dimension of variation appears. The cost of premature Bridge: extra indirection, harder to trace execution, more classes to maintain.
+**Premature abstraction.** One implementation and one operation do not need two class hierarchies. A direct implementation is easier to trace. Bridge earns its extra indirection when the second independent dimension appears.
 
-**Abstraction leaking implementation details** — if `IPaymentGateway` exposes Stripe-specific concepts (like `PaymentIntentId`), the abstraction is polluted. The gateway interface should speak in domain terms (`transactionId`, `amount`, `currency`), not provider terms. Leaky abstractions force all implementations to support concepts that only one provider uses.
+**Implementation details in the bridge.** A gateway that exposes `PaymentIntentId` has embedded a Stripe concept in the shared contract. Provider-neutral terms such as `transactionId` keep other implementations from pretending to support a foreign model.
 
-**Misidentifying the two dimensions** — Bridge requires two genuinely orthogonal dimensions. If payment type and provider are actually coupled (subscriptions only work with Stripe), Bridge creates false flexibility. Verify that every combination of abstraction × implementation is valid before committing to the pattern.
+**False independence.** Bridge assumes the combinations are meaningful. If subscriptions only work with Stripe, provider and payment type are coupled, and the abstraction advertises flexibility the system does not have.
 
 # Tradeoffs
 
 | Concern | Bridge | Monolithic class hierarchy |
 |---|---|---|
 | Adding a new provider | One new implementation class | N new methods (one per payment type) |
-| Adding a new payment type | One new abstraction class | M new methods (one per provider) |
+| Adding an operation variant from existing gateway primitives | One new abstraction class | M new methods (one per provider) |
 | Shared logic (retry, logging) | In the abstraction base class | Duplicated across all methods |
 | Complexity | Two class hierarchies, indirection | Single hierarchy, direct calls |
 | Testability | Mock `IPaymentGateway` for abstraction tests | Must mock entire service |
 
-**Decision rule**: Use Bridge when you have 2+ implementations today AND expect 2+ abstractions, or vice versa. The break-even is roughly 2×2 = 4 combinations. Below that, a simpler approach (strategy, direct implementation) is less overhead. The signal is when you find yourself writing the same logic in multiple methods that differ only in the provider they call.
+Bridge becomes useful when both dimensions already vary or are about to vary. A 2×2 = 4 combination is a useful prompt to inspect the design, though repeated methods that differ only by provider are stronger evidence. With one dimension, Strategy or a direct implementation is usually enough.
 
 # Questions
 
-> [!QUESTION]- How do you decide whether to use Bridge or Strategy for payment provider selection?
-> Strategy selects an algorithm at runtime — the client chooses which strategy to inject. Bridge separates two dimensions of variation that both need to evolve independently. If you only need to swap payment providers (one dimension), Strategy is sufficient: inject `IPaymentGateway` and let the client choose. Bridge adds value when you also need payment types to vary independently — when both dimensions grow. The structural difference: Strategy has one interface; Bridge has two (abstraction + implementation). Use Strategy first; introduce Bridge when the second dimension appears.
+> [!QUESTION]- When does payment-provider selection need Bridge rather than Strategy?
+> Strategy swaps one behavior behind an interface. Bridge connects two independently changing models. Provider selection alone needs Strategy. Provider selection combined with a growing set of payment operations may justify Bridge.
 
-> [!QUESTION]- Why does ADO.NET use Bridge instead of just having SqlCommand implement ICommand directly?
-> Because the abstraction (`DbCommand`) and the implementation (`SqlConnection`) need to vary independently. `DbCommand` defines what operations are possible (execute, prepare, cancel); `SqlCommand` defines how they're executed against SQL Server. A new database provider (PostgreSQL) can implement `DbConnection`/`DbCommand` without changing the abstraction. A new command type (batch command) can be added to the abstraction without changing providers. If `SqlCommand` directly implemented `ICommand` without the Bridge hierarchy, adding PostgreSQL support would require duplicating the entire command abstraction. The cost: the hierarchy is complex; understanding ADO.NET requires understanding both layers.
+> [!QUESTION]- What makes the payment example Bridge rather than ordinary provider polymorphism?
+> Both sides vary. `PaymentOperation` has charge, subscription, or refund variants, while `IPaymentGateway` has Stripe, PayPal, or bank implementations. Provider implementations can grow independently, and operation variants can grow independently while they compose existing gateway primitives. A new primitive still changes the gateway contract and every provider. Injecting only one gateway behind one service interface would be ordinary polymorphism or Strategy.
 
-> [!QUESTION]- What's the difference between Bridge and Dependency Injection?
-> DI is a mechanism for providing dependencies; Bridge is a structural pattern for organizing class hierarchies. They're complementary: you use DI to inject the `IPaymentGateway` implementation into the `PaymentOperation` abstraction. DI doesn't tell you how to structure the classes — Bridge does. Without Bridge, DI would inject a single `IPaymentService` that handles both dimensions; with Bridge, DI injects the gateway into the abstraction, and the abstraction handles the payment type logic. Bridge defines the structure; DI wires it together.
+> [!QUESTION]- How does Bridge differ from dependency injection?
+> Dependency injection supplies an object with its dependencies. Bridge is the design decision to keep an abstraction and its implementation as separate models that can vary independently and connect through composition. DI can wire an `IPaymentGateway` into a `PaymentOperation`, but that wiring does not create the two dimensions or prove that they need to evolve separately.
 
 # References
 
-- [Bridge Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=F1YQ7YRjttI\&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc\&index=11) — video walkthrough of the Bridge pattern with OOP examples
-- [Bridge — refactoring.guru](https://refactoring.guru/design-patterns/bridge) — canonical pattern description with structure diagram and C# example
-- [DbConnection — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.data.common.dbconnection) — ADO.NET's Bridge abstraction for database connections
-- [IDistributedCache — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.caching.distributed.idistributedcache) — .NET caching Bridge with multiple provider implementations
-- [Design Patterns: Elements of Reusable Object-Oriented Software — GoF](https://www.amazon.com/Design-Patterns-Elements-Reusable-Object-Oriented/dp/0201633612) — original Bridge pattern definition and Handle/Body idiom
+- [Bridge pattern](https://refactoring.guru/design-patterns/bridge)
+- [Bridge Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=F1YQ7YRjttI\&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc\&index=11)
+- [IDistributedCache — .NET caching Bridge with multiple provider implementations](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.caching.distributed.idistributedcache)

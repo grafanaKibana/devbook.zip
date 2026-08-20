@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T14:02:44.080Z
-modified: 2026-07-25T13:57:51.935Z
-published: 2026-07-25T13:57:51.935Z
+created: 2026-08-20T20:41:15.628Z
+modified: 2026-08-20T20:41:15.628Z
+published: 2026-08-20T20:41:15.628Z
 topic:
   - Networks
 subtopic:
@@ -14,9 +14,9 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-A VPN (Virtual Private Network) creates an encrypted tunnel between two endpoints so traffic flows as if both are on the same private network, even over the public internet. You reach for it to access private resources remotely, connect geographically separated offices, or secure traffic over untrusted networks (public Wi-Fi, cloud provider links).
+A virtual private network carries selected traffic through an authenticated, encrypted tunnel over another network. Routing and policy make remote addresses reachable through a virtual interface. The tunnel does not automatically grant access or place every endpoint on one flat network.
 
-The key engineering work is not just encryption — it is routing, DNS, identity, and split-tunnel policy: deciding which traffic goes through the tunnel and which goes directly to the internet.
+Encryption protects the tunnel hop. The rest of the design decides who may establish it, which prefixes enter it, how names resolve, what the gateway may reach, and whether traffic can bypass inspection.
 
 # How It Works
 
@@ -29,52 +29,52 @@ flowchart LR
   D -->|Direct| I[Internet]
 ```
 
-**Split tunneling:** only traffic destined for private resources goes through the tunnel; internet traffic goes directly. This reduces gateway load and latency for non-private traffic.
+**Split tunneling:** selected prefixes or applications use the tunnel while other traffic follows the local route. This reduces gateway load and often shortens the path for public traffic, but it creates two simultaneous trust paths on the endpoint.
 
-**Full tunneling:** all traffic goes through the gateway. Useful when you need to enforce corporate security policies on all outbound traffic.
+**Full tunneling:** the VPN installs a default route through the gateway. Central inspection becomes possible, at the cost of gateway capacity, a longer path, and a larger outage boundary.
 
 # VPN Types
 
 **Client VPN (remote access)**
-A single device connects to a gateway. Common for remote workers accessing corporate resources. The device gets a virtual IP on the private network.
+A device authenticates to a gateway and receives routes, addressing, and DNS policy for protected resources. Authorization still belongs to the gateway and downstream services.
 
 **Site-to-site VPN**
-Two networks connect via gateways. Traffic between the networks flows through the tunnel transparently. Used to connect branch offices or cloud VPCs to on-premises networks.
+Gateways connect selected prefixes from two networks. Route overlap, asymmetric paths, failover, and traffic selectors matter as much as tunnel establishment.
 
 **Mesh VPN (overlay)**
-Instead of routing everything through a central gateway (hub-and-spoke), every device connects **directly** to every other (peer-to-peer), with a coordination plane handling key exchange and NAT traversal. Tailscale/Netbird (WireGuard-based) popularized this: lower latency (no gateway hop), no single chokepoint, at the cost of a control plane that manages identities.
+An overlay control plane distributes peer identity, keys, and routes. Endpoints attempt direct paths and may use relays when NAT or firewall policy prevents them. This can avoid a central data-plane gateway, while the control plane and relay fleet remain availability dependencies.
 
 # Beyond the VPN: Zero Trust (ZTNA)
 
-The traditional VPN model is **"authenticate once, get the whole network"** — a flat trust boundary where a compromised laptop can reach everything. **Zero Trust Network Access (ZTNA)** replaces it with _per-application_, continuously-verified access: every request is authenticated and authorized against identity + device posture, and a user reaches only the specific apps they're entitled to, never the underlying network. The mantra is "never trust, always verify." Many "modern VPN" products (Tailscale, Cloudflare Access, Zscaler) are really ZTNA overlays. This matters because the classic VPN's all-or-nothing network access is one of the biggest **lateral-movement** risks in breaches.
+A tunnel supplies connectivity, not least privilege. Broad routes and permissive network ACLs let a compromised endpoint explore far beyond the application it needed. ZTNA designs narrow the exposed surface by authorizing access to a specific service using identity and device signals. The two approaches can coexist: a VPN may carry traffic while application and network policy still enforce per-resource authorization.
 
 # Protocols
 
 **IPsec**
-The traditional standard. Operates at the network layer (Layer 3). Supports two modes:
+The traditional standard operates at the network layer. With ESP, two common modes are:
 
-- _Transport mode_: encrypts only the payload, used for host-to-host.
-- _Tunnel mode_: encrypts the entire packet, used for site-to-site and client VPN.
+- _Transport mode_: protects the upper-layer payload while leaving the original IP header available for routing, commonly used host to host.
+- _Tunnel mode_: protects an encapsulated IP packet inside a new outer packet, commonly used through gateways.
 
-IPsec is complex to configure (IKE negotiation, SA management) but is widely supported by hardware appliances and cloud providers (AWS VPN, Azure VPN Gateway).
+IPsec separates key management from packet protection through IKE and security associations. Its broad platform and appliance support makes it common for site-to-site interoperability, while the policy surface makes troubleshooting demanding.
 
 **WireGuard**
-A modern, minimal protocol (~4,000 lines of code vs IPsec's ~400,000). Uses state-of-the-art cryptography (ChaCha20, Curve25519, BLAKE2). Faster handshake, simpler configuration, and better performance than IPsec in most benchmarks. Supported natively in Linux kernel since 5.6. Used by Tailscale, Cloudflare WARP, and many cloud providers.
+WireGuard uses a small protocol surface and a fixed suite built from ChaCha20-Poly1305, Curve25519, BLAKE2s, SipHash24, and HKDF. Peers are identified by public keys, while `AllowedIPs` acts as both routing configuration and a source-address policy. Performance still depends on implementation, platform, packet size, and hardware.
 
 **OpenVPN**
-TLS-based, runs over UDP or TCP. Highly portable and widely supported. Slower than WireGuard due to TLS overhead and userspace implementation.
+OpenVPN uses TLS for control-channel security and can carry its tunnel over UDP or TCP. Its mature cross-platform ecosystem is useful when existing clients and network policy already support it. Running a TCP tunnel over TCP can amplify loss-related stalls, so UDP is normally the better transport when available.
 
 | Protocol | Layer | Complexity | Performance | Use case |
 |----------|-------|------------|-------------|----------|
-| IPsec | 3 | High | Good | Enterprise, hardware appliances |
-| WireGuard | 3 | Low | Excellent | Modern deployments, cloud |
-| OpenVPN | App | Medium | Moderate | Legacy, cross-platform |
+| IPsec | 3 | Broad policy surface | Implementation-dependent | Appliance and cloud-gateway interoperability |
+| WireGuard | 3 | Low protocol surface | Implementation-dependent | Key-based routed overlays and remote access |
+| OpenVPN | TLS tunnel over UDP/TCP | Mature but configurable | Implementation-dependent | Existing cross-platform client fleets |
 
 # Tradeoffs
 
-**IPsec vs WireGuard vs OpenVPN**: see the protocol comparison table in the Protocols section. Decision rule: default to WireGuard for new deployments (simpler, faster, smaller attack surface — ~4,000 lines vs ~400,000 for IPsec). Use IPsec when you need hardware appliance compatibility or regulatory mandate. Use OpenVPN only as a fallback for environments where WireGuard is not yet supported.
+**IPsec vs WireGuard vs OpenVPN:** interoperability decides first. IPsec is the common boundary for network appliances and cloud gateways. WireGuard keeps the protocol and configuration surface small when both endpoints support it. OpenVPN remains practical for established client fleets and restrictive environments. Benchmark the actual implementations instead of treating protocol choice as a universal performance ranking.
 
-**Full tunnel vs split tunnel**: full tunnel routes all traffic through the VPN gateway, enforcing corporate security policies (content filtering, DLP) on all outbound traffic at the cost of increased gateway load and latency for internet traffic. Split tunnel routes only private-destined traffic through the VPN, reducing gateway bandwidth cost, but requires precise ACLs — overly broad rules can expose private resources to the internet.
+**Full tunnel vs split tunnel:** full tunnel gives the gateway a chance to inspect outbound traffic but increases its capacity and availability burden. Split tunnel reduces that burden and keeps public traffic local, while the endpoint remains attached to both trusted and untrusted paths. Neither mode replaces destination authorization or endpoint controls.
 
 WireGuard peer configuration (client side):
 
@@ -91,31 +91,19 @@ AllowedIPs = 10.0.0.0/24   # split tunnel: only private subnet
 PersistentKeepalive = 25
 ```
 
-# Questions
-
-> [!QUESTION]- What is split tunneling and when would you use it?
-> Split tunneling routes only traffic destined for private resources through the VPN; internet traffic goes directly. Use it to reduce gateway bandwidth cost and latency for internet-bound traffic. Avoid it when corporate policy requires all traffic to pass through security inspection (content filtering, DLP).
-
-> [!QUESTION]- Why does WireGuard have a smaller attack surface than IPsec?
-> WireGuard is ~4,000 lines of code (auditable by a small team) vs IPsec's ~400,000 lines. Fewer lines means fewer potential vulnerabilities. WireGuard also uses a fixed, modern cryptographic suite (ChaCha20, Curve25519, BLAKE2) with no negotiation — removing cipher selection as an attack vector.
-
-> [!QUESTION]- What causes DNS leaks in a VPN setup, and how do you fix them?
-> DNS queries bypass the encrypted tunnel — typically because the OS sends DNS requests to the default interface rather than the VPN interface. Fix: route DNS through the tunnel by setting DNS to an internal server and ensuring DNS requests use the VPN's routing table, or by running a local DNS resolver that forces all queries through the tunnel.
-
 # Pitfalls
 
 **DNS leaks**
-If DNS queries bypass the tunnel, they reveal browsing activity to the ISP even when traffic is encrypted. Fix: route DNS through the tunnel or use a DNS server inside the private network.
+If protected-name queries bypass the tunnel, they may expose names and can return answers inconsistent with the private network. Resolver policy must follow the same routing boundary as the names it serves.
 
 **Split-tunnel misconfiguration**
-Overly broad split-tunnel rules can expose private resources to the internet. Overly narrow rules force unnecessary traffic through the gateway, increasing latency and cost.
+Overly broad advertised routes send unrelated traffic through the gateway. Missing routes bypass required controls or make private destinations unreachable. Route tables and ACLs should be tested independently because one controls the path and the other controls permission.
 
 **MTU issues**
-VPN encapsulation adds overhead (20–60 bytes per packet). If the MTU is not adjusted, large packets get fragmented, degrading performance. Fix: set the VPN interface MTU to account for encapsulation overhead (e.g., 1420 for WireGuard over a 1500-byte Ethernet link).
+Encapsulation reduces the payload that fits within the underlying path MTU. A guessed interface MTU may work on one path and fail on another. Preserve Packet Too Big feedback, measure the real path, and set interface MTU or TCP MSS only when the tunnel boundary requires it.
 
 # References
 
-- [WireGuard official site](https://www.wireguard.com/) — protocol design, performance benchmarks, and implementation guide for the modern VPN standard.
-- [IPsec architecture (RFC 4301)](https://www.rfc-editor.org/rfc/rfc4301) — the authoritative specification for IPsec tunnel and transport modes.
-- [Virtual private network (Wikipedia)](https://en.wikipedia.org/wiki/Virtual_private_network) — overview of VPN types, protocols, and use cases.
-- [WireGuard vs OpenVPN vs IPsec (Tailscale blog)](https://tailscale.com/blog/how-tailscale-works) — practitioner comparison of VPN protocols with real-world performance data.
+- [WireGuard](https://www.wireguard.com/)
+- [Security Architecture for the Internet Protocol](https://www.rfc-editor.org/rfc/rfc4301)
+- [How Tailscale works](https://tailscale.com/blog/how-tailscale-works)

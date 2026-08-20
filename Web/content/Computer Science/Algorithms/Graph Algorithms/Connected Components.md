@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T14:02:43.942Z
-modified: 2026-08-08T09:12:51.614Z
-published: 2026-08-08T09:12:51.614Z
+created: 2026-08-20T20:41:15.513Z
+modified: 2026-08-20T20:41:15.514Z
+published: 2026-08-20T20:41:15.514Z
 topic:
   - Computer Science
 subtopic:
@@ -14,11 +14,11 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-A social graph has 10M users and an edge for every friendship. "Which users belong to the same cluster as Ann?" and "how many disconnected clusters are there?" are the same question: find the **connected components**. A component is a maximal set of vertices in which every pair is joined by _some_ path — in an undirected graph, reachability is symmetric, so "u reaches v" and "u and v are in the same component" mean the same thing. That symmetry is what separates this from the directed case: [[Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components|strongly connected components]] needs paths _both ways_ and a two-pass or low-link algorithm; here one ordinary traversal suffices.
+In a friendship graph with 10M users, asking which users are connected to Ann and asking which cluster contains Ann are the same problem. A **connected component** is a maximal set of vertices where every pair is joined by some path. Reachability is symmetric in an undirected graph, so one traversal from any vertex covers its whole component. Directed graphs need a different definition: [[Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components|strongly connected components]] require paths in both directions and a two-pass or low-link algorithm.
 
-The two mechanisms fit different workloads. For a static graph, [[Computer Science/Algorithms/Graph Algorithms/DFS BFS|DFS or BFS]] floods each reachable region and assigns its component id. For incremental edges, **[[Computer Science/Data Structures/Graph Structures/Union-Find|union-find]]** merges each edge's endpoints and answers interleaved `connected(a, b)` queries without rebuilding the partition.
+The implementation depends on how the graph changes. For a static graph, [[Computer Science/Algorithms/Graph Algorithms/DFS BFS|DFS or BFS]] floods each reachable region and assigns a component id. When edges arrive incrementally, **[[Computer Science/Data Structures/Graph Structures/Union-Find|union-find]]** merges their endpoints and answers `connected(a, b)` queries without rebuilding the partition.
 
-The decisive detail is the outer loop: a single DFS from one source finds only _that_ vertex's component. Covering a disconnected graph means restarting the traversal from each vertex the previous floods never reached.
+The outer loop does the work that is easy to miss. One DFS finds only its source component. Finding the full partition requires another flood from every vertex left unlabelled by earlier traversals.
 
 ````tabsdown
 tab: Visualization
@@ -48,7 +48,7 @@ F unlabelled -> flood id 2: reach F       component = [0,0,0,1,1,2]  id -> 3
 DFS and BFS produce identical labels — the partition does not depend on visit order, only on which vertices are mutually reachable.
 
 
-When edges arrive over time, [[Computer Science/Data Structures/Graph Structures/Union-Find|union-find]] maintains the partition incrementally: initialize `V` singleton roots, then union each edge's endpoints. This is the same [[Computer Science/Data Structures/Graph Structures/Disjoint Set|disjoint-set]] forest used by [[Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree|Kruskal's MST]]; its canonical page carries the tree and compression mechanics.
+When edges arrive over time, [[Computer Science/Data Structures/Graph Structures/Union-Find|union-find]] maintains the partition incrementally: initialize `V` singleton roots, then union each edge's endpoints. This is the same [[Computer Science/Data Structures/Graph Structures/Disjoint Set|disjoint-set]] forest used by [[Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree|Kruskal's MST]]; union by rank keeps trees shallow, and path compression flattens the route each `find` traverses.
 
 tab: Complexity
 
@@ -135,7 +135,7 @@ tab: Complexity
 With adjacency lists, traversal visits each vertex once and scans each stored adjacency entry once. An undirected edge appears in two adjacency lists, which changes the constant count of scans but not the charted bound.
 ````
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Three components in an undirected graph
 >
@@ -197,20 +197,8 @@ With adjacency lists, traversal visits each vertex once and scans each stored ad
 
 # Comparison
 
-On a static, in-memory undirected graph, DFS or BFS labelling is the direct answer — one sweep, per-vertex ids, and component membership fall out together; pick the iterative form when recursive depth could overflow the call stack. Reserve [[Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components|strongly connected components]] for directed graphs: on an undirected graph its extra machinery collapses to exactly these connected components, so it is wasted effort here.
-
-# Questions
-
-> [!QUESTION]- Why does finding all components need an outer loop over every vertex?
-> A single DFS or BFS from one source only reaches that source's component. In a disconnected graph, vertices in other components are never touched by that flood. Scanning every vertex and starting a new flood from each still-unlabelled one is what guarantees full coverage; each such vertex is provably in a component no earlier flood reached, so it starts a new component id.
-
-> [!QUESTION]- Why do DFS and BFS produce the same components but different from strongly connected components?
-> Connected components depend only on which vertices are mutually reachable, which is order-independent, so DFS and BFS partition identically. Strongly connected components are defined on _directed_ graphs and require a path each way between every pair; a single undirected-style traversal cannot detect that, which is why the directed case needs Tarjan's or Kosaraju's two-way-reachability algorithm.
+For a static undirected graph, DFS or BFS labelling is the direct answer. One sweep produces both per-vertex ids and the component count. An iterative traversal avoids recursion overflow on deep graphs. [[Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components|strongly connected components]] belong to directed graphs. Their extra machinery adds nothing on an undirected input.
 
 # References
 
-- [Connected component (graph theory) (Wikipedia)](https://en.wikipedia.org/wiki/Component_\(graph_theory\)) — definition of a component as a maximal connected subgraph and the labelling procedure.
-- [Undirected graphs (Sedgewick & Wayne, Algorithms 4th ed.)](https://algs4.cs.princeton.edu/41graph/) — the `CC` class computing component ids with DFS, plus the connectivity query it enables.
-- [Search for connected components in a graph (cp-algorithms)](https://cp-algorithms.com/graph/search-for-connected-components.html) — DFS-based component enumeration with a reference implementation.
-- [Disjoint Set Union (cp-algorithms)](https://cp-algorithms.com/data_structures/disjoint_set_union.html) — the union-find approach to incremental connectivity and component counting.
-- [Efficiency of a Good But Not Linear Set Union Algorithm](https://doi.org/10.1145/321879.321884) — Tarjan's primary analysis of union by rank with path compression.
+- [Search for connected components in a graph](https://cp-algorithms.com/graph/search-for-connected-components.html)

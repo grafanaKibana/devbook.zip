@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T14:02:43.950Z
-modified: 2026-08-08T07:30:30.428Z
-published: 2026-08-08T07:30:30.428Z
+created: 2026-08-20T20:41:15.520Z
+modified: 2026-08-20T20:41:15.520Z
+published: 2026-08-20T20:41:15.520Z
 topic:
   - Computer Science
 subtopic:
@@ -14,9 +14,9 @@ priority: High
 status: Ready to Repeat
 ---
 
-A build system holds a set of compilation units, each declaring which units must be built before it. Those dependencies form a directed graph: an edge `u → v` means `u` must precede `v`. The recurring question during scheduling is which unit can be built right now — one whose every prerequisite is already built. Topological sort answers that question for the whole graph at once: it produces a linear ordering of the vertices in which every edge points forward, so for each `u → v`, `u` appears before `v`.
+A build system needs an order that respects every dependency. Model each prerequisite as an edge `u → v`, meaning `u` must be built before `v`. A topological sort produces a linear vertex order in which every edge points forward, so `u` appears before `v` for each such edge.
 
-Such an order exists only when the dependencies are acyclic. A cycle `a → b → … → a` demands `a` before `b` and `b` before `a` simultaneously, which no linear order can satisfy. The construction that emits the order also settles this question: a directed graph admits a topological order exactly when it is acyclic.
+The order exists only when the dependency graph is acyclic. A cycle `a → b → … → a` eventually requires `a` to precede itself. Both standard constructions detect that contradiction while attempting to build the order: a directed graph is topologically sortable exactly when it is a DAG.
 
 ````tabsdown
 tab: Visualization
@@ -120,13 +120,13 @@ tab: Complexity
 
 # Where the Order Fails or Splits
 
-A topological order exists if and only if the graph is a DAG, and both constructions surface a violation instead of returning garbage. Kahn's emits fewer than `V` vertices: the vertices trapped behind a cycle keep at least one incoming edge from another cycle member, so their in-degree never reaches 0 and they are never enqueued. DFS reports the cycle the instant it follows an edge to a vertex still open on the recursion stack — a descendant reaching an ancestor, a back edge. Testing the emitted count, or the color, is the acyclicity check; a `null`/`false` result is frequently the answer the caller wanted (which modules form the circular dependency).
+Both constructions expose a cycle instead of returning a partial order as if it were valid. Kahn's emits fewer than `V` vertices because every vertex trapped in a cycle keeps an incoming edge and never reaches in-degree 0. DFS detects a back edge to a vertex still open on the recursion stack. The emitted count or DFS color state is therefore part of the result, not an optional check.
 
-The order is generally not unique. Whenever two or more vertices sit at in-degree 0 together — as `B` and `C` do above — the choice between them is free, and any DAG with such a moment admits several valid orders.
+The order is usually not unique. Whenever several vertices have in-degree 0 at once, as `B` and `C` do above, any of them may be chosen next. A fixed tie-break is needed when downstream work expects a reproducible order.
 
-Direction is load-bearing. An undirected edge carries no before/after, so topological sort is undefined on undirected graphs, and a directed graph with even one cycle has no order at all. Both cases lie outside the DAG precondition and are not repaired by the algorithm — they are detected by it.
+Direction carries the dependency meaning. An undirected edge says nothing about which endpoint comes first, so topological sort is defined only for directed input. A cycle in that directed graph leaves no valid order, and both constructions detect it.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Kahn's control flow
 >
@@ -175,25 +175,14 @@ Direction is load-bearing. An undirected edge carries no before/after, so topolo
 
 | Approach | Traversal | Order produced | Cycle signal | Tie-break control |
 | --- | --- | --- | --- | --- |
-| Kahn's | BFS over the in-degree-0 frontier, iterative | Emission order | Fewer than `V` vertices emitted | Priority queue yields a canonical (e.g. lexicographically smallest) order |
-| DFS-based | Recursive depth-first | Reverse postorder (decreasing finish time) | Back edge to a vertex on the recursion stack | Fixed by traversal order; no natural tie-break |
+| Kahn's | BFS over the in-degree-0 frontier, iterative | Emission order | Fewer than `V` vertices emitted | Priority queue yields a canonical (e.g. Lexicographically smallest) order |
+| DFS-based | Recursive depth-first | Reverse postorder (decreasing finish time) | Back edge to a vertex on the recursion stack | Fixed by traversal order. No natural tie-break |
 
-Kahn's fits when cycle detection and iterative control matter: the count check is a free acyclicity test, the frontier is an explicit queue with no recursion-depth ceiling, and a priority queue turns it deterministic. DFS reverse-postorder is the compact choice when a recursive traversal is already in place, because it hands back finish times that other algorithms reuse. [[Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components|Strongly Connected Components]] detection connects here: Kosaraju's is built on exactly those finish times, while Tarjan's uses DFS discovery indices and low-links, emitting components in reverse topological order as it unwinds. Contracting each strongly connected component of a general digraph to a single vertex gives the condensation, which is always a DAG and therefore topologically sortable even when the original graph is not. DAG path computations can follow this order directly instead of using [[Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]].
+Kahn's fits iterative schedulers. Its queue makes the ready frontier explicit, the emitted-count check detects cycles, and a priority queue gives deterministic tie-breaking without recursion. DFS reverse postorder is shorter when a recursive traversal already exists and finish times will be reused.
 
-# Questions
-
-> [!QUESTION]- Why does a topological order exist only for a DAG?
-> A valid order must place `u` before `v` for every edge `u → v`. A cycle `a → b → … → a` would require `a` before `b` and `b` before `a` at once, which is impossible. So an order exists iff the graph is acyclic, and the construction that finds the order doubles as the acyclicity test.
-
-> [!QUESTION]- How does each construction detect a cycle?
-> Kahn's only enqueues a vertex when its in-degree reaches 0. A vertex on a cycle keeps at least one incoming edge from another cycle member, so its count never reaches 0 and it is never emitted; an output shorter than `V` means a cycle remains. The DFS construction reports a cycle when it follows an edge to a vertex still open on the recursion stack — a descendant reaching an ancestor.
-
-> [!QUESTION]- Why is the topological order generally not unique, and how is a deterministic one obtained?
-> Whenever two or more vertices have in-degree 0 at the same time, either may be emitted next, so most DAGs admit many orders. Keying Kahn's frontier with a priority queue instead of a plain queue fixes the choice — for example always taking the smallest label yields the lexicographically smallest order.
+[[Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components|Strongly Connected Components]] connect the two ideas. Kosaraju's algorithm uses DFS finish times, while Tarjan's emits components in reverse topological order as it unwinds. Contracting every SCC in a general digraph produces a DAG, so the condensation remains topologically sortable even when the original graph is cyclic. Path computations on that DAG can follow the order directly instead of using [[Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]].
 
 # References
 
-- [Topological sorting of large networks (Kahn, 1962)](https://dl.acm.org/doi/10.1145/368996.369025) — the original in-degree/queue construction the algorithm is named after.
-- [Topological sorting (Wikipedia)](https://en.wikipedia.org/wiki/Topological_sorting) — both constructions with correctness proofs and the reverse-postorder argument.
-- [Topological sort (cp-algorithms)](https://cp-algorithms.com/graph/topological-sort.html) — DFS finish-time implementation, cycle handling, and applications.
-- [Course Schedule II (LeetCode #210)](https://leetcode.com/problems/course-schedule-ii/) — topological order with cycle detection as an exercise; returns an empty order when the prerequisites cycle.
+- [Topological sorting of large networks (Kahn, 1962)](https://dl.acm.org/doi/10.1145/368996.369025)
+- [Topological sort (cp-algorithms)](https://cp-algorithms.com/graph/topological-sort.html)

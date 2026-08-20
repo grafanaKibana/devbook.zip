@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T14:02:44.179Z
-modified: 2026-07-25T13:51:15.247Z
-published: 2026-07-25T13:51:15.247Z
+created: 2026-08-20T20:41:15.698Z
+modified: 2026-08-20T20:41:15.699Z
+published: 2026-08-20T20:41:15.699Z
 topic:
   - Software Architecture
 subtopic:
@@ -14,9 +14,9 @@ priority: High
 status: Ready to Repeat
 ---
 
-A security guard at a building entrance is a Proxy. The guard has the same "enter" interface as an open door, but checks your badge before letting you through. Some proxies are lazy — like an automatic door that only powers on when someone approaches. Some are protective — checking credentials before granting access. Some are virtual — an intercom that represents someone who isn’t physically present. In every case, the proxy stands in front of the real thing and controls access to it.
+A proxy stands between a client and another object while exposing the same contract. It can delay expensive work, return a cached result, or reject an unauthorized call before the real object runs. The client depends on the subject interface and does not need a separate calling path for those controls.
 
-The Proxy pattern provides a surrogate for another object to control access to it. The proxy implements the same interface as the real subject and holds a reference to it, intercepting calls and deciding whether, when, and how to forward them. Three common variants: a **virtual proxy** defers expensive creation until first use (lazy-loading product images), a **caching proxy** stores results to avoid repeated work, and a **protection proxy** checks authorization before forwarding. The client interacts with the proxy transparently — it looks identical to the real object.
+That transparency is also the pattern's sharp edge. Access policy and hidden cost move behind an ordinary method call, so proxy behavior must stay observable. Common forms include a **virtual proxy** that defers creation, a **caching proxy** that reuses results, and a **protection proxy** that authorizes access.
 
 ```mermaid
 classDiagram
@@ -40,11 +40,11 @@ classDiagram
 ```
 
 > [!NOTE] Proxy vs Decorator
-> Both wrap the same interface. **Proxy CONTROLS ACCESS** — lazy loading, caching, auth. [[Software Architecture/Patterns/Design Patterns/Structural/Decorator]] **ADDS BEHAVIOR** — logging, metrics, validation. The structural difference is intent: Proxy restricts or defers; Decorator enriches. A caching proxy that also logs is a Proxy with a Decorator concern mixed in — keep them separate.
+> Both patterns wrap the same interface, but their intent differs. A proxy controls access by deferring, caching, or authorizing a call. A [[Software Architecture/Patterns/Design Patterns/Structural/Decorator|decorator]] attaches another responsibility to an object. Mixing both concerns in one wrapper makes ordering and failure behavior harder to reason about.
 
 # Problem
 
-`ProductService` loads full product details (high-res images, reviews, related products) on every request — slow and wasteful for catalog browsing:
+`ProductService` loads full product details on every request, even when a catalog view needs only a summary:
 
 ```csharp
 public class ProductService(IProductRepository repository)
@@ -65,62 +65,89 @@ public class ProductService(IProductRepository repository)
 // ⚠️ No caching — same product fetched repeatedly across requests
 ```
 
-Here's what breaks when requirements change: adding a "recently viewed" feature that loads 10 products per page makes the page 5 seconds slower because every product loads all related data.
+A "recently viewed" panel that loads 10 products would add roughly five seconds because every lookup pulls the expensive related data.
 
 # Solution
 
-Three proxy variants for the same `IProductService` interface:
+These examples show three proxy boundaries: one product instance for deferred loading, then service-level wrappers for caching and authorization.
 
 ```csharp
+using System.Collections.Immutable;
+
+public sealed record ProductSnapshot(Guid Id, string Name, decimal Price);
+
 public interface IProductService
 {
-    Task<Product> GetProductAsync(Guid productId);
-    Task<IReadOnlyList<Product>> GetCatalogAsync(int page, int pageSize);
+    Task<ProductSnapshot> GetProductAsync(Guid productId);
+    Task<ImmutableArray<ProductSnapshot>> GetCatalogAsync(int page, int pageSize);
+}
+
+public interface IProductDetails
+{
+    Task<Product> GetSummaryAsync();
+    Task<Product> GetWithHighResImagesAsync();
 }
 
 // Real subject
 public class ProductService(IProductRepository repository) : IProductService
 {
-    public Task<Product> GetProductAsync(Guid productId) =>
-        repository.GetFullProductAsync(productId); // loads everything
+    public async Task<ProductSnapshot> GetProductAsync(Guid productId)
+    {
+        var product = await repository.GetSummaryAsync(productId);
+        return new ProductSnapshot(product.Id, product.Name, product.Price);
+    }
 
-    public Task<IReadOnlyList<Product>> GetCatalogAsync(int page, int pageSize) =>
-        repository.GetCatalogAsync(page, pageSize); // loads summaries only
+    public async Task<ImmutableArray<ProductSnapshot>> GetCatalogAsync(int page, int pageSize)
+    {
+        var products = await repository.GetCatalogAsync(page, pageSize);
+        return products
+            .Select(product => new ProductSnapshot(product.Id, product.Name, product.Price))
+            .ToImmutableArray();
+    }
 }
 
-// Virtual Proxy — lazy-loads expensive data on first access
-public class LazyProductProxy(Guid productId, IProductRepository repository) : IProductService
+// Real subject — both operations load the complete product
+public class ProductDetails(Guid productId, IProductRepository repository) : IProductDetails
+{
+    private Product? _product;
+
+    public async Task<Product> GetSummaryAsync() =>
+        _product ??= await repository.GetFullProductAsync(productId);
+
+    public Task<Product> GetWithHighResImagesAsync() => GetSummaryAsync();
+}
+
+// Virtual Proxy — represents one product and defers its expensive images
+public class LazyProductProxy(Guid productId, IProductRepository repository) : IProductDetails
 {
     private Product? _product;
     private bool _imagesLoaded;
 
-    public async Task<Product> GetProductAsync(Guid productId)
-    {
-        // ✅ Load basic data immediately, expensive data only when accessed
+    public async Task<Product> GetSummaryAsync() =>
         _product ??= await repository.GetSummaryAsync(productId);
 
+    public async Task<Product> GetWithHighResImagesAsync()
+    {
+        var product = await GetSummaryAsync();
         if (!_imagesLoaded)
         {
-            _product.HighResImages = await repository.GetImagesAsync(productId);
+            product.HighResImages = await repository.GetImagesAsync(productId);
             _imagesLoaded = true; // ✅ subsequent calls use cached images
         }
 
-        return _product;
+        return product;
     }
-
-    public Task<IReadOnlyList<Product>> GetCatalogAsync(int page, int pageSize) =>
-        repository.GetCatalogAsync(page, pageSize);
 }
 
 // Caching Proxy — memoizes results to avoid repeated DB calls
 public class CachingProductProxy(IProductService inner, IMemoryCache cache) : IProductService
 {
-    public async Task<Product> GetProductAsync(Guid productId)
+    public async Task<ProductSnapshot> GetProductAsync(Guid productId)
     {
         var cacheKey = $"product:{productId}";
 
         // ✅ Return cached result if available
-        if (cache.TryGetValue(cacheKey, out Product? cached))
+        if (cache.TryGetValue(cacheKey, out ProductSnapshot? cached))
             return cached!;
 
         var product = await inner.GetProductAsync(productId);
@@ -130,11 +157,11 @@ public class CachingProductProxy(IProductService inner, IMemoryCache cache) : IP
         return product;
     }
 
-    public async Task<IReadOnlyList<Product>> GetCatalogAsync(int page, int pageSize)
+    public async Task<ImmutableArray<ProductSnapshot>> GetCatalogAsync(int page, int pageSize)
     {
         var cacheKey = $"catalog:{page}:{pageSize}";
-        if (cache.TryGetValue(cacheKey, out IReadOnlyList<Product>? cached))
-            return cached!;
+        if (cache.TryGetValue(cacheKey, out ImmutableArray<ProductSnapshot> cached))
+            return cached;
 
         var result = await inner.GetCatalogAsync(page, pageSize);
         cache.Set(cacheKey, result, TimeSpan.FromMinutes(1));
@@ -146,22 +173,17 @@ public class CachingProductProxy(IProductService inner, IMemoryCache cache) : IP
 public class AuthorizedProductProxy(IProductService inner, IAuthorizationService auth, IHttpContextAccessor ctx)
     : IProductService
 {
-    public async Task<Product> GetProductAsync(Guid productId)
+    public async Task<ProductSnapshot> GetProductAsync(Guid productId)
     {
-        var product = await inner.GetProductAsync(productId);
+        // ✅ The policy can evaluate the request-visible product ID before retrieval
+        var result = await auth.AuthorizeAsync(ctx.HttpContext!.User, productId, "ViewProduct");
+        if (!result.Succeeded)
+            throw new UnauthorizedAccessException("Product access denied");
 
-        // ✅ B2B-only products require business account
-        if (product.IsB2BOnly)
-        {
-            var result = await auth.AuthorizeAsync(ctx.HttpContext!.User, "B2BCustomer");
-            if (!result.Succeeded)
-                throw new UnauthorizedAccessException("B2B account required");
-        }
-
-        return product;
+        return await inner.GetProductAsync(productId);
     }
 
-    public Task<IReadOnlyList<Product>> GetCatalogAsync(int page, int pageSize) =>
+    public Task<ImmutableArray<ProductSnapshot>> GetCatalogAsync(int page, int pageSize) =>
         inner.GetCatalogAsync(page, pageSize);
 }
 
@@ -174,23 +196,25 @@ builder.Services.AddScoped<IProductService>(sp =>
         sp.GetRequiredService<IHttpContextAccessor>()));
 ```
 
-Adding a rate-limiting proxy now means one new class implementing `IProductService` — the real service and existing proxies never change.
+Another access policy, such as rate limiting, can be added as one more `IProductService` implementation. The service itself remains focused on product retrieval.
 
-# You Already Use This
+The process cache stores detached immutable snapshots, including an immutable catalog collection. It must not expose mutable EF-tracked entities across requests. The TTL defines freshness; write paths still need explicit invalidation when that window is too stale.
 
-**EF Core lazy-loading proxies** — `UseLazyLoadingProxies()` generates a proxy class for each entity. `order.Customer` returns a proxy; the proxy loads the `Customer` from the database on first property access. The proxy implements the same interface as the real entity.
+# Common .NET Examples
 
-**`System.Reflection.DispatchProxy`** — .NET's built-in mechanism for creating proxy classes at runtime. `DispatchProxy.Create<T, TProxy>()` generates a proxy that intercepts all interface method calls. Used by Moq, NSubstitute, and Castle DynamicProxy for test doubles.
+**EF Core lazy-loading proxies.** `UseLazyLoadingProxies()` creates derived entity proxies. Reading an unloaded, overridable navigation property can then trigger a database query. This is convenient, and it makes I/O easy to miss in an ordinary property access.
 
-**`IHttpClientFactory` + `DelegatingHandler`** — each `DelegatingHandler` in the `HttpClient` pipeline is a proxy over the inner handler. Retry handlers, auth handlers, and circuit breakers are all protection/virtual proxies over the HTTP call.
+**`System.Reflection.DispatchProxy`.** `DispatchProxy.Create<T, TProxy>()` creates a runtime-generated type that implements `T` and derives from `TProxy`. It is useful for interface interception when a handwritten wrapper would be repetitive, though dynamic code generation limits ahead-of-time compilation scenarios.
+
+**Castle DynamicProxy.** Castle can proxy interfaces and classes at runtime, with interception limited to virtual members for class proxies. Frameworks use that mechanism for concerns such as lazy loading and test doubles.
 
 # Pitfalls
 
-**Proxy hiding performance problems** — a caching proxy can mask a slow underlying service. If the cache is cold (first request, cache miss), the caller experiences the full latency. Monitor cache hit rates; a low hit rate means the proxy isn't helping and the underlying service needs optimization.
+**Hidden latency.** A caching proxy can disguise a slow service until the cache is cold. Cache-hit ratio and miss latency need separate telemetry. Otherwise the underlying bottleneck stays invisible.
 
-**Proxy chains creating unexpected behavior** — stacking a caching proxy over a protection proxy means the auth check runs on cache miss but not on cache hit. If authorization rules change, cached results bypass the new rules until they expire. Order proxies carefully: auth should be outermost (runs every time), caching should be inner (only caches authorized results).
+**Order-dependent policy.** If caching wraps authorization, a cache hit can bypass the authorization check. Authorization normally belongs outside caching so every call is checked before an authorized result is reused.
 
-**EF Core lazy-loading N+1 problem** — lazy-loading proxies load related entities one at a time. Loading 100 orders and accessing `order.Customer` for each triggers 100 separate DB queries. Use `Include()` for known access patterns; reserve lazy loading for genuinely unpredictable access.
+**Lazy-loading N+1 queries.** Loading 100 orders and then reading `order.Customer` can issue 100 additional queries. Known access paths are better expressed explicitly with `Include()` or projection.
 
 # Tradeoffs
 
@@ -202,23 +226,15 @@ Adding a rate-limiting proxy now means one new class implementing `IProductServi
 | Debugging | Extra indirection, harder to trace | Direct call, easy to trace |
 | Stale data (caching) | Risk of serving outdated results | Always fresh |
 
-**Decision rule**: Use a caching proxy when the same data is read frequently and changes infrequently (product catalog, configuration). Use a virtual proxy when initialization is expensive and the object may not always be needed. Use a protection proxy when access control must be enforced consistently across all callers. Avoid proxy chains deeper than 3 — the interaction effects become hard to reason about.
+A proxy earns its indirection when access must remain transparent and one policy applies across callers. Caching fits repeated reads of slowly changing data. Virtual proxies fit expensive objects that may never be needed, while protection proxies centralize an access decision. Deep wrapper chains are a warning sign because their order becomes part of the behavior.
 
 # Questions
 
-> [!QUESTION]- How does EF Core's lazy-loading proxy differ from a manually written virtual proxy?
-> EF Core generates the proxy class at runtime using Castle DynamicProxy — you don't write it. The proxy overrides every virtual navigation property; accessing the property triggers a DB query if the value isn't loaded. The difference from a manual proxy: EF Core's proxy is generated per entity type, not per instance; it uses the same `DbContext` that loaded the entity. A manual proxy is written once and works for all instances. The tradeoff: EF Core's proxy is automatic but requires virtual properties and a parameterless constructor; a manual proxy is explicit but requires more code.
-
-> [!QUESTION]- When should you use a caching proxy vs `IMemoryCache` directly in the service?
-> Use a caching proxy when you want caching to be transparent to the service — the service doesn't know it's being cached. This is useful when the service is a third-party class you can't modify, or when you want to swap caching strategies (in-memory vs distributed) without changing the service. Use `IMemoryCache` directly in the service when caching is a core concern of the service (e.g., a product catalog service that always caches), or when you need fine-grained control over cache keys and expiration. The tradeoff: proxy keeps the service pure but adds indirection; direct caching is explicit but couples the service to the caching strategy.
-
 > [!QUESTION]- What's the difference between a Proxy and a Decorator in terms of intent?
-> Intent is the key difference — the structure is identical. A Proxy controls access: it decides whether to forward the call at all (protection proxy), when to forward it (virtual proxy), or whether to use a cached result instead (caching proxy). A Decorator always forwards the call and adds behavior around it. A logging decorator always calls `next.HandleAsync(order)` — it never skips the call. A protection proxy may throw before calling the real service. If the wrapper can prevent the call from reaching the real object, it's a Proxy. If it always calls through and adds behavior, it's a Decorator.
+> A proxy stands in for the subject to control access to it. A decorator attaches another responsibility while preserving the component contract. Their class diagrams can look identical, so the design intent and the wrapper's reason for existing settle the classification.
 
 # References
 
-- [Proxy Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=NwaabHqPHeM\&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc\&index=10) — video walkthrough of the Proxy pattern with OOP examples
-- [Proxy — refactoring.guru](https://refactoring.guru/design-patterns/proxy) — canonical pattern description with virtual/caching/protection variants and C# example
-- [Lazy loading related data — EF Core — Microsoft Learn](https://learn.microsoft.com/en-us/ef/core/querying/related-data/lazy) — EF Core lazy-loading proxy in production use
-- [DispatchProxy — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.reflection.dispatchproxy) — .NET's runtime proxy generation mechanism
-- [Castle DynamicProxy — GitHub](https://github.com/castleproject/Core) — the proxy library used by Moq, NSubstitute, and EF Core
+- [Proxy — refactoring.guru](https://refactoring.guru/design-patterns/proxy)
+- [Proxy Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=NwaabHqPHeM\&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc\&index=10)
+- [Lazy loading related data — EF Core lazy-loading proxy in production use](https://learn.microsoft.com/en-us/ef/core/querying/related-data/lazy)

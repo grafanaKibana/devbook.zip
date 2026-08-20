@@ -1,24 +1,22 @@
 ---
 publish: true
-created: 2026-07-25T08:24:19.993Z
-modified: 2026-08-08T08:06:03.060Z
-published: 2026-08-08T08:06:03.060Z
+created: 2026-08-20T20:41:15.540Z
+modified: 2026-08-20T20:41:15.540Z
+published: 2026-08-20T20:41:15.540Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
-summary: Scatters elements into range buckets, sorts each, then concatenates; works best when keys are uniformly distributed.
+summary: Scatters elements into range buckets, sorts each, then concatenates. Works best when keys are uniformly distributed.
 level:
   - "4"
 priority: Medium
 status: Creation
 ---
 
-When keys are numbers drawn from a known, bounded range, their magnitude says more than a comparison does: it says directly which slice of the range a key belongs to. Bucket Sort uses that by partitioning the range into `m` equal-width buckets, mapping each key to its bucket with a single arithmetic computation, sorting the buckets, and concatenating them in order.
+For numeric keys in a known, bounded range, magnitude can identify a range slice directly. Bucket Sort divides that range into `m` equal-width buckets, maps each key with one arithmetic calculation, sorts within each bucket, then concatenates the buckets in range order.
 
-The mapping stands in for comparison only because the range is known: `bucketIndex = floor(m · (key − min) / (upperExclusive − min))` locates a bucket without inspecting any other element. The payoff depends on buckets staying small and balanced, which requires keys to be spread roughly uniformly over the range. A distribution that piles keys into a few buckets leaves the per-bucket sort to do most of the work.
-
-**Core condition:** numeric keys over a known, roughly uniform range → direct bucket mapping → sort within each range slice → concatenate slices in order.
+The mapping works because the bounds are known. `bucketIndex = floor(m · (key − min) / (upperExclusive − min))` locates a bucket without inspecting another element. Performance depends on the buckets remaining small, which usually means the keys are spread roughly uniformly. When most keys land in a few buckets, the inner sort does nearly all the work.
 
 ````tabsdown
 tab: Visualization
@@ -135,14 +133,14 @@ tab: Complexity
 
 The average curve assumes a known, roughly uniform distribution and about as many buckets as elements. Skew can collapse distinct reverse-ordered values into one bucket and expose the inner sort's quadratic behavior; duplicate-heavy occupancy alone does not, because equal keys trigger no shifts. The chart's space curves include both bucket headers and stored elements, separate from the input array.
 
-Replacing the stable insertion sort inside each bucket with a comparison sort improves the skewed tail but may change stability. Bucket Sort still returns the right order under skew because range partitioning remains valid; only the work inside an overloaded bucket changes.
+Replacing the stable insertion sort inside each bucket with an `O(s log s)` inner sort such as introsort, where `s` is the bucket size, improves the skewed tail but may change stability. Bucket Sort still returns the right order under skew because range partitioning remains valid; only the work inside an overloaded bucket changes.
 ````
 
-The value-to-index mapping restricts the input. Bucket Sort needs `bucketIndex = floor(m · (key − min) / (upperExclusive − min))` to be meaningful, so keys must live on a numeric or otherwise orderable half-open range with known bounds. Opaque identifiers with no magnitude — arbitrary strings, GUIDs, keys ordered only by an external comparator — have no such mapping and cannot be bucketed by range at all; they fall back to a comparison sort or a digit-wise scheme like [[Computer Science/Algorithms/Sorting Algorithms/Radix Sort|Radix Sort]].
+The value-to-index mapping restricts the input. Keys need a numeric or otherwise orderable half-open range with known bounds. Opaque identifiers and values ordered only by an external comparator have no meaningful bucket index. They need a comparison sort or a digit-wise scheme such as [[Computer Science/Algorithms/Sorting Algorithms/Radix Sort|Radix Sort]].
 
-Stability is inherited, not intrinsic. Scatter appends keys in read order, so order within a bucket is preserved, and gather concatenates buckets in range order. Global stability therefore holds exactly when the per-bucket sort is stable. [[Computer Science/Algorithms/Sorting Algorithms/Insertion Sort|Insertion Sort]] is; substituting `List<T>.Sort` (an [[Computer Science/Algorithms/Sorting Algorithms/Introsort|Introsort]]) is not, and that swap silently reorders equal keys the moment they carry satellite data.
+Stability comes from the inner sort. Scatter preserves read order within each bucket, and gather does not mix buckets. Using [[Computer Science/Algorithms/Sorting Algorithms/Insertion Sort|Insertion Sort]] therefore keeps the whole algorithm stable. Replacing it with `List<T>.Sort`, an [[Computer Science/Algorithms/Sorting Algorithms/Introsort|Introsort]], can reorder equal keys when they carry associated data.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Scatter–sort–gather flow
 >
@@ -204,15 +202,8 @@ Stability is inherited, not intrinsic. Scatter appends keys in read order, so or
 > }
 > ```
 >
-> Reject keys outside `[0, 1)`. For another half-open range `[min, upperExclusive)`, normalize with `(key − min) / (upperExclusive − min)` before indexing. The clamp only guards against floating-point rounding that produces `n`; it does not admit the exclusive upper bound.
-
-# Questions
-
-> [!QUESTION]- Why can the sorted buckets be concatenated with no comparison between buckets?
-> Bucket `i` covers a strictly lower slice of the range than bucket `i + 1`, so every key in one bucket is smaller than every key in the next by construction. Reading internally sorted buckets in index order therefore emits a globally sorted sequence, and no per-bucket sort ever inspects a key outside its own bucket.
+> Keys outside `[0, 1)` are rejected. For another half-open range `[min, upperExclusive)`, normalize with `(key − min) / (upperExclusive − min)` before indexing. The clamp handles floating-point rounding to `n`. The exclusive upper bound remains invalid.
 
 # References
 
-- [Bucket sort (Wikipedia)](https://en.wikipedia.org/wiki/Bucket_sort) — the equal-width partition, the average-case analysis under the uniform-distribution assumption, and the relationship to counting and radix sorting.
-- [String Sorts, exercise 2 (Princeton Algorithms)](https://algs4.cs.princeton.edu/51radix/) — Sedgewick and Wayne analyze uniform values placed into equal-width buckets and insertion-sorted within each bucket.
-- [Upper Tail Analysis of Bucket Sort and Random Tries](https://arxiv.org/abs/2002.10499) — primary probabilistic analysis of the uniform-input assumption and the overload tail when each bucket uses a quadratic inner sort.
+- [Upper Tail Analysis of Bucket Sort and Random Tries](https://arxiv.org/abs/2002.10499)

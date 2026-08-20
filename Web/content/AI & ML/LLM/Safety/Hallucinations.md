@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T14:02:43.913Z
-modified: 2026-07-25T13:51:15.670Z
-published: 2026-07-25T13:51:15.670Z
+created: 2026-08-20T20:41:15.502Z
+modified: 2026-08-20T20:41:15.502Z
+published: 2026-08-20T20:41:15.502Z
 topic:
   - AI & ML
 subtopic:
@@ -14,7 +14,9 @@ priority: Medium
 status: Done
 ---
 
-Hallucination is a correctness failure where an LLM output sounds fluent and confident but is not supported by evidence or reality. The mechanism matters: the model optimizes next-token likelihood, not truth, so it can produce a high-probability continuation even when the underlying claim is false. Three root causes show up repeatedly in production. **Training data gaps** leave weak signal for rare entities and post-cutoff facts, so the model fills missing details with plausible fabrication. **RLHF reward misalignment** can push the model toward convincing and agreeable answers over accurate ones. **Decoding randomness** at higher temperature amplifies low-probability token paths that inject invented specifics.
+Hallucination is generated content that lacks support from the available evidence. It can be false, or merely impossible to verify from the supplied context. Fluency hides the failure: a language model predicts plausible tokens rather than checking each claim against reality.
+
+Several mechanisms can produce the same symptom. Sparse or stale training data leaves the model with weak evidence. Preference tuning may reward a confident, agreeable answer. Sampling can then select an invented detail from several plausible continuations. None of these causes can be diagnosed from polished prose alone.
 
 ```mermaid
 flowchart TD
@@ -24,102 +26,81 @@ flowchart TD
     C -->|No| E[Hallucination]
 ```
 
-**Concrete example**: if your retrieved context says Austen wrote Pride and Prejudice and the model answers Dickens, the response is fluent but wrong. See [[Generation]] for how sampling and structure constraints influence this behavior.
+If retrieved context says Austen wrote _Pride and Prejudice_ and the answer names Dickens, the contradiction is visible. Many production failures are less obvious because the model adds a plausible date or citation that the source never mentioned. [[Generation]] explains how sampling and output constraints shape these continuations.
 
-# Intrinsic Vs Extrinsic
+# Intrinsic and Extrinsic Hallucination
 
-Ji et al. (2022) split hallucinations into two operational classes. **Intrinsic hallucination** contradicts facts already present in supplied context, such as claiming Dickens wrote Pride and Prejudice when the source states Austen. This is detectable with source-output comparison, commonly via NLI entailment checks. **Extrinsic hallucination** adds facts not present in source material, such as adding a completion year not in context; it may be true or false, but it is unsupported by provided evidence. Extrinsic errors are harder to detect because they require external verification, not only context alignment.
+Ji et al. separate two cases. An **intrinsic hallucination** contradicts the source, such as naming Dickens when the passage names Austen. An **extrinsic hallucination** adds a claim the source does not contain. That extra claim may happen to be true, but the response has no evidence for it. Intrinsic failures can often be found by comparing answer and context. Extrinsic claims need another source or an explicit abstention policy.
 
 # Detection
 
-Use multiple detectors because each catches different failure modes.
+Detection starts by splitting an answer into claims. Each technique answers a different question about those claims.
 
-- **NLI-based fact checking**: decompose an answer into claims, then score each claim against source context as entailed, neutral, or contradicted. This is strong on intrinsic hallucinations where contradictions are explicit in context. Azure AI Content Safety Groundedness detection provides this as a managed path; lightweight open-source NLI classifiers offer a self-hosted alternative.
-- **Self-consistency (SelfCheckGPT)**: sample the same prompt multiple times and compare outputs. If the model has stable knowledge, core claims remain consistent; high variance and contradictions indicate potential hallucination. This is zero-resource and black-box (no logprobs or external KB), but it adds 3-5 extra inference calls.
-- **LLM-as-judge**: score answer [[Monitoring#LLM-as-Judge Metrics|faithfulness]] against context using an evaluator LLM. Common metric: faithfulness = supported claims divided by total claims. Frameworks like RAGAS automate this decomposition.
-- **Atomic fact verification (FActScore)**: break text into atomic facts, retrieve evidence from a knowledge base, and validate each fact independently. This gives granular failure localization; on biography generation benchmarks, models score around 58% FActScore, illustrating how frequently atomic claims lack support.
+- **NLI-based checking** scores a claim against source context as entailed, neutral, or contradicted. It works best when the required evidence is already present and the relationship is stated clearly.
+- **Self-consistency (SelfCheckGPT)** compares several samples from the same prompt. Contradictory or unstable details are warning signals. But stable repetition still does not prove truth, even when the method needs no external knowledge base.
+- **LLM-as-judge** estimates answer [[Monitoring#LLM-as-Judge Metrics|faithfulness]] against supplied context. It handles semantic variation better than exact matching, but the evaluator is another fallible model and needs calibration against reviewed examples.
+- **Atomic fact verification (FActScore)** breaks a response into small claims, retrieves evidence for each one, and scores support separately. This makes the failing claim visible instead of hiding it inside an answer-level score.
 
-For RAG stacks, pair these with [[AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation|RAG Evaluation]] so retrieval quality and answer faithfulness are measured separately.
+For a RAG system, [[AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation|RAG Evaluation]] must measure retrieval and generation separately. A faithful answer cannot recover evidence that retrieval never supplied.
 
 # Mitigation
 
-Start with grounding, then add targeted controls where risk justifies cost.
+Grounding is the usual starting point. More expensive checks belong on claims whose failure has a real cost.
 
-- **Retrieval grounding (RAG)**: move from memory recall to source summarization. This is usually the single biggest reduction in fabricated claims because it gives explicit evidence boundaries. It is not a hard guarantee: RAG-based legal tools still report hallucination rates above 17%, so treat grounding as risk reduction, not elimination. See [[AI & ML/LLM/Context Engineering/RAG/RAG|RAG]].
-- **Chain-of-Verification (CoVe)**: run a factored loop of generate answer, plan verification questions, answer verification questions independently without original draft context, then revise. Independent verification interrupts the feedback loop where the model reuses its own hallucinated tokens as if they were evidence.
-- **Structured output with constrained decoding**: enforce schema, enums, and field contracts so the model cannot invent arbitrary free-form structures. This shrinks the space of possible fabrications and is especially useful for downstream automation.
-- **Abstention policy**: define a strict fallback phrase (for example, "I do not have enough evidence in the provided context") when evidence is insufficient. Explicit abstention is safer than confident guessing in high-stakes flows.
-- **Tool-augmented generation**: route factual subproblems to tools (databases, calculators, APIs) and have the model synthesize tool outputs instead of inventing unsupported details.
+- **Retrieval grounding (RAG)** supplies passages that the answer can cite and check against, turning many recall tasks into source-based synthesis. It reduces reliance on parametric recall without guaranteeing correctness. The legal-system study in the references still found hallucinations above 17% across evaluated tools. See [[AI & ML/LLM/Context Engineering/RAG/RAG|RAG]].
+- **Chain-of-Verification (CoVe)** drafts an answer, creates verification questions, answers them independently, then revises the draft. The separation matters because verification should not treat the draft's own claims as evidence.
+- **Constrained output** enforces a schema and allowed values. It prevents structural invention, which protects downstream automation, but a valid field can still contain a false claim.
+- **Abstention** returns a defined fallback when evidence is missing. The threshold must be calibrated because an overly cautious system becomes useless.
+- **Tool-backed generation** sends factual subproblems to authoritative databases or calculators and synthesizes their results. The tool response still needs provenance and error handling.
 
-In practice, combine these with [[Guardrails]] so abstention, citation behavior, and output validation are enforced consistently.
+[[Guardrails]] turns these techniques into enforced runtime behavior: citations can be checked, unsupported answers can abstain, and invalid tool requests can be rejected.
 
 # Pitfalls
 
 ## RAG Does Not Eliminate Hallucinations
 
-- **What goes wrong**: teams ship RAG and assume hallucination is solved, then stop active monitoring.
-- **Why it happens**: RAG introduces its own failure modes: retrieval miss, context overflow, and model additions beyond retrieved evidence.
-- **How to avoid or detect it**: track [[Monitoring#Retrieval Quality Metrics|retrieval recall]] and [[Monitoring#LLM-as-Judge Metrics|faithfulness]] separately; keep claim-to-context verification in place even after RAG rollout. Stanford and Yale findings on legal RAG tools (>17% hallucination) are the practical warning signal.
+- **Failure.** RAG is treated as proof that an answer is grounded.
+- **Cause.** The corpus may lack the fact, retrieval may miss it, or generation may add a claim beyond the returned passages.
+- **Control.** Track [[Monitoring#Retrieval Quality Metrics|retrieval recall]] separately from [[Monitoring#LLM-as-Judge Metrics|faithfulness]]. Then verify material claims against the passages actually used.
 
-## RLHF Makes Factuality Worse
+## Preference Tuning Can Reward the Wrong Signal
 
-- **What goes wrong**: model quality looks better to users while factual precision degrades.
-- **Why it happens**: human preference signals reward confidence, detail, and agreeableness; RLHF then optimizes approval, not truth.
-- **How to avoid or detect it**: include factuality-aware reward signals (for example FActScore-style objectives in preference optimization) and monitor calibration, not only user satisfaction. Reported RLHF rollbacks due to sycophancy are concrete examples of reward signals overpowering factuality safeguards.
+- **Failure.** An answer becomes more agreeable or polished without becoming better supported.
+- **Cause.** Preference data can reward agreement with the user even when that agreement is wrong. The cited sycophancy work demonstrates this failure mode. It does not imply that every RLHF model is less factual.
+- **Control.** Evaluate factual precision and calibration alongside preference scores. Reviewed counterexamples should include prompts with a false premise so agreement is not mistaken for quality.
 
 ## Over-Aggressive Mitigation Causes Over-Refusal
 
-- **What goes wrong**: the system refuses answerable questions, hedges excessively, or returns partial responses.
-- **Why it happens**: aggressive abstention or safety tuning shifts the model from fabrication risk to under-answering risk.
-- **How to avoid or detect it**: calibrate refusal thresholds by domain; evaluate faithfulness and helpfulness together, not independently. There is no universal optimum, only a domain-specific operating point.
+- **Failure.** The system refuses answerable questions or returns fragments despite sufficient evidence.
+- **Cause.** A strict abstention threshold trades fabrication risk for under-answering.
+- **Control.** Measure answer coverage beside faithfulness and set thresholds by consequence. Medical advice and an internal search summary should not share the same operating point.
 
 # Tradeoffs
 
-| Approach | Hallucination reduction | Cost | Latency impact | Risk |
-| --- | --- | --- | --- | --- |
-| RAG grounding | High -- shifts to summarization | Medium -- retrieval infra + embedding cost | +100-500ms retrieval | Retrieval failures become silent hallucination source |
-| Self-consistency | Medium -- catches extrinsic | High -- 3-5x inference cost | 3-5x latency | Misses intrinsic hallucinations |
-| NLI fact checking | Medium-High -- catches intrinsic | Low -- lightweight model | +50-100ms per claim | NLI model has its own error rate |
-| LLM-as-judge | High -- semantic evaluation | Medium -- judge inference cost | +1-3s per response | Judge can itself hallucinate |
-| Constrained output | Low-Medium -- limits format | Low -- built into decoding | Minimal | Only prevents structural fabrication, not factual |
-| Abstention policy | Variable -- depends on calibration | None -- prompt change only | None | Over-refusal degrades helpfulness |
+| Approach | What it covers | Runtime cost | Main limitation |
+| --- | --- | --- | --- |
+| RAG grounding | Supplies external evidence | Retrieval and indexing | Bad retrieval silently caps answer quality |
+| Self-consistency | Finds unstable claims | Several generations | Repeated agreement is not proof |
+| NLI fact checking | Finds contradiction or missing support in context | One or more checks per claim | The checker has its own error rate |
+| LLM-as-judge | Handles semantic claim-to-context comparison | Evaluator-model calls | Requires calibration and can reproduce model bias |
+| Constrained output | Prevents structural fabrication | Usually low | Does not establish factual truth |
+| Abstention policy | Stops unsupported answers | Low at runtime | Poor calibration causes over-refusal |
 
-**Decision rule**: use RAG grounding + NLI fact checking as baseline. Add self-consistency only for high-stakes flows where latency budget allows it. Use LLM-as-judge primarily for offline evaluation, not as a strict real-time gate.
+For evidence-backed answers, start with retrieval and claim-to-context checks. Self-consistency is worth its extra calls when an unstable answer would be costly. An LLM judge is usually easier to calibrate offline before it is trusted as a live gate.
 
 # Questions
 
-> [!QUESTION]- Why can RAG-grounded systems still hallucinate significantly?
->
-> - RAG changes the task to summarizing retrieved evidence, but generation can still add unsupported claims beyond context.
-> - The model can misread or incorrectly compose facts from valid passages.
-> - Retrieval failures silently cap answer quality before generation starts.
-> - Legal RAG tools reporting >17% hallucination shows the gap between grounding and guaranteed correctness.
-> - RAG adds retrieval and embedding cost yet only reduces hallucination rather than eliminating it, so size the investment to the cost of an undetected fabrication.
+> [!QUESTION]- Why can an LLM still hallucinate when using RAG?
+> RAG gives the model context, but it does not prove that the answer follows from it. The source may not contain the fact, retrieval may miss the right passage, or the model may ignore the passage and add unsupported details. Retrieval quality and answer faithfulness should be measured separately so the failing stage is clear.
 
-> [!QUESTION]- Why does RLHF increase hallucination risk while perceived quality improves?
->
-> - Human raters generally reward confidence, verbosity, and polished style.
-> - RLHF optimizes approval signals, so "sounds good" can outrank "is true."
-> - The model becomes more overconfident on wrong answers, which worsens calibration.
-> - Factuality-aware optimization (for example FActScore-informed preference training) counterbalances this failure mode.
-> - RLHF buys engagement and instruction-following at the risk of factual reliability, unless factuality rewards are baked into the training signal.
-
-> [!QUESTION]- How do you separate retrieval failure from generation hallucination in a RAG pipeline?
->
-> - Check corpus coverage first: does the needed document exist at all.
-> - Check retrieval recall next: if present, was it retrieved for this query.
-> - Check claim traceability: can each answer claim be grounded to retrieved passages.
-> - Not retrieved implies retrieval failure (fix chunking, embeddings, ranking); retrieved but unsupported claims imply generation hallucination (fix grounding prompt and verification).
-> - Per-claim attribution (NLI on every claim) adds cost and latency, but it pays for itself by pointing at the real bottleneck instead of guessing.
+> [!QUESTION]- Why can preference tuning make an answer sound better without making it more factual?
+> Preference data may reward agreement, confidence, or style without checking whether a claim is supported. The model can then produce a polished answer that accepts a false premise. Factual accuracy and calibration still need separate evaluation from preference scores.
 
 # References
 
-- [Survey of hallucination in natural language generation -- canonical intrinsic and extrinsic taxonomy (Ji et al., ACM Computing Surveys 2022)](https://arxiv.org/abs/2202.03629) - Anchor survey that defines the widely used taxonomy and detection framing.
-- [FActScore -- fine-grained atomic evaluation of factual precision in text generation (Min et al., EMNLP 2023)](https://arxiv.org/abs/2305.14251) - Introduces atomic-fact factuality measurement and reports baseline model behavior.
-- [SelfCheckGPT -- zero-resource black-box hallucination detection (Manakul et al., EMNLP 2023)](https://aclanthology.org/2023.emnlp-main.557/) - Practical self-consistency method that does not require external knowledge bases.
-- [Towards understanding sycophancy in language models -- RLHF reward misalignment (Sharma et al., Anthropic, ICLR 2024)](https://www.anthropic.com/news/towards-understanding-sycophancy-in-language-models) - Explains why preference optimization can push models toward agreement over correctness.
-- [Groundedness detection -- NLI-based claim verification as a managed service (Azure AI Content Safety)](https://learn.microsoft.com/azure/ai-services/content-safety/concepts/groundedness) - Official service documentation for production groundedness checks.
-- [Reduce hallucinations -- grounding, citations, and abstention patterns (Anthropic Docs)](https://docs.anthropic.com/en/docs/test-and-evaluate/strengthen-guardrails/reduce-hallucinations) - Practice-oriented guardrail patterns for grounded generation.
-- [Chain-of-Verification reduces hallucination in LLMs -- factored verification methodology (Dhuliawala et al., Meta AI 2023)](https://arxiv.org/abs/2309.11495) - Core paper for generate-verify-revise decomposition.
-- [Hallucination in RAG-based legal AI tools -- Stanford and Yale study finding over 17% rate (Magesh et al., JELS 2025)](https://law.stanford.edu/wp-content/uploads/2024/05/Legal_RAG_Hallucinations.pdf) - Domain-specific evidence that RAG meaningfully reduces but does not remove hallucinations.
-- [Extrinsic hallucinations in LLMs -- mechanistic causes and mitigation survey (Lilian Weng, July 2024)](https://lilianweng.github.io/posts/2024-07-07-hallucination/) - Mechanism-focused practitioner synthesis with concrete mitigation patterns.
+- [Survey of hallucination in natural language generation: intrinsic and extrinsic taxonomy (Ji et al., ACM Computing Surveys 2022)](https://arxiv.org/abs/2202.03629)
+- [FActScore: atomic evaluation of factual precision (Min et al., EMNLP 2023)](https://arxiv.org/abs/2305.14251)
+- [SelfCheckGPT: black-box hallucination detection (Manakul et al., EMNLP 2023)](https://aclanthology.org/2023.emnlp-main.557/)
+- [Reduce hallucinations (Anthropic Docs)](https://docs.anthropic.com/en/docs/test-and-evaluate/strengthen-guardrails/reduce-hallucinations)
+- [Chain-of-Verification reduces hallucination in LLMs (Dhuliawala et al., Meta AI 2023)](https://arxiv.org/abs/2309.11495)
+- [Hallucination in RAG-based legal AI tools (Magesh et al., JELS 2025)](https://law.stanford.edu/wp-content/uploads/2024/05/Legal_RAG_Hallucinations.pdf)

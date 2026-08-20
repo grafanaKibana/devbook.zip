@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-03T07:22:13.842Z
-modified: 2026-08-08T09:22:39.930Z
-published: 2026-08-08T09:22:39.930Z
+created: 2026-08-20T20:41:15.605Z
+modified: 2026-08-20T20:41:15.606Z
+published: 2026-08-20T20:41:15.606Z
 topic:
   - Computer Science
 subtopic:
@@ -16,13 +16,13 @@ status: Ready to Repeat
 
 [[Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]] and Prim's [[Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree|minimum spanning tree]] algorithm spend most of their time on one operation: lowering the tentative key of a vertex already in the frontier. Only a successful relaxation that lowers a tentative distance triggers decrease-key, so a dense graph can perform up to `E` of them against only `V` extract-mins.
 
-A Fibonacci heap removes that cost by refusing to reorganize eagerly. It keeps a forest of heap-ordered trees strung together in a circular doubly-linked **root list** with a pointer to the minimum root, and it does the least work each operation allows: insert splices a new single-node tree into the root list, merge concatenates two root lists, and decrease-key cuts the affected node loose to the root list rather than sifting it. All the deferred restructuring is paid off once, later, by extract-min.
+A Fibonacci heap avoids that cost by postponing reorganization. It keeps heap-ordered trees in a circular doubly-linked **root list** with a pointer to the minimum root. Insert splices in one node. Merge joins two root lists, while decrease-key cuts the affected node into the root list instead of sifting it. Extract-min eventually pays for the deferred restructuring.
 
 The forest can hold many trees and many equal degrees between extract-mins, and a single extract-min can then be expensive.
 
 **Core shape:** heap-ordered trees in a circular root list → min pointer → lazy insert/merge/cut now → consolidate by degree at extract-min
 
-The initial forest is replayed through public **Insert** operations. Add roots lazily, use **Extract min** to consolidate equal degrees, then decrease an existing key to see the cut rule move it to the root list; **Reset** repeats those public inserts rather than loading a hidden prebuilt forest.
+The initial forest is replayed through public **Insert** operations. Add roots lazily, use **Extract min** to consolidate equal degrees, then decrease an existing key to see the cut rule move it to the root list. **Reset** repeats those public inserts rather than loading a hidden prebuilt forest.
 
 ````tabsdown
 tab: Visualization
@@ -245,9 +245,9 @@ On sparse graphs, or any workload where extract-min is a constant fraction of op
 
 The physical layout usually erases the theoretical win. Each operation chases pointers through a forest of separately allocated nodes scattered across the managed heap, so consolidation and cascading cuts thrash the cache, while a binary [[Computer Science/Data Structures/Trees/Heap-like/Heap|heap]] does index arithmetic over one contiguous array.
 
-The mark-and-cascading-cut machinery is intricate and error-prone: forgetting to clear a mark on promotion to root, or to stop the cascade at an unmarked parent, silently breaks the degree bound and quietly degrades consolidation without any crash.
+The mark-and-cascading-cut machinery is easy to get wrong. Failing to clear a mark when a node becomes a root, or continuing a cascade past an unmarked parent, breaks the degree bound without a crash. Consolidation simply gets slower.
 
-# Reference Drawer
+# Root List and Cascading-Cut Diagram
 
 > [!ABSTRACT]- Root list and a cascading cut
 >
@@ -267,16 +267,8 @@ The mark-and-cascading-cut machinery is intricate and error-prone: forgetting to
 >   classDef cut fill:#c33,stroke:#611,color:#fff
 > ```
 >
-> `*` marks a node that has already lost one child. Decreasing `30` to `2` cuts it to the root list; because its parent `21` was already marked, the cut cascades and `21` is cut up as well.
-
-# Questions
-
-> [!QUESTION]- What does the laziness actually defer, and to where?
-> Insert, merge, and decrease-key avoid any tree reorganization: insert and merge only splice into the root list, and decrease-key cuts the node loose instead of sifting it. The deferred work — linking trees so degrees become distinct — is done once by the next extract-min during consolidation, so many cheap operations prepay one expensive cleanup.
+> `*` marks a node that has already lost one child. Decreasing `30` to `2` cuts it to the root list. Because its parent `21` was already marked, the cut cascades and `21` is cut up as well.
 
 # References
 
-- [Fredman & Tarjan, "Fibonacci heaps and their uses in improved network optimization algorithms" (JACM 1987)](https://dl.acm.org/doi/10.1145/28869.28874) — the original structure, potential-function analysis, and the resulting Dijkstra/Prim bounds.
-- [Fibonacci heap (Wikipedia)](https://en.wikipedia.org/wiki/Fibonacci_heap) — root-list laziness, consolidation, marks, and cascading cuts.
-- [Larkin, Sen & Tarjan, "A back-to-basics empirical study of priority queues" (ALENEX 2014)](https://arxiv.org/abs/1403.0252) — benchmarks where implicit d-ary and pairing heaps beat Fibonacci heaps on real workloads.
-- [Fredman, Sedgewick, Sleator & Tarjan, "The pairing heap: a new form of self-adjusting heap" (Algorithmica 1986)](https://link.springer.com/article/10.1007/BF01840439) — the simpler self-adjusting alternative with near-Fibonacci practical performance.
+- [Fredman & Tarjan, "Fibonacci heaps and their uses in improved network optimization algorithms" (JACM 1987)](https://dl.acm.org/doi/10.1145/28869.28874)

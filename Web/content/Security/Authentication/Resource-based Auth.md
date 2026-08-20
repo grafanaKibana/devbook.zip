@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T14:02:44.133Z
-modified: 2026-07-25T13:57:51.878Z
-published: 2026-07-25T13:57:51.878Z
+created: 2026-08-20T20:41:15.665Z
+modified: 2026-08-20T20:41:15.665Z
+published: 2026-08-20T20:41:15.665Z
 topic:
   - Security
 subtopic:
@@ -14,21 +14,21 @@ priority: High
 status: Ready to Repeat
 ---
 
-Resource-based authorization checks whether the current user has permission to perform an action on a specific resource instance — not just a resource type. It answers: "Can this user edit this specific document?" rather than "Can this user edit documents?"
+Resource-based authorization decides whether a principal may perform an operation on one concrete resource. A role can grant document-editing capability in general. The resource check decides whether this document falls within that principal's authority.
 
 # When to Use
 
-Role-based authorization (`[Authorize(Roles = "Admin")]`) checks what type of user you are. Resource-based authorization checks ownership or relationship to a specific resource. Use it when authorization depends on data — for example, only the document owner can edit it.
+Role authorization such as `[Authorize(Roles = "Admin")]` evaluates assigned roles without loading the target object. Resource-based authorization is needed when the decision depends on object data such as owner, tenant, project, classification, or current state. The application loads the resource first, then passes it to the authorization service.
 
 ## Where it Sits among Authorization Models
 
-Resource-based auth is one point on a spectrum of access-control models:
+RBAC, ABAC, and ReBAC describe where an authorization decision gets its facts:
 
-- **RBAC (Role-Based)** — permissions attached to roles, roles to users. Simple and the common default, but coarse: "Admin can edit documents" can't express "only _this_ document's owner."
-- **ABAC (Attribute-Based)** — decisions from attributes of the _user, resource, action, and context_ ("editors in the EU during business hours"). Flexible, but rules can sprawl.
-- **ReBAC (Relationship-Based)** — decisions from the _relationship graph_ between subject and resource ("user is in the team that owns the folder"). The Google Zanzibar / OpenFGA model, ideal for sharing/hierarchy-heavy apps.
+- **RBAC (Role-Based):** permissions attach to roles, and roles attach to principals. It is easy to audit, though a rule such as "Admin can edit documents" cannot express ownership of one document.
+- **ABAC (Attribute-Based):** the policy evaluates attributes of the principal, resource, action, and environment. It handles rules such as tenant membership or data classification, but large policy sets can become difficult to trace.
+- **ReBAC (Relationship-Based):** the decision follows relationships between subjects and resources, such as membership in the team that owns a folder. Zanzibar-style systems fit sharing and hierarchy-heavy products.
 
-Resource-based authorization is the _implementation mechanism_ (evaluate a rule against a specific resource instance) that ABAC and ReBAC require — in ASP.NET Core it's expressed as policy handlers given the resource. It complements RBAC rather than replacing it: use roles for coarse gates and resource-based checks for per-instance ownership. See [[Authorization|ASP.NET Authorization]].
+Resource-based authorization is an evaluation shape rather than a fourth model. An ASP.NET Core handler receives the concrete resource and can apply role, attribute, or relationship rules to it. Coarse route policy can reject obviously ineligible principals early. The per-resource handler makes the final instance-level decision. See [[Authorization|ASP.NET Authorization]].
 
 # ASP.NET Core Implementation
 
@@ -63,15 +63,20 @@ builder.Services.AddAuthorization(options =>
 public async Task<IActionResult> Edit(int id)
 {
     var document = await _repo.GetAsync(id);
+    if (document is null) return NotFound();
     var authResult = await _authorizationService.AuthorizeAsync(User, document, "DocumentOwner");
     if (!authResult.Succeeded) return Forbid();
     // proceed with edit
 }
 ```
 
+The sample shows the handler shape, not a hardened production policy. The policy should call `RequireAuthenticatedUser()` before adding the ownership requirement. The handler must also require a non-null stable subject identifier and a non-null owner identifier before comparing them. Otherwise two absent values can compare equal.
+
+When `_repo.GetAsync` returns `null`, ASP.NET Core skips an `AuthorizationHandler<TRequirement, TResource>` whose resource type does not match. Without the explicit `NotFound` check, this sample would collapse a missing document into the later `Forbid` result rather than dereference `OwnerId`. The authorization check must also stay coupled to the write: if ownership or tenant state can change between the check and update, the repository command needs the same predicate or a transaction that prevents a stale decision from authorizing a later state.
+
 # Testing Authorization Handlers
 
-Authorization handlers are plain classes and easy to unit test without spinning up ASP.NET Core:
+Authorization handlers are plain classes, so their decisions can be tested without starting an ASP.NET Core host:
 
 ```csharp
 // Unit test for DocumentOwnerHandler
@@ -116,33 +121,30 @@ public class DocumentOwnerHandlerTests
 }
 ```
 
+These tests exercise the handler alone. `new ClaimsIdentity(claims)` has no authentication type, so its principal is unauthenticated. The sample handler can still succeed because it only compares the identifier claim. Production policy tests should use an authenticated identity, evaluate the configured policy with `RequireAuthenticatedUser()`, and include an unauthenticated negative case.
+
 # Pitfalls
 
 ## Missing Authorization Check After Fetching Resource
 
-**What goes wrong**: the controller fetches the resource and returns it without checking ownership. Any authenticated user can access any resource by guessing the ID (Insecure Direct Object Reference, OWASP A01).
+The controller loads a resource and returns or mutates it without an instance-level decision. An authenticated principal can then enumerate identifiers and cross an ownership or tenant boundary. This is an insecure direct object reference under OWASP Broken Access Control.
 
-**Why it happens**: authorization is added as an afterthought, or developers assume role-based checks are sufficient.
+Role checks often create false confidence because they establish broad capability while saying nothing about this object's owner or tenant.
 
-**Mitigation**: always call `IAuthorizationService.AuthorizeAsync(User, resource, policy)` after fetching the resource and before returning it. Return `403 Forbidden` (not `404 Not Found`) when the resource exists but the user lacks permission — unless you want to hide resource existence.
+Call `IAuthorizationService.AuthorizeAsync(User, resource, policy)` after loading the resource and before releasing data or applying a change. The data-access boundary should enforce the same ownership or tenant constraint when concurrent changes are possible.
 
 ## Returning 404 Vs 403
 
-**What goes wrong**: returning `404 Not Found` for unauthorized access hides resource existence but can confuse legitimate users who have the wrong ID.
+`403 Forbidden` reveals that the resource exists. `404 Not Found` can conceal existence, but it also makes a missing object indistinguishable from a hidden one.
 
-**Decision rule**: return `403 Forbidden` when the resource exists and the user is authenticated but lacks permission. Return `404 Not Found` only when you intentionally want to hide resource existence from unauthorized users (e.g., private content).
+Use `403` when authenticated callers may know that the resource exists. Use `404` when existence itself is sensitive, and apply that policy consistently so response timing or list endpoints do not undo the concealment.
 
 # Questions
 
 > [!QUESTION]- What is the difference between role-based and resource-based authorization?
-> Role-based authorization checks what type of user you are (e.g., Admin, Editor). Resource-based authorization checks your relationship to a specific resource instance (e.g., are you the owner of this document?). Use role-based for coarse-grained access control; use resource-based when the decision depends on data.
-
-> [!QUESTION]- Why inject `IAuthorizationService` instead of checking ownership in the controller directly?
-> `IAuthorizationService` centralizes authorization logic in handlers, making it testable and reusable across controllers. Direct ownership checks in controllers scatter authorization logic, making it easy to miss a check or apply it inconsistently. The handler pattern also supports multiple requirements composing into a single policy.
+> Role-based authorization evaluates assigned roles without needing the target instance. Resource-based authorization includes the loaded object's attributes or relationships in the decision. Roles work well as coarse gates. Resource checks enforce ownership, tenancy, or object state.
 
 # References
 
-- [Microsoft — Resource-based authorization in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/security/authorization/resourcebased) — official guide with full implementation example including handler registration and controller usage
-- [Microsoft — Policy-based authorization](https://learn.microsoft.com/en-us/aspnet/core/security/authorization/policies) — how to define and use authorization policies; covers requirement composition and handler ordering
-- [OWASP — Broken Access Control (A01:2021)](https://owasp.org/Top10/A01_2021-Broken_Access_Control/) — OWASP's top vulnerability category; Insecure Direct Object Reference (IDOR) is the canonical resource-based auth failure mode
-- [Microsoft — Authorization in ASP.NET Core (overview)](https://learn.microsoft.com/en-us/aspnet/core/security/authorization/introduction) — covers the full authorization model: simple, role-based, claims-based, and resource-based
+- [Resource-based authorization in ASP.NET Core](https://learn.microsoft.com/aspnet/core/security/authorization/resourcebased)
+- [OWASP Broken Access Control](https://owasp.org/Top10/2025/A01_2025-Broken_Access_Control/)

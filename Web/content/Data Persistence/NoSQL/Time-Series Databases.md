@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T14:02:44.062Z
-modified: 2026-07-18T14:02:44.063Z
-published: 2026-07-18T14:02:44.063Z
+created: 2026-08-20T20:41:15.617Z
+modified: 2026-08-20T20:41:15.617Z
+published: 2026-08-20T20:41:15.617Z
 topic:
   - Data Persistence
 subtopic:
@@ -14,7 +14,7 @@ priority: Medium
 status: Creation
 ---
 
-A time-series database stores timestamped samples grouped into stable series. It earns its place when ingestion, retention, compression, and time-window aggregates dominate the workload; a timestamp column alone does not require one. PostgreSQL with time partitioning can be enough at moderate cardinality and ingestion rates. A specialized TSDB becomes useful when label indexing, compressed chunks, and long-range rollups are the bottleneck.
+A time-series database organizes timestamped observations for ordered range reads and time-window calculations. It earns its place when ingest rate, retention, compression, or repeated window queries dominate storage cost. A timestamp column alone is not enough. PostgreSQL with time partitioning may handle a moderate workload cleanly. A specialized engine becomes useful when series indexing, compressed chunks, and rollups are the limiting work.
 
 # Series and Cardinality
 
@@ -24,7 +24,7 @@ In Prometheus, a series is the metric name plus its complete label set:
 http_request_duration_seconds_count{service="checkout",method="POST",status="200"} 8431 1721044800000
 ```
 
-Changing any label value creates a different series. Bounded labels such as `service` and `status` are useful dimensions. An unbounded label such as `user_id` creates a series per user, expanding the index and active-series memory until ingestion or queries fail.
+Changing one label value creates another series. Bounded labels such as `service` and `status` make useful dimensions. An unbounded label such as `user_id` can create a series per user, growing the index and active-series memory until ingestion or queries become too expensive.
 
 # Storage Decisions
 
@@ -38,14 +38,13 @@ Changing any label value creates a different series. Bounded labels such as `ser
 
 ![[Assets/Data Persistence/Data Persistence-Time-Series Databases-18120000.jpg]]
 
-The diagram is a workload selector, not a rule that every metrics system needs a dedicated TSDB. The decision turns on measured cardinality, ingest rate, retention volume, and query windows.
+The diagram is a workload selector. A metrics system does not automatically need a dedicated TSDB. Measured series cardinality, ingest rate, retention volume, and query windows decide.
 
-# Concrete Boundary
+# Rollups Cap Repeated Scans
 
-At 10,000 samples per second, a 15-day raw retention window contains about 13 billion samples. If most dashboards query 5-minute rates over 30 days, keeping only raw samples forces repeated wide scans. Time-partitioned raw chunks plus a persisted 5-minute rollup make retention a partition drop and bound the dashboard input. The cost is extra write work and the need to define how late samples repair an already-built rollup.
+At 10,000 samples per second, 15 days of raw retention contains about 13 billion samples. Recomputing every 5-minute rate from that raw history makes each dashboard revisit the same data. Time-partitioned raw chunks plus a persisted 5-minute rollup bound the query input, and expired raw data can leave as a whole partition. That saves read work but adds write amplification and a repair rule for samples that arrive after a rollup was built.
 
 # References
 
-- [Prometheus data model](https://prometheus.io/docs/concepts/data_model/) — defines a series by metric name and label set, including the sample timestamp and value.
-- [Prometheus instrumentation practices](https://prometheus.io/docs/practices/instrumentation/) — explains label cardinality and why unbounded dimensions should not become labels.
-- [PostgreSQL table partitioning](https://www.postgresql.org/docs/current/ddl-partitioning.html) — primary reference for time-range partitions and dropping old partitions without row-by-row deletion.
+- [Prometheus data model](https://prometheus.io/docs/concepts/data_model/)
+- [PostgreSQL table partitioning](https://www.postgresql.org/docs/current/ddl-partitioning.html)

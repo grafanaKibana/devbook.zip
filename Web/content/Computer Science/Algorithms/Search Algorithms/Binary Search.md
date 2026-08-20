@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T14:02:43.977Z
-modified: 2026-08-08T08:06:01.897Z
-published: 2026-08-08T08:06:01.897Z
+created: 2026-08-20T20:41:15.533Z
+modified: 2026-08-20T20:41:15.533Z
+published: 2026-08-20T20:41:15.533Z
 topic:
   - Computer Science
 subtopic:
@@ -14,9 +14,9 @@ priority: Medium
 status: Done
 ---
 
-A sorted array contains one million user IDs. Binary Search uses the ordering to discard half of the remaining range after each comparison.
+A sorted array may contain a million user IDs, yet Binary Search needs only about twenty comparisons to find one. Each comparison uses the ordering to discard half of the remaining range.
 
-The reduction depends on two properties: the values are ordered, and the middle element is directly accessible by index. Without ordering, a comparison cannot prove which half is irrelevant. Without cheap random access, reaching the middle can cost as much as scanning the range.
+That reduction has two requirements. The values must be ordered, and the middle element must be cheap to reach by index. Without ordering, a comparison says nothing about the untouched half. Without random access, reaching each midpoint may cost as much as scanning the range.
 
 ````tabsdown
 tab: Visualization
@@ -113,13 +113,13 @@ tab: Complexity
 
 # When the Assumptions Stop Holding
 
-On `[2, 100, 3, 4, 5]`, a search for `100` begins at `3`, moves right, and permanently discards the half containing the target. Nothing crashes; unsorted input produces a plausible false negative.
+On `[2, 100, 3, 4, 5]`, a search for `100` begins at `3`, moves right, and discards the half containing the target. The algorithm still terminates normally. Its answer is simply wrong.
 
-Duplicates create a different ambiguity. Searching `[2, 5, 5, 5, 9]` may return any of the three matching indices. A first-match variant stores `mid` as a candidate and continues left with `right = mid - 1`; a last-match variant continues right.
+Duplicates create a different ambiguity. Searching `[2, 5, 5, 5, 9]` may return any of the three matching indices. A first-match variant stores `mid` as a candidate and continues left with `right = mid - 1`. A last-match variant continues right.
 
-Boundary conventions remain paired. This version uses an inclusive range, so its loop is `left <= right` and its updates exclude the inspected element with `mid + 1` or `mid - 1`. Combining those updates with a half-open range can skip elements or prevent the range from shrinking.
+Boundary conventions have to stay paired. This version uses an inclusive range, so the loop condition is `left <= right`, and each update excludes `mid` with `mid + 1` or `mid - 1`. Mixing those updates with a half-open range can skip an element or leave the interval unchanged.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Control flow
 >
@@ -171,20 +171,7 @@ Boundary conventions remain paired. This version uses an inclusive range, so its
 >
 > This implementation uses an inclusive search range and returns `-1` when the target is absent. .NET's `Array.BinarySearch` instead returns the bitwise complement of the insertion index.
 
-# Questions
-
-> [!QUESTION]- Why does Binary Search require sorted data?
-> The comparison at `mid` must prove that an entire half cannot contain the target. Ordering supplies that proof: if `a[mid] < target`, every earlier value is also too small. Without ordering, moving either boundary is a guess and can discard the answer.
-
-> [!QUESTION]- How do you find the first occurrence of a duplicated value?
-> A first-occurrence variant stores `mid` as the current answer and continues through the left half with `right = mid - 1`. The stored candidate becomes the result when the range is empty. This removes the plain search's early exit in exchange for a defined duplicate policy.
-
-> [!QUESTION]- When is a hash lookup a better fit?
-> Hash-based lookup fits repeated exact-match searches where ordering is irrelevant and the additional memory is acceptable. Binary Search retains an advantage when sorted order already exists or supports adjacent operations such as lower bounds, insertion points, and range queries.
-
 # References
 
-- [`Array.BinarySearch` method](https://learn.microsoft.com/en-us/dotnet/api/system.array.binarysearch) — .NET's built-in array search contract, including its insertion-point encoding for missing values.
-- [`ArraySortHelper<T>` in dotnet/runtime](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Collections/Generic/ArraySortHelper.cs) — runtime source for the generic array-search implementation and its internal comparison loop.
-- [Binary search](https://cp-algorithms.com/num_methods/binary_search.html) — lower-bound, upper-bound, and predicate-based variants derived from the same range invariant.
-- [Nearly all binary searches and mergesorts are broken](https://research.google/blog/extra-extra-read-all-about-it-nearly-all-binary-searches-and-mergesorts-are-broken/) — Joshua Bloch's account of the midpoint-overflow defect and the safer calculation.
+- [`Array.BinarySearch` method](https://learn.microsoft.com/en-us/dotnet/api/system.array.binarysearch)
+- [Binary search](https://cp-algorithms.com/num_methods/binary_search.html)

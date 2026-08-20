@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-03T15:55:17.232Z
-modified: 2026-08-08T08:43:34.330Z
-published: 2026-08-08T08:43:34.330Z
+created: 2026-08-20T20:41:15.521Z
+modified: 2026-08-20T20:41:15.523Z
+published: 2026-08-20T20:41:15.523Z
 topic:
   - Computer Science
 subtopic:
@@ -14,9 +14,9 @@ priority: Medium
 status: Creation
 ---
 
-A 0/1 knapsack with 40 items has `2^40` candidate subsets; a symmetric travelling-salesman tour over 15 cities has `14!/2` orderings after fixing the start and treating reversals as equivalent. Branch-and-bound explores the same decision tree but attaches an optimistic bound to each partial candidate, discarding a subtree once it cannot beat the incumbent.
+A 0/1 knapsack with 40 items has `2^40` candidate subsets. A symmetric travelling-salesman tour over 15 cities still has `14!/2` orderings after fixing the start and treating reversals as equivalent. Branch-and-bound explores these decision trees while attaching an optimistic bound to each partial candidate. Once a subtree cannot beat the best complete solution found so far, the search discards it.
 
-That pruning is valid only under one precondition: the bound must be _optimistic_. For a maximisation problem it must never fall below the true best achievable in the subtree; for minimisation it must never rise above it. A bound that leans in the pessimistic direction can throw away the subtree that held the optimum. A bound so loose it never clears the best-so-far leaves plain exponential enumeration.
+The bound must be _optimistic_. In a maximisation problem it cannot fall below the true best achievable in the subtree. In minimisation it cannot rise above the true best. A pessimistic error can discard the optimum. At the other extreme, a loose bound that never loses to the incumbent leaves plain exponential enumeration.
 
 **Core condition:** an optimisation objective + a cheap optimistic bound from a relaxation → prune any subtree whose bound cannot beat the best complete solution so far (the incumbent) → exact search that can touch only a fraction of an exponential tree.
 
@@ -115,11 +115,11 @@ The general `b`-ary model expands `1 + b + ... + b^n = Θ(b^n)` nodes when pruni
 
 # When the Bound Stops Helping
 
-A **non-optimistic bound returns a wrong answer, silently.** Suppose a maximisation subtree's true best is 90 but the bound reports 78, and the incumbent is 80. The subtree is pruned, its 90 is never found, and the search halts reporting 80 as _proven optimal_. Nothing flags the error — the optimality certificate is simply false. The defence is to derive a relaxation that provably upper-bounds maximisation or lower-bounds minimisation, even when that makes the bound looser.
+A **non-optimistic bound can return the wrong answer without warning.** Suppose a maximisation subtree contains a solution worth 90, its bound reports 78, and the incumbent is 80. The search prunes the subtree and returns 80 as _proven optimal_. The certificate is false. Bounds therefore come from relaxations that provably upper-bound maximisation or lower-bound minimisation, even when a safe bound is looser.
 
-A **bound too loose to discriminate degenerates to brute force.** "Assume every remaining item is taken at full value with no weight limit" is optimistic and valid, but it exceeds the incumbent at nearly every node, so nothing is pruned and the frontier never shrinks below the full `2ⁿ` tree. Validity keeps the answer correct; tightness is what decides the practical runtime, and the two goals pull against per-node cost.
+A **bound too loose to discriminate degenerates to brute force.** Assuming every remaining item can be taken at full value with no weight limit is optimistic and valid. It also beats the incumbent at nearly every node, so almost nothing is pruned from the `2ⁿ` tree. Validity protects the answer. Tightness controls practical runtime and must be weighed against the cost of computing the bound.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Control flow
 >
@@ -143,40 +143,50 @@ A **bound too loose to discriminate degenerates to brute force.** "Assume every 
 > ```csharp
 > public sealed record Item(int Value, int Weight);
 >
-> public static int Knapsack(Item[] items, int capacity)
+> public static long Knapsack(Item[] items, int capacity)
 > {
 >     ArgumentNullException.ThrowIfNull(items);
 >     ArgumentOutOfRangeException.ThrowIfNegative(capacity);
 >     if (items.Any(i => i.Weight <= 0 || i.Value < 0))
 >         throw new ArgumentException("Weights must be positive and values nonnegative.", nameof(items));
 >
->     // Sort by value-to-weight ratio so the fractional bound is a simple prefix fill.
->     var order = items.OrderByDescending(i => (double)i.Value / i.Weight).ToArray();
->     int best = 0;
+>     // Exact cross-products avoid rounding the value-to-weight ordering.
+>     var order = items.ToArray();
+>     Array.Sort(order, static (a, b) =>
+>         ((Int128)b.Value * a.Weight).CompareTo((Int128)a.Value * b.Weight));
+>     long best = 0;
 >
->     // Fractional (LP) relaxation: fill the remaining room by ratio, last item taken fractionally.
->     // The fractional optimum dominates the 0/1 optimum, so this never under-shoots.
->     double Bound(int index, int weight, int value)
+>     // Round the fractional remainder upward so the integer bound stays optimistic.
+>     long Bound(int index, long weight, long value)
 >     {
->         double bound = value;
->         int room = capacity - weight;
+>         long bound = value;
+>         long room = (long)capacity - weight;
 >         for (int i = index; i < order.Length && room > 0; i++)
 >         {
->             int take = Math.Min(order[i].Weight, room);
->             bound += take * (double)order[i].Value / order[i].Weight;
->             room -= take;
+>             if (order[i].Weight <= room)
+>             {
+>                 room -= order[i].Weight;
+>                 bound = checked(bound + order[i].Value);
+>                 continue;
+>             }
+>
+>             Int128 numerator = (Int128)room * order[i].Value;
+>             long fractionalCeiling = (long)((numerator + order[i].Weight - 1) / order[i].Weight);
+>             return checked(bound + fractionalCeiling);
 >         }
 >         return bound;
 >     }
 >
->     void Explore(int index, int weight, int value)
+>     void Explore(int index, long weight, long value)
 >     {
 >         if (weight > capacity) return;                    // infeasible: constraint prune
 >         if (value > best) best = value;                   // a feasible completion; update incumbent
 >         if (index == order.Length) return;
 >         if (Bound(index, weight, value) <= best) return;  // optimistic bound loses -> prune subtree
 >
->         Explore(index + 1, weight + order[index].Weight, value + order[index].Value); // take
+>         Explore(index + 1,
+>             checked(weight + order[index].Weight),
+>             checked(value + order[index].Value));                                  // take
 >         Explore(index + 1, weight, value);                                            // skip
 >     }
 >
@@ -185,16 +195,8 @@ A **bound too loose to discriminate degenerates to brute force.** "Assume every 
 > }
 > ```
 >
-> The example accepts a nonnegative capacity, strictly positive weights, and nonnegative values; the guards preserve the ratio ordering and the fractional upper-bound argument. Updating `best` on entry, before the bound check, means a fresh incumbent tightens pruning for the sibling branch immediately. `Bound` returns an upper bound on every completion of the current node, so `Bound(...) <= best` proves the subtree cannot improve the answer.
-
-# Questions
-
-> [!QUESTION]- Why must the bounding function be optimistic?
-> The bound gates pruning: a subtree is discarded when its bound cannot beat the incumbent. If a maximisation bound under-estimates a subtree's true best, that subtree can be pruned while it still holds the optimum, and the search returns a suboptimal incumbent labelled as proven-optimal — a silent correctness failure. The requirement is exactly A\* search's admissibility: the estimate may only err optimistically. For maximisation 0/1 knapsack, an LP relaxation satisfies it because a fractional optimum can only meet or exceed the integer one.
+> The guards require a nonnegative `int` capacity, positive `int` weights, and nonnegative `int` values. Cumulative totals use checked `long` arithmetic. Exact `Int128` cross-products order ratios without floating-point drift, and the fractional remainder is rounded upward, so `Bound(...) <= best` proves that the subtree cannot improve the answer.
 
 # References
 
-- [An Automatic Method of Solving Discrete Programming Problems](https://doi.org/10.2307/1910129) — Land and Doig's 1960 Econometrica paper introducing branch-and-bound for integer programming; the origin of the branch/bound/prune formulation.
-- [Integer programming](https://en.wikipedia.org/wiki/Integer_programming) — how LP-relaxation bounds drive branch-and-bound inside commercial MIP solvers.
-- [Admissible heuristic](https://en.wikipedia.org/wiki/Admissible_heuristic) — the optimism condition the bounding function shares with an A\* search heuristic.
-- [0/1 Knapsack using Branch and Bound](https://www.geeksforgeeks.org/0-1-knapsack-using-branch-and-bound/) — the fractional-LP bound worked through the 0/1 knapsack search tree.
+- [An Automatic Method of Solving Discrete Programming Problems](https://doi.org/10.2307/1910129)

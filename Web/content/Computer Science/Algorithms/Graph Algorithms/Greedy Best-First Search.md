@@ -1,22 +1,22 @@
 ---
 publish: true
-created: 2026-07-18T14:02:43.946Z
-modified: 2026-08-08T08:02:46.184Z
-published: 2026-08-08T08:02:46.184Z
+created: 2026-08-20T20:41:15.516Z
+modified: 2026-08-20T20:41:15.517Z
+published: 2026-08-20T20:41:15.517Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
-summary: Expands whichever node looks closest by heuristic h(n) alone; fast but not optimal.
+summary: Expands whichever node looks closest by heuristic h(n) alone. Fast but not optimal.
 level:
   - "4"
 priority: Medium
 status: Ready to Repeat
 ---
 
-A grid pathfinder has to reach a goal cell and cares more about producing _a_ route quickly than about producing the shortest one. A cost-aware search like [[Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]] weighs the distance already travelled and fans out in every direction, so most of its expansions land on cells that point away from the goal. Greedy Best-First Search discards the accumulated cost and orders its frontier by the heuristic `h(n)` alone — the estimated remaining distance to the goal — so it always expands whichever node currently looks closest and drives almost straight at the target.
+A grid pathfinder may value a quick route over the shortest route. A cost-aware search such as [[Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]] counts the distance already travelled and can fan out in directions that lead away from the goal. Greedy Best-First Search ignores that accumulated cost. It orders the frontier only by `h(n)`, the estimated distance remaining, and expands whichever node currently looks closest to the target.
 
-That single ranking key is also the whole weakness. Because `g(n)`, the cost paid to reach a node, never enters the comparison, the search cannot separate a short route from a long one that merely ends near the goal. It expands what looks close, not what is cheap: the path it returns can be far longer than necessary, and on an infinite graph it can follow a forever-improving estimate down a branch that never terminates.
+That ranking rule is also the weakness. The search cannot distinguish a short route from a long one that happens to end near the goal because `g(n)`, the cost already paid, never enters the comparison. A returned path may be far longer than necessary. On an infinite graph, an improving estimate can also pull the search down a branch that never terminates.
 
 ````tabsdown
 tab: Visualization
@@ -134,15 +134,15 @@ tab: Complexity
 
 # When the Estimate Misleads
 
-The h-only ordering fails in three distinct ways, all traceable to the missing `g` term.
+Every failure here comes from the missing `g` term.
 
-**A path that looks close but is long.** Suppose neighbor `A` sits one cell from the goal in straight-line distance (`h(A) = 1`) but reaches it only through a long corridor that winds the far way around, while neighbor `B` is farther in straight line (`h(B) = 5`) yet lies on a short, direct route of about five steps. Greedy Best-First pops `A` first because `1 < 5`, follows the corridor, and returns a route many times the length of the direct route through `B`. `B` remains in the frontier when the goal is dequeued and the search terminates, and nothing flags the result as suboptimal — the search optimised "get closer now," never "minimise total cost."
+**A path that looks close but is long.** Suppose neighbor `A` is one cell from the goal by straight-line distance (`h(A) = 1`) but can reach it only through a corridor that winds around an obstacle. Neighbor `B` looks farther away (`h(B) = 5`) and lies on a direct route of about five steps. Greedy Best-First pops `A` because `1 < 5`, follows the corridor, and may reach the goal while `B` still waits in the frontier. Nothing marks the result as suboptimal. The ranking asks which node looks closer now, not which complete path costs less.
 
-**Loops without a visited set.** With no closed set, a node the search has already left can be re-enqueued, and on a cyclic graph the frontier can oscillate between two low-`h` nodes indefinitely. A visited set bounds any finite graph, but it cannot rescue an infinite one: where `h` keeps improving down a fruitless branch, there is no `g` bound to force the search to abandon that region, so it never terminates.
+**Loops without a visited set.** Without a closed set, the search can enqueue a node again after leaving it. A cyclic graph may then keep the frontier moving between low-`h` nodes. A visited set bounds this behavior on a finite graph. It cannot rescue an infinite graph where `h` keeps improving along a fruitless branch because no `g` bound forces the search to leave that region.
 
-The concave obstacle is the common concrete case: a wall cupping the goal gives every cell inside the pocket a tempting low `h`, so the search thrashes along the barrier — re-committing to the blocked heading because those cells keep scoring lowest — before it discovers the way around.
+A concave obstacle is the common concrete case. A wall cupping the goal gives every cell inside the pocket a tempting low `h`, so the search keeps returning to the blocked heading before it discovers the way around.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Control flow
 >
@@ -210,20 +210,7 @@ The concave obstacle is the common concrete case: a wall cupping the goal gives 
 >
 > The priority key is `heuristic(v)` with no `g` term, so the frontier orders by estimated distance to the goal alone. `visited` guarantees termination on a finite graph but says nothing about path length.
 
-# Questions
-
-> [!QUESTION]- When is Greedy Best-First Search complete, and why is it not optimal?
-> With duplicate detection, it is complete on a finite graph because it can enqueue each reachable vertex at most once and will eventually exhaust the frontier or reach the goal. It is not complete on an infinite graph, where a monotonically improving `h` can lead expansion down a branch that never reaches the goal. It is not optimal in either case because it ignores `g(n)`, the cost already spent, so a close-looking long detour can outrank a shorter route.
-
-> [!QUESTION]- Why does a concave obstacle around the goal cause thrashing?
-> Every cell inside the pocket is geometrically near the goal, so all of them score a low `h` and the frontier keeps selecting barrier-hugging cells. The direct heading is blocked, and the accumulated `g` that would reveal the long way around is never read, so expansion oscillates along the wall before escaping. It is the h-only ordering, not the map, that has no way to notice the pocket is a dead pull.
-
-> [!QUESTION]- What does the visited set guarantee, and what does it not fix?
-> It stops a node from being enqueued twice, which prevents cycles from looping forever and guarantees termination on a finite graph. It does not make the returned path optimal, and it cannot bound an infinite graph where `h` keeps improving down a fruitless branch.
-
 # References
 
-- [Experiments with the Graph Traverser program](https://doi.org/10.1098/rspa.1966.0205) — Doran and Michie's primary 1966 study of heuristic graph traversal and how evaluation functions guide search.
-- [Best-first search (Wikipedia)](https://en.wikipedia.org/wiki/Best-first_search) — greedy best-first as the `f = h` special case of best-first search, with its optimality and completeness caveats.
-- [Heuristics (Amit's A\* Pages, Stanford)](https://theory.stanford.edu/~amitp/GameProgramming/Heuristics.html) — how the heuristic weight slides a search between Dijkstra, A\*, and greedy behaviour.
-- [Introduction to A\* (Red Blob Games)](https://www.redblobgames.com/pathfinding/a-star/introduction.html) — side-by-side interactive comparison of Greedy Best-First, Dijkstra, and A\* on one grid, including the concave-obstacle case.
+- [Experiments with the Graph Traverser program](https://doi.org/10.1098/rspa.1966.0205)
+- [Heuristics (Amit's A\* Pages, Stanford)](https://theory.stanford.edu/~amitp/GameProgramming/Heuristics.html)

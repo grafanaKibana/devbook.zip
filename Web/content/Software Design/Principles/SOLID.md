@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T14:02:44.195Z
-modified: 2026-07-18T14:02:44.195Z
-published: 2026-07-18T14:02:44.195Z
+created: 2026-08-20T20:41:15.708Z
+modified: 2026-08-20T20:41:15.708Z
+published: 2026-08-20T20:41:15.708Z
 topic:
   - Software Design
 subtopic:
@@ -14,15 +14,21 @@ priority: High
 status: Ready to Repeat
 ---
 
-SOLID is a mnemonic for five design principles that govern how classes relate to each other — who knows about whom, who changes when, and where new behavior gets added. Think of a large enterprise codebase as a city: SOLID principles are zoning laws that prevent a chemical factory from opening next to a kindergarten. Violating them does not cause an immediate explosion — it causes slow rot where tests require 14 dependencies, features take two sprints because one change breaks three classes, and onboarding stretches to months because every file does four unrelated things.
+SOLID names five principles for managing change, dependencies, and behavioral contracts in object-oriented design. They are diagnostic tools, not a demand for an interface around every class. Each principle identifies a different failure mode:
+
+| Principle | Question it asks |
+| --- | --- |
+| Single Responsibility | Which actor or policy causes this module to change? |
+| Open/Closed | Can the expected variant be added without reopening stable policy? |
+| Liskov Substitution | Does every subtype preserve the contract its callers rely on? |
+| Interface Segregation | Does each client depend only on the operations it needs? |
+| Dependency Inversion | Do source dependencies point toward policy or toward details? |
 
 # S — Single Responsibility Principle
 
-**One class, one reason to change.** "Reason to change" means one actor or stakeholder whose requirements drive modifications to that class.
+**A module should have one reason to change.** A reason is tied to an actor: a group whose requirements change together. SRP is about cohesive change, not about limiting a class to one method.
 
-Imagine a Swiss Army knife. It has a blade, a screwdriver, a corkscrew, and a toothpick. Handy for camping — terrible for a professional kitchen. A chef needs a proper knife that does one thing excellently. SRP says: build chef's knives, not Swiss Army knives.
-
-When a class serves multiple actors, a change requested by one actor can silently break behavior relied upon by another. The `OrderService` below handles order persistence, email notifications, and invoice PDF generation — three actors (the warehouse team, the marketing team, the finance team) whose requirements change on different schedules.
+When one class serves independent actors, their changes collide. The `OrderService` below combines persistence policy, notification formatting, and invoice generation even though those concerns evolve for different reasons.
 
 **Violation — one class, three actors:**
 
@@ -56,7 +62,7 @@ public class OrderService
 }
 ```
 
-Marketing wants to redesign the confirmation email. A developer adds the customer's shipping address to the template — `order.Customer.ShippingAddress.City` — but digital-only orders have a null `ShippingAddress`. The `NullReferenceException` fires _after_ `SaveChangesAsync` completes: the order is persisted and the customer is charged, but the confirmation email never sends. The bug originates in marketing's email template, but it breaks the warehouse workflow because operators rely on confirmation emails to start packing.
+An email-formatting failure can occur after `SaveChangesAsync` has persisted the order. The method then reports failure despite partial completion, so a retry may repeat already-completed work. The failure crosses responsibility boundaries because persistence and notification share one execution unit.
 
 **Fix — each actor gets its own class:**
 
@@ -92,17 +98,15 @@ public class InvoiceGenerator
 }
 ```
 
-**Why breaking SRP hurts you:** Every bug fix and feature request requires reading and understanding code that has nothing to do with the change. Test setup explodes — testing email logic requires mocking the database. Deployment risk compounds — a finance-team invoice format change forces redeploying the entire order pipeline.
+The split isolates change and test setup, but it does not by itself make the workflow atomic. A coordinator still owns ordering, idempotency, and recovery across the repository, mailer, and invoice generator.
 
-**Detection:** If describing a class requires the word "and" ("it saves orders _and_ sends emails _and_ generates invoices"), it has multiple responsibilities. If two different teams file tickets that touch the same class, SRP is violated.
+**Evidence of an SRP problem:** unrelated actors repeatedly edit the same module, a focused test requires unrelated infrastructure, or one concern cannot change without retesting several independent policies. The word “and” is only a prompt to inspect cohesion, not proof of a violation.
 
 # O — Open/Closed Principle
 
-**Open for extension, closed for modification.** Add new behavior by adding new code — not by editing existing code that already works.
+**Software entities should be open for extension and closed for modification.** Closure is always relative to a predicted axis of change. A module can stabilize its dispatch policy while allowing new variants through an established abstraction. It cannot be closed against every future requirement.
 
-Think of a power strip. When you buy a new appliance, you plug it into an open socket. You do not rewire the strip's internals. The strip is _closed_ for modification (its wiring is fixed) but _open_ for extension (new plugs fit existing sockets).
-
-The problem surfaces when behavior selection lives inside a method as branching logic. Every new variant forces modifying the same method, retesting all existing branches, and risking regressions in paths that were working fine.
+The problem appears when every new variant edits the same selection logic. That file becomes both the registry of variants and the policy that executes them, so unrelated additions compete in one change surface.
 
 **Violation — switch statement that grows with every new shipping carrier:**
 
@@ -120,7 +124,7 @@ public class ShippingCostCalculator
 }
 ```
 
-**Fix — new carriers are new classes, existing code untouched:**
+**Refactor — stable dispatch with carrier strategies:**
 
 ```csharp
 // ✅ Adding FedEx = adding one new class. Zero changes to existing code.
@@ -153,17 +157,15 @@ public class ShippingCostCalculator
 }
 ```
 
-**Why breaking OCP hurts you:** Every modification to a working method is a potential regression. In a team of 8 developers, the shipping calculator becomes a merge conflict hotspot — three developers adding three carriers in the same sprint all edit the same switch statement. Code review becomes archaeology: reviewers must verify that the new branch did not subtly change an existing one.
+The strategy version keeps calculation policy stable while new carrier implementations vary independently. The composition root or registration data may still change to make a carrier available. OCP removes recurring edits from the stable policy, not every edit from the system.
 
-**Detection:** Count the number of times a file appears in `git log` across unrelated feature branches. If the same file is modified for every new variant of a behavior, OCP is violated.
+**Evidence of an OCP problem:** the same dispatch method changes for every new variant, unrelated additions create merge conflicts, or one branch addition requires retesting all existing branches. A `switch` is not automatically wrong. A small, stable, non-duplicated switch can be clearer than a speculative hierarchy.
 
 # L — Liskov Substitution Principle
 
-**Subtypes must honor the contract of their base type.** If calling code works with a base class reference, swapping in any derived class must not break correctness — no surprises, no silent behavioral changes, no weakened guarantees.
+**Subtypes must preserve the contract of the type they replace.** A subtype cannot require more from callers, promise less in return, violate invariants, or introduce failures that the base contract excludes. The rule concerns observable behavior, not shared syntax or inheritance mechanics.
 
-Imagine hiring a substitute teacher. Parents expect the substitute to follow the same curriculum, the same grading policy, and the same classroom rules. A substitute who cancels all homework and gives everyone an A _technically fills the role_ but violates the contract the parents relied on. LSP says: substitutes must honor the original's promises.
-
-The violation is subtle because the code compiles and runs. The damage is silent incorrectness — logic that depends on base-class behavior quietly produces wrong results.
+These violations compile because C# checks type compatibility, not the full behavioral contract.
 
 **Violation — a caching repository that silently drops writes:**
 
@@ -197,15 +199,17 @@ public class CachedProductRepository : ProductRepository
 }
 ```
 
-A developer writes integration tests against `ProductRepository`. They pass. In production, DI resolves `CachedProductRepository`. Price updates from the admin panel appear to succeed (the UI reads from cache) but never reach the database. After an app restart, all prices revert to their old values. The team spends two days debugging what looks like a database issue.
+The base contract says that `SaveAsync` persists a product. The override stores only a cached value, so callers observe success without durable state. A later cache miss or process restart exposes the lost write.
 
 **Fix — composition instead of inheritance, explicit contracts:**
 
 ```csharp
 // ✅ Cache is a decorator that preserves the persistence contract
+public sealed record ProductSnapshot(int Id, string Name, decimal Price);
+
 public interface IProductRepository
 {
-    Task<Product?> GetByIdAsync(int id);
+    Task<ProductSnapshot?> GetByIdAsync(int id);
     Task SaveAsync(Product product);
 }
 
@@ -213,8 +217,13 @@ public class SqlProductRepository : IProductRepository
 {
     private readonly ShopDbContext _db;
     public SqlProductRepository(ShopDbContext db) => _db = db;
-    public async Task<Product?> GetByIdAsync(int id) =>
-        await _db.Products.FindAsync(id);
+    public async Task<ProductSnapshot?> GetByIdAsync(int id)
+    {
+        var product = await _db.Products.FindAsync(id);
+        return product is null
+            ? null
+            : new ProductSnapshot(product.Id, product.Name, product.Price);
+    }
     public async Task SaveAsync(Product product)
     {
         _db.Products.Update(product);
@@ -228,25 +237,34 @@ public class CachedProductRepository : IProductRepository
     private readonly IMemoryCache _cache;
     public CachedProductRepository(IProductRepository inner, IMemoryCache cache) { _inner = inner; _cache = cache; }
 
+    public async Task<ProductSnapshot?> GetByIdAsync(int id)
+    {
+        if (_cache.TryGetValue<ProductSnapshot>($"product:{id}", out var cached))
+            return cached;
+
+        var product = await _inner.GetByIdAsync(id);
+        if (product is not null)
+            _cache.Set($"product:{id}", product);
+        return product;
+    }
+
     public async Task SaveAsync(Product product)
     {
         await _inner.SaveAsync(product); // ✅ Persistence contract honored
-        _cache.Set($"product:{product.Id}", product);
+        _cache.Remove($"product:{product.Id}");
     }
 }
 ```
 
-**Why breaking LSP hurts you:** LSP violations are the hardest SOLID violations to catch because the compiler cannot enforce behavioral contracts. Tests pass against the base type; bugs surface only when the DI container resolves a subtype — often only in production. Debugging is expensive because the symptom (wrong data) is disconnected from the cause (a subtype override).
+The decorator preserves the persistence postcondition and adds caching as a separate behavior. Cached reads are detached immutable snapshots, and a successful write invalidates them; mutable EF-tracked entities are never shared through the process cache. Composition is not inherently safer than inheritance. It works here because the wrapper explicitly delegates the original contract before adding its own effect.
 
-**Detection:** Search for `override` methods that do not call `base.Method()` when the base established a side effect. Search for `is` or `as` type checks in consuming code — they often indicate that the caller cannot trust the base type contract and is compensating.
+**Evidence of an LSP problem:** a subtype throws `NotSupportedException` for a promised operation, strengthens input requirements, weakens output guarantees, or makes callers branch on the runtime type. Calling `base.Method()` is neither required nor sufficient. Substitutability is judged from externally visible behavior.
 
 # I — Interface Segregation Principle
 
-**No client should be forced to depend on methods it does not use.** Prefer small, focused interfaces over large "fat" interfaces.
+**No client should be forced to depend on methods it does not use.** Interfaces are shaped around client roles, not around the complete capability list of one implementation. Smallness is a consequence of that boundary, not the objective by itself.
 
-Think of a restaurant menu. A steakhouse that hands you a 40-page binder covering sushi, pizza, dim sum, and BBQ is not being helpful — it is overwhelming you with options you did not ask for. ISP says: give each customer the menu relevant to what they ordered.
-
-Fat interfaces create phantom dependencies. A class implements 12 methods to satisfy the interface, but its caller uses only 2. When any of the other 10 method signatures change, the implementing class must be updated and recompiled — even though the change is irrelevant to the caller.
+A broad interface couples clients and implementers to operations outside their role. Changes to those operations then propagate through code that neither calls nor supports them.
 
 **Violation — one interface forces every implementation to handle everything:**
 
@@ -312,17 +330,15 @@ public class NotificationHandler : IOrderNotifier
 }
 ```
 
-**Why breaking ISP hurts you:** Fat interfaces turn unrelated classes into change partners. Adding a `Task TrackShipmentAsync()` method to `IOrderService` forces _every_ implementation to add a stub — including `NotificationHandler` which has nothing to do with shipment tracking. This means every new method triggers changes in N classes, N sets of tests, and N code reviews for zero business value.
+The split lets order management, notification, and invoicing evolve for their own clients. A class may legitimately implement several interfaces when it serves several roles. ISP prevents those roles from being bundled into every client contract.
 
-**Detection:** Count `throw new NotSupportedException()` or `throw new NotImplementedException()` in interface implementations. Each one signals a method that the class was forced to "implement" but does not actually support.
+**Evidence of an ISP problem:** implementations contain unsupported-operation stubs, clients mock members they never call, or an interface change forces unrelated consumers to rebuild and retest. Many one-method interfaces can be the opposite failure when all clients use the same cohesive operation set.
 
 # D — Dependency Inversion Principle
 
-**High-level modules should not depend on low-level modules. Both should depend on abstractions.** The direction of source-code dependency should point toward the business policy, not toward the implementation detail.
+**High-level policy should not depend on low-level details. Both should depend on abstractions.** The policy side owns the contract it needs, and infrastructure implements that contract. Runtime calls can still flow from policy to infrastructure while source-code dependencies point back toward policy.
 
-Think of a wall outlet. Your laptop charger depends on the outlet _shape_ (the abstraction), not on the specific wiring inside the wall. The power company can completely rewire the building infrastructure without you buying a new charger — because both sides agreed on the outlet interface.
-
-Without DIP, high-level business logic reaches directly into low-level infrastructure. The `OrderProcessor` below knows the concrete type of every dependency — SQL Server for storage, Stripe for payments, SMTP for emails. Replacing any of these requires rewriting the core business class.
+Without DIP, the `OrderProcessor` chooses SQL persistence, a payment provider, and email infrastructure itself. Those construction decisions make volatile details part of the business module.
 
 **Violation — business logic hardcoded to infrastructure:**
 
@@ -391,77 +407,37 @@ flowchart LR
     end
 ```
 
-**Why breaking DIP hurts you:** Without DIP, unit testing the order processing flow requires a live SQL database, a Stripe test account, and an SMTP server. Test execution time goes from milliseconds to seconds. In CI, flaky infrastructure dependencies cause intermittent failures. When the team decides to switch from Stripe to Adyen, the change touches the core business class instead of being isolated to a single `AdyenPaymentGateway` implementation.
+Dependency injection supplies the implementations, but it is not DIP by itself. DIP is the source-dependency rule shown in the diagram: the business policy knows its abstractions, while infrastructure and the composition root know the concrete details.
 
-**Detection:** Look for `new ConcreteClass()` inside business logic classes. If a high-level class directly instantiates a low-level dependency, DIP is violated. In ASP.NET Core, check whether all infrastructure dependencies are registered in DI and injected via constructors.
+**Evidence of a DIP problem:** business policy imports provider SDK types, constructs infrastructure dependencies, or changes whenever a storage or transport detail changes. Constructing concrete classes is expected inside a composition root and harmless inside self-contained leaf code. Location and dependency direction determine the design cost.
 
 # How the Principles Reinforce Each Other
 
-SOLID principles are not independent checkboxes — violating one typically cascades into violating others.
+The principles overlap without becoming interchangeable. SRP identifies change axes. OCP can stabilize an extension point along one of those axes. ISP keeps a contract aligned with its clients. LSP requires every implementation of that contract to remain substitutable. DIP places those abstractions on the policy side so infrastructure changes do not pull business logic with them.
 
-**SRP violation often leads to OCP violation:** A class with three responsibilities accumulates changes from three actors. The more frequently a class changes, the more likely those changes modify existing code rather than extending through new classes — increasing pressure toward OCP violations.
-
-**ISP violation often leads to LSP violation:** A fat interface pushes implementors to stub methods with `NotSupportedException`. Callers who invoke those stubs get runtime errors — the subtype does not honor the base contract, which is the defining symptom of an LSP violation.
-
-**DIP violation amplifies all others:** When high-level code depends on concrete low-level classes, substituting implementations becomes difficult (LSP pressure), extending behavior often requires modifying existing code (OCP pressure), and splitting interfaces has limited value because everything is already coupled through concrete types (ISP pressure).
-
-The practical implication: when debugging a SOLID violation, look one level deeper. The visible symptom (a class that is hard to extend) often has a root cause in a different principle (it depends on concrete types instead of abstractions).
+A single design smell may therefore have several causes. An interface full of unsupported members is both an ISP warning and evidence that implementations cannot satisfy one substitutable contract. A frequently edited policy class may need a clearer responsibility boundary before it needs polymorphism.
 
 # Tradeoffs
 
-| Principle | Benefit | Cost | When to relax |
-|-----------|---------|------|---------------|
-| SRP | Focused classes, isolated testing, fewer unrelated regressions | More files, more navigation, harder to follow a single request across classes | Small utilities with one actor, scripts under 100 lines |
-| OCP | New features without regression risk, reduced merge conflicts | Requires upfront abstraction design, more types to navigate | When the extension point has not yet emerged from real usage — premature abstraction is worse than a switch statement |
-| LSP | Substitutable types, no runtime type checks, reliable polymorphism | Constrains inheritance hierarchies, may require redesigning class relationships | Rarely — LSP violations are almost always design errors, not pragmatic shortcuts |
-| ISP | Clients depend only on what they use, reduced recompilation surface, focused mocking | More interfaces to maintain, risk of over-splitting into single-method interfaces | When one client genuinely uses all methods and no other client exists |
-| DIP | Testable with mocks, swappable implementations, deployment flexibility | DI container configuration overhead, more indirection in stack traces | Performance-critical hot paths where virtual dispatch overhead is measurable, or leaf classes with no realistic alternative implementation |
+| Principle | Useful pressure | Over-application signal |
+| --- | --- | --- |
+| SRP | Independent actors change independently | Cohesive behavior is scattered across tiny classes |
+| OCP | A recurring variant can extend a stable policy | An abstraction predicts variants that have not appeared |
+| LSP | One contract supports honest substitution | The hierarchy exists only for code reuse and needs exceptions |
+| ISP | Clients see role-specific contracts | Interfaces are split more finely than any client requires |
+| DIP | Volatile details depend on stable policy contracts | Every leaf class receives an interface and container registration |
 
-**Decision rule:** Apply SOLID where you have evidence of coupling pain — code that is hard to test, hard to change, or hard to understand. Do not apply it speculatively to code that has not yet caused problems. The cost of over-engineering (47 single-method interfaces for a 20-endpoint CRUD app) is as real as the cost of under-engineering (a 2,000-line `OrderService` that nobody dares touch).
+SOLID pays for itself at observed change seams: repeated edits, unstable dependencies, dishonest contracts, or tests dominated by unrelated setup. Concrete, cohesive code remains the simpler choice where no such seam exists. LSP is different from the other tradeoffs: once a subtype relationship is declared, violating its contract is a correctness defect rather than a simplification.
 
 # Pitfalls
 
-**Over-abstraction theater.** A team applies ISP so aggressively to a 20-endpoint internal tool that they create 47 single-method interfaces. Navigating the codebase requires tracing through 3-4 layers of indirection for every feature. New developers take 2 weeks to onboard on what should be a simple CRUD application. **Why it happens:** Mechanical rule-following without assessing whether the abstraction serves a real need. **Mitigation:** An interface should exist because two or more consumers need different implementations, not because "SOLID says so."
-
-**SRP taken to the extreme.** Splitting every method into its own class creates a constellation of tiny objects with no cohesion. A 10-line helper becomes 4 files with dependency injection wiring. **Why it happens:** Confusing "one responsibility" with "one method." SRP is about actors, not methods. **Mitigation:** A class can have multiple methods as long as they all change for the same stakeholder.
-
-**Premature DIP.** Extracting an interface for a class that will only ever have one implementation adds indirection without value. `ICurrentDateProvider` wrapping `DateTime.UtcNow` makes sense in a time-sensitive domain; `IStringHelper` does not. **Why it happens:** Applying DIP as a blanket rule rather than responding to real substitution needs. **Mitigation:** Extract interfaces when you have a second consumer or need testability for a specific dependency.
-
-**LSP-violating inheritance hierarchies.** Inheriting for code reuse rather than behavioral substitution (e.g., `CachedRepository : SqlRepository`) creates subtypes that silently change the base contract. **Why it happens:** Inheritance feels like the obvious reuse mechanism. **Mitigation:** Prefer composition (decorator pattern) when the derived class modifies rather than extends behavior.
-
-**Interface explosion from ISP.** Splitting interfaces too granularly creates a combinatorial explosion of types that are harder to discover, harder to mock in tests, and harder to compose in DI registration. **Why it happens:** Applying ISP mechanically to every interface without checking whether any client actually suffers from the fat interface. **Mitigation:** Split only when you find a concrete client that is forced to depend on methods it does not call.
-
-# Questions
-
-> [!QUESTION]- Which SOLID principles does a typical Singleton violate, and why does it matter in a microservice?
->
-> - **DIP**: consuming code depends on a concrete global instance (`Singleton.Instance`) instead of an abstraction injected via DI. This makes it impossible to swap implementations per-tenant or per-environment.
-> - **SRP**: the singleton class mixes business logic with lifecycle management (lazy initialization, thread-safety) and global access control. Changes to any of these concerns affect the same class.
-> - **OCP**: replacing or extending behavior usually requires changing call sites or the singleton itself — you cannot plug in an alternative without modifying existing code.
-> - **Fix in .NET**: expose an interface, register the implementation with `AddSingleton<IService, ConcreteService>()` in the DI container. The container manages lifetime; the class manages only its business logic.
-> - DI adds indirection and configuration overhead, so a static singleton is simpler for genuinely global, stateless utilities (`StringComparer.OrdinalIgnoreCase`). For anything stateful or with infrastructure dependencies, DI-managed singletons win outright.
-
-> [!QUESTION]- How would you refactor a 2,000-line service class to satisfy SRP without breaking existing callers?
->
-> - **Step 1**: Identify actors — group methods by which team or business process triggers changes to them. Common groupings: persistence, notification, validation, reporting.
-> - **Step 2**: Extract method groups into focused classes (e.g., `OrderValidator`, `OrderNotifier`, `OrderRepository`). Each class gets one actor's methods.
-> - **Step 3**: Introduce interfaces for each new class. The original `OrderService` becomes a thin facade that delegates to the extracted classes via interfaces.
-> - **Step 4**: Existing callers continue using `OrderService` (facade). New callers depend on the focused interfaces directly.
-> - **Step 5**: Gradually migrate existing callers away from the facade as you touch them for other reasons. Eventually remove the facade.
-> - The intermediate facade adds indirection without the full SRP payoff, but it buys an incremental migration over several sprints instead of a big-bang rewrite that freezes feature work.
-
-> [!QUESTION]- When is it acceptable to violate SOLID principles, and how do you decide?
->
-> - **Small scripts and prototypes**: abstractions cost more than the code they protect. A 50-line console app does not need interfaces.
-> - **Performance-critical hot paths**: virtual dispatch, interface resolution, and DI overhead are measurable in tight loops processing millions of items per second. Profile first — if the abstraction boundary appears in your flame graph, inline it.
-> - **Premature abstraction risk**: when you have exactly one implementation and no foreseeable second one, extracting an interface adds navigation cost without substitution value. Wait for the second use case.
-> - **Decision heuristic**: apply SOLID when you have evidence — when tests are hard to write, when unrelated teams edit the same file, when adding a feature requires modifying code that already works. Do not apply it to prevent hypothetical future problems.
-> - Every SOLID application trades simplicity for flexibility. The real question is never "should I apply SOLID" but "does the flexibility outweigh the complexity it adds right now?"
+- **One method per class.** SRP concerns cohesive change for one actor, not method count.
+- **An abstraction for every class.** DIP protects a policy/detail boundary. It does not require indirection around stable leaf code.
+- **No switches anywhere.** OCP targets recurring extension pressure. A local, stable switch can express a closed set clearly.
+- **Inheritance for reuse.** Shared implementation does not establish behavioral substitutability. Composition often exposes the real contract more honestly.
+- **Tiny interfaces by default.** ISP starts from client needs. Splitting a contract without a client boundary only increases navigation and wiring.
 
 # References
 
-- [Architectural Principles — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/architecture/modern-web-apps-azure/architectural-principles) — SOLID principles in the context of ASP.NET Core architecture with dependency injection examples and real .NET guidance from the Microsoft architecture team
-- [Clean Architecture (Robert C. Martin)](https://www.oreilly.com/library/view/clean-architecture-a/9780134494272/) — the book that extends SOLID into architectural-level principles including component cohesion, coupling metrics, and the dependency rule that underpins DIP
-- [SOLID Principles in C# — dotnetcurry](https://www.dotnetcurry.com/software-gardening/1235/solid-principles-csharp-dotnet) — practitioner walkthrough of all five principles with C# examples showing before/after refactorings in realistic codebases
-- [The Principles of OOD — Robert C. Martin](http://butunclebob.com/ArticleS.UncleBob.PrinciplesOfOod) — the original article series where Robert C. Martin articulated the SOLID principles with links to individual principle papers on SRP, OCP, LSP, ISP, and DIP
-- [Dependency Injection in .NET — Mark Seemann](https://www.manning.com/books/dependency-injection-principles-practices-patterns) — deep practitioner treatment of DIP in .NET: composition roots, lifetime management, decorator patterns, and the pitfalls of service locator anti-patterns
+- [Architectural Principles](https://learn.microsoft.com/en-us/dotnet/architecture/modern-web-apps-azure/architectural-principles)
+- [Clean Architecture](https://www.pearson.com/en-us/subject-catalog/p/Martin-Clean-Architecture-A-Craftsman-s-Guide-to-Software-Structure-and-Design/P200000009528?view=educator)

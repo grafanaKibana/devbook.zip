@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-10T08:13:07.800Z
-modified: 2026-08-10T15:00:48.535Z
-published: 2026-08-10T15:00:48.535Z
+created: 2026-08-20T20:41:15.709Z
+modified: 2026-08-20T20:41:15.710Z
+published: 2026-08-20T20:41:15.710Z
 topic:
   - Software Design
 subtopic:
@@ -14,30 +14,20 @@ priority: High
 status: Not-Started
 ---
 
-The testing pyramid allocates verification by feedback speed and maintenance cost. It favors many narrow tests near the code and fewer broad tests across deployed boundaries. The shape is a heuristic, not a fixed ratio: the useful mix follows the system’s risks, architecture, and cost of a missed defect.
+The testing pyramid arranges checks by feedback speed, fidelity, and maintenance cost. Narrow tests near the code are usually cheap and diagnostic. Broad tests across deployed boundaries prove more wiring but fail for more possible reasons. The shape is a heuristic rather than a fixed ratio, so the useful mix follows architecture and the cost of each missed defect.
 
 ![[Assets/Excalidraw/Testing Pyramid.excalidraw|700|center]]
 
 | Layer | Purpose | Relative quantity | Speed | Cost and failure diagnosis |
 | --- | --- | --- | --- | --- |
-| Unit | Verify branching rules and small behaviors without real I/O | Many | Fastest; normally milliseconds | Cheapest to run and maintain; failures usually identify one behavior |
-| Integration / service | Verify components and real boundaries such as persistence, serialization, messaging, or an in-process API | Fewer | Slower; setup and I/O dominate | More environment and data management; failures can span several components |
-| End-to-end / UI | Verify a critical user journey through the assembled system | Few | Slowest | Highest setup, runtime, and maintenance cost; failures have the widest diagnostic surface |
+| Unit | Verify branching rules and small behaviors without real I/O | Many | Fastest. Normally milliseconds | Cheapest to run and maintain. Failures usually identify one behavior |
+| Integration / service | Verify components and real boundaries such as persistence, serialization, messaging, or an in-process API | Fewer | Slower. Setup and I/O dominate | More environment and data management. Failures can span several components |
+| End-to-end / UI | Verify a critical user journey through the assembled system | Few | Slowest | Highest setup, runtime, and maintenance cost. Failures have the widest diagnostic surface |
 
-Push an assertion downward only when the lower layer can expose the same risk. A price rule belongs in unit tests; a database constraint needs an integration test; checkout routing through browser, API, identity, and payment needs a small number of end-to-end checks. A service dominated by SQL or protocol adapters may rationally contain more integration tests than unit tests without “breaking” the pyramid.
+Move an assertion downward only when the lower layer can expose the same failure. A price rule belongs in a unit test. A database constraint needs the actual relational boundary. Checkout routing through browser, API, identity, and payment needs a small number of end-to-end checks. A service dominated by SQL or protocol adapters may reasonably contain more integration tests than unit tests without violating the model.
 
-The common failure is an inverted suite: broad UI tests cover every branch, run slowly, and fail for unrelated environmental reasons. Keep a thin end-to-end layer for critical journeys, put boundary behavior at the integration layer, and retain fast local feedback for logic. Measure duration, flakiness, maintenance effort, and escaped defects instead of enforcing percentages.
-
-# Questions
-
-> [!QUESTION]- Why is the testing pyramid not a prescribed ratio?
-> Test value depends on where a risk can be observed most cheaply and faithfully. Architecture, regulatory evidence, legacy seams, and infrastructure-heavy behavior change the appropriate mix; fixed percentages ignore those conditions.
-
-> [!QUESTION]- Which layer should verify a duplicate-charge invariant?
-> Pure idempotency decisions can be unit tested, persistence uniqueness and request replay need integration coverage, and only a small critical-path end-to-end test should prove the assembled checkout flow. Each layer covers a distinct failure boundary.
+An inverted suite asks broad UI tests to cover branches that a lower boundary could verify more cheaply. The result is slow feedback and a wide diagnostic surface. Keep end-to-end coverage for critical journeys, integration coverage for real boundaries, and local tests for decisions. Duration, rerun rate, maintenance effort, and escaped defects are better signals than layer percentages.
 
 # References
 
-- [The Practical Test Pyramid](https://martinfowler.com/articles/practical-test-pyramid.html) — Ham Vocke’s primary practitioner account explains layer scope, feedback economics, and why UI-heavy suites become slow and brittle.
-- [Unit testing best practices with .NET](https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-best-practices) — Microsoft’s official guidance on fast, isolated, deterministic unit tests.
-- [Integration tests in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/test/integration-tests) — Microsoft’s official guidance for exercising the real application pipeline with `WebApplicationFactory`.
+- [The Practical Test Pyramid](https://martinfowler.com/articles/practical-test-pyramid.html)

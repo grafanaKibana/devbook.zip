@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T14:02:44.059Z
-modified: 2026-07-18T14:02:44.059Z
-published: 2026-07-18T14:02:44.059Z
+created: 2026-08-20T20:41:15.613Z
+modified: 2026-08-20T20:41:15.613Z
+published: 2026-08-20T20:41:15.613Z
 topic:
   - Data Persistence
 subtopic: []
@@ -13,15 +13,15 @@ priority: High
 status: Ready to Repeat
 ---
 
-Opening a database connection is expensive: a TCP handshake, TLS negotiation, and server-side authentication and session setup that can take tens of milliseconds — far longer than the query itself. A connection pool keeps a set of already-open connections and **lends** them to requests, returning them to the pool instead of closing them. The result is that "opening a connection" becomes a cheap rent-from-pool, and the database is protected from being swamped by thousands of short-lived connections. In .NET this is on by default (ADO.NET / `SqlClient` / `Npgsql`); the skill is sizing and using it correctly.
+Opening a physical database connection can require a socket, a security handshake, authentication, and server-side session setup. Repeating that work for every query wastes latency and server capacity. A connection pool keeps physical connections open and lends them to callers. `SqlClient` and Npgsql enable pooling by default. The application still has to return connections promptly and keep the fleet-wide limit within what the database can serve.
 
 # How It Works
 
-The pool sits in the application (client-side) and manages a bounded set of physical connections:
+The client-side pool manages a bounded set of physical connections:
 
-1. App calls `OpenConnection()` → pool hands back an **idle** connection, or opens a new one if under the max, or **waits** if the pool is exhausted.
-2. App runs its query.
-3. App "closes"/`Dispose()`s the connection → it's **reset and returned to the pool**, not physically closed.
+1. `OpenAsync()` takes a usable idle connection or creates one while the pool is below its maximum.
+2. Once the pool is full, another caller waits until a connection returns or the connection timeout expires.
+3. `Close()` or `Dispose()` returns the logical connection. The provider resets reusable session state and places the physical connection back in the pool.
 
 ```mermaid
 flowchart LR
@@ -31,11 +31,11 @@ flowchart LR
     P -.->|idle too long| C[Close extra conns]
 ```
 
-Connections are keyed by **connection string** — a different string (different database, user, or even option) gets its **own** pool. Pools also retire connections that have been idle too long or exceeded a max lifetime.
+Pools are separated by connection configuration. `SqlClient` uses an exact connection-string match and may also separate by identity, credential object, transaction context, or other provider state. Npgsql similarly maintains pools by data-source configuration. Idle and maximum-lifetime settings decide when a provider retires extra or aging connections.
 
 # Example
 
-The pattern that makes pooling work is **open late, dispose early** — hold the connection only for the query, never across I/O or user think-time:
+Pooling works when checkout time stays short. Open immediately before database work and dispose as soon as that work finishes. An open connection should not sit idle while unrelated network calls or user interaction completes.
 
 ```csharp
 // 'using' returns the connection to the pool immediately after the query.
@@ -47,31 +47,33 @@ var name = (string?)await cmd.ExecuteScalarAsync(ct);
 // dispose → connection reset and returned to pool
 ```
 
-Pool size is configured in the connection string, e.g. `Maximum Pool Size=100;Minimum Pool Size=5;Connection Lifetime=300`.
+Npgsql pool settings can be configured in the connection string, for example `Maximum Pool Size=100;Minimum Pool Size=5;Connection Lifetime=300`. Defaults and keyword names are provider-specific.
 
 # Sizing the Pool
 
-Bigger is **not** better. Each pooled connection consumes memory and a worker/backend on the database server, and past the point of CPU/disk saturation more concurrency just adds contention and latency. A useful starting heuristic (from the HikariCP project) is roughly:
+Bigger is not automatically better. Every open connection consumes client and server resources. Once the database reaches its CPU, I/O, or lock-contention limit, more concurrent queries increase queueing inside the server instead of raising throughput.
+
+The HikariCP project offers this rough starting point for a database handling mostly active work:
 
 > **connections ≈ (CPU cores × 2) + effective spindle count**
 
-— often a _small_ number (e.g. 10–30) per app instance, not hundreds. Then **multiply by the number of app instances**: 50 pods × 100 max-pool = 5,000 connections hammering a database that handles maybe a few hundred well. Size the _total_ against the database's limit (`max_connections`), not each app in isolation.
+It is a heuristic, not a per-instance entitlement. Storage architecture, query mix, transaction duration, and workload burstiness can move the useful limit. Start from a database-wide concurrency budget, reserve capacity for administration and background work, then divide the remainder across application instances. Fifty pods with a maximum of 100 connections each expose 5,000 possible sessions even if the database can run only a small fraction at once.
 
 # Pitfalls
 
-- **Pool exhaustion** — every connection is checked out and the next request blocks until the pool timeout, then throws ("timeout obtaining a connection from the pool"). Causes: pool too small for the load, or **leaked connections** (see below), or holding connections during slow I/O/transactions.
-- **Connection leaks** — forgetting to `Dispose()` (no `using`) keeps a connection checked out forever; under load the pool drains and the app hangs. Always scope connections with `using`/`await using`.
-- **Holding a connection across slow work** — opening a connection, then awaiting an HTTP call or user input before running the query, ties up a pooled connection for the whole wait. Open it _immediately before_ the query and release right after (this mirrors the "keep transactions short" rule in [[ACID]]).
-- **Per-tenant connection strings explode pools** — building a connection string per tenant/user (different credentials) creates a separate pool each, multiplying total connections. Use one app identity + row-level scoping, not a string per tenant.
-- **Pool × instances overwhelms the DB** — autoscaling to N replicas multiplies your connection footprint by N; the database hits `max_connections` and rejects everyone. Account for fleet size when sizing.
-- **Serverless makes pooling hard** — short-lived functions (Lambda, Azure Functions) spin up many isolated instances, each with its own tiny pool and no sharing, easily exhausting the database. This is the main reason external proxies exist.
+- **Pool exhaustion.** Every connection is checked out, so another `OpenAsync()` waits and eventually times out. A leak, a long transaction, unrelated work inside the checkout window, or more concurrency than the configured pool can support can all produce the same symptom.
+- **Connection leaks.** A connection that is never disposed may remain checked out. `using` or `await using` makes the return path explicit even when the command fails.
+- **Slow work inside the checkout window.** Waiting for an HTTP response while holding a connection consumes scarce database concurrency without using it. The same problem appears when a transaction remains open across unrelated work. See [[ACID]].
+- **Pool fragmentation.** Different connection strings, identities, or provider configurations create separate pools. Per-user credentials and per-tenant databases can multiply the physical connection count even when each pool looks small.
+- **Autoscaling multiplication.** Each process owns its client pool. Adding instances raises the possible server-session count unless pool limits shrink with the fleet.
+- **Elastic compute fan-out.** A warm function environment may reuse its own pool, but separate environments do not share it. A burst that creates many environments can therefore create many independent pools at once.
 
 # Server-Side Poolers
 
-When the _client_-side pool isn't enough — too many app instances, or serverless — put a pooler **in front of the database**:
+When many application processes would otherwise maintain too many server sessions, a proxy can multiplex client connections in front of the database:
 
-- **PgBouncer** (PostgreSQL) — a lightweight proxy that multiplexes thousands of client connections onto a small number of real ones. In **transaction mode** a backend connection is held only for the duration of a transaction, drastically cutting real connections (caveat: session-level features like prepared statements/`SET` need care).
-- **RDS Proxy / Azure SQL** — managed equivalents that also smooth failovers and protect the database from connection storms.
+- **PgBouncer** assigns a server connection for an entire client session, transaction, or statement depending on mode. Transaction pooling reduces server-session occupancy, but session-scoped state such as `SET`, `LISTEN`, session advisory locks, and SQL `PREPARE` does not follow a client between transactions. Protocol-level prepared plans can work when `max_prepared_statements` is configured.
+- **Managed database proxies**, such as RDS Proxy, can provide a shared connection boundary for elastic clients. Azure SQL Database is a managed database service rather than a drop-in server-side pooler, so its connection limits and gateway behavior must be designed separately.
 
 # Tradeoffs
 
@@ -81,22 +83,16 @@ When the _client_-side pool isn't enough — too many app instances, or serverle
 | App throughput under burst | May queue/timeout | More concurrency, until DB becomes the bottleneck |
 | Latency | Slight wait when busy | Lower wait, but risks DB-side contention |
 
-**Decision rule**: start small (cores × 2-ish per instance), measure wait time and DB CPU, and grow only until the database — not the pool — is the limiter. If many instances or serverless functions push total connections past the DB's comfort zone, add a server-side pooler (PgBouncer / RDS Proxy) rather than enlarging client pools.
+Start with a conservative fleet-wide budget. Measure pool wait time alongside database CPU, I/O, active sessions, transaction age, and query latency. Increase concurrency only while throughput improves within the latency target. A shared proxy can help when process count, rather than useful database parallelism, is driving the session count.
 
 # Questions
 
 > [!QUESTION]- Why is a bigger connection pool often worse, not better?
-> Each connection costs a server-side backend/worker plus memory, and once the database's CPU and disk are saturated, additional concurrent queries just contend and add latency — throughput can actually _drop_. The right size is a small multiple of the database's core count, sized against `max_connections` across the _whole fleet_, not maximized per app.
-
-> [!QUESTION]- What causes connection-pool exhaustion and how do you fix it?
-> All connections are checked out and new requests block until timing out. Usual causes: a pool too small for real concurrency, connections **leaked** by missing `Dispose()`/`using`, or connections held across slow I/O or long transactions. Fixes: scope every connection with `using`, keep the checkout window to just the query, right-size the pool, and add a server-side pooler if the fleet is large.
-
-> [!QUESTION]- Why is connection pooling hard in serverless environments?
-> Serverless platforms run many short-lived, isolated function instances that can't share an in-process pool, and each may open its own connections — so a spike spawns thousands of connections and exhausts the database. The standard remedy is an external pooler (RDS Proxy, PgBouncer) that all instances share, multiplexing them onto a small set of real connections.
+> Each connection consumes server resources. After the useful database concurrency is saturated, additional queries wait on CPU, I/O, or locks inside the engine, so latency rises without a matching throughput gain. Size the whole fleet against measured database capacity and the server connection limit, then divide that budget across instances.
 
 # References
 
-- [About connection pooling (ADO.NET, Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/framework/data/adonet/sql-server-connection-pooling) — how .NET pools by connection string, lifetime, and reset semantics.
-- [Npgsql connection string parameters (pooling)](https://www.npgsql.org/doc/connection-string-parameters.html) — Min/Max pool size, lifetime, and timeout tuning.
-- [About Pool Sizing (HikariCP wiki)](https://github.com/brettwooldridge/HikariCP/wiki/About-Pool-Sizing) — the canonical, math-backed argument for small pools.
-- [PgBouncer documentation](https://www.pgbouncer.org/) — transaction vs session pooling modes for PostgreSQL at scale.
+- [SQL Server connection pooling](https://learn.microsoft.com/en-us/dotnet/framework/data/adonet/sql-server-connection-pooling)
+- [Npgsql connection string parameters](https://www.npgsql.org/doc/connection-string-parameters.html)
+- [HikariCP pool sizing](https://github.com/brettwooldridge/HikariCP/wiki/About-Pool-Sizing)
+- [PgBouncer documentation](https://www.pgbouncer.org/)

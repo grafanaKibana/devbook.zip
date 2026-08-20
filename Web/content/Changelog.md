@@ -1,9 +1,9 @@
 ---
 publish: true
 title: Changelog
-created: 2026-08-08T08:38:21.957Z
-modified: 2026-08-08T09:27:18.132Z
-published: 2026-08-08T09:27:18.132Z
+created: 2026-08-10T06:36:38.071Z
+modified: 2026-08-10T06:36:38.071Z
+published: 2026-08-10T06:36:38.071Z
 tags:
   - MetricsIgnore
 summary: Release history for DevBook, grouped by platform changes, note updates, fixes, and maintenance.

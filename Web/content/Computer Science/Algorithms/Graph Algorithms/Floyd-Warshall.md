@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-21T18:52:02.621Z
-modified: 2026-08-08T07:30:30.067Z
-published: 2026-08-08T07:30:30.067Z
+created: 2026-08-20T20:41:15.515Z
+modified: 2026-08-20T20:41:15.516Z
+published: 2026-08-20T20:41:15.516Z
 topic:
   - Computer Science
 subtopic:
@@ -14,9 +14,9 @@ priority: Medium
 status: Creation
 ---
 
-A weighted directed graph of `V` vertices, and the question is not one shortest path but the distance between every ordered pair — a full `V×V` table. Running a single-source algorithm from each vertex answers it, yet on a dense graph that repeats most of the work, and a negative edge weight rules out the fastest single-source choice outright.
+Floyd-Warshall computes the shortest distance between every ordered pair in a weighted directed graph, producing a full `V×V` table. Running a single-source algorithm from each vertex can produce the same table, but on a dense graph that repeats much of the work. Negative edge weights also rule out Dijkstra.
 
-Floyd-Warshall fills the whole table with one triple loop by recasting the problem as [[Computer Science/Algorithms/Paradigms/Dynamic Programming|dynamic programming]] over a growing set of permitted waypoints. The sub-problem is "the shortest path from `i` to `j` that may route only through intermediate vertices drawn from `{0..k}`." Beginning with direct edges alone and admitting one more permitted intermediate per stage, the last stage leaves every entry at its unrestricted shortest distance when no negative cycle is reachable on the route. Each stage `k` poses a single question at every pair: keep `dist[i][j]`, or improve it by going `i → k → j`. A negative cycle makes every pair that can reach it and then leave it have no finite shortest distance; the diagonal detects the condition, but the raw finite values left in the matrix are not valid answers for those pairs.
+Floyd-Warshall fills the whole table with one triple loop by recasting the problem as [[Computer Science/Algorithms/Paradigms/Dynamic Programming|dynamic programming]] over a growing set of permitted waypoints. The sub-problem is "the shortest path from `i` to `j` that may route only through intermediate vertices drawn from `{0..k}`." Beginning with direct edges alone and admitting one more permitted intermediate per stage, the last stage leaves every entry at its unrestricted shortest distance when no negative cycle is reachable on the route. Each stage `k` poses a single question at every pair: keep `dist[i][j]`, or improve it by going `i → k → j`. A negative cycle makes every pair that can reach it and then leave it have no finite shortest distance. The diagonal detects the condition, but the raw finite values left in the matrix are not valid answers for those pairs.
 
 The decisive step is a single relaxation sweeping the whole distance matrix for one admitted intermediate vertex.
 
@@ -113,7 +113,7 @@ tab: Complexity
 ```
 ````
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Staged relaxation
 >
@@ -201,28 +201,17 @@ tab: Complexity
 > }
 > ```
 >
-> A null weight means no direct edge; every non-null weight is finite. The matrix must be square, and every path sum must fit in `long` — `checked` turns a violated numeric bound into an `OverflowException` instead of a false shortest path. `next[i, j]` stores the first hop of the current best `i`→`j` route and is rewritten to `next[i, k]` on each improving relaxation. `Path` rejects any pair that can reach and leave a negative-cycle witness; a raw `dist`/`next` pair cannot extract the concrete cycle, so that feature needs predecessor tracking during relaxation.
+> A null weight means no direct edge. Every non-null weight is finite. The matrix must be square, and every path sum must fit in `long` — `checked` turns a violated numeric bound into an `OverflowException` instead of a false shortest path. `next[i, j]` stores the first hop of the current best `i`→`j` route and is rewritten to `next[i, k]` on each improving relaxation. `Path` rejects any pair that can reach and leave a negative-cycle witness. A raw `dist`/`next` pair cannot extract the concrete cycle, so that feature needs predecessor tracking during relaxation.
 
 # When the Reported Distances Are Wrong
 
-A negative edge is fine on its own — a stage relaxes through it and the invariant still holds. A negative cycle is not: looping it lowers the total without bound, so every pair that can reach the cycle and then leave it has shortest distance `−∞`. The signal lives on the diagonal. When `dist[w][w] < 0`, there is a negative closed walk reachable from `w` and back to `w`; it is a witness, not proof that `w` itself lies on a simple negative cycle. Every `dist[u][v]` with finite `dist[u][w]` and `dist[w][v]` is affected and must be marked `−∞` or excluded from results. The plain distance matrix detects this condition but does not extract the concrete cycle; record predecessors during relaxation when the cycle itself matters.
+A negative edge is fine on its own — a stage relaxes through it and the invariant still holds. A negative cycle is not: looping it lowers the total without bound, so every pair that can reach the cycle and then leave it has shortest distance `−∞`. The signal lives on the diagonal. When `dist[w][w] < 0`, there is a negative closed walk reachable from `w` and back to `w`. It is a witness, not proof that `w` itself lies on a simple negative cycle. Every `dist[u][v]` with finite `dist[u][w]` and `dist[w][v]` is affected and must be marked `−∞` or excluded from results. The plain distance matrix detects this condition but does not extract the concrete cycle. Record predecessors during relaxation when the cycle itself matters.
 
 Reordering the loops so `i` or `j` is outermost still compiles, runs, and terminates, but it relaxes pairs against cells from a stage that has not finished. The matrix comes back full of finite numbers that are simply wrong wherever a shortest path needed an intermediate whose row or column was consulted before that stage completed. Because nothing crashes, the defect hides until a specific graph exposes it.
 
-Overflow is the other silent corruptor. With `int.MaxValue` as `∞`, the unconditional `dist[i][k] + dist[k][j]` wraps to a large negative number whenever both operands are the sentinel, and that phantom shortcut then propagates through the rest of the sweep. Representing an absent edge as `null` avoids a numeric sentinel, but finite path sums can still exceed `long`; the checked addition in the sample makes that input-contract violation explicit.
-
-# Questions
-
-> [!QUESTION]- Why is the `k`-loop the outermost of the three?
-> After stage `k`, `dist[i][j]` is defined as the shortest `i`→`j` path using intermediates only from `{0..k}`, so `k` names a stage that must complete over the entire matrix before the next begins. The relaxation reads `dist[i][k]` and `dist[k][j]` expecting the previous stage's values; with `i` or `j` outermost those cells belong to an unfinished stage, and the recurrence consumes half-updated data. The output is still finite and still returned, so the error is silent.
-
-> [!QUESTION]- How does Floyd-Warshall surface a negative cycle, and how does that differ from Bellman-Ford?
-> After the sweep, `dist[w][w] < 0` is a negative-cycle witness: a negative closed walk leaves `w` and returns to `w`, even if the simple cycle lies elsewhere on that walk. Any pair that can reach and leave `w` has no finite shortest distance and must be marked `−∞` or rejected. Bellman-Ford instead runs one additional relaxation from a chosen source and, with predecessors, can extract a concrete cycle, which is what arbitrage-style problems need.
+Overflow is the other silent corruptor. With `int.MaxValue` as `∞`, the unconditional `dist[i][k] + dist[k][j]` wraps to a large negative number whenever both operands are the sentinel, and that phantom shortcut then propagates through the rest of the sweep. Representing an absent edge as `null` avoids a numeric sentinel, but finite path sums can still exceed `long`. The checked addition in the sample makes that input-contract violation explicit.
 
 # References
 
-- [Robert W. Floyd, _Algorithm 97: Shortest Path_](https://doi.org/10.1145/367766.368168) — the 1962 primary source for the matrix recurrence.
-- [Floyd-Warshall algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Floyd%E2%80%93Warshall_algorithm) — DP formulation, path reconstruction via the successor matrix, and negative-cycle handling.
-- [All-pairs shortest paths, Floyd-Warshall (cp-algorithms)](https://cp-algorithms.com/graph/all-pair-shortest-path-floyd-warshall.html) — implementation, the correctness argument, and route reconstruction.
-- [Johnson's algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Johnson%27s_algorithm) — the sparse-graph-with-negative-edges alternative built on reweighting plus per-source Dijkstra.
-- [Shortest paths (Princeton Algorithms)](https://algs4.cs.princeton.edu/44sp/) — Sedgewick's treatment of shortest-path algorithms and their tradeoffs.
+- [Robert W. Floyd, _Algorithm 97: Shortest Path_](https://doi.org/10.1145/367766.368168)
+- [All-pairs shortest paths, Floyd-Warshall (cp-algorithms)](https://cp-algorithms.com/graph/all-pair-shortest-path-floyd-warshall.html)

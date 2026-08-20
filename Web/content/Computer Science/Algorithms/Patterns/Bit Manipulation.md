@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-03T15:55:17.234Z
-modified: 2026-08-08T08:43:34.543Z
-published: 2026-08-08T08:43:34.543Z
+created: 2026-08-20T20:41:15.527Z
+modified: 2026-08-20T20:41:15.528Z
+published: 2026-08-20T20:41:15.528Z
 topic:
   - Computer Science
 subtopic:
@@ -103,13 +103,13 @@ tab: Complexity
 
 # Where the Representation Bites
 
-Right shift is not one operation. On a signed type C#'s `>>` is arithmetic: it copies the sign bit into the vacated high positions, so `-8 >> 1 == -4`, preserving sign. The logical shift that zero-fills is `>>>` (C# 11) or `>>` on an unsigned type. Java splits the same way — `>>` arithmetic, `>>>` logical — while C leaves right-shift of a negative value implementation-defined. Choosing the arithmetic shift where a zero-fill was intended leaves spurious 1s in the high bits whenever the sign bit is set.
+Right shift has two meanings. On a signed C# type, `>>` is arithmetic: it copies the sign bit into the vacated high positions, so `-8 >> 1 == -4`. A logical shift zero-fills instead. C# uses `>>>` (since C# 11), or `>>` on an unsigned type. Java makes the same distinction, while C leaves right-shifting a negative value implementation-defined. The difference appears as soon as the high bit is set.
 
-Shifting by at least the type width has no portable result. C# masks the shift count to the low bits of the width, so `1 << 32` on an `int` shifts by `32 & 31 == 0` and yields `1`, not `0`; C and C++ call the same expression undefined behavior. A subset-DP loop that shifts by exactly `n` at the boundary is where this usually surfaces.
+Shift counts at or above the type width are another boundary. C# masks the count to the low bits of the width, so `1 << 32` on an `int` becomes a shift by `32 & 31 == 0` and yields `1`. In C and C++, the same expression has undefined behavior. A subset-DP loop that shifts by exactly `n` is a common place to hit this edge.
 
-`n & -n` depends on two's-complement negation. It isolates the lowest set bit only because `-n` is `~n + 1`; under a sign-magnitude representation the identity fails outright. The neighbouring trap is widening: assigning a negative `int` to a `long` sign-extends, filling the new high bits with the sign, so a value treated as a 32-bit mask silently grows 32 leading ones. Widening through an unsigned type (`(uint)x`) zero-extends instead and keeps the mask intact.
+`n & -n` depends on two's-complement negation, where `-n` is `~n + 1`. A sign-magnitude representation would break the identity. Widening creates a related trap: converting a negative `int` to `long` sign-extends it, adding 32 leading ones to a value that may have been intended as a 32-bit mask. Converting through `(uint)x` zero-extends and keeps those high bits clear.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Kernighan's popcount loop
 >
@@ -167,29 +167,14 @@ Four ways to count the set bits in a word, from the identity to the silicon:
 | --- | --- | --- | --- |
 | Naive bit scan | None | Fully portable, no assumptions | Every call pays the full word width |
 | Kernighan `n & (n-1)` | None | Sparse words with few set bits | Dense words visit most bit positions |
-| Lookup table (byte/nibble) | Precomputed table in memory | Many counts that reuse the table | Cache pressure; table must stay hot |
-| `BitOperations.PopCount` | Needs CPU `POPCNT` support | Any hot path on modern x86/ARM | Absent hardware → software fallback |
+| Lookup table (byte/nibble) | Precomputed table in memory | Many counts that reuse the table | Cache pressure. Table must stay hot |
+| `BitOperations.PopCount` | .NET runtime API | General-purpose set-bit counts | Runtime may use a software fallback |
 
-The hardware intrinsic wins wherever the CPU exposes `POPCNT`, and `.NET` falls back to a software routine when it does not, which makes it the default for a set-bit count. Kernighan's loop is the best portable choice when set bits are sparse; a lookup table pays off only when it stays cache-resident and the intrinsic is unavailable.
+`BitOperations.PopCount` is the default in .NET: the runtime uses a hardware intrinsic when one is available and otherwise falls back to software. Kernighan's loop remains useful when the identity itself matters or no suitable intrinsic exists. A lookup table earns its memory only when repeated counts keep it hot in cache.
 
-Counting bits is the narrow contest. The identities themselves are not optimizations waiting for a library call to replace them: XOR cancellation, `1 << k` masking, and `n & -n` are the correct — often the only — expression of "the unpaired value", "toggle this flag", or "the lowest active bit". They are load-bearing in low-level and embedded code with no room for a container, and in bitmask [[Computer Science/Algorithms/Paradigms/Dynamic Programming|Dynamic Programming]], where the entire state is one integer.
-
-# Questions
-
-> [!QUESTION]- Why does `n & (n - 1)` clear only the lowest set bit?
-> Subtracting 1 borrows through the trailing zeros and flips the lowest set bit to 0, leaving every higher bit unchanged; the two values differ exactly in that bit and the zeros beneath it. AND keeps the shared high bits and clears the low region.
-
-> [!QUESTION]- Why does XOR-ing an entire array isolate a single unpaired value?
-> XOR is commutative and self-inverse: `a ^ a == 0` and `a ^ 0 == a`.
-
-> [!QUESTION]- What distinguishes an arithmetic right shift from a logical one, and when does the choice matter?
-> An arithmetic shift copies the sign bit into the vacated high positions (`>>` on signed types in C# and Java), so `-8 >> 1 == -4`. A logical shift zero-fills (`>>>`, or `>>` on unsigned types). The difference only shows on values with the high bit set; using the arithmetic shift where zero-fill was intended leaves stray 1s in the high bits.
-
-> [!QUESTION]- Why does `n & -n` isolate the lowest set bit only under two's-complement?
-> `-n` is computed as `~n + 1`, which inverts every bit above the lowest set bit while reproducing that bit and its trailing zeros; AND with `n` keeps just that bit. The identity is a property of two's-complement negation and does not hold under a sign-magnitude representation.
+Popcount is only one use. XOR cancellation expresses an unpaired value, `1 << k` addresses one flag, and `n & -n` isolates the lowest active bit. These identities also carry bitmask [[Computer Science/Algorithms/Paradigms/Dynamic Programming|Dynamic Programming]], where a single integer records the whole used-item set.
 
 # References
 
-- [`BitOperations` class (.NET)](https://learn.microsoft.com/en-us/dotnet/api/system.numerics.bitoperations) — official contract for `PopCount`, `LeadingZeroCount`, and `TrailingZeroCount`, including the hardware-intrinsic-or-software-fallback guarantee.
-- [Bit manipulation (cp-algorithms)](https://cp-algorithms.com/algebra/bit-manipulation.html) — derivations of `n & (n-1)`, `n & -n`, popcount, and subset enumeration.
-- [Bit Twiddling Hacks (Sean Eron Anderson)](https://graphics.stanford.edu/~seander/bithacks.html) — reference catalogue of branch-free bit operations, including several popcount constructions.
+- [`BitOperations` class (.NET)](https://learn.microsoft.com/en-us/dotnet/api/system.numerics.bitoperations)
+- [Bit manipulation (cp-algorithms)](https://cp-algorithms.com/algebra/bit-manipulation.html)

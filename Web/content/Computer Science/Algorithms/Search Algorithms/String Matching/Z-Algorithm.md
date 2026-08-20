@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-03T10:27:09.356Z
-modified: 2026-08-08T07:48:03.184Z
-published: 2026-08-08T07:48:03.184Z
+created: 2026-08-20T20:41:15.538Z
+modified: 2026-08-20T20:41:15.539Z
+published: 2026-08-20T20:41:15.539Z
 topic:
   - Computer Science
 subtopic:
@@ -14,11 +14,11 @@ priority: Medium
 status: Creation
 ---
 
-The Z-algorithm avoids repeatedly comparing each suffix from scratch by computing the **Z-array**: `z[i]` is the length of the longest substring starting at index `i` that also matches a prefix of `S`.
+The Z-algorithm computes how much of a string's prefix reappears at every position. Its **Z-array** stores that result: `z[i]` is the length of the longest substring beginning at `i` that matches a prefix of `S`.
 
-For `S = "aabaab"`, `z = [·, 1, 0, 3, 1, 0]`. The block starting at index 3 (`"aab"`) matches the prefix `"aab"` for three characters, so `z[3] = 3`; index 1 shares only the leading `a`, so `z[1] = 1`. (`z[0]` spans the whole string and is left undefined or set to `n` by convention.) The array records, for every suffix, how far it agrees with the prefix — the same prefix-overlap information [[Computer Science/Algorithms/Search Algorithms/String Matching/KMP (Knuth-Morris-Pratt) Algorithm|KMP]]'s failure function encodes, expressed as a forward match length rather than a recursive fallback.
+For `S = "aabaab"`, the array is `[·, 1, 0, 3, 1, 0]`. The substring at index 3 begins with `"aab"`, matching three prefix characters, so `z[3] = 3`. Index 1 shares only the first `a`, giving `z[1] = 1`. By convention, `z[0]` is either undefined or set to `n`. This is the same prefix-overlap information encoded by [[Computer Science/Algorithms/Search Algorithms/String Matching/KMP (Knuth-Morris-Pratt) Algorithm|KMP]], stored as a forward match length instead of a fallback.
 
-A window `[l, r]` — the **Z-box** — remembers the match reaching furthest right; positions inside it reuse an already-computed mirror when that match ends within the box.
+A window `[l, r]`, called the **Z-box**, tracks the prefix match that reaches furthest right. Positions inside the box can reuse earlier work whenever their mirrored match ends before the box boundary.
 
 The trace keeps the prefix, current Z-box, mirror source, and committed Z values aligned while each entry is copied or extended.
 
@@ -152,11 +152,13 @@ The search space row counts both the temporary concatenated string and its Z-arr
 
 # When the Assumptions Stop Holding
 
-**A separator drawn from the alphabet — and why `>=` survives it.** A separator outside the input alphabet caps every text-region `z[i]` at `m`: exceeding `m` would require matching `S[m]`, the separator, against a text character, which cannot happen. That cap keeps `z[i] == m` and `z[i] >= m` equivalent and stops any match from spanning the `P`/`T` boundary. Let the separator back into the alphabet and the cap is gone. Searching for `P = "ab"` in `T = "aba"` with `sep = 'a'` builds `"ab" + "a" + "aba" = "abaaba"`, whose Z-array is `[6, 0, 1, 3, 0, 1]`. The real occurrence of `"ab"` at text position 0 lands at index 3, where the match runs on through the separator-turned-`a` into the prefix and gives `z[3] = 3`. A strict `z[i] == m` test checks for `2` and misses it — a genuine hit dropped. The shipped `FindAll` uses `z[i] >= m`, which is robust: any text-region index (scanned from `m + 1` on) with `z[i] >= m` has `S[i..i+m-1]` equal to `P` in `m` consecutive characters lying wholly inside `T` — an occurrence whatever `sep` is. So the separator's job is narrower than correctness: with `>=`, an in-alphabet separator costs only the `== m` equivalence, not the result. A sentinel outside the alphabet — a `\0` byte, or `-1` over an integer sequence — keeps the two tests interchangeable.
+**A separator from the input alphabet.** A separator outside the alphabet caps every text-region `z[i]` at `m`. A longer match would have to match `S[m]`, the separator, against a text character. The cap makes `z[i] == m` equivalent to `z[i] >= m` and prevents a match from crossing the `P`/`T` boundary.
 
-**Copying a mirror that reaches the box edge.** Inside the box the mirror `z[i-l]` is exact only while it ends before `r`. When `z[i-l] >= r - i + 1`, taking it verbatim asserts a match over characters past `r` that were never compared. On `S = "aaabaaa"`, index 2 mirrors index 1 with `z[1] = 2`, but copying that would claim `S[2..3] = "ab"` matches the prefix `"aa"`; the true value is `z[2] = 1`. The mirror at the edge is only a lower bound, so `z[i]` must be reset to the box remainder and re-extended from `r + 1`.
+That cap disappears when the separator occurs in the input. Searching for `P = "ab"` in `T = "aba"` with `sep = 'a'` builds `"abaaba"`, whose Z-array is `[6, 0, 1, 3, 0, 1]`. The occurrence at text position 0 maps to index 3 and has `z[3] = 3`, not `2`, because the match continues across the join. A strict `z[i] == m` test misses this valid occurrence. `FindAll` uses `z[i] >= m`. From a text-region index, those first `m` matching characters lie wholly inside `T`, so the result remains correct for any separator. A sentinel outside the alphabet, such as `\0` for ordinary text or `-1` for an integer sequence, simply restores the useful cap.
 
-# Reference Drawer
+**A mirror reaching the box edge.** Inside the box, `z[i-l]` is exact only when its match ends before `r`. If `z[i-l] >= r - i + 1`, copying it would claim equality for characters past `r` that have never been compared. In `S = "aaabaaa"`, index 2 mirrors index 1, where `z[1] = 2`. Copying that value would say `"ab"` matches the prefix `"aa"`. The actual value is `z[2] = 1`. At the edge, the mirror supplies a lower bound. The algorithm starts with the box remainder and resumes comparison at `r + 1`.
+
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Control flow
 >
@@ -241,22 +243,8 @@ The search space row counts both the temporary concatenated string and its Z-arr
 > }
 > ```
 >
-> `FindAll` rejects an empty pattern rather than defining the `n + 1` zero-length occurrences. It scans non-empty patterns from `m + 1`, so every index it tests lies in `T`; a text-region `z[i] >= m` means `m` characters of `T` reproduce `P`, a genuine occurrence for any separator. With a separator outside both arguments the cap makes `z[i] >= m` fire only at exactly `m`; `\0` suits ordinary text but must change if the input can contain it. Should the separator leak into the alphabet, `>= m` still reports correctly — only a stricter `== m` test would start dropping hits.
-
-# Questions
-
-> [!QUESTION]- What does `z[i]` measure, and how does the Z-box reuse an earlier match?
-> `z[i]` is the length of the longest substring starting at index `i` that also matches a prefix of the string. The box `[l, r]` is the match interval with the largest `r`; a position inside it copies its value from the mirror `z[i-l]` when that mirror ends before the edge, spending no comparisons. Direct comparisons occur only while extending past `r`, and each either fails once or pushes `r` one step right.
-
-> [!QUESTION]- Why should the concatenation separator lie outside the input alphabet?
-> To keep the cap: a separator absent from `P` and `T` holds every text-region `z[i]` to at most `|P|`, so `z[i] == |P|` and `z[i] >= |P|` coincide and no match spans the pattern/text join. If the separator also appears in the input, a genuine occurrence can extend across the join and produce `z[i] > |P|` — a strict `== |P|` test would then drop it. The shipped `>= |P|` test survives this (a text-region `z[i] >= |P|` is always `|P|` real characters of `T` matching `P`); a sentinel outside the alphabet is what lets the simpler `==` formulation stay correct too.
-
-> [!QUESTION]- Inside the box, when can `z[i]` be copied from the mirror, and when must it be recomputed?
-> When `z[i-l] < r - i + 1` the mirrored match ends strictly before the box edge, so it is fully verified and `z[i] = z[i-l]`. When `z[i-l] >= r - i + 1` the mirror only guarantees a match up to `r`; the characters past `r` were never compared, so `z[i]` is reset to the box remainder `r - i + 1` and extended from `r + 1`.
+> `FindAll` rejects an empty pattern instead of defining `n + 1` zero-length occurrences. It begins at `m + 1`, the first index inside `T`. There, `z[i] >= m` proves that `m` text characters reproduce `P`, regardless of the separator. A separator absent from both inputs caps that value at exactly `m`. `\0` works for ordinary text but must change when the input may contain it. Only a strict `== m` check would lose valid matches when the separator also appears in the input.
 
 # References
 
-- [Main and Lorentz's 1984 repetition-finding paper](https://doi.org/10.1016/0196-6774\(84\)90021-X) — the original paper uses string-period structure related to the Z-box mechanism.
 - [Z-function](https://cp-algorithms.com/string/z-function.html)
-- [Algorithms on Strings, Trees, and Sequences](https://doi.org/10.1017/CBO9780511574931)
-- [Competitive Programmer's Handbook](https://cses.fi/book/book.pdf) — Antti Laaksonen; the string chapter covers the Z-array alongside the prefix function and their shared applications.

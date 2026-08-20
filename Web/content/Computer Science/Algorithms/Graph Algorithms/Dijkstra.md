@@ -1,13 +1,13 @@
 ---
 publish: true
-created: 2026-07-18T14:02:43.944Z
-modified: 2026-08-08T15:47:37.634Z
-published: 2026-08-08T15:47:37.634Z
+created: 2026-08-20T20:41:15.514Z
+modified: 2026-08-20T20:41:15.515Z
+published: 2026-08-20T20:41:15.515Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
-summary: Single-source shortest paths on non-negative-weighted graphs, greedily finalizing the closest tentative node and relaxing its outgoing edges.
+summary: Single-source shortest paths on graphs with non-negative edge weights, greedily finalizing the closest tentative node and relaxing its outgoing edges.
 level:
   - "4"
 priority: Medium
@@ -16,7 +16,7 @@ status: Done
 
 A weighted graph assigns each edge a non-negative cost — travel time, latency, price — and the question is the cheapest total cost from one source node to every other node. Dijkstra's algorithm keeps a single tentative distance per node, improves it only through edge relaxation, and commits nodes to a final distance in increasing order of that distance.
 
-The commit order is what makes it cheap. Each vertex becomes settled once, when its smallest queued entry is removed; a lazy-deletion heap may later pop older entries for that same vertex and skip them. A settled distance can no longer change. Relaxing outgoing edges can only lower still-unsettled neighbours, never a node already behind the frontier. Non-negative weights are the precondition: they guarantee that leaving a settled node and returning through a longer detour cannot arrive cheaper.
+The commit order makes settle-once correct. Each vertex becomes settled when its smallest queued entry is removed. A lazy-deletion heap may later pop older entries for that same vertex and skip them. A settled distance can no longer change. Relaxing outgoing edges can only lower still-unsettled neighbours, never a node already behind the frontier. Non-negative weights are the precondition: they guarantee that leaving a settled node and returning through a longer detour cannot arrive cheaper.
 
 ````tabsdown
 tab: Visualization
@@ -155,7 +155,7 @@ A negative _cycle_ has no shortest path at all: a route can loop it repeatedly t
 
 The second boundary is internal to the implementation. Standard binary heaps (including .NET's `PriorityQueue<TElement, TPriority>`) offer no `decrease-key`, so a relaxation pushes a fresh `(distance, node)` pair and leaves the older, larger one in the heap. A vertex still settles only once, but the queue can pop it repeatedly. The `if settled[node] continue` guard skips those stale entries before they rescan outgoing edges. Omitting the guard does not corrupt distances under the non-negative-weight precondition—the stale distance is larger than the one already processed—but every stale pop scans that vertex's outgoing adjacency again and repeats relaxations that already ran.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Control flow
 >
@@ -218,17 +218,7 @@ The second boundary is internal to the implementation. Standard binary heaps (in
 >
 > The lazy-deletion pattern replaces `decrease-key`: relaxation always pushes a new pair, while `settled` makes the first valid pop final and lets the guard discard later stale entries. A parallel `parent[]` array, written whenever `dist[to]` is lowered, reconstructs a path by walking backward from the target.
 
-# Questions
-
-> [!QUESTION]- Why does the settle-once rule require non-negative edge weights?
-> When a node is popped it is treated as final. The proof that this is safe relies on the tail of any alternative path — from the first unsettled node it reaches onward — having non-negative length, so that first node's tentative distance already bounds the whole path. A negative edge lets that tail subtract cost, so a later path can beat a node's settled distance and the reported distance is wrong.
-
-> [!QUESTION]- What does the `if settled[node] continue` guard fix?
-> A binary heap has no `decrease-key`, so relaxing a node pushes a new pair and leaves the old larger one behind. The guard skips every later pop after the cheapest pair has settled that vertex. Without it, each stale pop scans the same outgoing adjacency and repeats its relaxation loop, although non-negative weights keep the settled distances correct.
-
 # References
 
-- [A Note on Two Problems in Connexion with Graphs](https://doi.org/10.1007/BF01386390) — Dijkstra's 1959 paper introducing the algorithm and its greedy minimum-distance selection.
-- [Dijkstra — finding shortest paths from given vertex](https://cp-algorithms.com/graph/dijkstra.html) — adjacency-list implementation with a binary heap and the lazy-deletion (skip-stale) pattern for sparse graphs.
-- [Dijkstra on dense graphs](https://cp-algorithms.com/graph/dijkstra_dense.html) — the array-scan variant and when it outperforms the heap version.
-- [`PriorityQueue<TElement, TPriority>`](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.priorityqueue-2) — .NET's min-priority-queue, which exposes `Enqueue`/`TryDequeue` but no `decrease-key`, forcing the lazy-deletion approach used above.
+- [A Note on Two Problems in Connexion with Graphs](https://doi.org/10.1007/BF01386390)
+- [Dijkstra — finding shortest paths from given vertex](https://cp-algorithms.com/graph/dijkstra.html)

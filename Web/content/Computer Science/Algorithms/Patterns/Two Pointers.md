@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-03T15:55:17.236Z
-modified: 2026-08-08T09:22:38.955Z
-published: 2026-08-08T09:22:38.955Z
+created: 2026-08-20T20:41:15.533Z
+modified: 2026-08-20T20:41:15.533Z
+published: 2026-08-20T20:41:15.533Z
 topic:
   - Computer Science
 subtopic:
@@ -14,9 +14,9 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-Sorting the array replaces nested pair enumeration with a converging scan. Two indices start at opposite ends, `left` on the smallest value and `right` on the largest, and each step compares `a[left] + a[right]` against the target. The comparison decides which index moves inward, and every move permanently removes a block of pairs that can no longer reach the target.
+On a sorted array, two indices replace nested pair enumeration with a converging scan. `left` starts at the smallest value and `right` at the largest. Each sum comparison decides which index moves inward and rules out every pair anchored at the discarded index.
 
-The collapse depends on order. On sorted input, raising `left` can only increase the sum and lowering `right` can only decrease it, so one comparison settles the fate of an entire set of pairs. Without that monotonic relationship, a pointer move is a guess that can step over the answer.
+Order is the proof. Raising `left` can only increase the sum. Lowering `right` can only decrease it. One comparison can therefore settle a whole set of pairs. Without that monotonic relationship, moving either pointer is only a guess.
 
 ````tabsdown
 tab: Visualization
@@ -96,15 +96,15 @@ tab: Complexity
 The chart describes the converging pass over already-sorted input. If sorting is required first, account for that preprocessing separately.
 ````
 
-# When Order is the Whole Precondition
+# When the Proof Stops Working
 
-The discard argument is valid only while the sequence is monotonic. On the unsorted array `[13, 1, 10, 4, 8, 3, 6]`, a search for `18` starts at `13 + 6 = 19`, retreats `right` once, and from then on advances `left` on every too-small sum. It reports no pair even though `10 + 8 = 18` sits in the array. Nothing crashes; unsorted input yields a plausible false negative.
+The discard argument requires monotonic order. On the unsorted array `[13, 1, 10, 4, 8, 3, 6]`, a search for `18` starts at `13 + 6 = 19` and retreats `right`. Every later sum is too small, so `left` keeps advancing. The scan reports no match even though `10 + 8 = 18` is present. Unsorted input fails quietly with a plausible false negative.
 
-Duplicates change what counts as an answer. Enumerating every distinct pair that sums to the target — rather than just the first — needs a skip step: after recording a match, advance `left` past its run of equal values and pull `right` back past its run. On `[2, 2, 3, 3]` with target `5`, plain `left++; right--` reports the pair `(2, 3)` twice; skipping equal runs reports it once.
+Duplicates change the output contract. Returning the first match needs no special handling. Enumerating distinct value pairs does: after a match, move `left` past equal values and move `right` past its equal run. On `[2, 2, 3, 3]` with target `5`, plain `left++; right--` reports `(2, 3)` twice. Skipping equal runs reports it once.
 
-The pattern here moves its pointers toward each other from opposite ends. That is distinct from [[Computer Science/Algorithms/Patterns/Fast and Slow Pointers|Fast and Slow Pointers]], where both pointers travel the same direction at different speeds to detect a cycle or find a midpoint; those never rely on sorted order, and their invariant is relative position rather than a converging sum.
+This pattern moves pointers toward each other from opposite ends. [[Computer Science/Algorithms/Patterns/Fast and Slow Pointers|Fast and Slow Pointers]] sends both in the same direction at different speeds to detect a cycle or find a midpoint. That method does not depend on sorted order. Its invariant is relative position rather than a converging sum.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Control flow
 >
@@ -150,7 +150,7 @@ The pattern here moves its pointers toward each other from opposite ends. That i
 > }
 > ```
 >
-> The guard `left < right` keeps the two indices on distinct elements; a match returns immediately, and crossing pointers report absence. This variant scans for the opposite-direction pattern only; a same-direction fast/slow walk belongs with [[Computer Science/Algorithms/Patterns/Fast and Slow Pointers|Fast and Slow Pointers]].
+> The guard `left < right` keeps the two indices on distinct elements. A match returns immediately, and crossing pointers report absence. This variant scans for the opposite-direction pattern only. A same-direction fast/slow walk belongs with [[Computer Science/Algorithms/Patterns/Fast and Slow Pointers|Fast and Slow Pointers]].
 
 # Comparison
 
@@ -158,26 +158,12 @@ The pattern here moves its pointers toward each other from opposite ends. That i
 | --- | --- | --- | --- |
 | Converging two pointers | Sorted / monotonic input | Order already exists and space is tight | Unsorted or non-monotonic data |
 | Brute-force nested loops | Nothing | Tiny arrays where setup cost dominates | Any large input |
-| Hash lookup | Nothing | Unsorted input; repeated complement lookups | Memory pressure; ordered or range access |
+| Hash lookup | Nothing | Unsorted input. Repeated complement lookups | Memory pressure. Ordered or range access |
 | [[Computer Science/Algorithms/Search Algorithms/Binary Search\|Binary Search]] per element | Sorted input | Complements drawn from a separate sorted set | Plain two-sum, where the converging pass already applies |
 | [[Computer Science/Algorithms/Patterns/Sliding Window\|Sliding Window]] | Contiguous-subarray aggregate | Running sum or count over a window | Comparing or rearranging arbitrary element pairs |
 
-Binary-searching each element's complement repeats a separate search for every element, so it earns its place only when the two operands come from different sequences. [[Computer Science/Algorithms/Patterns/Sliding Window|Sliding Window]] shares the forward-moving-index shape yet answers a different question — an aggregate over a contiguous range rather than a relationship between two ends.
-
-# Questions
-
-> [!QUESTION]- Why does the converging two-sum require sorted input?
-> The move "advance left or retreat right" is justified only because raising `left` can only increase the sum and lowering `right` can only decrease it. Sorted order guarantees that monotonicity. On unsorted data the relationship is gone, so a pointer move can step over the pair that answers the query.
-
-> [!QUESTION]- When `a[left] + a[right]` is too small, which pairs become impossible and why is `left++` safe?
-> Every pair that keeps the current `left` and uses any partner at or below `right` is even smaller than the current sum, so no pair anchored at `left` can reach the target. That entire column is eliminated, and `left++` discards it without losing a possible answer.
-
-> [!QUESTION]- What does a hash set buy over two pointers for two-sum?
-> A hash set removes the sorted-input requirement by remembering previously seen complements, but it stores values as the scan proceeds. Use it for unsorted input; prefer converging pointers when ordering already exists and preserving a small state footprint matters.
+Binary-searching each element's complement repeats a separate search for every element. It makes sense when the operands come from different sorted sequences, not for plain two-sum. [[Computer Science/Algorithms/Patterns/Sliding Window|Sliding Window]] also moves indices forward, but it maintains an aggregate over a contiguous range rather than comparing two ends.
 
 # References
 
-- [C. A. R. Hoare, "Quicksort" (1962)](https://doi.org/10.1093/comjnl/5.1.10) — the primary paper for a canonical bidirectional-pointer scan: inward indices partition an ordered range without additional state.
-- [Two Sum II (LeetCode #167)](https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/) — the canonical converging-pointer problem on a sorted array.
-- [Two Pointers (USACO Guide)](https://usaco.guide/silver/two-pointers) — categorised converging and same-direction two-pointer problems with worked solutions.
-- [Floyd's cycle detection (cp-algorithms)](https://cp-algorithms.com/others/tortoise_and_hare.html) — the same-direction fast/slow variant distinguished from the converging pattern on this page.
+- [Two Pointers (USACO Guide)](https://usaco.guide/silver/two-pointers)

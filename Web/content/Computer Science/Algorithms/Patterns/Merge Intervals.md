@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-03T15:55:17.235Z
-modified: 2026-08-08T17:05:50.429Z
-published: 2026-08-08T17:05:50.429Z
+created: 2026-08-20T20:41:15.530Z
+modified: 2026-08-20T20:41:15.530Z
+published: 2026-08-20T20:41:15.530Z
 topic:
   - Computer Science
 subtopic:
@@ -14,7 +14,7 @@ priority: Medium
 status: Creation
 ---
 
-A calendar holds a list of `[start, end]` ranges in arbitrary order, some of them overlapping, and the task is to collapse the overlaps into a minimal set of blocks. Sorting the intervals by start coordinate removes that scatter: once the starts ascend, any interval that overlaps a given block must be the next one in the order, so a single left-to-right sweep with one comparison per interval resolves the whole list.
+An arbitrary set of calendar ranges may contain overlaps and nested intervals. Sorting by start time makes those relationships local. A left-to-right sweep then carries one current block: extend it when the next interval overlaps, or emit it when a gap appears.
 
 ````tabsdown
 tab: Visualization
@@ -39,7 +39,7 @@ The reason one comparison suffices is the sort. After ascending starts, every in
 
 The same sort-then-sweep skeleton answers the rest of the interval family, each specialising the emit/extend step:
 
-- **Insert one interval into a sorted, pairwise-disjoint list** — the sweep copies intervals ending before the new one, merges the run that overlaps it by taking `max` of the ends, then copies the rest. No re-sort is needed. If the existing list overlaps itself, normalize it first.
+- **Insert one interval into a sorted, pairwise-disjoint list** — the sweep copies intervals ending before the new one, then expands the pending interval to `[min(starts), max(ends)]` for every overlap under the chosen closed or half-open endpoint convention. It copies the remaining intervals after that run. No re-sort is needed. If the existing list overlaps itself, normalize it first.
 - **Intersect two sorted, pairwise-disjoint lists** — a [[Computer Science/Algorithms/Patterns/Two Pointers|Two Pointers]] sweep advances the pointer whose interval ends first and emits `[max(starts), min(ends)]` whenever the current pair overlaps. Ordering and internal non-overlap on both sides keep the scan to one pass; otherwise each list needs normalization first.
 
 tab: Complexity
@@ -97,11 +97,11 @@ tab: Complexity
 
 # When the Convention or Order Breaks
 
-**The overlap definition is a decision, not a default.** Whether `[1,2]` and `[2,3]` merge depends on closed versus half-open semantics. Closed intervals share the point `2` and merge into `[1,3]`; half-open `[1,2)` and `[2,3)` touch nothing and stay separate. The choice maps straight onto the comparison operator — `<=` for closed, `<` for half-open — and getting it wrong produces off-by-one merges that pass small tests and fail exactly on boundary-touching inputs. Meeting-room problems almost always want half-open so a meeting ending at `2` and one starting at `2` share the room.
+The overlap rule comes from the interval convention. Closed intervals `[1,2]` and `[2,3]` share the point `2`, so they merge. Half-open ranges `[1,2)` and `[2,3)` do not overlap. The code expresses that choice as `<=` for closed intervals or `<` for half-open ones. Scheduling usually uses half-open ranges so one meeting may start when another ends.
 
-**Unsorted input silently produces wrong merges.** The "overlap is local" guarantee is the sort's, not the sweep's. On `[[1,3],[6,8],[2,5]]` an unsorted sweep sees `[1,3]` then `[6,8]`, finds a gap, emits `[1,3]`, and never reconsiders it — so the overlapping `[2,5]` merges against the wrong block or opens a spurious one, and `[1,5]` is never formed. Nothing crashes; the output is simply incorrect. Sorting by end rather than start breaks the same guarantee for the same reason.
+The sweep is correct only after sorting by start. On `[[1,3],[6,8],[2,5]]`, an unsorted pass emits `[1,3]` when it sees the gap before `[6,8]`, then encounters `[2,5]` too late to form `[1,5]`. Sorting by end does not restore the needed invariant: later intervals must have starts no earlier than the one currently being processed.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Sweep control flow
 >
@@ -155,21 +155,9 @@ tab: Complexity
 | Insert into a merged list | Sorted, pairwise-disjoint input | Add one interval to an already-normalized list |
 | Intersect two merged lists | Both inputs sorted and pairwise-disjoint | Produce only shared coverage |
 
-Sort-then-merge is the default when an arbitrary static set must become a minimal disjoint list. Insert and intersection variants rely on a prior operation already having established sorted, pairwise-disjoint input.
-
-# Questions
-
-> [!QUESTION]- Why does sorting by start reduce merging to a single sweep?
-> After ascending starts, every interval later in the list starts at or after the current one. If `next.start > current.end`, no later interval can reach back to `current` either, so `current` is final and can be emitted.
-
-> [!QUESTION]- Why take `max(current.end, next.end)` when extending rather than `next.end`?
-> `next` can be entirely nested inside `current` — merging `[1,10]` with `[2,3]` should stay `[1,10]`. Assigning `current.end = next.end` would shrink the block to `[1,3]` and lose coverage. The `max` keeps `current.end` at the furthest right edge merged so far, which is the value the next overlap test depends on.
-
-> [!QUESTION]- How does the interval convention change the result, and where does it show up in code?
-> Closed intervals count touching endpoints as overlap (`[1,2]` and `[2,3]` merge); half-open intervals do not. The convention is the difference between `<=` and `<` in the overlap test. Choosing wrong yields off-by-one merges that only fail on boundary-touching inputs. Meeting-room problems usually want half-open so back-to-back bookings share a room.
+Sort then merge is the reliable default for an arbitrary static set. Insert and intersection variants earn their single pass only when their inputs are already sorted and pairwise disjoint.
 
 # References
 
-- [Merge Intervals (LeetCode #56)](https://leetcode.com/problems/merge-intervals/) — the canonical sort-and-sweep merge problem.
-- [Insert Interval (LeetCode #57)](https://leetcode.com/problems/insert-interval/) — inserting into an already-sorted list without a full re-sort.
-- [`Array.Sort<T>`](https://learn.microsoft.com/en-us/dotnet/api/system.array.sort) — documents the .NET sorting API; the example applies it to a cloned array to preserve caller-owned ranges.
+- [Merge Intervals (LeetCode #56)](https://leetcode.com/problems/merge-intervals/)
+- [`Array.Sort<T>`](https://learn.microsoft.com/en-us/dotnet/api/system.array.sort)

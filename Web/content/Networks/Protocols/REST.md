@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T14:02:44.087Z
-modified: 2026-07-25T13:51:15.517Z
-published: 2026-07-25T13:51:15.517Z
+created: 2026-08-20T20:41:15.633Z
+modified: 2026-08-20T20:41:15.633Z
+published: 2026-08-20T20:41:15.633Z
 topic:
   - Networks
 subtopic:
@@ -16,11 +16,11 @@ status: Done
 
 REST is an architectural style for networked systems, not a synonym for JSON over HTTP. It constrains interactions around stable resource identities, a uniform interface, and explicit cache/representation behavior so clients, servers, and intermediaries can evolve with fewer assumptions.
 
-Use REST when the problem is broad interoperability, stable resource contracts, and cacheable reads. Use GraphQL when clients need flexible projections with a robust governance model, and gRPC when schema-coupled service-to-service contracts and streaming are the first-class need.
+REST fits broad interoperability, stable resource contracts, and cacheable reads. GraphQL fits clients that need flexible projections and can support query governance. GRPC fits schema-coupled service calls and streaming between controlled peers.
 
-# Constraint and Method Boundaries
+# REST Constraints and Method Semantics
 
-REST is mostly about the contract boundaries, not framework syntax:
+REST is defined by contract boundaries rather than framework syntax:
 
 - Client-server separation
 - Stateless request handling
@@ -37,19 +37,19 @@ If-Match: "order-v7"
 {"id":42,"status":"shipped"}
 ```
 
-`PUT` is idempotent and may be retried after a communication failure. With `If-Match`, however, a successful first attempt can advance the entity tag so the retry returns `412 Precondition Failed`. That response does not prove the first attempt failed; reconcile the current representation before deciding the next action.
+`PUT` is idempotent and may be retried after a communication failure. With `If-Match`, however, a successful first attempt can advance the entity tag so the retry returns `412 Precondition Failed`. That response does not prove the first attempt failed. Reconcile the current representation before deciding the next action.
 
-Use status contracts that describe the real boundary:
+Status codes should describe the boundary that actually failed or succeeded:
 
 - `201` plus `Location` for creation
 - `409` for state conflict
 - `412` for failed preconditions
-- `422` for instruction-valid but unprocessable content
+- `422` for syntactically valid content whose instructions the server cannot process
 - `429`/`503` when retry policy applies
 
 # API Design and Compatibility Surface
 
-Resource naming is the external boundary; framework choice is local.
+Resource naming is the external boundary. Framework choice is local.
 
 | Intent | HTTP contract | Boundary rule |
 | --- | --- | --- |
@@ -66,7 +66,7 @@ Idempotency keys solve an ambiguous retry only when their store is durable and s
 
 Compatibility strategy:
 
-Prefer additive fields, tolerant readers, and new optional capabilities before versioning. A version is earned when old and new contracts cannot coexist safely.
+Additive fields and new optional capabilities usually preserve compatibility. A new version is earned when the old and new contracts cannot coexist safely.
 
 | Strategy | Strength | Cost |
 |---|---|---|
@@ -74,13 +74,13 @@ Prefer additive fields, tolerant readers, and new optional capabilities before v
 | Media type or header | Keeps resource URI stable | Harder discovery, gateway, and cache configuration |
 | New resource or operation | Makes a genuinely new capability explicit | Clients may coordinate across old and new workflows |
 
-Pick one strategy per API surface and publish deprecation, migration, and removal dates. Do not add `v1` before a real breaking change exists.
+One strategy should govern each API surface, with published deprecation, migration, and removal dates. Adding `v1` before a real breaking change creates a permanent compatibility surface without solving a compatibility problem.
 
 REST and GraphQL expose different control surfaces:
 
 | Dimension | REST | [[GraphQL]] |
 |---|---|---|
-| Contract owner | Server owns resources and representations | Server owns schema; clients own operation documents |
+| Contract owner | Server owns resources and representations | Server owns schema. Clients own operation documents |
 | Cache key | Method, URL, and `Vary` work with generic caches | Arbitrary operations need persisted IDs or GraphQL-aware caches |
 | Authorization | Checked per endpoint and resource | Checked through nested field and object resolution |
 | Cost control | Endpoint work is comparatively predictable | Depth, aliases, list sizes, and resolver fan-out need budgets |
@@ -92,7 +92,7 @@ Neither removes backend fan-out. Choose GraphQL only when selectable graph proje
 
 The visual is a design prompt, not a protocol mandate. `POST` becomes retry-safe only with durable idempotency handling, path versioning is one compatibility option, and action resources are legitimate when the operation is not a collection mutation.
 
-# Pagination Contracts
+# Offset, Keyset, and Cursor Pagination
 
 Pagination limits response size and does not imply snapshot consistency.
 
@@ -118,7 +118,7 @@ Fetch one extra row to determine whether another page exists. The unique `id` ti
 
 Encode and integrity-protect the cursor rather than exposing an editable database token. Bind it to tenant, principal or authorization scope, filters, sort order, direction, page-size policy, and expiry.
 
-## Consistency Contract
+## What a Cursor Does Not Snapshot
 
 A cursor identifies a position, not a snapshot. With live keyset traversal:
 
@@ -137,11 +137,11 @@ For backward traversal, encode direction and boundary explicitly. Query in the d
 | Deep query cost | Often scans or skips earlier rows | Seeks from indexed boundary |
 | Human-readable navigation | Easy | Cursor is opaque |
 
-Use offset for small, stable administrative lists and approximate page jumps. Use keyset for large or changing collections. In both cases, cap page size and total backend work independently.
+Offset pagination fits small, stable administrative lists and approximate page jumps. Keyset pagination fits large or changing collections. Both need independent limits for page size and total backend work.
 
-# Implementation Boundary (ASP.NET Core)
+# Enforcing ETags and Pagination in ASP.NET Core
 
-Framework mapping is mechanical; contract enforcement is architectural:
+Framework mapping is mechanical. Contract enforcement is architectural:
 
 ```csharp
 app.MapGet("/api/orders/{id:int}", async (
@@ -170,7 +170,7 @@ app.MapPost("/api/orders", async (
 });
 ```
 
-A missing resource returns `404`; creation returns `201` and a `Location` value. Production creation also needs authorization, input validation, problem details, and an idempotency contract before a caller may retry it.
+A missing resource returns `404`. Creation returns `201` and a `Location` value. Production creation also needs authorization, input validation, problem details, and an idempotency contract before a caller may retry it.
 
 ```csharp
 app.MapPut("/api/orders/{id:int}", async (
@@ -206,7 +206,7 @@ Operational boundaries remain part of the resource contract:
 - Set request-body size and JSON-depth limits before deserialization work grows without bound.
 - Return RFC 9457 problem details without exception traces or secret values.
 - Measure dependency time and queue time separately from serialization time.
-- Keep retries in the caller or a clearly owned resilience layer; a handler must not replay a non-idempotent downstream operation blindly.
+- Keep retries in the caller or a clearly owned resilience layer. A handler must not replay a non-idempotent downstream operation blindly.
 
 # Uniform Interface and Richardson Levels
 
@@ -229,7 +229,7 @@ The REST uniform interface has four parts:
 }
 ```
 
-The client still needs the media type and link-relation contract. Hypermedia reduces hard-coded workflow URLs; it does not eliminate versioning, authorization, or schema evolution.
+The client still needs the media type and link-relation contract. Hypermedia reduces hard-coded workflow URLs. It does not eliminate versioning, authorization, or schema evolution.
 
 The Richardson maturity model is a teaching model, not the definition of REST or a universal score:
 
@@ -244,7 +244,7 @@ Level 2 is common because it works with ordinary tooling and generated clients. 
 
 # Performance and Error Tradeoffs
 
-Performance gains are not free; each one adds a contract:
+Performance gains are not free. Each one adds a contract:
 
 - Cache: speedups with freshness/invalidation cost
 - Compression: saves bandwidth, adds CPU
@@ -263,25 +263,12 @@ Treat the visual as a technique inventory. Deep offset pagination can become slo
 | [[GraphQL]] | Selective projections for evolving clients | Query cost control, resolver load, authorization complexity |
 | [[gRPC]] | Controlled service meshes with typed streaming | Schema/toolchain coupling and browser bridge needs |
 
-No style removes governance; it changes where the cost is paid.
-
-# Questions
-
-> [!QUESTION]- What does a retry-time `412` mean for a conditional `PUT`?
-> The first request may already have succeeded and changed the entity tag. The retry is allowed because `PUT` is idempotent, but its `412` cannot distinguish a successful first attempt from another writer's update. Read the current representation and reconcile before choosing a new precondition.
-
-> [!QUESTION]- When should `POST` be idempotent in practice?
-> Only when the client sends a durable idempotency key and the server enforces dedupe boundaries; otherwise `POST` can create duplicates.
+No style removes governance. It changes where the cost is paid.
 
 # References
 
-- [REST dissertation (Fielding)](https://www.ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm) — architectural constraints and uniform interface.
-- [HTTP Semantics (RFC 9110)](https://www.rfc-editor.org/rfc/rfc9110) — method, status, conditional, and header semantics for API contracts.
-- [Problem Details for HTTP APIs (RFC 9457)](https://www.rfc-editor.org/rfc/rfc9457) — machine-readable error payloads.
-- [Microsoft REST API Guidelines](https://github.com/microsoft/api-guidelines) — practical compatibility, pagination, and error conventions.
-- [Microsoft REST API Guidelines: Collections](https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md#collections) — cursor, continuation, page-size, and collection response guidance.
-- [PostgreSQL row constructor comparison](https://www.postgresql.org/docs/current/functions-comparisons.html#ROW-WISE-COMPARISON) — primary semantics for the composite boundary used in the SQL example.
-- [ASP.NET Core web APIs](https://learn.microsoft.com/aspnet/core/web-api/) — official routing, controllers, results, validation, and problem-details guidance.
-- [ASP.NET Core minimal APIs](https://learn.microsoft.com/aspnet/core/fundamentals/minimal-apis) — official endpoint mapping, binding, responses, and filters.
-- [Richardson Maturity Model (Martin Fowler)](https://martinfowler.com/articles/richardsonMaturityModel.html) — explains the four teaching levels with resource and hypermedia examples.
-- [Web Linking (RFC 8288)](https://www.rfc-editor.org/rfc/rfc8288) — standard relation and link representation model for typed links.
+- [Architectural Styles and the Design of Network-based Software Architectures](https://www.ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm)
+- [Problem Details for HTTP APIs](https://www.rfc-editor.org/rfc/rfc9457)
+- [Microsoft REST API Guidelines](https://github.com/microsoft/api-guidelines)
+- [PostgreSQL row constructor comparison](https://www.postgresql.org/docs/current/functions-comparisons.html#ROW-WISE-COMPARISON)
+- [Richardson Maturity Model](https://martinfowler.com/articles/richardsonMaturityModel.html)

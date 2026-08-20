@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-03T15:55:17.236Z
-modified: 2026-08-08T19:51:56.887Z
-published: 2026-08-08T19:51:56.887Z
+created: 2026-08-20T20:41:15.532Z
+modified: 2026-08-20T20:41:15.532Z
+published: 2026-08-20T20:41:15.532Z
 topic:
   - Computer Science
 subtopic:
@@ -14,9 +14,9 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-A report needs the largest total of any 30 consecutive daily readings across a series of 100,000. The sliding window keeps one running total and a pair of boundaries: advancing the right boundary adds the entering value, advancing the left boundary subtracts the leaving value, so each successive window costs one addition and one subtraction instead of a full rescan.
+A report needs the largest total among all 30-day spans in a series of 100,000 readings. A sliding window keeps a running total between two boundaries. Moving right adds one reading. Moving left subtracts one. Each new span costs two arithmetic operations instead of another 30-value scan.
 
-The elements need not be sorted; their existing order matters because the candidate ranges must remain contiguous.
+Sorting would destroy the ranges being measured. Sliding windows preserve the input order because every candidate must remain contiguous.
 
 ````tabsdown
 tab: Visualization
@@ -99,15 +99,15 @@ tab: Complexity
 
 ````
 
-# Where the Incremental Aggregate Fails
+# Where the Pattern Breaks
 
-A fixed-size window contracts on a schedule: every element the right boundary adds, the left boundary removes exactly one, holding the width at `k`. A variable-size window contracts conditionally — the left boundary advances only while the window violates (or, for a minimizing problem, still satisfies) the constraint, so a single right step can trigger several left steps or none. Applying the fixed rule to a variable problem pins the width and never explores shorter or longer ranges; applying the variable rule without a stopping condition shrinks past validity.
+A fixed-size window contracts on a schedule. Every addition at the right removes one value at the left, so the width stays `k`. A variable-size window contracts only when its constraint says to. One right step may trigger several left steps or none. Using the fixed rule on a variable problem prevents the width from adapting. Using the variable rule without a stopping condition shrinks past the useful range.
 
-The removal step must rebuild the new aggregate from the leaving element alone. A running sum or a per-key frequency count does; a window maximum does not — dropping the element that happened to be the maximum leaves no cheap way to find the next-largest element still inside the window.
+Removal must update the aggregate from the old state and the leaving value. A running sum or per-key frequency count can do that directly. A scalar maximum cannot. When its current maximum leaves, finding the next one requires information about the rest of the window.
 
-With negatives present a longer window can carry a smaller sum, so a window that fails the constraint can become valid again by extending — incremental maintainability of the sum is intact, but the decision of _when_ to contract no longer has a valid basis. Sum-with-negatives problems (a sub-array summing to exactly `k`, say) drop the moving window for [[Computer Science/Algorithms/Patterns/Prefix Sum|prefix sums]] plus a hash map, which locates any range with a target sum without assuming monotone length.
+Negative values break the usual contraction proof. Extending a window can lower its sum, so a range that currently fails may become valid after another value arrives. The sum remains cheap to update, but it no longer tells the left boundary when an entire family of ranges can be discarded. Exact-target problems with negatives can use [[Computer Science/Algorithms/Patterns/Prefix Sum|prefix sums]] plus a hash map instead. That combination finds a target range without assuming that sum grows with length.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Variable-window control flow
 >
@@ -123,6 +123,8 @@ With negatives present a longer window can carry a smaller sum, so a window that
 >   F --> D
 >   G --> B
 > ```
+
+The diagram shows a minimum-satisfying window: record a candidate when the constraint holds, then keep shrinking while it remains valid. A maximum-valid window reverses that control order. It shrinks while invalid, then records the candidate after validity has been restored.
 
 > [!EXAMPLE]- C# implementations
 >
@@ -156,33 +158,22 @@ With negatives present a longer window can carry a smaller sum, so a window that
 >     return best;
 > }
 > ```
+>
+> `MaxSumWindow` assumes `1 <= k <= a.Length` and sums that fit `int`; a public API should validate the window size and use `long` when the input range can overflow an `int` sum.
 
 # Comparison
 
 | Technique | Required input | Stronger case | Weaker case |
 | --- | --- | --- | --- |
-| Sliding window | Contiguous range; aggregate reversible on removal | Contiguous sub-array or substring with an incrementally maintained aggregate | Non-reversible extreme, or a constraint non-monotone in length |
+| Sliding window | Contiguous range. Aggregate reversible on removal | Contiguous sub-array or substring with an incrementally maintained aggregate | Non-reversible extreme, or a constraint non-monotone in length |
 | Brute-force recompute | None | Tiny inputs or a one-off computation | Repeats work across overlapping windows |
-| [[Computer Science/Algorithms/Patterns/Two Pointers\|Two Pointers]] | Often sorted; two ends converging inward | Finding a pair/partition by moving opposite ends toward each other | A single window with a running aggregate over its interior |
-| [[Computer Science/Algorithms/Patterns/Prefix Sum\|Prefix Sum]] | Precomputed cumulative array | Many static range-sum queries; sums involving negatives | One constraint-driven window that must also report its members |
+| [[Computer Science/Algorithms/Patterns/Two Pointers\|Two Pointers]] | Often sorted. Two ends converging inward | Finding a pair/partition by moving opposite ends toward each other | A single window with a running aggregate over its interior |
+| [[Computer Science/Algorithms/Patterns/Prefix Sum\|Prefix Sum]] | Precomputed cumulative array | Many static range-sum queries. Sums involving negatives | One constraint-driven window that must also report its members |
 | [[Computer Science/Algorithms/Patterns/Monotonic Stack and Queue\|Monotonic Stack and Queue]] | Deque of candidate indices | Maximum/minimum of every window | Plain reversible aggregates where a scalar already suffices |
 
-When two ends converge instead of trailing in the same direction, the shape is [[Computer Science/Algorithms/Patterns/Two Pointers|Two Pointers]]. When the aggregate is a non-reversible max or min, a [[Computer Science/Algorithms/Patterns/Monotonic Stack and Queue|monotonic deque]] restores the once-in-once-out accounting a scalar cannot.
-
-# Questions
-
-> [!QUESTION]- Why does the window avoid rescanning its interior?
-> Each index is added to the aggregate once, when the right boundary passes it, and removed at most once, when the left boundary passes it.
-
-> [!QUESTION]- What property must the aggregate have, and which aggregate violates it?
-> Entering or leaving one element must update the aggregate directly. A running sum and a per-key frequency count satisfy that requirement; a window maximum does not, because removing the maximum leaves no direct way to recover the next-largest element still inside the window. That case uses a monotonic deque of candidate indices instead of a scalar.
-
-> [!QUESTION]- Why do negative numbers break sum-based sliding windows?
-> The contraction rule "shrink while the sum exceeds the target" relies on the sum rising on every entry and falling on every removal, which makes the smallest valid window length monotone as the right boundary advances. Negatives remove that monotonicity — a longer window can carry a smaller sum — so a failed window can become valid by extending. The replacement depends on the objective: exact-target sums can use prefix sums plus a hash map, while shortest-sum-at-least-`K` uses prefix sums plus a monotonic deque.
+If the two ends converge rather than trail in the same direction, the shape is [[Computer Science/Algorithms/Patterns/Two Pointers|Two Pointers]]. For a maximum or minimum that a scalar cannot reverse on removal, a [[Computer Science/Algorithms/Patterns/Monotonic Stack and Queue|monotonic deque]] keeps only the candidates that may become the next extreme.
 
 # References
 
-- [Mayur Datar et al., "Maintaining Stream Statistics over Sliding Windows" (2002)](https://doi.org/10.1137/S0097539701398363) — a primary treatment of maintaining aggregates over the last `N` stream elements, the same enter-once/expire-once model used here.
-- [Window Sliding Technique](https://www.geeksforgeeks.org/window-sliding-technique/) — GeeksforGeeks walkthrough of fixed and variable windows with the incremental-update derivation.
-- [Longest Substring Without Repeating Characters (LeetCode #3)](https://leetcode.com/problems/longest-substring-without-repeating-characters/) — canonical variable-window problem backed by a frequency map.
-- [Sliding Window Maximum (LeetCode #239)](https://leetcode.com/problems/sliding-window-maximum/) — the non-reversible-aggregate case that requires a monotonic deque.
+- [Mayur Datar et al., "Maintaining Stream Statistics over Sliding Windows" (2002)](https://doi.org/10.1137/S0097539701398363)
+- [Longest Substring Without Repeating Characters (LeetCode #3)](https://leetcode.com/problems/longest-substring-without-repeating-characters/)

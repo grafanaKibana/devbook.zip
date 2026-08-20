@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-19T15:05:27.976Z
-modified: 2026-07-25T13:51:15.339Z
-published: 2026-07-25T13:51:15.339Z
+created: 2026-08-20T20:41:15.656Z
+modified: 2026-08-20T20:41:15.656Z
+published: 2026-08-20T20:41:15.656Z
 topic:
   - Programming
 subtopic:
@@ -14,18 +14,20 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-Methods are the core unit of behavior in C#: they define contracts, shape API boundaries, and express how data flows through a system. Parameter modifiers like `ref`, `in`, and `params` are not just syntax details — they directly affect mutability, copying/allocation behavior, and performance characteristics at call sites. A misplaced `in` on a 4-byte `int` adds overhead instead of saving it (the runtime passes a pointer plus a defensive copy), while a missing `ref` on a 128-byte `Matrix4x4` silently copies 128 bytes per call in a hot rendering loop. Dispatch keywords like `virtual`, `override`, and `new` determine whether behavior is polymorphic at runtime or resolved by compile-time type — getting this wrong creates bugs where the "right" method runs for the wrong variable type, invisible until you upcast.
+Methods define where behavior begins and what data may cross the boundary. The parameter list is part of that contract. By-value parameters isolate the caller's variable, `ref` and `out` expose it for reassignment, and `in` exposes storage as readonly. `params` changes how an expanded argument list is collected at the call site.
+
+Inheritance adds a separate question: which implementation runs? `virtual` and `override` use runtime dispatch. `new` hides a member and leaves selection to the compile-time type of the reference. Similar syntax, very different behavior.
 
 # Input Parameters
 
 ## Ref
 
-`ref` passes a variable by reference.
+`ref` aliases the caller's storage rather than copying its current value into a new parameter variable.
 
 - The caller must initialize the variable.
 - The method can read and write the variable.
 
-Even for reference types, `ref` is useful when you want to change the reference itself (not just mutate the object it points to):
+For reference types, `ref` allows the callee to replace the caller's reference rather than only mutate the referenced object:
 
 ```csharp
 class MyClass {}
@@ -39,7 +41,7 @@ var myObj = new MyClass();
 ModifyReference(ref myObj);
 ```
 
-`ref` is also useful for value types when you need the callee to update the caller's variable:
+For value types, `ref` allows the callee to update the caller's variable:
 
 ```csharp
 static void InitializeAndModify(ref int value)
@@ -53,11 +55,11 @@ InitializeAndModify(ref num);
 
 ## In
 
-`in` is a readonly by-ref parameter.
+`in` is a readonly by-reference parameter. It can avoid copying a large struct, though the compiler may still create a temporary for argument expressions that are not variables.
 
 - The caller must initialize the argument.
 - The method can read, but cannot assign to the parameter.
-- Often used to avoid copying large structs while making intent explicit.
+- It is most useful when measurements show that copying a large readonly struct matters.
 
 ```csharp
 static void ProcessData(in int value)
@@ -69,7 +71,7 @@ static void ProcessData(in int value)
 
 ## Out
 
-`out` passes by reference for **output**: the callee _must_ assign it before returning, and the caller need not initialize it. It's the basis of the `TryParse` pattern (return a `bool` for success, hand back the value via `out`) and pairs with inline `out var`:
+`out` also aliases caller storage, but the value flows outward. The caller need not initialize it, and every normal return path must assign it. This supports `Try*` APIs that separate success from the produced value.
 
 ```csharp
 static bool TryDivide(int a, int b, out int result)
@@ -83,15 +85,15 @@ if (TryDivide(10, 2, out var quotient))   // 'quotient' declared inline
     Console.WriteLine(quotient);           // 5
 ```
 
-Use `out` (success-or-default) instead of throwing for _expected_ failures on hot paths; `Dictionary.TryGetValue` is the canonical example.
+`Dictionary.TryGetValue` shows the boundary well: a missing key is expected input, so a Boolean result is clearer than an exception.
 
 ## Params
 
-`params` lets a method accept a variable number of arguments as an array (or, since C# 13, recognized collection types).
+`params` lets callers provide zero or more arguments without constructing the parameter collection explicitly. C# 13 extended the feature beyond arrays to recognized collection types.
 
 - Must be the last parameter in the method signature.
-- The caller can pass individual arguments, an array, or nothing at all.
-- Expanded-form calls (for example, `Sum(1, 2, 3)`) construct the `params` collection at the call site; passing an existing collection can avoid extra construction.
+- Individual arguments or no arguments use expanded form, which constructs the declared `params` collection at the call site.
+- Normal form accepts one expression implicitly convertible to the declared parameter type. An array works only when that array-to-parameter conversion exists, including the applicable array-to-span conversion.
 
 ```csharp
 static int Sum(params int[] numbers)
@@ -107,7 +109,7 @@ Sum();           // 0
 Sum(new[] { 4, 5 }); // 9 — explicit array also works
 ```
 
-C# 13 extends `params` beyond arrays to recognized collection types such as `Span<T>`, `ReadOnlySpan<T>`, and `IEnumerable<T>`. This can reduce allocations in some call patterns (especially span-based calls), but allocation behavior still depends on the target type and call form:
+C# 13 permits collection types such as `Span<T>`, `ReadOnlySpan<T>`, and types with a suitable collection-builder shape. Allocation behavior still depends on the declared parameter type and whether the call uses expanded or normal form.
 
 ```csharp
 static int Sum(params ReadOnlySpan<int> numbers)
@@ -123,7 +125,7 @@ static int Sum(params ReadOnlySpan<int> numbers)
 
 ## Virtual
 
-`virtual` marks a base-class method as overridable.
+`virtual` marks a base implementation as an extension point. Calls through a base reference still select the most-derived override at runtime.
 
 - Enables runtime polymorphism.
 - Calls are resolved by the runtime type, not just the variable type.
@@ -137,10 +139,10 @@ class Animal
 
 ## Override
 
-`override` replaces a `virtual`/`abstract` member implementation in a derived class.
+`override` supplies the derived implementation of a virtual or abstract member while keeping the same dispatch slot.
 
 - Signature must match the base member.
-- You can still call the base implementation with `base.MethodName()`.
+- The derived method can still call the base implementation with `base.MethodName()`.
 
 ```csharp
 class Dog : Animal
@@ -151,10 +153,10 @@ class Dog : Animal
 
 ## New
 
-`new` hides a member from the base class (it does not override it).
+`new` declares a separate member that hides one inherited with the same name. It does not join the base member's dispatch slot.
 
 - Behavior depends on the compile-time type of the variable.
-- Use intentionally when you want member hiding, not polymorphism.
+- Use intentionally only when member hiding, rather than polymorphism, is the required behavior.
 
 ```csharp
 class Animal
@@ -192,56 +194,55 @@ Console.WriteLine(asAnimal.Category()); // Animal (member hiding)
 Console.WriteLine(asDog.Category());    // Dog
 ```
 
-`override` participates in polymorphism; `new` does not.
+The object is the same in both calls. Only the lookup rule changes: runtime type for `Speak`, compile-time reference type for `Category`.
 
 # Other Method Forms
 
-- **`ref return` / `ref readonly return`** — return an _alias_ to existing storage instead of a copy, letting callers read (and with `ref`, mutate) the original. Combined with `ref` locals (`ref var slot = ref array[i];`) this enables in-place updates of array/struct fields with no copying — used heavily in high-performance code (`Span<T>`, `Dictionary.GetValueRefOrAddDefault`).
-- **Local functions vs lambdas** — a local function is a named method nested in another method. Prefer it over a lambda when you don't need a delegate: it can be `static` (forbids accidental captures), supports `ref`/`out` and iterators, and **doesn't allocate a delegate/closure** unless converted to one. Lambdas are for when you actually need a `Func`/`Action` value.
-- **Extension methods** — `static` methods in a `static` class with a `this`-modified first parameter, letting you "add" methods to existing types (the whole of LINQ is extension methods on `IEnumerable<T>`).
-- **Expression-bodied members** (`=> ...`) are just concise syntax for single-expression methods/properties.
+- **`ref return` and `ref readonly return`** return an alias to existing storage. The writable form lets a caller update that storage. The readonly form avoids a copy without granting mutation. Ref-safety rules prevent the alias from outliving its source.
+- **Local functions** name behavior inside another method. A `static` local function cannot capture outer state, and a direct call needs no delegate. A lambda is the natural form when the method must produce a `Func` or `Action` value.
+- **Extension methods** are static methods whose first parameter has the `this` modifier. They participate in normal static overload resolution and do not modify the extended type.
+- **Expression-bodied members** use shorter syntax for a single expression. Their call and dispatch semantics do not change.
 
-**Overload resolution** picks the "best" match by a betterness algorithm (most specific parameter types, fewest conversions); named and optional arguments interact here, and an ambiguous tie is a compile error. Since **.NET 7**, a method-group conversion (`Func<int,int> f = Square;`) is **cached**, so repeatedly assigning the same method group no longer allocates a new delegate each time.
+**Overload resolution** compares the applicable candidates and their required conversions. Optional and named arguments affect applicability, while an unresolved tie is a compile error. Modern compilers can cache some static method-group conversions, but capturing lambdas and instance targets still need their own lifetime analysis.
 
 # Pitfalls
 
-- Optional parameter defaults are substituted at the call site during compilation, so changing a default value in a shared library does not update already compiled consumers; this can create silent behavior drift across services. Prefer explicit overloads for public APIs and treat default-value changes as breaking behavior.
-- `in` parameters are readonly by reference, but the compiler can introduce temporaries for some argument forms or conversions, which means expected copy-avoidance may not happen. Benchmark hot paths, and if you must minimize temporaries, design APIs around stricter by-ref calling patterns (for example, `ref readonly` parameters) and avoid argument expressions that require conversions.
-- Member hiding with `new` is resolved by compile-time type, so callers can observe different results for the same runtime object depending on reference type. Prefer `virtual`/`override` when polymorphism is intended, and avoid `new` on public APIs unless the behavior split is deliberate and documented.
+- Optional defaults are copied into the caller at compile time. Changing a library's default does not affect an already compiled consumer, so a default-value change can create version-dependent behavior.
+- An `in` parameter does not guarantee zero copies. Conversions and non-variable arguments can require temporaries, and readonly access to a mutable struct may trigger defensive copies.
+- Member hiding with `new` makes the result depend on the reference's compile-time type. That split is hard to reason about in public APIs unless compatibility requires it.
 
 # Tradeoffs
 
 | Decision | Option A | Option B | When A | When B |
 | --- | --- | --- | --- | --- |
-| **By-value vs `in`** | By-value (copies the argument) | `in` (readonly reference) | Small types (≤16 bytes: `int`, `Guid`, small structs) — copy is cheaper than indirection | Large structs (>16 bytes: `Matrix4x4`, `decimal`-heavy DTOs) — avoids 128+ byte copies on hot paths |
-| **`in` vs `ref`** | `in` (readonly reference) | `ref` (mutable reference) | Callee only reads — communicates intent, compiler enforces immutability | Callee must mutate or rebind — e.g., `TryParse` patterns, swap utilities |
-| **`override` vs `new`** | `override` (runtime polymorphism) | `new` (compile-time hiding) | Almost always — predictable dispatch, works through base-type references | Rare: deliberate compile-time-only behavior split, documented API hiding for compatibility |
-| **`params T[]` vs `params ReadOnlySpan<T>`** | `params T[]` (heap array per call) | `params ReadOnlySpan<T>` (stack or inline buffer) | Pre-C# 13 code, or when caller needs to store the array | C# 13+, hot paths where allocation pressure matters — span-based avoids the heap allocation |
+| **By-value vs `in`** | By-value copies the value | `in` passes a readonly alias | Small values and ordinary APIs | Large readonly structs on a measured hot path |
+| **`in` vs `ref`** | `in` forbids reassignment through the parameter | `ref` permits it | The callee only reads | Mutation or rebinding is part of the contract |
+| **`override` vs `new`** | `override` uses runtime polymorphism | `new` uses compile-time hiding | Derived behavior must work through base references | A deliberate compatibility split requires a separate member |
+| **`params T[]` vs `params ReadOnlySpan<T>`** | Array form is broadly compatible and can be retained by the callee | Span form is stack-only and cannot escape | The method or caller needs array semantics | Synchronous processing benefits from span-based calls |
 
-**Decision rule**: default to by-value for types ≤16 bytes and `override` for all polymorphic methods. Introduce `in` only when profiling shows copy cost matters (typically structs >16 bytes called >10K/sec). Use `new` only when you own both types and the behavior split is documented in XML comments.
+Default to by-value parameters and ordinary virtual dispatch. Add by-reference semantics when aliasing is part of the API or profiling shows that struct copies matter. Use `new` only when compile-time hiding is the intended contract.
 
 # Questions
 
-> [!QUESTION]- Why might you need `ref` for reference types if reference types are already passed by reference?
-> Reference type _values_ (the reference) are passed by value. `ref` is needed when you want the callee to replace the caller's reference (rebind it to a different object).
+> [!QUESTION]- Why would a method need `ref` when the argument is already a reference type?
+> A reference-type argument still passes the reference itself by value. The method can use that copied reference to mutate the same object, but assigning a different object changes only the method's local copy. With `ref`, the method receives an alias to the caller's variable and can replace the reference stored there.
 
-> [!QUESTION]- What is an `in` parameter used for?
-> To pass an argument by readonly reference: avoid copies for large structs and communicate that the method should not modify the argument.
+> [!QUESTION]- What does an `in` parameter do, and when is it useful?
+> An `in` parameter passes an argument by readonly reference. The method can read the value but cannot assign through that parameter. This can avoid copying a large struct on a measured hot path, although conversions and non-variable arguments may still create a temporary copy. It rarely helps for small values.
 
-> [!QUESTION]- What are optional parameters in methods?
-> Parameters with default values that callers can omit; the default is substituted at compile time at the call site.
+> [!QUESTION]- How do optional parameters work in C#?
+> An optional parameter has a default value, so the caller may leave that argument out. The compiler inserts the default into the calling code at compile time. If a library later changes the default, already compiled callers keep using the old value until they are recompiled.
 
-> [!QUESTION]- In a hierarchy where `Animal a = new Dog();`, how can you make `a.Category()` return the derived value, and what does that imply for API design?
-> Mark the base member as `virtual` and the derived member as `override`. That enables polymorphic dispatch by runtime type. It also means the base API explicitly supports extensibility and behavioral substitution.
+> [!QUESTION]- With `Animal a = new Dog();`, how can `a.Category()` call the derived implementation, and what does that mean for the base API?
+> Mark `Animal.Category()` as `virtual` and implement it with `override` in `Dog`. The runtime then chooses the method from the actual object type, even though the variable is typed as `Animal`. Declaring the base method virtual also makes derived replacement part of the API's intended extension model.
 
-> [!QUESTION]- When should you prefer `new` over `override`?
-> Prefer `new` only when polymorphism is not desired and you intentionally want different behavior based on the compile-time reference type (for compatibility or specialized APIs). In most extensible designs, `override` is the safer default.
+> [!QUESTION]- When is hiding a method with `new` appropriate instead of overriding it?
+> Use `new` only when the base member cannot or should not participate in runtime polymorphism and the result is intentionally allowed to depend on the variable's compile-time type. This sometimes preserves compatibility with an existing API. If derived behavior should still appear through a base reference, the member needs `virtual` and `override` instead.
 
-> [!QUESTION]- A base method is not marked `virtual`, but you need derived-specific behavior. What are your options?
-> Option 1: Change the base API to `virtual` (best if you own the base type and want polymorphism). Option 2: Hide with `new` (works, but no polymorphism and can confuse callers). Option 3: Redesign with composition/strategy if inheritance is not a good fit.
+> [!QUESTION]- What can be done when a base method is not virtual but derived behavior is needed?
+> If the base type is under control and derived substitution is intended, make the method `virtual` and override it. If the base API cannot change, `new` can hide the member, but calls through the base type will still use the base implementation. Composition is usually clearer when the varying behavior does not naturally belong to the inheritance hierarchy.
 
 # References
 
-- [Method parameters and modifiers (ref/in/out)](https://learn.microsoft.com/dotnet/csharp/language-reference/keywords/method-parameters#reference-parameters) — official reference for all parameter modifiers with semantics and examples.
-- [C# 13: params collections](https://learn.microsoft.com/dotnet/csharp/whats-new/csharp-13#params-collections) — explains the C# 13 extension of `params` to any collection type, not just arrays.
-- [C# 13: calling methods is easier and faster](https://devblogs.microsoft.com/dotnet/csharp13-calling-methods-is-easier-and-faster/) — .NET team blog post on the performance and ergonomics improvements to method calls in C# 13.
+- [Method parameters](https://learn.microsoft.com/dotnet/csharp/language-reference/keywords/method-parameters#reference-parameters)
+- [C# 13: Calling methods is easier and faster](https://devblogs.microsoft.com/dotnet/csharp13-calling-methods-is-easier-and-faster/)

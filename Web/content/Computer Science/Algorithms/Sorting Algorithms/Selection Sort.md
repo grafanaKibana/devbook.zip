@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T14:02:44.031Z
-modified: 2026-08-08T08:06:02.776Z
-published: 2026-08-08T08:06:02.776Z
+created: 2026-08-20T20:41:15.547Z
+modified: 2026-08-20T20:41:15.547Z
+published: 2026-08-20T20:41:15.547Z
 topic:
   - Computer Science
 subtopic:
@@ -14,11 +14,11 @@ priority: Low
 status: Ready to Repeat
 ---
 
-An array must be ordered on a medium where a write costs far more than a comparison — a flash or EEPROM cell rated for a limited number of erase cycles, for instance. Most sorts move elements repeatedly before they settle into their final slots. Selection sort limits that movement: pass `i` scans the unsorted suffix `a[i..n-1]`, finds its minimum, and swaps that minimum into position `i`. The classic guarded implementation performs at most one swap per pass. Index `i` becomes final after its swap, but the other physical position written by that swap remains in the unsorted suffix and may be written again later.
+Selection sort is useful when writes cost much more than comparisons, such as on flash or EEPROM with limited erase cycles. Pass `i` scans the unsorted suffix `a[i..n-1]`, finds its minimum, and swaps that value into position `i`. The guarded implementation performs at most one swap per pass. Position `i` is now final, while the other position touched by the swap remains in the unsorted suffix and may be written again.
 
-The scan that finds each minimum is unconditional. It inspects every remaining element, and nothing about the data — already sorted, reversed, random — changes that count. The write budget stays small; the comparison schedule is fixed.
+The minimum scan is unconditional. It examines every remaining element whether the input is sorted, reversed, or random. The write count stays small, but the comparison schedule never improves with input order.
 
-**Core condition:** unsorted array, writes dearer than comparisons → at most one swap finalizes each prefix position → repeat over the shrinking suffix.
+**Operating condition:** each full suffix scan finalizes one prefix position with at most one swap.
 
 ````tabsdown
 tab: Visualization
@@ -108,9 +108,9 @@ Comparisons dominate the running time and are identical across all three rows �
 A stable variant exists but abandons the write budget that motivates the algorithm. Rather than swapping the minimum into place, it removes the minimum and shifts the intervening elements up by one — the same move [[Computer Science/Algorithms/Sorting Algorithms/Insertion Sort|Insertion Sort]] makes. Preserving equal-key order costs `Θ(n)` writes per pass, restoring the `Θ(n²)` write total that the swap-based form was chosen to avoid.
 ````
 
-Selection sort is not stable because its long-distance swap can carry an equal key past its partner. Sorting `[5a, 3, 5b, 1]` by value produces `[1, 3, 5b, 5a]`, reversing the two fives.
+Selection sort is unstable because a long-distance swap can carry one equal key past another. Sorting `[5a, 3, 5b, 1]` by value produces `[1, 3, 5b, 5a]`. The two fives have changed order.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Control flow
 >
@@ -154,16 +154,8 @@ Selection sort is not stable because its long-distance swap can carry an equal k
 > }
 > ```
 >
-> The `minIdx != i` guard skips the write when the minimum already sits in place, which is why a sorted input performs zero swaps while still running every comparison.
-
-# Questions
-
-> [!QUESTION]- When can selection sort be preferable despite its `Θ(n²)` comparison cost?
-> When writes are materially more expensive than comparisons, its guarded form performs at most one swap per pass and none when the minimum is already placed. A stable shift-based variant loses that advantage by restoring a quadratic write count.
+> The `minIdx != i` guard avoids a write when the minimum is already in place. A sorted input therefore performs no swaps, although it still runs every comparison.
 
 # References
 
-- [Selection sort (Wikipedia)](https://en.wikipedia.org/wiki/Selection_sort) — the exchange count, the non-adaptive comparison total, and the shift-based stable variant.
-- [Elementary Sorts (Sedgewick & Wayne, algs4)](https://algs4.cs.princeton.edu/21elementary/) — analysis showing `~N²/2` compares and `N` exchanges, and why the running time is insensitive to input order.
-- [Selection.java (algs4)](https://algs4.cs.princeton.edu/21elementary/Selection.java.html) — the authors' reference implementation of selection sort and its exchange step.
-- [Sorting visualizations (VisuAlgo)](https://visualgo.net/en/sorting) — side-by-side animation of the elementary sorts, useful for contrasting selection sort's swap count with bubble and insertion sort.
+- [Elementary Sorts (Sedgewick & Wayne, algs4)](https://algs4.cs.princeton.edu/21elementary/)

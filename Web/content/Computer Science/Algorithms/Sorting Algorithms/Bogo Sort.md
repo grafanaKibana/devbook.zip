@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-10T07:56:54.913Z
-modified: 2026-08-10T15:10:48.312Z
-published: 2026-08-10T15:10:48.312Z
+created: 2026-08-20T20:41:15.539Z
+modified: 2026-08-20T20:41:15.539Z
+published: 2026-08-20T20:41:15.539Z
 topic:
   - Computer Science
 subtopic:
@@ -14,9 +14,9 @@ priority: Low
 status: Not-Started
 ---
 
-Bogo sort applies generate-and-test without useful guidance: check whether the array is sorted; if not, shuffle it and try again. For `n` distinct values only one of the `n!` permutations is sorted, so a random attempt succeeds with probability `1/n!`. A sequence of random shuffles can miss indefinitely.
+Bogo sort takes generate-and-test literally. It checks whether the array is sorted, shuffles when it is not, then starts over. With `n` distinct values, only one of the `n!` permutations is sorted, so each random attempt succeeds with probability `1/n!`. The shuffles can miss forever.
 
-The algorithm is a counterexample, not a production choice. It makes the value of progress invariants concrete: a real sorting algorithm proves that each step shrinks disorder or fixes a region, while Bogo Sort forgets all previous work after every shuffle.
+Bogo Sort is useful as a counterexample. Practical sorting algorithms preserve progress by shrinking the unsorted region or removing disorder. Bogo Sort discards all previous work after every shuffle.
 
 ````tabsdown
 tab: Visualization
@@ -67,9 +67,9 @@ tab: Complexity
 ```
 ````
 
-# Boundary and implementation
+# Attempt cap and termination
 
-The storage result shown above assumes an unbiased Fisher–Yates shuffle that modifies the array directly. An attempt cap makes a program terminate but changes the contract: it may return failure with an unsorted array. The deterministic StepTrace demonstrates the state space; it is not evidence that random Bogo Sort finishes within 120 attempts.
+The storage result shown above assumes an unbiased Fisher–Yates shuffle that modifies the array directly. An attempt cap makes a program terminate but changes the contract: it may return failure with an unsorted array. The deterministic StepTrace demonstrates the state space. It is not evidence that random Bogo Sort finishes within 120 attempts.
 
 > [!EXAMPLE]- C# bounded demonstration
 >
@@ -94,18 +94,9 @@ The storage result shown above assumes an unbiased Fisher–Yates shuffle that m
 > }
 > ```
 >
-> `Random.Shuffle` performs an unbiased shuffle directly on the array in current .NET. `maxAttempts` counts shuffles: the initial state is checked once, and every shuffle—including the final allowed shuffle—is checked before returning `false`. Returning `false` exposes the cap instead of pretending the array was sorted.
-
-# Questions
-
-> [!QUESTION]- Why is the expected time factorial?
-> With distinct values, each unbiased shuffle selects one of `n!` permutations and only one is sorted. The expected number of attempts is proportional to `n!`; each Fisher–Yates shuffle costs `Θ(n)`, while the order check is `O(n)` in the worst case, so expected time is `Θ(n · n!)`. The worst case remains unbounded because random shuffles may miss the sorted permutation indefinitely.
-
-> [!QUESTION]- What important guarantee does an attempt cap change?
-> It guarantees termination by allowing failure. The method is no longer a sorting algorithm that always returns a sorted result.
+> `Random.Shuffle` performs an unbiased shuffle directly on the array in current .NET. The initial state is checked before the attempt budget starts, and `maxAttempts` counts the later shuffles. Every allowed shuffle is checked, including the last one. Returning `false` makes the cap explicit instead of claiming success with an unsorted array.
 
 # References
 
-- [Gruber, Holzer, and Ruepp, “Sorting the Slow Way”](https://doi.org/10.1007/978-3-540-72914-3_17) — the primary formal analysis of Bogo Sort and related randomized pessimal algorithms.
-- [NIST Dictionary of Algorithms and Data Structures: bogosort](https://www.nist.gov/dads/HTML/bogosort.html) — authoritative definition and the published expected-time lower bound.
-- [`Random.Shuffle<T>`](https://learn.microsoft.com/en-us/dotnet/api/system.random.shuffle) — official .NET API used by the bounded C# demonstration.
+- [Gruber, Holzer, and Ruepp, “Sorting the Slow Way”](https://doi.org/10.1007/978-3-540-72914-3_17)
+- [NIST Dictionary of Algorithms and Data Structures: bogosort](https://www.nist.gov/dads/HTML/bogosort.html)

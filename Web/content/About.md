@@ -1,9 +1,9 @@
 ---
 publish: true
 title: About
-created: 2026-08-08T08:38:21.957Z
-modified: 2026-08-08T09:27:18.045Z
-published: 2026-08-08T09:27:18.045Z
+created: 2026-08-20T20:41:15.508Z
+modified: 2026-08-20T20:41:15.508Z
+published: 2026-08-20T20:41:15.508Z
 tags:
   - MetricsIgnore
 summary: The purpose, scope, and AI-assisted authorship of this software engineering notebook.
@@ -12,13 +12,13 @@ icon: heart
 
 # Welcome to My Software Engineering Notebook
 
-The notes I've written to actually _understand_ the stack, not just recall it for an interview. .NET internals, distributed systems, databases, security, cloud, AI/ML, and most of what sits between. Every note goes deep: core mechanics, real examples, the pitfalls that bite in production, and the questions worth being able to answer.
+I write these notes to _understand_ a system well enough to reason about it, not just repeat an interview answer. The subjects range from .NET internals and distributed systems to databases, security, cloud, and AI/ML. Some topics need a deep treatment. Others only need the few mechanisms and failure cases that change what I would build.
 
 > [!info] Why this exists
-> I learn by writing things down and coming back to them. This vault is that process in the open — built on spaced repetition, organized into 11 topic areas, and updated continuously. Browse by topic from the home dashboard.
+> I learn by writing things down and returning to them later. This vault keeps that process in the open. Spaced repetition brings older material back, and the home dashboard reflects the topic map as it changes.
 
 Release history lives in the [[Changelog]].
 
-## AI usage
+## AI assistance
 
-In creating this project, I collaborated with Claude Code to assist with drafting notes, research, editing, and code. I affirm that all AI-generated and co-created content underwent thorough review and evaluation. The final output accurately reflects my understanding, expertise, and intended meaning. While AI assistance was instrumental in the process, I maintain full responsibility for the content, its accuracy, and its presentation. This disclosure is made in the spirit of transparency and to acknowledge the role of AI in the creation process.
+I use coding agents, including Claude Code, for research and first drafts of notes and code. I review the result before publishing it and remain responsible for its meaning and accuracy.

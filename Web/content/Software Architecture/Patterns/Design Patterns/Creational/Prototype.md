@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T14:02:44.174Z
-modified: 2026-07-25T13:51:15.253Z
-published: 2026-07-25T13:51:15.253Z
+created: 2026-08-20T20:41:15.694Z
+modified: 2026-08-20T20:41:15.694Z
+published: 2026-08-20T20:41:15.694Z
 topic:
   - Software Architecture
 subtopic:
@@ -14,9 +14,9 @@ priority: High
 status: Done
 ---
 
-Photocopying a filled-out form is a Prototype in everyday life. Instead of filling out a new form from scratch, you copy the existing one and change just the name or address. The copy carries all the original structure and most of the original data — you only modify what differs.
+Prototype creates an object from an existing instance. It fits when construction starts from a configured template or when the concrete runtime type must decide how to copy itself.
 
-The Prototype pattern creates new objects by copying an existing instance rather than constructing from scratch. The prototype object knows how to copy itself, producing either a shallow copy (references shared) or a deep copy (full object graph duplicated). The client asks the prototype to clone itself, then tweaks the variant-specific fields. In modern C#, **`record with {}` expressions are the idiomatic Prototype** for value-semantic objects — the compiler generates the copy logic for you. The classical `ICloneable` interface is considered problematic because it doesn’t specify shallow vs deep semantics. Prefer `record with {}` for new code, or explicit copy constructors when you need deep-copy control over reference types.
+The copy contract matters more than the `Clone` method. A shallow copy creates a new outer object but shares referenced objects. A deep copy duplicates the mutable parts that must vary independently. C# records and `with` expressions make shallow copies concise. Explicit copy constructors are clearer when selected members need deeper copying. `ICloneable` is a weak public contract because it does not state which semantics callers receive.
 
 ```mermaid
 flowchart LR
@@ -31,7 +31,7 @@ flowchart LR
 
 # Problem
 
-Creating product variants (same base product, different size/color/region pricing) by manually copying properties is error-prone:
+Manual property assignment makes each copy site responsible for tracking the entire type:
 
 ```csharp
 public class ProductService
@@ -57,11 +57,11 @@ public class ProductService
 }
 ```
 
-Here's what breaks when requirements change: adding a `ShippingConstraints` property to `Product` requires finding every manual copy site and adding the assignment — a maintenance burden that grows with the object's complexity.
+Adding `ShippingConstraints` now requires finding every manual copy site. A missed assignment produces a valid-looking object with incomplete state, while shared mutable members can make two variants change each other.
 
 # Solution
 
-Use `record with {}` for the modern approach, or an explicit copy constructor for classes:
+Use `with` for a shallow record copy and override every member that needs fresh identity or independent mutable state. Use an explicit copy constructor when those rules should be visible in one place.
 
 ```csharp
 // Modern approach: record with {} — the idiomatic C# Prototype
@@ -123,35 +123,34 @@ var draftOrder = templateOrder.Clone();
 draftOrder.Customer = currentCustomer;
 ```
 
-Adding a new field to `Product` record automatically includes it in `with` copies — no manual update needed.
+New record fields participate in the compiler-generated copy automatically. Referenced objects are still shared unless the initializer replaces them. The example replaces `Tags` for that reason.
 
-# You Already Use This
+# .NET Forms
 
-**`record with {}` expression (C# 9+)** — the language-native Prototype. Every `record` type gets a compiler-generated copy constructor and `with` expression support. This is the recommended approach for new code: it's shallow by default, explicit about what changes, and the compiler keeps it in sync with the type definition.
+**`record with {}`** creates a modified shallow copy. It works well for value-like models whose referenced members are immutable or replaced explicitly.
 
-**`ICloneable` / `MemberwiseClone()`** — the classical .NET Prototype interface. `MemberwiseClone()` performs a shallow copy (reference types share the same instance). Avoid `ICloneable` in new code — its contract doesn't specify shallow vs deep, leading to subtle bugs. Use explicit copy constructors instead.
+**Copy constructors or named copy methods** can state exactly which members remain shared and which are duplicated. They are usually the clearest choice for mutable object graphs.
 
-**`Array.Clone()` / `Array.Copy()`** — shallow array copy. `int[] copy = (int[])original.Clone()` copies the array structure but shares reference-type elements.
-
-**`DataTable.Copy()`** — deep copies a `DataTable` including schema and data. `DataTable.Clone()` copies only the schema (shallow). The naming inconsistency is a classic `ICloneable` ambiguity problem.
+**`MemberwiseClone()`** performs the outer shallow copy used by many classical implementations. A protected primitive is safer than promising unspecified semantics through `ICloneable`.
 
 # Pitfalls
 
-**Shallow copy sharing mutable state** — `record with {}` is shallow by default. If `Product.Tags` is a `List<string>` (mutable), the copy shares the same list instance. Mutating `variant.Tags` mutates `baseProduct.Tags`. Use immutable collections (`IReadOnlyList<T>`, `ImmutableList<T>`) or explicitly copy mutable fields in the `with` expression.
+**Shared mutable references.** `with` does not recursively copy a list, array, or child entity. `IReadOnlyList<T>` restricts the exposed API but does not prove that the underlying collection is immutable. Replace mutable members or use an immutable collection.
 
-**Forgetting to update copy logic when adding fields** — with explicit copy constructors or manual `MemberwiseClone()` overrides, adding a new field to the class requires updating the copy method. `record with {}` avoids this: the compiler-generated copy constructor always includes all fields. This is the primary reason to prefer `record` for Prototype scenarios.
+**Ambiguous identity.** A cloned entity usually needs a new identifier, while shared value objects may keep their values. Copying persistence identifiers, event subscriptions, locks, or caches can create two objects that claim to be the same entity or share runtime-only state.
+
+**Stale explicit copy logic.** Copy constructors must be reviewed when the source type gains a member. That cost is acceptable when the alternative is an implicit deep-copy policy nobody can see.
 
 # Questions
 
-> [!QUESTION]- When should you use Prototype instead of just calling `new`?
-> When construction is expensive (loading from DB, computing derived fields) and you need many similar objects. Prototype amortizes the construction cost: build one template, clone it N times with small variations. Also use it when the exact type isn't known at compile time — `prototype.Clone()` works without knowing the concrete type. The tradeoff: cloning can be as expensive as construction if the object graph is deep; profile before assuming it's faster.
+> [!QUESTION]- When is Prototype useful instead of constructing an object directly?
+> Prototype fits when the new object starts as a variant of an existing configured instance. It also fits when code knows only an abstraction and the runtime object must copy its own concrete type. Direct construction is clearer when there is no useful template and the runtime type is already known.
 
-> [!QUESTION]- What's the difference between shallow and deep copy, and when does it matter?
-> Shallow copy duplicates the object's fields but shares reference-type values. Deep copy recursively duplicates the entire object graph. It matters when the copied object contains mutable reference types: two shallow copies sharing a `List<OrderItem>` will interfere with each other. Use deep copy when the clone must be fully independent. Use shallow copy when shared references are intentional (e.g., `Customer` is shared across orders — that's correct). The cost of deep copy scales with graph depth; for large graphs, consider serialization-based cloning (`JsonSerializer.Deserialize(JsonSerializer.Serialize(obj))`).
+> [!QUESTION]- Where is the boundary between a shallow and a deep copy?
+> A shallow copy duplicates the outer object's fields and preserves references to nested objects. A deep-copy policy replaces the mutable nested state that must evolve independently. Copying every reachable object is rarely the real requirement. Ownership and identity decide where copying stops.
 
 # References
 
-- [Prototype — refactoring.guru](https://refactoring.guru/design-patterns/prototype) — canonical pattern description with shallow/deep copy discussion and C# example
-- [Records (C# reference) — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record) — `record with {}` as the modern C# Prototype
-- [Object.MemberwiseClone — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.object.memberwiseclone) — classical shallow copy mechanism
-- [ICloneable interface — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.icloneable) — why the interface is problematic and when to avoid it
+- [Prototype pattern](https://refactoring.guru/design-patterns/prototype)
+- [Records (C# reference) — `record with {}` as the modern C# Prototype](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record)
+- [Object.MemberwiseClone — classical shallow copy mechanism](https://learn.microsoft.com/en-us/dotnet/api/system.object.memberwiseclone)

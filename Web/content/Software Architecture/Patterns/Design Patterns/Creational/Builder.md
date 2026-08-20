@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T14:02:44.172Z
-modified: 2026-07-25T13:51:15.255Z
-published: 2026-07-25T13:51:15.255Z
+created: 2026-08-20T20:41:15.693Z
+modified: 2026-08-20T20:41:15.693Z
+published: 2026-08-20T20:41:15.693Z
 topic:
   - Software Architecture
 subtopic:
@@ -14,9 +14,9 @@ priority: High
 status: Done
 ---
 
-Ordering a custom sandwich at a sub shop is a Builder in action. You start with bread, add meat, choose veggies, pick a sauce, decide on a size — step by step, in any order, skipping what you don’t want. At the end, the sandwich artist assembles everything into a finished product. You never see a constructor that takes twelve arguments for bread-type, meat-type, lettuce-yes-no, tomato-yes-no.
+A complex object often cannot be created sensibly in one constructor call. Some inputs are optional, others interact, and derived values should never be supplied by callers.
 
-The Builder pattern separates the construction of a complex object from its representation. A `Builder` class accumulates configuration through a fluent API — `.WithShipping(address)`, `.WithDiscount(code)`, `.WithGiftWrap()` — and a final `Build()` call validates constraints and assembles the finished object. Each step is optional, order-independent, and self-documenting. For **simple objects**, modern C# `required` properties and `init` setters with object initializers are often sufficient — Builder earns its complexity when construction involves cross-field validation, computed values, or a director-driven assembly sequence where the same process produces different representations.
+Builder gives that construction process a temporary home. Its methods collect intent through named operations, and `Build()` checks the complete configuration before creating the product. Fluent chaining is common, but it is syntax rather than the pattern's purpose. A builder is justified when construction has real sequencing, derivation, or cross-field invariants. For a simple data object, `required` members and `init` setters are smaller and provide more compile-time help.
 
 ```mermaid
 flowchart LR
@@ -76,7 +76,7 @@ var order = orderService.CreateOrder(customer, items, shipping, null, "SAVE10",
     true, "Happy Birthday!", null, "FedEx", false, null, false);
 ```
 
-Here's what breaks when requirements change: adding a "priority shipping" flag means a 13th parameter, and every existing call site must be updated even if they don't use priority shipping.
+A priority-shipping flag would extend an already opaque call and can force unrelated callers to pass another placeholder value.
 
 # Solution
 
@@ -147,6 +147,14 @@ public class OrderBuilder(Customer customer)
         return this;
     }
 
+    public OrderBuilder WithSpecialInstructions(string instructions)
+    {
+        _specialInstructions = string.IsNullOrWhiteSpace(instructions)
+            ? null
+            : instructions.Trim();
+        return this;
+    }
+
     public OrderBuilder AsBusinessOrder()
     {
         _isBusinessOrder = true;
@@ -171,7 +179,7 @@ public class OrderBuilder(Customer customer)
         {
             Id = Guid.NewGuid(),
             Customer = customer,
-            Items = _items.AsReadOnly(),
+            Items = _items.ToArray(), // snapshot; later builder changes cannot mutate this order
             Subtotal = subtotal,
             DiscountAmount = discount,
             Total = subtotal - discount,                    // ✅ computed field, not caller's responsibility
@@ -199,25 +207,25 @@ var order = new OrderBuilder(customer)
     .Build();
 ```
 
-Adding priority shipping now means one new `WithPriorityShipping()` method — existing call sites are unaffected.
+Priority shipping can become a named builder operation without changing callers that use the default. The builder still has to reject combinations that the final `Order` cannot represent safely.
 
-# You Already Use This
+# Framework examples
 
-**`WebApplicationBuilder` / `IHostBuilder`** — the canonical .NET Builder. `builder.Services.AddDbContext<>()`, `builder.Configuration.AddJsonFile()`, `builder.Logging.AddConsole()` accumulate configuration; `builder.Build()` assembles the `WebApplication`. The director pattern is implicit: `Program.cs` is the director.
+**`WebApplicationBuilder` and `IHostBuilder`** collect services, configuration sources, and hosting options before `Build()` creates the host. `Program.cs` may coordinate those steps, though it is ordinary composition code rather than necessarily a formal Director.
 
-**`StringBuilder`** — the original .NET Builder. `Append()`, `AppendLine()`, `Insert()` accumulate string segments; `ToString()` produces the final string. Avoids the O(n²) allocation cost of string concatenation.
+**`StringBuilder`** accumulates mutable text and materializes a string with `ToString()`. It is useful for repeated or conditional assembly. Small interpolated strings remain clearer and may be optimized adequately by the compiler.
 
-**`IQueryable<T>` LINQ chain** — each LINQ operator (`Where`, `OrderBy`, `Select`) adds to the query expression tree; `ToListAsync()` is the `Build()` call that executes it. EF Core translates the accumulated expression tree into SQL.
+**`IQueryable<T>` chains** accumulate an expression tree before a terminal operation executes it. This resembles staged construction, but the result is query execution rather than a classic built product.
 
-**`UriBuilder`** — builds `Uri` objects from scheme, host, port, path, and query components without string manipulation.
+**`UriBuilder`** exposes named URI components and produces a `Uri`, avoiding manual delimiter assembly.
 
 # Pitfalls
 
-**Over-engineering simple objects** — if an object has 3-4 required fields and no validation logic, a Builder adds indirection for no benefit. Use C# `required` properties with object initializers: `new Order { Customer = customer, Items = items, Total = total }`. The compiler enforces required fields at the call site.
+**Simple products.** A builder around independent assignments only duplicates an object initializer. Use `required` members when presence is the main invariant.
 
-**Mutable builder state leaking into the product** — if `Build()` returns the builder's internal list directly (not a copy), callers can mutate the order's items after construction. Always copy or wrap collections: `_items.AsReadOnly()` or `new List<OrderItem>(_items)`.
+**Leaked mutable state.** Returning the builder's internal collection lets later builder changes mutate an already built product. Copy mutable collections, and remember that `AsReadOnly()` is only a wrapper over the same underlying list.
 
-**Missing validation on `Build()`** — builders that don't validate produce invalid objects silently. Validate all invariants in `Build()`, not in individual setter methods (where partial state is expected). The builder's job is to accumulate; `Build()`'s job is to validate and assemble.
+**Partial validation.** Local argument checks can run in individual methods, but cross-field invariants need the complete state available at `Build()`. The product should not emerge invalid merely because one construction path forgot a check.
 
 # Tradeoffs
 
@@ -230,22 +238,19 @@ Adding priority shipping now means one new `WithPriorityShipping()` method — e
 | Fluent chaining | Yes | No | No |
 | Complexity | High | Low | Medium |
 
-**Decision rule**: Start with `required` properties and object initializers for new objects. Introduce Builder when: (1) construction requires multi-step validation, (2) computed fields depend on multiple inputs, (3) the same assembly process produces different representations, or (4) a director needs to drive construction programmatically. The signal is when `Build()` does real work beyond assignment.
+Start with a constructor or object initializer. Builder earns a separate type when `Build()` performs meaningful work across several inputs or when a reusable construction sequence needs a stable API.
 
 # Questions
 
-> [!QUESTION]- When does Builder's `Build()` method justify its existence over a constructor?
-> When `Build()` does work a constructor shouldn't: cross-field validation (gift wrap requires a message), computed fields (total = subtotal - discount), default derivation (billing = shipping if not set), or async initialization. Constructors should be fast and never throw business logic exceptions. `Build()` is the right place for invariant enforcement that spans multiple fields. The tradeoff: `Build()` can throw at runtime; `required` properties fail at compile time. Use `required` when all fields are independent; use Builder when fields interact.
-
-> [!QUESTION]- How does the Director role work, and when do you need it?
-> A Director encapsulates a specific construction sequence, calling builder methods in a fixed order. Example: `StandardOrderDirector.BuildGiftOrder(builder, customer, items)` always calls `ShipTo`, `WithGiftWrap`, `WithShipping(Express)` in the right order. Directors are useful when the same construction sequence is reused across multiple call sites, or when the sequence itself is a business rule (gift orders always use express shipping). Without a director, each call site must know the correct sequence — a form of knowledge duplication. The tradeoff: directors add a class; without them, call sites are more flexible but less consistent.
+> [!QUESTION]- When is a Builder worth using instead of a constructor?
+> A Builder is useful when inputs arrive across several steps and the complete object must be checked before it is created. `Build()` can validate relationships between those inputs and calculate values that callers should not supply. A constructor is still better when all required values fit in one clear call and it can enforce the same invariants directly. Async initialization usually belongs in an asynchronous factory because a conventional `Build()` cannot be awaited.
 
 > [!QUESTION]- Why does `WebApplicationBuilder` use a builder instead of a constructor with parameters?
-> Because `WebApplication` construction is a multi-step process where each step can affect subsequent steps: adding a service can change how middleware behaves; configuration sources are layered in priority order; logging providers must be registered before the host starts. A constructor can't express this ordering or allow conditional registration. The builder accumulates all configuration, then `Build()` wires everything together in the correct dependency order. The cost: `Build()` can fail at runtime if configuration is invalid — there's no compile-time guarantee that all required services are registered.
+> Hosting configuration arrives from several extension points before the application can be assembled. The builder gives those registrations one mutable setup phase, then `Build()` creates the service provider and host. Most dependency completeness remains a runtime property, so startup validation still matters.
 
 # References
 
-- [Builder — refactoring.guru](https://refactoring.guru/design-patterns/builder) — canonical pattern description with structure diagram and C# example
-- [WebApplicationBuilder — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.builder.webapplicationbuilder) — .NET's primary Builder in production use
-- [StringBuilder — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.text.stringbuilder) — the original .NET Builder for string construction
-- [Required members (C# reference) — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/required) — modern C# alternative for simple object construction
+- [Builder pattern](https://refactoring.guru/design-patterns/builder)
+- [WebApplicationBuilder — .NET's primary Builder in production use](https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.builder.webapplicationbuilder)
+- [StringBuilder — the original .NET Builder for string construction](https://learn.microsoft.com/en-us/dotnet/api/system.text.stringbuilder)
+- [Required members (C# reference) — modern C# alternative for simple object construction](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/required)

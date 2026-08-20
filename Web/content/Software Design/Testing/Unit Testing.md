@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T14:02:44.197Z
-modified: 2026-07-25T13:51:15.232Z
-published: 2026-07-25T13:51:15.232Z
+created: 2026-08-20T20:41:15.710Z
+modified: 2026-08-20T20:41:15.711Z
+published: 2026-08-20T20:41:15.711Z
 topic:
   - Software Design
 subtopic:
@@ -14,13 +14,13 @@ priority: High
 status: Ready to Repeat
 ---
 
-A unit test verifies a small, isolated piece of behavior — typically a single method or class — quickly and deterministically. "Isolated" means all external dependencies (database, HTTP, filesystem, clock) are replaced with test doubles so the test exercises only the logic under test. Unit tests are the foundation of a fast feedback loop: a suite of hundreds of unit tests should run in under a second, catching regressions the moment they are introduced.
+A unit test verifies one small behavior without crossing slow or nondeterministic process boundaries. The unit may be one method, one class, or a small group of collaborating objects. Databases, remote HTTP, the filesystem, and uncontrolled time stay outside the test. Ordinary in-memory collaborators do not need to be mocked merely to satisfy a definition.
 
-The primary value of unit tests is not coverage — it is **design pressure**. Code that is hard to unit-test is usually poorly designed: too many dependencies, too much responsibility, or hidden coupling to global state.
+The value is fast, local evidence and a diagnostic failure. Testability can reveal hidden time, global state, or too many responsibilities, but difficulty testing does not automatically prove a design defect. The production boundary still decides whether an abstraction is worth adding.
 
 # Anatomy of a Unit Test (AAA Pattern)
 
-Every unit test follows **Arrange → Act → Assert**:
+Arrange → Act → Assert is a useful structure for making setup, behavior, and observation visible:
 
 ```csharp
 public class DiscountServiceTests
@@ -50,7 +50,7 @@ public class DiscountServiceTests
 }
 ```
 
-**Naming convention**: `MethodName_StateUnderTest_ExpectedBehavior` or a plain English description. The test name is the first thing you read when a test fails — make it diagnostic.
+A diagnostic name states the condition and observable result. `MethodName_StateUnderTest_ExpectedBehavior` is one convention. A readable behavioral sentence is equally valid when the runner supports it.
 
 # Test Doubles: Stubs Vs Mocks
 
@@ -59,7 +59,7 @@ public class DiscountServiceTests
 | **Stub** | Returns canned data so the test can proceed | `IOrderRepository` that returns a fixed list |
 | **Mock** | Verifies interactions — was a method called with the right arguments? | Assert `_emailSender.Send(...)` was called once |
 | **Fake** | A working lightweight implementation | In-memory `IOrderRepository` backed by a `Dictionary` |
-| **Spy** | Records calls for later assertion | Rarely needed; prefer mocks |
+| **Spy** | Records calls for later assertion | Rarely needed. Prefer mocks |
 
 ```csharp
 // Stub with Moq: return fixed data
@@ -74,28 +74,36 @@ service.NotifyShipped("c1");
 emailSender.Verify(e => e.Send("c1", It.IsAny<string>()), Times.Once);
 ```
 
-**Rule of thumb**: stub dependencies that provide data; mock dependencies that represent side effects (email, SMS, audit log). Over-mocking — mocking every dependency including internal ones — produces brittle tests that break on every refactor.
+Stubs commonly provide inputs. Interaction-based mocks are most useful for commands whose observable result is the call itself, such as publishing an event. That is a heuristic, not a type rule. Verifying every internal collaboration couples the test to call structure and makes behavior-preserving refactors expensive.
 
 ## Two Schools: Classicist Vs Mockist
 
-How much you mock isn't just taste — it's two named philosophies, and knowing them resolves most "should I mock this?" arguments:
+Two testing traditions frame how much of a unit remains real:
 
-- **Classicist / Detroit / "solitary-ish but sociable"** — mock only at true system boundaries (DB, HTTP, clock); let a unit use its _real_ collaborators (real value objects, real domain services). Tests assert on **observable state/results**. Tests survive refactors because they don't know internal call structure, but a failure can implicate several classes.
-- **Mockist / London / "outside-in"** — isolate the unit by mocking **all** collaborators and assert on the **interactions** between them. Tests pinpoint the exact class and drive interface design top-down, but they couple to implementation and break when you reshuffle internals (the over-mocking brittleness above).
+- **Classicist / Detroit** tests a behavior with real in-memory collaborators and replaces awkward process boundaries. Assertions favor returned state and externally visible effects. The tests tolerate internal refactoring, although a failure may implicate several classes.
+- **Mockist / London** replaces collaborators and specifies their interactions while driving the design outside-in. Failures can localize collaboration changes, but the tests are coupled to those interactions.
 
-Most pragmatic suites lean **classicist** — mock the boundary, use the real thing inside — precisely to avoid that brittleness, reaching for interaction verification only for genuine side effects. The same split shows up in [[Software Design/Testing/Test-Driven Development|TDD]] as inside-out (Detroit) vs outside-in (London).
+Neither school removes the need for integration tests. A pragmatic default is to keep stable in-memory collaborators real and verify interactions only when the interaction is part of the contract. The same distinction appears in [[Software Design/Testing/Test-Driven Development|TDD]] as inside-out and outside-in design styles.
 
 # xUnit in .NET
 
-xUnit is the standard .NET unit testing framework. Key attributes:
+xUnit is a widely used .NET test framework. `[Fact]`, `[Theory]`, `[InlineData]`, `[MemberData]`, and `[Collection("name")]` are attributes. Shared context for one test class is declared by implementing `IClassFixture<TFixture>`.
 
 ```csharp
 [Fact]                          // single test case
 [Theory]                        // parameterized test
 [InlineData(1, 2, 3)]           // inline parameters for Theory
 [MemberData(nameof(Cases))]     // external data source
-[ClassFixture<T>]               // shared setup across tests in a class
 [Collection("db")]              // shared setup across test classes
+```
+
+```csharp
+public sealed class DatabaseTests : IClassFixture<DatabaseFixture>
+{
+    private readonly DatabaseFixture fixture;
+
+    public DatabaseTests(DatabaseFixture fixture) => this.fixture = fixture;
+}
 ```
 
 ```csharp
@@ -115,67 +123,42 @@ public void DiscountCalculation(int orderCount, decimal price, decimal expected)
 
 ## Testing Implementation, Not Behavior
 
-**What goes wrong**: tests assert on private state or verify every internal method call. When you refactor the implementation, tests break even though behavior is unchanged.
+White-box tests mirror the current code structure by asserting private state or every internal call. A behavior-preserving refactor then breaks the test.
 
-**Why it happens**: writing tests after the fact often produces white-box tests that mirror the code structure.
-
-**Mitigation**: test through the public interface only. Assert on return values and observable side effects. If a refactor breaks a test without changing behavior, the test was testing the wrong thing.
+Exercise the same public or internal contract that production callers use and assert observable results. A test that fails after a behavior-preserving refactor may be observing an implementation detail. Review it before changing production code to satisfy the old call structure.
 
 ## Shared Mutable State Between Tests
 
-**What goes wrong**: tests pass individually but fail when run together because one test mutates a static field or shared object that another test reads.
+Tests can pass individually and fail together when a static helper, singleton, or shared fixture lets one test mutate state another test reads.
 
-**Why it happens**: static helpers, singleton services, or shared test fixtures with mutable state.
-
-**Mitigation**: create fresh instances in each test's Arrange step. Use `IClassFixture<T>` only for expensive but immutable setup (e.g., starting a test server). Never share mutable state across tests.
+Create fresh behavior-owning objects and data per test. A fixture may share an expensive process or immutable configuration, but each test needs isolated mutable state or an explicit reset protocol.
 
 ## Slow Tests from Real I/O
 
-**What goes wrong**: a "unit" test hits a real database or filesystem, making the suite take minutes instead of seconds.
+A test that reaches a real database or filesystem crosses a process boundary, regardless of its label. The suite becomes slower and its failures include infrastructure state.
 
-**Why it happens**: dependencies are not injected — the class creates its own `SqlConnection` or `HttpClient` internally.
-
-**Mitigation**: inject all I/O dependencies as interfaces. Use fakes or in-memory implementations in unit tests. Reserve real I/O for integration tests.
+Separate the decision from I/O when that separation improves the production design. Test the decision with values and the real adapter through an integration test. An interface is useful when it represents a genuine seam, not as a wrapper around every library call.
 
 # Tradeoffs
 
 | Approach | Strengths | Weaknesses | When to use |
 |---|---|---|---|
-| Unit tests with mocks | Fast, isolated, design pressure | Can miss integration bugs, mocks can diverge from real behavior | Domain logic, business rules, pure functions |
-| Unit tests with fakes | More realistic than mocks, still fast | Fakes require maintenance | Repository layer, service layer with complex state |
-| Integration tests only | Tests real wiring | Slow, harder to isolate failures | Infrastructure layer, DB queries, HTTP contracts |
+| State-based unit tests with real in-memory collaborators | Refactor-tolerant and close to domain behavior | A failure may span several objects | Domain rules, value objects, deterministic workflows |
+| Interaction-based unit tests | Specify commands and collaboration protocols precisely | Couple to call structure. Doubles can diverge | Side-effect ports where the interaction is the observable contract |
+| Integration tests | Prove real wiring and provider semantics | More setup and a wider failure surface | Database queries, serialization, HTTP adapters, and configuration |
 
-**Decision rule**: write unit tests for all domain logic and anything with branching. Add integration tests for the infrastructure layer (DB, HTTP, queues). Don't try to unit-test infrastructure — mock it at the boundary and test the real thing in integration tests.
+Choose the lowest-cost layer that can expose the failure faithfully. Deterministic domain decisions usually belong in unit tests. SQL, serialization, HTTP, queues, and configuration require integration evidence. Coverage and branch count can reveal gaps, but neither makes every line worth an independent test.
 
 # Questions
 
 > [!QUESTION]- What is the difference between a stub and a mock?
->
-> - A stub provides canned return values so the test can proceed — it answers questions ("what orders does customer X have?").
-> - A mock verifies interactions — it records calls and lets you assert that a specific method was called with specific arguments.
-> - Practical rule: stub data sources (repositories, config); mock side-effect sinks (email, SMS, audit log, event bus).
-> - Over-mocking (mocking everything including internal collaborators) produces tests that break on every refactor without catching real bugs.
-> - Tradeoff: mocks couple tests to implementation details. Prefer fakes (working in-memory implementations) when the dependency has non-trivial behavior.
+> A stub supplies answers needed to reach the behavior. A mock is configured with interaction expectations and verifies them. A spy records calls for later assertions, while a fake provides a working simplified implementation. Frameworks often let one object play several roles, so the distinction is about how the test uses the double. Prefer result assertions when they expose the behavior, and interaction assertions when the command itself is the observable contract.
 
-> [!QUESTION]- How do you test code that depends on the current time?
->
-> - Inject `TimeProvider` (built into .NET 8+) instead of calling `DateTime.UtcNow` directly.
-> - In tests, use `FakeTimeProvider` (from `Microsoft.Extensions.TimeProvider.Testing`) to control "now".
-> - This makes time-dependent logic (expiry checks, scheduling, TTL calculations) fully deterministic in tests.
-> - Tradeoff: requires changing existing code that calls `DateTime.UtcNow` directly — a one-time refactor cost that pays off in every time-sensitive test.
-
-> [!QUESTION]- When should you NOT write unit tests?
->
-> - Trivial property getters/setters with no logic — the test adds noise without catching real bugs.
-> - UI rendering logic — visual correctness is better verified with snapshot tests or manual QA.
-> - Infrastructure wiring (DI registration, config parsing) — test this with integration tests that boot the real container.
-> - Exploratory spike code — write the spike without tests, learn from it, then delete it before it becomes production code.
-> - Tradeoff: every test has a maintenance cost. Tests that don't catch real bugs are pure overhead. Focus unit tests on logic with branching, edge cases, and business rules.
+> [!QUESTION]- When is a unit test the wrong testing layer?
+> A unit test adds little value when it only repeats language or framework behavior, such as an uncustomized property accessor. Failures in visual rendering, dependency registration, configuration binding, or database-provider behavior need a component or integration test that can observe that boundary. Exploratory code may start without tests, but behavior kept in production still needs evidence that matches its risk. The best layer is the cheapest one that can catch the realistic failure.
 
 # References
 
-- [Unit testing best practices in .NET (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-best-practices) — Microsoft's official guidance on naming, AAA pattern, avoiding anti-patterns, and test isolation.
-- [xUnit.net documentation](https://xunit.net/docs/getting-started/netcore/cmdline) — getting started guide and reference for `[Fact]`, `[Theory]`, fixtures, and parallelism in xUnit.
-- [Moq quickstart](https://github.com/devlooped/moq/wiki/Quickstart) — the most widely used .NET mocking library; covers setup, verification, argument matchers, and callbacks.
-- [The Art of Unit Testing (Roy Osherove)](https://www.artofunittesting.com/) — practitioner book covering test design, mocking strategies, and how to maintain a large test suite without it becoming a burden.
-- [TimeProvider in .NET 8 (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/core/whats-new/dotnet-8/runtime#time-abstraction) — built-in time abstraction replacing `DateTime.UtcNow` coupling; includes `FakeTimeProvider` for tests.
+- [Unit testing best practices in .NET](https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-best-practices)
+- [xUnit.net documentation](https://xunit.net/docs/getting-started/netcore/cmdline)
+- [Moq quickstart](https://github.com/devlooped/moq/wiki/Quickstart)

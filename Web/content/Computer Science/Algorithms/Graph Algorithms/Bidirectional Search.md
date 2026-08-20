@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T14:02:43.941Z
-modified: 2026-08-08T07:57:18.729Z
-published: 2026-08-08T07:57:18.729Z
+created: 2026-08-20T20:41:15.512Z
+modified: 2026-08-20T20:41:15.513Z
+published: 2026-08-20T20:41:15.513Z
 topic:
   - Computer Science
 subtopic:
@@ -14,11 +14,11 @@ priority: Medium
 status: Creation
 ---
 
-Finding the shortest path between two specific vertices `s` and `t` in a large graph with a single BFS from `s` expands every vertex within distance `d` of the source. That frontier grows as `b^d`, where `b` is the branching factor and `d` is the shortest-path length — for `b = 10, d = 6` that is on the order of a million vertices, almost all of them nowhere near `t`.
+Finding the shortest path between two specific vertices `s` and `t` with a single BFS means expanding vertices out to distance `d` from `s`. With branching factor `b` and shortest-path length `d`, that frontier grows as `b^d`. At `b = 10, d = 6`, the estimate is about a million vertices, most of them nowhere near `t`.
 
-Bidirectional search launches a second BFS backward from `t` over reversed edges and runs both at once. Each side only has to reach depth `d/2` before the two frontiers collide somewhere in the middle, so together they expand about `2·b^(d/2)` vertices — roughly two thousand for the same `b = 10, d = 6`. Two small frontiers growing toward each other sweep far less of the graph than one frontier covering the whole distance.
+Bidirectional search launches a second BFS backward from `t` over reversed edges. Each side only has to reach depth `d/2` before the frontiers meet, so together they expand about `2·b^(d/2)` vertices. That is roughly two thousand for the same `b = 10, d = 6`. Two small frontiers sweep far less of the graph than one frontier covering the whole distance.
 
-The saving is conditional. The goal must be one or more enumerable states that can seed the backward search, and the graph has to expose predecessors — a reverse adjacency list, or an invertible move operator for an implicit state space. A goal predicate is insufficient when its satisfying states cannot be enumerated.
+The saving has conditions. The goal must provide one or more enumerable states that can seed the backward search. The graph must also expose predecessors through a reverse adjacency list or an invertible move operator. A goal predicate alone is useless when its matching states cannot be listed.
 
 ````tabsdown
 tab: Visualization
@@ -148,13 +148,13 @@ tab: Complexity
 
 # Where the Clean Case Ends
 
-Weighted edges break first-touch. Once the frontiers advance by cumulative cost rather than by level, the first vertex to appear in both visited sets is no longer guaranteed shortest — a cheaper meeting can still be one relaxation away at a different vertex whose two halves are not both settled. A correct termination tracks the best summed cost `μ = min(gF[u] + gB[u])` over all met vertices and keeps expanding until the sum of the two frontiers' smallest keys — their current search radii — reaches `μ`. Only then can no unexpanded path undercut the best meeting. Returning on first contact is the classic bidirectional-search correctness bug; unweighted BFS avoids it because level-order expansion settles distances in nondecreasing order, so the first overlap is already optimal.
+Weighted edges break first-touch termination. The frontiers now advance by cumulative cost, and the first shared vertex can belong to an expensive path while a cheaper meeting remains one relaxation away. Correct termination tracks the best known sum `μ = min(gF[u] + gB[u])` over met vertices. Expansion continues until the smallest forward key plus the smallest backward key reaches `μ`. At that point no unsettled path can beat the current meeting. Returning on first contact is the usual correctness bug. Unweighted BFS avoids it because level-order expansion settles distances in nondecreasing order.
 
-The backward search needs one or more enumerable goals. A finite goal set can seed a multi-source backward BFS, but a predicate such as "any solved state" leaves nothing to grow from when its satisfying states cannot be listed. In that case a forward search must evaluate the predicate as it explores.
+The backward search needs an enumerable goal. A finite goal set can seed a multi-source BFS, but a predicate such as "any solved state" provides no starting frontier when its matching states cannot be listed. In that case the search must run forward and evaluate the predicate as it explores.
 
-Predecessors must be enumerable. The backward BFS walks edges in reverse, so a directed graph needs a reverse adjacency list and an implicit state space needs an invertible move operator. Without incoming edges the backward frontier cannot advance past depth zero, and the `b^(d/2)` bound depends on that frontier reaching depth `d/2`. Undirected graphs supply this for free.
+Predecessors must be enumerable too. A directed graph needs a reverse adjacency list. An implicit state space needs an invertible move operator. Without incoming moves, the backward frontier stops at depth zero and the `b^(d/2)` model no longer applies. Undirected graphs provide reverse traversal for free.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Control flow (unweighted case)
 >
@@ -282,19 +282,7 @@ Predecessors must be enumerable. The backward BFS walks edges in reverse, so a d
 >     return path;
 > }
 > ```
->
-> The full-level scan gives deterministic minimum-sum tie selection when several meetings appear together; complete BFS-level expansion is the correctness invariant. On a weighted graph this level rule is replaced by the `gF + gB` termination test from the section above. The `meet != target` guard covers the single-edge `s → t` query, where the forward side discovers the target directly and the backward half is empty.
-
-# Questions
-
-> [!QUESTION]- Why is stopping at the first frontier collision correct on an unweighted graph but wrong on a weighted one?
-> Unweighted BFS expands level by level, settling distances in nondecreasing order, so the first vertex shared by both visited sets already lies on a shortest path. With weights the frontiers advance by cumulative cost, and the first shared vertex can sit on an expensive path while a cheaper meeting is one relaxation away elsewhere. The weighted version must track the best `gF[u] + gB[u]` and keep expanding until the two frontiers' combined radius reaches that best, proving no unexpanded path can beat it.
-
-> [!QUESTION]- What must the graph and the goal provide before bidirectional search applies?
-> The goal must be one or more enumerable states that can seed the backward frontier; a predicate is insufficient when its satisfying states cannot be listed. The graph must expose predecessors, either as a reverse adjacency list or as an invertible move operator, since the backward frontier walks edges in reverse. Without both, the second frontier cannot reach the meeting region.
 
 # References
 
-- [Bidirectional search (Wikipedia)](https://en.wikipedia.org/wiki/Bidirectional_search) — the `b^(d/2)` argument, the balanced-frontier heuristic, and front-to-front versus front-to-back heuristic variants.
-- [Bidirectional Search That Is Guaranteed to Meet in the Middle (Holte et al., AAAI 2016)](https://ojs.aaai.org/index.php/AAAI/article/view/10436) — the MM algorithm and a rigorous treatment of the meeting condition that makes the answer optimal.
-- [Contraction hierarchies (Wikipedia)](https://en.wikipedia.org/wiki/Contraction_hierarchies) — how production road routers pair bidirectional Dijkstra with preprocessing for millisecond continental queries.
+- [Bidirectional Search That Is Guaranteed to Meet in the Middle (Holte et al., AAAI 2016)](https://ojs.aaai.org/index.php/AAAI/article/view/10436)

@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-29T20:22:59.984Z
-modified: 2026-08-08T09:22:39.104Z
-published: 2026-08-08T09:22:39.104Z
+created: 2026-08-20T20:41:15.592Z
+modified: 2026-08-20T20:41:15.592Z
+published: 2026-08-20T20:41:15.592Z
 topic:
   - Computer Science
 subtopic:
@@ -14,9 +14,9 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-A network receives connections over time and repeatedly asks whether two nodes belong to the same connected component. Running a graph traversal for every query revisits edges whose connectivity was already established. A disjoint set keeps only the partition of nodes into components, so merges and connectivity checks reuse the parent forest instead of traversing the graph again.
+A network receives connections over time and repeatedly asks whether two nodes share a connected component. Running a graph traversal for every query keeps rediscovering old connectivity. A disjoint set stores that partition directly, so later merges and membership checks work on a parent forest instead of revisiting graph edges.
 
-The structure is narrower than a graph representation. It remembers which elements belong together, but not the edges, paths, or order that produced each component. Sets can merge; they cannot be split efficiently afterward.
+This is deliberately less information than a graph. The structure remembers which elements belong together and forgets the edges and paths that produced each component. Sets merge cheaply. Splitting them afterward does not.
 
 **Core shape:** elements → parent-index forest → one root per set → shared root means shared membership
 
@@ -218,13 +218,13 @@ tab: Complexity
 
 # When the Structure Stops Fitting
 
-Deletion is the hard boundary. After several unions and path-compressing finds, the structure no longer records which original edge caused a component to form. Removing an edge therefore cannot identify whether the component should stay connected or split. Fully dynamic connectivity needs a graph representation plus a more complex dynamic structure; a known offline sequence can use rollback DSU without path compression.
+Deletion exposes the missing information. After unions and path-compressing finds, nothing records which original edge caused a component to form. Removing an edge cannot reveal whether the component should remain whole or split. Fully dynamic connectivity needs the graph plus a stronger dynamic structure. A known offline sequence can instead use rollback DSU without path compression.
 
-Connectivity also carries no route information. `Connected(a, b)` can return `true`, but the parent forest is an implementation artifact rather than a path through the original graph. Shortest paths, neighbors, degrees, and edge metadata require an adjacency representation alongside the disjoint set.
+Connectivity carries no route information either. `Connected(a, b)` may return `true`, but the parent chain is an implementation artifact rather than a path in the original graph. Shortest paths, neighborhoods, degrees, and edge metadata still require an adjacency representation.
 
-The array representation assumes dense integer IDs from `0` through `n - 1`. Strings, GUIDs, and sparse numeric IDs need a `Dictionary<T, int>` mapping before they can enter the structure. That mapping adds memory and makes identity management part of the API boundary.
+The array form also assumes dense integer IDs from `0` through `n - 1`. Strings, GUIDs, and sparse numbers need a `Dictionary<T, int>` mapping first. That mapping costs memory and makes identity management part of the API boundary.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Parent forest
 >
@@ -303,21 +303,10 @@ The array representation assumes dense integer IDs from `0` through `n - 1`. Str
 | Static component labels | Component ID snapshot | The graph is immutable and receives many connectivity queries |
 | Rollback disjoint set | Component membership plus change history | Offline connectivity where additions must be undone in reverse order |
 
-The disjoint set occupies a specific point in this comparison: it gives up graph topology and deletion in exchange for extremely cheap incremental merges and membership checks. Static labels are cheaper to query when the graph never changes. Rollback retains change history at a higher per-operation cost and without path compression.
+A disjoint set gives up graph topology and deletion for cheap incremental merges and membership checks. Static labels make queries simpler when the graph never changes. Rollback retains enough history to undo merges, with a higher operation cost and normally without path compression.
 
-The related [[Computer Science/Data Structures/Graph Structures/Union-Find|Union-Find]] note covers the operation heuristics and their analysis. This page remains centered on stored state, invariants, and the boundary of the data structure itself.
-
-# Questions
-
-> [!QUESTION]- How is a disjoint set represented in memory?
-> A parent array stores a forest: `parent[i]` is the next index toward the representative, and each root points to itself. Rank or size is stored in a parallel array for roots. No linked node objects are required.
-
-> [!QUESTION]- Why does `Union` link roots rather than the original elements?
-> A root represents an entire existing set. Linking one root under another merges both complete sets. Re-parenting an interior node can move only its subtree and leave other members behind, breaking the partition semantics.
+[[Computer Science/Data Structures/Graph Structures/Union-Find|Union-Find]] isolates union by rank, path compression, and their analysis in more depth. This note keeps the stored-state invariants and the information the structure discards visible.
 
 # References
 
-- [Efficiency of a Good But Not Linear Set Union Algorithm](https://dl.acm.org/doi/10.1145/321879.321884) — source for the structure and its analysis.
-- [Union-Find](https://algs4.cs.princeton.edu/15uf/) — Princeton Algorithms implementations showing the progression from quick-find and quick-union to weighted, compressed forests.
-- [Disjoint Set Union](https://cp-algorithms.com/data_structures/disjoint_set_union.html) — implementation variants, complexity discussion, and graph applications.
-- [Rollback disjoint sets](https://cp-algorithms.com/data_structures/deleting_in_log_n.html) — rollback DSU implementation and the offline segment-tree technique for undoing merges.
+- [Efficiency of a Good But Not Linear Set Union Algorithm](https://dl.acm.org/doi/10.1145/321879.321884)

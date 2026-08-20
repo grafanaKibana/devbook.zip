@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-03T15:55:17.232Z
-modified: 2026-08-08T08:43:34.297Z
-published: 2026-08-08T08:43:34.297Z
+created: 2026-08-20T20:41:15.520Z
+modified: 2026-08-20T20:41:15.521Z
+published: 2026-08-20T20:41:15.521Z
 topic:
   - Computer Science
 subtopic:
@@ -14,9 +14,9 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-Placing eight queens on a chessboard so that none attacks another has 4,426,165,368 ways to drop eight pieces onto 64 squares, and only 92 of them are solutions. Generating every arrangement and then testing it spends almost all of its work on boards that a single early queen already invalidated.
+The eight-queens problem has 4,426,165,368 ways to place eight pieces on 64 squares, but only 92 valid arrangements. Generating every board before testing it wastes almost all the work on positions whose first few queens already conflict.
 
-Backtracking removes that waste by building a candidate one choice at a time and checking it against the constraints after each choice. A queen is committed to a row; if it shares a column or diagonal with a queen placed above, no completion of the remaining rows can succeed, so every board extending that partial placement is discarded without being generated. The reduction rests on one property: the constraint must be testable on a partial candidate — a prefix — not only on a finished one. Placing one queen in each of eight rows leaves `8^8` column choices when columns may repeat; rejecting shared columns narrows that to `8! = 40,320` permutations, and diagonal checks prune it further.
+Backtracking avoids that waste by building one candidate a choice at a time and checking constraints as it goes. A queen is placed in one row. If it shares a column or diagonal with a queen above, no completion of the remaining rows can work, so the search drops the entire partial board. This depends on being able to test a prefix instead of waiting for a finished candidate. One queen in each of eight rows leaves `8^8` column choices when columns may repeat. Rejecting shared columns narrows the search to `8! = 40,320` permutations, and diagonal checks cut it further.
 
 ````tabsdown
 tab: Visualization
@@ -95,15 +95,15 @@ tab: Complexity
 
 # When Pruning Stops Helping
 
-The advantage lives entirely in the prefix test, and three mechanism details decide whether it materializes.
+The prefix test creates all of the savings. A late or incorrect test can erase that advantage or corrupt the result.
 
-If the constraint can only be evaluated on a finished candidate — every partial prefix looks feasible — rejection never fires before completion, so the search degenerates to generating and testing every complete configuration. The depth-first structure adds nothing without an early feasibility signal.
+If every partial prefix looks feasible and the constraint can only be checked at the leaf, rejection never fires early. The search still generates and tests every complete configuration. Depth-first traversal alone saves no work.
 
-The partial candidate is one shared mutable buffer, so a choice that is not undone after its subtree is exhausted leaks into later branches. A sibling then reads a `used[]` flag or board square that still reflects an abandoned placement and either skips valid candidates or accepts impossible ones. Nothing raises an error; the enumeration is silently incomplete or wrong.
+The partial candidate is usually one shared mutable buffer. A choice left in place after its subtree is exhausted leaks into the next sibling, which may read a `used[]` flag or board square from an abandoned branch. The program keeps running, but its enumeration is now incomplete or wrong.
 
-Recording a solution by appending the live buffer stores a reference that subsequent choices overwrite, leaving the result full of identical copies of the final buffer state — a leaf must snapshot (copy) the candidate. With repeated input elements, equal sibling choices generate identical subtrees, so the same solution appears more than once unless equal siblings at a level are skipped.
+Appending the live buffer as a solution stores a reference that later choices overwrite. A leaf must copy the candidate instead. Repeated input elements cause a different problem: equal sibling choices generate identical subtrees unless duplicates are skipped at that level.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Pruned search tree
 >
@@ -147,18 +147,13 @@ Recording a solution by appending the live buffer stores a reference that subseq
 > }
 > ```
 >
-> The `used[i]` guard is the prefix feasibility test; a constraint problem such as n-queens replaces it with an `IsSafe(row, col)` check that reads the columns and diagonals already occupied. The `used[i] = false` line is the undo that keeps sibling branches independent.
+> The `used[i]` guard is the prefix test. N-queens replaces it with an `IsSafe(row, col)` check over occupied columns and diagonals. The `used[i] = false` line restores the parent state before the next sibling runs.
 
 # Questions
 
 > [!QUESTION]- What turns brute-force enumeration into backtracking?
-> A feasibility test applied to a partial candidate. Brute force builds every complete configuration and tests it at the end; backtracking tests the prefix after each choice and, on a violation, discards every configuration sharing that prefix without generating them.
-
-> [!QUESTION]- Why must a choice be undone after its subtree is explored?
-> The partial candidate is a single mutable buffer shared by all branches to avoid copying. After a subtree is exhausted the choice is reverted so the next sibling starts from the state its parent established. An un-reverted choice leaks into siblings and silently corrupts the enumeration.
+> A feasibility test on the partial candidate. Brute force waits until a configuration is complete. Backtracking checks after each choice and discards every completion that shares a rejected prefix.
 
 # References
 
-- [Backtracking](https://en.wikipedia.org/wiki/Backtracking) — formal definition of the method as a depth-first walk of a candidate tree with a partial-candidate rejection test.
-- [Dancing Links](https://arxiv.org/abs/cs/0011047) — Donald Knuth's technique for efficient backtracking over exact-cover problems (n-queens, Sudoku), with undo of each choice.
-- [Introduction to backtracking](https://usaco.guide/silver/intro-backtracking) — categorized constraint problems and the pruning patterns that keep the search tree small.
+- [Dancing Links](https://arxiv.org/abs/cs/0011047)

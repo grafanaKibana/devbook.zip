@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T14:02:44.146Z
-modified: 2026-07-25T13:51:15.306Z
-published: 2026-07-25T13:51:15.306Z
+created: 2026-08-20T20:41:15.676Z
+modified: 2026-08-20T20:41:15.676Z
+published: 2026-08-20T20:41:15.676Z
 topic:
   - Software Architecture
 subtopic:
@@ -14,11 +14,11 @@ priority: High
 status: Done
 ---
 
-An API Gateway is a single entry point between external clients and a set of backend services. It centralizes cross-cutting concerns such as request routing, authentication and authorization enforcement, rate limiting, TLS termination, and traffic policies so individual services do not have to re-implement them. This matters because it gives you one place to enforce consistency and security while keeping clients simpler, especially when each client would otherwise need to call many services directly.
+A client sends `GET /orders/42` to one public endpoint. The API gateway terminates TLS, authenticates the caller, checks the route quota, selects the Orders service, and forwards the request with its deadline and trace context. Clients no longer need internal service addresses or a separate authentication and throttling implementation for every backend.
 
-In .NET ecosystems, a common implementation is to run a reverse proxy gateway at the system edge and keep service-level business behavior inside domain services.
+That consistency costs another network hop and another component that can reject or delay every request. In a .NET system the gateway is often a reverse proxy such as YARP. It may shape a response, but the Orders service still decides whether an order can be refunded and the Inventory service still decides which reservation wins.
 
-# Core Responsibilities
+# What Happens Before a Request Reaches a Service
 
 ```mermaid
 flowchart LR
@@ -28,33 +28,33 @@ flowchart LR
     Gateway --> SvcC[Service C]
 ```
 
-- **Request routing**: Map incoming paths, headers, hostnames, or methods to the right downstream service.
-- **Authentication and authorization**: Validate tokens at the edge and enforce coarse-grained access policy before forwarding.
-- **Rate limiting and quotas**: Protect services from abusive or accidental traffic spikes.
-- **Request and response transformation**: Normalize payload shape, hide internal endpoint changes, or project data for specific clients.
-- **[[Software Architecture/Distributed Systems/Load Balancing]]**: Distribute requests across service instances using health-aware selection.
-- **[[Software Architecture/Patterns/Resilience Patterns/Circuit Breaker|Circuit breaking]] and resiliency policies**: Fail fast when a downstream is unhealthy and apply retries or fallback only where safe.
-- **TLS termination**: Offload certificate handling and HTTPS policy enforcement from every backend service.
-- **[[DevOps/Observability]]**: Emit centralized logs, traces, metrics, and correlation IDs for end-to-end troubleshooting.
+- **Request routing:** match the host, path, headers, or method to a downstream service.
+- **Authentication and authorization:** validate credentials and reject requests that fail coarse route policy.
+- **Rate limiting and quotas:** stop one caller from exhausting shared downstream capacity.
+- **Request and response transformation:** adapt an external contract without exposing internal endpoint churn.
+- **[[Software Architecture/Distributed Systems/Load Balancing]]:** choose a healthy instance within the selected service.
+- **[[Software Architecture/Patterns/Resilience Patterns/Circuit Breaker|Circuit breaking]] and retry policy:** stop waiting on a failed dependency and retry only when replay is safe.
+- **TLS termination:** keep certificate and HTTPS policy at the edge rather than copying it into every service.
+- **[[DevOps/Observability]]:** attach correlation context and record the edge view of latency and failures.
 
-## Routing, Policy Enforcement, Composition, and Failure Boundary
+## How `GET /mobile/orders/42` Fans Out
 
-Trace `GET /mobile/orders/42` through the edge:
+For `GET /mobile/orders/42`, the edge path is concrete:
 
 1. Terminate TLS and enforce request-size and protocol limits.
 2. Authenticate the caller and apply a coarse-grained route policy.
 3. Rate-limit by tenant or credential before consuming downstream capacity.
-4. Route to `Orders`, or fan out to `Orders`, `Payments`, and `Shipping` for a mobile projection.
-5. Propagate trace and cancellation context; cap every downstream timeout inside the client deadline.
-6. Return a bounded response: complete, explicitly partial, or failed. Never silently omit a failed dependency.
+4. Route to `Orders`, or fan out to `Orders`, `Payments`, and `Shipping` when the endpoint owns a mobile projection.
+5. Propagate trace and cancellation context. Cap every downstream timeout inside the client deadline.
+6. Return a complete, explicitly partial, or failed response. A missing dependency must never disappear silently.
 
-Routing and policy are common gateway duties. Composition, response caching, transformation, retries, and circuit breaking are optional because each concentrates more state, latency, and failure at the gateway. A fan-out endpoint with three independent 99.9% dependencies has lower end-to-end availability than any one dependency unless it can degrade safely.
+Routing and edge policy are ordinary gateway work. Composition is a separate choice because it concentrates latency and downstream failure in one request path. Caching and retries add still more state. If a response needs three independent dependencies that are each 99.9% available, the combined path is less available than any one of them unless partial results are valid.
 
 ## Reverse Proxy, Gateway, and Load Balancer Capability Overlap
 
 ![[Assets/Software Architecture/Software Architecture-API Gateway-18120000-1.png]]
 
-The image shows archetypal roles, not mutually exclusive products. NGINX, Envoy, YARP, and cloud gateways can combine several columns.
+The image describes roles rather than exclusive product categories. NGINX, Envoy, YARP, and managed gateways can cover more than one column.
 
 | Capability | Reverse proxy | API gateway | Load balancer |
 |---|---|---|---|
@@ -64,58 +64,45 @@ The image shows archetypal roles, not mutually exclusive products. NGINX, Envoy,
 | Compose multiple APIs | Possible in custom code | Optional | Outside scope |
 | Health-aware distribution across equivalent instances | Possible | Often delegated or built in | Core |
 
-Choose the failure boundary deliberately. A global edge proxy affects all routes; a domain gateway affects one bounded context; a per-service load balancer affects one replica pool. Product names do not define the blast radius — topology and ownership do.
+The deployment shape defines the blast radius. A global edge proxy can affect every route. A domain gateway can fail only one group of APIs, while a per-service load balancer sits in front of one replica pool. The product name alone does not reveal how much traffic one deployment can interrupt.
 
-# Patterns
+# When the Gateway Does More Than Route
 
-## Gateway Routing
+## One Public Route Maps to One Service
 
-Use the gateway as the policy and routing edge. Clients call one host, and route rules dispatch traffic to internal services.
+Clients call one host. Route rules then dispatch the request to an internal service after the edge policy passes. This works well when:
 
-When it works best:
+- backend services remain private.
+- access and throttling policy must be consistent.
+- the public API needs to evolve independently from internal addresses.
 
-- Many services are private on internal networks.
-- You need consistent auth and throttling policy.
-- You want controlled API evolution at the boundary.
+## One Client Request Fans Out
 
-## Gateway Aggregation
+Aggregation trades server-side fan-out for fewer client round trips. For example, a mobile order page may need data from `Orders`, `Payments`, and `Shipping`. The gateway can call those services in parallel and return one screen-shaped payload.
 
-The gateway composes a single response from multiple service calls to reduce client round trips.
+That code should remain response-oriented. It may combine reads and describe a partial result. It should not decide how an order changes state.
 
-Concrete example:
+## Transport Work Stops at the Edge
 
-- Mobile app needs order summary page.
-- Gateway calls `Orders`, `Payments`, and `Shipping` services.
-- Gateway returns one payload tuned for the mobile screen.
+Offloading keeps transport policy at the boundary: TLS, compression, CORS, header normalization, and request-size limits. Services then receive traffic that already satisfies the edge contract, and one policy deployment can cover every route behind that gateway.
 
-Use carefully: aggregation is orchestration logic, not domain logic. Keep it thin and response-oriented.
+## A BFF Follows One Client
 
-## Gateway Offloading
+Separate gateways or route sets by client only after their needs have clearly diverged. Payload shape may be enough. Separate release schedules or teams can also force the split. A mobile checkout BFF, for example, can fetch order, inventory, loyalty, and payment-method data in parallel and return a payload sized for a constrained network.
 
-The gateway handles edge concerns such as TLS, compression, CORS, header normalization, and request size limits.
-
-Benefit:
-
-- Service teams focus on domain behavior.
-- Security and policy changes roll out in one place.
-
-## BFF (Backend for Frontend)
-
-Separate gateways or route sets per client type only when payload, authentication, latency, release cadence, or ownership needs have materially diverged. A mobile checkout BFF can fetch order, inventory, loyalty, and payment-method data in parallel and return one payload sized for a constrained network.
-
-Keep domain decisions out of the BFF. `CanRefundOrder` belongs to Orders or Payments, not to a client adapter; otherwise mobile, web, and partner clients acquire different business rules.
+Domain decisions still belong to the owning service. `CanRefundOrder` does not belong in a client adapter, because that would let mobile and web acquire different refund rules.
 
 ## Netflix API Evolution: Aggregation to Federation
 
 ![[Assets/Software Architecture/Software Architecture-API Gateway-18120000.png]]
 
-The visual compresses distinct systems into an evolution story. Federation redistributes schema and resolver ownership toward domains while a shared registry and graph gateway retain composition and execution responsibilities. Each domain owns its schema contribution and resolver behavior; composition checks compatibility before a change reaches the gateway.
+The visual compresses several distinct systems into one evolution story. With federation, domains own their schema contributions and resolver behavior. A shared registry checks whether those contributions compose, and the graph gateway executes the resulting plan.
 
-Federation does not remove network cost. A query crossing five subgraphs can still create fan-out latency or an N+1 pattern, so the boundary needs query limits, tracing, batching, and ownership metadata. A BFF and federation can coexist when they solve different ownership problems: the BFF follows a client, while federation follows domains. Do not stack them unless each layer has a distinct owner and measured value.
+Federation does not remove network cost. A query that crosses five subgraphs can still produce fan-out latency or an N+1 call pattern. Query limits and tracing make that cost visible. Batching may reduce it. A BFF follows a client, while federation follows domain ownership. Stacking both only makes sense when each layer has a distinct job and a measured benefit.
 
-# .NET Gateway Implementation
+# Routing with YARP
 
-YARP provides configurable routes, clusters, transforms, destination health, and ASP.NET Core extension points:
+YARP supplies the proxy mechanics through ASP.NET Core: routes, destination clusters, transforms, and health-aware selection.
 
 ```csharp
 var builder = WebApplication.CreateBuilder(args);
@@ -150,75 +137,37 @@ app.Run();
 }
 ```
 
-Authenticate before proxying and authorize by route or endpoint metadata. Forward trace context without logging bearer tokens or bodies by default. Apply client-facing rate limits at the edge, use destination health only when it distinguishes one backend from the fleet, and retry only replayable requests. An uncertain `POST` needs an end-to-end idempotency contract.
+YARP does not add authentication or authorization by default. When the host configures them, authentication runs before proxying and authorization follows route or endpoint metadata. Trace context continues downstream, but bearer tokens and request bodies stay out of default logs. Edge rate limits protect client-facing capacity. Destination health should eject one bad instance rather than hide a fleet-wide failure. Retries are limited to replayable requests. An uncertain `POST` needs an end-to-end idempotency contract.
 
-The gateway pattern remains independent of YARP. If gateway code starts deciding payment state, order eligibility, or inventory invariants, move that logic to the owning service.
+YARP is one implementation, not the pattern. Payment state and inventory invariants remain in their domain services regardless of which proxy sits at the edge.
 
-# Gateway Vs Service Mesh
+# The Gateway Handles Ingress; the Mesh Handles Service Traffic
 
-API Gateway and Service Mesh solve different traffic planes and are often used together.
+An API gateway and a service mesh govern different traffic planes, so they commonly coexist.
 
-- **Gateway (north-south)**: Handles client-to-system traffic, public API exposure, edge auth, and external policy enforcement.
-- **Service mesh (east-west)**: Handles service-to-service traffic inside the platform, including mTLS, retries, traffic shifting, and per-service telemetry.
+- **Gateway (north-south):** handles traffic entering from clients, including public API exposure and edge access policy.
+- **Service mesh (east-west):** handles traffic between internal services, including mTLS and traffic shifting.
 
-Rule of thumb:
+The gateway applies rules to traffic entering the system. The mesh applies rules to calls between services. Retries need one configured layer: two gateway attempts multiplied by three mesh attempts can send six calls to the same dependency.
 
-- Put internet-facing boundary policy in the gateway.
-- Put internal service communication policy in the mesh.
+# What the Extra Hop Buys
 
-# Tradeoffs
+- **Direct calls or a gateway:** direct calls save one hop, but clients inherit service discovery and repeat edge policy.
+- **One gateway or several BFFs:** one gateway is easier to operate. BFFs earn their cost when client contracts or ownership genuinely differ.
+- **Gateway transformation or service-owned contracts:** a thin transform can shield clients from endpoint churn. A growing translation layer usually signals a poor service boundary.
 
-- **Direct client to services vs gateway**: Direct calls reduce one network hop but increase client complexity and duplicate policy enforcement.
-- **Single gateway vs BFF gateways**: Single gateway is simpler to operate; BFF improves client optimization and team autonomy at the cost of more moving parts.
-- **Centralized transformation vs service-owned contracts**: Gateway transformations can shield clients from churn, but too much translation can hide unhealthy service boundaries.
+# How Gateways Become Bottlenecks
 
-# Pitfalls
+1. **The gateway becomes a monolith.** Every feature enters one deployment, so a small change can affect all consumers. Keep the edge stateless and split it only after different teams or traffic patterns need independent releases and scaling.
 
-1. **Gateway becomes a monolith bottleneck**
-   - What goes wrong: every change flows through one oversized gateway, and outages impact all consumers.
-   - Why it happens: uncontrolled feature growth and weak horizontal scaling strategy.
-   - How to prevent/detect: keep gateway stateless, scale out aggressively, split by bounded context or BFF when ownership and traffic diverge.
+2. **Business logic moves to the edge.** Aggregation slowly becomes orchestration, then starts making domain decisions. The gateway owns transport policy and response shaping. The service owns its invariants.
 
-2. **Business logic creeps into the gateway**
-   - What goes wrong: domain rules are duplicated at the edge, causing inconsistent behavior and hard-to-test flows.
-   - Why it happens: aggregation code gradually turns into orchestration and then decision logic.
-   - How to prevent/detect: enforce a boundary rule that gateway owns transport and policy only; domain invariants stay in services.
+3. **The extra hop hides tail latency.** Serialization and downstream calls accumulate at p95 and p99, especially under fan-out. End-to-end traces should expose each child call. Cap fan-out depth and use a cache only when its freshness contract is explicit.
 
-3. **Extra latency from the additional hop**
-   - What goes wrong: p95 and p99 latency increase, especially under fan-out aggregation.
-   - Why it happens: more network hops, serialization work, and downstream dependency chains.
-   - How to prevent/detect: measure end-to-end traces, cap fan-out depth, use parallel downstream calls, and cache only where freshness allows.
-
-4. **Configuration sprawl with many routes**
-   - What goes wrong: route conflicts, accidental exposure, and hard-to-review config changes.
-   - Why it happens: rapid service growth without governance for route naming and ownership.
-   - How to prevent/detect: define route conventions, enforce config validation in CI, and assign clear ownership per route group.
-
-# Questions
-
-> [!QUESTION]- How do you design gateway aggregation endpoints for client efficiency, and what do you keep out of the gateway?
-> Use gateway routing for normal traffic and add a few targeted aggregation endpoints where a client — usually mobile — would otherwise make five round trips for one screen. The gateway composes those reads and tunes the payload, but it stays thin: auth, throttling, routing, transformation, observability, and nothing else. Business rules, transactions, and domain invariants live in the backend services, with correlation IDs flowing across the fan-out so you can trace a slow screen. The line to hold: aggregation is response-shaping, not orchestration — the moment decision logic creeps in, you have a distributed monolith.
-
-> [!QUESTION]- Where do API Gateway and service mesh responsibilities belong in one architecture?
-> They handle different traffic planes, so they sit side by side rather than compete. The gateway owns north-south traffic — clients entering the system — so edge auth, TLS termination, external rate limits, and API surface control belong there. The mesh owns east-west traffic between internal services: mTLS, retries, traffic shifting, and per-service telemetry. The gateway guards the front door; the mesh governs the hallways.
+4. **Nobody is accountable for a route group.** Conflicting rules or accidental exposure follow when changes have no reviewing team. Validate configuration in CI and require each public route group to name the team that approves and operates it.
 
 # References
 
-- [API Gateway pattern (Azure Architecture Center)](https://learn.microsoft.com/azure/architecture/patterns/gateway-routing) — pattern description covering routing, aggregation, and offloading cross-cutting concerns.
-- [YARP documentation](https://learn.microsoft.com/aspnet/core/fundamentals/servers/yarp/getting-started) — official getting-started guide for Microsoft's YARP reverse proxy library for .NET.
-- [YARP GitHub repository](https://github.com/dotnet/yarp) — source code, samples, and issue tracker for the YARP project.
-- [Ocelot documentation](https://ocelot.readthedocs.io/en/latest/) — configuration reference for the Ocelot .NET API gateway including routing, authentication, and rate limiting.
-- [Microservices.io — API Gateway pattern (Chris Richardson)](https://microservices.io/patterns/apigateway.html) — pattern catalog entry covering API gateway vs BFF, forces, and consequences in microservices architectures.
-- [How Netflix scales its API with GraphQL Federation](https://medium.com/netflix-techblog/how-netflix-scales-its-api-with-graphql-federation-part-1-ae3557c187e2) — Netflix's primary account of the unified aggregation layer, domain graph services, schema registry, and graph gateway.
-- [Backends for Frontends](https://samnewman.io/patterns/architectural/bff/) — Sam Newman's client-specific ownership model and caution against unnecessary BFF proliferation.
-- [Apollo Federation architecture](https://www.apollographql.com/docs/federation/) — official subgraph, composition, and graph-router model.
-- [GraphQL specification](https://spec.graphql.org/) — primary language and execution contract underlying federated GraphQL APIs.
-- [YARP configuration files](https://learn.microsoft.com/aspnet/core/fundamentals/servers/yarp/config-files) — official route, cluster, destination, and transform schema.
-- [YARP health checks](https://learn.microsoft.com/aspnet/core/fundamentals/servers/yarp/dests-health-checks) — official active and passive destination-health behavior.
-- [ASP.NET Core rate limiting](https://learn.microsoft.com/aspnet/core/performance/rate-limit) — official middleware and policy model for edge quotas.
-
-## ByteByteGo Provenance
-
-- [API gateway 101](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/api-gateway-101.md) — editorial lead for the request trace; its stale product infographic was rejected.
-- [Reverse proxy versus API gateway versus load balancer](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/reverse-proxy-vs-api-gateway-vs-load-balancer.md) — provenance for the role visual, qualified by capability overlap.
-- [Evolution of the Netflix API architecture](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/evolution-of-the-netflix-api-architecture.md) — editorial lead for the simplified evolution case, grounded in Netflix's federation write-up.
+- [Gateway Routing pattern](https://learn.microsoft.com/azure/architecture/patterns/gateway-routing)
+- [YARP documentation](https://learn.microsoft.com/aspnet/core/fundamentals/servers/yarp/getting-started)
+- [Backends for Frontends](https://samnewman.io/patterns/architectural/bff/)

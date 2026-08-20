@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-03T16:14:52.156Z
-modified: 2026-08-08T08:43:34.702Z
-published: 2026-08-08T08:43:34.702Z
+created: 2026-08-20T20:41:15.531Z
+modified: 2026-08-20T20:41:15.532Z
+published: 2026-08-20T20:41:15.532Z
 topic:
   - Computer Science
 subtopic:
@@ -14,7 +14,7 @@ priority: Medium
 status: Creation
 ---
 
-A dataset holds daily sales for a year, and a report asks for the total of dozens of arbitrary date ranges. A prefix sum precomputes every running total once: `prefix[i]` is the sum of the first `i` elements, with `prefix[0] = 0` standing for the empty prefix. The sum of an inclusive range `[l, r]` is then `prefix[r + 1] - prefix[l]` — a single subtraction, because the shared left portion `prefix[l]` cancels out and only the elements between the two totals survive.
+Repeated range-sum queries should not rescan the same values. A prefix array stores `prefix[i]`, the sum of the first `i` elements, with `prefix[0] = 0` for the empty prefix. An inclusive range `[l, r]` then costs one subtraction: `prefix[r + 1] - prefix[l]`. The shared prefix before `l` cancels, leaving exactly the requested range.
 
 ````tabsdown
 tab: Visualization
@@ -89,13 +89,13 @@ Both curves are per-query. The prefix array costs `O(n)` to build once, so the p
 
 # When the Precompute Stops Holding
 
-The array must be **static** for the whole query phase. A workload that mutates the array between reads wants a [[Computer Science/Data Structures/Trees/Fenwick Tree|Fenwick tree]] for point updates plus prefix sums, or a [[Computer Science/Data Structures/Trees/Segment Tree|segment tree]] for point updates plus general associative range aggregation. Lazy range updates are not automatic: they require an update operation whose state composes correctly with the stored aggregate.
+The source array must remain static during the query phase. One element update invalidates every later prefix. Workloads that mix writes with reads need a [[Computer Science/Data Structures/Trees/Fenwick Tree|Fenwick tree]] for point updates and sums, or a [[Computer Science/Data Structures/Trees/Segment Tree|segment tree]] for broader associative range aggregation. Lazy range updates require an update operation that composes correctly with the stored aggregate.
 
-The `+1` convention is the classic off-by-one. Because the formula is `prefix[r + 1] - prefix[l]` for the inclusive range `[l, r]`, mixing inclusive and exclusive endpoints, or dropping the leading `prefix[0] = 0`, shifts the answer by exactly one element — a full-array or single-element query surfaces it immediately. The half-open shape (`prefix` covers elements _before_ the index) is a fixed contract; querying it with a closed-interval mental model silently reads one slot too few or too many.
+The `+1` convention prevents a special case at the left edge. `prefix[k]` covers elements before `k`, so an inclusive query `[l, r]` uses `prefix[r + 1] - prefix[l]`. Mixing that half-open prefix definition with closed endpoints shifts the result by one element. Single-element and full-array queries expose the mismatch quickly.
 
-Accumulated totals also grow far faster than any individual element. A million `int` values near `2^31` overflow a 32-bit prefix long before any single value does, wrapping to a wrong — often negative — total while every input looked in range. Accumulating in a 64-bit type keeps the running sum valid; the same risk carries into the difference between two large prefixes.
+The running total may overflow even when every input fits its type. A million large `int` values exceed 32-bit range long before the array ends, so the prefix storage and subtraction should use a wider type such as `long`.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Range sum as a difference of prefixes
 >
@@ -123,7 +123,7 @@ Accumulated totals also grow far faster than any individual element. A million `
 > public static long RangeSum(long\[] prefix, int l, int r) => prefix\[r + 1] - prefix\[l];
 >
 > ```
-> `RangeSum` assumes `0 <= l <= r < n`; the leading `0` and the extra prefix slot remove the `l == 0` and `r == n - 1` boundary cases.
+> `RangeSum` assumes `0 <= l <= r < n`. The leading `0` and the extra prefix slot remove the `l == 0` and `r == n - 1` boundary cases.
 > ```
 
 # Comparison
@@ -133,20 +133,10 @@ Accumulated totals also grow far faster than any individual element. A million `
 | Naive re-sum | A handful of queries, or an array that changes constantly | Re-reads the whole range every time |
 | Prefix sum | Many range sums over a static array | Any element write invalidates the stored suffix of totals |
 | [[Computer Science/Data Structures/Trees/Fenwick Tree\|Fenwick tree]] | Point updates interleaved with prefix or range sums | Prefix-style associative queries only |
-| [[Computer Science/Data Structures/Trees/Segment Tree\|Segment tree]] | Point updates and general associative range aggregation | Lazy updates must compose with the aggregate; higher implementation and memory cost |
-| [[Computer Science/Algorithms/Patterns/Sliding Window\|Sliding window]] | One contiguous window advancing over the array | No random-access range; endpoints only move forward |
-
-# Questions
-
-> [!QUESTION]- Why does `prefix[r + 1] - prefix[l]` yield the sum of `a[l..r]`?
-> `prefix[r + 1]` is the sum of every element before index `r + 1`, i.e. `a[0..r]`, and `prefix[l]` is the sum of `a[0..l-1]`. Their difference cancels the shared head `a[0..l-1]` exactly, leaving `a[l] + ... + a[r]`. The `prefix[0] = 0` sentinel lets `l = 0` use the same formula with no special case.
-
-> [!QUESTION]- What makes prefix sums unsuitable once the array is updated between queries?
-> Writing one element changes every stored total from that index onward. If updates and queries are interleaved, a Fenwick tree or segment tree updates only the summaries that cover the changed position instead of rebuilding the entire suffix.
+| [[Computer Science/Data Structures/Trees/Segment Tree\|Segment tree]] | Point updates and general associative range aggregation | Lazy updates must compose with the aggregate. Higher implementation and memory cost |
+| [[Computer Science/Algorithms/Patterns/Sliding Window\|Sliding window]] | One contiguous window advancing over the array | No random-access range. Endpoints only move forward |
 
 # References
 
-- [Guy E. Blelloch, "Prefix Sums and Their Applications", CMU-CS-90-190 (November 1990)](https://www.cs.cmu.edu/afs/cs.cmu.edu/project/scandal/public/papers/CMU-CS-90-190.html) — defines all-prefix-sums (scan) and gives sequential and PRAM algorithms.
-- [Prefix sum (Wikipedia)](https://en.wikipedia.org/wiki/Prefix_sum) — definition and scan terminology.
-- [Fenwick (Binary Indexed) Tree](https://cp-algorithms.com/data_structures/fenwick.html)
-- [Subarray Sum Equals K (LeetCode #560)](https://leetcode.com/problems/subarray-sum-equals-k/) — canonical use of running prefixes to answer a range-count question in one pass.
+- [Guy E. Blelloch, "Prefix Sums and Their Applications", CMU-CS-90-190 (November 1990)](https://www.cs.cmu.edu/afs/cs.cmu.edu/project/scandal/public/papers/CMU-CS-90-190.html)
+- [Subarray Sum Equals K (LeetCode #560)](https://leetcode.com/problems/subarray-sum-equals-k/)

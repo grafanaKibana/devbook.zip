@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T14:02:44.108Z
-modified: 2026-07-18T14:02:44.108Z
-published: 2026-07-18T14:02:44.108Z
+created: 2026-08-20T20:41:15.653Z
+modified: 2026-08-20T20:41:15.653Z
+published: 2026-08-20T20:41:15.653Z
 topic:
   - Programming
 subtopic:
@@ -14,17 +14,17 @@ priority: High
 status: Ready to Repeat
 ---
 
-`Semaphore` controls concurrent access by allowing up to N holders at once, unlike `Mutex` and `lock` which allow exactly one. This is the right primitive when you need **bounded parallelism** — for example, limiting an HTTP client to 10 concurrent outbound requests to avoid overwhelming a downstream API (which returns 429 at 15 concurrent connections), or capping database connection usage below the pool maximum during batch processing. In modern .NET, `SemaphoreSlim` is preferred for in-process async workflows because it supports `WaitAsync` and avoids kernel transitions.
+A semaphore represents a fixed number of permits. At most N callers may hold one at the same time, which makes the primitive useful for bounded concurrency rather than single-owner exclusion. `SemaphoreSlim` is the usual in-process choice in .NET because waiting can be asynchronous through `WaitAsync`. The operating-system-backed `Semaphore` exists for synchronous and named cross-process coordination.
 
 # How It Works
 
-A semaphore tracks a permit count:
+A wait consumes one permit. `Release` puts it back:
 
 - `Semaphore`: `WaitOne` consumes one permit.
 - `SemaphoreSlim`: `Wait`/`WaitAsync` consumes one permit.
-- If no permits are available, callers wait.
-- `Release` returns a permit and wakes a waiter.
-- `System.Threading.Semaphore` can be named for cross-process coordination; `SemaphoreSlim` is in-process only. **Named (cross-process) semaphores are Windows-only** — constructing one on Linux/macOS throws `PlatformNotSupportedException`, so don't rely on them for cross-platform IPC (same caveat as named `Mutex`).
+- With no permits available, another caller waits.
+- A release allows one waiter to compete for the returned permit.
+- `System.Threading.Semaphore` can be named for cross-process coordination. `SemaphoreSlim` stays inside one process. Named semaphores are Windows-only, and construction with a name throws `PlatformNotSupportedException` on Linux and macOS.
 
 # Example
 
@@ -63,34 +63,25 @@ finally
 
 # Pitfalls
 
-- **Leaked permits stall all waiters** — forgetting `Release` in an exception path permanently reduces available permits. With a maxCount of 4, one leaked permit drops throughput by 25%; four leaked permits deadlock the system. Always release in `finally`.
-- **Over-release inflates concurrency** — for `SemaphoreSlim` without an explicit `maxCount`, calling `Release` without a matching `Wait` silently increases the permit count beyond your intended limit. Your "max 10 concurrent" throttle quietly becomes 11, then 12. With explicit `maxCount`, over-release throws `SemaphoreFullException` — which is noisy but at least detectable. Always set `maxCount` and keep acquire/release symmetry in one scope.
-- **No fairness guarantee** — `SemaphoreSlim` does not guarantee FIFO ordering under contention. A request that arrives later can acquire the permit before an earlier waiter, causing starvation in pathological cases. If ordering matters, use a bounded [[Channels|channel]] instead.
-- **No ownership tracking, and not reentrant** — unlike [[Mutex]] or [[Locking|lock/Monitor]], semaphores have no thread affinity: any code path can `Release`, even without a matching `Wait`, which makes leaks hard to trace (instrument `Wait`/`Release` in production throttling code). The flip side is there is **no recursion count** — a method holding the only permit that calls another method which also `WaitAsync`s the _same_ semaphore self-deadlocks. Take the permit once at the top of the call chain.
-- **`WaitAsync` allocates under contention** — an immediately-available permit is cheap, but when callers have to wait, `WaitAsync` enqueues an async waiter (a `Task`/state object) per caller. On a very hot throttle this allocation shows up; for high-throughput producer/consumer flows a bounded [[Channels|channel]] (which also gives true FIFO) is often the better primitive.
+- **A leaked permit shrinks capacity.** If an exception path skips `Release`, the semaphore permanently admits fewer callers. With four permits, four leaks stop all future work. Acquisition and release belong in one `try/finally` scope.
+- **An extra release expands capacity.** A `SemaphoreSlim` created without an explicit `maxCount` can grow beyond its intended limit. Setting `maxCount` turns the mistake into `SemaphoreFullException` instead of a silent throttle failure.
+- **Waiters are not guaranteed FIFO order.** A later caller may acquire before an earlier one. A bounded [[Channels|channel]] is a better model when queue order belongs to the contract.
+- **There is no owner or recursion count.** Unlike [[Mutex]] or [[Locking|lock/Monitor]], any code path may call `Release`. A method that holds the only permit and then waits on the same semaphore blocks itself. One boundary should own the acquire/release pair.
+- **Contention creates async waiter state.** An immediately available permit is cheap. A blocked `WaitAsync` must enqueue state for later completion. A bounded [[Channels|channel]] can combine the throttle with the queue when producer/consumer flow is the real problem.
 
 # Tradeoffs
 
-- `SemaphoreSlim` vs `Semaphore`: `SemaphoreSlim` is lighter and async-friendly in-process; `Semaphore` supports named cross-process coordination.
-- Semaphore vs mutex/lock: semaphore allows bounded parallelism; mutex/lock allows only one owner at a time.
-- Semaphore vs unbounded `Task.WhenAll`: semaphore caps pressure on dependencies and connection pools at the cost of a little orchestration complexity.
+- `SemaphoreSlim` supports asynchronous waiting in one process. `Semaphore` is operating-system-backed and can be named on Windows.
+- A semaphore models capacity. A mutex or lock models one owner.
+- `Task.WhenAll` only composes the tasks supplied to it. If callers eagerly create an unbounded set of async operations, all of them may reach the dependency before `WhenAll` observes completion. Acquiring a semaphore inside each operation limits how many enter the protected work at once.
 
-**Default to `SemaphoreSlim`** for anything in-process — it is the only one of these that supports `await`. Reach for the named `Semaphore` only when the count has to be shared across processes on one machine, and then only on Windows. If you also need ordering or buffering rather than just a count, a bounded [[Channels|channel]] is the better primitive.
+`SemaphoreSlim` is the direct choice for an in-process async throttle. A named `Semaphore` only earns its heavier boundary when Windows processes on the same machine must share the count. Ordering or buffering turns the problem into a bounded [[Channels|channel]] rather than a bare permit counter.
 
 # Questions
 
-> [!QUESTION]- When should you choose `SemaphoreSlim` over `lock`?
-> Choose `SemaphoreSlim` when critical sections include `await` and you need asynchronous waiting. `lock` cannot contain `await` safely.
-
-> [!QUESTION]- Why is a semaphore useful for fan-out HTTP calls?
-> It limits in-flight requests, protecting downstream dependencies and your own resources from overload while preserving concurrency.
-
-> [!QUESTION]- What bug pattern most often breaks semaphore-based code?
-> Missing or unbalanced `Release` calls. The safe pattern is acquire then `try/finally` release in the same method scope.
+> [!QUESTION]- When is `SemaphoreSlim` a better fit than `lock`?
+> `SemaphoreSlim` fits asynchronous work or a resource that may allow more than one operation at a time. `WaitAsync` lets a caller wait for a permit without blocking a thread, and the permit can be released after an `await`. A `lock` is better for a short synchronous critical section that allows only one thread at a time. Because a semaphore has no owner, its acquire and release still need one clear `try/finally` boundary.
 
 # References
 
-- [Semaphore class (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/system.threading.semaphore) — the OS-backed, nameable variant; the ctor overloads and the Windows-only constraint on named semaphores.
-- [SemaphoreSlim class (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/system.threading.semaphoreslim) — the in-process async variant: `WaitAsync` overloads, `CurrentCount`, and the `SemaphoreFullException` contract on over-release.
-- [Overview of synchronization primitives (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/standard/threading/overview-of-synchronization-primitives) — where the semaphore sits among `lock`, `Mutex`, and the rest, with a decision table.
-- [Threading in C#: Event wait handles, mutexes, and semaphores (Joe Albahari)](https://www.albahari.com/threading/part2.aspx) — mechanism-level treatment of `WaitHandle`-based waiting and the slim vs OS-backed split.
+- [Overview of synchronization primitives](https://learn.microsoft.com/en-us/dotnet/standard/threading/overview-of-synchronization-primitives)

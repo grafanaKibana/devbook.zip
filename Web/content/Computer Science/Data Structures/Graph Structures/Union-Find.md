@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-29T20:22:59.985Z
-modified: 2026-08-08T09:22:39.175Z
-published: 2026-08-08T09:22:39.175Z
+created: 2026-08-20T20:41:15.594Z
+modified: 2026-08-20T20:41:15.594Z
+published: 2026-08-20T20:41:15.594Z
 topic:
   - Computer Science
 subtopic:
@@ -14,9 +14,9 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-A program receives a stream of merge and connectivity requests: `union(a, b)` joins two groups, `find(x)` reports which group `x` belongs to, and two elements are connected when their finds agree. The cost that dominates is the walk `find` performs up a parent chain toward its set's root.
+A stream of updates asks for two operations. `union(a, b)` joins groups, while `find(x)` returns the representative of `x`'s group. Two elements are connected when their representatives match. The main cost is the walk `find` makes up a parent chain to the root.
 
-Two heuristics keep the forest shallow so the walk stays short. Union by rank controls how two trees combine; path compression rewrites the chain each `find` traverses. The [[Computer Science/Data Structures/Graph Structures/Disjoint Set|Disjoint Set]] note covers the parent-array forest these operations run over; this page is about the heuristics and their analysis.
+Union by rank controls how trees combine. Path compression rewrites the chain traversed by `find`. Together they keep the forest shallow. [[Computer Science/Data Structures/Graph Structures/Disjoint Set|Disjoint Set]] establishes the parent-array state and its invariants. This note concentrates on the two heuristics and their cost.
 
 **Core condition:** merges only accumulate → each `find` walks toward a root
 
@@ -207,11 +207,11 @@ tab: Complexity
 
 # Where the Bound and the Interface Stop
 
-Standard rollback DSU keeps union by rank or size but omits path compression, so each successful union logs at most one parent change and one rank or size change. For offline dynamic connectivity, map each edge to the time interval in which it is active, add that interval to a segment tree over time, then traverse the tree: apply the node's edges on entry and roll them back on exit. Reverse-time processing alone is sufficient only for deletion-only workloads ([rollback DSU](https://cp-algorithms.com/data_structures/deleting_in_log_n.html)).
+Standard rollback DSU keeps rank or size and omits path compression. A successful union then logs at most one parent change plus one rank or size change. Offline dynamic connectivity maps each edge to its active time interval and places that interval in a segment tree over time. Traversal applies a node's edges on entry and rolls them back on exit. Reverse-time processing by itself covers only deletion-only workloads; mixed updates need the rollback DSU case described in the annotated reference below.
 
-The interface only grows sets. There is no split, and no removal of an element from a set — the parent forest records membership, not the edges that produced it, so a merged component cannot be separated back into its pre-merge pieces. That limit belongs to the [[Computer Science/Data Structures/Graph Structures/Disjoint Set|Disjoint Set]] page as its own boundary; the algorithmic consequence here is that any workload with removals needs either a rollback variant run offline or a fully dynamic connectivity structure.
+The interface only grows sets. It has no split and cannot remove one element from a set. The forest records membership rather than the edges that created it, so a merged component cannot reconstruct its earlier pieces. The [[Computer Science/Data Structures/Graph Structures/Disjoint Set|Disjoint Set]] page treats that as an information boundary. Operationally, removals require an offline rollback variant or a fully dynamic connectivity structure.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Operation flow
 >
@@ -256,29 +256,22 @@ The interface only grows sets. There is no split, and no removal of an element f
 > }
 > ```
 >
-> `DisjointSet` is the rank + path-compression forest defined on the [[Computer Science/Data Structures/Graph Structures/Disjoint Set|Disjoint Set]] page; only its `Union` return value drives the cycle test.
+> `DisjointSet` is the rank + path-compression forest defined on the [[Computer Science/Data Structures/Graph Structures/Disjoint Set|Disjoint Set]] page. Only its `Union` return value drives the cycle test.
 
 # Comparison
 
 | Strategy | Structural property |
 | ---------------------------------- | ----------------------------------------------------- |
-| Quick-find (label array) | flat labels; a union rewrites every member of one set |
+| Quick-find (label array) | flat labels. A union rewrites every member of one set |
 | Quick-union (forest, no heuristic) | a chain can grow to length `n` |
-| Union by rank alone | bounded height; rollback-friendly with a change log |
-| Rank + path compression | flattened forest; rollback logs many parent rewrites |
+| Union by rank alone | bounded height. Rollback-friendly with a change log |
+| Rank + path compression | flattened forest. Rollback logs many parent rewrites |
 
-Rank plus path compression is the standard structure for incremental connectivity. Rollback DSU instead keeps rank or size but drops compression so each union records only its local parent and size changes; compression can be logged too, but its many parent rewrites make undo more expensive. Quick-find stays attractive only when unions are rare relative to queries, since each merge rewrites every member of one component.
+Rank plus path compression is the usual choice for incremental connectivity. Rollback DSU drops compression so a union records only local parent and size changes. Compression can also be logged, but its many rewrites make undo more expensive. Quick-find remains reasonable only when unions are rare, because every merge rewrites an entire component.
 
-The same forest answers several graph questions: the [[Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree|Minimum Spanning Tree]] cycle test in Kruskal's algorithm, incremental connected-component queries, and cycle detection while streaming edges — in each, `union` merges endpoints and `find` reports whether an edge would close a loop.
-
-# Questions
-
-> [!QUESTION]- Why does standard rollback DSU omit path compression?
-> Compression can be reversed only if every rewritten parent is logged. That turns one find into many logged mutations, so the standard rollback variant omits compression and logs the constant number of parent and rank changes made by a union.
+The same forest supports Kruskal's [[Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree|Minimum Spanning Tree]] cycle test and incremental component queries. It also detects cycles in an edge stream. In each case, `union` merges endpoints and `find` reports whether an edge would close a loop.
 
 # References
 
-- [Efficiency of a Good But Not Linear Set Union Algorithm](https://dl.acm.org/doi/10.1145/321879.321884) — source for the structure and its analysis.
-- [Union-Find](https://algs4.cs.princeton.edu/15uf/) — Princeton Algorithms, tracing the progression from quick-find and quick-union to weighted union and path compression with cost measurements for each.
-- [Disjoint Set Union](https://cp-algorithms.com/data_structures/disjoint_set_union.html) — the two heuristics, their combined complexity, and graph applications including Kruskal's MST.
-- [Rollback disjoint sets](https://cp-algorithms.com/data_structures/deleting_in_log_n.html) — rollback DSU with segment-tree-over-time intervals for offline deletions.
+- [Union-Find](https://algs4.cs.princeton.edu/15uf/)
+- [Rollback disjoint sets with segment-tree-over-time intervals](https://cp-algorithms.com/data_structures/deleting_in_log_n.html)

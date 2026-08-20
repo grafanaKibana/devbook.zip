@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-29T20:22:59.992Z
-modified: 2026-08-08T08:06:04.250Z
-published: 2026-08-08T08:06:04.250Z
+created: 2026-08-20T20:41:15.604Z
+modified: 2026-08-20T20:41:15.605Z
+published: 2026-08-20T20:41:15.605Z
 topic:
   - Computer Science
 subtopic:
@@ -14,9 +14,9 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-A mutable array of scores must answer prefix-sum questions such as “what is the total through index `i`?” while individual scores keep changing. Rebuilding every prefix after each update repeats work that a Fenwick tree stores incrementally in one indexed array.
+A mutable score array must answer “total through index `i`” while individual values keep changing. Rebuilding every prefix after an update repeats work. A Fenwick tree keeps the needed partial sums in one indexed array.
 
-The compactness comes from a specific division of labour. In a 1-indexed array, slot `i` is responsible for the block of `i & -i` elements ending at `i`, where `i & -i` isolates the lowest set bit of the index. Slot `12` (`1100₂`) covers four elements, positions 9 through 12; slot `8` (`1000₂`) covers eight, positions 1 through 8. Odd-indexed slots have a low bit of 1 and therefore store one source value, while the remaining slots aggregate wider blocks. The structure answers prefix questions directly and reconstructs a range only by subtracting two prefixes — which is why the aggregate has to be invertible.
+Each slot owns one precisely sized block. In a 1-indexed array, slot `i` aggregates the `i & -i` elements ending at `i`. `i & -i` isolates the index's lowest set bit. Slot `12` (`1100₂`) covers positions 9 through 12, while slot `8` (`1000₂`) covers positions 1 through 8. Odd indices store one source value because their low bit is 1. Other slots cover wider blocks. Prefixes are direct. Arbitrary ranges come from subtracting two prefixes, so the aggregate must be invertible.
 
 **Core shape:** 1-indexed array → slot `i` sums the `i & -i` elements ending at `i` → a prefix query clears low bits downward, a point update adds the low bit upward → arbitrary range reconstruction requires an invertible aggregate
 
@@ -176,13 +176,13 @@ tab: Complexity
 
 # When the Structure Stops Fitting
 
-The prefix-subtraction mechanism sets the hard boundary: `RangeSum(l, r) = Prefix(r) − Prefix(l − 1)` only reconstructs `[l..r]` when the aggregate has an inverse. Sum, count, and XOR qualify (subtraction, subtraction, XOR-again); a product over a group works when every element is invertible. Minimum and maximum have no inverse — knowing `min(1..r)` and `min(1..l−1)` says nothing about `min(l..r)` — so range-min/max queries need a [[Computer Science/Data Structures/Trees/Segment Tree|Segment Tree]] instead. A "prefix max" Fenwick tree exists but is valid only when values never decrease, so it cannot survive point _updates_ that lower a value.
+The prefix-subtraction mechanism sets the hard boundary: `RangeSum(l, r) = Prefix(r) − Prefix(l − 1)` only reconstructs `[l..r]` when the aggregate has an inverse. Sum, count, and XOR qualify (subtraction, subtraction, XOR-again). A product over a group works when every element is invertible. Minimum and maximum have no inverse — knowing `min(1..r)` and `min(1..l−1)` says nothing about `min(l..r)` — so range-min/max queries need a [[Computer Science/Data Structures/Trees/Segment Tree|Segment Tree]] instead. A "prefix max" Fenwick tree exists but is valid only when values never decrease, so it cannot survive point _updates_ that lower a value.
 
 The plain layout also supports point update with range query, not the reverse. Range update with point query needs a Fenwick tree built over a difference array (add `delta` at `l`, subtract at `r + 1` only when `r < n`, then a point query becomes a prefix sum). Range update with range query needs two such BITs run together. Reaching for the plain single-BIT operations in those cases silently answers the wrong question rather than failing.
 
-Two mechanical traps recur. The `Update` contract takes a **delta**, not an assignment: setting position `i` to `v` requires passing `v − current[i]` and tracking current values separately, which trips implementations ported from a segment tree's assign-style update. The one-based loops also require positive update indices; a stray `0` stalls `i += i & -i`. The index type only needs compatible bitwise-and and unary-negation semantics.
+Two implementation errors recur. `Update` accepts a **delta**, not an assignment. Setting position `i` to `v` requires passing `v − current[i]` and tracking current values separately. One-based loops also require positive update indices. `0` stalls `i += i & -i`. The index type must provide compatible bitwise-and and unary-negation semantics.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Responsibility blocks for n = 8
 >
@@ -205,7 +205,7 @@ Two mechanical traps recur. The `Update` contract takes a **delta**, not an assi
 >   S2 --> S1
 > ```
 >
-> An update at position `i` walks upward along these parent links (`i += i & -i`); a prefix query at `i` walks the complementary downward chain (`i -= i & -i`).
+> An update at position `i` walks upward along these parent links (`i += i & -i`). A prefix query at `i` walks the complementary downward chain (`i -= i & -i`).
 
 > [!EXAMPLE]- C# implementation
 >
@@ -259,21 +259,9 @@ Two mechanical traps recur. The `Update` contract takes a **delta**, not an assi
 > }
 > ```
 >
-> `Update` applies a delta rather than assigning a value; setting position `i` to `v` means `Update(i, v - current[i])` with `current` tracked by the caller.
-
-# Questions
-
-> [!QUESTION]- Why can a Fenwick tree answer range sums but not range minimums?
-> A range is reconstructed only as `Prefix(r) − Prefix(l − 1)`, which needs the aggregate to have an inverse. Sum has subtraction; minimum does not — `min(1..r)` and `min(1..l−1)` reveal nothing about `min(l..r)`. Non-invertible aggregates therefore need a segment tree.
-
-> [!QUESTION]- Why is the array 1-indexed, and what breaks at index 0?
-> The shown formulas are one-based. `i & -i` isolates the lowest set bit, but `0` has none, so `i += i & -i` never moves off zero. A zero-based Fenwick tree works only with its matching transitions: `i | (i + 1)` upward and `(i & (i + 1)) - 1` downward.
-
-> [!QUESTION]- How does a Fenwick tree handle a range update with a point query?
-> Not with the plain layout. It is built over a difference array: `Update(l, +delta)` starts the range increment, and `Update(r + 1, -delta)` ends it only when `r < n`; when `r == n`, omit that second update. A point query at `i` becomes `Prefix(i)`. Range update with range query extends this to two BITs run in parallel.
+> `Update` applies a delta rather than assigning a value. Setting position `i` to `v` means `Update(i, v - current[i])` with `current` tracked by the caller.
 
 # References
 
-- [Fenwick tree](https://cp-algorithms.com/data_structures/fenwick.html) — source for the structure and its analysis.
-- Peter M. Fenwick, [A new data structure for cumulative frequency tables (1994)](https://doi.org/10.1002/spe.4380240306) — the original paper, framed around arithmetic-coding frequency tables and the binary-indexed decomposition.
-- [Binary Indexed Trees](https://www.topcoder.com/thrive/articles/Binary%20Indexed%20Trees) — TopCoder tutorial walking the low-bit responsibility ranges and the two traversal loops with worked indices.
+- [Fenwick tree](https://cp-algorithms.com/data_structures/fenwick.html)
+- [A new data structure for cumulative frequency tables (1994)](https://doi.org/10.1002/spe.4380240306)

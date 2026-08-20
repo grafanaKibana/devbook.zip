@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-03T15:55:17.236Z
-modified: 2026-08-08T08:43:34.774Z
-published: 2026-08-08T08:43:34.774Z
+created: 2026-08-20T20:41:15.532Z
+modified: 2026-08-20T20:41:15.532Z
+published: 2026-08-20T20:41:15.532Z
 topic:
   - Computer Science
 subtopic:
@@ -14,9 +14,9 @@ priority: Medium
 status: Creation
 ---
 
-A feed produces millions of latency samples and a dashboard needs the ten slowest.
+A latency feed produces millions of samples. The dashboard needs only the ten slowest.
 
-Keeping a size-`k` heap while scanning removes that waste. To surface the `k` **largest** values the heap is a **min**-heap. While filling, it contains every value seen; once full, its root is the smallest of the `k` best elements seen so far — the weakest survivor. A new element only matters if it beats that root, and when it does the root is evicted and the newcomer inserted, so the heap size never exceeds `k`. After one pass the heap holds the largest `min(k, n)` values, and it held no more than `k` elements at any moment, so the input can arrive as a stream. The symmetric problem — the `k` smallest — uses a max-heap the same way.
+A size-`k` heap avoids sorting or retaining the whole feed. Finding the `k` **largest** values requires a **min**-heap. Once full, its root is the smallest retained winner. A new value replaces that root only when it is larger, and the heap never grows beyond `k`. After one pass it holds the largest `min(k, n)` values, even if the input arrived as a stream. Finding the `k` smallest reverses the polarity and uses a max-heap.
 
 ````tabsdown
 tab: Visualization
@@ -100,11 +100,11 @@ tab: Complexity
 
 # When the Assumptions Stop Holding
 
-Using a size-`k` max-heap for the `k` largest inverts the mechanism: its root is the strongest retained element, so replacing that root keeps the wrong side and collects the `k` smallest. The min-heap invariant and its operations are described further in [[Computer Science/Data Structures/Trees/Heap-like/Heap|Heap]].
+Using a size-`k` max-heap for the `k` largest keeps the wrong side of the partition. Its root is the strongest retained element, so replacing that root eventually collects the `k` smallest. The min-heap invariant and its operations are described further in [[Computer Science/Data Structures/Trees/Heap-like/Heap|Heap]].
 
-For a known-size input where `k ≥ n`, bypass the heap and return all values. Sort them only when the caller requires ranked output, using an in-memory algorithm such as [[Computer Science/Algorithms/Sorting Algorithms/Quick Sort|Quick Sort]] or [[Computer Science/Algorithms/Sorting Algorithms/Heap Sort|Heap Sort]]. An unknown-length stream that ends before the heap fills simply returns every value seen.
+For known-size input with `k ≥ n`, return every value and skip the heap. Sort only if the caller requires ranked output, using an in-memory algorithm such as [[Computer Science/Algorithms/Sorting Algorithms/Quick Sort|Quick Sort]] or [[Computer Science/Algorithms/Sorting Algorithms/Heap Sort|Heap Sort]]. A stream that ends before the heap fills follows the same rule and returns everything it produced.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Streaming min-heap for the k largest
 >
@@ -150,18 +150,9 @@ For a known-size input where `k ≥ n`, bypass the heap and return all values. S
 > }
 > ```
 >
-> `KLargest` returns all values seen when the stream contains fewer than `k`; otherwise it returns exactly `k`. `UnorderedItems` exposes no enumeration-order guarantee, so callers must treat the returned order as unspecified.
-
-# Questions
-
-> [!QUESTION]- To find the `k` largest elements, why is the heap a min-heap rather than a max-heap?
-> The size-`k` min-heap keeps its root as the smallest of the `k` best elements seen so far — the weakest survivor. A max-heap would surface the largest retained element, which is never the one to drop, so it cannot drive the scan.
-
-> [!QUESTION]- What should the streaming implementation return when fewer than `k` values arrive?
-> It returns every value seen. The heap never reaches capacity, so no element faces the weakest-winner rejection test; `UnorderedItems` still exposes those values in unspecified enumeration order.
+> `KLargest` returns all values seen when the stream contains fewer than `k`. Otherwise it returns exactly `k`. `UnorderedItems` exposes no enumeration-order guarantee, so callers must treat the returned order as unspecified.
 
 # References
 
-- [Kth Largest Element in an Array (LeetCode #215)](https://leetcode.com/problems/kth-largest-element-in-an-array/) — the canonical problem contrasting the size-`k` heap with Quickselect.
-- [C. A. R. Hoare, "Algorithm 65: Find"](https://doi.org/10.1145/366622.366647) — the original partition-selection algorithm behind Quickselect.
-- [`PriorityQueue<TElement,TPriority>`](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.priorityqueue-2) — .NET's array-backed quaternary min-heap and the `DequeueEnqueue` operation used by the streaming implementation.
+- [C. A. R. Hoare, "Algorithm 65: Find"](https://doi.org/10.1145/366622.366647)
+- [Kth Largest Element in an Array](https://leetcode.com/problems/kth-largest-element-in-an-array/)
