@@ -247,8 +247,8 @@ Default to a modular monolith for a product that needs durable boundaries but ca
 
 # Questions
 
-> [!QUESTION]- When would you choose a modular monolith over microservices, and what signals tell you it is time to extract?
-> Keep the modular monolith while domains fit cleanly into modules and one deployment remains reliable. Extract when a module repeatedly needs its own scaling, release cadence, or isolation policy. Preserve the domain contract during cutover, but redesign the interaction around remote deadlines, retries, observability, and local transactions.
+> [!QUESTION]- When is a modular monolith a better fit than microservices, and what signals justify extracting a module?
+> A modular monolith fits while business domains stay cleanly separated into modules and one deployment remains reliable. Extraction becomes worthwhile when one module repeatedly needs its own scaling, release cadence, or isolation policy. The domain contract can remain familiar, but the remote interaction must be redesigned around deadlines, retries, observability, and local transactions.
 
 # References
 

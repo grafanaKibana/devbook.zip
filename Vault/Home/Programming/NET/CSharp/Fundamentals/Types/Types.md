@@ -71,14 +71,14 @@ The direct `h.Counter.Inc()` call compiles, but it mutates the temporary value r
 
 # Questions
 
-> [!QUESTION]- Why can updating a value-type item inside `foreach` fail to persist, and what are safe fixes?
-> The loop variable is normally a value copy, so changing it cannot update the collection element. Properties and ordinary indexers have the same copy boundary. Prefer immutable values and replace the whole element. A ref-returning API is appropriate only when in-place mutation is a deliberate part of the collection contract.
+> [!QUESTION]- Why might changing a struct inside `foreach` not update the collection, and how can it be fixed?
+> A `foreach` variable normally contains a copy of the struct, so changing that copy does not change the element stored in the collection. Properties and ordinary indexers can return the same kind of copy. A safe fix is to create the changed value and assign the whole element back. A ref-returning API is appropriate only when the collection deliberately supports in-place mutation.
 
-> [!QUESTION]- Where does boxing usually sneak in, and what is the practical mitigation in production code?
-> Boxing usually appears at conversions to `object`, interface-typed variables, non-generic collections, and `params object[]`. Each box allocates and copies the value. Generic APIs such as `List<T>` and constrained calls keep values strongly typed. Profiling should identify whether that boundary is frequent enough to matter.
+> [!QUESTION]- Where does boxing commonly happen, and how can it be reduced?
+> Boxing commonly happens when a value type is converted to `object` or an interface, stored in a non-generic collection, or passed through `params object[]`. Each box creates a heap object and copies the value into it. Generic APIs such as `List<T>` and constrained generic calls can keep the value in its concrete type. Profiling should confirm that the boxing occurs often enough to matter before the API is made more complex.
 
-> [!QUESTION]- What criteria should drive choosing between `struct`, `class`, and `record class`?
-> Start with semantics. A struct fits a small logical value when copying is expected and boxing is controlled. A conventional class fits an entity whose identity survives state changes. A record class fits reference-typed data whose contents define equality. Size, mutation, and measured allocation behavior can then reject an otherwise plausible choice.
+> [!QUESTION]- When should a type be a `struct`, `class`, or `record class`?
+> Start with assignment and equality semantics. A `struct` fits a small logical value that should be copied as a whole. A conventional class fits an entity whose identity stays the same while its state changes. A `record class` fits reference-typed data whose contents define equality. After that, size, mutation, boxing, and measured allocation cost can rule out a choice that looked correct from the data model alone.
 
 # References
 

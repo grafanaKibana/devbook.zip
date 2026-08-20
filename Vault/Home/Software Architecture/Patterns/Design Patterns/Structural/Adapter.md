@@ -180,8 +180,8 @@ Replacing the legacy system now requires a new adapter. `OrderService` stays unc
 
 # Questions
 
-> [!QUESTION]- When does an Adapter become a Facade?
-> The boundary shifts when the wrapper stops translating a contract and starts presenting a smaller workflow-oriented API. An Adapter maps incompatible interfaces. A Facade may hide most subsystem operations and coordinate several of them. A wrapper that exposes three high-level operations over twenty legacy calls is probably a Facade.
+> [!QUESTION]- How can an Adapter be distinguished from a Facade when both wrap another system?
+> An Adapter translates an incompatible interface into the contract a client expects. A Facade gives clients a smaller, workflow-oriented API and may coordinate several subsystem calls. For example, a wrapper that exposes three business operations over twenty legacy calls is acting as a Facade, even if some translation also happens inside it.
 
 # References
 

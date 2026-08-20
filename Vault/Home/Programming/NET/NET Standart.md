@@ -84,8 +84,8 @@ var buffer = new byte[256];
 
 # Questions
 
-> [!QUESTION]- When should you still target netstandard?
-> Target `netstandard2.0` when a documented consumer requirement includes .NET Framework or another runtime that cannot consume a modern `netX.0` asset. Multi-targeting preserves a modern implementation while serving that compatibility requirement. If every supported consumer runs current .NET, the modern TFM is the smaller and more capable contract.
+> [!QUESTION]- When is targeting .NET Standard still justified?
+> The decision starts with the supported consumers. `netstandard2.0` is still justified when a library must work with .NET Framework or another runtime that cannot consume a modern `netX.0` target. Multi-targeting can keep that compatibility asset while giving current .NET applications a modern build. If every supported consumer runs current .NET, targeting only the modern TFM keeps the package simpler and exposes the newer platform APIs.
 
 # References
 

@@ -138,7 +138,7 @@ Direct retrieval provides the control. Multi-query or RAG-Fusion earns its cost 
 
 # Questions
 
-> [!QUESTION]- Why does query translation often improve recall but sometimes hurt precision, and how do you detect the tradeoff?
+> [!QUESTION]- Why does query translation often improve recall but sometimes hurt precision, and how can the tradeoff be detected?
 > Query translation raises recall by searching more phrasings, but it lowers precision when a rewrite adds concepts or changes constraints.
 > Measure Recall@k and Precision@k before and after translation, split by query type. If Recall@20 rises while Precision@5 falls, coverage improved but the generator receives worse evidence. Keep the original query in the candidate set and reject variants that change material constraints.
 

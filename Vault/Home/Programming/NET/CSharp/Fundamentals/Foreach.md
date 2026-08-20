@@ -88,17 +88,17 @@ Two boundaries are easy to miss:
 
 # Questions
 
-> [!QUESTION]- What types can you use in `foreach`?
-> Any type that implements `IEnumerable` / `IEnumerable<T>`, or any type that provides the enumerator pattern (`GetEnumerator()` + `Current` + `MoveNext()`).
+> [!QUESTION]- What must a type provide to work with `foreach`?
+> A type does not have to implement `IEnumerable`. The compiler can use the enumerable pattern: a public parameterless instance `GetEnumerator` method, or a supported extension `GetEnumerator` when instance lookup does not provide one. That method must return an enumerator with a public `Current` property and a public parameterless `bool MoveNext()` method. Implementing `IEnumerable<T>` is the usual reusable contract. Arrays receive dedicated compiler handling, while `Span<T>` works through its enumerator pattern.
 
-> [!QUESTION]- How is `foreach` implemented under the hood?
-> The compiler chooses a lowering for the source type. The general form calls `GetEnumerator()`, loops through `MoveNext()` and `Current`, then disposes the enumerator when required. Arrays receive specialized handling.
+> [!QUESTION]- How does `foreach` work under the hood?
+> The compiler rewrites the loop according to the source type. In the general case it obtains an enumerator, calls `MoveNext`, reads `Current`, and disposes the enumerator in a `finally` block when disposal is required. Arrays use a simpler indexed loop, so the exact generated shape is not identical for every collection.
 
-> [!QUESTION]- What is `yield` and how does it work?
-> It creates an iterator: each `yield return` produces a value and pauses the method. The method resumes on the next iteration request.
+> [!QUESTION]- How does `yield return` implement an iterator?
+> The compiler turns the method into a state machine that stores its current position and local state. Calling the method creates the iterator, but the body normally starts only when enumeration begins. Each `yield return` produces one value and pauses execution; the next `MoveNext` call resumes from that point. This also means work and exceptions occur during enumeration rather than when the iterator is created.
 
-> [!QUESTION]- Why and when should you use `yield return` instead of returning a materialized collection like `List<T>`?
-> Use `yield return` for deferred execution and streaming when consumers may stop early or the sequence is large, because it lowers peak memory usage. Materialize (`ToList()` / `ToArray()`) when you need a snapshot, random access or `Count`, or repeated enumeration without rerunning expensive or side-effectful generation logic.
+> [!QUESTION]- When is `yield return` better than returning a materialized collection such as `List<T>`?
+> `yield return` is useful when values can be produced one at a time, the sequence is large, or the caller may stop early. It avoids building the whole collection first, but the generation logic runs again on each enumeration and can observe changing state. A materialized collection is better when a stable snapshot, random access, a cheap `Count`, or repeated enumeration is required.
 
 # References
 

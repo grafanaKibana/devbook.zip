@@ -200,8 +200,8 @@ Interpreter fits a small language represented as data. Stable rules are clearer 
 > [!QUESTION]- How does EF Core use LINQ Expression Trees as an Interpreter?
 > The `Queryable.Where` overload accepts an `Expression<Func<Order, bool>>`, so the compiler represents the lambda as a tree instead of only emitting an executable delegate. EF Core examines supported nodes, builds a database query, and parameterizes captured values. A custom method fails when no translator handles its expression node.
 
-> [!QUESTION]- What's the difference between Interpreter and Strategy for runtime rule selection?
-> Strategy selects among algorithms already written in code. Interpreter evaluates a rule represented as data. Strategy suits a closed set of implementations. Interpreter suits combinations that must be authored or changed without compiling a new strategy class.
+> [!QUESTION]- How does Interpreter differ from Strategy when rules are selected at runtime?
+> Strategy selects an algorithm that already exists in code. Interpreter evaluates a rule represented as data. Strategy fits a known set of implementations. Interpreter fits rules that need to be combined or changed without writing and compiling another strategy class.
 
 # References
 

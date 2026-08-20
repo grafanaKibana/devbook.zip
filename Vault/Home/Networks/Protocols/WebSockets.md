@@ -110,7 +110,7 @@ Every long-lived option needs a queue policy. Bound per-client memory, coalesce 
 
 # Questions
 
-> [!QUESTION]- When would you choose Server-Sent Events over WebSockets?
+> [!QUESTION]- What conditions make Server-Sent Events a better fit than WebSockets?
 > SSE fits ordered server-to-browser events when ordinary HTTP requests already cover client commands. `EventSource` reconnects and sends `Last-Event-ID`, giving the server a natural replay cursor. WebSocket fits low-latency bidirectional messages, but the application must define its own resume contract.
 
 # References

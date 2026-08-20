@@ -172,8 +172,8 @@ C# events fit synchronous UI notifications. Server-side async subscribers need a
 
 # Questions
 
-> [!QUESTION]- How do you prevent memory leaks from event subscriptions?
-> Align the subscription with an owning lifetime and detach when that lifetime ends, often in `Dispose()`. Weak events help when the publisher must outlive subscribers and explicit ownership is unavailable. Matching DI scopes prevents retention only when the publisher also stays inside that scope and no subscription escapes into a singleton, static event, or other longer-lived object.
+> [!QUESTION]- How should event subscriptions be managed to avoid retaining subscribers after their lifetime ends?
+> A subscription should be removed when its owner is disposed or otherwise reaches the end of its lifetime. Weak events help when the publisher must live longer than its subscribers and there is no clear owner that can unsubscribe. Matching DI scopes helps only if the publisher stays in the same scope and the subscription does not escape into a singleton, static event, or another longer-lived object.
 
 # References
 

@@ -98,8 +98,8 @@ The riskiest call may be perfectly valid: real tool, valid schema, wrong account
 
 # Questions
 
-> [!QUESTION]- Why tool selection and argument accuracy remain separate metrics?
-> They fail for different reasons. A wrong tool suggests routing or description problems. A correct tool with a wrong value suggests grounding or schema problems. A blended score can hide a 95%/70% split and send engineering effort toward the healthy axis. Structured fields can use exact references, while free text usually needs a semantic scorer.
+> [!QUESTION]- Why should tool selection and argument accuracy be measured separately?
+> They fail for different reasons. Choosing the wrong tool usually points to routing or unclear tool descriptions. Choosing the right tool but passing the wrong order ID, filter, or date points to grounding or schema problems. Separate metrics make a result such as 95% selection accuracy and 70% argument accuracy actionable instead of hiding it inside one average. Identifiers and enums can usually be checked against exact references, while free-text arguments often need a semantic check.
 
 # References
 

@@ -76,8 +76,8 @@ finally
 
 # Questions
 
-> [!QUESTION]- When should you choose `SemaphoreSlim` over `lock`?
-> `SemaphoreSlim.WaitAsync` suspends the waiter without requiring monitor ownership by a particular thread. A `lock` block is synchronous and cannot contain `await`.
+> [!QUESTION]- When is `SemaphoreSlim` a better fit than `lock`?
+> `SemaphoreSlim` fits asynchronous work or a resource that may allow more than one operation at a time. `WaitAsync` lets a caller wait for a permit without blocking a thread, and the permit can be released after an `await`. A `lock` is better for a short synchronous critical section that allows only one thread at a time. Because a semaphore has no owner, its acquire and release still need one clear `try/finally` boundary.
 
 # References
 

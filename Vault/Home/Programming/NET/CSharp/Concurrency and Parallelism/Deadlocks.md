@@ -187,13 +187,13 @@ public async Task UpdateAsync()
 # Questions
 
 > [!QUESTION]- What are the four Coffman conditions and which is easiest to break in practice?
-> Mutual exclusion, hold-and-wait, no preemption, and circular wait. A single global acquisition order removes circular wait without adding runtime machinery, though the order has to remain visible across every code path that takes those locks.
+> The four conditions are mutual exclusion, hold-and-wait, no preemption, and circular wait. In practice, circular wait is usually the easiest to remove by defining one lock order and following it everywhere. If every code path takes the locks in the same order, the cycle cannot form.
 
-> [!QUESTION]- Why does calling `.Result` on a `Task` deadlock in a UI app but not in a console app?
-> A UI `SynchronizationContext` marshals the continuation back to the UI thread. `.Result` blocks that thread while waiting for the continuation, creating the cycle. Console applications and ASP.NET Core normally allow continuations on pool threads, so the same call lacks this particular cycle. It still wastes a thread and can cause pool starvation under load.
+> [!QUESTION]- Why can calling `.Result` on a `Task` deadlock in a UI app but usually not in a console app?
+> A deadlock can happen when the task is still incomplete and its continuation needs the UI thread. `.Result` blocks that thread, while the continuation waits to get back onto it, so neither can finish. Console applications and ASP.NET Core normally run continuations on thread-pool threads, so this specific cycle is usually absent. Blocking is still harmful because it ties up a thread and can cause thread-pool starvation under load.
 
-> [!QUESTION]- How do you diagnose a deadlock in a production .NET service?
-> Capture a process dump and inspect thread stacks plus monitor ownership. Repeated stacks in `Monitor.Enter`, `.Result`, or `.Wait()` reveal the blocked edge. `syncblk` shows monitor owners. For async cases, the missing continuation and the context or scheduler it needs complete the wait graph.
+> [!QUESTION]- What steps help diagnose a deadlock in a production .NET service?
+> Start with a process dump. Inspect thread stacks for waits in `Monitor.Enter`, `.Result`, or `.Wait()`, then check which thread owns each monitor; `syncblk` shows that ownership. For an async deadlock, find the continuation that cannot run and the context or scheduler it is waiting for. Together, those waits reveal the cycle.
 
 # References
 

@@ -88,8 +88,8 @@ This pattern fits work where feedback improves the output and the evaluator can 
 
 # Questions
 
-> [!QUESTION]- Which control-flow decision separates the five workflow patterns?
-> Prompt chaining fixes a sequence. Routing selects one predefined branch. Parallelization runs predefined work concurrently. Orchestrator-workers lets the model decide the tasks and worker count at runtime. Evaluator-optimizer repeats generation against an explicit acceptance test. The right choice is the first pattern whose control boundary matches the task. Extra model-owned decisions add latency and make failures harder to reproduce.
+> [!QUESTION]- How do the five workflow patterns differ in who controls the next step?
+> The difference is how much of the control flow is fixed by the application. Prompt chaining fixes the sequence, routing chooses among predefined branches, and parallelization runs predefined work at the same time. With orchestrator-workers, the model decides the tasks and worker count at runtime. Evaluator-optimizer adds a loop that continues until an acceptance test passes or a limit is reached. The simplest pattern that matches the task is usually easier to test because every extra model-owned decision adds variable cost and makes failures harder to reproduce.
 
 > [!QUESTION]- Why are orchestrator-workers harder to operate than ordinary parallelization even when their diagrams look similar?
 > Parallelization starts a known set of calls, so coverage, cost, and aggregation can be tested ahead of time. An orchestrator chooses the decomposition and worker count from the input. That flexibility creates variable cost and new failure modes: missing work, overlapping assignments, or a synthesis that cannot reconcile the results. It also makes the pattern a bridge into [[Multi-Agentic Systems]], because the model controls the shape of the work.

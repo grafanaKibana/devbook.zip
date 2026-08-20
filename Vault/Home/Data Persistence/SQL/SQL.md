@@ -84,11 +84,11 @@ No physical join is universally fastest. Input size, ordering, row width, indexe
 > [!QUESTION]- What is the difference between WHERE and HAVING?
 > `WHERE` filters source rows before grouping and cannot use aggregate results. `HAVING` filters groups after `GROUP BY` and can test aggregates such as `COUNT(*)`. A non-aggregate predicate belongs in `WHERE` when it can reduce the rows entering the grouping step without changing semantics.
 
-> [!QUESTION]- What is a stored procedure and how is it different from a function?
-> A stored procedure can coordinate multi-step, data-changing work and return result sets or output parameters. A function produces a scalar or table value for use inside a query and is constrained by the engine's function rules. SQL Server can inline eligible scalar UDFs. An ineligible UDF may execute per row and restrict plan choices such as parallelism.
+> [!QUESTION]- What is the difference between a stored procedure and a function?
+> A stored procedure runs as a separate database operation. It can execute several statements, change data, and return result sets or output parameters. A function returns a scalar or table value and can be used inside a query, so the database limits what it can do. SQL Server may inline an eligible scalar UDF. Otherwise, the function may run once per row and limit plan choices such as parallelism.
 
-> [!QUESTION]- What is a Common Table Expression (CTE) and when should you use a temp table instead?
-> A CTE is a statement-scoped named query expression, not a promise of materialization or reuse. A temp table is the clearer boundary when the intermediate result must be inspected, indexed, reused across statements, or separated from later optimization with its own statistics.
+> [!QUESTION]- What is a Common Table Expression (CTE), and when is a temp table a better fit?
+> A CTE gives a name to a query result for one statement. It does not automatically store the result or guarantee that repeated references reuse the same work. A temp table is usually better when the intermediate result must be inspected, indexed, reused across statements, or optimized with its own statistics.
 
 > [!QUESTION]- What are SQL Server transaction isolation levels?
 > SQL Server provides `READ UNCOMMITTED`, `READ COMMITTED`, `REPEATABLE READ`, `SERIALIZABLE`, and `SNAPSHOT`. Enabling Read Committed Snapshot Isolation changes `READ COMMITTED` reads to statement-level row versions. `NOLOCK` is not a general performance switch: it permits observations of rolled-back work and can return missing or duplicate rows while data changes concurrently.

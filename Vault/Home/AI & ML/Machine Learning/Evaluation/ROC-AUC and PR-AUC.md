@@ -133,11 +133,13 @@ Threshold selection needs a constraint rather than a visually appealing knee. A 
 
 # Questions
 
-> [!QUESTION]- What does ROC-AUC measure?
-> It measures pairwise ranking quality. ROC-AUC is the probability that a random positive receives a higher score than a random negative, with half credit for a tie. It does not say which threshold to deploy or whether the score is calibrated.
+> [!QUESTION]- What does ROC-AUC show about a classifier?
+> ROC-AUC shows how well the classifier ranks positive cases above negative cases across all thresholds. For example, an ROC-AUC of 0.8 means a randomly chosen positive receives a higher score than a randomly chosen negative about 80% of the time, with a tie counted as half.
+> It does not choose a production threshold or show whether the predicted scores are calibrated probabilities.
 
-> [!QUESTION]- When is PR-AUC more useful than ROC-AUC?
-> PR-AUC is more revealing when positives are rare and the quality of positive predictions drives cost, as in fraud alerts or anomaly review. False positives directly reduce precision. The score must be interpreted against the dataset's prevalence.
+> [!QUESTION]- What types of classification problems are better evaluated with PR-AUC than ROC-AUC?
+> PR-AUC is usually more useful when the positive class is rare and the system acts on positive predictions, as with fraud alerts or anomaly review. In these cases, false positives fill the review queue, and precision shows that cost directly.
+> The score must still be compared with the positive rate in the evaluation data because the PR-AUC baseline changes with prevalence.
 
 # References
 

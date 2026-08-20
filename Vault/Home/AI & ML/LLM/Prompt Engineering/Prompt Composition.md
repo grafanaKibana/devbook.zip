@@ -108,17 +108,11 @@ Meta prompting keeps a person in the revision loop. [[Automated Prompt Optimizat
 
 # Questions
 
-> [!QUESTION]- When should you choose prompt chaining instead of a single large prompt?
-> - Choose chaining when the task has genuine stages with enforceable intermediate contracts.
-> - It is strongest when validation can stop bad data before the next call.
-> - Step-level observability must be worth the added latency and token cost.
-> - Keep one prompt for simple work whose intermediate state does not need independent control.
+> [!QUESTION]- When is prompt chaining a better fit than one large prompt?
+> Chaining fits when a task has real stages and an intermediate result changes what should happen next. Each stage should have a clear output contract, so invalid data can be stopped before it reaches the following call and failures can be traced to one step. That control has to justify the extra latency, token cost, and risk of errors passing between calls. If the task is simple and no intermediate result needs separate validation, one prompt is usually easier to operate.
 
 > [!QUESTION]- What is a practical meta prompting workflow for improving a weak prompt?
-> - Collect real failures and group them by cause.
-> - Ask for a revision that addresses those causes with a clear output contract.
-> - Compare the candidate with the current prompt on held-out data.
-> - Version prompt and evaluator changes together, with a rollback threshold.
+> A useful workflow starts with real failures rather than a general request to make the prompt better. Group the failures by cause, then ask for a revision that addresses those causes and states a clear output contract. Compare the candidate with the current prompt on held-out cases, not only on the examples used to create it. Version the prompt and evaluator together, and keep a rollback threshold in case the revision fixes known failures but hurts normal inputs.
 
 # References
 

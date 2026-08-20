@@ -23,9 +23,8 @@ return FolderStructureMap;
 
 # Questions
 
-> [!QUESTION]- When should you reach for classic ML instead of an LLM?
-> Classic ML fits a well-defined prediction with representative labeled data, such as classification, regression, or ranking. It usually gives lower latency, lower unit cost, and more predictable behavior at scale.
-> An LLM API fits open-ended language tasks or early product discovery, especially when a prompt can express the task before a training set exists. The choice changes when volume, latency, or output variability becomes the dominant constraint. A rule-based system or smaller trained model may then be the better fit.
+> [!QUESTION]- When is classic machine learning a better fit than an LLM?
+> Classic ML fits a well-defined prediction problem with representative labeled data, such as classification, regression, or ranking. It usually has lower latency and unit cost, and its behavior is easier to measure at scale. An LLM fits open-ended language work or early product discovery, where a prompt can describe the task before a training set exists. That choice can change as traffic grows or output variability becomes a problem. At that point, a rule-based system or a smaller trained model may be the better option.
 
 # References
 

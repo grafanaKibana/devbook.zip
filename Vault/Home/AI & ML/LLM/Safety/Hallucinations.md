@@ -87,11 +87,11 @@ For evidence-backed answers, start with retrieval and claim-to-context checks. S
 
 # Questions
 
-> [!QUESTION]- Why can RAG-grounded systems still hallucinate significantly?
-> RAG only supplies context. The corpus can be incomplete, retrieval can return the wrong passages, and generation can still add unsupported details. Diagnose those stages separately before changing the model.
+> [!QUESTION]- Why can an LLM still hallucinate when using RAG?
+> RAG gives the model context, but it does not prove that the answer follows from it. The source may not contain the fact, retrieval may miss the right passage, or the model may ignore the passage and add unsupported details. Retrieval quality and answer faithfulness should be measured separately so the failing stage is clear.
 
-> [!QUESTION]- How can preference tuning improve perceived quality while weakening factual behavior?
-> The reward may favor agreement, confidence, or style without checking evidence. A model can therefore become more satisfying to read while accepting a false premise. Factual evaluation and calibration tests must remain separate from preference scores.
+> [!QUESTION]- Why can preference tuning make an answer sound better without making it more factual?
+> Preference data may reward agreement, confidence, or style without checking whether a claim is supported. The model can then produce a polished answer that accepts a false premise. Factual accuracy and calibration still need separate evaluation from preference scores.
 
 # References
 

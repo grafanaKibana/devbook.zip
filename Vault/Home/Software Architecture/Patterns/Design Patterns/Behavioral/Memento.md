@@ -152,8 +152,8 @@ This compact example keeps `CartMemento` public, so opacity is conventional rath
 
 # Questions
 
-> [!QUESTION]- How do you prevent the memento from growing unbounded in memory?
-> Bound the history by count or memory budget. Long-lived recovery often needs only the newest snapshot, while an editor may retain a fixed undo window. A full audit record should use durable events or changes rather than an unbounded stack of opaque object copies.
+> [!QUESTION]- How can memento history be kept from growing without limit?
+> Keep a fixed number of snapshots or set a memory budget. Long-lived recovery may need only the latest snapshot, while an editor can keep a limited undo window. A full audit history should store durable events or changes instead of keeping an unlimited stack of object copies.
 
 > [!QUESTION]- When is Memento overkill compared to simpler approaches?
 > A full snapshot is wasteful when undo can be represented as one small delta. If restoring a removed item needs only that item and its position, store those values. Memento earns the extra copy when state is interdependent or restoration must survive across sessions.

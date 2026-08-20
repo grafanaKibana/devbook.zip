@@ -97,11 +97,11 @@ For short synchronous state changes inside one process, `lock` is the smallest c
 > [!QUESTION]- Why can't a `lock` block contain `await`?
 > `Monitor` ownership belongs to the acquiring thread. Since an async continuation may resume elsewhere, the compiler rejects `await` in a `lock` block with CS1996. `SemaphoreSlim.WaitAsync` models asynchronous waiting without monitor ownership.
 
-> [!QUESTION]- Why prefer `System.Threading.Lock` over locking on a plain `object` in .NET 9+?
-> A dedicated type exposes the field's purpose and prevents several accidental operands. The compiler recognizes a `Lock`-typed operand and uses its scoped acquisition API directly.
+> [!QUESTION]- What does `System.Threading.Lock` improve over locking on a plain `object` in .NET 9+?
+> A dedicated `Lock` field makes its purpose clear and avoids reusing an arbitrary object that other code may also lock or expose. The compiler recognizes the type and lowers the block to its scoped `EnterScope` API instead of the usual `Monitor.Enter` and `Monitor.Exit` pattern. It is still a synchronous lock, so it does not make `await` valid inside the block.
 
-> [!QUESTION]- Is `lock`/`Monitor` reentrant, and is `SemaphoreSlim`?
-> `lock`/`Monitor` tracks the owning thread and a recursion count, so nested acquisition by that thread succeeds. `SemaphoreSlim` does not. Waiting twice on a one-permit [[Semaphore|semaphore]] blocks the second wait.
+> [!QUESTION]- How does reentrancy differ between `lock`/`Monitor` and `SemaphoreSlim`?
+> `lock` and `Monitor` track the owning thread and a recursion count, so the same thread can enter the same lock again and must exit it the same number of times. `SemaphoreSlim` tracks permits, not an owner or recursion count. If code holding the only permit waits on that semaphore again, the second wait blocks and can deadlock the operation.
 
 # References
 

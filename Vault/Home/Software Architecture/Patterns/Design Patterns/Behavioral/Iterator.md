@@ -143,8 +143,8 @@ This sample uses offset paging because the iterator boundary is the focus. Offse
 
 # Questions
 
-> [!QUESTION]- When should you return `IEnumerable<T>` vs `IReadOnlyList<T>` vs `IAsyncEnumerable<T>`?
-> `IReadOnlyList<T>` promises materialization, `Count`, and indexed access. `IEnumerable<T>` promises only synchronous enumeration. `IAsyncEnumerable<T>` fits a source that produces items asynchronously and should stream instead of buffering everything. The return type should state the strongest guarantee the caller can safely rely on.
+> [!QUESTION]- What should determine whether an API returns `IEnumerable<T>`, `IReadOnlyList<T>`, or `IAsyncEnumerable<T>`?
+> The return type should describe what the caller can safely rely on. `IReadOnlyList<T>` guarantees `Count` and indexed access, but it does not say whether values are computed lazily or represent a snapshot. If the method returns a materialized snapshot, that should be stated separately in the method's contract. `IEnumerable<T>` promises only synchronous enumeration, which may be lazy and repeat the underlying work when enumerated again. `IAsyncEnumerable<T>` fits a source that waits between items and should stream them instead of buffering the full result.
 
 > [!QUESTION]- What does the compiler generate for a `yield return` method?
 > The compiler generates a state-machine type that implements the enumeration contracts. Each `yield return` becomes a suspension point. `MoveNext()` resumes execution and `Current` exposes the yielded value. Locals that must survive suspension become fields on the generated object.

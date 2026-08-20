@@ -267,10 +267,10 @@ Start an OLTP design by writing candidate keys and functional dependencies, then
 > [!QUESTION]- What is normalization and why do most systems stop at 3NF/BCNF?
 > Normalization decomposes relations according to their dependencies so that one update cannot leave conflicting versions of the same fact. 3NF and BCNF cover ordinary functional dependencies. 4NF and 5NF matter when the domain contains independent multivalued facts or a genuine join dependency. 6NF is mainly a temporal modeling tool. The stopping point follows the domain's dependencies, not a universal target number.
 
-> [!QUESTION]- When would you denormalize a table, and what risks does it introduce?
-> Denormalize when a named read path misses its latency or resource objective and a stored projection is cheaper than computing the result from source facts. The duplicate introduces a second maintenance path, possible lag, write contention, and repair work. Its design must name the source of truth, freshness contract, transactional or asynchronous update mechanism, and reconciliation procedure.
+> [!QUESTION]- What conditions justify denormalizing a table, and what risks does it introduce?
+> Denormalization is justified when a specific read path misses its latency or resource target and storing the result is cheaper than rebuilding it from source facts on every read. The duplicate adds another update path and can introduce lag, write contention, and repair work. The design must identify the source of truth, acceptable freshness, how updates are applied, and how the duplicate is reconciled when it drifts.
 
-> [!QUESTION]- What is the difference between 2NF and 3NF, and how would you recognize a violation of each?
+> [!QUESTION]- How can 2NF and 3NF violations be distinguished?
 > 2NF removes partial dependencies of a non-prime attribute on part of a composite candidate key. A make-level discount repeated in rows keyed by `{Make, Model}` violates it. 3NF additionally constrains dependencies whose determinant is not a superkey. A store phone determined by `Store` inside a table keyed by `Model` is the usual transitive shape. A repair separates the facts only when the decomposition is lossless and preserves the constraints the system needs.
 
 # References

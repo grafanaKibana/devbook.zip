@@ -131,8 +131,8 @@ The extra local gives each iteration separate storage. This is needed whenever l
 
 # Questions
 
-> [!QUESTION]- What does a delegate compile to in IL/runtime terms?
-> A delegate declaration becomes a sealed type derived from `System.MulticastDelegate` with `Invoke`, `BeginInvoke`, and `EndInvoke` metadata. Delegate instances carry a target object (or null for static methods), a method pointer, and optionally an invocation list. In modern .NET (6+), calling delegate `BeginInvoke`/`EndInvoke` is not supported and throws `PlatformNotSupportedException`.
+> [!QUESTION]- How is a delegate represented at runtime?
+> A delegate declaration creates a sealed type derived from `System.MulticastDelegate`. Its `Invoke` method describes the signature that compatible methods must match. A delegate instance stores a method pointer and, for an instance method, the target object; a multicast delegate also stores an invocation list. The type still has `BeginInvoke` and `EndInvoke` metadata, but calling those methods on modern .NET (6+) throws `PlatformNotSupportedException`.
 
 # References
 

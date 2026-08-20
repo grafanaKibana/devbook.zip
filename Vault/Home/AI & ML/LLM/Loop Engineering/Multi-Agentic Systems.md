@@ -134,14 +134,14 @@ Multi-agent architecture should solve a measured limit in the current system. If
 
 # Questions
 
-> [!QUESTION]- When is multi-agent coordination justified over a single agent with more tools?
-> It is justified when separate contexts protect reasoning quality, independent work materially reduces latency, or specialists need incompatible tools or instructions. The comparison should be empirical: the multi-agent design must improve a relevant quality or latency measure enough to pay for extra tokens and a harder trace.
+> [!QUESTION]- When is multi-agent coordination worth the added complexity?
+> Multi-agent coordination makes sense when separate contexts keep unrelated work apart, independent tasks can run in parallel, or specialists need tools or instructions that would conflict inside one agent. The extra agents also mean more tokens, handoffs, and traces to debug, so the design should show a clear improvement in quality or latency over a single agent.
 
-> [!QUESTION]- Why does context-centric decomposition outperform problem-centric decomposition?
-> Context-centric ownership keeps tightly related evidence and decisions in one working window. A problem-centric split often forces agents to reconstruct the same local context at every handoff. The benefit is fewer transfers and less information loss. The cost is a broader responsibility for each agent.
+> [!QUESTION]- What is the benefit of keeping related context with one agent?
+> Keeping related evidence and decisions in one working context lets the agent complete connected work without rebuilding the same background after each handoff. Splitting that work between agents creates more transfers and more chances to lose details. The tradeoff is that each agent owns a broader part of the work.
 
-> [!QUESTION]- What makes multi-agent failures harder to diagnose than single-agent failures?
-> The failure may cross several traces before it becomes visible. Natural language can carry a false claim while remaining structurally valid, and parallel workers can amplify the same bad premise. Diagnosis therefore needs handoff records, artifact provenance, and budgets tied to a run rather than isolated agent logs.
+> [!QUESTION]- What makes multi-agent failures difficult to trace?
+> A bad output can pass through several agents before the failure becomes visible. A handoff may contain a false claim that looks valid, and parallel agents may repeat that claim in several places. Debugging therefore needs the full handoff history, the source of each artifact, and limits such as token or turn budgets for the whole run, not just separate agent logs.
 
 # References
 

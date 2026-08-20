@@ -95,19 +95,11 @@ Use the cheapest method that clears the evaluation target:
 
 # Questions
 
-> [!QUESTION]- When does Chain-of-Thought usually help, and when can it hurt?
-> - It can help when intermediate state can be expressed as a sequence of smaller decisions.
-> - It adds little to simple retrieval or extraction and may create new opportunities for drift.
-> - A wrong early assumption can contaminate the rest of the trace.
-> - The visible explanation still needs independent checks. Fluency is not proof.
-> The technique is useful only when its added tokens expose something that can improve or verify the result.
+> [!QUESTION]- When does Chain-of-Thought help, and when can it make a result worse?
+> Chain-of-Thought can help when a task has intermediate state that can be expressed as a sequence of smaller decisions. It adds little to simple retrieval or extraction, where the extra tokens mainly create more room for drift. A wrong assumption near the start can shape the rest of the trace, and a fluent explanation still does not prove the answer is correct. The technique earns its cost when the intermediate steps improve measured results or expose something that can be checked independently.
 
-> [!QUESTION]- When is Tree of Thoughts justified over CoT or self-consistency?
-> - ToT is justified when candidate states can be generated, evaluated, and revisited.
-> - Planning and combinatorial search may have that shape. Extraction does not.
-> - Branching factor, depth, and evaluator quality determine whether search stays tractable.
-> - If a direct call or deterministic tool meets the target, the tree is unnecessary.
-> ToT pays only when there is a real search problem around the model.
+> [!QUESTION]- When does Tree of Thoughts justify its cost over Chain-of-Thought or self-consistency?
+> Tree of Thoughts fits a real search problem where candidate states can be generated, evaluated, revisited, and abandoned when they lead to a dead end. Planning and combinatorial search can have that shape; extraction usually does not. Its cost grows with the branching factor and depth, and a weak evaluator can keep the wrong branches. If a direct call or deterministic tool already meets the evaluation target, the tree adds work without improving the result.
 
 # References
 

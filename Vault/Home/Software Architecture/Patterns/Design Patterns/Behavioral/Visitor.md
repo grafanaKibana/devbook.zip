@@ -225,8 +225,8 @@ Visitor fits a stable element set that receives new cross-cutting operations. Pa
 > [!QUESTION]- When does EF Core use ExpressionVisitor, and what does it do?
 > EF Core receives a LINQ expression tree and passes it through multiple visitor-based phases that normalize, expand, translate, and shape the query. A method or member fails translation when the provider has no supported server-side mapping for that expression in its current context. The failure is broader than a missing `Visit` overload because providers often visit the node successfully but cannot translate its semantics.
 
-> [!QUESTION]- When should you use pattern matching instead of Visitor?
-> Pattern matching is usually clearer for a small hierarchy or a short operation because it needs no `Accept` method. Exhaustiveness depends on the type shape. An interface hierarchy plus a discard arm does not warn when a new implementation appears. Visitor is worth the ceremony when compile-time pressure to update every operation is part of the design.
+> [!QUESTION]- When is pattern matching a better fit than Visitor?
+> Pattern matching is usually clearer for a small hierarchy or a short operation because it needs no `Accept` method or visitor interface. Its exhaustiveness depends on the type shape: an interface hierarchy with a discard arm does not warn when a new implementation appears. Visitor earns its ceremony when the element hierarchy is stable and compile-time pressure to update every operation is an important part of the design.
 
 # References
 

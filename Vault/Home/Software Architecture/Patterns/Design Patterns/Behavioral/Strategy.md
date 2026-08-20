@@ -192,11 +192,11 @@ The algorithm now lives in its own class. The selection policy still needs a det
 
 # Questions
 
-> [!QUESTION]- When should you use a Strategy interface vs a `Func<T, TResult>` delegate?
-> A delegate is enough for one operation whose inputs capture everything it needs. An interface becomes useful when the algorithm needs several related operations, lifecycle semantics, or dependencies that should be explicit in DI. Stateful behavior alone does not force an interface because a delegate may close over state, though that can hide ownership and lifetime.
+> [!QUESTION]- What determines whether a strategy should use an interface or a `Func<T, TResult>` delegate?
+> A delegate is enough when the variation is one operation and its inputs contain everything it needs. An interface becomes useful when the algorithm has several related operations, owns a lifecycle, or has dependencies that should be visible in dependency injection. State alone does not require an interface because a delegate can close over state, although doing that may hide who owns the state and how long it lives.
 
-> [!QUESTION]- How do you handle strategy selection when multiple strategies apply?
-> Make precedence part of the contract. A first-match registry needs stable ordering, explicit selection needs a validated key, and a composite must define how results combine. Ambiguous selection is a domain bug, not something DI registration order should decide accidentally.
+> [!QUESTION]- How should strategy selection work when several strategies can handle the same request?
+> Precedence has to be part of the contract. A first-match registry needs stable ordering, explicit selection needs a validated key, and a composite needs a rule for combining results. If two strategies apply with the same priority and the contract does not say what happens, that is a domain bug. Dependency-injection registration order should not decide it by accident.
 
 # References
 

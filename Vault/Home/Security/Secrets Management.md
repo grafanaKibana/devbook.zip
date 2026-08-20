@@ -92,8 +92,8 @@ Prefer workload identity when the platform and target service can bind it narrow
 
 # Questions
 
-> [!QUESTION]- A secret was accidentally committed and pushed. What's the correct response?
-> Treat it as compromised and revoke or rotate it immediately.
+> [!QUESTION]- What should happen when a secret is accidentally committed and pushed?
+> Treat the secret as compromised and revoke or rotate it immediately. Update the affected workloads through the normal secret-delivery path, then verify that the old value is rejected. Check access logs and usage for signs of abuse. Removing the value from the current file and rewriting repository history can reduce future exposure, but neither action replaces revocation because copies may already exist in clones, caches, logs, or alerts.
 
 # References
 

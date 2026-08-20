@@ -84,10 +84,7 @@ Amazon Q Developer provides IDE and CLI assistance with AWS-oriented development
 # Questions
 
 > [!QUESTION]- What controls reduce production risk when adopting coding agents?
-> - Encode boundaries the repository cannot enforce mechanically.
-> - Block destructive or external side effects before execution, then use hooks and CI for deterministic checks.
-> - Limit the task, tool permissions, and iteration budget.
-> - Review the diff and require fresh evidence before merge, regardless of which model produced it.
+> Start by limiting the task, the tools the agent can call, and the number of iterations it can run. Destructive or external actions need code-enforced approval before execution, while hooks and CI should run deterministic checks. Repository instructions capture architectural rules that tests cannot enforce. Before merge, the diff still needs review and the claimed behavior needs fresh test or build evidence, regardless of which model produced the change.
 
 # References
 

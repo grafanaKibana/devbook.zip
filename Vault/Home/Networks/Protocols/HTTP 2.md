@@ -119,7 +119,7 @@ HTTP/3 keeps HTTP semantics but replaces HTTP/2's framing-over-TCP with HTTP fra
 
 # Questions
 
-> [!QUESTION]- When would you choose HTTP/1.1 over HTTP/2?
+> [!QUESTION]- When can HTTP/1.1 be necessary or perform better than HTTP/2?
 > HTTP/1.1 remains necessary across a server or intermediary that cannot negotiate HTTP/2. On a lossy path without HTTP/3, several HTTP/1.1 connections can also isolate TCP loss better than one HTTP/2 connection, though extra connections add handshake and congestion-control cost. The choice should follow measurements across the real path.
 
 # References

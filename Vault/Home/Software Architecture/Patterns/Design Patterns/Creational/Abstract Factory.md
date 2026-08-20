@@ -194,8 +194,8 @@ Abstract Factory fits several product types that must vary together across more 
 
 # Questions
 
-> [!QUESTION]- How do you add a new product type (e.g., IFraudDetector) to an existing Abstract Factory without breaking all existing factories?
-> If fraud detection is part of every provider family, change the interface and update every concrete factory. That compile-time break is useful because it exposes incomplete families. A separate factory is appropriate only when fraud detection varies independently. A default no-op avoids the break but can turn a missing security control into apparently valid behavior.
+> [!QUESTION]- What should happen when an Abstract Factory gains a new product type such as `IFraudDetector`?
+> If every provider family must supply fraud detection, add it to the factory interface and update every concrete factory. The compile-time failures are useful because they expose incomplete families. A separate factory fits only when fraud detection varies independently. A default no-op keeps existing factories compiling, but it can make a missing security control look valid.
 
 > [!QUESTION]- When is Abstract Factory overkill compared to a simpler approach?
 > It is unnecessary when only one product varies or the products do not share a compatibility boundary. In that case, inject the product interface directly. Abstract Factory earns its indirection only when a family choice must move together.

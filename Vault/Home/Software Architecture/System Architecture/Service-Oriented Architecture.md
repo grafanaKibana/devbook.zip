@@ -94,8 +94,8 @@ Many estates use both styles. Existing systems meet through governed integration
 
 # Questions
 
-> [!QUESTION]- What is the lasting architectural idea in SOA?
-> Business capabilities are exposed through explicit contracts that hide implementation details. SOAP, WSDL, and ESBs are historical implementation choices rather than the definition.
+> [!QUESTION]- Which part of SOA remains useful without SOAP, WSDL, or an ESB?
+> The durable part is the explicit service contract around a business capability. Consumers depend on that contract instead of importing the service's internal code or writing directly to its database. This allows systems built on different technology stacks to change independently as long as the contract stays compatible. SOAP, WSDL, and ESBs were common ways to implement or govern that boundary, but the boundary still matters when the transport is HTTP, gRPC, or messaging.
 
 # References
 

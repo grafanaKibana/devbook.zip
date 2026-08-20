@@ -75,10 +75,7 @@ A long architecture essay is a poor substitute. It consumes context, hides the f
 # Questions
 
 > [!QUESTION]- Why do hierarchical instruction files often outperform a single giant root file?
-> - Root guidance carries invariants shared by the whole repository.
-> - A local file can add the build command or dependency rule for one subtree when the runtime supports path-scoped loading.
-> - The agent receives less irrelevant material while working in another area.
-> - The cost is governance: precedence must be explicit, and local rules cannot silently contradict the root.
+> The root file can hold rules that apply to the whole repository, while a local file adds the build command or dependency rule for one subtree when the runtime supports path-based loading. This keeps unrelated guidance out of the model's context and makes the active instructions more specific to the files being changed. The hierarchy works only when precedence is clear and local rules refine the root instead of silently contradicting it.
 
 # References
 

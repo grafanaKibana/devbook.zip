@@ -114,7 +114,11 @@ Attributes cannot receive runtime services through their own constructors, so at
 # Questions
 
 > [!QUESTION]- What is the execution order of ASP.NET Core filter types?
-> The type order is authorization, resource, action, exception, then result, with wrapping stages unwinding in reverse after the inner stage completes. Scope normally nests global, controller, then action. `IOrderedFilter.Order` takes precedence over scope when explicitly set.
+> Authorization filters run first. Resource filters then wrap the rest of the MVC pipeline, action filters wrap the action, and result filters wrap execution of the selected result. The normal before path is therefore authorization, resource, action, then result, with the wrapping filters running their after logic in reverse.
+>
+> Exception filters are conditional, not another before-and-after stage. They run only when an unhandled exception comes from controller creation, model binding, an action filter, or the action method. They do not catch failures from authorization filters, resource filters, result filters, or result execution. If an exception filter handles the failure and supplies a result, result processing continues; otherwise the exception leaves the MVC pipeline.
+>
+> Within one filter type, lower `IOrderedFilter.Order` values run earlier on the way in and later on the way out. When order values are equal, scope normally nests global, controller, then action.
 
 # References
 

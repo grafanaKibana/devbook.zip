@@ -139,23 +139,14 @@ Strict output shape needs structured output or schema validation. Examples can c
 
 # Questions
 
-> [!QUESTION]- Why do prompt anatomy and model settings have to be designed together?
-> - Prompt text defines intent and constraints, settings define sampling behavior.
-> - A precise prompt can still fail with overly random settings.
-> - Conservative settings can still produce poor output if instructions are ambiguous.
-> - Reliable systems tune both and evaluate with task-specific metrics.
+> [!QUESTION]- Why must prompt structure and model settings be designed together?
+> The prompt defines the task, context, constraints, and expected output, while model settings control sampling and output limits. Clear instructions can still produce unstable results when sampling is too random for the task. Conservative settings cannot repair an ambiguous instruction or a missing output contract. Both parts should be tested together on the same task-specific evaluation set because changing either one can change quality, consistency, latency, and cost.
 
 > [!QUESTION]- When is few-shot prompting a better fit than pure instruction prompting?
-> - When acceptable semantics or an output convention is hard to describe in words.
-> - When label boundaries are subtle and examples clarify decision edges.
-> - When consistency matters more than novelty.
-> - Use a schema for strict shape; start with minimal examples, then add edge cases.
+> Few-shot prompting is useful when the expected meaning, label boundary, or output convention is easier to demonstrate than to describe. A small set of representative examples can show how close cases should be handled and make repeated outputs more consistent. Examples do not replace a schema when the shape must be strict. Start with the smallest set that improves held-out results, then add edge cases only when evaluation shows a real gap because every example consumes context.
 
 > [!QUESTION]- How can an accurate but verbose and expensive prompt be tightened?
-> - Tighten output indicator with length limits and schema.
-> - Lower `max tokens` and add stop sequences.
-> - Keep `temperature` low for lower-variance concise tasks.
-> - Evaluate token usage and failure rate after each change.
+> First identify whether the cost comes from repeated instructions, unnecessary examples, oversized context, or a verbose output contract. Remove duplicated input and state the required length and shape directly. `max_tokens` is a safety cap rather than the main way to request a concise answer because a low cap can truncate a valid response; stop sequences help only when the output has a reliable delimiter. Compare token usage, task quality, and truncation or failure rates after each change so a cheaper prompt does not quietly become less accurate.
 
 # References
 

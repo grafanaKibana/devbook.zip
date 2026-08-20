@@ -192,10 +192,10 @@ The runtime defaults are the starting point. A mode change is justified only whe
 # Questions
 
 > [!QUESTION]- Why can generation 0 be collected without scanning every generation 2 object?
-> Roots identify direct entry points into the managed graph. Write barriers additionally record older heap ranges that may contain references to young objects. The collector scans those dirty cards as a remembered set, preserving young objects reached from older generations without a full old-generation walk.
+> The collector starts from normal GC roots, but it also needs to find references from old objects to young ones. A write barrier records the older heap ranges where those references may have been written. During a generation 0 collection, the GC scans those recorded ranges, called dirty cards, instead of walking every generation 2 object. Young objects referenced by older ones are still preserved without paying for a full old-generation scan.
 
 > [!QUESTION]- Why can process memory remain high after a generation 2 collection?
-> Reachable graphs still occupy memory, pinned objects and swept regions can leave fragmented gaps, and committed heap memory is not necessarily returned to the operating system immediately. A collection proves reachability. It does not promise a small working set.
+> A generation 2 collection removes objects that are no longer reachable; it cannot remove live object graphs held by caches, static fields, or other roots. Pinned objects and swept heap regions can also leave gaps that are free to the GC but difficult to reuse. Finally, the runtime may keep committed heap memory for later allocations instead of returning it to the operating system immediately. A completed collection therefore does not guarantee that the process working set will shrink.
 
 # References
 

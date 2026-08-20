@@ -205,8 +205,8 @@ Bridge becomes useful when both dimensions already vary or are about to vary. A 
 > [!QUESTION]- What makes the payment example Bridge rather than ordinary provider polymorphism?
 > Both sides vary. `PaymentOperation` has charge, subscription, or refund variants, while `IPaymentGateway` has Stripe, PayPal, or bank implementations. Provider implementations can grow independently, and operation variants can grow independently while they compose existing gateway primitives. A new primitive still changes the gateway contract and every provider. Injecting only one gateway behind one service interface would be ordinary polymorphism or Strategy.
 
-> [!QUESTION]- What's the difference between Bridge and Dependency Injection?
-> Dependency injection supplies an object with its dependencies. Bridge decides that the abstraction and implementation should be separate models connected through composition. DI can wire an `IPaymentGateway` into a `PaymentOperation`, but it does not create the structural boundary.
+> [!QUESTION]- How does Bridge differ from dependency injection?
+> Dependency injection supplies an object with its dependencies. Bridge is the design decision to keep an abstraction and its implementation as separate models that can vary independently and connect through composition. DI can wire an `IPaymentGateway` into a `PaymentOperation`, but that wiring does not create the two dimensions or prove that they need to evolve separately.
 
 # References
 

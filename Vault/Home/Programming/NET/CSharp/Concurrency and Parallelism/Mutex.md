@@ -108,11 +108,11 @@ The decision follows the ownership boundary. A [[Locking|lock]] covers synchrono
 
 # Questions
 
-> [!QUESTION]- When is a named `Mutex` the right tool in .NET?
-> When several processes on one machine need thread-owned mutual exclusion around the same local resource, such as a single-instance guard or a shared file writer.
+> [!QUESTION]- When is a named `Mutex` appropriate in .NET?
+> A named `Mutex` fits mutual exclusion between processes on the same machine, for example a single-instance application or several processes writing the same local file. The thread that acquires it owns it and must release it. For coordination inside one process, `lock` is usually lighter; for distributed coordination across machines, a named mutex is not enough.
 
 > [!QUESTION]- What does `AbandonedMutexException` signal?
-> The previous owner exited before release. The waiter now owns the mutex, but it cannot assume that the interrupted operation left the protected resource consistent.
+> It means the previous owning thread ended without releasing the mutex. The waiting thread receives the exception but also acquires the mutex, so it must treat the protected state as possibly incomplete or corrupted. Recovery may require validating or rebuilding that state before the mutex is released in a `finally` block.
 
 # References
 

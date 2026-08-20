@@ -140,8 +140,8 @@ Validate the function name and arguments before execution, then return a precise
 
 # Questions
 
-> [!QUESTION]- Why does the ReAct pattern outperform chain-of-thought reasoning alone for tasks requiring external knowledge?
-> Reasoning alone must rely on parametric memory. ReAct can retrieve or compute an intermediate fact before continuing, so later steps can use observed evidence. The price is another model round trip and a larger context for every action.
+> [!QUESTION]- What does ReAct add to chain-of-thought reasoning when a task needs external knowledge?
+> Chain-of-thought reasoning still works with information already available to the model. ReAct can pause that reasoning to search, call an API, or run a calculation, then use the observed result in the next decision. This helps when the answer depends on current or missing evidence, but it does not guarantee a better result. Each action adds another model round trip, grows the context, and creates another place for a tool or interpretation error.
 
 > [!QUESTION]- Which safeguards must be enforced outside the model, and what failure does each contain?
 > A per-request iteration cap contains non-terminating behavior. Token and cost budgets stop context growth before it becomes an outage or an unexpected bill. Tool validation blocks unknown functions and malformed arguments before they reach a side-effecting boundary. Prompt instructions can help, but none of these controls can depend on the model obeying them.

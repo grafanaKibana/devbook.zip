@@ -91,15 +91,11 @@ Hot paths sometimes need construction without intermediate strings:
 
 # Questions
 
-> [!QUESTION]- When should you choose `StringBuilder` over `string`?
-> - Use `StringBuilder` for iterative construction (loops, batched appends, streaming transforms) where many intermediate strings would otherwise be allocated.
-> - Prefer interpolation/concatenation for one-off formatting with a small number of values because readability is usually better.
-> - In hot paths, benchmark both options and pre-size `StringBuilder` capacity to reduce buffer growth and copying.
+> [!QUESTION]- When is `StringBuilder` a better choice than string concatenation?
+> `StringBuilder` is useful when text is built through many appends, especially in a loop, because it avoids allocating a new string for every intermediate result. For one expression with a small number of values, interpolation or concatenation is usually clearer and the compiler can optimize it well. In a hot path, the choice should be measured; when `StringBuilder` wins and the final size is roughly known, setting its capacity reduces buffer growth and copying.
 
-> [!QUESTION]- Why can `ReferenceEquals(a, b)` be `false` even when `a == b` is `true` for strings?
-> - `==` for strings compares content, while `ReferenceEquals` checks object identity.
-> - Two strings can contain identical text but be different objects (for example, literal vs runtime-composed value).
-> - Use `ReferenceEquals` only for diagnostics/allocation analysis, not for business equality logic.
+> [!QUESTION]- Why can `ReferenceEquals(a, b)` be `false` when `a == b` is `true` for strings?
+> String equality with `==` compares the characters, while `ReferenceEquals` checks whether both variables point to the same object. Two separately created strings can contain the same text and therefore be equal without sharing an object. Business comparisons should use string equality with the required `StringComparison`; reference equality is mainly useful when object identity or allocation behavior is being inspected.
 
 # References
 

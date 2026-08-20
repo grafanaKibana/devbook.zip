@@ -122,16 +122,16 @@ Parallelism is not limited to running more threads:
 # Questions
 
 > [!QUESTION]- Why can adding more parallel workers reduce performance?
-> Workers compete for cores, memory bandwidth, cache lines, and synchronized state. Once coordination costs more than the extra worker contributes, throughput falls.
+> More workers help only while useful work can run independently and the machine still has capacity. After that point, workers compete for CPU time, memory bandwidth, cache lines, and shared locks, while scheduling and coordination add more overhead. Throughput can then fall even though more tasks are running, so the useful degree of parallelism has to be measured for the actual workload.
 
-> [!QUESTION]- How do you decide `MaxDegreeOfParallelism`?
-> `Environment.ProcessorCount` is a reasonable CPU-bound starting point, not a universal answer. Benchmarks determine whether the workload is limited by cores, memory bandwidth, or an external dependency.
+> [!QUESTION]- How should `MaxDegreeOfParallelism` be chosen?
+> The starting point comes from the bottleneck. For CPU-bound work, `Environment.ProcessorCount` is a reasonable first value, but memory-heavy work may reach its limit earlier. Work that calls a database or remote service should also respect that dependency's safe concurrency. The final value comes from measuring throughput, latency, and resource pressure under a realistic load.
 
-> [!QUESTION]- When should you avoid PLINQ?
-> Avoid it when correctness depends on side-effect order, the result must preserve source order without paying merge cost, or each item is too cheap to amortize partitioning.
+> [!QUESTION]- When is PLINQ a poor fit?
+> PLINQ works best when each item can be processed independently and does enough CPU work to repay the parallel overhead. It is a poor fit when correctness depends on side-effect order, strict source ordering is required, or each item is so cheap that partitioning and merging cost more than the work. A sequential query is also easier to reason about, so parallel execution should be kept only when measurement shows a useful gain.
 
-> [!QUESTION]- Why can a parallel query be slower than sequential for small inputs?
-> Partitioning, scheduling, and merging have fixed costs. A short sequential loop can finish before the parallel pipeline has recovered that overhead.
+> [!QUESTION]- Why can a parallel query be slower than a sequential query for small inputs?
+> Parallel execution has fixed costs: the input is partitioned, work is scheduled, and partial results are merged. With only a few items or very little work per item, the sequential query can finish before those costs are recovered. Parallelism becomes useful only when the amount of independent work is large enough to outweigh that setup and coordination.
 
 # References
 

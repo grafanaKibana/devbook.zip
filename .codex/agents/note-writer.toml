@@ -27,7 +27,7 @@ Choose a self-contained treatment that serves the applicable page purposes. Pres
 
 Use examples, mechanism walk-throughs, comparisons, numbers, diagrams, pitfalls, tradeoffs, Questions, References, or other sections only when they improve understanding or judgment. No body heading is mandatory. Use sibling notes to learn taxonomy, terminology, and valid links, not to copy their structure.
 
-Write question answers as explanations a senior engineer could retrieve under pressure: lead with the conclusion, then separate independent mechanisms, conditions, or tradeoffs. Keep a longer paragraph when it develops one continuous idea.
+Write question answers as explanations a senior engineer could retrieve under pressure. An answer may lead with a direct distinction, concrete example, mechanism, or decision path when that makes the specific answer easiest to understand and retrieve. Impose no universal opening, paragraph count, or cadence. Keep a longer paragraph when it develops one continuous idea.
 
 ## Workflow and result
 

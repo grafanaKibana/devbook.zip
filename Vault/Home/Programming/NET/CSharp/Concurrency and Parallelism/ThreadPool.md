@@ -134,10 +134,12 @@ var result = await _http.GetStringAsync(url);
 # Questions
 
 > [!QUESTION]- What is ThreadPool starvation and how does it usually start?
-> Starvation is sustained delay in assigning queued work to workers even though CPU is not fully occupied by useful computation. It often starts with synchronous waits inside pool work. Raising the minimum can shorten injection delay, but it does not remove the blocking dependency and can make contention worse.
+> ThreadPool starvation means queued callbacks and continuations wait too long because too few worker threads are available, even though the CPU is not fully busy doing useful work. A common cause is pool workers blocking on `.Result`, `.Wait()`, synchronous I/O, or similar waits. The work needed to complete those waits may also depend on the pool, so latency rises while the runtime adds workers. Raising the minimum can reduce that ramp-up delay, but it does not remove the blocking and may increase contention.
 
 > [!QUESTION]- When is it appropriate to call `ThreadPool.SetMinThreads`?
-> Only after measurements separate slow worker injection from CPU saturation, downstream throttling, and sync-over-async blocking. Raise it in a load test, then watch queue length, worker count, CPU, memory, and tail latency. The setting is a threshold for faster injection, not a preallocation count.
+> `ThreadPool.SetMinThreads` is worth testing when measurements show that work is waiting for the pool to add workers during a burst. It is not a fix for CPU saturation, a slow downstream service, or workers blocked by sync-over-async code.
+>
+> Change it under a representative load test and watch queue length, worker count, CPU, memory, and tail latency. The value is a threshold below which the pool can add workers without its normal delay; it does not create that many threads in advance.
 
 # References
 

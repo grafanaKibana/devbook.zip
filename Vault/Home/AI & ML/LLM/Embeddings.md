@@ -105,8 +105,8 @@ Start with the simplest model that establishes a credible recall baseline. Fine-
 
 # Questions
 
-> [!QUESTION]- How can Matryoshka dimensionality reduction lower embedding storage costs without significant recall loss?
-> The `dimensions` parameter can return a 256- or 512-dimensional Matryoshka vector because each prefix is trained to remain useful. Moving an ANN index from 1536 to 256 dimensions cuts its raw vector storage by about six times and reduces search work. The recall loss is model- and corpus-specific, so compare Recall@k at several sizes. Re-ranking with full vectors requires generating and retaining those full embeddings outside the ANN index, or recomputing them for the candidates; that extra storage or API work belongs in the comparison.
+> [!QUESTION]- How do Matryoshka embeddings reduce vector storage, and how should the smaller size be validated?
+> Matryoshka training makes shorter prefixes of the full vector useful on their own, so a model with a `dimensions` option can return 256 or 512 values instead of the full size. Indexing 256 rather than 1536 float values cuts raw ANN vector storage by about six times and also reduces similarity work. Recall is not guaranteed, so the same labeled queries must be compared at several dimensions using Recall@k and latency. If full vectors are used for reranking, retaining or recomputing them adds storage, API cost, or latency outside the smaller index.
 
 > [!QUESTION]- Why can switching to a higher-scoring embedding model cause recall to drop on existing queries?
 > Each model defines its own vector space. Comparing a query from the new model with stored vectors from the old one produces meaningless distances and broken rankings. Build the new corpus index before switching query traffic, and include the model name and version in embedding-cache keys.

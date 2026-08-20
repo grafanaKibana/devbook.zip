@@ -207,10 +207,10 @@ Schema changes take provider-specific locks and may scan or rewrite a large tabl
 
 # Questions
 
-> [!QUESTION]- How does EF Core's change tracker work, and when should you disable it?
-> Tracking queries attach entity instances to the context and provide identity resolution. The default change-detection strategy compares current values with tracked original state when changes are detected. Use `.AsNoTracking()` for a read model that will not be updated through that context. Reattaching a disconnected entity is possible, but the application must then define which properties are modified and how concurrency is checked.
+> [!QUESTION]- How does EF Core change tracking work, and when is a no-tracking query appropriate?
+> A tracking query attaches its entity instances to the context and reuses the same instance when the same entity key appears again. With the default snapshot strategy, EF Core compares current values with the tracked original values when change detection runs, normally before `SaveChanges()`. `.AsNoTracking()` fits a read-only result that will not be updated through that context. If a disconnected entity is attached later, the application must state which properties changed and how concurrency will be checked.
 
-> [!QUESTION]- What is the N+1 query problem and how do you detect it?
+> [!QUESTION]- What is the N+1 query problem, and how can it be detected?
 > N+1 means one query loads parent rows and later navigation access issues another query for each parent. Detect it by counting database commands per operation and inspecting generated SQL in logs or tracing. Fix the query shape with a projection, an explicit include, or a deliberate second query. The choice depends on result size and consistency needs. There is no universal collection-size threshold for split queries.
 
 # References

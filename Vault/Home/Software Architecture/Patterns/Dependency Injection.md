@@ -252,7 +252,7 @@ The container cannot construct a graph in which `A` requires `B` and `B` require
 > - **Singleton:** one instance for the application lifetime, suitable for a thread-safe cache or `IClock`.
 > Lifetime is a shared-state decision, not a performance setting. A singleton cannot safely capture a scoped service.
 
-> [!QUESTION]- What is a captive dependency, and how do you fix it?
+> [!QUESTION]- What is a captive dependency, and how can it be fixed?
 > A captive dependency appears when a longer-lived service stores a shorter-lived one, classically an `IHostedService` holding a scoped `DbContext`. The scoped object escapes its boundary, so request state may leak across work and disposal happens too late. Scope validation catches this configuration when enabled. The repair is to inject `IServiceScopeFactory`, create a short scope for the operation, resolve the scoped service inside it, and dispose the scope when the operation ends.
 
 # References

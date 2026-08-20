@@ -63,8 +63,8 @@ This is not an API gateway. A gateway governs inbound traffic to APIs the organi
 
 # Questions
 
-> [!QUESTION]- A small CRUD service is expected to grow, but its domain rules are still simple. Which application architecture is the safest starting point, and what evidence would justify moving toward Clean Architecture?
-> Start with a layered structure and keep domain logic separate from infrastructure. Move toward Clean Architecture when valuable business policy needs protection from framework churn, inward dependency rules prevent recurring coupling, and the added ports and adapters pay for themselves in testing or change isolation.
+> [!QUESTION]- How should a small CRUD service with simple domain rules be structured if growth is expected?
+> Expected growth alone is not enough reason to start with the full ceremony of Clean Architecture. A layered structure is usually sufficient, provided domain logic does not leak into controllers or infrastructure code. Stricter inward dependency rules become useful when valuable business policy is repeatedly coupled to a framework, database, or external service. Ports and adapters should earn their cost through faster tests or clearer change isolation, not through the possibility that the service may become complex later.
 
 # References
 

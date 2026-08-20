@@ -31,8 +31,8 @@ return FolderStructureMap;
 > When input sizes are small and bounded (e.g., iterating over 10 HTTP headers), constant factors and cache locality dominate. A theoretically better algorithm with higher overhead (setup cost, memory indirection) can be slower than a simpler one on small inputs.
 > This is why .NET's `Array.Sort` uses insertion sort for small subarrays inside its introspective sort implementation.
 
-> [!QUESTION]- How do you decide between optimizing data structure choice versus algorithm choice?
-> Start with the dominant operation. A `HashSet<T>` removes repeated membership scans, while a `SortedSet<T>` maintains order as values change. Algorithm work becomes the next lever when the representation is fixed by an external format or when the chosen structure still leaves substantial work per operation.
+> [!QUESTION]- What determines whether a performance problem needs a different data structure or a different algorithm?
+> The dominant operation is the starting point. A `HashSet<T>` removes repeated membership scans, while a `SortedSet<T>` keeps the set ordered as items are added or removed. If a change affects an item's sort order, remove it and add it again. The algorithm becomes the next target when the representation is fixed by an external format or the chosen structure still leaves too much work in each operation.
 
 # References
 

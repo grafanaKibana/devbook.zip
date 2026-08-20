@@ -34,7 +34,7 @@ The patterns solve different construction problems. The condition in the last co
 # Questions
 
 > [!QUESTION]- How do Factory Method and Abstract Factory differ?
-> Factory Method lets a creator subtype choose one product implementation. Abstract Factory is a composed object that supplies several related product types as one family. The former varies a creation step inside inheritance. The latter moves a family choice behind an injected factory.
+> Factory Method uses inheritance: a creator subclass chooses one product implementation for a step in its workflow. Abstract Factory uses composition: an injected factory creates several related products as one family. Factory Method fits when one creation step varies. Abstract Factory fits when a whole compatible set must change together.
 
 # References
 

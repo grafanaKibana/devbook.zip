@@ -50,8 +50,8 @@ The "tool quality" principle in the [[Home/AI & ML/LLM/Agents/Agents|Agents]] hu
 
 # Questions
 
-> [!QUESTION]- What is harness engineering, and how does it differ from context engineering?
-> Harness engineering designs the tools and execution boundary that the model acts through. Context engineering selects what the model sees, while loop engineering controls how work continues across turns. Tool schemas and results connect these concerns, but capability and permission decisions still belong to the harness.
+> [!QUESTION]- What does harness engineering control that context engineering does not?
+> Context engineering decides what information the model receives. Harness engineering decides what the runtime allows the model to do with that information: which tools are exposed, what permissions they have, how calls are validated, and where execution is sandboxed or stopped for approval. Tool schemas and results connect the two areas because they consume context, but capability and permission decisions still belong to the harness. Loop engineering then controls whether another turn is allowed.
 
 > [!QUESTION]- Why does harness quality deserve as much investment as prompt quality for agent reliability?
 > Agents reuse the harness on every iteration. An ambiguous tool or vague error can redirect one step and then contaminate every later step. A precise contract helps the model recover, and repairing it improves every run that shares the surface.

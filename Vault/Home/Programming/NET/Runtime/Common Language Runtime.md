@@ -120,11 +120,15 @@ Managed exception dispatch uses two logical passes. The search pass walks frames
 
 # Questions
 
-> [!QUESTION]- What is managed vs unmanaged code? Why does unmanaged interop require careful lifetime management?
-> Managed code executes with runtime metadata and services. Unmanaged code follows the native platform's own ABI and ownership rules. A P/Invoke signature must match that ABI, including calling convention, layout, encoding, and ownership. The GC cannot release a native resource merely because its managed wrapper is no longer useful. `SafeHandle` plus deterministic disposal keeps the handle valid across calls and gives release one owner.
+> [!QUESTION]- How do managed and unmanaged code differ, and why does interop require careful lifetime management?
+> Managed code runs under the CLR, which uses metadata to provide services such as garbage collection, type checks, and exception handling. Unmanaged code runs as native code and follows the platform's ABI. A P/Invoke or other interop signature must match that ABI, including the calling convention, data layout, and encoding. A mismatch can corrupt the arguments, returned data, or call stack.
+>
+> Resource lifetime is a separate contract defined by the native API: which side allocates the resource, which side owns it, and which function releases it. The GC can track a managed wrapper, but it does not know that native ownership contract. An owned handle should normally be placed in `SafeHandle` and released through deterministic disposal. The wrapper then keeps the handle valid during native calls and releases it once with the correct native operation.
 
-> [!QUESTION]- What is the CLR and IL? How does JIT compilation affect startup vs steady-state performance, and when is NativeAOT a better choice?
-> IL is the intermediate instruction set stored with type metadata in ordinary managed assemblies. JIT deployments compile executed methods on demand, then tier hot code using runtime observations. This creates first-use work but preserves runtime adaptation and dynamic-code features. Native AOT moves code generation to publish time and removes the runtime JIT. It is a better fit when startup or footprint measurements matter and every dependency survives trimming and AOT analysis.
+> [!QUESTION]- How does the CLR run IL, and when does JIT or Native AOT make more sense?
+> Most .NET builds store IL together with type metadata in an assembly. The CLR loads that assembly, and a JIT deployment compiles each method when it is first used. Tiered compilation can later replace frequently executed methods with more optimized code. This adds first-use work, but it allows runtime optimization and supports dynamic-code features.
+>
+> Native AOT compiles the application at publish time, so the deployed process has no JIT compilation step. It can be a better fit when measured startup time or footprint matters, but dependencies must survive trimming and AOT analysis, and features that require runtime code generation may not work.
 
 # References
 

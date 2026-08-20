@@ -159,14 +159,14 @@ Use middleware when the concern belongs outside a particular endpoint model or m
 
 # Questions
 
-> [!QUESTION]- Action filter vs middleware: what is the difference?
-> Middleware wraps the HTTP pipeline and can cover controllers, Minimal APIs, static files, or requests that never reach an endpoint. MVC action filters run inside controller execution and can inspect bound arguments or results. Required scope and context decide between them.
+> [!QUESTION]- How does middleware differ from an MVC action filter?
+> Middleware runs around the broader HTTP pipeline, so it can handle requests before an endpoint is selected or even when no controller is involved. An action filter runs inside MVC around a controller action, where it can work with bound arguments, model state, and action results. Middleware fits application-wide HTTP concerns; an action filter fits behavior that specifically needs MVC context.
 
-> [!QUESTION]- How can you centrally catch errors for all requests?
-> Put exception-handling middleware near the start of the pipeline so it wraps downstream components. `UseExceptionHandler` can route failures into a consistent Problem Details response, while the developer exception page remains a development-only diagnostic.
+> [!QUESTION]- How are unhandled exceptions handled consistently across an ASP.NET Core application?
+> Exception-handling middleware is placed near the start of the pipeline so it wraps the components registered after it. When downstream code throws, `UseExceptionHandler` can log the failure and produce one safe response format, usually Problem Details. The developer exception page is useful during development, but it should not expose stack traces in production.
 
-> [!QUESTION]- What is the ASP.NET request processing pipeline?
-> The server passes each request through registered middleware in order. Routing selects an endpoint, authorization may stop execution, and the chosen handler eventually produces the response. Control then returns through earlier middleware in reverse order for post-processing.
+> [!QUESTION]- How does a request move through the ASP.NET Core middleware pipeline?
+> The request enters each registered middleware in order. A middleware can handle it immediately or call the next component; routing selects an endpoint, authorization may stop the request, and the endpoint eventually creates the response. Control then returns through the earlier middleware in reverse order, which allows work such as response headers, logging, or cleanup after the endpoint runs.
 
 # References
 

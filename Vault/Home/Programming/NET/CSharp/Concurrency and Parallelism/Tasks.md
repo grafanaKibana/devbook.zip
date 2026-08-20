@@ -152,16 +152,16 @@ Bound concurrency according to the scarce resource. `Parallel.ForEachAsync`, a c
 # Questions
 
 > [!QUESTION]- Why is `Task` not equivalent to a thread?
-> `Task` models an operation's eventual outcome. A thread is an execution resource. Asynchronous I/O can remain incomplete while no managed thread is assigned to it. Threads are needed when code actually runs, including when completions resume the state machine.
+> A `Task` represents an operation that may finish later and records whether it completed, failed, or was canceled. A thread is a resource that executes code. A task for asynchronous I/O can remain incomplete while no managed thread is assigned to it; a thread is needed only when code starts the operation or resumes after completion.
 
-> [!QUESTION]- When should `Task.Run` be used in ASP.NET Core?
-> Do not wrap asynchronous request I/O in `Task.Run`. For CPU-bound work, `Task.Run` can move execution to the pool, but it does not create more CPU capacity and can reduce server throughput under load. Long or expensive work usually belongs behind a bounded background queue or separate service.
+> [!QUESTION]- When is `Task.Run` appropriate in ASP.NET Core?
+> `Task.Run` can move CPU-bound work to a thread-pool thread, but it does not add CPU capacity. Under load, those extra work items compete with request processing and can reduce throughput. It should not wrap I/O APIs that are already asynchronous. Long or expensive work usually belongs behind a bounded background queue or in a separate service instead of running inside the request.
 
-> [!QUESTION]- Why is `Task.WhenAll` usually better than sequential `await` for independent calls?
-> Starting independent operations before awaiting the combined task allows their waits to overlap. `WhenAll` only coordinates tasks already supplied to it. It does not make synchronous work parallel. The concurrency must still respect downstream and connection limits.
+> [!QUESTION]- Why can `Task.WhenAll` reduce the elapsed time for independent async calls?
+> If the operations are started before they are awaited, their waiting time can overlap. `Task.WhenAll` then completes when all of those tasks finish, so the elapsed time is closer to the slowest call than to the sum of every call. It only coordinates tasks that have already started; it does not make synchronous work parallel, and the fan-out must still respect connection and downstream limits.
 
-> [!QUESTION]- When should you use `ValueTask` instead of `Task`?
-> Use it when profiling shows completed `Task` allocations matter, synchronous completion is common, and callers can follow single-consumption rules. `Task` remains the simpler default because it can be stored, shared, and awaited repeatedly.
+> [!QUESTION]- When is `ValueTask` worth using instead of `Task`?
+> `ValueTask` is useful in a measured hot path where operations often complete synchronously and allocating a completed `Task` is a real cost. Its consumption rules are stricter: depending on what backs it, the value may be safe to await only once and should not be cached or shared directly. `Task` remains the simpler choice when the result needs to be stored, shared, or awaited more than once.
 
 # References
 

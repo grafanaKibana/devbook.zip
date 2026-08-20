@@ -198,8 +198,8 @@ Queue depth alone hides whether one old message is stuck or fresh traffic is arr
 
 # Questions
 
-> [!QUESTION]- When do you choose Kafka over RabbitMQ for a .NET service?
-> Choose Kafka for high-throughput, replayable event streams and RabbitMQ for low-latency work queues or routing-key patterns. In either case, define the ordering boundary per partition or queue key and include operational complexity and team experience in the decision.
+> [!QUESTION]- How do Kafka and RabbitMQ fit different messaging workloads in a .NET service?
+> Kafka fits high-throughput event streams that must be retained and replayed. RabbitMQ fits low-latency work queues and messages that need flexible routing. For either broker, the design still needs a clear ordering boundary, such as a Kafka partition or a RabbitMQ queue, and the decision must include operating cost and the team's experience.
 
 # References
 

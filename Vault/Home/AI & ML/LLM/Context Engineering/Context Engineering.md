@@ -118,7 +118,7 @@ The smallest context that answers the task is the starting point. Retrieval and 
 > Attention is uneven across a long window, so evidence buried in the middle may be underused. Added tokens also compete with the evidence already present, even when they are loosely relevant. Larger inputs cost more and take longer. The fix is signal density: keep fewer complete chunks, order them deliberately, and measure whether each increase in context improves the answer.
 
 > [!QUESTION]- What are the main techniques for keeping a long-running agent's context under control?
-> Track the token budget on every iteration. Select a small set of strong evidence and put the best material where the model will use it. Compact old turns, trim tool results to the fields needed next, and offload bulky state behind references.
+> Context control starts with tracking the token budget on every iteration instead of waiting for the window to fill. Keep a small set of strong evidence and place the best material where the model is likely to use it. Older turns can be compacted into decisions, constraints, and pending work. Tool results should contain only the fields needed for the next step, while bulky state can live outside the window and be loaded through a reference when needed.
 # References
 
 - [Lost in the Middle: How Language Models Use Long Contexts (Liu et al., 2023)](https://arxiv.org/abs/2307.03172)

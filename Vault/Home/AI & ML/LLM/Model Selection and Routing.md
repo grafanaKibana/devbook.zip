@@ -97,11 +97,14 @@ Versions should be pinned where the provider allows it. A model change behind an
 
 # Questions
 
-> [!QUESTION]- Why are “frontier is best” and “small is cheap” insufficient selection rules?
-> They describe common tendencies rather than results for a particular task and serving stack. Selection needs measured quality, safety, latency, and cost per successful task on the same workload.
+> [!QUESTION]- What matters when choosing an LLM?
+> Model size and labels such as "frontier" are only starting points. A frontier model may produce better answers but miss the latency or cost target. A smaller model may look cheap until retries and human escalation are included.
+> Candidates should be tested on the same representative workload for task quality, safety, reliability, latency, and total cost per successful task. The best choice is the least expensive model that meets all required targets.
 
-> [!QUESTION]- What determines whether a classifier or cascade is the better router?
-> A classifier fits tasks whose difficulty can be predicted before generation and where duplicate latency is expensive. A cascade fits tasks whose first result exposes a cheap, reliable failure signal. Both require end-to-end evaluation because classifier misses and cascade retries fail differently.
+> [!QUESTION]- How do classifier routing and cascading differ, and when is each useful?
+> A classifier chooses a model before generation based on the predicted task type or difficulty. It is useful when those signals are reliable and generating a second answer would cost too much or take too long. Its main risk is sending a hard request to a model that cannot handle it.
+> A cascade starts with one model and decides whether to escalate after checking its answer. It works well when failures can be detected with a cheap, reliable signal, such as schema validation or a groundedness check. Failed first attempts pay for a second generation and add latency.
+> The patterns can also work together: a classifier can choose the initial route, while a cascade handles answers that fail a quality gate. The complete route should be evaluated for end-to-end quality, cost, and tail latency.
 
 # References
 

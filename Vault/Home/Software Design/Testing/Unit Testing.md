@@ -151,8 +151,8 @@ Choose the lowest-cost layer that can expose the failure faithfully. Determinist
 > [!QUESTION]- What is the difference between a stub and a mock?
 > A stub supplies answers needed to reach the behavior. A mock is configured with interaction expectations and verifies them. A spy records calls for later assertions, while a fake provides a working simplified implementation. Frameworks often let one object play several roles, so the distinction is about how the test uses the double. Prefer result assertions when they expose the behavior, and interaction assertions when the command itself is the observable contract.
 
-> [!QUESTION]- When should you NOT write unit tests?
-> Skip an independent unit test when it merely repeats language or framework behavior, such as an uncustomized property accessor. Visual rendering, dependency registration, configuration binding, and provider semantics need a layer that can observe those boundaries. Exploratory code may begin without tests, but any behavior retained in production needs evidence proportional to its risk. The question is not whether a line has a test. It is whether a realistic failure would be caught at the cheapest faithful layer.
+> [!QUESTION]- When is a unit test the wrong testing layer?
+> A unit test adds little value when it only repeats language or framework behavior, such as an uncustomized property accessor. Failures in visual rendering, dependency registration, configuration binding, or database-provider behavior need a component or integration test that can observe that boundary. Exploratory code may start without tests, but behavior kept in production still needs evidence that matches its risk. The best layer is the cheapest one that can catch the realistic failure.
 
 # References
 

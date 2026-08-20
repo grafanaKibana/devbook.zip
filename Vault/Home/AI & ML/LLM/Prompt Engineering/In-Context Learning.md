@@ -136,19 +136,11 @@ Start zero-shot. Add one example for a stubborn output contract, then add only t
 
 # Questions
 
-> [!QUESTION]- When should you start with zero-shot versus few-shot?
-> - Start zero-shot when instructions and labels fully define the task.
-> - Add one example when the main failure is output shape.
-> - Use few-shot when examples express decision boundaries more clearly than prose.
-> - Keep the smallest set that wins on a representative evaluation set.
-> Every example adds cost and another artifact that can drift.
+> [!QUESTION]- How should a task move from zero-shot to one-shot or few-shot prompting?
+> Zero-shot is the baseline when instructions and labels define the task clearly. One example is useful when the main failure is the output shape. Few-shot prompting earns its extra tokens when examples express decision boundaries better than prose. The final prompt should keep the smallest demonstration set that wins on a representative evaluation set, because every example adds cost and another artifact that can drift.
 
 > [!QUESTION]- What are the main failure modes of few-shot prompting?
-> - Sensitivity to ordering, formatting, and model changes.
-> - Context pressure from long demonstrations.
-> - Weakness on tasks that need external facts or reliable multi-step control.
-> - False confidence from examples that do not match production traffic.
-> Some failures require retrieval, decomposition, or training rather than another shot.
+> Few-shot behavior can shift when examples are reordered, reformatted, or run on a different model. Long demonstrations also consume context, while examples that do not match production traffic create false confidence. Examples cannot reliably supply missing external facts or control a long multi-step process. Those failures call for retrieval, decomposition, or training rather than simply adding more shots.
 
 # References
 

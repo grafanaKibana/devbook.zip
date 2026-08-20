@@ -239,8 +239,8 @@ Start with a constructor or object initializer. Builder earns a separate type wh
 
 # Questions
 
-> [!QUESTION]- When does Builder's `Build()` method justify its existence over a constructor?
-> `Build()` earns its place when it validates relationships among inputs or derives product state that callers must not calculate. Constructors may enforce invariants and throw when inputs violate them. A builder helps when valid inputs arrive across several calls and cannot be checked until the set is complete. Async initialization usually belongs in an asynchronous factory because a conventional `Build()` cannot be awaited.
+> [!QUESTION]- When is a Builder worth using instead of a constructor?
+> A Builder is useful when inputs arrive across several steps and the complete object must be checked before it is created. `Build()` can validate relationships between those inputs and calculate values that callers should not supply. A constructor is still better when all required values fit in one clear call and it can enforce the same invariants directly. Async initialization usually belongs in an asynchronous factory because a conventional `Build()` cannot be awaited.
 
 > [!QUESTION]- Why does `WebApplicationBuilder` use a builder instead of a constructor with parameters?
 > Hosting configuration arrives from several extension points before the application can be assembled. The builder gives those registrations one mutable setup phase, then `Build()` creates the service provider and host. Most dependency completeness remains a runtime property, so startup validation still matters.

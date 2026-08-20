@@ -115,8 +115,10 @@ var list = Activator.CreateInstance(closed);
 > [!QUESTION]- Why does `IEnumerable<string>` assign to `IEnumerable<object>`, but `List<string>` does not assign to `List<object>`?
 > `IEnumerable<out T>` only produces values, so treating a sequence of strings as a sequence of objects is safe. `List<T>` also accepts values. If a `List<string>` could masquerade as `List<object>`, a caller could insert a non-string and break the original list's contract.
 
-> [!QUESTION]- When should you mark a generic interface type parameter as `out` or `in`?
-> Use `out` for a parameter that appears only in output positions and `in` for one used only as input. A parameter that is both consumed and produced must remain invariant.
+> [!QUESTION]- When should a generic interface type parameter be marked as `out` or `in`?
+> Mark a type parameter as `out` when the interface only produces values of that type. This is why a producer of strings can safely be used where a producer of objects is expected. Mark it as `in` when the interface only consumes the type, so a consumer that accepts any object can also accept strings.
+>
+> If the interface both accepts and returns the type, it must remain invariant because either conversion could make a read or write unsafe. Variance applies only to reference-type substitutions.
 
 > [!QUESTION]- A generic method uses `default(T)` as a fallback value. Why can this be dangerous in production code?
 > `default(T)` may be `0`, `DateTime.MinValue`, a zeroed struct, or `null`. Those values can be valid domain data, so a failed lookup becomes indistinguishable from a real result. A `Try*` contract, nullable result, or explicit result type keeps the distinction visible.

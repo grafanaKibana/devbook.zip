@@ -108,7 +108,7 @@ Use TDD when the next behavior can be stated as an example and early caller feed
 
 # Questions
 
-> [!QUESTION]- Why does TDD improve design, not just test coverage?
+> [!QUESTION]- How can TDD improve design beyond increasing test coverage?
 > The test is the first concrete caller, so construction, inputs, outputs, and failure semantics must be expressed before implementation details dominate. Difficult setup is a design signal worth investigating, not proof that a class must be split. The benefit comes from selecting the next useful example and refactoring after it passes. A test that begins green may document existing behavior, but it does not prove that the intended production change was necessary.
 
 > [!QUESTION]- When is TDD not worth the overhead?

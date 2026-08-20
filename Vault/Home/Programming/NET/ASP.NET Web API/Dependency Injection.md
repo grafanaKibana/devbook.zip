@@ -143,10 +143,10 @@ The container owns disposal for instances it creates. Scoped disposables are rel
 # Questions
 
 > [!QUESTION]- What is a captive dependency and why is it dangerous?
-> A longer-lived service captures an object intended for a shorter boundary, extending that object's effective lifetime. Capturing a scoped `DbContext` in a singleton also exposes a non-thread-safe unit of work to concurrent operations. A captured transient is not automatically invalid, but it must be safe for the singleton's lifetime and concurrency.
+> A captive dependency appears when a long-lived service holds a dependency that was meant to live for less time. For example, a singleton that captures a scoped `DbContext` keeps it beyond one request and may share that non-thread-safe object across concurrent operations. A transient captured by a singleton also lives as long as the singleton, which is safe only if it can handle that lifetime and concurrency.
 
-> [!QUESTION]- How do you use a Scoped service inside a Singleton without a captive dependency?
-> Inject `IServiceScopeFactory`, create a scope for one operation, resolve the scoped service from that scope, and dispose the scope after the operation. A background loop usually creates a fresh scope on each iteration rather than retaining one for the worker's lifetime.
+> [!QUESTION]- How can a scoped service be used safely from a singleton?
+> The singleton should not keep the scoped service. Inject `IServiceScopeFactory`, create a new scope for each operation, resolve and use the service inside that scope, then dispose the scope. A background worker normally repeats this for every iteration instead of keeping one scope for the worker's lifetime.
 
 > [!QUESTION]- What is the difference between `GetService<T>` and `GetRequiredService<T>`?
 > `GetService<T>` returns `null` when no registration exists. `GetRequiredService<T>` throws `InvalidOperationException` at the point of resolution. Startup validation can move some failures earlier, but calling `GetRequiredService` alone does not guarantee startup-time failure.

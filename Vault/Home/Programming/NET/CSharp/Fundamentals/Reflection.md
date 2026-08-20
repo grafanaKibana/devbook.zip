@@ -109,11 +109,11 @@ var ctor = Expression.Lambda<Func<Jobs>>(Expression.New(typeof(Jobs))).Compile()
 > [!QUESTION]- Why is reflection often a bad default in performance-critical code?
 > Reflection moves member discovery, argument validation, and dispatch to runtime. That cost is often irrelevant during startup, but repeated lookup and invocation can dominate a small hot-path operation. Measure first, then cache metadata or bind a delegate when the same member is reused.
 
-> [!QUESTION]- What is an attribute and why is reflection central to attribute-driven frameworks?
-> An attribute is metadata attached to a program element. Reflection lets runtime infrastructure read it. A source generator can read the same metadata during compilation and emit direct code. The attribute itself does nothing until some tool interprets it.
+> [!QUESTION]- How do attributes become behavior at runtime?
+> An attribute only stores metadata on a type, member, or other program element. A framework uses reflection to find that metadata and decide what code to run, such as registering a test or mapping an HTTP route. The attribute itself does nothing until runtime code interprets it. A source generator can perform a similar interpretation during the build and emit direct code instead.
 
-> [!QUESTION]- When should you choose reflection versus alternatives like interfaces, generics, or source generators?
-> Use reflection when the shape is genuinely unknown until runtime. Use interfaces or generics when a compile-time contract can express the variation. Source generation fits repeated metadata-driven work whose shapes are known during the build, especially when trimming or Native AOT needs a visible call graph.
+> [!QUESTION]- How should code choose between reflection, interfaces or generics, and source generators?
+> Reflection fits cases where the types or members are genuinely unknown until runtime, such as loading plugins or inspecting external models. Interfaces and generics are simpler when the variation can be expressed as a compile-time contract. A source generator fits repeated metadata-driven work whose shapes are known during the build, especially when startup cost, trimming, or Native AOT makes runtime discovery a problem.
 
 # References
 

@@ -147,8 +147,8 @@ Keep lifetime validation enabled. Short access-token lifetimes bound exposure. A
 
 # Questions
 
-> [!QUESTION]- What does `ValidateIssuerSigningKey = true` actually enforce?
-> It enables validation of the issuer's signing key as part of token validation. Signature, issuer, audience, lifetime, and accepted algorithms still need a coherent configuration. No single flag establishes the whole trust boundary.
+> [!QUESTION]- What does `ValidateIssuerSigningKey = true` control during JWT validation?
+> For a signed token, the handler uses a resolved key to verify the signature. This flag tells the default validation path to also validate that signing key itself. It does not enable issuer, audience, lifetime, or algorithm validation, and a custom `IssuerSigningKeyValidator` runs regardless of the flag. The rest of the JWT validation settings still have to form one coherent trust configuration.
 
 # References
 

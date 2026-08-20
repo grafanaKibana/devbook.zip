@@ -216,8 +216,10 @@ Use both only when authoritative history and replay are requirements of the writ
 CQRS is worth considering when write invariants and query shapes pull the shared model in different directions. Independent scaling may strengthen the case, but a ratio alone is not enough.
 # Questions
 
-> [!QUESTION]- When is CQRS worth the operational complexity, and when is it an anti-pattern?
-> CQRS earns its cost when one model cannot express write invariants cleanly and also serve the required queries. A separate read model can then remove query compromises from the domain model. It is an anti-pattern when ordinary CRUD already meets consistency, latency, and scaling needs because the second model adds projection and recovery work without changing the constraint.
+> [!QUESTION]- When is CQRS useful, and when does it add unnecessary complexity?
+> CQRS is useful when the write side and the read side have clearly different needs. For example, writes may enforce order and payment rules, while reads need data prepared for fast searches and reports.
+>
+> It is not useful when the same model already handles both sides without difficulty. In that case, maintaining a separate read model and keeping it synchronized adds complexity without enough benefit.
 
 # References
 

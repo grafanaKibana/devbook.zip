@@ -369,22 +369,25 @@ The governing rule is ownership, not syntax. Each subscription, cache entry, tim
 
 # Questions
 
-> [!QUESTION]- What is a memory leak? Is it possible in .NET? How?
-> A memory leak is memory that is no longer useful but remains allocated or reachable beyond its intended lifetime. Sustained process growth is evidence to investigate, not part of the definition.
-> Yes, it is possible in .NET:
-> - Managed leaks: objects stay reachable (for example via static caches, event subscriptions, long-lived collections), so GC cannot collect them.
-> - Unmanaged leaks: native memory/handles are allocated (directly or indirectly) and not released (for example, missing `Dispose()` / `using`).
+> [!QUESTION]- Can a .NET application leak memory even though it has garbage collection?
+> Yes. The GC reclaims managed objects only after they become unreachable. If a static cache, event subscription, or long-lived collection still points to an object that is no longer useful, the object and everything it references remain alive. The collector is doing its job, but the application is keeping the object alive for too long.
+>
+> The GC does not own native memory or operating-system handles. They leak when their owner never releases them, usually through `Dispose()` or a safe wrapper such as `SafeHandle`. Repeated process growth is a reason to investigate, but a managed root path or an unreleased native allocation is what proves the leak.
 
-> [!QUESTION]- Why do we need `using {}` if there is a GC?
-> `using` provides deterministic cleanup for resources that are not just managed memory (file handles, sockets, OS handles, unmanaged buffers). GC runs non-deterministically and does not guarantee timely release of such resources.
-> The `using` statement provides `try/finally` cleanup semantics, so `Dispose()` is called when control leaves the scope, including through an exception.
+> [!QUESTION]- Why is `using` needed when .NET already has garbage collection?
+> The GC manages managed memory and decides for itself when to run. Resources such as file handles, sockets, operating-system handles, and unmanaged buffers often need to be released as soon as their owner is finished with them.
+>
+> A `using` statement gives that cleanup a clear scope. It has `try`/`finally` semantics, so `Dispose()` is called when control leaves the scope, including when an exception is thrown.
 
-> [!QUESTION]- What are `IDisposable` and `Finalize`?
-> `IDisposable` is an interface for explicit, deterministic cleanup via `Dispose()`.
-> `Finalize` (a finalizer, written as `~TypeName()` in C#) is scheduled after a finalizable object becomes unreachable, but its timing is non-deterministic and execution is not guaranteed during abrupt process termination. A custom finalizer is reserved for directly owned unmanaged resources when no suitable `SafeHandle` exists. `Dispose()` normally calls `GC.SuppressFinalize(this)` after successful cleanup.
+> [!QUESTION]- How do `IDisposable` and a finalizer differ?
+> `IDisposable` provides explicit cleanup through `Dispose()`. The owner can call it directly or use `using`, so the resource is released at a known point.
+>
+> A finalizer is a fallback that the runtime may run after the object becomes unreachable. Its timing is unpredictable, and it is not guaranteed during abrupt process termination. A custom finalizer is normally needed only when a type directly owns an unmanaged resource and no suitable `SafeHandle` exists. After explicit cleanup succeeds, `Dispose()` calls `GC.SuppressFinalize(this)` to avoid the extra finalization work.
 
-> [!QUESTION]- What is the disposable (dispose) pattern?
-> A standard way to make resource ownership explicit and cleanup idempotent. `Dispose()` releases owned disposable state and suppresses finalization when a finalizer exists. The extensible form uses `Dispose(bool disposing)`. A finalizer is added only for direct unmanaged ownership that cannot be delegated to a safe wrapper.
+> [!QUESTION]- How does the .NET dispose pattern work?
+> `Dispose()` releases the resources owned by the object and must be safe to call more than once. In an inheritable type, the public method normally calls a protected `Dispose(bool disposing)` method and then suppresses finalization. The `disposing` flag is `true` during explicit cleanup, when owned managed disposables can also be released.
+>
+> A finalizer is added only when the type directly owns an unmanaged resource that cannot be delegated to a safe wrapper. Its path calls `Dispose(false)`, which releases only that unmanaged state because other managed objects may already have been finalized.
 
 # References
 

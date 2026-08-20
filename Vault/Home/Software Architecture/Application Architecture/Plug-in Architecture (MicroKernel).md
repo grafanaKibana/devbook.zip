@@ -107,8 +107,8 @@ Use plug-in architecture when extensions must ship independently of the core or 
 
 # Questions
 
-> [!QUESTION]- How do you prevent version conflicts between plug-ins that depend on different versions of the same library?
-> Load each plug-in's private dependencies through its own `AssemblyLoadContext`. Plug-in A can then resolve `Newtonsoft.Json` 12.x while plug-in B resolves 13.x. The host contract must remain shared from the default context. Loading a second copy creates a different type identity even when the assembly name and source code match. Crossing contexts is easiest through contract types and plain data.
+> [!QUESTION]- How can plug-ins use different versions of the same dependency without breaking the host contract?
+> Each plug-in can load its private dependencies through its own `AssemblyLoadContext`. Plug-in A may then resolve `Newtonsoft.Json` 12.x while plug-in B resolves 13.x. The extension contract must still come from the host's default context. If a plug-in loads another copy of that contract assembly, its types have a different identity even when the name and source code match. Values should cross the boundary through the shared contract types and plain data.
 
 > [!QUESTION]- When is plug-in architecture the wrong choice?
 > It is the wrong choice when one team owns all features and releases them with the host. Dynamic loading and contract compatibility add failure modes without creating independent delivery. A modular monolith with feature flags handles that case with fewer moving parts. Plug-ins earn their cost when an extension must evolve without changing or rebuilding the core.

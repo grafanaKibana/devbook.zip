@@ -110,11 +110,11 @@ MCP earns its overhead when several clients need the same integration or when ca
 
 # Questions
 
-> [!QUESTION]- When would you choose function calling over MCP even for a shared tool?
-> Keep the tool in process when it depends on private application state, belongs to one client, or does not justify another deployment boundary. This is often easier to debug because schema and implementation live together. A shared tool may still stay in process when exposing it as a server would widen access to sensitive business logic.
+> [!QUESTION]- When should a tool remain an in-process function instead of becoming an MCP server?
+> Function calling and MCP are not direct alternatives, because an MCP tool can still be presented to the model as a function. The real decision is whether the tool needs a separate reusable server boundary. Keeping it in process is simpler when it belongs to one application, depends on private application state, or would expose sensitive business logic through a broader interface.
 
-> [!QUESTION]- What makes MCP servers harder to secure than traditional REST APIs?
-> An MCP server combines an API boundary with model-controlled selection and untrusted descriptions. It may also hold broad database or file access. Transport authorization confirms who connected, but per-tool authorization and input validation still have to be implemented by the server. Traditional API controls such as rate limits, tenant isolation, and audit logging remain necessary.
+> [!QUESTION]- What additional security risks appear when a model uses tools from an MCP server?
+> An MCP server still has the usual API risks, but its tool names and descriptions also become model context, and the model may request an operation after reading untrusted content. With HTTP, MCP authorization can restrict access to the server and enforce OAuth audience and scopes; insufficient scope can trigger another authorization step. Those scopes do not automatically define whether a caller may run each business operation or access a particular tenant's data. The server still needs per-tool authorization, input validation, tenant isolation, rate limits, and audit logging.
 
 # References
 

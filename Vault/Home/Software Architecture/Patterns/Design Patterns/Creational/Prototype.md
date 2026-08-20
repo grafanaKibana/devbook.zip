@@ -140,8 +140,8 @@ New record fields participate in the compiler-generated copy automatically. Refe
 
 # Questions
 
-> [!QUESTION]- What pressure justifies Prototype instead of direct construction?
-> The new object begins as a variant of an existing configured instance, or the client knows only an abstract type and needs that runtime object to reproduce itself. Direct construction remains clearer when there is no meaningful template or runtime-type boundary.
+> [!QUESTION]- When is Prototype useful instead of constructing an object directly?
+> Prototype fits when the new object starts as a variant of an existing configured instance. It also fits when code knows only an abstraction and the runtime object must copy its own concrete type. Direct construction is clearer when there is no useful template and the runtime type is already known.
 
 > [!QUESTION]- Where is the boundary between a shallow and a deep copy?
 > A shallow copy duplicates the outer object's fields and preserves references to nested objects. A deep-copy policy replaces the mutable nested state that must evolve independently. Copying every reachable object is rarely the real requirement. Ownership and identity decide where copying stops.

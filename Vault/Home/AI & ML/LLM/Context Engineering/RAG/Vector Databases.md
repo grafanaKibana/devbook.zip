@@ -118,7 +118,7 @@ HNSW is a practical starting point for a typical text corpus. IVF or IVF-PQ beco
 # Questions
 
 > [!QUESTION]- Why do vector databases use approximate nearest-neighbor search instead of exact search?
-> Exact search compares the query with every vector, which costs O(N) per request. ANN indexes search only a promising part of the collection and return most true neighbors much faster..
+> Exact search scores the query against every stored vector, so its work grows linearly with the collection. An ANN index organizes the vectors so a query visits only the most promising parts of the search space, which cuts latency and compute. The tradeoff is that it can miss some true nearest neighbors, so recall must be compared with brute-force ground truth at the required latency.
 
 # References
 

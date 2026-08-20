@@ -131,7 +131,7 @@ Shard requests are retry-safe only when the operation is idempotent or deduplica
 
 # Questions
 
-> [!QUESTION]- When should you shard a database?
+> [!QUESTION]- What evidence justifies sharding a database?
 > Scale-driven sharding is justified after evidence shows that write throughput or storage exceeds one ownership domain and simpler measures cannot remove the ceiling. Hard tenant isolation, locality, or data-placement constraints can justify it earlier. Read replicas help reads, caches remove repeated reads, and in-engine partitioning improves manageability without creating cross-database transactions.
 
 # References

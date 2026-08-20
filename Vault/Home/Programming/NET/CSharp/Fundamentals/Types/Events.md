@@ -111,11 +111,11 @@ public sealed class Listener : IDisposable
 
 # Questions
 
-> [!QUESTION]- How is an event different from a delegate field in terms of access control?
-> An event exposes only `add`/`remove` from outside the declaring type. A delegate field can be invoked, replaced, or nulled by external callers. Events preserve publisher ownership of invocation.
+> [!QUESTION]- What is the difference between an event and a public delegate field?
+> Outside code can only subscribe to or unsubscribe from an event. The type that declares the event keeps control over when it is raised. A public delegate field also lets outside code invoke the delegate, replace its handlers, or set it to `null`, which can break the publisher's notification logic.
 
-> [!QUESTION]- Why do event leaks happen, and how do you prevent them?
-> The publisher keeps strong references to subscriber handlers. If the publisher outlives subscribers, those subscribers cannot be garbage-collected. Prevent with explicit unsubscribe (`Dispose`), weak-event pattern, or scoped subscription helpers.
+> [!QUESTION]- Why can event subscriptions cause memory leaks, and how can they be prevented?
+> The publisher stores each handler, and the handler normally holds a strong reference to its subscriber. If the publisher lives longer, that reference keeps the subscriber alive even when the rest of the application no longer uses it. The subscription should be removed when the subscriber's lifetime ends, commonly through `Dispose`. Weak-event patterns or scoped subscription helpers are alternatives when explicit ownership is difficult.
 
 # References
 

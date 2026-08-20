@@ -209,11 +209,11 @@ Default to `sealed` when inheritance is not part of the design. Use a `record cl
 
 # Questions
 
-> [!QUESTION]- How does an `abstract class` differ from an interface with default members, and when does the abstract class fit better?
-> Both can provide implementation. An abstract class may also own instance fields, constructors, and protected state, while a class can inherit from only one base class. An interface carries no instance fields and lets one class implement several contracts. Choose the abstract class when the shared state or construction protocol is part of the model. Choose the interface when callers need a capability and implementations should remain unrelated.
+> [!QUESTION]- What is the difference between an abstract class and an interface with default members, and when is an abstract class a better fit?
+> Both can contain implemented members. An abstract class can also store instance state, define constructors, and expose protected members, but a class can inherit from only one base class. An interface has no instance fields, and a class can implement several interfaces. An abstract class fits when derived types must share state or initialization rules. An interface fits when callers only need a common capability and the implementations do not belong in one inheritance hierarchy.
 
 > [!QUESTION]- Why can't a static class implement an interface?
-> A static class has no instance to convert to an interface value. For instance polymorphism, use a regular class and choose its lifetime through dependency injection. Generic algorithms that need type-level operations can use static abstract interface members and a constrained type parameter.
+> An interface normally describes behavior on an object. A static class has no instances, so no object can be assigned to an interface variable. When an implementation needs to be injected or replaced, use a regular class and choose its lifetime through dependency injection. A generic algorithm that needs operations on the type itself can use static abstract interface members with a constrained type parameter.
 
 > [!QUESTION]- A `sealed override` stops further overriding, but can a derived class use `new` to hide the sealed method? What happens at runtime?
 > Yes, `new` compiles and hides the sealed method. But the behavior depends on the variable's compile-time type:

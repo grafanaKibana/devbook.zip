@@ -23,11 +23,10 @@ return FolderStructureMap;
 
 # Questions
 
-> [!QUESTION]- How do you choose between a monolith, a modular monolith, and microservices?
-> - A monolith keeps one deployment and local transactions, which suits a small team while domain boundaries are still moving.
-> - A modular monolith adds enforced module seams without adding network failure or separate operations. It is the safer default when one deployment is not blocking delivery.
-> - Microservices fit stable boundaries that repeatedly need independent deployment, scaling, or ownership. The split adds remote calls, separate data ownership, eventual-consistency workflows, and distributed observability.
-> Good module seams make later extraction safer, but they do not remove those costs.
+> [!QUESTION]- What factors determine whether a system should use a monolith, a modular monolith, or microservices?
+> A monolith keeps one deployment and local transactions, so it usually fits a small team while domain boundaries are still changing. A modular monolith adds enforced module boundaries without introducing network failures or separate operations. It is a safer default when one deployment is not slowing delivery.
+>
+> Microservices fit stable boundaries that repeatedly need independent deployment, scaling, or ownership. That independence comes with remote calls, separate data ownership, eventual-consistency workflows, and distributed observability. Strong module boundaries make a later extraction safer, but they do not remove those costs.
 
 # References
 

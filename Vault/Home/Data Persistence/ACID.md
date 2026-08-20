@@ -161,8 +161,8 @@ await db.SaveChangesAsync();
 
 # Questions
 
-> [!QUESTION]- What isolation level should you use for a read-modify-write transaction, and why?
-> Match the protection to the invariant. Repeatable Read stabilizes repeated reads and may protect a same-row update under the engine's semantics, but it does not generically prevent write skew. For a financial or inventory decision spanning rows or a predicate, use Serializable or explicitly lock the full invariant set. Optimistic row-version checks are a lower-contention option only when the transaction validates every record whose version informed the decision.
+> [!QUESTION]- What determines the isolation level needed for a read-modify-write transaction?
+> The required protection depends on the invariant and on every row or predicate used to make the decision. Repeatable Read stabilizes repeated reads and may protect an update to the same row under the database engine's rules, but it does not generally prevent write skew. A financial or inventory decision that spans rows or a predicate needs Serializable isolation or explicit locks over the full set. Optimistic row-version checks reduce contention only when the transaction validates every record that influenced the decision.
 
 # References
 

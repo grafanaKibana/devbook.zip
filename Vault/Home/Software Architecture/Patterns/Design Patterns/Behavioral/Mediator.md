@@ -141,8 +141,8 @@ Cross-cutting fraud screening can sit in a pipeline behavior shared by every rel
 
 # Questions
 
-> [!QUESTION]- When does Mediator become a bottleneck or anti-pattern?
-> A mediator has failed when it owns the business logic rather than routing it. Moving a 300-line workflow from a controller into one handler changes location, not complexity. Direct dependencies remain better for simple, stable interactions.
+> [!QUESTION]- What are the signs that a mediator is adding indirection without reducing coupling?
+> A mediator should route work, not become the place where business rules accumulate. Moving a 300-line workflow from a controller into one handler changes its location without reducing its complexity or dependencies. For a simple, stable interaction, a direct dependency is usually clearer.
 
 > [!QUESTION]- How do MediatR pipeline behaviors implement the Chain of Responsibility pattern?
 > Each `IPipelineBehavior<TRequest, TResponse>` wraps the next delegate. It calls `next()` to continue or returns its own response to stop. DI registration supplies the order, so the chain is less visible than explicit `SetNext()` calls but centralized in application composition.

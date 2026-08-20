@@ -242,16 +242,18 @@ Console.WriteLine(a.Items.Count); // 3 — same list instance
 > [!QUESTION]- In `record Wrapper(List<int> Items)`, if `var b = a with { };` and an item is added to `b.Items`, does `a` observe the change, and why?
 > Yes. The copy is shallow, so both properties hold the same `List<int>` reference. Record equality also delegates to the list's equality, which remains reference-based before and after the mutation. A model that needs structural collection equality must choose a suitable immutable value or implement that equality explicitly.
 
-> [!QUESTION]- When would you choose `record class` over `readonly record struct`?
-> Choose `record class` when reference identity for the instance lifetime is acceptable, inheritance is required, or copying a large value would be costly. It also has natural `null` semantics. Reference members alone do not decide the question: a record struct can contain them, though those referenced objects still allocate independently.
+> [!QUESTION]- When is `record class` a better choice than `readonly record struct`?
+> A `record class` is a reference type, so assignment copies a reference instead of the whole value. It is a better fit when inheritance or natural `null` semantics are needed, or when copying a large value would be expensive.
 > 
-> Choose `readonly record struct` for a small logical value when copies are cheap, inheritance is unnecessary, and boxing is controlled. Allocation and copy behavior should be measured in the actual call path rather than inferred from the declaration alone.
+> A `readonly record struct` fits a small logical value when whole-value copies are cheap and inheritance is unnecessary. Boxing and frequent copies can remove its allocation advantage, so the real call path still needs measurement. Reference members do not decide the choice by themselves; either form can contain references to separately allocated objects.
 
 > [!QUESTION]- If `Equals` on a positional record is overridden to ignore one property, does `GetHashCode` still include that property, and what breaks?
-> A custom strongly typed `Equals` changes the equality contract, while the synthesized hash still follows the record's members unless `GetHashCode` is also overridden. Equal values may then produce different hashes and become unreliable keys. C# reports CS8851 for this mismatch. Override both members from the same set of equality components.
+> Yes, unless `GetHashCode` is overridden as well. Two records can then be equal according to `Equals` but produce different hash codes because the ignored property still affects the synthesized hash. Hash-based collections may fail to find an equal key or place equal values in different buckets. C# reports CS8851 for this mismatch, so both methods should use the same equality components.
 
-> [!QUESTION]- Can a record struct be used as a `Dictionary` key safely? What do you need to watch out for?
-> Yes, when every equality component is stable for the key's lifetime. A mutable record struct can change its hash after insertion, making lookup fail for the changed value. Reference members add another boundary: arrays and many mutable collections use reference equality rather than structural contents. A readonly record struct with stable value-semantic members avoids both traps.
+> [!QUESTION]- Can a record struct be used safely as a `Dictionary` key, and what can make it unsafe?
+> Yes. A dictionary copies a struct key when it is inserted, so changing the caller's local variable later does not change the stored key. The stored key is safe only while every value observed by its equality and hash code remains stable.
+>
+> A reference field is the main risk because the stored copy and the caller's copy still point to the same object. If custom equality or a comparer hashes that object's mutable contents, changing the object changes the hash seen for the stored key and can make the entry unreachable in its original bucket. A comparer whose results change over time causes the same problem. A `readonly record struct` prevents direct field reassignment, but it does not freeze referenced objects. Stable value-semantic members and a stable comparer make the type safe to use as a key.
 
 # References
 

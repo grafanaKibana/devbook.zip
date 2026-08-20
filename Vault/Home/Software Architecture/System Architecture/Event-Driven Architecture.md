@@ -159,8 +159,8 @@ Propagate trace context, record event identity at operation boundaries, and keep
 
 # Questions
 
-> [!QUESTION]- When would you choose orchestration over choreography in an event-driven workflow?
-> Use [[Home/Software Architecture/Distributed Systems/Orchestration|orchestration]] for the ordered checkout that must expose compensation state. Use [[Home/Software Architecture/Distributed Systems/Choreography|choreography]] for independent `OrderPlaced` reactions such as email, analytics, and indexing. The deciding boundary is whether one owner must reason about the process end to end.
+> [!QUESTION]- What determines whether an event-driven workflow uses orchestration or choreography?
+> The main question is whether one component must own the process from start to finish. An ordered checkout with compensation steps fits [[Home/Software Architecture/Distributed Systems/Orchestration|orchestration]] because the current step and recovery state need one visible owner. Independent reactions to `OrderPlaced`, such as email, analytics, or indexing, fit [[Home/Software Architecture/Distributed Systems/Choreography|choreography]] because no subscriber controls the others. Asynchronous messaging supports both styles; it does not force choreography.
 
 # References
 

@@ -101,8 +101,10 @@ The categories overlap. CQRS may use materialized views, event sourcing may feed
 
 # Questions
 
-> [!QUESTION]- How should you choose between SQL and NoSQL for a new service?
-> Start with a relational database when the service needs constraints, transactions, joins, or changing query patterns. Choose a specialized store only after one access pattern dominates and the relational cost is measured. Scale by itself is not the reason: a well-indexed relational database handles more load than most services ever reach. A relational source of truth plus one specialized hot path is often safer than forcing every workload into one model.
+> [!QUESTION]- What factors determine whether a new service should use SQL or a NoSQL store?
+> The decision starts with the data model, required guarantees, and main access patterns. Relational storage fits when constraints, multi-record transactions, joins, or changing queries matter. A document, key-value, graph, or other specialized store fits when its access pattern clearly dominates and its consistency and query limits are acceptable.
+>
+> Scale alone does not settle the choice. A well-indexed relational database handles more load than most services need, so a specialized store should solve a measured problem. A relational source of truth with one specialized read or hot path is often safer than forcing every workload into one model.
 
 # References
 

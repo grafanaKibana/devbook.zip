@@ -81,8 +81,8 @@ The question is not which strategy is universally safest. It is which failure ca
 
 # Questions
 
-> [!QUESTION]- Which boundary favors canary over blue-green deployment?
-> Canary fits when a representative production cohort can expose regressions before full release and the platform can measure that cohort separately. Blue-green fits when a complete candidate must be tested before one traffic switch. Canary pays in routing and analysis; blue-green pays mainly in duplicate capacity.
+> [!QUESTION]- When does canary fit better than blue-green deployment, and what does each approach cost?
+> Canary fits when a small but representative production cohort can reveal regressions and its results can be measured separately. Blue-green fits when a complete candidate environment must be tested before one traffic switch. Canary adds gradual routing, cohort analysis, and a longer overlap between versions. Blue-green mainly adds the cost of running duplicate capacity.
 
 # References
 

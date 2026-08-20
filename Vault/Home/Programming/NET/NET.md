@@ -25,8 +25,8 @@ return FolderStructureMap;
 
 # Questions
 
-> [!QUESTION]- What are the three layers of the .NET platform, and why does that distinction matter?
-> The useful separation is language and compiler, runtime and base libraries, and application frameworks plus tooling. A C# allocation decision can create pressure observed by the GC. An ASP.NET Core middleware decision can consume thread-pool workers. Naming the owning layer narrows both evidence and repair.
+> [!QUESTION]- What are the main layers of .NET, and why does it help to separate them?
+> The main layers are the language and compiler, the runtime and base libraries, and the application frameworks and SDK tooling. Separating them makes diagnosis more precise. A C# allocation decision can create pressure that appears in the GC, while an ASP.NET Core middleware decision can tie up thread-pool workers. Identifying the layer that owns the behavior narrows where to measure and fix it.
 
 # References
 

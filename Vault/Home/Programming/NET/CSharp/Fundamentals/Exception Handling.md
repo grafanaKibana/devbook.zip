@@ -125,16 +125,16 @@ Unhandled exceptions need an application boundary that records the failure and c
 # Questions
 
 > [!QUESTION]- What is the difference between `throw;` and `throw ex;` inside a `catch` block?
-> `throw;` preserves the original stack trace, while `throw ex;` resets it to the current method. In practice, this means `throw;` keeps the real failure path for debugging and observability.
+> `throw;` rethrows the current exception without changing its original stack trace. `throw ex;` throws the same exception object from the current line and resets the stack trace, which hides the calls that led to the original failure. Use `throw;` when the same exception is rethrown from its `catch` block.
 
-> [!QUESTION]- When should you wrap an exception instead of rethrowing it directly?
-> Wrap when you need to add domain context or translate infrastructure exceptions at a boundary (for example, repository to application service). Keep the original error in `InnerException` so root cause details remain available.
+> [!QUESTION]- When should an exception be wrapped instead of rethrown directly?
+> Wrap an exception when code crosses a boundary and the caller needs context that the original failure does not provide. For example, a repository can translate a database exception into an order-saving exception that the application layer understands. The original exception should remain in `InnerException` so its stack trace and details are still available. If the wrapper adds no useful meaning, `throw;` is clearer.
 
 > [!QUESTION]- Why is throwing from `finally` considered dangerous?
-> A throw in `finally` can replace the original exception and hide root cause information. The safer pattern is cleanup-only logic in `finally`, with error handling done in `catch` or at higher boundaries.
+> If the `try` block throws one exception and `finally` throws another, the exception from `finally` can replace the original failure. The caller then sees the cleanup error while the real cause is hidden. A `finally` block should normally perform cleanup that is safe to run during stack unwinding, while failure handling stays in `catch` or at a higher boundary.
 
 > [!QUESTION]- When might `finally` not execute?
-> When the process terminates abruptly and normal stack unwinding does not happen (for example, crash/kill, `Environment.FailFast()`, or `StackOverflowException`).
+> `finally` normally runs when control leaves the protected block, including during exception-driven stack unwinding. It may not run when the process stops without normal unwinding, such as an operating-system kill, `Environment.FailFast()`, a severe runtime failure, or a `StackOverflowException`. It is an in-process cleanup guarantee, not a crash-recovery mechanism.
 
 # References
 

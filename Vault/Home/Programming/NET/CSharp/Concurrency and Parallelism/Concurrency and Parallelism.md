@@ -129,10 +129,10 @@ A short synchronous critical section belongs behind a [[Home/Programming/NET/CSh
 # Questions
 
 > [!QUESTION]- What is the difference between concurrency and parallelism in practice?
-> Concurrency allows operations to make progress over overlapping periods. Parallelism executes operations simultaneously and needs multiple cores. Async I/O uses the first property to avoid blocked threads. CPU partitioning uses the second to reduce elapsed processing time.
+> Concurrency means several operations are in progress during the same period, even if one thread takes turns running them. Parallelism means operations execute at the same time on multiple cores. Asynchronous I/O uses concurrency so a thread is not blocked while an external operation is pending. CPU-bound work uses parallelism when splitting the calculation across cores reduces its elapsed time.
 
-> [!QUESTION]- What is the first decision before choosing a primitive (`Task`, `lock`, `Parallel`, `Channel`)?
-> Identify what the work waits for and who owns its completion. I/O waits, CPU execution, shared-state ownership, and durable background work need different mechanisms.
+> [!QUESTION]- What should be checked before choosing `Task`, `lock`, `Parallel`, or `Channel`?
+> First check what the work spends time doing and who is responsible for finishing it. I/O-bound work usually needs asynchronous APIs so threads are not blocked. CPU-bound work may benefit from measured parallelism. Shared mutable state needs synchronization or a single owner, while background work needs a queue with a clear lifetime and failure policy. The primitive follows from those requirements.
 
 # References
 

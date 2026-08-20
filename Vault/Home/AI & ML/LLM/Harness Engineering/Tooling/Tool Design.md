@@ -169,8 +169,8 @@ Several mechanisms contribute:
 > [!QUESTION]- Why is tool design often more impactful than prompt engineering in agentic systems?
 > A tool contract is reused at every call site and every loop iteration. Ambiguous selection, malformed arguments, or an opaque error can redirect all later steps. Fixing the interface removes that failure mode across prompts, while a prompt workaround depends on the model remembering an exception each time.
 
-> [!QUESTION]- How to decide between one broad tool and many narrow tools?
-> Split operations that need different descriptions, schemas, or permissions. Keep closely related actions together when one contract expresses them without a bag of optional parameters. Then control the active set with routing or filtering. Narrow tools help argument generation only while the model can still select the right one.
+> [!QUESTION]- What determines whether related operations should use one broad tool or several narrow tools?
+> Separate tools make sense when operations need different descriptions, input schemas, or permissions. Closely related actions can stay together when one clear contract covers them without a long list of unrelated optional parameters. Narrow tools make arguments easier to generate, but a large catalog makes tool selection harder. Routing or filtering can limit the tools shown for each request, and selection and argument accuracy should be measured separately.
 
 # References
 

@@ -68,7 +68,7 @@ Repository workflow files are not the whole control plane. GitHub Actions can at
 # Questions
 
 > [!QUESTION]- What separates continuous delivery from continuous deployment?
-> Both keep a verified artifact releasable. Continuous delivery retains a routine production decision outside the automated evidence path. Continuous deployment automates that decision for every qualifying change.
+> Both approaches keep a tested artifact ready for production. With continuous delivery, releasing that artifact is still a separate decision, often an approval or a business-controlled step. With continuous deployment, every change that passes the required automated checks is released automatically.
 
 # References
 

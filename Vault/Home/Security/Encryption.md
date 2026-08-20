@@ -83,8 +83,8 @@ In .NET, `HttpClient` negotiates TLS for HTTPS endpoints. An ASP.NET Core deploy
 
 # Questions
 
-> [!QUESTION]- When should you use symmetric vs asymmetric encryption?
-> Use symmetric authenticated encryption for bulk data. Use a public-key encryption scheme only for the small payload and protocol it was designed for, a signature scheme for public verification, and authenticated key agreement to establish fresh shared secrets. Real systems compose these through protocols such as TLS or envelope encryption rather than choosing one family for the whole job.
+> [!QUESTION]- How are symmetric and asymmetric cryptography used together in a real system?
+> Symmetric authenticated encryption handles bulk data because it is efficient and protects both confidentiality and integrity. Public-key encryption is limited to the small payloads and protocols it was designed for. Signatures provide public verification, while authenticated key agreement establishes a fresh shared secret. Protocols such as TLS and envelope encryption combine these roles instead of choosing one family for the whole job.
 
 # References
 

@@ -23,7 +23,7 @@ return FolderStructureMap;
 
 # Questions
 
-> [!QUESTION]- What does the CLR do when your application starts, and why does startup behavior matter?
+> [!QUESTION]- What does the CLR do when an application starts, and why does startup behavior matter?
 > A native host selects and starts the runtime, then the loader resolves the entry assembly and dependencies. Executed methods use ReadyToRun code when available or are JIT-compiled. Tiering can replace those bodies later. Assembly loading, static initialization, JIT work, and dependency setup can all appear in cold-start latency, so traces must separate them.
 
 # References

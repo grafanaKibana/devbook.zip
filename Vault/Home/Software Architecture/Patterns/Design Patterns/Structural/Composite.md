@@ -198,7 +198,7 @@ Composite fits a genuine part-whole tree when callers need the same operation on
 # Questions
 
 > [!QUESTION]- How does Composite relate to the Visitor pattern?
-> Composite defines a uniform tree. Visitor can add operations to that tree without adding methods to every node type. Composite helps when the hierarchy varies. Visitor helps when operations vary more often than the nodes.
+> Composite gives leaves and groups one interface, and each group can recurse through its children. Visitor adds an operation across the node types without putting that operation on every node. They work well together when the tree structure belongs to Composite, the set of node types is stable, and operations change more often than the nodes.
 
 > [!QUESTION]- When does a Composite tree become a performance problem?
 > Cost grows with the number of visited nodes. A bundle containing 10,000 SKUs makes `GetPrice()` visit those nodes on each uncached call. Profiling should decide whether to cache totals or update an aggregate during mutation. Either choice introduces an invalidation rule.

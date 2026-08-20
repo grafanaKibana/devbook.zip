@@ -97,10 +97,10 @@ SHA-256 is a common fingerprint when the protocol permits it. HMAC fits a shared
 
 # Questions
 
-> [!QUESTION]- Why can't you use SHA-256 directly to store passwords?
+> [!QUESTION]- Why is SHA-256 alone unsuitable for password storage?
 > SHA-256 is fast and gives an offline attacker a cheap guess test. Password verifiers need a unique salt and an adaptive password-hashing function whose CPU and memory costs are tuned for the deployment and raised as hardware improves.
 
-> [!QUESTION]- What's the difference between a hash, an HMAC, and a digital signature?
+> [!QUESTION]- How do a hash, an HMAC, and a digital signature differ?
 > A hash is keyless. Adversarial integrity depends on authenticating the expected digest. HMAC authenticates within a shared-secret group, where every verifier can also create tags. A digital signature gives one private-key holder the signing capability while allowing public verification, provided the verification key is trusted.
 
 > [!QUESTION]- What does a salt protect against, and why must it be unique per user?
