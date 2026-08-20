@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-29T20:22:59.988Z
-modified: 2026-08-08T08:06:03.288Z
-published: 2026-08-08T08:06:03.288Z
+created: 2026-08-20T20:41:15.598Z
+modified: 2026-08-20T20:41:15.599Z
+published: 2026-08-20T20:41:15.599Z
 topic:
   - Computer Science
 subtopic:
@@ -14,9 +14,9 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-A program holds an ordered collection of same-typed values and needs to reach the i-th one directly, not by walking from the front. An array stores those values as a contiguous block of equal-size slots, so the address of element `i` is `base + i * elementSize` — a single multiply-and-add that lands on the element regardless of how large `i` is. That same contiguity places neighbors in the sequence next to each other in RAM, which is what makes a scan cache-friendly.
+A program often needs the i-th value in a sequence without walking through everything before it. An array makes that possible by packing equal-size slots into one contiguous block. The runtime computes `base + i * elementSize` and lands directly on the requested slot. Neighbors in the sequence are neighbors in memory too, which makes sequential scans friendly to CPU caches.
 
-The block backs many .NET collections: `List<T>`, `Stack<T>`, and `Queue<T>` wrap one, while `Dictionary<TKey,TValue>` stores entries in arrays. The cost of contiguity is rigidity — the size is fixed at allocation, so growth means allocating a new block and copying, and inserting in the middle shifts every later element to keep the slots packed. Growable capacity belongs to [[Computer Science/Data Structures/Linear Structures/Dynamic Array|Dynamic Array]]; a zero-copy view over an existing block belongs to [[Computer Science/Data Structures/Linear Structures/Span|Span]].
+This block is the storage underneath `List<T>`, `Stack<T>`, and `Queue<T>`. `Dictionary<TKey,TValue>` also keeps its entries in arrays. Contiguity is rigid. The length is fixed at allocation, growth needs a new block and a copy, and a middle insert shifts the tail to keep every slot packed. [[Computer Science/Data Structures/Linear Structures/Dynamic Array|Dynamic Array]] adds growable capacity by reallocating geometrically. [[Computer Science/Data Structures/Linear Structures/Span|Span]] provides a zero-copy view over an existing block.
 
 **Core shape:** equal-size elements → one contiguous fixed block → address `base + i·elementSize` → no cheap growth or middle insert.
 
@@ -37,7 +37,7 @@ Multi-dimensional arrays flatten the same way. A row-major `T[,]` stores row 0 i
 
 For a value type the values live in the block itself — `new int[1000]` is one allocation holding 4,000 bytes of data. For a reference type the block holds references and the objects live elsewhere, so `string[]` iteration is contiguous over the _pointers_ but still chases each one to reach the characters.
 
-Contiguity is worth more than the complexity table shows. On representative x86-64 machines, cache lines are commonly 64 bytes, so one miss brings in a line of neighbors (16 elements for 4-byte ints), and the hardware prefetcher can stream later lines during a sequential scan. Representative orders of magnitude put an L1 hit near 1 ns and main-memory access near 100 ns, although both vary by processor and workload — the top rungs of the [[Data Persistence/Caching#Latency ladder|latency ladder]]. This is the physical reason .NET's default collections are array-backed.
+Contiguity is worth more than the complexity table shows. On representative x86-64 machines, cache lines are commonly 64 bytes, so one miss brings in a line of neighbors (16 elements for 4-byte ints), and the hardware prefetcher can stream later lines during a sequential scan. Representative orders of magnitude put an L1 hit near 1 ns and main-memory access near 100 ns, although both vary by processor and workload — the [[Data Persistence/Caching#Measure the Actual Path|measurement boundary]] matters when applying those ratios. This is the physical reason .NET's default collections are array-backed.
 
 #### Boundaries Tied to Contiguity
 
@@ -196,7 +196,7 @@ tab: Complexity
 ```
 ````
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Contiguous block and index arithmetic
 >
@@ -229,16 +229,8 @@ tab: Complexity
 > }
 > ```
 >
-> A true insert cannot grow the block; `InsertAt` overwrites the last element because the capacity was fixed at allocation. Preserving every element is a resize, which allocates a new array — the job of [[Computer Science/Data Structures/Linear Structures/Dynamic Array|Dynamic Array]].
-
-# Questions
-
-> [!QUESTION]- Why can an array scan beat an asymptotically better structure at small `n`?
-> On representative x86-64 machines, contiguous neighbors share commonly 64-byte cache lines and the prefetcher can stream later lines during a sequential scan. L1 hits are roughly nanosecond-scale while fetching from DRAM is roughly two orders of magnitude slower, though exact latency depends on the processor and workload. A scattered structure can pay a cache miss per node. Asymptotic analysis counts operations; the array moves less data per operation, so the crossover where a better bound wins can sit past the sizes a workload reaches.
+> A true insert cannot grow the block. `InsertAt` overwrites the last element because capacity was fixed at allocation. Preserving every element requires a resize and a new array, the job of [[Computer Science/Data Structures/Linear Structures/Dynamic Array|Dynamic Array]].
 
 # References
 
-- [System.Array class (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/system.array) — API surface, fixed-size semantics, and supported array shapes.
-- [Arrays — C# reference](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/arrays) — element access, row-major multidimensional semantics, and jagged array syntax.
-- [Array data structure (Wikipedia)](https://en.wikipedia.org/wiki/Array_\(data_structure\)) — the address formula, row-major addressing, and the contiguity assumptions behind direct indexing.
-- [Latency numbers every programmer should know](https://gist.github.com/jboner/2841832) — the L1-versus-main-memory figures behind the cache-locality argument.
+- [Arrays — C# reference](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/arrays)

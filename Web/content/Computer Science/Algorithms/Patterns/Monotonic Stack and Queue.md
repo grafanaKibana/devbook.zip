@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-03T15:55:17.235Z
-modified: 2026-08-08T08:43:34.671Z
-published: 2026-08-08T08:43:34.671Z
+created: 2026-08-20T20:41:15.530Z
+modified: 2026-08-20T20:41:15.531Z
+published: 2026-08-20T20:41:15.531Z
 topic:
   - Computer Science
 subtopic:
@@ -14,11 +14,11 @@ priority: Medium
 status: Creation
 ---
 
-An array of daily temperatures needs, for every day, the number of days until a warmer one. The redundancy has structure. Once a warmer day arrives, every earlier colder day pending an answer is resolved at once and never consulted again.
+For each daily temperature, the next warmer day may be far ahead. Rescanning the suffix repeats the same comparisons. A monotonic stack keeps only unresolved days, and one warmer value can settle several of them at once.
 
-A monotonic stack captures exactly that. It holds indices whose values stay sorted — increasing or decreasing — by popping any element that can no longer be an answer before the next element is pushed. Scanning left to right for the next _greater_ value, the stack keeps values non-increasing from bottom to top; the arriving element pops every smaller index below it, and it _is_ their next greater element. Each index is pushed once and removed at most once.
+A monotonic stack stores indices while their values remain ordered. For a next-greater query, values are non-increasing from bottom to top. An arriving value pops every smaller value above it and becomes the next greater value for each popped index. Every index is pushed once and removed at most once.
 
-A monotonic deque generalises this to a moving window. It usually stores indices, keeping candidates sorted at the back and evicting from the front when an index expires. Values plus duplicate counts can also work when the departing value is available, but indices make expiry and identity explicit.
+A monotonic deque adds window expiry. New candidates enter at the back, dominated candidates leave from the back, and expired indices leave from the front. Storing indices makes both expiry and duplicate identity explicit.
 
 ````tabsdown
 tab: Visualization
@@ -33,7 +33,7 @@ The trace uses daily temperatures `[73, 74, 75, 71, 69, 72, 76, 73]`. At `72`, t
 
 The stack holds unanswered indices whose values are non-increasing from bottom to top. When `a[i]` pops index `j`, no position between `j` and `i` held a greater value — such a value would already have popped `j`. Therefore `i` is the nearest qualifying index to the right. Entries left after the scan have no greater value to their right.
 
-The deque keeps the same monotone contents but adds a second exit. Values decrease from front to back; the front is always the current window maximum. Each new index `i` drops the front if it has slid out of the window, then pops from the back while `a[back] <= a[i]`: the incoming value is at least as large, and an equal newer index dominates because it expires later. Indices are the standard representation because the expiry check is direct; a value-only variant needs the departing value and duplicate counts to preserve the same information.
+The deque keeps the same monotone contents but adds a second exit. Values decrease from front to back; the front is always the current window maximum. Each new index `i` drops the front if it has slid out of the window, then pops from the back while `a[back] <= a[i]`: the incoming value is at least as large, and an equal newer index dominates because it expires later. Indices are the standard representation because the expiry check is direct; a value-only variant needs the departing value and may preserve equal entries separately or compress them into counts.
 
 Each index is pushed once and removed at most once. Charge a removal to that index's earlier push and no index can be charged twice, even though one arriving value may trigger several pops.
 
@@ -92,13 +92,13 @@ tab: Complexity
 
 # When the Invariant is Set Wrong
 
-The monotone direction must match the query. A non-increasing stack with a `<` pop condition yields next greater; reversing the invariant computes the opposite relation and can leave different entries unresolved. Shape- or sentinel-only assertions can miss the mistake; use exact expected outputs for increasing, decreasing, mixed, and duplicate inputs.
+The monotone direction must match the query. A non-increasing stack with a `<` pop condition finds the next greater value. Reverse the invariant and it answers the opposite relation, leaving a different set of entries unresolved. Exact expected outputs over ordered, mixed, and duplicate inputs catch this mistake better than shape-only assertions.
 
-Strict versus non-strict comparison decides ties in both stacks and deques. `<` and `<=` diverge whenever equal values meet, including non-adjacent duplicates such as `[2, 1, 2]`: one keeps the older equal candidate, while the other lets the newer one supersede it.
+Strictness decides what equal values mean. With `[2, 1, 2]`, `<` keeps the older equal candidate while `<=` lets the newer one replace it. The choice affects both the reported relation and how long a deque candidate survives.
 
-Prefer indices for a window deque because expiry is positional. Values can work when the departing value is supplied and duplicate counts are tracked, but that adds bookkeeping and loses element identity.
+Window expiry is positional, so indices are the simplest deque representation. A value-only version needs the departing value and must either preserve equal entries or compress them into counts. Either representation loses element identity.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Next-greater control flow
 >
@@ -150,7 +150,7 @@ Prefer indices for a window deque because expiry is positional. Values can work 
 > }
 >
 > ```
-> The pop comparison (`<` vs `<=`) sets tie handling; both examples store indices so distances and window eviction stay recoverable.
+> The pop comparison (`<` vs `<=`) sets tie handling. Both examples store indices so distances and window eviction stay recoverable.
 > ```
 
 # Comparison
@@ -162,20 +162,7 @@ Prefer indices for a window deque because expiry is positional. Values can work 
 | Lazy-deletion heap without rebuilding | Avoid when a long stream can accumulate expired entries |
 | Two heaps / order-statistic tree | Window median / general `k`-th value |
 
-# Questions
-
-> [!QUESTION]- Why can repeated popping still remain bounded across the traversal?
-> Every index is pushed once and removed at most once.
-
-> [!QUESTION]- Why does a monotonic deque usually store indices rather than values?
-> A window maximum expires by position, so indices make the front eviction a direct comparison with the window bound and preserve identity across duplicates. Values can work when the departing value is supplied and duplicate counts are tracked, but that needs more bookkeeping.
-
-> [!QUESTION]- How does the monotone direction relate to which query is answered?
-> The invariant and pop comparison fix the relation. A non-increasing stack that pops smaller values yields next greater; reversing it yields next smaller and may leave a different set of indices unresolved.
-
 # References
 
-- [Mayur Datar et al., "Maintaining Stream Statistics over Sliding Windows" (2002)](https://doi.org/10.1137/S0097539701398363) — a primary treatment of maintaining aggregates over the most recent fixed-size stream window, the setting where deque expiry matters.
-- [Sliding Window Maximum (LeetCode #239)](https://leetcode.com/problems/sliding-window-maximum/) — the canonical monotonic-deque problem; indices are the standard way to express expiry, while value-count variants require the departing value.
-- [Largest Rectangle in Histogram (LeetCode #84)](https://leetcode.com/problems/largest-rectangle-in-histogram/) — the previous-smaller / next-smaller boundary application of a monotonic stack.
-- [Minimum stack / minimum queue](https://cp-algorithms.com/data_structures/stack_queue_modification.html) — index- and value-based queue variants, including how duplicate handling changes a value-only representation.
+- [Largest Rectangle in Histogram (LeetCode #84)](https://leetcode.com/problems/largest-rectangle-in-histogram/)
+- [Minimum stack / minimum queue](https://cp-algorithms.com/data_structures/stack_queue_modification.html)

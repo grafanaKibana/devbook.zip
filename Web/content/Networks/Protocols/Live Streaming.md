@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T14:02:44.085Z
-modified: 2026-07-18T14:02:44.085Z
-published: 2026-07-18T14:02:44.085Z
+created: 2026-08-20T20:41:15.632Z
+modified: 2026-08-20T20:41:15.632Z
+published: 2026-08-20T20:41:15.632Z
 topic:
   - Networks
 subtopic:
@@ -14,15 +14,17 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-Live streaming moves audio and video from a live encoder to many viewers while the program is still being produced. The working path is **ingest → transcode → package → origin → CDN → player**. Each stage trades latency against quality, reach, and failure isolation. A sports stream may accept 8–15 seconds to gain CDN scale; a live auction may need WebRTC-class latency and accept a more expensive distribution model.
+Live streaming distributes media while it is still being captured. The usual path is **ingest → transcode → package → origin → CDN → player**. Latency accumulates at every boundary, especially where a stage waits for a keyframe, segment, network response, or playback buffer.
+
+HTTP adaptive streaming scales well because manifests and media objects can pass through ordinary CDNs. Interactive broadcasts need a shorter feedback loop. WebRTC can reach sub-second targets, but it replaces cache-friendly objects with stateful media sessions and a different cost model.
 
 # End-to-End Path
 
-1. **Capture and ingest.** The encoder compresses camera and microphone input and sends a contribution stream to an ingest edge. RTMP is still common in encoder ecosystems; SRT and WebRTC/WHIP address loss recovery or lower-latency ingest.
-2. **Transcode.** The service decodes the contribution feed and produces an aligned bitrate ladder, for example 1080p at 6 Mb/s, 720p at 3 Mb/s, and 480p at 1.2 Mb/s. Keyframes must align across renditions so a player can switch without corrupting the timeline.
-3. **Package.** A packager writes short media segments or chunks plus manifests. HLS uses playlists; MPEG-DASH uses an MPD. CMAF fragmented MP4 can let both protocols share media objects when codec and profile choices overlap.
-4. **Origin and CDN.** The origin exposes manifests and new media objects. CDN edges cache them and collapse simultaneous misses instead of sending every viewer to the packager.
-5. **Player.** The player estimates throughput and buffer health, selects a rendition, downloads segments, decodes them, and moves up or down the ladder before playback stalls.
+1. **Capture and ingest.** The encoder compresses source media and sends a contribution feed to an ingest edge. RTMP remains common in encoder tooling. SRT adds recovery for unreliable contribution paths. WHIP standardizes the HTTP signaling used to establish a WebRTC ingest session. WebRTC carries the media.
+2. **Transcode.** The service produces a bitrate ladder, perhaps 1080p at 6 Mb/s, 720p at 3 Mb/s, and 480p at 1.2 Mb/s. Renditions need aligned timelines and keyframes so a player can switch cleanly.
+3. **Package.** The packager writes manifests and addressable media units. HLS uses playlists. MPEG-DASH uses an MPD. Compatible codec, encryption, and profile choices can let both reference the same CMAF fragmented-MP4 objects.
+4. **Origin and CDN.** The origin exposes the current manifest and media. CDN edges cache immutable objects and can collapse simultaneous misses when the provider supports and enables request coalescing, keeping viewer fan-out away from the packager.
+5. **Player.** The player estimates available throughput against buffer health, chooses a rendition, and changes quality before the buffer empties.
 
 ```text
 camera -> encoder -> ingest -> transcoder -> packager -> origin -> CDN edge -> player
@@ -31,34 +33,33 @@ camera -> encoder -> ingest -> transcoder -> packager -> origin -> CDN edge -> p
 
 # Latency Is a Budget
 
-A six-second segment cannot usually deliver sub-second glass-to-glass latency: the encoder must fill it, the packager must publish it, the CDN must fetch it, and the player normally buffers more than one segment. Shorter segments or partial segments reduce wait time but increase request rate, manifest churn, cache pressure, and sensitivity to jitter.
+A player cannot achieve sub-second glass-to-glass latency while waiting for whole multi-second segments. Encoding, publication, CDN retrieval, and the playback buffer each consume part of the budget. Short segments reduce one delay and create others: more requests, more manifest updates, smaller cache objects, and less room to absorb jitter.
 
-Low-Latency HLS and low-latency DASH publish chunks before a full segment closes. WebRTC sends media continuously and handles congestion interactively, making it a better fit for calls, auctions, and remote control. It costs more per viewer because the delivery path cannot rely on ordinary immutable HTTP objects as effectively.
+Low-Latency HLS and low-latency DASH expose partial media before a full segment closes. They keep HTTP distribution while tightening encoder, packager, CDN, and player behavior. WebRTC sends media continuously and adapts to congestion on an interactive timescale. Calls, auctions, and remote control often need that path despite its stateful per-viewer cost.
 
 # Protocol Compatibility
 
 | Protocol | Typical role | Browser/device boundary |
 | --- | --- | --- |
-| RTMP | Encoder-to-ingest contribution | Not a modern browser playback protocol; retain it where encoder support matters |
+| RTMP | Encoder-to-ingest contribution | Not a modern browser playback protocol. Retain it where encoder support matters |
 | SRT | Loss-tolerant contribution over uncontrolled networks | Common between encoders and media infrastructure, not native browser playback |
-| HLS | Adaptive HTTP playback | Native on Apple platforms; other browsers commonly use Media Source Extensions through a JavaScript player |
-| MPEG-DASH | Adaptive HTTP playback | Common through Media Source Extensions; Safari support depends on player and codec/container choices |
-| WebRTC with WHIP/WHEP-style signaling | Interactive ingest or playback | Browser-native media stack with sub-second goals; harder CDN economics and session state |
+| HLS | Adaptive HTTP playback | Native on Apple platforms. Other browsers commonly use Media Source Extensions through a JavaScript player |
+| MPEG-DASH | Adaptive HTTP playback | Common through Media Source Extensions. Safari support depends on player and codec/container choices |
+| WebRTC with HTTP signaling such as WHIP for ingest | Interactive ingest or playback | Browser-native media stack with sub-second goals. Harder CDN economics and per-session state |
 
-Do not infer compatibility from the manifest name alone. Codec, profile, encryption, container, captions, and DRM support can rule out a device even when it understands HLS or DASH.
+Manifest support does not prove playback support. The device must also accept the selected codec and profile, container, encryption scheme, captions, and DRM system.
 
 # Failure Boundaries
 
-- Keep the last valid manifest available briefly when the packager restarts; a malformed or empty live manifest can drop every player at once.
-- Measure capture timestamp to playback timestamp, not only CDN request latency.
-- Preserve monotonic timestamps and aligned keyframes across failover encoders.
-- Apply backpressure or drop frames deliberately; an unbounded ingest queue converts overload into ever-growing live latency.
-- Separate the live path from replay finalization so a storage outage does not stop the broadcast.
+- Keep the last valid manifest available briefly during a packager restart. Publishing an empty or malformed live manifest can disconnect the whole audience.
+- Measure capture-to-playback time. CDN request latency covers only one stage.
+- Failover encoders must preserve monotonic timestamps and aligned keyframes.
+- Bound ingest queues. Under overload, dropping frames or shedding a rendition is safer than allowing live latency to grow without limit.
+- Replay finalization should fail independently from the live path so a storage outage does not stop the broadcast.
 
 # References
 
-- [RFC 8216: HTTP Live Streaming](https://www.rfc-editor.org/rfc/rfc8216) — defines HLS playlists, media segments, encryption tags, and client reload behavior.
-- [W3C Media Source Extensions](https://www.w3.org/TR/media-source-2/) — specifies how web applications feed segmented media into browser playback buffers.
-- [RFC 9725: WebRTC-HTTP Ingestion Protocol](https://www.rfc-editor.org/rfc/rfc9725) — defines WHIP signaling for WebRTC media contribution.
-- [CMAF (ISO/IEC 23000-19)](https://www.iso.org/standard/79106.html) — the common fragmented-media format used to share encoded objects across adaptive streaming workflows.
-- [ByteByteGo: Live streaming explained](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/live-streaming-explained.md) — source pipeline corrected here for stage order, protocol roles, and current compatibility.
+- [HTTP Live Streaming](https://www.rfc-editor.org/rfc/rfc8216)
+- [Media Source Extensions](https://www.w3.org/TR/media-source-2/)
+- [WebRTC-HTTP Ingestion Protocol](https://www.rfc-editor.org/rfc/rfc9725)
+- [Common Media Application Format](https://www.iso.org/standard/85623.html)

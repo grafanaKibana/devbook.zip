@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-19T15:05:28.111Z
-modified: 2026-07-25T13:51:15.292Z
-published: 2026-07-25T13:51:15.292Z
+created: 2026-08-20T20:41:15.681Z
+modified: 2026-08-20T20:41:15.681Z
+published: 2026-08-20T20:41:15.681Z
 topic:
   - Software Architecture
 subtopic:
@@ -14,11 +14,13 @@ priority: High
 status: Done
 ---
 
-RabbitMQ is an open-source message broker implementing AMQP 0-9-1, where producers publish to exchanges and messages are routed to queues through bindings and routing keys before consumers process them. It matters because it decouples producers and consumers, enables asynchronous processing, and absorbs traffic spikes without forcing synchronous dependency chains. In interviews, reach for RabbitMQ when you need task queues, request-reply, pub/sub fan-out, or fair work distribution across multiple workers. In a `[[Software Architecture/Distributed Systems/Webhooks|Webhook]] -> Queue -> Worker` system, RabbitMQ is usually the safety valve between bursty ingress and bounded worker throughput.
+RabbitMQ is an open-source broker. This note focuses on its classic and quorum AMQP 0-9-1 queues: producers publish messages to exchanges, which route them into queues for consumers. This extra hop separates the rate of incoming work from the rate at which workers can finish it. In a `[[Software Architecture/Distributed Systems/Webhooks|Webhook]] -> Queue -> Worker` flow, the queue turns a short traffic spike into backlog instead of forcing the webhook endpoint to wait for every job.
+
+Classic and quorum queues fit task queues and request-reply flows, especially when messages need flexible routing or fair distribution across competing workers. They can also fan one publication out to several queues. RabbitMQ Streams add retention and replay, so durable event history is not a boundary of the RabbitMQ ecosystem as a whole.
 
 # AMQP Model
 
-RabbitMQ routing is explicit: producers publish to an exchange, not directly to a queue (except via the default exchange behavior).
+Routing is explicit. A producer publishes to an exchange, and bindings decide which queues receive the message. The default exchange preserves the convenient appearance of publishing directly to a queue, but it still performs exchange routing.
 
 ```mermaid
 flowchart LR
@@ -27,7 +29,7 @@ flowchart LR
     Q --> C[Consumer]
 ```
 
-Core parts:
+Each part has one job:
 
 - **Producer**: publishes a message.
 - **Exchange**: decides routing destination(s).
@@ -47,37 +49,31 @@ Core parts:
 
 # Delivery Guarantees
 
-RabbitMQ provides mechanisms to build guarantees; it does not make exactly-once automatic.
+RabbitMQ supplies the acknowledgements and persistence controls needed to build a delivery contract. The application still decides when ownership has safely moved and how to handle a repeated delivery.
 
 ## At-most-once
 
-- Consumer uses `autoAck: true`.
-- Producer does not use publisher confirms.
-- If consumer crashes after delivery, message is lost.
-- If broker fails before safe persistence/replication, message can be lost.
+With `autoAck: true`, the broker treats a delivery as complete as soon as it sends it. A consumer crash after delivery can therefore lose the message. Publishing without confirms adds another loss window because the producer never learns whether the broker accepted responsibility.
 
-Use this only when occasional loss is acceptable.
+That contract is suitable only when an occasional lost message has little consequence.
 
 ## At-least-once
 
-- Producer uses publisher confirms.
-- Queue is durable and messages are persistent.
-- Consumer uses manual ack.
-- On failure before ack, message is redelivered.
+At-least-once closes those loss windows with publisher confirms, a durable queue, persistent messages, and manual consumer acknowledgements. If the consumer or its connection fails before the acknowledgement reaches the broker, RabbitMQ makes the message available again.
 
-Tradeoff: duplicates are possible; consumers must be idempotent.
+Redelivery creates duplicates. A stable message ID and an idempotent consumer are part of the contract, not an optional cleanup step.
 
 ## Exactly-once
 
-RabbitMQ does not natively offer end-to-end exactly-once delivery. Achieve business-level exactly-once behavior with idempotent consumers, deduplication keys, and producer outbox patterns.
+RabbitMQ does not provide end-to-end exactly-once delivery. Business-level exactly-once behavior comes from controlling side effects with stable deduplication keys. On the publishing side, an outbox keeps the database change and the intent to publish in the same transaction.
 
 ## Confirms, Ack, Nack, Reject, DLX
 
-- **Publisher confirms**: broker acks or nacks a publish after it enters the broker reliability path; this does not confirm consumer processing.
-- **`BasicAck`**: processing succeeded; broker can remove message.
-- **`BasicNack`**: processing failed; choose requeue or dead-letter.
-- **`BasicReject`**: reject one message (single-message variant).
-- **DLX (Dead Letter Exchange)**: catches rejected messages (`requeue: false`), expired messages (TTL), queue overflow drops, and quorum delivery-limit failures.
+- **Publisher confirms** report whether the broker accepted responsibility for a publication. They say nothing about consumer processing.
+- **`BasicAck`** transfers ownership after successful processing, allowing the broker to remove the message.
+- **`BasicNack`** reports failed processing and can requeue or dead-letter one or several deliveries.
+- **`BasicReject`** rejects one delivery.
+- **DLX (Dead Letter Exchange)** receives messages rejected with `requeue: false`, expired by TTL, removed by a queue length limit, or rejected after a quorum queue delivery limit.
 
 # C# Example (`RabbitMQ.Client`)
 
@@ -95,12 +91,25 @@ await using var channel = await connection.CreateChannelAsync(
         publisherConfirmationsEnabled: true,
         publisherConfirmationTrackingEnabled: true));
 
+await channel.ExchangeDeclareAsync("orders.dlx", ExchangeType.Direct, durable: true);
+await channel.QueueDeclareAsync(
+    queue: "orders.dlq",
+    durable: true,
+    exclusive: false,
+    autoDelete: false,
+    arguments: null);
+await channel.QueueBindAsync("orders.dlq", "orders.dlx", "orders.failed");
+
 await channel.QueueDeclareAsync(
     queue: "orders",
     durable: true,
     exclusive: false,
     autoDelete: false,
-    arguments: null);
+    arguments: new Dictionary<string, object?>
+    {
+        ["x-dead-letter-exchange"] = "orders.dlx",
+        ["x-dead-letter-routing-key"] = "orders.failed"
+    });
 
 var order = new Order("ord-1001", "cust-42", 129.50m);
 var body = JsonSerializer.SerializeToUtf8Bytes(order);
@@ -151,10 +160,6 @@ consumer.ReceivedAsync += async (_, ea) =>
         await ProcessOrderAsync(order);
         await channel.BasicAckAsync(ea.DeliveryTag, multiple: false);
     }
-    catch (TransientDependencyException)
-    {
-        await channel.BasicNackAsync(ea.DeliveryTag, multiple: false, requeue: true);
-    }
     catch
     {
         await channel.BasicNackAsync(ea.DeliveryTag, multiple: false, requeue: false);
@@ -167,86 +172,52 @@ await Task.Delay(Timeout.InfiniteTimeSpan);
 
 static Task ProcessOrderAsync(Order order) => Task.CompletedTask;
 
-public sealed class TransientDependencyException : Exception;
 public sealed record Order(string OrderId, string CustomerId, decimal Amount);
 ```
 
-# Key Operational Concepts
+This compact consumer treats every failed delivery as terminal, so `requeue: false` routes it through the declared DLX instead of discarding it. Transient retry needs a separate bounded delayed path, such as retry queues/exchanges or a quorum-queue delivery limit, before terminal dead-lettering. Immediate unbounded `requeue: true` can hot-loop a poison delivery.
+
+# Operating the Queue
 
 ## Prefetch Count (QoS)
 
-- Controls max unacked messages per consumer.
-- Prevents one slow worker from hoarding deliveries.
-- Tune by workload: lower for CPU-heavy handlers, higher for IO-heavy handlers.
+Prefetch caps the number of unacknowledged messages in flight to a consumer. A low value limits the damage from a slow worker but may leave capacity idle. A higher value can improve throughput for I/O-heavy handlers, provided each worker has enough memory and concurrency to process the deliveries it already owns.
 
 ## Message TTL
 
-- `x-message-ttl` expires stale messages.
-- Useful for time-sensitive events.
-- Expired messages can be inspected through DLX.
+`x-message-ttl` expires work that is no longer useful. When a DLX is configured, expired messages can be routed there for inspection instead of disappearing without evidence.
 
 ## Queue Length Limits
 
-- `x-max-length` and `x-max-length-bytes` cap backlog.
-- Protects memory and disk under producer spikes.
-- Pair with alerts on queue depth and message age.
+`x-max-length` and `x-max-length-bytes` put a hard ceiling on backlog. They protect disk and memory only if the overflow behavior matches the business contract, so queue depth and age still need alerts.
 
-## Lazy Queues
+## Disk-backed Classic Queues
 
-- Prioritize disk storage over memory residency.
-- Good for deep buffers and burst handling.
-- Tradeoff: generally higher per-message latency.
+The old `lazy` queue mode no longer exists. Since RabbitMQ 3.12, classic queues already keep a small working set in memory and move most queued data to disk. Configuring `x-queue-mode=lazy` is ignored, so capacity planning must use current classic or quorum queue behavior rather than the old latency tradeoff.
 
 ## Quorum Queues
 
-- Replicated queues based on Raft.
-- Better safety and failover behavior than classic mirrored queues.
-- Recommended replacement for mirrored classic queues in production designs.
+Quorum queues replicate a durable FIFO queue through Raft. They are the default choice when queue data must survive a node failure with clear recovery semantics. Classic queue mirroring was removed in RabbitMQ 4.0. Existing installations that depended on it need a migration to quorum queues or streams.
 
 # Pitfalls
 
-## 1) Unbounded Queues without TTL and Length Limits
+## Unbounded Backlog
 
-- **What goes wrong**: backlog grows without bound.
-- **Why**: producer rate exceeds consumer rate and no limits are configured.
-- **Impact**: memory/disk exhaustion and potential node crash.
-- **Mitigation**: set TTL and max-length policies, use lazy/quorum queues where appropriate, and alert aggressively.
+When producers stay faster than consumers, a queue is delayed failure unless its backlog has a limit. Disk eventually fills, and message age can exceed the time in which the work is useful. TTL and length policies put boundaries around the failure. Alerts on depth and oldest-message age reveal it before the broker runs out of room.
 
-## 2) Auto-ack in Production
+## Acknowledging before the Side Effect
 
-- **What goes wrong**: message acknowledged before work is complete.
-- **Why**: consumer crashes after receive but before business side effects finish.
-- **Impact**: silent message loss.
-- **Mitigation**: disable auto-ack and ack only after successful processing.
+Automatic acknowledgement hands ownership back to the broker before business work finishes. A crash in the gap leaves no message to retry. Manual acknowledgement should follow the durable business side effect, with repeated deliveries handled safely.
 
-## 3) Relying on Classic Mirrored Queues
+## Treating Classic Mirroring as a Current Design
 
-- **What goes wrong**: weaker safety profile in failure scenarios.
-- **Why**: mirrored classic queues are legacy compared to quorum queues.
-- **Impact**: higher data-loss/failover risk.
-- **Mitigation**: use quorum queues for new systems and migration plans.
+Mirrored classic queues are gone from RabbitMQ 4.x. A system that still assumes their policies or failure behavior has an upgrade blocker, not a supported high-availability design. New replicated queues should use quorum queues. Migrations need to account for their different feature set and resource cost.
 
-## 4) Not Setting Prefetch
+## Leaving Prefetch Unbounded
 
-- **What goes wrong**: one slow consumer starves others.
-- **Why**: uneven distribution of in-flight deliveries.
-- **Impact**: higher tail latency and poor parallelism.
-- **Mitigation**: set and tune `BasicQos` prefetch via load tests.
-
-# Questions
-
-> [!QUESTION]- How do you use RabbitMQ to absorb bursty ingress when producers outpace consumers?
-> Put a durable queue between the ingress and the workers so bursts land in the queue instead of overwhelming the worker tier. Keep the ingress path thin — validate, enqueue, return `200` fast — so a webhook sender never waits on your processing. Then scale competing consumers horizontally off the same queue, and use prefetch (`BasicQos`) so one slow worker can't hoard unacked messages while others sit idle. Route poison messages to a dead-letter exchange and watch queue depth, redelivery rate, and message age. The queue is the shock absorber: it turns a traffic spike into a temporary backlog instead of dropped requests or a melted worker tier.
-
-> [!QUESTION]- How do you implement at-least-once delivery, and what new risk appears?
-> At-least-once is four settings working together: a durable queue, persistent messages (`DeliveryMode = 2`), publisher confirms so the producer knows the broker accepted the message, and manual consumer ack so a message isn't removed until processing succeeds. If a consumer crashes before acking, the broker redelivers. The risk that buys you is duplicates — a redelivery can race an ack — so consumers must be [[Software Architecture/Distributed Systems/Idempotency|idempotent]], keyed on a stable message ID with a dedupe store. You trade the possibility of loss for the certainty of occasional duplicates, which is the far easier problem to make safe.
-
-> [!QUESTION]- When would you choose RabbitMQ over Kafka?
-> Choose RabbitMQ when you want a smart broker doing the routing — direct, topic, fanout, and header exchanges, per-message TTL, priorities, dead-lettering — for task queues, request-reply, and command dispatch where low latency and flexible routing matter more than retention. Choose [[Software Architecture/Distributed Systems/Message Queues/Kafka]] when you need a durable, replayable log: high-throughput event streams, ordering per partition, and multiple independent consumers re-reading history by offset. The rough line is that RabbitMQ moves a message and forgets it, while Kafka stores an event history. If you keep wishing you could re-consume past messages, you actually wanted Kafka.
+Too much in-flight work can pile up behind one slow consumer while another consumer has room. `BasicQos` makes that ownership window explicit. The right count comes from load tests because handler cost and downstream latency determine whether a value such as `32` is conservative or excessive.
 
 # References
 
-- [RabbitMQ Documentation](https://www.rabbitmq.com/docs) — official reference covering exchanges, queues, bindings, durability, and clustering.
-- [RabbitMQ Tutorials](https://www.rabbitmq.com/tutorials) — step-by-step tutorials for common messaging patterns: work queues, pub/sub, routing, topics, and RPC.
-- [CloudAMQP: RabbitMQ Best Practice for High Performance](https://www.cloudamqp.com/blog/part1-rabbitmq-best-practice.html) — practitioner guide on connection pooling, prefetch count, persistent messages, and avoiding common performance pitfalls.
-- [RabbitMQ .NET API Guide](https://www.rabbitmq.com/client-libraries/dotnet-api-guide) — official .NET client library reference covering connection management, channel lifecycle, and consumer patterns.
+- [RabbitMQ documentation](https://www.rabbitmq.com/docs)
+- [RabbitMQ tutorials](https://www.rabbitmq.com/tutorials)

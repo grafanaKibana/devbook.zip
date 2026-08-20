@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-03T07:22:13.842Z
-modified: 2026-08-08T09:22:40.001Z
-published: 2026-08-08T09:22:40.001Z
+created: 2026-08-20T20:41:15.607Z
+modified: 2026-08-20T20:41:15.607Z
+published: 2026-08-20T20:41:15.607Z
 topic:
   - Computer Science
 subtopic:
@@ -14,15 +14,15 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-Two priority queues need to become one. A leftist heap stores the same heap-ordered keys as an explicit binary tree and adds one field per node so melding follows only the short right spines.
+Leftist heaps make melding the main priority-queue operation. Keys remain heap-ordered in an explicit binary tree, while one extra field per node keeps the path used by merge short.
 
-That field is the **null-path length** (npl, also called rank or s-value): the distance from a node to the nearest missing child, with `npl(null) = 0` and a leaf at `1`. The **leftist property** holds `npl(left) ≥ npl(right)` at every node, forcing the shorter route toward a missing child onto the right. Merge therefore recurses only down the right spines and restores the property while unwinding.
+The field is the **null-path length** (npl, also called rank or s-value): the distance to the nearest missing child, with `npl(null) = 0` and a leaf at `1`. Every node satisfies `npl(left) ≥ npl(right)`. This **leftist property** puts the shorter route to a missing child on the right, exactly where merge recurses.
 
-The tradeoff is shape. The tree is heap-ordered but deliberately left-heavy and can be arbitrarily deep; there is no balance guarantee on height, no index arithmetic, and no cache-friendly contiguous layout. What is bounded is exactly the one path merge uses.
+The whole tree need not be balanced. It may grow deep and strongly left-heavy. Only the right spine receives a logarithmic bound, and that is enough because merge never walks the left subtrees.
 
 **Core shape:** heap-ordered binary tree + npl per node → merge two heaps by recursing down their right spines → insert and extract-min are both merges.
 
-Use **Merge** on the same canonical heaps `[2, 7, 10]` and `[3, 5, 8]`. The active path follows the right spines; amber nodes are exactly those where the null-path-length comparison requires a child swap.
+Use **Merge** on the heaps `[2, 7, 10]` and `[3, 5, 8]`. The active path follows the right spines. Amber marks the nodes whose children must swap after the null-path-length comparison.
 
 ````tabsdown
 tab: Visualization
@@ -218,13 +218,13 @@ tab: Complexity
 
 # Where the Invariant is Load-bearing
 
-The child swap in step 4 is not cosmetic.
+The child swap in step 4 carries the bound.
 
-The npl bookkeeping must be updated on every merge, not lazily. The swap decision at each level reads the children's current npl values, so a stale rank on a subtree can cause a wrong swap — or a skipped one — and silently corrupt the bound for all ancestors. The field is part of the invariant, not a cached hint.
+Null-path length is structural state, so every merge must update it before returning. A stale value can trigger the wrong swap and give every ancestor an incorrect rank. Once that happens, the right spine is no longer bounded by the stored metadata.
 
-These are worst-case bounds. A leftist heap trades that field for a per-operation guarantee.
+The extra field buys a worst-case guarantee for each operation.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Leftist structure and the right spine
 >
@@ -286,15 +286,8 @@ These are worst-case bounds. A leftist heap trades that field for a per-operatio
 > }
 > ```
 >
-> The swap and the `a.Npl` update are the two lines that keep the shorter subtree on the right; dropping either breaks the leftist invariant.
-
-# Questions
-
-> [!QUESTION]- Why does the leftist invariant keep merge on a logarithmically short right spine?
-> Every step down the right spine reduces null-path length by one, while a node of null-path length `r` contains at least `2ʳ - 1` nodes. The root's right-spine length is therefore at most logarithmic in the heap size, and merge visits only that spine.
+> The swap and the `a.Npl` update are the two lines that keep the shorter subtree on the right. Dropping either breaks the leftist invariant.
 
 # References
 
-- [Leftist tree (Wikipedia)](https://en.wikipedia.org/wiki/Leftist_tree) — s-value (npl) definition, the leftist invariant, and the right-spine length proof.
-- [Crane, _Linear Lists and Priority Queues as Balanced Binary Trees_ (Stanford dissertation, 1972)](https://rtheunissen.github.io/bst/docs/references/1972_clark_allan_crane.pdf) — the original leftist-tree structure, rank invariant, and merge analysis.
-- Mark Allen Weiss, _Data Structures and Algorithm Analysis in C++_, ch. 6 (Priority Queues) — the null-path-length invariant, the worst-case merge along right paths, and the npl-maintaining implementation this note follows.
+- [Crane, _Linear Lists and Priority Queues as Balanced Binary Trees_ (Stanford dissertation, 1972)](https://rtheunissen.github.io/bst/docs/references/1972_clark_allan_crane.pdf)

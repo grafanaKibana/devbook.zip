@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T14:02:44.198Z
-modified: 2026-07-25T13:51:15.231Z
-published: 2026-07-25T13:51:15.231Z
+created: 2026-08-20T20:41:15.711Z
+modified: 2026-08-20T20:41:15.711Z
+published: 2026-08-20T20:41:15.711Z
 topic:
   - Software Design
 subtopic:
@@ -14,9 +14,9 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-A UML class diagram is a static map of types, their members, and the relationships between their instances. Use it to make a domain model or public contract discussable before implementation. It does not show runtime order, database tables, or object allocation by itself; a sequence diagram, data model, or code is needed for those questions.
+A UML class diagram is a static view of classifiers, their members, and selected relationships. It makes a domain model or public contract discussable without pretending to describe every runtime detail. Execution order, persistence layout, and allocation belong in sequence diagrams, data models, or code when those details matter.
 
-The diagram is useful only when the arrows carry precise meaning. Association says objects know about one another. Shared aggregation adds a weak whole–part hint but does not define lifecycle. Composition says the whole owns each part exclusively and the part has no independent lifecycle in that model. Generalization and realization describe type contracts, not object ownership.
+The diagram earns its keep when each line carries a deliberate meaning. An association records a semantic relationship between classifiers. Navigability is a separate choice and the line alone does not prove that one object stores a direct reference to another. Shared aggregation adds only a weak whole–part hint. Composite aggregation is stronger: a part can belong to at most one composite at a time, and the model gives that composite responsibility for the part's existence and storage. The exact create, remove, and delete behaviour still has to be stated and enforced. Generalization and realization describe type contracts rather than object ownership.
 
 # Notation and Relationship Semantics with a C# Example
 
@@ -30,6 +30,8 @@ The diagram is useful only when the arrows carry precise meaning. Association sa
 | Filled diamond | Composition | An order owns order lines |
 | Solid line with hollow triangle | Generalization | `CardPayment` is a `Payment` |
 | Dashed line with hollow triangle | Realization | `CardPayment` implements `IPayment` |
+
+The `~` marker means UML package visibility. Mermaid labels it “Package/Internal,” but C# `internal` is assembly visibility, so the two are only rough analogues.
 
 ## C# Domain Example
 
@@ -46,9 +48,9 @@ classDiagram
     Team "1" o-- "0..*" Developer : groups
 ```
 
-- `Customer` and `Order` are associated. Deleting a customer record does not imply that completed orders lose their legal or accounting lifecycle.
-- `Team` aggregates `Developer`. Developers exist before and after a team and may move without being recreated. UML gives shared aggregation deliberately weak semantics; use a plain association when the whole–part hint adds no decision value.
-- `Order` composes `OrderLine`. A line belongs to one order in this model and has no operation outside it. Removing the order removes the aggregate's lines from the domain lifecycle, even though .NET garbage collection is a separate runtime mechanism.
+- `Customer` and `Order` are associated. The arrow gives this Mermaid diagram a reading direction, while the domain still decides whether either object stores a direct reference. Deleting a customer record does not imply that completed orders lose their legal or accounting lifecycle.
+- `Team` aggregates `Developer`. Developers exist before and after a team and may move without being recreated. UML gives shared aggregation deliberately weak semantics. Use a plain association when the whole–part hint adds no decision value.
+- `Order` composes `OrderLine`. A line belongs to at most one order at a time in this model, and the order is responsible for the line's lifecycle within the aggregate. That domain rule is separate from .NET garbage collection and must also be reflected in construction, mutation, and persistence.
 
 ```csharp
 public sealed class Order
@@ -71,7 +73,9 @@ public sealed class Order
 public sealed record OrderLine(string Sku, int Quantity, decimal UnitPrice);
 ```
 
-The private collection makes composition visible in code: callers cannot attach a line to two orders or bypass `AddLine` and its invariants. C# has no aggregation keyword; association, aggregation, and composition are design semantics enforced by ownership and APIs.
+The private collection and `AddLine` method give `Order` control over membership and validation. Through this API, a caller cannot insert an existing `OrderLine` into several orders or mutate the collection directly. C# has no aggregation keyword. Association, aggregation, and composition remain design semantics enforced through construction, ownership, mutation, and persistence rules.
+
+The code does not fully enforce the diagram's `1..*` multiplicity. A newly constructed `Order` contains zero lines. If every valid order must always contain at least one line, construction should require the first line or go through a factory that establishes the invariant. If an empty draft is valid, the diagram should say `0..*` for that state instead.
 
 # Pitfalls
 
@@ -79,10 +83,9 @@ The private collection makes composition visible in code: callers cannot attach 
 
 **Reading multiplicity as a database constraint.** `1..*` expresses the domain model. The database, constructor, and mutation methods must still enforce it.
 
-**Treating inheritance as reuse.** The triangle promises substitutability. If a subtype disables a base operation or strengthens its preconditions, the diagram is hiding a broken contract; prefer composition or a narrower interface.
+**Treating inheritance as reuse.** The triangle promises substitutability. If a subtype disables a base operation or strengthens its preconditions, the diagram is hiding a broken contract. Prefer composition or a narrower interface.
 
 # References
 
-- [OMG Unified Modeling Language 2.5.1](https://www.omg.org/spec/UML/2.5.1/PDF) — the normative UML specification for classifiers, associations, aggregation, composition, generalization, and realization.
-- [Mermaid class diagrams](https://mermaid.js.org/syntax/classDiagram.html) — the syntax used for the Obsidian/Quartz-compatible example.
-- [ByteByteGo source snapshot: a cheatsheet for UML class diagrams](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/a-cheatsheet-for-uml-class-diagrams.md) — the source summary expanded here with lifecycle and ownership semantics plus a concrete C# model.
+- [OMG Unified Modeling Language 2.5.1](https://www.omg.org/spec/UML/2.5.1/PDF)
+- [Mermaid class diagrams](https://mermaid.js.org/syntax/classDiagram.html)

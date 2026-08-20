@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-28T10:17:33.010Z
-modified: 2026-08-08T08:06:02.556Z
-published: 2026-08-08T08:06:02.556Z
+created: 2026-08-20T20:41:15.543Z
+modified: 2026-08-20T20:41:15.544Z
+published: 2026-08-20T20:41:15.544Z
 topic:
   - Computer Science
 subtopic:
@@ -14,9 +14,9 @@ priority: Low
 status: Ready to Repeat
 ---
 
-A sequential data source or a linked list with no random access favors merging over pivot-based array partitioning. Compare the two front elements of already-sorted sequences, emit the smaller, advance that side, and repeat. Merge sort turns all of sorting into that one operation. It splits the input by position until each piece holds one element — a run of length 1 is sorted by definition — then merges runs pairwise, doubling the sorted run length each pass: 1 into 2, 2 into 4, up to a single run of length n.
+A sequential data source or a linked list has no cheap random access, so merging fits better than pivot-based array partitioning. Compare the front values of two sorted sequences, emit the smaller one, and advance that side. Merge sort builds the whole algorithm from this operation. It splits by position until every piece holds one element, then merges those runs pairwise. Their lengths double from 1 to 2, 2 to 4, and onward until one sorted run remains.
 
-The merge is the only place ordering happens, and it is valid because of one fact: when both runs are sorted, the smaller of their two front elements is the smallest element neither run has placed yet. A single left-to-right pass therefore merges two runs by comparing only their fronts and never looking back. Because the split is by position rather than by value, sorted, reversed, and random input all produce the same recursion shape.
+Ordering happens only during the merge. When both runs are sorted, the smaller front value is the smallest value still waiting in either run. One left-to-right pass can therefore compare only the two fronts and never look back. Splitting uses positions rather than values, so input order does not change the recursion shape.
 
 **Core condition:** two sorted runs → emit the smaller front element → merge pairwise until one ordered run remains.
 
@@ -108,7 +108,7 @@ The auxiliary figure is the merge buffer. A top-down array merge sort copies eac
 
 ````
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Divide-and-merge structure
 >
@@ -152,15 +152,8 @@ The auxiliary figure is the merge buffer. A top-down array merge sort copies eac
 > }
 > ```
 >
-> The `a[i] <= a[j]` comparison keeps the merge stable. This teaching version allocates a temporary array for each merge; a production implementation normally reuses one shared buffer.
-
-# Questions
-
-> [!QUESTION]- What single line makes the array merge stable, and why?
-> The comparison `a[i] <= a[j]`, which emits the left run's element on a tie. The left run holds elements that appeared earlier in the original array, so taking it first preserves the original order of equal keys. Using `a[i] < a[j]` instead emits the right element on ties and makes the sort unstable.
+> The `a[i] <= a[j]` comparison keeps the merge stable. This teaching version allocates a temporary array for each merge. A production implementation normally reuses one shared buffer.
 
 # References
 
-- [Mergesort](https://algs4.cs.princeton.edu/22mergesort/) — Princeton Algorithms: top-down and bottom-up merge, the stability argument, and the doubling of run lengths.
-- [Merge sort](https://en.wikipedia.org/wiki/Merge_sort) — stability proof, bottom-up variant, and the external / multiway merge used for out-of-core data.
-- [listsort.txt](https://github.com/python/cpython/blob/main/Objects/listsort.txt) — CPython's description of Timsort: run detection and galloping merge built on the same take-the-smaller-front rule.
+- [Mergesort](https://algs4.cs.princeton.edu/22mergesort/)

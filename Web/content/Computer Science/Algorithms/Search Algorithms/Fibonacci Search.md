@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-10T07:55:26.057Z
-modified: 2026-08-10T07:55:26.057Z
-published: 2026-08-10T07:55:26.057Z
+created: 2026-08-20T20:41:15.534Z
+modified: 2026-08-20T20:41:15.534Z
+published: 2026-08-20T20:41:15.534Z
 topic:
   - Computer Science
 subtopic:
@@ -14,9 +14,9 @@ priority: Low
 status: Not-Started
 ---
 
-Fibonacci search is a comparison search for a sorted, random-access array. It keeps three consecutive Fibonacci numbers large enough to cover the remaining candidate range. A probe lands at `offset + F(k-2)`; comparing that value with the target discards one side and shifts the Fibonacci triple down without division.
+Fibonacci Search locates a value in a sorted, random-access array without repeatedly dividing the search interval. It keeps three consecutive Fibonacci numbers large enough to cover the candidate range and probes at `offset + F(k-2)`.
 
-The invariant is that every possible target index is greater than `offset` and inside the current Fibonacci window. A probe below the target moves `offset` to the probe. A probe above the target keeps the offset and replaces the window with its smaller left component. Like [[Computer Science/Algorithms/Search Algorithms/Binary Search|Binary Search]], the method is logarithmic and requires sorted input; the practical distinction is Fibonacci-offset arithmetic rather than repeated midpoint calculation.
+Every possible target index stays greater than `offset` and inside the current Fibonacci window. A value below the target advances the offset. A value above it keeps the offset and contracts the window to its left component. Like [[Computer Science/Algorithms/Search Algorithms/Binary Search|Binary Search]], the algorithm repeatedly discards part of the candidate range. Its distinction is the Fibonacci offset arithmetic.
 
 ````tabsdown
 tab: Visualization
@@ -93,9 +93,9 @@ tab: Complexity
 
 # Boundaries
 
-The array must be sorted under the same comparison used by the search. Unsorted input invalidates the discarded ranges. Random access is also required: Fibonacci search jumps to computed indices and is not a forward-only stream algorithm.
+The array must be sorted under the same comparison used by the search. Otherwise, neither discarded side is proven irrelevant. Random access is required as well because the algorithm jumps to computed indices. A forward-only stream cannot do that.
 
-Duplicate targets are safe, but the algorithm returns an arbitrary matching index rather than the first or last occurrence. A lower-bound or upper-bound [[Computer Science/Algorithms/Search Algorithms/Binary Search|Binary Search]] is the direct choice when duplicate boundaries matter. Building the Fibonacci numbers in a wider integer type prevents the covering value from overflowing near the maximum array length.
+Duplicates are safe, though the returned match is arbitrary. A lower-bound or upper-bound [[Computer Science/Algorithms/Search Algorithms/Binary Search|Binary Search]] is clearer when the first or last duplicate matters. The covering Fibonacci number should use a wider integer type so it cannot overflow near the maximum array length.
 
 > [!EXAMPLE]- C# implementation
 >
@@ -141,17 +141,9 @@ Duplicate targets are safe, but the algorithm returns an arbitrary matching inde
 > }
 > ```
 >
-> The `long` Fibonacci state protects the covering-number calculation; array probes are clamped back into the valid `int` index range.
-
-# Questions
-
-> [!QUESTION]- What does `offset` prove after a probe below the target?
-> Every index through that probe is too small, so the target, if present, must be strictly to its right. The next Fibonacci window is therefore anchored after the new offset.
-
-> [!QUESTION]- Why is Fibonacci search not a general replacement for binary search?
-> Both require sorted random-access data and have `O(log n)` comparisons. Fibonacci search changes the probe arithmetic and can favor storage where nearby forward offsets are useful, while binary search is simpler and directly supports standard lower-bound and upper-bound forms.
+> The `long` Fibonacci state protects the covering-number calculation. Array probes are clamped back into the valid `int` index range.
 
 # References
 
-- [David E. Ferguson, “Fibonaccian Searching”](https://doi.org/10.1145/367487.367496) — the 1960 primary paper introducing the Fibonacci-interval search method.
-- [NIST Dictionary of Algorithms and Data Structures: Fibonaccian search](https://www.nist.gov/dads/HTML/fibonaccianSearch.html) — authoritative definition, interval rule, and bibliography for the original algorithm.
+- [David E. Ferguson, “Fibonaccian Searching”](https://doi.org/10.1145/367487.367496)
+- [NIST Dictionary of Algorithms and Data Structures: Fibonaccian search](https://www.nist.gov/dads/HTML/fibonaccianSearch.html)

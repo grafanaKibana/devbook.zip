@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T14:02:44.132Z
-modified: 2026-07-25T13:57:51.879Z
-published: 2026-07-25T13:57:51.879Z
+created: 2026-08-20T20:41:15.664Z
+modified: 2026-08-20T20:41:15.665Z
+published: 2026-08-20T20:41:15.665Z
 topic:
   - Security
 subtopic:
@@ -14,15 +14,18 @@ priority: High
 status: Ready to Repeat
 ---
 
-Basic Authentication is the simplest HTTP authentication scheme. The client sends credentials (username:password) encoded as Base64 in the `Authorization` header on every request. It is defined in RFC 7617.
+HTTP Basic authentication sends a reusable user identifier and password in the `Authorization` header. Base64 makes the bytes safe for the header syntax. It provides no confidentiality. RFC 7617 defines the scheme and its protection-space behavior.
 
 # Mechanism
 
-1. Client sends: `Authorization: Basic base64(username:password)`
-2. Server decodes the Base64 string, splits on `:`, and validates the credentials
-3. If valid, the request proceeds; if not, the server returns `401 Unauthorized` with `WWW-Authenticate: Basic realm="My API"`
+1. A server challenges with `WWW-Authenticate: Basic realm="My API"`.
+2. The client sends `Authorization: Basic base64(username:password)` after the challenge or preemptively when reusing credentials for the same protection space.
+3. The server decodes the credential, separates the user identifier at the first colon, and verifies the password.
+4. Missing or invalid credentials produce `401 Unauthorized` with an applicable challenge.
 
-**Important**: Base64 is encoding, not encryption. The credentials are trivially decodable. Basic Auth MUST be used over HTTPS only — over HTTP, credentials are sent in plaintext.
+The optional `charset` parameter appears on the challenge and is advisory. RFC 7617 defines only `UTF-8`. It signals NFC normalization followed by UTF-8 encoding. When the parameter is absent, the legacy default remains deliberately unspecified for compatibility, except that it must map US-ASCII characters to their matching single-byte values. Non-ASCII credentials therefore need an agreed encoding profile rather than an assumed default.
+
+TLS is mandatory because the credential is otherwise exposed to every observer on the path. TLS protects transit to its termination point. Logs, proxies, traces, and the verifier can still disclose the reusable password.
 
 # ASP.NET Core Example
 
@@ -61,50 +64,50 @@ httpClient.DefaultRequestHeaders.Authorization =
 var response = await httpClient.GetAsync("/api/internal/data");
 ```
 
+These snippets show the wire format, not a production authentication handler. The server sketch assumes valid Base64 and a colon, compares the scheme case-sensitively even though HTTP scheme names are case-insensitive, and embeds a plaintext secret. A real implementation must reject malformed input without crashing the pipeline, handle the negotiated character encoding, verify a stored password hash through a credential-verification library, emit the correct challenge, rate-limit guessing, and keep credentials out of configuration files and logs. ASP.NET Core authentication handlers provide the right pipeline boundary for that work.
+
 # When to Use
 
-- Internal APIs between trusted services where simplicity matters more than security sophistication
-- Development and testing environments
-- Legacy system integration where the client cannot support OAuth/JWT
+- A constrained legacy integration that already requires the scheme.
+- A small machine-to-machine boundary with TLS, vaulted credentials, narrow authorization, rotation, and monitoring.
+- Temporary development tooling that never reuses production credentials.
 
-**Avoid** for user-facing authentication. Use OAuth 2.0 / JWT Bearer for APIs and ASP.NET Core Identity for user login.
+Basic is a poor default for interactive login and broad external APIs because every request presents the primary secret. Browser sessions, workload identity, mutual TLS, or OAuth client authentication usually provide a better lifecycle.
 
 # Pitfalls
 
 ## Credentials on Every Request
 
-**What goes wrong**: Basic Auth sends credentials with every HTTP request. If any request is intercepted (misconfigured proxy, logging middleware that logs headers), credentials are exposed.
+The same password appears on every request in the protection space. A misconfigured TLS hop, proxy, trace, or header log can disclose it.
 
-**Mitigation**: always use HTTPS. Never log the `Authorization` header. Rotate service account credentials regularly.
+Use TLS across every hop, redact the `Authorization` header, restrict credential scope, and rotate through a secret manager. Short rotation intervals reduce exposure but do not prevent replay between rotations.
 
-## No Token Revocation
+## Coarse Revocation
 
-**What goes wrong**: Basic Auth has no concept of token expiry or revocation. If credentials are compromised, the only remediation is changing the password, which requires updating all clients.
+Basic defines no access-token lifetime or refresh protocol. Revocation means disabling the account or replacing its password, which can interrupt every client sharing that credential.
 
-**Mitigation**: for user-facing authentication, use OAuth 2.0 / JWT Bearer with short-lived tokens and refresh token rotation. For service-to-service, use client credentials flow or API keys with rotation support.
+Give each client a distinct credential so one can be disabled without rotating an entire fleet. Where supported, workload identity, mutual TLS, or OAuth client authentication provides stronger client identity and rotation boundaries.
 
 # Tradeoffs
 
-| Scheme | Complexity | Revocation | User-facing | Use when |
-|---|---|---|---|---|
-| Basic Auth | Minimal | Password change only | No | Internal M2M over HTTPS, legacy integration |
-| API Key | Low | Key rotation | No | Public APIs, third-party integrations |
-| JWT Bearer | Medium | Token expiry + refresh | Yes | User-facing APIs, stateless auth |
-| OAuth 2.0 | High | Token revocation, refresh | Yes | Delegated access, third-party clients |
+| Mechanism | Presented secret | Revocation boundary | Fit |
+|---|---|---|---|
+| Basic | Reusable identifier and password | Account disable or password replacement | Legacy HTTP authentication and small controlled integrations |
+| API key | Reusable opaque key | Disable or replace one issued key | Product-specific client identification with per-key lifecycle |
+| Bearer access token | Shorter-lived token | Expiry plus issuer/resource-server controls | Delegated API access. Token format may be opaque or JWT |
+| Mutual TLS | Client-certificate private-key proof | Certificate issuance, rotation, and revocation | Service identity where both peers can operate a certificate trust model |
+| Managed workload identity | Platform-issued credential or attestation | Platform identity assignment and token lifecycle | Service identity without an application-managed long-lived secret |
 
-**Decision rule**: use Basic Auth only for internal service-to-service calls over HTTPS where simplicity is the priority. For user-facing authentication or any external-facing API, use JWT Bearer or OAuth 2.0.
+Basic earns its place when interoperability requires it and its coarse credential lifecycle is acceptable. Network location alone does not make it safe. TLS, per-client credentials, narrow authorization, secret rotation, and redaction are minimum controls.
 
 # Questions
 
 > [!QUESTION]- Why is Basic Auth unsafe over HTTP?
-> Base64 is encoding, not encryption — it is trivially reversible. Over HTTP, the `Authorization` header is sent in plaintext and visible to any network observer. Over HTTPS, the header is encrypted by TLS, making Basic Auth safe to use.
+> Base64 is reversible encoding. Without TLS, every observer on the path can recover the reusable password. TLS protects it only to the termination point. The credential remains exposed to the client, verifier, trusted proxies, and any system that records the header.
 
 > [!QUESTION]- When is Basic Auth acceptable in production?
-> For machine-to-machine calls between trusted services on an internal network over HTTPS, Basic Auth is acceptable when simplicity matters and the credential is a service account (not a user password). For user-facing authentication, use OAuth 2.0 / JWT Bearer — Basic Auth requires sending credentials on every request, which increases exposure.
+> It can be acceptable for a constrained integration that requires Basic and supports TLS across every hop, a unique vaulted credential, narrow authorization, rotation, rate limiting, and header redaction. A shared password across many clients or an interactive user's primary password creates an unnecessarily large compromise boundary.
 
 # References
 
-- [RFC 7617 — HTTP Basic Authentication](https://datatracker.ietf.org/doc/html/rfc7617) — the authoritative specification for Basic Auth, including the `charset` parameter and interaction with TLS
-- [Microsoft — ASP.NET Core Authentication](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/) — overview of ASP.NET Core authentication schemes and middleware pipeline
-- [OWASP — Authentication Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html) — OWASP guidance on secure credential handling, transport requirements, and when to avoid Basic Auth
-- [RFC 9110 §11.7 — HTTP Semantics: Authorization](https://www.rfc-editor.org/rfc/rfc9110#section-11.7) — the HTTP/1.1 semantics spec defining the `Authorization` header and `WWW-Authenticate` challenge/response flow
+- [HTTP Basic Authentication](https://www.rfc-editor.org/rfc/rfc7617)

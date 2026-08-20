@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-03T07:22:13.845Z
-modified: 2026-08-08T07:35:06.069Z
-published: 2026-08-08T07:35:06.069Z
+created: 2026-08-20T20:41:15.610Z
+modified: 2026-08-20T20:41:15.611Z
+published: 2026-08-20T20:41:15.611Z
 topic:
   - Computer Science
 subtopic:
@@ -14,7 +14,7 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-An autocomplete box holds a set of strings and must answer a different question than "is this exact word present?": given the typed fragment `lap`, which stored keys begin with it? A [[Computer Science/Data Structures/Hash-based Structures/HashMap|hash map]] hashes the whole key, so it can confirm exact membership but has no notion of a shared prefix — answering the fragment query means scanning all `n` keys. A trie (prefix tree) keys the set on the _sequence_ of characters instead of a hash of the whole string, so the prefix becomes a location in the structure rather than a filter over every entry.
+An autocomplete box must answer more than exact membership. Given the fragment `lap`, it needs every stored key that begins there. A [[Computer Science/Data Structures/Hash-based Structures/HashMap|hash map]] hashes the whole key and has no location for a shared prefix, so this query scans all `n` keys. A trie keys the set by the _sequence_ of characters. The prefix becomes a node in the structure rather than a filter over every entry.
 
 Each edge is labelled with a single character. The path from the root to a node spells a prefix, which means keys are represented by paths, not stored explicitly at the nodes. Every node carries a child map (or a fixed array with one slot per alphabet symbol) and an end-of-word flag marking where a complete key terminates. Words that share a prefix share the same path until they diverge: `car`, `card`, and `care` all reuse the `c → a → r` route and only branch at the fourth character.
 
@@ -206,11 +206,11 @@ The wasted memory is structural, not incidental. An array-backed node reserves `
 
 The same layout fixes the alphabet at construction. An array-indexed trie using `children[c - 'a']` silently breaks on uppercase, digits, Unicode, or emoji: the index lands outside the 26-slot array or aliases the wrong slot. The character domain has to be decided up front, and input normalized (for example, lower-cased) identically on insert and query, or the two operations walk different paths for the same word.
 
-A trie pays off when the key has a useful symbol sequence and the workload queries that sequence — strings, byte sequences, IP prefixes, or integers treated as bit strings for longest-prefix matching. Opaque IDs queried only by exact equality gain nothing from the prefix structure; for that workload, a hash map fits.
+A trie pays off when the key has a useful symbol sequence and the workload queries that sequence — strings, byte sequences, IP prefixes, or integers treated as bit strings for longest-prefix matching. Opaque IDs queried only by exact equality gain nothing from the prefix structure. For that workload, a hash map fits.
 
 Deletion is the operation that exposes the shared-path invariant. Removing `car` when `card` is also present must clear the `r` node's `IsEnd` flag but leave the node itself, because `d` still hangs off it. Pruning may only remove nodes that have become both unflagged and childless, walking back up until that condition fails. Implementations that skip the prune and merely tombstone the flag leak nodes under churn.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Shared-prefix paths for `car`, `card`, `care`
 >
@@ -276,32 +276,22 @@ Deletion is the operation that exposes the shared-path invariant. Removing `car`
 > }
 > ```
 >
-> `Search` and `StartsWith` share the same walk; the only difference is that `Search` requires the terminal node's `IsEnd` flag while `StartsWith` accepts any reached node. A `Dictionary` child map keeps memory proportional to actual branches; a `Node[26]` array is faster per step but reserves all slots.
+> `Search` and `StartsWith` share the same walk. The only difference is that `Search` requires the terminal node's `IsEnd` flag while `StartsWith` accepts any reached node. A `Dictionary` child map keeps memory proportional to actual branches. A `Node[26]` array is faster per step but reserves all slots.
 
 # Comparison
 
-Every structure below stores a set of keys; they differ in whether prefixes and ordering survive, and in memory.
+Every structure below stores a set of keys. They differ in whether prefixes and ordering survive, and in memory.
 
 | Structure | Exact membership | Prefix / ordered support | Storage shape | Stronger case |
 | --- | --- | --- | --- | --- |
-| Trie | Walks one edge per key character | Native prefix walk; sorted output when children are visited in symbol order | One node per distinct prefix; sparse maps or fixed child arrays | Autocomplete, routing, and shared-prefix key sets |
+| Trie | Walks one edge per key character | Native prefix walk. Sorted output when children are visited in symbol order | One node per distinct prefix. Sparse maps or fixed child arrays | Autocomplete, routing, and shared-prefix key sets |
 | [[Computer Science/Data Structures/Hash-based Structures/HashMap\|Hash map]] | Hashes the complete key | No native prefix or ordered scan | One entry per complete key | Membership-only workloads |
-| Radix / PATRICIA trie | Compares compressed edge labels | Native prefix walk; sorted output requires symbol-ordered edges | Compresses single-child runs but retains edge-label data | Long sparse keys where plain-trie node count dominates |
+| Radix / PATRICIA trie | Compares compressed edge labels | Native prefix walk. Sorted output requires symbol-ordered edges | Compresses single-child runs but retains edge-label data | Long sparse keys where plain-trie node count dominates |
 | [[Computer Science/Algorithms/Search Algorithms/String Matching/Aho-Corasick\|Aho-Corasick]] | Retains every pattern in a trie | Scans text for many patterns through failure links | Trie nodes plus failure and output links | Matching many patterns against the same text |
 
 A [[Computer Science/Data Structures/Hash-based Structures/HashMap|hash map]] wins when only exact membership matters and memory is tight: it drops prefix and ordering entirely and avoids a node per distinct prefix. A radix tree is the trie to pick when the plain trie's node count is the problem — it compresses single-child chains without changing the query semantics. [[Computer Science/Algorithms/Search Algorithms/String Matching/Aho-Corasick|Aho-Corasick]] extends the trie with failure links to scan one text against many patterns at once, a different workload from single-key lookup.
 
-# Questions
-
-> [!QUESTION]- How does the same walk serve both exact search and a prefix query?
-> Both follow the query's characters edge by edge from the root. Exact search additionally requires the terminal node's end-of-word flag, proving the path is a complete stored key. A prefix query stops at "did the path exist", since reaching the node already certifies that at least one stored key starts with the fragment.
-
-> [!QUESTION]- Why can deleting one key not simply remove the nodes along its path?
-> Nodes are shared. `car` and `card` share the `c → a → r` path, so deleting `car` must clear the `r` node's end-of-word flag but keep the node, because `d` still descends from it. Only nodes that become both unflagged and childless may be pruned, walking up until that condition stops holding.
-
 # References
 
-- [Trie (Wikipedia)](https://en.wikipedia.org/wiki/Trie) — formal definition, the array-versus-map node layout, and the radix/PATRICIA compression variant.
-- [PATRICIA — Practical Algorithm To Retrieve Information Coded In Alphanumeric](https://dl.acm.org/doi/10.1145/321479.321481) — Donald Morrison's original path-compressed trie, the basis of the radix tree.
-- [Aho-Corasick algorithm](https://cp-algorithms.com/string/aho_corasick.html) — building a trie of patterns and adding failure links to turn it into a multi-pattern matching automaton.
-- [Ternary search trees](https://www.cs.princeton.edu/~rs/strings/) — Bentley and Sedgewick's alternative node layout that trades the `σ`-wide array for a small BST per node to cut trie memory.
+- [PATRICIA — Practical Algorithm To Retrieve Information Coded In Alphanumeric](https://dl.acm.org/doi/10.1145/321479.321481)
+- [Tries](https://algs4.cs.princeton.edu/52trie/)

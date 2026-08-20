@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T14:02:44.110Z
-modified: 2026-07-25T13:57:51.923Z
-published: 2026-07-25T13:57:51.923Z
+created: 2026-08-20T20:41:15.656Z
+modified: 2026-08-20T20:41:15.656Z
+published: 2026-08-20T20:41:15.656Z
 topic:
   - Programming
 subtopic:
@@ -14,39 +14,40 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-Generics let you write type-safe, reusable code without duplicating logic per type. Instead of accepting `object` and casting later, you keep strong compile-time guarantees and better IDE support. In .NET, generics also matter for performance because collections like `List<int>` avoid boxing that older non-generic APIs caused.
+Generics parameterize code by type. `List<T>` can store any `T` while the compiler still checks every read and write. That is a stronger contract than accepting `object` and recovering the real type with casts. For value types, generic collections also avoid the boxing required by older object-based APIs.
 
 - `T` is a placeholder for a type chosen by the caller.
-- `List<T>` is an open generic type definition; `List<int>` is a closed constructed type.
+- `List<T>` is an open generic type definition. `List<int>` is a closed constructed type.
 - Constraints (`where T : ...`) are capability contracts that unlock members safely.
-- Generic code is checked at compile time, then JIT-optimized per runtime type usage.
+- The runtime specializes generic code for value-type arguments and can share code between reference-type arguments.
 
 # Use Cases
 
-- Collections: `List<T>`, `Dictionary<TKey, TValue>`, and `HashSet<T>` provide reusable containers with strong typing.
-- Reusable algorithms: sorting, filtering, and comparison helpers can work across many types with constraints.
-- Repository/service abstractions: patterns like `IRepository<TEntity>` avoid repeating CRUD interfaces per entity.
-- Result wrappers: types like `Result<T>` or `ApiResponse<T>` let you model success payloads consistently.
+- Collections preserve the element or key type throughout an API.
+- Algorithms can require only the operations they use, such as comparison or numeric operators.
+- Generic result and handler types can keep payload types explicit without duplicating infrastructure.
+
+A generic abstraction should still represent one real behavior. `IRepository<TEntity>` is not useful merely because every entity happens to support create, read, update, and delete operations. Different aggregates often need different contracts.
 
 # Constraints
 
-Constraints define what operations are legal on `T` and protect APIs from invalid type arguments.
+Constraints tell the compiler what operations are valid for `T`. They also document the smallest capability the algorithm expects.
 
 - `where T : class` - `T` must be a reference type.
 - `where T : struct` - `T` must be a non-nullable value type.
-- `where T : notnull` - `T` cannot be nullable (`string?`, `int?`, etc.).
-- `where T : unmanaged` - `T` must be blittable/unmanaged (useful for low-level memory scenarios).
+- `where T : notnull` - nullable analysis warns when a nullable type argument is used.
+- `where T : unmanaged` - `T` is a non-nullable unmanaged type whose fields are also unmanaged. This is not identical to every platform's definition of blittable.
 - `where T : new()` - `T` must have a public parameterless constructor.
 - `where T : BaseType` - `T` must inherit from a specific base type.
 - `where T : ISomeInterface` - `T` must implement a specific interface.
 
 # Variance
 
-Variance controls assignment compatibility between constructed generic types.
+Variance controls safe assignment between constructed interface or delegate types when their type arguments are related by inheritance.
 
 - Invariance (default): `List<string>` is not assignable to `List<object>`.
-- Covariance (`out T`): lets you use a more derived type where a base type is expected for producer-only APIs (for example, `IEnumerable<string>` to `IEnumerable<object>`).
-- Contravariance (`in T`): lets you use a less derived type where a more derived type is expected for consumer-only APIs (for example, `IComparer<object>` as `IComparer<string>`).
+- Covariance (`out T`): allows a more derived type where a base type is expected for producer-only APIs (for example, `IEnumerable<string>` to `IEnumerable<object>`).
+- Contravariance (`in T`): allows a less derived type where a more derived type is expected for consumer-only APIs (for example, `IComparer<object>` as `IComparer<string>`).
 - Variance is supported on interfaces and delegates marked with `in`/`out`, and only for reference-type substitutions.
 
 ```csharp
@@ -74,7 +75,7 @@ public static T CreateAndValidate<T>()
 
 # Generic Math (.NET 7+)
 
-For years you couldn't write a generic `Sum<T>` because `T` had no way to express "supports `+`." **Static abstract interface members** fixed that: interfaces like `INumber<T>` declare static operators, so the constraint `where T : INumber<T>` (the "curiously recurring" self-referencing pattern) unlocks arithmetic on the type parameter.
+Generic code once had no static contract for operators such as `+`. Static abstract interface members changed that. `INumber<T>` declares numeric operators and identities, so a `where T : INumber<T>` constraint makes arithmetic available on the type parameter.
 
 ```csharp
 public static T Sum<T>(ReadOnlySpan<T> values) where T : INumber<T>
@@ -85,53 +86,47 @@ public static T Sum<T>(ReadOnlySpan<T> values) where T : INumber<T>
 }
 ```
 
-This is also the mechanism behind `IParsable<T>`, `ISpanFormattable`, and other "static contract" interfaces.
+The same static-member mechanism supports contracts such as `IParsable<TSelf>`, where parsing belongs to the type rather than an instance.
 
 # Reflection over Generics
 
-An _open_ generic (`List<>`) can't be instantiated until its type arguments are supplied at runtime via `MakeGenericType` (and `MakeGenericMethod` for methods):
+An open generic such as `List<>` has unassigned type parameters and cannot be instantiated. Reflection can close it at runtime with `MakeGenericType`. Generic methods use `MakeGenericMethod`.
 
 ```csharp
 Type closed = typeof(List<>).MakeGenericType(itemType); // e.g. List<Order>
 var list = Activator.CreateInstance(closed);
 ```
 
-Newer constraints worth knowing: `where T : struct, Enum` (enum-only generics), `where T : unmanaged`, and **`allows ref struct`** (C# 13) which lets `Span<T>` flow through generic code.
+`where T : struct, Enum` admits enum value types, while `allows ref struct` tells the compiler that a type argument may be stack-only. Code using that anti-constraint must obey the ref-safety rules for every possible `T`.
 
 # Pitfalls
 
-- Unconstrained `T` blocks member/operator usage because the compiler cannot prove capabilities, which pushes unsafe casts and weakens API clarity; add the smallest constraint set (`where T : IFoo`, `where T : struct`, etc.) that encodes what the algorithm really needs.
-- **Static members are per-closed-type.** A `static` field in `Cache<T>` is _not_ shared across `Cache<int>` and `Cache<string>` — each closed type gets its own copy of the static state. Handy for per-type caches, but a classic surprise if you expected one shared counter.
-- **Value-type specialization bloats code.** The JIT emits a separate native body per value-type argument (`List<int>`, `List<double>`, `List<MyStruct>`…). Great for speed, but a generic-heavy library instantiated over many value types grows the code/JIT footprint — a real cost on memory-constrained or fast-startup targets.
-- `default(T)` can hide correctness bugs because reference and nullable types become `null` while value types become zeroed data, which may be interpreted as valid business values; model absence explicitly (for example, `Try` pattern, `Option`, or nullable annotations) and validate before use.
-- Over-constraining (`where T : class, SomeConcreteType`) couples generic APIs to one hierarchy, which prevents reuse and forces duplicate implementations later; prefer interface-based constraints that describe behavior instead of concrete inheritance chains.
+- An unconstrained `T` exposes only operations valid for every type. Add the smallest constraint that the algorithm actually needs instead of casting internally.
+- **Static state belongs to each closed type.** `Cache<int>` and `Cache<string>` receive separate copies of a `static` field declared on `Cache<T>`.
+- **Value-type specialization can grow native code.** Separate value-type instantiations can produce separate JIT-compiled bodies. The specialization removes boxing and preserves value semantics, but many large instantiations increase startup and code-size costs.
+- `default(T)` is `null` for reference types and zero-initialized data for value types. Either result may look valid in a domain model, so absence should have an explicit contract.
+- A concrete base-class constraint couples the abstraction to one hierarchy. Prefer a behavioral interface when inheritance is not itself part of the requirement.
 
 # Tradeoffs
 
-- **Generics vs `object` (boxing)**: Non-generic collections (`ArrayList`, `Hashtable`) store value types as `object`, boxing them on every add and unboxing on every read. `List<int>` avoids boxing entirely — the JIT generates a specialized implementation per value type. The performance difference is measurable in allocation-heavy loops on value types like `int`, `Guid`, or `DateTime`.
-- **Generics vs inheritance for polymorphism**: Generics express static (compile-time) polymorphism — the type argument is resolved at JIT time. Inheritance expresses dynamic (runtime) polymorphism via virtual dispatch. Use generics when the concrete type is always known at the call site (algorithm or container); use inheritance when the concrete type is determined at runtime (strategy, plugin, handler).
-- **CLR generic specialization**: The CLR generates separate JIT-compiled bodies for each value-type argument (`List<int>`, `List<double>` each get their own code) but shares one compiled body for all reference-type arguments (`List<string>` and `List<object>` share JIT output). This means value-type generics are as fast as hand-typed code, while reference-type generics share an efficient single body with a small type-pointer indirection.
+- **Generics versus `object`.** Non-generic collections box value types when storing them as `object`. `List<int>` keeps integers unboxed and removes casts at the read boundary.
+- **Generics versus inheritance.** A generic API carries a concrete type argument through compile-time checks. Inheritance allows one base reference to dispatch to different runtime implementations. The choice is about when variation is known, not a blanket performance rule.
+- **Specialization versus code sharing.** The CLR normally specializes code for value-type arguments and shares compatible code for reference-type arguments. This balances value-type performance against native code size.
 
 # Questions
 
 > [!QUESTION]- Why does `IEnumerable<string>` assign to `IEnumerable<object>`, but `List<string>` does not assign to `List<object>`?
-> `IEnumerable<out T>` is covariant, so it is safe to upcast because it only produces `T` values.
-> `List<T>` is invariant because it both reads and writes `T`; if `List<string>` were assignable to `List<object>`, code could add a non-string object and break type safety.
-> In practice, expose covariant interfaces (`IEnumerable<T>`, `IReadOnlyList<T>`) at API boundaries and keep mutable concrete collections internal.
+> `IEnumerable<out T>` only produces values, so treating a sequence of strings as a sequence of objects is safe. `List<T>` also accepts values. If a `List<string>` could masquerade as `List<object>`, a caller could insert a non-string and break the original list's contract.
 
-> [!QUESTION]- When should you mark a generic interface type parameter as `out` or `in`?
-> Use `out` when the type parameter is output-only (returned values), and `in` when it is input-only (method arguments).
-> If a parameter must be both consumed and produced, keep it invariant because variance would allow unsafe assignments.
-> This design choice improves API flexibility without sacrificing compile-time safety.
+> [!QUESTION]- When should a generic interface type parameter be marked as `out` or `in`?
+> Mark a type parameter as `out` when the interface only produces values of that type. This is why a producer of strings can safely be used where a producer of objects is expected. Mark it as `in` when the interface only consumes the type, so a consumer that accepts any object can also accept strings.
+>
+> If the interface both accepts and returns the type, it must remain invariant because either conversion could make a read or write unsafe. Variance applies only to reference-type substitutions.
 
 > [!QUESTION]- A generic method uses `default(T)` as a fallback value. Why can this be dangerous in production code?
-> `default(T)` can silently map to meaningful domain values (`0`, `DateTime.MinValue`, `null`), so failures look like valid data instead of explicit errors.
-> Repeated fallback usage can spread bad state across caches, persistence, or downstream services before detection.
-> Prefer explicit failure paths (`TryXxx`, exceptions, discriminated result types) and validate invariants at boundaries.
+> `default(T)` may be `0`, `DateTime.MinValue`, a zeroed struct, or `null`. Those values can be valid domain data, so a failed lookup becomes indistinguishable from a real result. A `Try*` contract, nullable result, or explicit result type keeps the distinction visible.
 
 # References
 
-- [Generics in C#](https://learn.microsoft.com/dotnet/csharp/programming-guide/generics/) — official guide covering generic classes, methods, interfaces, and delegates with examples.
-- [Constraints on type parameters](https://learn.microsoft.com/dotnet/csharp/programming-guide/generics/constraints-on-type-parameters) — full list of constraint keywords and their semantics.
-- [Covariance and contravariance in generics](https://learn.microsoft.com/dotnet/standard/generics/covariance-and-contravariance) — Microsoft reference on `in`/`out` variance with interface and delegate examples.
-- [Covariance and Contravariance in C# (Eric Lippert)](https://ericlippert.com/2007/10/16/covariance-and-contravariance-in-c-part-1/) — 10-part series by a former C# compiler team member; the definitive practitioner explanation of variance semantics.
+- [Generics in C#](https://learn.microsoft.com/dotnet/csharp/programming-guide/generics/)
+- [Covariance and contravariance in C#](https://ericlippert.com/2007/10/16/covariance-and-contravariance-in-c-part-1/)

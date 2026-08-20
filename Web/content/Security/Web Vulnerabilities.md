@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T14:02:44.143Z
-modified: 2026-07-18T14:02:44.143Z
-published: 2026-07-18T14:02:44.143Z
+created: 2026-08-20T20:41:15.673Z
+modified: 2026-08-20T20:41:15.673Z
+published: 2026-08-20T20:41:15.673Z
 topic:
   - Security
 subtopic:
@@ -14,11 +14,13 @@ priority: High
 status: Ready to Repeat
 ---
 
-Three injection-family attacks account for an outsized share of real-world web breaches: **SQL Injection**, **Cross-Site Scripting (XSS)**, and **Cross-Site Request Forgery (CSRF)**. They sit behind several [[OWASP|OWASP Top 10]] categories (Injection, Broken Access Control). The unifying lesson: **never trust input, and never mix untrusted data into a command/markup/request without the right escaping or token**. This page covers how each works and the .NET defenses.
+SQL injection, cross-site scripting (XSS), and cross-site request forgery (CSRF) cross different trust boundaries. SQL injection changes a database command. XSS makes a browser execute attacker-controlled content in the application's origin. CSRF causes a browser to send an authenticated request that the user did not intend.
+
+They do not share one universal “sanitize input” fix. SQL values need parameterization, rendered content needs context-specific encoding or sanitization, and cookie-authenticated state changes need request-origin or antiforgery protection. The categories connect to the broader risk model in [[OWASP|OWASP Top 10]], but each mechanism must be handled at its own sink.
 
 # SQL Injection (SQLi)
 
-The attacker smuggles SQL syntax through user input into a query that's built by string concatenation, changing what the query _means_.
+SQL injection occurs when untrusted data becomes part of SQL command text and changes the statement's structure. String concatenation is the usual path, including interpolation that produces a string before a database API receives it.
 
 ```csharp
 // VULNERABLE: input becomes part of the SQL text
@@ -27,7 +29,7 @@ var sql = $"SELECT * FROM Users WHERE Name = '{name}'";
 // name = "x'; DROP TABLE Users;--"  → destructive
 ```
 
-**Defense — parameterize.** A parameter is sent separately from the SQL text, so the database treats it as _data_, never as code:
+Parameterization keeps values separate from SQL syntax. The database parses a command with placeholders and binds typed values through the provider:
 
 ```csharp
 // Safe: ADO.NET parameter
@@ -39,17 +41,19 @@ var users = await db.Users.Where(u => u.Name == name).ToListAsync();
 await db.Database.ExecuteSqlInterpolatedAsync($"DELETE FROM Logs WHERE Id = {id}");
 ```
 
-Parameterization is the _complete_ fix for SQLi; input validation and least-privilege DB accounts are defense-in-depth, not substitutes. The one place parameters can't help is dynamic identifiers (table/column names) — allowlist those against a fixed set. NoSQL has the analogous **NoSQL injection** (e.g. passing an object where a string is expected), defended the same way: never interpolate untrusted input into a query.
+Parameterized values cannot alter the command structure. Dynamic identifiers such as a table or sort column usually cannot be parameters. Map those from a fixed set rather than accepting arbitrary text. Stored procedures are safe only when they avoid constructing SQL from untrusted input internally. Input validation and least-privilege database accounts remain useful impact controls, but neither repairs a query that mixes code and data.
+
+Document databases and query DSLs have related injection failures when an application accepts operator objects or builds query expressions from untrusted structure. Their safe construction APIs are technology-specific, so “parameterize” should not be copied mechanically from SQL.
 
 # Cross-Site Scripting (XSS)
 
-The attacker gets their JavaScript to run **in another user's browser**, in the victim site's origin — so it can read cookies, the DOM, and act as the user. Three flavours:
+XSS makes a browser interpret attacker-controlled content as active content in the application's origin. The script can read origin-accessible data and issue requests with the user's ambient authority. `HttpOnly` prevents direct cookie reads, but it does not stop injected code from acting through the authenticated page.
 
-- **Stored** — the payload is saved server-side (a comment, a profile field) and served to every viewer. Worst, because it's persistent and self-spreading.
-- **Reflected** — the payload is in the request (a query param) and echoed straight back into the response; the attacker must lure the victim to a crafted URL.
-- **DOM-based** — client-side JS writes untrusted data into the DOM (`element.innerHTML = location.hash`) with no server involved.
+- **Stored:** the payload is persisted and later rendered to one or more users.
+- **Reflected:** the current request carries a payload that the server places into its response.
+- **DOM-based:** client-side code reads attacker-influenced data and passes it to an unsafe DOM sink such as `innerHTML`.
 
-**Defense — contextual output encoding.** The root cause is putting untrusted data into HTML without encoding it for the context (HTML body vs attribute vs JS vs URL). Razor encodes by default; the danger is opting out:
+The primary defense is to keep untrusted values in safe sinks and encode them for the exact output context. HTML text, attributes, URLs, CSS, and JavaScript follow different rules. Some contexts should not accept untrusted values at all. Razor HTML-encodes ordinary expressions by default. Explicit raw rendering removes that protection:
 
 ```cshtml
 @* Safe: Razor HTML-encodes automatically *@
@@ -59,20 +63,15 @@ The attacker gets their JavaScript to run **in another user's browser**, in the 
 <p>@Html.Raw(Model.UserComment)</p>
 ```
 
-Layered defenses:
+Rich HTML that must preserve markup needs an actively maintained allowlist sanitizer. After sanitization, the result must not be modified by code that can create new executable markup. A well-designed Content Security Policy limits script sources and can require nonces or hashes, reducing exploitability when a rendering mistake survives. CSP is a second layer, not the primary XSS fix.
 
-- **Output-encode** at every sink, in the right context (use the framework's encoders; don't hand-roll).
-- **Sanitize** rich HTML you must render (e.g. a WYSIWYG field) with an allowlist library like **HtmlSanitizer** — never a blocklist.
-- **Content-Security-Policy (CSP)** header — a strong backstop: disallow inline scripts so an injected `<script>` won't execute even if encoding is missed.
-- Store JWTs/session tokens in **HttpOnly cookies** so XSS can't read them (see [[JWT Bearer]]).
+Session cookies should use `HttpOnly` so injected JavaScript cannot read their values. This limits credential theft, not authenticated actions, and does not make an XSS defect harmless. See [[JWT Bearer]] for the distinct risks of bearer-token storage.
 
 # Cross-Site Request Forgery (CSRF)
 
-CSRF abuses the fact that browsers **auto-attach cookies** to requests. A malicious page makes the victim's browser send a _state-changing_ request to a site where the victim is logged in; the cookie rides along and the request is honored as the user. The attacker can't _read_ the response (that's what the same-origin policy and CORS prevent) — but a fire-and-forget `POST /transfer` still does damage.
+CSRF exploits ambient credentials, most commonly cookies that the browser attaches without the attacking origin knowing their value. A malicious page triggers a state-changing request to a site where the victim is signed in. The same-origin policy usually prevents the attacker from reading the response, but confidentiality of the response does not undo the action.
 
-**Defenses (use both):**
-
-- **Anti-forgery token** (synchronizer token pattern) — the server embeds an unpredictable token in the form that the attacker's site can't know or read. ASP.NET Core does this automatically for Razor form posts (`@Html.AntiForgeryToken()` + `[ValidateAntiForgeryToken]`):
+Cookie-authenticated endpoints need a CSRF policy appropriate to their framework and browser clients. The synchronizer-token pattern binds an unpredictable request value to the user's session. ASP.NET Core Razor Pages have antiforgery protection by convention, and MVC form tag helpers can emit tokens for qualifying forms. Controller actions must still be covered by the chosen validation policy:
 
 ```csharp
 [HttpPost]
@@ -80,44 +79,33 @@ CSRF abuses the fact that browsers **auto-attach cookies** to requests. A malici
 public IActionResult Transfer(TransferDto dto) { /* ... */ }
 ```
 
-- **`SameSite` cookies** — `SameSite=Lax` (the modern browser default) or `Strict` stops the cookie from being sent on cross-site requests, neutralizing most CSRF at the browser level. Pair it with the token; don't rely on it alone.
+`SameSite=Lax` withholds a cookie from most cross-site subrequests while allowing it on some top-level safe navigations. `Strict` withholds it more broadly. `None` permits cross-site use and requires `Secure`. Because browser compatibility, sibling subdomains, navigation behavior, and application flows complicate the boundary, `SameSite` is normally paired with token validation or another explicit origin-verification design rather than treated as the only control.
 
 > [!NOTE]
-> **Token-based APIs (JWT in an `Authorization` header) are largely CSRF-immune** because the browser doesn't auto-attach a header the way it does a cookie. CSRF is primarily a _cookie-authentication_ problem — which is also why storing tokens in cookies (good for XSS) reintroduces CSRF and needs `SameSite` + anti-forgery.
+> An API whose credential is supplied only through an `Authorization` header is not exposed to classic ambient-cookie CSRF because a hostile page cannot make the browser attach that header. CORS still governs which browser origins may send permitted cross-origin requests and read responses, while server authorization remains mandatory. The token's storage may create a separate XSS exposure. If the same bearer token is placed in a cookie, the browser treats it as a cookie credential and the CSRF boundary returns.
 
 # Pitfalls
 
-- **Blocklist filtering** — trying to strip `<script>` or `'` with regex. Attackers have endless encodings/variants; always use parameterization (SQLi) and contextual encoding/allowlist sanitization (XSS) instead.
-- **Validation mistaken for output encoding** — input validation reduces attack surface but is _not_ the XSS/SQLi fix; the same data is safe in one context and dangerous in another. Encode/parameterize at the sink.
-- **`Html.Raw` / `dangerouslySetInnerHTML` on user content** — the classic stored-XSS hole.
-- **Disabling anti-forgery "to make the SPA work"** — fix it with `SameSite` + token-in-header, don't switch the protection off.
-- **Reflected XSS in error pages / search results** — echoing the raw query string back is a common reflected-XSS sink.
+- **Blocklist filtering:** regular expressions that remove `<script>` or quotes do not model parser behavior and are bypassable through alternate syntax and contexts.
+- **Validation used as output encoding:** validation can constrain an input domain, but the safe representation still depends on the sink that later consumes the value.
+- **Raw HTML APIs on user content:** `Html.Raw` and `dangerouslySetInnerHTML` move responsibility from framework encoding to the caller. Untrusted rich content needs sanitization first.
+- **Antiforgery disabled for a SPA:** cookie-authenticated JSON endpoints need a token-in-header or supported origin-verification design. Removing validation does not make the client architecture simpler. It moves trust to the browser's automatic cookie behavior.
+- **CSP treated as a sanitizer:** policy mistakes and allowed script gadgets can leave an injection exploitable. Fix the unsafe sink even when a CSP blocks the current payload.
 
 # Tradeoffs
 
 | Vulnerability | Root cause | Primary fix | Backstop |
 |---|---|---|---|
-| SQL Injection | Data concatenated into SQL | **Parameterized queries** | Least-privilege DB user, input validation |
-| XSS | Untrusted data in HTML/JS unescaped | **Contextual output encoding** | CSP, HtmlSanitizer, HttpOnly cookies |
-| CSRF | Browser auto-sends cookies | **Anti-forgery token** | `SameSite` cookies |
+| SQL injection | Untrusted values become SQL syntax | Parameterized values. Allowlisted identifiers | Least-privilege database identity |
+| XSS | Untrusted content reaches an executable browser context | Safe sinks, contextual encoding, or HTML sanitization | CSP and `HttpOnly` session cookies |
+| CSRF | Browser sends ambient credentials on an unintended request | Framework antiforgery or explicit origin verification | `SameSite` cookies and narrow methods/content types |
 
-**Decision rule**: parameterize _every_ query, output-encode _every_ untrusted value at the point of rendering, and protect _every_ cookie-authenticated state-changing endpoint with an anti-forgery token plus `SameSite`. These three habits eliminate the most common and most damaging web vulnerabilities; treat CSP and least-privilege as defense-in-depth on top.
-
-# Questions
-
-> [!QUESTION]- Why does parameterizing a query fully prevent SQL injection, where input filtering does not?
-> A parameter is transmitted to the database **separately from the SQL text**, and the query is parsed/planned _before_ the value is bound — so the value can never change the statement's structure, no matter what characters it contains. Filtering tries to anticipate every dangerous input and always misses encodings/edge cases. Parameterization removes the entire class of attack rather than playing whack-a-mole with payloads.
-
-> [!QUESTION]- What's the difference between XSS and CSRF?
-> **XSS** runs the attacker's _code_ in the victim's browser within your site's origin (so it can read the DOM, cookies, and act with full privilege) — caused by unescaped untrusted data in your output. **CSRF** runs no code in your origin; it tricks the victim's browser into _sending a request_ to your site using its existing cookies, and the attacker can't even read the response — caused by browsers auto-attaching cookies. XSS is fixed by output encoding/CSP; CSRF by anti-forgery tokens and `SameSite`. Notably, an XSS hole can defeat CSRF tokens, so XSS is the more severe of the two.
-
-> [!QUESTION]- Why are header-token (JWT) APIs less exposed to CSRF than cookie-session apps?
-> CSRF works because browsers automatically include cookies on cross-site requests without the attacker's page needing to read or set anything. A bearer token sent in the `Authorization` header is _not_ auto-attached — JavaScript on the attacker's origin can't read your token (same-origin policy) and can't set the header on a forged cross-site request. So pure header-token APIs sidestep CSRF; the risk returns the moment you store the token in a cookie, which is why cookie storage (good against XSS) must be paired with `SameSite` + anti-forgery.
+The control must meet the parser or credential mechanism at the boundary it protects. Parameterize SQL values. Keep browser data in safe sinks and encode for its context. Cover every cookie-authenticated state-changing endpoint with the application's CSRF policy. CSP, least privilege, and cookie attributes reduce impact when a primary control fails.
 
 # References
 
-- [OWASP SQL Injection Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html) — parameterization and defense-in-depth.
-- [OWASP XSS Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html) — contextual output-encoding rules.
-- [OWASP CSRF Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html) — synchronizer token and `SameSite`.
-- [Prevent XSS in ASP.NET Core (Microsoft Learn)](https://learn.microsoft.com/en-us/aspnet/core/security/cross-site-scripting) — Razor encoding and `Html.Raw` caveats.
-- [Anti-forgery / CSRF in ASP.NET Core (Microsoft Learn)](https://learn.microsoft.com/en-us/aspnet/core/security/anti-request-forgery) — token generation and validation.
+- [OWASP SQL Injection Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html)
+- [OWASP Cross Site Scripting Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html)
+- [OWASP Cross-Site Request Forgery Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html)
+- [Prevent cross-site scripting in ASP.NET Core](https://learn.microsoft.com/aspnet/core/security/cross-site-scripting)
+- [Prevent Cross-Site Request Forgery attacks in ASP.NET Core](https://learn.microsoft.com/aspnet/core/security/anti-request-forgery)

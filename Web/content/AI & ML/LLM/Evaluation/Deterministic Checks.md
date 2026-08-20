@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T14:02:43.898Z
-modified: 2026-07-25T13:57:52.076Z
-published: 2026-07-25T13:57:52.076Z
+created: 2026-08-20T20:41:15.488Z
+modified: 2026-08-20T20:41:15.489Z
+published: 2026-08-20T20:41:15.489Z
 topic:
   - AI & ML
 subtopic:
@@ -14,7 +14,9 @@ priority: Medium
 status: Done
 ---
 
-Deterministic checks are non-LLM tests that validate LLM outputs strictly: schema validity, required fields, safety rules, and tool/policy constraints. They are cheap (microseconds), deterministic (same input always gives same result), and should run on every evaluation before any LLM judge. They catch the obvious failures fast and cheaply, leaving expensive LLM-as-judge calls for semantic quality.
+Deterministic checks turn explicit requirements into executable pass/fail rules. They validate structure, required fields, tool permissions, and other contracts without asking another model for an opinion. Run them before semantic scorers. There is no reason to pay for a judge when the output is malformed or an agent called a forbidden tool.
+
+The boundary is simple: deterministic checks enforce properties that can be stated exactly. They cannot decide whether a valid action was the right action, whether an explanation is persuasive, or whether an answer captured the user's intent.
 
 # Types of Deterministic Checks
 
@@ -23,8 +25,8 @@ Deterministic checks are non-LLM tests that validate LLM outputs strictly: schem
 | **Schema validation** | Output is parseable and matches expected structure | JSON schema, required fields, no extra fields |
 | **Allowlist enforcement** | Only permitted actions/tools are invoked | `action` must be one of `["search", "escalate"]` |
 | **Citation rules** | Factual answers must cite sources | Response contains at least one `[source]` reference |
-| **PII scanning** | No personal data in output | No email addresses, SSNs, phone numbers |
-| **Injection-resistant formatting** | Output is safe to render | No `<script>` tags, no SQL injection patterns |
+| **PII scanning** | Known personal-data patterns are blocked or flagged | Email, account, and phone-number detectors |
+| **Safe rendering** | Output cannot introduce active content | Escaped HTML and an allowlist for permitted elements |
 | **Length constraints** | Output is within expected bounds | Response is 10–500 characters |
 | **Language/encoding** | Output is in the expected language and encoding | UTF-8, English only |
 
@@ -43,7 +45,7 @@ Deterministic checks are non-LLM tests that validate LLM outputs strictly: schem
 }
 ```
 
-Any output that fails this schema is rejected immediately — no LLM judge needed.
+An output that fails this schema is rejected immediately. No judge is needed.
 
 # Where Deterministic Checks Fit in the Evaluation Pipeline
 
@@ -62,48 +64,46 @@ LLM Output
 [3] Human review          ← for high-stakes or ambiguous cases
 ```
 
-Run deterministic checks first. A malformed JSON or a disallowed action does not need a judge — it is a hard failure.
+Run deterministic checks first. Malformed JSON and disallowed actions are hard failures.
 
 # Deterministic Checks Vs LLM-as-Judge
 
 | Aspect | Deterministic checks | LLM-as-judge |
 |--------|---------------------|--------------|
-| Speed | Microseconds | Seconds |
-| Cost | Near zero | LLM API cost per call |
-| Determinism | Always same result | Non-deterministic |
+| Speed | Usually local and fast | Usually a model call |
+| Cost | Compute for parsing or scanning | Model inference per judgment |
+| Repeatability | Stable for the same rule and input | Can vary by model and sampling settings |
 | What it measures | Format, structure, hard rules | Semantic quality, relevance, tone |
-| False positive rate | Zero (rule-based) | Non-zero (LLM can misjudge) |
-| Coverage | Only what you explicitly define | Open-ended quality dimensions |
+| Error boundary | Exact for schema and allowlist rules. Heuristic scanners can misclassify | Judge can misread the rubric or candidate |
+| Coverage | Only explicitly defined properties | Open-ended quality dimensions |
 
-**Use both.** Deterministic checks enforce hard constraints; LLM judges evaluate soft quality. Neither replaces the other.
+The two layers solve different problems. Hard contracts belong in code. Semantic quality belongs in a calibrated judge or human review.
 
 # Pitfalls
 
 ## Over-Relying on Schema Validation Alone
 
-**What goes wrong**: the team adds JSON schema validation and considers deterministic checks done. The output is structurally valid but semantically wrong — the `action` field is `"search"` when it should be `"escalate"`, and the schema allows both.
+Schema validation can pass an output that is semantically wrong. The `action` field may contain `"search"` even when the case required `"escalate"`. Both values are valid under the contract.
 
-**Mitigation**: schema validation is necessary but not sufficient. Add allowlist checks (only permitted action values), citation rules (factual answers must cite sources), and PII scanning. Schema catches structure; business rules catch semantic violations.
+Add deterministic business rules only where the expected behavior is explicit. Cases that require judgment should continue to a rubric scorer rather than hiding a semantic decision inside brittle string matching.
 
 ## Treating Deterministic Failures as Soft Warnings
 
-**What goes wrong**: a deterministic check fails (PII detected in output, disallowed action invoked) but the team logs it as a warning and continues. The LLM judge then evaluates the output and may pass it.
+A failed policy rule cannot be repaired by a favorable semantic score. If PII is detected or a disallowed action is invoked, the result fails even when the answer otherwise reads well.
 
-**Mitigation**: deterministic check failures are hard failures. Reject the output immediately. Do not pass it to the LLM judge. The pipeline order matters: deterministic checks first, LLM judge only on outputs that pass all hard rules.
+Some scanners are heuristic, so their operational response may be quarantine or human review rather than automatic rejection. That choice belongs in the policy attached to the check.
 
 ## Forgetting to Check Tool Inputs, Not Just Outputs
 
-**What goes wrong**: the team validates the final LLM response but not the tool calls the agent makes. The agent calls a `delete_record` tool that is not on the allowlist, and the check never fires because it only runs on the text response.
+Validating only the final response misses the actions that produced it. An agent can call `delete_record`, receive a successful result, and then return perfectly valid JSON.
 
-**Mitigation**: apply allowlist checks to every tool invocation, not just the final response. For agentic systems, each tool call is an action that needs validation.
+Apply permission and argument checks at the tool boundary, before execution. Output validation comes later.
 
 # Questions
 
 > [!QUESTION]- What is the minimum useful set of deterministic checks for a tool-using agent?
-> (1) Allowlisted tools/actions only, (2) strict output schema validation, (3) PII scanning on outputs, (4) injection-resistant formatting, (5) length constraints. These catch the most common failure modes cheaply before any expensive evaluation.
+> Start with the contracts that can prevent irreversible harm: tool permission, argument validation, and output schema. Add data-loss prevention, citation, rendering, or length rules only when the product contract requires them. Each rule needs an explicit failure policy.
 
 # References
 
-- [OWASP Top 10 for LLM Applications](https://genai.owasp.org/llm-top-10/) — the canonical list of LLM security risks including prompt injection, insecure output handling, and data leakage — each maps to a deterministic check category.
-- [OWASP LLM Prompt Injection Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/LLM_Prompt_Injection_Prevention_Cheat_Sheet.html) — specific mitigations for prompt injection, including input validation and output sanitization.
-- [LLM-as-a-Judge (Zheng et al., 2023)](https://arxiv.org/abs/2306.05685) — the paper that established LLM-as-judge as an evaluation method; useful for understanding what deterministic checks cannot cover.
+- [JSON Schema Core specification](https://json-schema.org/draft/2020-12/json-schema-core)

@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T14:02:44.035Z
-modified: 2026-07-25T13:51:15.579Z
-published: 2026-07-25T13:51:15.579Z
+created: 2026-08-20T20:41:15.591Z
+modified: 2026-08-20T20:41:15.592Z
+published: 2026-08-20T20:41:15.592Z
 topic:
   - Computer Science
 subtopic:
@@ -16,7 +16,7 @@ status: Creation
 
 A geohash converts a longitude/latitude point into a base-32 string whose prefixes name progressively smaller rectangular cells. It is an encoding and query-partitioning technique, not a distance metric or a complete spatial index. The practical advantage is that a two-dimensional location can become a one-dimensional key for a sorted index, cache, partition key, or aggregation bucket.
 
-Reach for geohash when fixed grid precision and ordinary key infrastructure are useful. Do not reach for it merely because data has coordinates: exact containment, nearest-neighbor ranking, polygons, and error-critical distance usually belong in a spatial engine that understands geometry.
+Geohash fits fixed grid precision and ordinary key infrastructure. Coordinates alone are not a reason to use it. Exact containment, nearest-neighbor ranking, polygons, and error-critical distance usually belong in a spatial engine that understands geometry.
 
 # Encoding and Query Path
 
@@ -36,20 +36,20 @@ A radius query therefore has two phases:
 1. **Generate candidates.** Choose a precision whose cell size is near the query radius, cover the center and neighboring cells that intersect the search shape, then scan each prefix or numeric score range.
 2. **Filter exactly.** Compute distance for every candidate and discard points outside the radius.
 
-Scanning only the center prefix creates false negatives at cell edges. Skipping the final distance check creates false positives from the rectangular cover. Higher precision reduces candidates per cell but increases the number of ranges needed for a large region; lower precision does the opposite.
+Scanning only the center prefix creates false negatives at cell edges. Skipping the final distance check creates false positives from the rectangular cover. Higher precision reduces candidates per cell but increases the number of ranges needed for a large region. Lower precision does the opposite.
 
 # Real Systems Use the Encoding Differently
 
-**Redis GEO** stores members in a sorted set using an interleaved 52-bit geospatial score. `GEOSEARCH` covers the requested radius or box with score ranges and filters results; Redis documents spherical Haversine distance and a possible error that is unsuitable for error-critical applications. The standard geohash string returned by `GEOHASH` is a representation of that location, while the internal index uses Redis's numeric variant.
+**Redis GEO** stores members in a sorted set using an interleaved 52-bit geospatial score. `GEOSEARCH` covers the requested radius or box with score ranges and filters results. Redis documents spherical Haversine distance and a possible error that is unsuitable for error-critical applications. The standard geohash string returned by `GEOHASH` is a representation of that location, while the internal index uses Redis's numeric variant.
 
 ```text
 GEOADD drivers 30.5234 50.4501 driver:42
 GEOSEARCH drivers FROMLONLAT 30.52 50.45 BYRADIUS 3 KM WITHDIST
 ```
 
-The first command indexes one driver near Kyiv. The second asks Redis to generate and filter candidates within three kilometres; application code still decides whether Redis's spherical-distance error and update model fit the product.
+The first command indexes one driver near Kyiv. The second asks Redis to generate and filter candidates within three kilometres. Application code still decides whether Redis's spherical-distance error and update model fit the product.
 
-**Elasticsearch** accepts geohash strings as one input form for `geo_point`, but translates them to longitude and latitude for indexing. Its `geohash_grid` aggregation groups indexed points or shapes into user-selected geohash cells. That aggregation is a bucketing view, not evidence that the underlying `geo_point` field is a string-prefix index; current Elasticsearch stores geospatial data in Lucene BKD-tree structures.
+**Elasticsearch** accepts geohash strings as one input form for `geo_point`, but translates them to longitude and latitude for indexing. Its `geohash_grid` aggregation groups indexed points or shapes into user-selected geohash cells. That aggregation is a bucketing view, not evidence that the underlying `geo_point` field is a string-prefix index. Current Elasticsearch stores geospatial data in Lucene BKD-tree structures.
 
 These examples expose the boundary: “uses geohash” can mean a sorted numeric candidate index, a textual interchange encoding, or a result aggregation grid. Verify which one a product implements before reasoning about complexity or durability.
 
@@ -61,7 +61,7 @@ These examples expose the boundary: “uses geohash” can mean a sorted numeric
 | [[Quadtree]] | Adaptive four-way subdivision | Mutable in-memory regions, sparse rasters, collision broad phase | Distribution-dependent depth and custom traversal/storage |
 | R-tree / GiST spatial index | Bounding rectangles organized for paged access | Durable geometry columns and database query planners | Overlapping bounds produce candidates that still need exact geometry checks |
 
-For a durable database, start with its native spatial type and index. PostGIS, for example, uses GiST-backed R-tree behavior to index geometry bounding boxes and can accelerate predicates such as `ST_Intersects` and `ST_DWithin`. Choose geohash instead when the prefix itself is useful for sharding, caching, coarse aggregation, or interoperability. Choose a quadtree when adaptive subdivision is the data structure you need rather than an encoding layered onto an existing index.
+For a durable database, its native spatial type and index are the usual starting point. PostGIS, for example, uses GiST-backed R-tree behavior to index geometry bounding boxes and can accelerate predicates such as `ST_Intersects` and `ST_DWithin`. Geohash fits when the prefix itself is useful for sharding, caching, coarse aggregation, or interoperability. A quadtree fits when the workload needs adaptive subdivision rather than an encoding layered onto an existing index.
 
 # Pitfalls
 
@@ -72,9 +72,5 @@ For a durable database, start with its native spatial type and index. PostGIS, f
 
 # References
 
-- [Redis GEOADD](https://redis.io/docs/latest/commands/geoadd/) — primary documentation for the 52-bit interleaved score, sorted-set ranges, neighboring-area cover, and Haversine filtering.
-- [Redis GEOHASH](https://redis.io/docs/latest/commands/geohash/) — primary documentation for standard geohash strings, prefix truncation, and the fact that different prefixes can still be nearby.
-- [Elasticsearch `geo_point`](https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/geo-point) — official coordinate and geohash input behavior, including conversion to longitude/latitude.
-- [Elasticsearch `geohash_grid` aggregation](https://www.elastic.co/docs/reference/aggregations/search-aggregations-bucket-geohashgrid-aggregation) — official fixed-precision geohash bucketing semantics.
-- [Elasticsearch features](https://www.elastic.co/elasticsearch/features) — official statement that Lucene BKD-tree structures store Elasticsearch geospatial data.
-- [PostGIS spatial indexing](https://postgis.net/workshops/postgis-intro/indexing.html) — project documentation for bounding-box R-tree indexes and the predicates they accelerate.
+- [Redis GEOADD](https://redis.io/docs/latest/commands/geoadd/)
+- [PostGIS spatial indexing](https://postgis.net/workshops/postgis-intro/indexing.html)

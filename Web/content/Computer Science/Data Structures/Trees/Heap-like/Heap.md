@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-03T07:22:13.842Z
-modified: 2026-08-08T08:06:04.617Z
-published: 2026-08-08T08:06:04.617Z
+created: 2026-08-20T20:41:15.606Z
+modified: 2026-08-20T20:41:15.607Z
+published: 2026-08-20T20:41:15.607Z
 topic:
   - Computer Science
 subtopic:
@@ -14,9 +14,9 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-A scheduler holds thousands of pending tasks and repeatedly needs the one with the earliest deadline while new tasks keep arriving.
+A scheduler holds thousands of pending tasks. New work keeps arriving, and the earliest deadline must remain cheap to retrieve.
 
-The structure buys that speed by remembering less than a sorted list. It guarantees that the root is the smallest (or largest) element and nothing more: siblings, cousins, and every element below the root sit in a partial order. The second-smallest item in a binary min-heap is a root child — the smaller one when both exist — but there is no direct arbitrary successor or kth-rank lookup and no sorted iteration.
+A heap gets that speed by maintaining less order than a sorted list. It guarantees only that the root is the smallest (or largest) element. Everything below it remains partially ordered. In a binary min-heap, the second-smallest item is the smaller root child when both exist. Arbitrary successor and kth-rank lookup still require a scan, and iteration is not sorted.
 
 **Core shape:** complete binary tree → heap-order property (min-heap: parent ≤ both children) → packed implicitly into an array → only the root is the extreme
 
@@ -208,12 +208,12 @@ tab: Complexity
 
 # Boundaries
 
-Every boundary here traces back to the same fact: the array holds a partial order, not a sorted sequence.
+The array holds a partial order, not a sorted sequence. That single boundary explains the missing operations.
 
-- A heap answers "what is the minimum," never "where is `x`."
+- A heap answers "what is the minimum," not "where is `x`."
 - **Efficient arbitrary delete and decrease-key need an external position map.** The operations touch a node by _position_, but the heap exposes elements only by heap-order, not by identity. In .NET 9 and .NET 10, `System.Collections.Generic.PriorityQueue.Remove` performs that linear scan and can be followed by `Enqueue` to emulate a priority update, but the type has no `DecreaseKey`. Lazy deletion — enqueue the new priority and skip stale entries on dequeue — avoids the scan when duplicate entries are acceptable.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Array-backed min-heap (indices under values)
 >
@@ -317,16 +317,9 @@ Every boundary here traces back to the same fact: the array holds a partial orde
 > }
 > ```
 >
-> `Build` starts sift-down at index `Count / 2 - 1` — the last internal node — because every index beyond it is a leaf that already satisfies heap order. A decrease-key or arbitrary remove needs stable unique item handles and a parallel handle-to-index dictionary updated inside both sift loops; mapping by value alone fails when duplicate values occupy different indices.
-
-# Questions
-
-> [!QUESTION]- Why can a complete binary tree be stored without any pointers?
-> Completeness means levels fill left to right with no gaps, so node positions are contiguous. A node at index `i` therefore has children at `2i+1` and `2i+2` and a parent at `(i-1)/2`, computed arithmetically. A tree with holes would break that indexing and force explicit links.
+> `Build` starts sift-down at index `Count / 2 - 1` — the last internal node — because every index beyond it is a leaf that already satisfies heap order. A decrease-key or arbitrary remove needs stable unique item handles and a parallel handle-to-index dictionary updated inside both sift loops. Mapping by value alone fails when duplicate values occupy different indices.
 
 # References
 
-- [`PriorityQueue<TElement, TPriority>.Remove`](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.priorityqueue-2.remove?view=net-10.0) — official .NET 9/10 API documentation for the scan used to remove an arbitrary element.
-- [`PriorityQueue` source in dotnet/runtime](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Collections/src/System/Collections/Generic/PriorityQueue.cs) — the production .NET implementation uses a quaternary rather than binary heap, but applies the same implicit-array and sift mechanisms with four children per node.
-- [Sedgewick and Wayne, _Algorithms, 4th Edition_, §2.4 Priority Queues](https://algs4.cs.princeton.edu/24pq/) — binary-heap representation, swim/sink operations, resizing costs, and the bottom-up heap-construction proof.
-- [CLRS, _Introduction to Algorithms_, Chapter 6 — Heapsort](https://mitpress.mit.edu/9780262046305/introduction-to-algorithms/) — the build-heap height-sum proof and the heap-order invariant.
+- [`PriorityQueue` source in dotnet/runtime](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Collections/src/System/Collections/Generic/PriorityQueue.cs)
+- [Sedgewick and Wayne, _Algorithms, 4th Edition_, §2.4 Priority Queues](https://algs4.cs.princeton.edu/24pq/)

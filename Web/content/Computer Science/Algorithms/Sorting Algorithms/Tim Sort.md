@@ -1,24 +1,24 @@
 ---
 publish: true
-created: 2026-07-18T14:02:44.032Z
-modified: 2026-08-08T08:06:02.848Z
-published: 2026-08-08T08:06:02.848Z
+created: 2026-08-20T20:41:15.549Z
+modified: 2026-08-20T20:41:15.550Z
+published: 2026-08-20T20:41:15.550Z
 topic:
   - Computer Science
 subtopic:
   - Algorithms
-summary: Natural merge sort that exploits existing runs; stable, adaptive, and the default in Python and Java.
+summary: Natural merge sort that exploits existing runs. Stable, adaptive, and used for Python lists and Java object arrays.
 level:
   - "4"
 priority: Medium
 status: Creation
 ---
 
-CPython's `list.sort`/`sorted` and Java's `Arrays.sort` for object arrays lean on one fact about production data: it is rarely random. Log lines arrive mostly time-ordered, an appended list is sorted except at its tail, exported records come pre-grouped. A plain [[Computer Science/Algorithms/Sorting Algorithms/Merge Sort|merge sort]] ignores that structure and re-discovers order that was already present.
+Production data often arrives with some order already present. Logs are mostly time-ordered, appended lists are disturbed near the tail, and exported records may already be grouped. A plain [[Computer Science/Algorithms/Sorting Algorithms/Merge Sort|merge sort]] ignores that structure and discovers the same order again.
 
-Tim sort is the _natural_ merge-sort family behind both runtimes. It reads the existing order first: it splits the array into maximal already-sorted stretches — **runs** — spends work only where order is missing, and merges the runs back together. A single ascending or descending run needs no merge; unstructured input still remains correct and stable. Exploitable order is not a precondition for correctness; it is the condition under which adaptivity pays. Uniformly random keys rarely contain long runs, so the extra machinery usually earns little over a plain merge.
+Tim sort is the _natural_ merge-sort family used by CPython's `list.sort`/`sorted` and Java's `Arrays.sort` for object arrays. It first splits the array into maximal ordered stretches called **runs**, then merges those runs. A single ascending or descending run needs no merge. Random input still sorts correctly and stays stable, though its short runs leave less existing order to exploit.
 
-The visualization and invariant discussion below describe classic TimSort as retained by OpenJDK: strictly descending runs, one fixed `minrun`, and a merge stack governed by run-size invariants. Current CPython retains the adaptive, stable natural-merge mechanics, but now detects non-increasing runs with equal-block reversal, chooses merges with Powersort, and, since 2025, varies `minrun` sizing from run to run.
+The visualization follows classic TimSort as retained by OpenJDK: strictly descending runs, one fixed `minrun`, and run-size invariants that control the merge stack. Current CPython keeps the same adaptive and stable natural-merge foundation. Its details have changed: non-increasing runs use equal-block reversal, Powersort chooses merges, and the 2025 implementation can vary `minrun` sizing between runs.
 
 **Classic/OpenJDK shape:** partially ordered input → detect natural runs → pad short runs to `minrun` with binary insertion sort → merge under stack size invariants while preserving equal-key order.
 
@@ -134,9 +134,9 @@ tab: Complexity
 
 # When the Merge Policy Breaks
 
-In 2015, de Gouw et al. found that OpenJDK's `mergeCollapse` restored the invariant only among the top runs, allowing a crafted run-length sequence to violate it deeper in the stack and reach `ArrayIndexOutOfBoundsException`. The later correction widened the invariant check; current CPython's Powersort policy no longer uses this merge-collapse invariant.
+In 2015, de Gouw et al. Found that OpenJDK's `mergeCollapse` restored the invariant only near the top of the stack. A crafted sequence of run lengths could leave a deeper violation and eventually raise `ArrayIndexOutOfBoundsException`. The fix widened the invariant check. Current CPython's Powersort policy no longer uses this merge-collapse invariant.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Classic/OpenJDK control flow
 >
@@ -289,19 +289,9 @@ In 2015, de Gouw et al. found that OpenJDK's `mergeCollapse` restored the invari
 > }
 > ```
 >
-> `MergeCollapse` carries the correctness contract: the second clause testing `runs[n - 2]` is the check the 2015 verification found missing. This compact implementation always buffers the left run, whereas production TimSort buffers the smaller run; it keeps the left-on-tie rule so the merge stays stable.
-
-# Questions
-
-> [!QUESTION]- What did the 2015 formal-verification effort reveal, and how did it tie back to the run stack?
-> de Gouw et al. proved OpenJDK's `mergeCollapse` routine only restored the invariant among the top runs, leaving deeper violations reachable by a crafted run-length sequence. Java's fixed-size run stack could then overflow into a reachable `ArrayIndexOutOfBoundsException`; CPython had the analogous defect, but its larger fixed stack made overflow theoretical at feasible list sizes. Java's stopgap enlarged the stack; the real fix widened the invariant check to also test the run below the top three.
-
-> [!QUESTION]- Why does classic/OpenJDK TimSort detect descending runs with strict `>`?
-> A descending run is reversed in place. Strict descent keeps equal keys out of that run, so reversal cannot swap their relative order. Current CPython permits non-increasing runs by reversing equal-key blocks during detection before reversing the whole run, restoring their original order.
+> `MergeCollapse` carries the correctness contract. Its second clause checks `runs[n - 2]`, the deeper run missed by the implementation studied in 2015. This compact version always buffers the left run, while production TimSort buffers the smaller one. Taking the left value on a tie preserves stability.
 
 # References
 
-- [CPython `listsort.txt` (Tim Peters and contributors)](https://github.com/python/cpython/blob/main/Objects/listsort.txt) — current implementation note covering non-increasing run detection, Powersort, galloping, and the 2025 variable-per-run `minrun` scheme.
-- [OpenJDK `TimSort.java`](https://github.com/openjdk/jdk/blob/master/src/java.base/share/classes/java/util/TimSort.java) — production source for `mergeCollapse`, the run-length stack, and the `MIN_GALLOP` threshold, including the post-2015 invariant fix.
-- [OpenJDK's `java.utils.Collection.sort()` is broken: The Good, the Bad and the Worst Case (de Gouw, Rot, de Boer, Bubel, Hähnle, CAV 2015)](https://doi.org/10.1007/978-3-319-21690-4_16) — the KeY-prover paper on the merge-stack invariant defect, the reachable crash, and both fixes.
-- [Timsort (Wikipedia)](https://en.wikipedia.org/wiki/Timsort) — overview of runs, `minrun`, galloping, the merge invariants, and the verification bug.
+- [CPython `listsort.txt` (Tim Peters and contributors)](https://github.com/python/cpython/blob/main/Objects/listsort.txt)
+- [OpenJDK's `java.utils.Collection.sort()` is broken: The Good, the Bad and the Worst Case (de Gouw, Rot, de Boer, Bubel, Hähnle, CAV 2015)](https://doi.org/10.1007/978-3-319-21690-4_16)

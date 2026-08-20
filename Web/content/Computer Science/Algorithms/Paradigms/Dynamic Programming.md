@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-03T15:55:17.233Z
-modified: 2026-08-08T08:43:34.405Z
-published: 2026-08-08T08:43:34.405Z
+created: 2026-08-20T20:41:15.523Z
+modified: 2026-08-20T20:41:15.524Z
+published: 2026-08-20T20:41:15.524Z
 topic:
   - Computer Science
 subtopic:
@@ -14,9 +14,9 @@ priority: High
 status: Ready to Repeat
 ---
 
-Suppose a target state depends on two smaller states, and those states depend on earlier ones. Solving that dependency graph in order turns it into a table where every state is written once and later transitions read stored results instead of rebuilding them.
+In finite one-pass dynamic programming, a dependency graph becomes a set of stored answers. Each state is solved after the states it depends on, written once, and then reused by later transitions.
 
-Dynamic programming starts with a well-defined state, base cases, and a recurrence that composes already-solved states. In the finite, one-pass formulations covered here, those dependencies form an acyclic order, whether followed lazily by recursion or eagerly by iteration. For optimization problems, that valid recurrence usually expresses **optimal substructure**: an optimum is assembled from optima of smaller states. Counting and decision DPs use the same state-and-recurrence machinery without necessarily optimizing anything. Repeated states are what make storing results pay, but they are an efficiency condition rather than a correctness requirement. Iterative methods such as value iteration are also DP, but may revisit mutually dependent value estimates until convergence rather than solve every state once.
+The formulation starts with a state definition, base cases, and a recurrence over already-solved states. In the finite one-pass cases covered here, dependencies form an acyclic order. Recursion follows that order lazily. Iteration writes it out as loops. Optimization DP usually relies on **optimal substructure**, assembling an optimum from smaller optima. Counting and decision problems use the same machinery without optimizing. Repeated states make storage worthwhile, though repetition affects efficiency rather than correctness. Other DP methods, including value iteration, may revisit mutually dependent estimates until they converge.
 
 **Core shape for finite one-pass DP:** state + base cases + recurrence + acyclic dependency order → each reached state solved once → `(number of distinct states) × (transition work per state)` time.
 
@@ -41,7 +41,7 @@ tab: Naive Recursion
 {"algorithm":"coin-change-naive"}
 ```
 
-Try every first coin; repeated remainders rebuild the same work.
+Try every first coin. Repeated remainders rebuild the same work.
 
 tab: Memoization
 
@@ -106,18 +106,29 @@ The simplified Memoization and Tabulation tabs keep the cashier model visible. M
 > ```csharp
 > static int FewestCoinsTopDown(int amount, int[] coins)
 > {
+>     ArgumentNullException.ThrowIfNull(coins);
+>     ArgumentOutOfRangeException.ThrowIfNegative(amount);
+>     if (amount == int.MaxValue)
+>         throw new ArgumentOutOfRangeException(nameof(amount), "amount + 1 must fit in Int32.");
+>     if (coins.Any(coin => coin <= 0))
+>         throw new ArgumentException("Coin denominations must be positive.", nameof(coins));
+>
 >     var memo = new Dictionary<int, int> { [0] = 0 };
 >     var answer = Solve(amount);
 >     return answer > amount ? -1 : answer;
 >
 >     int Solve(int remaining)
 >     {
->         if (remaining < 0) return amount + 1;
 >         if (memo.TryGetValue(remaining, out var cached)) return cached;
 >
 >         var best = amount + 1;
 >         foreach (var coin in coins)
->             best = Math.Min(best, Solve(remaining - coin) + 1);
+>         {
+>             if (coin > remaining) continue;
+>             var suffix = Solve(remaining - coin);
+>             if (suffix <= amount)
+>                 best = Math.Min(best, suffix + 1);
+>         }
 >
 >         memo[remaining] = best;
 >         return best;
@@ -128,18 +139,29 @@ The simplified Memoization and Tabulation tabs keep the cashier model visible. M
 > ```csharp
 > static int FewestCoinsBottomUp(int amount, int[] coins)
 > {
+>     ArgumentNullException.ThrowIfNull(coins);
+>     ArgumentOutOfRangeException.ThrowIfNegative(amount);
+>     if (amount == int.MaxValue)
+>         throw new ArgumentOutOfRangeException(nameof(amount), "amount + 1 must fit in Int32.");
+>     if (coins.Any(coin => coin <= 0))
+>         throw new ArgumentException("Coin denominations must be positive.", nameof(coins));
+>
 >     var dp = Enumerable.Repeat(amount + 1, amount + 1).ToArray();
 >     dp[0] = 0;
 >
 >     for (var remaining = 1; remaining <= amount; remaining++)
 >         foreach (var coin in coins)
 >             if (coin <= remaining)
->                 dp[remaining] = Math.Min(dp[remaining], dp[remaining - coin] + 1);
+>             {
+>                 var suffix = dp[remaining - coin];
+>                 if (suffix <= amount)
+>                     dp[remaining] = Math.Min(dp[remaining], suffix + 1);
+>             }
 >
 >     return dp[amount] > amount ? -1 : dp[amount];
 > }
 > ```
-> `FewestCoinsTopDown(30, [1, 10, 25, 50])` and the bottom-up version both return `3`.
+> `FewestCoinsTopDown(30, [1, 10, 25, 50])` and the bottom-up version both return `3`. The contract requires `0 <= amount < int.MaxValue` and strictly positive denominations; those constraints keep dependencies acyclic and the sentinel arithmetic valid.
 
 
 A warehouse robot may move only right or down from the loading bay to the dispatch door. Choosing the cheaper immediate tile and breaking ties to the right walks into an expensive corridor and costs `21`; the best complete route costs `10`. Naive recursion eventually finds it, but different route prefixes repeatedly reach the same coordinate.
@@ -152,7 +174,7 @@ tab: Greedy
 {"algorithm":"grid-path-greedy"}
 ```
 
-Choose the cheaper next tile, breaking ties right; later costs trap the route.
+Choose the cheaper next tile, breaking ties right. Later costs trap the route.
 
 tab: Naive Recursion
 
@@ -210,23 +232,28 @@ Here the state is a coordinate rather than an amount. `best(R2C2)` means “the 
 > [!EXAMPLE]- Grid path, top-down and bottom-up (C#)
 >
 > ```csharp
-> static int CheapestPathTopDown(int[,] cost)
+> static long CheapestPathTopDown(int[,] cost)
 > {
+>     ArgumentNullException.ThrowIfNull(cost);
 >     var rows = cost.GetLength(0);
 >     var columns = cost.GetLength(1);
->     var memo = new int?[rows, columns];
+>     if (rows == 0 || columns == 0)
+>         throw new ArgumentException("The cost grid must be nonempty.", nameof(cost));
+>     var memo = new long?[rows, columns];
 >
 >     return Solve(0, 0);
 >
->     int Solve(int row, int column)
+>     long Solve(int row, int column)
 >     {
->         if (row >= rows || column >= columns) return int.MaxValue / 4;
 >         if (row == rows - 1 && column == columns - 1) return cost[row, column];
->         if (memo[row, column] is int cached) return cached;
+>         if (memo[row, column] is long cached) return cached;
 >
->         var answer = cost[row, column] + Math.Min(
->             Solve(row + 1, column),
->             Solve(row, column + 1));
+>         long suffix = row == rows - 1
+>             ? Solve(row, column + 1)
+>             : column == columns - 1
+>                 ? Solve(row + 1, column)
+>                 : Math.Min(Solve(row + 1, column), Solve(row, column + 1));
+>         var answer = checked((long)cost[row, column] + suffix);
 >         memo[row, column] = answer;
 >         return answer;
 >     }
@@ -234,11 +261,14 @@ Here the state is a coordinate rather than an amount. `best(R2C2)` means “the 
 > ```
 >
 > ```csharp
-> static int CheapestPathBottomUp(int[,] cost)
+> static long CheapestPathBottomUp(int[,] cost)
 > {
+>     ArgumentNullException.ThrowIfNull(cost);
 >     var rows = cost.GetLength(0);
 >     var columns = cost.GetLength(1);
->     var dp = new int[rows, columns];
+>     if (rows == 0 || columns == 0)
+>         throw new ArgumentException("The cost grid must be nonempty.", nameof(cost));
+>     var dp = new long[rows, columns];
 >
 >     for (var row = rows - 1; row >= 0; row--)
 >     for (var column = columns - 1; column >= 0; column--)
@@ -249,15 +279,18 @@ Here the state is a coordinate rather than an amount. `best(R2C2)` means “the 
 >             continue;
 >         }
 >
->         var down = row + 1 < rows ? dp[row + 1, column] : int.MaxValue / 4;
->         var right = column + 1 < columns ? dp[row, column + 1] : int.MaxValue / 4;
->         dp[row, column] = cost[row, column] + Math.Min(down, right);
+>         long suffix = row == rows - 1
+>             ? dp[row, column + 1]
+>             : column == columns - 1
+>                 ? dp[row + 1, column]
+>                 : Math.Min(dp[row + 1, column], dp[row, column + 1]);
+>         dp[row, column] = checked((long)cost[row, column] + suffix);
 >     }
 >
 >     return dp[0, 0];
 > }
 > ```
-> Both versions return the same minimum route cost; the visualization keeps the full table so it can also highlight the chosen route.
+> Both versions require a nonempty grid and return the same checked `long` route cost. Explicit edge transitions prevent an out-of-grid sentinel from winning against a large valid suffix. The visualization keeps the full table so it can also highlight the chosen route.
 
 tab: Complexity
 
@@ -319,29 +352,21 @@ tab: Complexity
 
 # Boundaries
 
-The recurrence and state definition are load-bearing; reuse and table shape determine whether the formulation is practical.
+A DP formulation is only as sound as its state definition and recurrence. Reuse and table shape decide whether it is practical.
 
-- **The state omits necessary history.** A coordinate is sufficient only because movement is restricted to right and down and the remaining tile costs depend solely on position. If the robot had fuel, keys, or visited-tile restrictions, those values would also belong in the state.
-- **The dependency order is cyclic.** Right/down movement forms a DAG. Allowing unrestricted movement can create cycles, so a single recursive or tabulated pass is no longer enough; the formulation needs a graph shortest-path algorithm or another convergence rule.
-- **A state may be unreachable.** Coin change without a `1¢` denomination can leave some amounts impossible. The sentinel must survive the recurrence without overflowing, and the public result should distinguish “no solution” from a large valid answer.
-- **No repeated states.** A memo with no cache hits only adds overhead. This is the usual [[Computer Science/Algorithms/Paradigms/Divide and Conquer|divide-and-conquer]] regime: merge sort's subarrays are distinct even though its recurrence is valid.
+- **The state omits necessary history.** A coordinate is sufficient because movement is restricted to right and down and the remaining tile costs depend only on position. Fuel, keys, or visited-tile restrictions would also have to become part of the state.
+- **The dependency order is cyclic.** Right/down movement forms a DAG. Unrestricted movement can introduce cycles, so one recursive or tabulated pass no longer works. The problem needs a graph shortest-path algorithm or another convergence rule.
+- **A state may be unreachable.** Coin change without a `1¢` denomination can leave some amounts impossible. Its sentinel must pass through the recurrence without overflowing, and the public result must distinguish “no solution” from a large valid answer.
+- **No states repeat.** A memo with no cache hits adds overhead. This is the usual [[Computer Science/Algorithms/Paradigms/Divide and Conquer|divide-and-conquer]] regime: merge sort has a valid recurrence, but every subarray state is unique.
 
-Optimization DP still needs a valid composition rule. For the same US-coin drawer, the largest-coin rule returns `25 + 1 + 1 + 1 + 1 + 1` for `30¢`, while the recurrence compares every allowed predecessor and finds `10 + 10 + 10`. The [[Computer Science/Algorithms/Paradigms/Greedy Algorithms|greedy algorithms]] note develops this failure of the greedy-choice property and the conditions under which the cheaper local rule is safe.
+Optimization DP still needs a valid composition rule. For the same US-coin drawer, the largest-coin rule returns `25 + 1 + 1 + 1 + 1 + 1` for `30¢`. The recurrence compares every allowed predecessor and finds `10 + 10 + 10`. The [[Computer Science/Algorithms/Paradigms/Greedy Algorithms|greedy algorithms]] note explains why that local rule fails and when it is safe.
 
 # Questions
 
-> [!QUESTION]- Why are remaining amount and current coordinate valid states?
-> Each captures everything that can change the future answer. With reusable denominations, the coins already chosen do not change which combinations can finish a remaining amount; finite stock would add the remaining counts to the state. Once the coordinate is known, the route prefix does not change the right/down suffix costs. Calls with the same state are therefore interchangeable and may share one stored answer.
-
-> [!QUESTION]- Why does greedy coin selection fail while the DP succeeds?
-> Greedy commits to `25¢` because it is the largest usable coin, leaving five pennies and producing six coins. DP compares every predecessor of `30¢`, including the `20¢` state reached by taking `10¢`, so it can keep the globally smaller `10 + 10 + 10` result. The extra work buys freedom from an unproved greedy-choice property.
-
 > [!QUESTION]- What changes between memoization and tabulation if the recurrence is the same?
-> Evaluation order and control flow. Memoization begins at the target, follows recursive dependencies, and stores states on demand. Tabulation begins at base cases and fills states in a predetermined order. Their asymptotic work matches when both visit the same states; tabulation avoids call-stack cost, while memoization may skip states the target never reaches.
+> Evaluation order and control flow. Memoization starts at the target, follows recursive dependencies, and stores states on demand. Tabulation starts at the base cases and fills states in a fixed order. Their asymptotic work matches when they visit the same states. Tabulation avoids call-stack cost, while memoization may skip states the target never reaches.
 
 # References
 
-- [Dynamic programming (Wikipedia)](https://en.wikipedia.org/wiki/Dynamic_programming) — formal definition, Bellman's origin of the term, and the optimal-substructure / overlapping-subproblems conditions.
-- [Richard Bellman, "The Theory of Dynamic Programming" (1954)](https://www.ams.org/bull/1954-60-06/S0002-9904-1954-09848-8/S0002-9904-1954-09848-8.pdf) — the primary paper formalizing state variables and the principle of optimality.
-- [MIT 6.006 Dynamic Programming lecture notes, Spring 2020](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/pages/lecture-notes/) — lectures 15–18 develop recursive formulations, subproblem selection, memoisation, and bottom-up evaluation.
-- Cormen, Leiserson, Rivest, Stein, _Introduction to Algorithms_ — the "Dynamic Programming" chapter (Ch. 15 in the 3rd edition, Ch. 14 in the 4th edition) develops state recurrences, optimal substructure, overlapping subproblems, and both evaluation orders.
+- [Richard Bellman, "The Theory of Dynamic Programming" (1954)](https://www.ams.org/bull/1954-60-06/S0002-9904-1954-09848-8/S0002-9904-1954-09848-8.pdf)
+- [MIT 6.006 Dynamic Programming lecture notes, Spring 2020](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/pages/lecture-notes/)

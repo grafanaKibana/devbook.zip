@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-26T19:20:54.793Z
-modified: 2026-08-02T10:49:20.673Z
-published: 2026-08-02T10:49:20.673Z
+created: 2026-08-20T20:41:15.519Z
+modified: 2026-08-20T20:41:15.519Z
+published: 2026-08-20T20:41:15.519Z
 topic:
   - Computer Science
 subtopic:
@@ -14,9 +14,9 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-[[Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components|Strongly connected components]] collapse every mutually reachable region of a digraph into one node. Tarjan's algorithm finds that partition in one DFS. It records when each vertex was discovered, how far an active subtree can reach back, and which vertices still belong to a component under construction.
+[[Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components|Strongly connected components]] partition a digraph into maximal mutually reachable regions. Tarjan's algorithm finds that partition in one DFS by recording each vertex's discovery time, the earliest reachable vertex still on the active stack, and whether it still belongs to a component under construction.
 
-The decisive event is a pop. When a vertex cannot reach an earlier active vertex, it is the root of one SCC; popping the stack down to that vertex emits the whole component. The canonical SCC page carries the interactive Tarjan trace and growth chart, so this focused note does not duplicate either payload.
+The component boundary appears when a vertex cannot reach any earlier active vertex. That vertex is an SCC root, and popping the stack down to it emits the complete component. [[Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components|Strongly Connected Components]] compares Tarjan with the two-pass and path-based alternatives. This note follows Tarjan's active-stack invariant and implementation.
 
 # Low-Link State
 
@@ -24,7 +24,7 @@ The decisive event is a pop. When a vertex cannot reach an earlier active vertex
 - `low[v]` is the smallest discovery index reachable from `v` through DFS-tree edges plus at most one edge to a vertex still on the stack.
 - `onStack[v]` distinguishes an active vertex from one already assigned to a completed component.
 
-On entry, set `disc[v] = low[v] = time++` and push `v`. For each edge `v → w`, recurse when `w` is unvisited and then fold `low[w]` into `low[v]`. If `w` is already visited and still active, fold `disc[w]` into `low[v]`. After all outgoing edges, `low[v] == disc[v]` identifies an SCC root.
+On entry, set `disc[v] = low[v] = time++`, then push `v`. For an edge `v → w`, recurse if `w` is unvisited and fold `low[w]` into `low[v]` on return. If `w` is already visited and still active, fold `disc[w]` into `low[v]`. Once every outgoing edge has been processed, `low[v] == disc[v]` identifies an SCC root.
 
 On `A→B, B→C, C→A, C→D, D→E, E→D`:
 
@@ -45,7 +45,7 @@ A done: low[A]=disc[A]=0 -> pop {C,B,A}
 
 The components leave in reverse topological order of the condensation: `{D, E}` before `{A, B, C}`.
 
-# Reference Drawer
+# C# Implementation
 
 > [!EXAMPLE]- C# implementation
 >
@@ -123,22 +123,12 @@ The components leave in reverse topological order of the condensation: `{D, E}` 
 
 # The Guard That Keeps Components Separate
 
-The non-tree update must ignore a vertex already removed from the stack. Such an edge points into a finished component that the current DFS subtree cannot climb back through. Letting its discovery index lower `low[v]` can suppress a valid root and merge separate SCCs.
+The non-tree update must ignore vertices already removed from the stack. An edge to one of them enters a finished component. It cannot provide a return path for the active DFS subtree. Letting that vertex lower `low[v]` can hide a valid root and merge separate SCCs.
 
-Tarjan's canonical definition uses `disc[w]` for an edge to an active, already-visited vertex. A guarded `low[w]` variant still identifies the same SCC roots, but its stored values no longer have Tarjan's formal low-link meaning. Dropping the `onStack` guard is the corrupting change.
+For an edge to an active, already-visited vertex, Tarjan's definition uses `disc[w]`. A guarded `low[w]` variant still finds the same SCC roots, but the stored values no longer match Tarjan's formal low-link definition. Removing the `onStack` guard breaks the component boundary.
 
 This is related to the discovery/low-value pattern in [[Computer Science/Algorithms/Graph Algorithms/Articulation Points and Bridges|articulation points and bridges]], but the directed edge classification, active stack, and update rules are different.
 
-# Questions
-
-> [!QUESTION]- What does `low[v] == disc[v]` prove?
-> No vertex in `v`'s DFS subtree can reach an earlier active vertex. `v` is therefore the entry point of one SCC, and popping down to `v` emits exactly that component.
-
-> [!QUESTION]- Why may only active vertices lower a low link?
-> An active vertex still belongs to the component under construction. An already-popped vertex belongs to a finished component that cannot provide a return path, so using it would cross a component boundary.
-
 # References
 
-- [Depth-First Search and Linear Graph Algorithms](https://epubs.siam.org/doi/10.1137/0201010) — Tarjan's 1972 primary paper introducing the one-pass SCC procedure.
-- [Finding strongly connected components](https://cp-algorithms.com/graph/strongly-connected-components.html) — implementation-oriented treatment of SCC decomposition and the condensation DAG.
-- [Tarjan's strongly connected components algorithm](https://en.wikipedia.org/wiki/Tarjan%27s_strongly_connected_components_algorithm) — low-link and active-stack invariants with pseudocode.
+- [Depth-First Search and Linear Graph Algorithms](https://epubs.siam.org/doi/10.1137/0201010)

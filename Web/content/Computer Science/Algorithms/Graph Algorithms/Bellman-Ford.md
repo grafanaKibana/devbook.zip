@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T14:02:43.941Z
-modified: 2026-08-08T07:30:29.576Z
-published: 2026-08-08T07:30:29.576Z
+created: 2026-08-20T20:41:15.512Z
+modified: 2026-08-20T20:41:15.512Z
+published: 2026-08-20T20:41:15.512Z
 topic:
   - Computer Science
 subtopic:
@@ -14,9 +14,9 @@ priority: Medium
 status: Creation
 ---
 
-A weighted digraph carries a single source and edge weights that may be negative — a currency graph, a distance-vector routing table, a cost network where some transitions refund more than they charge. [[Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]] settles one vertex at a time and never revisits it, so a negative edge discovered later, one that could still lower an already-final distance, breaks its greedy invariant. Bellman-Ford drops the settle-once rule: it relaxes every edge once per round and repeats the sweep, letting any distance keep falling for as many rounds as it takes.
+A weighted digraph can have one source and negative edge weights, as in a currency graph or a cost network where some transitions refund more than they charge. [[Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]] settles one vertex at a time and never revisits it, so a negative edge discovered later can lower a distance that was already treated as final. That breaks its greedy invariant. Bellman-Ford drops the settle-once rule: it relaxes every edge once per round and repeats the sweep, letting any distance keep falling for as many rounds as it takes.
 
-Correctness rests on a fact about shortest paths: with no negative cycle present a shortest path is simple, so it spans at most `V−1` edges, `V−1` rounds suffice, and a relaxation still possible in a `V`-th round can only be a negative cycle.
+Correctness rests on a fact about shortest paths. With no negative cycle present, a shortest path is simple and spans at most `V−1` edges. That makes `V−1` rounds sufficient. If a relaxation is still possible in a `V`-th round, a reachable negative cycle exists.
 
 The trace uses the adverse scan order `2→3, 1→2, 0→2, 0→1`, so each round exposes one more edge of the shortest path.
 
@@ -136,13 +136,13 @@ tab: Complexity
 
 # When Distances Stop Being Defined
 
-A reachable negative cycle has no shortest path: each lap around it lowers the total, so the infimum is `−∞`. The `V−1`-round distances into that region are a snapshot taken mid-descent, not an answer. Code that prints them reports finite numbers that mean nothing, and the failure is silent because the arrays are fully populated and no exception fires. A correct report distinguishes three states: a finite distance, `+∞` for a vertex with no path at all, and `−∞` for a vertex reachable through a negative cycle — the last set found by marking every vertex that relaxed on the `V`-th round and everything reachable from it.
+A reachable negative cycle has no shortest path: each lap around it lowers the total, so the infimum is `−∞`. The `V−1`-round distances into that region are only a snapshot taken mid-descent. Code that prints them reports finite numbers that mean nothing, and the failure is silent because the arrays are fully populated and no exception fires. A correct report distinguishes a finite distance from `+∞` for an unreachable vertex and `−∞` for one reachable through a negative cycle. The last set is found by marking every vertex that relaxed on the `V`-th round and everything reachable from it.
 
-Overflow is the second silent failure. Because a round relaxes every edge, including edges leaving vertices not yet reached, computing `dist[u] + w` while `dist[u]` is still the infinity sentinel can wrap a fixed-width integer into a small or negative value and invent a shortest path. Skipping any edge whose source is still at the sentinel (`if (dist[u] == INF) continue;`) removes it; [[Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]] never hits this because it only expands vertices it has already settled.
+Overflow is the second silent failure. Because a round relaxes every edge, including edges leaving vertices not yet reached, computing `dist[u] + w` while `dist[u]` is still the infinity sentinel can wrap a fixed-width integer into a small or negative value and invent a shortest path. Skipping any edge whose source is still at the sentinel (`if (dist[u] == INF) continue;`) removes the risk. [[Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]] never hits this because it only expands vertices it has already settled.
 
 When every source needs an answer, [[Computer Science/Algorithms/Graph Algorithms/Floyd-Warshall|Floyd-Warshall]] solves the all-pairs problem directly instead of repeating this single-source procedure.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Round and detection flow
 >
@@ -204,23 +204,9 @@ When every source needs an answer, [[Computer Science/Algorithms/Graph Algorithm
 > }
 > ```
 >
-> `long.MaxValue` marks an unreached vertex and is skipped as a relaxation source, so no `int`-width sentinel wraps. Recording `pred[to] = from` alongside each update is what later makes the negative cycle walkable.
-
-# Questions
-
-> [!QUESTION]- Why exactly `V−1` rounds, and what does a relaxation on the `V`-th round prove?
-> Without a negative cycle, every shortest path is simple and spans at most `V−1` edges. Round `k` finalizes every shortest path of at most `k` edges, so `V−1` rounds finalize all of them. A relaxation still possible on the `V`-th round means a path is shortening past that `V−1`-edge limit, which only a negative cycle permits, so the extra round is the negative-cycle detector rather than wasted work.
-
-> [!QUESTION]- How is the actual negative cycle recovered after detection?
-> Take a vertex that relaxed on the `V`-th round; it lies on a negative cycle or is reachable from one. Walking `pred` back `V` times cannot exit a cycle once inside it, so the walk ends on a cycle vertex. Following `pred` from there until it returns to that vertex lists the cycle.
-
-> [!QUESTION]- After a reachable negative cycle is detected, what are the correct distances?
-> Vertices reachable through the cycle have distance `−∞`, because each lap lowers the total without bound; vertices with no path have `+∞`; the rest are finite. The `V−1`-round numbers for the `−∞` region are a mid-descent snapshot, so reporting them as finite distances is the common bug.
+> `long.MaxValue` marks an unreached vertex and is skipped as a relaxation source, so no sentinel is added to an edge weight. The sample still requires every finite path sum to fit `long`; code accepting arbitrary weights should use checked or bounded addition. Recording `pred[to] = from` alongside each update is what later makes the negative cycle walkable.
 
 # References
 
-- [On a Routing Problem](https://www.ams.org/qam/1958-16-01/S0033-569X-1958-0102435-2/S0033-569X-1958-0102435-2.pdf) — Bellman's 1958 dynamic-programming formulation of the shortest-path recurrence.
-- [Bellman–Ford algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Bellman%E2%80%93Ford_algorithm) — correctness, the `V−1`-round bound, and negative-cycle detection.
-- [Bellman-Ford (cp-algorithms)](https://cp-algorithms.com/graph/bellman_ford.html) — implementation with the early-exit optimization and cycle retrieval.
-- [Finding a negative cycle in the graph (cp-algorithms)](https://cp-algorithms.com/graph/finding-negative-cycle-in-graph.html) — the `pred`-walk extraction technique used above.
-- [Shortest paths (Princeton Algorithms)](https://algs4.cs.princeton.edu/44sp/) — Sedgewick on Bellman-Ford, negative cycles, and the arbitrage reduction via `-log(rate)` weights.
+- [On a Routing Problem](https://www.ams.org/qam/1958-16-01/S0033-569X-1958-0102435-2/S0033-569X-1958-0102435-2.pdf)
+- [Bellman-Ford (cp-algorithms)](https://cp-algorithms.com/graph/bellman_ford.html)

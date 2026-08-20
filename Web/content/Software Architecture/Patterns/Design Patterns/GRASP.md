@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T14:02:44.176Z
-modified: 2026-07-25T13:57:51.865Z
-published: 2026-07-25T13:57:51.865Z
+created: 2026-08-20T20:41:15.695Z
+modified: 2026-08-20T20:41:15.695Z
+published: 2026-08-20T20:41:15.695Z
 topic:
   - Software Architecture
 subtopic:
@@ -14,27 +14,31 @@ priority: High
 status: Ready to Repeat
 ---
 
-GRASP (General Responsibility Assignment Software Patterns) is a set of nine principles for deciding which class or object should be responsible for a given behavior. Introduced by Craig Larman, GRASP answers the question "who should do this?" in object-oriented design. The principles don't prescribe specific class structures — they provide heuristics for assigning responsibilities in a way that keeps designs cohesive, loosely coupled, and understandable.
+GRASP (General Responsibility Assignment Software Patterns) is a set of nine responsibility-assignment principles described by Craig Larman. They answer a concrete design question: which object should know, create, coordinate, or vary this behavior?
+
+The principles are heuristics, so they can point in different directions. Information Expert may place behavior beside the data it needs, while Low Coupling may argue against importing a dependency into that object. The design work is choosing which pressure matters at that boundary.
+
+GRASP applies [[Software Design/Paradigms/OOP]] encapsulation and polymorphism to responsibility assignment rather than prescribing a fixed class structure.
 
 # The Nine Principles
 
-**Information Expert** — assign responsibility to the class that has the information needed to fulfill it. If `Order` knows its line items and prices, `Order` should calculate its total — not a separate `OrderCalculator`.
+**Information Expert** assigns a responsibility to the object that already has the information required to perform it. An `Order` that owns line items can calculate its total without exposing its internals to an `OrderCalculator`.
 
-**Creator** — assign responsibility for creating an object to the class that aggregates, contains, or closely uses it. `Order` creates `LineItem` objects because it contains them.
+**Creator** places construction with an object that contains, records, closely uses, or has the initialization data for the new object. `Order` is a natural creator of the line items it owns.
 
-**Controller** — assign responsibility for handling system events to a class that represents the overall system or a use-case scenario. In MVC, the Controller receives HTTP requests and delegates to domain objects.
+**Controller** receives a system operation at the boundary and coordinates the use case. It represents the system, a subsystem, or a use-case session rather than performing all domain work itself. An MVC controller can play this role, but the UI pattern and the GRASP principle are not identical.
 
-**Low Coupling** — assign responsibilities to minimize dependencies between classes. A class with many dependencies is hard to change, test, and reuse. Prefer injecting abstractions over concrete types.
+**Low Coupling** favors assignments that limit how many elements depend on each other and how much they know. Adding an interface helps only when it creates a stable boundary. An interface with no real variation merely moves the dependency.
 
-**High Cohesion** — assign responsibilities so that each class has a focused, related set of behaviors. A class that does too many unrelated things is hard to understand and maintain.
+**High Cohesion** keeps an object's responsibilities strongly related. A controller that validates input, calculates prices, writes SQL, and sends email has absorbed several reasons to change.
 
-**Polymorphism** — when behavior varies by type, assign responsibility to the type using polymorphism rather than conditional logic. Replace `if (type == "pdf") ... else if (type == "csv") ...` with an `IReportGenerator` interface and type-specific implementations.
+**Polymorphism** assigns type-dependent behavior to the types that vary. It replaces a conditional owned by an outsider when new variants are expected to keep arriving.
 
-**Pure Fabrication** — when no domain class is a natural fit for a responsibility, create a service class (a "fabrication") to hold it. `EmailSender` is not a domain concept but is a valid place to put email-sending logic.
+**Pure Fabrication** introduces a non-domain object when no domain concept is a good home for a responsibility. A persistence mapper or email gateway can improve cohesion without pretending to be part of the business model.
 
-**Indirection** — assign responsibility to an intermediate object to decouple two components. A message broker between services is an indirection that prevents direct coupling.
+**Indirection** inserts an intermediate object so two elements do not depend on each other directly. The extra hop earns its place only when it absorbs a real variation or communication rule.
 
-**Protected Variations** — identify points of variation and assign responsibilities to create a stable interface around them. If the payment provider might change, hide it behind `IPaymentGateway` so the rest of the system is protected from that variation.
+**Protected Variations** puts a stable boundary around an identified point of change. A payment-provider contract protects domain code when providers genuinely vary. It is speculative overhead when there is one fixed integration with no separate policy.
 
 # Example: Applying Information Expert
 
@@ -55,27 +59,23 @@ public sealed class Order
 }
 ```
 
-The `Order` class has the information (line items, prices, quantities) — it should own the calculation.
+`Order` owns both the data and the invariant, so the calculation can remain inside its boundary. A separate service becomes justified when the result depends on information or policy outside that boundary.
 
 # Pitfalls
 
-## Misapplying Information Expert (Anemic Domain Model)
+## Treating Information Expert as an Absolute
 
-**What goes wrong**: domain classes hold only data (properties) while all behavior lives in service classes. This is the Anemic Domain Model anti-pattern — it violates Information Expert by separating data from the behavior that operates on it.
-
-**Why it happens**: developers default to putting logic in service classes because it feels more 'service-oriented.' The result is service classes that reach into domain objects to get data, creating tight coupling.
-
-**Mitigation**: ask 'which class has the information needed to fulfill this responsibility?' If `Order` has the line items and prices, `Order.CalculateTotal()` belongs on `Order`, not on `OrderService`.
+Putting every calculation on the object that holds the data can produce a domain object that also performs I/O, coordinates other aggregates, or imports infrastructure concerns. Information Expert identifies a strong candidate, not an automatic winner. Keep behavior on `Order` when it depends on `Order` state. Move cross-aggregate policy or external communication behind a separate collaborator.
 
 # Tradeoffs
 
 | Decision | Option A | Option B | When A | When B |
 | --- | --- | --- | --- | --- |
-| **Information Expert vs Pure Fabrication** | Put behavior on the class that has the data | Create a service class for the behavior | Always try first — keeps data and behavior together, reduces coupling | When behavior requires cross-aggregate coordination, external I/O, or infrastructure concerns that do not belong in domain objects |
+| **Information Expert vs Pure Fabrication** | Put behavior on the class that has the data | Create a service class for the behavior | The rule depends on state and invariants already owned by the object | The work coordinates aggregates or external I/O that does not belong in the domain object |
 | **Low Coupling vs Information Expert** | Minimize dependencies via indirection | Assign to the class with the data even if it adds a dependency | When the dependency would cross module or layer boundaries | When the dependency is within the same aggregate and adding indirection adds complexity without benefit |
-| **GRASP vs GoF Patterns** | GRASP heuristics for who should own this | GoF patterns for how this collaboration should work | During initial design: responsibility assignment | During refinement: when a specific structural problem like factory, strategy, or observer needs a concrete solution |
+| **GRASP vs GoF Patterns** | GRASP heuristics for who should own this | GoF patterns for how the collaboration works | Assigning responsibility | Naming a recurring construction, composition, or communication structure |
 
-**Decision rule**: use GRASP principles to make initial responsibility assignments. When two principles conflict (Information Expert says class A, Low Coupling says class B), prefer the assignment that keeps the most change-prone behavior behind the fewest interfaces. GRASP answers who; GoF answers how.
+The better assignment keeps the change-prone rule close to the information it needs without pulling unstable dependencies across a boundary. No single GRASP principle settles every case.
 
 # Example: Polymorphism Replacing Conditionals
 
@@ -109,15 +109,13 @@ public sealed class CsvReportGenerator : IReportGenerator
 
 # Questions
 
-> [!QUESTION]- What is the Information Expert principle and why does it reduce coupling?
-> Information Expert assigns responsibility to the class that has the information needed to fulfill it. This keeps related data and behavior together, reducing the need for one class to reach into another to get data. The result is lower coupling and higher cohesion — each class does what it knows.
+> [!QUESTION]- How does Information Expert reduce coupling, and when should another principle override it?
+> It places behavior beside the information it needs, so another object does not have to pull data out and reproduce the rule. Low Coupling or Pure Fabrication should override it when that placement would import infrastructure, coordinate other aggregates, or give the object unrelated responsibilities.
 
 > [!QUESTION]- How does GRASP differ from SOLID?
-> GRASP focuses on responsibility assignment — which class should own a behavior or data. SOLID focuses on design principles for maintainability (single responsibility, open/closed, etc.). They are complementary: GRASP guides initial design decisions; SOLID guides refactoring and long-term maintainability.
+> GRASP focuses on assigning responsibilities among collaborating objects. SOLID describes broader properties of class and dependency design. They overlap around cohesion, coupling, and variation, but GRASP starts with ownership: who should do the work?
 
 # References
 
-- [GRASP (Wikipedia)](https://en.wikipedia.org/wiki/GRASP_\(object-oriented_design\)) — overview of all nine principles with definitions and examples.
-- [Applying UML and Patterns (Craig Larman)](https://www.oreilly.com/library/view/applying-uml-and/0131489062/) — the book that introduced GRASP; covers all nine principles with detailed worked examples in the context of iterative OO design.
-- [[Software Design/Paradigms/OOP]] — object-oriented programming fundamentals that GRASP principles build on: encapsulation, polymorphism, and responsibility assignment.
-- [GRASP Patterns Explained (Baeldung)](https://www.baeldung.com/java-grasp-patterns) — practical walkthrough of all nine GRASP principles with code examples; Java-based but the responsibility assignment concepts apply directly to C#.
+- [Applying UML and Patterns](https://www.oreilly.com/library/view/applying-uml-and/0131489062/)
+- [GRASP Patterns Explained (Baeldung) — practical walkthrough of all nine GRASP principles with code examples](https://www.baeldung.com/java-grasp-patterns)

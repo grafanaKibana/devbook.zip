@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T14:02:44.139Z
-modified: 2026-07-18T14:02:44.139Z
-published: 2026-07-18T14:02:44.139Z
+created: 2026-08-20T20:41:15.670Z
+modified: 2026-08-20T20:41:15.671Z
+published: 2026-08-20T20:41:15.671Z
 topic:
   - Security
 subtopic:
@@ -14,13 +14,15 @@ priority: High
 status: Ready to Repeat
 ---
 
-OWASP (Open Worldwide Application Security Project) publishes the OWASP Top 10, an awareness document for common web-application risk classes. It is a baseline for threat modeling and verification, not proof that an application is secure. The current released list is the 2025 edition.
+The Open Worldwide Application Security Project (OWASP) publishes community-maintained security guidance and tools. Its Web Application Security Top 10 is an awareness document: ten broad risk categories selected from contributed data and community analysis. The current released edition is 2025.
+
+The list gives application teams a shared vocabulary and a useful coverage check. It is not a standard, a complete threat model, or evidence that a particular system resists attack. The OWASP API Security Top 10 is a separate project whose current released edition remains 2023. Its categories should not be silently merged with the web list below.
 
 # OWASP Top 10 (2025)
 
 ## A01: Broken Access Control
 
-The system accepts an operation the caller is not allowed to perform. A signed-in user changes `/invoices/42` to `/invoices/43` and reads another tenant's data because the endpoint checked identity but not ownership. Authorize every resource and action server-side, deny by default, and test nearby denied cases.
+The system accepts an operation the caller is not allowed to perform. A signed-in user changes `/invoices/42` to `/invoices/43` and reads another tenant's data because the endpoint checked identity without checking ownership. Authorization belongs at the server-side operation that loads or mutates the resource. Deny by default, then test nearby identifiers and forbidden state transitions.
 
 ```csharp
 var decision = await authorizationService.AuthorizeAsync(
@@ -34,19 +36,19 @@ if (!decision.Succeeded)
 
 ## A02: Security Misconfiguration
 
-Unsafe defaults, unnecessary services, permissive cloud policies, missing headers, or detailed production errors expose a path the application did not intend. Build hardened configuration into deployment, compare it continuously with policy, and fail closed when required settings are absent.
+Unsafe defaults, unnecessary services, permissive cloud policy, missing security headers, or detailed production errors expose paths the application did not intend. Hardened configuration belongs in the deployment definition. Compare the running system with that policy and fail closed when a required setting is absent.
 
 ## A03: Software Supply Chain Failures
 
-A compromised package, build action, registry, or signing identity reaches production through a trusted delivery path. Maintain an inventory, restrict and pin build inputs, verify provenance where available, isolate CI credentials, and practice replacing a compromised dependency without disabling the evidence trail.
+A compromised package, build action, registry, or signing identity can reach production through a trusted delivery path. Maintain an inventory of deployed components and build inputs. Restrict CI credentials, verify provenance where the ecosystem supports it, and rehearse replacing a compromised dependency without destroying the evidence needed to investigate it.
 
 ## A04: Cryptographic Failures
 
-Sensitive data is exposed because protection is absent or the primitive, parameters, nonce, key, or trust model is wrong. Plain SHA-256 password hashes and a reused AES-GCM nonce are different failures with the same root: cryptography was applied outside its required construction. Use approved libraries, [[Security/Password Storage|password-storage schemes]], [[Security/Encryption|authenticated encryption]], and managed key lifecycles.
+Sensitive data is exposed because protection is absent or a construction is used outside its security requirements. Plain SHA-256 password verifiers are cheap to guess. AES-GCM nonce reuse can break confidentiality and integrity. Use maintained libraries, [[Security/Password Storage|password-storage schemes]], [[Security/Encryption|authenticated encryption]], and a key lifecycle that covers generation, access, rotation, revocation, and loss.
 
 ## A05: Injection
 
-Untrusted data changes the syntax of a SQL, shell, template, LDAP, or another interpreter command. A query built by concatenating an email address lets input become SQL. Keep code and data separate with parameterized APIs, allowlist identifiers that cannot be parameters, and constrain any interpreter the process can reach.
+Untrusted data changes the syntax interpreted by SQL, a shell, a template engine, LDAP, or another parser. A query built by concatenating an email address lets the value become SQL syntax. Use parameterized APIs for values, a closed allowlist for identifiers that cannot be parameters, and the least privilege needed by the interpreter account.
 
 ```csharp
 var user = await connection.QueryFirstOrDefaultAsync<User>(
@@ -56,62 +58,46 @@ var user = await connection.QueryFirstOrDefaultAsync<User>(
 
 ## A06: Insecure Design
 
-The intended workflow lacks a control, so correct implementation still produces an exploitable system. A password-reset token with no expiry, attempt budget, or account binding is not repaired by clean code. Threat-model abuse cases and make rate, value, state transition, and recovery invariants explicit before implementation.
+The intended workflow lacks a security invariant, so an implementation can match its design and remain exploitable. A password-reset token with no expiry or account binding is still unsafe when implemented cleanly. Threat modeling should make abuse cases and failure behavior concrete before code fixes the wrong contract in place.
 
 ## A07: Authentication Failures
 
-Credential, session, recovery, or authenticator handling lets an attacker assume another identity. Defend against credential stuffing, protect session and renewal tokens, require phishing-resistant authentication where the risk warrants it, and make account recovery at least as strong as normal sign-in.
+Credential, session, recovery, or authenticator handling lets an attacker assume another identity. Rate and detect credential attacks, protect session and renewal tokens, and choose phishing-resistant authenticators when the risk warrants them. Recovery is part of the authentication boundary. A weak recovery path bypasses a strong sign-in path.
 
 ## A08: Software or Data Integrity Failures
 
-The system trusts code, serialized state, updates, or business data without establishing its origin and integrity. Verify signed artifacts and update metadata, constrain deserialization to expected types and schemas, and keep the verification key outside the channel that delivers the payload.
+The system trusts code, serialized state, updates, or business data without establishing origin and integrity. Verify artifacts and update metadata before use, constrain deserialization to expected schemas, and keep verification trust outside the channel delivering the payload. A signature authenticates only what the verifier actually covers and the key authority it trusts.
 
 ## A09: Security Logging and Alerting Failures
 
-The system cannot reconstruct or detect an attack because decision events are absent, unsafe, or never turned into alerts. Record authentication, authorization, administrative, and sensitive-data events with safe metadata. Test that a real abuse sequence triggers a routed alert; collecting logs alone is not detection.
+The system cannot reconstruct or detect an attack because decision events are absent, unsafe, or never turned into alerts. Record security-relevant decisions with safe metadata and stable correlation. Then test that an abuse sequence produces a routed signal. A stored log that nobody evaluates is evidence at best, not detection.
 
 ## A10: Mishandling of Exceptional Conditions
 
-Unexpected states, timeouts, resource exhaustion, partial failure, or exception paths leave the system open or inconsistent. A payment handler that commits an order after its authorization service times out fails open. Define failure semantics, bound resources, make retries idempotent, and test recovery from faults at every external boundary.
+Unexpected state, timeout, exhaustion, partial failure, or an exception path leaves the system open or inconsistent. A payment handler that commits an order after its authorization service times out has failed open. Define which failures deny the operation, bound resource consumption, and make any retry policy consistent with the operation's idempotency guarantees.
 
 # API Threats and Controls
 
-For an API, apply the same Top 10 categories at the object, property, and function levels. A valid token does not prove that the caller may read object `42`, set its `isAdmin` property, or invoke an administrative operation. Load the exact resource, authorize each action, bind writable schemas, reject unknown fields, parameterize interpreter inputs, and bound payload size, concurrency, and workflow retries.
+The API Security Top 10 adds vocabulary for object-, property-, and function-level authorization along with resource consumption, inventory, SSRF, and unsafe upstream consumption. A valid token does not prove that the caller may read object `42`, set `isAdmin`, or invoke an administrative operation. Load the exact resource, authorize the action, bind writable schemas, and put explicit bounds on payload size and work.
 
-Pair preventive controls with evidence: denied cross-tenant identifiers for access control, validation-failure rates for malformed input, inventory drift for shadow endpoints, and cost or queue-depth anomalies for resource abuse. Do not log tokens, passwords, API keys, card data, or request bodies to obtain that evidence. Basic authentication, JWT, OAuth, and OpenID Connect also remain different protocol roles; changing token format does not repair a missing authorization or trust check.
+Each preventive control needs evidence tied to its failure mode. Cross-tenant tests exercise access control. Inventory drift reveals shadow endpoints. Cost and queue-depth changes can expose resource abuse. That telemetry must not contain tokens, passwords, API keys, card data, or unrestricted request bodies. Basic authentication, JWT, OAuth, and OpenID Connect have different protocol roles. Changing token format does not repair a missing authorization decision.
 
 # Pitfalls
 
 ## Checklist Security (False Sense of Compliance)
 
-**What goes wrong**: a team marks each broad risk class "done" and treats the result as proof of security, even though the list cannot identify this application's assets, trust boundaries, business rules, or chained abuse cases.
+Marking every broad category "done" turns an awareness list into false assurance. The list cannot identify one application's assets, trust boundaries, business rules, or chained abuse cases.
 
-**Mitigation**: use the Top 10 to seed threat models and verification. Add architecture-specific abuse cases, security review, dependency monitoring, runtime testing, and penetration testing according to the system's exposure and release risk.
+Use the Top 10 to seed threat models and verification. Add architecture-specific abuse cases and review depth according to the system's exposure, change surface, and release risk.
 
 # Questions
 
-> [!QUESTION]- Why does passing an OWASP Top 10 checklist not prove an application is secure?
->
-> - The Top 10 groups broad, common risk classes; it does not enumerate the application's assets, trust boundaries, business rules, or attackers.
-> - A system can prevent listed injection patterns and still let a valid customer refund another customer's order through broken workflow authorization.
-> - Use the list to seed threat models and verification, then add abuse cases, architecture-specific controls, dependency review, and incident exercises.
-
-> [!QUESTION]- How do you prevent SQL injection in a .NET application?
->
-> - Use parameterized queries always — EF Core and Dapper with parameters are safe by default.
-> - Never concatenate user input into SQL strings, even for dynamic ORDER BY or table names.
-> - For dynamic SQL, use allowlists (validate column names against a known set) rather than sanitization.
-> - Do not assume an ORM makes interpolated raw SQL safe; verify which APIs parameterize and which execute literal command text.
-> - Raw SQL is appropriate for performance-sensitive paths when every value remains parameterized and dynamic identifiers come from a closed allowlist.
+> [!QUESTION]- How should a .NET application prevent SQL injection?
+> Keep untrusted values out of SQL text by using parameterized APIs. Dynamic identifiers such as a sort column cannot normally be parameters, so map them from a closed allowlist. ORM safety depends on the exact API: LINQ and parameterizing raw-SQL methods differ from APIs that accept already constructed SQL text. Least-privilege database permissions reduce impact but do not repair concatenation.
 
 # References
 
-- [ByteByteGo — Top 12 Tips for API Security](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/top-12-tips-for-api-security.md) — the pinned checklist source, mapped here to preventive and detective controls; its defective visual is not reused.
-- [ByteByteGo — A Cheatsheet to Build Secure APIs](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/a-cheatsheet-to-build-secure-apis.md) — the pinned control categories, with authentication, JWT, and OAuth terminology corrected.
-- [OWASP API Security Top 10 2023](https://owasp.org/API-Security/editions/2023/en/0x11-t10/) — object, property, function, resource, inventory, SSRF, and unsafe-upstream risk definitions.
-- [RFC 7617 — Basic HTTP Authentication](https://datatracker.ietf.org/doc/html/rfc7617) — the Basic scheme and its cleartext credential transport considerations.
-- [RFC 9700 — OAuth 2.0 Security Best Current Practice](https://datatracker.ietf.org/doc/html/rfc9700) — current OAuth threat model and deployment guidance.
-- [OWASP Top 10 2025](https://owasp.org/Top10/2025/0x00_2025-Introduction/) — the current released web-application risk list and change summary.
-- [OWASP .NET Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/DotNet_Security_Cheat_Sheet.html) — .NET-specific mitigations for each OWASP category
-- [OWASP Testing Guide](https://owasp.org/www-project-web-security-testing-guide/) — comprehensive guide for testing web application security
-- [Microsoft — ASP.NET Core Security](https://learn.microsoft.com/en-us/aspnet/core/security/) — official ASP.NET Core security documentation covering authentication, authorization, and data protection
+- [OWASP Top 10 2025](https://owasp.org/Top10/2025/0x00_2025-Introduction/)
+- [OWASP API Security Top 10 2023](https://owasp.org/API-Security/editions/2023/en/0x11-t10/)
+- [OWASP Web Security Testing Guide](https://owasp.org/www-project-web-security-testing-guide/)
+- [ASP.NET Core security](https://learn.microsoft.com/aspnet/core/security/)

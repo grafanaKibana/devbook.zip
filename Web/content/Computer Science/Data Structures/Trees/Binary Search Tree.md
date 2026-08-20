@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-29T20:23:26.770Z
-modified: 2026-08-08T07:30:32.702Z
-published: 2026-08-08T07:30:32.702Z
+created: 2026-08-20T20:41:15.604Z
+modified: 2026-08-20T20:41:15.604Z
+published: 2026-08-20T20:41:15.604Z
 topic:
   - Computer Science
 subtopic:
@@ -14,13 +14,13 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-An ordered collection of keys needs three things at once: fast lookup, fast insertion, and ordered access — min, max, "the next key after 40", every key in `[10, 90)`. A binary search tree stores keys in a shape that keeps both: each key sits at a node with two children, and the position of every key is fixed by comparison against its ancestors.
+An ordered collection needs efficient lookup and insertion without giving up min, max, successor, or range queries over `[10, 90)`. A binary search tree gets those operations from one rule: comparison with each ancestor determines whether a key belongs to the left or right.
 
-The binding rule is the **ordering invariant**: for any node, every key in its left subtree is smaller than the node's key, and every key in its right subtree is larger. That invariant is what lets a search discard one whole subtree at each comparison, and it is what makes an in-order traversal emit the keys already sorted. What the tree does not carry is any bound on its own height — the invariant fixes left-versus-right, not depth.
+The **ordering invariant** applies at every node: all keys in the left subtree are smaller, and all keys in the right subtree are larger. A search can therefore discard one subtree after each comparison, while an in-order traversal emits sorted keys. The invariant controls direction, not depth. A plain BST places no bound on its height.
 
 **Core shape:** keys → nodes with `left`/`right` ordered smaller/larger → each comparison discards one subtree
 
-Press **Insert** with the prefilled `80`: the balanced seven-key start gains a deeper right branch. Continue with larger keys to see sorted insertion stretch that branch while the BST keeps order but does not repair height.
+Inserting the prefilled `80` adds a deeper right branch to the balanced seven-key start. Further increasing keys stretch the same branch: order remains valid, but nothing repairs the height.
 
 ````tabsdown
 tab: Visualization
@@ -208,19 +208,19 @@ A plain BST does not self-balance. Inserting keys in sorted order — `1, 2, 3, 
 1 → 2 → 3 → 4 → 5   (every node has only a right child)
 ```
 
-Sorted or nearly-sorted input is common, not contrived: auto-increment IDs, timestamps, exported-and-reimported tables. Adversarial input can force the same chain deliberately. Because the invariant constrains order but never height, the tree has no mechanism to notice or prevent this.
+Sorted or nearly sorted input appears naturally in auto-increment IDs and timestamps. Adversarial input can force the same chain deliberately. The invariant constrains order but gives the tree no mechanism to detect or repair excessive height.
 
 Deletion is the operation with real cases, and each is a consequence of keeping the invariant intact:
 
 1. **Leaf** — unlink it from its parent. Nothing below depends on it.
-2. **One child** — splice that child into the removed node's place; the subtree's ordering relative to the rest is unchanged.
+2. **One child** — splice that child into the removed node's place. The subtree's ordering relative to the rest is unchanged.
 3. **Two children** — the node cannot simply vanish without orphaning a subtree. Replace its key with the **in-order successor** (the minimum of the right subtree: step right once, then left until a node has no left child), then delete that successor node. By construction the successor has no left child, so its removal reduces to case 1 or 2. The in-order predecessor works symmetrically.
 
-The base structure stores order but not position.
+No delete case repairs the overall shape. The base structure preserves order and leaves height to insertion history.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
-> [!ABSTRACT]- Balanced vs. degenerate shape
+> [!ABSTRACT]- Balanced vs. Degenerate shape
 >
 > ```mermaid
 > flowchart TD
@@ -316,29 +316,19 @@ The base structure stores order but not position.
 > }
 > ```
 >
-> `Find` is iterative so a degenerate chain of a million nodes cannot overflow the stack; the recursive `Insert`/`Delete` are safe only because production keys go into a balanced variant. .NET ships no plain BST — `SortedSet<T>` and `SortedDictionary<TKey, TValue>` are red-black trees.
+> `Find` is iterative so a degenerate chain of a million nodes cannot overflow the stack. The recursive `Insert`/`Delete` are safe only because production keys go into a balanced variant. .NET ships no plain BST — `SortedSet<T>` and `SortedDictionary<TKey, TValue>` are red-black trees.
 
 # Comparison
 
 | Structure | Ordering retained | Update behavior | Height protection | Stronger case |
 | --- | --- | --- | --- | --- |
-| Binary search tree | Yes; supports min/max/successor/range | Links a new leaf without rebalancing | None; insertion order determines shape | The simplest mutable ordered structure when input is already well shaped |
-| Self-balancing BST | Yes; supports the same ordered queries | Rotates or recolors after updates | Rebalancing keeps paths shallow | Production mutable ordered sets and maps |
+| Binary search tree | Yes. Supports min/max/successor/range | Links a new leaf without rebalancing | None. Insertion order determines shape | The simplest mutable ordered structure when input is already well shaped |
+| Self-balancing BST | Yes. Supports the same ordered queries | Rotates or recolors after updates | Rebalancing keeps paths shallow | Production mutable ordered sets and maps |
 | [[Computer Science/Data Structures/Hash-based Structures/HashMap\|Hash map]] | No | Updates buckets by hash | Tree height does not apply | Exact-match lookups where order is irrelevant |
-| Sorted array + [[Computer Science/Algorithms/Search Algorithms/Binary Search\|binary search]] | Yes; index order is key order | Inserts shift later elements | Tree height does not apply | Static data searched far more often than it changes |
+| Sorted array + [[Computer Science/Algorithms/Search Algorithms/Binary Search\|binary search]] | Yes. Index order is key order | Inserts shift later elements | Tree height does not apply | Static data searched far more often than it changes |
 
-A plain BST is the simplest structure that keeps keys ordered while supporting cheap insertion, and it behaves well on random or already-balanced input. A hash map is faster still for point lookups but discards ordering entirely, so it cannot answer range or successor queries; a sorted array matches the search cost but cannot absorb insertions cheaply.
-
-# Questions
-
-> [!QUESTION]- Why does an in-order traversal of a BST produce sorted keys?
-> The ordering invariant places every smaller key in the left subtree and every larger key in the right. Visiting left, then the node, then right therefore reaches the smallest key first and the largest last, in strictly increasing order — the invariant made observable.
-
-> [!QUESTION]- How is a node with two children deleted?
-> Its key is replaced by the in-order successor — the minimum of the right subtree, found by stepping right once then left to the end. That successor has no left child, so removing it reduces to the leaf or one-child case. This keeps the ordering invariant intact without orphaning either subtree.
+A plain BST is useful when input already produces a reasonable shape and rebalancing would add needless machinery. A hash map gives up ordering for exact-match lookup. A sorted array keeps binary-search reads but pays to shift elements on insertion. Production mutable ordered sets and maps usually need a self-balancing tree.
 
 # References
 
-- [Binary Search Trees (Princeton Algorithms)](https://algs4.cs.princeton.edu/32bst/) — the ordering invariant, Hibbard deletion, and average search-hit, search-miss, and insertion costs when keys arrive in random order.
-- [`SortedSet<T>` source (dotnet/runtime)](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Collections/src/System/Collections/Generic/SortedSet.cs) — .NET's red-black implementation for an ordered set, contrasting with the unbalanced base structure.
-- [Binary search tree (Wikipedia)](https://en.wikipedia.org/wiki/Binary_search_tree) — formal invariant, operation pseudocode, and the effect of insertion order on height.
+- [Binary Search Trees (Princeton Algorithms)](https://algs4.cs.princeton.edu/32bst/)

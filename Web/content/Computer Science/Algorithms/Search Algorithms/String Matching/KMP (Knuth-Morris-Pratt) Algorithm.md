@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T14:02:43.998Z
-modified: 2026-08-08T07:48:03.031Z
-published: 2026-08-08T07:48:03.031Z
+created: 2026-08-20T20:41:15.537Z
+modified: 2026-08-20T20:41:15.537Z
+published: 2026-08-20T20:41:15.537Z
 topic:
   - Computer Science
 subtopic:
@@ -14,9 +14,9 @@ priority: Medium
 status: Done
 ---
 
-A monitoring process scans a byte stream — logs, packets, a large file — for a fixed pattern of length `m` inside text of length `n`. The naive method aligns the pattern at each start position and, on a mismatch after matching several characters, discards that progress and restarts one position over.
+Naive string search restarts the pattern one position later after a mismatch, even when the matched prefix already reveals how far the pattern can move. KMP preprocesses that self-overlap into a prefix, or failure, table.
 
-The wasted work has structure. The characters already matched are a prefix of the pattern, and that prefix's own internal repetition fixes how far the pattern can safely slide. KMP computes that self-overlap once, before the scan. On a mismatch after `k` matched characters, it consults the overlap and resumes the pattern where its longest matched prefix-that-is-also-a-suffix already lines up against the text — the text pointer stays put.
+During the search, a mismatch lowers only the matched pattern length. The text index never retreats. The table identifies the longest prefix that already matches the consumed text's suffix. That invariant gives KMP a linear scan and lets it operate on a stream that cannot be rewound.
 
 ````tabsdown
 tab: Visualization
@@ -147,13 +147,13 @@ tab: Complexity
 
 # Where the Guarantee Earns Its Keep
 
-The repetitive input that breaks naive search is exactly where KMP's ceiling matters. On `aⁿ` against `aᵐ⁻¹b` the failure table is `[0, 1, 2, …, m-2, 0]` — the trailing `b` has no matching prefix, so the last entry drops back to `0` (for `m = 5`, `aaaab` → `[0,1,2,3,0]`). This is a correctness-of-cost property, not a speedup on friendly text: on random text with a short, low-overlap pattern, naive search and KMP examine nearly the same number of characters, and naive wins on constants and code size.
+KMP's bound matters most on repetitive input. For `aⁿ` searched with `aᵐ⁻¹b`, the failure table is `[0, 1, 2, …, m-2, 0]`. The trailing `b` has no matching prefix. For `m = 5`, `aaaab` produces `[0,1,2,3,0]`. On random text with a short, low-overlap pattern, naive search may win on constants and code size because both methods inspect nearly the same characters.
 
-The classic implementation bug lives in the failure table. On a mismatch while building it, the length pointer must fall back through `failure[k - 1]`, not reset to `0`. Resetting to zero corrupts every entry where the prefix overlaps itself: `AABAAAB` then builds as `[0,1,0,1,2,1,0]` instead of `[0,1,0,1,2,2,3]`, and the search silently misses matches that depend on the longer overlap. A quick comparison against known outputs surfaces this class of bug.
+The classic implementation bug lives in the failure table. On a mismatch during construction, the length pointer must fall back through `failure[k - 1]`, not reset to `0`. Resetting corrupts self-overlapping entries: `AABAAAB` becomes `[0,1,0,1,2,1,0]` instead of `[0,1,0,1,2,2,3]`, and later searches can miss matches that depend on the longer overlap.
 
 KMP compares left to right and does not skip untouched text regions. [[Computer Science/Algorithms/Search Algorithms/String Matching/Boyer-Moore|Boyer-Moore]] instead scans the pattern right to left and uses a bad-character table to jump over alignments that cannot match, so a wider alphabet makes each mismatch more informative.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Search control flow
 >
@@ -227,24 +227,9 @@ KMP compares left to right and does not skip untouched text regions. [[Computer 
 > }
 > ```
 >
-> The method rejects an empty pattern before building the failure table because the search loop indexes `pattern[j]`; callers must provide at least one character. Both loops then share the same fallback shape: the inner `while` retreats through `failure` rather than resetting to `0`. That preserves reusable overlap and keeps the table correct.
-
-# Questions
-
-> [!QUESTION]- Why does the text index never move backward, and what does that buy?
-> On a mismatch the algorithm only lowers the match length `j` via `π[j-1]`; it never decrements the text index `i`. A monotonic text pointer also lets the search run over a stream that cannot be rewound.
-
-> [!QUESTION]- What does `π[j]` encode, and how is it used on a mismatch?
-> `π[j]` is the length of the longest proper prefix of `pattern[0..j]` that is also a suffix of it. On a mismatch after matching `j` characters, `j` resets to `π[j-1]`, which realigns that shared prefix/suffix against the text so no already-matched characters are re-read.
-
-> [!QUESTION]- On what input does KMP reuse the most overlap, and what can it not skip?
-> Repetitive text and patterns repeatedly fall back to a shorter valid prefix instead of restarting the match. On large alphabets it gains little from that reuse: unlike Boyer-Moore it still reads essentially every character and cannot jump over untouched regions.
-
-> [!QUESTION]- What is the standard bug when building the failure table?
-> Resetting the length pointer to `0` on a mismatch instead of falling back through `failure[k-1]`. That corrupts entries where the prefix overlaps itself — `AABAAAB` builds as `[0,1,0,1,2,1,0]` rather than `[0,1,0,1,2,2,3]` — and the search then misses matches that depend on the longer overlap.
+> The method rejects an empty pattern before building the failure table because the search loop indexes `pattern[j]`. Callers must provide at least one character. Both loops then share the same fallback shape: the inner `while` retreats through `failure` rather than resetting to `0`. That preserves reusable overlap and keeps the table correct.
 
 # References
 
-- [Knuth, Morris, Pratt, "Fast Pattern Matching in Strings" (1977)](https://doi.org/10.1137/0206024) — the original algorithm and failure-function construction.
+- [Knuth, Morris, Pratt, "Fast Pattern Matching in Strings" (1977)](https://doi.org/10.1137/0206024)
 - [Prefix function and KMP (cp-algorithms)](https://cp-algorithms.com/string/prefix-function.html)
-- [Knuth–Morris–Pratt algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Knuth%E2%80%93Morris%E2%80%93Pratt_algorithm) — worked failure-table examples and the formal correctness argument.

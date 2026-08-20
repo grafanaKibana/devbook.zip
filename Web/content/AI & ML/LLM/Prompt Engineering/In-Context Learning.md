@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T14:02:43.911Z
-modified: 2026-07-25T13:57:52.058Z
-published: 2026-07-25T13:57:52.058Z
+created: 2026-08-20T20:41:15.500Z
+modified: 2026-08-20T20:41:15.500Z
+published: 2026-08-20T20:41:15.500Z
 topic:
   - AI & ML
 subtopic:
@@ -14,19 +14,17 @@ priority: Medium
 status: Done
 ---
 
-In-context learning is the ability of an LLM to adapt to a task from the prompt context itself, without updating model weights. Mechanically, the model is still doing next-token prediction at inference time; the examples in the prompt change what token sequences are most probable next, so behavior changes without training. The key control is shot count: zero-shot (no examples), one-shot (one example), or few-shot (multiple examples). More shots can improve task steering, but they also consume context window budget.
+In-context learning changes model behavior through examples in the prompt, without updating model weights. The model still predicts the next token at inference time. Demonstrations shift that prediction by establishing the task, label space, and expected output shape.
+
+Shot count is only the visible control: zero-shot provides no example, one-shot provides one, and few-shot provides several. Example choice, order, and formatting often matter as much as count. Every demonstration also consumes context that could have held the actual input.
 
 # Zero-Shot Prompting
 
-Zero-shot prompting asks the model to perform a task with no demonstrations, relying on instruction quality and prior training.
+Zero-shot prompting supplies instructions without a demonstration. It is the cheapest useful baseline because every later technique should beat it by enough to justify extra tokens and maintenance.
 
-When it works well:
+It works well when labels are clear, fields are explicit, or a transformation has a simple rule.
 
-- classification with clear labels
-- extraction with explicit fields
-- transformations with deterministic rules
-
-Instruction-tuned models (for example ChatGPT- and Claude-style assistants) usually perform much better in zero-shot settings than base next-token models because they were aligned to follow instructions.
+Instruction-tuned models are built to follow task descriptions, so they are generally stronger zero-shot baselines than base language models.
 
 ```text
 Classify sentiment as Positive, Neutral, or Negative.
@@ -43,7 +41,7 @@ Neutral
 
 # One-Shot Prompting
 
-One-shot prompting is the minimal demonstration setting: one complete input-output example plus a new input to solve. Use it when zero-shot mostly works but output format or decision boundaries are still inconsistent.
+One-shot prompting adds one complete input-output pair. A single example is often enough when the instruction is understood but the output schema is not.
 
 ```text
 Extract entities from support messages.
@@ -64,15 +62,11 @@ Possible output:
 
 # Few-Shot Prompting
 
-Few-shot prompting provides multiple demonstrations so the model can copy task structure, label space, and output format. In practice, a small number of examples often improves stability on noisier inputs compared with one-shot.
+Few-shot prompting adds several demonstrations. The set can show class boundaries and edge cases that prose describes poorly, but repeated easy examples mostly burn tokens.
 
-Why it works:
+Examples make the local task concrete. They expose the allowed labels, demonstrate the schema, and give the model a nearby pattern to continue.
 
-- examples define the allowed labels and schema
-- examples teach output style more reliably than prose instructions alone
-- examples give local task context that may override vague priors
-
-Min et al. (2022) showed that demonstration format, label space, and input distribution can matter more than per-example label correctness. They report that randomly replacing labels in demonstrations often hurts less than expected, which suggests the model is strongly using structural cues from demonstrations.
+Min et al. (2022) found that demonstration format, label space, and input distribution explain much of few-shot performance on the tasks they studied. Corrupting labels did less damage than a simple input-label mapping account would predict. Correct labels are still the only sensible production choice. The result shows how strongly the model uses structure around them.
 
 ```text
 Extract entities from support messages.
@@ -94,22 +88,20 @@ Possible output:
 {"customer":"Ava","issue":"password reset fails after SSO migration","severity":"high"}
 ```
 
-# Design Principles
+# Building a Demonstration Set
 
-- keep example formatting strictly consistent (same separators, casing, field order)
-- cover the real label space in demonstrations, including edge classes
-- prefer representative examples over many similar ones
-- test ordering effects; recency can bias outputs toward later examples
-- add examples when failures are about format or decision boundaries, not missing world knowledge
-- if accuracy is unstable, first fix schema clarity and demonstration distribution before increasing shot count
-- random labels in a consistent format can still help structure-following (Min et al., 2022), but use correct labels in production prompts for reliability and auditability
+- Keep separators, casing, and field order consistent.
+- Cover real decision boundaries, including classes that are easy to confuse.
+- Prefer a few representative examples over many near-duplicates.
+- Test more than one ordering because later examples can receive disproportionate influence.
+- Add demonstrations for format or boundary failures. They cannot supply missing external facts reliably.
 
 # Limitations
 
-- few-shot can be brittle on tasks with long dependency chains or strict global constraints
-- examples cannot inject knowledge the model does not have; they only condition behavior in-context
-- long demonstration blocks consume context window and can reduce room for actual user input
-- performance can be brittle across model versions, prompt order, and minor formatting changes
+- Long dependency chains and global constraints can remain brittle even with good examples.
+- Demonstrations condition behavior. They are not a reliable store for facts absent from the model and prompt.
+- Long example blocks leave less context for the request and its source material.
+- A model upgrade, reordered example, or formatting change can move quality enough to require reevaluation.
 
 When this pattern is not enough for reasoning-heavy tasks, continue with [[Reasoning Techniques]].
 
@@ -117,67 +109,44 @@ When this pattern is not enough for reasoning-heavy tasks, continue with [[Reaso
 
 ## Recency Bias in Example Ordering
 
-**What goes wrong**: the last example in a few-shot prompt has disproportionate influence on the output. If the last example is a rare edge case, the model over-applies that pattern to normal inputs.
+The last example can pull outputs toward a rare edge case.
 
-**Mitigation**: test multiple orderings of your demonstration set. Place the most representative examples last, or randomize order across requests to average out the bias.
+Test several fixed orderings against the same evaluation set. Randomizing order in production can reduce systematic position bias, but it also makes failures harder to reproduce. Measure that tradeoff before enabling it.
 
 ## Adding More Shots Instead of Fixing the Root Cause
 
-**What goes wrong**: the model produces inconsistent output, so the team adds more examples. The real problem is ambiguous instructions or inconsistent example formatting. More shots amplify the inconsistency rather than fixing it.
+Inconsistent output often comes from ambiguous instructions or mismatched example formats. Adding more examples can amplify both problems.
 
-**Mitigation**: before increasing shot count, audit example consistency (same separators, same field order, same casing). Fix formatting first. Add shots only when the schema is clean and failures are about coverage, not consistency.
+Normalize the schema first. Add another shot only when evaluation shows a missing case rather than a broken contract.
 
 ## Context Window Pressure
 
-**What goes wrong**: a few-shot prompt with 10 long examples consumes 3,000 tokens, leaving little room for the actual user input. For long documents or multi-turn conversations, the demonstrations crowd out the content.
+A long demonstration block can crowd out the document or conversation being processed. The failure may appear as truncation, lost instructions, or weak attention to earlier content.
 
-**Mitigation**: keep examples short and representative. For long-context tasks, use one-shot or zero-shot with precise instructions. Measure token cost of the demonstration block and set a budget.
+Measure the fixed token cost of the prompt, then reserve context for the largest supported input and output. Shorten or retrieve demonstrations when that budget no longer fits.
 
 # Tradeoffs
 
-| Approach | Token cost | Format control | Knowledge injection | Use when |
+| Approach | Token cost | Format control | External facts | Use when |
 |----------|-----------|---------------|-------------------|----------|
-| Zero-shot | Minimal | Low | None | Simple, well-specified tasks; instruction-tuned models |
-| One-shot | Low | Medium | None | Format is inconsistent; one example clarifies the schema |
-| Few-shot (3-5) | Medium | High | None | Ambiguous class boundaries; complex output structure |
-| Fine-tuning | High (training) | Very high | Yes (new knowledge) | Consistent task at scale; examples cannot fit in context |
+| Zero-shot | Minimal | Low | None | Simple, well-specified tasks. Instruction-tuned models |
+| One-shot | Low | Medium | None | Format is inconsistent. One example clarifies the schema |
+| Few-shot (3-5) | Medium | High | None | Ambiguous class boundaries. Complex output structure |
+| Fine-tuning | High (training) | Very high | No reliable external source | Stable behavior at scale. Examples cannot fit in context |
 | RAG + zero-shot | Medium (retrieval) | Low | Yes (external docs) | Task requires external knowledge not in model weights |
 
-**Decision rule**: start zero-shot. Move to one-shot when output format is inconsistent. Move to few-shot when class boundaries are ambiguous. Move to fine-tuning only when few-shot is too expensive at scale or the task requires knowledge injection. Use RAG when the task requires external facts.
+Start zero-shot. Add one example for a stubborn output contract, then add only the demonstrations that cover measured boundary failures. Fine-tuning fits stable behavior at scale. Retrieval fits tasks that need external facts.
 
 # Questions
 
-> [!QUESTION]- When should you start with zero-shot versus few-shot?
-> Expected answer:
->
-> - Start zero-shot for simple, well-specified tasks (basic classification, extraction, rewrite).
-> - Move to one-shot/few-shot when output format is inconsistent or class boundaries are ambiguous.
-> - Use one-shot first for lightweight steering, then increase shots only if failure patterns persist.
->   Why this matters: it minimizes prompt complexity and token cost while improving reliability only where needed.
-
-> [!QUESTION]- What makes a good few-shot example set?
-> Expected answer:
->
-> - Consistent input and output structure.
-> - Coverage of real label space and edge cases.
-> - Examples representative of production distribution, not synthetic easy cases.
-> - Minimal but sufficient count (often 1-5) to show mapping clearly.
->   Why this matters: demonstration quality usually matters more than raw quantity.
+> [!QUESTION]- How should a task move from zero-shot to one-shot or few-shot prompting?
+> Zero-shot is the baseline when instructions and labels define the task clearly. One example is useful when the main failure is the output shape. Few-shot prompting earns its extra tokens when examples express decision boundaries better than prose. The final prompt should keep the smallest demonstration set that wins on a representative evaluation set, because every example adds cost and another artifact that can drift.
 
 > [!QUESTION]- What are the main failure modes of few-shot prompting?
-> Expected answer:
->
-> - Breakdown on tasks requiring multi-step reasoning.
-> - Sensitivity to example order and formatting drift.
-> - Context-window pressure from too many demonstrations.
-> - Poor transfer when task needs external facts not present in model knowledge.
->   Why this matters: these limits tell you when to pivot to other techniques instead of adding more shots.
+> Few-shot behavior can shift when examples are reordered, reformatted, or run on a different model. Long demonstrations also consume context, while examples that do not match production traffic create false confidence. Examples cannot reliably supply missing external facts or control a long multi-step process. Those failures call for retrieval, decomposition, or training rather than simply adding more shots.
 
 # References
 
-- [Prompt Engineering Guide - Zero-Shot Prompting](https://www.promptingguide.ai/techniques/zeroshot) — practitioner guide to zero-shot patterns and when they work.
-- [Prompt Engineering Guide - Few-Shot Prompting](https://www.promptingguide.ai/techniques/fewshot) — practitioner guide to few-shot design, example selection, and common failure modes.
-- [Brown et al. 2020 - Language Models are Few-Shot Learners](https://arxiv.org/abs/2005.14165) — GPT-3 paper that introduced few-shot prompting as a capability; foundational reading.
-- [Min et al. 2022 - Rethinking the Role of Demonstrations](https://arxiv.org/abs/2202.12837) — shows that demonstration format and label space matter more than per-example label correctness.
-- [Anthropic Prompt Engineering Overview](https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/overview) — Anthropic's practical guide to prompt design including zero-shot and few-shot patterns for Claude.
-- [Prompt Engineering for Large Language Models (Eugene Yan)](https://eugeneyan.com/writing/prompting/) — practitioner deep-dive covering shot selection, formatting, and evaluation of prompting strategies.
+- [Brown et al. 2020 - Language Models are Few-Shot Learners](https://arxiv.org/abs/2005.14165)
+- [Min et al. 2022 - Rethinking the Role of Demonstrations](https://arxiv.org/abs/2202.12837)
+- [Prompt Engineering for Large Language Models (Eugene Yan)](https://eugeneyan.com/writing/prompting/)

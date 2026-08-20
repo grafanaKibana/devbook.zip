@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-27T06:20:03.462Z
-modified: 2026-08-08T09:22:39.704Z
-published: 2026-08-08T09:22:39.704Z
+created: 2026-08-20T20:41:15.601Z
+modified: 2026-08-20T20:41:15.601Z
+published: 2026-08-20T20:41:15.601Z
 topic:
   - Computer Science
 subtopic:
@@ -14,11 +14,11 @@ priority: Medium
 status: Done
 ---
 
-A service accepts jobs faster than a single worker drains them, and fairness requires that the earliest arrival is served first.
+A queue preserves arrival order. When a service accepts work faster than one worker can drain it, the oldest waiting job remains at the front.
 
-The structure records only order of arrival. It cannot reach the middle by position, and it cannot promote an urgent item ahead of an older one — retrieval by priority needs [[Computer Science/Data Structures/Trees/Heap-like/Heap|a priority queue]], not a FIFO queue. What it retains is exactly the front-to-back sequence and nothing more.
+The structure records nothing beyond that order. It cannot address the middle by position or promote urgent work ahead of an older item. Retrieval by priority needs [[Computer Science/Data Structures/Trees/Heap-like/Heap|a priority queue]], not FIFO.
 
-The interactive view isolates circular wraparound and fixed-capacity full behavior; the growable resize remains explained in the prose below.
+The interactive view isolates circular wraparound and fixed-capacity full behavior. The growable resize remains explained in the prose below.
 
 ````tabsdown
 tab: Visualization
@@ -163,13 +163,13 @@ tab: Complexity
 
 # When the FIFO Shape Stops Fitting
 
-Random access and priority both fall outside the contract. The queue exposes only the front for removal and the back for insertion; there is no index into the middle and no way to serve the smallest key first.
+Random access and priority fall outside the contract. The queue exposes the front for removal and the back for insertion. It has no middle index and cannot serve the smallest key first.
 
-The naive array implementation fails specifically at the front. The observable state stays correct — items still leave in arrival order — but throughput collapses under load. A circular buffer removes the shift entirely by moving `head` instead of the data.
+A naive array implementation pays at the front. Items still leave in arrival order, but every dequeue shifts the remaining elements. A circular buffer moves `head` instead of the data and removes that cost.
 
-A fixed-capacity circular queue has a hard ceiling. Once the live region occupies every slot, `head` has wrapped to meet `tail` and there is nowhere to write; the next enqueue must either block, reject, drop the item, or overwrite the oldest, depending on the chosen policy. The bound always caps memory. It creates backpressure only when the policy blocks or rejects producers; dropping or overwriting sheds data instead. This is the direct trade against an unbounded queue that accepts every arrival and risks unbounded memory growth when producers outpace consumers.
+A fixed-capacity circular queue has a hard ceiling. Once every slot is live, the next enqueue must block, reject the item, drop it, or overwrite the oldest entry. The bound caps memory. Blocking or rejection creates backpressure. Dropping or overwriting sheds data. An unbounded queue accepts every arrival instead and can exhaust memory when producers stay ahead of consumers.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Circular-buffer layout
 >
@@ -183,7 +183,7 @@ A fixed-capacity circular queue has a hard ceiling. Once the live region occupie
 >   T[tail] --> S4
 > ```
 >
-> `head` marks the next element to dequeue; `tail` marks the next free slot to enqueue. Both advance modulo capacity, wrapping from slot 5 back to slot 0.
+> `head` marks the next element to dequeue. `tail` marks the next free slot to enqueue. Both advance modulo capacity, wrapping from slot 5 back to slot 0.
 
 > [!EXAMPLE]- C# usage of `Queue<T>`
 >
@@ -202,16 +202,9 @@ A fixed-capacity circular queue has a hard ceiling. Once the live region occupie
 > }
 > ```
 >
-> `Queue<T>` is the growable circular buffer described above; `Dequeue` and `Peek` throw `InvalidOperationException` when empty, so a `Count` guard or the `Try*` variants are required at boundaries where the queue can drain.
-
-# Questions
-
-> [!QUESTION]- Which bounded-queue full policies create backpressure, and which shed data?
-> Blocking or rejecting an enqueue forces the producer to slow down or handle refusal, so the capacity limit becomes backpressure. Dropping the new item or overwriting the oldest keeps the producer moving by sacrificing data instead.
+> `Queue<T>` is the growable circular buffer described above. `Dequeue` and `Peek` throw `InvalidOperationException` when empty, so a `Count` guard or the `Try*` variants are required at boundaries where the queue can drain.
 
 # References
 
-- [`Queue<T>` class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.queue-1) — .NET API contract for Enqueue, Dequeue, Peek, and the growable circular-buffer semantics.
-- [`Queue<T>` source in dotnet/runtime](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Collections/Generic/Queue.cs) — the `_head`, `_tail`, `_array`, and `SetCapacity` fields implementing the wrap-around ring and its resize.
-- [`PriorityQueue<TElement, TPriority>` class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.priorityqueue-2) — the by-priority alternative when dequeue order is a key rather than arrival time.
-- [Queue (abstract data type)](https://en.wikipedia.org/wiki/Queue_\(abstract_data_type\)) — the FIFO ADT, circular-buffer and linked-list implementations, and bounded-versus-unbounded designs.
+- [`Queue<T>` class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.queue-1)
+- [`Queue<T>` source in dotnet/runtime](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Collections/Generic/Queue.cs)

@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-25T08:24:19.993Z
-modified: 2026-08-08T07:48:03.504Z
-published: 2026-08-08T07:48:03.504Z
+created: 2026-08-20T20:41:15.546Z
+modified: 2026-08-20T20:41:15.547Z
+published: 2026-08-20T20:41:15.547Z
 topic:
   - Computer Science
 subtopic:
@@ -14,11 +14,11 @@ priority: Medium
 status: Creation
 ---
 
-Sorting ten million 32-bit integers with [[Computer Science/Algorithms/Sorting Algorithms/Quick Sort|Quick Sort]] or [[Computer Science/Algorithms/Sorting Algorithms/Merge Sort|Merge Sort]] learns order by comparing pairs of keys. Radix Sort never compares two keys. It reads each key as a sequence of digits in some radix `b` and distributes keys into buckets by one digit at a time, so its work follows the width of the keys rather than the number of pairwise comparisons.
+[[Computer Science/Algorithms/Sorting Algorithms/Quick Sort|Quick Sort]] and [[Computer Science/Algorithms/Sorting Algorithms/Merge Sort|Merge Sort]] discover order by comparing keys. Radix Sort takes a different route. It treats each key as a sequence of digits in radix `b`, then distributes the keys by one digit at a time. Its cost follows key width rather than the number of comparisons needed to establish order.
 
-That move is only available when a key decomposes into a bounded number of digits `d`: a 32-bit integer is four base-256 digits, and a fixed five-byte ASCII key is five base-256 digits. The algorithm runs one stable distribution-and-gather pass per digit.
+This works only when every key can be decomposed into a bounded number of digits `d`. A 32-bit integer has four base-256 digits. A fixed five-byte ASCII key has five. One stable distribution-and-gather pass handles each position.
 
-**Core condition:** keys decomposable into fixed-width digits over radix `b` → one stable pass per digit distributes then gathers → earlier digit order survives later passes.
+**Operating condition:** the keys expose bounded-width digits, and every pass preserves the order established by earlier passes.
 
 ````tabsdown
 tab: Visualization
@@ -160,11 +160,11 @@ tab: Complexity
 
 ````
 
-Variable-length lexicographic strings cannot be aligned blindly from the right; use a common width plus a missing-character sentinel, or switch to MSD radix and recurse left-to-right. Keys exposed only through a comparator have no positional digit structure and cannot use radix sorting.
+Variable-length lexicographic strings cannot simply be aligned from the right. They need a common width with an explicit missing-character sentinel, or an MSD radix sort that works left to right. Keys exposed only through a comparator have no positional digit structure, so radix sorting does not apply.
 
-Raw two's-complement negatives and IEEE-754 bit patterns need a monotonic transform before their digits are read; invert that transform after sorting.
+Raw two's-complement negatives and IEEE-754 bit patterns do not follow numeric order when read as unsigned digits. A monotonic bit transform must be applied before sorting and reversed afterward.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Per-digit pass loop
 >
@@ -224,18 +224,9 @@ Raw two's-complement negatives and IEEE-754 bit patterns need a monotonic transf
 > }
 > ```
 >
-> The backward final loop is load-bearing: reversing it turns the inner sort unstable and corrupts every prior pass. Signed or floating-point keys must first go through the unsigned transform from the boundaries above.
-
-# Questions
-
-> [!QUESTION]- Why must each per-digit pass be stable?
-> Each pass sorts on one digit and trusts that ties on that digit are already ordered by the less-significant digits sorted in earlier passes. A stable counting sort preserves that established order; an unstable one reorders the ties and destroys the work of every prior pass, producing output that is sorted only on the final digit. Stability is a correctness requirement here, not an optimization.
-
-> [!QUESTION]- When does Radix Sort not apply?
-> Radix Sort needs keys that can be decomposed into ordered digits. Keys exposed only through a comparator have no digit to bucket on, and variable-length keys need an explicit end-of-key convention so shorter prefixes retain the intended order.
+> The backward loop preserves equal-digit order. Iterating forward would make the inner sort unstable and invalidate the earlier passes. Signed integers and floating-point values also need the transform described above.
 
 # References
 
-- [Radix sort (Wikipedia)](https://en.wikipedia.org/wiki/Radix_sort) — secondary overview of variants, analysis, and implementation details.
-- [Radix sorts (Princeton Algorithms)](https://algs4.cs.princeton.edu/51radix/) — Sedgewick and Wayne on key-indexed counting and LSD/MSD string sorts, with the stability argument stated directly.
-- [Radix Tricks (Michael Herf)](http://stereopsis.com/radix.html) — the canonical write-up of the sign-bit and flip-all-bits transform for radix-sorting IEEE-754 floats.
+- [Radix sorts (Princeton Algorithms)](https://algs4.cs.princeton.edu/51radix/)
+- [Radix Tricks (Michael Herf)](http://stereopsis.com/radix.html)

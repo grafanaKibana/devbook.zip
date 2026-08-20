@@ -1,24 +1,26 @@
 ---
 publish: true
-created: 2026-07-19T15:05:27.996Z
-modified: 2026-07-25T13:57:51.922Z
-published: 2026-07-25T13:57:51.922Z
+created: 2026-08-20T20:41:15.657Z
+modified: 2026-08-20T20:41:15.657Z
+published: 2026-08-20T20:41:15.657Z
 topic:
   - Programming
 subtopic:
   - NET
-summary: A reference type defining a heap-allocated object with state, inheritance, and dispatch.
+summary: A C# reference type combining shared object identity with state, inheritance, and virtual dispatch.
 level:
   - "4"
 priority: Medium
 status: Ready to Repeat
 ---
 
-A class is a reference type that defines a blueprint for objects allocated on the managed heap. Multiple variables can reference the same object, so mutations through one reference are visible through all others — a property that enables shared state but also creates aliasing bugs when callers don't expect it. Classes support single-class inheritance, virtual dispatch, finalizers, and the full range of access modifiers, making them the default choice for services, domain entities, and infrastructure types in C#. The key design decision is knowing when NOT to use a class: value-typed data carriers should be `record struct` or `readonly struct` (stack-allocated, no GC pressure), and pure data objects with value equality should be `record class` (auto-generated `Equals`/`GetHashCode`/`==`).
+A class defines a reference type with object identity. Assignment copies a reference, so two variables can point at the same instance and observe the same mutations. Shared identity fits services and mutable domain entities. But it also creates aliasing bugs when ownership is unclear.
 
-# Deeper Explanation
+Classes support inheritance and virtual dispatch, but neither feature should be automatic. A small value that behaves like data may fit a `readonly struct` or `readonly record struct`. A reference-typed data carrier that needs value equality often fits a `record class`. Value types are stored inline in their containing location, which may itself be on the managed heap.
 
-Instances are heap-allocated and accessed through a reference stored on the stack (or inside another heap object). Assignment copies the reference, not the object:
+# Reference Identity
+
+Class variables hold references rather than object contents. A reference may live in a local, a field, an array slot, or another runtime-managed location. Assignment copies that reference, not the object:
 
 ```csharp
 public class Order
@@ -38,7 +40,7 @@ Console.WriteLine(a.Total); // 0 — both references share the object
 
 ## Abstract
 
-An `abstract` class cannot be instantiated directly — it exists only to be inherited. It may contain abstract members (no body, must be overridden) and concrete members (shared implementation).
+An `abstract` class defines a base that cannot be instantiated directly. Abstract members leave behavior to derived classes. Concrete members provide shared implementation.
 
 ```csharp
 public abstract class Shape
@@ -62,18 +64,13 @@ public class Circle : Shape
 Shape s = new Circle { Radius = 5 };
 ```
 
-Key rules:
+The boundary is inheritance. An abstract class may hold instance state, declare constructors, and expose protected members, but a derived class can have only one direct base class.
 
-- Can contain both abstract and non-abstract members.
-- Can have constructors (called by derived constructors via `base(...)`), fields, and state.
-- Cannot be `sealed` (the two modifiers are contradictory).
-- Cannot be `static` (abstract implies inheritance, static forbids it).
-
-**Abstract vs Interface**: abstract classes carry state and shared implementation but lock you into single inheritance. Interfaces (especially with default interface methods in C# 8+) provide multiple implementation but cannot hold instance state.
+Use an interface when the contract matters more than shared instance state. Default interface members can provide reusable behavior, while a class can implement several interfaces. An abstract class is the stronger coupling and earns its place when constructors, protected state, or a controlled template method belong to the hierarchy.
 
 ## Sealed
 
-A `sealed` class cannot be inherited. The compiler can devirtualize method calls on sealed types, enabling small performance gains.
+A `sealed` class closes the inheritance boundary. This communicates that the type has no supported extension points and may also give the runtime more opportunities to devirtualize calls. Any performance benefit depends on the call site and JIT decisions.
 
 ```csharp
 public sealed class JwtToken
@@ -93,7 +90,7 @@ public sealed class JwtToken
 // class ExtendedToken : JwtToken { }  // Compile error — cannot inherit from sealed
 ```
 
-You can also seal individual overrides to stop further overriding down the chain:
+An individual override can be sealed while the containing class remains inheritable:
 
 ```csharp
 public class Base
@@ -116,7 +113,7 @@ public class Middle : Base
 
 ## Static
 
-A `static` class cannot be instantiated or inherited. It can only contain static members. The compiler enforces this — you cannot add instance fields, properties, or methods.
+A `static` class groups members that belong to the type rather than an instance. It cannot be instantiated, inherited, or given instance members.
 
 ```csharp
 public static class MathHelpers
@@ -131,18 +128,13 @@ public static class MathHelpers
 // var h = new MathHelpers();  // Compile error
 ```
 
-Key rules:
+In metadata, a static class is marked `abstract` and `sealed`. C# also requires extension methods to live in a top-level, non-generic static class. A static constructor runs at most once for a closed type, with initialization synchronized by the runtime.
 
-- Implicitly `sealed` and `abstract` at IL level (the CLR has no concept of "static class").
-- Cannot implement interfaces or extend base classes (other than `object`).
-- Extension methods must be defined in a static, non-generic, non-nested class.
-- Static constructors run once, before the first member access, and are thread-safe by the runtime guarantee.
-
-**Gotcha**: static classes are singletons by nature. If they hold mutable state (`static` fields), you get global mutable state — hard to test and prone to race conditions.
+A static class is not a singleton: no instance exists. Mutable static fields still create process-wide shared state for the relevant load context. That state needs synchronization and usually makes tests interfere with one another.
 
 ## Partial
 
-The `partial` keyword splits a class definition across multiple files. The compiler merges them into a single type. Commonly used for separating generated code from hand-written code.
+The `partial` keyword lets one type declaration span multiple source files. The compiler combines the parts before normal type checking, which keeps generated members separate from handwritten code without creating a runtime boundary.
 
 ```csharp
 // Order.cs
@@ -159,13 +151,9 @@ public partial class Order
 }
 ```
 
-Key rules:
+Every declaration must use `partial` and resolve to the same type. Modifiers from the parts describe the combined type, so `abstract`, `sealed`, or `static` on one part applies to all of it.
 
-- All parts must use `partial` and have the same accessibility, type-parameter list, and enclosing namespace.
-- If any part is `abstract`, the whole type is abstract. Same for `sealed` and `static`.
-- Partial methods (C# 9+) can have implementations in another part; if no implementation is provided for a partial method without accessibility modifier, the compiler removes the call entirely.
-- Heavily used by source generators, EF Core scaffolding, WinForms/WPF designers, and Razor pages.
-- Also applies to structs, interfaces, and records.
+The feature also applies to structs, interfaces, and records. Partial methods form an optional hook between parts: when a declaration meets the erasable restrictions and has no implementation, the compiler removes both the method and its calls. Modern partial methods with accessibility or non-void signatures require an implementation.
 
 ## Modifier Compatibility
 
@@ -173,14 +161,14 @@ Key rules:
 |---|---|
 | `abstract` + `sealed` | No in C# source (`static` is the IL equivalent) |
 | `abstract` + `static` | No |
-| `sealed` + `static` | Redundant — `static` is already sealed |
-| `partial` + any modifier | Yes |
+| `sealed` + `static` | No in C# source (`static` types are sealed in metadata) |
+| `partial` + another class modifier | Yes, when the other modifier is otherwise legal |
 | `abstract` + `partial` | Yes |
 | `sealed` + `partial` | Yes |
 
 # Modern Construction Features
 
-- **Primary constructors (C# 12)** — declare constructor parameters on the class header; they're in scope for the whole body (field/property initializers, methods). Unlike record primary constructors, they do **not** auto-generate public properties — the parameters are captured as private state:
+- **Primary constructors (C# 12)** put constructor parameters on the class declaration. The parameters are in scope throughout the body, but unlike record positional parameters they do not generate public properties. The compiler stores a parameter only when an instance member needs it after construction.
 
   ```csharp
   public sealed class OrderService(IOrderRepository repo, ILogger<OrderService> log)
@@ -189,57 +177,47 @@ Key rules:
   }
   ```
 
-- **`required` members (C# 11)** force the caller to set a property in the object initializer even though it's not a constructor parameter — compile-time enforcement without boilerplate constructors:
+- **`required` members (C# 11)** make object creation invalid unless the caller initializes the marked field or property, subject to constructors annotated with `SetsRequiredMembers`.
 
   ```csharp
   public sealed class Customer { public required string Name { get; init; } }
   var c = new Customer { Name = "Acme" }; // omitting Name is a compile error
   ```
 
-- **Constructor chaining** with `: this(...)` reuses one constructor from another (and `: base(...)` calls the base). **Initialization order** matters: instance field initializers run _before_ the constructor body; a **`static` constructor** runs once, lazily, before first use — and if it throws, the type is permanently unusable (`TypeInitializationException` on every later access).
+- **Constructor chaining** uses `: this(...)` to delegate to another constructor and `: base(...)` to select the base constructor. Instance field initializers run before the constructor body. A failed static constructor usually causes later initialization attempts for that type to throw `TypeInitializationException` again.
 
-- **`file`-scoped types (C# 11)** (`file class X`) limit visibility to one source file — useful for source generators. The full access ladder is `private` → `private protected` → `protected`/`internal` → `protected internal` → `public`.
+- **File-local types (C# 11)** use `file class X` to limit a top-level type to one source file. This is useful when generated helper types must not collide across files.
 
 # Pitfalls
 
-1. **Reference equality surprise** — `==` compares references, not content. Two `new Order(...)` with identical fields are not equal unless you override `==`/`Equals`. Use records or implement `IEquatable<T>` for value-like equality.
+1. **Accidental reference equality.** For a class that does not overload `==`, the operator compares references. Separate instances with equal field values still compare unequal. A record supplies value equality. A conventional class can implement `IEquatable<T>`, override `Equals` and `GetHashCode`, and overload the operators when operator syntax is part of the contract.
 
-2. **Finalizer abuse** — Finalizers delay GC (objects with finalizers are promoted to Gen 1+), are non-deterministic, and run on a single finalizer thread. Prefer `IDisposable`/`IAsyncDisposable` with `using`. Only add a finalizer as a safety net for unmanaged resources.
+2. **Finalizers used as cleanup.** Finalization is nondeterministic and adds collection work. Deterministic resource ownership belongs in `IDisposable` or `IAsyncDisposable`. A finalizer is a last-resort safety net for a type that directly owns unmanaged resources.
 
-3. **Static mutable state** — Static fields in any class (including non-static classes) are effectively global state. They survive GC, are shared across threads, and make unit testing painful. If you must use them, make them `readonly` or guard with `lock`/`Interlocked`.
+3. **Mutable static state.** Static fields are shared by every caller in the relevant runtime scope. Mutation needs synchronization, and state can leak between tests. Prefer immutable static data. When mutation is unavoidable, define the ownership and guard it with the appropriate concurrency primitive.
 
-4. **Abstract class tight coupling** — Deriving from an abstract class couples you to its implementation details (constructor signature, protected fields, method call order). Changes in the base class can break all derived classes (fragile base class problem). Prefer interface contracts when you do not need shared state.
+4. **A fragile base class.** Derived types depend on constructor shape, protected surface, and the order in which virtual members are called. An interface is easier to evolve when shared state is unnecessary.
 
-5. **Partial class hidden members** — Source generators can add fields, methods, and interface implementations to your partial class that you do not see in your source file. Name collisions produce confusing compiler errors pointing at generated code.
+5. **Generated members hidden from the handwritten file.** A source generator can add members or interface implementations to a partial type. Collisions are compile-time errors, often reported against generated output. The generated files are part of the type and need the same review and test coverage as handwritten members.
 
 # Tradeoffs
 
 | Decision | Option A | Option B | When A | When B |
 | --- | --- | --- | --- | --- |
-| **`class` vs `record class`** | Regular class (manual equality, mutable by default) | Record class (value equality, `with` expressions, immutable by convention) | Entities with identity semantics (two `Order` objects with same data are different if IDs differ), mutable state machines, services | DTOs, events, messages, API responses — anywhere value equality is natural and immutability is preferred |
-| **`abstract class` vs `interface`** | Abstract class (shared state + implementation, single inheritance) | Interface (multiple implementation, no instance state, default methods since C# 8) | Need shared fields/constructors, template method pattern, protected state | Need multiple implementations per type, or only defining a contract without shared state |
-| **`sealed` vs open** | Sealed (no inheritance, enables devirtualization) | Open (extensible) | Leaf types, DTOs, types not designed for extension — `sealed` is safer default | Explicitly designed for inheritance with documented extension points |
+| **`class` vs `record class`** | Regular class (identity equality unless changed) | Record class (generated value equality and `with` expressions) | Entities, stateful services, and types whose identity outlives their current data | Data carriers where equal contents should compare equal |
+| **`abstract class` vs `interface`** | Abstract class (shared state and implementation, single inheritance) | Interface (multiple contracts, no instance fields) | The hierarchy needs constructors, protected state, or a template method | Consumers need a capability contract without inheriting implementation state |
+| **`sealed` vs open** | Sealed (no derived classes) | Open (supported inheritance) | The type exposes no deliberate extension points | Derived behavior is part of the documented design |
 | **`static class` vs singleton** | Static class (no instance, no DI, no interface) | Singleton via DI (`services.AddSingleton<T>()`) | Pure utility functions with no state and no need for testing isolation | Needs DI injection, interface-based testing, or configuration-dependent behavior |
 
-**Decision rule**: default to `sealed class` for new types (prevents accidental inheritance, enables compiler optimizations). Use `record class` for immutable data carriers. Use `abstract class` only when you need shared instance state across a type hierarchy — otherwise prefer interfaces.
+Default to `sealed` when inheritance is not part of the design. Use a `record class` when value equality matches the domain. Reach for an abstract class only when the hierarchy genuinely shares state or construction rules.
 
 # Questions
 
-> [!QUESTION]- What is the difference between `abstract class` and `interface` with default interface methods (C# 8+)? When would you still choose an abstract class?
-> Both can define contracts with shared implementation. Key differences:
->
-> - **State**: abstract classes can have instance fields and constructors; interfaces cannot hold instance state (only static fields).
-> - **Inheritance**: a class can implement many interfaces but inherit from only one class.
-> - **Access modifiers**: abstract classes support `protected`/`internal` members; interface members are implicitly public (C# 8+ allows explicit modifiers but no `protected` instance state).
-> - **Performance**: virtual dispatch on abstract class methods is a single vtable lookup; default interface methods may involve additional dispatch overhead.
-> - **Use Case**: The default implementation for interface methods have different goal compared to the abstract class implemented methods. While in class, semantically methods providing the basic shared functionality for the delivered classes, that don't have to be overriden. While default implementation exist for making extending the interfaces without breaking the inheritors.
+> [!QUESTION]- What is the difference between an abstract class and an interface with default members, and when is an abstract class a better fit?
+> Both can contain implemented members. An abstract class can also store instance state, define constructors, and expose protected members, but a class can inherit from only one base class. An interface has no instance fields, and a class can implement several interfaces. An abstract class fits when derived types must share state or initialization rules. An interface fits when callers only need a common capability and the implementations do not belong in one inheritance hierarchy.
 
-> [!QUESTION]- Can a static class implement an interface? Why or why not?
-> No. A static class compiles to an `abstract sealed` class at IL level — it cannot be instantiated, so there is no object to dispatch interface calls through. Interfaces require an instance for virtual dispatch. If you need a "static implementation" of a contract, the patterns are:
->
-> - Use static abstract/virtual interface members (C# 11+) with generics: `where T : IMyInterface`.
-> - Use a singleton instance of a regular class that implements the interface.
-> - Use delegates/`Func<T>` instead of an interface.
+> [!QUESTION]- Why can't a static class implement an interface?
+> An interface normally describes behavior on an object. A static class has no instances, so no object can be assigned to an interface variable. When an implementation needs to be injected or replaced, use a regular class and choose its lifetime through dependency injection. A generic algorithm that needs operations on the type itself can use static abstract interface members with a constrained type parameter.
 
 > [!QUESTION]- A `sealed override` stops further overriding, but can a derived class use `new` to hide the sealed method? What happens at runtime?
 > Yes, `new` compiles and hides the sealed method. But the behavior depends on the variable's compile-time type:
@@ -257,34 +235,17 @@ Key rules:
 > x.Do();           // "Middle" — same virtual dispatch
 > ```
 >
-> The `new` method is completely invisible to polymorphic code. This is almost always a design smell — if you need to change behavior, the method should not have been sealed, or you should use composition instead.
+> The hidden method is selected only when the compile-time receiver exposes `Bottom.Do`. Calls through `Middle` or `Base` stay on the sealed virtual slot and invoke `Middle.Do`. Hiding therefore does not replace polymorphic behavior. It creates a second member with type-dependent call semantics.
 
-> [!QUESTION]- Can you have an abstract sealed class? What about in IL?
-> In C# source code, you cannot write `abstract sealed class` — the compiler rejects it as contradictory. However, at the IL level, **static classes** compile to exactly `abstract sealed`. The CLR treats `abstract sealed` as "cannot be instantiated and cannot be inherited." So every `static class` in C# is literally an `abstract sealed` class in metadata. You can verify this with `ildasm` or reflection: `typeof(Math).IsAbstract && typeof(Math).IsSealed` is `true`.
+> [!QUESTION]- Can a C# type be both abstract and sealed, and how are static classes represented in metadata?
+> C# rejects that modifier pair on an ordinary class. A C# static class is represented in metadata with both flags, which prevents construction and inheritance. Reflection therefore reports `typeof(Math).IsAbstract && typeof(Math).IsSealed` as `true`.
 
 > [!QUESTION]- Why can `partial` be dangerous with source generators? Give a concrete scenario.
-> Partial classes merge at compile time, and source generators can add members to your type that you do not see in your source file. Dangers:
->
-> - **Name collisions**: a generator adds a method `Validate()` and you also write `Validate()` — compile error with a confusing message pointing at generated code.
-> - **Implicit behavior changes**: a generator adds `INotifyPropertyChanged` implementation and overrides `Equals`. Your tests pass locally but break in CI where a different generator version runs.
-> - **Debugging opacity**: stepping through code jumps into generated files that may not be in source control.
-> - **Partial method removal**: if a partial method (without accessibility modifier) has no implementing declaration, the compiler silently removes all calls to it. If you forget to generate the body, the call vanishes with no warning.
->   Best practice: always inspect generated output (visible in IDE under Dependencies and Analyzers), and write tests that verify generator-dependent behavior explicitly.
+> The generated part is the same type, so it can add interface implementations or members that are absent from the handwritten file. A generator and handwritten code that both declare `Validate()` cause a compile-time collision. An optional partial-method hook may disappear entirely when no implementing declaration is generated. Generated output should be inspectable, and tests should cover the behavior that depends on it.
 
-> [!QUESTION]- Two classes have identical fields and values. You compare them with `==`. Why is it `false`, and what are the three ways to fix it?
-> `==` compares references by default for classes — two separate `new` calls produce different heap objects with different references.
-> Fixes:
->
-> 1. **Override `Equals`/`GetHashCode` and overload `==`/`!=`** — full manual control, but tedious and error-prone.
-> 2. **Implement `IEquatable<T>`** — avoids boxing in generic code and gives a clean `Equals(T)` method. Still need to overload `==`.
-> 3. **Use `record class` instead** — the compiler generates value-based `Equals`, `GetHashCode`, `==`, and `!=` automatically. This is the recommended approach for data-carrier types.
-
-> [!QUESTION]- A static constructor throws an exception. What happens on subsequent accesses to that type?
-> The runtime marks the type as permanently broken. Every subsequent attempt to access any member of the type throws a `TypeInitializationException` wrapping the original exception — even if the condition that caused the failure has been resolved. The type cannot be re-initialized for the lifetime of the AppDomain (or AssemblyLoadContext in .NET Core). This is why static constructors should be kept minimal and defensive because failures are unrecoverable.
+> [!QUESTION]- Why do two separately created class instances with equal fields compare unequal with `==`, and how should value equality be added?
+> A class uses reference equality for `==` unless it overloads the operator, so two separately created instances are different references. A value-like conventional class should implement `IEquatable<T>`, override `Equals` and `GetHashCode`, and overload `==`/`!=` if operator equality belongs to its API. A `record class` is the shorter choice when generated value equality matches the domain.
 
 # References
 
-- [Classes - C# Programming Guide](https://learn.microsoft.com/dotnet/csharp/fundamentals/types/classes) — Microsoft's overview of class declaration, construction, inheritance, members, and object lifetime.
-- [Abstract and sealed classes - C# reference](https://learn.microsoft.com/dotnet/csharp/programming-guide/classes-and-structs/abstract-and-sealed-classes-and-class-members)
-- [Static classes - C# Programming Guide](https://learn.microsoft.com/dotnet/csharp/programming-guide/classes-and-structs/static-classes-and-static-class-members)
-- [Partial classes and methods - C# reference](https://learn.microsoft.com/dotnet/csharp/programming-guide/classes-and-structs/partial-classes-and-methods)
+- [Classes](https://learn.microsoft.com/dotnet/csharp/fundamentals/types/classes)

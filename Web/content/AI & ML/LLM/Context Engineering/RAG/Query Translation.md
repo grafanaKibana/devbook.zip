@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T14:02:43.893Z
-modified: 2026-07-18T14:02:43.894Z
-published: 2026-07-18T14:02:43.894Z
+created: 2026-08-20T20:41:15.483Z
+modified: 2026-08-20T20:41:15.483Z
+published: 2026-08-20T20:41:15.483Z
 topic:
   - AI & ML
 subtopic:
@@ -14,9 +14,9 @@ priority: High
 status: Done
 ---
 
-Query translation rewrites a user question into one or more retrieval-optimized variants before search. The core problem: user phrasing rarely matches document phrasing. A user asks "Can partners burst above limits now?" but the answer lives in a document titled "Q3 Quota Policy Update — Partner Tier Burst Allowance." A single query embedding captures one neighborhood in vector space; translation expands coverage to multiple neighborhoods without changing the corpus or the [[Embeddings|embedding model]].
+Query translation changes a user's wording before search so that retrieval sees language closer to the corpus. Someone asks, "Can partners burst above limits now?" The relevant document is titled "Q3 Quota Policy Update — Partner Tier Burst Allowance." Both describe the same policy, but a single query embedding may place them in different neighborhoods. Translation searches more of that space without changing the corpus or the [[Embeddings|embedding model]].
 
-The mechanism: the user query goes to an LLM that generates N translated variants — paraphrases, sub-questions, abstractions, or hypothetical answers depending on the technique. Each variant runs through [[Retrieval]] independently. Results are fused and deduplicated into a single candidate set, then passed to [[Re-ranking|reranking]] or directly to the generator.
+An LLM produces one or more variants. Depending on the technique, those variants may be paraphrases, narrower sub-questions, a broader question, or a hypothetical answer. Each one runs through [[Retrieval]]. The candidate lists are then deduplicated and fused before [[Re-ranking|reranking]] or generation.
 
 ```mermaid
 flowchart LR
@@ -33,62 +33,56 @@ flowchart LR
     F --> G[Reranker or generator]
 ```
 
-Example: a user asks "rate limit behavior for partner tier accounts." Multi-query generates paraphrases — "partner tier throttling policy," "API quota enforcement for partner customers," "rate limiting rules by account tier." Each paraphrase hits a different document neighborhood. Fusion combines the best candidates from all three retrieval runs. Without translation, only chunks matching the exact phrasing "rate limit behavior" surface, missing policy documents that use "throttling" or "quota enforcement" instead.
+A query such as "rate limit behavior for partner tier accounts" can become "partner tier throttling policy" and "API quota enforcement for partner customers." Each wording reaches a slightly different document neighborhood. Fusion keeps the strongest candidates from both searches.
 
-Query translation addresses a specific failure mode: recall gaps caused by vocabulary mismatch between queries and documents. It does not fix [[Chunking]] problems, embedding model quality, or index configuration — those are upstream issues. If relevant documents are not in the corpus at all, no amount of query rewriting will find them.
+This only fixes recall lost to vocabulary mismatch. It cannot repair bad [[Chunking]], a weak embedding model, a broken index, or a missing source document.
 
-# Approaches
+# How Each Rewrite Changes Search
 
 ## Multi-Query
 
-The LLM generates N paraphrases of the same intent, each targeting a different vocabulary or framing angle. Each paraphrase retrieves independently, and results are deduplicated by document ID.
+Multi-query generates several phrasings of one intent. Each variant retrieves independently, and the result sets are deduplicated by document ID.
 
-The key insight: different phrasings land in different neighborhoods of embedding space. "Authentication failure" and "credential validation error" are semantically similar to a human but may be far apart in a specific embedding model's vector space. Generating both as query variants covers both neighborhoods.
+The useful part is coverage. "Authentication failure" and "credential validation error" mean nearly the same thing, yet a particular embedding model may place them far enough apart to return different documents.
 
-Example — original query: "How to handle connection timeouts in HttpClient?"
+Original query: "How to handle connection timeouts in HttpClient?"
 Translated variants:
 
 - "HttpClient timeout configuration and retry behavior"
 - "System.Net.Http connection timeout exception handling"
 - ".NET HTTP client request deadline exceeded"
 
-Each variant retrieves chunks that the others miss. The fused set covers API-reference-style documentation (matching "System.Net.Http") and tutorial-style content (matching "retry behavior").
+The first variant is likely to match guides, the second API documentation, and the third operational incident text.
 
-Where it fits: user-facing systems with natural-language queries and varied vocabulary. The safe starting point when user query phrasing is unpredictable.
-
-Main risk: query drift — a paraphrase that subtly shifts intent pulls in irrelevant documents. "HttpClient timeout" drifting to "network timeout troubleshooting" surfaces OS-level networking content that dilutes the .NET-specific answer.
+Multi-query is the usual first translation technique for natural-language search. Its main failure is query drift. If "HttpClient timeout" becomes "network timeout troubleshooting," operating-system diagnostics can crowd out the .NET-specific evidence.
 
 ## RAG-Fusion
 
-RAG-Fusion extends multi-query with explicit rank fusion. Instead of simple deduplication, results from all query variants are merged using [[Re-ranking|Reciprocal Rank Fusion (RRF)]]: for each document, sum `1 / (rank + k)` across all query variant result lists, where k=60 is the standard constant.
+RAG-Fusion adds an explicit ranking step to multi-query. It merges all result lists with [[Re-ranking|Reciprocal Rank Fusion (RRF)]]. For each document, it sums `1 / (rank + k)` across the lists. The conventional constant is `k=60`.
 
-The mechanism rewards consensus — a document that appears in the top results for 3 of 4 query variants scores higher than one that ranks first for a single variant but is absent from the others. This acts as an implicit relevance vote: agreement across phrasings is a stronger signal than high rank from one phrasing.
+A document that ranks well for three variants usually gains more fusion score than one that appears only once. Agreement across independent phrasings acts as a relevance vote. RRF does not reject a drifted variant or its documents: a result ranked highly by one bad rewrite can still survive the cutoff. This is useful in enterprise and policy search, where the same concept appears under several names, only when the variants themselves remain faithful.
 
-Where it fits: broad questions where a single phrasing captures only part of the relevant evidence space. Enterprise search, customer support knowledge bases, and policy-heavy domains where terminology varies across documents.
-
-Main risk: latency and cost. N query variants means N retrieval calls plus the LLM call that generates the variants. For 4 variants against a retriever with 100ms latency, query translation adds ~400ms sequentially (parallelizable to ~100ms with concurrent retrieval) plus the LLM generation time for variant creation.
+The bill is predictable: N variants require N retrieval calls plus the translation call. Four sequential 100 ms searches add roughly 400 ms. Running them concurrently reduces the retrieval portion to about the slowest individual call, though the translation call still sits in front of them.
 
 ## Step-Back Prompting
 
-Step-back prompting generates a more abstract, higher-level version of the question. The system retrieves context for both the step-back question (background/principles) and the original question (specifics), then provides both to the generator.
+Step-back prompting asks a broader version of the question and retrieves for both versions. The original search supplies the case-specific evidence. The broader search supplies the mechanism needed to interpret it.
 
-The intuition: some questions require first-principles context before the specific answer is useful. Asking "Why does EF Core throw timeout on batch insert of 10K rows?" benefits from background on EF Core's batch execution model and connection management before the specific timeout cause.
+For "Why does EF Core time out on a batch insert of 10K rows?", the broader query might ask how EF Core batches commands and manages connections.
 
-Example — original query: "Why is my HNSW recall dropping after adding 5M vectors?"
+Original query: "Why is my HNSW recall dropping after adding 5M vectors?"
 
 Step-back question: "How does HNSW index recall scale with corpus size and what parameters affect it?"
 
-The step-back retrieval surfaces foundational content about HNSW graph structure, `ef_search` tuning, and recall-versus-scale behavior. The original query retrieval surfaces specific troubleshooting content. Together, the generator has both the conceptual framework and the specific guidance to produce a grounded answer.
+The broader search can recover HNSW graph behavior and `ef_search` tuning, while the original query finds troubleshooting reports for large indexes. This works when a symptom only makes sense through the underlying mechanism.
 
-Where it fits: questions that implicitly assume background knowledge. Common in technical domains where users ask about symptoms without understanding the underlying mechanism.
-
-Main risk: overly abstract retrieval. If the step-back question is too general ("What are vector database best practices?"), the retrieved context is too broad to be actionable and wastes prompt tokens on background the generator does not need.
+But abstraction can go too far. "What are vector database best practices?" is too broad to explain a recall drop and mostly burns context tokens.
 
 ## Decomposition
 
-Decomposition splits a complex multi-part question into focused sub-questions, retrieves evidence for each independently, and synthesizes the final answer from the combined context. Unlike multi-query, the sub-questions are _different questions_ — each targets a distinct piece of evidence needed for the answer.
+Decomposition breaks a genuinely multi-part request into different questions. It retrieves for each one, then synthesizes the evidence. Multi-query keeps one intent and changes its wording. Decomposition changes the work itself.
 
-Example — original query: "How does Task compare to ValueTask for high-throughput API endpoints?"
+Original query: "How does Task compare to ValueTask for high-throughput API endpoints?"
 
 Sub-questions:
 
@@ -96,95 +90,64 @@ Sub-questions:
 - "When does ValueTask avoid heap allocation and what are its constraints?"
 - "What are the performance characteristics of high-throughput API endpoints with frequent async completions?"
 
-Each sub-question retrieves different documents. The synthesis step combines the evidence into a comparative answer that the original single query could not have retrieved directly — no single chunk likely contains both Task internals and ValueTask constraints and throughput benchmarks together.
+No single chunk is likely to contain `Task` internals, `ValueTask` constraints, and representative throughput evidence. Separate searches can find each piece.
 
-Where it fits: multi-hop questions that span multiple concepts, entities, or constraints. Comparison questions, timeline questions ("What changed between v1 and v2?"), and questions requiring evidence from different document sections.
+The danger is context fragmentation. A sub-question about `Task` may forget that the original problem is a high-throughput endpoint. Once that constraint disappears, retrieval returns generic async guidance and the synthesis step cannot recover the lost specificity. Each sub-question therefore carries the original constraints. Decomposition adds no value when one coherent search intent is enough.
 
-Main risk: context fragmentation. Sub-questions lose the constraints that connect them. "Compare Task vs ValueTask for high-throughput endpoints" becomes three independent questions — none of which carries the "high-throughput" constraint that makes the comparison relevant. Sub-question retrieval returns general-purpose content, and the synthesis step cannot reconstruct specificity that was discarded during decomposition. For questions that are not genuinely multi-hop, decomposition adds complexity without improving retrieval.
+## HyDE: Hypothetical Document Embeddings
 
-## HyDE — Hypothetical Document Embeddings
+HyDE generates a hypothetical answer, embeds that text, and searches for real documents near it. Short questions often make weak dense-retrieval inputs. A paragraph shaped like an answer carries more domain vocabulary and may sit closer to the source material.
 
-HyDE flips the approach: instead of rewriting the query, the LLM generates a hypothetical answer document. That synthetic text is embedded (not the query), and the embedding retrieves the nearest real documents in vector space.
+That advantage comes from invented text. If the draft assumes the wrong error code or product version, retrieval follows the mistake into the wrong neighborhood. HyDE is therefore strongest on vague, semantic questions and weakest when exact identifiers carry the meaning. Those query classes require separate measurements.
 
-The mechanism exploits a property of dense retrieval: answer documents are closer to each other in embedding space than they are to short queries. A user query like "connection pooling in EF Core" is a sparse, underspecified point in embedding space. A hypothetical answer — a paragraph explaining how EF Core manages connection pools, default pool sizes, and disposal behavior — occupies a denser, more specific region near real documentation about the same topic. The encoder's dense bottleneck filters out hallucinated specifics while preserving the correct semantic neighborhood.
-
-Where it fits: very short or vague queries where the query embedding is too sparse to retrieve well. Also effective for exploratory questions where the user does not know the right terminology.
-
-Main risk: hallucination bias. If the LLM generates a plausible but semantically wrong hypothetical document, the embedding retrieves real documents from the wrong neighborhood. For factual queries with specific constraints (error codes, version numbers, entity names), HyDE can encode wrong assumptions into the search vector — retrieving documents that match the hallucinated answer rather than the actual question. In practice, HyDE performs strongest on semantic similarity tasks and degrades on identifier-heavy or constraint-specific queries where exact tokens matter more than meaning; validate per query type on your own data.
-
-# Pitfalls
+# How Translation Fails
 
 ## Query Drift and Semantic Leakage
 
-Translated queries subtly shift intent, introducing concepts not present in the original question. "HttpClient connection timeout" becomes "network infrastructure timeout diagnostics" — still related, but now retrieving OS-level networking content instead of .NET HttpClient documentation. The LLM generator receives diluted context and produces a vague answer that touches the right topic but misses the specific question.
+A rewrite can stay topically related while changing the request. "HttpClient connection timeout" becoming "network infrastructure timeout diagnostics" is a classic example: the search now favors operating-system material over .NET documentation. Fusion makes this harder to notice because the drifted results still look relevant.
 
-This is especially dangerous with multi-query and RAG-Fusion because drifted variants still contribute to the fused result. If 2 of 4 variants drift, up to half the candidate set may be off-topic.
-
-Mitigation: include the original query as one of the retrieval variants — never translate only, always include the original. Set explicit constraints in the translation prompt ("preserve all specific entities, identifiers, and version numbers"). Evaluate translated queries against the original: if cosine similarity between a variant and the original drops below a threshold, discard the variant before retrieval.
+The original query remains one of the retrieval variants. Translation prompts preserve entities, identifiers, and version numbers verbatim. A similarity threshold can reject extreme drift, but a labeled retrieval set is the real test because semantic similarity does not prove intent preservation.
 
 ## Latency Multiplication
 
-N query variants means N retrieval calls. In a pipeline with a tight total latency SLA, the LLM translation step (generating the variants) runs before any retrieval begins, and the retrieval calls follow — even with parallelization, the sequential translation-then-retrieval pattern adds meaningful overhead. Teams adopt query translation for quality, then discover that p95 latency exceeds the SLA under production load because total cost is LLM generation time plus the slowest retrieval call, not just retrieval alone.
+Translation adds a serial model call before retrieval. Even with concurrent searches, end-to-end latency is the translator plus the slowest search. That is the number the p95 budget must absorb.
 
-Mitigation: set a hard variant budget (2–4 variants is the practical range). Parallelize all retrieval calls. Pre-compute translations for common query patterns via [[AI & ML/LLM/Context Engineering/RAG/Caching|caching]]. Profile end-to-end latency under realistic concurrency, not single-query benchmarks.
+A hard budget of two to four variants bounds the cost. Searches run concurrently, and stable rewrites can be reused through [[AI & ML/LLM/Context Engineering/RAG/Caching|caching]]. Production-like concurrency exposes queueing and tail latency that a single-query benchmark hides.
 
 ## HyDE Hallucination Amplification
 
-HyDE's hypothetical document encodes the LLM's assumptions into the search vector. For domain-specific or factual queries, those assumptions can be wrong — the LLM "imagines" a plausible but incorrect answer, and the embedding retrieves real documents matching the hallucination rather than the actual question. Unlike multi-query drift (which dilutes results with noise), HyDE hallucination actively steers retrieval toward the wrong document neighborhood.
+HyDE puts the model's assumptions inside the search vector. A plausible but wrong draft does more than add noise: it steers retrieval toward documents that support the invented premise.
 
-Detection: compare HyDE retrieval results against direct query retrieval on a ground-truth evaluation set. If HyDE consistently retrieves different documents that score lower on relevance, the hypothetical document is misleading. HyDE works best on semantic similarity tasks and poorly on identifier-heavy or constraint-specific queries — evaluate per query type, not in aggregate.
+HyDE is compared with direct retrieval on a labeled set. Separate results for vague semantic queries and identifier-heavy factual queries prevent an aggregate score from hiding failures in the second group.
 
 ## Decomposition Losing Global Constraints
 
-When a complex question is split into sub-questions, the constraints connecting them are often lost. "Compare Task vs ValueTask for high-throughput endpoints" becomes three independent questions — none of which carries the "high-throughput" constraint that makes the comparison relevant. Sub-question retrieval returns general-purpose content, and the synthesis step cannot reconstruct specificity that was discarded during decomposition.
+Decomposition often drops the words that connect the pieces. A generic `ValueTask` search is not enough when the original question is specifically about frequent synchronous completion under high load.
 
-Mitigation: append the original question or its key constraints to each sub-question as context. Use a synthesis prompt that explicitly references the original question, not just the sub-question answers. Only use decomposition for genuinely multi-hop questions — for single-intent queries, multi-query is simpler and preserves context better.
+Every sub-question includes the original request or its material constraints. The synthesis prompt also receives the original request. For a single intent, multi-query is cheaper and keeps the context intact.
 
-# Tradeoffs
+# Choosing a Technique
 
 | Technique | Recall improvement | Precision risk | Latency cost | Best for |
 | --- | --- | --- | --- | --- |
 | No translation | Baseline -- single query only | Lowest -- no drift risk | None | Simple corpora with predictable query vocabulary |
 | Multi-Query | Moderate -- covers vocabulary variants | Low-moderate -- drift from paraphrases | N retrieval calls -- parallelizable | Natural-language queries with varied user phrasing |
-| RAG-Fusion | Moderate-high -- consensus ranking suppresses noise | Low -- RRF filters drifted variants | N retrieval calls + fusion computation | Broad questions where single phrasing is insufficient |
+| RAG-Fusion | Moderate-high -- consensus can lift repeated evidence | Moderate -- RRF rewards agreement but does not remove drift | N retrieval calls + fusion computation | Broad questions where faithful variants surface the same evidence |
 | Decomposition | High for multi-hop -- distinct evidence per sub-question | Moderate -- constraint loss across sub-questions | N retrieval calls + synthesis LLM call | Multi-entity or multi-constraint questions requiring separate evidence |
 | Step-Back | Moderate -- adds principled background context | Low-moderate -- overly abstract retrieval possible | 2 retrieval calls -- original + step-back | Questions requiring first-principles context before specifics |
 | HyDE | High for vague queries -- denser search vector | High -- hallucination can bias retrieval | 1 retrieval call + LLM generation | Short or exploratory queries where direct embedding is too sparse |
 
-Decision rule: start with no translation and measure baseline retrieval quality. Add multi-query or RAG-Fusion first — they provide the most consistent recall improvement with manageable risk. Use decomposition only for verified multi-hop query patterns. Use HyDE only for vague/short query patterns where direct embedding measurably underperforms. Always evaluate each technique against the no-translation baseline on your actual query distribution.
+Direct retrieval provides the control. Multi-query or RAG-Fusion earns its cost when evaluation isolates vocabulary mismatch. Decomposition fits requests with independently retrievable sub-problems, while HyDE fits vague semantic queries. A technique stays only when it beats direct retrieval for its target query class within the latency budget.
 
 # Questions
 
-> [!QUESTION]- Why does query translation often improve recall but sometimes hurt precision, and how do you detect the tradeoff?
-> Expected answer:
->
-> - Additional query variants cover vocabulary the original misses, hitting more document neighborhoods and improving recall
-> - Weak variants introduce concepts not in the original intent, pulling related-but-irrelevant documents into the candidate set
-> - Precision drop is invisible in aggregate recall metrics — recall goes up while noisy candidates are buried in the ranked list
-> - Detection: measure precision@k (not just recall@k) before and after translation, segmented by query type
-> - If recall@20 improves but precision@5 drops, translation helps coverage but hurts candidates that reach the generator
-> - Key mitigation: always include the original query as a variant and discard translations that drift too far from the original intent
+> [!QUESTION]- Why does query translation often improve recall but sometimes hurt precision, and how can the tradeoff be detected?
+> Query translation raises recall by searching more phrasings, but it lowers precision when a rewrite adds concepts or changes constraints.
+> Measure Recall@k and Precision@k before and after translation, split by query type. If Recall@20 rises while Precision@5 falls, coverage improved but the generator receives worse evidence. Keep the original query in the candidate set and reject variants that change material constraints.
 
 > [!QUESTION]- When is decomposition a better choice than multi-query, and when does it hurt?
-> Expected answer:
->
-> - Decomposition fits when the original query has distinct sub-problems requiring separate evidence — comparisons, multi-entity questions, timeline questions
-> - Multi-query fits when the question has a single intent but user phrasing may not match document terminology
-> - Decomposition hurts on single-intent questions: sub-questions fragment a coherent topic and lose the constraints that make the original specific
-> - The test: if sub-questions can be answered independently and concatenated answers address the original, decomposition fits
-> - If sub-questions only make sense in context of the original question, use multi-query instead
-> - Key tradeoff: decomposition adds a synthesis LLM call and risks context fragmentation; multi-query only adds retrieval calls
-
-> [!QUESTION]- Why can HyDE outperform direct query embedding for vague questions but fail on specific factual queries?
-> Expected answer:
->
-> - Vague queries produce sparse, underspecified embeddings equidistant from many document clusters — poor retrieval signal
-> - HyDE generates a hypothetical answer paragraph, creating a denser point in embedding space closer to real answer documents
-> - The encoder's bottleneck filters hallucinated details while preserving the correct semantic neighborhood
-> - For specific factual queries (error codes, versions), the LLM may hallucinate wrong details — different error code, different version
-> - The hallucinated embedding steers retrieval toward documents matching the wrong specifics
-> - Direct query embedding, while sparse, preserves exact tokens that [[Retrieval#Sparse Retrieval — Keyword Search (BM25)|keyword search]] in a hybrid setup can catch
-> - HyDE failure is stealth: retrieved documents look topically relevant but answer the wrong specific question
+> Decomposition fits distinct sub-problems that need different evidence, such as a comparison or a timeline assembled from several sources. Multi-query fits one intent expressed with uncertain vocabulary.
+> Decomposition hurts when the split removes the constraints connecting the pieces. It fits only when each sub-question can be answered independently and those answers can support the original request. It also adds a synthesis call, while multi-query adds only retrieval work.
 
 # References
 
@@ -192,8 +155,3 @@ Decision rule: start with no translation and measure baseline retrieval quality.
 - [Take a Step Back: Evoking Reasoning via Abstraction in Large Language Models (Zheng et al., ICLR 2024)](https://arxiv.org/abs/2310.06117)
 - [RAG-Fusion: a New Take on Retrieval-Augmented Generation (Rackauckas, IJNLC 2024)](https://arxiv.org/abs/2402.03367)
 - [Query Rewriting for Retrieval-Augmented Large Language Models — Rewrite-Retrieve-Read framework (Ma et al., EMNLP 2023)](https://arxiv.org/abs/2305.14283)
-- [Query Transformations — practitioner overview of multi-query, RAG-Fusion, step-back, and HyDE with real prompts (LangChain Engineering)](https://blog.langchain.dev/query-transformations/)
-- [Retrieval-Augmented Generation for Large Language Models: A Survey — query transformation taxonomy within Advanced RAG (Gao et al., 2024)](https://arxiv.org/abs/2312.10997)
-- [MultiQueryRetriever — multi-query implementation and usage patterns (LangChain)](https://python.langchain.com/docs/how_to/MultiQueryRetriever/)
-- [Query Transform Cookbook — HyDE, step-back, and decomposition implementations (LlamaIndex)](https://docs.llamaindex.ai/en/stable/examples/query_transformations/query_transform_cookbook/)
-- [Deconstructing RAG — retrieval patterns and query strategy evaluation (LangChain Engineering)](https://blog.langchain.com/deconstructing-rag/)

@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-10T07:58:47.063Z
-modified: 2026-08-10T13:59:29.611Z
-published: 2026-08-10T13:59:29.611Z
+created: 2026-08-20T20:41:15.548Z
+modified: 2026-08-20T20:41:15.549Z
+published: 2026-08-20T20:41:15.549Z
 topic:
   - Computer Science
 subtopic:
@@ -14,9 +14,9 @@ priority: Low
 status: Not-Started
 ---
 
-Stooge sort compares the endpoints of a range and swaps them if inverted. For a range longer than two elements, it recursively sorts the first two-thirds, the last two-thirds, then the first two-thirds again. The overlap repairs values displaced by the middle call.
+Stooge sort compares the endpoints of a range and swaps them when they are inverted. For a range longer than two elements, it sorts the first two-thirds, the last two-thirds, then the first two-thirds again. The final call repairs values displaced by the middle call.
 
-Its three overlapping calls expand even when the range is already ordered. The algorithm is unstable because endpoint swaps are non-adjacent and is useful mainly as a recurrence-analysis exercise.
+All three recursive calls still run when the range is already ordered. Non-adjacent endpoint swaps make the algorithm unstable. Its practical value is as a recurrence-analysis exercise.
 
 ````tabsdown
 tab: Visualization
@@ -69,9 +69,9 @@ tab: Complexity
 The recurrence is `T(n) = 3T(2n/3) + O(1)`, giving `Θ(n^log₁.₅3) ≈ Θ(n².7095)`. The recursion stack follows one branch at a time.
 ````
 
-# Boundary and implementation
+# Recursive work and the demonstration ceiling
 
-Each child range is about two-thirds of its parent, but every non-base call branches three times. Already sorted input still expands the same call tree. The StepTrace ceiling bounds the demonstration only; it does not change the algorithm.
+Each child range is about two-thirds of its parent, but every non-base call branches three times. Already sorted input still expands the same call tree. The StepTrace ceiling bounds the demonstration only. It does not change the algorithm.
 
 > [!EXAMPLE]- C# implementation
 >
@@ -94,15 +94,6 @@ Each child range is about two-thirds of its parent, but every non-base call bran
 > }
 > ```
 
-# Questions
-
-> [!QUESTION]- Why is the first two-thirds sorted twice?
-> Sorting the last two-thirds can move smaller values back into the overlapping prefix. The final prefix call repairs that displacement.
-
-> [!QUESTION]- Why does sorted input not produce a faster asymptotic case?
-> Endpoint swaps disappear, but the implementation still expands the same three recursive calls at every non-base range.
-
 # References
 
-- [Cormen, Leiserson, Rivest, and Stein, _Introduction to Algorithms_](https://mitpress.mit.edu/9780262046305/introduction-to-algorithms/) — the primary algorithms text that presents Stooge Sort as a recurrence-analysis exercise.
-- [NIST Dictionary of Algorithms and Data Structures: stooge sort](https://www.nist.gov/dads/HTML/stoogesort.html) — authoritative definition of the first-last-first overlapping recursion.
+- [NIST Dictionary of Algorithms and Data Structures: stooge sort](https://www.nist.gov/dads/HTML/stoogesort.html)

@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-03T07:22:13.841Z
-modified: 2026-08-08T09:22:39.856Z
-published: 2026-08-08T09:22:39.856Z
+created: 2026-08-20T20:41:15.605Z
+modified: 2026-08-20T20:41:15.605Z
+published: 2026-08-20T20:41:15.605Z
 topic:
   - Computer Science
 subtopic:
@@ -14,15 +14,15 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-A priority queue must sometimes absorb another whole priority queue — merge two work sets, join two event streams — and keep answering "smallest first". The contiguous layout that makes a binary heap fast to index is exactly what makes it slow to union.
+A priority queue sometimes has to absorb another queue and keep answering "smallest first". The contiguous layout that makes a binary heap fast to index is what makes it slow to union.
 
-A binomial queue (binomial heap) trades that single array for a **forest of heap-ordered binomial trees, at most one tree of each order**. A binomial tree `Bₖ` holds exactly `2ᵏ` nodes and is built by **linking** two `Bₖ₋₁` trees — the root with the larger key becomes a child of the other. Because each order appears at most once, the set of orders present is the **binary representation of `n`**: a queue of 13 items (`1101₂`) holds trees of orders 3, 2, and 0, sized 8 + 4 + 1.
+A binomial queue (binomial heap) trades that array for a **forest of heap-ordered binomial trees, with at most one tree of each order**. A binomial tree `Bₖ` holds exactly `2ᵏ` nodes. It is built by **linking** two `Bₖ₋₁` trees, placing the larger root under the smaller one. The orders present are the **binary representation of `n`**: a queue of 13 items (`1101₂`) holds trees of orders 3, 2, and 0, sized 8 + 4 + 1.
 
 What the forest gives up is compactness and locality. Nodes are separate allocations wired by child and sibling pointers, so every traversal chases references instead of striding an array, and the minimum is no longer at a fixed slot.
 
 **Core shape:** items → forest of heap-ordered binomial trees, one per order → orders present = binary digits of `n` → meld = binary addition of orders
 
-Use **Meld** to combine the canonical 3-value forest with a singleton. The forest slots expose the two equal-order links and the carry into `B₂`; **Reset** restores both source forests.
+Use **Meld** to combine the canonical 3-value forest with a singleton. The forest slots expose the two equal-order links and the carry into `B₂`. **Reset** restores both source forests.
 
 ````tabsdown
 tab: Visualization
@@ -51,7 +51,7 @@ The other operations are corollaries:
 
 #### Representation and Invariants
 
-Each item is a heap node holding a key, a `degree` (the order of the tree it roots or the subtree it heads), a `child` pointer to its leftmost child, and a `sibling` pointer. Roots form a singly linked list kept in **strictly increasing order**; a node's children are likewise linked by `sibling` in decreasing order, which is the shape reversing produces during extract-min.
+Each item is a heap node holding a key, a `degree` (the order of the tree it roots or the subtree it heads), a `child` pointer to its leftmost child, and a `sibling` pointer. Roots form a singly linked list kept in **strictly increasing order**. A node's children are linked by `sibling` in decreasing degree order; extract-min reverses that list into increasing degree order before melding it with the remaining roots.
 
 Four invariants define a valid state:
 
@@ -268,9 +268,9 @@ tab: Complexity
 
 A binary heap keeps `n` keys in one array with implicit `2i+1 / 2i+2` child indices: no per-node pointers, no allocation per insert, and sequential memory that the cache prefetches. A binomial queue pays a pointer chase per level and an allocation per node.
 
-Find-min degrades the moment the min-pointer is dropped. Without it, the minimum is not at a known slot the way it is in a binary heap's `a[0]`; it is one of up to `log n` roots and must be found by a scan.
+Find-min degrades the moment the min-pointer is dropped. Without it, the minimum is not at a known slot the way it is in a binary heap's `a[0]`. It is one of up to `log n` roots and must be found by a scan.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Forest shape for `n = 13` (`1101₂`)
 >
@@ -401,12 +401,6 @@ Find-min degrades the moment the min-pointer is dropped. Without it, the minimum
 >
 > `Meld` defers a link when three consecutive roots share a degree, letting the trailing pair carry on the next iteration — this is the case a naive equal-degree link would corrupt.
 
-# Questions
-
-> [!QUESTION]- Why does meld defer when three consecutive roots have the same degree?
-> Linking the first pair would create a higher-degree carry before the third same-degree root, breaking the root list's degree order and risking a skipped collision. Deferring lets the trailing pair link first, after which the carry is processed in order like binary addition.
-
 # References
 
-- [Vuillemin, "A data structure for manipulating priority queues" (CACM 1978)](https://dl.acm.org/doi/10.1145/359460.359478) — the original binomial queue paper defining tree orders, linking, and the binary-addition meld.
-- [Binomial heap (Wikipedia)](https://en.wikipedia.org/wiki/Binomial_heap) — forest representation, linking rules, and meld mechanics.
+- [Vuillemin, "A data structure for manipulating priority queues" (CACM 1978)](https://dl.acm.org/doi/10.1145/359460.359478)

@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-29T20:22:59.987Z
-modified: 2026-08-08T09:22:39.321Z
-published: 2026-08-08T09:22:39.321Z
+created: 2026-08-20T20:41:15.595Z
+modified: 2026-08-20T20:41:15.596Z
+published: 2026-08-20T20:41:15.596Z
 topic:
   - Computer Science
 subtopic:
@@ -14,9 +14,9 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-A pipeline emits 500K event IDs and needs to drop the ones it has already seen. A hash set keeps only the question "is this element present?" answerable directly: `IEqualityComparer<T>.GetHashCode` selects a home bucket or cell, the collision strategy follows its bucket chain or probe sequence, and `IEqualityComparer<T>.Equals` checks each candidate.
+A pipeline emits 500K event IDs and must drop repeats. A hash set answers one question directly: is this element already present? `IEqualityComparer<T>.GetHashCode` selects a home bucket or cell. The collision strategy finds the candidates, and `IEqualityComparer<T>.Equals` identifies the matching member.
 
-The structure stores elements that are **unique according to its comparer**. It is effectively a [[Computer Science/Data Structures/Hash-based Structures/HashMap|hash map]] that keeps only keys and discards the associated value — the same bucket array, hash function, collision resolution, load factor, and resize behavior. A second `Add` is rejected when the comparer considers the new value equal to an existing member, so a `HashSet<string>(StringComparer.OrdinalIgnoreCase)` treats `"dotnet"` and `"DOTNET"` as the same member. What it retains is exactly which comparer-distinct elements are present; what it discards is insertion order, per-element counts, and any value a map would have carried.
+Elements are unique according to the set's comparer. The structure is effectively a [[Computer Science/Data Structures/Hash-based Structures/HashMap|hash map]] without value slots, using the same hashing and collision mechanics. A second `Add` is rejected when it compares equal to an existing member. For example, `HashSet<string>(StringComparer.OrdinalIgnoreCase)` treats `"dotnet"` and `"DOTNET"` as one member. The set retains comparer-distinct values and discards insertion order, occurrence counts, and associated data.
 
 **Core shape:** element → `comparer.GetHashCode` → home bucket/cell → bucket chain or probe sequence → `comparer.Equals` candidate already there? reject : store
 
@@ -229,15 +229,15 @@ tab: Complexity
 
 # When the Structure Stops Fitting
 
-Three boundaries follow directly from "hash to a home position, follow the collision path, compare candidates":
+The lookup path exposes the main limits.
 
-- **Ordered and range queries.** A member's bucket index carries no information about its rank among the others, so nothing answers "the smallest element ≥ k" or "all elements in `[a, b]`" without scanning every bucket.
-- For its built-in string comparers, modern .NET `HashSet<string>` starts with a non-randomized internal comparer and switches to randomized hashing when an excessive collision chain triggers the fallback. Custom types and custom comparers still own their hash distribution.
-- **The comparer contract.** Membership depends on both starting from the same home position and matching by equality. Values for which `comparer.Equals(x, y)` is `true` must return the same `comparer.GetHashCode` value; violating this starts a different collision path, letting a duplicate enter or hiding an existing member. Mutating state observed by the comparer after insertion strands the member on its old collision path, so exact membership requires both the comparer and comparer-observed member state to remain stable while stored.
+- **Ordered and range queries.** A bucket index says nothing about rank, so finding the smallest element above k or every element in `[a, b]` requires a full scan.
+- Current .NET implementations can switch built-in `HashSet<string>` hashing to a randomized comparer after detecting excessive collisions. Custom types and comparers remain responsible for their own distribution.
+- **The comparer contract.** Values for which `comparer.Equals(x, y)` is `true` must return the same `comparer.GetHashCode`. Breaking that rule starts lookups from different positions and can admit a duplicate or hide an existing member. Mutating state used by the comparer after insertion has the same effect because the member remains on its old collision path.
 
 Pre-sizing the set to the expected count avoids the intermediate resizes.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Bucket layout
 >
@@ -270,14 +270,6 @@ Pre-sizing the set to the expected count avoids the intermediate resizes.
 >
 > `HashSet<T>` stores keys only. Passing an explicit `capacity` pre-sizes the bucket array to avoid intermediate rehashes.
 
-# Questions
-
-> [!QUESTION]- Why can a member become unreachable after insertion?
-> Membership uses `comparer.GetHashCode` to select a home position, follows its collision path, then confirms candidates with `comparer.Equals`. If the comparer is invalid, or a member's comparer-observed state changes after insertion, a lookup can follow a different path and return `false` even though the member is still stored. Exact membership requires comparer-equal values to share a hash code and comparer-observed state to stay stable.
-
 # References
 
-- [`HashSet<T>` class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.hashset-1) — .NET set API, including the `UnionWith`/`IntersectWith`/`ExceptWith` set-algebra methods and capacity constructor.
-- [`HashSet<T>` in dotnet/runtime](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Collections/Generic/HashSet.cs) — source for the bucket-and-slot layout, load-factor threshold, and rehash-on-resize path shared with `Dictionary<TKey,TValue>`.
-- [`IEqualityComparer<T>.GetHashCode`](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.iequalitycomparer-1.gethashcode) — the comparer contract requiring equal values to return the same hash code.
-- [Denial of Service via Algorithmic Complexity Attacks](https://www.usenix.org/legacy/event/sec03/tech/full_papers/crosby/crosby.pdf) — source for the structure and its analysis.
+- [`HashSet<T>` class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.hashset-1)

@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-21T18:52:02.838Z
-modified: 2026-08-08T07:48:03.270Z
-published: 2026-08-08T07:48:03.270Z
+created: 2026-08-20T20:41:15.539Z
+modified: 2026-08-20T20:41:15.539Z
+published: 2026-08-20T20:41:15.539Z
 topic:
   - Computer Science
 subtopic:
@@ -14,11 +14,11 @@ priority: Medium
 status: Creation
 ---
 
-A ball launched at angle `θ` carries farther as `θ` climbs toward the optimum, then falls off as the angle steepens past it: the range is a single-peaked function of `θ` with no closed-form optimum once drag enters the model. Locating that peak means sampling the function and narrowing toward it, which needs a rule for deciding which samples to keep. [[Computer Science/Algorithms/Search Algorithms/Binary Search|Binary Search]] cannot supply the rule — there is no order to compare a target against, only a value that rises then falls.
+A ball's range rises as its launch angle `θ` approaches the optimum, then falls after passing it. Once a model includes drag, the best angle may have no useful closed form. The search must sample the function and narrow the interval around its single peak. [[Computer Science/Algorithms/Search Algorithms/Binary Search|Binary Search]] solves a different problem because there is no ordered target here, only values that rise and then fall.
 
-Ternary search is that rule for a **unimodal** function — one that strictly increases to a single peak, then strictly decreases (or the mirror image for a valley). Two interior probes `m1` and `m2` at the third-points of `[lo, hi]` bracket the peak: whichever probe returns the smaller value sits on the far slope, so the third of the interval beyond it cannot hold the maximum and is discarded. Each step removes a third of the range using two function evaluations.
+Ternary search works on a **unimodal** function: one that strictly increases to a single peak and then strictly decreases, or the reverse for a valley. It evaluates two interior points, `m1` and `m2`, at the thirds of `[lo, hi]`. The smaller value lies on the slope farther from the maximum, so the outer third beyond that probe can be discarded. Two evaluations remove one third of the interval.
 
-The same name describes a three-way split of a sorted array, but the extra split earns nothing there because binary search already chooses the correct half with one comparison. Ternary search's distinct value is the unimodal case, which binary search does not address — one-parameter convex optimization, geometric extremum problems, and [[Computer Science/Algorithms/Patterns/Binary Search on Answer|parametric search]] whose objective is unimodal rather than monotone.
+The name also appears in sorted-array lookup, where a three-way split buys nothing: binary search chooses the correct half with fewer comparisons. Ternary search is useful for unimodal objectives, including one-parameter optimization and geometric extrema. [[Computer Science/Algorithms/Patterns/Binary Search on Answer|Binary Search on Answer]] solves a different shape: a monotone feasibility predicate rather than a non-monotone objective that rises and falls.
 
 ````tabsdown
 tab: Visualization
@@ -146,17 +146,17 @@ The chart counts interval reductions. If evaluating the objective is not fixed-c
 
 # When Unimodality Fails
 
-Unimodality is the algorithmic precondition; strict unimodality is the StepTrace renderer's narrower contract, and it is easy to violate either one.
+Unimodality is the algorithmic precondition. Strict unimodality is the StepTrace renderer's narrower contract, and it is easy to violate either one.
 
-A second hump defeats the discard rule. Take `f` with peaks at `x = 1` (height 5) and `x = 4` (height 4) separated by a valley. If the two probes straddle that valley, the taller probe points back toward its own hump, and the step discards the third containing the _other_ hump — which here holds the global maximum. The returned point is then a local maximum, silently wrong, with nothing thrown or logged.
+A second hump breaks the discard rule. Suppose `f` has peaks at `x = 1` with height 5 and `x = 4` with height 4, separated by a valley. Probes on opposite sides of the valley can point toward the shorter peak and discard the third containing the global maximum. The algorithm then returns a local maximum without any runtime signal.
 
-A flat maximum changes what can be promised. If the task accepts any maximizer, equality can keep the middle interval and ternary search still converges to a point on the plateau. If the task needs the whole maximizing interval, its left endpoint, or its right endpoint, an arbitrary tie update may discard part of that answer; boundary searches or a final scan are then required. StepTrace deliberately accepts only strict increase-then-decrease so the visual has one unambiguous peak and every equality case has a single interpretation.
+A flat maximum changes what can be promised. If the task accepts any maximizer, equality can keep the middle interval and ternary search still converges to a point on the plateau. If the task needs the whole maximizing interval, its left endpoint, or its right endpoint, an arbitrary tie update may discard part of that answer. Boundary searches or a final scan are then required. StepTrace deliberately accepts only strict increase-then-decrease so the visual has one unambiguous peak and every equality case has a single interpretation.
 
-The discrete domain needs a different stopping rule. With integer bounds and integer division, `m1 = lo + (hi − lo)/3` and `m2 = hi − (hi − lo)/3` do not collide, but a probe can coincide with a bound (e.g. `m1 == lo` once `hi − lo` is small), leaving the interval unchanged, and a loop that waits for `lo == hi` never advances. The integer form loops while `hi − lo > 2` and finishes by scanning the two or three remaining indices, which also sidesteps the rounding traps of three-way integer splits.
+Discrete search needs a different stopping rule. With integer division, `m1 = lo + (hi − lo)/3` or `m2 = hi − (hi − lo)/3` eventually lands on a bound. A loop waiting for `lo == hi` can then stop making progress. The integer form loops while `hi − lo > 2` and scans the final two or three positions.
 
-For membership in a sorted array the boundary is simpler still: binary search dominates.
+For membership in a sorted array, binary search remains the smaller and faster choice.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Control flow (maximizing form)
 >
@@ -201,19 +201,9 @@ For membership in a sorted array the boundary is simpler still: binary search do
 > }
 > ```
 >
-> Flipping the comparison to `f(m1) > f(m2)` minimizes instead. The method rejects non-positive or non-finite tolerances, and the equality check stops if floating-point rounding prevents either probe from shrinking the interval.
-
-# Questions
-
-> [!QUESTION]- Why does the smaller of the two probe values mark a discardable third?
-> Under strict unimodality `f` rises to the peak then falls. The probe returning the smaller value sits farther down a slope, on the side away from the peak, so the interval beyond it lies entirely on that slope and cannot contain the maximum. Two probes are needed because a single point on a non-monotone function cannot reveal which side the peak is on.
-
-> [!QUESTION]- What input makes the discard rule return a wrong answer?
-> A non-unimodal function. With two humps, probes straddling the valley can discard the third holding the global maximum and return a local one. A flat maximum still permits finding any maximizer, but it cannot support a unique-peak contract or recover the entire maximizing interval without extra boundary work.
+> Reversing the comparison to `f(m1) > f(m2)` finds a minimum. The method rejects non-positive or non-finite tolerances. Its equality guard also stops when floating-point rounding prevents either probe from shrinking the interval.
 
 # References
 
-- [J. Kiefer, “Sequential Minimax Search for a Maximum” (1953)](https://doi.org/10.2307/2032161) — the primary sequential-search treatment behind Fibonacci and golden-section strategies for locating a unimodal maximum.
-- [Ternary search (Wikipedia)](https://en.wikipedia.org/wiki/Ternary_search) — definition, the unimodality requirement, and the iteration-count derivation.
-- [Ternary search (cp-algorithms)](https://cp-algorithms.com/num_methods/ternary_search.html) — continuous and integer forms with correctness reasoning and the `hi − lo > 2` stopping rule.
-- [Golden-section search (Wikipedia)](https://en.wikipedia.org/wiki/Golden-section_search) — the evaluation-reuse trick and why the golden ratio is the optimal probe placement.
+- [J. Kiefer, “Sequential Minimax Search for a Maximum” (1953)](https://doi.org/10.2307/2032161)
+- [Ternary search (cp-algorithms)](https://cp-algorithms.com/num_methods/ternary_search.html)

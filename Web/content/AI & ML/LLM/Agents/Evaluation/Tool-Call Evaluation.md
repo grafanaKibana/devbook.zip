@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T14:02:43.888Z
-modified: 2026-07-25T13:51:15.681Z
-published: 2026-07-25T13:51:15.681Z
+created: 2026-08-20T20:41:15.469Z
+modified: 2026-08-20T20:41:15.472Z
+published: 2026-08-20T20:41:15.472Z
 topic:
   - AI & ML
 subtopic:
@@ -14,9 +14,11 @@ priority: High
 status: Done
 ---
 
-A tool call is the point where an agent acts on the world, and it is the most common place an agent goes wrong: it picks the wrong tool, fills an argument with a plausible-but-wrong value, invents a tool that does not exist, or calls the same thing three times. Evaluating tool calls means scoring each call along four independent axes — _was the right tool selected, were the arguments correct, was the call valid, and was it necessary_ — because a single "tool accuracy" number collapses failures that have completely different fixes (a selection error is a prompt or tool-description problem; a bad-argument error is often a schema or grounding problem).
+A tool call is where an agent stops describing an action and asks a system to perform it. Failures at this boundary are concrete: the agent can name the wrong tool, send the wrong value in valid JSON, invent a function, or repeat a call that changed nothing.
 
-This page is the deep version of the "tool-call correctness" line in [[AI & ML/LLM/Agents/Evaluation/Evaluation|Agent Evaluation]]. The scoring machinery it reuses — schema validation as a [[Deterministic Checks|deterministic check]] and an [[LLM-as-a-Judge|LLM judge]] for the semantic calls — is general; only the decomposition below is agent-specific.
+Score four properties separately: validity, selection, arguments, and necessity. A combined "tool accuracy" number hides the repair. Selection failures usually point to routing or tool descriptions. Argument failures more often expose weak grounding or an unsafe schema.
+
+This is the detailed version of tool-call correctness in [[AI & ML/LLM/Agents/Evaluation/Evaluation|Agent Evaluation]]. A [[Deterministic Checks|deterministic check]] handles structure. An [[LLM-as-a-Judge|LLM judge]] or labeled reference handles decisions whose meaning depends on conversation state.
 
 # What a Tool Call Can Get Wrong
 
@@ -33,10 +35,10 @@ flowchart TD
     NEC -->|advances task| OK[Good call]
 ```
 
-- **Validity** — is the call well-formed: a real tool name, the right arity, JSON that parses against the schema? Pure structure, caught for free by a deterministic schema check before the call ever executes.
-- **Selection** — given the state, is this the right tool, and _should the agent have called a tool at all_? Two asymmetric errors hide here: calling a tool when none was needed (wasteful, sometimes harmful) and answering from memory when a tool was required (the agent guesses instead of looking up).
-- **Arguments** — the call is schema-valid but the _values_ are wrong: `order_id=4815` when the user meant `4851`, a date in the wrong timezone, a search query that drops the key constraint. This is the failure deterministic checks cannot see — the JSON is perfect, the meaning is wrong.
-- **Necessity** — does the call advance the task, or is it a duplicate of one already made and a re-fetch of unchanged state? Redundant calls inflate cost and latency and are an early signal of a looping trajectory.
+- **Validity** asks whether the tool exists and whether its arguments parse against the schema. This check is deterministic and can run before execution.
+- **Selection** asks whether the current state calls for this tool. It covers both needless calls and the opposite failure: answering from memory when fresh state was required.
+- **Arguments** checks meaning after structure has passed. `order_id=4851` is valid JSON even when the conversation identifies order `4815`. Time zones and dropped search constraints fail the same way.
+- **Necessity** checks whether the call advances the task. Repeating the same read against unchanged state raises cost and often marks the start of a loop.
 
 # Metrics
 
@@ -48,11 +50,13 @@ flowchart TD
 | Redundant-call rate | Duplicate or no-progress calls per task | Deterministic (hash of tool+args) + judge |
 | Calls-per-task | Total calls vs the minimum a clean solve needs | Counter |
 
-Report selection and argument accuracy _separately_. A model can score 95% on tool selection and 70% on arguments — averaging them into one number hides that the fix is argument grounding, not tool descriptions.
+Keep selection and argument accuracy separate. If selection is 95% and argument accuracy is 70%, the immediate problem is value grounding. Averaging them to 82.5% destroys that diagnosis.
 
 # Ground Truth
 
-Two regimes, mirroring retrieval eval. **Reference-based**: each step has an expected `(tool, arguments)`, and you score selection by tool match and arguments by field-level comparison. Build these from successful human or agent trajectories rather than writing them by hand — the same chunk-anchored inversion used for [[Retrieval Evaluation Sets|retrieval eval sets]], applied to traces. **Reference-free**: deterministic checks cover validity and exact-duplicate detection with zero labels, and an LLM judge rates selection and necessity from the tool catalog plus the conversation. Reference-free is how you bootstrap before you have labeled traces; it cannot catch a subtly-wrong argument the way a reference can.
+Reference-based evaluation stores the expected `(tool, arguments)` for a step. Tool equality scores selection. Field comparison scores the arguments. Successful human or agent traces are usually better raw material than hand-written cases. This is the trace equivalent of deriving [[Retrieval Evaluation Sets|retrieval eval sets]] from known source evidence.
+
+Reference-free evaluation starts with schema validation and exact-duplicate detection. A judge then reads the conversation and tool catalog to score selection or necessity. This works before labeled traces exist, but it is weak at catching a plausible value that differs from the real target by one digit.
 
 # Example
 
@@ -79,42 +83,28 @@ checks cannot see. Caught only because the reference pinned order_id=4815.
 | Reference match | Wrong tool, wrong argument values | Medium — needs labeled traces | Valid alternate tools/paths the reference didn't list |
 | LLM judge | Tool-choice reasonableness, necessity, semantic args | Highest — a judge call per step, plus judge bias | Subtle value errors a reference would pin exactly |
 
-Decision rule: run the deterministic validity check on every call always — it is free and pre-execution, so it can _block_ a bad call rather than just score it. Add reference matching for the high-traffic tools where a wrong argument is costly (payments, deletes). Reserve the judge for selection and necessity on open-ended tasks where no single reference sequence is correct, and calibrate it against human labels because it inherits the verbosity bias that rewards more tool calls.
+Run deterministic validity checks on every call. They are cheap and can block malformed requests before execution. Add reference matching to tools where a wrong value is expensive, such as payments or deletion. A judge fits open-ended selection and necessity decisions, provided its scores are calibrated against human labels. Otherwise it may reward a longer trace simply because the trace looks more thorough.
 
 # Pitfalls
 
 ## Exact Argument Match Flags Semantically-equal Values
 
-Scoring free-text arguments by string equality marks `"refund the full amount"` wrong against a reference of `"full refund"`, tanking argument accuracy on calls that were actually correct. Reserve exact match for ids, enums, and booleans; score natural-language arguments with a semantic judge or normalized comparison.
+String equality marks `"refund the full amount"` wrong against `"full refund"`, even though the action is identical. Exact matching belongs on identifiers, enums, and booleans. Natural-language fields need normalization or a semantic scorer.
 
 ## Order-sensitive Scoring Punishes Valid Reorderings
 
-Requiring the exact reference _sequence_ penalizes an agent that fetched two independent read-only facts in the other order. Score independent calls as a set; only enforce order where a real dependency exists (you cannot refund before looking up the order).
+An exact reference sequence penalizes harmless reordering of independent reads. Compare those calls as a set. Order becomes part of correctness only when one call establishes a precondition for the next, such as looking up an order before issuing its refund.
 
 ## Schema-valid Hides Semantically Wrong
 
-The most dangerous tool error passes every deterministic check — perfect JSON, real tool, wrong value — and executes against production. Validity gates give false confidence; pair them with reference or judge argument checks, and where the action is irreversible, add a confirmation or dry-run step.
+The riskiest call may be perfectly valid: real tool, valid schema, wrong account. Structural checks should be paired with reference or semantic argument checks. Irreversible actions also need confirmation or a dry run at the execution boundary.
 
 # Questions
 
-> [!QUESTION]- Why report tool-selection and argument accuracy separately instead of one tool-call score?
->
-> - The two failures have different root causes and fixes: selection errors point at tool descriptions and prompt routing, argument errors point at grounding and schema design
-> - A single averaged number can look healthy while one axis is broken — 95% selection with 70% arguments averages to a misleading 82%
-> - They need different scorers: selection is reference/judge, arguments are exact for structured fields and semantic for free text
-> - Acting on the blended number wastes effort optimizing the half that is already fine
-> - Per-axis scoring costs more labels and more judge calls, but without it you can't tell which fix to ship — spend the granularity on the tools where a wrong call is expensive
-
-> [!QUESTION]- Why are deterministic schema checks necessary but not sufficient for tool-call evaluation?
->
-> - They catch malformed JSON, unknown tools, and wrong arity for free and pre-execution, so they can block a bad call before it runs
-> - They are blind to semantics: a call with perfect schema and a wrong order id or mis-scoped query passes every check and then executes against real state
-> - They cannot judge selection or necessity — whether a tool should have been called at all
-> - Pair them with reference argument matching (for structured fields) and a judge (for selection/necessity), and add confirmation steps for irreversible actions
-> - The semantic layers cost labels and judge calls, so gate them on the high-risk tools rather than running them on every read-only call
+> [!QUESTION]- Why should tool selection and argument accuracy be measured separately?
+> They fail for different reasons. Choosing the wrong tool usually points to routing or unclear tool descriptions. Choosing the right tool but passing the wrong order ID, filter, or date points to grounding or schema problems. Separate metrics make a result such as 95% selection accuracy and 70% argument accuracy actionable instead of hiding it inside one average. Identifiers and enums can usually be checked against exact references, while free-text arguments often need a semantic check.
 
 # References
 
-- [Berkeley Function-Calling Leaderboard -- AST and executable accuracy for tool/function calls, including irrelevance detection (Gorilla, UC Berkeley)](https://gorilla.cs.berkeley.edu/blogs/8_berkeley_function_calling_leaderboard.html) — the standard methodology for scoring tool selection and arguments, and a live leaderboard of model performance.
-- [Tool use (function calling) overview (Anthropic Docs)](https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview) — how tool schemas, calls, and results are structured, which defines what a deterministic validity check enforces.
-- [tau-bench -- tool-agent-user interaction with rule-grounded ground truth (Yao et al., Sierra, 2024)](https://arxiv.org/abs/2406.12045) — a benchmark whose tasks supply reference end states and policies, a practical source of tool-call ground truth.
+- [Berkeley Function-Calling Leaderboard -- AST and executable accuracy for tool/function calls, including irrelevance detection (Gorilla, UC Berkeley)](https://gorilla.cs.berkeley.edu/blogs/8_berkeley_function_calling_leaderboard.html)
+- [Tool use (function calling) overview (Anthropic Docs)](https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview)

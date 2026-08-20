@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T14:02:43.948Z
-modified: 2026-08-08T09:12:51.778Z
-published: 2026-08-08T09:12:51.778Z
+created: 2026-08-20T20:41:15.517Z
+modified: 2026-08-20T20:41:15.517Z
+published: 2026-08-20T20:41:15.517Z
 topic:
   - Computer Science
 subtopic:
@@ -14,9 +14,9 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-A connected, undirected, weighted graph can contain many spanning trees. [[Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree|Minimum spanning tree]] asks for the one with minimum total edge weight. Kruskal's algorithm treats the graph as an edge list: sort every edge from lightest to heaviest, then accept an edge only when it joins two components that are still separate.
+A connected, undirected, weighted graph can contain many spanning trees. The [[Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree|Minimum spanning tree]] problem asks for the one with the least total edge weight. Kruskal's algorithm works from an edge list: sort the edges from lightest to heaviest, then accept an edge only when its endpoints still belong to separate components.
 
-The cycle test is the whole mechanism. A [[Computer Science/Data Structures/Graph Structures/Disjoint Set|disjoint set]] stores the current forest components. If `find(u) == find(v)`, edge `(u, v)` would close a cycle and is rejected; otherwise `union(u, v)` merges the components and the edge enters the result. The cut property makes that greedy choice safe: the lightest edge crossing a cut belongs to some MST.
+The cycle test does the real work. A [[Computer Science/Data Structures/Graph Structures/Disjoint Set|disjoint set]] tracks the current forest components. If `find(u) == find(v)`, edge `(u, v)` would close a cycle and is rejected. Otherwise `union(u, v)` merges the components and the edge enters the result. The cut property makes the greedy choice safe: a lightest edge crossing a cut belongs to some MST.
 
 ````tabsdown
 tab: Visualization
@@ -100,16 +100,11 @@ tab: Complexity
 
 # Boundary Cases
 
-A disconnected graph never reaches `V - 1` accepted edges. The scan returns a minimum spanning forest rather than an MST, so the edge count must be checked.
+A disconnected graph never reaches `V - 1` accepted edges. The scan returns a minimum spanning forest, so the edge count distinguishes that result from an MST.
 
-Equal weights can produce several valid MSTs. Sort stability or an explicit endpoint tie-break changes which equal-weight edge enters, but not the minimum total weight. Negative weights require no special handling: ascending order and the cut property remain valid.
-
-# Questions
-
-> [!QUESTION]- How does Kruskal's algorithm reveal that the input graph is disconnected?
-> A connected graph reaches exactly `V - 1` accepted edges after its components merge into one. If the sorted-edge scan ends earlier, no remaining edge can connect the residual components, so the result is a minimum spanning forest rather than an MST.
+Equal weights can produce several valid MSTs. Sort stability or an endpoint tie-break changes which equal-weight edge enters without changing the minimum total weight. Negative weights need no special handling because ascending order and the cut property still apply.
 
 # References
 
-- [On the Shortest Spanning Subtree of a Graph and the Traveling Salesman Problem](https://www.ams.org/journals/proc/1956-007-01/S0002-9939-1956-0078686-7/) — Kruskal's original 1956 paper.
-- [Minimum spanning tree — Kruskal with disjoint set union](https://cp-algorithms.com/graph/mst_kruskal_with_dsu.html) — implementation details and union-find complexity.
+- [On the Shortest Spanning Subtree of a Graph and the Traveling Salesman Problem](https://www.ams.org/journals/proc/1956-007-01/S0002-9939-1956-0078686-7/)
+- [Minimum spanning tree — Kruskal with disjoint set union](https://cp-algorithms.com/graph/mst_kruskal_with_dsu.html)

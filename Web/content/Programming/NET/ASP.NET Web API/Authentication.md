@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T14:02:44.099Z
-modified: 2026-07-25T13:57:51.930Z
-published: 2026-07-25T13:57:51.930Z
+created: 2026-08-20T20:41:15.644Z
+modified: 2026-08-20T20:41:15.645Z
+published: 2026-08-20T20:41:15.645Z
 topic:
   - Programming
 subtopic:
@@ -14,13 +14,13 @@ priority: Medium
 status: Ready to Repeat
 ---
 
-Authentication is the process of verifying _who_ a caller is. In ASP.NET Core, authentication is handled by the authentication middleware, which runs early in the pipeline, reads credentials from the request, and populates `HttpContext.User` with a `ClaimsPrincipal` if the credentials are valid. Authorization (what the caller can do) runs after authentication — see [[Authorization]].
+Authentication turns request credentials into an identity. In ASP.NET Core, a registered authentication handler validates the credential for its scheme and, on success, supplies the `ClaimsPrincipal` exposed through `HttpContext.User`. Authorization evaluates that principal later in the pipeline. [[Authorization]] covers that separate decision.
 
-ASP.NET Core supports multiple authentication schemes simultaneously. The most common for APIs are **JWT Bearer** tokens and **API Keys**. Cookie authentication is standard for web applications.
+Several schemes can coexist in one application. Bearer tokens suit APIs called by mobile apps, SPAs, or other services. Cookies remain the natural fit for browser applications, while API-key authentication is usually implemented as a custom handler or gateway concern.
 
 # JWT Bearer Authentication
 
-JWT (JSON Web Token) is the standard for stateless API authentication. The client sends a signed token in the `Authorization: Bearer <token>` header. The server validates the signature and expiry without a database lookup.
+A bearer token arrives in the `Authorization: Bearer <token>` header. With a JWT, the handler can validate the signature, issuer, audience, and lifetime from configured key material without looking up an application session. That local validation is useful, but it also means an issued token normally remains valid until expiry unless the system adds revocation state.
 
 ```csharp
 // Program.cs — register JWT Bearer authentication
@@ -47,7 +47,7 @@ app.UseAuthentication();  // must come before UseAuthorization
 app.UseAuthorization();
 ```
 
-Generating a token (e.g., in a login endpoint):
+A local issuer can generate a token after validating the caller's credentials:
 
 ```csharp
 public string GenerateToken(string userId, string email)
@@ -75,7 +75,7 @@ public string GenerateToken(string userId, string email)
 
 # Cookie Authentication
 
-For web applications (Razor Pages, MVC), cookie authentication stores the identity in an encrypted cookie:
+Cookie authentication protects a serialized authentication ticket and stores it in a cookie. The browser then returns the cookie automatically on matching requests, which works well for Razor Pages and MVC applications.
 
 ```csharp
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -95,7 +95,7 @@ await HttpContext.SignInAsync(
 
 # Multiple Schemes
 
-APIs that serve both browser clients and machine-to-machine callers can register multiple schemes:
+An application serving browser sessions and machine callers can register both cookie and bearer schemes. The selected endpoint can name the required scheme when the default is ambiguous.
 
 ```csharp
 builder.Services.AddAuthentication()
@@ -109,60 +109,50 @@ public IActionResult ApiEndpoint() => Ok();
 
 # Claims, Events, and External Providers
 
-- **`IClaimsTransformation`** runs after a principal is authenticated and lets you add claims (e.g. look up roles/permissions from a store) without touching the token: implement `TransformAsync(ClaimsPrincipal)` and register it. (It can run more than once per request, so make it idempotent.)
-- **`JwtBearerEvents`** hooks let you customize the flow: `OnTokenValidated` (post-validation enrichment/extra checks), `OnAuthenticationFailed` (logging), `OnMessageReceived` (pull the token from a non-standard place, e.g. a SignalR query string).
-- **External / enterprise identity** — beyond hand-rolled JWT and cookies, use `AddOpenIdConnect` for OIDC providers (Auth0, Okta, social logins) and **`Microsoft.Identity.Web`** for Microsoft Entra ID. These handle discovery, key rotation (JWKS), and token validation for you — prefer them over manually configuring `TokenValidationParameters` against an external IdP.
+- **`IClaimsTransformation`** enriches an authenticated principal, often with roles or permissions loaded from an application store. `TransformAsync(ClaimsPrincipal)` can run more than once, so the transformation must be idempotent.
+- **`JwtBearerEvents`** exposes focused hooks. `OnTokenValidated` can run extra checks, `OnAuthenticationFailed` can record a safe diagnostic, and `OnMessageReceived` can obtain a token from a non-standard location such as a SignalR query string.
+- **External identity providers** should own token issuance and key rotation. `AddOpenIdConnect` integrates OIDC sign-in flows, while `Microsoft.Identity.Web` provides Microsoft Entra ID integration. Discovery metadata and JWKS rotation make this safer than copying an external provider's keys into hand-written `TokenValidationParameters`.
 
 > [!WARNING]
-> **Claim-type mapping gotcha.** The legacy `JwtSecurityTokenHandler` silently rewrites short JWT claim names (`sub`, `email`) into long XML URIs (`http://schemas.xmlsoap.org/...nameidentifier`), so `User.FindFirst("sub")` returns `null`. Set `options.MapInboundClaims = false` to keep the original names, or use the modern `JsonWebTokenHandler` (default in newer stacks) which doesn't remap.
+> **Claim-type mapping can change lookup names.** Inbound mapping may translate short JWT names such as `sub` into .NET claim-type URIs, so code looking only for `"sub"` can miss the value. Set `options.MapInboundClaims = false` when the application contract uses the original JWT names, and test claim lookup against the configured handler.
 
 # Pitfalls
 
 ## Symmetric Key Too Short or Hardcoded
 
-**What goes wrong**: a short or hardcoded JWT signing key is brute-forced or leaked via source control.
+**Failure:** a short signing key is easier to brute-force, while a hardcoded key can leak through source control or build artifacts.
 
-**Why it happens**: developers use simple keys in development and forget to change them for production.
+Development placeholders often survive into deployment configuration.
 
-**Mitigation**: use a minimum 256-bit (32-byte) key. Store it in Azure Key Vault, AWS Secrets Manager, or environment variables — never in `appsettings.json` committed to source control. Rotate keys periodically.
+Use key material appropriate for the selected algorithm and keep it in a secret store or protected environment configuration. Rotation also needs an overlap period so tokens signed by the previous key can finish their intended lifetime.
 
 ## Missing `UseAuthentication()` Before `UseAuthorization()`
 
-**What goes wrong**: `[Authorize]` attributes are ignored — all requests are treated as anonymous.
+**Failure:** authorization sees an anonymous principal because no authentication handler populated `HttpContext.User` first.
 
-**Why it happens**: middleware order in ASP.NET Core is significant. `UseAuthorization()` without `UseAuthentication()` before it means `HttpContext.User` is never populated.
+Middleware order is executable behavior. `UseAuthorization()` cannot evaluate the intended identity when authentication has not run.
 
-**Mitigation**: always add `app.UseAuthentication()` immediately before `app.UseAuthorization()` in `Program.cs`.
+Place `app.UseAuthentication()` before `app.UseAuthorization()` in `Program.cs`. Endpoint mapping follows both in the conventional pipeline.
 
 ## Not Validating Token Expiry
 
-**What goes wrong**: expired tokens are accepted because `ValidateLifetime = false`.
+**Failure:** a token remains usable after its intended expiry because lifetime validation was disabled.
 
-**Why it happens**: developers disable expiry validation during development and forget to re-enable it.
+Temporary development configuration can escape into a deployed environment.
 
-**Mitigation**: always set `ValidateLifetime = true` in production. Use short-lived access tokens (15–60 minutes) with refresh tokens for long-lived sessions.
+Keep lifetime validation enabled. Short access-token lifetimes bound exposure. A refresh-token flow can preserve a longer session while keeping revocation state on the server.
 
 # Tradeoffs
 
-- **JWT Bearer vs Cookie auth**: JWT is stateless — the server stores nothing per session, making it ideal for horizontally scaled APIs and mobile/SPA clients. Cookie auth is simpler for browser-based web apps (browsers handle transmission automatically) and easier to revoke. Downside of JWT: tokens cannot be revoked before expiry without a server-side blacklist or short-lived access tokens with refresh token rotation.
-- **JWT vs API keys**: API keys are simpler (no signing algorithm, no expiry rotation) and appropriate for server-to-server authentication where the caller is not an end user. JWT carries identity claims and integrates with ASP.NET Core's claims pipeline. Use API keys for machine clients; JWT for user-facing authentication.
-- **Stateless vs stateful sessions**: stateless (JWT) scales without shared session storage but requires refresh token infrastructure. Stateful (session/cookie) is easier to revoke and simpler to implement, but requires sticky sessions or a distributed session store (Redis) in multi-instance deployments.
+- **Bearer token or cookie:** bearer tokens travel explicitly and fit non-browser clients. Cookies integrate naturally with browser navigation, but automatic transmission creates a CSRF boundary that the application must handle. Either format can carry a protected ticket. The real state tradeoff depends on revocation and session storage, not the transport name alone.
+- **JWT or API key:** a JWT can carry a subject and claims with a bounded lifetime. An API key usually identifies an application or integration and needs its own storage, rotation, and revocation design. Machine callers can use either, depending on whether delegated identity and claims are required.
+- **Local validation or central session state:** local JWT validation removes a per-request session lookup. Central state makes immediate revocation easier. Short-lived access tokens plus server-held refresh tokens split the difference at the cost of a more involved renewal flow.
 
 # Questions
 
-> [!QUESTION]- Why can't you revoke a JWT before its expiry?
-> JWTs are self-contained and the server stores no record of issued tokens. Revocation requires a server-side blacklist (typically Redis) or very short expiry (15–60 min) combined with long-lived refresh tokens stored server-side and revocable on logout.
-
-> [!QUESTION]- When would you choose cookie authentication over JWT Bearer in an ASP.NET Core API?
-> For browser-based web applications (Razor Pages/MVC) where the browser manages cookie transmission automatically, where session revocation (logout everywhere) is a hard requirement, and where CSRF risk is manageable via ASP.NET Core's built-in anti-forgery tokens.
-
-> [!QUESTION]- What does `ValidateIssuerSigningKey = true` actually enforce?
-> It forces the JWT middleware to verify the token's signature against your known signing key. Without it, a token signed by a different (attacker-controlled) key could be accepted — breaking the entire authentication model.
+> [!QUESTION]- What does `ValidateIssuerSigningKey = true` control during JWT validation?
+> For a signed token, the handler uses a resolved key to verify the signature. This flag tells the default validation path to also validate that signing key itself. It does not enable issuer, audience, lifetime, or algorithm validation, and a custom `IssuerSigningKeyValidator` runs regardless of the flag. The rest of the JWT validation settings still have to form one coherent trust configuration.
 
 # References
 
-- [Authentication in ASP.NET Core (Microsoft Learn)](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/) — official overview of the authentication middleware, scheme registration, and `ClaimsPrincipal` population.
-- [JWT Bearer authentication (Microsoft Learn)](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/jwt-authn) — step-by-step guide to configuring JWT Bearer in ASP.NET Core with token generation and validation.
-- [Cookie authentication (Microsoft Learn)](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/cookie) — cookie-based authentication for web applications: sign-in, sign-out, sliding expiration, and claims transformation.
-- [[JWT Bearer]] — how JWTs work: structure, signing algorithms, claims, and security considerations.
-- [[Authorization]] — what happens after authentication: policy-based, role-based, and resource-based authorization in ASP.NET Core.
+- [Authentication in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/)

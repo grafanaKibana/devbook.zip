@@ -1,22 +1,22 @@
 ---
 publish: true
-created: 2026-07-18T14:02:44.169Z
-modified: 2026-07-25T13:51:15.258Z
-published: 2026-07-25T13:51:15.258Z
+created: 2026-08-20T20:41:15.690Z
+modified: 2026-08-20T20:41:15.691Z
+published: 2026-08-20T20:41:15.691Z
 topic:
   - Software Architecture
 subtopic:
   - Patterns
-summary: Extracts state-specific behavior into separate classes; the context delegates to its current state, which drives transitions.
+summary: Extracts state-specific behavior into separate classes. The context delegates to its current state, which drives transitions.
 level:
   - "3"
 priority: High
 status: Done
 ---
 
-Think of a vending machine. Press the same button and you get different results depending on what state the machine is in — idle shows a prompt, has-money dispenses a drink, out-of-stock shows an error. The button doesn’t change. The machine’s response changes because its internal state changed. That’s the State pattern.
+A vending machine responds to the same button differently while idle, holding credit, or out of stock. The input stays the same. Its current state decides what the input means.
 
-The State pattern extracts state-specific behavior into separate state classes. The context object — your `Order` — holds a reference to its current state object and delegates all behavior to it. When the order transitions from Pending to Paid, the context swaps its state object, and suddenly `Ship()` does something different without any switch statement. The state objects themselves drive transitions: `PaidState.Ship()` changes the context’s state to `ShippedState`. This is key — the **object decides** its next state, not the caller. In C#, the compiler implements exactly this pattern for every `async` method: **`async`/`await` generates an `IAsyncStateMachine`** where each `await` point is a state transition.
+The State pattern moves state-dependent behavior into objects that share one interface. A context such as `Order` holds its current state and delegates operations to it. Replacing `PendingState` with `PaidState` changes how `Ship()` behaves without spreading a status switch across every operation. Transitions may be initiated by the context or by a state object. The important boundary is that callers ask for domain operations instead of setting state directly. C# compiler-generated `IAsyncStateMachine` types use the same broad idea—saved state determines where `MoveNext()` resumes—though their generated switch is an implementation technique rather than a textbook object-oriented State hierarchy.
 
 ```mermaid
 stateDiagram-v2
@@ -26,12 +26,11 @@ stateDiagram-v2
     Paid --> Shipped : Warehouse dispatches
     Paid --> Cancelled : Refund before shipping
     Shipped --> Delivered : Carrier confirms
-    Shipped --> Returned : Customer returns
     Delivered --> Returned : Return window open
 ```
 
 > [!NOTE] State vs Strategy
-> Identical class structure, different intent. **State** transitions are **driven by the object** — the order changes its own state from Pending to Paid. **Strategy** selection is **driven by the client** — the caller chooses which shipping algorithm to inject. If the object decides which "algorithm" to use next, it's State. If the caller decides, it's Strategy. See [[Software Architecture/Patterns/Design Patterns/Behavioral/Strategy]].
+> The class diagrams can look alike, but the reasons for change differ. State represents an internal mode and its valid transitions. [[Software Architecture/Patterns/Design Patterns/Behavioral/Strategy|Strategy]] represents a replaceable algorithm, usually selected from outside the context.
 
 # Problem
 
@@ -78,7 +77,7 @@ public class Order
 }
 ```
 
-Here's what breaks when requirements change: adding `OrderStatus.OnHold` requires editing `Ship()`, `Cancel()`, `Refund()`, and `Deliver()` — four methods, each with its own switch.
+Adding `OrderStatus.OnHold` means finding every operation that switches on status. Missing one leaves an inconsistent transition rule.
 
 # Solution
 
@@ -141,7 +140,9 @@ public class DeliveredState : IOrderState
     public void Return(Order order) => order.TransitionTo(new ReturnedState()); // ✅ valid
 }
 
-// ✅ Adding OnHoldState = one new class, zero changes to existing states
+// CancelledState and ReturnedState are omitted; they reject or define any later transitions.
+
+// Adding OnHoldState = one new class plus edits to states that transition to or from it
 public class OnHoldState : IOrderState
 {
     public string StatusName => "OnHold";
@@ -175,51 +176,44 @@ public class Order
 }
 ```
 
-Adding `OnHoldState` now means one new class — existing states never change.
+`OnHoldState` localizes the new behavior. Existing states still need edits if they gain transitions to or from the new state, so the pattern does not eliminate all change. It keeps each change near the state that owns it.
 
-# You Already Use This
+# Familiar state machines
 
-**`async`/`await` compiler-generated `IAsyncStateMachine`** — every `async` method is compiled into a class implementing `IAsyncStateMachine`. The `MoveNext()` method is a state machine with states for each `await` point. The compiler implements the State pattern for you: the method's execution state transitions from one `await` to the next. This is the State pattern at the language level.
+**Compiler-generated `IAsyncStateMachine`** stores a numeric state and resumes `MoveNext()` at the corresponding continuation point. It demonstrates state-driven control flow, but it does so with generated fields and branching rather than interchangeable state objects.
 
-**Polly `CircuitBreaker`** — the circuit breaker has three states: Closed (requests pass through), Open (requests fail fast), HalfOpen (one test request allowed). State transitions are driven by success/failure counts. Each state has different behavior for the same `Execute()` call.
+**Circuit breakers** move among closed, open, and half-open modes. The same execution request is admitted, rejected, or used as a probe according to the current mode and transition policy.
 
-**`TaskStatus` enum + `Task` state transitions** — a `Task` transitions through `Created → WaitingForActivation → Running → RanToCompletion/Faulted/Cancelled`. Each status represents a state with different behavior for `Wait()`, `Result`, and `ContinueWith()`.
+**`TaskStatus`** exposes a task's lifecycle state. It is an enum-backed state machine, which is often the better design when the transition table is small and behavior does not warrant separate classes.
 
 # Pitfalls
 
-**State explosion** — if you have 10 states and 8 operations, that's 80 methods to implement. Many will throw `InvalidOperationException`. Consider using a default base class that throws for all operations, with concrete states overriding only valid transitions. Or use a state machine library (`Stateless`) that defines transitions declaratively.
+**State explosion.** Ten states behind an eight-method interface can produce 80 method bodies, many of which only reject an operation. A default base state can centralize rejection, while a library such as `Stateless` can express a transition-heavy machine as a table.
 
-**Missing transitions** — if `PaidState.Cancel()` doesn't trigger a refund, the order is cancelled but the customer isn't refunded. State transitions often have side effects (send email, trigger refund, update inventory). Put side effects in `TransitionTo()` or in the state's transition method, not in the context.
+**Incomplete transition effects.** Changing `Paid` to `Cancelled` without arranging the refund creates a valid-looking state with broken business meaning. The transition boundary must define whether effects complete atomically, run through an outbox, or leave the machine in an intermediate state.
 
-**Serializing state** — if `Order` is persisted to a database, the current state must be serializable. Store the state name as a string and reconstruct the state object on load. Don't store the state object directly — it creates a tight coupling between the persistence model and the state class hierarchy.
+**Persistence coupling.** Persist a stable state identifier and reconstruct behavior after loading. Serializing concrete state objects ties stored data to the class hierarchy and makes refactoring much harder.
 
 # Tradeoffs
 
 | Concern | State pattern | Enum + switch |
 |---|---|---|
-| Adding a new state | One new class, zero changes to existing | Edit every switch in every method |
+| Adding a new state | Add one class, then edit existing states whose transitions reference it | Edit every switch that handles the state |
 | Adding a new operation | Add method to interface + all state classes | Add one method with a switch |
 | Valid transition enforcement | Each state class defines its own | Switch in each method |
 | Complexity | Many small classes | Few large methods |
 | Readability | State behavior is localized | All behavior in one class |
 
-**Decision rule**: Use State when you have 4+ states and 3+ operations, and the valid transitions differ significantly per state. For 2-3 states with simple transitions, an enum + switch is less overhead. The signal is when you find yourself copying the same switch statement into multiple methods. The `Stateless` library provides a declarative alternative that avoids the class proliferation.
+State earns its classes when state-dependent rules are scattered across several operations and each mode owns meaningful behavior. A compact enum and one transition function remain easier to audit for a small machine. `Stateless` is useful when the transition table matters more than rich behavior inside each state.
 
 # Questions
 
-> [!QUESTION]- How does the `async`/`await` compiler implement the State pattern?
-> The compiler transforms an `async` method into a struct implementing `IAsyncStateMachine`. The struct has a `state` field (an integer) representing the current position in the method. `MoveNext()` is a switch on `state`: each case resumes execution from the last `await` point. When an `await` suspends, the state is saved and `MoveNext()` returns. When the awaited task completes, `MoveNext()` is called again with the next state. Local variables become fields on the struct (captured state). This is exactly the State pattern: the method's execution state drives behavior, and transitions happen automatically at each `await`.
-
-> [!QUESTION]- When should you use the `Stateless` library instead of hand-written state classes?
-> When the state machine has many states and transitions that are better expressed declaratively. `Stateless` lets you define `machine.Configure(State.Paid).Permit(Trigger.Ship, State.Shipped).OnEntry(() => SendShipmentEmail())` — the transition table is explicit and readable. Hand-written state classes are better when each state has complex behavior beyond transitions (not just "what's the next state" but "what does Ship() do in this state"). The tradeoff: `Stateless` is concise for transition-heavy machines; hand-written classes are better for behavior-heavy states.
-
-> [!QUESTION]- How do you handle state transitions that require async operations (e.g., sending a refund on cancel)?
-> Make `TransitionTo()` async and await the side effects before completing the transition. Or use the Observer pattern: raise a `StatusChanged` event after transitioning, and let async observers handle side effects. The second approach keeps state transitions synchronous and side effects decoupled. The tradeoff: synchronous transitions are simpler but can't await side effects; event-based side effects are decoupled but harder to reason about ordering and failure handling.
+> [!QUESTION]- How does a compiler-generated async state machine relate to the State pattern?
+> The compiler emits an `IAsyncStateMachine` implementation with a numeric state field. `MoveNext()` branches on that field, saves a continuation when an awaiter is incomplete, and later resumes from the saved point. Locals that must survive suspension become fields. This is a compiler state machine, but it does not use the pattern's usual family of state objects.
 
 # References
 
-- [State Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=N12L5D78MAA\&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc\&index=17) — video walkthrough of the State pattern with OOP examples
-- [State — refactoring.guru](https://refactoring.guru/design-patterns/state) — canonical pattern description with context/state diagram and C# example
-- [Async/await state machine — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/task-asynchronous-programming-model) — how the compiler generates IAsyncStateMachine
-- [Stateless — GitHub](https://github.com/dotnet-state-machine/stateless) — declarative state machine library for .NET
-- [Polly CircuitBreaker — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/core/resilience/resilience-strategies) — State pattern for resilience: Closed/Open/HalfOpen states
+- [State pattern](https://refactoring.guru/design-patterns/state)
+- [State Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=N12L5D78MAA\&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc\&index=17)
+- [Async/await state machine — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/task-asynchronous-programming-model)
+- [Stateless — declarative state machine library for .NET](https://github.com/dotnet-state-machine/stateless)

@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-18T14:02:44.140Z
-modified: 2026-07-25T13:51:15.310Z
-published: 2026-07-25T13:51:15.310Z
+created: 2026-08-20T20:41:15.671Z
+modified: 2026-08-20T20:41:15.671Z
+published: 2026-08-20T20:41:15.671Z
 topic:
   - Security
 subtopic:
@@ -14,31 +14,31 @@ priority: High
 status: Ready to Repeat
 ---
 
-A _secret_ is any credential that grants access: database connection strings, API keys, signing keys, TLS private keys, OAuth client secrets, cloud-provider credentials. Secrets management is the discipline of keeping these out of source code and build artifacts, distributing them to the workloads that need them, and rotating them — ideally without anyone ever pasting a long-lived secret into a config file. The single most common breach starter is a credential committed to a Git repo; everything here exists to make that impossible.
+A service needs a credential before it can open a database connection, call an API, or sign a token. Copying that credential into source or an image turns every clone and build artifact into another disclosure path. Replacing it without telling running consumers when to reload can instead cause an outage. Secrets management moves credentials from an issuer or store to an authorized workload, limits how long they remain useful, and removes them after expiry or compromise.
 
-# The Core Rule: Never Commit Secrets
+Database passwords, API keys, signing keys, TLS private keys, OAuth client credentials, and cloud credentials all fit this problem. The strongest design avoids a stored bootstrap key: a workload identity exchanges platform evidence for a short-lived token scoped to one service. When a static secret remains necessary, the system still needs to identify who issues it, which workloads receive it, what it permits, how consumers refresh it, and how it is revoked during an incident.
 
-A secret in Git is compromised the moment it's pushed — and **deleting it in a later commit does not help**, because the value lives forever in the history (and on every clone, fork, and CI cache). The fix is layered:
+# What Happens After a Secret Reaches Git
 
-- **`.gitignore`** every local secret file (`appsettings.*.json` with real values, `.env`, `*.pem`).
-- **Pre-commit / push scanning** — tools like `gitleaks`, `trufflehog`, or GitHub **Push Protection** block known secret patterns before they land.
-- **Assume-breach on leak** — if a secret reaches history, _rotate it_, don't just rewrite history. Revocation is the only real remediation.
+A secret pushed to a shared repository is treated as compromised. Deleting the visible line does not revoke copies already present in history, clones, forks, caches, logs, or alerts.
 
-# Where Secrets Should Live Instead
+- Keep local secret files and private-key material outside tracked paths. `.gitignore` reduces accidental additions but does not protect a file that is already tracked.
+- Scan before commit and again at the hosting boundary. Pattern and entropy scanners reduce exposure time. They cannot prove that a repository contains no secrets.
+- Revoke or rotate the exposed credential first. History rewriting can reduce future discovery, but it cannot recall a value another system has already copied.
 
-A rough hierarchy from worst to best:
+# How a Workload Receives a Secret
 
-| Approach | Problem / when acceptable |
-|---|---|
-| Hard-coded in source | Never. Leaks with the code. |
-| Config file in the repo | Never for real values; fine for _placeholders_/local dev defaults. |
-| Environment variables | Better — keeps secrets out of the image; the [12-Factor](https://12factor.net/config) baseline. But visible to the whole process and child processes, and easily logged. |
-| **Dedicated secret store** (Key Vault, AWS Secrets Manager, HashiCorp Vault) | The target state: access-controlled, audited, versioned, rotatable. |
-| **Keyless / workload identity** (OIDC federation, managed identity) | Best — _no stored secret at all_; the workload proves its identity to get short-lived tokens. |
+| Approach | Useful property | Failure to handle |
+|---|---|---|
+| Checked-in placeholder | Documents the configuration key without carrying a credential | Defaults must fail closed and never resemble usable production values |
+| Environment variable | Keeps a runtime value out of source and image layers. Matches the [12-Factor](https://12factor.net/config) configuration boundary | Process inspection, child processes, crash dumps, deployment definitions, and logs may expose it |
+| Mounted secret file | Separates delivery from the image and can support atomic replacement | File permissions, shared volumes, backup behavior, and application reload semantics |
+| Dedicated secret store | Centralizes access policy, audit, versioning, and rotation | The workload still needs a trusted authentication path to the store |
+| Workload identity | Replaces a long-lived bootstrap secret with platform-issued evidence and short-lived tokens | Federation policy, subject binding, token audience, and platform control-plane trust become critical |
 
 # .NET Configuration and User Secrets
 
-ASP.NET Core layers configuration providers; later providers override earlier ones, so a secret store can override checked-in defaults without changing code:
+ASP.NET Core composes configuration providers, with later providers taking precedence. That makes it possible to keep non-secret defaults in source and supply credentials from a development or production provider:
 
 ```csharp
 // Local development: Secret Manager keeps secrets OUT of the project tree
@@ -55,54 +55,51 @@ var connectionString = builder.Configuration["Db:ConnectionString"];
 ```
 
 > [!NOTE]
-> **User Secrets is a dev-only convenience, not encryption.** The file is plain JSON outside the repo; it keeps secrets off Git, nothing more. Production must use a real store.
+> Secret Manager is a development convenience, not an encrypted vault. It stores values outside the project tree and reduces accidental source-control exposure. Local account access, backups, logs, and application code can still reveal them.
 
-# Managed Identity / Keyless Auth (The bEst oPtion)
+# Workload Identity and the Bootstrap Problem
 
-The strongest pattern removes the bootstrap secret entirely. In Azure, a **managed identity** gives the app an identity the platform vouches for, so `DefaultAzureCredential` fetches a short-lived token to read Key Vault — there's no Key Vault _password_ anywhere. The CI equivalent is **OIDC / workload identity federation** (covered in [[CI CD tools|CI/CD tools]]): the pipeline exchanges a job-scoped token with AWS/Azure/GCP instead of holding a static cloud key. The "secret zero" / bootstrapping problem — _how does the app authenticate to the secret store?_ — is solved by the platform's identity rather than yet another stored credential.
+The bootstrap problem asks how a workload authenticates to the system that holds its other secrets. Storing a vault password beside the application only moves the problem.
 
-# Rotation
+Managed identity lets a cloud platform attest to the workload and issue a short-lived access token. CI systems can use OIDC federation for the same pattern, as described in [[CI CD tools|CI/CD tools]]. There is no application-managed cloud key to distribute, but trust has not disappeared. It has moved into the platform identity, federation rules, token audience, and authorization policy.
 
-Secrets must be rotatable on a schedule and _immediately_ on suspected compromise. Two models:
+# Rotating Without Breaking Consumers
 
-- **Static secrets with rotation** — the store holds the value and you rotate it periodically; apps re-read on a cache expiry. Managed stores can rotate some secrets (e.g. database passwords) automatically.
-- **Dynamic secrets** — HashiCorp Vault can _generate_ short-lived, per-request credentials (a database user that expires in an hour), so a leaked secret is useless almost immediately. This is the gold standard but requires the app to fetch on demand.
+Rotation changes the value accepted by a target while applications may still hold the old one. The issuer, store, delivery channel, target system, and every consumer have to move in a safe order. An incident requires that sequence to run quickly; routine rotation requires it to run without an outage.
 
-# Pitfalls
+- **Static rotation:** publish a new version, allow an overlap window where the target system accepts both versions, move consumers, then revoke the old value. Consumers need defined refresh behavior.
+- **Dynamic credentials:** issue a credential for one workload or lease and expire it automatically. This narrows reuse and exposure time, but the issuing system and workload-authentication path become runtime dependencies.
 
-- **Secret committed then "removed"** — deleting in a later commit leaves it in history forever. Rotate the secret; scrubbing history is cleanup, not remediation.
-- **Logging secrets** — connection strings or tokens printed to logs (exception dumps, `Console.WriteLine(config)`, verbose HTTP tracing) leak into log aggregators readable by many. Mask at the source.
-- **Baking secrets into Docker images** — `ENV API_KEY=...` in a Dockerfile is permanent and visible in `docker history` (see [[Docker]]). Inject at runtime.
-- **Over-broad access** — one shared "god" secret with access to everything. Scope secrets per service and grant least privilege so a single leak has a small blast radius.
-- **No rotation plan** — a 5-year-old API key that "can't" be rotated because nobody knows what uses it. Inventory and rotate from day one.
-- **Treating Kubernetes Secrets as encrypted** — they're base64-encoded, not encrypted at rest by default (see [[Kubernetes]]). Enable etcd encryption or use an external store via the Secrets Store CSI driver.
+Lifetime follows the credential and threat model. Some credentials should last minutes. Hardware-rooted keys may last much longer. What matters is that the old credential can be rejected and consumers have a tested path to the replacement.
 
-# Tradeoffs
+# Failure Paths
+
+- **Deletion mistaken for revocation:** removing a committed value leaves copies usable. Revoke first. Scrub later.
+- **Secrets in telemetry:** exception dumps, connection strings, HTTP headers, environment snapshots, and support bundles often have wider readership and retention than the source system. Redaction belongs before export.
+- **Secrets baked into images:** Dockerfile `ARG` and `ENV` values can remain in build history or metadata. Runtime injection keeps them out of the immutable image. See [[Docker]].
+- **Shared administrative credentials:** one credential used by many workloads destroys attribution and widens the compromise radius. Issue separate identities with narrow permissions.
+- **Rotation without consumer behavior:** replacing the stored value does nothing if a process caches the old value forever. Refresh, overlap, rollback, and revocation must be exercised together.
+- **Kubernetes Secret confused with encryption:** Secret data is base64-encoded for transport in manifests, not encrypted by that encoding. Upstream Kubernetes requires explicit encryption-at-rest configuration for API data or integration with an external store. See [[Kubernetes]].
+
+# Choosing the Delivery Path
 
 | Approach | Security | Operational cost | When |
 |---|---|---|---|
-| Env vars | Low-medium | Trivial | Local dev, simple containers, 12-factor baseline |
-| Managed secret store | High | Low (managed) | Default for cloud apps |
-| HashiCorp Vault (dynamic) | Highest | High (run/operate Vault) | Regulated/large orgs, short-lived credentials |
-| Keyless / managed identity | Highest (no secret) | Low | Anywhere the platform supports it — prefer it |
+| Environment variable | Keeps values out of source and image layers | Weak audit and refresh. Easy to expose through process tooling | Simple runtime injection where the platform offers no better binding |
+| Mounted file from a store | File permissions and atomic replacement are available | Application must reload safely. Node storage becomes part of the boundary | Software that already reads credentials from files |
+| Managed secret store | Central policy, versions, access logs, rotation integration | Availability, quotas, SDK behavior, and bootstrap identity | Normal cloud application boundary |
+| Dynamic credential | Short lifetime and per-workload attribution | Issuer becomes a runtime dependency and the target system must support leases | Databases and services that can create scoped temporary access |
+| Workload identity | No application-managed bootstrap key | Federation and platform identity policy carry the trust | Preferred when the platform and target service support it |
 
-**Decision rule**: use the platform's **managed identity / OIDC** wherever it exists so there's no stored secret at all; otherwise put secrets in a **managed store** (Key Vault / Secrets Manager) and inject them at runtime. Reserve plain environment variables for local development and rotate everything on a schedule. Never let a real secret touch source control.
+Prefer workload identity when the platform and target service can bind it narrowly. Otherwise keep static values in a managed store and deliver them at runtime through a channel the application can refresh. Environment variables and mounted files are delivery mechanisms, not systems of record. Any real secret that reaches source control enters incident response.
 
 # Questions
 
-> [!QUESTION]- A secret was accidentally committed and pushed. What's the correct response?
-> Treat it as compromised and **rotate (revoke + reissue) it immediately** — that's the only real fix, because the value persists in Git history, clones, forks, and CI caches even after you delete it. Rewriting history (e.g. `git filter-repo`) is useful cleanup to stop further exposure, but it does not un-leak a secret that others may already have. Afterward, add push protection / secret scanning so it can't recur.
-
-> [!QUESTION]- What is the "secret zero" (bootstrapping) problem and how is it solved?
-> If all your secrets live in a vault, the app still needs _one_ credential to authenticate to the vault — secret zero. Storing it just moves the problem. The modern solution is **platform-provided identity**: a managed identity (Azure) / IAM role (AWS) / workload identity (Kubernetes/GCP) that the infrastructure vouches for, letting the workload obtain a short-lived token with no stored secret. CI pipelines do the same via OIDC federation.
-
-> [!QUESTION]- Why are environment variables a weak place to store secrets despite being common?
-> They keep secrets out of the image (good, and the 12-factor standard), but the whole process and any child processes can read them, they're easy to leak accidentally (a crash dump, a `printenv` in a build log, an APM that captures env), they aren't audited or versioned, and rotating them means redeploying. A dedicated secret store adds access control, auditing, versioning, and rotation that env vars lack — so env vars are fine for dev but a managed store is better for production.
+> [!QUESTION]- What should happen when a secret is accidentally committed and pushed?
+> Treat the secret as compromised and revoke or rotate it immediately. Update the affected workloads through the normal secret-delivery path, then verify that the old value is rejected. Check access logs and usage for signs of abuse. Removing the value from the current file and rewriting repository history can reduce future exposure, but neither action replaces revocation because copies may already exist in clones, caches, logs, or alerts.
 
 # References
 
-- [Safe storage of app secrets in development (Microsoft Learn)](https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets) — the Secret Manager tool and configuration layering in ASP.NET Core.
-- [Azure Key Vault + managed identity (Microsoft Learn)](https://learn.microsoft.com/en-us/azure/key-vault/general/overview) — keyless access to a managed secret store.
-- [The Twelve-Factor App — Config](https://12factor.net/config) — the case for keeping config/secrets in the environment, not the code.
-- [HashiCorp Vault — dynamic secrets](https://developer.hashicorp.com/vault/docs/secrets) — generating short-lived, per-request credentials.
-- [OWASP Secrets Management Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html) — practical guidance on storage, rotation, and leak response.
+- [Azure Key Vault overview](https://learn.microsoft.com/azure/key-vault/general/overview)
+- [HashiCorp Vault secrets engines](https://developer.hashicorp.com/vault/docs/secrets)
+- [OWASP Secrets Management Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html)

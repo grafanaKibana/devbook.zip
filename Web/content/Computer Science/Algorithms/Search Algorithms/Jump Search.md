@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-07-21T18:52:02.837Z
-modified: 2026-08-08T08:06:02.046Z
-published: 2026-08-08T08:06:02.046Z
+created: 2026-08-20T20:41:15.534Z
+modified: 2026-08-20T20:41:15.535Z
+published: 2026-08-20T20:41:15.535Z
 topic:
   - Computer Science
 subtopic:
@@ -14,11 +14,11 @@ priority: Medium
 status: Creation
 ---
 
-A sorted sequential file links every `m`-th checkpoint so following one jump is a single operation, while arbitrary index lookup is unavailable. Binary Search cannot probe offsets `n/2`, `n/4`, then `3n/4` without that random-access capability. Linear Search follows every record. Jump Search follows the checkpoint links — block ends `a[m−1], a[2m−1], a[3m−1], …` — until one reaches or passes the target, retains the previous checkpoint, then traverses ordinary next-links through the one candidate block.
+A sorted sequential file may link every `m`-th record as a checkpoint while offering no arbitrary index lookup. Binary Search cannot jump to midpoints on that structure, and Linear Search follows every record. Jump Search follows block ends `a[m−1], a[2m−1], a[3m−1], …` until one reaches or passes the target. It then scans forward from the previous checkpoint through the single candidate block.
 
-Two properties justify skipping `m − 1` records per stride. Ordering lets `a[block] < target` prove the target lies further ahead, so the skipped records cannot match. A direct checkpoint link makes that proof cost one record probe rather than `m` sequential traversals. Keeping the previous checkpoint makes the final block available without rewinding the source.
+Ordering proves that a block ending below the target contains no match. A direct checkpoint link makes that proof cost one probe instead of `m` traversals, while the retained previous checkpoint avoids any need to rewind.
 
-The move that defines the algorithm is the overshoot: the first block end that crosses the target, collapsing the search to a single block.
+The first block end at or above the target narrows the search to one block. That overshoot is the defining move.
 
 ````tabsdown
 tab: Visualization
@@ -121,7 +121,7 @@ tab: Complexity
 The chart assumes the block size is chosen near the square root of the input length, balancing the jump phase against the final scan.
 ````
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Control flow
 >
@@ -156,11 +156,11 @@ The chart assumes the block size is chosen near the square root of the input len
 >     while (values[Math.Min(step, n) - 1] < target)
 >     {
 >         prev = step;
->         step += block;
 >         if (prev >= n)
 >         {
 >             return -1;   // ran off the end without reaching the target
 >         }
+>         step = step > n - block ? n : step + block;
 >     }
 >
 >     // Scan the single block that can contain the target.
@@ -176,23 +176,16 @@ The chart assumes the block size is chosen near the square root of the input len
 > }
 > ```
 >
-> Every block-end read clamps with `Math.Min(step, n) - 1`; the final block is usually shorter than `block`, so an unclamped probe would index past the array.
+> Every block-end read clamps with `Math.Min(step, n) - 1`. The final block is usually shorter than `block`, so an unclamped probe would index past the array. Capping `step` before addition also prevents an `int` overflow near the end of a very large array.
 
 # When the Assumptions Stop Holding
 
-The niche is a sequential-file or linked-record representation with explicit skip links or block-end access plus a retained route into the final block. Outside that model Jump Search is either a slower array search or a linear traversal with different bookkeeping.
+Jump Search fits a sequential file or linked representation with explicit skip links and a retained route into the final block. On an ordinary array it loses to Binary Search. On a plain linked list with no skips, each apparent jump still walks the intervening nodes and the work remains linear.
 
-Unsorted input breaks the jump proof. On `[2, 40, 9, 55, 13, 91, 7]` a search for `9` reads block ends that are not monotonic; a stride can land on `55`, satisfy `a[block] >= target`, and hand the scan a block that never held the value, while `9` sits in a block that was already skipped. Nothing crashes — the result is a silent false negative.
+Unsorted input breaks the jump proof. For `[2, 40, 9, 55, 13, 91, 7]`, the block size is `floor(√7) = 2`. A search for `9` first probes index `1`, sees `40 >= 9`, and scans only indices `0` and `1`. The match at index `2` is missed, producing a silent false negative.
 
-The final block is usually shorter than `m`, so the block-end index `k·m − 1` can fall past the array. Each block-end access clamps to `Math.Min(step, n) - 1`, and the jump loop halts once `prev` passes `n`; dropping either guard reads out of bounds on the last stride.
-
-# Questions
-
-> [!QUESTION]- What breaks when Jump Search runs on unsorted input?
-> The jump phase assumes `a[block] < target` proves the target lies further ahead, which requires monotonic order. On unsorted data a block end can exceed the target while the matching value sits in an earlier, already-skipped block, so the scan examines the wrong block. The failure is a silent false negative rather than a crash.
+The final block is often shorter than `m`, so `k·m − 1` may exceed the last index. Each block-end access clamps to `Math.Min(step, n) - 1`, and the loop stops once `prev` reaches `n`. Either missing guard can produce an out-of-range read on the last stride.
 
 # References
 
-- [Ben Shneiderman, “Jump Searching: A Fast Sequential Search Technique” (CACM, 1978)](https://doi.org/10.1145/359619.359623) — the primary treatment of square-root jumps, variable and multi-level variants, and the sequential-file applications where binary search is unavailable.
-- [Jump search (Wikipedia)](https://en.wikipedia.org/wiki/Jump_search) — the block-step scheme and the `√n` optimality derivation.
-- [Jump Search (GeeksforGeeks)](https://www.geeksforgeeks.org/jump-search/) — worked example, block-size analysis, and the comparison with binary search.
+- [Ben Shneiderman, “Jump Searching: A Fast Sequential Search Technique” (CACM, 1978)](https://doi.org/10.1145/359619.359623)
