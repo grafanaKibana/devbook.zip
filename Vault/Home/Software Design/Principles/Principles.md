@@ -12,22 +12,20 @@ level:
 status: Creation
 ---
 
-Principles like SOLID, DRY, KISS, and YAGNI are decision checks, not a scoring system. Their value is operational: standards make code predictable, tests expose awkward boundaries, dependency control limits the blast radius of change, refactoring keeps those boundaries honest, and security rules constrain what the design is allowed to expose.
+Principles like SOLID, DRY, KISS, and YAGNI are decision checks, not a scoring system. Each one names a recurring risk: responsibilities that change for different reasons, duplicated rules that drift, unnecessary moving parts, or flexibility built before its requirements are known.
 
 Applying single responsibility usually means splitting a module at a stable reason to change, not splitting every method. Likewise, DRY does not require a shared abstraction for two lines that merely look alike. A principle earns its cost only when it removes a concrete change or failure risk.
 
 # Why Software Design Principles Matter
 
-Following established software design principles provides significant long-term benefits for any software project.
+The value of a principle appears in the behavior of the codebase, not in the label attached to a design. Useful principles make change costs and failure boundaries easier to reason about.
 
-| Benefit | Description |
+| Design effect | What becomes easier to judge |
 | --- | --- |
-| Maintainability | Well-designed code is easier to fix, update, and improve over time. |
-| Scalability | Principles such as Separation of Concerns help systems grow without becoming tightly coupled or difficult to manage. |
-| Readability | Code is read far more often than it is written. Design principles make it easier for others—and your future self—to understand. |
-| Reusability | Principles such as DRY encourage reusable components, reducing duplicated work and implementation effort. |
-| Testability | Code that follows principles such as SRP and DIP is easier to isolate and unit test. |
-| Collaboration | A shared understanding of design principles helps teams make consistent decisions and work together more effectively. |
+| Change locality | A requirement change reaches a bounded set of modules instead of leaking through unrelated code. |
+| Explicit dependencies | Construction, data flow, and external effects are visible rather than hidden behind global state or incidental calls. |
+| Verifiable behavior | Business rules and boundaries can be exercised without reproducing the entire production environment. |
+| Consistent decisions | Shared heuristics let a team discuss tradeoffs in terms of change, ownership, and failure risk. |
 
 ```datacorejsx
 const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
@@ -46,21 +44,14 @@ Consider an endpoint that charges a card and records an order. The first version
 | Continuous refactoring | Extract only after a stable boundary appears in tests and changes | The method does not become a permanent knot, and premature abstractions are avoided |
 | Security assurance | Validate authorization, keep card data out of logs, and use parameterized persistence | A clean design does not accidentally become a data-exposure path |
 
-These practices reinforce one another. Tests make a refactor safe; dependency inversion gives the test a controllable seam; a smaller seam makes security review more precise. The loop is continuous because the evidence changes as the code and threat model change.
+These practices reinforce one another. Tests make a refactor safe. Dependency inversion gives the test a controllable seam. A smaller seam makes security review more precise. The loop is continuous because the evidence changes as the code and threat model change.
 
 Two common overcorrections break the loop:
 
-- **Moderate abstraction becomes an interface per class.** An abstraction with one implementation and no substitution pressure often adds navigation without reducing coupling. Extract the interface when an external boundary, test seam, or independent change rate justifies it.
-- **Pattern literacy becomes pattern collection.** A `FactoryStrategyProvider` around a constructor is not flexibility. Use a pattern when it names and contains a recurring force; delete it when direct code makes the machine clearer.
-
-# Questions
-
-> [!QUESTION]- When is added design ceremony justified, and when is direct code safer?
-> Add an abstraction, pattern, or policy when it contains a demonstrated change, failure, security, or coordination risk. Prefer direct code when the variation is speculative and the extra indirection adds maintenance and review cost without reducing a concrete risk.
+- **Abstraction becomes an interface per class.** An abstraction with one implementation and no substitution pressure often adds navigation without reducing coupling. Extract the interface when an external boundary, test seam, or independent change rate justifies it.
+- **Pattern literacy becomes pattern collection.** A `FactoryStrategyProvider` around a constructor is not flexibility. Use a pattern when it names and contains a recurring force. Delete it when direct code makes the machine clearer.
 
 # References
 
-- [.NET Framework Design Guidelines](https://learn.microsoft.com/en-us/dotnet/standard/design-guidelines/) — Microsoft's design rules for consistent, usable public .NET APIs.
-- [.NET code-quality analysis overview](https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/) — the official analyzer rule families that turn maintainability, reliability, performance, and design concerns into executable checks.
-- [OWASP Application Security Verification Standard](https://owasp.org/www-project-application-security-verification-standard/) — a concrete verification baseline for translating security assurance into testable requirements.
-- [ByteByteGo source snapshot: 10 good coding principles](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/10-good-coding-principles-to-improve-code-quality.md) — the source list reframed here as a reinforcing operating loop rather than ten independent maxims.
+- [.NET Framework Design Guidelines](https://learn.microsoft.com/en-us/dotnet/standard/design-guidelines/)
+- [OWASP Application Security Verification Standard](https://owasp.org/www-project-application-security-verification-standard/)

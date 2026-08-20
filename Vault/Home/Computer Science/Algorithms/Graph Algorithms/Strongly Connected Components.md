@@ -11,11 +11,13 @@ status: Ready to Repeat
 publish: true
 ---
 
-A package manager resolves a directed dependency graph. When two packages depend on each other, directly or through a longer cycle, no install order separates them — they form one unit that has to be reasoned about together.
+A package manager cannot order two packages that depend on each other through a cycle. For dependency analysis, the whole cycle behaves as one unit.
 
-A **strongly connected component** (SCC) is a maximal set of vertices in which every vertex reaches every other: for any `u, v` in the set there is a path `u → v` **and** a path `v → u`. A [[Home/Computer Science/Algorithms/Graph Algorithms/DFS BFS|depth-first traversal]] exposes the finishing or low-link structure used to recover the partition. Collapsing each SCC to a single node yields the **condensation**, which is always a DAG: a cycle between two components would make their vertices mutually reachable, merging them into one. That property makes SCC decomposition the standard preprocessing for cyclic digraphs — 2-SAT, deadlock and dependency analysis, and any dataflow that wants a [[Home/Computer Science/Algorithms/Graph Algorithms/Topological Sort|topological order]] but has cycles in the way.
+A **strongly connected component** (SCC) is a maximal set of vertices in which every vertex reaches every other. For any `u, v` in the set, paths exist both from `u` to `v` and from `v` to `u`. A [[Home/Computer Science/Algorithms/Graph Algorithms/DFS BFS|depth-first traversal]] exposes the finish-time or low-link structure needed to recover this partition.
 
-Edge direction is the whole point. On an undirected graph mutual reachability is just reachability, so "strongly connected components" collapse to ordinary connected components, answered by [[Home/Computer Science/Data Structures/Graph Structures/Union-Find|union-find]] or flood fill.
+Collapsing each SCC into one node produces the **condensation**, which is always a DAG. If two component nodes formed a cycle, their original vertices would be mutually reachable and the components would have merged. SCC decomposition therefore turns a cyclic dependency graph into units that can receive a [[Home/Computer Science/Algorithms/Graph Algorithms/Topological Sort|topological order]]. The same reduction appears in 2-SAT and deadlock analysis.
+
+Direction defines the problem. In an undirected graph, mutual reachability is ordinary reachability, so the task reduces to connected components found by [[Home/Computer Science/Data Structures/Graph Structures/Union-Find|union-find]] or a flood fill.
 
 ~~~~~tabsdown
 tab: Visualization
@@ -147,7 +149,7 @@ tab: Complexity
 ```
 ~~~~~
 
-# Reference Drawer
+# Components and the Condensation Graph
 
 > [!ABSTRACT]- Structural view
 >
@@ -166,17 +168,7 @@ tab: Complexity
 > ```
 > Collapsing each subgraph to a single node gives the condensation `A-B-C → D-E`, a two-node DAG.
 
-# Questions
-
-> [!QUESTION]- Why does Kosaraju process decreasing finish time on the transpose?
-> Individual vertices inside an SCC have no meaningful topological order. What matters is that decreasing maximum finish time orders SCCs in `G`'s condensation DAG from sources onward. Reversing the edges turns the selected source SCC into a sink in `Gᵀ`, letting the second DFS fill it without escaping.
-
-> [!QUESTION]- Why is the condensation always a DAG?
-> A cycle between two distinct components would make every vertex in both mutually reachable, so maximality would already have merged them. Removing those cycles by contraction is what makes topological ordering possible.
-
 # References
 
-- [Depth-First Search and Linear Graph Algorithms](https://epubs.siam.org/doi/10.1137/0201010) — Robert Tarjan's 1972 paper introducing the discovery/low-link DFS and the single-pass SCC procedure.
-- [Finding strongly connected components](https://cp-algorithms.com/graph/strongly-connected-components.html) — Kosaraju's two-pass algorithm with the transpose, the condensation, and a correctness argument.
-- [Tarjan's strongly connected components algorithm](https://en.wikipedia.org/wiki/Tarjan%27s_strongly_connected_components_algorithm) — the low-link invariant, the `onStack` guard, and the reverse-topological output order.
-- [Path-Based Depth-First Search for Strong and Biconnected Components](https://doi.org/10.1016/S0020-0190%2800%2900051-X) — Harold Gabow's two-stack variant that computes SCCs in one pass without a low-link array.
+- [Finding strongly connected components](https://cp-algorithms.com/graph/strongly-connected-components.html)
+- [Path-Based Depth-First Search for Strong and Biconnected Components](https://doi.org/10.1016/S0020-0190%2800%2900051-X)

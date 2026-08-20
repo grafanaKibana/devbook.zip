@@ -11,9 +11,9 @@ status: Done
 publish: true
 ---
 
-A newspaper subscription is the Observer pattern in everyday life. You subscribe once, and the publisher delivers every new issue to your mailbox automatically. You didn’t ask for each specific issue — you registered your interest, and the publisher notifies all subscribers whenever there’s something new. Unsubscribe anytime, and the deliveries stop. The publisher doesn’t need to know what you do with the newspaper.
+A newspaper subscription has the shape of Observer. The publisher keeps a subscriber list and sends each new issue to that list. Subscribers can leave independently, and the publisher does not know how any recipient uses the issue.
 
-The Observer pattern defines a one-to-many dependency: when one object (the **subject** or **publisher**) changes state, all its dependents (**observers** or **subscribers**) are notified automatically. The subject maintains a subscriber list and calls each observer when state changes. Observers register and unregister independently — the subject doesn’t know how many observers exist or what they do. In C#, **`event` and `delegate` ARE the Observer pattern** — the language has it built in. `order.StatusChanged += handler` is subscribe; `order.StatusChanged -= handler` is unsubscribe; raising the event is notify.
+Observer defines one publisher with many independently registered subscribers. A state change triggers notification through a stable callback contract, so the publisher does not depend on subscriber types. C# events provide this mechanism directly: `+=` subscribes, `-=` unsubscribes, and invoking the event notifies the current delegate list.
 
 ```mermaid
 sequenceDiagram
@@ -30,7 +30,7 @@ sequenceDiagram
 
 # Problem
 
-`OrderService.UpdateStatus()` directly calls every subscriber — adding a new subscriber means editing the service:
+`OrderService.UpdateStatus()` calls every downstream system itself. Notification policy is mixed into order state changes:
 
 ```csharp
 public class OrderService
@@ -56,11 +56,11 @@ public class OrderService
 }
 ```
 
-Here's what breaks when requirements change: adding a push notification subscriber requires editing `OrderService` — a class that should only know about order state, not notification channels.
+A push notification requires another `OrderService` dependency and another call. The publisher has become a registry of notification channels.
 
 # Solution
 
-Two approaches: C# `event` (language-native) and explicit subscriber list (more control):
+C# events work for synchronous notifications. An explicit observer interface gives server-side code an awaitable contract and clearer failure handling:
 
 ```csharp
 // Approach 1: C# event — the idiomatic .NET Observer
@@ -85,109 +85,97 @@ public class Order
 public record OrderStatusChangedEventArgs(Guid OrderId, OrderStatus Previous, OrderStatus New)
     : EventArgs;
 
-// Subscribers register independently — OrderService doesn't know about them
-public class EmailNotifier(IEmailService email)
+// Synchronous UI subscriber
+public class StatusBadge
 {
+    public string Text { get; private set; } = "Pending";
+
     public void Subscribe(Order order) =>
-        order.StatusChanged += async (_, e) =>
-            await email.SendStatusUpdateAsync(order.Customer.Email, e.OrderId, e.New);
+        order.StatusChanged += (_, e) => Text = e.New.ToString();
 }
 
-public class AnalyticsTracker(IAnalyticsService analytics)
-{
-    public void Subscribe(Order order) =>
-        order.StatusChanged += async (_, e) =>
-            await analytics.TrackStatusChangeAsync(e.OrderId, e.New);
-}
-
-// ✅ Adding push notifications = new subscriber class, zero changes to Order or OrderService
-public class PushNotifier(IPushService push)
-{
-    public void Subscribe(Order order) =>
-        order.StatusChanged += async (_, e) =>
-            await push.SendAsync(order.Customer.DeviceToken, $"Order {e.OrderId}: {e.New}");
-}
-
-// Approach 2: Explicit subscriber list — more control over async execution
+// Approach 2: awaitable observers discovered through DI
 public interface IOrderStatusObserver
 {
     Task OnStatusChangedAsync(Order order, OrderStatus previous, OrderStatus current);
 }
 
-public class Order
+public class EmailNotifier(IEmailService email) : IOrderStatusObserver
 {
-    private readonly List<IOrderStatusObserver> _observers = [];
+    public Task OnStatusChangedAsync(Order order, OrderStatus previous, OrderStatus current) =>
+        email.SendStatusUpdateAsync(order.Customer.Email, order.Id, current);
+}
 
-    public void Subscribe(IOrderStatusObserver observer) => _observers.Add(observer);
-    public void Unsubscribe(IOrderStatusObserver observer) => _observers.Remove(observer);
+public class AnalyticsTracker(IAnalyticsService analytics) : IOrderStatusObserver
+{
+    public Task OnStatusChangedAsync(Order order, OrderStatus previous, OrderStatus current) =>
+        analytics.TrackStatusChangeAsync(order.Id, current);
+}
 
-    public async Task UpdateStatusAsync(OrderStatus newStatus)
+public class PushNotifier(IPushService push) : IOrderStatusObserver
+{
+    public Task OnStatusChangedAsync(Order order, OrderStatus previous, OrderStatus current) =>
+        push.SendAsync(order.Customer.DeviceToken, $"Order {order.Id}: {current}");
+}
+
+public class OrderStatusService(IEnumerable<IOrderStatusObserver> observers)
+{
+    public async Task UpdateStatusAsync(Order order, OrderStatus newStatus)
     {
-        var previous = Status;
-        Status = newStatus;
-        // ✅ Notify all observers — Order doesn't know their types
-        // Run in parallel for independent notifications
-        await Task.WhenAll(_observers.Select(o => o.OnStatusChangedAsync(this, previous, newStatus)));
+        var previous = order.Status;
+        order.UpdateStatus(newStatus);
+        await Task.WhenAll(
+            observers.Select(o => o.OnStatusChangedAsync(order, previous, newStatus)));
     }
 }
 
 // DI registration for explicit observer approach
 builder.Services.AddScoped<IOrderStatusObserver, EmailNotifier>();
-builder.Services.AddScoped<IOrderStatusObserver, SmsNotifier>();
 builder.Services.AddScoped<IOrderStatusObserver, AnalyticsTracker>();
 // ✅ Adding push notifications = register new observer, zero code changes
 builder.Services.AddScoped<IOrderStatusObserver, PushNotifier>();
 ```
 
-Adding a push notification subscriber now means a new class registered in DI — `Order` and `OrderService` never change.
+A push subscriber is registered alongside the others. The publisher contract does not change.
 
-# You Already Use This
+# Events and Observable APIs in .NET
 
-**C# `event` / `delegate`** — the language-native Observer. Every `event` in .NET is an Observer pattern implementation. `button.Click += handler` subscribes; `button.Click -= handler` unsubscribes. The event publisher doesn't know the subscribers.
+**C# `event` / `delegate`** supplies the language-native subscription list. `button.Click += handler` registers a callback and `-=` removes it.
 
-**`IObservable<T>` / `IObserver<T>`** — the Reactive Extensions (Rx) Observer interfaces. `IObservable<T>` is the subject; `IObserver<T>` is the observer. Rx adds operators (filter, transform, combine) over the observable stream.
+**`IObservable<T>` / `IObserver<T>`** model push streams through `OnNext`, `OnError`, and `OnCompleted`. Reactive Extensions builds composition operators over that protocol.
 
-**`INotifyPropertyChanged`** — WPF/MAUI data binding uses Observer. `PropertyChanged` event notifies the UI when a property changes. The ViewModel raises the event; the binding infrastructure subscribes.
+**`INotifyPropertyChanged`** lets binding infrastructure observe ViewModel property changes without the ViewModel knowing which controls display them.
 
-**`ObservableCollection<T>`** — raises `CollectionChanged` events when items are added, removed, or replaced. WPF/MAUI list controls subscribe to update the UI automatically.
+**`ObservableCollection<T>`** raises `CollectionChanged` after mutations. UI collection views subscribe and update their projection.
 
-**`IChangeToken` / `ChangeToken.OnChange()`** — ASP.NET Core's Observer for configuration changes. `IConfiguration.GetReloadToken()` returns a token that fires when configuration is reloaded.
+**`IChangeToken` / `ChangeToken.OnChange()`** exposes one-shot change notifications, including configuration reload signals.
 
 # Pitfalls
 
-**Memory leaks from unsubscribed event handlers** — if a short-lived subscriber subscribes to a long-lived publisher's event and never unsubscribes, the publisher holds a reference to the subscriber, preventing garbage collection. Classic example: a view subscribes to a ViewModel's event; the view is closed but the ViewModel lives on. Always unsubscribe in `Dispose()` or use weak event patterns (`WeakEventManager`).
+**Unsubscribed event handlers.** A long-lived publisher retains its delegate targets. A closed view can stay alive because its handler is still attached to a surviving ViewModel. Unsubscribe with the owning lifetime or use a weak-event mechanism where that ownership cannot be aligned.
 
-**Exception in one observer breaks all others** — if `EmailNotifier` throws, subsequent observers (`SmsNotifier`, `AnalyticsTracker`) never run. Wrap each observer call in try/catch, or use `Task.WhenAll` with exception aggregation. Decide upfront: should one observer's failure stop others?
+**One observer breaks the notification loop.** A synchronous event invocation stops when a handler throws. Explicit async observers can isolate failures or aggregate them with `Task.WhenAll`, but the policy must say whether one subscriber may fail the whole operation.
 
-**Ordering dependencies between observers** — if `WarehouseNotifier` must run before `ShippingNotifier`, you have an implicit ordering dependency. The Observer pattern doesn't guarantee order. Make the dependency explicit: use a Chain of Responsibility or a sequenced event pipeline instead.
+**Hidden ordering dependencies.** `Task.WhenAll` starts independent observers together and gives no completion order. When `WarehouseNotifier` must finish before `ShippingNotifier`, await observers sequentially in an explicit workflow or chain.
 
 # Tradeoffs
 
-| Concern | C# `event` | Explicit `IOrderStatusObserver` list |
+| Concern | C# `event` | DI-discovered observers |
 |---|---|---|
 | Async support | Awkward (`async void` or fire-and-forget) | Natural (`Task`-returning interface) |
 | Error handling | Exceptions propagate to publisher | Can wrap each observer independently |
 | Subscriber discovery | Manual registration | DI container can inject all implementations |
-| Ordering control | None | Explicit via registration order |
-| Unsubscription | Must hold reference to handler delegate | Remove from list |
+| Completion order | Invocation-list order for synchronous handlers | None with `Task.WhenAll`. Use a sequential awaited loop when order matters |
+| Lifetime and removal | Must hold the handler delegate and unsubscribe | Governed by DI registration and the containing scope |
 
-**Decision rule**: Use C# `event` for synchronous, UI-oriented notifications where `async void` is acceptable (WPF/MAUI event handlers). Use explicit `IObserver` interface for async, server-side notifications where error handling and ordering matter. Use `IObservable<T>` (Rx) when you need stream operators (filter, throttle, combine).
+C# events fit synchronous UI notifications. Server-side async subscribers need a `Task`-returning interface so completion and failure remain observable. `IObservable<T>` with Rx becomes worthwhile when the event stream itself needs composition over time.
 
 # Questions
 
-> [!QUESTION]- Why does subscribing to an event with `async void` cause problems?
-> `async void` event handlers can't be awaited. If the handler throws, the exception propagates to the synchronization context (often crashing the app) rather than being catchable by the publisher. If the handler does async work, the publisher doesn't know when it completes — the event returns before the async work finishes. Use `async void` only for top-level event handlers in UI frameworks where the framework expects it. For server-side observers, use an explicit `Task`-returning interface and `await Task.WhenAll(observers.Select(o => o.OnStatusChangedAsync(...)))`.
-
-> [!QUESTION]- How do you prevent memory leaks from event subscriptions?
-> Three approaches: (1) **Unsubscribe in `Dispose()`** — implement `IDisposable` and unsubscribe in `Dispose()`. (2) **Weak event pattern** — use `WeakEventManager` (WPF) or `WeakReference<T>` to hold subscriber references; the publisher doesn't prevent GC. (3) **Scoped lifetime** — if both publisher and subscriber have the same DI lifetime (both scoped), they're collected together. The tradeoff: explicit unsubscription is reliable but requires discipline; weak events are automatic but add complexity and slight performance overhead.
-
-> [!QUESTION]- When should you use `IObservable<T>` (Rx) instead of plain events?
-> When you need stream operators: filtering (`Where`), transformation (`Select`), throttling (`Throttle`), combining multiple streams (`Merge`, `CombineLatest`), or backpressure. Plain events are push-only with no composition. Rx adds a rich operator library over the observable stream. Use Rx when: you're processing a stream of events with complex filtering or timing requirements (e.g., "notify only if status changes twice within 5 seconds"). The cost: Rx has a steep learning curve and adds a dependency. For simple one-to-many notification, plain events or explicit interfaces are sufficient.
+> [!QUESTION]- How should event subscriptions be managed to avoid retaining subscribers after their lifetime ends?
+> A subscription should be removed when its owner is disposed or otherwise reaches the end of its lifetime. Weak events help when the publisher must live longer than its subscribers and there is no clear owner that can unsubscribe. Matching DI scopes helps only if the publisher stays in the same scope and the subscription does not escape into a singleton, static event, or another longer-lived object.
 
 # References
 
-- [Observer Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=_BpmfnqjgzQ&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc&index=2) — video walkthrough of the Observer pattern with OOP examples
-- [Observer — refactoring.guru](https://refactoring.guru/design-patterns/observer) — canonical pattern description with subject/observer diagram and C# example
-- [Events (C# programming guide) — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/events/) — C# event/delegate as the language-native Observer
-- [`IObservable<T>` — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.iobservable-1) — Reactive Extensions Observer interfaces
-- [Weak event patterns — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/events/weak-event-patterns) — preventing memory leaks in long-lived publishers
+- [Observer pattern](https://refactoring.guru/design-patterns/observer)
+- [Observer Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=_BpmfnqjgzQ&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc&index=2)

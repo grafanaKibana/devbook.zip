@@ -11,9 +11,9 @@ status: Done
 publish: true
 ---
 
-Traveling abroad with a US laptop charger, you discover your plug doesn’t fit the European outlet. You buy a power adapter at the airport. The adapter doesn’t change your charger or rewire the outlet — it sits between them and translates one shape into another. Both sides keep working exactly as before.
+A travel plug adapter lets a US charger connect to a European outlet. It changes neither device. The small piece between them translates one physical interface into the other.
 
-The Adapter pattern does the same thing in code: it converts the interface of an existing class into a different interface that clients expect. The adapter implements the target interface your code already works with and holds a reference to the incompatible object (the adaptee). Every method call on the target interface delegates to the adaptee with any necessary translation — converting data formats, mapping method names, or adapting return types. The key insight: the adapter preserves the original capability without modifying either side.
+The Adapter pattern applies the same idea to software. An adapter implements the interface expected by client code and delegates to an incompatible object, the adaptee. Translation stays at that boundary: method names can be mapped, data reshaped, and return values converted without modifying either side. The original capability remains intact behind a compatible interface.
 
 ```mermaid
 classDiagram
@@ -37,7 +37,7 @@ classDiagram
 ```
 
 > [!NOTE] Adapter vs Facade vs Bridge
-> **Adapter** makes an existing incompatible interface work — it's a retrofit. [[Home/Software Architecture/Patterns/Design Patterns/Structural/Facade]] creates a new simplified interface over a complex subsystem — it's about convenience. [[Home/Software Architecture/Patterns/Design Patterns/Structural/Bridge]] is designed upfront to separate abstraction from implementation — it's not a retrofit at all.
+> **Adapter** retrofits compatibility onto an existing interface. [[Home/Software Architecture/Patterns/Design Patterns/Structural/Facade]] puts a simpler interface over a complex subsystem. [[Home/Software Architecture/Patterns/Design Patterns/Structural/Bridge]] separates abstraction from implementation as part of the design.
 
 # Problem
 
@@ -85,11 +85,11 @@ public class OrderService
 }
 ```
 
-Here's what breaks when requirements change: replacing the legacy system with a modern REST API requires rewriting `OrderService` — the XML parsing and legacy error codes are embedded throughout.
+Replacing the legacy system with a REST API now requires rewriting `OrderService` because XML parsing and legacy error codes have leaked into its domain logic.
 
 # Solution
 
-Introduce `IInventoryService` and an adapter that translates between the modern interface and the legacy system:
+`IInventoryService` gives the order domain a stable contract. The adapter owns every translation between that contract and the legacy system:
 
 ```csharp
 // Target interface — what OrderService wants to work with
@@ -114,13 +114,11 @@ public class LegacyInventoryAdapter(LegacyInventorySystem legacy) : IInventorySe
     public async Task<InventoryReservation> ReserveAsync(Guid productId, int quantity, string warehouseCode)
     {
         // ✅ XML translation isolated here — OrderService never sees it
-        var xmlRequest = $"""
-            <InventoryRequest>
-                <SKU>{productId}</SKU>
-                <Quantity>{quantity}</Quantity>
-                <WarehouseCode>{warehouseCode}</WarehouseCode>
-            </InventoryRequest>
-            """;
+        var xmlRequest = new XElement(
+            "InventoryRequest",
+            new XElement("SKU", productId),
+            new XElement("Quantity", quantity),
+            new XElement("WarehouseCode", warehouseCode)).ToString(SaveOptions.DisableFormatting);
 
         var xmlResponse = await legacy.CheckAndReserveAsync(xmlRequest);
         var doc = XDocument.Parse(xmlResponse);
@@ -133,7 +131,9 @@ public class LegacyInventoryAdapter(LegacyInventorySystem legacy) : IInventorySe
 
     public async Task ReleaseAsync(string reservationId)
     {
-        var xmlRequest = $"<ReleaseRequest><ReservationId>{reservationId}</ReservationId></ReleaseRequest>";
+        var xmlRequest = new XElement(
+            "ReleaseRequest",
+            new XElement("ReservationId", reservationId)).ToString(SaveOptions.DisableFormatting);
         await legacy.ReleaseReservationAsync(xmlRequest);
     }
 
@@ -164,32 +164,28 @@ public class OrderService(IInventoryService inventory)
 builder.Services.AddScoped<IInventoryService, ModernInventoryRestAdapter>();
 ```
 
-Replacing the legacy system now means writing a new adapter class — `OrderService` never changes.
+Replacing the legacy system now requires a new adapter. `OrderService` stays unchanged.
 
-# You Already Use This
+# Common .NET Examples
 
-**`StreamReader` / `StreamWriter`** — adapts the byte-oriented `Stream` interface to a text-oriented API. `new StreamReader(fileStream)` wraps a `FileStream` (which speaks bytes) and exposes `ReadLine()`, `ReadToEnd()` (which speak strings). The adapter translates between the two interfaces.
+**`StreamReader` / `StreamWriter`** adapt the byte-oriented `Stream` interface to text. `new StreamReader(fileStream)` wraps a `FileStream` and exposes operations such as `ReadLine()` and `ReadToEnd()`.
 
-**`ILogger` adapters (Serilog, NLog, Application Insights)** — these logging libraries implement the .NET `ILogger` / `ILoggerProvider` interfaces, adapting their own internal APIs to the .NET logging abstraction. Your code depends on `ILogger<T>`; the adapter translates to Serilog's `ILogger` or NLog's `Logger`.
+**`ILogger` adapters** let code depend on `ILogger<T>` while a provider translates calls to Serilog, NLog, or Application Insights.
 
-**`DelegatingHandler` subclasses** — wrap `HttpMessageHandler` to add behavior (auth headers, retry logic, logging) while adapting the `HttpRequestMessage`/`HttpResponseMessage` interface. Each handler in the chain adapts the request/response before passing it along.
+**A boundary `DelegatingHandler`** can contain Adapter logic when it translates an external message shape into an application contract. The handler chain itself is Decorator. Translation inside a handler is the Adapter responsibility.
 
 # Pitfalls
 
-**Leaky abstraction** — if the legacy system has quirks (rate limits, specific error codes, ordering requirements), the adapter may expose these through the target interface. Example: `IInventoryService.ReserveAsync` returning a legacy-specific error code string. Keep the target interface clean; map all legacy concepts to domain concepts inside the adapter.
+**Leaky abstraction.** Legacy error codes or protocol rules do not belong in the target interface. `IInventoryService.ReserveAsync` should return domain results, while the adapter maps every legacy concept at the boundary. Operational constraints that cannot be translated, such as a provider rate limit, still need explicit handling elsewhere.
 
 # Questions
 
-> [!QUESTION]- How do you test code that uses an Adapter?
-> Test the consumer (`OrderService`) by injecting a mock `IInventoryService` — the adapter is invisible to the test. Test the adapter itself with integration tests against the real legacy system (or a recorded response). Unit-testing the adapter with a mock `LegacyInventorySystem` is valid but limited — the real value is verifying the XML translation is correct, which requires the actual legacy format. The tradeoff: integration tests are slower and environment-dependent; unit tests are fast but may miss translation bugs.
-
-> [!QUESTION]- When does an Adapter become a Facade?
-> When the adapter starts simplifying the interface rather than just translating it. An Adapter preserves the full capability of the adaptee — every method on `IInventoryService` maps to a corresponding legacy operation. A Facade intentionally hides complexity, exposing only a subset of the subsystem's capabilities. If your "adapter" only exposes 3 of the legacy system's 20 operations and adds orchestration logic, it's a Facade. The distinction matters for maintenance: an Adapter should be a thin translation layer; a Facade can contain business logic.
+> [!QUESTION]- How can an Adapter be distinguished from a Facade when both wrap another system?
+> An Adapter translates an incompatible interface into the contract a client expects. A Facade gives clients a smaller, workflow-oriented API and may coordinate several subsystem calls. For example, a wrapper that exposes three business operations over twenty legacy calls is acting as a Facade, even if some translation also happens inside it.
 
 # References
 
-- [Adapter Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=2PKQtcJjYvc&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc&index=8) — video walkthrough of the Adapter pattern with OOP examples
-- [Adapter — refactoring.guru](https://refactoring.guru/design-patterns/adapter) — canonical pattern description with object and class adapter variants, C# example
-- [StreamReader — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.io.streamreader) — .NET's built-in Adapter for byte-to-text stream translation
-- [DelegatingHandler — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.net.http.delegatinghandler) — HTTP pipeline adapter pattern in .NET
-- [Strangler Fig pattern — Microsoft Learn](https://learn.microsoft.com/en-us/azure/architecture/patterns/strangler-fig) — using Adapters to incrementally replace legacy systems
+- [Adapter pattern](https://refactoring.guru/design-patterns/adapter)
+- [Adapter Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=2PKQtcJjYvc&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc&index=8)
+- [StreamReader — .NET's built-in Adapter for byte-to-text stream translation](https://learn.microsoft.com/en-us/dotnet/api/system.io.streamreader)
+- [DelegatingHandler — HTTP pipeline adapter pattern in .NET](https://learn.microsoft.com/en-us/dotnet/api/system.net.http.delegatinghandler)

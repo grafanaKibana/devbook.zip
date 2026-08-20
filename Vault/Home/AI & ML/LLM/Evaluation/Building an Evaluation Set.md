@@ -3,7 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
-summary: "The labeled data every eval technique scores against; labeling and size decide if numbers mean anything."
+summary: "How to structure, label, generate, and size the cases that every evaluation method relies on."
 level:
   - "3"
 priority: High
@@ -11,17 +11,19 @@ status: Done
 publish: true
 ---
 
-An evaluation set is the labeled data every other eval technique runs against — [[LLM-as-a-Judge]], [[Deterministic Checks]], and the regression gate all score against it. A bad eval set produces misleading numbers no matter how sophisticated the scoring is, so the set itself is the foundation. This page covers the parts that are the same whether you are evaluating a RAG pipeline, an agent, or a single-shot prompt: how an example is structured, how to bootstrap one with synthetic generation, and how large it must be to detect a real change.
+An evaluation set is the common input to [[LLM-as-a-Judge]], [[Deterministic Checks]], and regression gates. If its cases do not represent the workload, a precise scorer still produces a misleading result. The set defines what is measured before any metric assigns a number.
 
-Two design choices drive whether the numbers mean anything. The first is **labeling** — what counts as a correct output, which gets domain-specific fast (retrieval relevance in [[Retrieval Evaluation Sets]], trajectory and tool-call correctness for agents). The second is **size** relative to the effect you want to detect; get this wrong and the eval cannot distinguish two configurations at all. The curated regression subset and the offline/online loop that consume this set are covered in [[Golden Test Set and Regression Runs]] and [[Online Evaluation and AB Tests]].
+Two choices matter most. Labels describe acceptable behavior, which quickly becomes domain-specific: [[Retrieval Evaluation Sets]] shows how queries map to relevant evidence, while an agent may need correct tool choice and trajectory constraints. Sample size determines whether the set can distinguish a real change from sampling noise. A stable subset becomes the release gate described in [[Golden Test Set and Regression Runs]], and [[Online Evaluation and AB Tests]] carries the comparison into production traffic.
 
 # Structure
 
-Each example contains an input (the query or task), the expected behavior (a reference answer or acceptance criteria), and optionally the supporting evidence the system should have used. How strict the expected side is determines which scorers you can run: a reference answer enables correctness scoring, while acceptance criteria alone enable rubric-based judging. Some harnesses run reference-free — RAGAS judges faithfulness and relevance from context alone, and ARES evaluates with synthetic data plus a small human-labeled set via prediction-powered inference (PPI), so a tiny labeled set calibrates judgments over a large unlabeled one.
+Each case needs an input and a testable description of acceptable behavior. That description may be a reference answer, a rubric, hard constraints, or some combination. Supporting evidence is part of the case when the system is expected to ground its answer in a particular source.
+
+The label determines which scorer is valid. Exact or structured expectations support deterministic checks. Open-ended criteria need rubric-based grading. Reference-free methods can measure properties such as faithfulness against supplied context, but they do not replace domain ground truth when correctness depends on facts outside that context. ARES combines synthetic data with a smaller human-labeled set and uses prediction-powered inference to estimate performance over more examples.
 
 # Synthetic Generation
 
-The fastest bootstrap is to prompt an LLM to write the inputs your system will receive from material you already have. The general form: sample source items (documents, transcripts, prior tickets), and for each, ask the model to produce the natural questions or tasks a real user would pose, recording the source as the expected ground truth. This inverts the expensive direction of labeling — instead of writing inputs and then hunting for what's correct, you start from a known-good source and synthesize the input backwards.
+Synthetic generation is a practical bootstrap. Start from source material with known provenance, ask a model for plausible requests that the material can answer, and keep the source identifier with each generated case. This reverses the expensive part of labeling: the evidence is known before the input is written.
 
 ```text
 for item in sample(source_material, n=2000):
@@ -35,45 +37,34 @@ for item in sample(source_material, n=2000):
         eval_set.append({"input": q, "expected_source_id": item.id})
 ```
 
-The failure mode every synthetic set shares is **distributional homogeneity**: generated cases are individually reasonable but collectively cluster in the style and difficulty the model finds easy to produce, missing ambiguous, multi-hop, and adversarial inputs real users send. Mitigation: stratify the source sample so common boilerplate does not dominate, vary the prompt to request different input types, and augment with real production logs to cover the actual distribution. Domain-specific distortions — retrieval false-negatives and lexical leakage — are covered where they bite, in [[Retrieval Evaluation Sets]].
+The weakness appears across the set rather than in one obvious bad case. Generated requests tend to share the model's phrasing and preferred difficulty, so ambiguous or adversarial production inputs disappear from view. Stratified source sampling helps. Prompt variants can widen the case shapes, and production examples should replace synthetic cases as real traffic becomes available. Retrieval-specific problems such as lexical leakage are covered in [[Retrieval Evaluation Sets]].
 
 # Size and Statistical Power
 
-Most eval sets are too small to detect meaningful differences between configurations. Anthropic's analysis shows that treating eval questions as samples from a query universe and computing confidence intervals reveals that many published eval results lack statistical power — the observed difference is inside the noise band. Required sample size depends on the target effect size, the confidence level, and the metric's variance. End-to-end metrics typically have higher variance than component metrics and therefore need *more* samples, not fewer. For regression detection, size the set so that a 3-5% change in your target metric is statistically significant at your chosen confidence level; below that, a "regression" or "improvement" may be sampling noise you will chase for nothing.
+An evaluation result is an estimate over sampled cases. Its uncertainty depends on the metric, case distribution, correlation between observations, and the effect the gate is meant to detect. A small set may expose large failures while remaining unable to separate two close configurations.
+
+Choose the minimum detectable effect before sizing the set, then report an interval around the observed difference. Paired evaluation, where baseline and candidate answer the same cases, often reduces variance because each case acts as its own control. End-to-end outcomes may still need many observations when user behavior or task difficulty varies widely.
 
 # Pitfalls
 
 ## Eval Set Drift
 
-The corpus or product changes, but the eval set stays frozen. Inputs that were valid last month reference material that has been updated, deleted, or superseded. The set reports stable metrics on stale ground truth while real users see degraded behavior.
+The corpus or product changes while the evaluation set stays frozen. Cases begin to reference deleted material or obsolete behavior, yet the dashboard remains stable.
 
-Detection: track the fraction of eval-set ground truth that still exists in the current system. When it drops below ~90%, the set needs refresh. Version the eval set alongside the data it labels so you can attribute metric changes to data changes, not only to code changes.
+Version the set with the data and policy it describes. Validate that referenced sources still exist, and review cases when the product contract changes. Otherwise a score change cannot be attributed cleanly to the system, the data, or the labels.
 
 ## Threshold Cargo-Culting
 
-Teams copy pass thresholds from blog posts or talks ("score above 0.9") without validating that those thresholds match their workload. A curated support assistant may need a far higher bar than a research tool over a noisy corpus, and the same number means different things on different data.
+A threshold copied from another workload has no local meaning. The same score can represent different risks when the rubric, traffic, or cost of failure changes.
 
-Fix: establish your own baseline by running the pipeline on your eval set and measuring user satisfaction at different metric levels. Set thresholds as regression deltas from that baseline, not as absolute targets borrowed from another deployment.
+Calibrate thresholds against human labels and product outcomes from the workload being shipped. Relative regression limits are useful when the measurement scale is stable, but they cannot make an unsafe baseline acceptable.
 
 # Questions
 
-> [!QUESTION]- Why are relative regression thresholds preferable to absolute quality targets for release gates?
-> - Absolute thresholds are brittle across data changes, model updates, and workload shifts
-> - A threshold set during initial launch becomes meaningless after the data doubles or input distribution shifts
-> - Relative thresholds (no more than N% regression from baseline) adapt automatically because the baseline tracks the current system state
-> - They prevent the failure mode where a team sets an ambitious absolute target, cannot reach it, and disables the gate entirely
-> - Relative thresholds do require a consistent baseline measurement maintained across releases, which adds CI/CD complexity — but that cost is far lower than the risk of shipping regressions absolute thresholds can't catch after the first data evolution
-
 > [!QUESTION]- When should a team invest in a human-annotated golden set versus relying on synthetic generation?
-> - Synthetic generation bootstraps evaluation quickly and covers breadth at low cost
-> - LLM-generated inputs cluster around patterns the model finds easy to generate, missing adversarial cases, ambiguous inputs, and domain edge cases
-> - A golden set is worth the investment when the system serves high-stakes decisions (medical, legal, financial) where evaluation failures have direct business or safety impact
-> - Golden sets also serve as regression gates — known past failures are captured permanently, preventing recurrence (see [[Golden Test Set and Regression Runs]])
-> - In practice, combine both: synthetic for broad coverage, golden for regression gating on known failure modes
-> - Golden sets do cost annotator time (typically 2-4 hours per 100 examples) and ongoing maintenance as the data evolves — invest proportionally to the cost of an undetected evaluation failure in your domain
+> Synthetic cases are enough to bootstrap breadth and test the harness. Human annotation becomes necessary when labels require domain judgment, the failure cost is high, or synthetic phrasing no longer matches production traffic. A practical set combines generated coverage with reviewed incidents and a curated regression subset in [[Golden Test Set and Regression Runs]].
 
 # References
 
-- [A statistical approach to model evaluations -- confidence intervals and sample sizing (Anthropic)](https://www.anthropic.com/research/statistical-approach-to-model-evals)
-- [ARES -- automated evaluation with synthetic data and prediction-powered inference (Stanford)](https://arxiv.org/abs/2311.09476)
-- [RAGAS synthetic test data generation -- generating question/answer/context sets from a corpus (RAGAS docs)](https://docs.ragas.io/en/stable/concepts/test_data_generation/rag/)
+- [A statistical approach to model evaluations (Anthropic)](https://www.anthropic.com/research/statistical-approach-to-model-evals)
+- [ARES (Stanford)](https://arxiv.org/abs/2311.09476)

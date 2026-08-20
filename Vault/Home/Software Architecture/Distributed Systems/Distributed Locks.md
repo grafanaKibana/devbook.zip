@@ -24,19 +24,18 @@ worker B acquires reports/monthly -> fence 42
 A resumes and sends write with fence 41 -> storage rejects 41 < 42
 ```
 
-The protected resource must remember the highest accepted fence. Without that check, the lease service can exclude current holders while a stale holder still corrupts the resource. A quorum or consensus-backed store improves the ownership decision; it does not remove process pauses or make an unfenced downstream write safe.
+The protected resource must remember the highest accepted fence. Without that check, the lease service can exclude current holders while a stale holder still corrupts the resource. A quorum or consensus-backed store improves the ownership decision. It does not remove process pauses or make an unfenced downstream write safe.
 
-# Prefer a Native Invariant
+# Prefer Constraints, Version Checks, Idempotency, or Partitioning
 
-Use a unique database constraint to prevent duplicate order creation, optimistic concurrency to reject stale document updates, idempotency keys to suppress retries, and partition ownership to serialize queue work. These mechanisms protect the actual data invariant and are often safer than a separate lock.
+A unique database constraint can prevent duplicate orders. Optimistic concurrency rejects stale document updates, idempotency keys suppress retries, and partition ownership serializes queue work. These mechanisms protect the data invariant directly and are often safer than a separate lock.
 
-Use a distributed lease when the resource has no stronger atomic primitive and duplicate work is expensive: singleton maintenance, leader-only scheduling, or exclusive access to a legacy device. Define lease duration from the worst expected pause, renewal failure behavior, fencing, and recovery ownership.
+A distributed lease fits when the resource has no stronger atomic primitive and duplicate work is expensive, such as singleton maintenance or exclusive access to a legacy device. Its contract includes lease duration, renewal failure behavior, fencing, and recovery ownership. The duration must cover expected pauses without delaying recovery for too long.
 
-The source visual remains rejected because it presents mutual exclusion as sufficient and recommends locks for cases better served by constraints, idempotency, or partition ownership.
+Mutual exclusion alone does not protect against a stale lock holder. Fencing, a database constraint, idempotency, or partition ownership may be the stronger control.
 
 # References
 
-- [The Chubby lock service](https://research.google/pubs/the-chubby-lock-service-for-loosely-coupled-distributed-systems/) — primary design for coarse-grained distributed locking, sessions, sequencers, and failure semantics.
-- [etcd concurrency API](https://etcd.io/docs/v3.6/dev-guide/api_concurrency_reference_v3/) — official lease, mutex, election, and session interfaces backed by etcd consensus.
-- [How to do distributed locking](https://martin.kleppmann.com/2016/02/08/how-to-do-distributed-locking.html) — practitioner analysis of leases, pauses, and fencing-token requirements.
-- [ByteByteGo: why distributed locks](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/why-do-we-need-to-use-a-distributed-lock.md) — provenance for the problem inventory; its visual is rejected because it omits fencing and stronger alternatives.
+- [The Chubby lock service](https://research.google/pubs/the-chubby-lock-service-for-loosely-coupled-distributed-systems/)
+- [etcd concurrency API](https://etcd.io/docs/v3.6/dev-guide/api_concurrency_reference_v3/)
+- [How to do distributed locking](https://martin.kleppmann.com/2016/02/08/how-to-do-distributed-locking.html)

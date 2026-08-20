@@ -11,9 +11,11 @@ status: Ready to Repeat
 publish: true
 ---
 
-RPC (Remote Procedure Call) is a communication style where a client invokes a server operation as if it were a local function call. The RPC framework handles serialization, network transport, and deserialization, hiding the network boundary from the caller. You define a service interface; the framework generates client stubs that make remote calls look like local method calls.
+Remote Procedure Call (RPC) exposes operations on another process through a client API. A generated stub or client library serializes the arguments, sends a request, waits for a response, and maps the result back into the caller's language.
 
-RPC is the foundation of [[gRPC]] (Google's modern RPC framework) and was the basis of SOAP/WCF. It contrasts with [[REST]], which models resources and uses HTTP verbs rather than procedure calls.
+The API may resemble a local method, but its failure model is remote. The call crosses a network, runs in a different failure domain, and may complete even when the caller never receives the response. That boundary is the central fact of RPC.
+
+RPC is a family of approaches, not one wire protocol. [[gRPC]] uses service definitions, Protocol Buffers by default, and HTTP/2. SOAP/WCF and JSON-RPC make different choices. [[REST]] draws the interface around resources and representations rather than named operations.
 
 # How RPC Works
 
@@ -31,51 +33,50 @@ OrderService.PlaceOrder(req)
   ← Return result to caller
 ```
 
-The client stub makes the call look local. The network, serialization, and error handling are handled by the framework.
+The stub removes encoding and transport boilerplate. It cannot remove latency, partial failure, or uncertainty about whether a timed-out operation ran on the server.
 
 # RPC Vs REST
 
-| Dimension | RPC (gRPC) | REST |
+| Dimension | RPC | REST-style HTTP API |
 |---|---|---|
-| Interface style | Procedure/action-oriented (`PlaceOrder`, `GetUser`) | Resource-oriented (`POST /orders`, `GET /users/1`) |
-| Contract | Strongly typed (Protobuf IDL, WSDL) | Loosely typed (OpenAPI, convention) |
-| Serialization | Binary (Protobuf) — compact, fast | JSON/XML — human-readable, larger |
-| Transport | HTTP/2 (gRPC) | HTTP/1.1 or HTTP/2 |
-| Streaming | Native bidirectional streaming (gRPC) | Limited (SSE, WebSocket for push) |
-| Browser support | Limited (requires gRPC-Web proxy) | Native |
-| Best for | Internal service-to-service, high-throughput, streaming | Public APIs, browser clients, simple CRUD |
+| Interface shape | Named operations such as `PlaceOrder` | Resource state and links, commonly `POST /orders` |
+| Contract | Often an IDL with generated clients. The mechanism depends on the RPC system | May use OpenAPI and generated clients. REST itself does not require an IDL |
+| Encoding | Chosen by the framework, such as Protobuf or JSON | Commonly JSON, although the media type is negotiable |
+| Transport | Framework-specific. GRPC commonly uses HTTP/2 | HTTP semantics are part of the architectural style |
+| Streaming | Framework-specific. GRPC supports four RPC shapes | Usually modeled with HTTP responses, SSE, or a separate WebSocket protocol |
+| Best fit | Operation-oriented service contracts under coordinated ownership | Resource-oriented APIs that benefit from HTTP visibility, caching, and broad clients |
 
 # The Fallacies of Distributed Computing
 
-RPC's "local call" abstraction is leaky. The eight fallacies of distributed computing (Peter Deutsch) describe what RPC hides:
+RPC's local-call syntax is useful and dangerous in equal measure. The fallacies of distributed computing name assumptions that the syntax can hide:
 
-1. The network is reliable — it isn't. Calls can fail, time out, or be delivered twice.
-2. Latency is zero — network calls are 100–1000× slower than local calls.
-3. Bandwidth is infinite — serialization and payload size matter.
-4. The network is secure — calls can be intercepted or replayed.
+1. The network is reliable. Requests and responses can be delayed, lost, or interrupted.
+2. Latency is zero. Even a healthy remote call crosses queues, protocol stacks, and another scheduler.
+3. Bandwidth is infinite. Encoding and payload shape affect cost and tail latency.
+4. The network is secure. Authentication, authorization, confidentiality, and replay defenses remain protocol concerns.
 
-**Practical implication**: always handle RPC failures explicitly. Implement retries with idempotency keys, timeouts, and circuit breakers. Never assume a failed RPC means the server didn't execute the operation — it may have executed and the response was lost.
+Every RPC needs an explicit deadline and a defined response to ambiguous failure. Retries belong only where the operation is safe to repeat or the server deduplicates attempts. A transport error says that the caller lacks a result. It does not prove that the server skipped the work.
 
 # Delivery Semantics
 
-Because the network can drop either the request or the response, an RPC framework can offer one of three guarantees — and the difference drives your whole error-handling design:
+Delivery labels describe execution bounds, not business outcomes:
 
-- **At-most-once** — never retry; the call runs zero or one times. No duplicates, but a lost response means the operation may not have happened and you'll never know. Fine for non-critical, naturally-idempotent reads.
-- **At-least-once** — retry until acknowledged; the call runs one *or more* times. No lost work, but **duplicates are possible** (the request succeeded, the ACK was lost, you retry). This is what naive "just retry on timeout" gives you.
-- **Exactly-once** — the holy grail, and **not achievable at the transport layer** in the presence of failures. It's *approximated* end-to-end by combining at-least-once delivery with **idempotency**: the server deduplicates retries via an idempotency key / sequence number so re-execution has no extra effect.
+- **At-most-once** allows zero or one execution. An implementation may avoid retries or suppress duplicates with request identifiers. The caller can still end in an unknown state after losing the response.
+- **At-least-once** retries until success or a policy limit. Work is less likely to be lost, but one logical request may execute several times.
+- **Exactly-once effect** requires application cooperation. Durable deduplication, an idempotency key, and the state change must share a consistency boundary. The transport alone cannot provide that result through every failure.
 
-The practical rule: assume at-least-once and make your operations idempotent (so duplicates are harmless) rather than chasing true exactly-once. This is the same conclusion the [[gRPC|gRPC retry policy]] and [[ACID|distributed transactions]] reach.
+The normal design is bounded at-least-once delivery for retryable calls plus idempotent server behavior. When duplicate suppression must survive crashes, its record belongs in the same transaction as the side effect. This connects the [[gRPC|gRPC retry policy]] to the consistency boundary described by [[ACID|distributed transactions]].
 
 # Pitfalls
 
-**Versioning hell**
-Changing a Protobuf message (removing a field, reusing a field number) breaks existing clients. Mitigation: never remove or reuse field numbers; use the `reserved` keyword for deprecated fields; version service names (`OrderServiceV2`) for breaking changes.
+**Breaking a shared contract**
+For Protobuf-based RPC, field numbers are wire identities. Existing fields must not be renumbered, and deleted numbers should be reserved. Additive wire-safe changes still need application-level review because generated APIs and validation rules can change independently of the bytes.
 
-**Tight coupling through generated stubs**
-Client and server must share the same `.proto` file. A server-side change requires regenerating and redeploying all clients. Treat `.proto` files as a public API contract with the same backward-compatibility rules as a REST API.
+**Mistaking code generation for coordinated deployment**
+Generated stubs give compile-time names and types, but compatible clients and servers should remain independently deployable. A change that forces every client to regenerate and ship at once is a contract migration problem, not an unavoidable property of RPC.
 
-**Serialization overhead masking latency**
-Protobuf is fast, but large messages (nested objects, repeated fields) still add serialization cost. A 10KB Protobuf message serialized 10,000 times/sec adds measurable CPU. Profile serialization in hot paths; use streaming for large payloads instead of single large messages.
+**Letting large calls hide in a method signature**
+A typed request can still carry an unbounded collection or object graph. Large messages increase allocation, flow-control pressure, and retry cost. Put size limits at the boundary and use streaming when the data is naturally incremental.
 
 # gRPC C# Example
 
@@ -103,19 +104,7 @@ var response = await client.PlaceOrderAsync(
     deadline: DateTime.UtcNow.AddSeconds(5)); // client-side timeout
 ```
 
-# Questions
-
-> [!QUESTION]- Why is RPC's 'local call' abstraction considered leaky?
-> RPC hides the network boundary, but the network introduces failures that local calls never have: calls can time out, be delivered twice (at-least-once delivery), or fail with the server having already executed the operation. A failed RPC does not mean the server didn't execute — the response may have been lost. This forces callers to implement idempotency keys, retries with backoff, and circuit breakers — concerns that don't exist for local calls. The abstraction is useful but must not be trusted blindly.
-
-> [!QUESTION]- When should you choose gRPC over REST?
-> Choose gRPC for internal service-to-service communication where: (1) you need high throughput or low latency (binary Protobuf is 3-10x smaller than JSON), (2) you need bidirectional streaming, or (3) you want strongly typed contracts enforced at compile time. Choose REST for public APIs, browser clients (gRPC requires a proxy for browsers), or when human-readable payloads matter for debugging. The key constraint: gRPC requires HTTP/2 and a Protobuf toolchain; REST works with any HTTP client.
-
 # References
 
-- [[gRPC]] — the modern RPC framework: Protobuf contracts, HTTP/2 transport, streaming, and .NET implementation.
-- [[REST]] — the alternative communication style: resource-oriented, HTTP verbs, JSON, browser-native.
-- [Fallacies of distributed computing (Wikipedia)](https://en.wikipedia.org/wiki/Fallacies_of_distributed_computing) — the eight assumptions that make distributed systems harder than they appear; essential context for any RPC-based system.
-- [gRPC core concepts](https://grpc.io/docs/what-is-grpc/core-concepts/) — official gRPC documentation covering service definitions, stub generation, and the four service types (unary, server streaming, client streaming, bidirectional).
-- [Protocol Buffers language guide (Google)](https://protobuf.dev/programming-guides/proto3/) — field numbering rules, reserved fields, and backward compatibility; essential for safe schema evolution.
-- [gRPC .NET documentation (Microsoft Learn)](https://learn.microsoft.com/en-us/aspnet/core/grpc/) — ASP.NET Core gRPC server setup, client factory, interceptors, and health checks.
+- [Protocol Buffers language guide](https://protobuf.dev/programming-guides/proto3/)
+- [gRPC for .NET](https://learn.microsoft.com/aspnet/core/grpc/)

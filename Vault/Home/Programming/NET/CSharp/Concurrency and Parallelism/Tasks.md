@@ -11,27 +11,29 @@ status: Ready to Repeat
 publish: true
 ---
 
-`Task` is the core .NET abstraction for asynchronous work. It models eventual completion, result/error propagation, and composition (`WhenAll`, `WhenAny`) without forcing you to manage raw threads. For production systems, understanding `Task` semantics is critical for avoiding deadlocks, thread starvation, and unbounded fan-out.
+`Task` is a handle to an operation that may finish later. It records completion, cancellation, or failure and gives other code something to await or combine. The abstraction says nothing about whether a thread is currently executing the operation.
 
-`Task` represents an operation, not a thread. A task might run on a pooled worker, or it might represent asynchronous I/O that completes later without occupying a worker while waiting.
+A CPU-bound task may run on a ThreadPool worker. A task representing asynchronous I/O normally spends most of its lifetime waiting for the operating system, with a thread needed only to initiate work and process completion. Keeping that distinction visible prevents needless `Task.Run` calls and misleading thread-count assumptions.
 
 # How It Works
 
-`Task` is the **future** half of the Futures and Promises pattern — the read side, the handle to a result that isn't ready yet. The write side is the **promise**, `TaskCompletionSource<T>`, which you complete by hand (see below). A task doesn't *start* in a terminal state, it *ends* in one: it begins as `WaitingForActivation` (async methods, `TaskCompletionSource<T>`), `WaitingToRun` (`Task.Run`, queued to the pool), or `Created` (the `new Task(…)` form only), and settles into exactly one of `RanToCompletion`, `Faulted`, or `Canceled`. The runtime tracks the state and stores the result or exception. When you `await` a task, the compiler generates a continuation that runs when the task reaches a terminal state.
+`Task` is the read side of a future/promise pair. `TaskCompletionSource<T>` exposes the write side for adapting callbacks or events to a task-based contract. A task eventually reaches `RanToCompletion`, `Faulted`, or `Canceled`. Its earlier status depends on how it was created and scheduled.
 
-**Key types:**
+`await` first asks whether the awaiter has completed. If so, execution may continue synchronously. Otherwise, the async state machine registers its continuation and returns control to the caller. The continuation later runs through the captured scheduling context when one applies, or through the default task infrastructure.
+
+**Core forms:**
 - `Task` — represents an operation with no return value.
 - `Task<T>` — represents an operation that produces a value of type `T`.
-- `ValueTask` / `ValueTask<T>` — stack-allocated alternative for hot paths where the result is often synchronously available (e.g., cached reads). Has strict consumption rules.
+- `ValueTask` / `ValueTask<T>` — value-type awaitables that can represent an immediate result, a `Task`, or an `IValueTaskSource`. They can avoid a `Task` allocation in carefully measured APIs, but their consumption rules are stricter.
 
-**Hot vs cold tasks.** Tasks returned from `async` methods, `Task.Run`, and most BCL APIs are **hot** — already started. Only a `Task` created with the `new Task(...)` constructor is **cold** and must be `.Start()`ed; this form is essentially never correct in modern code. Avoid `Task.Factory.StartNew` too — it is full of foot-guns:
+**Creation and scheduling.** Tasks returned by `async` methods and most framework APIs already represent work in progress. A task created with the `Task` constructor remains in `Created` until scheduled with `Start`, which is rarely useful in application code. `Task.Factory.StartNew` is lower-level and easy to misuse with asynchronous delegates:
 
-- It is **not async-aware**: passing an `async` lambda returns a `Task<Task>`, so you must call `.Unwrap()` (or you'll "complete" before the inner work does).
-- It defaults to **`TaskScheduler.Current`**, not `TaskScheduler.Default` — inside a parallel/UI context that can schedule your work somewhere surprising.
+- An `async` lambda can produce a nested task that requires `Unwrap`.
+- The default scheduler is `TaskScheduler.Current`, so behavior can depend on the caller's context.
 
-Use `Task.Run` for CPU-bound offload; reserve `Task.Factory.StartNew` for the rare case you genuinely need `TaskCreationOptions.LongRunning` (which spins a dedicated thread instead of borrowing a pool thread).
+`Task.Run` is the normal way to queue CPU-bound work to the default scheduler. `TaskCreationOptions.LongRunning` is a scheduler hint for work that would otherwise monopolize a worker. The default scheduler typically responds with a non-pool thread, but custom schedulers may behave differently.
 
-**Cached completed tasks.** Don't allocate a fresh task for synchronous results — use the runtime's cached singletons: `Task.CompletedTask`, `Task.FromResult(value)`, `Task.FromException(ex)`, `Task.FromCanceled(token)`. `Task.FromResult` caches common values (e.g. `true`/`false`/small ints) so it is allocation-free in the common case.
+**Already-completed tasks.** `Task.CompletedTask`, `Task.FromResult`, `Task.FromException`, and `Task.FromCanceled` express a known outcome without scheduling work. The runtime may cache some completed instances, but that is an implementation optimization rather than a contract to build allocation claims around.
 
 # Example — Parallel Fan-Out
 
@@ -46,11 +48,13 @@ public async Task<IReadOnlyList<UserDto>> LoadUsersAsync(
 }
 ```
 
-`Task.WhenAll` starts all requests concurrently and waits for all to complete. Total latency is the slowest individual request, not the sum.
+Enumerating `ids.Select(...)` creates the request tasks, and `Task.WhenAll` returns a task that completes after all of them finish. `WhenAll` does not start dormant tasks itself. When the operations are independent and their work overlaps, elapsed time approaches the slowest operation rather than the sum. Downstream limits can change that result.
 
 # Failure Aggregation
 
-`Task.WhenAll` throws the first exception when awaited, but all tasks run to completion. To inspect all failures:
+The task returned by `WhenAll` waits for every input. If any input faults, the combined task is faulted and retains the collection of unwrapped input failures in its `Exception`. Awaiting it propagates one exception, so code that needs the full set must inspect the combined task or the individual tasks after completion.
+
+The example below rebuilds an aggregate from the individual tasks. Its catch executes only after `WhenAll` has reached a terminal state, so every input can be inspected.
 
 ```csharp
 public async Task SyncAllAsync(CancellationToken cancellationToken)
@@ -63,7 +67,7 @@ public async Task SyncAllAsync(CancellationToken cancellationToken)
     {
         await Task.WhenAll(a, b, c);
     }
-    catch
+    catch when (a.IsFaulted || b.IsFaulted || c.IsFaulted)
     {
         // Inspect all faults, not only the first observed one.
         var failures = new[] { a, b, c }
@@ -80,37 +84,36 @@ public async Task SyncAllAsync(CancellationToken cancellationToken)
 
 | Pattern | Use case |
 |---------|----------|
-| `Task.WhenAll(tasks)` | Wait for all; aggregate failures |
-| `Task.WhenAny(tasks)` | Race multiple operations; first-success or timeout fallback |
+| `Task.WhenAll(tasks)` | Complete after every input. Preserve failures on the combined task |
+| `Task.WhenAny(tasks)` | Return the first completed task, whether successful, faulted, or canceled |
 | `TaskCompletionSource<T>` | Bridge callback/event APIs into task-based APIs |
 | `Task.Run(action)` | Offload CPU-bound work to a pool thread |
-| `ValueTask<T>` | Hot-path optimization when result is often synchronously available |
+| `ValueTask<T>` | Measured optimization when synchronous completion is common |
 
 ## Processing Tasks as They Finish
 
-A common anti-pattern is "loop, `WhenAny`, remove the winner, repeat" to process tasks in completion order. That is **O(n²)** — each `WhenAny` re-registers a continuation on every remaining task — and leaves the losing tasks unobserved if you exit early. On **.NET 9+** use `Task.WhenEach`, which yields each task as it completes:
+Repeatedly calling `WhenAny` over a shrinking list adds coordination work and makes early-exit cleanup easy to forget. On .NET 10+, `Task.WhenEach` yields each task after it completes. If several tasks finish together, their exact enumeration order is unspecified:
 
 ```csharp
 await foreach (var finished in Task.WhenEach(tasks))
 {
-    // handle each result/fault as soon as it's ready, in completion order
+    // handle each result/fault once available; ties have no defined order
     Use(await finished);
 }
 ```
 
-`TaskScheduler` is the abstraction that decides where continuations run; you rarely implement one, but it's why `Task.Factory.StartNew` defaulting to `TaskScheduler.Current` matters (above). For bounded concurrent [[Parallelism|fan-out]] over a collection, prefer `Parallel.ForEachAsync` over hand-rolled `WhenAll` + `SemaphoreSlim`.
+`TaskScheduler` decides where scheduled task work runs. Async continuations also interact with `SynchronizationContext`, so continuation placement is broader than `TaskScheduler` alone. For bounded concurrent [[Parallelism|fan-out]] over a collection, `Parallel.ForEachAsync` is often clearer than creating every task up front and gating each one with `SemaphoreSlim`.
 
 # Pitfalls
 
-**Unobserved task exceptions**
-If a `Task` faults and nothing observes its exception (no `await`, no `.Exception` check), the exception is silently swallowed. In .NET 4.5+, unobserved exceptions no longer crash the process by default, but they are still lost.
+**Unobserved task exceptions.** A fault stays on its task until observed through `await`, `Wait`, `Result`, or `Exception`. If the task becomes collectible first, the runtime can raise `TaskScheduler.UnobservedTaskException`. Modern .NET does not terminate the process by default after that event. Relying on finalization for reporting is still nondeterministic.
 
 ```csharp
 // Exception is lost — the task is never awaited or observed
 _ = SendEmailAsync(user);
 ```
 
-Fix: `await` the task, or attach a continuation to handle the exception:
+The fault-only continuation below observes the fault, but it is not a general fire-and-forget primitive. Application work should normally be awaited or handed to an owned background queue whose worker logs failures and participates in shutdown.
 
 ```csharp
 _ = SendEmailAsync(user).ContinueWith(
@@ -118,8 +121,7 @@ _ = SendEmailAsync(user).ContinueWith(
     TaskContinuationOptions.OnlyOnFaulted);
 ```
 
-**`ValueTask` consumed more than once**
-`ValueTask` may be backed by a pooled object. Awaiting it twice, calling `.Result` after awaiting, or storing it for later use violates its contract and causes undefined behavior.
+**`ValueTask` consumed more than once.** A `ValueTask` backed by `IValueTaskSource` may reuse pooled state, so multiple awaits, concurrent awaits, or mixing `Result` with awaiting can break its contract. A value backed by a `Task` or immediate result is more permissive, but callers should not depend on knowing that representation.
 
 ```csharp
 var vt = GetCachedValueAsync();
@@ -127,10 +129,9 @@ var r1 = await vt; // OK
 var r2 = await vt; // WRONG — may read from a recycled object
 ```
 
-Fix: convert to `Task` with `.AsTask()` if you need to consume the result multiple times.
+Call `AsTask()` once when the result must be cached, shared, or awaited more than once.
 
-**`Task.Run` for I/O**
-Wrapping async I/O in `Task.Run` wastes a pool thread for the entire I/O duration.
+**`Task.Run` for asynchronous I/O.** Wrapping an already asynchronous API adds a ThreadPool scheduling hop. The worker normally returns after the I/O has been initiated, so it is inaccurate to say that it stays occupied for the whole wait, but the wrapper still adds no useful asynchrony.
 
 ```csharp
 // Pointless — GetStringAsync is already async
@@ -139,37 +140,30 @@ var result = await Task.Run(() => _http.GetStringAsync(url));
 
 Fix: `await` the async method directly.
 
-**Unbounded `Task.WhenAll`**
-Calling `Task.WhenAll` on thousands of tasks simultaneously can overwhelm the ThreadPool and downstream services.
+**Unbounded fan-out.** Creating thousands of operations can exhaust connection limits, rate limits, memory, or downstream capacity. Pure asynchronous waiting does not consume one ThreadPool worker per task, but every completion and CPU segment still needs processing.
 
 ```csharp
 // Dangerous with large collections — no concurrency limit
 var results = await Task.WhenAll(items.Select(i => ProcessAsync(i)));
 ```
 
-Fix: bound concurrency with `SemaphoreSlim` so a large collection can't exhaust the [[ThreadPool]].
+Bound concurrency according to the scarce resource. `Parallel.ForEachAsync`, a channel-backed worker set, or `SemaphoreSlim` can limit work before it reaches the dependency or [[ThreadPool]].
 
 # Questions
 
 > [!QUESTION]- Why is `Task` not equivalent to a thread?
-> `Task` models completion and scheduling, while threads are execution resources. Many async tasks complete I/O without holding a thread during waiting. A single thread can drive thousands of concurrent I/O tasks by processing their continuations sequentially.
-> Cost of confusing them: over-allocating threads (via `Task.Run` for I/O) wastes memory and increases context-switching overhead.
+> A `Task` represents an operation that may finish later and records whether it completed, failed, or was canceled. A thread is a resource that executes code. A task for asynchronous I/O can remain incomplete while no managed thread is assigned to it; a thread is needed only when code starts the operation or resumes after completion.
 
-> [!QUESTION]- When should `Task.Run` be used in ASP.NET Core?
-> Rarely for request I/O — async I/O APIs already don't block threads. Use `Task.Run` for CPU-bound work that must be isolated from the request thread (e.g., image processing, heavy computation), ideally with bounded concurrency via `SemaphoreSlim`.
+> [!QUESTION]- When is `Task.Run` appropriate in ASP.NET Core?
+> `Task.Run` can move CPU-bound work to a thread-pool thread, but it does not add CPU capacity. Under load, those extra work items compete with request processing and can reduce throughput. It should not wrap I/O APIs that are already asynchronous. Long or expensive work usually belongs behind a bounded background queue or in a separate service instead of running inside the request.
 
-> [!QUESTION]- Why is `Task.WhenAll` usually better than sequential `await` for independent calls?
-> Sequential `await` runs operations one after another — total latency is the sum. `Task.WhenAll` runs them concurrently — total latency is the slowest. For three 100ms calls: sequential = 300ms, concurrent = ~100ms.
-> Cost: concurrent fan-out can overwhelm downstream services; bound concurrency when calling external APIs.
+> [!QUESTION]- Why can `Task.WhenAll` reduce the elapsed time for independent async calls?
+> If the operations are started before they are awaited, their waiting time can overlap. `Task.WhenAll` then completes when all of those tasks finish, so the elapsed time is closer to the slowest call than to the sum of every call. It only coordinates tasks that have already started; it does not make synchronous work parallel, and the fan-out must still respect connection and downstream limits.
 
-> [!QUESTION]- When should you use `ValueTask` instead of `Task`?
-> Only when profiling shows allocation pressure from `Task` on a hot path where the result is frequently synchronously available (e.g., a cache hit). `ValueTask` has strict consumption rules and is harder to use correctly. Default to `Task`; switch to `ValueTask` only with measurement evidence.
+> [!QUESTION]- When is `ValueTask` worth using instead of `Task`?
+> `ValueTask` is useful in a measured hot path where operations often complete synchronously and allocating a completed `Task` is a real cost. Its consumption rules are stricter: depending on what backs it, the value may be safe to await only once and should not be cached or shared directly. `Task` remains the simpler choice when the result needs to be stored, shared, or awaited more than once.
 
 # References
 
-- [Task class (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.task) — full API reference for `Task`, `Task<T>`, `WhenAll`, `WhenAny`, `Run`, and `FromResult`.
-- [Task.WhenAll documentation (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.task.whenall) — behavior details including exception aggregation semantics.
-- [Understanding the Whys, Whats, and Whens of ValueTask (Stephen Toub, Microsoft)](https://devblogs.microsoft.com/dotnet/understanding-the-whys-whats-and-whens-of-valuetask/) — deep dive into when `ValueTask` is appropriate and its consumption rules.
-- [There is no thread (Stephen Cleary)](https://blog.stephencleary.com/2013/10/there-is-no-thread.html) — explains why async I/O tasks don't require a dedicated thread while waiting.
-- [Threading in C#: Task Parallelism (Joe Albahari)](https://www.albahari.com/threading/part5.aspx#_Task_Parallelism) — comprehensive reference on `Task` creation, continuations, and `AggregateException` handling.
-- [Threading in C#: Working with AggregateException (Joe Albahari)](https://www.albahari.com/threading/part5.aspx#_Working_with_AggregateException) — how to inspect all faults from `Task.WhenAll`.
+- [Task class](https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.task)
+- [Understanding the whys, whats, and whens of ValueTask](https://devblogs.microsoft.com/dotnet/understanding-the-whys-whats-and-whens-of-valuetask/)

@@ -7,7 +7,7 @@ This document owns StepTrace-specific design, consistency, and review rules. The
 ## Source of truth
 
 - **Status:** Active
-- **Last refreshed:** 2026-08-01
+- **Last refreshed:** 2026-08-14
 - **Product surface:** `steptrace` fenced blocks rendered in Obsidian and Quartz.
 - **Source:** `Web/custom/steptrace/src/`.
 - **Generated artifacts:** `Web/custom/steptrace/generated/` and `Vault/.obsidian/plugins/steptrace/`.
@@ -125,15 +125,22 @@ Reuse before creating:
 
 Local primitives are acceptable only when the underlying concept has a distinct shape.
 
-### State vocabulary
+### Semantic carrier grammar
 
-- **Blue:** current item, active comparison, or present focus.
-- **Amber:** frontier, candidate, open set, pending scope, or held value.
-- **Green:** accepted, closed, path, stored result, or success.
-- **Violet:** goal, competing special state, or secondary semantic emphasis.
+Related algorithms share semantic roles and cues even when their concept shapes differ. Per-algorithm names may remain local, but their meaning cannot drift:
+
+- **Blue:** active, current, or the comparison happening now.
+- **Amber:** candidate, frontier, open set, pending scope, or held value.
+- **Green without a check:** accepted, visited, closed, path, or stored progress.
+- **Green with the canonical shared check:** final, sorted, terminal success, or a completed result.
+- **Violet:** goal or target.
+- **Red:** rejected, invalid, infeasible, or mismatch.
 - **Neutral:** untouched, inactive, or contextual state.
+- **Underline:** only a true matched or range extent, never a generic emphasis or single-cell completion cue.
 
-The local legend is authoritative. Reinforce color with text, stroke, fill pattern, shape, badge, or position. Do not add a color when an existing semantic role fits.
+A primitive has one primary process role. An independent goal, target, range, or similar overlay may compose with it without replacing that primary role. Reinforce color with text, stroke, fill pattern, shape, badge, or position. Final markers and other semantic children are created with stable primitive topology and shown by state; state-only paint must not recreate geometry or append duplicate markers.
+
+The local legend translates algorithm terminology into this shared grammar; it does not redefine the grammar. `steptrace.semantic-inventory.mjs` and its StepTrace tests enforce exact source carriers, roles, marker associations, compositions, and explicit exclusions. Production changes belong in `src/`; generated Quartz and Obsidian projections are updated only through `npm run steptrace:build` and are never hand-edited.
 
 ## Visual style
 

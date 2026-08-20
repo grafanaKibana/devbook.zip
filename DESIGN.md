@@ -145,6 +145,7 @@ Their main jobs are to find a topic, understand its scope, inspect the mechanism
 - Use medium rounded rectangles for cards and controls.
 - Use circles only for circular data or play/progress controls, and pills only for compact tracks or state chips.
 - Shared cards use one border, a modest radius, one soft accent glow, and a small hover/focus lift.
+- `[!QUESTION]-` is a collapsed FAQ disclosure, not a card: clear internal padding, a divider, and a plus/minus control expose its behavior; Obsidian uses native app tokens, while Quartz uses DevBook typography and green accent details.
 - Visualization stages remain unboxed like diagrams; only functional control surfaces may be raised.
 
 ### Motion

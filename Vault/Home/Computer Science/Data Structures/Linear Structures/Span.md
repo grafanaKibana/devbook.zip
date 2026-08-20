@@ -11,13 +11,13 @@ status: Done
 publish: true
 ---
 
-Parsing a 4 KB network buffer routinely needs to hand a middle section to another method. Passing `buffer[100..200]` as a `byte[]` allocates a fresh array and copies 100 bytes; doing that per packet turns parsing into a stream of short-lived allocations the garbage collector must later reclaim. A `Span<T>` describes that same section as a (reference, length) pair over the original buffer, so the sub-view costs nothing to create and shares the bytes it points at.
+Parsing a 4 KB network buffer often means passing a small middle section to another method. Treating `buffer[100..200]` as a new `byte[]` allocates an array and copies 100 bytes. Repeating that for every packet creates avoidable garbage. A `Span<T>` describes the same section as a reference and a length over the original buffer, so the view is created without copying its bytes.
 
-A span owns nothing. It is a small value type — a managed reference to the first element in view plus an `int` length — laid over memory that lives elsewhere: a managed array, a `stackalloc` block, or native memory. Slicing returns another span over the same backing store with a shifted reference and a new length; no element is copied, which is why a write through a slice is visible in the original buffer. Being a `ref struct` prevents the span value from being stored in heap objects; C# escape analysis also stops a span over stack-local memory from escaping that memory's lifetime. Native memory remains the caller's responsibility because the type system cannot observe when it is freed.
+A span owns nothing. It is a small value containing a managed reference to the first element in view and an `int` length. The memory lives elsewhere, perhaps in a managed array or a `stackalloc` block. Slicing shifts the reference and changes the length. It does not copy elements, so writes through a slice reach the original buffer. The `ref struct` restriction keeps a span out of ordinary heap objects, and C# escape analysis stops stack-backed spans from outliving their storage. Native memory still needs manual lifetime control because the type system cannot observe when it is freed.
 
 **Core shape:** existing contiguous buffer → (ref-to-first, length) window → `Slice` adjusts ref+length with no copy → shared memory across views
 
-The interactive view keeps the backing array and active window visible together. Slice narrows the `(start, length)` window without copying; a write through it mutates the same backing slot.
+The interactive view keeps the backing array and active window visible together. Slice narrows the `(start, length)` window without copying. A write through it mutates the same backing slot.
 
 ~~~~~tabsdown
 tab: Visualization
@@ -155,15 +155,15 @@ tab: Complexity
 
 # Where the Stack-only Window Breaks down
 
-The restrictions follow from ref safety: the compiler confines the span value to contexts that do not require storing it in an ordinary heap object or state machine.
+The restrictions follow from ref safety. The compiler confines a span to contexts that do not store it in an ordinary heap object or state machine.
 
-Storage and capture are blocked at compile time. A `Span<T>` cannot be boxed, assigned to a class field, captured in a lambda or closure, used as an ordinary generic type argument (absent an `allows ref struct` constraint, added in C# 13 / .NET 9), or held across an `await` or `yield` boundary — those operations would require storing the ref-struct value in a heap object or state machine. Code that must keep a managed-memory view in a field or carry it across async suspension uses `Memory<T>` instead: a heap-storable handle whose `.Span` yields a `Span<T>` at the synchronous point of use.
+Storage and capture are blocked at compile time. A `Span<T>` cannot be boxed, assigned to a class field, captured by a closure, or held across an `await` or `yield` boundary. Ordinary generic use also needs an `allows ref struct` constraint, available from C# 13 and .NET 9. Those cases would otherwise place the ref-struct value in a heap object or state machine. Code that must retain a managed-memory view in a field or across async suspension uses `Memory<T>` instead. Its `.Span` property creates the synchronous view at the point of use.
 
-Backing-store lifetime still matters. A span over a `stackalloc` buffer is valid only while the allocating stack frame is alive; escape rules block returning or capturing it. A span over a managed array may be returned because its managed reference keeps the array reachable. A span over native memory that has been freed is invalid, and nothing in the type system records that free.
+Backing-store lifetime still matters. A span over `stackalloc` memory is valid only while its stack frame is alive, so escape rules block returning or capturing it. A managed-array span may be returned because its managed reference keeps the array reachable. A span over freed native memory is invalid, and the type system has no record of that free.
 
-`ReadOnlySpan<T>` narrows these rules rather than lifting them: it still cannot escape to the heap, and it additionally rejects writes, so an attempt to mutate through a `ReadOnlySpan<char>` obtained from a `string` fails to compile rather than corrupting an interned literal.
+`ReadOnlySpan<T>` keeps the same lifetime rules and removes writes. A `ReadOnlySpan<char>` over a string therefore cannot mutate the string or an interned literal.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Window over a backing array
 >
@@ -198,24 +198,8 @@ Backing-store lifetime still matters. A span over a `stackalloc` buffer is valid
 | `ArraySegment<T>` | Yes | Managed array only | A heap-storable array window from before `Span<T>` existed |
 | `Memory<T>` | Yes | Array or other owned buffer | A view must live on the heap or cross an async boundary |
 
-`Span<T>` is the zero-copy, zero-allocation view for synchronous code that touches contiguous memory — parsing, formatting, buffer manipulation — and it pays for that speed by being a stack-only value. `Memory<T>` accepts one level of indirection to become heap-storable and async-safe, which is the deciding factor whenever a managed-memory view must sit in a field or survive an `await`. `ArraySegment<T>` fills the same heap-storable niche for managed arrays only and predates both. A real copy — a fresh array — is warranted when the data needs independent ownership rather than another view of the same storage.
-
-# Questions
-
-> [!QUESTION]- How is a `Span<T>` represented, and why is its size independent of the window length?
-> It is a value type holding two fields — a managed reference to the first element in view and an integer length. The elements stay in the memory it points at, so the span itself is two machine words whether it covers 2 elements or 2 million.
-
-> [!QUESTION]- What makes `Slice` zero-copy, and what is the observable consequence?
-> `Slice` returns a new span with the reference advanced to `start` and a new length; no memory is allocated and no element is copied. Because the result aliases the same backing store, a write through the slice changes the element seen through the original span.
-
-> [!QUESTION]- Why can a `Span<T>` not cross an `await` boundary, and what replaces it there?
-> A span that remains live across `await` or `yield` would have to be stored in the heap-allocated state machine, but a `ref struct` cannot be stored there. `Memory<T>` is the heap-storable handle for managed-memory cases, yielding a `Span<T>` through `.Span` at the synchronous point of use.
-
-> [!QUESTION]- When is a copy into a fresh array required instead of a span or `Memory<T>`?
-> When the data needs ownership independent of the source buffer — for example, the source is stack or native memory that will be released, or the caller cannot retain the managed owner. A copy creates a new lifetime and snapshot; a span remains only a view, while `Memory<T>` can safely retain supported managed backing storage.
+`Span<T>` is the zero-copy view for synchronous code over contiguous memory. Its stack-only lifetime is the price. `Memory<T>` adds enough indirection to live in fields and survive `await`, which decides the choice whenever a managed-memory view must cross an async boundary. `ArraySegment<T>` covers the older, array-only version of that heap-storable view. A fresh array is warranted when the data needs independent ownership instead of another alias to the same storage.
 
 # References
 
-- [`Span<T>` struct](https://learn.microsoft.com/en-us/dotnet/api/system.span-1) — API reference for the constructors, `Slice`, and the `ref struct` constraints that govern where the value may be stored.
-- [Memory and spans](https://learn.microsoft.com/en-us/dotnet/standard/memory-and-spans/) — Microsoft's ownership, lifetime, and consumption rules covering when a view should be `Span<T>` versus `Memory<T>`.
-- [All About Span: Exploring a New .NET Mainstay](https://learn.microsoft.com/en-us/archive/msdn-magazine/2018/january/csharp-all-about-span-exploring-a-new-net-mainstay) — Stephen Toub's design walkthrough of the two-field layout, slicing, and the `ref struct` motivation.
+- [Memory and spans](https://learn.microsoft.com/en-us/dotnet/standard/memory-and-spans/)

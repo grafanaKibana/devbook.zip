@@ -11,7 +11,7 @@ status: Ready to Repeat
 publish: true
 ---
 
-SMTP is the transfer protocol for sending outbound mail from clients and between servers. It is not mailbox retrieval (IMAP/POP3); those are separate protocols.
+SMTP moves outbound mail into a submission service and relays it between mail servers. IMAP and POP3 solve a different problem: reading messages already stored in a mailbox.
 
 # Flow and Boundaries
 
@@ -21,21 +21,21 @@ A common path is:
 Alice client -> Alice SMTP submission server -> DNS MX lookup -> Bob SMTP server -> Bob mailbox
 ```
 
-Submission is usually authenticated and policy-enforced. The server enqueues durably before or during remote transfer depending on internal architecture.
+Submission normally authenticates the sender and applies local policy. The submission service may queue the message before attempting remote delivery, but durability is a property of that service's contract rather than SMTP acceptance in general.
 
 SMTP response classes:
 
-- `4xx`: transient; retry semantics may apply
-- `5xx`: typically non-retryable for that recipient
-- `250`: accepted for submission policy, not guaranteed final delivery
+- `4xx` means the requested action failed temporarily. The sending system can retry under a bounded schedule.
+- `5xx` means the request failed permanently in the current form, often for one recipient rather than the whole message.
+- `250` means the command succeeded at that SMTP hop. It does not prove final delivery or inbox placement.
 
-Timeouts are ambiguous: a server can accept a message then drop the response, so duplicate detection must exist.
+A timeout leaves the sender uncertain. The remote server may have accepted the message and lost only the response, so a retry can create a duplicate.
 
 ![[Networks/Networks-SMTP-18120000.jpg]]
 
 # Email Authentication
 
-Email has two sender identities. The SMTP envelope sender (`MAIL FROM`, later exposed as Return-Path) receives bounces; the message's header `From` is what users see. SPF authenticates infrastructure for the envelope identity, DKIM authenticates signed message fields for a signing domain, and DMARC asks whether at least one passing identity aligns with the header From domain.
+Email carries separate transport and author identities. The SMTP envelope sender (`MAIL FROM`, commonly recorded in `Return-Path` at final delivery) receives delivery failures. The header `From` identifies the author shown to the reader. SPF evaluates whether the connecting infrastructure is authorized for the envelope identity. DKIM verifies signed message content for a signing domain. DMARC then checks whether a passing SPF or DKIM domain aligns with the header `From` domain.
 
 SMTP authentication is layered:
 
@@ -45,7 +45,7 @@ SMTP authentication is layered:
 | DKIM | Signed headers/body hash validate under the selector/domain public key | The signer is the visible From domain unless alignment holds |
 | DMARC | Passing SPF or DKIM aligns with the header From domain | Inbox placement, harmless content, or a trustworthy sender |
 
-Alignment compares organizational domains in relaxed mode and exact domains in strict mode. A third-party sender can pass its own SPF while failing DMARC for `From: billing@example.com` unless the envelope domain aligns or it signs with an aligned `d=example.com` DKIM identity.
+Relaxed alignment compares organizational domains. Strict alignment requires an exact domain match. A third-party service can pass SPF for its own bounce domain and still fail DMARC for `From: billing@example.com`. An aligned envelope domain or an aligned `d=example.com` DKIM signature closes that gap.
 
 ```text
 MAIL FROM:<bounce@mailer.example.net>   SPF passes for example.net
@@ -54,20 +54,20 @@ DKIM-Signature: d=example.com; s=mail   aligned DKIM passes
 DMARC: pass through DKIM alignment
 ```
 
-Roll authentication out as an observed migration:
+Authentication changes should be observable and reversible:
 
 1. Inventory every legitimate sender and bounce domain.
-2. Publish the narrowest SPF policy that covers them; avoid exceeding the SPF DNS-lookup limit.
+2. Publish the narrowest SPF policy that covers them. Avoid exceeding the SPF DNS-lookup limit.
 3. Enable DKIM with managed key rotation and an aligned signing domain.
 4. Publish DMARC with reporting and `p=none` while validating coverage.
-5. Move toward quarantine or reject only after reports show legitimate streams align.
-6. Monitor forwarding and mailing-list behavior; DKIM can survive forwarding when signed fields remain intact, while SPF commonly evaluates the forwarder's IP.
+5. General-purpose domains whose users may send through mailing lists SHOULD NOT publish `p=reject`. RFC 9989 documents the resulting indirect-mail failures. A dedicated transactional subdomain can move toward enforcement only after every legitimate source aligns and reports show the expected impact.
+6. Monitor forwarding and mailing-list behavior. DKIM can survive forwarding when signed fields remain intact, while SPF commonly evaluates the forwarder's IP.
 
-Receiver requirements are not universal. Providers publish different requirements for personal mail, bulk senders, and high-volume traffic, and those policies change. Treat the strictest important receiver as a deployment requirement and verify its current primary documentation. Authentication is necessary for many sending programs but still competes with reputation, complaint rate, content, list hygiene, and unsubscribe handling.
+Receiver rules differ and change outside the SMTP standard. Gmail, for example, applies extra authentication requirements to high-volume senders and requires one-click unsubscribe for bulk marketing or subscribed messages in that category. Production rollout therefore follows the strictest important receiver's current documentation. Passing authentication still does not guarantee placement. Reputation, complaint rate, and recipient behavior remain inputs to filtering.
 
 # .NET Sending: Direct Protocol Vs Provider APIs
 
-`System.Net.Mail.SmtpClient` is usable but legacy; it is not Microsoft-recommended for new systems that need modern reliability.
+`System.Net.Mail.SmtpClient` remains available, but Microsoft does not recommend it for new development. MailKit exposes modern SMTP authentication and transport controls while preserving direct protocol access.
 
 ```csharp
 using MailKit.Net.Smtp;
@@ -88,13 +88,13 @@ await client.SendAsync(message, ct);
 await client.DisconnectAsync(true, ct);
 ```
 
-Do not keep passwords in code or configuration files. Prefer short-lived tokens or a secret store, validate the server certificate, and set connect/send timeouts at the application boundary.
+Credentials belong in a secret store or short-lived token flow. The client must validate the server certificate and enforce connect and send deadlines at the application boundary.
 
 ## Submission and Acceptance Contract
 
-An SMTP `250` after DATA means the receiving submission server accepted responsibility under its policy; it does not mean the recipient read the message or that another domain accepted it. HTTP `202 Accepted` only means a provider accepted the request for processing. It proves durable queueing only when that provider's documented contract says so, and it never proves final delivery.
+An SMTP `250` after DATA means that hop accepted the message under its policy. It does not mean the recipient read it, and it may not mean another domain accepted it. An HTTP provider's `202 Accepted` has the same boundary: processing has started. Durable queueing exists only when the provider documents it.
 
-Persist an outbox row in the same transaction as the business state that requires the email. A worker sends it, records the provider/message ID, and retries transient failures with a bounded schedule. Because a timeout can occur after acceptance, retries can duplicate messages; use a stable application notification ID and provider idempotency support where available.
+Persist an outbox row in the transaction that creates the business obligation to send mail. A worker records the provider or message ID and retries transient failures on a bounded schedule. A stable notification ID and provider idempotency support reduce duplicates after ambiguous timeouts.
 
 Process delivery events as untrusted, duplicate-prone input. Verify webhook signatures, deduplicate event IDs, and update suppressions for hard bounces, complaints, and unsubscribes before the next send.
 
@@ -105,25 +105,13 @@ Compare approaches:
 | Direct SMTP with MailKit | Full protocol control and internal infrastructure | Higher operational burden |
 | Managed provider API | Deliverability, suppression, bounces, complaints workflows | Vendor dependency and data residency contract |
 
-Choose from delivery and compliance requirements rather than assuming one path for every production system.
-
-# Operational Notes
-
-- `System.Net.Mail.SmtpClient` can work for simple internal scenarios but misses modern transport-control expectations.
-- For high-volume sending, managed platforms often simplify deliverability and event-driven suppression.
-
-# Questions
-
-> [!QUESTION]- Why does SPF/DKIM/DMARC improve delivery but not guarantee it?
-> They verify different authenticity and alignment properties, but inbox placement still depends on reputation, engagement, anti-abuse decisions, and content quality.
+The decision turns on operational ownership. Direct SMTP gives protocol control. A managed provider owns more deliverability machinery and exposes its own delivery contract.
 
 # References
 
-- [SMTP (RFC 5321)](https://www.rfc-editor.org/rfc/rfc5321) — protocol commands, response model, and delivery contracts.
-- [Message Submission (RFC 6409)](https://www.rfc-editor.org/rfc/rfc6409) — authenticated submission boundary.
-- [Sender Policy Framework (RFC 7208)](https://www.rfc-editor.org/rfc/rfc7208) — SPF policy and operational limits.
-- [DKIM (RFC 6376)](https://www.rfc-editor.org/rfc/rfc6376) — signing and verification model.
-- [DMARC (RFC 7489)](https://www.rfc-editor.org/rfc/rfc7489) — alignment and policy.
-- [MailKit](https://github.com/jstedfast/MailKit) — maintained SMTP/IMAP/POP3/MIME implementation.
-- [Gmail email sender guidelines](https://support.google.com/a/answer/81126) — receiver-specific authentication and bulk-sender requirements that must be rechecked before rollout.
-- [SmtpClient remarks](https://learn.microsoft.com/dotnet/api/system.net.mail.smtpclient#remarks) — official statement that `SmtpClient` is usable but not recommended for new development.
+- [Simple Mail Transfer Protocol](https://www.rfc-editor.org/rfc/rfc5321)
+- [Sender Policy Framework](https://www.rfc-editor.org/rfc/rfc7208)
+- [DomainKeys Identified Mail Signatures](https://www.rfc-editor.org/rfc/rfc6376)
+- [Domain-based Message Authentication, Reporting, and Conformance](https://www.rfc-editor.org/rfc/rfc9989)
+- [MailKit](https://github.com/jstedfast/MailKit)
+- [Gmail email sender guidelines](https://support.google.com/a/answer/81126)

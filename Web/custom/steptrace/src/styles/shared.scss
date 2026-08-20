@@ -390,6 +390,10 @@
   border-radius: 999px;
   background: var(--_legend-color, var(--_neutral));
 }
+.steptrace__legend-swatch .steptrace__success-marker {
+  inline-size: 0.75rem;
+  block-size: 0.75rem;
+}
 @container steptrace-wide-stage (max-width: 34rem) {
   .steptrace__legend {
     gap: 0.3rem 0.7rem;
@@ -609,6 +613,7 @@
    only the live line gives way to the answer. It restates the card's own 14px so
    its em-based box does not shrink against the log's 0.72rem text. */
 .steptrace__insight {
+  position: relative;
   display: block;
   list-style: none;
   margin: 0;
@@ -618,6 +623,29 @@
   border-left: 3px solid var(--_green);
   background: color-mix(in srgb, var(--_green) 9%, transparent);
   min-height: 4.65em;
+}
+.steptrace__insight-marker {
+  position: absolute;
+  inset-block-start: 0.55rem;
+  inset-inline-end: 0.55rem;
+  inline-size: 0.9rem !important;
+  block-size: 0.9rem !important;
+}
+
+.steptrace__row-success {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-end: 0.45rem;
+  display: none !important;
+  inline-size: 0.8rem !important;
+  block-size: 0.8rem !important;
+  transform: translateY(-50%);
+}
+.steptrace__coin-attempt {
+  position: relative;
+}
+.steptrace__coin-attempt[data-state="best"] .steptrace__row-success {
+  display: inline-block !important;
 }
 .steptrace__insight-label {
   display: block;

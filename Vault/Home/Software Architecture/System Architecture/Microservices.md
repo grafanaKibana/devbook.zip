@@ -12,14 +12,17 @@ status: Done
 publish: true
 ---
 
-Microservices are an architecture style where a system is split into independently deployable services, each aligned to a business capability and owning its own data. They matter because they let teams release changes independently, scale only hot paths, and use technology choices per domain when needed. You usually reach for microservices when team count grows, deployment independence becomes a bottleneck, and domains have different scaling or availability needs. The tradeoff is distributed-systems complexity: network latency, partial failures, eventual consistency, and heavier operational tooling.
+Microservices divide a system into services that can be changed and deployed independently. Each service owns a business capability and the data behind it. The useful boundary is deployment independence: separate processes alone do not make a microservice architecture.
+
+This style starts paying for itself when teams block one another's releases or parts of the system need sharply different scaling and availability. It also moves work out of the compiler and into production. Network latency, partial failure, asynchronous consistency, and a larger operational surface become everyday design constraints.
 
 # Core Principles
-- **Boundaries follow business capabilities**: split by bounded contexts like Orders, Inventory, Billing, Shipping.
-- **Database per service**: each service owns its schema and persistence model; no cross-service table reads.
-- **Communication by contracts**: integrate through versioned APIs/events, avoid shared databases, and keep shared libraries limited to generated contracts or platform primitives.
-- **Independent deployment**: each service can ship, roll back, and scale independently.
-- **Decentralized governance**: shared platform standards, local team autonomy.
+
+- **Boundaries follow business capabilities.** Orders, Inventory, Billing, and Shipping are plausible boundaries because each contains its own rules and language.
+- **Data has one owner.** A service controls its schema and persistence model. Other services use its contract instead of reading its tables. Separate database servers are optional. Exclusive ownership is not.
+- **Integration happens through contracts.** Versioned APIs and events carry data across boundaries. Shared libraries stay small enough that one team's release cannot force another's.
+- **Deployment is independent.** A service can ship, roll back, and scale without coordinating a full-system release.
+- **Governance stays thin.** Platform standards cover cross-cutting concerns while teams retain control of domain choices.
 
 ```mermaid
 flowchart LR
@@ -39,41 +42,32 @@ flowchart LR
 ```
 
 # Communication Patterns
-**Synchronous calls**
-- Use synchronous communication when the caller needs an immediate answer.
-- Common options are [[Home/Networks/Protocols/REST]] and [[Home/Networks/Protocols/gRPC]].
-- Best for short request-response interactions on the critical path.
-- Risk: long synchronous chains amplify latency and failure propagation.
 
-**Asynchronous messaging**
-- Use [[Home/Software Architecture/Distributed Systems/Message Queues/Message Queues|Message Queues]] and [[Home/Software Architecture/System Architecture/Event-Driven Architecture]] when temporal decoupling matters.
-- Best for workflows, retries, burst smoothing, and eventual consistency.
-- Publish immutable events like `OrderPlaced` or `InventoryReserved`.
-- Make handlers idempotent to survive retries and duplicate delivery.
+A synchronous call fits a decision that must complete before the caller can continue. [[Home/Networks/Protocols/REST]] and [[Home/Networks/Protocols/gRPC]] both serve that case. Keep the path short. A chain such as `A -> B -> C -> D` adds every dependency's latency and gives each failure another route back to the client.
 
-**Rule of thumb**
-- Prefer synchronous for short, local decisions.
-- Prefer asynchronous for cross-domain workflows and side effects.
-- Avoid deep synchronous chains (`A -> B -> C -> D`) on critical paths.
+[[Home/Software Architecture/Distributed Systems/Message Queues/Message Queues|Message Queues]] and [[Home/Software Architecture/System Architecture/Event-Driven Architecture]] fit work that can continue later. An immutable `OrderPlaced` event can start reservation or notification work after the request has returned. Consumers still need idempotency because a broker may redeliver a message after an uncertain acknowledgement.
+
+The boundary is the business decision. Use a direct call when an immediate answer is part of that decision. Publish a fact when independent work can happen afterward.
 
 # Implementation and Operations
 
-An independently deployable service can run in a container, virtual machine, managed application platform, or function/container service. Docker and Kubernetes are optional delivery mechanisms, not defining properties of microservices.
+An independently deployable service can run in a container, virtual machine, managed application platform, or function service. Docker and Kubernetes are delivery choices, not defining properties of microservices.
 
-For each service, record the minimum operating contract:
+Each service needs a small operating contract:
 
-- owner, escalation path, and supported API or event versions;
-- build artifact, deployment, and rollback procedure;
-- service-level indicators and alert thresholds;
-- logs, metrics, traces, and correlation across synchronous and asynchronous calls;
-- request deadlines, bounded retries, circuit breaking, and load shedding;
-- configuration and secret delivery with audit history;
+- an owner and escalation path.
+- supported API or event versions, plus the build artifact and rollback procedure.
+- service-level indicators with alert thresholds.
+- correlation across logs, metrics, traces, synchronous calls, and messages.
+- request deadlines, bounded retries, circuit breaking, and load shedding.
+- audited configuration and secret delivery.
 - datastore ownership, migration order, backup, and restore evidence.
 
-A platform should make this the default path without forcing one topology onto every service. A low-volume internal API can run on App Service, a partitioned consumer fleet may benefit from Kubernetes, and a scheduled job can run as a managed container task.
+A platform should make these basics cheap without forcing one topology onto every service. A low-volume internal API can run on App Service. A partitioned consumer fleet may justify Kubernetes, while a scheduled job can remain a managed container task.
 
-Kubernetes supplies declarative rollout, service discovery, probes, and resource controls; it does not create correct service boundaries, retry budgets, or database migrations. Set resource requests from measured use, a disruption budget from required availability, readiness from instance-specific serving ability, and a rollout gate from the service's latency and error objectives. Avoid making every shared dependency a readiness check: a common database outage can remove all pods even though routing elsewhere cannot improve the result.
-# Microservices Vs Monolith Vs Modular Monolith
+Kubernetes supplies declarative rollout, service discovery, probes, and resource controls. It cannot supply correct service boundaries or safe database migrations. Resource requests should come from measurements. Disruption budgets come from the required availability. Readiness should report whether this instance can serve traffic. If every pod fails readiness during a shared database outage, the cluster removes all routes even though another pod cannot improve the result.
+
+# Microservices vs. Monolith vs. Modular Monolith
 
 | Dimension | [[Home/Software Architecture/System Architecture/Monolith Architecture\|Monolith]] | [[Home/Software Architecture/System Architecture/Modular Monolith]] | Microservices |
 |---|---|---|---|
@@ -84,26 +78,26 @@ Kubernetes supplies declarative rollout, service discovery, probes, and resource
 | Operational complexity | Low | Low to medium | High |
 | Best fit | Small team, early product | Growing product, clear domains, limited ops capacity | Large org, high release velocity, independent scaling needs |
 
-[[Home/Software Architecture/System Architecture/Monolith Architecture]] is usually the best starting point when boundaries are still evolving and operational maturity is limited.
+[[Home/Software Architecture/System Architecture/Monolith Architecture]] is usually the safest starting point while domain boundaries are still moving. It keeps refactoring local and failure modes visible. Distribution can wait until a real constraint appears.
 
 # Migration Boundary
 
-A migration should remove a measured constraint, not merely distribute the same coupling. Start with a capability whose ownership is clear, whose data can be isolated, and whose release or scaling pressure already costs the organization. Avoid the most central workflow as the first extraction because it maximizes unknown dependencies and makes rollback hardest.
+A migration should remove a measured constraint. Moving the same coupling across a network only makes it harder to see. A good first candidate has clear ownership, isolatable data, and release or scaling pressure that already costs the organization. The most central workflow is usually a poor first extraction because it hides the most dependencies and makes rollback hardest.
 
 ## Staged Extraction
 
-1. **Measure the pressure.** Record deployment wait time, change collisions, asymmetric load, and incidents caused by the candidate boundary.
+1. **Measure the pressure.** Record deployment wait time, change collisions, uneven load, and incidents caused by the candidate boundary.
 2. **Create an in-process seam.** Put the capability behind a contract inside the monolith and block direct table or internal-code access.
 3. **Assign data ownership.** Move writes behind that contract. Replace cross-boundary joins with explicit queries, replicated read models, or events.
-4. **Introduce the remote implementation.** Route a controlled cohort through HTTP, gRPC, or messaging while the old path remains available.
+4. **Introduce the remote implementation.** Route a controlled cohort through HTTP, gRPC, or messaging while keeping the old path available.
 5. **Prove independent operation.** Deploy and roll back the service alone, exercise dependency failure, and verify traces and alerts.
 6. **Retire the old path.** Remove duplicate code and tables only after traffic, reconciliation, and rollback windows show the new owner is stable.
 
-This is a strangler migration: replacement grows around a working system rather than requiring a big-bang rewrite.
+This is a strangler migration. The replacement grows around a working system, one boundary at a time.
 
 ## Extraction Gate
 
-Extract `Billing` from `Orders` only when Billing owns payment-intent state and a versioned contract, Orders no longer reads or writes Billing tables, and either service can release without a lockstep deployment. Declare whether an outage makes Orders reject, queue, or degrade; connect synchronous and asynchronous work with trace and causation identifiers; and provide reconciliation for orders whose payment state does not converge. If these conditions do not hold, keep the boundary in-process or finish the isolation before extracting another service.
+`Billing` is ready to leave `Orders` when it owns payment-intent state behind a versioned contract, Orders has stopped touching Billing tables, and either side can release alone. Its outage policy must be explicit: Orders rejects, queues, or degrades. Trace and causation identifiers connect the request to later messages, and reconciliation catches orders whose payment state does not converge. Until those conditions hold, the boundary belongs in-process.
 
 ## Data Migration
 
@@ -116,7 +110,7 @@ Prefer one writer during transition:
 5. Switch writes only when lag is zero and rollback can replay the retained change stream.
 6. Stop the old writer, then remove its tables after the recovery window.
 
-Uncontrolled dual writes create two sources of truth. If temporary dual writing is unavoidable, name the authoritative store and build reconciliation before the first production write.
+Uncontrolled dual writes create two sources of truth. If a transition cannot avoid them, name the authoritative store and build reconciliation before the first production write.
 
 ## Migration Evidence
 
@@ -127,102 +121,74 @@ Uncontrolled dual writes create two sources of truth. If temporary dual writing 
 | Better isolation | Candidate incidents affect whole deploy | Failure drill contains impact at contract boundary |
 | Clear ownership | Multiple teams modify same internals | One team owns contract, data, SLO, and pager |
 
-Stop extracting when the next candidate lacks a measurable constraint. A mixed architecture with one monolith and a few services is often the stable destination. The action visuals remain here as provenance for the historical Airbnb case.
+Stop when the next candidate lacks a measurable constraint. One monolith beside a few services can be a stable architecture. The visuals below show Airbnb's historical migration rather than a universal sequence.
 
 ![[Software Architecture/Software Architecture-Microservices-18120000-3.png]]
 
-Airbnb's multi-year evolution supports incremental extraction under measured organizational and scaling pressure, not a fixed service-count target.
+Airbnb's multi-year evolution shows services being extracted as organizational and scaling pressure appeared. It does not support a target service count.
 
 ![[Software Architecture/Software Architecture-Microservices-18120000-4.jpg]]
 
-Later use of both microservices and larger macroservices reinforces that service size follows ownership and change coupling.
+Its later use of both microservices and larger macroservices shows that service size should follow ownership and change coupling.
 
 # Boundaries and Delivery Independence
 
-A service boundary is credible only when one team can change, test, deploy, roll back, and operate it without a lockstep release. Shared writable tables, paired deployments, or a mandatory long synchronous chain produce a distributed monolith even when processes run separately.
+A service boundary is credible only when one team can change and operate it without a lockstep release. Shared writable tables or paired deployments create a distributed monolith even when the processes run separately. A mandatory synchronous chain can do the same.
 
 ![[Software Architecture/Software Architecture-Microservices-18120000.png]]
 
-This capability map is a menu, not a mandatory topology. Gateways, meshes, containers, and separate databases support particular operating constraints; they do not create sound domain boundaries.
+This capability map is a menu. Gateways and meshes answer specific operating needs. Containers and separate databases do not create sound domain boundaries by themselves.
 
 ![[Software Architecture/Software Architecture-Microservices-18120000-2.png]]
 
-Ownership, explicit failure behavior, and cross-boundary telemetry are the baseline; the operating contract above makes those responsibilities concrete for every service.
+Ownership and explicit failure behavior are the baseline. Cross-boundary telemetry shows whether those promises hold once requests and messages leave a process.
 
 # Production Platform Capabilities Are Conditional
 
 ![[Software Architecture/Software Architecture-Microservices-18120000-1.png]]
 
-The pictured components are optional capabilities selected by observed failure modes and platform constraints. They are not prerequisites for calling a system microservices.
+The pictured components answer observed failure modes or platform constraints. None is a prerequisite for a microservice architecture.
 
 # Workflow Ownership: Orchestration versus Choreography
 
-Workflow ownership crosses service boundaries. For `Charge -> Reserve -> Ship`, [[Home/Software Architecture/Distributed Systems/Orchestration|orchestration]] gives one durable process manager responsibility for incomplete state and compensation. For `OrderPlaced -> email + analytics + search indexing`, [[Home/Software Architecture/Distributed Systems/Choreography|choreography]] preserves independent service reactions without a coordinator that adds no business decision. Mixing them is normal: orchestrate the transaction and publish facts for independent reactions. The authority notes own the general definitions and tradeoff comparison.
+Workflow ownership crosses service boundaries. For `Charge -> Reserve -> Ship`, [[Home/Software Architecture/Distributed Systems/Orchestration|orchestration]] gives one durable process manager responsibility for incomplete state and compensation. For `OrderPlaced -> email + analytics + search indexing`, [[Home/Software Architecture/Distributed Systems/Choreography|choreography]] lets independent services react without inventing a coordinator that makes no business decision. A single workflow can use both: orchestrate the transaction, then publish facts for unrelated reactions.
 
 # When Microservices Are the Wrong Fit
 
-Prefer a modular monolith when the domain boundaries are changing weekly, one team owns the whole product, deployments are not blocking each other, or the team cannot operate distributed tracing, on-call ownership, and asynchronous consistency. Microservices turn compile-time coupling into network and operational coupling; they do not remove coordination for free.
+A modular monolith fits better while domain boundaries change weekly, one team owns the product, and deployments do not block delivery. It is also the honest choice when the team cannot support distributed tracing, on-call ownership, or asynchronous consistency. Microservices replace some compile-time coupling with network and operational coupling. Coordination never disappears for free.
 
-A concrete stop rule: if extracting `Catalog` creates a separate pipeline, datastore, dashboard, pager, and compatibility contract but releases remain coordinated with the monolith, the extraction has added cost without delivery independence. Restore the module boundary in-process and revisit it when a measured constraint changes.
+A useful stop rule is simple. If extracting `Catalog` creates its own pipeline, datastore, dashboard, pager, and compatibility contract while releases remain coordinated with the monolith, the extraction has bought cost without independence. Restore the in-process boundary and wait for the constraint to change.
 
 # Pitfalls
-**1) Distributed monolith**
-- **What goes wrong**: services are physically separate but tightly coupled via shared DBs or sync chains.
-- **Why it happens**: boundaries follow technical layers, not business capabilities.
-- **How to avoid it**: enforce database-per-service and reduce synchronous depth.
 
-**2) Data consistency across services**
-- **What goes wrong**: one service commits and another fails, leaving partial business state.
-- **Why it happens**: distributed ACID transactions (for example, 2PC) are possible but usually avoided due to coupling, latency, and failure complexity.
-- **How to avoid it**: use sagas, compensating actions, outbox pattern, and idempotent consumers.
+**Distributed monolith.** Processes are separate, but shared tables and lockstep releases keep them coupled. Splitting by technical layer often causes this shape. Business boundaries, exclusive data ownership, and short call paths make independence testable.
 
-**3) Operational complexity explosion**
-- **What goes wrong**: incidents are hard to debug because logs/metrics/traces are fragmented.
-- **Why it happens**: every service adds pipelines, dependencies, and monitoring surfaces.
-- **How to avoid it**: standardize deployment templates, telemetry, alerts, and runbooks.
+**Partial business state.** One service commits before another fails. Distributed ACID protocols such as two-phase commit can coordinate supported resources, though they add coupling and difficult recovery. Most workflows instead use local transactions, an outbox, idempotent consumers, and compensation.
 
-**4) Network is not reliable**
-- **What goes wrong**: latency spikes, partial failures, and retry storms hurt end-to-end flow.
-- **Why it happens**: network calls are slower and less reliable than in-process calls.
-- **How to avoid it**: strict timeouts, bounded retries with jitter, circuit breakers, and backpressure.
+**Operational overload.** Every service adds a build, deployment surface, dependencies, telemetry, and an on-call burden. A platform can standardize the common path, but it cannot erase that cost. Too many small services make incidents a graph traversal exercise.
+
+**Retry storms.** Network calls fail slowly and sometimes ambiguously. Deadlines limit the wait. Bounded retries with jitter avoid synchronized pressure. Circuit breakers and backpressure stop a struggling dependency from pulling the rest of the system down.
 
 # Questions
-> [!QUESTION]- Why can microservices lead to distributed data consistency problems, and how do you address them?
-> - Each service owns its data, so cross-service business actions cannot assume one local ACID transaction. A distributed transaction can coordinate supported resources, but its coupling, latency, and recovery costs make sagas and local transactions the usual design.
-> - A later step can fail after an earlier local commit, producing partial state.
-> - Use sagas with compensating actions across local transactions.
-> - Use outbox/inbox and idempotent handlers to survive retries and duplicates.
-> - Accept eventual consistency and make process state observable.
 
-> [!QUESTION]- How do you decide between monolith, modular monolith, and microservices for a new product?
-> - Decide from team size, release pressure, domain volatility, and ops maturity.
-> - One team in discovery phase usually benefits most from monolith speed.
-> - Clear domains with limited platform capacity often fit modular monolith.
-> - Choose microservices when independent deploy/scale constraints are proven.
-> - Re-evaluate architecture periodically as constraints change.
+> [!QUESTION]- Why do microservices create distributed data consistency problems, and what keeps a cross-service workflow reliable?
+> Each service commits its own data, so a cross-service workflow cannot rely on one local ACID transaction. One service may commit successfully and a later step may fail. The workflow is usually split into local transactions connected by a saga. Outbox and inbox patterns make message transfer recoverable, and idempotent handlers make redelivery safe.
+>
+> If a completed step must be reversed, the saga runs a business compensation where that is possible. Its state must remain visible so the system can keep retrying, finish later, or wait for manual repair instead of leaving partial work hidden.
+
+> [!QUESTION]- What architecture usually fits a new product, and what evidence would justify moving to microservices?
+> The starting point is the release and ownership constraint, not a preferred topology. One team still discovering the domain usually gets the fastest feedback from a monolith. A modular monolith keeps changes and transactions in-process while enforcing domain boundaries.
+>
+> Microservices become justified when a stable boundary repeatedly needs independent deployment or scaling, and the team can own the added operational cost. Until that pressure is measured, distribution adds network and data-consistency problems without buying real independence.
+
+> [!QUESTION]- What evidence shows that an extracted service is independent rather than part of a distributed monolith?
+> - Its team can change, deploy, roll back, and operate it without a paired release.
+> - It owns its writable data and exposes a versioned contract. Dependency failure behavior is defined and exercised.
+> - Traces and reconciliation prove that synchronous calls and later messages can be followed across the boundary.
 
 # References
-- [Microservices Pattern: Microservice Architecture](https://microservices.io/patterns/microservices.html) — core microservices patterns and decomposition guidance.
-- [Microservices — Martin Fowler](https://martinfowler.com/articles/microservices.html) — original definition and key characteristics.
-- [.NET Microservices: Architecture for Containerized .NET Applications](https://learn.microsoft.com/en-us/dotnet/architecture/microservices/) — official Microsoft .NET guidance.
-- [Building Microservices (2nd Edition) — Sam Newman](https://samnewman.io/books/building_microservices_2nd_edition/) — practical production lessons on boundaries and migration.
-- [Decompose by business capability](https://microservices.io/patterns/decomposition/decompose-by-business-capability.html) — pattern reference for assigning cohesive business ownership instead of splitting by technical layer.
-- [Strangler Fig pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/strangler-fig) — Microsoft guidance for incremental replacement while the existing system keeps serving traffic.
-- [Monolith First](https://martinfowler.com/bliki/MonolithFirst.html) — Martin Fowler's argument for learning domain boundaries before distributing them.
-- [How to break a monolith into microservices](https://martinfowler.com/articles/break-monolith-into-microservices.html) — dependency-driven extraction strategies and sequencing.
-- [OpenTelemetry context propagation](https://opentelemetry.io/docs/concepts/context-propagation/) — official trace-context model for correlating work across service and messaging boundaries.
-- [Kubernetes deployments](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/) — primary rollout, scaling, and revision behavior.
-- [Google SRE service-level objectives](https://sre.google/sre-book/service-level-objectives/) — primary SLI/SLO and error-budget operating model.
-- [Saga distributed transactions](https://learn.microsoft.com/en-us/azure/architecture/reference-architectures/saga/saga) — Microsoft reference for orchestration, choreography, compensation, and their operational tradeoffs.
-- [Airbnb's Great Migration](https://www.infoq.com/presentations/airbnb-services/) — Jessica Tai's case study of Airbnb's service migration and the organizational constraints behind it.
 
-## ByteByteGo Provenance
-
-- [Airbnb architectural evolution](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/airbnb-artchitectural-evolution.md) — editorial lead for the staged extraction case; company-specific scale claims are treated as dated context.
-- [Typical microservice architecture](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/what-does-a-typical-microservice-architecture-look-like.md) — provenance for the conditional topology map.
-- [Production microservice components](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/9-essential-components-of-a-production-microservice-application.md) — provenance for the platform-capability map; "essential" is not adopted as a universal claim.
-- [Orchestration versus choreography](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/orchestration-vs-choreography-microservices.md) — provenance for the symmetric workflow comparison.
-- [Microservice development practices](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/9-best-practices-for-developing-microservices.md) — editorial lead for delivery independence; its prescriptive visual was rejected.
-- [Is microservice architecture the silver bullet?](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/is-microservice-architecture-the-silver-bullet.md) — provenance for the wrong-fit decision rule.
-- [Evolution of Airbnb's microservices](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/evolution-of-airbnb%27s-microservice.md) — editorial lead for the microservice and macroservice case.
-- [Building microservices practices](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/9-best-practices-for-building-microservices.md) — provenance for the ownership, discovery, failure, and observability checklist.
+- [Microservices](https://martinfowler.com/articles/microservices.html)
+- [.NET microservices architecture guide](https://learn.microsoft.com/en-us/dotnet/architecture/microservices/)
+- [Building Microservices, Second Edition](https://samnewman.io/books/building_microservices_2nd_edition/)
+- [Decompose by business capability](https://microservices.io/patterns/decomposition/decompose-by-business-capability.html)

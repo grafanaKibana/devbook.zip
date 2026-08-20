@@ -11,9 +11,9 @@ status: Done
 publish: true
 ---
 
-A bracket matcher, an expression evaluator, and a depth-first traversal share one requirement: each time the work descends into a nested item, the item currently in progress has to be set aside and resumed later, and the one resumed first is always the most recently suspended. A general list can hold those pending items, but locating "the most recent one" and removing it is a discipline the list does not enforce.
+Nested work often resumes in reverse order. A bracket matcher suspends the outer expression while it processes an inner pair. Depth-first traversal does the same with unexplored branches. The most recently suspended item must resume first, and a general list does not enforce that rule.
 
-A stack enforces it structurally. All mutation is fixed to a single end called the top: `push` adds an element there, `pop` removes and returns it, `peek` reads it without removing. Because every operation touches only that one end, the last element pushed is the first popped (LIFO). The cost is no direct index access or interior removal.
+A stack fixes every mutation at one end, the top. `push` adds an item, `pop` removes it, and `peek` reads it in place. The last item pushed is therefore the first one popped (LIFO). Direct indexing and interior removal stay outside the contract.
 
 **Core shape:** elements → one open end (the top) → last pushed is first popped
 
@@ -31,7 +31,7 @@ tab: Visualization
 A stack is an interface — push/pop/peek at one end — that admits two common backings.
 
 - **[[Home/Computer Science/Data Structures/Linear Structures/Dynamic Array|Dynamic Array]] backing.** A contiguous array plus a `_size` counter. The top is the last used slot, index `_size - 1`. `Push` writes at `_size` and increments it, doubling the array when full; `Pop` decrements `_size` and returns that slot; `Peek` reads `_size - 1`. Nothing is ever shifted, so all three operations stay at the tail. This is what `Stack<T>` uses in .NET.
-- **Singly-[[Home/Computer Science/Data Structures/Linear Structures/LinkedList|linked list]] backing.** The head node is the top. `Push` prepends a new node; `Pop` unlinks the head; `Peek` reads it. Every push allocates one node and every pop frees one, but no bulk copy ever happens.
+- **Singly-[[Home/Computer Science/Data Structures/Linear Structures/LinkedList|linked list]] backing.** The head node is the top. `Push` prepends a new node; `Pop` unlinks the head; `Peek` reads it. Every push allocates one node. A pop detaches one, which becomes collectible once no references reach it; no bulk copy happens.
 
 Two invariants define a valid state regardless of backing:
 
@@ -132,17 +132,17 @@ Array-backed push is `O(1)` amortized but `O(n)` on the resizing push that doubl
 
 # Where the Discipline Bites
 
-Each of these follows directly from fixing access to one end.
+The limits follow from fixing access to one end.
 
-A workload that repeatedly queries or removes interior elements wants an array, not a stack.
+Repeated access to interior elements calls for an array, not a stack.
 
-On a latency-sensitive path this shows up as an intermittent stall exactly on the push that doubles the [[Home/Computer Science/Data Structures/Linear Structures/Dynamic Array|Dynamic Array]]. Constructing with a known capacity (`new Stack<T>(capacity)`) pre-sizes the array and removes those spikes when the maximum depth is predictable.
+An array-backed stack can still stall on the push that doubles its [[Home/Computer Science/Data Structures/Linear Structures/Dynamic Array|Dynamic Array]]. `new Stack<T>(capacity)` pre-sizes the storage and removes those growth spikes when maximum depth is predictable.
 
-**Underflow on an empty stack.** `Pop`/`Peek` with no elements has nothing to return; in .NET both throw `InvalidOperationException`. Guarding with `Count > 0` or using `TryPop`/`TryPeek` is required whenever emptiness is reachable — recursion base cases and drain loops both hit it.
+**Underflow on an empty stack.** `Pop` and `Peek` have nothing to return when the stack is empty, so .NET throws `InvalidOperationException`. Code that can reach an empty state uses `Count > 0`, `TryPop`, or `TryPeek`.
 
-**The hardware call stack is a stack too.** Each function call pushes a frame (locals, return address) and each return pops it, following the same LIFO discipline on a fixed-size region. Deep or unbounded recursion overflows it — `StackOverflowException`, uncatchable. Converting the recursion to an explicit `Stack<T>` moves pending work or frame state to the heap, where depth is bounded by available memory rather than the fixed call-stack size. The translation is not always mechanical: a traversal may need to push children in reverse order to preserve visit order and store continuation state that recursion kept in the call frame.
+**The hardware call stack follows the same discipline.** Each function call pushes a frame, and each return pops it from a fixed-size region. Deep or unbounded recursion raises an uncatchable `StackOverflowException`. Converting to an explicit `Stack<T>` moves pending work to the heap, where available memory sets the limit. The translation may still need continuation state, and tree traversals often push children in reverse order to preserve visit order.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Top-of-stack view
 >
@@ -170,15 +170,8 @@ On a latency-sensitive path this shows up as an intermittent stall exactly on th
 >     // not reached — the stack is now empty
 > }
 > ```
-> `Pop`/`Peek` throw `InvalidOperationException` on an empty stack; `TryPop`/`TryPeek` return `false` instead. `new Stack<T>(capacity)` pre-sizes the backing array to avoid resize spikes when the depth is known.
-
-# Questions
-
-> [!QUESTION]- Why convert deep recursion into an explicit stack?
-> The call stack is itself a LIFO stack on a fixed-size memory region; deep enough recursion overflows it with an uncatchable `StackOverflowException`. An explicit `Stack<T>` holds pending work or frame state on the heap, where depth is bounded by available memory instead. Preserving behavior may require pushing children in reverse order and storing continuation state that recursion kept implicitly.
+> `Pop`/`Peek` throw `InvalidOperationException` on an empty stack. `TryPop`/`TryPeek` return `false` instead. `new Stack<T>(capacity)` pre-sizes the backing array to avoid resize spikes when the depth is known.
 
 # References
 
-- [`Stack<T>` class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.stack-1) — the .NET LIFO contract: `Push`, `Pop`, `Peek`, `TryPop`/`TryPeek`, and enumeration from top to bottom.
-- [`Stack<T>` source in dotnet/runtime](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Collections/Generic/Stack.cs) — source for the structure and its analysis.
-- [Selecting a collection class](https://learn.microsoft.com/en-us/dotnet/standard/collections/selecting-a-collection-class) — Microsoft's guidance on choosing between `Stack<T>`, `Queue<T>`, and the other collections by access discipline.
+- [`Stack<T>` class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.stack-1)

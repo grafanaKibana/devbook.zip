@@ -12,11 +12,11 @@ level:
 priority: High
 ---
 
-.NET is Microsoft's cross-platform runtime and framework for building production software: web APIs, background services, desktop apps, mobile clients, and cloud-native systems. It matters for backend development because it combines strong typing, high performance (consistently competitive in TechEmpower benchmarks), a mature ecosystem of libraries, and first-party support for modern patterns like dependency injection, structured logging, and health checks.
+.NET is a cross-platform application stack built from a runtime, base libraries, SDK tooling, languages, and higher-level frameworks. The runtime executes managed code and owns services such as garbage collection. The SDK restores, builds, tests, and publishes projects. C# and F# target the same runtime model, while ASP.NET Core and other frameworks add application-specific abstractions.
 
-The platform has three layers worth understanding separately: the **runtime** (CLR — memory management, JIT compilation, threading), the **language** (primarily C#, with F# for functional-first work), and the **framework libraries** (ASP.NET Core for web, Entity Framework Core for data access, extensions for DI/configuration/logging). Most production issues cross these layers — a memory leak requires understanding both C# allocation patterns and GC behavior; an API performance issue might involve middleware pipeline design and async I/O.
+These boundaries matter during diagnosis. A memory symptom can begin with application retention and become visible through GC behavior. Slow HTTP work may come from a framework pipeline, synchronous I/O, or generated machine code. “.NET is slow” is not yet a useful hypothesis.
 
-.NET releases annually. Even-numbered releases (.NET 8, .NET 10) are LTS with three years of support. The ecosystem is open-source on GitHub, and the runtime team publishes detailed performance improvement analyses with each release.
+.NET ships annually with separate LTS and STS support tracks. Deployment policy should follow the current support lifecycle rather than assuming that a runtime remains serviced because an application still starts on it.
 
 ```datacorejsx
 const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
@@ -25,14 +25,11 @@ return FolderStructureMap;
 
 # Questions
 
-> [!QUESTION]- What are the three layers of the .NET platform, and why does that distinction matter?
-> Runtime (CLR), language (C#/F#), and framework libraries (ASP.NET Core, EF Core, extensions).
-> It matters because most production issues cross layers: a performance problem might involve language-level allocations (C#), runtime GC behavior (CLR), and framework middleware configuration (ASP.NET Core). Understanding the boundaries helps you diagnose root causes instead of applying surface-level fixes.
+> [!QUESTION]- What are the main layers of .NET, and why does it help to separate them?
+> The main layers are the language and compiler, the runtime and base libraries, and the application frameworks and SDK tooling. Separating them makes diagnosis more precise. A C# allocation decision can create pressure that appears in the GC, while an ASP.NET Core middleware decision can tie up thread-pool workers. Identifying the layer that owns the behavior narrows where to measure and fix it.
 
 # References
 
-- [.NET documentation (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/) — Platform overview, guides, and API reference.
-- [.NET runtime (GitHub)](https://github.com/dotnet/runtime) — Source code, design docs, and issue discussions.
-- [.NET release lifecycle](https://dotnet.microsoft.com/en-us/platform/support/policy/dotnet-core) — LTS vs STS release support timelines.
-- [ASP.NET Core documentation (Microsoft Learn)](https://learn.microsoft.com/en-us/aspnet/core/) — Web framework guide.
-- [Performance improvements in .NET 9 (Stephen Toub)](https://devblogs.microsoft.com/dotnet/performance-improvements-in-net-9/) — Practitioner walkthrough of runtime optimizations with benchmarks.
+- [.NET documentation](https://learn.microsoft.com/en-us/dotnet/)
+- [.NET runtime source](https://github.com/dotnet/runtime)
+- [.NET release lifecycle](https://dotnet.microsoft.com/en-us/platform/support/policy/dotnet-core)

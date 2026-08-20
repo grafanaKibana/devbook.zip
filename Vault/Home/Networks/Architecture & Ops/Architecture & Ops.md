@@ -12,7 +12,9 @@ level:
 status: Creation
 ---
 
-Network architecture and operations cover how networks are designed, observed, and kept healthy in real environments. This is where theory meets incident response: routing, segmentation, monitoring, and troubleshooting. Example: when users report intermittent failures, you need logs + metrics + packet-level thinking to isolate where packets drop.
+Network architecture decides how traffic should flow. Network operations proves that it still flows under real load and failure. The work spans routing boundaries, segmentation, capacity, telemetry, and incident response.
+
+An intermittent request failure rarely identifies its own layer. Application traces may show a timeout while interface counters reveal drops, packet captures reveal retransmissions, or proxy logs reveal an unhealthy upstream. Diagnosis gets faster when each observation is tied to the device and protocol that produced it.
 
 ```datacorejsx
 const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
@@ -21,5 +23,4 @@ return FolderStructureMap;
 
 # References
 
-- [RFC 1122: Requirements for Internet Hosts — Communication Layers](https://www.rfc-editor.org/rfc/rfc1122) — the IETF host-layer requirements that define how Internet protocol layers cooperate operationally.
-- [Network architecture (Wikipedia)](https://en.wikipedia.org/wiki/Network_architecture)
+- [RFC 1122: Requirements for Internet Hosts](https://www.rfc-editor.org/rfc/rfc1122)

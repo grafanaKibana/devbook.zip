@@ -11,21 +11,21 @@ status: Ready to Repeat
 publish: true
 ---
 
-Two-factor authentication (2FA) requires evidence from exactly two independent factor categories: knowledge, possession, or inherence. MFA means two or more. A password plus a second password is still one factor; a password plus a TOTP authenticator combines knowledge and possession.
+Two-factor authentication (2FA) requires evidence from two distinct factor categories: knowledge, possession, or inherence. MFA covers two or more factors. Two passwords remain one factor category. A password plus a TOTP authenticator combines knowledge with possession.
 
-The engineering boundary includes enrollment and recovery. A phishing-resistant authenticator does not protect an account whose help desk can remove it after answering weak questions.
+Enrollment and recovery belong to the same security boundary as login. A phishing-resistant authenticator cannot protect an account when weak help-desk questions are enough to remove it.
 
 # Method Tradeoffs
 
 | Method | Proof | Phishing and replay | Recovery boundary | Choose it when |
 | --- | --- | --- | --- | --- |
-| SMS OTP | Control of a phone-number delivery path | Code is phishable; SIM swap and carrier interception add risk | Phone-number recovery can transfer control | Existing users/devices make a stronger factor unavailable |
+| SMS OTP | Control of a phone-number delivery path | Code is phishable. SIM swap and carrier interception add risk | Phone-number recovery can transfer control | Existing users/devices make a stronger factor unavailable |
 | [[Home/Security/Authentication/TOTP\|TOTP]] | Possession of a shared authenticator secret | Code is phishable and valid inside the accepted time window | Backup codes or replacement authenticator must be protected | Broad offline authenticator compatibility matters |
 | Push approval | Control of an enrolled app/device | Generic approve/deny prompts enable fatigue attacks | Device enrollment and support reset are critical | Enterprise context/number matching is enforced |
 | WebAuthn security key | Private key unlocked on an external authenticator | Origin-bound signature over a fresh challenge | Spare key or controlled reenrollment is needed | High-assurance, portable phishing resistance matters |
-| Synced passkey | Discoverable WebAuthn credential available through a platform account | Same origin binding; sync-provider account becomes part of recovery trust | Platform sync and account recovery restore credentials | Consumer passwordless UX across devices matters |
+| Synced passkey | Discoverable WebAuthn credential available through a platform account | Same origin binding. Sync-provider account becomes part of recovery trust | Platform sync and account recovery restore credentials | Consumer passwordless UX across devices matters |
 
-Default to passkeys/WebAuthn when the client population supports them. Keep TOTP as a compatibility fallback when needed, and protect fallback and recovery at least as carefully as primary enrollment. Avoid SMS for new high-value systems.
+Passkeys and WebAuthn are the default when the client population supports them. TOTP remains a compatibility fallback. Recovery and fallback paths need the same scrutiny as primary enrollment, and SMS is a poor choice for new high-value systems.
 
 # TOTP
 
@@ -33,7 +33,9 @@ TOTP derives a short code from a shared secret and a time-step counter. The serv
 
 # FIDO2 and WebAuthn
 
-WebAuthn defines the browser/API ceremony between a relying party (RP), client, and authenticator. CTAP defines communication with roaming authenticators such as security keys. A passkey is a WebAuthn discoverable credential: the authenticator can identify an account without the user first typing a username.
+WebAuthn defines the ceremony among a relying party (RP), client, and authenticator. CTAP covers communication with roaming authenticators such as security keys. A passkey is a discoverable WebAuthn credential, so the authenticator can identify an account before a username is entered.
+
+A WebAuthn credential is not automatically multi-factor. The assertion signature proves control of the credential, while user presence such as touching a key shows interaction and authentication intent. Multi-factor use also requires a local activation factor such as a PIN or biometric, a request for user verification, and server validation of the resulting UV flag. Without verified UV, the credential is treated as a single-factor cryptographic authenticator.
 
 ## Registration Ceremony
 
@@ -51,7 +53,9 @@ RP: validate the attestation statement and trust path only when attestation poli
 RP: store credential ID, public key, user binding, and metadata
 ```
 
-The attested credential data inside `authenticatorData` carries the credential ID and credential public key. With `none` attestation, the attestation statement can be empty and no attestation signature is returned; the RP still validates the client data, authenticator data, and public key. Other attestation formats may sign the authenticator data plus the hash of `clientDataJSON`, but the RP verifies that evidence only when its enrollment policy asks for attestation. The private key remains under authenticator control. The RP stores a public key, so a database leak does not directly reveal a reusable authentication secret. Registration must be authorized by a recent trusted session; otherwise an attacker who briefly controls an account can enroll their own credential.
+Attested credential data inside `authenticatorData` carries the credential ID and public key. With `none` attestation, the statement can be empty and no attestation signature is returned. The RP still validates client data, authenticator data, and the credential key. Other formats may sign authenticator data plus the hash of `clientDataJSON`. That evidence is verified only when enrollment policy requires attestation.
+
+The private key remains under authenticator control, while the RP stores its public counterpart. A database leak therefore does not directly expose a reusable authentication secret. Registration still needs a recent trusted session, because brief account control is otherwise enough to enroll an attacker's credential.
 
 ## Authentication Ceremony
 
@@ -64,7 +68,7 @@ RP: validate clientDataJSON type/challenge/origin, authenticatorData RP-ID hash/
 RP: consume the challenge once and create or elevate a session
 ```
 
-Origin and RP-ID binding give WebAuthn its phishing resistance: a credential registered for `example.com` will not sign a challenge for `examp1e.com`. The fresh challenge and one-time server state stop replay. User verification such as a device PIN or biometric unlocks the authenticator; the biometric is not sent to the website.
+Origin and RP-ID binding provide phishing resistance: a credential registered for `example.com` will not sign for `examp1e.com`. A fresh challenge and one-time server state stop replay. A device PIN or biometric can activate the authenticator and set user verification. Biometric data stays local to the authenticator or device.
 
 ![[Security/Security-Two-Factor Auth-18120000.png]]
 
@@ -78,30 +82,19 @@ Origin and RP-ID binding give WebAuthn its phishing resistance: a credential reg
 | Attestation required | Can restrict enrollment to approved authenticator models in managed environments | Reduces consumer compatibility and can add identifying metadata |
 | Attestation not required | Broad compatibility and less device metadata | RP cannot enforce a hardware provenance policy |
 
-Attestation says something about the authenticator at registration; it does not establish the human's legal identity and is not required for ordinary consumer passkeys. Decide it from the relying party's assurance policy, not from a blanket belief that more attestation is always safer.
+Attestation describes the authenticator at registration. It does not establish a person's legal identity and is unnecessary for ordinary consumer passkeys. The relying party's assurance policy decides whether hardware provenance is worth the compatibility and privacy cost.
 
 # Failure and Recovery Behavior
 
 - Expire and consume WebAuthn challenges once, and bind them to the initiating session and intended ceremony.
-- Validate `origin` and RP ID on the server through a maintained WebAuthn library; never trust client-provided account identity without matching the stored credential binding.
+- Validate `origin` and RP ID on the server through a maintained WebAuthn library. Never trust client-provided account identity without matching the stored credential binding.
 - Signature counters can signal some cloned authenticators, but zero or non-increasing counters are valid for some implementations. Treat counter anomalies according to authenticator behavior and risk policy, not as the sole replay defense.
 - Require recent strong authentication to add or remove a credential. Notify the user and expose named-device/credential revocation.
 - Offer multiple credentials or protected recovery codes before loss occurs. A TOTP/SMS fallback restores the fallback's phishing resistance, not WebAuthn's.
 - After high-risk recovery, revoke sessions, rotate recovery material, and apply a delay or additional review to sensitive actions where appropriate.
 
-# Questions
-
-> [!QUESTION]- Why does WebAuthn resist a real-time phishing proxy better than TOTP?
-> TOTP is a transferable number that a proxy can relay before it expires. WebAuthn signs data bound to the browser-observed origin and RP ID, so a credential for the real site will not produce a valid assertion for the phishing origin.
-
-> [!QUESTION]- Is a synced passkey the same trust model as a hardware security key?
-> No. Both use WebAuthn origin-bound public-key credentials, but a synced passkey relies on a platform account and encrypted synchronization/recovery, while a device-bound security key keeps the private key on one authenticator and needs a separate backup path.
-
 # References
 
-- [W3C Web Authentication Level 3](https://www.w3.org/TR/webauthn-3/) — registration/authentication ceremonies, RP binding, discoverable credentials, attestation, and verification rules.
-- [FIDO Alliance — Passkeys](https://fidoalliance.org/passkeys/) — passkey terminology, device-bound and synced credential models, and deployment material.
-- [NIST SP 800-63B](https://pages.nist.gov/800-63-4/sp800-63b.html) — authenticator assurance, phishing resistance, recovery, and lifecycle guidance.
-- [OWASP Multifactor Authentication Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Multifactor_Authentication_Cheat_Sheet.html) — factor selection, reset, recovery, and bypass controls.
-- [Microsoft — Enable QR code generation for TOTP authenticator apps in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/identity-enable-qrcodes) — official ASP.NET Core TOTP enrollment mechanics.
-- [ByteByteGo — Is Passkey Shaping a Passwordless Future?](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/is-passkey-shaping-a-passwordless-future.md) — source passkey overview expanded with complete ceremonies, trust choices, and recovery risk.
+- [Web Authentication Level 3](https://www.w3.org/TR/webauthn-3/)
+- [Passkeys](https://fidoalliance.org/passkeys/)
+- [NIST SP 800-63B-4: Authentication and Authenticator Management](https://pages.nist.gov/800-63-4/sp800-63b.html)

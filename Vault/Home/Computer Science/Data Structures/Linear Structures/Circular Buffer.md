@@ -11,11 +11,11 @@ status: Ready to Repeat
 publish: true
 ---
 
-A stream produces items faster than a consumer drains them, and only a bounded window of recent items needs to survive: the last N log lines, one frame of audio samples, packets waiting for a socket. A growable [[Home/Computer Science/Data Structures/Linear Structures/Queue|Queue]] also uses circular indexing but occasionally allocates and copies when it runs out of capacity; a fixed circular buffer chooses its capacity up front and moves indices without ever resizing.
+A circular buffer keeps a bounded slice of a stream, such as the last N log lines or one frame of audio samples. A growable [[Home/Computer Science/Data Structures/Linear Structures/Queue|Queue]] also uses circular indexing, but it occasionally allocates and copies when capacity runs out. A fixed ring chooses its capacity once and moves indices without resizing.
 
-The array is treated as if its ends were joined. A `head` index marks the front (next read), a `tail` index marks the back (next write), and every advance is taken modulo the capacity so an index running off the end reappears at `0`. Enqueue writes at `tail` and sets `tail = (tail + 1) % capacity`; dequeue reads at `head` and advances `head` the same way.
+The backing array behaves as though its ends were joined. `head` marks the next read and `tail` the next write. Advancing either index modulo the capacity sends it back to `0` after the last physical slot. Enqueue writes at `tail` and sets `tail = (tail + 1) % capacity`. Dequeue reads at `head` and advances `head` the same way.
 
-What it gives up is growth and history: capacity is chosen once, and once the ring is full the next write either overwrites the oldest element or is refused. There is no record of items that scrolled past.
+The trade is explicit. Capacity never grows, and a full ring must either overwrite the oldest element or refuse the next write. Anything that has scrolled past is gone.
 
 **Core shape:** fixed array + `head`/`tail`/`count` → indices wrap `mod capacity` → a full write overwrites the oldest element or is rejected, according to policy.
 
@@ -45,7 +45,7 @@ The invariant that needs a deliberate design decision is the **`head == tail` am
 1. **Explicit `count`.** Store the element count directly. Empty is `count == 0`, full is `count == capacity`, and `head == tail` is disambiguated by which of those holds. This uses the whole array and costs one extra field.
 2. **Sacrificial slot.** Keep one cell permanently empty. Full becomes `(tail + 1) % capacity == head` and empty stays `head == tail`, so the two states never collide. This needs no counter but stores at most `capacity - 1` elements.
 
-A monotonic-counter variant (never-wrapped 64-bit `head`/`tail`, masked to the array on access) achieves the same disambiguation because `tail - head` is the true count; power-of-two capacities then replace `% capacity` with `& (capacity - 1)`. Whichever scheme is chosen, enqueue and dequeue may change only the cursor they own plus `count`; no operation touches or relocates a slot that another element still occupies.
+A monotonic-counter variant uses increasing 64-bit `head` and `tail` counters that are not reduced modulo capacity and are masked only for array access. Their difference is the true count while arithmetic remains within the supported counter range; an implementation must either tolerate unsigned wraparound correctly or prevent overflow. Power-of-two capacities then replace `% capacity` with `& (capacity - 1)`. Under reject-on-full or wait-on-full, enqueue changes `tail` and `count`, while dequeue changes `head` and `count`. Under overwrite-oldest, a full enqueue also advances `head`, logically evicting the oldest slot before replacing it.
 
 tab: Complexity
 
@@ -173,15 +173,15 @@ tab: Complexity
 
 # When the Capacity is Reached
 
-Every boundary here follows from the two design commitments — a fixed array and wrap arithmetic.
+The boundaries come from the fixed array and wrap arithmetic.
 
-A **full buffer** forces a choice, not a bug. Overwrite-oldest advances `head` on top of the write, dropping the front element so the newest N always survive; this is the lossy ring behind debug logs, telemetry, and audio frame buffers, where stale data is disposable. Reject-on-full leaves the buffer unchanged and signals the producer to wait, applying backpressure; this is what a bounded work queue wants, so that no task is silently discarded. The same structure serves both — the policy lives entirely in the enqueue path when `count == capacity`.
+A **full buffer** forces a policy choice. Overwrite-oldest advances `head` after the write and drops the front element, preserving the newest N items. That fits lossy logs or frame buffers. Reject-on-full leaves the ring unchanged and immediately reports refusal. Wait-on-full is a separate policy that suspends the producer until capacity becomes available, applying backpressure when every work item matters. The selected policy runs when enqueue finds `count == capacity`.
 
-The **empty-vs-full ambiguity** becomes a real failure when neither a `count` nor a sacrificial slot is used: code that treats `head == tail` as unconditionally empty will report a full ring as empty and refuse to drain it, or the mirror bug on the write side, corrupting the stream. The ambiguity is not avoidable by clever index math alone; it requires one of the disambiguation schemes above.
+The **empty-vs-full ambiguity** becomes a bug when the representation has neither a `count` nor a sacrificial slot. Code that treats `head == tail` as always empty can report a full ring as empty and refuse to drain it. Index arithmetic alone cannot distinguish the states.
 
-The ring **does not grow**. Reaching capacity never triggers a resize — that is the point of a bounded footprint.
+The ring **does not grow**. Reaching capacity never triggers a resize. Bounded memory is the point.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Index layout of a wrapped ring
 >
@@ -193,7 +193,7 @@ The ring **does not grow**. Reaching capacity never triggers a resize — that i
 >   S3 --> S4["4: b"]
 >   S4 --> S0
 > ```
-> `capacity = 5`, `head = 3`, `count = 3`. Live elements `a, b, c` occupy indices `3, 4, 0`; `tail = 1`.
+> `capacity = 5`, `head = 3`, `count = 3`. Live elements `a, b, c` occupy indices `3, 4, 0`. `tail = 1`.
 
 > [!EXAMPLE]- C# implementation
 >
@@ -250,19 +250,7 @@ The ring **does not grow**. Reaching capacity never triggers a resize — that i
 > ```
 > The `count` field is what disambiguates `head == tail`. Clearing the dequeued slot matters when `T` is a reference type or contains references: otherwise the backing array keeps objects that are logically gone alive, causing avoidable retention in a long-lived ring.
 
-# Questions
-
-> [!QUESTION]- Why do a full ring and an empty ring both satisfy `head == tail`, and how is the collision resolved?
-> Empty rings put the read and write cursors on the same slot with nothing between them; a full ring wraps `tail` all the way around until it lands back on `head`. The index pair is identical in both states. Resolutions: store an explicit `count` (empty is `0`, full is `capacity`), or leave one slot unused so full becomes `(tail + 1) % capacity == head` while empty stays `head == tail`.
-
-> [!QUESTION]- On reaching capacity, what distinguishes an overwrite ring from a reject ring, and when does each fit?
-> Overwrite advances `head` over the write, dropping the oldest element so the newest N always remain — right for logs, telemetry, and frame buffers where old data is disposable. Reject leaves the buffer unchanged and signals the producer to back off — right for a work queue where every item must be processed. The structure is identical; only the full-buffer branch of enqueue differs.
-
-> [!QUESTION]- Why must a ring whose `T` contains references clear dequeued slots?
-> The backing array retains references in every physical slot, including slots whose logical element was already dequeued. Until such a slot is overwritten, those stale references keep their objects alive. Assigning `default` on dequeue releases them for collection.
-
 # References
 
-- [Circular buffer (Wikipedia)](https://en.wikipedia.org/wiki/Circular_buffer) — index schemes, the full-versus-empty disambiguation, and the mirroring/sacrificial-slot techniques.
-- [System.Threading.Channels](https://learn.microsoft.com/en-us/dotnet/core/extensions/channels) — .NET's bounded producer/consumer abstraction exposes explicit full modes such as wait, drop-oldest, and drop-newest, mirroring the policy choice a bounded buffer must make.
-- [The LMAX Disruptor](https://lmax-exchange.github.io/disruptor/) — a high-throughput ring buffer using monotonic sequence counters instead of a `count` field to disambiguate and to coordinate producers and consumers lock-free.
+- [System.Threading.Channels](https://learn.microsoft.com/en-us/dotnet/core/extensions/channels)
+- [The LMAX Disruptor](https://lmax-exchange.github.io/disruptor/)

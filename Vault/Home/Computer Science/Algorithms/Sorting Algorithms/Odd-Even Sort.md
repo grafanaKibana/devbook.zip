@@ -11,9 +11,9 @@ status: Not-Started
 publish: true
 ---
 
-Odd-even sort, or odd-even transposition sort, alternates two adjacent compare-swap phases. The odd phase compares `(1,2), (3,4), …`; the even phase compares `(0,1), (2,3), …`. Pairs within one phase are disjoint, so they can run in parallel without writing the same element.
+Odd-even sort, also called odd-even transposition sort, alternates between two adjacent compare-swap phases. The odd phase checks `(1,2), (3,4), …`. The even phase checks `(0,1), (2,3), …`. Pairs within one phase do not overlap, so they can run in parallel without writing the same element.
 
-A complete odd/even phase pair covers every adjacent boundary. If neither phase swaps, no adjacent inversion exists and the array is sorted. The algorithm matters mainly as a simple sorting network for parallel processors.
+Together, one odd phase and one even phase cover every adjacent boundary. If neither phase swaps, no adjacent inversion remains and the array is sorted. The algorithm is mainly useful as a simple sorting network for parallel processors.
 
 ~~~~~tabsdown
 tab: Visualization
@@ -60,9 +60,9 @@ tab: Complexity
 With enough processors, one phase performs about `n/2` comparisons concurrently and sorting takes `O(n)` parallel phases, while total work remains `O(n²)`. The plotted table describes sequential execution.
 ~~~~~
 
-# Boundary and implementation
+# Phase barriers and stability
 
-Strict `>` comparison makes the sequential form stable because equal adjacent values never cross. A real parallel implementation needs a barrier between phases so the next set does not start while the previous set still owns array positions.
+The sequential form is stable when it uses a strict `>` comparison, since equal adjacent values never cross. A parallel implementation needs a barrier between phases. Otherwise the next set of comparisons may begin while the previous set still owns array positions.
 
 > [!EXAMPLE]- C# sequential implementation
 >
@@ -84,17 +84,8 @@ Strict `>` comparison makes the sequential form stable because equal adjacent va
 > }
 > ```
 >
-> A real parallel implementation needs a barrier between odd and even phases; running both phases concurrently would introduce overlapping writes.
-
-# Questions
-
-> [!QUESTION]- Why can comparisons inside one phase run concurrently?
-> Every pair is disjoint, so no two comparisons read or write the same array position during that phase.
-
-> [!QUESTION]- What does a swap-free pair of phases prove?
-> Odd and even phases together cover every adjacent boundary. If none is inverted, the array is sorted.
+> A real parallel implementation needs a barrier between odd and even phases. Running both phases concurrently would introduce overlapping writes.
 
 # References
 
-- [N. Habermann, “Parallel Neighbor-Sort (or the Glory of the Induction Principle)”](https://apps.dtic.mil/sti/pdfs/AD0759248.pdf) — the 1972 primary report proving the alternating neighbor-sort process.
-- [NIST Dictionary of Algorithms and Data Structures: sorting](https://www.nist.gov/dads/HTML/sort.html) — authoritative terminology for comparison sorting and mutation of the input array.
+- [N. Habermann, “Parallel Neighbor-Sort (or the Glory of the Induction Principle)”](https://apps.dtic.mil/sti/pdfs/AD0759248.pdf)

@@ -261,6 +261,10 @@
   border-radius: 999px;
   background: var(--_legend-color, var(--_neutral));
 }
+.steptrace__legend-swatch .steptrace__success-marker {
+  inline-size: 0.75rem;
+  block-size: 0.75rem;
+}
 @container steptrace-wide-stage (max-width: 34rem) {
   .steptrace__legend {
     gap: 0.3rem 0.7rem;
@@ -457,6 +461,7 @@
   z-index: 4;
 }
 .steptrace__insight {
+  position: relative;
   display: block;
   list-style: none;
   margin: 0;
@@ -466,6 +471,28 @@
   border-left: 3px solid var(--_green);
   background: color-mix(in srgb, var(--_green) 9%, transparent);
   min-height: 4.65em;
+}
+.steptrace__insight-marker {
+  position: absolute;
+  inset-block-start: 0.55rem;
+  inset-inline-end: 0.55rem;
+  inline-size: 0.9rem !important;
+  block-size: 0.9rem !important;
+}
+.steptrace__row-success {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-end: 0.45rem;
+  display: none !important;
+  inline-size: 0.8rem !important;
+  block-size: 0.8rem !important;
+  transform: translateY(-50%);
+}
+.steptrace__coin-attempt {
+  position: relative;
+}
+.steptrace__coin-attempt[data-state=best] .steptrace__row-success {
+  display: inline-block !important;
 }
 .steptrace__insight-label {
   display: block;
@@ -1189,7 +1216,7 @@
   opacity: 1;
 }
 .steptrace__bar[data-state=swap] .steptrace__fill {
-  background: var(--_violet);
+  background: var(--_blue);
   opacity: 1;
 }
 .steptrace__bar[data-state=swap] .steptrace__cue-swap {
@@ -1451,7 +1478,7 @@
   opacity: 0;
 }
 .steptrace__distribution-bars--output .steptrace__bar[data-target="1"] .steptrace__fill {
-  outline: 2px solid var(--_green);
+  outline: 2px solid var(--_violet);
   outline-offset: 2px;
 }
 .steptrace__distribution-frequency {
@@ -1624,8 +1651,8 @@
   transform: translateY(-1px);
 }
 .steptrace__distribution-token[data-compare="1"] {
-  border-color: var(--_amber);
-  background: color-mix(in srgb, var(--_amber) 12%, var(--_surface));
+  border-color: var(--_blue);
+  background: color-mix(in srgb, var(--_blue) 12%, var(--_surface));
 }
 .steptrace__distribution-token[data-gather="1"] {
   border-color: var(--_green);
@@ -1733,6 +1760,7 @@
   transition: transform var(--_tween) var(--_spring);
 }
 .steptrace__cell {
+  position: relative;
   flex: 1 1 0;
   min-width: 0;
   height: 44px;
@@ -1762,17 +1790,31 @@
   box-shadow: inset 0 -3px 0 var(--_green);
 }
 .steptrace__cell[data-state=mismatch] {
-  background: color-mix(in srgb, var(--_amber) 22%, transparent);
-  box-shadow: inset 0 0 0 2px var(--_amber);
+  background: color-mix(in srgb, var(--_red) 22%, transparent);
+  box-shadow: inset 0 0 0 2px var(--_red);
 }
 .steptrace__cell[data-state=probe] {
   background: color-mix(in srgb, var(--_blue) 18%, transparent);
-  box-shadow: inset 0 -3px 0 var(--_blue);
+  box-shadow: inset 0 0 0 2px var(--_blue);
 }
 .steptrace__cell[data-state=found] {
   background: color-mix(in srgb, var(--_green) 22%, transparent);
   color: var(--_green);
+}
+.steptrace__match:not(.steptrace__z) .steptrace__cell[data-state=found] {
   box-shadow: inset 0 -3px 0 var(--_green);
+}
+.steptrace__cell-success {
+  position: absolute;
+  inset-block-start: 0.2rem;
+  inset-inline-end: 0.2rem;
+  display: none !important;
+  inline-size: 0.78rem !important;
+  block-size: 0.78rem !important;
+  pointer-events: none;
+}
+.steptrace__cell[data-state=found] > .steptrace__cell-success {
+  display: block !important;
 }
 .steptrace__bm {
   inline-size: 100%;
@@ -1833,7 +1875,6 @@
   inline-size: 100%;
   block-size: 100%;
 }
-.steptrace__bm-cell[data-state=match] .steptrace__bm-icon--match,
 .steptrace__bm-cell[data-state=mismatch] .steptrace__bm-icon--mismatch {
   opacity: 1;
 }
@@ -1966,13 +2007,12 @@
   box-shadow: inset 0 0 0 2px var(--_amber);
 }
 .steptrace__z-cell[data-state=copy-target] {
-  color: var(--_blue);
+  color: var(--_violet);
   font-weight: 700;
-  background: color-mix(in srgb, var(--_blue) 10%, transparent);
-  box-shadow: inset 0 -2px 0 var(--_blue);
+  background: color-mix(in srgb, var(--_violet) 10%, transparent);
+  box-shadow: inset 0 0 0 2px var(--_violet);
 }
-.steptrace__z .steptrace__cell[data-state=match],
-.steptrace__z .steptrace__cell[data-state=found] {
+.steptrace__z .steptrace__cell[data-state=match] {
   box-shadow: inset 0 -2px 0 var(--_green);
 }
 .steptrace__z-cursor,
@@ -2192,7 +2232,7 @@
   fill: var(--_blue);
 }
 .steptrace__prefix-edge[data-state=fallback] {
-  stroke: var(--_violet);
+  stroke: var(--_blue);
   stroke-width: 2.2;
 }
 .steptrace__prefix-node circle {
@@ -2211,7 +2251,7 @@
 }
 .steptrace__prefix-edge[data-state=reused],
 .steptrace__prefix-node[data-state=reused] circle {
-  stroke: var(--_violet);
+  stroke: var(--_green);
 }
 .steptrace__prefix-edge[data-state=created],
 .steptrace__prefix-node[data-state=created] circle {
@@ -2267,7 +2307,7 @@
   border-color: var(--_blue);
 }
 .steptrace__prefix-swatch[data-state=reused] {
-  border-color: var(--_violet);
+  border-color: var(--_green);
 }
 .steptrace__prefix-swatch[data-state=created] {
   border-color: var(--_amber);
@@ -2590,9 +2630,9 @@
   background: color-mix(in srgb, var(--_violet) 13%, var(--_matrix-cell));
 }
 .steptrace .steptrace__dp td[data-roles~=target] {
-  --_target-ring-color: var(--_blue);
-  background: color-mix(in srgb, var(--_blue) 15%, var(--_matrix-cell));
-  color: var(--_blue);
+  --_target-ring-color: var(--_violet);
+  background: color-mix(in srgb, var(--_violet) 15%, var(--_matrix-cell));
+  color: var(--_violet);
 }
 .steptrace .steptrace__dp--guided td[data-roles~=target]::before {
   position: absolute;
@@ -2604,18 +2644,16 @@
   pointer-events: none;
 }
 .steptrace .steptrace__dp td[data-roles~=target][data-decision=improve] {
-  --_target-ring-color: var(--_green);
   background: color-mix(in srgb, var(--_green) 18%, var(--_matrix-cell));
   color: var(--_green);
 }
 .steptrace .steptrace__dp td[data-roles~=target][data-decision=keep] {
-  --_target-ring-color: var(--_muted);
   background: color-mix(in srgb, var(--_matrix-text) 7%, var(--_matrix-cell));
   color: var(--_matrix-text);
 }
 .steptrace .steptrace__dp td[data-roles~=negative-cycle] {
-  color: var(--_amber);
-  background: color-mix(in srgb, var(--_amber) 14%, var(--_matrix-cell));
+  color: var(--_red);
+  background: color-mix(in srgb, var(--_red) 14%, var(--_matrix-cell));
 }
 .steptrace .steptrace__dp--guided td:is([data-roles~=stage-axis], [data-roles~=operand-b]):not([data-roles~=target]) .steptrace__dp-value {
   font-weight: 600;
@@ -2635,10 +2673,10 @@
   color: var(--_violet);
 }
 .steptrace .steptrace__matrix-role-badge[data-role=target] {
-  color: var(--_blue);
+  color: var(--_violet);
 }
 .steptrace .steptrace__matrix-role-badge[data-role=write] {
-  color: var(--_green);
+  color: var(--_blue);
 }
 .steptrace .steptrace__matrix-role-badge[data-role=keep] {
   color: var(--_muted);
@@ -2825,8 +2863,8 @@
   color: var(--_blue);
 }
 .steptrace .steptrace__coin[data-state=selected] {
-  border-color: var(--_amber);
-  background: color-mix(in srgb, var(--_amber) 13%, var(--_story-cell));
+  border-color: var(--_blue);
+  background: color-mix(in srgb, var(--_blue) 13%, var(--_story-cell));
 }
 .steptrace .steptrace__coin-attempts {
   display: grid;
@@ -2887,7 +2925,7 @@
   border-top: 1px solid var(--_story-border);
 }
 .steptrace .steptrace__coin-memo-row[data-state=stored] {
-  background: color-mix(in srgb, var(--_violet) 8%, var(--_story-cell));
+  background: color-mix(in srgb, var(--_green) 8%, var(--_story-cell));
 }
 .steptrace .steptrace__coin-memo-row[data-state=hit] {
   background: color-mix(in srgb, var(--_green) 11%, var(--_story-cell));
@@ -2903,12 +2941,25 @@
   background: var(--_story-cell);
 }
 .steptrace .steptrace__amount-cell {
+  position: relative;
   display: grid;
   min-height: 4rem;
   place-content: center;
   gap: 0.3rem;
   text-align: center;
   transition: background-color var(--_tween) ease, color var(--_tween) ease;
+}
+.steptrace .steptrace__dp-story-success {
+  position: absolute;
+  inset-block-start: 0.25rem;
+  inset-inline-end: 0.25rem;
+  display: none;
+  inline-size: 0.78rem;
+  block-size: 0.78rem;
+}
+.steptrace .steptrace__amount-cell[data-state=best] .steptrace__dp-story-success,
+.steptrace .steptrace__warehouse-matrix td[data-state=best] .steptrace__dp-story-success {
+  display: block;
 }
 .steptrace .steptrace__amount-cell + .steptrace__amount-cell {
   border-left: 1px solid var(--_story-border);
@@ -2929,7 +2980,7 @@
   background: color-mix(in srgb, var(--_amber) 12%, var(--_story-cell));
 }
 .steptrace .steptrace__amount-cell[data-state=stored] {
-  background: color-mix(in srgb, var(--_violet) 7%, var(--_story-cell));
+  background: color-mix(in srgb, var(--_green) 7%, var(--_story-cell));
 }
 .steptrace .steptrace__amount-cell[data-state=best] {
   background: color-mix(in srgb, var(--_green) 13%, var(--_story-cell));
@@ -2997,7 +3048,7 @@
 .steptrace .steptrace__warehouse-cell-stored {
   display: block;
   margin-top: 0.25rem;
-  color: var(--_violet);
+  color: var(--_green);
   font: 600 0.6875rem/1 var(--_font-mono);
 }
 .steptrace .steptrace__warehouse-cell-stored:empty {
@@ -3010,7 +3061,7 @@
   box-shadow: inset 0 0 0 2px var(--_blue);
 }
 .steptrace .steptrace__warehouse-matrix td[data-state=path] {
-  background-color: color-mix(in srgb, var(--_amber) 12%, var(--_story-cell)) !important;
+  background-color: color-mix(in srgb, var(--_blue) 12%, var(--_story-cell)) !important;
 }
 .steptrace .steptrace__warehouse-matrix td[data-state=repeated] {
   background-color: color-mix(in srgb, var(--_violet) 13%, var(--_story-cell)) !important;
@@ -3020,7 +3071,7 @@
   background-color: color-mix(in srgb, var(--_amber) 12%, var(--_story-cell)) !important;
 }
 .steptrace .steptrace__warehouse-matrix td[data-state=stored] {
-  background-color: color-mix(in srgb, var(--_violet) 7%, var(--_story-cell)) !important;
+  background-color: color-mix(in srgb, var(--_green) 7%, var(--_story-cell)) !important;
 }
 .steptrace .steptrace__warehouse-matrix td[data-state=best] {
   background-color: color-mix(in srgb, var(--_green) 13%, var(--_story-cell)) !important;
@@ -3047,13 +3098,13 @@
 }
 .steptrace .steptrace__dp-story-swatch[data-state=selected],
 .steptrace .steptrace__dp-story-swatch[data-state=path] {
-  background: var(--_amber);
+  background: var(--_blue);
 }
 .steptrace .steptrace__dp-story-swatch[data-state=repeated] {
   background: var(--_violet);
 }
 .steptrace .steptrace__dp-story-swatch[data-state=stored] {
-  background: var(--_violet);
+  background: var(--_green);
 }
 .steptrace .steptrace__dp-story-swatch[data-state=dependency] {
   background: var(--_amber);
@@ -3166,8 +3217,8 @@
     repeating-linear-gradient(
       135deg,
       transparent 0 0.35rem,
-      color-mix(in srgb, var(--_amber) 14%, transparent) 0.35rem 0.42rem),
-    color-mix(in srgb, var(--_amber) 8%, var(--_boundary-cell));
+      color-mix(in srgb, var(--_red) 14%, transparent) 0.35rem 0.42rem),
+    color-mix(in srgb, var(--_red) 8%, var(--_boundary-cell));
   color: var(--_muted);
 }
 .steptrace .steptrace__boundary-tick[data-state=feasible] {
@@ -3178,7 +3229,18 @@
   color: var(--_text);
   font-weight: 700;
 }
-.steptrace .steptrace__boundary-tick[data-current=true]::after {
+.steptrace .steptrace__boundary-answer-marker {
+  position: absolute;
+  inset-block-start: 0.25rem;
+  inset-inline-end: 0.25rem;
+  display: none;
+  inline-size: 0.8rem;
+  block-size: 0.8rem;
+}
+.steptrace .steptrace__boundary-tick[data-state=answer] .steptrace__boundary-answer-marker {
+  display: block;
+}
+.steptrace .steptrace__boundary-tick[data-current=true]:not([data-state=answer])::after {
   position: absolute;
   inset: 0;
   border: 2px solid var(--_blue);
@@ -3194,7 +3256,7 @@
   color: var(--_green);
 }
 .steptrace .steptrace__boundary-verdict[data-state=infeasible] {
-  color: var(--_amber);
+  color: var(--_red);
 }
 .steptrace .steptrace__boundary-lanes {
   display: grid;
@@ -3290,7 +3352,7 @@
   background: var(--_surface);
 }
 .steptrace .steptrace__boundary-legend-swatch[data-state=infeasible] {
-  background: color-mix(in srgb, var(--_amber) 18%, var(--_surface));
+  background: color-mix(in srgb, var(--_red) 18%, var(--_surface));
 }
 .steptrace .steptrace__boundary-legend-swatch[data-state=feasible] {
   background: color-mix(in srgb, var(--_green) 22%, var(--_surface));
@@ -3348,7 +3410,7 @@
   transition: stroke var(--_tween) ease;
 }
 .steptrace__ufarc[data-active=true] {
-  stroke: var(--_violet);
+  stroke: var(--_blue);
   stroke-dasharray: 5 3;
 }
 .steptrace__union-find {
@@ -3554,9 +3616,9 @@
   font-weight: 600;
 }
 .steptrace__bcell[data-state=die] {
-  background: color-mix(in srgb, var(--_amber) 26%, transparent);
-  box-shadow: inset 0 0 0 2px var(--_amber);
-  color: var(--_amber);
+  background: color-mix(in srgb, var(--_blue) 26%, transparent);
+  box-shadow: inset 0 0 0 2px var(--_blue);
+  color: var(--_blue);
   font-weight: 700;
 }
 .steptrace__bcell[data-state=borrow] {
@@ -3623,7 +3685,7 @@
   background: color-mix(in srgb, var(--_blue) 22%, transparent);
 }
 .steptrace__btcell[data-state=reject] {
-  background: color-mix(in srgb, var(--_amber) 22%, transparent);
+  background: color-mix(in srgb, var(--_red) 22%, transparent);
 }
 .steptrace__btcell[data-state=remove] {
   background: color-mix(in srgb, var(--_amber) 40%, transparent);
@@ -3633,6 +3695,17 @@
 }
 .steptrace__btcell[data-state=solved] {
   background: color-mix(in srgb, var(--_green) 40%, transparent);
+}
+.steptrace__bt-success {
+  position: absolute;
+  inset-block-start: 0.18rem;
+  inset-inline-end: 0.18rem;
+  display: none !important;
+  inline-size: 0.82rem !important;
+  block-size: 0.82rem !important;
+}
+.steptrace__btcell[data-state=solved] .steptrace__bt-success {
+  display: block !important;
 }
 .steptrace__btcell[data-conflict="1"] {
   box-shadow: inset 0 0 0 2.5px var(--_amber);
@@ -3689,8 +3762,8 @@
   font-weight: 700;
 }
 .steptrace__btslot[data-state=reject] {
-  background: color-mix(in srgb, var(--_amber) 20%, transparent);
-  color: var(--_amber);
+  background: color-mix(in srgb, var(--_red) 20%, transparent);
+  color: var(--_red);
 }
 .steptrace__btslot[data-state=remove] {
   background: color-mix(in srgb, var(--_amber) 34%, transparent);
@@ -4022,8 +4095,8 @@
   stroke-dasharray: 3 2;
 }
 .steptrace .steptrace__rtnode[data-state=infeasible] .steptrace__rtcirc {
-  fill: color-mix(in srgb, var(--_amber) 9%, var(--st-page, var(--_surface)));
-  stroke: var(--_amber);
+  fill: color-mix(in srgb, var(--_red) 9%, var(--st-page, var(--_surface)));
+  stroke: var(--_red);
   stroke-dasharray: 2 2;
 }
 .steptrace .steptrace__rectree[data-profile=branch-and-bound] .steptrace__rtnode[data-shape=card] .steptrace__rtbadge {
@@ -4053,7 +4126,7 @@
   background: var(--_muted);
 }
 .steptrace .steptrace__rtswatch[data-state=infeasible] {
-  background: var(--_amber);
+  background: var(--_red);
 }
 .steptrace {
   --_graph-node-size: 1.625rem;
@@ -4101,7 +4174,7 @@
   stroke-dasharray: 4 4;
 }
 .steptrace__edge[data-active=true] {
-  stroke: var(--_violet);
+  stroke: var(--_blue);
   stroke-dasharray: 3 3;
 }
 .steptrace__edge[data-selected=true] {
@@ -4155,12 +4228,6 @@
 }
 .steptrace__node .steptrace__nmark[data-state=frontier] {
   color: var(--_amber);
-}
-.steptrace__node .steptrace__nmark-success {
-  display: none;
-}
-.steptrace__node[data-state=visited] .steptrace__nmark-success {
-  display: block;
 }
 .steptrace__node[data-state=visited] .steptrace__ncirc {
   fill: color-mix(in srgb, var(--_green) 20%, transparent);
@@ -4237,12 +4304,20 @@
 .steptrace .steptrace__gs-arrow {
   fill: var(--_neutral);
 }
-.steptrace .steptrace__gs-arrow[data-role=active],
+.steptrace .steptrace__gs-arrow[data-role=active] {
+  fill: var(--_blue);
+}
+.steptrace .steptrace__gs-arrow[data-role=candidate] {
+  fill: var(--_amber);
+}
 .steptrace .steptrace__gs-arrow[data-role=cut] {
   fill: var(--_violet);
 }
-.steptrace .steptrace__gs-arrow[data-role=selected] {
+.steptrace .steptrace__gs-arrow[data-role=accepted] {
   fill: var(--_green);
+}
+.steptrace .steptrace__gs-arrow[data-role=rejected] {
+  fill: var(--_red);
 }
 .steptrace .steptrace__gs-edge-label {
   pointer-events: none;
@@ -4254,22 +4329,27 @@
   text-anchor: middle;
   dominant-baseline: central;
 }
-.steptrace .steptrace__gs-edge[data-active=true] {
-  stroke: var(--_violet);
+.steptrace .steptrace__gs-edge[data-state=active] {
+  stroke: var(--_blue);
   stroke-dasharray: 3 3;
 }
-.steptrace .steptrace__gs-edge[data-selected=true] {
+.steptrace .steptrace__gs-edge[data-state=candidate],
+.steptrace .steptrace__gs-edge[data-state=residual] {
+  stroke: var(--_amber);
+  stroke-dasharray: 3 3;
+}
+.steptrace .steptrace__gs-edge[data-state=accepted] {
   stroke: var(--_green);
   stroke-width: 2.4;
   stroke-dasharray: none;
 }
-.steptrace .steptrace__gs-edge[data-cut=true] {
+.steptrace .steptrace__gs-edge[data-state=cut] {
   stroke: var(--_violet);
   stroke-width: 2.4;
   stroke-dasharray: 4 3;
 }
-.steptrace .steptrace__gs-edge[data-dim=true] {
-  opacity: 0.26;
+.steptrace .steptrace__gs-edge[data-state=rejected] {
+  stroke: var(--_red);
   stroke-dasharray: 5 5;
 }
 .steptrace .steptrace__gs-node-circle {
@@ -4304,8 +4384,8 @@
   stroke-width: 2.2;
 }
 .steptrace .steptrace__gs-node[data-state=rejected] .steptrace__gs-node-circle {
-  fill: color-mix(in srgb, var(--_violet) 10%, var(--_surface));
-  stroke: var(--_violet);
+  fill: color-mix(in srgb, var(--_red) 10%, var(--_surface));
+  stroke: var(--_red);
   stroke-dasharray: 3 2;
 }
 .steptrace .steptrace__gs-node[data-group="1"]:not([data-state=open]):not([data-state=current]):not([data-state=rejected]) .steptrace__gs-node-circle {
@@ -4394,6 +4474,11 @@
   border-color: var(--_violet);
   border-style: dashed;
 }
+.steptrace .steptrace__gs-swatch--rejected {
+  border-color: var(--_red);
+  border-style: dashed;
+  background: color-mix(in srgb, var(--_red) 10%, transparent);
+}
 .steptrace--reduced .steptrace__gs-edge,
 .steptrace--reduced .steptrace__gs-node-circle {
   transition: none !important;
@@ -4436,8 +4521,8 @@
   background: color-mix(in srgb, var(--_green) 18%, transparent);
 }
 .steptrace .steptrace__heap-stream .steptrace__pcell[data-state=rejected] {
-  color: var(--_muted);
-  background: color-mix(in srgb, var(--_violet) 8%, transparent);
+  color: var(--_red);
+  background: color-mix(in srgb, var(--_red) 8%, transparent);
 }
 .steptrace .steptrace__heap-stream .steptrace__pcell[data-state=seen] {
   color: var(--_muted);
@@ -4488,8 +4573,11 @@
   grid-template-rows: auto minmax(12rem, 1fr) auto;
 }
 .steptrace .steptrace__heap-edge[data-path="1"] {
-  stroke: var(--_blue);
+  stroke: var(--_green);
   stroke-width: 2.4;
+}
+.steptrace .steptrace__heap-variant .steptrace__heap-edge[data-path="1"] {
+  stroke: var(--_blue);
 }
 .steptrace .steptrace__heap-array-label {
   padding-top: 0.7rem;
@@ -4530,12 +4618,25 @@
   stroke: var(--_blue);
 }
 .steptrace .steptrace__heap-node[data-state=settled] .steptrace__ncirc {
+  fill: color-mix(in srgb, var(--_neutral) 16%, var(--_surface));
+  stroke: var(--_neutral);
+}
+.steptrace .steptrace__heap-node[data-state=swap] .steptrace__ncirc {
+  fill: color-mix(in srgb, var(--_blue) 20%, var(--_surface));
+  stroke: var(--_blue);
+}
+.steptrace[data-structure=heap] .steptrace__heap-node[data-state=settled] .steptrace__ncirc,
+.steptrace[data-structure=binomial-queue] .steptrace__heap-node[data-state=settled] .steptrace__ncirc {
+  fill: color-mix(in srgb, var(--_green) 18%, var(--_surface));
+  stroke: var(--_green);
+}
+.steptrace[data-structure=fibonacci-heap] .steptrace__heap-node[data-state=settled] .steptrace__ncirc {
   fill: color-mix(in srgb, var(--_amber) 20%, var(--_surface));
   stroke: var(--_amber);
 }
-.steptrace .steptrace__heap-node[data-state=swap] .steptrace__ncirc {
-  fill: color-mix(in srgb, var(--_violet) 20%, var(--_surface));
-  stroke: var(--_violet);
+.steptrace .steptrace__merge-heap .steptrace__heap-node[data-state=settled] .steptrace__ncirc {
+  fill: color-mix(in srgb, var(--_blue) 20%, var(--_surface));
+  stroke: var(--_blue);
 }
 .steptrace .steptrace__heap-node,
 .steptrace .steptrace__heap-root-label {
@@ -4548,8 +4649,11 @@
   visibility: hidden;
 }
 .steptrace .steptrace__heap-root-label {
-  fill: var(--_amber);
+  fill: var(--_muted);
   font: 600 0.52rem/1 var(--_font-head);
+}
+.steptrace .steptrace__heap-selection:not(.steptrace__two-heaps) .steptrace__heap-root-label {
+  fill: var(--_amber);
 }
 .steptrace .steptrace__heap-swatch {
   inline-size: 0.58rem;
@@ -4585,8 +4689,8 @@
   background: color-mix(in srgb, var(--_amber) 20%, transparent);
 }
 .steptrace .steptrace__heap-swatch--rejected {
-  border-color: var(--_violet);
-  color: var(--_violet);
+  border-color: var(--_red);
+  color: var(--_red);
 }
 @container steptrace-heap-selection (max-width: 36rem) {
   .steptrace .steptrace__two-heaps-grid {
@@ -4709,20 +4813,20 @@
   background: color-mix(in srgb, var(--_amber) 18%, var(--_surface));
 }
 .steptrace .steptrace__interval-band[data-state=gap] {
-  border-color: var(--_violet);
-  background: color-mix(in srgb, var(--_violet) 12%, var(--_surface));
+  border-color: var(--_amber);
+  background: color-mix(in srgb, var(--_amber) 12%, var(--_surface));
 }
 .steptrace .steptrace__interval-band[data-state=conflict] {
-  border-color: var(--_violet);
-  background: color-mix(in srgb, var(--_violet) 18%, var(--_surface));
+  border-color: var(--_amber);
+  background: color-mix(in srgb, var(--_amber) 18%, var(--_surface));
 }
 .steptrace .steptrace__interval-band[data-state=accepted] {
   border-color: var(--_green);
   background: color-mix(in srgb, var(--_green) 18%, var(--_surface));
 }
 .steptrace .steptrace__interval-band[data-state=rejected] {
-  border-color: var(--_violet);
-  background: color-mix(in srgb, var(--_violet) 10%, var(--_surface));
+  border-color: var(--_red);
+  background: color-mix(in srgb, var(--_red) 10%, var(--_surface));
   opacity: 0.42;
 }
 .steptrace .steptrace__interval-band[data-state=processed] {
@@ -4768,7 +4872,7 @@
   background: var(--_green);
 }
 .steptrace .steptrace__interval-swatch--rejected {
-  background: var(--_violet);
+  background: var(--_red);
 }
 @media (max-width: 560px) {
   .steptrace .steptrace__interval-board {
@@ -5106,8 +5210,8 @@
   font-size: 0.62rem;
 }
 .steptrace .steptrace__lru-map .steptrace__contiguous-cell[data-active="1"] {
-  --steptrace-array-outline: var(--_green);
-  background: color-mix(in srgb, var(--_green) 16%, transparent);
+  --steptrace-array-outline: var(--_blue);
+  background: color-mix(in srgb, var(--_blue) 16%, transparent);
 }
 .steptrace .steptrace__lru-chain .steptrace__linked-list-board {
   margin-inline: auto;
@@ -5445,12 +5549,12 @@
 .steptrace .steptrace__stack-sequence-scan .steptrace__pcell[data-state=retained] {
   background: color-mix(in srgb, var(--_amber) 12%, var(--_surface));
 }
-.steptrace .steptrace__stack-sequence-scan .steptrace__pcell[data-state=popped],
 .steptrace .steptrace__stack-sequence-scan .steptrace__pcell[data-state=resolved] {
-  background: color-mix(in srgb, var(--_violet) 10%, var(--_surface));
+  background: color-mix(in srgb, var(--_green) 10%, var(--_surface));
 }
 .steptrace .steptrace__stack-sequence-scan .steptrace__pcell[data-state=popped] {
-  outline-color: var(--_violet);
+  background: color-mix(in srgb, var(--_blue) 10%, var(--_surface));
+  outline-color: var(--_blue);
   animation: steptrace-stack-sequence-pop var(--_dur-move) var(--_spring-snappy) both;
 }
 .steptrace .steptrace__stack-sequence-stack {
@@ -5507,7 +5611,7 @@
   background: var(--_amber);
 }
 .steptrace .steptrace__stack-sequence-swatch--popped {
-  background: var(--_violet);
+  background: var(--_green);
 }
 @keyframes steptrace-stack-sequence-pop {
   45% {
@@ -5876,8 +5980,8 @@
   opacity: 0;
 }
 .steptrace__hash-token[data-motion=success] {
-  border-color: var(--_green);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--_green) 18%, transparent);
+  border-color: var(--_blue);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--_blue) 18%, transparent);
 }
 .steptrace__hash-token[data-motion=extract] {
   opacity: 0;
@@ -5955,14 +6059,14 @@
   border-block-start: 1px solid color-mix(in srgb, var(--_text) 22%, transparent);
 }
 .steptrace__hash-chain-slot[data-path="1"] {
-  border-color: var(--_blue);
+  border-color: var(--_green);
 }
 .steptrace__hash-chain-slot[data-selected="1"] {
-  box-shadow: inset 0 0 0 1px var(--_amber);
+  box-shadow: inset 0 0 0 1px var(--_blue);
 }
 .steptrace__hash-chain-slot[data-result=success] {
-  border-color: var(--_green);
-  box-shadow: inset 0 0 0 1px var(--_green);
+  border-color: var(--_blue);
+  box-shadow: inset 0 0 0 1px var(--_blue);
 }
 .steptrace__hash-chain-slot[data-result=remove] {
   border-color: var(--_amber);
@@ -6013,18 +6117,18 @@
   background: color-mix(in srgb, var(--_accent) 8%, transparent);
 }
 .steptrace__hash-cell[data-probe=visited] {
-  background: color-mix(in srgb, var(--_blue) 9%, transparent);
+  background: color-mix(in srgb, var(--_green) 9%, transparent);
 }
 .steptrace__hash-cell[data-probe=current] {
-  box-shadow: inset 0 0 0 2px var(--_amber);
+  box-shadow: inset 0 0 0 2px var(--_blue);
 }
 .steptrace__hash-cell[data-probe=collision] {
   background: color-mix(in srgb, var(--_amber) 12%, transparent);
   box-shadow: inset 0 0 0 2px var(--_amber);
 }
 .steptrace__hash-cell[data-result=success] {
-  background: color-mix(in srgb, var(--_green) 12%, transparent);
-  box-shadow: inset 0 0 0 2px var(--_green);
+  background: color-mix(in srgb, var(--_blue) 12%, transparent);
+  box-shadow: inset 0 0 0 2px var(--_blue);
 }
 .steptrace__hash-cell[data-result=remove] {
   background: color-mix(in srgb, var(--_amber) 8%, transparent);
@@ -6413,11 +6517,11 @@
   opacity: 0;
 }
 .steptrace .steptrace__binary-tree-edge[data-state=path] {
-  stroke: var(--_blue);
+  stroke: var(--_green);
   stroke-width: 2.4;
 }
 .steptrace .steptrace__binary-tree-edge[data-state=rotation] {
-  stroke: var(--_violet);
+  stroke: var(--_blue);
   stroke-width: 2.6;
 }
 .steptrace .steptrace__binary-tree-node .steptrace__ncirc {
@@ -6435,16 +6539,16 @@
   opacity: 0;
 }
 .steptrace .steptrace__binary-tree-node[data-state=path] .steptrace__ncirc {
-  fill: color-mix(in srgb, var(--_blue) 18%, var(--_surface));
-  stroke: var(--_blue);
+  fill: color-mix(in srgb, var(--_green) 18%, var(--_surface));
+  stroke: var(--_green);
 }
 .steptrace .steptrace__binary-tree-node[data-state=changed] .steptrace__ncirc {
   fill: color-mix(in srgb, var(--_green) 18%, var(--_surface));
   stroke: var(--_green);
 }
 .steptrace .steptrace__binary-tree-node[data-state=rotation] .steptrace__ncirc {
-  fill: color-mix(in srgb, var(--_violet) 20%, var(--_surface));
-  stroke: var(--_violet);
+  fill: color-mix(in srgb, var(--_blue) 20%, var(--_surface));
+  stroke: var(--_blue);
   stroke-width: 2.4;
 }
 .steptrace .steptrace__binary-tree-node[data-color=black] .steptrace__ncirc {
@@ -6518,7 +6622,7 @@
   stroke-width: 1.6;
 }
 .steptrace .steptrace__multiway-tree-edge[data-state=path] {
-  stroke: var(--_blue);
+  stroke: var(--_green);
   stroke-width: 2.4;
 }
 .steptrace .steptrace__multiway-tree-cell {
@@ -6527,23 +6631,29 @@
   stroke-width: 1.4;
 }
 .steptrace .steptrace__multiway-tree-node[data-path="1"] .steptrace__multiway-tree-cell {
-  fill: color-mix(in srgb, var(--_blue) 14%, var(--_surface));
-  stroke: var(--_blue);
+  fill: color-mix(in srgb, var(--_green) 14%, var(--_surface));
+  stroke: var(--_green);
 }
 .steptrace .steptrace__multiway-tree-node[data-affected="1"] .steptrace__multiway-tree-cell {
-  fill: color-mix(in srgb, var(--_violet) 16%, var(--_surface));
-  stroke: var(--_violet);
+  fill: color-mix(in srgb, var(--_blue) 16%, var(--_surface));
+  stroke: var(--_blue);
   stroke-width: 2;
 }
 .steptrace .steptrace__multiway-tree-node .steptrace__multiway-tree-cell[data-state=special] {
-  fill: color-mix(in srgb, var(--_amber) 24%, var(--_surface));
-  stroke: var(--_amber);
+  fill: color-mix(in srgb, var(--_blue) 24%, var(--_surface));
+  stroke: var(--_blue);
   stroke-width: 2.2;
 }
 .steptrace .steptrace__multiway-tree-node .steptrace__multiway-tree-cell[data-state=found] {
   fill: color-mix(in srgb, var(--_green) 20%, var(--_surface));
   stroke: var(--_green);
   stroke-width: 2.2;
+}
+.steptrace .steptrace__multiway-tree-success {
+  display: none;
+}
+.steptrace .steptrace__multiway-tree-success[data-state=found] {
+  display: block;
 }
 .steptrace .steptrace__multiway-tree-key {
   fill: var(--_text);

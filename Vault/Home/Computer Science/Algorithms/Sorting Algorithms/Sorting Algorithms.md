@@ -12,7 +12,9 @@ level:
 status: Creation
 ---
 
-Sorting is a foundational operation that impacts performance all over the stack: databases, UIs, pipelines, and in-memory processing. The important part is not memorizing algorithms, but understanding stability, memory tradeoffs, and typical runtime behavior. Example: mergesort is stable and predictable, while quicksort is often fast in practice but has worst-case pitfalls.
+Choosing a sorting algorithm is mostly a choice among guarantees. Stability preserves the input order of equal keys. Extra memory may buy predictable merges, while in-place partitioning usually improves locality. Key structure can remove the comparison bound entirely.
+
+The input decides which tradeoff matters. Nearly sorted data favors adaptive algorithms, a small integer range can make counting sort linear, and strict memory limits narrow the field to in-place choices. The tables below keep those boundaries visible instead of treating one algorithm as a universal default.
 
 ```datacorejsx
 const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
@@ -45,21 +47,21 @@ flowchart TD
 | Algorithm | Average | Worst | Space | Stable | Reach for it when |
 | --- | --- | --- | --- | --- | --- |
 | [[Bubble Sort]] | O(n²) | O(n²) | O(1) | Yes | Teaching only |
-| [[Home/Computer Science/Algorithms/Sorting Algorithms/Cocktail Shaker Sort|Cocktail Shaker Sort]] | O(n²) | O(n²) | O(1) | Yes | Teaching bidirectional passes; moves small tail values forward faster than Bubble Sort |
+| [[Home/Computer Science/Algorithms/Sorting Algorithms/Cocktail Shaker Sort|Cocktail Shaker Sort]] | O(n²) | O(n²) | O(1) | Yes | Teaching bidirectional passes. Moves small tail values forward faster than Bubble Sort |
 | [[Home/Computer Science/Algorithms/Sorting Algorithms/Gnome Sort|Gnome Sort]] | O(n²) | O(n²) | O(1) | Yes | Teaching inversion removal with one walking index |
-| [[Home/Computer Science/Algorithms/Sorting Algorithms/Bogo Sort|Bogo Sort]] | Θ(n · n!) expected | Unbounded | O(1) | No | Bounded demonstrations only; random retries make no progress guarantee |
-| [[Comb Sort]] | ~O(n² / 2^p) | O(n²) | O(1) | No | Teaching why bubble sort is slow |
+| [[Home/Computer Science/Algorithms/Sorting Algorithms/Bogo Sort|Bogo Sort]] | Θ(n · n!) expected | Unbounded | O(1) | No | Bounded demonstrations only. Random retries make no progress guarantee |
+| [[Comb Sort]] | Empirically near O(n log n) on random input. Not guaranteed | O(n²) | O(1) | No | Teaching why bubble sort is slow |
 | [[Selection Sort]] | O(n²) | O(n²) | O(1) | No | Writes are far costlier than reads |
 | [[Home/Computer Science/Algorithms/Sorting Algorithms/Cycle Sort|Cycle Sort]] | Θ(n²) | Θ(n²) | O(1) | No | Writes are exceptionally expensive and keys can be compared cheaply |
-| [[Insertion Sort]] | O(n²) | O(n²) | O(1) | Yes | Tiny or nearly-sorted input; base case of hybrids |
-| [[Home/Computer Science/Algorithms/Sorting Algorithms/Odd-Even Sort|Odd-Even Sort]] | O(n²) sequential | O(n²) sequential | O(1) | Yes | Disjoint neighbor phases will run in parallel; otherwise teaching only |
+| [[Insertion Sort]] | O(n²) | O(n²) | O(1) | Yes | Tiny or nearly-sorted input. Base case of hybrids |
+| [[Home/Computer Science/Algorithms/Sorting Algorithms/Odd-Even Sort|Odd-Even Sort]] | O(n²) sequential | O(n²) sequential | O(1) | Yes | Disjoint neighbor phases will run in parallel. Otherwise teaching only |
 | [[Home/Computer Science/Algorithms/Sorting Algorithms/Pancake Sort|Pancake Sort]] | Θ(n²) | Θ(n²) | O(1) | No | The only permitted move is a prefix reversal |
 | [[Home/Computer Science/Algorithms/Sorting Algorithms/Stooge Sort|Stooge Sort]] | Θ(n².7095) | Θ(n².7095) | O(log n) | No | Recurrence-analysis exercise only |
 | [[Shell Sort]] | ~O(n^1.3) | O(n^1.5) with Hibbard | O(1) | No | No recursion, no scratch memory (embedded) |
 | [[Heap Sort]] | O(n log n) | O(n log n) | O(1) | No | Hard worst-case bound with no extra memory |
-| [[Merge Sort]] | O(n log n) | O(n log n) | O(n) | Yes | Stability required; linked lists; external sort |
-| [[Quick Sort]] | O(n log n) | O(n²) | O(log n) | No | Cache-friendly in-memory default |
-| [[Tim Sort]] | O(n log n) | O(n log n) | O(n) | Yes | Real-world partly-ordered data (Python, Java) |
+| [[Merge Sort]] | O(n log n) | O(n log n) | O(n) | Yes | Stability required. Linked lists. External sort |
+| [[Quick Sort]] | O(n log n) | O(n²) | O(log n) expected, O(n) worst | No | Cache-friendly in-memory default |
+| [[Tim Sort]] | O(n log n) | O(n log n) | O(n) | Yes | Real-world partly-ordered data. Python lists and Java object arrays |
 | [[Introsort]] | O(n log n) | O(n log n) | O(log n) | No | Quicksort's speed without its O(n²) tail (C++, .NET) |
 
 ## Non-comparison Sorts — Beat the Bound by Reading Key Structure
@@ -67,30 +69,9 @@ flowchart TD
 | Algorithm | Time | Space | Stable | Precondition |
 | --- | --- | --- | --- | --- |
 | [[Counting Sort]] | O(n + k) | O(n + k) | Yes | Integer keys in a small range `[0, k)` |
-| [[Radix Sort]] | O(d · (n + b)) | O(n + b) | Yes | Fixed-width keys; needs a stable inner sort |
-| [[Bucket Sort]] | O(n + k) avg, O(n²) worst | O(n + k) | If inner sort is | Keys roughly uniform over a known range |
-
-# Questions
-
-> [!QUESTION]- How do you choose between Merge Sort and Quick Sort in production?
-> - Merge sort gives reliable `O(n log n)` worst-case behavior and stable ordering.
-> - Quick sort is often faster in practice on in-memory arrays due to cache behavior.
-> - Quick sort has worst-case `O(n^2)` if pivot strategy is poor, so randomized or introspective variants are safer.
-> - Why it matters: this choice affects latency tail risk, memory usage, and correctness when stable ordering is required.
-
-> [!QUESTION]- When is Insertion Sort still a good choice?
-> - It is strong on very small arrays because constant overhead is tiny.
-> - It performs well on nearly sorted data where shifts are minimal.
-> - It is commonly used as a base case inside hybrid production sort implementations.
-> - Why it matters: knowing this avoids overengineering and explains hybrid sort internals in interviews.
-
-> [!QUESTION]- What does .NET's built-in Array.Sort use, and why?
-> .NET uses an introspective sort (IntroSort): it starts with Quick Sort for fast average performance, switches to Heap Sort when recursion depth exceeds a threshold (to guarantee O(n log n) worst case), and uses Insertion Sort for small partitions (to exploit its low overhead on nearly-sorted data).
-> This hybrid approach demonstrates why production sort implementations combine multiple algorithms rather than using a single one.
+| [[Radix Sort]] | O(d · (n + b)) | O(n + b) | Yes | Fixed-width keys. Needs a stable inner sort |
+| [[Bucket Sort]] | O(n + k) avg, O(n²) worst | O(n + k) | Depends. Stable with order-preserving scatter and stable per-bucket sort | Keys roughly uniform over a known range |
 
 # References
 
-- [Sorting algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Sorting_algorithm)
-- [Array Sort method .NET](https://learn.microsoft.com/dotnet/api/system.array.sort)
-- [Nearly all binary searches and mergesorts are broken](https://research.google/blog/extra-extra-read-all-about-it-nearly-all-binary-searches-and-mergesorts-are-broken/)
-- [Sorting (Sedgewick and Wayne, Algorithms 4th ed.)](https://algs4.cs.princeton.edu/20sorting/) — implementations and empirical performance analysis for the whole family.
+- [Sorting (Sedgewick and Wayne, Algorithms 4th ed.)](https://algs4.cs.princeton.edu/20sorting/)

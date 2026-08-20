@@ -36,13 +36,24 @@
   fill: var(--_neutral);
 }
 
-.steptrace .steptrace__gs-arrow[data-role="active"],
+.steptrace .steptrace__gs-arrow[data-role="active"] {
+  fill: var(--_blue);
+}
+
+.steptrace .steptrace__gs-arrow[data-role="candidate"] {
+  fill: var(--_amber);
+}
+
 .steptrace .steptrace__gs-arrow[data-role="cut"] {
   fill: var(--_violet);
 }
 
-.steptrace .steptrace__gs-arrow[data-role="selected"] {
+.steptrace .steptrace__gs-arrow[data-role="accepted"] {
   fill: var(--_green);
+}
+
+.steptrace .steptrace__gs-arrow[data-role="rejected"] {
+  fill: var(--_red);
 }
 
 .steptrace .steptrace__gs-edge-label {
@@ -56,25 +67,31 @@
   dominant-baseline: central;
 }
 
-.steptrace .steptrace__gs-edge[data-active="true"] {
-  stroke: var(--_violet);
+.steptrace .steptrace__gs-edge[data-state="active"] {
+  stroke: var(--_blue);
   stroke-dasharray: 3 3;
 }
 
-.steptrace .steptrace__gs-edge[data-selected="true"] {
+.steptrace .steptrace__gs-edge[data-state="candidate"],
+.steptrace .steptrace__gs-edge[data-state="residual"] {
+  stroke: var(--_amber);
+  stroke-dasharray: 3 3;
+}
+
+.steptrace .steptrace__gs-edge[data-state="accepted"] {
   stroke: var(--_green);
   stroke-width: 2.4;
   stroke-dasharray: none;
 }
 
-.steptrace .steptrace__gs-edge[data-cut="true"] {
+.steptrace .steptrace__gs-edge[data-state="cut"] {
   stroke: var(--_violet);
   stroke-width: 2.4;
   stroke-dasharray: 4 3;
 }
 
-.steptrace .steptrace__gs-edge[data-dim="true"] {
-  opacity: 0.26;
+.steptrace .steptrace__gs-edge[data-state="rejected"] {
+  stroke: var(--_red);
   stroke-dasharray: 5 5;
 }
 
@@ -118,8 +135,8 @@
 }
 
 .steptrace .steptrace__gs-node[data-state="rejected"] .steptrace__gs-node-circle {
-  fill: color-mix(in srgb, var(--_violet) 10%, var(--_surface));
-  stroke: var(--_violet);
+  fill: color-mix(in srgb, var(--_red) 10%, var(--_surface));
+  stroke: var(--_red);
   stroke-dasharray: 3 2;
 }
 
@@ -241,6 +258,12 @@
 .steptrace .steptrace__gs-swatch--goal {
   border-color: var(--_violet);
   border-style: dashed;
+}
+
+.steptrace .steptrace__gs-swatch--rejected {
+  border-color: var(--_red);
+  border-style: dashed;
+  background: color-mix(in srgb, var(--_red) 10%, transparent);
 }
 
 .steptrace--reduced .steptrace__gs-edge,

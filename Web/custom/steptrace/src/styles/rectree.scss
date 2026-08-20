@@ -273,8 +273,8 @@
 }
 
 .steptrace .steptrace__rtnode[data-state="infeasible"] .steptrace__rtcirc {
-  fill: color-mix(in srgb, var(--_amber) 9%, var(--st-page, var(--_surface)));
-  stroke: var(--_amber);
+  fill: color-mix(in srgb, var(--_red) 9%, var(--st-page, var(--_surface)));
+  stroke: var(--_red);
   stroke-dasharray: 2 2;
 }
 
@@ -315,5 +315,5 @@
 }
 
 .steptrace .steptrace__rtswatch[data-state="infeasible"] {
-  background: var(--_amber);
+  background: var(--_red);
 }

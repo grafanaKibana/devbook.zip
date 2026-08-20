@@ -366,7 +366,7 @@ export function makeBucketDistributionView(frames: readonly BucketDistributionFr
   const legend = makeLegend(
     [
       { label: "active bucket", color: "var(--_blue)" },
-      { label: "local comparison", color: "var(--_amber)" },
+      { label: "local comparison", color: "var(--_blue)" },
       { label: "gathered output", color: "var(--_green)" },
     ],
     "Distribution state legend",

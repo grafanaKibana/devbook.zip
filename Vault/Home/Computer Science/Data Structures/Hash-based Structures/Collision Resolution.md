@@ -11,9 +11,9 @@ status: Ready to Repeat
 publish: true
 ---
 
-A hash table mixes a key into a hash, then derives a **home bucket** or slot. Common reductions are `hash mod m` for `m` buckets and `hash & (m - 1)` when `m` is a power of two and the hash bits have been mixed. A collision occurs when distinct keys derive the same home bucket. The pigeonhole principle guarantees one only after more distinct keys are mapped than there are home buckets; before that, collisions are possible but not inevitable. What the table does next — chain or probe — sets its delete semantics and how it degrades under load. The [[Home/Computer Science/Data Structures/Hash-based Structures/HashMap|HashMap]] note covers .NET's `Dictionary` as one concrete table.
+A hash table mixes a key into a hash, then reduces that hash to a **home bucket** or slot. Common reductions are `hash mod m` for `m` buckets and `hash & (m - 1)` when `m` is a power of two and the hash bits have already been mixed. Distinct keys can choose the same home bucket even while other buckets remain empty. Once there are more keys than home buckets, the pigeonhole principle guarantees a collision. The response, chaining or probing, determines deletion behavior and how sharply the table slows as it fills. The [[Home/Computer Science/Data Structures/Hash-based Structures/HashMap|HashMap]] note follows these mechanics through .NET's `Dictionary`.
 
-The naming is genuinely confusing because two independent axes both use the words "open" and "closed", meaning opposite things:
+Two naming systems overlap here. Both use "open" and "closed," but for different boundaries:
 
 | Common name | Also called | Where entries live | The address of a key is… |
 | --- | --- | --- | --- |
@@ -21,7 +21,7 @@ The naming is genuinely confusing because two independent axes both use the word
 | **Closed hashing** | **Open addressing** | Inside the array itself | Open — may end up in a slot other than its home |
 | **Bucket/group layout** | Bucket addressing | Fixed-size blocks layered over chaining or probing | Depends on the overflow strategy |
 
-Read it as two questions. *Is the storage open-ended or closed?* Chaining's lists grow beyond the bucket array (open hashing); open addressing lives in a closed array (closed hashing). *Is a key's final address fixed or open?* Chaining pins each key to one bucket (closed addressing); open addressing lets a key drift to another slot. Bucket size is a separate layout choice: either strategy can process several adjacent slots as one bucket or group.
+Hashing names the storage boundary. Chaining can grow beyond the bucket array, so it is open hashing. Probing stays inside a fixed array, so it is closed hashing. Addressing names the placement boundary. Chaining fixes a key to one bucket, while open addressing allows it to move to another slot. But bucket size is independent of both names: either strategy may examine several adjacent slots as one bucket or group.
 
 **Core split:** collisions land two keys in one home bucket → chain them outside the array or probe to another in-array slot. A bucket/group layout changes how many candidates one access examines, then delegates overflow to chaining or probing. The third StepTrace tab demonstrates bucketed probing.
 
@@ -206,7 +206,7 @@ tab: Complexity
 ```
 ~~~~~
 
-# Reference Drawer
+# Chaining and Open-Addressing Layouts
 
 > [!ABSTRACT]- Two resolution strategies and one bucket layout at slot 1
 >
@@ -225,38 +225,21 @@ tab: Complexity
 >     B1["bucket 1 | A | B | _ |"]
 >   end
 > ```
-> Keys A and B both derive home slot 1. Chaining links B off slot 1's list; probing advances B to slot 2; bucketed probing tests both positions in bucket 1 before it advances to another bucket.
+> Keys A and B share home slot 1. Chaining links B to that slot's list. Linear probing moves B to slot 2, while bucketed probing checks the rest of bucket 1 before advancing to another bucket.
 
 # Comparison
 
-Chaining and probing decide where a colliding key goes. Bucket/group layout decides how many candidates each access examines and still needs one of those overflow rules.
+Chaining and probing decide where a colliding key goes. Bucket/group layout decides how many candidates one access examines. A grouped table still needs one of those overflow rules.
 
 | Pick | When | Because |
 | --- | --- | --- |
 | Open hashing (chaining) | Load factor is hard to bound, hash quality is uncertain, deletes are frequent | Survives `α > 1`, degrades gracefully, delete is a pointer unlink |
 | Closed hashing (open addressing) | Load factor is controlled, the hash is good, memory and speed matter | Often lowers link overhead and improves locality under moderate load |
-| Bucket/group layout plus a resolution strategy | Locality dominates — on-disk pages or cache-line SIMD scans | One access covers `B` candidates; overflow still follows a chain or probe sequence |
+| Bucket/group layout plus a resolution strategy | Locality dominates — on-disk pages or cache-line SIMD scans | One access covers `B` candidates. Overflow still follows a chain or probe sequence |
 
-Chaining is the forgiving default when load is uncertain or deletes are frequent. Open addressing often reduces per-entry overhead when a good hash, spare capacity, and a probe-preserving delete policy are acceptable. Add bucket/group layout when the access unit is the bottleneck: a disk page or SIMD-sized control group.
-
-# Questions
-
-> [!QUESTION]- Why do "open hashing" and "open addressing" mean opposite things?
-> They name different axes. "Open hashing" describes the *storage*: chaining's per-bucket lists grow open-endedly outside the array. "Open addressing" describes the *key's address*: the key may land in a slot other than its home, so its address is open. Chaining is open hashing but *closed* addressing (the bucket is fixed); probing is closed hashing (fixed array) but *open* addressing (the slot drifts).
-
-> [!QUESTION]- Why can a load factor exceed 1 with chaining but not with open addressing?
-> Chaining stores entries in lists outside the array, so the array can hold more entries than it has slots — `α > 1` just means the average chain is longer than one. Open addressing stores every entry *in* the array, so it cannot hold more entries than slots; it needs empty slots to terminate probe sequences, and its cost blows up as `α → 1`.
-
-> [!QUESTION]- Why can an open-addressed table not always clear a deleted slot, and when can it avoid tombstones?
-> A true empty slot terminates lookup, so clearing a slot inside a probe chain can strand keys displaced past it. A tombstone preserves reachability by saying "deleted, keep probing", but it is only one strategy. Linear probing can backward-shift entries or rebuild the affected cluster; other schemes may repair or rehash if they can preserve every key's probe sequence.
-
-> [!QUESTION]- What makes bucketed hashing fast for on-disk and SIMD tables?
-> The bucket or group matches the expensive access unit, so one I/O or vector metadata scan examines `B` candidates. It is a layout optimisation, not a complete collision strategy: a full home bucket still overflows through chaining or probing.
+Chaining is the forgiving default when load is uncertain or deletes are frequent. Open addressing cuts per-entry overhead when hash distribution is good and spare capacity is acceptable. Its delete rule must preserve probe reachability. Bucket/group layout helps when the expensive access unit is a disk page or a SIMD-sized control group.
 
 # References
 
-- [Hash table (Wikipedia)](https://en.wikipedia.org/wiki/Hash_table) — the separate-chaining vs open-addressing split, the open/closed terminology clash, and load-factor analysis for each.
-- [Open addressing (Wikipedia)](https://en.wikipedia.org/wiki/Open_addressing) — linear, quadratic, and double-hashing probe sequences with their clustering behaviour and the tombstone deletion problem.
-- [Swiss Tables design notes (Abseil)](https://abseil.io/about/design/swisstables) — a bucketed open-addressing table that scans control bytes with SIMD, showing how buckets and open addressing combine in a modern high-performance map.
-- [OpenJDK `HashMap` source](https://github.com/openjdk/jdk/blob/master/src/java.base/share/classes/java/util/HashMap.java) — the treeification threshold, minimum table capacity, and comparable-key tree-search path.
-- [The Art of Computer Programming, Vol. 3, §6.4](https://www-cs-faculty.stanford.edu/~knuth/taocp.html) — Knuth's original analysis of chaining, linear probing, and their expected probe counts as a function of load factor.
+- [Swiss Tables design notes (Abseil)](https://abseil.io/about/design/swisstables)
+- [OpenJDK `HashMap` source](https://github.com/openjdk/jdk/blob/master/src/java.base/share/classes/java/util/HashMap.java)

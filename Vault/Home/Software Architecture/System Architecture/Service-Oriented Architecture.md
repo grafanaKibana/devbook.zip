@@ -11,37 +11,37 @@ status: Ready to Repeat
 publish: true
 ---
 
-Service-Oriented Architecture (SOA) structures a system as a collection of loosely coupled services that communicate over a network, typically via standardized protocols (SOAP/WSDL historically, REST or messaging today). Each service exposes a well-defined interface and can be developed, deployed, and scaled independently. SOA emerged in the 2000s as a way to integrate heterogeneous enterprise systems — SAP, Salesforce, custom ERP, mainframe CICS — without rewriting them. The Enterprise Service Bus (ESB) acted as the central nervous system: routing messages, transforming schemas, and orchestrating workflows between services that knew nothing about each other.
+Service-Oriented Architecture (SOA) exposes business capabilities through explicit network contracts. It became common in enterprise integration because SAP, mainframes, custom applications, and later SaaS products could cooperate without sharing an implementation stack.
 
-SOA and microservices share the same decomposition philosophy but differ in scope, governance, and communication style. Understanding the distinction matters for interviews and architecture decisions.
+The service contract is the durable idea. SOAP and WSDL were common, and an Enterprise Service Bus (ESB) often handled protocol translation or routing. Neither technology is required for an architecture to be service-oriented.
 
-# SOA Vs Microservices
+SOA can separate development and ownership, but it does not guarantee independent deployment, data ownership, or scaling. Those properties depend on the service boundaries and governance model.
 
-| Dimension | SOA | Microservices |
-|---|---|---|
-| Service size | Larger, coarser-grained (e.g., "Order Management Service") | Smaller, fine-grained (e.g., "Order Placement", "Order Status") |
-| Communication | Enterprise Service Bus (ESB) or SOAP/WSDL | Direct HTTP/REST, gRPC, or lightweight message broker |
-| Data sharing | Services may share a database | Each service owns its data store |
-| Governance | Centralized (ESB, shared schemas) | Decentralized (each team owns their service) |
-| Deployment | Often deployed together on shared infrastructure | Independently deployable, often containerized |
-| Typical context | Enterprise integration (ERP, CRM, legacy systems) | Cloud-native, greenfield, high-scale |
+# SOA and Microservices
 
-**Key distinction**: SOA uses an ESB as a central integration hub; microservices prefer "smart endpoints, dumb pipes" — the services contain the logic, the message broker is just a transport.
+| Concern | Typical enterprise SOA | Typical microservices system |
+| --- | --- | --- |
+| Primary pressure | Integrate heterogeneous systems | Give bounded capabilities independent ownership |
+| Service size | Often coarse business services | Usually smaller bounded services |
+| Communication | SOAP, messaging, or mediated integration | HTTP, gRPC, or lightweight messaging |
+| Integration logic | May live in an ESB or orchestration layer | Usually stays near service endpoints or a workflow engine |
+| Data | Shared enterprise stores are common | Service-owned data is strongly preferred |
+| Governance | Central contracts and schemas | Team-owned contracts within platform guardrails |
+| Deployment | May share infrastructure and release coordination | Independent deployment is a core goal |
 
-> [!NOTE]
-> The ESB didn't vanish — it **evolved and decomposed**. Its routing/auth/rate-limiting concerns moved to a thin edge **[[Home/Software Architecture/Distributed Systems/API Gateway]]**, its async transport to a **[[Home/Software Architecture/Distributed Systems/Message Queues/Message Queues|message broker]]** (Kafka/RabbitMQ), and its orchestration to either the services themselves (**choreography**) or a dedicated workflow engine. The microservices "dumb pipe" is the lesson learned from ESBs accreting too much logic.
+The useful distinction is where change is controlled. Traditional SOA often centralizes integration policy. Microservices push more responsibility into independently owned services and keep transport infrastructure comparatively simple.
 
-# When SOA Still Applies
+The ESB's responsibilities did not disappear. Edge routing and rate limits often moved to an [[Home/Software Architecture/Distributed Systems/API Gateway]], asynchronous transport to a [[Home/Software Architecture/Distributed Systems/Message Queues/Message Queues|message broker]], and long-running coordination to services or workflow engines. Trouble starts when business decisions collect in the integration layer and every domain change needs its approval.
 
-SOA remains relevant in enterprise contexts where:
+# When SOA Still Fits
 
-- **Legacy integration**: connecting SAP, Salesforce, and custom systems via a shared integration layer (Azure Integration Services, MuleSoft).
-- **Shared services**: a single "Customer Service" used by multiple business units, where the overhead of microservice decomposition isn't justified.
-- **Regulated industries**: where centralized governance, audit trails, and schema contracts are required.
+SOA remains practical when the main job is integrating systems that cannot be changed together. A coarse customer or order service can give several business units one stable contract without forcing each legacy application into a new deployment model.
 
-# Example: SOA Service Contract
+Central governance also has a place when contracts require formal audit, schema review, or protocol mediation. The trade is slower local autonomy in exchange for controlled interoperability.
 
-In classic SOA, services expose contracts via WSDL (SOAP) or OpenAPI (REST). A service consumer depends only on the contract, not the implementation:
+# Service Contract
+
+A classic service can publish a WSDL contract. Consumers depend on that contract rather than the implementation:
 
 ```xml
 <!-- WSDL-style service contract (simplified) -->
@@ -55,11 +55,11 @@ In classic SOA, services expose contracts via WSDL (SOAP) or OpenAPI (REST). A s
 </definitions>
 ```
 
-In modern SOA using REST, the equivalent is an OpenAPI contract. The consumer generates a typed client from the contract and never imports the service's internal assemblies:
+A REST-based service can use OpenAPI for the same boundary. Generated clients reduce hand-written protocol code, although compatibility still depends on disciplined schema evolution.
 
 ```csharp
 // Consumer: generated client from OpenAPI spec
-// dotnet-openapi add https://orders-service/swagger/v1/swagger.json
+// dotnet openapi add url https://orders-service/swagger/v1/swagger.json
 var client = new OrderServiceClient(httpClient);
 var response = await client.PlaceOrderAsync(new PlaceOrderRequest
 {
@@ -68,36 +68,37 @@ var response = await client.PlaceOrderAsync(new PlaceOrderRequest
 });
 ```
 
-The contract boundary is the key SOA discipline: services communicate through published interfaces, not shared code or shared databases.
+The consumer should not import the service's internal assemblies or reach into its tables. Once it does, the published contract is no longer the real boundary.
 
-# Pitfalls
+# How Central Integration Goes Wrong
 
-**ESB as a God Object** — the Enterprise Service Bus accumulates business logic: routing rules, data transformations, orchestration, error handling. A real example: a logistics company's ESB grew to 2,400 routing rules and 180 XSLT transformations over 5 years. A single schema change in the "Shipment" service required updating 47 ESB transformations, a 3-week effort. The ESB became the most complex and fragile component in the system — every change required the ESB team's involvement. Mitigation: keep the ESB as a dumb transport. Business logic belongs in the services. If the ESB is doing domain decisions, refactor them into the services.
+## Business Logic in the ESB
 
-**Shared database coupling** — classic SOA allows services to share a database, unlike microservices which mandate per-service data stores. In practice, shared databases create hidden coupling: the Order Service and Inventory Service both read/write the same `Products` table, and a schema migration by one team breaks the other. Mitigation: establish clear table ownership per service, use views or stored procedures as the service contract, and plan migration toward per-service databases when coupling pain exceeds migration cost.
+Routing and transformation are integration concerns. Pricing rules, eligibility decisions, and order state transitions belong to the service that owns the domain. Putting them in the bus creates a second application whose ownership is usually less clear.
 
-**Contract versioning hell** — WSDL/SOAP contracts are rigid: adding an optional field can break consumers that validate strictly against the schema. After 3 years, a financial services SOA had 6 concurrent versions of the "Account" service contract, each with a different subset of consumers. Mitigation: design contracts for backward compatibility (additive-only changes), use versioned endpoints (`/v1/`, `/v2/`), and set sunset dates with deprecation warnings.
+## Shared Data Without Ownership
 
-# Tradeoffs
+A shared database can be unavoidable during legacy integration. The dangerous part is shared write authority. Give each service explicit ownership of its tables or stored procedures, then expose cross-boundary behavior through contracts. Direct writes from several services turn a schema change into a coordinated release.
 
-| Decision | SOA | Microservices | When SOA | When Microservices |
-| --- | --- | --- | --- | --- |
-| **Service granularity** | Coarse-grained ("Order Management") | Fine-grained ("Order Placement", "Order Status") | Fewer teams, shared business domains, integration-heavy | Many teams with clear bounded contexts and independent deployment needs |
-| **Communication** | ESB / centralized broker | Direct HTTP/gRPC / lightweight broker | Heterogeneous protocol translation needed (SOAP, CICS, MQ) | Homogeneous stack, latency-sensitive, team autonomy valued |
-| **Data ownership** | Shared databases acceptable | Per-service data stores required | Legacy databases that can't be split without major re-architecture | Greenfield or after domain boundaries are well-understood |
-| **Governance** | Centralized (shared schemas, ESB team) | Decentralized (team-owned contracts) | Regulated industries requiring audit trails and central schema control | Fast-moving product teams with strong DevOps culture |
+## Contract Version Sprawl
 
-**Decision rule**: start with SOA when integrating existing enterprise systems that can't be rewritten. Move to microservices when team autonomy and independent deployment velocity matter more than centralized governance. Many organizations run both — SOA for legacy integration, microservices for new product development.
+Rigid consumers can make a harmless additive field behave like a breaking change. Prefer tolerant readers and additive evolution, record deprecation dates, and measure remaining consumers before retiring a version. A permanent collection of `/v1` through `/v6` endpoints is not a versioning strategy.
+
+## Central Governance as a Queue
+
+A central contract review can protect interoperability, but it can also serialize every team behind one group. Standardize the parts that must interoperate and leave service implementation decisions with the owning team.
+
+# Coexisting with Microservices
+
+Many estates use both styles. Existing systems meet through governed integration services, while newer product capabilities use smaller independently deployed services. The dividing line is whether stable cross-system contracts or independent product-team delivery is the stronger constraint.
 
 # Questions
 
-> [!QUESTION]- When is SOA still the right choice over microservices?
-> SOA remains appropriate for enterprise integration scenarios: connecting heterogeneous legacy systems (SAP, Salesforce, custom ERP) via a shared integration layer, shared services used by multiple business units where microservice decomposition overhead isn't justified, and regulated industries requiring centralized governance and audit trails. Microservices are better for greenfield cloud-native systems where teams can own independent services end-to-end.
+> [!QUESTION]- Which part of SOA remains useful without SOAP, WSDL, or an ESB?
+> The durable part is the explicit service contract around a business capability. Consumers depend on that contract instead of importing the service's internal code or writing directly to its database. This allows systems built on different technology stacks to change independently as long as the contract stays compatible. SOAP, WSDL, and ESBs were common ways to implement or govern that boundary, but the boundary still matters when the transport is HTTP, gRPC, or messaging.
 
 # References
 
-- [Service-oriented architecture (Wikipedia)](https://en.wikipedia.org/wiki/Service-oriented_architecture) — historical context, ESB patterns, and the evolution from SOA to microservices.
-- [Microservices vs SOA (Martin Fowler)](https://martinfowler.com/articles/microservices.html#MicroservicesAndSOA) — Fowler's comparison of the two approaches, explaining why microservices emerged as a reaction to SOA's centralized governance model.
-- [[Home/Software Architecture/System Architecture/Microservices]] — the modern evolution of SOA: fine-grained services, decentralized data, independent deployment, and "smart endpoints, dumb pipes."
-- [Azure Integration Services overview (Microsoft Learn)](https://learn.microsoft.com/en-us/azure/architecture/reference-architectures/enterprise-integration/basic-enterprise-integration) — Microsoft's modern SOA integration reference architecture using API Management, Logic Apps, and Service Bus as the integration layer.
-- [SOA Manifesto](http://www.soa-manifesto.org/) — the original SOA design principles: service contracts, loose coupling, abstraction, reusability, autonomy, statelessness, discoverability, and composability.
+- [SOA Manifesto](https://soa-manifesto.org/)
+- [Azure Integration Services reference architecture](https://learn.microsoft.com/en-us/azure/architecture/reference-architectures/enterprise-integration/basic-enterprise-integration)
+- [Microservices and SOA](https://martinfowler.com/articles/microservices.html#MicroservicesAndSOA)

@@ -71,7 +71,7 @@
 }
 
 .steptrace__prefix-edge[data-state="fallback"] {
-  stroke: var(--_violet);
+  stroke: var(--_blue);
   stroke-width: 2.2;
 }
 
@@ -96,7 +96,7 @@
 
 .steptrace__prefix-edge[data-state="reused"],
 .steptrace__prefix-node[data-state="reused"] circle {
-  stroke: var(--_violet);
+  stroke: var(--_green);
 }
 
 .steptrace__prefix-edge[data-state="created"],
@@ -166,7 +166,7 @@
 }
 
 .steptrace__prefix-swatch[data-state="reused"] {
-  border-color: var(--_violet);
+  border-color: var(--_green);
 }
 
 .steptrace__prefix-swatch[data-state="created"] {

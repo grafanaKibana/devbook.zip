@@ -14,7 +14,7 @@ level:
 status: Creation
 ---
 
-Software architecture is about structuring software so it can evolve: clear boundaries, explicit tradeoffs, and sustainable complexity. It spans every scale — from in-process application structure and design patterns up to distributed, system-level architecture — and good architecture makes the "next change" cheaper without over-engineering the current one. Example: choosing between a modular monolith and microservices is mainly about team boundaries, deployment independence, and operational cost.
+Software architecture decides which code changes together, which state has one authority, and which failures can be isolated. Those boundaries range from in-process modules to independently deployed services. A boundary is useful when it contains a real change, scaling, or failure cost. Splitting a system without that pressure only adds coordination.
 
 ```datacorejsx
 const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
@@ -23,14 +23,11 @@ return FolderStructureMap;
 
 # Questions
 
-> [!QUESTION]- How do you choose between a monolith, a modular monolith, and microservices?
-> - The decision is mainly organizational: microservices buy independent deployment and team autonomy at the cost of network calls, distributed failure modes, and operational overhead
-> - A modular monolith captures most of the boundary benefits — clear module seams, enforced dependencies — while keeping one deployable and in-process calls; it's the right default for most teams
-> - Reach for microservices when independent scaling or deployment or team boundaries genuinely demand it, not because it's fashionable, and rarely before you understand the domain boundaries
-> - Migration is one-directional and cheap the right way round: a well-structured modular monolith can later be carved into services along its existing seams
+> [!QUESTION]- What factors determine whether a system should use a monolith, a modular monolith, or microservices?
+> A monolith keeps one deployment and local transactions, so it usually fits a small team while domain boundaries are still changing. A modular monolith adds enforced module boundaries without introducing network failures or separate operations. It is a safer default when one deployment is not slowing delivery.
+>
+> Microservices fit stable boundaries that repeatedly need independent deployment, scaling, or ownership. That independence comes with remote calls, separate data ownership, eventual-consistency workflows, and distributed observability. Strong module boundaries make a later extraction safer, but they do not remove those costs.
 
 # References
 
-- [Architecture styles (Microsoft Azure Architecture Center)](https://learn.microsoft.com/en-us/azure/architecture/guide/architecture-styles/) — a decision-oriented survey of monolith, microservices, event-driven, and other styles.
-- [Patterns of Enterprise Application Architecture (Martin Fowler)](https://martinfowler.com/eaaCatalog/) — the canonical catalog of application-architecture patterns.
-- [Fallacies of distributed computing (Wikipedia)](https://en.wikipedia.org/wiki/Fallacies_of_distributed_computing) — the assumptions that break every distributed architecture; essential before splitting a system.
+- [Software architecture guide](https://martinfowler.com/architecture/)

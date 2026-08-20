@@ -78,9 +78,9 @@
     repeating-linear-gradient(
       135deg,
       transparent 0 0.35rem,
-      color-mix(in srgb, var(--_amber) 14%, transparent) 0.35rem 0.42rem
+      color-mix(in srgb, var(--_red) 14%, transparent) 0.35rem 0.42rem
     ),
-    color-mix(in srgb, var(--_amber) 8%, var(--_boundary-cell));
+    color-mix(in srgb, var(--_red) 8%, var(--_boundary-cell));
   color: var(--_muted);
 }
 
@@ -93,8 +93,19 @@
   color: var(--_text);
   font-weight: 700;
 }
+.steptrace .steptrace__boundary-answer-marker {
+  position: absolute;
+  inset-block-start: 0.25rem;
+  inset-inline-end: 0.25rem;
+  display: none;
+  inline-size: 0.8rem;
+  block-size: 0.8rem;
+}
+.steptrace .steptrace__boundary-tick[data-state="answer"] .steptrace__boundary-answer-marker {
+  display: block;
+}
 
-.steptrace .steptrace__boundary-tick[data-current="true"]::after {
+.steptrace .steptrace__boundary-tick[data-current="true"]:not([data-state="answer"])::after {
   position: absolute;
   inset: 0;
   border: 2px solid var(--_blue);
@@ -113,7 +124,7 @@
 }
 
 .steptrace .steptrace__boundary-verdict[data-state="infeasible"] {
-  color: var(--_amber);
+  color: var(--_red);
 }
 
 .steptrace .steptrace__boundary-lanes {
@@ -224,7 +235,7 @@
 }
 
 .steptrace .steptrace__boundary-legend-swatch[data-state="infeasible"] {
-  background: color-mix(in srgb, var(--_amber) 18%, var(--_surface));
+  background: color-mix(in srgb, var(--_red) 18%, var(--_surface));
 }
 
 .steptrace .steptrace__boundary-legend-swatch[data-state="feasible"] {

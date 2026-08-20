@@ -11,9 +11,9 @@ publish: true
 priority: Medium
 ---
 
-An array of comparable keys has to be put in order. Selection sort scans the unsorted region again to find its maximum on every round. The waste is that each scan re-derives an ordering the previous scans already partly established.
+Selection sort finds the maximum of the unsorted region by scanning it from scratch on every round. Each scan throws away ordering information that the previous rounds already uncovered.
 
-Heap sort removes that waste by keeping the unsorted region as a [[Home/Computer Science/Data Structures/Trees/Heap-like/Heap|max-heap]] instead of a flat span. The maximum is always at the root; after extracting it, only one root-to-leaf path may need repair. The node at index `i` stores its children at `2i + 1` and `2i + 2`, so the array itself carries the heap shape.
+Heap sort keeps that information by treating the unsorted region as a [[Home/Computer Science/Data Structures/Trees/Heap-like/Heap|max-heap]]. The maximum stays at the root. After extraction, only one root-to-leaf path may need repair. Children of index `i` sit at `2i + 1` and `2i + 2`, so the array carries the heap shape without separate nodes.
 
 **Core shape:** array reinterpreted as a max-heap → repeated extract-max grows a sorted suffix from the back → sift-down restores the shrinking heap.
 
@@ -113,9 +113,9 @@ The best curve assumes all keys compare equal, so each sift-down stops after its
 
 # Stability
 
-Heap geometry does not preserve equal-key order. `2ᵃ, 2ᵇ, 1ᶜ` may emerge as `1ᶜ, 2ᵇ, 2ᵃ`; use a stable sort such as [[Home/Computer Science/Algorithms/Sorting Algorithms/Merge Sort|Merge Sort]] when prior order must survive as a tiebreak.
+Heap geometry can reorder equal keys. `2ᵃ, 2ᵇ, 1ᶜ` may emerge as `1ᶜ, 2ᵇ, 2ᵃ`. When input order must survive as a tiebreak, use a stable sort such as [[Home/Computer Science/Algorithms/Sorting Algorithms/Merge Sort|Merge Sort]].
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Phase structure
 >
@@ -162,13 +162,6 @@ Heap geometry does not preserve equal-key order. `2ᵃ, 2ᵇ, 1ᶜ` may emerge a
 > }
 > ```
 
-# Questions
-
-> [!QUESTION]- Where does heap sort's instability come from?
-> The extraction swaps. Moving the root to the end and sifting a new root down relocates elements by heap geometry, not by input order, so two equal keys can be swapped past each other with nothing to restore their original sequence. Merge sort's merge step, choosing the left element on ties, keeps equal keys in input order.
-
 # References
 
-- [`ArraySortHelper<T>` in dotnet/runtime](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Collections/Generic/ArraySortHelper.cs) — the `IntroSort`/`HeapSort` source behind `Array.Sort`, showing the recursion-depth limit that hands a partition to heap sort.
-- [Heapsort (Wikipedia)](https://en.wikipedia.org/wiki/Heapsort) — the bottom-up heap construction, extraction loop, stability, and implementation variants.
-- [Introsort (Wikipedia)](https://en.wikipedia.org/wiki/Introsort) — Musser's hybrid of quicksort, heap sort, and insertion sort, and the depth-limit rule that triggers the heap-sort fallback.
+- [NIST Dictionary of Algorithms and Data Structures: heapsort](https://xlinux.nist.gov/dads/HTML/heapSort.html)

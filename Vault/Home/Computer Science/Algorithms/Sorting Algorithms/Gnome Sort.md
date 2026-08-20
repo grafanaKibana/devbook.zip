@@ -11,9 +11,9 @@ status: Not-Started
 publish: true
 ---
 
-Gnome sort maintains a sorted prefix with one index. If `a[i-1] <= a[i]`, the index advances. If the pair is inverted, the values swap and the index steps back so the displaced value can continue moving toward its insertion point. Reaching index `0` immediately resumes at `1`.
+Gnome sort maintains a sorted prefix with a single index. An ordered pair, `a[i-1] <= a[i]`, moves the index forward. An inverted pair swaps, then the index steps back so the displaced value can keep moving toward its insertion point. At the front of the array, the scan resumes from index `1`.
 
-The mechanism is [[Home/Computer Science/Algorithms/Sorting Algorithms/Insertion Sort|Insertion Sort]] expressed through adjacent swaps rather than shifting a saved value. Each swap removes one inversion, so the process terminates. Strict comparison keeps equal values from crossing, making the sort stable.
+The mechanism is [[Home/Computer Science/Algorithms/Sorting Algorithms/Insertion Sort|Insertion Sort]] expressed as adjacent swaps instead of shifting a saved value. Every swap removes one inversion, which guarantees termination. Equal values never cross because the comparison is strict, so the sort is stable.
 
 ~~~~~tabsdown
 tab: Visualization
@@ -58,9 +58,9 @@ tab: Complexity
 ```
 ~~~~~
 
-# Boundary and implementation
+# Inversion cost and adjacent swaps
 
-Ordered input needs one forward scan, but reverse-ordered input contains `n(n-1)/2` inversions and forces that many adjacent swaps. Insertion Sort reaches the same asymptotic bound with fewer writes because it shifts a block and writes the inserted value once; Gnome Sort is mainly useful for seeing inversion removal in a single loop.
+Ordered input needs one forward scan. Reverse-ordered input contains `n(n-1)/2` inversions and forces the same number of adjacent swaps. Insertion Sort has the same asymptotic bound but writes less: it shifts a block and places the saved value once. Gnome Sort is mainly useful as a compact demonstration of inversion removal.
 
 > [!EXAMPLE]- C# implementation
 >
@@ -85,15 +85,6 @@ Ordered input needs one forward scan, but reverse-ordered input contains `n(n-1)
 >
 > Clamping the index to `1` avoids reading `values[-1]` after a swap at the front.
 
-# Questions
-
-> [!QUESTION]- What guarantees termination?
-> Every swap removes one adjacent inversion, and a forward step eventually passes an ordered pair. The finite inversion count cannot decrease forever.
-
-> [!QUESTION]- Why can Insertion Sort perform fewer writes with the same asymptotic time?
-> Gnome Sort swaps through every crossed neighbor. Insertion Sort can save the moving value, shift the larger block, and write the saved value once.
-
 # References
 
-- [Dick Grune, “Gnome Sort — The Simplest Sort Algorithm”](https://dickgrune.com/Programs/gnomesort.html) — the algorithm author's primary description and compact implementation.
-- [NIST Dictionary of Algorithms and Data Structures: gnome sort](https://www.nist.gov/dads/HTML/gnomeSort.html) — authoritative definition, classification, and historical notes.
+- [Dick Grune, “Gnome Sort — The Simplest Sort Algorithm”](https://dickgrune.com/Programs/gnomesort.html)

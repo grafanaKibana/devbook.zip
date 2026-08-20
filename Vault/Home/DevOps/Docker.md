@@ -11,94 +11,39 @@ status: Ready to Repeat
 publish: true
 ---
 
-Docker builds OCI-compatible images and runs containers from them. Pinning the application, runtime, and filesystem reduces environment drift, but it does not guarantee identical behavior across development, CI, and production. The host kernel and CPU architecture, resource limits, network and DNS path, mounts, injected configuration and secrets, security policy, and external dependencies remain part of the runtime contract.
+Docker builds an OCI-compatible image containing an application and its filesystem dependencies, then starts isolated processes from that image. The image is portable; the complete runtime is not. The host kernel and CPU architecture, networking, mounts, resource limits, injected configuration, security policy, and external services remain environmental inputs.
 
-# How Containers Work
+# Image, Container, and Runtime Boundary
 
-A container is not a VM. A Linux container is a host process isolated with Linux namespaces and constrained through cgroups. Docker can also run Windows containers, which use Windows kernel isolation mechanisms, and Docker Desktop commonly runs Linux containers inside a Linux VM on macOS or Windows. An image must match the target OS and CPU architecture unless a multi-platform manifest supplies a compatible variant.
+An **image** is an immutable set of filesystem layers plus configuration such as the entry point and default environment. A **container** is one running instance of that image with a writable layer. Removing the container removes that writable layer unless data lives in a volume or external service.
 
-A Docker **image** combines filesystem layers with image configuration. Filesystem-changing build instructions such as `RUN`, `COPY`, and `ADD` produce layer changes; metadata instructions such as `CMD`, `ENTRYPOINT`, and `ENV` update image configuration and do not each imply a new filesystem payload. BuildKit can also reuse cached results without making "one Dockerfile line equals one stored layer" a safe mental model.
+A Linux container is a host process isolated with namespaces and constrained with cgroups, not a virtual machine. Docker Desktop commonly runs Linux containers inside a Linux VM on macOS or Windows. The image must therefore match the target operating system and CPU architecture, or publish a multi-platform manifest with a compatible variant.
 
-A **container** is a running instance of an image. Multiple containers can run from the same image simultaneously, each with its own writable layer.
+# Reading a Multi-Stage Dockerfile
 
-# Dockerfile for a .NET 8 App
-
-Multi-stage builds are the standard pattern for .NET — they produce small production images by separating the build environment from the runtime environment:
-
-```dockerfile
-# Stage 1: Build
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /src
-COPY ["MyApp/MyApp.csproj", "MyApp/"]
-RUN dotnet restore "MyApp/MyApp.csproj"
-COPY . .
-WORKDIR /src/MyApp
-RUN dotnet publish -c Release -o /app/publish
-
-# Stage 2: Runtime (much smaller image)
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
-WORKDIR /app
-COPY --from=build /app/publish .
-EXPOSE 8080
-ENTRYPOINT ["dotnet", "MyApp.dll"]
-```
-
-The SDK stage contains compilers and build tooling. The final stage starts from the ASP.NET runtime image and receives only the published output, so build-only tools are absent from the runtime image. Measure the resulting digest for the selected tag and architecture; image sizes change across .NET versions, base variants, and platforms.
-
-# Reproducible and Least-Privilege Images
-
-A production image should be reproducible from a small context, contain only runtime output, and run without root privileges. Pin the base by version and, where the threat model requires reproducible bytes, by digest. Put stable restore inputs before frequently changing source so the layer cache stays useful. Generate labels and an SBOM in CI, scan the final digest, and promote that same digest rather than rebuilding it per environment.
+This small .NET example teaches stage and runtime boundaries; it is not a production-ready build:
 
 ```dockerfile
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
-COPY MyApp.csproj .
-RUN dotnet restore MyApp.csproj
 COPY . .
-RUN dotnet publish MyApp.csproj -c Release -o /out --no-restore
+RUN dotnet publish MyApp.csproj -c Release -o /out
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
 COPY --from=build /out .
 USER $APP_UID
+EXPOSE 8080
 ENTRYPOINT ["dotnet", "MyApp.dll"]
 ```
 
-Keep `.git`, `bin`, `obj`, local secrets, and test output out of the build context with `.dockerignore`. Environment variables are configuration transport, not secret storage: inject secrets at runtime from the platform, and use BuildKit secret mounts for private package feeds during build. A smaller image reduces transfer and attack surface, but removing diagnostics can slow incidents; keep a separate debug image or ephemeral debugging workflow.
+`FROM ... AS build` gives compilation its own stage. The second `FROM` starts a new image that has the runtime but not the SDK. `COPY --from=build` transfers only published output. `USER` avoids running the application as root. `EXPOSE 8080` documents the intended listening port but does not publish it to the host. `ENTRYPOINT` defines the process whose lifetime is the container lifetime.
 
-![[DevOps/DevOps-Docker-18120000.png]]
+A real build should use a small `.dockerignore`, lock or review base-image identity, keep private-feed credentials out of layers, scan the final digest, and promote that same digest through environments.
 
-> [!WARNING] Non-normative source visual
-> The Node 14 tags and `docker scan` command are obsolete examples. Build from a supported, pinned base image, scan the final immutable digest with the scanner enforced by CI, run as a non-root user, and inject secrets through runtime secret mounts rather than ordinary environment variables.
+# Reading a Compose File
 
-# Key Commands
-
-```bash
-# Build an image tagged as myapp:latest
-docker build -t myapp:latest .
-
-# Run a container, mapping host port 8080 to container port 8080
-docker run -p 8080:8080 myapp:latest
-
-# Non-sensitive runtime configuration can use environment variables
-docker run -e ASPNETCORE_ENVIRONMENT=Production myapp:latest
-
-# Mount sensitive configuration at runtime; keep the source file out of Git
-docker run --mount type=bind,source="$(pwd)/secrets/appsettings.Production.json",target=/app/appsettings.Production.json,readonly myapp:latest
-
-# View running containers
-docker ps
-
-# View logs
-docker logs <container-id>
-
-# Execute a command inside a running container (debugging)
-docker exec -it <container-id> /bin/bash
-```
-
-# Docker Compose
-
-Compose defines multi-container applications in a single YAML file. Useful for local development with a database, cache, and app running together:
+Compose describes a multi-container application, commonly for local development. This example is intentionally incomplete for production:
 
 ```yaml
 services:
@@ -106,81 +51,39 @@ services:
     build: .
     ports:
       - "8080:8080"
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Production
-    secrets:
-      - source: appsettings
-        target: /app/appsettings.Production.json
     depends_on:
       - db
+
   db:
     image: postgres:17
     environment:
-      - POSTGRES_DB=mydb
-      - POSTGRES_USER=app
-      - POSTGRES_PASSWORD_FILE=/run/secrets/postgres_password
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
     secrets:
-      - postgres_password
+      - db_password
     volumes:
       - pgdata:/var/lib/postgresql/data
 
 secrets:
-  appsettings:
-    file: ./secrets/appsettings.Production.json
-  postgres_password:
-    file: ./secrets/postgres_password
+  db_password:
+    file: ./secrets/db_password
 
 volumes:
   pgdata:
 ```
 
-# Pitfalls
+`build` creates the API image from the local Dockerfile. `ports` publishes a container port on the host. `depends_on` controls start order but does not prove the database is ready. The named volume keeps database files outside the replaceable container. The secret is mounted as a file instead of embedded in the image or committed YAML; its source file must remain outside Git.
 
-**Running as root**: By default, containers run as root inside the container. If the container is compromised, the attacker has root access to the container filesystem. Fix: add `USER app` to your Dockerfile after creating a non-root user.
+# Safety Boundaries
 
-**Secrets in image layers or tracked configuration**: `ENV MY_SECRET=abc`, a literal connection string in Compose, or a committed `appsettings` password leaves recoverable credentials in image or Git history. Keep ordinary configuration in environment variables, but mount credentials at runtime from Docker secrets or a platform secret-provider volume. Keep the source secret files out of Git.
+- **Privilege** — run as a non-root user and add only required capabilities or mounts. Container isolation does not make root harmless.
+- **Secrets** — keep credentials out of Dockerfile `ARG`/`ENV`, copied files, image history, and tracked Compose values. Inject them at build or run time through the platform's secret mechanism.
+- **State** — treat the writable container layer as disposable. Put durable data in a volume or external service.
+- **Health** — a running process may still be unable to serve traffic. Configure the health mechanism consumed by the actual runtime; a Docker `HEALTHCHECK` does not automatically become a Kubernetes readiness probe.
+- **Artifact identity** — tags can move. A digest identifies the exact image that passed verification.
 
-**Image bloat**: Shipping the SDK and build context in the runtime image adds tools and bytes that production does not need. Use a multi-stage build when build-time and runtime dependencies differ, and use `.dockerignore` to exclude `bin/`, `obj/`, `.git/`, and local artifacts from the build context. Verify the final image contents and size instead of relying on a generic reduction percentage.
-
-**State tied to one container**: A container's writable layer survives a stop and start of that same container, but it is deleted when the container is removed and does not follow a replacement container. Use volumes or bind mounts for database files and other durable state that must survive redeployment.
-
-**Ignoring health checks**: Kubernetes and load balancers need to know when a container is ready. Without a health check, traffic is routed to containers that are still starting up. Fix: add `HEALTHCHECK` in Dockerfile or configure liveness/readiness probes in Kubernetes.
-
-# Tradeoffs
-
-| | Docker | Podman | Bare Metal |
-|---|---|---|---|
-| Daemon | Required (dockerd) | Daemonless | N/A |
-| Rootless | Requires config | Native | N/A |
-| Kubernetes workflow | Build and push OCI images; Kubernetes uses its configured CRI runtime | Build and push OCI images; Kubernetes uses its configured CRI runtime | N/A |
-| Windows-host workflow | Docker Desktop supports Linux containers and Windows-container tooling | Podman Desktop runs Linux containers through a VM or WSL; no native Windows containers | N/A |
-
-**Docker vs Podman**: Docker has the broader Compose, Build, Desktop, and integration ecosystem. Podman uses a daemonless architecture and supports rootless workflows, with a Docker-compatible CLI and API where the required features are implemented. For Linux containers, choose the workflow your build and deployment tooling actually supports. For Windows containers, validate a Windows-capable runtime and orchestrator stack; Docker is one option, not the container contract.
-
-**Docker Compose vs Kubernetes**: Compose is a good fit for local development and can run bounded single-host production workloads when host failure, manual rollout, and limited orchestration are acceptable. Kubernetes fits multi-node workloads that need scheduling, controlled rollout, autoscaling, and reconciliation. Compose is not an HA orchestrator; the boundary is the workload requirement, not the word "production."
-
-# Questions
-
-> [!QUESTION]- Why use multi-stage builds for .NET applications?
-> - The .NET SDK stage includes compilers and build tools that the running application usually does not need.
-> - The runtime stage can start from the ASP.NET runtime image and copy only the published output.
-> - This separates build credentials and tooling from the production filesystem and usually reduces transfer and scan surface; measure the actual result for the chosen tags and architecture.
-> - Smaller images mean faster pulls, less attack surface, and lower registry storage costs.
-> - Cost: slightly more complex Dockerfile; worth it for any production workload.
-
-> [!QUESTION]- How do you prevent secrets from leaking into Docker images?
-> - Never use `ENV` or `ARG` for secrets in Dockerfiles — they are visible in `docker history`.
-> - Keep non-sensitive settings in environment variables; mount credentials at runtime from Docker secrets or a platform secret provider.
-> - For build-time secrets (e.g., NuGet feeds), use `RUN --mount=type=secret` (BuildKit).
-> - In Kubernetes, mount Secrets or external-secret-provider volumes as files and restrict access with RBAC.
-> - Tradeoff: runtime injection adds operational complexity but is the only safe approach.
+Docker Compose is suitable when a single-host lifecycle is enough. Kubernetes adds multi-node scheduling and reconciliation when the workload requires them; it does not replace the image or application runtime contract.
 
 # References
 
-- [Docker documentation](https://docs.docker.com/) — official Docker docs; covers Dockerfile reference, Compose, networking, and volumes
-- [Docker multi-stage builds](https://docs.docker.com/build/building/multi-stage/) — official guide to multi-stage builds; essential for .NET production images
-- [.NET Docker samples](https://github.com/dotnet/dotnet-docker/tree/main/samples) — official Microsoft .NET Docker examples including multi-stage builds and Compose
-- [Docker security best practices](https://docs.docker.com/develop/security-best-practices/) — official guide covering rootless containers, secrets, and image scanning
-- [Docker build best practices](https://docs.docker.com/build/building/best-practices/) — official guidance on base images, cache order, contexts, pinning, and multi-stage output.
-- [Docker build secrets](https://docs.docker.com/build/building/secrets/) — official mechanism for build-time credentials that must not enter layers.
-- [ByteByteGo: Docker practices](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/9-docker-best-practices-you-must-know.md) — source contribution for the reproducible least-privilege image example.
+- [Docker documentation](https://docs.docker.com/)
+- [.NET Docker samples](https://github.com/dotnet/dotnet-docker/tree/main/samples)

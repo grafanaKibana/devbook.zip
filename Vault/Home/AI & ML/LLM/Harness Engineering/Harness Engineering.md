@@ -3,18 +3,20 @@ topic:
   - AI & ML
 subtopic:
   - LLM
-summary: "Designing the capability surface and scaffold the model acts through — tools, protocols, execution environment."
+summary: "Designing the tools, protocol wiring, and execution boundary that a model acts through."
 tags: [FolderNote]
 publish: true
 level:
   - "3"
-priority: Low
+priority: Medium
 status: Done
 ---
 
-Harness engineering is the discipline of deliberately designing everything the model acts *through*: the scaffold between the model's text output and the real world. It has three layers — the **tool surface** (which tools exist, how they are named, documented, and scoped — see [[Tools]]), the **wiring protocol** that connects tools to clients (see [[Model Context Protocol]]), and the **execution environment** (sandboxes, permissions, filesystem access — what the model is allowed to touch). The model only ever emits structured calls; the harness decides what those calls can reach and what happens when they run.
+Harness engineering designs the boundary between a model's structured output and the systems that act on it. The boundary includes the callable operations in [[Tool Design]], the developer-facing extension surfaces in [[Tooling]], the client wiring defined by [[Model Context Protocol]], and the execution environment that controls permissions and filesystem access. The model proposes a call. The harness decides what that call can reach and what happens when it runs.
 
-The scope ladder places it among its neighbors: [[Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering|Prompt Engineering]] shapes the single instruction, [[Home/AI & ML/LLM/Context Engineering/Context Engineering|Context Engineering]] decides what the model *sees*, harness engineering decides what the model *can do*, and [[Home/AI & ML/LLM/Loop Engineering/Loop Engineering|Loop Engineering]] decides how it iterates over time. The layers interact constantly — every tool schema the harness exposes is context the model must read, and every tool result feeds the next loop iteration — but the design questions are distinct: a harness question is "should this agent have a `delete_branch` tool, and who approves it?", not "which evidence goes first in the window?".
+This puts harness engineering in the middle of the runtime stack. [[Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering|Prompt Engineering]] shapes one instruction, while [[Home/AI & ML/LLM/Context Engineering/Context Engineering|Context Engineering]] decides what the model sees. Harness engineering sets what it can do. [[Home/AI & ML/LLM/Loop Engineering/Loop Engineering|Loop Engineering]] controls how the work continues over time.
+
+The boundaries overlap. Tool schemas consume context, and tool results feed later iterations. Still, the harness owns a different decision: whether an agent should have a `delete_branch` tool at all, and which policy approves its use.
 
 ```datacorejsx
 const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
@@ -23,47 +25,38 @@ return FolderStructureMap;
 
 # The Tool Surface Is an API for a Model
 
-Designing the tool surface is API design where the consumer cannot read source code, ask clarifying questions, or debug — it selects tools by matching names and descriptions against its current subgoal. The harness-level decisions sit above any single tool's design:
+The tool surface is an API for a consumer that cannot inspect its implementation. A model chooses among tools from their names, descriptions, and schemas, then interprets whatever each call returns. That makes a few surface-wide decisions especially important:
 
-- **Minimal, high-signal toolsets.** Expose only what the current task needs. Every connected schema is sent with every request and competes for attention — large toolsets measurably lower accuracy, not just raise cost (the MCPGauge numbers in [[Tools]]). The token side of this is a [[Home/AI & ML/LLM/Context Engineering/Context Engineering|Context Engineering]] concern; deciding *which* tools exist at all is a harness one.
-- **Surface-wide consistency.** A surface where every tool follows the same naming scheme, return shape, and error contract lets the model transfer what it learned from one tool to the rest — consolidation patterns and naming specifics are covered in [[Tools]].
+- **Keep the surface small.** Expose only what the current task needs. Every connected schema competes for attention on every request. Large toolsets cost tokens and reduce selection accuracy, as the MCPGauge results in [[Tool Design]] show. [[Home/AI & ML/LLM/Context Engineering/Context Engineering|Context Engineering]] manages that token cost. The harness decides which tools exist.
+- **Make the contracts consistent.** Shared naming, return shapes, and error conventions let the model reuse what it learned from one tool when it calls another. [[Tool Design]] covers the lower-level naming and consolidation patterns.
 
-Depth on individual tool design — descriptions, parameters, return minimalism, fault tolerance — lives in [[Tools]].
+Individual descriptions, parameters, compact results, and failure behavior belong in [[Tool Design]]. Skills, plugins, hooks, coding agents, and repository instructions live together under [[Tooling]].
 
 # The Execution Environment
 
-The third layer of the harness is what happens *after* the model emits a call. Because the model never executes anything directly, the runtime is a natural enforcement point — controls placed here hold regardless of what the prompt says or what an injected instruction asks for:
+The execution environment takes over after the model emits a call. Since the model does not execute the operation itself, the runtime can enforce rules that no prompt or injected instruction can bypass.
 
-- **Sandboxing.** Run tool execution in a constrained environment: a scoped filesystem root, a network allowlist, a container. The blast radius of a wrong or hostile call is bounded by the sandbox, not by the model's judgment.
-- **Permission gating.** Classify operations by risk. Read-only calls can auto-approve; state-mutating or irreversible ones (deploy, delete, send, pay) route through explicit policy — allowlists, per-tool scopes, least-privilege credentials for whatever the tool touches downstream.
-- **Human approval boundaries.** For the highest-risk actions, the harness pauses and asks. Where that boundary sits is a per-deployment design decision: too tight and the agent is a form-filler, too loose and one poisoned tool description can exfiltrate secrets (the tool-poisoning attacks in [[Model Context Protocol]]).
+- **Sandbox execution.** A scoped filesystem, network allowlist, or container limits the damage from a mistaken or hostile call.
+- **Gate by risk.** Read-only operations may run automatically. State-changing or irreversible work such as deploying, deleting, sending, or paying should pass through explicit policy and least-privilege credentials.
+- **Stop for human approval.** The highest-risk actions need a person at the boundary. Too many pauses turn the agent into a form filler. Too few leave room for a poisoned tool description to exfiltrate secrets, as the attacks in [[Model Context Protocol]] demonstrate.
 
-These are the deterministic, code-level controls that [[Guardrails]] recommends over prompt-level pleading: the prompt asks the model to behave; the harness makes misbehavior impossible or reviewable.
+These are the deterministic controls described by [[Guardrails]]. A prompt can request safe behavior. The harness can make an unsafe operation impossible or force it through review.
 
 # Harness Quality and Agent Reliability
 
-Harness effort deserves parity with prompt effort — the "tool quality" principle from the [[Home/AI & ML/LLM/Agents/Agents|Agents]] hub. The reason is compounding: agents interact with the harness across many [[Agent Loop]] iterations, so a surface flaw doesn't cause one bad answer — it causes a wrong turn that every subsequent step builds on, and the resulting failures masquerade as model failures. The SWE-bench case study and the amortization argument (a fixed tool contract helps every run that shares the surface) are covered in [[Tools]].
+A weak harness can waste a strong model. Agents reuse the same surface across many [[Agent Loop]] iterations, so one ambiguous name or vague error can send a run down the wrong path and keep it there. Those failures often look like model failures even though the interface caused them.
+
+The "tool quality" principle in the [[Home/AI & ML/LLM/Agents/Agents|Agents]] hub gives harness work the same weight as prompt work. One repaired tool contract improves every run that shares it. [[Tool Design]] covers that amortization argument and the SWE-bench case study behind it.
 
 # Questions
 
-> [!QUESTION]- What is harness engineering, and how does it differ from context engineering?
-> - Harness engineering designs everything the model acts *through*: the tool surface (which tools exist, how they're named and scoped), the wiring protocol (MCP), and the execution environment (sandboxes, permissions, approval boundaries)
-> - Context engineering decides what the model *sees* in its window; harness engineering decides what it *can do*; loop engineering decides how it iterates over time
-> - They intersect — tool schemas consume context budget, tool results feed the loop — but the design questions differ: capability and safety boundaries versus signal selection and ordering
-
-> [!QUESTION]- Why is the runtime, not the prompt, the right place to enforce what an agent may do?
-> - The model never executes tools directly — it only emits structured calls; the runtime executes, so controls placed there cannot be talked around
-> - Prompt-level rules fail under prompt injection or poisoned tool descriptions; code-level sandboxes, permission gates, and human-approval boundaries hold regardless of what enters the context
-> - Practical layering: sandbox execution to bound blast radius, auto-approve read-only calls, gate state-mutating ones by policy, require a human for irreversible actions
+> [!QUESTION]- What does harness engineering control that context engineering does not?
+> Context engineering decides what information the model receives. Harness engineering decides what the runtime allows the model to do with that information: which tools are exposed, what permissions they have, how calls are validated, and where execution is sandboxed or stopped for approval. Tool schemas and results connect the two areas because they consume context, but capability and permission decisions still belong to the harness. Loop engineering then controls whether another turn is allowed.
 
 > [!QUESTION]- Why does harness quality deserve as much investment as prompt quality for agent reliability?
-> - Agents hit the harness on every loop iteration, so tool-surface flaws compound: one ambiguous name or vague error causes a wrong turn that later steps build on
-> - Precise contracts and structured errors let the model self-correct; sloppy ones produce failures that masquerade as model failures
-> - Harness fixes amortize across every run and every agent sharing the surface; prompt tweaks are flow-specific and fragile
+> Agents reuse the harness on every iteration. An ambiguous tool or vague error can redirect one step and then contaminate every later step. A precise contract helps the model recover, and repairing it improves every run that shares the surface.
 
 # References
 
-- [Writing effective tools for agents (Anthropic Engineering)](https://www.anthropic.com/engineering/writing-tools-for-agents) — practitioner guidance on designing, consolidating, and evaluating agent tool surfaces.
-- [Building Effective Agents (Anthropic Engineering)](https://www.anthropic.com/engineering/building-effective-agents) — source of the tool-quality principle and the treat-tools-as-API-design framing.
-- [Model Context Protocol (Official docs)](https://modelcontextprotocol.io/) — the open standard for wiring tools and data sources to LLM clients.
-- [Effective context engineering for AI agents (Anthropic Engineering)](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents) — the neighboring discipline; covers why tool schemas count against the context budget.
+- [Writing effective tools for agents (Anthropic Engineering)](https://www.anthropic.com/engineering/writing-tools-for-agents)
+- [Model Context Protocol (Official docs)](https://modelcontextprotocol.io/)

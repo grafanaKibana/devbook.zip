@@ -14,11 +14,11 @@ status: Creation
 priority: High
 ---
 
-Computer science gives you the reasoning tools behind effective software engineering: algorithmic thinking, data structure selection, complexity analysis ([[Home/Computer Science/Big O Notation|Big O]]), and the operating-system mechanisms that execute and isolate programs. For a senior .NET developer, these fundamentals matter when choosing collections and algorithms, diagnosing whether work is CPU-bound or waiting on memory and I/O, and reasoning about tradeoffs before writing code.
+Computer science supplies the model behind software engineering decisions: how data is organized, how work scales ([[Home/Computer Science/Big O Notation|Big O]]), and how an operating system executes and isolates programs. Those fundamentals show up in ordinary .NET work whenever a collection is chosen, a slow path is diagnosed, or a design tradeoff needs a mechanical explanation.
 
-Three canonical branches are covered here: [[Home/Computer Science/Data Structures/Data Structures|data structures]] organize data for efficient access, mutation, and iteration; [[Home/Computer Science/Algorithms/Algorithms|algorithms]] solve search, sorting, graph, and set problems with predictable cost; [[Home/Computer Science/Operating Systems/Operating Systems|operating systems]] explain privilege, memory, I/O, process, and thread boundaries. The practical payoff is making design decisions from the mechanism instead of discovering performance or isolation failures in production.
+The core branches answer different questions. The [[Home/Computer Science/Data Structures/Data Structures|data structures]] branch decides how data can be accessed and changed. [[Home/Computer Science/Algorithms/Algorithms|algorithms]] define the work needed to search, sort, or traverse it.
 
-A concrete example: a code review reveals a nested loop checking membership in a `List<T>` — O(n²) per batch. Replacing the inner list with a `HashSet<T>` turns it into O(n) with expected constant-time lookups. That is not optimization trivia — it is the difference between a batch job finishing in seconds versus timing out.
+A code review might expose a nested loop checking membership in a `List<T>`, making each batch O(n²). Replacing the inner list with a `HashSet<T>` reduces the batch to O(n) expected work. The structure changed. The surrounding business logic did not.
 
 ```datacorejsx
 const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
@@ -31,13 +31,9 @@ return FolderStructureMap;
 > When input sizes are small and bounded (e.g., iterating over 10 HTTP headers), constant factors and cache locality dominate. A theoretically better algorithm with higher overhead (setup cost, memory indirection) can be slower than a simpler one on small inputs.
 > This is why .NET's `Array.Sort` uses insertion sort for small subarrays inside its introspective sort implementation.
 
-> [!QUESTION]- How do you decide between optimizing data structure choice versus algorithm choice?
-> Start with the data structure. The right structure often eliminates the need for a clever algorithm — a `HashSet<T>` gives O(1) lookup without binary search, a `SortedSet<T>` gives ordered iteration without explicit sorting. Optimize the algorithm when the structure is fixed by external constraints (e.g., searching within a sorted array from an external source).
+> [!QUESTION]- What determines whether a performance problem needs a different data structure or a different algorithm?
+> The dominant operation is the starting point. A `HashSet<T>` removes repeated membership scans, while a `SortedSet<T>` keeps the set ordered as items are added or removed. If a change affects an item's sort order, remove it and add it again. The algorithm becomes the next target when the representation is fixed by an external format or the chosen structure still leaves too much work in each operation.
 
 # References
 
-- [Microsoft — `HashSet<T>.Contains`](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.hashset-1.contains?view=net-10.0) — official API documentation for the expected `O(1)` membership lookup used in the example.
-- [.NET runtime — `ArraySortHelper<T>`](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Collections/Generic/ArraySortHelper.cs) — current implementation source showing introsort and its insertion-sort threshold for small partitions.
-- [Big O cheat sheet](https://www.bigocheatsheet.com/) — Visual comparison of data structure and algorithm complexities.
-- [Introduction to Algorithms (MIT OpenCourseWare)](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/) — University-level CS fundamentals with lectures and problem sets.
-- [Steve Yegge — Get That Job at Google](https://steve-yegge.blogspot.com/2008/03/get-that-job-at-google.html) — Practitioner perspective on why CS fundamentals matter in industry interviews and system design.
+- [Harvard CS50x](https://cs50.harvard.edu/x/)

@@ -11,15 +11,15 @@ status: Ready to Repeat
 publish: true
 ---
 
-Entity Framework Core (EF Core) is Microsoft's official ORM for .NET. It maps C# classes to database tables, translates LINQ queries to SQL, tracks changes to loaded entities, and manages schema migrations. EF Core supports SQL Server, PostgreSQL, SQLite, MySQL, and Cosmos DB through provider packages.
+Entity Framework Core (EF Core) is a cross-platform .NET ORM. A database provider maps its model and query pipeline to a specific engine. Microsoft ships providers for SQL Server, SQLite, and Azure Cosmos DB. PostgreSQL and MySQL support comes from external provider packages with their own compatibility schedules.
 
-EF Core is the default data access layer for most .NET applications. Understanding its change tracking, query translation, and migration system is essential for building correct and performant data layers.
+EF Core removes much routine mapping and persistence code. It does not make providers interchangeable or generated SQL harmless. Correct use depends on a short `DbContext` lifetime, deliberate tracking, inspected query shape, and migrations reviewed for the target engine.
 
 # Core Concepts
 
 ## DbContext and DbSet
 
-`DbContext` is the unit of work and the entry point for all database operations. `DbSet<T>` represents a table and is the starting point for queries.
+`DbContext` represents one session and unit of work. It owns the model, tracks selected entities, coordinates `SaveChanges`, and exposes provider services. `DbSet<T>` is a query and persistence entry point for an entity type. It is not a literal table abstraction because mappings can span tables, views, owned types, or provider-specific storage.
 
 ```csharp
 public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
@@ -41,16 +41,18 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
 
 ## Change Tracking
 
-EF Core tracks all entities loaded through a `DbContext`. When you call `SaveChangesAsync()`, it generates INSERT/UPDATE/DELETE SQL for all tracked changes.
+Entity queries are tracking by default. Entities also become tracked when they are added or attached. No-tracking queries and keyless entity types do not follow that default. A projection is untracked only when its result contains no entity instances. EF Core still tracks entity instances nested inside an anonymous or custom projection unless the query is explicitly no-tracking. `SaveChangesAsync()` detects changes in tracked entries and asks the provider to execute the required insert, update, or delete commands.
 
 ```csharp
 // Load → modify → save: EF Core detects the change automatically
 var order = await db.Orders.FindAsync(orderId);
-order.Status = OrderStatus.Confirmed;  // EF Core marks this as Modified
+order.Status = OrderStatus.Confirmed;  // changes the CLR property; snapshot detection runs before save
 await db.SaveChangesAsync();           // generates: UPDATE Orders SET Status = 'Confirmed' WHERE Id = @id
 ```
 
-For read-only queries where you don't need change tracking, use `.AsNoTracking()` to reduce memory and CPU overhead:
+With the default snapshot strategy, assigning `Status` does not itself notify EF Core. Automatic change detection compares current and original values before `SaveChanges`, at which point the entry and property are marked as modified. Notification-based tracking can detect changes earlier.
+
+For a read-only query that does not need identity resolution or later updates through the same context, `.AsNoTracking()` avoids change-tracker work:
 
 ```csharp
 var orders = await db.Orders
@@ -60,11 +62,11 @@ var orders = await db.Orders
 ```
 
 > [!WARNING]
-> **`DbContext` is a unit of work, not a singleton.** It is **not thread-safe** and is designed to be short-lived — one per request/operation. In ASP.NET Core it's registered **scoped**; injecting it into a singleton (or sharing one instance across concurrent tasks) corrupts the change tracker and throws "a second operation was started on this context." For long-lived or parallel work, create a fresh context per unit via `IDbContextFactory<T>` (see the captive-dependency note in [[Home/Programming/NET/ASP.NET Web API/Dependency Injection|Dependency Injection]]). For high-throughput apps, `AddDbContextPool` reuses context instances to cut allocation.
+> **`DbContext` is a unit of work, not a singleton.** It is not thread-safe, and EF Core does not support parallel operations on one instance. `AddDbContext` registers it as scoped by default in ASP.NET Core, which often aligns one context with one request. A request can still contain several units of work, and background or parallel work needs a fresh context from `IDbContextFactory<T>`. See the captive-dependency boundary in [[Home/Programming/NET/ASP.NET Web API/Dependency Injection|Dependency Injection]]. `AddDbContextPool` can reuse reset context instances, but mutable per-request state such as a tenant identifier must be re-established safely.
 
 ## Transactions and Concurrency
 
-A single `SaveChangesAsync()` is **atomic** — EF Core wraps all of its INSERT/UPDATE/DELETE statements in one transaction automatically, so they all commit or all roll back. To make **multiple** `SaveChanges` calls (or raw SQL plus EF) atomic, open an explicit transaction:
+When the provider supports transactions, one `SaveChangesAsync()` call is transactional by default: all generated changes commit or the call rolls them back. Several `SaveChanges` calls or a unit that mixes EF and SQL need an explicit shared transaction when they must have one atomic outcome:
 
 ```csharp
 await using var tx = await db.Database.BeginTransactionAsync(ct);
@@ -78,11 +80,13 @@ try
 catch { await tx.RollbackAsync(ct); throw; }
 ```
 
-**Optimistic concurrency** prevents lost updates without locking. Mark a column as a concurrency token (a `[Timestamp]`/`rowversion`, or `IsConcurrencyToken()`); EF Core then appends it to the `WHERE` clause of every UPDATE. If another transaction changed the row since you read it, zero rows match and EF throws **`DbUpdateConcurrencyException`** — catch it to retry or surface a conflict to the user (this is the lighter alternative to Serializable from [[ACID]]). For providers with transient faults (Azure SQL), enable a **retrying execution strategy** with `EnableRetryOnFailure()` — note it then requires manual transactions to be wrapped in `strategy.ExecuteAsync(...)`.
+**Optimistic concurrency** detects a stale update without holding a lock while application code works. A configured concurrency token, such as SQL Server `rowversion`, is included in the update or delete predicate. If the row no longer has the original token, the command affects zero rows and `SaveChanges` throws `DbUpdateConcurrencyException`. The application must reload, merge, retry from fresh state, or report a conflict. A token protects the rows included in the check. It is not a substitute for Serializable protection of an unvalidated predicate in [[ACID]].
+
+Provider execution strategies can retry transient database failures. When an application opens a transaction manually, the complete transactional unit must run through the configured execution strategy so a retry can recreate it safely. Business operations also need protection against an ambiguous commit result.
 
 ## Migrations
 
-EF Core migrations track schema changes as C# code, enabling version-controlled, repeatable schema evolution.
+EF Core migrations record model changes as C# operations and maintain a history table of applied migrations. Generated code is a starting point. Deployment still needs reviewed SQL, backups or a rollback path, and provider-specific handling for long-running or destructive changes.
 
 ```bash
 # Create a migration after changing the model
@@ -117,7 +121,7 @@ public partial class AddOrderStatus : Migration
 
 ## Projection Instead of Full Entity Load
 
-Loading full entities when you only need a few columns wastes bandwidth and memory. Project to a DTO:
+Loading a tracked entity is unnecessary when the result only needs a few columns. A projection keeps the SQL result narrow and avoids creating a larger object graph:
 
 ```csharp
 // BAD: loads all columns including large blobs
@@ -132,7 +136,7 @@ var summaries = await db.Orders
 
 ## Avoiding N+1 Queries
 
-Loading a list of orders and then accessing `order.Customer` for each one triggers N additional queries.
+With lazy loading enabled, loading orders and then accessing each `Customer` navigation can issue one additional query per order.
 
 ```csharp
 // BAD: N+1 — one query for orders, one per order for customer
@@ -148,7 +152,7 @@ var orders = await db.Orders
 
 ## Bulk Updates and Raw SQL
 
-The classic "load → modify → SaveChanges" round-trips every row through the change tracker. For set-based updates/deletes, **`ExecuteUpdateAsync` / `ExecuteDeleteAsync` (EF Core 7+)** issue a single SQL statement and touch **no** entities in memory:
+The usual load-modify-save path materializes and tracks each affected entity. `ExecuteUpdateAsync` and `ExecuteDeleteAsync` perform a set-based command without loading those entities:
 
 ```csharp
 // One UPDATE statement; nothing loaded or tracked
@@ -157,18 +161,18 @@ await db.Orders
     .ExecuteUpdateAsync(s => s.SetProperty(o => o.Status, OrderStatus.Expired), ct);
 ```
 
-(Caveat: these bypass the change tracker, so already-tracked entities in the same context go stale.) When LINQ can't express a query, drop to **`FromSql`/`SqlQuery`** — parameterized to stay injection-safe.
+These methods bypass the change tracker, so matching entities already tracked by the context can become stale. Raw SQL is available when LINQ cannot express the required operation, but only parameterized APIs or correctly supplied parameters keep values out of SQL syntax. Raw fragments such as column names require validation because database parameters cannot represent identifiers.
 
 ## Global Query Filters
 
-Define a predicate once on the model and EF Core appends it to **every** query for that entity — the standard way to implement **soft delete** and **multi-tenancy** without repeating `Where` everywhere:
+A global query filter adds a model-level predicate to queries for an entity type. It can centralize soft-delete or tenant filtering, while explicit filter disabling remains a privileged escape hatch:
 
 ```csharp
 modelBuilder.Entity<Order>().HasQueryFilter(o => !o.IsDeleted && o.TenantId == _tenant.Id);
 // Opt out per-query with .IgnoreQueryFilters()
 ```
 
-The risk to know: a forgotten filter on a related type, or `IgnoreQueryFilters()` in the wrong place, silently leaks soft-deleted or cross-tenant rows.
+The filter is part of the security and correctness boundary when it carries tenant scope. `IgnoreQueryFilters()`, pooled-context tenant state, and filters on required navigations deserve tests because each can change which rows are returned.
 
 # Pitfalls
 
@@ -178,46 +182,37 @@ The risk to know: a forgotten filter on a related type, or `IgnoreQueryFilters()
 
 **Why it happens**: lazy loading is convenient in development but hides query patterns.
 
-**Mitigation**: disable lazy loading in production (it's off by default in EF Core). Use explicit `Include()` for eager loading or split queries for large result sets.
+**Mitigation**: lazy loading is off unless it is configured. Prefer a projection when the response has a fixed shape, or load the required navigation explicitly. Inspect command counts in tests and telemetry instead of assuming an object traversal stays in memory.
 
 ## Cartesian Explosion from Multiple Includes
 
-`Include`-ing two or more **collection** navigations in one query makes EF Core emit a single JOIN whose row count is the *product* of the collections — an order with 50 line items and 20 history rows returns 1,000 duplicated rows, which EF then de-duplicates client-side. Fix with **`AsSplitQuery()`**, which runs one SQL query per collection and stitches them in memory (trading a JOIN for extra round-trips). Use single (joined) queries for one-to-one/small includes; split queries when you `Include` multiple or large collections.
+Two sibling collection includes can produce a relational cross product. An order with 50 line items and 20 history rows can yield 1,000 rows before EF materializes the graph. Nested includes do not create the same sibling cross product, though they can still duplicate principal columns. `AsSplitQuery()` issues the root query plus separate commands for included collections, trading row multiplication for more commands and a possible consistency gap if data changes between them. A transaction with suitable isolation can close that gap when the graph must represent one database view.
 
 ## Code First Vs Database First
 
-- **Code First**: C# model is the source of truth. Migrations generate and evolve the schema. Best for new projects with a strong domain model.
-- **Database First**: scaffold the model from an existing schema with `dotnet ef dbcontext scaffold`. Best for legacy databases or DBA-controlled schemas.
+- **Model and migrations**: the EF model owns intended schema evolution, and reviewed migrations carry it forward.
+- **Reverse engineering**: `dotnet ef dbcontext scaffold` generates a model from an existing schema. Re-scaffolding and custom code need an ownership policy because generated files can change.
 
-**Decision rule**: use Code First for new projects. Use Database First when integrating with an existing database you don't own.
+Choose the owner first. Application-owned schemas fit model-driven migrations. An externally governed or existing schema fits reverse engineering, often with partial classes or separate configuration to keep custom behavior out of regenerated code.
 
 ## Zero-Downtime Migrations
 
-Adding a non-nullable column without a default value locks the table during migration. For large tables, this causes downtime.
+Schema changes take provider-specific locks and may scan or rewrite a large table. Adding a required column, changing a type, building an index, or validating a constraint can exceed the deployment window even when the migration looks small. A generated migration does not establish that an operation is online.
 
-**Mitigation**: use the expand-contract pattern:
-1. Add the column as nullable (no lock).
-2. Backfill existing rows in batches.
-3. Add a NOT NULL constraint after backfill completes.
-4. Remove the old column in a later migration.
+**Mitigation**: use an expand-contract rollout when old and new application versions must overlap:
+1. Add a backward-compatible schema shape using the target engine's online-safe procedure where one exists.
+2. Deploy code that can read the old and new shapes and writes the new value.
+3. Backfill in bounded batches while monitoring locks, log growth, and replica lag.
+4. Validate the new invariant, make the column required when the engine can do so within the window, then remove obsolete compatibility code in a later release.
 
 # Questions
 
-> [!QUESTION]- How does EF Core's change tracker work, and when should you disable it?
-> - EF Core takes a snapshot of each loaded entity's property values. On `SaveChangesAsync()`, it compares current values to the snapshot and generates SQL for changed properties.
-> - Overhead: change tracking adds memory (snapshot storage) and CPU (comparison on save) per tracked entity.
-> - Disable with `.AsNoTracking()` for read-only queries (reports, API responses that don't modify data). This is the single most impactful EF Core performance optimization for read-heavy workloads.
-> - Tradeoff: `.AsNoTracking()` entities cannot be modified and saved — you must re-attach them or use `ExecuteUpdateAsync()` for bulk updates.
+> [!QUESTION]- How does EF Core change tracking work, and when is a no-tracking query appropriate?
+> A tracking query attaches its entity instances to the context and reuses the same instance when the same entity key appears again. With the default snapshot strategy, EF Core compares current values with the tracked original values when change detection runs, normally before `SaveChanges()`. `.AsNoTracking()` fits a read-only result that will not be updated through that context. If a disconnected entity is attached later, the application must state which properties changed and how concurrency will be checked.
 
-> [!QUESTION]- What is the N+1 query problem and how do you detect it?
-> - N+1 occurs when loading N entities and then accessing a navigation property on each, triggering N additional queries.
-> - Detection: enable EF Core query logging (`LogTo(Console.WriteLine)`) or use MiniProfiler/Application Insights to see query counts per request.
-> - Fix: use `Include()` for eager loading, or split into two queries and join in memory for large result sets.
-> - Tradeoff: `Include()` generates a JOIN, which can produce a large result set if the included collection is large. For collections with >100 items per parent, consider `AsSplitQuery()` to use separate queries instead of a JOIN.
+> [!QUESTION]- What is the N+1 query problem, and how can it be detected?
+> N+1 means one query loads parent rows and later navigation access issues another query for each parent. Detect it by counting database commands per operation and inspecting generated SQL in logs or tracing. Fix the query shape with a projection, an explicit include, or a deliberate second query. The choice depends on result size and consistency needs. There is no universal collection-size threshold for split queries.
 
 # References
 
-- [EF Core documentation (Microsoft Learn)](https://learn.microsoft.com/en-us/ef/core/) — official reference covering DbContext, migrations, querying, change tracking, and all supported database providers.
-- [EF Core performance (Microsoft Learn)](https://learn.microsoft.com/en-us/ef/core/performance/) — official performance guide: AsNoTracking, projections, compiled queries, bulk operations, and connection pooling.
-- [EF Core migrations (Microsoft Learn)](https://learn.microsoft.com/en-us/ef/core/managing-schemas/migrations/) — complete migrations guide: creating, applying, reverting, and customizing migrations for production deployments.
-- [Using lazy loading in EF Core 8](https://toreaurstad.blogspot.com/2024/09/using-lazy-loading-in-entity-framework.html) — practitioner post on EF Core 8 lazy loading configuration, pitfalls, and when to use it vs eager loading.
+- [Entity Framework Core documentation](https://learn.microsoft.com/en-us/ef/core/)

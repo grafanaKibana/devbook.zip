@@ -12,13 +12,13 @@ status: Done
 publish: true
 ---
 
-Normalization is the process of structuring a relational database to eliminate redundancy and ensure data integrity. It works by decomposing tables so each fact is stored exactly once, which prevents update anomalies: if a customer's address lives in one place, you can't accidentally update it in three rows and miss a fourth. The tradeoff is read performance: fully normalized schemas require joins, and joins cost CPU and I/O.
+Normalization uses functional, multivalued, and join dependencies to separate facts that have different keys. The goal is not to remove every repeated value. It is to prevent insertion, update, and deletion anomalies by giving each fact one authoritative dependency boundary. If a customer's current address is one fact, changing it should not require finding every order row that happened to repeat it.
 
-Most production OLTP systems stop at 3NF or BCNF. Higher normal forms (4NF, 5NF, 6NF) address increasingly rare anomalies involving multivalued or join dependencies, and the decomposition overhead rarely pays off outside temporal or analytical databases. The decision of where to stop is driven by write-to-read ratio: the more writes dominate, the more normalization pays off (fewer places to update); the more reads dominate, the more joins hurt and denormalization becomes attractive.
+Third Normal Form (3NF) and Boyce-Codd Normal Form (BCNF) cover most ordinary OLTP dependencies. Fourth and Fifth Normal Form address independent multivalued facts and join dependencies. Sixth Normal Form is mainly useful in specialized temporal designs. The stopping point is determined by the actual dependencies and workload. Join count alone is not a reason to denormalize, and a read-heavy system does not automatically benefit from duplicated state.
 
 # First Normal Form
 
-A relation is in 1NF if all its attributes are simple and all domains used contain only atomic values. Each cell must hold a single value, not a list or set (no repeating groups).
+A relation is in 1NF when each tuple has one value for each attribute and repeating groups are represented as rows rather than numbered columns or packed lists. “Atomic” is relative to the declared domain: a timestamp may be one value even though it has components. The design question is whether the database can apply the intended key, constraint, and query semantics to the value.
 
 For example, consider the "Cars" table:
 
@@ -27,7 +27,7 @@ For example, consider the "Cars" table:
 | Audi | A4, S5, RS6, TT |
 | Infiniti | Q50 |
 
-The 1NF violation occurs for the Audi row because a single cell contains a comma-separated list of 4 values: A4, S5, RS6, TT (not atomic). Convert the table to 1NF:
+The Audi row packs four independent model values into one string, so the database cannot constrain or join an individual model as a row. Represent each make-model fact separately:
 
 | Make | Models |
 | --- | --- |
@@ -39,9 +39,7 @@ The 1NF violation occurs for the Audi row because a single cell contains a comma
 
 # Second Normal Form
 
-A relation is in 2NF if it is in 1NF and every non-key attribute depends irreducibly on every attribute of the Primary Key (PK).
-
-Irreducibility means you cannot remove part of a candidate key (attributes) and still preserve the same relationship between the data.
+A relation is in 2NF when it is in 1NF and every non-prime attribute is fully functionally dependent on every candidate key. A partial dependency exists when a non-prime attribute depends on only part of a composite candidate key. Relations whose candidate keys are all single attributes satisfy this condition automatically.
 
 For example, consider the table:
 
@@ -52,7 +50,7 @@ For example, consider the table:
 | Audi | TT | 2500000 | 5% |
 | Infiniti | Q50 | 5000000 | 10% |
 
-The table is in 1NF but not in 2NF. The car price depends on both model and make. The discount depends **only on** the make, meaning the dependency on the primary key is partial. This is fixed by decomposing into two relations in which non-key attributes depend on the PK.
+Assuming `{Make, Model}` identifies a row, `Price` depends on the full key while `Discount` depends only on `Make`. Repeating the make-level discount in every model row creates a partial dependency. Separate the model price from the make discount:
 
 | Make | Model | Price |
 | --- | --- | --- |
@@ -68,13 +66,11 @@ The table is in 1NF but not in 2NF. The car price depends on both model and make
 
 # Third Normal Form
 
-A relation is in 3NF when it is in 2NF and every non-key attribute depends on the primary key non-transitively.
+A relation is in 3NF when, for every non-trivial functional dependency `X → A`, either `X` is a superkey or `A` is a prime attribute belonging to some candidate key. A common practical violation is a non-key fact that depends on another non-key fact instead of on a key.
 
 ## What Are Transitive Functional Dependencies?
 
-A transitive functional dependency means changing one non-key column can imply a change in another non-key column.
-
-Put simply, the rule requires moving all non-key fields whose contents can apply to multiple table rows into separate tables.
+A transitive dependency appears when a key determines one non-key attribute, which in turn determines another. The second fact has a different determinant and should usually have its own relation.
 
 Consider the table:
 
@@ -86,13 +82,11 @@ Consider the table:
 
 The table is in 2NF but not in 3NF.
 
-In this relation, the "Model" attribute is the primary key. Cars do not have personal phone numbers, and the phone depends only on the store.
+Assume `Model` is the candidate key. A store has a phone number, so the phone depends on `Store`, not directly on the car model.
 
-Therefore, the following functional dependencies exist in the relation: Model → Store, Store → Phone, Model → Phone.
+The dependencies are `Model → Store`, `Store → Phone`, and therefore `Model → Phone`. Because `Store` is not a superkey and `Phone` is not prime, `Store → Phone` violates 3NF.
 
-The dependency Model → Phone is transitive; therefore, the relation is not in 3NF.
-
-As a result of decomposing the original relation, we get two relations that are in 3NF:
+Decomposing the original relation produces two relations in 3NF:
 
 | Store | Phone |
 | --- | --- |
@@ -107,21 +101,9 @@ As a result of decomposing the original relation, we get two relations that are 
 
 # Boyce-Codd Normal Form (BCNF)
 
-*(A stricter variant of 3NF.)*
+BCNF strengthens 3NF: for every non-trivial functional dependency `X → Y`, `X` must be a superkey. The difference from 3NF appears in schemas with overlapping candidate keys, where 3NF may allow a dependency whose right side is prime even though its determinant is not a superkey.
 
-The definition of 3NF is not fully suitable for the following relations:
-
-1) the relation has two or more candidate keys;
-
-2) two or more candidate keys are composite;
-
-3) they overlap, i.e., they share at least one common attribute.
-
-For relations that have one candidate key (primary), BCNF is equivalent to 3NF.
-
-A relation is in BCNF when every non-trivial functional dependency with an irreducible left-hand side has a candidate key as its determinant.
-
-Suppose we consider a relation representing data about parking reservations for a day:
+Consider a relation representing parking reservations for one day:
 
 | Parking spot number | Start time | End time | Rate |
 | --- | --- | --- | --- |
@@ -139,13 +121,13 @@ The rate has a unique name and depends on the chosen parking spot and whether di
 - "Premium A": parking spot 2 for discount-eligible customers
 - "Premium B": parking spot 2 for non-eligible customers.
 
-Thus, the following composite primary keys are possible: {Parking spot number, Start time}, {Parking spot number, End time}, {Rate, Start time}, {Rate, End time}.
+Under the example's assumptions that times identify one reservation per spot or rate, the candidate keys are `{Parking spot number, Start time}`, `{Parking spot number, End time}`, `{Rate, Start time}`, and `{Rate, End time}`.
 
-The relation is in 3NF. The requirements of 2NF are satisfied because all attributes are part of some candidate key, and there are no non-key attributes in the relation. There are also no transitive dependencies, which meets the requirements of 3NF. Nevertheless, there is a functional dependency Rate → Parking spot number, where the left side (determinant) is not a candidate key of the relation, meaning the relation is not in Boyce-Codd Normal Form.
+Every attribute is prime, so `Rate → Parking spot number` is permitted by 3NF. `Rate` is not a superkey, however, so the same dependency violates BCNF.
 
-A drawback of this structure is that, for example, by mistake you can assign the "Economy" rate to a reservation for parking spot 2, even though it can only apply to parking spot 1.
+The anomaly is concrete: the table can assign the `Economy` rate to parking spot 2 even though the rate determines parking spot 1.
 
-You can improve the structure by decomposing the relation into two and adding the **Has discounts** attribute, obtaining relations that satisfy BCNF (attributes that are part of the primary key are underlined):
+Decompose the rate-to-spot fact from the reservation and make discount eligibility explicit. Under the stated dependencies, both resulting relations satisfy BCNF:
 
 **Rates**
 
@@ -169,53 +151,43 @@ You can improve the structure by decomposing the relation into two and adding th
 
 # Fourth Normal Form
 
-A relation is in 4NF if it is in BCNF and all non-trivial multivalued dependencies are in fact functional dependencies on its candidate keys.
+A relation is in 4NF when every non-trivial multivalued dependency `X ↠ Y` has a superkey on its left side. A multivalued dependency says that, for one `X`, the set of `Y` values is independent of the remaining attributes.
 
-In a relation R (A, B, C), a **multivalued dependency** R.A -> -> R.B exists if and only if the set of B values corresponding to a pair of values A and C depends only on A and does not depend on C.
+Suppose restaurants make different kinds of pizza, and each restaurant's delivery service operates only in certain areas of the city. The candidate key for the combined relation is `{Restaurant, Pizza type, Delivery area}`.
 
-Suppose restaurants make different kinds of pizza, and each restaurant's delivery service operates only in certain areas of the city. The composite primary key of the corresponding relation variable includes three attributes: {Restaurant, Pizza type, Delivery area}.
+The relation is not in 4NF because two independent sets are multiplied together:
 
-Such a relation variable is not in 4NF because the following multivalued dependencies exist:
+{Restaurant} ↠ {Pizza type}
 
-{Restaurant} → {Pizza type}
+{Restaurant} ↠ {Delivery area}
 
-{Restaurant} → {Delivery area}
+Adding one pizza type requires a row for every delivery area. Missing one row falsely states that the pizza is unavailable in that area, even though pizza choice and delivery coverage are independent facts.
 
-That is, for example, when adding a new pizza type you would need to insert one new tuple for each delivery area. A logical anomaly is possible where a given pizza type is associated with only some of the delivery areas served by the restaurant.
+The anomaly disappears when the independent facts move into `{Restaurant, Pizza type}` and `{Restaurant, Delivery area}` relations.
 
-To prevent the anomaly, you need to decompose the relation by placing independent facts into different relations. In this example, you should decompose into {Restaurant, Pizza type} and {Restaurant, Delivery area}.
-
-However, if you add an attribute that functionally depends on the full candidate key, for example a delivery-inclusive price ({Restaurant, Pizza type, Delivery area} -> Price), the new attribute does not remove the independent multivalued dependencies. Whether the resulting relation satisfies 4NF depends on whether those MVDs are still non-trivial. In practice, the safe approach is to decompose first (eliminating the MVDs) and add the price-dependent attribute to the appropriate decomposed relation.
+An attribute such as delivery-inclusive price may genuinely depend on the full `{Restaurant, Pizza type, Delivery area}` key. That fact cannot be placed in either binary projection without changing its meaning. The dependency model must therefore decide whether pizza availability and delivery coverage are truly independent before decomposition. 4NF is not a mechanical instruction to discard facts that require the full key.
 
 # Fifth Normal Form
 
 A relation is in 5NF (also called PJ/NF, Projection-Join Normal Form) if it is in 4NF and every join dependency is implied by its candidate keys. In other words, the relation cannot be losslessly decomposed into smaller projections unless those projections are defined by candidate keys.
 
-The classic example involves three entities: Supplier, Product, and Customer, where the business rule is "a supplier supplies a product to a customer only if the supplier supplies that product AND the supplier serves that customer AND the customer buys that product." This creates a join dependency across three binary relations: {Supplier, Product}, {Supplier, Customer}, and {Product, Customer}. Joining any two of the three produces spurious tuples; only joining all three reconstructs the original valid data. Because this join dependency is not implied by any candidate key, the original three-attribute relation is not in 5NF and must be decomposed into those three binary relations.
+The classic example uses Supplier, Product, and Customer. Suppose the business rule says that a valid ternary fact exists exactly when the supplier offers the product, serves the customer, and the customer buys the product. The ternary relation is then the lossless join of `SupplierProduct`, `SupplierCustomer`, and `ProductCustomer`. That join dependency is not derived from one candidate key, so the original relation violates 5NF and can be decomposed into those three projections.
 
-This is a very strict requirement that can be satisfied only under additional conditions. In practice, it is difficult to find a clean real-world example of this requirement.
-
-The decomposition produces three binary relations: `SupplierProduct(Supplier, Product)`, `SupplierCustomer(Supplier, Customer)`, and `ProductCustomer(Product, Customer)`. Joining any two of these produces spurious tuples; only joining all three reconstructs the original valid data. The general recommendation is to design schemas to avoid the need for 4NF and 5NF, as these anomalies are rare in practice.
-
-Fifth Normal Form focuses on join dependencies. Such join dependencies among three attributes are very rare. Join dependencies among four, five, or more attributes are practically impossible to specify.
+The business rule is essential. If a supplier may offer a product to only selected customers, joining the three pairwise relations invents spurious triples and the decomposition is not lossless. Fifth Normal Form applies when the full fact is implied by lower-arity facts. It does not assume that every ternary relation should be split.
 
 # Domain-key Normal Form
 
-A relation variable is in DKNF if and only if every constraint on it is a logical consequence of domain constraints and key constraints imposed on that relation variable.
+A relation is in Domain-key Normal Form (DKNF) when every constraint follows solely from its domains and keys.
 
-A domain constraint is a constraint that requires a particular attribute to take values only from a specified domain. In essence, it defines the set (or a logical equivalent of a set) of allowable values for a type and declares that the attribute has that type.
+A domain constraint restricts an attribute to the values and operations of its declared domain. A key constraint identifies tuples uniquely.
 
-A key constraint is a constraint stating that some attribute or combination of attributes is a candidate key.
-
-Any relation variable in DKNF is necessarily in 5NF. However, not every relation variable can be transformed into DKNF.
+DKNF removes the need for separate cross-attribute rules, but many business constraints cannot be expressed as domains or keys. It is therefore an ideal end state rather than a routine decomposition target. A relation in DKNF is necessarily in 5NF.
 
 # Sixth Normal Form
 
-A relation variable is in Sixth Normal Form if and only if it satisfies all non-trivial join dependencies. From the definition it follows that a relation variable is in 6NF if and only if it is irreducible, i.e., it cannot be further decomposed losslessly. Every relation variable that is in 6NF is also in 5NF.
+A relation is in 6NF when it has no non-trivial lossless join decomposition: it cannot be split further without losing information. Every 6NF relation is also in 5NF.
 
-The idea of "decomposing all the way" was proposed before research into temporal data began, but it did not gain support. However, for temporal databases, maximal decomposition helps combat redundancy and simplifies maintaining database integrity.
-
-For temporal databases, U operators are defined that unpack relations on the specified attributes, perform the corresponding operation, and pack the result back. In this example, the join of relation projections should be performed using the U_JOIN operator.
+Maximal decomposition is rarely useful for an ordinary current-state schema. It becomes valuable in temporal models because independently changing attributes can have independent validity intervals. Temporal relational theory defines unpacking and packing operators, including temporal joins, to align those intervals before recombination. These are theoretical operators rather than standard SQL syntax.
 
 **Employees**
 
@@ -225,7 +197,7 @@ For temporal databases, U operators are defined that unpack relations on the spe
 | 6575 | 11-02-2003:15-06-2006 | mechanic | Soviet St, 22 |
 | 6575 | 16-06-2006:05-03-2009 | foreman | Soviet St, 22 |
 
-The "Employees" relation variable is not in 6NF and can be decomposed into the relation variables "Employee positions" and "Home addresses".
+Position and home address change on different timelines, so the combined relation repeats one history whenever the other changes. Separate temporal relations let each fact record only its own change points.
 
 **Employee positions**
 
@@ -243,15 +215,16 @@ The "Employees" relation variable is not in 6NF and can be decomposed into the r
 
 # Denormalization
 
-Denormalization is the deliberate introduction of redundancy to speed up reads. Where normalization splits data across tables to eliminate duplication, denormalization collapses it back together to avoid expensive joins at query time.
+Denormalization deliberately stores a derived or duplicated fact in the shape a read path needs. It trades read-time work for write-time maintenance. The normalized source remains authoritative unless the design explicitly gives the denormalized representation its own ownership contract.
 
-**When to denormalize:** read-heavy workloads where joins dominate query cost, reporting and analytics queries that aggregate large datasets, and cases where latency requirements can't be met by [[Indexes]] alone.
+Denormalization is justified by a measured query whose latency or resource cost cannot be met through [[Indexes]], plan correction, partitioning, or an acceptable cache. Read frequency alone is insufficient. The gain must exceed the cost of maintaining and reconciling the duplicate.
 
-**Common techniques:**
-- Duplicate a column from a related table to avoid a join (e.g., storing `CustomerName` on the `Orders` table)
-- Pre-compute aggregates and store them as columns
-- Materialized views that cache the result of a complex query
-- Flatten a hierarchy into a single wide table for analytics
+Common forms include:
+
+- copying a related value into a read model.
+- storing a precomputed aggregate.
+- maintaining a materialized view that can be rebuilt from source data.
+- flattening a hierarchy into a columnar or analytical projection.
 
 **Concrete example:** instead of computing total order value on every request with a JOIN + SUM, store it directly:
 
@@ -266,46 +239,40 @@ GROUP BY c.Id, c.Name;
 SELECT Name, TotalOrderAmount FROM Customers;
 ```
 
-The tradeoff is real: reads get faster, but every write to `Orders` must also update `TotalOrderAmount` on `Customers`. Miss one update and the data is inconsistent. Denormalization shifts complexity from reads to writes and requires explicit consistency management.
+The second query removes aggregation from the read path, but every order change must update `TotalOrderAmount` under a defined consistency policy. A same-database transaction can maintain both synchronously. An asynchronous projection needs lag semantics, idempotent updates, and reconciliation. The duplicated value is safe only when ownership and repair are explicit.
 
 # Pitfalls
 
-**Over-normalizing into join hell** — a schema in 5NF or 6NF is theoretically clean but forces multi-way joins for simple queries. A real example: a SaaS app normalized `Users`, `Addresses`, `PhoneNumbers`, `Emails`, and `Preferences` into separate tables. Loading a user profile required a 5-table JOIN that took 12 ms at 100K rows. After the table grew to 10M rows, the same query took 340 ms even with proper indexes, because each join multiplied the working set. They denormalized `Addresses` and `Preferences` back onto `Users`, dropping the query to 8 ms. Rule of thumb: if a query joins 4+ tables and runs on every request, measure it under production load before committing to that schema.
+**Decomposition without a dependency** — splitting attributes merely because they can live in separate tables adds joins without removing an anomaly. Normalize from keys and dependencies, then measure critical plans with realistic cardinalities. A multi-table query is not inherently slow, and join count is not a reliable threshold. Poor estimates, missing indexes, wide rows, and unnecessary fan-out are the mechanisms to diagnose.
 
-**Under-normalizing and silent data corruption** — storing the same fact in multiple places creates update anomalies that are invisible until they cause business impact. A concrete scenario: an e-commerce system stored `product_price` on both `Products` and `OrderLineItems` (for historical pricing). A bug in the price-update API updated `Products` but not `OrderLineItems` for pending carts. 2,300 orders shipped at stale prices over a weekend — $47K revenue discrepancy discovered during Monday reconciliation. Fix: use a `PriceHistory` table with effective dates, and join to it at order-finalization time. The join costs 1-2 ms; the data integrity is worth it.
+**Under-normalizing and silent data corruption** — storing the same fact in multiple places creates update anomalies that are invisible until they cause business impact. Consider an e-commerce system that stores `product_price` on both `Products` and `OrderLineItems`. A price-update path changes `Products` but leaves pending carts stale. A finalized order-line price is a historical fact, while a pending cart may still depend on the current-price policy. Those facts need separate names and ownership. A `PriceHistory` table with effective dates can preserve the distinction, with the applicable price selected when the order is finalized.
 
-**Premature denormalization** — adding redundant columns or materialized aggregates before measuring whether reads are actually slow. A team pre-stored `TotalOrderAmount` on `Customers` from day one, requiring triggers on every `INSERT`, `UPDATE`, and `DELETE` to `Orders`. The triggers added 3 ms per write and caused deadlocks under concurrent order processing (trigger locks `Customers` row while another transaction tries to insert an `Order` for the same customer). The read query they were "optimizing" ran twice per day for a dashboard. Profile first: `EXPLAIN ANALYZE` the query, check if an index or a covering index solves it. Denormalize only when a specific query is a proven bottleneck and indexes can't fix it.
+**Premature denormalization** — storing `TotalOrderAmount` before proving the aggregate is costly adds another row to every order-write transaction. Concurrent orders for one customer can then contend on that summary row. Inspect the plan and workload first. A suitable index, materialized view, cache, or scheduled analytical projection may meet the read contract with a cheaper write path.
 
-**Schema migration pain from over-normalization** — highly decomposed schemas make `ALTER TABLE` migrations harder because foreign key chains cascade through many tables. Adding a column to a core entity might require updating 8 JOINs in application code, modifying 4 stored procedures, and rebuilding indexes on related tables. In PostgreSQL, `ALTER TABLE ADD COLUMN` with a default value rewrites the entire table (pre-v11), and with FK constraints this can lock dependent tables. Plan schema changes with `pg_repack` or online DDL tools, and keep normalization pragmatic — theoretical purity that creates operational risk isn't worth it.
+**Treating migration cost as a normal-form property** — foreign keys, large indexes, backfills, and application coupling can make a schema change expensive, but decomposition does not automatically require cascading DDL. Plan each migration from the engine's current behavior. For example, modern PostgreSQL can add a column with a non-volatile constant default without rewriting every row, while volatile defaults and later backfills have different costs. Measure locks and rewrite behavior on the deployed version instead of carrying forward an old rule.
 
 # Tradeoffs
 
 | Decision | Option A | Option B | When to Choose A | When to Choose B |
 | --- | --- | --- | --- | --- |
-| **Stop at 3NF vs BCNF** | 3NF (simpler, allows some redundancy in overlapping candidate keys) | BCNF (stricter, eliminates all FD-based anomalies) | Single candidate key per table (3NF = BCNF), or overlapping keys are rare and anomaly risk is low | Multiple overlapping composite candidate keys exist and data integrity is critical (e.g., scheduling, reservation systems) |
-| **Normalize vs Denormalize reads** | Full normalization (single source of truth, no update anomalies) | Denormalized columns / materialized views (faster reads, redundant data) | Write-heavy OLTP with strong consistency requirements (banking, inventory) | Read-heavy reporting / API responses where joins are measured bottlenecks |
-| **Pre-compute aggregates vs compute at read time** | Store aggregates (e.g., `TotalOrders` on `Customers`) | Compute via `JOIN + SUM` at query time | Aggregate queried on >50% of reads AND write frequency to source table is low | Aggregate queried rarely, or source table has high write concurrency (triggers cause contention) |
-| **Higher NFs (4NF/5NF) vs pragmatic 3NF** | Decompose to 4NF/5NF to eliminate multivalued/join dependencies | Stay at 3NF and accept rare anomaly risk | Temporal databases, audit-critical domains where any anomaly is unacceptable | Standard OLTP where MVDs are rare and the extra joins aren't justified |
+| **Stop at 3NF vs BCNF** | 3NF preserves dependencies and permits a prime attribute on the right of a non-superkey dependency | BCNF requires every determinant to be a superkey | A BCNF decomposition would lose enforceable dependencies needed by the design | Overlapping candidate keys create a demonstrated update anomaly and the decomposition is lossless |
+| **Normalize vs denormalize a read** | Keep one authoritative dependency boundary | Store a redundant column or materialized projection | Integrity and flexible queries dominate, or the normalized plan meets the objective | A named read path misses its objective and the duplicate has an owner, update policy, and reconciliation path |
+| **Precompute vs aggregate on demand** | Maintain a stored aggregate | Run `JOIN + SUM` from source facts | The aggregate is frequent and bounded write contention is acceptable | Fresh source truth matters more, or updates make the summary row a hotspot |
+| **4NF/5NF decomposition** | Separate independent multivalued or join-dependent facts | Retain the relation | The business dependencies prove a lossless decomposition | The full tuple carries information that the projections cannot reconstruct |
 
-**Decision rule**: start at 3NF for new OLTP schemas. Promote to BCNF only when you identify overlapping composite candidate keys. Denormalize only after `EXPLAIN ANALYZE` proves a specific query is bottlenecked on joins and indexes can't help. For every denormalized column, document which write paths must maintain it and add a reconciliation check (scheduled query comparing the denormalized value against the computed value).
+Start an OLTP design by writing candidate keys and functional dependencies, then decompose toward 3NF or BCNF while preserving a lossless join and the constraints the database must enforce. Denormalize only for a named, measured read path. Every duplicate needs an authoritative source, freshness contract, complete update path, failure behavior, and reconciliation query.
 
 # Questions
 
 > [!QUESTION]- What is normalization and why do most systems stop at 3NF/BCNF?
-> Normalization eliminates redundancy by decomposing tables so each fact is stored once, preventing update anomalies. Most production OLTP systems stop at 3NF or BCNF because higher forms (4NF, 5NF) address rare anomalies (multivalued and join dependencies) at the cost of more tables and more joins. The decomposition overhead rarely pays off outside temporal or analytical databases.
+> Normalization decomposes relations according to their dependencies so that one update cannot leave conflicting versions of the same fact. 3NF and BCNF cover ordinary functional dependencies. 4NF and 5NF matter when the domain contains independent multivalued facts or a genuine join dependency. 6NF is mainly a temporal modeling tool. The stopping point follows the domain's dependencies, not a universal target number.
 
-> [!QUESTION]- When would you denormalize a table, and what risks does it introduce?
-> Denormalize when a read-heavy workload has expensive joins that indexes can't fix: common in reporting, analytics, or high-throughput APIs. Risks: update anomalies (copies get out of sync), data inconsistency if writes don't update all copies atomically, and increased write complexity. Always measure before denormalizing; premature denormalization adds maintenance cost for no proven benefit.
+> [!QUESTION]- What conditions justify denormalizing a table, and what risks does it introduce?
+> Denormalization is justified when a specific read path misses its latency or resource target and storing the result is cheaper than rebuilding it from source facts on every read. The duplicate adds another update path and can introduce lag, write contention, and repair work. The design must identify the source of truth, acceptable freshness, how updates are applied, and how the duplicate is reconciled when it drifts.
 
-> [!QUESTION]- What is the difference between 2NF and 3NF, and how would you recognize a violation of each?
-> 2NF eliminates partial dependencies: every non-key attribute must depend on the entire composite primary key, not just part of it. A violation looks like a column that depends on only one column of a multi-column PK. 3NF eliminates transitive dependencies: non-key attributes must depend directly on the PK, not through another non-key attribute. A violation looks like column A depending on the PK, column B depending on A (not on the PK directly). Fixing both involves decomposing the offending columns into separate tables.
+> [!QUESTION]- How can 2NF and 3NF violations be distinguished?
+> 2NF removes partial dependencies of a non-prime attribute on part of a composite candidate key. A make-level discount repeated in rows keyed by `{Make, Model}` violates it. 3NF additionally constrains dependencies whose determinant is not a superkey. A store phone determined by `Store` inside a table keyed by `Model` is the usual transitive shape. A repair separates the facts only when the decomposition is lossless and preserves the constraints the system needs.
 
 # References
 
-For a deeper study of the topic, the book ["Introduction to Database Systems" by Chris J. Date](https://www.oreilly.com/library/view/an-introduction-to/9780132874281/) is recommended.
-
-- [Database normalization (Wikipedia)](https://en.wikipedia.org/wiki/Database_normalization) — encyclopedic overview of normal forms 1NF through 6NF with formal definitions and examples.
-- [Denormalization (Wikipedia)](https://en.wikipedia.org/wiki/Denormalization) — covers denormalization techniques, use cases, and the tradeoffs against normalization.
-- [Data partitioning strategies (Azure Architecture Center)](https://learn.microsoft.com/azure/architecture/best-practices/data-partitioning-strategies) — practical guidance on horizontal, vertical, and functional partitioning for scalable systems.
-- [Designing Data-Intensive Applications (Martin Kleppmann, O'Reilly)](https://www.oreilly.com/library/view/designing-data-intensive-applications/9781491903063/) — covers denormalization, replication, and consistency tradeoffs in production systems; chapters 2-3 are directly relevant.
-- [Description of the database normalization basics (Microsoft Learn)](https://learn.microsoft.com/troubleshoot/microsoft-365-apps/access/database-normalization-description) — accessible walkthrough of 1NF through 3NF with concrete table examples.
+- [Further Normalization of the Data Base Relational Model](https://apollo.inf.upol.cz/~urbanec/teaching/2021/data2/files/codd2.pdf)

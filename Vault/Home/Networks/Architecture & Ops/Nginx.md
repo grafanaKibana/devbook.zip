@@ -11,9 +11,9 @@ status: Ready to Repeat
 publish: true
 ---
 
-NGINX is an event-driven HTTP web server and reverse proxy. A master process handles global config and worker lifecycle; workers keep request state on sockets.
+NGINX is an event-driven HTTP server and reverse proxy. A master process owns configuration and worker lifecycle. Worker processes handle connections and requests.
 
-Use NGINX for commodity edge behavior: path/host routing, TLS termination, buffering, caching, and upstream balancing. Prefer managed ingress or platform edge services when operations ownership already exists and product requirements are not edge-specific.
+NGINX fits stable edge behavior such as host and path routing, TLS termination, buffering, caching, and upstream balancing. A managed ingress or platform edge is usually the smaller operational choice when it already supplies the required controls.
 
 ![[Networks/Networks-Nginx-18120000.png]]
 
@@ -28,7 +28,7 @@ When a public request enters NGINX:
 3. It opens upstream connection(s).
 4. It forwards, buffers, and returns a response.
 
-The origin sees proxy-origin traffic as client traffic. If app identity needs to include user identity, only trust proxy-authenticated forwarding headers from known and controlled edge nodes.
+The upstream connection originates at NGINX, so the application sees the proxy's network identity unless forwarding metadata carries the original scheme, host, or address. Only known proxies may supply identity-bearing forwarding headers, and the edge should overwrite untrusted client values.
 
 ```nginx
 upstream orders_api {
@@ -58,7 +58,7 @@ server {
 }
 ```
 
-If upstream uses TLS, verify certificate policy separately at that hop. A plain proxy-to-origin channel can reduce latency but lowers transport isolation.
+TLS to the client does not protect the proxy-to-upstream hop. If that hop crosses an untrusted network, configure upstream TLS and certificate verification explicitly.
 
 # Forward Proxy Vs Reverse Proxy
 
@@ -67,26 +67,21 @@ Both are intermediaries but represent different trust models:
 - Forward proxy: represents client egress and policy, may tunnel with `CONNECT`.
 - Reverse proxy: represents the origin side and handles inbound public entry.
 
-For forward proxy scenarios (egress controls, filtering, TLS inspection), enforce strict policy for `CONNECT`, authentication, and trusted CA trust-path assumptions.
+For forward-proxy scenarios, `CONNECT` destination policy, proxy authentication, and any interception CA become explicit parts of the egress trust boundary.
 
 # Observability and Failure Codes
 
 - `502`: upstream response was invalid for the proxy.
 - `504`: request hit gateway timeout before upstream completion.
-- `503`: capacity or protection boundary reached.
+- `503`: the proxy or upstream reports that the service is currently unavailable. Maintenance and protection policy can also produce it.
 
-Design retries and failover upstreams based on this boundary, not on the application alone.
+These codes identify the failing boundary, not the root cause. Correlate them with upstream timing, connection errors, and application health before retrying. An indiscriminate retry can multiply load on an already failing dependency.
 
 # Why NGINX for This Layer
 
-NGINX remains strong for stable declarative edge behavior and static/off-path optimization. For service-specific logic, policy, auth, and custom routing composition inside an app stack, YARP inside ASP.NET Core can reduce operational fragmentation.
+NGINX keeps generic edge policy outside application code. YARP can be a better fit when routing and transforms belong to the .NET service lifecycle and need the same dependency injection, deployment, and observability model.
 
 # References
 
-- [Why is NGINX so Popular? (ByteByteGo)](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/why-is-nginx-so-popular.md) — process and proxy feature baseline.
-- [NGINX Beginner's Guide](https://nginx.org/en/docs/beginners_guide.html) — configuration and proxy basics.
-- [Controlling NGINX](https://nginx.org/en/docs/control.html) — lifecycle and graceful reload behavior.
-- [NGINX HTTP proxy module](https://nginx.org/en/docs/http/ngx_http_proxy_module.html) — directives for forwarding and buffering.
-- [NGINX HTTP upstream module](https://nginx.org/en/docs/http/ngx_http_upstream_module.html) — load balancing and upstream options.
-- [NGINX TLS module](https://nginx.org/en/docs/http/ngx_http_ssl_module.html) — TLS protocol and certificate behavior.
-- [YARP overview](https://learn.microsoft.com/aspnet/core/fundamentals/servers/yarp/yarp-overview) — .NET-native proxy alternative.
+- [NGINX Beginner's Guide](https://nginx.org/en/docs/beginners_guide.html)
+- [YARP overview](https://learn.microsoft.com/aspnet/core/fundamentals/servers/yarp/yarp-overview)

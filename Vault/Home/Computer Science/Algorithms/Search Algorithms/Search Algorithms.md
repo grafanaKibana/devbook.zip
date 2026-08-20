@@ -12,9 +12,9 @@ level:
 status: Creation
 ---
 
-Search algorithms find target values in collections, trees, graphs, or text while minimizing work. Choosing the right search approach depends on data ordering, data shape, and whether you need worst-case guarantees or best average speed.
+Search starts with the shape of the data, not an algorithm name. An unsorted sequence usually needs a scan. Sorted random-access data can discard ranges, graph search follows edges, and text matching uses structure inside the pattern.
 
-Concrete example: in a sorted list of product ids, Binary Search gives fast lookups with logarithmic time. In graph traversal, BFS finds the shortest path by edge count in unweighted graphs. In text processing, KMP and Rabin Karp avoid naive full rescans.
+The workload matters too. A single lookup may not justify preprocessing, while repeated queries can repay the cost of sorting or building an index. Worst-case guarantees, memory, and update frequency then decide between the candidates that remain.
 
 ```datacorejsx
 const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
@@ -25,11 +25,11 @@ return FolderStructureMap;
 
 ```mermaid
 flowchart TD
-  A[Need to find target] --> B{Data is sorted array}
-  B -->|Yes| C{Length known and random access cheap}
-  C -->|Yes| C1[Binary Search]
-  C -->|Unbounded or target near the front| C2[Exponential Search]
-  C -->|Backward seeks are expensive| C3[Jump Search]
+  A[Need to find target] --> B{Data ordered by target key}
+  B -->|Yes| C{Access shape}
+  C -->|Known length and cheap random access| C1[Binary Search]
+  C -->|Indexable with unknown length or front-biased targets| C2[Exponential Search]
+  C -->|Sequential records with direct checkpoints| C3[Jump Search]
   B -->|No| D{Data is graph}
   D -->|Yes| E[DFS BFS]
   D -->|No| F{Data is text pattern}
@@ -46,24 +46,24 @@ flowchart TD
 
 | Data shape | Algorithm | Time | Precondition |
 | --- | --- | --- | --- |
-| Unsorted array, linked list, or one-pass stream | [[Linear Search]] | O(n) | None; needs no index or random access |
+| Unsorted array, linked list, or one-pass stream | [[Linear Search]] | O(n) | None. Needs no index or random access |
 | Sorted array | [[Binary Search]] | O(log n) | Sorted, random access |
-| Sorted array, Fibonacci-offset probing | [[Home/Computer Science/Algorithms/Search Algorithms/Fibonacci Search|Fibonacci Search]] | O(log n) | Sorted, random access; useful when division-free offset updates matter |
-| Sorted, unbounded length or target near front | [[Exponential Search]] | O(log i) for target at index i | Sorted |
+| Sorted array, Fibonacci-offset probing | [[Home/Computer Science/Algorithms/Search Algorithms/Fibonacci Search|Fibonacci Search]] | O(log n) | Sorted, random access. Useful when division-free offset updates matter |
+| Sorted, unknown length or target near front | [[Exponential Search]] | O(log(i + 1)) for target at index i | Sorted, indexable/random-access. Unknown length needs a detectable end |
 | Sorted, uniformly distributed keys | [[Interpolation Search]] | O(log log n) avg, O(n) worst | Sorted **and** near-uniform **numeric** distribution |
-| Sorted, forward-only / costly backward seeks | [[Jump Search]] | O(√n) | Sorted |
+| Sorted sequential records with explicit checkpoints | [[Jump Search]] | O(√n) | Sorted. Direct jump links and a route into the final block |
 | Unimodal function, not an array | [[Ternary Search]] | O(log n) probes | Strict unimodality |
 
-Binary Search also serves range and insertion-point queries — lower-bound / upper-bound, first/last match — because it keeps the data in sorted order rather than building a separate index.
+Binary Search also supports lower bounds, upper bounds, insertion points, and duplicate boundaries. Those operations are often the reason to preserve sorted order instead of building an exact-match hash index.
 
 ## Searching Text
 
-Text/pattern matching is its own sub-family — see [[Home/Computer Science/Algorithms/Search Algorithms/String Matching/String Matching|String Matching]] for the full comparison.
+Text search compares a pattern with positions inside a larger sequence rather than looking up an ordered key. [[Home/Computer Science/Algorithms/Search Algorithms/String Matching/String Matching|String Matching]] compares the preprocessing and skip rules used for that workload.
 
 | Data shape | Algorithm | Time | Precondition |
 | --- | --- | --- | --- |
 | Text + one pattern | [[KMP (Knuth-Morris-Pratt) Algorithm\|KMP]] | O(n + m) | — |
-| Text + one pattern, large alphabet | [[Boyer-Moore]] | O(n/m) best, O(n) with Galil | Sublinear in practice; powers `grep` |
+| Text + one pattern, large alphabet | [[Boyer-Moore]] | O(n/m) best, O(n) with Galil | Sublinear in practice. Powers `grep` |
 | Text + one pattern, prefix-structure problems | [[Z-Algorithm]] | O(n + m) | — |
 | Text + many patterns at once | [[Aho-Corasick]] | O(n + matches) after build | Build cost is sum of pattern lengths |
 | Text + rolling / multi-pattern hashing | [[Rabin Karp Search\|Rabin–Karp]] | O(n + m) avg | Good hash to avoid collisions |
@@ -75,29 +75,6 @@ Text/pattern matching is its own sub-family — see [[Home/Computer Science/Algo
 | Graph (unweighted) | [[DFS BFS\|BFS / DFS]] | O(V + E) | — |
 | Graph (weighted) | See [[Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms\|Graph Algorithms]] | — | [[Dijkstra]], [[A-Star Search\|A* Search]], [[Bellman-Ford]] |
 
-# Questions
-
-> [!QUESTION]- What is the first decision before picking a search algorithm?
-> - Check whether data is sorted, because that immediately enables Binary Search.
-> - Identify data shape: array, graph, or text stream, because each has specialized methods.
-> - Decide whether worst-case guarantees or average speed matters more.
-> - Checking these preconditions first avoids picking an algorithm whose assumptions your data violates — the most common source of wrong or slow searches.
-
-> [!QUESTION]- Why is one search algorithm never best for all cases?
-> - Different algorithms optimize for different constraints such as ordering, memory, and preprocessing.
-> - Workload shape changes the winner: single lookup, repeated queries, or many patterns.
-> - Correctness constraints can force specific methods, for example sorted input for Binary Search.
-> - Every choice trades preprocessing and memory against query speed; the senior move is to weigh those for the actual workload instead of reaching for a default.
-
-> [!QUESTION]- When does preprocessing (sorting or indexing) pay off versus a plain linear scan?
-> - A one-off search over unsorted data is just O(n) — sorting first (O(n log n)) would cost more than it saves.
-> - Once many queries hit the same data, a single sort or index build is amortized across all of them and each query drops to O(log n) or O(1).
-> - Indexes (hash maps, B-trees) trade memory and write cost for fast reads.
-> - Preprocessing front-loads cost and memory to make repeated queries cheap, so justify it by query volume, not by instinct.
-
 # References
 
-- [Search algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Search_algorithm) — Overview of search algorithm categories.
-- [BinarySearch method (.NET API)](https://learn.microsoft.com/en-us/dotnet/api/system.array.binarysearch) — Official .NET binary search reference with usage examples.
-- [Binary search (CP Algorithms)](https://cp-algorithms.com/num_methods/binary_search.html) — Implementation patterns and edge-case analysis.
-- [Nearly all binary searches and mergesorts are broken (Google Research)](https://research.google/blog/extra-extra-read-all-about-it-nearly-all-binary-searches-and-mergesorts-are-broken/) — Practitioner post-mortem on a subtle overflow bug present in most binary search implementations for decades.
+- [Search algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Search_algorithm)

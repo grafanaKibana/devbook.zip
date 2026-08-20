@@ -12,7 +12,7 @@ status: Creation
 priority: High
 ---
 
-Graphs model relationships: networks, dependencies, routes, permissions, and many real-world system structures. Graph algorithms help you traverse, rank, and optimize those relationships efficiently. Example: shortest-path algorithms answer "what's the cheapest route" while BFS/DFS answer "what's reachable".
+Graph algorithms turn edges into answers about reachability, dependency order, path cost, connectivity, or capacity. The required output comes first. Direction, weight semantics, and input density then narrow the valid choices. Breadth-first search finds a minimum-hop route, while Dijkstra minimizes total weight and becomes invalid as soon as an edge can be negative.
 
 ```datacorejsx
 const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
@@ -45,52 +45,29 @@ flowchart TD
 
 | Algorithm | Solves | Time | Constraint |
 | --- | --- | --- | --- |
-| [[DFS BFS]] | Reachability, shortest path by edge count | O(V + E) | Unweighted graphs |
-| [[DFS BFS]] | Cycle detection, topological sort, components | O(V + E) | Any graph |
-| [[Dijkstra]] | Single-source shortest path | O((V + E) log V) | Non-negative weights |
-| [[A-Star Search\|A* Search]] | Point-to-point shortest path | O((V + E) log V), far fewer nodes expanded | Non-negative weights **and** an admissible heuristic |
-| [[Greedy Best-First Search]] | Fast point-to-point path, not optimal | O((V + E) log V) | Heuristic only; sacrifices optimality for speed |
-| [[Bidirectional Search]] | Point-to-point shortest path | O(b^(d/2)) vs O(b^d) | Target known; graph must be reversible |
-| [[Bellman-Ford]] | Single-source shortest path | O(V·E) | Handles negative edges; detects negative cycles |
-| [[Floyd-Warshall]] | All-pairs shortest path | O(V³) time, Θ(V²) space | Small/dense graphs; detects negative cycles |
+| [[Home/Computer Science/Algorithms/Graph Algorithms/DFS BFS\|BFS]] | Reachability, shortest path by edge count | O(V + E) | Unweighted graphs |
+| [[Home/Computer Science/Algorithms/Graph Algorithms/DFS BFS\|DFS]] | Traversal, cycle detection, finish-order primitives | O(V + E) | General graphs. Topological order still requires a DAG |
+| [[Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra\|Dijkstra]] | Single-source shortest path | O((V + E) log V) | Non-negative weights |
+| [[Home/Computer Science/Algorithms/Graph Algorithms/A-Star Search\|A* Search]] | Point-to-point shortest path | O((V + E) log E) with a consistent heuristic and lazy heap. Reopenings make runtime re-expansion-dependent | Non-negative weights. Consistency permits close-once optimality, while an admissible but inconsistent heuristic requires reopenings |
+| [[Home/Computer Science/Algorithms/Graph Algorithms/Greedy Best-First Search\|Greedy Best-First Search]] | Fast point-to-point path, not necessarily optimal | O((V + E) log E) with a lazy heap | Heuristic only. Sacrifices optimality for speed |
+| [[Home/Computer Science/Algorithms/Graph Algorithms/Bidirectional Search\|Bidirectional Search]] | Point-to-point shortest path | About O(b^(d/2)) rather than O(b^d) in the ideal state-space model | Target known. Backward search must be available |
+| [[Home/Computer Science/Algorithms/Graph Algorithms/Bellman-Ford\|Bellman-Ford]] | Single-source shortest path | O(V·E) | Handles negative edges. Detects reachable negative cycles |
+| [[Home/Computer Science/Algorithms/Graph Algorithms/Floyd-Warshall\|Floyd-Warshall]] | All-pairs shortest path | Θ(V³) time, Θ(V²) space | Small or dense graphs. Detects negative cycles |
 
 ## Structure and Connectivity
 
 | Algorithm | Solves | Time | Constraint |
 | --- | --- | --- | --- |
-| [[Minimum Spanning Tree]] | Cheapest edge set connecting all vertices | O(E log V) | Connected, undirected, weighted |
-| [[Topological Sort]] | Linear order respecting dependencies | O(V + E) | Directed acyclic graph |
-| [[Strongly Connected Components]] | Maximal mutually-reachable vertex sets | O(V + E) | Directed graphs |
-| [[Connected Components]] | Maximal connected vertex sets | O(V + E) | Undirected graphs |
-| [[Articulation Points and Bridges]] | Cut vertices and cut edges | O(V + E) | Undirected graphs |
-| [[Maximum Flow]] | Max s–t throughput; min cut | O(V·E²) (Edmonds–Karp) | Capacitated network |
+| [[Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree\|Minimum Spanning Tree]] | Cheapest edge set connecting all vertices | O(E log V) | Connected, undirected, weighted |
+| [[Home/Computer Science/Algorithms/Graph Algorithms/Topological Sort\|Topological Sort]] | Linear order respecting dependencies | O(V + E) | Directed acyclic graph |
+| [[Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components\|Strongly Connected Components]] | Maximal mutually-reachable vertex sets | O(V + E) | Directed graphs |
+| [[Home/Computer Science/Algorithms/Graph Algorithms/Connected Components\|Connected Components]] | Maximal connected vertex sets | O(V + E) | Undirected graphs |
+| [[Home/Computer Science/Algorithms/Graph Algorithms/Articulation Points and Bridges\|Articulation Points and Bridges]] | Cut vertices and cut edges | O(V + E) | Undirected graphs |
+| [[Home/Computer Science/Algorithms/Graph Algorithms/Maximum Flow\|Maximum Flow]] | Max s–t throughput. Min cut | O(V·E²) (Edmonds–Karp) | Capacitated network |
 
 > [!NOTE]
-> Not every graph problem admits a polynomial algorithm. [[Hamiltonian Cycle]] — visit every vertex exactly once and return to the start — is **NP-complete**, so it sits outside the selection tables above: there is no known efficient algorithm to choose, only exponential search and heuristics.
-
-# Questions
-
-> [!QUESTION]- When do you pick BFS over DFS?
-> - BFS is preferred for shortest path by edge count in unweighted graphs.
-> - DFS is preferred for deep traversal tasks like cycle detection and topological ordering.
-> - BFS uses more memory on wide graphs because of the frontier queue.
-> - Both are O(V+E), so pick by the property you need, not by speed: BFS guarantees shortest paths but its frontier can hold a whole layer; DFS uses depth-bounded memory but gives no distance guarantee.
-
-> [!QUESTION]- Why is Dijkstra not valid with negative edges?
-> - Dijkstra assumes once a node is finalized, its best distance is known.
-> - Negative edges can later produce a shorter route to a finalized node.
-> - Bellman Ford handles negative edges by repeated relaxation.
-> - Dijkstra is faster (O((V+E) log V)) but only valid with non-negative weights; Bellman–Ford accepts negative edges at O(V·E) — pay the slower cost only when weights can go negative.
-
-> [!QUESTION]- Adjacency list or adjacency matrix?
-> - Adjacency list is the default for sparse graphs (most real-world graphs): O(V+E) space and efficient neighbor iteration.
-> - Adjacency matrix uses O(V²) space but answers "is there an edge A→B?" in O(1).
-> - In .NET, `Dictionary<T, List<T>>` is a common adjacency-list implementation.
-> - The list saves memory and speeds traversal on sparse graphs; the matrix trades O(V²) memory for constant-time edge checks, so reach for it only on dense graphs or edge-query-heavy workloads.
+> Not every graph problem admits a polynomial-time algorithm. [[Home/Computer Science/Algorithms/Graph Algorithms/Hamiltonian Cycle|Hamiltonian Cycle]] asks for a cycle that visits every vertex exactly once and is **NP-complete**. No polynomial-time algorithm is known. Exact methods take exponential time in the worst case.
 
 # References
 
-- [Graph algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Graph_algorithm)
-- [Introduction to algorithms graph lectures MIT](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/pages/lecture-notes/)
-- [Graph algorithms cp algorithms](https://cp-algorithms.com/graph/)
-- [Graph algorithms (Sedgewick and Wayne, Algorithms 4th ed.)](https://algs4.cs.princeton.edu/40graphs/) — Practitioner-oriented chapter covering graph representations, traversal implementations, and shortest-path algorithms with Java code and performance analysis.
+- [Graph algorithms](https://algs4.cs.princeton.edu/40graphs/)

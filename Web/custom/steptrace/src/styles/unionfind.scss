@@ -22,7 +22,7 @@
   transition: stroke var(--_tween) ease;
 }
 .steptrace__ufarc[data-active="true"] {
-  stroke: var(--_violet);
+  stroke: var(--_blue);
   stroke-dasharray: 5 3;
 }
 

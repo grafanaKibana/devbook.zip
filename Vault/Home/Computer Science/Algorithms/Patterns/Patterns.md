@@ -3,7 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
-summary: "Reusable coding idioms that turn brute-force solutions efficient; recognising the pattern is the hard part."
+summary: "Reusable coding idioms that turn brute-force approaches into efficient solutions. Recognising the pattern is the hard part."
 tags: [FolderNote]
 publish: true
 priority: Medium
@@ -12,7 +12,7 @@ level:
 status: Creation
 ---
 
-Patterns are reusable problem-solving idioms — not full named algorithms like Dijkstra, but recurring *techniques* you apply to turn a brute-force solution into an efficient one. Recognising the pattern is usually the hard part of a coding problem; once you see "this is a sliding window," the implementation follows. They differ from [[Home/Computer Science/Algorithms/Paradigms/Paradigms|paradigms]] (DP, greedy, backtracking), which are broader *design philosophies* — patterns are the concrete moves.
+Algorithm patterns are recurring implementation moves that replace repeated work with a maintained invariant. A sliding window carries a range aggregate, prefix sums reuse cumulative work, and a monotonic stack discards candidates that cannot win. They are narrower than [[Home/Computer Science/Algorithms/Paradigms/Paradigms|paradigms]] such as dynamic programming or greedy design: a paradigm shapes the solution, while a pattern describes the mechanism used inside it.
 
 ```datacorejsx
 const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
@@ -21,12 +21,12 @@ return FolderStructureMap;
 
 # Algorithm Selection
 
-| Pattern | The move | Tells you to reach for it | Typical win |
+| Pattern | The move | Strong signal | Typical win |
 |---|---|---|---|
 | [[Two Pointers]] | Two coordinated indices, ends-in | Sorted array, pair/triplet sums, in-place partition | O(n²) → O(n) |
 | [[Fast and Slow Pointers]] | Two indices at different speeds | "Cycle in a linked list", "find the middle in one pass", duplicate in `1..n` | O(n) space → O(1) |
 | [[Sliding Window]] | A moving contiguous range updated incrementally | "Longest/shortest contiguous subarray or substring with a constraint" | O(n·k) → O(n) |
-| [[Prefix Sum]] | Precompute cumulative sums; a range is one subtraction | "Many range-sum queries over static data", "count subarrays summing to k" | O(n) per query → O(1) |
+| [[Prefix Sum]] | Precompute cumulative sums. A range is one subtraction | "Many range-sum queries over static data", "count subarrays summing to k" | O(n) per query → O(1) |
 | [[Monotonic Stack and Queue]] | A stack or deque kept sorted, popping what can never win | "Next/previous greater element", "sliding-window maximum" | O(n²) → O(n) |
 | [[Merge Intervals]] | Sort by start, then sweep and coalesce | "Overlapping intervals", "meeting rooms", calendar booking | O(n²) → O(n log n) |
 | [[Cyclic Sort]] | Swap each value to the index it belongs at | "n numbers in the range 1..n" + find the missing/duplicate, in place | O(n) space → O(1) |
@@ -36,16 +36,10 @@ return FolderStructureMap;
 | [[Bit Manipulation]] | Operate on the binary representation directly | Small fixed sets, parity/toggles, subset enumeration | O(n) → O(1) space/time tricks |
 
 > [!TIP]
-> The interview skill is *recognition*: most problems announce their pattern through a keyword — "contiguous … with sum/length" → sliding window; "sorted … pair that sums to" → two pointers; "next greater" → monotonic stack; "minimise the maximum" → binary search on answer; "appears once / subsets of a small set" → bit manipulation.
+> Keywords are clues, not proof. The deciding evidence is the invariant: contiguous ranges that update at their boundaries suggest a sliding window, sorted pair elimination suggests two pointers, and a monotone feasibility predicate suggests binary search on the answer.
 
-A few of these are close relatives, and the distinction is worth holding onto. Variable-size sum windows whose shrink/expand decision relies on monotonic sums require non-negative values; [[Prefix Sum]] plus a hashmap handles the same "subarray summing to k" question when negatives are allowed. [[Fast and Slow Pointers]] is the speed-differential member of the [[Two Pointers]] family rather than a separate idea. And [[Binary Search on Answer]] is not really a search over data at all — it borrows only the halving mechanic from [[Binary Search]].
-
-# Questions
-
-> [!QUESTION]- A problem asks for a contiguous subarray summing to `k`, but values may be negative. Which pattern is safer than a variable-size sliding window, and why?
-> Use prefix sums with a hashmap because equal prefix-difference relationships remain valid with negative values. A sum-based sliding window cannot decide reliably which boundary to move when adding or removing a value may increase or decrease the sum.
+Several patterns share the same surface shape but depend on different proofs. A variable-size sum window needs a monotone rule for moving its boundaries, which negative values break. [[Prefix Sum]] plus a hashmap still handles exact subarray sums. [[Fast and Slow Pointers]] uses a speed difference along one successor chain, while [[Two Pointers]] usually eliminates candidates using order. [[Binary Search on Answer]] searches a monotone feasibility predicate rather than stored data, though it reuses the halving mechanic from [[Binary Search]].
 
 # References
 
-- [14 patterns to ace coding interviews (educative)](https://www.educative.io/blog/coding-interview-patterns) — the broader catalogue these belong to.
-- [Competitive Programmer's Handbook (Laaksonen)](https://cses.fi/book/book.pdf) — free book covering these techniques with proofs and exercises.
+- [Competitive Programmer's Handbook (Laaksonen)](https://cses.fi/book/book.pdf)

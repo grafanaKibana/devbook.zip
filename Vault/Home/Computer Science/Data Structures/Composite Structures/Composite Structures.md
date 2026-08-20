@@ -12,9 +12,9 @@ publish: true
 priority: High
 ---
 
-A composite structure combines two primitives to get a guarantee neither gives alone. The recipe is always the same: each primitive answers one question in O(1) or O(log n), and the implementation's job is keeping both in lockstep — every mutation updates both, or the structure silently corrupts. [[LRU Cache]] is the canonical case: a `Dictionary<TKey, Node>` answers "where is key k?" in O(1), a doubly linked `LinkedList<T>` answers "what's the eviction order?" in O(1), and the invariant is that every key in the map points at a live list node — [[LRU Cache]] shows exactly what breaks when it doesn't.
+A composite structure keeps the same logical entries in two coordinated representations. Each representation makes a different operation cheap. Every mutation must update both. [[LRU Cache]] is the standard example. A `Dictionary<TKey, Node>` finds key `k` in expected O(1), while a doubly linked `LinkedList<T>` exposes the eviction order in O(1). The shared invariant is simple: every map entry points at a live list node. [[LRU Cache]] shows what fails when the two views disagree.
 
-.NET ships one composite ready-made: `OrderedDictionary<TKey, TValue>` (.NET 9), hash lookup + insertion order. (`PriorityQueue<TElement, TPriority>` looks like a candidate but fails the membership test below — its guarantee comes from a single clever layout, an array with a heap invariant, so it lives with [[Heap|the heaps]].) When the combination you need isn't built in — LRU being the classic gap — you compose it yourself, which is why these structures dominate interviews: the design *is* the answer.
+`OrderedDictionary<TKey, TValue>` in .NET 9 is one built-in example: hash lookup paired with insertion order. `PriorityQueue<TElement, TPriority>` does not meet the membership test below because one array with a heap invariant provides its behavior, so it belongs with [[Heap|the heaps]]. LRU remains a common hand-built composite because the standard collections supply its parts but not the lockstep policy.
 
 ```datacorejsx
 const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
@@ -23,7 +23,7 @@ return FolderStructureMap;
 
 # What Belongs Here
 
-Membership test: the structure's headline guarantee comes from coordinating two simpler structures, not from a single clever layout. Today the folder has one note; candidates for future notes follow the same pattern:
+Membership test: the structure's headline guarantee comes from coordinating two simpler structures, not from a single clever layout. Today the folder has one note. Candidates for future notes follow the same pattern:
 
 | Structure | Composition | Combined guarantee |
 |---|---|---|
@@ -32,9 +32,8 @@ Membership test: the structure's headline guarantee comes from coordinating two 
 | Indexed priority queue | Heap + position map | O(log n) pop **and** O(log n) decrease-key by handle (Dijkstra's missing piece) |
 | Insertion-ordered map | HashMap + list (`OrderedDictionary`) | O(1) lookup and deterministic iteration order (removal is O(n) — the ordered array shifts) |
 
-A plain `Dictionary` or a lone `Stack<T>` doesn't belong here — those live with their families. The tell is the sentence "X alone can't do it, and Y alone can't either."
+A plain `Dictionary` or a lone `Stack<T>` belongs with its own family. A structure belongs here when its main guarantee disappears if either constituent representation is removed.
 
 # References
 
-- [OrderedDictionary<TKey,TValue> class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.ordereddictionary-2) — .NET 9's built-in hash-map-plus-order composite; documents the per-operation costs of the hash + ordered-array pairing (O(1) lookup, O(n) removal).
-- [LRU Cache (LeetCode #146)](https://leetcode.com/problems/lru-cache/) — the exercise that makes the lockstep invariant concrete; the classic failure is desynchronized map/list state.
+- [OrderedDictionary<TKey,TValue> class](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.ordereddictionary-2)

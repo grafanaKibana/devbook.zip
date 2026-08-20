@@ -17,6 +17,7 @@ import {
   milestoneAt,
   pad2,
   stripTags,
+  successMarker,
   summaryFor,
   thinMilestones,
 } from "./render"
@@ -156,7 +157,7 @@ export function createMount(
     const insightLabel = el("span", "steptrace__insight-label")
     insightLabel.textContent = "Result"
     const insightText = el("span", "steptrace__insight-text")
-    insight.append(insightLabel, insightText)
+    insight.append(successMarker("steptrace__insight-marker"), insightLabel, insightText)
     log.append(insight)
     traceWrap.append(traceLabel, log)
 

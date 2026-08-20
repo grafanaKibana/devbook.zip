@@ -11,15 +11,13 @@ status: Creation
 publish: true
 ---
 
-Scanning a megabyte of source code for the literal `getUserById` means asking, at each of a million positions, whether the pattern starts there.
+Boyer-Moore aligns the pattern under the text and compares from right to left. A mismatch exposes both the offending text character and the suffix that already matched. Two precomputed rules turn that information into a safe jump over alignments that cannot succeed.
 
-Boyer-Moore reverses the comparison direction. It aligns the pattern under the text and compares from the pattern's *last* character backward. A mismatch there yields two facts: the offending text character, and how much of the pattern's tail already matched. That is enough to prove that a run of the following alignments cannot match, so the pattern jumps forward past them — and those positions are never read.
-
-The jump distance comes from two precomputed tables, and every shift is sound only because scanning right-to-left turned one mismatch into a statement about a whole block of text.
+The **bad-character rule** uses the mismatching character's rightmost pattern position. The **good-suffix rule** repositions the suffix already known to match. Taking the larger safe shift can skip text positions that are never inspected, which is the algorithm's practical advantage over checking every alignment from the left.
 
 
 
-The trace keeps the pattern aligned under the text while the comparison cursor moves right-to-left and both rules expose the shift they propose.
+The trace keeps the pattern aligned under the text while the comparison cursor moves right to left and each rule proposes a shift.
 
 ~~~~~tabsdown
 tab: Visualization
@@ -101,7 +99,7 @@ tab: Complexity
             {
               "kind": "curve",
               "role": "Time",
-              "formula": "Θ(m + σ)",
+              "formula": "Θ(m) expected",
               "curveId": "linear"
             }
           ]
@@ -152,7 +150,7 @@ tab: Complexity
             {
               "kind": "curve",
               "role": "Auxiliary space",
-              "formula": "Θ(m + σ)",
+              "formula": "Θ(m) expected",
               "curveId": "linear"
             }
           ]
@@ -164,7 +162,7 @@ tab: Complexity
             {
               "kind": "curve",
               "role": "Auxiliary space",
-              "formula": "O(m + σ)",
+              "formula": "O(m)",
               "curveId": "linear"
             }
           ]
@@ -176,7 +174,7 @@ tab: Complexity
             {
               "kind": "curve",
               "role": "Auxiliary space",
-              "formula": "O(m + σ)",
+              "formula": "O(m)",
               "curveId": "linear"
             }
           ]
@@ -188,7 +186,7 @@ tab: Complexity
             {
               "kind": "curve",
               "role": "Auxiliary space",
-              "formula": "O(m + σ)",
+              "formula": "O(m)",
               "curveId": "linear"
             }
           ]
@@ -204,13 +202,13 @@ The favorable chart row describes inputs where large shifts repeatedly skip unto
 
 # Where the Skip Disappears
 
-A small alphabet can reduce the advantage when the pattern is long enough to contain most symbols and the text distribution makes them recur often. But alphabet size alone does not determine performance—a short or skewed pattern can still exclude common text symbols, and a useful good-suffix shift can recover distance even when the mismatching character occurs in the pattern. For binary or DNA data, measure against the actual pattern lengths, symbol distribution, and repetition instead of assuming the skip disappears.
+A small alphabet often shortens bad-character shifts because mismatching symbols recur in the pattern. It does not determine performance by itself: a short or skewed pattern may still exclude common text symbols, while the good-suffix rule can recover a useful jump. Binary and DNA workloads therefore need measurements against their actual pattern lengths and repetition.
 
 The good-suffix table is the part that breaks silently. Its prefix fallback is easy to compute off by one, and a wrong entry produces either a missed match or a shift of zero that loops forever. **Boyer-Moore-Horspool** removes that table and uses a bad-character delta keyed on the text character under the pattern's final position.
 
-Production code does not converge on one universal variant. GNU `grep` documents a Boyer-Moore fixed-string matcher but does not identify it as Horspool. `glibc`'s `memmem` chooses by needle length: a modified Horspool search for 3–256 bytes, then Two-Way for longer needles. Those are workload-specific engineering choices, not evidence that full Boyer-Moore is absent from production or that editor search commands share one implementation.
+Production code does not converge on one variant. GNU `grep` documents a Boyer-Moore fixed-string matcher without identifying it as Horspool. `glibc`'s `memmem` selects a modified Horspool search for 3–256-byte needles and Two-Way for longer ones. These are workload-specific choices, not a universal implementation rule.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Control flow
 >
@@ -239,7 +237,7 @@ Production code does not converge on one universal variant. GNU `grep` documents
 >     int n = text.Length, m = pattern.Length;
 >     if (m == 0 || m > n) yield break;
 >
->     int[] lastOccurrence = BuildLastOccurrenceTable(pattern);
+>     Dictionary<char, int> lastOccurrence = BuildLastOccurrenceTable(pattern);
 >     int[] goodSuffix = BuildGoodSuffixTable(pattern);
 >
 >     int shift = 0;
@@ -255,16 +253,17 @@ Production code does not converge on one universal variant. GNU `grep` documents
 >         }
 >         else
 >         {
->             int bc = Math.Max(1, j - lastOccurrence[text[shift + j]]);
+>             char mismatch = text[shift + j];
+>             int last = lastOccurrence.TryGetValue(mismatch, out var index) ? index : -1;
+>             int bc = Math.Max(1, j - last);
 >             shift += Math.Max(goodSuffix[j], bc); // never <= 0 because goodSuffix >= 1
 >         }
 >     }
 > }
 >
-> private static int[] BuildLastOccurrenceTable(string pattern)
+> private static Dictionary<char, int> BuildLastOccurrenceTable(string pattern)
 > {
->     var table = new int[256];
->     Array.Fill(table, -1);
+>     var table = new Dictionary<char, int>();
 >     for (int i = 0; i < pattern.Length; i++) table[pattern[i]] = i;
 >     return table;
 > }
@@ -309,25 +308,9 @@ Production code does not converge on one universal variant. GNU `grep` documents
 >     return suffix;
 > }
 > ```
-> The `lastOccurrence` table assumes byte-range characters; Unicode text needs a `Dictionary<char,int>` whose missing value is `-1`. Horspool uses a different delta table: it excludes the final pattern position and shifts from the character aligned under that position.
-
-# Questions
-
-> [!QUESTION]- Why does comparing right-to-left let Boyer-Moore skip characters it never reads?
-> A mismatch at the pattern's last position exposes a text character together with its offset. If that character is absent from the pattern, no alignment that places any pattern character over it can match, so the pattern jumps clear past it — up to `m` positions — without comparing the characters in between. A left-to-right comparison at the current alignment does not expose the trailing mismatch needed for this block-skipping argument; KMP instead advances by reusing pattern-overlap information.
-
-> [!QUESTION]- What does each shift rule contribute, and why might an implementation choose Horspool?
-> The bad-character rule aligns the pattern's rightmost copy of the mismatching text character, giving large skips on large alphabets. The strong good-suffix rule reuses an already-matched suffix only when its preceding character differs from the mismatching pattern character, then falls back to a pattern prefix. The algorithm takes the larger shift, so it is never worse than either alone. Horspool is attractive when a simpler one-table implementation matters more than the extra skips, but the right choice depends on the workload.
-
-
-> [!QUESTION]- Which inputs prevent the shift rules from making large jumps?
-> Long repeated runs shared by the text and pattern can reduce each shift to one position. An all-equal pattern `aaaa` over `aaaa…a` is the extreme case: every alignment is a full match and the good-suffix rule advances only one position.
+> The `Dictionary<char,int>` supports arbitrary .NET `char` values and treats a missing character as position `-1`. Like `string` indexing, the search compares UTF-16 code units rather than user-perceived grapheme clusters. Horspool uses a different delta table: it excludes the final pattern position and shifts from the character aligned under that position.
 
 # References
 
-- [A Fast String Searching Algorithm](https://dl.acm.org/doi/10.1145/359842.359859) — Boyer and Moore's original 1977 CACM paper introducing right-to-left scanning with the two shift heuristics.
-- Charras & Lecroq, *Handbook of Exact String-Matching Algorithms* (King's College Publications, 2004) — the canonical bad-character, good-suffix, and `suffixes` preprocessing this note's implementation follows (also published as the online ESMAJ handbook).
-- [GNU grep: Performance](https://www.gnu.org/software/grep/manual/html_node/Performance.html) — documents the fixed-string matcher's use of Boyer-Moore without naming the Horspool variant.
-- [`glibc` `memmem.c`](https://sourceware.org/git/?p=glibc.git;a=blob;f=string/memmem.c) — shows the modified Horspool path for 3–256-byte needles and the Two-Way fallback above that limit.
-- [Boyer–Moore string-search algorithm](https://en.wikipedia.org/wiki/Boyer%E2%80%93Moore_string-search_algorithm) — both shift heuristics, the Galil rule, and the distinction between the plain and Galil variants.
-- [Boyer–Moore–Horspool algorithm](https://en.wikipedia.org/wiki/Boyer%E2%80%93Moore%E2%80%93Horspool_algorithm) — a bad-character-only variant with simpler preprocessing and shift logic.
+- [A Fast String Searching Algorithm](https://dl.acm.org/doi/10.1145/359842.359859)
+- [`glibc` `memmem.c`](https://sourceware.org/git/?p=glibc.git;a=blob;f=string/memmem.c)

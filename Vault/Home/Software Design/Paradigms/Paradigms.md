@@ -12,9 +12,9 @@ level:
 priority: Medium
 ---
 
-A programming paradigm is a set of choices about where state lives, how control moves, and what unit composes into a larger program. C# is multi-paradigm: a service can model an order as an object, transform its lines with pure functions, react to events, and coordinate concurrent work without committing the entire codebase to one style.
+A programming paradigm is a model for organizing state and control flow. It determines which unit carries behavior, how larger operations compose, and where side effects appear. C# supports several of these models in the same program. An order can be an object with guarded invariants, its lines can pass through pure transformations, and the completed transaction can emit an event.
 
-The useful question is not “which paradigm wins?” It is “which model makes the state transitions and effects easiest to see?” Use [[Home/Software Design/Paradigms/OOP]] when identity and invariants dominate, [[Home/Software Design/Paradigms/Functional Programming]] for deterministic transformations, event-driven code when control should follow events, and imperative code when an explicit sequence is the clearest description.
+The practical test is visibility: which model makes the state transition and its effects easiest to inspect? [[Home/Software Design/Paradigms/OOP]] fits behavior tied to identity and invariants. [[Home/Software Design/Paradigms/Functional Programming]] fits deterministic transformations. Event-driven code fits work triggered by facts or signals, while imperative code remains the clearest choice for a short, explicit sequence.
 
 ```datacorejsx
 const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
@@ -29,17 +29,17 @@ return FolderStructureMap;
 | Object-oriented | Calls dispatch through objects and interfaces | Encapsulated behind object methods | Object and interface | Owned by collaborating objects | Synchronization follows shared object state | C#, Java, Smalltalk |
 | Functional | Expressions transform values | Prefer immutable values | Function | Isolated at boundaries | Immutable values reduce shared-state coordination | F#, Haskell, C# with LINQ |
 | Logic/declarative | State the result or constraints, not the steps | Engine-managed facts or relations | Rule, query, or expression | Delegated to the runtime | Defined by the query or rule engine | Prolog, SQL |
-| Event-driven | A producer publishes an event; registered handlers run according to the runtime or broker | Subscriber state and event-derived projections | Event and handler | At publication and handler boundaries | Delivery and ordering depend on the runtime; handlers may still run synchronously and block | .NET events, message brokers, UI event loops |
+| Event-driven | A producer publishes an event. Registered handlers run according to the runtime or broker | Subscriber state and event-derived projections | Event and handler | At publication and handler boundaries | Delivery and ordering depend on the runtime. Handlers may still run synchronously and block | .NET events, message brokers, UI event loops |
 | Reactive streams | Values flow through operators after a subscription establishes demand | Stream state and accumulated projections | Stream operator | At subscription and terminal-observer boundaries | Demand and backpressure are explicit only when the chosen protocol supports them | Reactive Streams, `IAsyncEnumerable<T>`, Rx operators |
 | Concurrent | Several tasks make progress over overlapping time | Shared, isolated, or message-passed | Task, actor, or channel | Coordinated across tasks | Progress can interleave even on one core | C# tasks/channels, Erlang actors, Go goroutines |
 
-Event-driven describes how control is triggered and how producers are decoupled from handlers. It does not imply asynchronous or non-blocking delivery: a C# event invokes its handlers synchronously unless the handler explicitly starts asynchronous work. Reactive streams describe value flow through a stream protocol; backpressure exists only when that protocol carries demand or provides a bounded consumption mechanism. These choices can combine, but they answer different questions.
+Event-driven code moves control to handlers when an event occurs. Delivery may still be synchronous: ordinary C# events invoke handlers on the publishing thread unless the handler starts other work. Reactive streams describe values flowing through a stream contract. Backpressure is present only when that contract exposes demand or otherwise bounds production against consumption. The two styles often meet in one design, but they solve different problems.
 
-Concurrency is about overlapping progress; parallelism is about simultaneous execution on multiple cores. An async HTTP request is concurrent while the thread is free to do other work, even if no two instructions run at once. A CPU-bound `Parallel.For` is parallel when iterations execute on different cores. Treating the terms as synonyms leads to the wrong synchronization and capacity assumptions.
+Concurrency allows operations to make progress during overlapping periods. Parallelism executes work simultaneously, usually across cores. An asynchronous HTTP operation provides concurrency because its thread can return to the pool while I/O is pending. A CPU-bound `Parallel.For` becomes parallel when iterations run at the same time. The distinction determines whether a design needs shared-state synchronization, capacity limits, or both.
 
 # Imperative, Functional, and Object-oriented Styles
 
-All three examples reject negative invoice lines and total the rest. The result is identical; the ownership of state and behavior changes.
+All three examples reject negative invoice lines and total the rest. The result is identical. The ownership of state and behavior changes.
 
 ```csharp
 static decimal TotalImperative(IEnumerable<decimal> amounts)
@@ -56,7 +56,7 @@ static decimal TotalImperative(IEnumerable<decimal> amounts)
 }
 ```
 
-The imperative version exposes the sequence and accumulator. It is the easiest version to step through, but correctness depends on every mutation path preserving the rule.
+The imperative version exposes both the sequence and the accumulator. It is easy to step through. Correctness still depends on every mutation path preserving the rule.
 
 ```csharp
 static decimal TotalFunctional(IReadOnlyList<decimal> amounts) =>
@@ -65,7 +65,7 @@ static decimal TotalFunctional(IReadOnlyList<decimal> amounts) =>
         : amounts.Sum();
 ```
 
-The functional version expresses validation and reduction as transformations. The caller owns no mutable accumulator, which makes the function deterministic for the same input.
+The functional version expresses validation and reduction as transformations. No mutable accumulator escapes the function, and the same values produce the same result.
 
 ```csharp
 public sealed class Invoice
@@ -84,7 +84,7 @@ public sealed class Invoice
 }
 ```
 
-The object-oriented version protects the invariant once and keeps the behavior beside the state. That extra type pays off when an invoice has identity and more legal transitions; it is ceremony when the operation is a one-off transformation.
+The object-oriented version protects the invariant at construction and keeps behavior beside the state. The type earns its keep when an invoice has identity and several legal transitions. For a one-off calculation, it adds machinery without adding much clarity.
 
 | Question | Imperative | Functional | Object-oriented |
 | --- | --- | --- | --- |
@@ -96,7 +96,4 @@ The object-oriented version protects the invariant once and keeps the behavior b
 
 # References
 
-- [C# language specification: statements](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/statements) — the normative statement and control-flow rules behind imperative C#.
-- [Task-based asynchronous pattern](https://learn.microsoft.com/en-us/dotnet/standard/asynchronous-programming-patterns/task-based-asynchronous-pattern-tap) — Microsoft's contract for task-based concurrency and asynchronous completion.
-- [ByteByteGo source snapshot: imperative vs functional vs object-oriented programming](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/imperative-vs-functional-vs-object-oriented-programming.md) — the comparison that prompted the symmetric C# example; the note narrows its broad labels into explicit state and composition choices.
-- [ByteByteGo source snapshot: top 8 programming paradigms](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/top-8-programming-paradigms.md) — the source catalog reconciled here with a strict concurrency-versus-parallelism distinction.
+- [Structure and Interpretation of Computer Programs](https://ocw.mit.edu/courses/6-001-structure-and-interpretation-of-computer-programs-spring-2005/)

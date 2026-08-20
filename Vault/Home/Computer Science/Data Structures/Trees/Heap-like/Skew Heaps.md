@@ -11,13 +11,13 @@ status: Ready to Repeat
 publish: true
 ---
 
-When two priority queues must combine repeatedly — merging event streams, uniting sub-schedules — the melding cost dominates. A skew heap keeps only a heap-ordered binary tree and makes merge the primitive: two heaps combine by walking down their right spines, and insert and extract-min are defined in terms of that merge.
+Skew heaps are small mergeable priority queues. They store a heap-ordered binary tree and make merge the only structural operation. Insert merges a singleton, and extract-min merges the old root's children.
 
-The structure is the self-adjusting cousin of a [[Home/Computer Science/Data Structures/Trees/Heap-like/Leftist Heaps|leftist heap]]. A leftist heap stores a null-path-length field per node and swaps children only when that field would be violated, buying a per-operation worst-case bound. A skew heap deletes the field entirely: after merging down a right spine it **swaps the two children at every touched node unconditionally** — no test, no bookkeeping. The blind swap moves a right path that just grew back to the left, where the next merge never looks.
+The structure is a self-adjusting relative of the [[Home/Computer Science/Data Structures/Trees/Heap-like/Leftist Heaps|leftist heap]]. A leftist heap stores null-path length and swaps children only when its invariant requires it. A skew heap stores no rank. After descending a right spine, it **swaps both children at every touched node**, moving the path that just grew away from the route used by the next merge.
 
 **Core shape:** heap-ordered binary tree, no rank field → merge recurses down right spines → swap children at every merged node
 
-Use **Merge** on the same canonical heaps `[2, 7, 10]` and `[3, 5, 8]`. Unlike the leftist version, every touched node swaps its children unconditionally; **Reset** restores both source heaps.
+Use **Merge** on the heaps `[2, 7, 10]` and `[3, 5, 8]`. Every touched node swaps its children, regardless of shape. **Reset** restores both inputs.
 
 ~~~~~tabsdown
 tab: Visualization
@@ -224,11 +224,11 @@ tab: Complexity
 ```
 ~~~~~
 
-Persistence exposes the same gap. Leftist worst-case bounds are per operation and survive shared subtrees.
+Persistence widens the difference. A leftist heap's worst-case bound applies to each operation, even when versions share subtrees. A skew heap spreads cost across an update sequence. Branching repeatedly from older versions needs a separate sequence analysis.
 
-The unconditional swap is the whole mechanism, not a tunable detail. There is no rank field to inspect, so the swap has to be blind and total for the potential argument to close.
+The unconditional swap is the entire adjustment mechanism. There is no rank to inspect, so skipping the swap produces a different structure and invalidates the usual potential argument.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Merge folding the right spine
 >
@@ -297,12 +297,6 @@ The unconditional swap is the whole mechanism, not a tunable detail. There is no
 > ```
 > The two swap-carrying lines are the entire self-adjustment: there is no rank field to update and no condition guarding the swap. Removing the swap, or making it conditional on stored metadata, produces a different data structure.
 
-# Questions
-
-> [!QUESTION]- What does the unconditional child swap buy when a skew heap stores no rank metadata?
-> It moves the right path that just grew onto the left, away from the path the next merge descends. A single merge can still be linear, but repeated swaps distribute that cost so a sequence of operations is logarithmic amortized.
-
 # References
 
-- [Sleator & Tarjan, "Self-Adjusting Heaps" (SIAM J. Comput. 1986)](https://www.cs.cmu.edu/~sleator/papers/adjusting-heaps.pdf) — the original skew-heap paper and sequence analysis.
-- [Skew heap (Wikipedia)](https://en.wikipedia.org/wiki/Skew_heap) — recursive merge, unconditional child swap, and comparison with leftist heaps.
+- [Sleator & Tarjan, "Self-Adjusting Heaps" (SIAM J. Comput. 1986)](https://www.cs.cmu.edu/~sleator/papers/adjusting-heaps.pdf)

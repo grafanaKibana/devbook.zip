@@ -11,13 +11,13 @@ status: Ready to Repeat
 publish: true
 ---
 
-An ordered collection has to answer key lookups and stay open to inserts and deletes.
+An ordered set still needs predictable lookups while keys are inserted and removed.
 
-An AVL tree is a binary search tree that refuses to let this happen. Each node additionally stores its subtree height (or the derived balance factor), and after every insert or delete the structure enforces the **AVL invariant**: for every node, `|height(left) − height(right)| ≤ 1`. Whenever a modification pushes some node's balance factor to ±2, a **rotation** restores the invariant.
+An AVL tree is a binary search tree with a hard height bound. Each node stores its subtree height (or the derived balance factor), and after every insert or delete the structure enforces the **AVL invariant**: for every node, `|height(left) − height(right)| ≤ 1`. A **rotation** repairs any node whose balance factor reaches ±2.
 
-What the structure gives up for that guarantee is written into every write: it carries a height field on each node, and its strict balance target forces more rebalancing on inserts and deletes than looser schemes need.
+That guarantee adds work to every mutation. Each node carries a height field, and the strict balance target triggers more rebalancing than looser schemes need.
 
-Press **Insert** with the prefilled `5`: the descent makes node `20` left-heavy, then an LL rotation restores the bound.
+The visualization starts with a balanced tree. Inserting the prefilled `5` makes node `20` left-heavy, then an LL rotation restores the bound.
 
 ~~~~~tabsdown
 tab: Visualization
@@ -172,15 +172,15 @@ tab: Complexity
 
 # Where Strict Balance Costs
 
-The strict `|balance| ≤ 1` target is exactly what makes AVL fast to read and comparatively expensive to write, and every boundary below traces back to it.
+The strict `|balance| ≤ 1` target keeps lookup paths short and makes writes comparatively expensive.
 
-Write-heavy workloads pay for the tight bound. A [[Home/Computer Science/Data Structures/Trees/Red-Black Tree|Red-Black Tree]] tolerates a subtree that is up to twice as tall on one side, so many insert and delete streams that would trip an AVL rebalance leave a red-black tree untouched after a recolor.
+Write-heavy workloads pay for the tight bound. A [[Home/Computer Science/Data Structures/Trees/Red-Black Tree|Red-Black Tree]] allows its longest root-to-leaf path to be up to twice its shortest, so many insert and delete streams that trigger AVL rotations need only recoloring there.
 
-The per-node bookkeeping is a second, quieter cost of the invariant. Every insert and delete must recompute stored heights along the touched path, and the field itself consumes memory on every node. The heights are also load-bearing: if a recompute is skipped after a rotation, the stored value goes stale, balance-factor checks read the wrong number, and later operations pick the wrong rotation case or skip a needed one — the tree silently violates its own invariant with no crash.
+Stored heights add both memory and mutation work. Every insert and delete recomputes them along the touched path. A missed recomputation after rotation leaves stale state. Later balance checks may choose the wrong case or skip a needed repair. The tree can then violate its invariant without crashing.
 
-Rotation-case selection is the classic implementation bug, and it too is a consequence of demanding an exact `|balance| ≤ 1`. Applying a single rotation to a Left-Right or Right-Left (zig-zag) shape leaves the tree just as unbalanced, mirrored to the opposite side, because only the double rotation moves the inner node out first. Getting the four-case dispatch wrong produces a tree that still parses as a BST but no longer honors the height bound.
+Rotation-case selection is the common implementation failure under `|balance| ≤ 1`. Applying one rotation to a Left-Right or Right-Left shape merely moves the imbalance to the other side. The inner node must move outward first. Incorrect dispatch can preserve BST order while losing the AVL height bound.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Left-Left case and its single right rotation
 >
@@ -277,17 +277,8 @@ Rotation-case selection is the classic implementation bug, and it too is a conse
 >     }
 > }
 > ```
-> `Rebalance` is applied to every node on the way back up the recursion. Deletion reuses the same `Recompute` + `Rebalance` pair; because it can shorten a subtree, the rebalancing must continue past the first fix rather than stopping like insertion does.
-
-# Questions
-
-> [!QUESTION]- What is the AVL invariant and when is it checked?
-> For every node, `height(left) − height(right)` must stay in `{−1, 0, +1}`. It is checked on the way back up after an insert or delete: each node's stored height is recomputed along the touched path, and the first node whose balance factor reaches ±2 is rotated.
-
-> [!QUESTION]- Why do the Left-Right and Right-Left cases require a double rotation?
-> A single rotation on a zig-zag shape only mirrors the imbalance to the other side. The inner (median) node has to be rotated outward into a straight chain first, after which a single rotation lifts it to the top.
+> `Rebalance` is applied to every node on the way back up the recursion. Deletion reuses the same `Recompute` + `Rebalance` pair. Because it can shorten a subtree, the rebalancing must continue past the first fix rather than stopping like insertion does.
 
 # References
 
-- [Adelson-Velsky & Landis, "An algorithm for the organization of information" (1962)](https://zhjwpku.com/assets/pdf/AED2-10-avl-paper.pdf) — the original paper (translated); primary source for the invariant and the height proof.
-- [AVL tree (Wikipedia)](https://en.wikipedia.org/wiki/AVL_tree) — the four rotation cases with diagrams, the Fibonacci-tree height derivation, and the rebalancing-after-delete analysis.
+- [Adelson-Velsky & Landis, "An algorithm for the organization of information" (1962)](https://zhjwpku.com/assets/pdf/AED2-10-avl-paper.pdf)

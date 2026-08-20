@@ -11,12 +11,11 @@ status: Ready to Repeat
 publish: true
 ---
 
-Filters in ASP.NET Core let you run logic before and after specific stages of controller action execution.
-They are useful for cross-cutting concerns that are tightly coupled to MVC actions, such as action-level validation, response shaping, and controller-scoped auditing — for example, an action filter that validates an `X-Correlation-Id` header on every inbound request and returns a 400 if missing, saving you from duplicating that check across 80+ controller actions.
-This matters because putting all of that logic inside actions quickly creates duplication and inconsistent behavior.
-Reach for filters when middleware is too broad and endpoint code is too local.
+MVC filters wrap defined stages of controller execution. They fit cross-cutting behavior that needs action arguments, model state, controller metadata, or the action result. A correlation-ID rule tied only to selected controllers is one example. An application-wide correlation ID usually belongs in middleware.
 
-Filters run inside the MVC pipeline after routing selects an action.
+The boundary matters. Middleware can cover every request type but lacks MVC action context. Endpoint code has full local context but duplicates a rule when many actions need it. Filters occupy the space between those two.
+
+Filters run after routing has selected an MVC action.
 
 - Authorization filters run first and can short-circuit unauthorized requests.
 - Resource filters run around most of the rest of the pipeline and can short-circuit early.
@@ -24,11 +23,11 @@ Filters run inside the MVC pipeline after routing selects an action.
 - Exception filters observe unhandled exceptions from action execution.
 - Result filters run before and after the action result is executed.
 
-Execution order is determined by scope (global, controller, action) and optionally by `IOrderedFilter`.
+Scope and filter type both affect nesting. `IOrderedFilter.Order` can override the default scope order, so a custom order should be treated as part of the endpoint's behavior.
 
 # Example
 
-Use an async action filter to require a custom header for selected endpoints:
+This async action filter rejects selected requests without a correlation header:
 
 ```csharp
 using Microsoft.AspNetCore.Mvc;
@@ -63,9 +62,9 @@ builder.Services.AddControllers(options =>
 });
 ```
 
-If this rule should apply only to one endpoint, apply it with `[ServiceFilter(typeof(RequireCorrelationIdFilter))]` instead of registering globally.
+For one action or controller, `[ServiceFilter(typeof(RequireCorrelationIdFilter))]` applies the registered filter without making it global.
 
-Exception filter to catch and shape unhandled action exceptions:
+An exception filter can translate an unhandled exception from action execution into an MVC result:
 
 ```csharp
 public sealed class ApiExceptionFilter(ILogger<ApiExceptionFilter> logger) : IAsyncExceptionFilter
@@ -85,24 +84,24 @@ public sealed class ApiExceptionFilter(ILogger<ApiExceptionFilter> logger) : IAs
 }
 ```
 
-Register globally: `builder.Services.AddControllers(opts => opts.Filters.Add<ApiExceptionFilter>());`
+Global registration applies it to every MVC action: `builder.Services.AddControllers(opts => opts.Filters.Add<ApiExceptionFilter>());`. Middleware remains the broader choice when errors from routing or non-MVC endpoints need the same response contract.
 
 # Applying Filters: `[ServiceFilter]` Vs `[TypeFilter]` Vs `IFilterFactory`
 
-How you attach a filter that has constructor dependencies matters:
+Attributes cannot receive runtime services through their own constructors, so attachment determines how the real filter instance is created.
 
-- **`[ServiceFilter(typeof(MyFilter))]`** — the filter is resolved from DI, so you **must register it** (`AddScoped<MyFilter>()`). Use this for filters with injected services.
-- **`[TypeFilter(typeof(MyFilter))]`** — the filter is instantiated via `ActivatorUtilities` (DI-resolved constructor args **plus** explicit `Arguments`), and does **not** need to be registered. Use this to pass literal arguments to the filter.
-- **`IFilterFactory`** — implement it on an attribute to build the real filter yourself (this is how attribute-with-dependencies patterns work under the hood).
-- A plain `[MyFilter]` attribute can't receive DI services — it's constructed by the runtime with only literal attribute args.
+- **`[ServiceFilter(typeof(MyFilter))]`** resolves the filter itself from DI, so `MyFilter` must be registered with the intended lifetime.
+- **`[TypeFilter(typeof(MyFilter))]`** uses `ActivatorUtilities`. Constructor services come from DI, while `Arguments` can supply literal values. The filter type itself does not need registration.
+- **`IFilterFactory`** gives an attribute explicit control over creation of the executable filter and whether the result can be reused.
+- A plain filter attribute can carry literal metadata but cannot accept runtime services in its attribute constructor.
 
-Note that **`[Authorize]` is itself an authorization filter** — which is why authorization runs first in the filter order (Authorization → Resource → Action → Exception → Result), and why duplicating auth logic in an action filter is redundant. Within a stage, execution order is global → controller → action, refined by `IOrderedFilter.Order`. Also: implement either the sync (`IActionFilter`) **or** async (`IAsyncActionFilter`) interface of a pair, never both — if you implement both, the async one wins and the sync one is ignored.
+`[Authorize]` contributes authorization metadata that MVC handles at its authorization stage, so duplicating policy checks in an action filter creates two access-control paths. Within a filter type, the usual nesting is global, controller, then action on the way in and the reverse on the way out. If a filter implements both sync and async forms of the same stage, the runtime invokes only the async interface. Implement one form.
 
 # Pitfalls
 
-- Running blocking I/O inside sync filters can hurt throughput because request threads are blocked; use async filters for I/O work. A sync `IActionFilter` that calls a remote validation API with `.Result` instead of using `IAsyncActionFilter` with `await` blocked thread-pool threads under load — at 200 concurrent requests, thread starvation caused p99 latency to spike from 50ms to 12 seconds and triggered 503 responses.
-- Putting authentication or authorization checks into custom action filters often duplicates policy logic and causes drift; prefer built-in `AddAuthentication`, `AddAuthorization`, and `[Authorize]` policies.
-- Expecting exception filters to handle everything is risky; they only catch exceptions thrown during action execution (action method, action filters, and result execution). Exceptions in middleware, model binding before action selection, or authorization filters bypass exception filters entirely — a `JsonException` during `[FromBody]` deserialization returned a raw 500 instead of the structured error the team expected because the exception filter never fired.
+- **Blocking I/O:** `.Result` or synchronous remote calls hold request threads while no CPU work is happening. I/O-bound filters should implement the async interface and await the operation.
+- **Authorization in action filters:** a second permission system drifts away from registered policies. Use authentication handlers and authorization policies for access decisions.
+- **Treating exception filters as global error handling:** exception filters cover unhandled exceptions from controller creation, model binding, action filters, and action methods. They do not cover middleware, routing, resource filters, result filters, or MVC result execution. Exception-handling middleware is the safer outer boundary for a uniform API error contract.
 
 # Tradeoffs
 
@@ -114,32 +113,13 @@ Note that **`[Authorize]` is itself an authorization filter** — which is why a
 
 # Questions
 
-> [!QUESTION]- Explain when to choose middleware over an MVC action filter.
-> Expected answer:
-> - Middleware when concern is app-wide and independent of controller/action internals.
-> - Action filter when concern needs `ActionExecutingContext`, action arguments, or action result wrapping.
-> - Middleware runs earlier in pipeline and can affect all endpoints.
-> - Filters are more granular for controller/action scope.
-> Why this matters: this is a common architecture tradeoff in API design interviews.
-
 > [!QUESTION]- What is the execution order of ASP.NET Core filter types?
-> Expected answer:
-> - Authorization -> Resource -> Action -> Exception -> Result (with before/after phases where applicable).
-> - Scope affects order: global, then controller, then action.
-> - `IOrderedFilter` can override default order.
-> Why this matters: ordering mistakes cause hidden bugs in validation, caching, and error handling.
-
-> [!QUESTION]- How do you inject services into a filter safely?
-> Expected answer:
-> - Register filter/service in DI container.
-> - Use `ServiceFilter`/`TypeFilter` or `options.Filters.AddService<TFilter>()`.
-> - Prefer constructor injection and async interfaces.
-> - Avoid `RequestServices.GetService` inside filter bodies unless absolutely necessary.
-> Why this matters: DI misuse in filters causes brittle code and testing pain.
+> Authorization filters run first. Resource filters then wrap the rest of the MVC pipeline, action filters wrap the action, and result filters wrap execution of the selected result. The normal before path is therefore authorization, resource, action, then result, with the wrapping filters running their after logic in reverse.
+>
+> Exception filters are conditional, not another before-and-after stage. They run only when an unhandled exception comes from controller creation, model binding, an action filter, or the action method. They do not catch failures from authorization filters, resource filters, result filters, or result execution. If an exception filter handles the failure and supplies a result, result processing continues; otherwise the exception leaves the MVC pipeline.
+>
+> Within one filter type, lower `IOrderedFilter.Order` values run earlier on the way in and later on the way out. When order values are equal, scope normally nests global, controller, then action.
 
 # References
 
-- [Filters in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/mvc/controllers/filters?view=aspnetcore-8.0) — official reference covering all filter types, execution order, DI registration, and cancellation.
-- [Middleware in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/middleware?view=aspnetcore-8.0) — use alongside this page to understand when middleware is the better choice.
-- [Minimal API endpoint filters](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/minimal-apis/min-api-filters?view=aspnetcore-8.0) — endpoint-scoped filter equivalent for Minimal APIs.
-- [Filter pipeline in ASP.NET Core (ABP blog)](https://abp.today/blog/2021/06/08/filter-pipeline-aspnet-core) — practitioner walkthrough of filter ordering and real-world usage patterns.
+- [Filters in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/mvc/controllers/filters?view=aspnetcore-10.0)

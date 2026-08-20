@@ -3,7 +3,7 @@ topic:
   - Computer Science
 subtopic:
   - Algorithms
-summary: "Visits every graph vertex exactly once and returns to the start; deciding existence is NP-complete."
+summary: "Visits every graph vertex exactly once and returns to the start. Deciding existence is NP-complete."
 level:
   - "4"
 priority: Medium
@@ -11,9 +11,9 @@ status: Ready to Repeat
 publish: true
 ---
 
-A graph route may need to visit every **vertex** exactly once and return to its start. That is a Hamiltonian cycle. Unlike an Eulerian cycle, which must use every edge exactly once and has a direct degree-based characterization, Hamiltonian existence has no known polynomial-time test for general graphs. The decision problem is NP-complete.
+A Hamiltonian cycle visits every **vertex** exactly once and returns to its start. An Eulerian cycle asks a different question: it uses every edge exactly once and has a direct degree-based characterization. No polynomial-time test is known for Hamiltonian-cycle existence in general graphs. The decision problem is NP-complete.
 
-For a graph with `n` vertices, a cycle is a permutation of the vertices whose consecutive pairs — including the last and first — are edges. Backtracking searches these permutations while pruning a partial path as soon as its next edge is missing or a vertex repeats.
+For a graph with `n` vertices, a candidate cycle is a permutation whose consecutive vertices are adjacent, including the last and first. Backtracking explores these permutations and abandons a partial path as soon as an edge is missing or a vertex repeats.
 
 ~~~~~tabsdown
 tab: Visualization
@@ -128,21 +128,16 @@ tab: Complexity
 
 # Necessary Checks and False Shortcuts
 
-Every vertex in a Hamiltonian graph has degree at least two, and a Hamiltonian graph cannot contain an articulation point: removing one vertex from the cycle leaves a path that still connects all remaining vertices. These are fast rejection tests, not sufficient conditions. A graph can satisfy both and still have no Hamiltonian cycle.
+Every vertex in a Hamiltonian graph has degree at least two. Such a graph also has no articulation point because removing one vertex from the cycle leaves a path through every remaining vertex. These checks reject some impossible inputs quickly. Passing them does not prove that a Hamiltonian cycle exists.
 
-A connected graph is also insufficient. Connectivity only promises some path between vertex pairs; it does not promise a single cycle that visits each vertex once. Likewise, a graph may have an Eulerian cycle but no Hamiltonian cycle because edge coverage and vertex coverage impose different constraints.
+Connectivity is too weak as well. It promises a path between each pair of vertices, not one cycle through every vertex. A graph may even have an Eulerian cycle and no Hamiltonian cycle because covering edges says nothing decisive about covering vertices once.
 
 # Comparison
 
 
-Hamiltonian cycle is the feasibility version of visiting every vertex once. Traveling Salesman adds weights and asks for the cheapest such cycle; Eulerian cycle solves a different, tractable edge-coverage problem.
-
-# Questions
-
-> [!QUESTION]- Why do degree-at-least-two and no-articulation-point checks fail to prove that a Hamiltonian cycle exists?
-> Both properties are necessary because every vertex on the cycle has two incident cycle edges and removing one cycle vertex leaves the others connected by a path. They are not sufficient: a graph can satisfy both local checks while no single cycle visits every vertex, so backtracking or a stronger problem-specific argument is still required.
+Hamiltonian cycle asks whether any cycle visits every vertex once. Traveling Salesman adds weights and asks which such cycle is cheapest. Eulerian cycle remains a separate, tractable edge-coverage problem.
 
 # References
 
-- [Reducibility Among Combinatorial Problems](https://doi.org/10.1007/978-1-4684-2001-2_9) — Karp's 1972 reductions, including directed Hamiltonian circuit among the original NP-complete problems.
-- [Hamiltonian Graphs](https://mathworld.wolfram.com/HamiltonianGraph.html) — definitions and classical sufficient and necessary conditions for Hamiltonian paths and cycles.
+- [Reducibility Among Combinatorial Problems](https://doi.org/10.1007/978-1-4684-2001-2_9)
+- [Hamiltonian Graphs](https://mathworld.wolfram.com/HamiltonianGraph.html)

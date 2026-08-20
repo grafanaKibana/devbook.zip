@@ -11,9 +11,9 @@ status: Done
 publish: true
 ---
 
-Generation is where the model produces output from a prompt and optional context. The engineering challenge is not getting any output — it is getting reliable, grounded, correctly formatted output at the right cost and latency. This requires controlling three things: how the model samples tokens (parameters), what evidence constrains the output (grounding), and what shape the output takes (structured output).
+Generation turns a prompt and its context into output. Producing text is easy. Producing text that is reliable, grounded, and usable by the next system is the engineering problem. Sampling controls affect token choice, evidence limits what the answer may claim, and structure determines whether another program can consume it.
 
-The mechanism: the model predicts a probability distribution over the vocabulary at each step, picks a token according to the sampling parameters, and appends it. Repeat until a stop condition fires. Every parameter you set reshapes that distribution — temperature scales it, top-p truncates it, penalties suppress repetition. The prompt and context determine what the distribution looks like in the first place. Structured output constraints mask invalid tokens before sampling.
+At each step, the model predicts a probability distribution over its vocabulary. The sampler chooses one token, appends it, and repeats until a stop condition fires. Temperature rescales the distribution, top-p trims its tail, and penalties push down repeated tokens. The prompt and context shape the distribution before any of those controls apply. Structured-output constraints can then mask tokens that would break the required form.
 
 ```mermaid
 flowchart LR
@@ -26,29 +26,29 @@ flowchart LR
 
 # Generation Parameters
 
-Generation parameters control how the model selects the next token from the predicted distribution. They shape randomness, repetition, length, and reproducibility.
+Generation parameters change how the next token is selected. Their effects show up as randomness, repetition, output length, and limited reproducibility.
 
-**`temperature`** scales the logit distribution before softmax. Temperature 0 (or near-zero) makes the model deterministic — it always picks the highest-probability token. Temperature 1.0 samples proportionally to learned probabilities. Temperature above 1.0 flattens the distribution, increasing diversity but also increasing the chance of low-quality tokens. In practice: use 0–0.3 for factual/grounded tasks, 0.7–1.0 for creative generation.
+**`temperature`** scales logits before softmax. A value at or near zero usually selects the highest-probability token. But provider infrastructure can still prevent exact reproducibility. At 1.0, sampling follows the model's learned probabilities. Higher values flatten the distribution, which increases variety and admits more low-probability tokens. Factual tasks usually start near 0–0.3. Creative work often needs a wider range such as 0.7–1.0. These are evaluation starting points, not universal settings.
 
-**`top_p`** (nucleus sampling) truncates the distribution to the smallest set of tokens whose cumulative probability mass reaches the threshold. `top_p=0.9` means the model samples from the top 90% of probability mass, discarding the long tail of unlikely tokens. This is an alternative way to control randomness — most provider documentation recommends adjusting temperature OR top_p, not both simultaneously.
+**`top_p`** (nucleus sampling) keeps the smallest token set whose cumulative probability reaches the threshold. With `top_p=0.9`, sampling happens inside the first 90% of probability mass and ignores the long tail. It is another randomness control. Provider guidance commonly recommends tuning either temperature or top-p while leaving the other at its default, which keeps cause and effect legible.
 
-**`top_k`** limits sampling to the top K most probable tokens regardless of their cumulative probability. Available in Anthropic's API and open-source inference stacks, but not in OpenAI's API. Less adaptive than top_p because a fixed K may be too restrictive for some distributions and too permissive for others.
+**`top_k`** limits sampling to the K most probable tokens, regardless of their cumulative mass. Anthropic and many open-source inference stacks expose it. OpenAI's API does not. A fixed K is less adaptive than top-p because the same cutoff can be cramped for one distribution and loose for another.
 
-**`frequency_penalty`** and **`presence_penalty`** control repetition. Frequency penalty scales with how many times a token has appeared (discourages repeating proportionally). Presence penalty applies a flat bias against any token that has appeared at all (pushes toward new topics). Range: -2.0 to 2.0 in OpenAI's API. Use moderate values (0.3–0.8) for generation tasks prone to looping.
+**`frequency_penalty`** and **`presence_penalty`** discourage repetition in different ways. Frequency penalty grows as a token reappears. Presence penalty applies a flat bias once a token has appeared at all, which can push the output toward new topics. OpenAI accepts values from -2.0 to 2.0. Moderate positive values such as 0.3–0.8 are reasonable starting points for loops, followed by task evaluation.
 
-**`max_tokens`** / **`max_completion_tokens`** caps response length. Set this based on the expected output size plus a margin. If the model hits the cap mid-sentence, the output is truncated without a proper ending — check the `finish_reason` in the API response to detect this. Reasoning models (o-series) use `max_completion_tokens` which includes internal reasoning tokens, not just visible output.
+**`max_tokens`** / **`max_completion_tokens`** caps response length. The limit needs enough room for the expected answer plus a margin. Hitting it can truncate a sentence, so `finish_reason` belongs in response handling. For o-series reasoning models, `max_completion_tokens` covers internal reasoning tokens as well as visible output.
 
 **`stop`** sequences terminate generation when the model produces a matching string. Useful for structured prompts where a delimiter signals the end of the useful output.
 
-**`seed`** enables best-effort deterministic sampling. With the same seed and identical inputs, the model attempts to produce the same output. This is not guaranteed across provider infrastructure changes — track response fingerprints when reproducibility matters.
+**`seed`** requests best-effort repeatability. The same seed and identical inputs may reproduce an output, but provider infrastructure changes can still alter it. Response fingerprints help distinguish a sampling change from a backend change.
 
-**`logprobs`** / **`top_logprobs`** expose token-level probabilities in the response. Use these for debugging: if the model assigns very low probability to the tokens it produced for a key claim, the output is unstable. For classification outputs, logprobs can serve as a confidence signal.
+**`logprobs`** / **`top_logprobs`** expose token-level probabilities. They help explain ambiguous classifications and unstable token choices. They are signals from the model's distribution, not calibrated confidence in factual truth.
 
-Note: some reasoning-focused models do not support certain sampling parameters or treat them as fixed. Check model-specific API docs before sending `temperature` or `top_p` — unsupported values may be silently ignored or cause request rejection depending on the provider.
+Some reasoning-focused models fix or omit sampling controls. Model-specific API documentation decides whether `temperature` or `top_p` is accepted. An unsupported field may be ignored or rejected.
 
 # Grounding and Citations
 
-Grounding constrains model output to evidence from provided context rather than parametric memory. A model can produce fluent, confident text that is entirely fabricated — grounding makes the evidence link explicit and testable. See [[Hallucinations]] for broader coverage of why models fabricate.
+Grounding ties model output to evidence in the supplied context instead of leaving claims to parametric memory. Fluent text can still be fabricated. An explicit evidence link makes that failure testable, as covered more broadly in [[Hallucinations]].
 
 The grounding contract defines the rules the model must follow:
 
@@ -57,23 +57,23 @@ The grounding contract defines the rules the model must follow:
 - If evidence is insufficient or conflicting, abstain rather than guess
 - Do not combine source material with parametric knowledge
 
-**Citation generation** — the model tags each claim with the source that supports it. Anthropic's Citations API returns structured citation objects with character-level source locations. For other providers, prompt the model to output citation tags and validate them in post-processing.
+**Citation generation:** the model tags a claim with its supporting source. Anthropic's Citations API returns structured citation objects with character-level source locations. Other providers may require citation tags in the output followed by post-processing validation.
 
-**Claim verification** — after generation, decompose the answer into individual claims and check each against the cited source. Natural Language Inference (NLI) models are the standard approach: a lightweight model classifies each claim-source pair as entailed, neutral, or contradicted. Azure AI Content Safety offers groundedness detection as a managed service using this approach. MiniCheck (EMNLP 2024) provides an efficient open-source alternative.
+**Claim verification:** generation is followed by splitting the answer into claims and checking each one against its cited source. Natural Language Inference (NLI) is one practical approach: a smaller model classifies each claim-source pair as entailed, neutral, or contradicted. Azure AI Content Safety offers managed groundedness detection, while MiniCheck provides an open-source verifier.
 
-**Abstention** — when evidence is insufficient, the model should explicitly state this rather than fabricate an answer. Abstention preserves user trust. Define the abstention output format in the system prompt: a specific phrase like "I don't have enough information to answer this" rather than a vague hedge.
+**Abstention:** insufficient evidence should produce an explicit non-answer. The system prompt needs a stable form, such as "I don't have enough information to answer this," so downstream code can distinguish abstention from vague hedging.
 
-Grounding is especially critical in [[Home/AI & ML/LLM/Context Engineering/RAG/RAG|RAG]] pipelines where the model must stay faithful to retrieved documents, but the same principles apply to any context-augmented generation: tool outputs, database results, or user-provided documents.
+Grounding is central to [[Home/AI & ML/LLM/Context Engineering/RAG/RAG|RAG]], where the answer must stay faithful to retrieved documents. The same contract applies when evidence comes from a tool, database result, or user-provided document.
 
 # Context Assembly
 
-Context assembly determines what evidence enters the prompt and in what order — the core of [[Home/AI & ML/LLM/Context Engineering/Context Engineering|Context Engineering]]. Research on how models use long contexts ("Lost in the Middle", Liu et al. 2023) shows a U-shaped performance curve: models attend most to information at the beginning and end of the context, and least to information in the middle.
+Context assembly decides which evidence enters the prompt and where it appears. That is the core of [[Home/AI & ML/LLM/Context Engineering/Context Engineering|Context Engineering]]. “Lost in the Middle” (Liu et al., 2023) found a U-shaped performance pattern in long contexts, with information near the beginning and end used more reliably than information in the middle.
 
 Practical implications:
 
 - Place the most relevant evidence at the start of the context window. If using multiple chunks, put the highest-ranked chunks first.
 - For long contexts, consider placing a summary or key evidence at both the start and end to exploit primacy and recency effects.
-- Keep the context compact and diverse — prefer fewer, higher-quality chunks over many partial fragments. More context is not always better; noise dilutes signal.
+- Keep the context compact. A few complete, high-quality chunks often beat a large pile of partial fragments because extra context also adds noise.
 - Include source identifiers (document IDs, section markers) in the context payload so the model can produce traceable citations.
 - When the total evidence exceeds the context window, truncate lower-ranked chunks rather than truncating all chunks. A complete chunk with full context is more useful than fragments of many chunks.
 
@@ -81,39 +81,39 @@ For RAG-specific context assembly patterns, see [[Home/AI & ML/LLM/Context Engin
 
 # Structured Output
 
-Structured output ensures the model returns data in a machine-parsable format (JSON, function calls, enums) rather than free text. Three mechanisms exist, in order of reliability:
+Structured output asks the model for data another program can parse, such as JSON, function arguments, or an enum value. The available mechanisms solve different problems.
 
-**Constrained decoding (Structured Outputs)** — the provider masks the logit distribution at each step so only tokens valid according to a JSON schema can be produced. The output is schema-compliant by construction, not by luck. OpenAI's `response_format: { type: "json_schema" }` and Azure's equivalent use this approach. Failure modes: the schema itself may be ambiguous, the model may produce technically valid but semantically nonsensical JSON, and complex nested schemas can degrade output quality.
+**Constrained decoding (Structured Outputs):** the provider masks tokens that would violate a JSON schema during decoding. The resulting output is structurally valid by construction. OpenAI's `response_format: { type: "json_schema" }` and Azure's equivalent use this approach. The schema may still encode the wrong contract, and valid JSON can carry nonsense values. Deeply nested schemas can also hurt output quality.
 
-**JSON mode** — guarantees the output is valid JSON but does not enforce a specific schema. The model can return any JSON structure. Useful when you want parsable output but the schema is flexible. Fails when the model returns valid JSON that does not match your expected structure.
+**JSON mode:** guarantees valid JSON without enforcing a particular schema. It fits exploratory output whose shape can vary. A consumer expecting fixed fields still needs validation because any JSON object satisfies the mode.
 
-**Function calling** — the model selects a function from a provided list and returns structured arguments. Best for tool-use scenarios where the model decides which action to take. The arguments conform to the function's parameter schema. Reliability depends on the model's ability to select the right function and populate arguments correctly.
+**Function calling:** the model selects a function from a supplied list and returns structured arguments. It fits tool use because the decision includes which action to take. Schema-valid arguments can still name the wrong function or carry semantically wrong values.
 
-Decision rule: use constrained decoding (Structured Outputs) when you need a specific schema enforced. Use function calling when the model must choose among multiple tools. Use JSON mode only as a fallback when neither is available.
+Use constrained decoding when a specific response schema must be enforced. Function calling fits a choice among tools. JSON mode is the loose option when parseability matters but the exact shape does not.
 
 # Pitfalls
 
 ## Temperature Miscalibration
 
-Setting temperature too high for factual tasks introduces token-level randomness that manifests as hallucinated details, inconsistent formatting, and unreliable structured output. Setting it too low for creative tasks produces repetitive, generic output. Teams often set temperature once during prototyping and never revisit it.
+High temperature adds token-level randomness to factual tasks, which can surface as invented details or broken formatting. Very low values can make creative work repetitive. A setting chosen during prototyping often survives long after the task or model has changed.
 
-Mitigation: evaluate output quality at multiple temperature values on your specific task before locking in a production value. Monitor output quality over time — model updates can shift the effective behavior at the same temperature.
+Mitigation: compare several values on the actual task before choosing a production setting. Keep evaluating it because a model update can change behavior at the same temperature.
 
 ## Lost-in-the-Middle Attention Failure
 
-When relevant evidence lands in the middle of a long context, the model underweights it relative to evidence at the start or end. This causes the model to miss critical information even though it was provided. The effect is strongest with 10+ context chunks.
+Evidence in the middle of a long context may receive less attention than evidence near either edge. The model can therefore miss supplied information. The cited study observed the failure across multi-document contexts. The exact threshold depends on the model and task.
 
 Mitigation: order chunks by relevance (most relevant first). For high-stakes queries, place key evidence at both the start and end of the context. Reduce context size by filtering lower-quality chunks rather than including everything.
 
 ## Grounding Bypass Under Conflicting Evidence
 
-When retrieved sources contain conflicting information, models often silently pick one version instead of flagging the conflict. The output appears grounded but omits the contradiction. This is especially dangerous when sources from different time periods or jurisdictions disagree.
+Conflicting sources can lead a model to choose one version silently. The answer may look grounded while hiding the contradiction, especially when the documents describe different dates or jurisdictions.
 
-Mitigation: instruct the model explicitly to surface conflicts rather than resolve them silently. Add a post-generation check that compares claims against all provided sources, not just the one the model cited.
+Mitigation: instruct the model explicitly to surface conflicts rather than resolve them silently. Add a post-generation check that compares claims against every provided source, including sources the model did not cite.
 
 ## Structured Output Schema Mismatch
 
-The model produces valid JSON that passes schema validation but contains semantically wrong values — wrong field mappings, hallucinated enum values that happen to be valid strings, or arrays with the right structure but wrong content. Schema compliance does not guarantee correctness.
+Valid JSON can pass schema validation while carrying wrong values: fields may be swapped, an allowed enum may be chosen without evidence, or a well-formed array may contain the wrong records. Schema compliance proves shape. It does not prove meaning.
 
 Mitigation: validate semantic content in addition to schema compliance. For critical fields, add explicit value constraints or post-generation checks. Test with adversarial inputs where the model must distinguish between structurally similar but semantically different schemas.
 
@@ -121,32 +121,24 @@ Mitigation: validate semantic content in addition to schema compliance. For crit
 
 | Factor | Low temperature with strict grounding | High temperature with loose grounding | Structured output | Free-text output |
 | --- | --- | --- | --- | --- |
-| Reliability | Highest -- deterministic and evidence-bound | Lowest -- creative but unpredictable | High -- schema-enforced format | Low -- format varies per response |
+| Reliability | Lower sampling variance; evidence-bound only when claims are verified | Lowest -- creative and less predictable | High -- schema-enforced format | Low -- format varies per response |
 | Expressiveness | Limited -- constrained by source material | Highest -- explores beyond evidence | Limited -- constrained by schema | Highest -- natural language |
-| Hallucination risk | Low -- grounding catches fabrication | High -- temperature amplifies fabrication | Medium -- format is reliable but content may not be | High -- no format or content constraints |
-| Cost and latency | Higher if using verification pass | Lower -- single generation | Higher -- constrained decoding adds overhead | Lowest -- single unconstrained generation |
+| Hallucination risk | Lower when evidence enforcement and claim verification reject unsupported text; citations alone do not | High -- broader sampling admits more unsupported continuations | Medium -- format is reliable but content may not be | High -- no format or content constraints |
+| Cost and latency | Higher only when a separate verification pass is used | Lower -- single generation | Provider-dependent constrained-decoding overhead | Lowest -- single unconstrained generation |
 | Best for | Factual QA and RAG and compliance | Brainstorming and creative writing and exploration | API responses and data extraction and tool integration | Conversational and explanatory and long-form |
 
 # Questions
 
 > [!QUESTION]- Why is adjusting temperature and top_p simultaneously discouraged?
-> Both reshape the same token probability distribution but through different mechanisms. Temperature scales the logit distribution (sharpening or flattening), while top_p truncates it to a cumulative mass threshold. Changing both creates unpredictable interactions — a low temperature already concentrates probability mass, so a low top_p on top of it may have no additional effect, while a high temperature with a low top_p creates conflicting signals. Tuning one while keeping the other at default keeps behavior predictable.
+> Both reshape the token distribution through different mechanisms. Temperature sharpens or flattens logits, while top_p truncates candidates at a cumulative-mass threshold. Changing both makes an observed output shift harder to attribute. Tuning one and leaving the other at its default keeps evaluation legible.
 
 > [!QUESTION]- Why can a grounded response still contain unsupported claims despite citation tags?
-> Models can attach citation markers to claims without verifying entailment. The citation looks correct but the cited passage may not actually support the claim — it may be topically related but not evidentially sufficient. This is why citation generation alone is not grounding: a separate claim-to-source verification step (NLI or similar) is needed to confirm that each cited passage actually entails the claim it is attached to.
-
-> [!QUESTION]- When should constrained decoding be preferred over JSON mode for structured output?
-> Constrained decoding enforces a specific JSON schema at the token level during generation — the output is structurally compliant by construction. JSON mode only guarantees valid JSON without schema enforcement, so the model can return any valid JSON structure. Use constrained decoding when downstream systems depend on a specific schema (API contracts, database inserts, tool arguments). Use JSON mode when you want parsable output but the structure is flexible or exploratory.
+> Citation markers do not verify entailment. A cited passage may be related to the topic without supporting the exact claim. Grounding therefore needs a separate claim-to-source check, using NLI or another verifier, before the citation can be trusted.
 
 # References
 
-- [Chat Completions API — generation parameters reference (OpenAI)](https://platform.openai.com/docs/api-reference/chat/create)
-- [Messages API — temperature, top_p, top_k, stop_sequences (Anthropic)](https://docs.anthropic.com/en/api/messages)
-- [REST API reference — generation parameters for Azure OpenAI (Microsoft Learn)](https://learn.microsoft.com/azure/ai-foundry/openai/reference)
-- [Structured Outputs — JSON schema enforcement and constrained decoding (OpenAI)](https://platform.openai.com/docs/guides/structured-outputs)
+- [Chat Completions API reference (OpenAI)](https://developers.openai.com/api/reference/resources/chat)
 - [Citations API — source-grounded responses with citation objects (Anthropic)](https://docs.anthropic.com/en/docs/build-with-claude/citations)
 - [Groundedness detection — NLI-based claim verification (Azure AI Content Safety)](https://learn.microsoft.com/azure/ai-services/content-safety/concepts/groundedness)
 - [Lost in the Middle — how language models use long contexts (Liu et al. 2023)](https://arxiv.org/abs/2307.03172)
 - [MiniCheck — efficient fact-checking of LLMs on grounding documents (EMNLP 2024)](https://aclanthology.org/2024.emnlp-main.499)
-- [Using logprobs for debugging and confidence estimation (OpenAI Cookbook)](https://cookbook.openai.com/examples/using_logprobs)
-- [Evaluating LLM temperature — systematic methodology for production tuning (Promptfoo)](https://www.promptfoo.dev/docs/guides/evaluate-llm-temperature/)

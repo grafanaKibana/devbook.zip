@@ -11,9 +11,9 @@ status: Ready to Repeat
 publish: true
 ---
 
-A dependency system holds a set of entities and a set of connections between them, and it repeatedly asks two different questions: does a direct link exist between `u` and `v`, and what are all the neighbors of `u`. The connections carry no inherent order and no single root, so there is nothing to sort or index the way an array allows. What must persist is the *incidence* structure — which vertex connects to which, in which direction, at what weight — and the storage choice decides which of those two questions is cheap and which is linear.
+A dependency system stores entities and the connections between them. It asks whether a direct link exists from `u` to `v`, then asks for every neighbor of `u`. Those connections have no inherent order or single root. The stored incidence structure must preserve endpoints, direction, and weight. Its physical layout decides which query is cheap and which needs a scan.
 
-A graph has no single canonical layout. The same set of vertices and edges can be stored as an **adjacency list** (per-vertex neighbor lists), an **adjacency matrix** (a `V × V` table of presence or weight), or an **edge list** (a flat sequence of `(u, v[, w])` tuples). All three retain the full topology, and all three can encode direction and weight; they differ in which questions their layout answers directly and which require a scan.
+A graph has no single canonical layout. The same vertices and edges can live in per-vertex neighbor lists, a `V × V` matrix of presence or weight, or a flat edge list of `(u, v[, w])` tuples. Each form retains the topology and can encode direction or weight. Their operation costs differ because they index different parts of that information.
 
 **Core shape:** vertices + edges → one of {neighbor lists, `V × V` table, flat edge tuples} → each keeps topology, direction, and weight but trades space against edge-test and neighbor-scan cost.
 
@@ -213,15 +213,15 @@ tab: Complexity
 
 # When One Representation Stops Fitting
 
-Density is the dividing line. A **sparse** graph is where the matrix fails: 10 000 vertices with 50 000 edges costs the list roughly 60 000 entries but costs an `int[V, V]` matrix 100 million cells (~400 MB), almost all of them the sentinel.
+Density is the first dividing line. With 10 000 vertices and 50 000 directed edges, an adjacency list holds roughly 60 000 structural entries. An `int[V, V]` matrix allocates 100 million cells, about 400 MB, and most contain the sentinel.
 
-The **edge list** is not a general-purpose store. [[Home/Computer Science/Algorithms/Graph Algorithms/Bellman-Ford|Bellman-Ford]] scans every edge for up to `V − 1` relaxation rounds, then performs an additional full scan to detect a reachable negative cycle; Kruskal sorts edges by weight, then scans them to build a [[Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree|Minimum Spanning Tree]]. Used for traversal, an edge list turns each neighbor lookup into a full-list scan.
+An **edge list** fits algorithms whose natural unit of work is an edge. [[Home/Computer Science/Algorithms/Graph Algorithms/Bellman-Ford|Bellman-Ford]] scans every edge for up to `V − 1` relaxation rounds, then scans once more for a reachable negative cycle. Kruskal sorts the edges before building a [[Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree|Minimum Spanning Tree]]. Traversal is the wrong workload because every neighbor lookup becomes a full-list scan.
 
 Dynamic vertex insertion splits the same way. A graph whose vertex set grows during its lifetime is a poor match for the matrix regardless of density.
 
-None of these are crashes. A matrix on a sparse graph runs correctly; it simply pays memory the workload never uses, and an edge list backing a traversal returns correct neighbors after scanning far more than it needed.
+These are cost mismatches rather than correctness failures. A sparse matrix still works, but it pays for mostly empty cells. An edge list still finds the right neighbors after inspecting many unrelated edges.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Same graph, three stored forms
 >
@@ -273,15 +273,8 @@ None of these are crashes. A matrix on a sparse graph runs correctly; it simply 
 | Adjacency matrix | Dense graphs and frequent single-edge tests |
 | Edge list | Algorithms that scan or sort the full edge set |
 
-The adjacency list is the general default: real graphs are usually sparse, its space tracks the actual edge count, and it enumerates neighbors — the operation traversal repeats — in output-sized time. The edge list retains the least accessible structure and fits exactly the algorithms that process the full edge set by repeated scans or sorting.
-
-# Questions
-
-> [!QUESTION]- How is an undirected edge encoded in each representation, and why does that matter for mutation?
-> The adjacency list stores it twice, as mirrored entries in both endpoints' lists; the matrix stores it as two symmetric cells `[u, v]` and `[v, u]`; the edge list stores one tuple read in both directions. For the list and matrix, symmetry is a maintained invariant — removing or updating the edge must touch both stored copies, or the graph silently becomes directed.
+The adjacency list is the practical default for sparse graphs. Its space follows the edge count, and a traversal can enumerate a vertex's neighbors in output-sized time. The edge list exposes less local structure but matches algorithms that repeatedly scan or sort the complete edge set.
 
 # References
 
-- [NIST Dictionary of Algorithms and Data Structures: graph](https://xlinux.nist.gov/dads/HTML/graph.html) — authoritative definition of graph vertices, edges, adjacency, and the adjacency-list and adjacency-matrix implementations.
-- [Graph (abstract data type)](https://en.wikipedia.org/wiki/Graph_(abstract_data_type)) — adjacency-list and adjacency-matrix representations with their operation costs side by side.
-- [Introduction to Algorithms, 4th ed., Ch. 20 §20.1 — Representations of graphs](https://mitpress.mit.edu/9780262046305/introduction-to-algorithms/) — source for the structure and its analysis.
+- [NIST Dictionary of Algorithms and Data Structures: graph](https://xlinux.nist.gov/dads/HTML/graph.html)

@@ -12,7 +12,7 @@ status: Ready to Repeat
 publish: true
 ---
 
-Encryption transforms readable data (plaintext) into ciphertext using a key. Only parties with the decryption key should recover it. Encryption by itself targets confidentiality; modern authenticated encryption also detects ciphertext or authenticated-metadata tampering. It does not attribute a message to a public identity—the job of a [[Home/Security/Digital Signature|digital signature]]. In .NET, these operations live under `System.Security.Cryptography`.
+Encryption transforms plaintext into ciphertext under a key. The security boundary is the set of workloads and people able to obtain that key. Encryption alone targets confidentiality. Authenticated encryption also detects changes to ciphertext and authenticated metadata, but it does not attach a public identity to the sender. That requires a [[Home/Security/Digital Signature|digital signature]] or a protocol with an authenticated peer.
 
 # Symmetric, Public-Key, and Hybrid Cryptography
 
@@ -21,11 +21,11 @@ Encryption transforms readable data (plaintext) into ciphertext using a key. Onl
 | Mechanism | Security property | Key relationship | Normal role | Critical failure |
 | --- | --- | --- | --- | --- |
 | AEAD, such as AES-GCM | Confidentiality plus integrity for plaintext and authenticated metadata | Sender and receiver share one secret key | Bulk records, streams, and envelope-encrypted data | Reusing a nonce with the same key can expose plaintext and enable forgery |
-| Public-key encryption, such as RSA-OAEP | Confidentiality to the private-key holder | Encrypt with public key; decrypt with private key | Small key material or protocol-specific payloads | Encrypting large data directly or using legacy padding |
-| Digital signature, such as RSA-PSS, ECDSA, or Ed25519 | Integrity and authenticity under a public key | Sign with private key; verify with public key | Software, tokens, certificates, and protocol messages | Trusting an unauthenticated public key or unapproved algorithm |
+| Public-key encryption, such as RSA-OAEP | Confidentiality to the private-key holder | Encrypt with public key. Decrypt with private key | Small key material or protocol-specific payloads | Encrypting large data directly or using legacy padding |
+| Digital signature, such as RSA-PSS, ECDSA, or Ed25519 | Integrity and authenticity under a public key | Sign with private key. Verify with public key | Software, tokens, certificates, and protocol messages | Trusting an unauthenticated public key or unapproved algorithm |
 | Authenticated key agreement, such as signed ECDHE | Establishes a fresh shared secret and authenticates the exchange | Each side contributes ephemeral key material | Modern transport handshakes | Omitting peer authentication or transcript binding |
 
-Use an authenticated-encryption API for bulk data. With AES-GCM, store the nonce and authentication tag with the ciphertext; they are not secrets. The nonce must be unique for every encryption under a given key.
+Authenticated-encryption APIs are the normal primitive for bulk data. With AES-GCM, the nonce and tag travel with the ciphertext and need not be secret. The nonce must be unique for each encryption under one key, and plaintext must not be released until tag verification succeeds.
 
 ```csharp
 var key = RandomNumberGenerator.GetBytes(32);
@@ -38,13 +38,17 @@ using var aes = new AesGcm(key, tag.Length);
 aes.Encrypt(nonce, plaintext, ciphertext, tag);
 ```
 
-Hybrid or envelope encryption uses a random data-encryption key for the payload and protects that key with a key-encryption key or recipient public key. The payload stays on the fast symmetric path, while recipients and rotation operate on small wrapped keys. Public-key cryptography does not remove key management: the system still has to authenticate public keys, protect private keys, and preserve old decryption keys for retained ciphertext. Algorithm agility requires versioned ciphertext metadata, an approved-algorithm policy, and a tested migration path; it must not let untrusted input select any installed primitive.
+The example generates a random 96-bit GCM nonce. Random nonces remain safe only within a bounded per-key invocation budget because collisions become more likely as use grows. High-volume systems normally let a reviewed protocol or cryptographic library own nonce construction and rekeying.
+
+Hybrid or envelope encryption uses a random data-encryption key for the payload and protects that key with a key-encryption key or recipient public key. The payload stays on the symmetric path, while recipient changes and key rotation operate on small wrapped keys. Public-key cryptography does not remove key management: public keys still need authentication, private keys need protection, and retained ciphertext needs access to the matching old key version.
+
+Algorithm agility means versioned ciphertext metadata, a controlled allow-list, and a tested migration path. Untrusted ciphertext may identify its version. It must not select any primitive installed on the machine.
 
 # Hashing Is Not Encryption
 
-Encryption is reversible with a decryption key; a cryptographic hash is one-way, and encoding such as Base64 is reversible without any secret. Pick by intent: confidentiality → encryption; integrity or fingerprinting → hashing; transport representation → encoding. Password verifiers need a purpose-built, salted password-hashing scheme rather than encryption or a fast general-purpose hash; [[Home/Security/Password Storage|Password Storage]] covers the algorithms and migration policy.
+Encryption is reversible with a decryption key. A cryptographic hash has no decryption operation, while Base64 is reversible without a secret. Confidentiality calls for encryption. Transport representation calls for encoding. Integrity needs an authenticated construction such as AEAD, HMAC, or a signature when an attacker can modify both data and metadata. Password verifiers need a purpose-built salted password-hashing scheme. [[Home/Security/Password Storage|Password Storage]] explains how to select and migrate password hashes.
 
-For integrity between parties sharing a secret, use an **HMAC** (keyed hash). A [[Home/Security/Digital Signature|digital signature]] can support attribution, but cryptography alone does not provide non-repudiation: the system also needs authenticated identity, evidenced key custody, compromise and revocation handling, trustworthy timestamps and audit records, and legal or operational procedures that connect the signing key to the claimed act. See [[Home/Security/Hashing|Hashing]] for hash functions and HMAC.
+For integrity between parties sharing a secret, HMAC is the direct construction. A [[Home/Security/Digital Signature|digital signature]] supports public verification and can contribute to attribution. It does not create non-repudiation alone: identity binding, key custody, compromise handling, timestamps, and audit evidence still connect the key to the claimed act. See [[Home/Security/Hashing|Hashing]] for hash functions and HMAC.
 
 # Encoding, Encryption, and Tokenization
 
@@ -54,21 +58,21 @@ For integrity between parties sharing a secret, use an **HMAC** (keyed hash). A 
 | Encryption | Hide plaintext and detect tampering when AEAD is used | A holder of the decryption key | Managed cryptographic key | Any workload with the key can recover the data |
 | Tokenization | Replace a sensitive value with a surrogate | The token vault or authorized detokenization service | Vault mapping and service credentials | Consumers outside the vault can operate without the original value |
 
-Base64 changes representation, encryption protects data only from workloads without the key, and tokenization keeps consumers outside the detokenization boundary. Token-vault availability, authorization, and audit become part of the design; [[Home/Security/Sensitive Data|Sensitive Data]] covers the resulting scope decision.
+Base64 changes representation, encryption protects data only from workloads without the key, and tokenization keeps consumers outside the detokenization boundary. Token-vault availability, authorization, and audit become part of the design. [[Home/Security/Sensitive Data|Sensitive Data]] shows how that boundary changes compliance scope.
 
 # TLS — Encryption in Transit
 
-TLS combines authenticated key agreement with symmetric record protection. In the normal certificate-based TLS 1.3 handshake on the public web, an ephemeral (EC)DHE exchange establishes fresh traffic secrets, the server authenticates the handshake transcript with a certificate signature, and an AEAD cipher protects application records. TLS 1.3 also defines PSK-only modes that omit certificate authentication and can omit (EC)DHE; their peer authentication and forward-secrecy properties depend on the selected PSK mode. The protocol does not send an AES session key encrypted by the certificate's RSA key.
+TLS combines authenticated key agreement with symmetric record protection. In the normal certificate-based TLS 1.3 handshake on the public web, an ephemeral (EC)DHE exchange establishes fresh traffic secrets, the server authenticates the handshake transcript with a certificate signature, and an AEAD cipher protects application records. TLS 1.3 also defines PSK-only modes that omit certificate authentication and can omit (EC)DHE. Their peer authentication and forward-secrecy properties depend on the selected PSK mode. The protocol does not send an AES session key encrypted by the certificate's RSA key.
 
-In .NET, TLS is handled automatically by `HttpClient` and ASP.NET Core. Enforce HTTPS with `app.UseHttpsRedirection()` and `app.UseHsts()`.
+In .NET, `HttpClient` negotiates TLS for HTTPS endpoints. An ASP.NET Core deployment configures its HTTPS listener in Kestrel or terminates TLS at a trusted reverse proxy. `UseHttpsRedirection()` can redirect HTTP requests, while `UseHsts()` tells supporting browsers to prefer HTTPS on future visits; neither middleware creates the TLS listener.
 
 # Pitfalls
 
-**Nonce reuse with AES-GCM**: Reusing a nonce with the same key in GCM mode completely breaks confidentiality and authentication. Always generate a fresh random nonce for each encryption operation.
+**Nonce reuse with AES-GCM:** repeating a nonce under the same key reuses the counter-mode keystream and can enable authentication forgeries. Nonce allocation and the per-key invocation limit need one owner.
 
-**Key management**: The hardest part of encryption is not the algorithm — it is key storage and rotation. Never hardcode keys. Use Azure Key Vault, AWS KMS, or .NET Data Protection API for key management.
+**Key management:** compromise usually enters through key access, backup, rotation, or accidental logging rather than AES itself. Keys belong in a managed key service or a platform facility such as .NET Data Protection, with explicit access and retention policy.
 
-**Rolling your own crypto**: Do not implement cryptographic algorithms yourself. Use `System.Security.Cryptography` or a well-audited library (libsodium via NSec). Custom implementations almost always have subtle vulnerabilities.
+**Custom constructions:** individual primitives do not supply a secure protocol. Maintained platform APIs or reviewed libraries carry encoding, nonce, tag, and validation behavior that ad hoc combinations often miss.
 
 # Tradeoffs
 
@@ -79,17 +83,12 @@ In .NET, TLS is handled automatically by `HttpClient` and ASP.NET Core. Enforce 
 
 # Questions
 
-> [!QUESTION]- When should you use symmetric vs asymmetric encryption?
-> Use symmetric authenticated encryption for bulk data. Use a public-key encryption scheme only for the small payload and protocol it was designed for, a signature scheme for public verification, and authenticated key agreement to establish fresh shared secrets. Real systems compose these through protocols such as TLS or envelope encryption rather than choosing one family for the whole job.
-
-> [!QUESTION]- What is envelope encryption and when is it used?
-> Envelope encryption uses two keys: a Data Encryption Key (DEK) encrypts the data; a Key Encryption Key (KEK) encrypts the DEK. The encrypted DEK is stored alongside the ciphertext. The KEK lives in a key management service (Azure Key Vault, AWS KMS) and never leaves it. This pattern is used in cloud storage (Azure Blob Storage, S3 server-side encryption) and allows key rotation without re-encrypting all data — you only re-encrypt the DEK.
+> [!QUESTION]- How are symmetric and asymmetric cryptography used together in a real system?
+> Symmetric authenticated encryption handles bulk data because it is efficient and protects both confidentiality and integrity. Public-key encryption is limited to the small payloads and protocols it was designed for. Signatures provide public verification, while authenticated key agreement establishes a fresh shared secret. Protocols such as TLS and envelope encryption combine these roles instead of choosing one family for the whole job.
 
 # References
 
-- [ByteByteGo — Symmetric vs Asymmetric Encryption](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/symmetric-encryption-vs-asymmetric-encryption.md) — the pinned comparison source, corrected here to separate primitives from protocols and remove the security ranking.
-- [ByteByteGo — Encoding vs Encryption vs Tokenization](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/encoding-vs-encryption-vs-tokenization.md) — the pinned decision source; its misleading encoding visual is intentionally not reused.
-- [RFC 8446 — TLS 1.3](https://datatracker.ietf.org/doc/html/rfc8446) — the authenticated handshake and AEAD record protocol.
-- [NIST Cryptographic Standards](https://csrc.nist.gov/projects/cryptographic-standards-and-guidelines) — authoritative cryptographic standards; covers AES, RSA, ECDSA, and key management guidelines
-- [Microsoft — Cryptography in .NET](https://learn.microsoft.com/en-us/dotnet/standard/security/cryptography-model) — .NET cryptography model; covers `System.Security.Cryptography` classes and best practices
-- [OWASP Cryptographic Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html) — practical guidance on algorithm selection, key management, and common mistakes
+- [TLS 1.3](https://www.rfc-editor.org/rfc/rfc8446)
+- [NIST Cryptographic Standards and Guidelines](https://csrc.nist.gov/projects/cryptographic-standards-and-guidelines)
+- [Cryptography in .NET](https://learn.microsoft.com/dotnet/standard/security/cryptography-model)
+- [OWASP Cryptographic Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html)

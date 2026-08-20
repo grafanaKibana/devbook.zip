@@ -1,5 +1,6 @@
 export const CURVE_IDS = [
   "constant",
+  "log-log-n",
   "log-n",
   "linear",
   "n-log-n",
@@ -123,6 +124,10 @@ const curves: Record<CurveId, Curve> = {
     formula: "O(1)",
     evaluate: () => 1,
   },
+  "log-log-n": {
+    formula: "O(log log n)",
+    evaluate: (n) => Math.log2(1 + Math.log2(1 + n)),
+  },
   // Shifted by one so the ladder is defined across the whole axis: log n is negative below
   // n = 1 and undefined at 0, which left these two riding the axis instead of climbing out
   // of the origin with the rest. Same growth class, drawable from the first pixel.
@@ -156,6 +161,7 @@ const curves: Record<CurveId, Curve> = {
 const CASE_COLORS = { Best: "#22a06b", Average: "#d99a00", Worst: "#e05252" } as const
 const CURVE_COLORS: Record<CurveId, string> = {
   constant: "#22a06b",
+  "log-log-n": "#2baf9f",
   "log-n": "#1597b8",
   linear: "#db7c2e",
   "n-log-n": "#9b6bd6",
@@ -550,8 +556,33 @@ function finishResource(
   highlighted: HighlightedPath[],
   semanticBounds: ComplexitySemanticBound[],
 ): ComplexityResourceViewModel {
+  const plotted =
+    mode === "cases"
+      ? highlighted.reduce<HighlightedPath[]>((merged, path) => {
+          const existing = merged.find(
+            (candidate) =>
+              candidate.curveId === path.curveId &&
+              candidate.bandTo === path.bandTo &&
+              candidate.formula === path.formula,
+          )
+          if (!existing) {
+            merged.push({ ...path })
+            return merged
+          }
+          const labels = [...new Set([...existing.legendLabel.split("/"), path.legendLabel])].sort(
+            (left, right) =>
+              ["Worst", "Average", "Best"].indexOf(left) -
+              ["Worst", "Average", "Best"].indexOf(right),
+          )
+          existing.legendLabel = labels.join("/")
+          existing.label = `${existing.legendLabel}: ${existing.formula}`
+          existing.category = categoryFor(labels[0])
+          existing.color = roleColor(labels[0], existing.curveId)
+          return merged
+        }, [])
+      : highlighted
   const scale = makeScale()
-  const selected = new Set(highlighted.map(({ curveId }) => curveId))
+  const selected = new Set(plotted.map(({ curveId }) => curveId))
   const context = CURVE_IDS.filter((curveId) => !selected.has(curveId)).map((curveId, index) =>
     curvePath(
       {
@@ -566,7 +597,7 @@ function finishResource(
       scale,
     ),
   )
-  const highlightedPaths = highlighted.map((entry) => curvePath({ ...entry, dimmed: false }, scale))
+  const highlightedPaths = plotted.map((entry) => curvePath({ ...entry, dimmed: false }, scale))
   const paths = [...context, ...highlightedPaths]
   const ticks: ComplexityViewModel["ticks"] = [{ value: 0, label: "0", y: AXIS_Y }]
   for (let value = 1; value <= MAX_VALUE; value *= 10) {
@@ -582,7 +613,7 @@ function finishResource(
   const legend: ComplexityLegendGroup[] = []
   const legendEntries = [
     ...highlightedPaths.map((path, index) => ({
-      order: highlighted[index].order,
+      order: plotted[index].order,
       group: path.legendGroup,
       item: {
         kind: "plotted" as const,

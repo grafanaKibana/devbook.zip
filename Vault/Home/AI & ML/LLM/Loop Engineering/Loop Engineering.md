@@ -3,7 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
-summary: "Designing how a model-driven system iterates — control flow, termination, verification, and recovery across turns."
+summary: "Designing control flow, stopping, verification, and recovery across repeated model calls."
 tags: [FolderNote]
 publish: true
 level:
@@ -12,9 +12,11 @@ priority: Medium
 status: Done
 ---
 
-Loop engineering is the discipline of designing the runtime that wraps the model: how the system iterates (observe → decide → act), when it stops, how progress is verified between steps, how errors are caught before they compound, and when control escalates to a human. A single model call is stateless and bounded; a loop is neither — every iteration conditions on the output of the last one, so the loop's design, not the model's quality, determines whether small mistakes stay small or cascade into a derailed run.
+Loop engineering designs the runtime around repeated model calls. It controls the observe → decide → act cycle, defines when work is finished, checks progress between steps, and hands uncertain decisions to a person.
 
-It is the last rung of the scope ladder: [[Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering|Prompt Engineering]] shapes one instruction, [[Home/AI & ML/LLM/Context Engineering/Context Engineering|Context Engineering]] shapes what the model sees, [[Home/AI & ML/LLM/Harness Engineering/Harness Engineering|Harness Engineering]] shapes what it can do, and loop engineering shapes how it behaves over time. It is the rung that turns a model-with-tools into an agent — the mechanics of that cycle live in [[Agent Loop]], and what changes when several loops must coordinate lives in [[Multi-Agentic Systems]].
+A single call is bounded. A loop carries each result into the next iteration, so mistakes can accumulate just as easily as useful progress. Good loop design keeps small errors small. Model quality alone cannot do that.
+
+This is the last rung of the runtime stack. [[Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering|Prompt Engineering]] shapes one instruction. [[Home/AI & ML/LLM/Context Engineering/Context Engineering|Context Engineering]] shapes what the model sees, while [[Home/AI & ML/LLM/Harness Engineering/Harness Engineering|Harness Engineering]] controls what it can do. Loop engineering adds time: how behavior develops across turns. [[Agent Loop]] covers the mechanics of that cycle, and [[Multi-Agentic Systems]] covers coordination among several loops.
 
 ```datacorejsx
 const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
@@ -23,53 +25,41 @@ return FolderStructureMap;
 
 # Termination and Budgets
 
-The defining risk of a loop is that it has no natural end: a model will keep calling tools as long as the runtime keeps asking it what to do next, and each slightly-off step conditions the next one — errors compound with iteration count. Bounding the loop is therefore the first design decision, not an afterthought:
+An agent loop has no natural end. It can keep calling tools for as long as the runtime asks for another step, with every weak result becoming input to the next one. Hard bounds belong in the initial design.
 
-- **Iteration caps** — a hard per-request limit on loop cycles. The cap is the last line against infinite tool-call cycles; the concrete framework knobs and the failure case they prevent are in [[Agent Loop]].
-- **Token and cost budgets** — track cumulative tokens per iteration and terminate or compact before the context window fills or the spend ceiling is hit, rather than letting the run fail mid-flight.
-- **Stop criteria** — define what "done" looks like in a form the system can check: the model returns text with no tool calls, a test suite passes, a schema-valid artifact exists. Prompt-level stop instructions complement but never replace the hard caps.
-- **Fallback on budget exhaustion** — decide upfront what happens at the cap: return the best partial result with a quality warning, or escalate to a human. Silently truncating is the worst option.
+- **Iteration caps** set a hard per-request limit on loop cycles. The cap is the final defense against an infinite tool-call sequence. [[Agent Loop]] shows concrete framework controls and the failure they prevent.
+- **Token and cost budgets** track cumulative use and stop or compact the run before it exhausts the context window or spend ceiling.
+- **Checkable stop criteria** define completion in terms the runtime can verify: no remaining tool calls, a passing test suite, or a schema-valid artifact. Instructions to stop may help, but they do not replace hard limits.
+- **A budget fallback** determines what happens at the cap. The runtime can return the best partial result with a warning or escalate to a person. Silent truncation hides the failure.
 
 # Verification Inside the Loop
 
-A loop that only generates drifts; a loop that checks its own progress self-corrects. Verification points are what convert the compounding-error dynamic into a feedback loop:
+A loop that only generates will drift. Verification turns each iteration into a chance to recover.
 
-- **Gates between steps** — programmatic checks that validate an intermediate output before the next iteration consumes it: schema validation on tool arguments, output checks between chained calls. The gate rejects and returns a clear error so the model can self-correct on the next pass.
-- **Self-checks** — a second model pass evaluates the draft against criteria and feeds revisions back (the evaluator-optimizer pattern; see [[Home/AI & ML/LLM/Agents/Agents|Agents]] for the workflow-pattern taxonomy).
-- **Ground-truth signals** — the strongest feedback is external and objective: tests pass or fail, code compiles, a claim traces to a source. Tasks with checkable success signals are exactly where loops work well; measuring loop quality rigorously — trajectory, tool-call correctness, reliability across stochastic runs — is [[Home/AI & ML/LLM/Agents/Evaluation/Evaluation|Agent Evaluation]].
-- **Human-in-the-loop escape hatches** — for actions the system cannot safely verify (irreversible side effects, low-confidence states), the loop pauses and asks rather than guessing. Enforce the critical controls in code and infrastructure, not the prompt (see [[Guardrails]]).
+- **Gates between steps** validate an intermediate result before another iteration consumes it. A rejected schema or failed output check should return a clear error that the next pass can act on.
+- **Self-checks** use a second model pass to compare a draft with explicit criteria and feed revisions back. This is the evaluator-optimizer pattern described in [[Home/AI & ML/LLM/Agents/Agents|Agents]].
+- **Ground-truth signals** give the strongest feedback: a test passes, code compiles, or a claim traces to a source. Loops work best when success is externally checkable. [[Home/AI & ML/LLM/Agents/Evaluation/Evaluation|Agent Evaluation]] covers trajectory quality and reliability across stochastic runs.
+- **Human escape hatches** pause work when an action is irreversible or its result cannot be checked safely. [[Guardrails]] explains why the boundary must live in code and infrastructure rather than the prompt.
 
 # State Across Iterations
 
-Every iteration appends reasoning, tool calls, and results to the history, so a loop's context grows monotonically by default — the loop is what makes context management a runtime problem rather than a one-time assembly problem. The division of labor: [[Home/AI & ML/LLM/Context Engineering/Context Engineering|Context Engineering]] decides *what* the window should contain; loop engineering decides *when* to act on it:
+Each iteration adds calls and results to the history. Without intervention, context grows until the runtime truncates it or the model reaches its limit. [[Home/AI & ML/LLM/Context Engineering/Context Engineering|Context Engineering]] decides what belongs in the window. Loop engineering decides when to compact, offload, or stop.
 
-- **Compaction cadence** — schedule summarization of older turns against the token budget (e.g. compact when cumulative tokens cross a threshold), instead of reacting when the window overflows and the runtime truncates the oldest — often most important — messages.
-- **Offloading between turns** — write large intermediate artifacts to external storage mid-run and carry lightweight references forward, so the working window stays compact while detail remains retrievable. [[Multi-Agentic Systems]] uses the same move as the filesystem-artifact pattern for handoffs.
-- **State that outlives the window** — a plan file, scratchpad, or progress log the loop re-reads each iteration survives compaction and keeps long runs anchored to the original goal even after early turns are summarized away.
+- **Compaction cadence** schedules summaries against a token threshold before overflow removes old, potentially important messages.
+- **Offloading between turns** moves large artifacts to external storage and keeps lightweight references in context. [[Multi-Agentic Systems]] uses the same filesystem-artifact pattern for handoffs.
+- **State outside the window** gives the loop a durable plan or progress log to reread after compaction. Long runs remain tied to the original goal even when early turns have been summarized away.
 
 # Questions
 
 > [!QUESTION]- What does loop engineering add on top of a model with tools, and why is it its own discipline?
-> - A model with tools is still one call; the loop is the runtime that iterates it: observe → decide → act, repeated until a stop condition
-> - Because each iteration conditions on the last, errors compound — the loop design (caps, gates, feedback) determines whether mistakes stay small or cascade
-> - It owns the time dimension the other rungs lack: prompt engineering shapes one instruction, context engineering what the model sees, harness engineering what it can do; the loop shapes behavior over many turns
-> - Concretely it decides: when to stop (iteration/token/cost budgets), how to verify progress (gates, self-checks, ground truth), and when to escalate to a human
+> A model with tools can still be a single call. Loop engineering adds the runtime that repeats observe → decide → act until a checkable stop condition. It owns budgets and verification between turns, which determines whether an early mistake is corrected or amplified.
 
 > [!QUESTION]- What are the main ways to bound a loop, and why are prompt-level stop instructions not enough?
-> - Hard iteration caps per request, cumulative token/cost budgets with early termination, and checkable stop criteria (no tool calls, tests pass, valid artifact)
-> - Prompt instructions ("stop if repeating yourself") reduce waste but are advisory — the model can ignore them, so they complement rather than replace hard limits enforced by the runtime
-> - Define fallback behavior at the cap upfront: return best partial result with a warning, or escalate to a human — never silently truncate
-> - The motivation is compounding error and cost runaway: a documented unbounded run burned 9.7M tokens across 369 repeated tool calls without converging (see [[Agent Loop]])
+> The runtime needs a hard iteration cap, a cumulative token or cost budget, and a stop condition it can verify. Prompt instructions are advisory, so they cannot replace those limits. At the cap, return an explicit partial result or escalate instead of truncating silently. The unbounded run documented in [[Agent Loop]] shows the failure mode: 369 repeated tool calls consumed 9.7M tokens without converging.
 
 > [!QUESTION]- How do loop engineering and context engineering divide the work of managing a long run's history?
-> - Context engineering decides WHAT belongs in the window: selection, ordering, structure, what a summary must preserve
-> - Loop engineering decides WHEN to act: compaction cadence tied to the token budget, when to offload artifacts to external storage, when to terminate instead of compact
-> - The loop makes it a runtime problem — history grows every iteration, so thresholds and triggers must be part of the loop design, not a one-time assembly choice
-> - Durable state (plan files, scratchpads re-read each turn) bridges the two: it survives compaction and keeps the loop anchored to the goal
+> Context engineering decides what belongs in the window and what a summary must preserve. Loop engineering decides when to compact, offload artifacts, or stop. Durable state such as a plan file bridges them by surviving compaction and keeping later iterations tied to the original goal.
 
 # References
 
-- [Building Effective Agents (Anthropic Engineering)](https://www.anthropic.com/engineering/building-effective-agents) — the loop as "LLM using tools in a loop", plus the simplicity/transparency/feedback principles that motivate gates and stop criteria.
-- [Multi-Agent Research System — Engineering (Anthropic)](https://www.anthropic.com/engineering/multi-agent-research-system) — production lessons on budgets, artifact offloading, and coordinating many loops.
-- [Effective context engineering for AI agents (Anthropic Engineering)](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents) — compaction, note-taking, and sub-agent isolation as long-horizon loop techniques.
-- [Claude Agent SDK — overview (Anthropic)](https://platform.claude.com/docs/en/agent-sdk/overview) — a production harness whose runtime implements the loop: automatic context compaction, permission gates, and session state.
+- [Claude Agent SDK — overview (Anthropic)](https://platform.claude.com/docs/en/agent-sdk/overview)

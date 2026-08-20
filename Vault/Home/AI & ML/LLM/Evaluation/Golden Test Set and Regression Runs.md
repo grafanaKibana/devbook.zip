@@ -3,7 +3,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
-summary: "Golden sets give broad regression coverage; targeted suites catch specific high-risk failures. You need both."
+summary: "Golden sets detect broad regressions. Targeted suites isolate specific high-risk failures."
 level:
   - "3"
 priority: Medium
@@ -11,26 +11,27 @@ status: Done
 publish: true
 ---
 
-Test sets are the foundation of LLM quality assurance. Without them, every prompt change, model swap, or retrieval tweak is a guess. Two complementary types cover the full picture: **golden test sets** for broad regression coverage across the system's normal operating range, and **targeted eval suites** for specific failure modes that carry real risk. You need both. Golden sets catch unexpected regressions across the board; targeted suites give fast, precise signal on the failure modes that break trust or create harm.
+Every prompt, model, or retrieval change needs a repeatable comparison with the current baseline. A golden test set provides that stable sample. Targeted suites sit beside it and isolate failures such as prompt injection, unsupported claims, or unsafe tool use.
+
+These sets answer different questions. The golden set asks whether normal behavior moved. A targeted suite asks whether one known boundary still holds.
 
 # Golden Test Sets
 
-A golden test set is a curated collection of representative cases (questions, context, expected behaviors) that you run repeatedly to catch regressions when you change prompts, retrieval, tools, or models.
+A golden test set is a versioned collection of representative inputs and reviewed expectations. Baseline and candidate run on the same cases, making the difference easier to attribute to the change under test.
 
-What a good golden set includes:
+A useful set samples routine traffic and the expensive mistakes worth guarding against:
 
-- Typical user requests (the 80%)
-- Edge cases (ambiguous, multi-hop, long context)
-- Adversarial cases (prompt injection, attempts to exfiltrate secrets)
-- Unanswerable cases (should abstain or ask clarifying questions)
-- High-stakes cases (safety, PII, finance/medical)
+- Common production requests
+- Ambiguous, multi-hop, and long-context cases
+- Requests the system should refuse or clarify
+- Reviewed incidents and high-cost failures
 
-Operational practices:
+Keep the set operationally boring:
 
-- Version the dataset (treat it like code).
-- Keep a true holdout slice you do not tune on.
-- Run the suite automatically on every meaningful change.
-- Track diffs: compare candidate vs baseline by rubric/judge + deterministic checks.
+- Version the data and scoring contract together.
+- Keep a holdout slice outside day-to-day prompt tuning.
+- Run baseline and candidate through the same harness.
+- Store case-level diffs, not only an aggregate score.
 
 ## Example — Golden Test Case
 
@@ -42,21 +43,16 @@ Simple JSONL schema for one test case:
 
 # Targeted Eval Suites
 
-Targeted evals are small, focused test suites that measure one specific failure mode (for example groundedness, prompt injection resistance, or PII leakage). They give faster signal than a huge general benchmark.
+Targeted evals are focused suites for one failure mode. Because their expected behavior is narrow, failures are easier to diagnose than a drop in one broad quality score.
 
-Common targeted suites:
+Common suites cover:
 
-- Groundedness / hallucinations (claims must be supported by retrieved sources)
-- Prompt injection / jailbreak resistance
-- PII and secrets leakage
-- Tool safety (no dangerous actions; correct tool choice)
-- Refusal correctness (refuse when required, answer when allowed)
+- Groundedness, where material claims need source support
+- Prompt injection and secret-exfiltration attempts
+- Tool permission and argument safety
+- Refusal correctness in both directions
 
-Best practices:
-
-- Keep each suite small and high-signal (10-50 cases).
-- Make expected behavior explicit (pass/fail rules + rubric).
-- Add new cases whenever an incident happens.
+Keep each suite small enough to run on the changes it protects. State the expected behavior as a rule or narrow rubric, and add a reproducing case after an incident. But one incident-shaped example is rarely enough. Add a nearby variation that tests the underlying class of failure.
 
 ## Example — Targeted Injection Case
 
@@ -71,51 +67,33 @@ Expected: refuse; do not reveal hidden prompt; provide a safe alternative.
 
 ## Tuning on the Golden Set
 
-**What goes wrong**: the team iterates prompts against the golden set until scores improve, then treats the improvement as validation. The golden set has become a training set — it no longer measures generalization.
+Repeated prompt tuning against the golden set turns it into training data. Its score can keep rising while unseen behavior stays flat.
 
-**Mitigation**: keep a true holdout slice that no one tunes on. Use the main golden set for iteration; use the holdout only for final validation before shipping.
+Keep a holdout slice for release validation. When both slices influence tuning, refresh the holdout from reviewed production cases and record the dataset version used for each decision.
 
 ## Golden Set Staleness
 
-**What goes wrong**: the golden set was built from early user queries. Six months later, user behavior has shifted — new question types, new product features, new failure modes. The set still passes, but real-world quality has degraded.
+Production traffic changes. A set built around the launch workload can stay green after new features and query shapes become common.
 
-**Mitigation**: treat the golden set like a living dataset. Add new cases from production incidents, user feedback, and A/B test failures. Version the dataset and track when cases were added.
+Refresh it from reviewed production incidents, user feedback, and online experiments. Version every change so score movement can be separated from dataset movement.
 
 ## Measuring Only Pass/Fail
 
-**What goes wrong**: binary pass/fail scoring hides partial regressions. A response that was previously excellent and is now mediocre still passes if the threshold is low.
+Binary gates are right for hard constraints and blunt for graded quality. A weaker answer can remain above the pass threshold.
 
-**Mitigation**: use rubric-based scoring (1-5 scale per dimension: groundedness, completeness, safety) alongside binary checks. Track score distributions, not just pass rates.
+Retain hard pass/fail checks where the contract is exact. For semantic dimensions, compare score distributions and case-level changes so a broad slide is visible before it crosses the gate.
 
 # Tradeoffs
 
-| Approach | Coverage | Maintenance | Signal speed | Use when |
-|----------|---------|-------------|-------------|----------|
-| Golden test set (broad) | High | Medium (grows over time) | Slow (full suite) | Regression detection across all normal operating range |
-| Targeted eval suite (focused) | Low (one failure mode) | Low (small, stable) | Fast (10-50 cases) | Specific failure modes: hallucination, injection, PII leakage |
-| Human eval | Highest | High (expensive) | Very slow | High-stakes launches, model swaps, ambiguous quality dimensions |
-| LLM-as-judge | Medium | Low (automated) | Medium | Semantic quality at scale where human eval is too expensive |
+| Approach | Typical scope | Maintenance | Signal speed | Use when |
+|----------|---------------|-------------|--------------|----------|
+| Golden test set | Representative workload | Medium. Grows with the product | Full-suite runtime | Broad regression detection |
+| Targeted eval suite | One failure mode | Low while the contract is stable | Fast | Injection, leakage, groundedness, or another named boundary |
+| Human evaluation | Small reviewed sample | High | Slow | High-cost decisions and scorer calibration |
+| LLM-as-judge | Large semantic sample | Medium. Rubric and judge need calibration | Model-call runtime | Human reading is the bottleneck and measured judge agreement is sufficient |
 
-**Decision rule**: use golden test sets for broad regression coverage on every change. Use targeted suites for fast signal on specific failure modes. Use LLM-as-judge for semantic quality at scale. Reserve human eval for launches and ambiguous cases where automated scoring is unreliable.
-
-# Questions
-
-> [!QUESTION]- Why keep a frozen holdout slice separate from the golden set you iterate on?
-> - Iterating prompts against the golden set until scores improve turns it into a training set — improvements stop measuring generalization
-> - The holdout slice is never used for tuning, so it stays an unbiased estimate of real quality
-> - Use the main golden set for day-to-day iteration; check the holdout only at release gates
-> - If holdout and golden-set scores diverge (golden improves, holdout does not), you have overfit to the golden set — refresh it from production traffic
-> - Key tradeoff: the holdout "wastes" labeled cases you cannot tune on, but without it you cannot trust any of your numbers
-
-> [!QUESTION]- When does a new failure belong in the golden set versus a targeted eval suite?
-> - Add it to a targeted suite when it represents a specific failure mode you want fast, focused signal on (injection, PII leakage, groundedness) — small suites run quickly and localize regressions
-> - Add it to the golden set when it represents the normal operating range: a realistic user request that the system must keep handling correctly
-> - Production incidents usually warrant both: a targeted case reproducing the exact failure, and a generalized case covering the query pattern
-> - Key tradeoff: targeted suites give precision but narrow coverage; the golden set gives breadth but slower, noisier signal — incidents are cheap opportunities to grow both
+Use the golden set to compare normal behavior across changes. Run targeted suites on the boundaries they protect. A calibrated judge can scale semantic scoring, while human review remains the reference for ambiguous or high-cost decisions.
 
 # References
 
-- [Evaluation best practices (OpenAI API Docs)](https://developers.openai.com/api/docs/guides/evaluation-best-practices) — OpenAI's guide to building eval pipelines, scoring rubrics, and regression workflows.
-- [Define your success criteria (Anthropic Docs)](https://docs.anthropic.com/en/docs/test-and-evaluate/define-success) — Anthropic's framework for specifying what good looks like before building evals.
-- [OWASP LLM Prompt Injection Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/LLM_Prompt_Injection_Prevention_Cheat_Sheet.html) — OWASP guidance on prompt injection; useful for designing adversarial test cases.
-- [Groundedness in Azure AI Content Safety](https://learn.microsoft.com/azure/ai-services/content-safety/concepts/groundedness) — Microsoft's definition and detection approach for groundedness; relevant for targeted hallucination eval suites.
+- [Evaluation best practices (OpenAI API Docs)](https://developers.openai.com/api/docs/guides/evaluation-best-practices)

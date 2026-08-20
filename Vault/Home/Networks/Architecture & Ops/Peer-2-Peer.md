@@ -11,13 +11,13 @@ status: Ready to Repeat
 publish: true
 ---
 
-Peer-to-Peer (P2P) is a network architecture where participants (peers) communicate directly with each other rather than through a central server. Each peer acts as both client and server — it consumes resources from other peers and contributes resources back. This contrasts with the client-server model where clients consume and servers provide.
+Peer-to-peer architecture moves some resource discovery, storage, or transfer from dedicated servers to participating nodes. A peer can consume and provide the same resource. Central services may still handle bootstrap, identity, coordination, or relaying.
 
-P2P eliminates the central server as a bottleneck and single point of failure. The tradeoff is coordination complexity: without a central authority, peers must discover each other, agree on data consistency, and handle churn (peers joining and leaving).
+Distributing the data path can add capacity as peers join and remove one central transfer bottleneck. It also introduces churn, partial trust, uneven connectivity, and data-availability problems. The architecture is only as decentralized as its remaining control and discovery dependencies.
 
 # How Peers Find Each Other: DHT
 
-Distributed Hash Tables (DHT) are the standard mechanism for peer discovery in large P2P networks (BitTorrent, IPFS). A DHT maps keys to values across all peers without a central directory:
+Distributed hash tables provide decentralized key lookup in systems such as BitTorrent and IPFS. A DHT assigns responsibility for key/value records across participating nodes without one directory:
 
 ```text
 Key: SHA1("ubuntu-22.04.iso")
@@ -25,59 +25,51 @@ Key: SHA1("ubuntu-22.04.iso")
      → Those peers store the list of peers that have the file
 ```
 
-Each peer knows a subset of other peers (its "routing table"). Lookups route through O(log N) hops to find the peer responsible for a key. BitTorrent's DHT (Kademlia) allows torrent discovery without a central tracker.
+Each peer keeps a routing table containing only part of the network. Kademlia-style lookup repeatedly queries nodes whose identifiers are closer to the target. With a healthy, well-distributed table, the number of rounds grows logarithmically with network size. BitTorrent's DHT locates peers for an infohash without requiring a tracker. The torrent identifier still has to arrive through a magnet link, metadata exchange, or another discovery channel.
 
 # P2P Architecture Spectrum
 
 "Pure P2P" is one end of a spectrum, not the only option:
 
-- **Structured vs unstructured** — *structured* networks place data deterministically by key (a DHT like Kademlia → O(log N) lookups), while *unstructured* networks (early Gnutella) discover content by **flooding** queries to neighbours — simple but O(N) and bandwidth-heavy.
-- **Pure P2P** — every peer is equal (classic BitTorrent swarm, blockchain). Maximum decentralization, hardest coordination.
-- **Hybrid / super-peer** — a few well-resourced peers take on coordination roles: BitTorrent **trackers** and original **Skype supernodes** helped peers find each other while data still flowed peer-to-peer. This blends P2P's bandwidth scaling with a central(ish) discovery point.
-- **Signaling-assisted** — WebRTC is peer-to-peer for *media* but needs a central **signaling server** just to exchange connection info (offer/answer) before the direct link forms.
+- **Structured vs unstructured** — structured networks route a key through an identifier space. Unstructured networks search by flooding or gossip, trading simple membership for higher and less predictable lookup cost.
+- **Peer-only data path** — peers exchange payloads directly, while bootstrap information may still come from a known node or static configuration.
+- **Hybrid / super-peer** — trackers, rendezvous services, or capable peers coordinate discovery while bulk data remains peer-to-peer.
+- **Signaling-assisted** — WebRTC applications use an application-defined signaling channel to exchange offers, answers, and candidates before ICE checks connectivity. Media may flow directly or through a TURN relay.
 
-The practical takeaway: most "P2P" systems are hybrids — they use a small central or super-peer component for bootstrap/discovery, then move the heavy data transfer peer-to-peer.
+Most deployed systems are hybrids. "Peer-to-peer" describes an important data or coordination path, not proof that every dependency is decentralized.
 
 # Real-World Applications
 
 | Application | P2P use | Why P2P |
 |---|---|---|
 | BitTorrent | File distribution | Scales with demand — more seeders = faster downloads |
-| IPFS | Content-addressed storage | Censorship resistance, no central hosting cost |
+| IPFS | Content-addressed retrieval | Verifiable content identifiers and provider-independent retrieval |
 | WebRTC | Browser video/audio | Direct peer connections reduce server relay cost |
-| Blockchain | Transaction ledger | No central authority, tamper-evident |
+| Blockchain | Replicated transaction protocol | Agreement among mutually distrustful participants under the protocol's assumptions |
 | Skype (original) | VoIP routing | Reduced server infrastructure cost |
 
 # Tradeoffs
 
 | Dimension | P2P | Client-Server |
 |---|---|---|
-| Scalability | Scales with peers (more peers = more capacity) | Scales with server investment |
-| Single point of failure | None (distributed) | Central server is SPOF |
-| Consistency | Hard (eventual consistency, no central authority) | Easy (server is source of truth) |
-| Coordination | Complex (peer discovery, churn handling) | Simple (clients talk to server) |
-| Latency | Variable (depends on peer proximity) | Predictable (server location known) |
+| Scalability | Can gain transfer/storage capacity from peers. Control paths may still bottleneck | Capacity is provisioned by service owners |
+| Single point of failure | Depends on bootstrap, discovery, identity, and relay design | Central service needs redundancy |
+| Consistency | Protocol-specific. Replicas and membership make coordination expensive | Central authority can serialize decisions more directly |
+| Coordination | Discovery, churn, trust, and NAT traversal are part of the design | Clients use a known service endpoint |
+| Latency | Variable across peer paths and relay use | Managed infrastructure gives more control, but the network path still varies |
 
-**Decision rule**: use P2P when you need to distribute large files at scale (BitTorrent), build censorship-resistant systems (IPFS, blockchain), or reduce server costs for direct communication (WebRTC). Use client-server when you need strong consistency, predictable latency, or centralized access control.
-
-# Questions
-
-> [!QUESTION]- Why is consistency hard in P2P systems?
-> P2P systems have no central authority to act as the source of truth. When peers hold different versions of data and there is no coordinator to resolve conflicts, the system must rely on eventual consistency — peers eventually converge to the same state through gossip or reconciliation protocols. This is acceptable for file distribution (BitTorrent) or content-addressed storage (IPFS) where data is immutable, but it makes P2P unsuitable for systems requiring strong consistency (financial transactions, inventory).
-
-> [!QUESTION]- How does WebRTC use P2P, and what is the role of STUN/TURN servers?
-> WebRTC establishes direct peer connections between browsers for audio, video, and data. The challenge is NAT traversal: most browsers are behind NAT and don't have public IP addresses. STUN servers help peers discover their public IP/port. When direct connection fails (symmetric NAT), TURN servers relay traffic. The goal is to minimize relay usage — direct P2P connections reduce latency and server cost; TURN relay is the fallback.
+P2P fits workloads where participants can contribute useful bandwidth, storage, or direct connectivity and where variable membership is acceptable. Client-server remains simpler when one authority owns access control and ordering or when latency and availability require tightly managed infrastructure.
 
 # Pitfalls
 
 **NAT traversal failure**
-Most peers are behind NAT and lack public IP addresses. STUN discovers the public IP/port; when symmetric NAT blocks direct connection, TURN relay is required. TURN adds latency and server cost. Mitigation: implement ICE (Interactive Connectivity Establishment) — try direct connection first, fall back to TURN relay only when necessary.
+NAT and firewall behavior can prevent candidate pairs from connecting directly. ICE checks available host, server-reflexive, and relay candidates, then selects a working pair. TURN must be provisioned as a supported path rather than treated as an exceptional implementation detail.
 
 **DHT poisoning**
-A malicious peer can inject false routing table entries, redirecting lookups to attacker-controlled nodes. Mitigations: Sybil resistance (proof-of-work for node IDs), content addressing (IPFS uses the hash as the content ID — poisoned data is detectable because the hash won't match).
+A malicious participant can advertise misleading routing information or surround a target in the identifier space. Defenses depend on the protocol: constrained node identifiers, diverse routing-table entries, authenticated records, and content-address verification protect different boundaries. Content addressing detects bytes that do not match an expected identifier. It does not prove that lookup results are complete or available.
 
 **Churn instability**
-Peers join and leave constantly. High churn degrades DHT routing — routing tables become stale, lookups fail. Kademlia's bucket refresh keeps routing tables current; replication factor (k=20 in BitTorrent) ensures data survives peer loss.
+Peers join and leave continuously, so routing entries and provider records become stale. Periodic bucket refresh, record expiration, replication, and parallel lookup keep the overlay usable. Exact bucket sizes and replication rules belong to the specific DHT. They are not universal Kademlia constants.
 
 # WebRTC Connection Setup
 
@@ -87,13 +79,12 @@ Peers join and leave constantly. High churn degrades DHT routing — routing tab
 2. Peer A gathers ICE candidates (STUN → public IP/port)
 3. Peer A sends offer + candidates to Peer B via signaling server
 4. Peer B responds with answer + its own candidates
-5. Both peers try all candidate pairs → select lowest-latency direct path
-6. If no direct path: fall back to TURN relay
+5. ICE checks prioritized candidate pairs; the controlling peer nominates a valid pair
+6. A TURN relay candidate may be selected when direct checks fail or policy requires relaying
 ```
 
 # References
 
-- [Kademlia: A Peer-to-peer Information System (Maymounkov & Mazières)](https://pdos.csail.mit.edu/~petar/papers/maymounkov-kademlia-lncs.pdf) — the original Kademlia DHT paper; the algorithm used by BitTorrent and IPFS for peer discovery.
-- [WebRTC (MDN)](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API) — browser P2P API for real-time audio, video, and data channels; includes ICE/STUN/TURN for NAT traversal.
-- [IPFS documentation](https://docs.ipfs.tech/concepts/how-ipfs-works/) — content-addressed P2P storage: how content IDs, DHT routing, and Bitswap work together.
-- [WebRTC for the Curious](https://webrtcforthecurious.com/) — deep dive into ICE, STUN, TURN, DTLS, and SRTP written by WebRTC implementers; explains why NAT traversal is hard and how TURN relay works.
+- [Kademlia: A Peer-to-peer Information System](https://pdos.csail.mit.edu/~petar/papers/maymounkov-kademlia-lncs.pdf)
+- [How IPFS works](https://docs.ipfs.tech/concepts/how-ipfs-works/)
+- [WebRTC for the Curious](https://webrtcforthecurious.com/)

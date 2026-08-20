@@ -11,9 +11,9 @@ status: Ready to Repeat
 publish: true
 ---
 
-Authorization evaluates a request such as `(alice, read, invoice-42, current context)` and returns permit or deny. Authentication establishes that the caller is Alice; authorization still has to prove that Alice may read this invoice. Enforce that decision on every request, close to the resource, and deny when no rule matches.
+Authorization evaluates a request such as `(principal, action, resource, context)` and returns a decision. Authentication supplies the principal. It does not prove that the principal may read this invoice, alter this field, or approve this workflow transition. The enforcement point must obtain a decision for every protected operation and deny when no rule matches.
 
-The common models are not mutually exclusive. An application can use RBAC to grant coarse capabilities, ABAC to add tenant and risk conditions, and an ACL to record exceptions on one document.
+The models describe different sources of policy facts and can be composed. RBAC may grant a coarse capability, ABAC may add tenant and risk conditions, and an ACL or relationship edge may narrow the decision to one document. Composition needs explicit precedence. An exception that silently overrides a mandatory restriction is a policy defect.
 
 # Compare on the Same Axes
 
@@ -59,7 +59,5 @@ Keep policy decisions deterministic and observable: record the policy and rule t
 
 # References
 
-- [ByteByteGo — Designing a Permission System](https://github.com/ByteByteGoHq/system-design-101/blob/b28380a4710c5ec9638ec037d4168e288f334cba/data/guides/how-do-we-design-a-permission-system.md) — the pinned source comparison that prompted this model-oriented rewrite.
-- [OWASP Authorization Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html) — least privilege, deny-by-default, per-request validation, testing, and logging guidance.
-- [NIST SP 800-162 — Attribute Based Access Control](https://csrc.nist.gov/pubs/sp/800/162/upd2/final) — the formal ABAC definition covering subject, object, action, and environment attributes.
-- [Microsoft — Resource-based authorization in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/security/authorization/resourcebased) — handlers that authorize a loaded resource rather than only an endpoint.
+- [OWASP Authorization Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html)
+- [NIST SP 800-162: Guide to Attribute Based Access Control](https://csrc.nist.gov/pubs/sp/800/162/upd2/final)

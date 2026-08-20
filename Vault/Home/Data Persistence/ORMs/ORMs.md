@@ -12,14 +12,23 @@ level:
 status: Creation
 ---
 
-Object-Relational Mappers bridge the gap between in-memory objects and relational tables, translating LINQ or method calls into SQL so developers work with domain models instead of raw queries. The convenience is real, but the abstraction leaks: understanding what SQL your ORM generates is the difference between a fast query and a full table scan. Example: chaining multiple `Include()` calls on separate collection navigations in Entity Framework produces a Cartesian explosion — the SQL JOIN cross-multiplies both collections, returning thousands of duplicate rows from what looks like a simple eager-load.
+An Object-Relational Mapper connects an object model to a relational database. It translates queries, materializes rows as objects, tracks changes, and turns those changes into SQL. This removes repetitive data-access code. It does not remove the database's query, transaction, and schema rules.
+
+Inspect the SQL and round trips EF Core generates. One LINQ expression may become a selective query, an unsupported translation, or a row-multiplying join. Loading two sibling collections in one query can multiply their rows before materialization. The application still owns query plans, indexes, transaction scope, and migration safety.
 
 ```datacorejsx
 const { FolderStructureMap } = await dc.require("Assets/components/devbook-folder-map.jsx");
 return FolderStructureMap;
 ```
 
+# Questions
+
+> [!QUESTION]- When is raw SQL a better boundary than an ORM query?
+> Raw SQL fits a provider-specific query, bulk operation, or execution-plan requirement that the ORM cannot express predictably. It should be parameterized, tested against the production database engine, and kept behind a narrow data-access boundary.
+
+> [!QUESTION]- Why can eager loading several collections be expensive?
+> Sibling collection joins can multiply rows, duplicating parent data across the result. Split queries or purpose-built projections avoid that multiplication, but split queries add commands and may need an explicit consistency boundary.
+
 # References
 
-- [Entity Framework Core documentation](https://learn.microsoft.com/ef/core/) — Microsoft's ORM documentation covering entity mapping, querying, change tracking, and persistence.
-- [Object-relational mapping (Wikipedia)](https://en.wikipedia.org/wiki/Object%E2%80%93relational_mapping)
+- [Data Mapper](https://martinfowler.com/eaaCatalog/dataMapper.html)

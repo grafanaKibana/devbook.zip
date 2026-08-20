@@ -512,6 +512,7 @@ test("Quartz registers complexity before syntax highlighting", () => {
 test("the catalogue is closed and representative values are exact for n=2…10", () => {
   assert.deepEqual(CURVE_IDS, [
     "constant",
+    "log-log-n",
     "log-n",
     "linear",
     "n-log-n",
@@ -522,10 +523,12 @@ test("the catalogue is closed and representative values are exact for n=2…10",
   assert.equal(curveValue("constant", 10), 1)
   // The log rungs are shifted by one so they are defined at n = 0 and climb out of the
   // origin; log 9 rather than log 8 is the price of a ladder with no gap at the left edge.
+  assert.equal(curveValue("log-log-n", 8), Math.log2(1 + Math.log2(9)))
   assert.equal(curveValue("log-n", 8), Math.log2(9))
   assert.equal(curveValue("linear", 10), 10)
   assert.equal(curveValue("n-log-n", 8), 8 * Math.log2(9))
   // Both start at 0, so no rung has a stretch of the axis it cannot be drawn on.
+  assert.equal(curveValue("log-log-n", 0), 0)
   assert.equal(curveValue("log-n", 0), 0)
   assert.equal(curveValue("n-log-n", 0), 0)
   assert.equal(curveValue("quadratic", 10), 100)
@@ -536,6 +539,7 @@ test("the catalogue is closed and representative values are exact for n=2…10",
 test("every representative function uses the fixed 0-origin and 1…10k log scale", () => {
   const evaluators = {
     constant: () => 1,
+    "log-log-n": (n: number) => Math.log2(1 + Math.log2(1 + n)),
     "log-n": (n: number) => Math.log2(1 + n),
     linear: (n: number) => n,
     "n-log-n": (n: number) => n * Math.log2(1 + n),
@@ -616,7 +620,7 @@ test("catalogue config derives formulas without redundant chart commentary", () 
   const view = buildComplexityViewModel(config)
   assert.deepEqual(
     view.paths.filter((path) => !path.dimmed).map((path) => path.formula),
-    ["O(1)", "O(log n)", "O(n)", "O(n log n)", "O(n²)", "O(2^n)", "O(n!)"],
+    ["O(1)", "O(log log n)", "O(log n)", "O(n)", "O(n log n)", "O(n²)", "O(2^n)", "O(n!)"],
   )
   assert.equal(view.paths.find((path) => path.curveId === "factorial")?.samples.length, 9)
   assert.equal(
@@ -657,19 +661,15 @@ test("the 10k ceiling clips visually without changing representative values", ()
   )
 })
 
-test("duplicate case curves share exact geometry", () => {
+test("duplicate case curves merge into one labelled path", () => {
   const view = buildComplexityViewModel(cases)
-  const best = view.paths.find((path) => path.label.startsWith("Best:"))
-  const average = view.paths.find((path) => path.label.startsWith("Average:"))
+  const combined = view.paths.find((path) => path.label.startsWith("Average/Best:"))
   const endpoint = view.endpointLabels.find((label) => label.curveId === "n-log-n")
-  assert.equal(best?.geometry, average?.geometry)
-  assert.match(best?.geometry ?? "", /^M0\.00,/)
-  assert.match(average?.geometry ?? "", /^M0\.00,/)
-  assert.notEqual(best?.id, average?.id)
-  assert.equal(best?.color, "#22a06b")
-  assert.equal(average?.color, "#d99a00")
-  assert.equal(endpoint?.pathIds.length, 2)
-  assert.equal(endpoint?.color, average?.color)
+  assert.match(combined?.geometry ?? "", /^M0\.00,/)
+  assert.equal(combined?.category, "average")
+  assert.equal(combined?.color, "#d99a00")
+  assert.equal(endpoint?.pathIds.length, 1)
+  assert.equal(endpoint?.color, combined?.color)
 
   const hast = renderComplexityHast(view)
   const hastCurves = findAllHastByClass(hast, "complexity__curve").filter(
@@ -678,13 +678,13 @@ test("duplicate case curves share exact geometry", () => {
   )
   assert.deepEqual(
     hastCurves.map(({ properties }) => properties.stroke),
-    [best?.color, average?.color],
+    [combined?.color],
   )
   assert.equal(
     findAllHastByClass(hast, "complexity__endpoint-label").find(
       ({ properties }) => properties["data-curve-id"] === "n-log-n",
     )?.properties.style,
-    `--complexity-label-color:${average?.color}`,
+    `--complexity-label-color:${combined?.color}`,
   )
 
   const document = new FakeDocument()
@@ -696,13 +696,13 @@ test("duplicate case curves share exact geometry", () => {
   )
   assert.deepEqual(
     domCurves.map(({ attributes }) => attributes.stroke),
-    [best?.color, average?.color],
+    [combined?.color],
   )
   assert.equal(
     findAllFake(root, "text")
       .find(({ attributes }) => attributes["data-curve-id"] === "n-log-n")
       ?.style.values.get("--complexity-label-color"),
-    average?.color,
+    combined?.color,
   )
 })
 
@@ -1204,7 +1204,7 @@ test("Quartz HAST renders the complete case union without renderer-owned tabs", 
   }
   assert.equal(hastElements(hast, "table").length, 0)
   assert.equal(hastElements(hast, "clipPath").length, 1)
-  assert.equal(hastElements(hast, "button").length, 3)
+  assert.equal(hastElements(hast, "button").length, 2)
   assert.equal(
     findAllHastByClass(hast, "complexity__tick")[0].properties.y,
     COMPLEXITY_CHART.axisY + 18,
@@ -1237,8 +1237,7 @@ test("Quartz HAST renders the complete case union without renderer-owned tabs", 
     view.paths.length,
   )
   assert.deepEqual(findAllHastByClass(hast, "complexity__legend-button").map(hastText), [
-    "Best",
-    "Average",
+    "Average/Best",
     "Worst",
   ])
   assert.doesNotMatch(hastText(hast), /Curves begin at/)
@@ -1674,8 +1673,8 @@ test("Obsidian DOM keeps the version 1 label accessible but not visible", () => 
   const svg = findFake(root, "svg")
   assert.equal(svg?.attributes["aria-hidden"], "true")
   assert.equal(findFake(root, "table"), undefined)
-  assert.equal(findAllFake(root, "li").length, 3)
-  assert.equal(findAllFake(root, "button").length, 3)
+  assert.equal(findAllFake(root, "li").length, 2)
+  assert.equal(findAllFake(root, "button").length, 2)
   assert.equal(findFake(root, "figcaption"), undefined)
   assert.equal(findFake(root, "dl"), undefined)
   assert.equal(findFake(root, "figure")?.attributes["aria-label"], view.title)
@@ -2010,4 +2009,31 @@ test("Big O keeps its standalone catalogue config", () => {
     variables,
     entries: CURVE_IDS.map((curveId) => ({ kind: "catalogue", curveId })),
   })
+})
+
+test("Interpolation Search plots log-log time with inline merged case legends", () => {
+  const source = readFileSync(
+    join(
+      process.cwd(),
+      "..",
+      "Vault",
+      "Home",
+      "Computer Science",
+      "Algorithms",
+      "Search Algorithms",
+      "Interpolation Search.md",
+    ),
+    "utf8",
+  )
+  const config = JSON.parse(source.match(/```complexity\n([\s\S]*?)\n```/)![1])
+  const [time, space] = buildComplexityViewModel(config, "interpolation-search").resources
+
+  assert.equal(time.mode, "cases")
+  assert.equal(time.legend.length, 1)
+  assert.equal(time.legend[0].label, undefined)
+  assert.equal(time.paths.find(({ curveId }) => curveId === "log-log-n")?.formula, "O(log log n)")
+  assert.deepEqual(
+    space.paths.map(({ legendLabel }) => legendLabel),
+    ["Worst/Average/Best"],
+  )
 })

@@ -30,7 +30,7 @@
 }
 
 .steptrace .steptrace__multiway-tree-edge[data-state="path"] {
-  stroke: var(--_blue);
+  stroke: var(--_green);
   stroke-width: 2.4;
 }
 
@@ -41,19 +41,19 @@
 }
 
 .steptrace .steptrace__multiway-tree-node[data-path="1"] .steptrace__multiway-tree-cell {
-  fill: color-mix(in srgb, var(--_blue) 14%, var(--_surface));
-  stroke: var(--_blue);
+  fill: color-mix(in srgb, var(--_green) 14%, var(--_surface));
+  stroke: var(--_green);
 }
 
 .steptrace .steptrace__multiway-tree-node[data-affected="1"] .steptrace__multiway-tree-cell {
-  fill: color-mix(in srgb, var(--_violet) 16%, var(--_surface));
-  stroke: var(--_violet);
+  fill: color-mix(in srgb, var(--_blue) 16%, var(--_surface));
+  stroke: var(--_blue);
   stroke-width: 2;
 }
 
 .steptrace .steptrace__multiway-tree-node .steptrace__multiway-tree-cell[data-state="special"] {
-  fill: color-mix(in srgb, var(--_amber) 24%, var(--_surface));
-  stroke: var(--_amber);
+  fill: color-mix(in srgb, var(--_blue) 24%, var(--_surface));
+  stroke: var(--_blue);
   stroke-width: 2.2;
 }
 
@@ -61,6 +61,14 @@
   fill: color-mix(in srgb, var(--_green) 20%, var(--_surface));
   stroke: var(--_green);
   stroke-width: 2.2;
+}
+
+.steptrace .steptrace__multiway-tree-success {
+  display: none;
+}
+
+.steptrace .steptrace__multiway-tree-success[data-state="found"] {
+  display: block;
 }
 
 .steptrace .steptrace__multiway-tree-key {

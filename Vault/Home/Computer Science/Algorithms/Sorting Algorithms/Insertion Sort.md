@@ -11,9 +11,9 @@ status: Ready to Repeat
 publish: true
 ---
 
-A mostly-ordered array arrives—a sorted log with a few late entries appended out of sequence. Re-sorting it with a general algorithm discards the order that is already present and pays the same cost as sorting random data. Insertion sort keeps that order: it treats the elements left of the current position as a sorted prefix and folds one more element into that prefix per step.
+A mostly ordered array already contains useful work, such as a sorted log with a few late entries appended out of sequence. A general sort may ignore that structure and pay roughly the same cost as it would on random data. Insertion sort keeps the ordered part as a sorted prefix and folds one new element into it on each step.
 
-Each incoming element—the key—is compared against the prefix from its right end leftward. Every element larger than the key copies one slot to the right, opening a gap; the key drops into the gap. Because the prefix was sorted before the key arrived, one leftward pass suffices: the walk stops at the first element that is not larger than the key, and everything it shifted was already in order relative to itself.
+The incoming element is the key. Starting at the right edge of the prefix, every larger element moves one slot right and opens a gap. The key drops into that gap. Since the prefix was already sorted, the walk can stop at the first value no larger than the key. The shifted values remain ordered among themselves.
 
 **Core condition:** a sorted prefix and one incoming key → shift larger prefix elements right until the key lands → repeat until the prefix covers the array.
 
@@ -106,7 +106,7 @@ tab: Complexity
 Cutting comparisons does not fix this. Since the prefix is sorted, [[Home/Computer Science/Algorithms/Search Algorithms/Binary Search|Binary Search]] can locate the key's slot in `O(log j)` comparisons instead of a linear scan—binary insertion sort. But locating the slot is not the bottleneck: the elements between the slot and the key still shift right one at a time, so the array movement stays `O(n²)`. Binary insertion only pays off when a comparison costs far more than a move, such as ordering long strings through an expensive comparator.
 ~~~~~
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Control flow
 >
@@ -142,15 +142,8 @@ Cutting comparisons does not fix this. Since the prefix is sorted, [[Home/Comput
 >     }
 > }
 > ```
-> The strict `a[i] > key` test is what makes the sort stable; relaxing it to `>=` would shift equal elements and reverse their original order.
-
-# Questions
-
-> [!QUESTION]- What keeps the prefix sorted after each insertion?
-> The inner loop shifts every prefix element greater than the key one slot right and stops at the first element `<= key`. The key is written into that gap, so nothing to its left is larger and everything to its right was already ordered; `a[0..j]` is sorted for the next step.
+> The strict `a[i] > key` test is what makes the sort stable. Relaxing it to `>=` would shift equal elements and reverse their original order.
 
 # References
 
-- [Insertion sort (Wikipedia)](https://en.wikipedia.org/wiki/Insertion_sort) — the shift-based algorithm, stability condition, binary-search variant, and move-count analysis.
-- [`ArraySortHelper<T>` in dotnet/runtime](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Collections/Generic/ArraySortHelper.cs) — `Array.Sort`'s introspective sort switches to an `InsertionSort` routine for small partitions; the runtime's real base case.
-- [`listsort.txt` (CPython)](https://github.com/python/cpython/blob/main/Objects/listsort.txt) — Tim Peters's notes on Timsort, including the binary insertion sort that builds minimal runs before merging.
+- [NIST Dictionary of Algorithms and Data Structures: insertion sort](https://xlinux.nist.gov/dads/HTML/insertionSort.html)

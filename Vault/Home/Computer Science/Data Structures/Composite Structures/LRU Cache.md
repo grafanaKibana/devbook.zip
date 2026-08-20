@@ -11,9 +11,9 @@ status: Ready to Repeat
 publish: true
 ---
 
-A cache holds a bounded number of entries and must answer two questions on every access: where is the value for key `k`, and if the cache is full, which entry should leave. Ordering the entries by recency in an array or list makes the victim obvious but turns lookup back into a scan.
+A bounded cache must find key `k` and choose a victim when no free slot remains. Keeping entries only in recency order makes the victim obvious, but finding an arbitrary key still requires a scan.
 
-An LRU (Least Recently Used) cache resolves the tension by storing the same entries in two structures at once. A doubly-[[Home/Computer Science/Data Structures/Linear Structures/LinkedList|linked list]] threads those same nodes in recency order: most-recently-used at the head, least-recently-used at the tail. A `get` finds the node through the map, unlinks it, and splices it to the head. A `put` over capacity removes the tail node and deletes its key from the map. What can no longer be recovered is insertion order or access frequency — the list records only "how recently," and only for entries still resident.
+LRU (Least Recently Used) stores each entry in a map and a doubly-[[Home/Computer Science/Data Structures/Linear Structures/LinkedList|linked list]]. The map finds the node. The list orders nodes from most recently used at the head to least recently used at the tail. A `get` promotes its node to the head. A `put` that exceeds capacity removes the tail and deletes the same key from the map. The structure retains neither insertion order nor access frequency. It records only the recency of entries still resident.
 
 **Core shape:** key → map → list node → recency-ordered doubly-linked list → head is MRU, tail is the eviction victim
 
@@ -30,7 +30,7 @@ The cache below has capacity four. The map stores node addresses, while the link
 
 Two structures hold the same set of entries, indexed differently:
 
-- It never scans the list.
+- The map stores key → node and provides expected $O(1)$ lookup. It never scans the list.
 - The doubly-linked list orders those nodes by recency. Each node stores `key`, `value`, and both `prev`/`next` pointers. The `key` is duplicated into the node deliberately: eviction starts from a node (the tail) and must delete the corresponding map entry, which requires recovering the key without a reverse lookup.
 - Sentinel `head` and `tail` nodes bracket the list. Every real node always has a non-null neighbour on each side, so splicing and unlinking are branch-free pointer rewrites with no empty-list or single-element special cases.
 
@@ -256,17 +256,17 @@ tab: Complexity
 
 # When the Composite Breaks
 
-The failure modes all stem from the map and the list being two views that must agree.
+Every failure starts with the map and list disagreeing about the resident entries.
 
 That is only possible because the list is doubly linked: the node reached through the map exposes both neighbours, so `node.prev.next = node.next` and `node.next.prev = node.prev` splice it out directly. This is why a [[Home/Computer Science/Data Structures/Linear Structures/Circular Buffer|circular buffer]] or a plain queue does not suffice for LRU: neither can promote an arbitrary interior entry without first finding its predecessor.
 
-The map and the list must be updated in lockstep, or they desynchronize. An eviction that unlinks the tail node but forgets to delete its key from the map leaves a stale key that resolves to a node no longer in the list: later `get`s return a value for an entry that was supposed to be gone (a false hit), and the node is unreachable for eviction (a leak). The inverse — deleting the map entry but leaving the node linked — leaves an orphan occupying a recency slot that can never be looked up or promoted, permanently shrinking the effective capacity by one.
+An eviction that unlinks the tail but leaves its key in the map creates a stale lookup. The exact symptom depends on the list implementation: promotion may throw because the node no longer belongs to the list, or custom pointer code may reinsert a logically evicted entry. The inverse, deleting the map entry while leaving the node linked, creates an orphan that consumes a recency slot but can never be found or promoted.
 
-Capacity is what forces an eviction *policy* to exist at all. An unbounded [[Home/Computer Science/Data Structures/Hash-based Structures/HashMap|hash map]] never evicts and needs neither the list nor a victim rule; the moment a size bound is imposed, some entry must be chosen to leave, and LRU's choice is "the tail." That choice has a known weakness: a single large scan touches many keys once, marching each to the head and pushing the genuinely hot working set toward the tail until it is evicted — cache pollution. LRU trades that vulnerability for its simplicity.
+Capacity is what forces an eviction *policy* to exist at all. An unbounded [[Home/Computer Science/Data Structures/Hash-based Structures/HashMap|hash map]] never evicts and needs neither the list nor a victim rule. The moment a size bound is imposed, some entry must be chosen to leave, and LRU's choice is "the tail." That choice has a known weakness: a single large scan touches many keys once, marching each to the head and pushing the genuinely hot working set toward the tail until it is evicted — cache pollution. LRU trades that vulnerability for its simplicity.
 
-The composite is not atomic. A `get` performs a map read followed by several pointer writes; a concurrent `put` interleaving between them can splice against neighbours the `get` already moved, corrupting the list. LRU needs external locking (or a sharded/striped design) — neither the map nor the list provides safe concurrent mutation on its own.
+The composite is not atomic. A `get` performs a map read followed by several pointer writes. A concurrent `put` interleaving between them can splice against neighbours the `get` already moved, corrupting the list. LRU needs external locking (or a sharded/striped design) — neither the map nor the list provides safe concurrent mutation on its own.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Map into a recency-ordered list
 >
@@ -345,21 +345,14 @@ The composite is not atomic. A `get` performs a map read followed by several poi
 | Cache | Eviction victim | Stronger case | Weaker case |
 | --- | --- | --- | --- |
 | LRU cache | Least recently *used* (tail) | Recent access predicts reuse (temporal locality) | A single large scan flushes the hot set |
-| LFU cache | Least *frequently* used | Popularity is stable and frequency predicts reuse | Cold-start bias; slow to drop a once-popular key; more bookkeeping |
-| FIFO / [[Home/Computer Science/Data Structures/Linear Structures/Circular Buffer | circular buffer]] cache | Insertion order only | Insertion order is an acceptable eviction proxy and reuse is irrelevant | Ignores reuse entirely; evicts hot entries that were inserted early |
-| Plain [[Home/Computer Science/Data Structures/Hash-based Structures/HashMap | hash map]] | None | The working set fits in memory with no bound | No eviction, so it grows without limit |
-| .NET `MemoryCache` | Size / time / priority policies | Absolute size limits, expirations, and eviction callbacks are needed | Not strict LRU; recency is one signal among several |
+| LFU cache | Least *frequently* used | Popularity is stable and frequency predicts reuse | Cold-start bias. Slow to drop a once-popular key. More bookkeeping |
+| FIFO / [[Home/Computer Science/Data Structures/Linear Structures/Circular Buffer | circular buffer]] cache | Insertion order only | Insertion order is an acceptable eviction proxy and reuse is irrelevant | Ignores reuse entirely. Evicts hot entries that were inserted early |
+| Plain [[Home/Computer Science/Data Structures/Hash-based Structures/HashMap | hash map]] | None | Eviction is unnecessary because the working set is externally bounded and fits memory | No eviction, so it grows without limit |
+| .NET `MemoryCache` | Size / time / priority policies | Absolute size limits, expirations, and eviction callbacks are needed | Not strict LRU. Recency is one signal among several |
 
-An LFU cache becomes stronger when frequency predicts reuse better than recency — a stable set of popular keys that a one-off scan should not dislodge. A FIFO or [[Home/Computer Science/Data Structures/Linear Structures/Circular Buffer|circular buffer]] cache is simpler still but blind to reuse, fitting only insertion-order eviction. A plain [[Home/Computer Science/Data Structures/Hash-based Structures/HashMap|hash map]] is the right structure precisely when the working set is unbounded and no entry ever needs to leave.
-
-# Questions
-
-> [!QUESTION]- What corruption results from updating only one of the two structures on eviction?
-> Removing the tail node but leaving its key in the map produces stale keys that resolve to evicted nodes — false hits and an unreachable node that leaks. Deleting the map entry but leaving the node linked produces an orphan that occupies a recency slot yet can never be looked up, permanently reducing effective capacity.
+An LFU cache becomes stronger when frequency predicts reuse better than recency — a stable set of popular keys that a one-off scan should not dislodge. A FIFO or [[Home/Computer Science/Data Structures/Linear Structures/Circular Buffer|circular buffer]] cache is simpler still but blind to reuse, fitting only insertion-order eviction. A plain [[Home/Computer Science/Data Structures/Hash-based Structures/HashMap|hash map]] is the right structure when an external bound keeps the working set within its allocated capacity and no eviction policy is needed.
 
 # References
 
-- [Cache replacement policies](https://en.wikipedia.org/wiki/Cache_replacement_policies) — LRU, LFU, FIFO, and adaptive policies compared, including the scan-resistance weakness of plain LRU.
-- [LRU Cache (LeetCode #146)](https://leetcode.com/problems/lru-cache/) — the canonical exercise whose direct `get`/`put` requirement forces the hash-map-plus-doubly-linked-list composition.
-- [`MemoryCache` in dotnet/runtime](https://github.com/dotnet/runtime/blob/main/src/libraries/Microsoft.Extensions.Caching.Memory/src/MemoryCache.cs) — the runtime cache built on size, expiration, and priority policies rather than strict LRU.
-- [Design of a modern cache (Caffeine)](https://github.com/ben-manes/caffeine/wiki/Efficiency) — why production caches favour W-TinyLFU admission over plain recency eviction to resist scan pollution.
+- [LRU Cache (LeetCode #146)](https://leetcode.com/problems/lru-cache/)
+- [Design of a modern cache (Caffeine)](https://github.com/ben-manes/caffeine/wiki/Efficiency)

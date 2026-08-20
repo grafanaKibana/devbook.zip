@@ -11,9 +11,9 @@ status: Not-Started
 publish: true
 ---
 
-Cocktail shaker sort is bidirectional [[Home/Computer Science/Algorithms/Sorting Algorithms/Bubble Sort|Bubble Sort]]. A forward pass swaps adjacent inversions and fixes the largest remaining value at the right boundary. A backward pass then fixes the smallest remaining value at the left boundary. Both boundaries shrink after a round.
+Cocktail shaker sort runs [[Home/Computer Science/Algorithms/Sorting Algorithms/Bubble Sort|Bubble Sort]] in both directions. The forward pass fixes the largest remaining value at the right boundary. The backward pass fixes the smallest at the left. Both boundaries then move inward.
 
-The backward pass repairs Bubble Sort's asymmetry: a small value near the tail can travel many positions toward the front in one round instead of one position per forward pass. Strict comparison keeps equal values from crossing, so the result is stable. Its value is explanatory rather than production performance.
+The backward pass addresses Bubble Sort's main weakness. A small value near the tail can move several positions toward the front in one round instead of one position per forward pass. Strict comparison keeps equal values from crossing, so the sort remains stable. It is still mainly useful for explaining adjacent-swap behavior.
 
 ~~~~~tabsdown
 tab: Visualization
@@ -58,9 +58,9 @@ tab: Complexity
 ```
 ~~~~~
 
-# Boundary and implementation
+# Early exit and stability
 
-Early exit depends on stopping after a swap-free round. Removing that flag schedules every shrinking pass even when the input is already ordered. Bidirectional motion improves some displaced-value patterns, but [[Home/Computer Science/Algorithms/Sorting Algorithms/Insertion Sort|Insertion Sort]] is usually the better simple algorithm for small or nearly sorted inputs.
+Early exit requires the swap flag. Without it, every shrinking pass runs even when the input is already ordered. Two-way movement helps with some displaced values, but [[Home/Computer Science/Algorithms/Sorting Algorithms/Insertion Sort|Insertion Sort]] is usually the better simple choice for small or nearly sorted inputs.
 
 > [!EXAMPLE]- C# implementation
 >
@@ -97,17 +97,8 @@ Early exit depends on stopping after a swap-free round. Removing that flag sched
 > }
 > ```
 >
-> Strict comparison preserves equal-key order; changing `>` to `>=` would make the implementation unstable.
-
-# Questions
-
-> [!QUESTION]- What does each direction settle?
-> The forward pass fixes the largest live value at the right boundary; the backward pass fixes the smallest live value at the left boundary.
-
-> [!QUESTION]- Why is cocktail shaker sort still a teaching algorithm?
-> Two-way movement repairs Bubble Sort's one-direction weakness but not its quadratic comparison count. General-purpose `O(n log n)` sorts dominate once inputs are not tiny.
+> Strict comparison preserves equal-key order. Changing `>` to `>=` would make the implementation unstable.
 
 # References
 
-- [Donald Knuth, *The Art of Computer Programming*, Volume 3](https://cs.stanford.edu/~knuth/taocp.html) — the primary sorting text discussing oscillating/shaker refinements to exchange sorting.
-- [NIST Dictionary of Algorithms and Data Structures: bidirectional bubble sort](https://www.nist.gov/dads/HTML/bidirectionalBubbleSort.html) — authoritative definition of the alternating-direction Bubble Sort variant.
+- [NIST Dictionary of Algorithms and Data Structures: bidirectional bubble sort](https://www.nist.gov/dads/HTML/bidirectionalBubbleSort.html)

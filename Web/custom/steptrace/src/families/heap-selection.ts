@@ -1,4 +1,4 @@
-import { el, ICON, makeArrayStrip, makeLegend, statusEl, successMarker } from "../render"
+import { el, ICON, makeArrayStrip, makeLegend, statusEl } from "../render"
 import { GRAPH_NODE_RADIUS_PX, observeFixedSvgNodes, trimGraphEdge } from "../graph-node"
 import type { StepTraceView, VisualFamily, WatchRow } from "../types"
 
@@ -469,7 +469,6 @@ export function makeHeapSelectionView(
       {
         label: "retained winner",
         swatchClass: "steptrace__heap-swatch steptrace__heap-swatch--winner",
-        marker: successMarker(),
       },
       {
         label: "weakest root",

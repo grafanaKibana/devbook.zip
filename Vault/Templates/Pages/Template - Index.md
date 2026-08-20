@@ -54,9 +54,10 @@ return FolderStructureMap;
 
 # Questions
 
-> [!QUESTION]- A real question worth being able to answer
-> Answer.
+<!-- Optional: keep only distinct recall targets. Delete this section when the prose already makes them obvious. -->
 
 # References
 
-- [Source](https://example.com) — why it is worth keeping.
+<!-- Optional: add when there is at least one annotated primary source. -->
+
+- [Source title](https://example.com).

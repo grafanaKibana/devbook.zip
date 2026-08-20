@@ -103,13 +103,13 @@
 }
 
 .steptrace .steptrace__interval-band[data-state="gap"] {
-  border-color: var(--_violet);
-  background: color-mix(in srgb, var(--_violet) 12%, var(--_surface));
+  border-color: var(--_amber);
+  background: color-mix(in srgb, var(--_amber) 12%, var(--_surface));
 }
 
 .steptrace .steptrace__interval-band[data-state="conflict"] {
-  border-color: var(--_violet);
-  background: color-mix(in srgb, var(--_violet) 18%, var(--_surface));
+  border-color: var(--_amber);
+  background: color-mix(in srgb, var(--_amber) 18%, var(--_surface));
 }
 
 .steptrace .steptrace__interval-band[data-state="accepted"] {
@@ -118,8 +118,8 @@
 }
 
 .steptrace .steptrace__interval-band[data-state="rejected"] {
-  border-color: var(--_violet);
-  background: color-mix(in srgb, var(--_violet) 10%, var(--_surface));
+  border-color: var(--_red);
+  background: color-mix(in srgb, var(--_red) 10%, var(--_surface));
   opacity: 0.42;
 }
 
@@ -176,7 +176,7 @@
 }
 
 .steptrace .steptrace__interval-swatch--rejected {
-  background: var(--_violet);
+  background: var(--_red);
 }
 
 @media (max-width: 560px) {

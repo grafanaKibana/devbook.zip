@@ -11,9 +11,9 @@ status: Done
 publish: true
 ---
 
-Searching a text `T` of length `n` for a pattern `P` of length `m` tests `P` against the window that begins at each of the `n − m + 1` positions. Rabin-Karp replaces that per-position character test with a single integer comparison: it hashes `P` once, keeps a hash of the current text window, and a hash mismatch proves the strings differ, so only matching hashes are worth verifying.
+Searching a text `T` of length `n` for a pattern `P` of length `m` creates `n − m + 1` candidate windows. Rabin–Karp hashes `P` once and maintains the hash of the current window. A different hash rejects the window with one integer comparison.
 
-The move that makes this cheap is the rolling hash. A hash mismatch discards a position with one comparison. Because distinct strings can still collide onto the same hash, a hash match is only a candidate — the algorithm then compares the `m` characters directly, and that verification is what keeps the answer correct.
+Equal hashes only identify a candidate. Distinct strings can collide, so the algorithm still compares the `m` characters before reporting a match. The rolling hash saves work. The direct comparison preserves correctness.
 
 
 
@@ -137,13 +137,13 @@ The expected row assumes a large modulus and suitable base make spurious hash ma
 
 # Collisions and the Multi-pattern Payoff
 
-A hash match is not a string match.
+A hash match is evidence, not proof.
 
-A weak modulus or overflow makes those collisions common rather than rare. A large prime such as `10^9 + 7` or `10^9 + 9`, with a reduction after every multiplication, keeps residues spread and the arithmetic in range.
+Collision rate depends on the base, modulus, and input distribution. A large prime such as `10^9 + 7` or `10^9 + 9`, with reduction after every multiplication, keeps the arithmetic in range and usually makes accidental collisions rare. Fixed public parameters can still be targeted, so adversarial workloads may randomize the base or verify with a second independent modulus.
 
-The screening is strongest across many patterns at once. One pass filters for all of them together, which is where the hashing earns its place — document fingerprinting, plagiarism and duplicate-block detection, multi-signature log scanning.
+Hashing pays off when one rolling-window pass screens for many patterns of the same length. Mixed lengths require grouping patterns by length and maintaining a rolling state for each group. Typical uses include document fingerprinting, duplicate-block detection, and multi-signature log scanning.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Control flow
 >
@@ -210,21 +210,9 @@ The screening is strongest across many patterns at once. One pass filters for al
 >     }
 > }
 > ```
-> `FindAll` scans every window and yields every confirmed start index; an empty pattern keeps the conventional single match at index `0`. `SequenceEqual` is the mandatory verification: it runs only when the hashes match and guards against reporting a collision as a match. The `+ Modulus` before the final reductions keeps the subtraction non-negative in modular arithmetic. `Base = 256` assumes byte-range (ASCII) input; non-ASCII `char` values exceed 255, so a larger base (or hashing the byte encoding) is needed — correctness is unaffected either way because verification checks every hit.
-
-# Questions
-
-> [!QUESTION]- How does the rolling hash advance by one text position?
-> The window hash is a base-`b` polynomial mod `p`. Moving right subtracts the outgoing character's weighted term `T[i]·b^(m-1)`, multiplies by `b` to shift the retained terms, and adds the incoming `T[i+m]`.
-
-> [!QUESTION]- Why does a hash match still require a character comparison?
-> The hash maps `m`-character strings onto residues mod `p`, a many-to-one map, so two different windows can share a value.
-
-> [!QUESTION]- What forces character verification at many consecutive windows?
-> Genuine matches everywhere, such as searching `aaaa` for `aa`, verify every position. A weak or small modulus can create the same pressure through frequent collisions; a large prime modulus makes spurious matches rarer.
+> `FindAll` scans every window and yields each confirmed start index. An empty pattern keeps the conventional single match at index `0`. `SequenceEqual` runs only after equal hashes and prevents a collision from becoming a false match. The `+ Modulus` term keeps the subtraction non-negative before reduction. `Base = 256` remains a valid polynomial base for UTF-16 `char` values; base and modulus choices affect collision frequency, so they should be measured on the actual corpus and hardened for adversarial inputs when needed. Direct verification keeps the result correct regardless.
 
 # References
 
-- [Efficient randomized pattern-matching algorithms](https://doi.org/10.1147/rd.312.0249) — Karp and Rabin's original paper introducing the hashing scheme and its randomized collision analysis (IBM Journal of Research and Development, 1987).
-- [Rabin–Karp algorithm](https://en.wikipedia.org/wiki/Rabin%E2%80%93Karp_algorithm) — rolling-hash mechanics, collision analysis, and the multiple-pattern extension.
-- [String hashing](https://cp-algorithms.com/string/string-hashing.html) — polynomial rolling hash with base and modulus selection, and its use in string matching.
+- [Efficient randomized pattern-matching algorithms](https://doi.org/10.1147/rd.312.0249)
+- [String hashing](https://cp-algorithms.com/string/string-hashing.html)

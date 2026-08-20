@@ -12,15 +12,17 @@ status: Ready to Repeat
 publish: true
 ---
 
-A socket is an endpoint for bidirectional communication between two processes over a network. It abstracts the OS networking stack into a file-like interface: you open a socket, connect it to a remote address, and then read/write bytes. The key mental model is that TCP sockets are **byte streams** — not message boundaries — so partial reads and partial writes are normal and must be handled explicitly.
+A socket is an operating-system endpoint for network communication. An Internet socket endpoint is an IP address plus a port. The address family, socket type, and protocol are selected when the socket is created. Together they determine whether the API exposes a TCP byte stream, UDP datagrams, or another protocol contract.
 
-You reach for raw sockets when building custom protocols, high-performance servers, or when HTTP/gRPC adds too much overhead. For most application-layer work, higher-level abstractions (`HttpClient`, gRPC, SignalR) are safer and faster to build with.
+TCP does not preserve the boundaries between writes. One read may return part of a frame, exactly one frame, or bytes from several frames. That is the first rule to recover when debugging a custom protocol.
+
+The low-level `Socket` API fits custom transports and code that needs direct option, packet, or protocol control. A true raw socket bypasses the normal TCP/UDP abstraction and is a narrower operating-system capability. Most application code is better served by `HttpClient`, gRPC, or SignalR because those libraries already own framing, pooling, deadlines, and protocol details.
 
 # Stream Vs Datagram Sockets
 
-The socket API comes in two flavors, one per transport. A **TCP (stream) socket** is a byte stream with no message boundaries — partial reads and writes are normal, so framing the application's messages is your responsibility. A **UDP (datagram) socket** preserves message boundaries — each `Send` maps to one `Receive` — but delivery and ordering are best-effort.
+The two common socket types expose different units of data. A **TCP stream socket** reads and writes bytes without message boundaries, so the application must define framing. A **UDP datagram socket** preserves each delivered datagram as one message. A sent datagram can still be lost, duplicated, or reordered. There is no guaranteed matching receive.
 
-For the full TCP-vs-UDP trade-off (delivery, ordering, congestion control, fan-out), see the [[Home/Networks/Transport & Sockets/Transport & Sockets|Transport & Sockets]] hub. **Decision rule**: use a stream socket when correctness requires delivery guarantees; use a datagram socket when latency matters more than reliability and the app can tolerate or handle loss itself.
+The [[Home/Networks/Transport & Sockets/Transport & Sockets|Transport & Sockets]] hub compares the transports directly. A stream socket is a good fit for one reliable ordered flow. A datagram socket is useful when message boundaries, multicast, or independent recovery matter enough to justify owning the missing transport behavior.
 
 # Socket Lifecycle
 
@@ -36,8 +38,7 @@ flowchart TD
   G --> H[Close / Shutdown]
 ```
 
-**Server side**: bind → listen → accept (blocks until a client connects) → read/write on the accepted socket.
-**Client side**: connect → read/write.
+On the server, `bind` assigns the local address, `listen` creates a connection queue, and `accept` returns a new connected socket. The listening socket stays available for later clients. A client usually lets the OS choose a local ephemeral port and calls `connect` with the remote endpoint.
 
 # Example
 
@@ -84,6 +85,8 @@ static async Task HandleClientAsync(TcpClient client)
 }
 ```
 
+This sample leaves connection ownership unsafe on purpose: the discarded handler task is not observed, and an exception before `client.Close()` can leave the client undisposed. Production code should track handler tasks, observe their failures, and wrap each accepted `TcpClient` in `using` or a `finally`-based disposal path. Shutdown should stop accepting, cancel active handlers, and await them.
+
 ## UDP with UdpClient
 
 ```csharp
@@ -97,49 +100,36 @@ var result = await udp.ReceiveAsync();
 Console.WriteLine($"Received {result.Buffer.Length} bytes from {result.RemoteEndPoint}");
 ```
 
+The two-byte payload is transport-only pseudodata, not a valid DNS query. The example also waits without a deadline. Real request/response code must serialize a valid protocol message and apply cancellation or a timeout so a lost datagram cannot leave the operation pending forever.
+
 # Pitfalls
 
-**Partial reads** — TCP is a byte stream. A single `ReadAsync` call may return fewer bytes than you sent. Always loop until you have received the expected number of bytes or a delimiter.
+**Treating a read as a message** — `ReadAsync` returns the bytes currently available, up to the supplied buffer length. It can split or combine application frames. Read until the framing rule says one complete message is present. A zero-byte read means the peer closed its sending side gracefully.
 
-**Partial writes** — `WriteAsync` may not send all bytes in one call on some platforms. Check the return value or use `WriteAllAsync`/`Stream.WriteAsync` which handles this internally.
+**Confusing stream and socket writes** — `NetworkStream.WriteAsync` completes the requested buffer or throws and has no byte-count return value. Low-level `Socket.Send` and `SendAsync` overloads that return a count may report a partial send, so code using those APIs must advance through the remaining buffer.
 
-**Not closing sockets** — unclosed sockets hold OS file descriptors. Use `using` or `try/finally` to ensure `Close`/`Dispose` is called even on exceptions.
+**Leaking ownership** — every accepted connection needs a clear owner and disposal path. Otherwise file descriptors and protocol state remain allocated until later cleanup.
 
-**Blocking the thread pool** — synchronous socket operations (`Receive`, `Send`) block a thread-pool thread. Use async APIs (`ReceiveAsync`, `SendAsync`, `TcpClient.GetStream()` + `ReadAsync`) to release threads during I/O waits.
+**Blocking one thread per connection** — synchronous operations occupy the calling thread while the network is idle. Async socket APIs let the runtime wait through the operating system and resume work only when an operation completes.
 
-**No framing on TCP** — TCP delivers a stream of bytes with no concept of message boundaries. If your protocol sends variable-length messages, you must add framing: length-prefix, delimiter, or fixed-size headers. A chat application that sent messages as raw UTF-8 without framing worked fine in local testing but in production, high-throughput scenarios caused two messages to arrive in a single `ReadAsync` call, merging "Hello" and "World" into "HelloWorld" — the bug took weeks to reproduce because it only occurred under network congestion.
+**No framing on TCP** — variable-length messages need a length prefix, delimiter, or self-describing format. Local tests often hide this because small writes happen to arrive separately. That behavior is timing, not a contract.
 
 # Half-Close and the Scaling Model
 
-**Half-close** — TCP connections are bidirectional and each direction closes independently. `socket.Shutdown(SocketShutdown.Send)` sends a FIN to signal "I'm done writing" while you keep *reading* the peer's response — the standard way to tell a server "request complete" without tearing down the read side. The peer sees end-of-stream (a 0-byte read) on its side.
+**Half-close** — each direction of a TCP connection closes independently. `socket.Shutdown(SocketShutdown.Send)` ends local writes while leaving reads open. The peer eventually observes end-of-stream as a zero-byte read after consuming any buffered data.
 
-**How one server handles thousands of connections** — you don't dedicate a thread per socket. The OS provides an **event-notification** mechanism — `epoll` (Linux), `kqueue` (BSD/macOS), **IOCP** (Windows) — that lets one (or a few) threads wait on many sockets and wake only for the ones with data ready. This is the "C10k" solution, and it's exactly what .NET's async socket APIs sit on top of: `await ReceiveAsync()` registers interest and releases the thread until the OS signals readiness/completion. Reaching for `SocketAsyncEventArgs` or `System.IO.Pipelines` squeezes out the remaining per-operation allocation for very high-throughput servers.
+**Scaling** — a server does not need one blocked thread per connection. .NET's async socket APIs use the operating system's readiness or completion facilities, such as `epoll`, `kqueue`, and IOCP. `SocketAsyncEventArgs` and `System.IO.Pipelines` become relevant when profiling shows per-operation allocation or buffer movement is the next limit. They do not remove the need for backpressure and bounded connection work.
 
 # Tradeoffs
 
 | Option | Best for | Weakness |
 |---|---|---|
-| Raw `Socket` class | Full control, custom protocols | Verbose; manual framing, error handling |
-| `TcpClient` / `TcpListener` | TCP client/server with stream API | Still requires framing; no HTTP semantics |
-| `UdpClient` | UDP datagrams | No delivery guarantees; application must handle loss |
-| `HttpClient` | HTTP/1.1, HTTP/2, HTTP/3 | Higher overhead; not suitable for custom binary protocols |
-| `System.Net.WebSockets` | Full-duplex over HTTP | Requires HTTP upgrade; not for raw TCP |
-
-# Questions
-
-> [!QUESTION]- Why do partial reads happen with TCP sockets?
-> TCP is a byte stream protocol. The network may deliver data in smaller chunks than the sender wrote. A single `ReadAsync` call returns however many bytes are available at that moment, which may be less than the full message. Applications must loop until the expected number of bytes is received.
-
-> [!QUESTION]- What is the difference between `Socket`, `TcpClient`, and `TcpListener`?
-> `Socket` is the low-level OS abstraction supporting TCP, UDP, and other protocols. `TcpClient` wraps a TCP socket and exposes a `NetworkStream` for stream-based I/O. `TcpListener` wraps a server-side TCP socket and provides `AcceptTcpClientAsync` for accepting connections. Use `TcpClient`/`TcpListener` for most TCP work; drop to `Socket` when you need protocol-level control.
-
-> [!QUESTION]- When would you choose UDP over TCP for a production system?
-> When latency matters more than delivery guarantees and the application can tolerate or recover from packet loss. Examples: real-time game state updates (stale frames are discarded anyway), DNS queries (fast retry is cheaper than TCP handshake), telemetry/metrics (occasional loss is acceptable). The application must implement its own reliability if needed.
+| Raw `Socket` class | Transport control and custom protocols | Manual framing, ownership, and error handling |
+| `TcpClient` / `TcpListener` | TCP client/server with stream API | Still requires framing. No HTTP semantics |
+| `UdpClient` | UDP datagrams | No delivery guarantees. Application must handle loss |
+| `HttpClient` | HTTP clients with connection pooling and protocol negotiation | Restricted to HTTP semantics |
+| `System.Net.WebSockets` | Full-duplex over HTTP | Requires HTTP upgrade. Not for raw TCP |
 
 # References
 
-- [System.Net.Sockets namespace](https://learn.microsoft.com/dotnet/api/system.net.sockets) — API reference for Socket, TcpClient, TcpListener, UdpClient, and NetworkStream.
-- [TcpClient class](https://learn.microsoft.com/dotnet/api/system.net.sockets.tcpclient) — API reference with examples for connecting, reading, and writing over TCP.
-- [Use sockets to send and receive data over TCP](https://learn.microsoft.com/dotnet/fundamentals/networking/sockets/tcp-classes) — Microsoft guide covering TcpClient/TcpListener patterns and async usage.
-- [Use UDP sockets](https://learn.microsoft.com/dotnet/fundamentals/networking/sockets/udp-client) — Microsoft guide for UdpClient send/receive patterns.
-- [Socket performance enhancements in .NET](https://learn.microsoft.com/dotnet/fundamentals/networking/sockets/socket-services) — covers SocketAsyncEventArgs and high-throughput socket patterns.
+- [Use sockets to send and receive data over TCP](https://learn.microsoft.com/dotnet/fundamentals/networking/sockets/tcp-classes)

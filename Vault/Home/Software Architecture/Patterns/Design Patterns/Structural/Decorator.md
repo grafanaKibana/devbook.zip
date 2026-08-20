@@ -11,9 +11,9 @@ status: Done
 publish: true
 ---
 
-Stacking toppings on a pizza is a Decorator in everyday life. Start with plain dough, add sauce, add cheese, add pepperoni, add mushrooms. Each topping wraps the previous pizza without changing what’s underneath, and you can add or remove any topping independently. A pepperoni pizza and a mushroom pizza share the same base — the toppings are layered on, not baked in.
+Pizza toppings work as layers over one base. Each layer changes the result without changing the dough underneath, and different combinations can be assembled from the same pieces.
 
-The Decorator pattern works the same way: it attaches additional responsibilities to an object dynamically by wrapping it in decorator objects that implement the same interface. Each decorator holds a reference to the wrapped object, calls it, and adds behavior before or after the call. Decorators compose freely — you can stack `LoggingHandler(ValidationHandler(MetricsHandler(CoreHandler)))` in any order. Each decorator is independently testable and deployable. The client sees a single `IOrderHandler` and doesn’t know (or care) how many decorators are wrapping the core.
+The Decorator pattern adds behavior by wrapping an object with another object that implements the same interface. A decorator keeps a reference to the wrapped component, delegates to it, and runs work before or after that call. Because the wrapper still satisfies the original contract, layers such as `LoggingHandler(ValidationHandler(MetricsHandler(CoreHandler)))` can be composed without changing the client. Order matters because each layer controls when delegation occurs.
 
 ```mermaid
 classDiagram
@@ -46,23 +46,23 @@ classDiagram
 ```
 
 > [!NOTE] Decorator vs Proxy
-> Both wrap the same interface. **Decorator ADDS new behavior** — logging, caching, validation. [[Home/Software Architecture/Patterns/Design Patterns/Structural/Proxy]] **CONTROLS ACCESS** to the real object — lazy loading, auth checks, remote calls. The structural difference is intent: Decorator enriches; Proxy restricts or defers.
+> Both wrap the same interface. Decorator adds behavior such as logging or validation. [[Home/Software Architecture/Patterns/Design Patterns/Structural/Proxy]] controls access to the real object through mechanisms such as authorization or lazy loading. Their structure can look identical. Intent separates them.
 
 # Problem
 
 `OrderProcessor.ProcessOrder()` has growing cross-cutting concerns mixed with core logic:
 
 ```csharp
-public class OrderProcessor
+public class OrderProcessor(
+    IOrderRepository repository,
+    ILogger<OrderProcessor> logger,
+    IMetricsCollector metrics,
+    IAuditLog auditLog)
 {
-    private readonly IOrderRepository _repository;
-    private readonly ILogger<OrderProcessor> _logger;
-    private readonly IMetricsCollector _metrics;
-
     public async Task<OrderResult> ProcessOrderAsync(Order order)
     {
         // ⚠️ Logging, metrics, validation, and core logic all interleaved
-        _logger.LogInformation("Processing order {OrderId}", order.Id);
+        logger.LogInformation("Processing order {OrderId}", order.Id);
         var stopwatch = Stopwatch.StartNew();
 
         try
@@ -74,20 +74,20 @@ public class OrderProcessor
                 throw new InvalidOperationException("Order total must be positive");
 
             // ⚠️ Audit trail mixed with processing
-            await _auditLog.RecordAsync($"Order {order.Id} processing started by {order.Customer.Id}");
+            await auditLog.RecordAsync($"Order {order.Id} processing started by {order.Customer.Id}");
 
-            var result = await _repository.SaveAndProcessAsync(order);
+            var result = await repository.SaveAndProcessAsync(order);
 
             stopwatch.Stop();
-            _metrics.RecordOrderProcessingTime(stopwatch.ElapsedMilliseconds);
-            _logger.LogInformation("Order {OrderId} processed in {Ms}ms", order.Id, stopwatch.ElapsedMilliseconds);
+            metrics.RecordOrderProcessingTime(stopwatch.ElapsedMilliseconds);
+            logger.LogInformation("Order {OrderId} processed in {Ms}ms", order.Id, stopwatch.ElapsedMilliseconds);
 
             return result;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Order {OrderId} processing failed", order.Id);
-            _metrics.RecordOrderFailure();
+            logger.LogError(ex, "Order {OrderId} processing failed", order.Id);
+            metrics.RecordOrderFailure();
             throw;
         }
         // ⚠️ Adding a new concern (rate limiting, idempotency check) means editing this method
@@ -95,11 +95,11 @@ public class OrderProcessor
 }
 ```
 
-Here's what breaks when requirements change: adding idempotency checking (skip duplicate orders) requires editing `ProcessOrderAsync` — touching code that already works and risking regressions in logging, metrics, and validation.
+Adding idempotency requires editing `ProcessOrderAsync`, where it can disturb unrelated processing concerns that already work.
 
 # Solution
 
-Each concern becomes a decorator that wraps the next handler:
+Move each concern into a decorator around the next handler:
 
 ```csharp
 // Component interface
@@ -171,29 +171,29 @@ public class MetricsOrderHandler(IOrderHandler next, IMetricsCollector metrics) 
     }
 }
 
+public interface IIdempotencyStore
+{
+    // Atomically coordinates concurrent calls for the same key.
+    Task<OrderResult> ExecuteOnceAsync(Guid key, Func<Task<OrderResult>> operation);
+}
+
 // ✅ Adding idempotency = new decorator class, zero changes to existing decorators
 public class IdempotencyOrderHandler(IOrderHandler next, IIdempotencyStore store) : IOrderHandler
 {
-    public async Task<OrderResult> HandleAsync(Order order)
-    {
-        if (await store.ExistsAsync(order.Id))
-            return await store.GetResultAsync(order.Id);
-
-        var result = await next.HandleAsync(order);
-        await store.StoreAsync(order.Id, result);
-        return result;
-    }
+    public Task<OrderResult> HandleAsync(Order order) =>
+        store.ExecuteOnceAsync(order.Id, () => next.HandleAsync(order));
 }
 
 // Composition — order matters: validation runs first, then idempotency, then logging, then metrics, then core
 IOrderHandler handler =
     new ValidationOrderHandler(
-        new IdempotencyOrderHandler(idempotencyStore,
+        new IdempotencyOrderHandler(
             new LoggingOrderHandler(
                 new MetricsOrderHandler(
                     new CoreOrderHandler(repository),
                     metrics),
-                logger)));
+                logger),
+            idempotencyStore));
 
 // With Scrutor (DI-based decoration):
 builder.Services.AddScoped<IOrderHandler, CoreOrderHandler>();
@@ -202,25 +202,25 @@ builder.Services.Decorate<IOrderHandler, LoggingOrderHandler>();
 builder.Services.Decorate<IOrderHandler, ValidationOrderHandler>(); // outermost = runs first
 ```
 
-Adding idempotency checking now means one new `IdempotencyOrderHandler` class — existing decorators and the core handler never change.
+Idempotency now lives in one `IdempotencyOrderHandler`. Existing decorators and the core handler stay unchanged.
 
-# You Already Use This
+# Common .NET Examples
 
-**`Stream` chain** — the canonical .NET Decorator. `new GZipStream(new CryptoStream(new BufferedStream(fileStream), encryptor, CryptoStreamMode.Write), CompressionMode.Compress)` stacks three decorators. Each wraps the next, adding compression, encryption, and buffering. All implement `Stream`.
+**A `Stream` chain** can layer buffering, encryption, or compression while every wrapper remains a `Stream`.
 
-**ASP.NET Core Middleware** — each middleware is a decorator. `app.UseAuthentication()`, `app.UseAuthorization()`, `app.UseRateLimiting()` each wrap the next `RequestDelegate`. The pipeline is a decorator chain built at startup.
+**ASP.NET Core middleware** composes delegates around the next `RequestDelegate`. Startup order determines request order and the reverse response path.
 
-**`DelegatingHandler` in `HttpClient`** — each handler in the `HttpClient` pipeline is a decorator. Retry handlers, auth handlers, and logging handlers each wrap the inner handler, adding behavior to HTTP requests and responses.
+**`DelegatingHandler` in `HttpClient`** layers request and response behavior around an inner handler.
 
-**Scrutor `Decorate<T>()`** — a DI extension that registers decorators without manual wiring. `services.Decorate<IOrderHandler, LoggingOrderHandler>()` wraps the existing `IOrderHandler` registration with the logging decorator.
+**Scrutor `Decorate<T>()`** registers a decorator around an existing service without manual object construction.
 
 # Pitfalls
 
-**Decorator ordering matters** — validation before logging means invalid orders are rejected before being logged. Logging before validation means every invalid order attempt is logged. The order is a business decision, not a technical one. Document the intended order and enforce it in the composition root.
+**Ordering changes behavior.** Validation outside logging rejects invalid orders before they are logged. Reversing those layers records every attempt. The composition root should make the chosen semantics visible.
 
-**Debugging wrapped stacks** — stack traces through a 5-layer decorator chain are hard to read. Each decorator adds a frame. Use structured logging with a correlation ID (set in the outermost decorator) so all log entries for one request share the same ID. In development, consider a single "all-in-one" decorator that's easier to step through.
+**Deep wrapper stacks are harder to trace.** Each layer adds another frame and another place where control may stop before delegation. Correlation identifiers help reconstruct one request, but a long chain is still a design smell worth inspecting.
 
-**Decorator state leaking between requests** — if a decorator holds mutable state (e.g., a counter), it must be scoped correctly. Singleton decorators with request-scoped state cause concurrency bugs. Register decorators with the same lifetime as the component they wrap.
+**Mutable state can leak between requests.** A singleton decorator must not carry request-specific fields. Its lifetime must be compatible with the wrapped service and every injected dependency.
 
 # Tradeoffs
 
@@ -232,23 +232,22 @@ Adding idempotency checking now means one new `IdempotencyOrderHandler` class �
 | Debuggability | Deep call stacks | Single method, easy to trace | Framework magic, hard to trace |
 | Complexity | Many small classes | One large class | Framework dependency |
 
-**Decision rule**: Use Decorator when you have 3+ cross-cutting concerns that need to be independently testable and composable in different orders. For 1-2 concerns, adding them directly to the class is simpler. For concerns that span many classes (not just one), AOP or middleware is more appropriate than per-class decorators.
+Decorator fits optional behaviors that share a contract and need explicit composition. One small concern may be clearer inside the component. A concern spanning every request usually belongs in middleware rather than in a decorator for each service.
 
 # Questions
 
 > [!QUESTION]- How does ASP.NET Core Middleware implement the Decorator pattern?
-> Each middleware is a decorator over `RequestDelegate next`. `app.UseAuthentication()` registers a middleware that calls `next(context)` after authenticating. The pipeline is built by composing these decorators at startup: each `Use()` call wraps the current pipeline in a new decorator. The outermost middleware runs first. This is exactly the Decorator pattern: each middleware implements the same interface (`RequestDelegate`), holds a reference to the next, and adds behavior before/after. The cost: middleware ordering bugs are runtime errors, not compile-time errors.
+> Each middleware receives a `RequestDelegate` for the remaining pipeline. It can run logic before delegation, after delegation, or stop the chain. Startup composition fixes the wrapper order, so ordering mistakes appear as runtime behavior rather than type errors.
 
-> [!QUESTION]- When should you use Decorator vs inheritance for adding behavior?
-> Decorator when: (1) you need to add behavior at runtime or compose behaviors dynamically, (2) the class is sealed or from a third-party library, (3) you need multiple independent behaviors that can be combined in different ways. Inheritance when: the new behavior is a fundamental specialization of the type, not a cross-cutting concern. The key difference: inheritance is static (decided at compile time); Decorator is dynamic (decided at composition time). Decorator also avoids the fragile base class problem — changes to the base class don't affect decorators.
+> [!QUESTION]- When should Decorator replace inheritance for added behavior?
+> Decorator suits optional behavior assembled at composition time, especially around sealed or third-party types. Inheritance suits a stable subtype relationship. A decorator avoids coupling behavior to a base-class implementation, but introduces another object and call boundary.
 
 > [!QUESTION]- What's the performance cost of a deep decorator chain?
-> Each decorator adds one virtual dispatch and one async state machine (if async). For a 5-layer chain, that's 5 virtual calls and 5 async allocations per request. In practice, this is negligible compared to I/O (DB queries, HTTP calls). Profile before optimizing. If the chain is genuinely hot (millions of calls/second with no I/O), consider collapsing the chain into a single class for that specific path. The tradeoff: performance vs maintainability. Premature optimization of decorator chains is a common mistake.
+> Each decorator adds a call boundary and may add asynchronous state-machine work if its method awaits. I/O usually dominates that cost. A CPU-bound hot path still deserves measurement. If wrapper overhead appears in profiles, collapsing layers on that path may be reasonable.
 
 # References
 
-- [Decorator Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=GCraGHx6gso&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc&index=3) — video walkthrough of the Decorator pattern with OOP examples
-- [Decorator — refactoring.guru](https://refactoring.guru/design-patterns/decorator) — canonical pattern description with wrapper chain diagram and C# example
-- [ASP.NET Core Middleware — Microsoft Learn](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/middleware/) — Decorator pattern in the ASP.NET Core request pipeline
-- [Scrutor — GitHub](https://github.com/khellang/Scrutor) — DI-based decorator registration for .NET without manual wiring
-- [DelegatingHandler — Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/api/system.net.http.delegatinghandler) — Decorator pattern in the HttpClient pipeline
+- [Decorator pattern](https://refactoring.guru/design-patterns/decorator)
+- [Decorator Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=GCraGHx6gso&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc&index=3)
+- [ASP.NET Core Middleware — Decorator pattern in the ASP.NET Core request pipeline](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/middleware/)
+- [DelegatingHandler — Decorator pattern in the HttpClient pipeline](https://learn.microsoft.com/en-us/dotnet/api/system.net.http.delegatinghandler)

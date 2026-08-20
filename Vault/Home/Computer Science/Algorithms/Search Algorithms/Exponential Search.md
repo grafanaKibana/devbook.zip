@@ -11,9 +11,9 @@ status: Creation
 publish: true
 ---
 
-A sorted sequence arrives without a known length — a seekable file, an indexable paginated API, a lazily materialized random-access list — and a lookup still has to land on one value. [[Home/Computer Science/Algorithms/Search Algorithms/Binary Search|Binary Search]] cannot begin: its first midpoint needs a right endpoint, and there is none to compute. Exponential search manufactures that endpoint by probing outward. It reads index `1`, then `2, 4, 8, 16, …`, doubling the probe until `a[bound] >= target` or the probe runs off the end. Every earlier probe was still below the target, so at the stopping point the target — if present — must sit between the previous probe and this one. The gallop has produced a bounded window `[bound/2, min(bound, n − 1)]`, and Binary Search finishes inside it.
+A sorted, indexable sequence may not expose its length. [[Home/Computer Science/Algorithms/Search Algorithms/Binary Search|Binary Search]] cannot choose a first midpoint without a right endpoint, so Exponential Search discovers one. It probes indices `1, 2, 4, 8, 16, …` until a value reaches the target or the probe passes the end. Binary Search then works inside `[bound/2, min(bound, n − 1)]`.
 
-The discovered window is anchored by the last probe below the target and the first probe at or beyond it.
+The window is sound because its lower edge comes from the last probe below the target. Its upper edge is the first probe at or beyond the target, or the end of the sequence.
 
 
 
@@ -149,13 +149,13 @@ The position-sensitive bound applies only when the target exists. A miss in a bo
 
 # When the Assumptions Stop Holding
 
-The headline use case is unknown-length input, but the source must still support indexed reads because the closing binary search revisits earlier positions. A forward-only stream does not satisfy that contract unless it buffers the prefix through the discovered upper bound and binary-searches the buffer. For an indexable source whose length is unknown, an out-of-range probe must act as a terminating signal alongside `a[bound] >= target`, and the eventual high bound must be clamped to the last valid index.
+Unknown length does not mean forward-only access. The closing binary search revisits earlier positions, so the source must support indexed reads. A stream can meet that contract only by buffering the prefix through the discovered upper bound. An unknown-length source must also turn an out-of-range probe into a clean stopping signal and expose the last valid index for clamping.
 
-On a bounded array the doubling overshoots by design: `bound` is the first power of two at or beyond the target, so it can land past `n − 1`. The high end of the bracket must be clamped with `min(bound, n − 1)` before bisecting; without the clamp the binary search reads `a[bound]` outside the array. The doubling itself is a second overflow site — `bound *= 2` on a very large array can wrap a 32-bit index negative, producing a negative probe or a loop that never terminates. Capping `bound` at `n` (or widening the index type) closes both.
+Doubling overshoots by design. On a bounded array, `bound` can land past `n − 1`, so the binary-search bracket must end at `min(bound, n − 1)`. The doubling operation can overflow too: `bound *= 2` may wrap a 32-bit index into a negative probe. Capping `bound` at `n`, or using a wider index type, handles both failures.
 
-The bracket is only as trustworthy as the ordering. The gallop's `a[bound] < target` test assumes sorted input; on `[2, 100, 3, 4, 5]` a search for `5` stops at index `1` because `100 >= 5`, incorrectly brackets `[0, 1]`, and misses the target at index `4`. Exponential search buys range discovery, not freedom from the sorting precondition.
+The bracket is only as trustworthy as the ordering. On `[2, 100, 3, 4, 5]`, a search for `5` stops at index `1` because `100 >= 5`, brackets `[0, 1]`, and misses index `4`. Exponential Search discovers a range. It does not remove the sorting precondition.
 
-# Reference Drawer
+# Diagram and C# Implementation
 
 > [!ABSTRACT]- Two-phase control flow
 >
@@ -206,18 +206,8 @@ The bracket is only as trustworthy as the ordering. The gallop's `a[bound] < tar
 > }
 > ```
 >
-> `Math.Min(bound, n - 1)` clamps the overshoot from the last doubling; an unknown-length indexable variant replaces the `bound < n` guard with an out-of-range probe signal.
-
-# Questions
-
-
-
-
-> [!QUESTION]- Why must the high end of the bracket be clamped, and what breaks without it?
-> The final doubling makes `bound` the first power of two at or beyond the target, so it can land past the last valid index. Bisecting `[bound/2, bound]` without clamping the upper end to `min(bound, n − 1)` reads outside the array; on an unknown-length finite source, the probe must report the terminal boundary or safely treat an out-of-range position as greater than the target. `bound *= 2` can also overflow a 32-bit index into a negative probe.
+> `Math.Min(bound, n - 1)` clamps the overshoot from the last doubling. An unknown-length indexable variant replaces the `bound < n` guard with an out-of-range probe signal.
 
 # References
 
-- [An almost optimal algorithm for unbounded searching](https://doi.org/10.1016/0020-0190%2876%2990071-5) — Bentley and Yao's original doubling-search analysis for searching an ordered sequence of unknown length.
-- [Exponential search (Wikipedia)](https://en.wikipedia.org/wiki/Exponential_search) — the doubling-then-binary-search scheme and its unbounded-array motivation.
-- [Timsort listsort.txt (CPython source)](https://github.com/python/cpython/blob/main/Objects/listsort.txt) — Tim Peters' description of galloping mode, exponential search running inside a production sort.
+- [An almost optimal algorithm for unbounded searching](https://doi.org/10.1016/0020-0190%2876%2990071-5)

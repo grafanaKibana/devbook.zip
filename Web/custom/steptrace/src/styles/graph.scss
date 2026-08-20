@@ -30,7 +30,7 @@
   stroke-dasharray: 4 4;
 }
 .steptrace__edge[data-active="true"] {
-  stroke: var(--_violet);
+  stroke: var(--_blue);
   stroke-dasharray: 3 3;
 }
 .steptrace__edge[data-selected="true"] {
@@ -85,12 +85,6 @@
 }
 .steptrace__node .steptrace__nmark[data-state="frontier"] {
   color: var(--_amber);
-}
-.steptrace__node .steptrace__nmark-success {
-  display: none;
-}
-.steptrace__node[data-state="visited"] .steptrace__nmark-success {
-  display: block;
 }
 .steptrace__node[data-state="visited"] .steptrace__ncirc {
   fill: color-mix(in srgb, var(--_green) 20%, transparent);

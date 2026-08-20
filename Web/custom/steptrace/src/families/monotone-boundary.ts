@@ -1,8 +1,5 @@
 import { BoundarySearchRecorder } from "../recorders"
-import {
-  makeBoundarySearchView,
-  type BoundarySearchViewDescriptor,
-} from "../render"
+import { makeBoundarySearchView, type BoundarySearchViewDescriptor } from "../render"
 import type { StepTraceView, VisualFamily } from "../types"
 
 export interface BoundaryLane {
@@ -91,7 +88,7 @@ export const shippingCapacityDescriptor: BoundarySearchViewDescriptor = {
       {
         k: "verdict",
         v: evaluation ? (evaluation.feasible ? "feasible" : "too small") : "—",
-        sw: evaluation?.feasible ? "var(--_green)" : "var(--_amber)",
+        sw: evaluation?.feasible ? "var(--_green)" : "var(--_red)",
         hint: "Whether this candidate satisfies the day limit.",
       },
     ]

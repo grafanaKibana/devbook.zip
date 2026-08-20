@@ -62,7 +62,7 @@
 }
 
 .steptrace__btcell[data-state="reject"] {
-  background: color-mix(in srgb, var(--_amber) 22%, transparent);
+  background: color-mix(in srgb, var(--_red) 22%, transparent);
 }
 
 .steptrace__btcell[data-state="remove"] {
@@ -75,6 +75,17 @@
 
 .steptrace__btcell[data-state="solved"] {
   background: color-mix(in srgb, var(--_green) 40%, transparent);
+}
+.steptrace__bt-success {
+  position: absolute;
+  inset-block-start: 0.18rem;
+  inset-inline-end: 0.18rem;
+  display: none !important;
+  inline-size: 0.82rem !important;
+  block-size: 0.82rem !important;
+}
+.steptrace__btcell[data-state="solved"] .steptrace__bt-success {
+  display: block !important;
 }
 
 .steptrace__btcell[data-conflict="1"] {
@@ -147,8 +158,8 @@
 }
 
 .steptrace__btslot[data-state="reject"] {
-  background: color-mix(in srgb, var(--_amber) 20%, transparent);
-  color: var(--_amber);
+  background: color-mix(in srgb, var(--_red) 20%, transparent);
+  color: var(--_red);
 }
 
 .steptrace__btslot[data-state="remove"] {
