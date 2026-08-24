@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.709Z
-modified: 2026-08-24T17:20:00.162Z
-published: 2026-08-24T17:20:00.162Z
+modified: 2026-08-24T18:34:23.559Z
+published: 2026-08-24T18:34:23.559Z
 topic:
   - Software Design
 subtopic:
@@ -16,7 +16,7 @@ status: Not-Started
 
 The testing pyramid arranges checks by feedback speed, fidelity, and maintenance cost. Narrow tests near the code are usually cheap and diagnostic. Broad tests across deployed boundaries prove more wiring but fail for more possible reasons. The shape is a heuristic rather than a fixed ratio, so the useful mix follows architecture and the cost of each missed defect.
 
-![[Assets/Excalidraw/Testing Pyramid.excalidraw.png|700|center]]
+![[Assets/Excalidraw/Testing Pyramid.excalidraw|700|center]]
 
 | Layer | Purpose | Relative quantity | Speed | Cost and failure diagnosis |
 | --- | --- | --- | --- | --- |
