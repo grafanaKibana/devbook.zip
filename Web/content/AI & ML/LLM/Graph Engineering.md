@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-24T15:49:58.437Z
-modified: 2026-08-24T16:59:37.525Z
-published: 2026-08-24T16:59:37.525Z
+modified: 2026-08-24T17:20:00.435Z
+published: 2026-08-24T17:20:00.435Z
 topic:
   - AI & ML
 subtopic:
@@ -30,7 +30,7 @@ An executable graph has three core parts:
 - **Edges route work.** A fixed edge always selects the same successor. A conditional edge inspects an outcome or current state. Dynamic routing can create a runtime-dependent fan-out, while a terminal edge ends the run.
 - **State records progress.** Nodes read a defined state and return updates. The schema determines what crosses boundaries, and merge rules determine how concurrent updates combine.
 
-![[Assets/Excalidraw/Graph Engineering.png|900|center]]
+![[Assets/Excalidraw/Graph Engineering.excalidraw.png|900|center]]
 
 This topology fixes the high-level contract: research precedes writing, review is mandatory, and only an accepted draft may publish. The nodes can still contain different kinds of work. Research might be an agent with search tools, writing a single model call, review deterministic checks plus a model evaluator, and publishing ordinary code behind an authorization gate.
 
