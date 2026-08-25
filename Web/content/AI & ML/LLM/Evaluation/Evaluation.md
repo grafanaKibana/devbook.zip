@@ -1,8 +1,9 @@
 ---
 publish: true
+title: LLM Evaluation
 created: 2026-08-20T20:41:15.489Z
-modified: 2026-08-20T20:41:15.490Z
-published: 2026-08-20T20:41:15.490Z
+modified: 2026-08-25T10:26:26.399Z
+published: 2026-08-25T10:26:26.399Z
 tags:
   - FolderNote
 topic:

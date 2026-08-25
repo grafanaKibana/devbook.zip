@@ -1,8 +1,9 @@
 ---
 publish: true
+title: Algorithm Design Paradigms
 created: 2026-08-20T20:41:15.525Z
-modified: 2026-08-20T20:41:15.526Z
-published: 2026-08-20T20:41:15.526Z
+modified: 2026-08-25T10:26:26.986Z
+published: 2026-08-25T10:26:26.986Z
 tags:
   - FolderNote
 topic:

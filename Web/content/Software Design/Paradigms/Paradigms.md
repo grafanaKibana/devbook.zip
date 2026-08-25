@@ -1,8 +1,9 @@
 ---
 publish: true
+title: Programming Paradigms
 created: 2026-08-20T20:41:15.706Z
-modified: 2026-08-20T20:41:15.707Z
-published: 2026-08-20T20:41:15.707Z
+modified: 2026-08-25T10:26:27.088Z
+published: 2026-08-25T10:26:27.088Z
 tags:
   - FolderNote
 topic:
