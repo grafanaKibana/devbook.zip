@@ -45,6 +45,7 @@
   },
   "dependencies": {
     "@clack/prompts": "^1.7.0",
+    "@excalidraw/excalidraw": "0.18.1",
     "@floating-ui/dom": "^1.8.0",
     "@myriaddreamin/rehype-typst": "^0.7.0",
     "@napi-rs/simple-git": "1.1.0",

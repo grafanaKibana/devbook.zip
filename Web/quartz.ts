@@ -1,3 +1,4 @@
+import { ExcalidrawExport } from "./custom/components/excalidraw-export"
 import { ExcalidrawEnhance } from "./custom/components/excalidraw-enhance"
 import { ExplorerIcons } from "./custom/components/explorer-icons"
 import { ContentMetaRow } from "./custom/components/content-meta-row"
@@ -13,6 +14,7 @@ import { SiteFooter } from "./custom/components/site-footer"
 import { SiteHeader } from "./custom/components/site-header"
 import { SiteMarquee } from "./custom/components/site-marquee"
 import { Steptrace } from "./custom/components/steptrace"
+import { ExcalidrawStatic } from "./custom/emitters/excalidraw-static"
 import { StepTraceStatic } from "./custom/emitters/steptrace-static"
 import { ClickableImages } from "./custom/transformers/clickable-images"
 import { ComplexityBlock } from "./custom/transformers/complexity-block"
@@ -30,10 +32,15 @@ import {
 import { componentRegistry } from "./quartz/components/registry"
 import type { QuartzComponent, QuartzComponentConstructor } from "./quartz/components/types"
 import { PageTypes } from "./quartz/plugins"
+import type { ExplorerOptions } from "./.quartz/plugins"
 import { loadQuartzConfig, loadQuartzLayout } from "./quartz/plugins/loader/config-loader"
 
 // DevBook customizations live here (the sanctioned Quartz override entrypoint)
 // and under ./custom — no engine files under quartz/ are modified.
+const explorerFilter: NonNullable<ExplorerOptions["filterFn"]> = (node) =>
+  node.slugSegment !== "tags" && !(node.slugSegment === "assets" && node.slugSegments?.length === 1)
+componentRegistry.setOptionOverrides("explorer", { filterFn: explorerFilter })
+
 const config = await loadQuartzConfig()
 
 insertAfterNamedPlugin(config.plugins.transformers, "Description", Seo())
@@ -89,6 +96,7 @@ config.plugins.transformers.push(ClickableImages())
 // Emit the generated engine from the sanctioned custom/ surface. This avoids
 // placing DevBook-owned code under Quartz's upgrade-owned quartz/static tree.
 config.plugins.emitters.push(StepTraceStatic())
+config.plugins.emitters.push(ExcalidrawStatic())
 config.plugins.emitters.push(Robots())
 
 const layout = await loadQuartzLayout()
@@ -122,6 +130,7 @@ const steptrace = Steptrace()
 const complexity = Complexity()
 const homepageFit = HomepageFit()
 const excalidrawEnhance = ExcalidrawEnhance()
+const excalidrawExport = ExcalidrawExport()
 const pageReveal = PageReveal()
 layout.defaults.afterBody = [
   ...(layout.defaults.afterBody ?? []),
@@ -129,6 +138,7 @@ layout.defaults.afterBody = [
   complexity,
   homepageFit,
   excalidrawEnhance,
+  excalidrawExport,
   pageReveal,
 ]
 for (const pageLayout of Object.values(layout.byPageType)) {
@@ -138,6 +148,7 @@ for (const pageLayout of Object.values(layout.byPageType)) {
     complexity,
     homepageFit,
     excalidrawEnhance,
+    excalidrawExport,
     pageReveal,
   ]
 }

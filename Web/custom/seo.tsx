@@ -90,14 +90,26 @@ export function seoHead(
   )
 }
 
-const rewriteSocialUrls = (child: ComponentChild, canonical: string): ComponentChild => {
+const rewriteSocialUrls = (child: ComponentChild, canonical?: string): ComponentChild => {
   if (Array.isArray(child)) return child.map((nested) => rewriteSocialUrls(nested, canonical))
   if (!child || typeof child !== "object" || !("type" in child)) return child
 
   const node = child as VNode<Record<string, unknown>>
   const property = node.props.property
-  if (node.type === "meta" && (property === "og:url" || property === "twitter:url")) {
+  if (
+    canonical &&
+    node.type === "meta" &&
+    (property === "og:url" || property === "twitter:url")
+  ) {
     return cloneElement(node, { content: canonical })
+  }
+  if (
+    node.type === "meta" &&
+    property === "og:image:type" &&
+    typeof node.props.content === "string" &&
+    node.props.content.startsWith("image/.")
+  ) {
+    return cloneElement(node, { content: node.props.content.replace("image/.", "image/") })
   }
 
   const children = node.props.children as ComponentChild | undefined
@@ -109,10 +121,8 @@ const rewriteSocialUrls = (child: ComponentChild, canonical: string): ComponentC
 export const withCanonicalSocialUrls = (Head: QuartzComponent): QuartzComponent => {
   const CanonicalSocialHead: QuartzComponent = (props) => {
     const slug = String(props.fileData.slug ?? "")
-    if (slug === "404") return Head(props)
-
     const baseUrl = requiredConfigText(props.cfg.baseUrl, "baseUrl")
-    return rewriteSocialUrls(Head(props), canonicalUrl(slug, baseUrl))
+    return rewriteSocialUrls(Head(props), slug === "404" ? undefined : canonicalUrl(slug, baseUrl))
   }
 
   return Object.assign(CanonicalSocialHead, Head)
