@@ -23,7 +23,11 @@ function transform(...children: Element[]): Root {
 }
 
 test("normalizes exact supported raster carriers before lightbox handling", () => {
-  const marked = element("img", { src: "/diagram.PNG?x=1#y", alt: "theme-aware", width: "auto" })
+  const marked = element("img", {
+    src: "/Assets/Software Architecture/Software Architecture-Microservices-18120000-3.PNG?x=1#y",
+    alt: "theme-aware",
+    width: "auto",
+  })
   const sized = element("img", { src: "/diagram.webp", alt: "640|theme-aware", width: "auto" })
   const supported = ["jxl", "jpg", "jpeg", "gif", "bmp"].map((extension) =>
     element("img", { src: `/diagram.${extension}`, alt: "theme-aware" }),
@@ -35,12 +39,15 @@ test("normalizes exact supported raster carriers before lightbox handling", () =
   transform(marked, sized, ...supported, linked)
 
   assert.equal(marked.properties["data-theme-aware"], "true")
-  assert.equal(marked.properties.alt, "")
-  assert.equal(marked.properties.ariaLabel, "Zoom image")
+  assert.equal(marked.properties.alt, "Software Architecture Microservices")
+  assert.equal(marked.properties.ariaLabel, "Zoom image: Software Architecture Microservices")
   assert.equal(sized.properties.width, 640)
   assert.equal(sized.properties["data-theme-aware"], "true")
+  assert.equal(sized.properties.alt, "diagram")
   assert.ok(supported.every((node) => node.properties["data-theme-aware"] === "true"))
+  assert.ok(supported.every((node) => node.properties.alt === "diagram"))
   assert.equal(linkedImage.properties["data-theme-aware"], "true")
+  assert.equal(linkedImage.properties.alt, "diagram")
   assert.equal(linkedImage.properties.className, undefined)
   assert.equal(linkedImage.properties.role, undefined)
 })
@@ -80,7 +87,7 @@ test("normalizes only true SVG objects without adding lightbox behavior", () => 
 
   assert.equal(svg.properties["data-theme-aware"], "true")
   assert.equal(svg.properties.width, 900)
-  assert.equal(svg.properties.ariaLabel, undefined)
+  assert.equal(svg.properties.ariaLabel, "diagram")
   assert.equal(svg.properties.className, undefined)
   assert.deepEqual(falseSvg.properties, {
     data: "/diagram.png",

@@ -64,11 +64,18 @@ export async function renderPageWith(
   if (page.getAttribute("data-devbook-excalidraw-export") !== "ready") {
     setStatus(page, "loading")
   }
+  const background = scene.appState?.viewBackgroundColor
+  const exportBackground =
+    scene.appState?.exportBackground !== false &&
+    typeof background === "string" &&
+    !["", "#fff", "#ffffff", "#ffffffff", "#00000000", "transparent"].includes(
+      background.trim().toLowerCase(),
+    )
   const exported = await exportToSvg({
     elements: scene.elements ?? [],
     appState: {
       ...(scene.appState ?? {}),
-      exportBackground: false,
+      exportBackground,
       exportEmbedScene: false,
       exportWithDarkMode: theme === "dark",
       theme,

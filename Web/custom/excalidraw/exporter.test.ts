@@ -110,6 +110,22 @@ test("preserves canonical SVG text colors against Quartz global text styles", as
   assert.equal(existing.style.fill, "#111827")
 })
 
+test("preserves authored non-default backgrounds", async () => {
+  const scene = fixture({
+    elements: [],
+    appState: { viewBackgroundColor: "#123456" },
+    files: {},
+  })
+  let received: Record<string, unknown> | undefined
+
+  await renderPageWith(scene.page as never, "light", async (options) => {
+    received = options
+    return exportedSvg() as never
+  })
+
+  assert.equal((received?.appState as Record<string, unknown>).exportBackground, true)
+})
+
 test("leaves the server SVG intact for overlays and unresolved binary files", async () => {
   const cases = [
     fixture({ elements: [], appState: {}, files: {} }, { overlay: true }),

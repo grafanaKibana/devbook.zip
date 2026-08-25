@@ -36,8 +36,14 @@ test("does not load the exporter on pages without Excalidraw scene data", () => 
   assert.deepEqual([...listeners.keys()].sort(), ["nav", "prenav", "render", "themechange"])
 })
 
-test("loads the exporter once when Excalidraw scene data is present", () => {
-  const { appended } = runLoader(true)
+test("loads the exporter once from the initial navigation event", () => {
+  const { appended, listeners } = runLoader(true)
+  assert.equal(appended.length, 0)
+
+  listeners.get("nav")?.()
   assert.equal(appended.length, 1)
   assert.equal((appended[0] as { src: string }).src, "/static/excalidraw/exporter.js")
+
+  listeners.get("render")?.()
+  assert.equal(appended.length, 1)
 })

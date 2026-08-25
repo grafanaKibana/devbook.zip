@@ -40,6 +40,18 @@ function targetExtension(target: unknown): string | undefined {
   return [...RASTER_EXTENSIONS, ".svg"].find((extension) => cleanTarget.endsWith(extension))
 }
 
+function imageLabel(target: unknown): string {
+  if (typeof target !== "string") return "Diagram"
+  const filename = target.split(/[?#]/, 1)[0].split("/").pop() ?? ""
+  return (
+    filename
+      .replace(/\.[^.]+$/, "")
+      .replace(/-\d{8}(?:-\d+)?$/, "")
+      .replace(/[-_]+/g, " ")
+      .trim() || "Diagram"
+  )
+}
+
 function normalizeThemeAware(el: Element): void {
   const properties = el.properties ?? (el.properties = {})
   const isRaster =
@@ -57,8 +69,9 @@ function normalizeThemeAware(el: Element): void {
 
   properties[THEME_AWARE_ATTRIBUTE] = "true"
   if (match[1]) properties.width = Number(match[1])
-  if (isRaster) properties.alt = ""
-  else delete properties.ariaLabel
+  const label = imageLabel(isRaster ? properties.src : properties.data)
+  if (isRaster) properties.alt = label
+  else properties.ariaLabel = label
 }
 
 const css = `

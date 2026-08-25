@@ -84,7 +84,6 @@ const loader = `
   document.addEventListener("nav", run);
   document.addEventListener("render", run);
   document.addEventListener("themechange", run);
-  run();
 })();
 `
 
