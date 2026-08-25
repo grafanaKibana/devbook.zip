@@ -15,7 +15,7 @@ A proxy receives traffic on one connection and sends it onward through another. 
 
 For concrete implementation patterns and configuration tradeoffs, see [[Nginx]].
 
-![[Networks/Networks-Forward and Reverse Proxies-18120000.png]]
+![[Networks/Networks-Forward and Reverse Proxies-18120000.png|theme-aware]]
 
 # Trust and Scope
 

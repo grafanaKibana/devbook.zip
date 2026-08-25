@@ -65,7 +65,7 @@ Lin  | NULL
 
 Putting `o.total >= 50` in `ON` preserves Lin as an unmatched left row. Putting it in `WHERE` removes Lin because `NULL >= 50` is unknown.
 
-![[Data Persistence/Data Persistence-SQL-18120000.png]]
+![[Data Persistence/Data Persistence-SQL-18120000.png|theme-aware]]
 
 | Physical join | Strong fit | Cost to watch |
 | --- | --- | --- |

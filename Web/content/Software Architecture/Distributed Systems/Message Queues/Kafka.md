@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.680Z
-modified: 2026-08-20T20:41:15.681Z
-published: 2026-08-20T20:41:15.681Z
+modified: 2026-08-25T13:45:27.886Z
+published: 2026-08-25T13:45:27.886Z
 topic:
   - Software Architecture
 subtopic:
@@ -133,7 +133,7 @@ The usual choices are straightforward:
 
 # Producer, Broker, and Consumer Loss Windows
 
-![[Assets/Software Architecture/Software Architecture-Kafka-18120000.png]]
+![[Assets/Software Architecture/Software Architecture-Kafka-18120000.png|theme-aware]]
 
 "Message loss" hides several different failure windows. The acknowledgement boundary identifies which one is in play:
 

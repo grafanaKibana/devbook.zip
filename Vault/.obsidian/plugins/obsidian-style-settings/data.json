@@ -136,5 +136,6 @@
   "baseline-style@@element-style": "input-baseline",
   "baseline-style@@density-modifier": 1,
   "baseline-style@@anim-speed-modifier": 1,
-  "baseline-style@@file-header-justify": "left"
+  "baseline-style@@file-header-justify": "left",
+  "baseline-style@@zoom-off": true
 }

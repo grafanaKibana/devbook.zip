@@ -1,4 +1,5 @@
 ---
+title: Algorithm Design Paradigms
 topic:
   - Computer Science
 subtopic:

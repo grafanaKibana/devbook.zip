@@ -85,7 +85,7 @@ sequenceDiagram
 
 CRUD stores the latest accepted state. Event Sourcing stores the ordered domain facts that produced it. An order row answers its current status. A well-designed event stream can also reconstruct earlier revisions and explain the accepted transitions.
 
-![[Software Architecture/Software Architecture-Event Sourcing-18120000.jpg]]
+![[Software Architecture/Software Architecture-Event Sourcing-18120000.jpg|theme-aware]]
 
 The rebuild arrow is conditional. Replay is trustworthy only when ordering is stable, historical schemas remain readable, and handlers isolate external effects. A handler that calls today's tax API can produce a different result from the same stream. Snapshots shorten the work without replacing the stream.
 

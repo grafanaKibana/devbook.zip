@@ -14,7 +14,7 @@ publish: true
 
 Model Context Protocol (MCP) gives LLM applications a common way to connect to tools and external data. Without a shared protocol, every client-service pairing needs its own adapter. In the ideal case, that produces N×M integrations for N clients and M services. MCP moves the integration boundary: clients implement the protocol once, while each service exposes an MCP server. The rough shape becomes N+M, provided both sides implement compatible versions and capabilities.
 
-A **host** application, such as an IDE or agent, creates one **client** for each server connection. That client maintains a stateful 1:1 session with an **MCP server** wrapping some capability, perhaps a database or a SaaS API. Servers publish **tools** for actions, **resources** for contextual data, and **prompts** for reusable interaction templates. The host chooses what reaches the model. That mediation point is where approval rules and access policy belong.
+A **host** application, such as an IDE or agent, uses an **MCP client** to communicate with each **MCP server**. A server wraps a capability, perhaps a database or a SaaS API. Under the `2026-07-28` protocol, every request is self-contained. Applications that need continuity pass an explicit handle as an ordinary tool argument. Earlier revisions used an initialization handshake and protocol-level sessions. Servers expose **tools** for actions, **resources** for contextual data, and **prompts** for reusable interaction templates. The host chooses what reaches the model. That mediation point is where approval rules and access policy belong.
 
 ```mermaid
 flowchart LR
@@ -40,7 +40,7 @@ Suppose a desktop host connects to PostgreSQL and GitHub servers. A request to f
 
 The control boundary differs by primitive. A model may request a tool call, the application decides when to fetch a resource, and a user can select a prompt. None of this removes the host's responsibility to authorize the resulting operation. Model choice is a proposal, not permission.
 
-Client and server negotiate **capabilities** when they connect. These declarations cover supported primitives and optional features such as resource subscriptions or logging.
+The `2026-07-28` core removed the required initialization handshake and protocol-managed sessions. Each request carries the protocol version, client information, and capabilities needed to process it. A client may call `server/discover` to inspect server capabilities first, but discovery is optional. Tools, resources, and prompts still have their own list methods, and the results include cache hints.
 
 ## Transports
 
@@ -50,14 +50,6 @@ MCP commonly uses two transports:
 - **Streamable HTTP.** The server runs behind an HTTP endpoint and may serve multiple clients. Responses may be streamed with Server-Sent Events. Remote deployments need transport security and authentication. The MCP authorization specification defines an OAuth-based flow for protected servers.
 
 Use stdio for a local process owned by one host. Use Streamable HTTP when the capability is remote or shared across clients.
-
-## Client Primitives
-
-Clients can expose capabilities back to a server:
-
-- **Sampling** lets the server ask the client for an LLM completion. The host remains in the path and can apply policy or request approval.
-- **Roots** describe file-system or URI boundaries relevant to the server. They provide context, not an operating-system sandbox or access-control mechanism.
-- **Elicitation** lets the server request additional information through the client. The client presents the request to the user, who controls whether and what to disclose. A server request is not consent, and sensitive data should not be collected through an opaque or auto-approved flow.
 
 # When to Use MCP Vs Function Calling
 
@@ -118,7 +110,7 @@ MCP earns its overhead when several clients need the same integration or when ca
 
 # References
 
-- [MCP Architecture — host, client, server model and capability negotiation (Official)](https://modelcontextprotocol.io/docs/learn/architecture)
+- [MCP Architecture — host, client, server, and capability discovery (Official)](https://modelcontextprotocol.io/docs/learn/architecture)
 - [MCPGauge — benchmarking token overhead and accuracy impact of MCP tool schemas (arXiv 2508.12566)](https://arxiv.org/abs/2508.12566)
 - [Invariant Labs — MCP security analysis and tool poisoning attack surface](https://invariantlabs.ai/blog/mcp-security-notification-tool-poisoning-attacks)
 - [Using MCP tools with an agent — Microsoft Agent Framework (Microsoft Learn)](https://learn.microsoft.com/en-us/agent-framework/agents/tools/local-mcp-tools)

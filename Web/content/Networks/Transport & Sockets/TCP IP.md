@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.643Z
-modified: 2026-08-20T20:41:15.643Z
-published: 2026-08-20T20:41:15.643Z
+modified: 2026-08-25T13:45:27.889Z
+published: 2026-08-25T13:45:27.889Z
 topic:
   - Networks
 subtopic:
@@ -60,7 +60,7 @@ NAT is translation, not firewall policy. A stateful firewall decides which packe
 
 Do not declare dual stack universally best. It gives native reachability during migration, but it doubles policy, observability, DNS, and failure surfaces: an `AAAA` record can send clients down a broken IPv6 path while IPv4 remains healthy. Use dual stack when both paths are operated and tested. IPv6-only with DNS64/NAT64 can be simpler inside controlled client networks. IPv4-only remains a compatibility constraint, not an end state.
 
-![[Assets/Networks/Networks-TCP IP-18120000.png]]
+![[Assets/Networks/Networks-TCP IP-18120000.png|theme-aware]]
 
 # TCP Connection: Three-Way Handshake
 

@@ -48,7 +48,7 @@ Wide-column stores group rows by partition key and order data within a partition
 
 Discord's message store shows the boundary at production scale. Messages are read by channel and time, so the key keeps that path local. Discord later moved from Cassandra to ScyllaDB after dealing with hot partitions, garbage collection, and repair work. The engine changed. The need for a deliberate partition shape did not.
 
-![[Data Persistence/Data Persistence-NoSQL Database Types-18120000.png]]
+![[Data Persistence/Data Persistence-NoSQL Database Types-18120000.png|theme-aware]]
 
 ## Graph
 

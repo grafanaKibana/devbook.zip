@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.493Z
-modified: 2026-08-20T20:41:15.494Z
-published: 2026-08-20T20:41:15.494Z
+modified: 2026-08-25T10:26:26.067Z
+published: 2026-08-25T10:26:26.067Z
 tags:
   - FolderNote
 topic:
@@ -16,7 +16,7 @@ priority: Medium
 status: Done
 ---
 
-Harness engineering designs the boundary between a model's structured output and the systems that act on it. The boundary includes the callable operations in [[Tool Design]], the developer-facing extension surfaces in [[Tooling]], the client wiring defined by [[Model Context Protocol]], and the execution environment that controls permissions and filesystem access. The model proposes a call. The harness decides what that call can reach and what happens when it runs.
+Harness engineering designs the boundary between a model's structured output and the systems that act on it. The boundary includes the callable operations in [[Tool Design]], the developer-facing extension surfaces in [[AI & ML/LLM/Harness Engineering/Tooling/Tooling|Tooling]], the client wiring defined by [[Model Context Protocol]], and the execution environment that controls permissions and filesystem access. The model proposes a call. The harness decides what that call can reach and what happens when it runs.
 
 This puts harness engineering in the middle of the runtime stack. [[AI & ML/LLM/Prompt Engineering/Prompt Engineering|Prompt Engineering]] shapes one instruction, while [[AI & ML/LLM/Context Engineering/Context Engineering|Context Engineering]] decides what the model sees. Harness engineering sets what it can do. [[AI & ML/LLM/Loop Engineering/Loop Engineering|Loop Engineering]] controls how the work continues over time.
 
@@ -31,7 +31,7 @@ The tool surface is an API for a consumer that cannot inspect its implementation
 - **Keep the surface small.** Expose only what the current task needs. Every connected schema competes for attention on every request. Large toolsets cost tokens and reduce selection accuracy, as the MCPGauge results in [[Tool Design]] show. [[AI & ML/LLM/Context Engineering/Context Engineering|Context Engineering]] manages that token cost. The harness decides which tools exist.
 - **Make the contracts consistent.** Shared naming, return shapes, and error conventions let the model reuse what it learned from one tool when it calls another. [[Tool Design]] covers the lower-level naming and consolidation patterns.
 
-Individual descriptions, parameters, compact results, and failure behavior belong in [[Tool Design]]. Skills, plugins, hooks, coding agents, and repository instructions live together under [[Tooling]].
+Individual descriptions, parameters, compact results, and failure behavior belong in [[Tool Design]]. Skills, plugins, hooks, coding agents, and repository instructions live together under [[AI & ML/LLM/Harness Engineering/Tooling/Tooling|Tooling]].
 
 # The Execution Environment
 

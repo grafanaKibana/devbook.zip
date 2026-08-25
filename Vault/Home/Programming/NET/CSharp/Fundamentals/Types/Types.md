@@ -1,4 +1,5 @@
 ---
+title: C# Types
 topic:
   - Programming
 subtopic:

@@ -153,6 +153,14 @@ test("folder canonical and social URLs use the same simplified route", () => {
   assert.doesNotMatch(html, /https:\/\/devbook\.zip\/security\/index/)
 })
 
+test("default Open Graph images use a valid MIME type", () => {
+  for (const slug of ["security/hashing", "404"]) {
+    const html = renderedHead(fileData(slug))
+    assert.match(html, /property="og:image:type" content="image\/png"/)
+    assert.doesNotMatch(html, /content="image\/\./)
+  }
+})
+
 test("homepage emits one safely serialized WebSite schema", () => {
   const html = render(seoHead(fileData("index"), "devbook.zip/</script><script>"))
   const scripts = [...html.matchAll(/<script type="application\/ld\+json">([^<]+)<\/script>/g)]

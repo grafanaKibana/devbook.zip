@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.467Z
-modified: 2026-08-20T20:41:15.468Z
-published: 2026-08-20T20:41:15.468Z
+modified: 2026-08-22T17:53:43.664Z
+published: 2026-08-22T17:53:43.664Z
 tags:
   - FolderNote
 topic:
@@ -29,7 +29,7 @@ An agent joins the four steering disciplines of the [[AI & ML/LLM/LLM|engineerin
 
 # The Augmented LLM
 
-Every agentic system starts with an LLM enhanced with retrieval, [[Tool Design|tools]], and memory. The model can generate search queries and choose tools. The surrounding runtime persists selected state and supplies it to later model calls. This component should work well before orchestration is added. Model choice, prompts, and clear tool contracts usually matter more than another control layer.
+Every agentic system starts with an LLM enhanced with retrieval, [[Tool Design|tools]], and memory. The model decides what to say or which tool to request. The surrounding harness builds the context, validates and runs tool calls, enforces operational limits, and carries selected state into later calls. [[Agent Loop]] follows that boundary across repeated decisions. This single-agent unit should work well before orchestration is added. Model choice, prompts, and clear tool contracts usually matter more than another control layer.
 
 [[Model Context Protocol|Model Context Protocol (MCP)]] standardizes how an augmented LLM connects to external tools and data sources.
 
@@ -64,6 +64,24 @@ That flexibility costs more model calls and introduces compounding error. A smal
 Agents work best when progress is observable. Tests constrain coding tasks, resolution criteria constrain support work, and cited evidence constrains research. Without a checkable success signal, the loop has no reliable way to distinguish progress from drift. Measuring task success, trajectory quality, tool-call correctness, and reliability across stochastic runs is [[AI & ML/LLM/Agents/Evaluation/Evaluation|Agent Evaluation]].
 
 For patterns on coordinating multiple agents, see [[Multi-Agentic Systems]].
+
+# Memory Systems
+
+Agent memory is durable state with explicit rules for storage and reuse. It is more than a transcript replayed on every turn or a vector index. Raw messages, tool calls, and results remain trace evidence. A promotion step chooses which observations become durable records, adds scope and provenance, and rejects unverified or duplicate entries. Later calls rebuild a bounded context from applicable rules, stable preferences, relevant memories, and recent state.
+
+A useful design separates five kinds of record. This is an architectural choice, not a universal standard. The separation makes one problem visible: each kind of memory needs a different read path.
+
+| Memory | Represents | Read path |
+| --- | --- | --- |
+| Policy | Authoritative constraints and procedures | Exact, exhaustive lookup |
+| Preference | Stable user or tenant parameters | Exact, exhaustive lookup |
+| Fact | Durable assertions with provenance | Scoped lexical, semantic, or hybrid retrieval |
+| Episode | A completed task or reusable experience | Scoped retrieval over a compact summary |
+| Trace | Raw execution and conversation events | Replay, audit, and extraction source |
+
+Durable records need rules for status, supersession, retention, and deletion. When a record changes, derived indexes and caches must be invalidated. Embeddings are a rebuildable search projection over canonical content, not the only copy of a fact. Authorization scope must be checked before ranking. Relevance metadata cannot enforce access.
+
+Memory systems usually repeat three operations: `record → recall → consolidate`. Consolidation turns raw observations into smaller durable records. Scheduled summaries are another form of derived state. Neither changes model weights or makes answers more accurate by itself. Promoted facts still need provenance, privacy controls, and evaluation.
 
 # Questions
 

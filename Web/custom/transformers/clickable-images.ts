@@ -23,6 +23,9 @@ import type { QuartzTransformerPlugin } from "@quartz-community/types"
 // is the final resolved URL. Theme-token CSS + SPA-safe JS ride externalResources.
 
 const LIGHTBOX_CLASS = "lightbox-image"
+const THEME_AWARE_ATTRIBUTE = "data-theme-aware"
+const THEME_AWARE_CARRIER = /^(?:(\d+)\|)?theme-aware$/
+const RASTER_EXTENSIONS = [".jxl", ".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp"]
 
 const classList = (node: Element): string[] => {
   const c = node.properties?.className
@@ -31,12 +34,58 @@ const classList = (node: Element): string[] => {
   return names.filter(Boolean)
 }
 
+function targetExtension(target: unknown): string | undefined {
+  if (typeof target !== "string") return
+  const cleanTarget = target.split(/[?#]/, 1)[0].toLowerCase()
+  return [...RASTER_EXTENSIONS, ".svg"].find((extension) => cleanTarget.endsWith(extension))
+}
+
+function imageLabel(target: unknown): string {
+  if (typeof target !== "string") return "Diagram"
+  const filename = target.split(/[?#]/, 1)[0].split("/").pop() ?? ""
+  return (
+    filename
+      .replace(/\.[^.]+$/, "")
+      .replace(/-\d{8}(?:-\d+)?$/, "")
+      .replace(/[-_]+/g, " ")
+      .trim() || "Diagram"
+  )
+}
+
+function normalizeThemeAware(el: Element): void {
+  const properties = el.properties ?? (el.properties = {})
+  const isRaster =
+    el.tagName === "img" && RASTER_EXTENSIONS.includes(targetExtension(properties.src) ?? "")
+  const isSvg =
+    el.tagName === "object" &&
+    properties.type === "image/svg+xml" &&
+    targetExtension(properties.data) === ".svg"
+  if (!isRaster && !isSvg) return
+
+  const carrier = isRaster ? properties.alt : properties.ariaLabel
+  if (typeof carrier !== "string") return
+  const match = THEME_AWARE_CARRIER.exec(carrier)
+  if (!match) return
+
+  properties[THEME_AWARE_ATTRIBUTE] = "true"
+  if (match[1]) properties.width = Number(match[1])
+  const label = imageLabel(isRaster ? properties.src : properties.data)
+  if (isRaster) properties.alt = label
+  else properties.ariaLabel = label
+}
+
 const css = `
+:root[saved-theme="dark"] :is(img[data-theme-aware="true"], object[data-theme-aware="true"]) {
+  background: transparent;
+  box-shadow: none;
+  filter: hue-rotate(180deg) invert(1);
+}
+
 .lightbox-image {
   cursor: zoom-in;
-  /* Share the DevBook card hover treatment (mirrors .db-card:hover): lift +
-     a fixed black shadow, so it reads identically to cards and never becomes a
-     light glow in dark mode. */
+  /* Share the DevBook card hover treatment for normal images. Dark
+     theme-aware images suppress the shadow above because their filter would
+     invert it into a glow. */
   transition:
     box-shadow var(--dur-2) var(--ease-out),
     transform var(--dur-2) var(--ease-out);
@@ -89,12 +138,6 @@ const css = `
   height: auto;
   object-fit: contain;
   border-radius: var(--surface-radius, 8px);
-  background: var(--light);
-  transform: scale(0.96);
-  transition: transform var(--dur-3) var(--ease-out);
-}
-.lightbox-modal.active img {
-  transform: scale(1);
 }
 
 .lightbox-close {
@@ -142,8 +185,7 @@ body.lightbox-open {
 
 @media (prefers-reduced-motion: reduce) {
   .lightbox-image,
-  .lightbox-modal,
-  .lightbox-modal img {
+  .lightbox-modal {
     transition: none;
   }
   .lightbox-image:hover,
@@ -196,6 +238,11 @@ const script = `
     lastFocus = img;
     modalImg.src = img.currentSrc || img.src;
     modalImg.alt = img.alt || "";
+    if (img.getAttribute("data-theme-aware") === "true") {
+      modalImg.setAttribute("data-theme-aware", "true");
+    } else {
+      modalImg.removeAttribute("data-theme-aware");
+    }
     // Commit the from-state before adding .active so the enter transition runs
     // even on a modal appended this same frame.
     void modal.offsetWidth;
@@ -245,6 +292,8 @@ export const ClickableImages: QuartzTransformerPlugin = () => ({
       () => (tree: HastRoot) => {
         visitParents(tree, "element", (node, ancestors) => {
           const el = node as Element
+          normalizeThemeAware(el)
+          if (el.tagName === "object") return
           if (el.tagName !== "img") return
           const src = el.properties?.src
           if (typeof src !== "string" || src.length === 0) return

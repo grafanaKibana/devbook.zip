@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.612Z
-modified: 2026-08-20T20:41:15.613Z
-published: 2026-08-20T20:41:15.613Z
+modified: 2026-08-25T13:45:27.878Z
+published: 2026-08-25T13:45:27.878Z
 topic:
   - Data Persistence
 subtopic: []
@@ -61,7 +61,7 @@ The common strategies differ in who owns an origin request and what an acknowled
 
 Write-around fits write-heavy data that is rarely read back: it avoids filling the cache with entries that may never be read, at the cost of making the first later read a miss.
 
-![[Assets/Data Persistence/Data Persistence-Caching-18120000-1.png]]
+![[Assets/Data Persistence/Data Persistence-Caching-18120000-1.png|theme-aware]]
 
 Cache-aside with `IDistributedCache`:
 
@@ -117,7 +117,7 @@ Choose the behavior before the client library: how often keys repeat, how stale 
 
 Track hit ratio by route and key class, miss latency, origin requests caused by misses, eviction and expiration rates, invalidation lag, timeouts, and stale-read or version-mismatch counts.
 
-![[Assets/Data Persistence/Data Persistence-Caching-18120000.png]]
+![[Assets/Data Persistence/Data Persistence-Caching-18120000.png|theme-aware]]
 
 # Invalidation Strategies
 
@@ -249,7 +249,7 @@ Netflix's EVCache illustrates four distinct contracts that can share an in-memor
 | Precomputed primary read store | An offline job publishes a generated data version | Retain or regenerate the last good generation before replacement |
 | Distribution plane | A publisher derives UI strings or translations from an upstream authority | Readers need versioned publication, rollback, and partial-generation handling |
 
-![[Assets/Data Persistence/Data Persistence-Caching-18120000-3.png]]
+![[Assets/Data Persistence/Data Persistence-Caching-18120000-3.png|theme-aware]]
 
 # Redis as a Cache or System of Record
 
@@ -287,7 +287,7 @@ Expiration, admission, and capacity eviction answer different questions: whether
 
 `IMemoryCache` is not bounded unless entries provide sizes and the cache has a `SizeLimit`. Redis uses `maxmemory-policy`. A pure cache commonly starts with an all-keys LRU or LFU policy, while `noeviction` rejects memory-growing writes. Choose from measured reuse distance, skew, object size, and miss cost, then watch eviction rate with hit ratio and origin load.
 
-![[Assets/Data Persistence/Data Persistence-Caching-18120000-2.png]]
+![[Assets/Data Persistence/Data Persistence-Caching-18120000-2.png|theme-aware]]
 
 # Other Pitfalls
 
@@ -297,4 +297,4 @@ High-cardinality keys, missing tenant or authorization dimensions, large payload
 
 Absent-key traffic follows `request → cache miss → origin not found`. Validate impossible keys, use a short negative TTL for repeated misses, consider a [[Computer Science/Data Structures/Hash-based Structures/Bloom Filter|Bloom Filter]] when membership is known, and rate-limit by principal. Negative entries must be invalidated on creation. Bloom false positives still reach the origin. Versioned keys still need TTLs so obsolete versions do not grow without bound.
 
-![[Assets/Data Persistence/Data Persistence-Caching-18120000-4.png]]
+![[Assets/Data Persistence/Data Persistence-Caching-18120000-4.png|theme-aware]]

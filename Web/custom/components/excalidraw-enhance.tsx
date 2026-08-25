@@ -1,9 +1,10 @@
 import type { QuartzComponent, QuartzComponentConstructor } from "@quartz-community/types"
+import { lucideMap } from "../lib/lucide-icons"
 
 // Excalidraw client enhancer. Renders nothing; contributes only an
-// afterDOMLoaded script that closes two gaps the pinned community plugin leaves
-// open, WITHOUT editing plugin files. It runs on every page as a guarded no-op
-// (the plugin's own interaction script is global-guarded the same way).
+// afterDOMLoaded script that closes the interaction gap left by the pinned
+// community plugin, WITHOUT editing plugin files. It runs on every page as a
+// guarded no-op (the plugin's own interaction script is global-guarded too).
 //
 //  1. Scroll-safe activation. The plugin attaches wheel + touchmove listeners on
 //     .excalidraw-container that preventDefault, trapping page scroll over every
@@ -16,12 +17,8 @@ import type { QuartzComponent, QuartzComponentConstructor } from "@quartz-commun
 //     Enter/Space activates pan/zoom; Esc or a click outside releases it. The
 //     touch-action side of the trap (set in CSS) is lifted by the same active
 //     class in custom.scss.
-//  2. Authored background. resolveBgColor emits a literal viewBackgroundColor into
-//     the svg's data-bg-color for non-white/non-transparent scenes; nothing
-//     consumes it. We apply that literal color to the container in BOTH themes
-//     (authored color is authoritative — never theme-adapted). Sentinel values
-//     (var(...) for white/transparent, or literal white) keep the plugin's
-//     theme-following default.
+
+const controlIcons = JSON.stringify(lucideMap(["zoom-in", "zoom-out", "rotate-ccw"]))
 
 const script = `
 (function () {
@@ -29,46 +26,19 @@ const script = `
   window.__devbookExcalidrawEnhance = true;
 
   var ACTIVE = "excalidraw-active";
+  var ICONS = ${controlIcons};
 
-  function isSentinelBg(value) {
-    if (!value) return true;
-    var s = value.trim().toLowerCase();
-    if (s.indexOf("var(") === 0) return true;
-    return s === "transparent" || s === "#ffffff" || s === "#ffffffff";
-  }
-
-  function applyAuthoredBg(container) {
-    var svg = container.querySelector("svg");
-    if (!svg) return;
-    var bg = svg.getAttribute("data-bg-color");
-    if (isSentinelBg(bg)) return;
-    // The plugin sets container.style.backgroundColor on every nav, which would
-    // clobber a background-color we set here. Publish the authored color as a
-    // custom property the plugin never touches; a scoped !important rule in
-    // custom.scss paints it (author !important beats the plugin's inline value)
-    // identically in light and dark — authored color is authoritative.
-    container.style.setProperty("--exc-authored-bg", bg);
-  }
-
-  // Inject an "open original" link into the control cluster, embeds only. The
-  // standalone drawing page already IS the original, so it gets no such link. The
-  // plugin renders no header/source link for a transcluded drawing; this button,
-  // grouped with the +/−/⟲ controls, is the way back to the full drawing. Href is
-  // the browser-resolved href from Quartz's standard transclusion source link.
-  function addOpenOriginal(page) {
-    var controls = page.querySelector(".excalidraw-controls");
-    if (!controls || controls.querySelector(".excalidraw-open-original")) return;
-    var tc = page.closest("blockquote.transclude");
-    if (!tc) return;
-    var source = tc.querySelector("a.transclude-src");
-    if (!source) return;
-    var a = document.createElement("a");
-    a.className = "excalidraw-open-original";
-    a.textContent = "↗";
-    a.setAttribute("aria-label", "Open original drawing");
-    a.setAttribute("title", "Open original drawing");
-    a.href = source.href;
-    controls.appendChild(a);
+  function decorateControls(page) {
+    [
+      [".excalidraw-zoom-in", "zoom-in"],
+      [".excalidraw-zoom-out", "zoom-out"],
+      [".excalidraw-reset", "rotate-ccw"]
+    ].forEach(function (entry) {
+      var button = page.querySelector(entry[0]);
+      var inner = ICONS[entry[1]];
+      if (!button || !inner) return;
+      button.innerHTML = '<svg class="lucide lucide-' + entry[1] + '" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + inner + '</svg>';
+    });
   }
 
   function pages() {
@@ -124,13 +94,9 @@ const script = `
 
   function setup(page) {
     var container = control(page);
-    if (page.dataset.devbookExc) {
-      if (container) applyAuthoredBg(container);
-      addOpenOriginal(page);
-      return;
-    }
+    decorateControls(page);
+    if (page.dataset.devbookExc) return;
     page.dataset.devbookExc = "1";
-    addOpenOriginal(page);
 
     page.addEventListener("wheel", gate, { capture: true, passive: true });
     page.addEventListener("touchmove", gate, { capture: true, passive: true });
@@ -142,7 +108,6 @@ const script = `
       container.setAttribute("aria-pressed", "false");
       container.setAttribute("aria-label", "Activate diagram to pan and zoom; press Escape to release");
       container.addEventListener("keydown", onKeydown);
-      applyAuthoredBg(container);
     }
   }
 

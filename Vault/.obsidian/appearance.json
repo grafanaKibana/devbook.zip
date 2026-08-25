@@ -10,10 +10,10 @@
   "theme": "system",
   "baseFontSize": 16,
   "enabledCssSnippets": [
-    "markdown-max-width",
     "hide-components",
     "paper-page",
-    "question-margin-note"
+    "question-margin-note",
+    "markdown-max-width"
   ],
   "monospaceFontFamily": "JetBrains Mono"
 }

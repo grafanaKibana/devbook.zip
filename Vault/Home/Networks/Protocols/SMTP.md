@@ -31,7 +31,7 @@ SMTP response classes:
 
 A timeout leaves the sender uncertain. The remote server may have accepted the message and lost only the response, so a retry can create a duplicate.
 
-![[Networks/Networks-SMTP-18120000.jpg]]
+![[Networks/Networks-SMTP-18120000.jpg|theme-aware]]
 
 # Email Authentication
 

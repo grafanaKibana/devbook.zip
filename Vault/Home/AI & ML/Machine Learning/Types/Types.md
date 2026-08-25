@@ -1,4 +1,5 @@
 ---
+title: Machine Learning Types
 topic:
   - AI & ML
 subtopic:

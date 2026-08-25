@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.497Z
-modified: 2026-08-20T20:41:15.497Z
-published: 2026-08-20T20:41:15.497Z
+modified: 2026-08-22T18:41:03.392Z
+published: 2026-08-22T18:41:03.392Z
 topic:
   - AI & ML
 subtopic:
@@ -14,7 +14,9 @@ priority: Medium
 status: Done
 ---
 
-An agent loop gives an LLM another move. The model can inspect the current state, call a tool, read the result, and decide whether the task is finished. That repeated decision is what separates a tool-using agent from a single model call.
+An agent loop gives an LLM another move after each result. Within one run, the harness builds the context, asks the model what to do next, performs the chosen action, appends the result, and repeats until a termination check ends the run. That repeated decision is what separates a tool-using agent from a single model call.
+
+The model and harness own different parts of the cycle. The model chooses the next response or tool call. The harness prepares context, validates and executes tools, enforces operational limits, and persists selected state. A failure in tool execution, permissions, termination, or state handling therefore belongs to harness engineering rather than model reasoning.
 
 ReAct (Reasoning + Acting), introduced by Yao et al., is the familiar form of this loop. Frameworks package it differently, but the runtime still alternates model decisions with external actions and observations.
 
@@ -49,7 +51,7 @@ The loop follows the chat API contract closely.
 
 **Observe.** The runtime validates and invokes the function, serializes the result, and appends it as a `tool` message. The model only sees that serialized result.
 
-**Repeat.** A response with more tool calls starts another iteration. Plain text with no tool calls normally terminates the run.
+**Repeat.** A response with more tool calls starts another iteration. Plain text with no tool calls normally ends the current turn, but it does not prove that the user's goal is satisfied. Long-running tasks need a separate completion predicate, such as passing tests or a schema-valid artifact.
 
 In Microsoft Agent Framework for .NET, `AIAgent.RunAsync` drives this cycle:
 
@@ -123,7 +125,9 @@ An agent can spend heavily without getting closer to a complete result. In a pro
 
 The model has no reliable sense of diminishing returns. As tool results accumulate, earlier attempts also become easier to miss.
 
-The runtime needs a hard iteration cap. Agent Framework's `FunctionInvokingChatClient` exposes `MaximumIterationsPerRequest`. Outer workflow agents use their own loop controls, such as `LoopAgentOptions.MaxIterations`. LangGraph exposes `recursion_limit`. Repeated calls with identical arguments can trigger an earlier stop, and per-run tool counts make unusual behavior visible.
+The runtime needs a hard iteration cap. Agent Framework's `FunctionInvokingChatClient` exposes `MaximumIterationsPerRequest`. Outer workflow agents use their own loop controls, such as `LoopAgentOptions.MaxIterations`. LangGraph exposes `recursion_limit`.
+
+Iteration caps alone are not enough. A wall-clock timeout covers slow calls, while a clear error path ends failures the loop cannot recover from. The loop should also stop when the agent repeats the same call or bounces between two states. Per-run tool counts make those patterns visible.
 
 ## Token Explosion
 

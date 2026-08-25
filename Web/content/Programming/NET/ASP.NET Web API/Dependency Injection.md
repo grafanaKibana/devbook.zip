@@ -1,8 +1,9 @@
 ---
 publish: true
+title: ASP.NET Core Dependency Injection
 created: 2026-08-20T20:41:15.646Z
-modified: 2026-08-20T20:41:15.646Z
-published: 2026-08-20T20:41:15.646Z
+modified: 2026-08-25T10:26:27.509Z
+published: 2026-08-25T10:26:27.509Z
 topic:
   - Programming
 subtopic:

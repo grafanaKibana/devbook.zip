@@ -21,7 +21,7 @@ return FolderStructureMap;
 
 # Quality Attributes and Measurable Targets
 
-![[Software Architecture/Software Architecture-Distributed Systems-18120000-2.png]]
+![[Software Architecture/Software Architecture-Distributed Systems-18120000-2.png|theme-aware]]
 
 The four labels are an orientation mnemonic, not independent boxes. Logging does not create reliability, and load balancing alone does not create availability. Turn each attribute into a workload, target, failure model, and measurement window:
 
@@ -36,7 +36,7 @@ Targets conflict. Synchronous multi-region replication may improve durability an
 
 # Map Symptoms to Mechanisms, then Test the Tradeoff
 
-![[Software Architecture/Software Architecture-Distributed Systems-18120000.png]]
+![[Software Architecture/Software Architecture-Distributed Systems-18120000.png|theme-aware]]
 
 Treat the visual as diagnostic prompts, not prescriptions:
 
@@ -83,7 +83,7 @@ Use [[Home/Software Architecture/Distributed Systems/Unique ID Generation]] for 
 
 # Pattern Map
 
-![[Software Architecture/Software Architecture-Distributed Systems-18120000-1.png]]
+![[Software Architecture/Software Architecture-Distributed Systems-18120000-1.png|theme-aware]]
 
 The visual mixes patterns from different layers. Use this linked map to keep the problem and cost visible:
 

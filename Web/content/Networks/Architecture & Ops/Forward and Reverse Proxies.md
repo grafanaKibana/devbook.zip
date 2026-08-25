@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.627Z
-modified: 2026-08-20T20:41:15.627Z
-published: 2026-08-20T20:41:15.627Z
+modified: 2026-08-25T13:45:27.888Z
+published: 2026-08-25T13:45:27.888Z
 topic:
   - Networks
 subtopic:
@@ -18,7 +18,7 @@ A proxy receives traffic on one connection and sends it onward through another. 
 
 For concrete implementation patterns and configuration tradeoffs, see [[Nginx]].
 
-![[Assets/Networks/Networks-Forward and Reverse Proxies-18120000.png]]
+![[Assets/Networks/Networks-Forward and Reverse Proxies-18120000.png|theme-aware]]
 
 # Trust and Scope
 

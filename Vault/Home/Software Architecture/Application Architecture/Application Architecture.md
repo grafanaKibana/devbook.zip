@@ -47,7 +47,7 @@ Search is a read projection, not the source of truth. Logging and monitoring obs
 
 # Trigger-action Integration Platforms
 
-![[Software Architecture/Software Architecture-Application Architecture-18120000.png]]
+![[Software Architecture/Software Architecture-Application Architecture-18120000.png|theme-aware]]
 
 The branded example is dated, but the mechanism is stable: a connector observes a trigger, normalizes it, evaluates filters, and invokes one or more actions with stored credentials.
 

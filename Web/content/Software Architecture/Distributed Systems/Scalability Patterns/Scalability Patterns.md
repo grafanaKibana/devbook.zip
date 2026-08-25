@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.682Z
-modified: 2026-08-20T20:41:15.683Z
-published: 2026-08-20T20:41:15.683Z
+modified: 2026-08-25T13:45:27.884Z
+published: 2026-08-25T13:45:27.884Z
 tags:
   - FolderNote
 topic:
@@ -43,7 +43,7 @@ Sharding is usually a late move because routing and resharding become permanent 
 
 # Measurement and Bottleneck Migration
 
-![[Assets/Software Architecture/Software Architecture-Scalability Patterns-18120000.png]]
+![[Assets/Software Architecture/Software Architecture-Scalability Patterns-18120000.png|theme-aware]]
 
 The strategies in the visual solve different measured bottlenecks. They are not a checklist. Each evaluation needs an explicit measurement contract:
 
