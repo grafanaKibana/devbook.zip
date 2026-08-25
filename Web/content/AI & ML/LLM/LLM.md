@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.496Z
-modified: 2026-08-20T20:41:15.496Z
-published: 2026-08-20T20:41:15.496Z
+modified: 2026-08-25T13:45:27.891Z
+published: 2026-08-25T13:45:27.891Z
 tags:
   - FolderNote
 topic:
@@ -82,7 +82,7 @@ instruction model = compatible base checkpoint + SFT + optional preference/rewar
 deployable artifact = model bundle + runtime + release evaluation
 ```
 
-![[Assets/AI & ML/AI & ML-LLM-18120000.png]]
+![[Assets/AI & ML/AI & ML-LLM-18120000.png|theme-aware]]
 
 1. **Pretraining** fits the architecture’s language objective over a large corpus. The output is a base checkpoint, not automatically a conversational assistant.
 2. **Supervised fine-tuning (SFT)** trains on instruction-response or task examples. [[AI & ML/LLM/Fine-tuning|Fine-tuning]] covers full and parameter-efficient updates, data contracts, preference alignment, GRPO, and evaluation.

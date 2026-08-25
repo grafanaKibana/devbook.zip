@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.621Z
-modified: 2026-08-20T20:41:15.621Z
-published: 2026-08-20T20:41:15.621Z
+modified: 2026-08-25T13:45:27.872Z
+published: 2026-08-25T13:45:27.872Z
 tags:
   - FolderNote
 topic:
@@ -66,7 +66,7 @@ Lin  | NULL
 
 Putting `o.total >= 50` in `ON` preserves Lin as an unmatched left row. Putting it in `WHERE` removes Lin because `NULL >= 50` is unknown.
 
-![[Assets/Data Persistence/Data Persistence-SQL-18120000.png]]
+![[Assets/Data Persistence/Data Persistence-SQL-18120000.png|theme-aware]]
 
 | Physical join | Strong fit | Cost to watch |
 | --- | --- | --- |

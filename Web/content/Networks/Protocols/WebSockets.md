@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.641Z
-modified: 2026-08-20T20:41:15.642Z
-published: 2026-08-20T20:41:15.642Z
+modified: 2026-08-25T13:45:27.880Z
+published: 2026-08-25T13:45:27.880Z
 topic:
   - Networks
 subtopic:
@@ -105,7 +105,7 @@ The echo sketch exits when it receives a close frame but does not send the requi
 | Server-Sent Events | Long-lived server→client UTF-8 event stream | Native browser `EventSource`. HTTP-friendly, but buffering proxies must be disabled | Browser reconnects and sends `Last-Event-ID`. Server needs replay retention. API has no explicit consumer-demand signal | One long response and server buffers/heartbeats per client |
 | WebSocket | Long-lived full-duplex framed messages | Native browser API after HTTP handshake. Some proxies impose idle limits | Application owns reconnect, resume tokens, acknowledgements, and queue bounds. Browser API has limited backpressure | One stateful connection, heartbeat, subscription state, and outbound queue per client |
 
-![[Assets/Networks/Networks-WebSockets-18120000.jpg]]
+![[Assets/Networks/Networks-WebSockets-18120000.jpg|theme-aware]]
 
 Short polling fits low-frequency state where seconds of staleness are acceptable. Long polling is mainly a compatibility bridge. SSE handles ordered server-to-browser updates and has a native replay cursor. WebSocket fits low-latency traffic in both directions. In .NET, SignalR is usually the smaller application surface unless wire-level control matters.
 

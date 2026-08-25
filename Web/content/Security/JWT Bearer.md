@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.670Z
-modified: 2026-08-20T20:41:15.670Z
-published: 2026-08-20T20:41:15.670Z
+modified: 2026-08-25T13:45:27.887Z
+published: 2026-08-25T13:45:27.887Z
 topic:
   - Security
 subtopic:
@@ -47,7 +47,7 @@ The signature covers the encoded protected header and payload. Integrity becomes
 
 Validation is a gate before authorization. The resource server verifies the cryptographic protection and applies the token profile's issuer, audience, lifetime, type, and other required claim rules. It then authorizes the requested action against the actual resource. A valid `is_root: true` claim grants nothing unless the trusted issuer is authoritative for that meaning and the resource server's policy maps it to the operation.
 
-![[Assets/Security/Security-JWT Bearer-18120000.png]]
+![[Assets/Security/Security-JWT Bearer-18120000.png|theme-aware]]
 
 # Signing Algorithms
 

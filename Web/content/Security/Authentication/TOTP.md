@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.666Z
-modified: 2026-08-20T20:41:15.666Z
-published: 2026-08-20T20:41:15.666Z
+modified: 2026-08-25T13:45:27.876Z
+published: 2026-08-25T13:45:27.876Z
 topic:
   - Security
 subtopic:
@@ -37,7 +37,7 @@ otpauth://totp/DevBook:alice@example.com
 
 The QR code contains the shared secret. Screenshots, analytics, logs, and backup exports can therefore clone the authenticator. Display and replacement require recent authentication, and rotation invalidates the previous secret once the new factor is confirmed.
 
-![[Assets/Security/Security-TOTP-18120000.jpg]]
+![[Assets/Security/Security-TOTP-18120000.jpg|theme-aware]]
 
 > [!WARNING] Diagram caveat
 > TOTP does not concatenate a secret and timestamp. It converts time to a moving counter, computes HMAC over the encoded counter, applies dynamic truncation, and reduces the result to the configured number of digits. The verifier accepts only a bounded time-step window.

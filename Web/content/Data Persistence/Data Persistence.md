@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.613Z
-modified: 2026-08-20T20:41:15.614Z
-published: 2026-08-20T20:41:15.614Z
+modified: 2026-08-25T13:45:27.877Z
+published: 2026-08-25T13:45:27.877Z
 tags:
   - FolderNote
 icon: database
@@ -51,7 +51,7 @@ Block, file, and object storage differ in the unit the application controls. The
 | Application responsibility | Filesystem, snapshots, replication, and recovery | Path/permission design, lock behavior, and shared throughput | Keys, metadata, checksums, lifecycle, versioning, and multi-object publication protocol |
 | Typical fit | Database pages, VM disks, transactional logs | Shared home directories, content tooling, lift-and-shift applications | Media, backups, artifacts, data lakes, immutable large values |
 
-![[Assets/Data Persistence/Data Persistence-Data Persistence-18120000-1.png]]
+![[Assets/Data Persistence/Data Persistence-Data Persistence-18120000-1.png|theme-aware]]
 
 A database volume normally needs block storage for low-latency random I/O and crash ordering. A render farm needs file semantics because workers open and lock shared project files. Immutable 500 MiB videos served through a CDN fit object storage and its lifecycle controls. Calling all cloud storage "object storage" hides the failure boundary the application relies on.
 
@@ -66,7 +66,7 @@ Start with the slow request and account for its time. Suppose `GET /orders/42` r
 5. Add the persistence-layer [[Data Persistence/Caching|cache]] or a materialized read model only when repeated reads tolerate a declared freshness window. Add [[Data Persistence/SQL/Replication|read replicas]] when reads dominate and replica lag is acceptable.
 6. Scale the node after the query path is sound. Partition or [[Data Persistence/SQL/Sharding|shard]] only when one node's measured capacity, data size, or failure/recovery boundary remains the limiter.
 
-![[Assets/Data Persistence/Data Persistence-Data Persistence-18120000-2.png]]
+![[Assets/Data Persistence/Data Persistence-Data Persistence-18120000-2.png|theme-aware]]
 
 This sequence keeps the diagnosis tied to evidence. Jumping to cache, replicas, or shards may improve one graph while adding stale reads or duplicated writes that hide the original defect.
 
@@ -96,7 +96,7 @@ Several steps may be necessary, but their guarantees accumulate. A cached read f
 | Support an alternate lookup | [[Data Persistence/SQL/Indexes\|Index table or secondary index]] | Maintain another key-to-record path for a known query | Every write must update it. Rebuilds and uniqueness need a protocol |
 | Distribute data and write load | [[Data Persistence/SQL/Sharding\|Sharding]] | Route each partition key to one shard | Cross-shard work, resharding, skew, and hot keys |
 
-![[Assets/Data Persistence/Data Persistence-Data Persistence-18120000.png]]
+![[Assets/Data Persistence/Data Persistence-Data Persistence-18120000.png|theme-aware]]
 
 The categories overlap. CQRS may use materialized views, event sourcing may feed them, and each shard may maintain local indexes. The design still starts with the problem. Event sourcing does not replace a cache, and a secondary index does not partition a write bottleneck.
 

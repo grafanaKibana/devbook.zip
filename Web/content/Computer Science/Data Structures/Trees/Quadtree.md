@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.608Z
-modified: 2026-08-20T20:41:15.608Z
-published: 2026-08-20T20:41:15.608Z
+modified: 2026-08-25T13:45:27.893Z
+published: 2026-08-25T13:45:27.893Z
 topic:
   - Computer Science
 subtopic:
@@ -23,7 +23,7 @@ A quadtree is a **spatial-partitioning tree, not a balanced search tree**. It ha
 ````tabsdown
 tab: Visualization
 
-![[Assets/Computer Science/Computer Science-Quadtree-Adaptive-Split.svg|900]]
+![[Assets/Computer Science/Computer Science-Quadtree-Adaptive-Split.svg|900|theme-aware]]
 
 Only the overfull northeast leaf subdivides; the other three root quadrants retain their bounds and contents. The inserted points are then routed into the four new child regions, so resolution increases locally where the data is dense.
 

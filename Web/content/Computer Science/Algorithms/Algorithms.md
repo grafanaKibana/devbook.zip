@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.510Z
-modified: 2026-08-20T20:41:15.510Z
-published: 2026-08-20T20:41:15.510Z
+modified: 2026-08-25T13:45:27.892Z
+published: 2026-08-25T13:45:27.892Z
 tags:
   - FolderNote
 topic:
@@ -39,7 +39,7 @@ System-design diagrams hide algorithms inside boxes labelled “cache,” “sch
 | Token buckets | Rate limiting with bounded bursts | A shared bucket needs atomic coordination. Per-node buckets only approximate a global limit |
 | Consensus | Replicated metadata and leader election | Safety requires quorum communication. A partition that cannot form a quorum loses progress while the quorum side can continue |
 
-![[Assets/Computer Science/Computer Science-Algorithms-18120000.jpg]]
+![[Assets/Computer Science/Computer Science-Algorithms-18120000.jpg|theme-aware]]
 
 The visual is a topic inventory, not a universal priority ranking. A design decision depends on the mechanism's invariant and where it fails under the actual workload.
 
