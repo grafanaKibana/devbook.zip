@@ -13,7 +13,7 @@ publish: true
 
 Presentation patterns separate a UI from the state and decisions behind it. Their real differences are ownership: who receives input, where screen state lives, what causes a render, and who chooses the next screen. The patterns fit different interaction models. They are not a maturity ladder, and the smallest boundary that keeps domain behavior out of the UI framework is usually enough.
 
-![[Software Architecture/Software Architecture-Presentation Architecture Variants-18120000.png]]
+![[Software Architecture/Software Architecture-Presentation Architecture Variants-18120000.png|theme-aware]]
 
 # Who Owns State, Rendering, and Navigation
 

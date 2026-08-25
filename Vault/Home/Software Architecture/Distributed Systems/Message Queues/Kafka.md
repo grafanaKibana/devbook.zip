@@ -131,7 +131,7 @@ The usual choices are straightforward:
 
 # Producer, Broker, and Consumer Loss Windows
 
-![[Software Architecture/Software Architecture-Kafka-18120000.png]]
+![[Software Architecture/Software Architecture-Kafka-18120000.png|theme-aware]]
 
 "Message loss" hides several different failure windows. The acknowledgement boundary identifies which one is in play:
 

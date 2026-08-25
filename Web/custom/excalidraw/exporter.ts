@@ -89,6 +89,9 @@ export async function renderPageWith(
 
   const viewBox = exported.getAttribute("viewBox")
   if (viewBox) target.setAttribute("viewBox", viewBox)
+  const filter = exported.getAttribute("filter")
+  if (filter) target.setAttribute("filter", filter)
+  else target.removeAttribute("filter")
   target.removeAttribute("data-bg-color")
   target.replaceChildren(...Array.from(exported.childNodes, (node) => node.cloneNode(true)))
   setStatus(page, "ready")

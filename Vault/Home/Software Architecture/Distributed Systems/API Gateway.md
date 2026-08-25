@@ -49,7 +49,7 @@ Routing and edge policy are ordinary gateway work. Composition is a separate cho
 
 ## Reverse Proxy, Gateway, and Load Balancer Capability Overlap
 
-![[Software Architecture/Software Architecture-API Gateway-18120000-1.png]]
+![[Software Architecture/Software Architecture-API Gateway-18120000-1.png|theme-aware]]
 
 The image describes roles rather than exclusive product categories. NGINX, Envoy, YARP, and managed gateways can cover more than one column.
 
@@ -91,7 +91,7 @@ Domain decisions still belong to the owning service. `CanRefundOrder` does not b
 
 ## Netflix API Evolution: Aggregation to Federation
 
-![[Software Architecture/Software Architecture-API Gateway-18120000.png]]
+![[Software Architecture/Software Architecture-API Gateway-18120000.png|theme-aware]]
 
 The visual compresses several distinct systems into one evolution story. With federation, domains own their schema contributions and resolver behavior. A shared registry checks whether those contributions compose, and the graph gateway executes the resulting plan.
 

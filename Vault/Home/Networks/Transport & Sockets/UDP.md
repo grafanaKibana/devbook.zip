@@ -65,7 +65,7 @@ event:    id=580                         duplicate after retry; acknowledge, do 
 
 Snapshots are replaceable. The receiver can keep a small sequence window, reject stale packets, and interpolate through isolated gaps. Critical events need a different policy: sequence numbers expose gaps, selective acknowledgments report arrivals, retry deadlines prevent stale work, and stable event IDs make duplicates harmless. A global order recreates head-of-line blocking. Independent channels preserve only the order each operation actually needs.
 
-![[Networks/Networks-UDP-18120000.png]]
+![[Networks/Networks-UDP-18120000.png|theme-aware]]
 
 Reliability logic does not excuse an unpaced sender. A sustained UDP flow must measure path feedback, cap bytes in flight, reduce its rate under congestion, and bound retransmissions. Datagrams should also fit the path MTU because losing one IP fragment discards the entire datagram. QUIC already supplies secure, congestion-controlled streams with independent ordering. TCP is simpler when one reliable ordered byte stream matches the workload.
 

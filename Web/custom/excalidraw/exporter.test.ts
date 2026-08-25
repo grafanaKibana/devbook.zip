@@ -37,9 +37,17 @@ const fixture = (payload: object, options: { overlay?: boolean; connected?: bool
   return { page, pageAttributes, svg, attributes, originalChildren }
 }
 
-const exportedSvg = (viewBox = "0 0 640 480", texts: FakeText[] = []) => ({
+const exportedSvg = (
+  viewBox = "0 0 640 480",
+  texts: FakeText[] = [],
+  filter: string | null = null,
+) => ({
   childNodes: [node("canonical")],
-  getAttribute: (name: string) => (name === "viewBox" ? viewBox : null),
+  getAttribute: (name: string) => {
+    if (name === "viewBox") return viewBox
+    if (name === "filter") return filter
+    return null
+  },
   querySelectorAll: (selector: string) => (selector === "text[fill]" ? texts : []),
 })
 
@@ -59,12 +67,13 @@ test("uses the canonical exporter with a transparent dark app state and preserve
 
   const result = await renderPageWith(scene.page as never, "dark", async (options) => {
     received = options
-    return exportedSvg() as never
+    return exportedSvg("0 0 640 480", [], "invert(93%) hue-rotate(180deg)") as never
   })
 
   assert.equal(result, "ready")
   assert.equal(scene.svg, originalSvg)
   assert.equal(scene.attributes.get("viewBox"), "0 0 640 480")
+  assert.equal(scene.attributes.get("filter"), "invert(93%) hue-rotate(180deg)")
   assert.equal(scene.attributes.has("data-bg-color"), false)
   assert.deepEqual(
     scene.originalChildren.map(({ id }) => id),
@@ -81,6 +90,9 @@ test("uses the canonical exporter with a transparent dark app state and preserve
   })
   assert.equal(received?.exportPadding, 10)
   assert.equal(received?.skipInliningFonts, true)
+
+  await renderPageWith(scene.page as never, "light", async () => exportedSvg() as never)
+  assert.equal(scene.attributes.has("filter"), false)
 })
 
 test("preserves canonical SVG text colors against Quartz global text styles", async () => {
@@ -88,8 +100,10 @@ test("preserves canonical SVG text colors against Quartz global text styles", as
   const exported = exportedText("#2563eb")
   const existing = exportedText("#475569", "#111827")
 
-  await renderPageWith(scene.page as never, "dark", async () =>
-    exportedSvg("0 0 640 480", [exported, existing]) as never,
+  await renderPageWith(
+    scene.page as never,
+    "dark",
+    async () => exportedSvg("0 0 640 480", [exported, existing]) as never,
   )
 
   assert.equal(exported.style.fill, "#2563eb")

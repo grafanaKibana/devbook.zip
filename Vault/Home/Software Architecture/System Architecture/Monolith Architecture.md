@@ -75,11 +75,11 @@ The hard part is not extracting code. It is separating data and operational resp
 
 # Collocation Case Studies
 
-![[Software Architecture/Software Architecture-Monolith Architecture-18120000-1.jpg]]
+![[Software Architecture/Software Architecture-Monolith Architecture-18120000-1.jpg|theme-aware]]
 
 Prime Video's monitoring pipeline and Stack Overflow's 2016 application tier are useful cases, not universal architecture targets. [[Home/Software Architecture/System Architecture/Modular Monolith]] develops the broader lesson: collocation can remove coordination and data-transfer costs when the boundary matches the workload.
 
-![[Software Architecture/Software Architecture-Monolith Architecture-18120000.png]]
+![[Software Architecture/Software Architecture-Monolith Architecture-18120000.png|theme-aware]]
 
 # Pitfalls
 

@@ -15,7 +15,7 @@ NGINX is an event-driven HTTP server and reverse proxy. A master process owns co
 
 NGINX fits stable edge behavior such as host and path routing, TLS termination, buffering, caching, and upstream balancing. A managed ingress or platform edge is usually the smaller operational choice when it already supplies the required controls.
 
-![[Networks/Networks-Nginx-18120000.png]]
+![[Networks/Networks-Nginx-18120000.png|theme-aware]]
 
 The diagram's “cache memory” label is shorthand: response bodies are file-backed under `proxy_cache_path`, while the shared-memory zone holds keys and metadata.
 

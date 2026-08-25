@@ -22,7 +22,7 @@ A firewall permits or denies traffic at a defined boundary. It constrains which 
 | Proxy or WAF | Decrypted HTTP route, method, headers, and body patterns | Blocking known web attacks and enforcing request limits | Only sees traffic routed through it and can miss business-logic abuse |
 | NGFW | Connection state plus application or threat signatures | Central inspection and intrusion prevention | Classification can fail on encrypted, novel, or tunneled traffic |
 
-![[Security/Security-Firewall-18120000.jpg]]
+![[Security/Security-Firewall-18120000.jpg|theme-aware]]
 
 Layer the boundaries around the intended flow. An Internet-facing reverse proxy may accept TLS on 443, a network policy may allow only the proxy identity to reach the API, and the API host may accept the application port only on its private interface. A direct request to the private API address is then denied even if DNS or routing information leaks. Egress rules matter as well: a compromised workload should not gain unrestricted access to internal control planes or arbitrary Internet destinations.
 
@@ -34,7 +34,7 @@ Layer the boundaries around the intended flow. An Internet-facing reverse proxy 
 
 **Application-aware inspection** parses a protocol or terminates a connection to enforce routes, methods, identities, or signatures. It adds useful context at the cost of protocol complexity, certificate/key handling, latency, and a larger trusted component.
 
-![[Security/Security-Firewall-18120000-1.png]]
+![[Security/Security-Firewall-18120000-1.png|theme-aware]]
 
 Start with default deny and add the narrowest rule that supports a named flow:
 

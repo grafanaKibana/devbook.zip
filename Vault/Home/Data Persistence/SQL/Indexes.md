@@ -27,7 +27,7 @@ The measured query plan supplies the starting point. Equality probes, ordered ra
 | LSM tree | Buffer, flush, and compact sorted runs | Sustained writes with point/range reads through run indexes and filters | Compaction and read amplification. It is a storage organization, not a PostgreSQL index method |
 | Columnstore | Compressed values grouped by column | Large scans and aggregates over a subset of columns | Point updates and single-row OLTP access |
 
-![[Data Persistence/Data Persistence-Indexes-18120000.jpg]]
+![[Data Persistence/Data Persistence-Indexes-18120000.jpg|theme-aware]]
 
 The image is a vocabulary map, not a universal engine diagram. A Bloom filter answers probable membership rather than locating a row. An LSM tree combines several structures, while spatial and inverted indexes expose engine-specific operators.
 

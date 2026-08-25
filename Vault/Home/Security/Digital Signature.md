@@ -69,7 +69,7 @@ HMAC authenticates a message within a group that shares one secret. Every verifi
 
 Request-authentication protocols also define canonical request bytes and freshness data such as timestamps or nonces. Those rules belong to [[Home/Security/Authentication/Authentication|API authentication]]. Signing arbitrary bytes without them does not stop replay.
 
-![[Security/Security-Digital Signature-18120000.png]]
+![[Security/Security-Digital Signature-18120000.png|theme-aware]]
 
 # Pitfalls
 

@@ -35,7 +35,7 @@ sequenceDiagram
 
 When a name is a CNAME, the resolver follows the alias chain toward the requested terminal record, bounded by loop and implementation limits. NXDOMAIN and NODATA answers can also be cached for SOA-derived intervals, so creating a missing name does not become visible everywhere at once.
 
-![[Networks/Networks-DNS-18120000-1.png]]
+![[Networks/Networks-DNS-18120000-1.png|theme-aware]]
 
 # Resolution and Transport
 
@@ -53,7 +53,7 @@ Classic DNS often uses UDP for ordinary queries, but TCP is a full protocol tran
 | `PTR` | Reversed name → host | Domain name | `42.113.0.203.in-addr.arpa → api.example.com` |
 | `SRV` | Service locator | Target, port, priority | `_sip._tcp.example.com → 10 5 5060 sip1.example.com` |
 
-![[Networks/Networks-DNS-18120000.png]]
+![[Networks/Networks-DNS-18120000.png|theme-aware]]
 
 # Cache Windows, Failover, and Traffic Steering
 
