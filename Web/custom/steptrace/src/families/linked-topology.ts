@@ -590,19 +590,20 @@ export function makeLinkedTopologyView(
   const legend = makeLegend(
     [
       {
-        label: "slow / cycle pointer",
+        label: "Slow / Cycle Pointer",
         swatchClass: "steptrace__linked-swatch steptrace__linked-swatch--slow",
       },
       {
-        label: "fast / head pointer",
+        label: "Fast / Head Pointer",
         swatchClass: "steptrace__linked-swatch steptrace__linked-swatch--fast",
       },
       {
-        label: "cycle edge",
+        label: "Cycle Edge",
         swatchClass: "steptrace__linked-swatch steptrace__linked-swatch--cycle",
+        carrier: "path",
       },
       {
-        label: "cycle entry",
+        label: "Cycle Entry",
         swatchClass: "steptrace__linked-swatch steptrace__linked-swatch--entry",
       },
     ],

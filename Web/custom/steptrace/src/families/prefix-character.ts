@@ -447,22 +447,22 @@ export function makePrefixCharacterView(
     [
       {
         state: "active",
-        label: "active path",
+        label: "Active Path",
         swatchClass: "steptrace__swatch steptrace__prefix-swatch",
       },
       {
         state: "reused",
-        label: "reused edge",
+        label: "Reused Edge",
         swatchClass: "steptrace__swatch steptrace__prefix-swatch",
       },
       {
         state: "created",
-        label: "new node",
+        label: "New Node",
         swatchClass: "steptrace__swatch steptrace__prefix-swatch",
       },
       {
         state: "terminal",
-        label: "terminal key",
+        label: "Terminal Key",
         swatchClass: "steptrace__swatch steptrace__prefix-swatch",
         marker: successMarker(),
       },

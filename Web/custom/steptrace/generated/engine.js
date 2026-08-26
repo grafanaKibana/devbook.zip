@@ -671,10 +671,10 @@
     root.append(domain, evaluation);
     const legend = makeLegend(
       [
-        ["range", "unknown candidate"],
-        ["infeasible", "known too small"],
-        ["feasible", "known feasible"],
-        ["probe", "current check"]
+        ["range", "Unknown Candidate"],
+        ["infeasible", "Known Too Small"],
+        ["feasible", "Known Feasible"],
+        ["probe", "Current Check"]
       ].map(([state, label]) => ({
         state,
         label,
@@ -1305,20 +1305,20 @@
       stage.append(amountBoard);
     }
     const legendItems = first.approach === "memoization" ? [
-      ["active", "coin being tried"],
-      ["selected", "current branch"],
-      ["stored", "saved remainder"],
-      ["hit", "answer reused"]
+      ["active", "Coin Being Tried"],
+      ["selected", "Current Branch"],
+      ["stored", "Saved Remainder"],
+      ["hit", "Answer Reused"]
     ] : first.approach === "tabulation" ? [
-      ["current", "amount being written"],
-      ["dependency", "smaller amount read"],
-      ["stored", "solved amount"],
-      ["best", "optimal amount chain"]
+      ["current", "Amount Being Written"],
+      ["dependency", "Smaller Amount Read"],
+      ["stored", "Solved Amount"],
+      ["best", "Optimal Amount Chain"]
     ] : [
-      ["active", "coin being tried"],
-      ["selected", "coins on the counter"],
-      ["repeated", "repeated subproblem"],
-      ["best", "best exact change"]
+      ["active", "Coin Being Tried"],
+      ["selected", "Coins on the Counter"],
+      ["repeated", "Repeated Subproblem"],
+      ["best", "Best Exact Change"]
     ];
     const legend = makeLegend(
       legendItems.map(([state, label]) => ({
@@ -1545,20 +1545,20 @@
     table.append(tfoot);
     const status = statusEl();
     const legendItems = first.approach === "memoization" ? [
-      ["current", "tile being evaluated"],
-      ["stored", "saved remaining cost"],
-      ["repeated", "saved answer reused"],
-      ["best", "best complete route"]
+      ["current", "Tile Being Evaluated"],
+      ["stored", "Saved Remaining Cost"],
+      ["repeated", "Saved Answer Reused"],
+      ["best", "Best Complete Route"]
     ] : first.approach === "tabulation" ? [
-      ["current", "tile being written"],
-      ["dependency", "written neighbour read"],
-      ["stored", "remaining cost stored"],
-      ["best", "optimal route"]
+      ["current", "Tile Being Written"],
+      ["dependency", "Written Neighbour Read"],
+      ["stored", "Remaining Cost Stored"],
+      ["best", "Optimal Route"]
     ] : [
-      ["current", "tile being considered"],
-      ["path", "current route"],
-      ["repeated", "tile reached again"],
-      ["best", "best complete route"]
+      ["current", "Tile Being Considered"],
+      ["path", "Current Route"],
+      ["repeated", "Tile Reached Again"],
+      ["best", "Best Complete Route"]
     ];
     const legend = makeLegend(
       legendItems.map(([state, label]) => ({
@@ -2122,9 +2122,11 @@
     function makeTreeLayout() {
       const leafGap = 36;
       const depthGap = 42;
+      const fixedNodeClearance = GRAPH_NODE_RADIUS_PX + GRAPH_NODE_HALO_GAP_PX + GRAPH_EDGE_ARROW_GAP_PX + 2;
+      const treePad = fixedNodeClearance * 2 + 4;
       const leafPad = 90;
-      const leafEndPad = 10;
-      const depthPad = 20;
+      const leafEndPad = treePad;
+      const depthPad = treePad;
       const positions = Object.fromEntries(
         treeNodes.map((node2) => {
           const leaf = leafSlots.get(node2.id);
@@ -2244,10 +2246,15 @@
     treeCanvas.append(treeSvg);
     const treeLegend = makeLegend(
       [
-        { label: "branch", state: "split", swatchClass: "steptrace__swatch steptrace__rtswatch" },
-        { label: "prune", state: "prune", swatchClass: "steptrace__swatch steptrace__rtswatch" },
-        { label: "return", state: "return", swatchClass: "steptrace__swatch steptrace__rtswatch" },
-        { label: "solution", state: "combine", swatchClass: "steptrace__swatch steptrace__rtswatch" }
+        { label: "Branch", state: "split", swatchClass: "steptrace__swatch steptrace__rtswatch" },
+        { label: "Prune", state: "prune", swatchClass: "steptrace__swatch steptrace__rtswatch" },
+        { label: "Return", state: "return", swatchClass: "steptrace__swatch steptrace__rtswatch" },
+        {
+          label: "Solution",
+          state: "combine",
+          swatchClass: "steptrace__swatch steptrace__rtswatch",
+          marker: successMarker()
+        }
       ],
       "Decision tree state legend",
       "steptrace__bt-tree-legend"
@@ -2842,9 +2849,9 @@
     minSvgWidth: 320,
     stateLabels: {},
     legend: [
-      { state: "compute", label: "compute" },
-      { state: "miss", label: "store (miss)" },
-      { state: "hit", label: "reuse (hit)" }
+      { state: "compute", label: "Compute" },
+      { state: "miss", label: "Store (Miss)" },
+      { state: "hit", label: "Reuse (Hit)" }
     ],
     frameModel(frame) {
       return {
@@ -2969,9 +2976,9 @@
     }
     const legend = makeLegend(
       [
-        { label: "current", swatchClass: "steptrace__swatch steptrace__swatch--current" },
-        { label: "frontier", swatchClass: "steptrace__swatch steptrace__swatch--frontier" },
-        { label: "visited", swatchClass: "steptrace__swatch steptrace__swatch--visited" }
+        { label: "Current", swatchClass: "steptrace__swatch steptrace__swatch--current" },
+        { label: "Frontier", swatchClass: "steptrace__swatch steptrace__swatch--frontier" },
+        { label: "Visited", swatchClass: "steptrace__swatch steptrace__swatch--visited" }
       ],
       "Graph state legend"
     );
@@ -3051,6 +3058,11 @@
     legend.setAttribute("role", "list");
     legend.setAttribute("aria-label", ariaLabel);
     for (const item of items) {
+      if (/(^|[\s/()–-])(?!(?:a|an|and|as|at|by|for|from|in|of|on|or|the|to|with)(?=$|[\s/()–-]))[a-z]/.test(
+        item.label
+      )) {
+        throw new Error(`Legend labels must be authored in Title Case: ${item.label}`);
+      }
       const row = el("span", "steptrace__legend-row");
       row.setAttribute("role", "listitem");
       const swatch = el(
@@ -3059,6 +3071,7 @@
       );
       if (item.state) swatch.dataset.state = item.state;
       if (item.role) swatch.dataset.role = item.role;
+      if (item.carrier) swatch.dataset.carrier = item.carrier;
       if (item.color) swatch.style.setProperty("--_legend-color", item.color);
       if (item.marker) swatch.append(item.marker);
       row.append(swatch, document.createTextNode(item.label));
@@ -3126,7 +3139,8 @@
     const familyProfile = frames[0]?.profile;
     const firstDistributionPass = frames.find((frame) => frame.type === "pass");
     const prefixOperation = (frame) => frame.operation && frame.key ? `${frame.operation[0].toUpperCase()}${frame.operation.slice(1)} ${frame.key}` : null;
-    const initial = kind === "sort" ? firstGap != null ? `Gap ${firstGap}` : familyProfile === "cyclic" ? "Place values" : familyProfile === "counting" ? "Tally keys" : familyProfile === "radix" ? `${firstDistributionPass?.passLabel || "Digit"} pass` : familyProfile === "bucket" ? "Scatter ranges" : familyProfile === "introsort" ? "Quicksort" : algorithm === "bubble-sort" ? "Pass 1" : algorithm === "insertion-sort" ? "Prefix 1" : algorithm === "selection-sort" ? "Select 1" : algorithm === "heap-sort" ? "Build heap" : algorithm === "merge-sort" ? "Runs of 1" : "Partition" : kind === "search" ? familyProfile === "exponential" ? "Gallop" : familyProfile === "interpolation" ? "Estimate" : familyProfile === "jump" ? "Jump blocks" : familyProfile === "ternary" ? "Narrow peak" : familyProfile === "shipping-capacity" ? "Answer range" : "Search range" : kind === "string" ? familyProfile === "z-array" ? "Initialize Z" : familyProfile === "boyer-moore" ? "Preprocess rules" : ["trie", "aho-corasick", "ternary-search-tree"].includes(familyProfile) ? prefixOperation(frames[0]) : "Shift 0" : kind === "backtrack" ? "Depth 0" : kind === "rectree" ? familyProfile === "divide-and-conquer" ? "Whole problem" : familyProfile === "branch-and-bound" ? "Root bound 116" : familyProfile === "merge-sort" ? "Whole array" : familyProfile === "memoization" ? "Empty cache" : familyProfile === "coin-change-top-down" ? "Amount 30¢" : familyProfile === "grid-path-top-down" ? "Loading bay" : "Call tree" : kind === "pointers" && ["merge-intervals", "activity-selection"].includes(familyProfile) ? "Input order" : kind === "pointers" && familyProfile === "fast-slow-pointers" ? "Start together" : "Initialize";
+    let initial = kind === "sort" ? firstGap != null ? `Gap ${firstGap}` : familyProfile === "cyclic" ? "Place values" : familyProfile === "counting" ? "Tally keys" : familyProfile === "radix" ? `${firstDistributionPass?.passLabel || "Digit"} pass` : familyProfile === "bucket" ? "Scatter ranges" : familyProfile === "introsort" ? "Quicksort" : algorithm === "bubble-sort" ? "Pass 1" : algorithm === "insertion-sort" ? "Prefix 1" : algorithm === "selection-sort" ? "Select 1" : algorithm === "heap-sort" ? "Build heap" : algorithm === "merge-sort" ? "Runs of 1" : "Partition" : kind === "search" ? familyProfile === "exponential" ? "Gallop" : familyProfile === "interpolation" ? "Estimate" : familyProfile === "jump" ? "Jump blocks" : familyProfile === "ternary" ? "Narrow peak" : familyProfile === "shipping-capacity" ? "Answer range" : "Search range" : kind === "string" ? familyProfile === "z-array" ? "Initialize Z" : familyProfile === "boyer-moore" ? "Preprocess rules" : ["trie", "aho-corasick", "ternary-search-tree"].includes(familyProfile) ? prefixOperation(frames[0]) : "Shift 0" : kind === "backtrack" ? "Depth 0" : kind === "rectree" ? familyProfile === "divide-and-conquer" ? "Whole problem" : familyProfile === "branch-and-bound" ? "Root bound 116" : familyProfile === "merge-sort" ? "Whole array" : familyProfile === "memoization" ? "Empty cache" : familyProfile === "coin-change-top-down" ? "Amount 30¢" : familyProfile === "grid-path-top-down" ? "Loading bay" : "Call tree" : kind === "pointers" && ["merge-intervals", "activity-selection"].includes(familyProfile) ? "Input order" : kind === "pointers" && familyProfile === "fast-slow-pointers" ? "Start together" : "Initialize";
+    if (familyProfile === "articulation-points-and-bridges") initial = "Discover DFS Tree";
     push(0, initial);
     let lastRange = "";
     let lastGap = firstGap;
@@ -3170,6 +3184,10 @@
           push(i, algorithm === "bubble-sort" ? `Pass ${count}` : `${word} ${count}`);
         }
         lastRange = range || lastRange;
+      } else if (familyProfile === "articulation-points-and-bridges") {
+        if (f.type === "back-edge") push(i, "Lower via Back Edge");
+        else if (f.type === "cut") push(i, "Identify Cuts");
+        else if (f.type === "propagate") push(i, "Propagate Low Links");
       } else if (kind === "graph" && (f.type === "visit" || f.type === "expand") && f.current != null) {
         const word = algorithm === "a-star" ? "Expand" : algorithm === "dijkstra" ? "Settle" : algorithm === "topological-sort" ? "Output" : "Visit";
         push(i, `${word} ${f.current}`);
@@ -3640,14 +3658,14 @@
     });
     outputSection.append(outputLabel, outputLane);
     const legendItems = scheduling ? [
-      ["next meeting", "candidate"],
-      ["last accepted", "current"],
-      ["accepted", "output"],
-      ["rejected overlap", "rejected"]
+      ["Next Meeting", "candidate"],
+      ["Last Accepted", "current"],
+      ["Accepted", "output"],
+      ["Rejected Overlap", "rejected"]
     ] : [
-      ["next interval", "candidate"],
-      ["current merged block", "current"],
-      ["emitted output", "output"]
+      ["Next Interval", "candidate"],
+      ["Current Merged Block", "current"],
+      ["Emitted Output", "output"]
     ];
     const legend = makeLegend(
       legendItems.map(([label, state]) => ({
@@ -5515,67 +5533,67 @@
     switch (kind) {
       case "heuristic-search":
         return [
-          ["current", "current"],
-          ["open", "open"],
-          ["closed / path", "closed"],
-          ["goal", "goal"]
+          ["Current", "current"],
+          ["Open", "open"],
+          ["Closed / Path", "closed"],
+          ["Goal", "goal"]
         ];
       case "dual-search":
         return [
-          ["current", "current"],
-          ["frontiers", "open"],
-          ["visited / path", "closed"],
-          ["meeting", "goal"]
+          ["Current", "current"],
+          ["Frontiers", "open"],
+          ["Visited / Path", "closed"],
+          ["Meeting", "goal"]
         ];
       case "edge-relaxation":
         return [
-          ["active edge", "current"],
-          ["candidate", "open"],
-          ["settled", "closed"],
-          ["source", "goal"]
+          ["Active Edge", "current"],
+          ["Candidate", "open"],
+          ["Settled", "closed"],
+          ["Source", "goal"]
         ];
       case "component-flood":
         return [
-          ["current", "current"],
-          ["frontier", "open"],
-          ["component", "closed"],
-          ["seed", "goal"]
+          ["Current", "current"],
+          ["Frontier", "open"],
+          ["Component", "closed"],
+          ["Seed", "goal"]
         ];
       case "low-link-cuts":
         return [
-          ["current", "current"],
-          ["DFS frontier", "open"],
-          ["visited", "closed"],
-          ["cut", "goal"]
+          ["Current", "current"],
+          ["DFS Frontier", "open"],
+          ["Visited", "closed"],
+          ["Cut", "goal"]
         ];
       case "low-link-components":
         return [
-          ["current", "current"],
-          ["stack", "open"],
-          ["component", "closed"],
-          ["root", "goal"]
+          ["Current", "current"],
+          ["Stack", "open"],
+          ["Component", "closed"],
+          ["Root", "goal"]
         ];
       case "mst-scan":
       case "mst-round":
         return [
-          ["active edge", "current"],
-          ["candidate", "open"],
-          ["tree", "closed"],
-          ["rejected", "rejected"]
+          ["Active Edge", "current"],
+          ["Candidate", "open"],
+          ["Tree", "closed"],
+          ["Rejected", "rejected"]
         ];
       case "path-backtrack":
         return [
-          ["current", "current"],
-          ["candidate", "open"],
-          ["path", "closed"],
-          ["rejected", "rejected"]
+          ["Current", "current"],
+          ["Candidate", "open"],
+          ["Path", "closed"],
+          ["Rejected", "rejected"]
         ];
       case "residual-flow":
         return [
-          ["active edge", "current"],
-          ["residual", "open"],
-          ["flow", "closed"],
-          ["cut", "goal"]
+          ["Active Edge", "current"],
+          ["Residual", "open"],
+          ["Flow", "closed"],
+          ["Cut", "goal"]
         ];
     }
   }
@@ -6368,22 +6386,22 @@
       [
         {
           state: "active",
-          label: "active path",
+          label: "Active Path",
           swatchClass: "steptrace__swatch steptrace__prefix-swatch"
         },
         {
           state: "reused",
-          label: "reused edge",
+          label: "Reused Edge",
           swatchClass: "steptrace__swatch steptrace__prefix-swatch"
         },
         {
           state: "created",
-          label: "new node",
+          label: "New Node",
           swatchClass: "steptrace__swatch steptrace__prefix-swatch"
         },
         {
           state: "terminal",
-          label: "terminal key",
+          label: "Terminal Key",
           swatchClass: "steptrace__swatch steptrace__prefix-swatch",
           marker: successMarker()
         }
@@ -10424,17 +10442,17 @@
     rejected.innerHTML = ICON.x;
     const legend = makeLegend(
       [
-        { label: "incoming", swatchClass: "steptrace__heap-swatch steptrace__heap-swatch--current" },
+        { label: "Incoming", swatchClass: "steptrace__heap-swatch steptrace__heap-swatch--current" },
         {
-          label: "retained winner",
+          label: "Retained Winner",
           swatchClass: "steptrace__heap-swatch steptrace__heap-swatch--winner"
         },
         {
-          label: "weakest root",
+          label: "Weakest Root",
           swatchClass: "steptrace__heap-swatch steptrace__heap-swatch--weakest"
         },
         {
-          label: "rejected / evicted",
+          label: "Rejected / Evicted",
           swatchClass: "steptrace__heap-swatch steptrace__heap-swatch--rejected",
           marker: rejected
         }
@@ -11721,10 +11739,10 @@
     ...executionTreeCardMetrics,
     stateLabels,
     legend: [
-      { state: "split", label: "split subproblem" },
-      { state: "base", label: "base case" },
-      { state: "return", label: "returned result" },
-      { state: "combine", label: "combined result" }
+      { state: "split", label: "Split Subproblem" },
+      { state: "base", label: "Base Case" },
+      { state: "return", label: "Returned Result" },
+      { state: "combine", label: "Combined Result" }
     ],
     frameModel,
     nodeLines(node2) {
@@ -11769,10 +11787,10 @@
     ...executionTreeCardMetrics,
     stateLabels,
     legend: [
-      { state: "split", label: "expand new state" },
-      { state: "base", label: "base result" },
-      { state: "store", label: "store first result" },
-      { state: "cache", label: "cache hit; skip branch" }
+      { state: "split", label: "Expand New State" },
+      { state: "base", label: "Base Result" },
+      { state: "store", label: "Store First Result" },
+      { state: "cache", label: "Cache Hit; Skip Branch" }
     ],
     frameModel,
     nodeLines(node2) {
@@ -11814,10 +11832,10 @@
     ...executionTreeCardMetrics,
     stateLabels,
     legend: [
-      { state: "split", label: "expand uncached state" },
-      { state: "base", label: "base case" },
-      { state: "store", label: "store result" },
-      { state: "cache", label: "reuse cached result" }
+      { state: "split", label: "Expand Uncached State" },
+      { state: "base", label: "Base Case" },
+      { state: "store", label: "Store Result" },
+      { state: "cache", label: "Reuse Cached Result" }
     ],
     frameModel,
     nodeLines(node2) {
@@ -11862,10 +11880,10 @@
     showStateBadge: true,
     stateLabels,
     legend: [
-      { state: "split", label: "expand decision" },
-      { state: "incumbent", label: "new incumbent" },
-      { state: "infeasible", label: "over capacity" },
-      { state: "prune", label: "bound cannot win" }
+      { state: "split", label: "Expand Decision" },
+      { state: "incumbent", label: "New Incumbent" },
+      { state: "infeasible", label: "Over Capacity" },
+      { state: "prune", label: "Bound Cannot Win" }
     ],
     frameModel,
     nodeLines(node2) {
@@ -13074,9 +13092,9 @@
     );
     const legend = makeLegend(
       [
-        { label: "active bucket", color: "var(--_blue)" },
-        { label: "local comparison", color: "var(--_blue)" },
-        { label: "gathered output", color: "var(--_green)" }
+        { label: "Active Bucket", color: "var(--_blue)" },
+        { label: "Local Comparison", color: "var(--_blue)" },
+        { label: "Gathered Output", color: "var(--_green)" }
       ],
       "Distribution state legend",
       "steptrace__distribution-legend"
@@ -14707,16 +14725,16 @@
     }
   };
   var coinRoles = [
-    { role: "operand-a", badge: "A", label: "predecessor amount" },
-    { role: "operand-b", badge: "B", label: "another predecessor" },
-    { role: "target", badge: "T", label: "amount being solved" },
-    { role: "path", badge: "success", label: "optimal amount chain" }
+    { role: "operand-a", badge: "A", label: "Predecessor Amount" },
+    { role: "operand-b", badge: "B", label: "Another Predecessor" },
+    { role: "target", badge: "T", label: "Amount Being Solved" },
+    { role: "path", badge: "success", label: "Optimal Amount Chain" }
   ];
   var gridRoles = [
-    { role: "operand-a", badge: "R", label: "right neighbour" },
-    { role: "operand-b", badge: "D", label: "down neighbour" },
-    { role: "target", badge: "T", label: "tile being solved" },
-    { role: "path", badge: "success", label: "optimal route" }
+    { role: "operand-a", badge: "R", label: "Right Neighbour" },
+    { role: "operand-b", badge: "D", label: "Down Neighbour" },
+    { role: "target", badge: "T", label: "Tile Being Solved" },
+    { role: "path", badge: "success", label: "Optimal Route" }
   ];
   function rolesForCell(frame, row, column) {
     const roles = [];
@@ -16103,12 +16121,12 @@
     return roles;
   }
   var matrixGridRoleLegend = [
-    { role: "operand-a", badge: "A", label: "dist[i][k]" },
-    { role: "operand-b", badge: "B", label: "dist[k][j]" },
-    { role: "target", badge: "T", label: "dist[i][j]" },
-    { role: "keep", badge: "K", label: "keep target" },
-    { role: "write", badge: "W", label: "write target" },
-    { role: "stage-axis", badge: "k", label: "active intermediate row/column" }
+    { role: "operand-a", badge: "A", label: "Dist[i][k]" },
+    { role: "operand-b", badge: "B", label: "Dist[k][j]" },
+    { role: "target", badge: "T", label: "Dist[i][j]" },
+    { role: "keep", badge: "K", label: "Keep Target" },
+    { role: "write", badge: "W", label: "Write Target" },
+    { role: "stage-axis", badge: "k", label: "Active Intermediate Row/Column" }
   ];
   function matrixGridFooterModel(frame) {
     const nodeCount = frame.rowLabels.length;
@@ -16735,19 +16753,20 @@
     const legend = makeLegend(
       [
         {
-          label: "slow / cycle pointer",
+          label: "Slow / Cycle Pointer",
           swatchClass: "steptrace__linked-swatch steptrace__linked-swatch--slow"
         },
         {
-          label: "fast / head pointer",
+          label: "Fast / Head Pointer",
           swatchClass: "steptrace__linked-swatch steptrace__linked-swatch--fast"
         },
         {
-          label: "cycle edge",
-          swatchClass: "steptrace__linked-swatch steptrace__linked-swatch--cycle"
+          label: "Cycle Edge",
+          swatchClass: "steptrace__linked-swatch steptrace__linked-swatch--cycle",
+          carrier: "path"
         },
         {
-          label: "cycle entry",
+          label: "Cycle Entry",
           swatchClass: "steptrace__linked-swatch steptrace__linked-swatch--entry"
         }
       ],
@@ -19203,15 +19222,15 @@
     const legend = makeLegend(
       [
         {
-          label: "scanning",
+          label: "Scanning",
           swatchClass: "steptrace__stack-sequence-swatch steptrace__stack-sequence-swatch--scan"
         },
         {
-          label: "retained candidate",
+          label: "Retained Candidate",
           swatchClass: "steptrace__stack-sequence-swatch steptrace__stack-sequence-swatch--retained"
         },
         {
-          label: "resolved pop",
+          label: "Resolved Pop",
           swatchClass: "steptrace__stack-sequence-swatch steptrace__stack-sequence-swatch--popped"
         }
       ],
@@ -19595,15 +19614,15 @@
     const legend = makeLegend(
       [
         {
-          label: "running total",
+          label: "Running Total",
           swatchClass: "steptrace__prefix-sum-swatch steptrace__prefix-sum-swatch--build"
         },
         {
-          label: "cancelled prefix",
+          label: "Cancelled Prefix",
           swatchClass: "steptrace__prefix-sum-swatch steptrace__prefix-sum-swatch--cancel"
         },
         {
-          label: "requested range",
+          label: "Requested Range",
           swatchClass: "steptrace__prefix-sum-swatch steptrace__prefix-sum-swatch--range"
         }
       ],
@@ -22451,6 +22470,7 @@
         });
         if (built.family) root.dataset.visualFamily = built.family.id;
         else delete root.dataset.visualFamily;
+        root.classList.toggle("steptrace--backtrack", built.kind === "backtrack");
         currentGraph = built.graph || null;
         currentMilestones = buildMilestones(state.algorithm, built.kind, built.frames);
         let view;
@@ -22601,7 +22621,8 @@
             "steptrace--reduced",
             "steptrace--stable-stage",
             "steptrace--compact-stage",
-            "steptrace--narrow"
+            "steptrace--narrow",
+            "steptrace--backtrack"
           );
         }
       };

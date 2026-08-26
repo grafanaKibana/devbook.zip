@@ -1,4 +1,5 @@
 import assert from "node:assert/strict"
+import { createHash } from "node:crypto"
 import { readdirSync, readFileSync } from "node:fs"
 import { join } from "node:path"
 import test from "node:test"
@@ -16,6 +17,11 @@ function markdownFiles(directory: string): string[] {
     if (entry.isDirectory()) return markdownFiles(path)
     return entry.name.endsWith(".md") ? [path] : []
   })
+}
+
+function complexityConfig(note: string): any {
+  const source = readFileSync(note, "utf8")
+  return JSON.parse(source.match(/```complexity\n([\s\S]*?)\n```/)![1])
 }
 
 const variables = { n: "number of input elements" }
@@ -765,6 +771,82 @@ test("operation legends group each operation and shade its plotted bounds", () =
   assert.ok(constantPaths.every((path) => path.geometry.startsWith("M0.00,")))
 })
 
+test("single-bound operations flatten into one row and keep semantic formulas", () => {
+  const config = structuredClone(dualResource) as any
+  config.resources.time = {
+    mode: "operations",
+    entries: [
+      {
+        kind: "operation",
+        operation: "Best",
+        bounds: [{ kind: "text", role: "Time", formula: "O(m)" }],
+      },
+      {
+        kind: "operation",
+        operation: "Worst",
+        bounds: [{ kind: "curve", role: "Time", formula: "O(n²)", curveId: "quadratic" }],
+      },
+    ],
+  }
+
+  const time = buildComplexityViewModel(config, "flat-operations").resources[0]
+  assert.equal(time.legend.length, 1)
+  assert.equal(time.legend[0].label, undefined)
+  assert.deepEqual(
+    time.legend[0].items.map((item) => item.label),
+    ["Best: O(m)", "Worst"],
+  )
+  assert.equal(time.semanticBounds[0].formula, "O(m)")
+  assert.ok(time.paths.every(({ legendGroup }) => legendGroup === undefined))
+})
+
+test("operation curve ranges reuse band geometry and reject invalid forms locally", () => {
+  const ranged = structuredClone(dualResource) as any
+  ranged.resources.time = {
+    mode: "operations",
+    entries: [
+      {
+        kind: "operation",
+        operation: "Worst",
+        bounds: [
+          {
+            kind: "curve",
+            role: "Time",
+            formula: "O(n·m)",
+            curveFrom: "linear",
+            curveTo: "quadratic",
+          },
+        ],
+      },
+    ],
+  }
+  const [path] = buildComplexityViewModel(ranged, "operation-band").resources[0].paths
+  assert.equal(path.curveId, "linear")
+  assert.equal(path.bandTo, "quadratic")
+  assert.ok(path.bandGeometry)
+  assert.equal(
+    buildComplexityViewModel(ranged, "operation-band").resources[0].legend[0].items[0].kind,
+    "plotted",
+  )
+
+  const bound = ranged.resources.time.entries[0].bounds[0]
+  for (const [replacement, message] of [
+    [{ ...bound, curveId: "linear" }, /bounds\[0\]\.curveId: cannot be combined/],
+    [{ kind: "curve", role: "Time", formula: "O(n·m)" }, /bounds\[0\]\.curveId: must be one of/],
+    [{ ...bound, curveFrom: undefined }, /bounds\[0\]\.curveFrom: must be one of/],
+    [{ ...bound, curveTo: undefined }, /bounds\[0\]\.curveTo: must be one of/],
+    [
+      { ...bound, curveFrom: "quadratic", curveTo: "linear" },
+      /bounds\[0\]\.curveTo: must grow faster/,
+    ],
+    [{ ...bound, curveTo: "cubic" }, /bounds\[0\]\.curveTo: must be one of/],
+  ] as const) {
+    const invalid = structuredClone(ranged)
+    invalid.resources.time.entries[0].bounds[0] = replacement
+    assert.throws(() => buildComplexityViewModel(invalid, "invalid-operation-band"), message)
+  }
+})
+
 test("semantic duplicates and unknown fields fail at their exact field", () => {
   assert.throws(
     () =>
@@ -1171,6 +1253,8 @@ test("dual-resource HAST has one accessible figure and Time and Space tab panels
   assert.equal(staticEntries[0].properties["data-path-id"], undefined)
   assert.equal(staticEntries[0].properties.ariaPressed, undefined)
   assert.equal(findAllHastByClass(hast, "complexity__legend-entry").length, 5)
+  assert.equal(findAllHastByClass(hast, "complexity__legend-label").length, 5)
+  assert.equal(findAllHastByClass(hast, "complexity__legend-formula").length, 5)
   assert.equal(findAllHastByClass(hast, "complexity__semantic-bounds").length, 0)
 })
 
@@ -1237,8 +1321,8 @@ test("Quartz HAST renders the complete case union without renderer-owned tabs", 
     view.paths.length,
   )
   assert.deepEqual(findAllHastByClass(hast, "complexity__legend-button").map(hastText), [
-    "Average/Best",
-    "Worst",
+    "Average/Best: O(n log n)",
+    "Worst: O(n²)",
   ])
   assert.doesNotMatch(hastText(hast), /Curves begin at/)
   assert.doesNotMatch(hastText(hast), /Expected balanced partitions/)
@@ -1638,6 +1722,18 @@ test("HAST and DOM normalize to the same IDs, labels, controls, and safe text", 
 
   assert.deepEqual(hastPaths, domPaths)
   assert.equal(hastLegend.length, domLegend.length)
+  assert.deepEqual(
+    findAllHastByClass(hast, "complexity__legend-label").map(hastText),
+    findAllFake(root, "span")
+      .filter((node) => node.className === "complexity__legend-label")
+      .map(fakeText),
+  )
+  assert.deepEqual(
+    findAllHastByClass(hast, "complexity__legend-formula").map(hastText),
+    findAllFake(root, "span")
+      .filter((node) => node.className === "complexity__legend-formula")
+      .map(fakeText),
+  )
   assert.equal(hastText(hast), fakeText(root))
   assert.match(hastText(hast), /<img src=x onerror=alert\(1\)>/)
   assert.match(hastText(hast), /<script>alert\(1\)<\/script>/)
@@ -1663,6 +1759,23 @@ test("version 2 variables render as the same description list in Quartz and Obsi
   assert.equal(findAllFake(root, "dl").length, 1)
   assert.match(hastText(hast), /nnumber of input elements/)
   assert.equal(hastText(hast), fakeText(root))
+
+  const hastClasses = (hast as Element).children.flatMap((child) =>
+    child.type === "element" && Array.isArray(child.properties.className)
+      ? child.properties.className
+      : [],
+  )
+  const domFigure = root.children[0] as FakeElement
+  const domClasses = domFigure.children.flatMap((child) =>
+    child instanceof FakeElement ? child.className.split(/\s+/).filter(Boolean) : [],
+  )
+  for (const classes of [hastClasses, domClasses]) {
+    assert.equal(classes.filter((name) => name === "complexity__variables").length, 1)
+    assert.equal(
+      classes.indexOf("complexity__variables"),
+      classes.indexOf("complexity__resources") + 1,
+    )
+  }
 })
 
 test("Obsidian DOM keeps the version 1 label accessible but not visible", () => {
@@ -1711,6 +1824,9 @@ test("complexity styles own their resource tabs and have no top margin", () => {
   assert.match(styles, /--cx-tab-gap:\s*var\(--tabsdown-gap,/)
   assert.match(styles, /--cx-tab-speed:\s*var\(--tabsdown-animation-speed,/)
   assert.match(styles, /--cx-tab-font:\s*var\(--bodyFont,/)
+  assert.match(styles, /--cx-body-font:\s*var\(--bodyFont,/)
+  assert.match(styles, /--cx-mono-font:\s*var\(--codeFont,/)
+  assert.doesNotMatch(styles, /_font-head|headerFont/)
   assert.match(
     styles,
     /\.complexity__tab\[aria-selected="true"\]\s*\{[^}]*color:\s*var\(--cx-accent\);[^}]*border-bottom-color:\s*var\(--cx-accent\);/s,
@@ -1744,6 +1860,10 @@ test("complexity styles own their resource tabs and have no top margin", () => {
   assert.match(styles, /\.complexity__curve\.is-highlighted\s*\{[^}]*stroke-width:\s*1\.5;/s)
   assert.match(styles, /\.complexity__curve\.is-subtle\s*\{[^}]*stroke-width:\s*1;/s)
   assert.match(styles, /\.complexity__legend-entry\s*\{[^}]*font:[^;]*0\.875rem/s)
+  assert.match(styles, /\.complexity__legend-label\s*\{[^}]*font-family:\s*var\(--cx-body-font\)/s)
+  assert.match(styles, /\.complexity__legend-formula\s*\{[^}]*font-family:\s*var\(--cx-mono-font\)/s)
+  assert.match(styles, /\.complexity__legend-entry\s*\{[^}]*flex-wrap:\s*wrap;[^}]*max-inline-size:\s*100%/s)
+  assert.match(styles, /\.complexity__legend-formula\s*\{[^}]*overflow-wrap:\s*anywhere/s)
   assert.match(
     styles,
     /\.complexity__legend\.is-ungrouped \.complexity__legend-items\s*\{[^}]*flex-wrap:\s*wrap;[^}]*justify-content:\s*center;/s,
@@ -1823,11 +1943,17 @@ test("every source chart builds and repeated growth classes share exact geometry
         const bounds = Array.isArray(entry.bounds) ? entry.bounds : [entry]
         for (const bound of bounds as Record<string, unknown>[]) {
           if (bound.kind === "text") {
-            assert.doesNotMatch(
-              String(bound.formula),
-              exactCurveText,
-              `${note} ${String(bound.formula)}`,
-            )
+            const formula = String(bound.formula)
+            if (exactCurveText.test(formula)) {
+              const horizontal = Object.values(config.variables ?? {}).flatMap(
+                ({ symbol, description }: any) =>
+                  /horizontal axis/.test(description) ? [String(symbol)] : [],
+              )
+              assert.ok(
+                horizontal.length > 0 && horizontal.every((symbol) => !formula.includes(symbol)),
+                `${note} ${formula} must stay semantic only when it is not a function of the horizontal variable`,
+              )
+            }
           }
         }
       }
@@ -1843,6 +1969,183 @@ test("every source chart builds and repeated growth classes share exact geometry
         )
       }
     }
+  }
+})
+
+test("the audited version-2 catalog pins every authored bound to its horizontal semantics", () => {
+  const root = join(process.cwd(), "..", "Vault", "Home")
+  const charts = markdownFiles(root).flatMap((note) => {
+    const source = readFileSync(note, "utf8")
+    return [...source.matchAll(/```complexity\n([\s\S]*?)\n```/g)].map((match, chartIndex) => ({
+      note: note.slice(root.length + 1),
+      chartIndex,
+      config: JSON.parse(match[1]),
+    }))
+  })
+  const explicitExceptions: string[] = []
+
+  const snapshot = (catalog: typeof charts) => {
+    const counts = { curve: 0, finiteBand: 0, unboundedBand: 0, semantic: 0 }
+    const rows: string[] = []
+    for (const { note, chartIndex, config } of catalog) {
+      if (config.version !== 2) continue
+      const horizontal = Object.values(config.variables ?? {})
+        .filter(({ description }: any) => /horizontal axis/.test(description))
+        .map(({ symbol, description }: any) => `${symbol}:${description}`)
+        .sort()
+        .join("|")
+      for (const [resourceKey, resource] of Object.entries(config.resources) as any[]) {
+        resource.entries.forEach((entry: any, entryIndex: number) => {
+          ;(entry.bounds ?? [entry]).forEach((bound: any, boundIndex: number) => {
+            let mapping: string
+            if (bound.kind === "text" || bound.kind === "samples") {
+              counts.semantic++
+              mapping = `semantic:${bound.kind}`
+            } else if (bound.curveTo === "unbounded") {
+              counts.unboundedBand++
+              mapping = `band:${bound.curveFrom}->unbounded`
+            } else if (bound.curveFrom && bound.curveTo) {
+              counts.finiteBand++
+              mapping = `band:${bound.curveFrom}->${bound.curveTo}`
+            } else {
+              counts.curve++
+              mapping = `curve:${bound.curveId}`
+            }
+            rows.push(
+              [
+                note,
+                chartIndex,
+                resourceKey,
+                entryIndex,
+                boundIndex,
+                entry.operation ?? entry.label ?? entry.role ?? "",
+                bound.role ?? "",
+                bound.formula ?? "",
+                horizontal,
+                mapping,
+              ].join("\u241f"),
+            )
+          })
+        })
+      }
+    }
+    rows.sort()
+    return {
+      counts,
+      sha256: createHash("sha256").update(rows.join("\n")).digest("hex"),
+    }
+  }
+  const expected = {
+    counts: { curve: 632, finiteBand: 8, unboundedBand: 3, semantic: 104 },
+    sha256: "b6228429e254352a632690c86ad1a1bde3978ec13025f77bea057e034e6aa3e1",
+  }
+  const assertAudited = (catalog: typeof charts) =>
+    assert.deepEqual(snapshot(catalog), expected, "version-2 bound classification snapshot")
+
+  assert.equal(charts.length, 98)
+  assert.deepEqual(explicitExceptions, [])
+  assertAudited(charts)
+
+  const changedCurve = structuredClone(charts)
+  const aStar = changedCurve.find(({ note }) => note.endsWith("A-Star Search.md"))!.config
+  aStar.resources.time.entries[0].bounds[0].curveId = "exponential"
+  assert.deepEqual(snapshot(changedCurve).counts, expected.counts)
+  assert.throws(() => assertAudited(changedCurve), /bound classification snapshot/)
+
+  const changedCarrier = structuredClone(charts)
+  const changedAStar = changedCarrier.find(({ note }) => note.endsWith("A-Star Search.md"))!.config
+  const plotted = changedAStar.resources.time.entries[0].bounds[0]
+  const semantic = changedAStar.resources.time.entries[1].bounds[0]
+  changedAStar.resources.time.entries[0].bounds[0] = {
+    kind: "text",
+    role: plotted.role,
+    formula: plotted.formula,
+  }
+  changedAStar.resources.time.entries[1].bounds[0] = {
+    kind: "curve",
+    role: semantic.role,
+    formula: semantic.formula,
+    curveId: "linear",
+  }
+  assert.deepEqual(snapshot(changedCarrier).counts, expected.counts)
+  assert.throws(() => assertAudited(changedCarrier), /bound classification snapshot/)
+})
+
+test("A-Star, Bellman-Ford, and Bidirectional Search use only proven plot mappings", () => {
+  const graphRoot = join(
+    process.cwd(),
+    "..",
+    "Vault",
+    "Home",
+    "Computer Science",
+    "Algorithms",
+    "Graph Algorithms",
+  )
+  const aStar = complexityConfig(join(graphRoot, "A-Star Search.md"))
+  assert.match(aStar.variables.branchingFactor.description, /b > 1/)
+  assert.match(aStar.variables.parameterD.description, /horizontal axis/)
+  for (const resource of Object.values(aStar.resources) as any[]) {
+    assert.deepEqual(
+      resource.entries.map(({ operation }: any) => operation),
+      ["Best", "Estimate", "Worst"],
+    )
+    assert.equal(resource.entries[0].bounds[0].curveId, "linear")
+    assert.equal(resource.entries[1].bounds[0].kind, "text")
+    assert.equal(resource.entries[2].bounds[0].curveId, "exponential")
+  }
+
+  const bellman = complexityConfig(join(graphRoot, "Bellman-Ford.md"))
+  assert.equal(bellman.variables.combinedSize.symbol, "s")
+  assert.match(bellman.variables.combinedSize.description, /n \+ m.*horizontal axis/)
+  const bellmanTime = bellman.resources.time.entries
+  assert.deepEqual(
+    [bellmanTime[0].bounds[0].formula, bellmanTime[0].bounds[0].curveId],
+    ["Θ(n + m)", "linear"],
+  )
+  assert.equal(bellmanTime[1].bounds[0].kind, "text")
+  assert.equal(bellmanTime[1].bounds[0].formula, "distribution-dependent; O(n + n·m) upper bound")
+  assert.equal(bellmanTime[2].bounds[0].formula, "O(n + n·m)")
+  assert.deepEqual(
+    [bellmanTime[2].bounds[0].curveFrom, bellmanTime[2].bounds[0].curveTo],
+    ["linear", "quadratic"],
+  )
+  assert.ok(bellman.resources.space.entries.every(({ curveId }: any) => curveId === "linear"))
+
+  const bidirectional = complexityConfig(join(graphRoot, "Bidirectional Search.md"))
+  assert.match(bidirectional.variables.branchingFactor.description, /b > 1/)
+  assert.match(bidirectional.variables.parameterD.description, /horizontal axis/)
+  for (const resource of Object.values(bidirectional.resources) as any[]) {
+    assert.deepEqual(
+      resource.entries.map(({ operation }: any) => operation),
+      ["Best", "Estimate", "Worst"],
+    )
+    assert.equal(resource.entries[1].bounds[0].curveId, "exponential")
+    assert.equal(resource.entries[2].bounds[0].kind, "text")
+  }
+})
+
+test("Two Heaps and Articulation Points flatten without changing formulas", () => {
+  const algorithms = join(process.cwd(), "..", "Vault", "Home", "Computer Science", "Algorithms")
+  for (const note of [
+    join(algorithms, "Patterns", "Two Heaps.md"),
+    join(algorithms, "Graph Algorithms", "Articulation Points and Bridges.md"),
+  ]) {
+    const config = complexityConfig(note)
+    const formulas = Object.values(config.resources).flatMap((resource: any) =>
+      resource.entries.flatMap((entry: any) => entry.bounds.map((bound: any) => bound.formula)),
+    )
+    const view = buildComplexityViewModel(config, note)
+    assert.ok(
+      view.resources.every((resource) => resource.legend.length === 1 && !resource.legend[0].label),
+    )
+    assert.deepEqual(
+      view.resources.flatMap((resource) =>
+        resource.paths
+          .map(({ formula }) => formula)
+          .concat(resource.semanticBounds.map(({ formula }) => formula)),
+      ),
+      formulas,
+    )
   }
 })
 
@@ -1973,7 +2276,7 @@ test("Paradigms and Patterns keep comparison charts except Two Heaps operations"
       const { mode, entries } = resource as { mode: string; entries: { label: string }[] }
       assert.equal(mode, "comparison", `${note} ${key} mode`)
       assert.equal(entries.length, 2, `${note} ${key} entry count`)
-      assert.match(entries[0].label, /^Naive \(/, `${note} ${key} baseline label`)
+      assert.match(entries[0].label, /^Naive\b/, `${note} ${key} baseline label`)
       assert.doesNotMatch(entries[1].label, /^Naive\b/, `${note} ${key} technique label`)
     }
     const [time, space] = ["time", "space"].map(

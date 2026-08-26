@@ -6,6 +6,7 @@
 // ==========================================================================
 
 import {
+  GRAPH_EDGE_ARROW_GAP_PX,
   GRAPH_NODE_HALO_GAP_PX,
   GRAPH_NODE_RADIUS_PX,
   observeFixedSvgNodes,
@@ -686,10 +687,10 @@ export function makeBoundarySearchView(frames, descriptor: BoundarySearchViewDes
 
   const legend = makeLegend(
     [
-      ["range", "unknown candidate"],
-      ["infeasible", "known too small"],
-      ["feasible", "known feasible"],
-      ["probe", "current check"],
+      ["range", "Unknown Candidate"],
+      ["infeasible", "Known Too Small"],
+      ["feasible", "Known Feasible"],
+      ["probe", "Current Check"],
     ].map(([state, label]) => ({
       state,
       label,
@@ -1488,23 +1489,23 @@ function makeCoinChangeStoryView(frames) {
   const legendItems =
     first.approach === "memoization"
       ? [
-          ["active", "coin being tried"],
-          ["selected", "current branch"],
-          ["stored", "saved remainder"],
-          ["hit", "answer reused"],
+          ["active", "Coin Being Tried"],
+          ["selected", "Current Branch"],
+          ["stored", "Saved Remainder"],
+          ["hit", "Answer Reused"],
         ]
       : first.approach === "tabulation"
         ? [
-            ["current", "amount being written"],
-            ["dependency", "smaller amount read"],
-            ["stored", "solved amount"],
-            ["best", "optimal amount chain"],
+            ["current", "Amount Being Written"],
+            ["dependency", "Smaller Amount Read"],
+            ["stored", "Solved Amount"],
+            ["best", "Optimal Amount Chain"],
           ]
         : [
-            ["active", "coin being tried"],
-            ["selected", "coins on the counter"],
-            ["repeated", "repeated subproblem"],
-            ["best", "best exact change"],
+            ["active", "Coin Being Tried"],
+            ["selected", "Coins on the Counter"],
+            ["repeated", "Repeated Subproblem"],
+            ["best", "Best Exact Change"],
           ]
   const legend = makeLegend(
     legendItems.map(([state, label]) => ({
@@ -1769,23 +1770,23 @@ function makeGridPathStoryView(frames) {
   const legendItems =
     first.approach === "memoization"
       ? [
-          ["current", "tile being evaluated"],
-          ["stored", "saved remaining cost"],
-          ["repeated", "saved answer reused"],
-          ["best", "best complete route"],
+          ["current", "Tile Being Evaluated"],
+          ["stored", "Saved Remaining Cost"],
+          ["repeated", "Saved Answer Reused"],
+          ["best", "Best Complete Route"],
         ]
       : first.approach === "tabulation"
         ? [
-            ["current", "tile being written"],
-            ["dependency", "written neighbour read"],
-            ["stored", "remaining cost stored"],
-            ["best", "optimal route"],
+            ["current", "Tile Being Written"],
+            ["dependency", "Written Neighbour Read"],
+            ["stored", "Remaining Cost Stored"],
+            ["best", "Optimal Route"],
           ]
         : [
-            ["current", "tile being considered"],
-            ["path", "current route"],
-            ["repeated", "tile reached again"],
-            ["best", "best complete route"],
+            ["current", "Tile Being Considered"],
+            ["path", "Current Route"],
+            ["repeated", "Tile Reached Again"],
+            ["best", "Best Complete Route"],
           ]
   const legend = makeLegend(
     legendItems.map(([state, label]) => ({
@@ -2437,9 +2438,12 @@ export function makeBacktrackView(frames) {
   function makeTreeLayout() {
     const leafGap = 36
     const depthGap = 42
+    const fixedNodeClearance =
+      GRAPH_NODE_RADIUS_PX + GRAPH_NODE_HALO_GAP_PX + GRAPH_EDGE_ARROW_GAP_PX + 2
+    const treePad = fixedNodeClearance * 2 + 4
     const leafPad = 90
-    const leafEndPad = 10
-    const depthPad = 20
+    const leafEndPad = treePad
+    const depthPad = treePad
     const positions = Object.fromEntries(
       treeNodes.map((node) => {
         const leaf = leafSlots.get(node.id)
@@ -2568,10 +2572,15 @@ export function makeBacktrackView(frames) {
 
   const treeLegend = makeLegend(
     [
-      { label: "branch", state: "split", swatchClass: "steptrace__swatch steptrace__rtswatch" },
-      { label: "prune", state: "prune", swatchClass: "steptrace__swatch steptrace__rtswatch" },
-      { label: "return", state: "return", swatchClass: "steptrace__swatch steptrace__rtswatch" },
-      { label: "solution", state: "combine", swatchClass: "steptrace__swatch steptrace__rtswatch" },
+      { label: "Branch", state: "split", swatchClass: "steptrace__swatch steptrace__rtswatch" },
+      { label: "Prune", state: "prune", swatchClass: "steptrace__swatch steptrace__rtswatch" },
+      { label: "Return", state: "return", swatchClass: "steptrace__swatch steptrace__rtswatch" },
+      {
+        label: "Solution",
+        state: "combine",
+        swatchClass: "steptrace__swatch steptrace__rtswatch",
+        marker: successMarker(),
+      },
     ],
     "Decision tree state legend",
     "steptrace__bt-tree-legend",
@@ -3293,9 +3302,9 @@ const legacyRecTreeDescriptor: ExecutionTreeViewDescriptor = {
   minSvgWidth: 320,
   stateLabels: {},
   legend: [
-    { state: "compute", label: "compute" },
-    { state: "miss", label: "store (miss)" },
-    { state: "hit", label: "reuse (hit)" },
+    { state: "compute", label: "Compute" },
+    { state: "miss", label: "Store (Miss)" },
+    { state: "hit", label: "Reuse (Hit)" },
   ],
   frameModel(frame) {
     return {
@@ -3442,9 +3451,9 @@ export function makeGraphView(frames, graph, frontierLabel) {
   // watch() below), matching the other renderers' rails.
   const legend = makeLegend(
     [
-      { label: "current", swatchClass: "steptrace__swatch steptrace__swatch--current" },
-      { label: "frontier", swatchClass: "steptrace__swatch steptrace__swatch--frontier" },
-      { label: "visited", swatchClass: "steptrace__swatch steptrace__swatch--visited" },
+      { label: "Current", swatchClass: "steptrace__swatch steptrace__swatch--current" },
+      { label: "Frontier", swatchClass: "steptrace__swatch steptrace__swatch--frontier" },
+      { label: "Visited", swatchClass: "steptrace__swatch steptrace__swatch--visited" },
     ],
     "Graph state legend",
   )
@@ -3538,6 +3547,13 @@ export function makeLegend(items, ariaLabel, extraClass = "") {
   legend.setAttribute("role", "list")
   legend.setAttribute("aria-label", ariaLabel)
   for (const item of items) {
+    if (
+      /(^|[\s/()–-])(?!(?:a|an|and|as|at|by|for|from|in|of|on|or|the|to|with)(?=$|[\s/()–-]))[a-z]/.test(
+        item.label,
+      )
+    ) {
+      throw new Error(`Legend labels must be authored in Title Case: ${item.label}`)
+    }
     const row = el("span", "steptrace__legend-row")
     row.setAttribute("role", "listitem")
     const swatch = el(
@@ -3546,6 +3562,7 @@ export function makeLegend(items, ariaLabel, extraClass = "") {
     )
     if (item.state) swatch.dataset.state = item.state
     if (item.role) swatch.dataset.role = item.role
+    if (item.carrier) swatch.dataset.carrier = item.carrier
     if (item.color) swatch.style.setProperty("--_legend-color", item.color)
     if (item.marker) swatch.append(item.marker)
     row.append(swatch, document.createTextNode(item.label))
@@ -3629,7 +3646,7 @@ export function buildMilestones(algorithm, kind, frames) {
     frame.operation && frame.key
       ? `${frame.operation[0].toUpperCase()}${frame.operation.slice(1)} ${frame.key}`
       : null
-  const initial =
+  let initial =
     kind === "sort"
       ? firstGap != null
         ? `Gap ${firstGap}`
@@ -3696,6 +3713,7 @@ export function buildMilestones(algorithm, kind, frames) {
                 : kind === "pointers" && familyProfile === "fast-slow-pointers"
                   ? "Start together"
                   : "Initialize"
+  if (familyProfile === "articulation-points-and-bridges") initial = "Discover DFS Tree"
   push(0, initial)
   let lastRange = ""
   let lastGap = firstGap
@@ -3766,6 +3784,10 @@ export function buildMilestones(algorithm, kind, frames) {
         push(i, algorithm === "bubble-sort" ? `Pass ${count}` : `${word} ${count}`)
       }
       lastRange = range || lastRange
+    } else if (familyProfile === "articulation-points-and-bridges") {
+      if (f.type === "back-edge") push(i, "Lower via Back Edge")
+      else if (f.type === "cut") push(i, "Identify Cuts")
+      else if (f.type === "propagate") push(i, "Propagate Low Links")
     } else if (
       kind === "graph" &&
       (f.type === "visit" || f.type === "expand") &&

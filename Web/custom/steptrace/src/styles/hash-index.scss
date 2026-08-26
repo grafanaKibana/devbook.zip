@@ -25,7 +25,7 @@
   border-radius: 6px;
   background: var(--st-page, #fff);
   color: var(--_text);
-  font: 700 0.66rem/1 var(--_font-mono);
+  font: 600 0.66rem/1 var(--_font-mono);
 }
 
 .steptrace__hash-token {
@@ -284,7 +284,7 @@
   justify-content: center;
   gap: 0.1rem;
   padding: 0.2rem 0.08rem;
-  font: 700 clamp(0.46rem, 1.45cqi, 0.68rem) / 1.05 var(--_font-mono);
+  font: 600 clamp(0.46rem, 1.45cqi, 0.68rem) / 1.05 var(--_font-mono);
 }
 
 .steptrace__hash-key,

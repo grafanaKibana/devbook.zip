@@ -61,6 +61,10 @@ tab: Complexity
     "vertexCount": {
       "symbol": "n",
       "description": "number of vertices"
+    },
+    "combinedSize": {
+      "symbol": "s",
+      "description": "n + m, the horizontal axis for the time plot"
     }
   },
   "resources": {
@@ -74,7 +78,7 @@ tab: Complexity
             {
               "kind": "curve",
               "role": "Time",
-              "formula": "O(m)",
+              "formula": "Θ(n + m)",
               "curveId": "linear"
             }
           ]
@@ -86,7 +90,7 @@ tab: Complexity
             {
               "kind": "text",
               "role": "Time",
-              "formula": "distribution-dependent; O(n·m) upper bound"
+              "formula": "distribution-dependent; O(n + n·m) upper bound"
             }
           ]
         },
@@ -95,9 +99,11 @@ tab: Complexity
           "operation": "Worst",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Time",
-              "formula": "O(n·m)"
+              "formula": "O(n + n·m)",
+              "curveFrom": "linear",
+              "curveTo": "quadratic"
             }
           ]
         }

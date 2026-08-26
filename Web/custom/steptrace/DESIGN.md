@@ -7,7 +7,7 @@ This document owns StepTrace-specific design, consistency, and review rules. The
 ## Source of truth
 
 - **Status:** Active
-- **Last refreshed:** 2026-08-14
+- **Last refreshed:** 2026-08-26
 - **Product surface:** `steptrace` fenced blocks rendered in Obsidian and Quartz.
 - **Source:** `Web/custom/steptrace/src/`.
 - **Generated artifacts:** `Web/custom/steptrace/generated/` and `Vault/.obsidian/plugins/steptrace/`.
@@ -142,6 +142,8 @@ A primitive has one primary process role. An independent goal, target, range, or
 
 The local legend translates algorithm terminology into this shared grammar; it does not redefine the grammar. `steptrace.semantic-inventory.mjs` and its StepTrace tests enforce exact source carriers, roles, marker associations, compositions, and explicit exclusions. Production changes belong in `src/`; generated Quartz and Obsidian projections are updated only through `npm run steptrace:build` and are never hand-edited.
 
+Algorithm legends use one default marker: a `0.75rem` circular solid semantic fill with no decorative border and a Title Case label. Terminal success adds the canonical shared check to green; accepted, visited, closed, path, and stored-progress green remain plain. Line, bar, band, edge, and path carriers are exceptions only when their geometry communicates the algorithmic relationship.
+
 ## Visual style
 
 ### Surface and chrome
@@ -154,10 +156,10 @@ The local legend translates algorithm terminology into this shared grammar; it d
 
 ### Typography
 
-- Headings and interface hierarchy use `--_font-head`.
-- Trace prose and labels use `--_font-body`.
-- Values, indices, addresses, counters, and aligned state use `--_font-mono`.
-- Do not introduce family-specific font stacks.
+- Human UI, headings, trace prose, and narrative labels use `--_font-body`.
+- Formulas, values, indices, addresses, counters, and aligned machine state use `--_font-mono`.
+- Shared hierarchy uses weights `400` and `600`; a geometry-fitted data label may use a different size only when the available node, cell, or track requires it.
+- Do not introduce a third rendered font role or family-specific font stack.
 - Keep labels short enough to remain readable without shrinking below the shared scale.
 
 ### Spacing and geometry
@@ -166,6 +168,7 @@ The local legend translates algorithm terminology into this shared grammar; it d
 - Keep controls at least `44px` on compact or coarse-pointer surfaces.
 - Align values and repeated structures to a visible grid.
 - Reserve geometry for the largest expected normal state when that prevents frame-to-frame layout shift.
+- Tree and graph view bounds include node radius, terminal halos, stroke width, arrowheads, and a small visual gutter on all four sides. Preserve intentional clipping only after those rendered extents fit at compact-boundary and wide widths.
 - Prefer reflow, wrapping, and family container queries over scaling the whole visualization.
 - Use horizontal scrolling only when reflow or compression would falsify the spatial relationship.
 

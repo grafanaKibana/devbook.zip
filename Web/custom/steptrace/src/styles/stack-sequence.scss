@@ -120,7 +120,7 @@
   place-items: center;
   color: var(--_text);
   background: transparent;
-  font: 700 0.64rem/1 var(--_font-mono);
+  font: 600 0.64rem/1 var(--_font-mono);
   text-align: center;
   opacity: 0;
   transform: translateY(0.35rem);
@@ -139,13 +139,6 @@
 
 .steptrace .steptrace__stack-sequence-stack-cell[data-top="1"] {
   background: color-mix(in srgb, var(--_amber) 22%, var(--_surface));
-}
-
-.steptrace .steptrace__stack-sequence-swatch {
-  inline-size: 0.52rem;
-  block-size: 0.52rem;
-  border-radius: 50%;
-  flex: none;
 }
 
 .steptrace .steptrace__stack-sequence-swatch--scan {
@@ -219,7 +212,7 @@
 
 .steptrace .steptrace__stack-cell .steptrace__contiguous-value {
   padding: 0.18rem 0.4rem;
-  font: 650 0.82rem/1.1 var(--_font-body);
+  font: 600 0.82rem/1.1 var(--_font-mono);
 }
 
 .steptrace .steptrace__stack-cell .steptrace__contiguous-index {
@@ -228,7 +221,7 @@
 
 .steptrace .steptrace__stack-cell[data-top="1"] .steptrace__contiguous-index {
   color: var(--_accent);
-  font-weight: 750;
+  font-weight: 600;
 }
 
 .steptrace .steptrace__stack-cell[data-empty="1"] .steptrace__contiguous-value {
@@ -246,7 +239,7 @@
   display: grid;
   place-items: center;
   color: var(--_text);
-  font: 650 0.82rem/1.1 var(--_font-body);
+  font: 600 0.82rem/1.1 var(--_font-mono);
   opacity: 0;
   pointer-events: none;
 }

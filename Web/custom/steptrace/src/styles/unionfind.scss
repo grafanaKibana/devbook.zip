@@ -14,7 +14,7 @@
 }
 .steptrace__uf .steptrace__id {
   fill: var(--_text);
-  font: 600 13px var(--_font-head);
+  font: 600 13px var(--_font-mono);
 }
 .steptrace__ufarc {
   stroke: var(--_neutral);
@@ -83,7 +83,7 @@
 
 .steptrace__union-find-node > text:not(.steptrace__union-find-root-label) {
   fill: var(--_text);
-  font: 650 0.76rem/1 var(--_font-mono);
+  font: 600 0.76rem/1 var(--_font-mono);
 }
 
 .steptrace__union-find-node[data-selected="true"] circle {
@@ -100,7 +100,7 @@
 
 .steptrace__union-find-root-label {
   fill: var(--_muted);
-  font: 600 0.5rem/1 var(--_font-head);
+  font: 600 0.5rem/1 var(--_font-body);
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }

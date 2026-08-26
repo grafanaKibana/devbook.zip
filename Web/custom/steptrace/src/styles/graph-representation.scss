@@ -74,7 +74,7 @@
   margin: 0;
   padding: 0 0.2rem 0.35rem;
   color: var(--_muted);
-  font: 700 0.65rem/1 var(--_font-head);
+  font: 600 0.65rem/1 var(--_font-body);
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -89,7 +89,7 @@
 
 .steptrace .steptrace__graph-rep-matrix-cell[data-value="1"] .steptrace__dp-value {
   color: var(--_green);
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .steptrace .steptrace__graph-rep-matrix-cell[data-changed="1"] {

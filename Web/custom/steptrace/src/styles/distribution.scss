@@ -150,7 +150,7 @@
 .steptrace__distribution-entry,
 .steptrace__distribution-entry-label,
 .steptrace__distribution-entry-value {
-  font: 650 clamp(0.56rem, 1.5vw, 0.66rem) / 1.15 var(--_font-mono);
+  font: 600 clamp(0.56rem, 1.5vw, 0.66rem) / 1.15 var(--_font-mono);
   font-variant-numeric: tabular-nums;
 }
 
@@ -174,7 +174,7 @@
 
 .steptrace__distribution-entry-value {
   color: var(--_text);
-  font-weight: 750;
+  font-weight: 600;
   text-align: end;
   white-space: nowrap;
 }
@@ -254,7 +254,7 @@
   border-block-end: 1px solid var(--_distribution-border);
   background: var(--_distribution-header);
   color: var(--_muted);
-  font: 650 clamp(0.55rem, 1.4vw, 0.64rem) / 1 var(--_font-mono);
+  font: 600 clamp(0.55rem, 1.4vw, 0.64rem) / 1 var(--_font-mono);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
@@ -293,7 +293,7 @@
   border-radius: 0.25rem;
   background: var(--_surface);
   color: var(--_text);
-  font: 650 clamp(0.58rem, 1.45vw, 0.68rem) / 1.15 var(--_font-mono);
+  font: 600 clamp(0.58rem, 1.45vw, 0.68rem) / 1.15 var(--_font-mono);
   font-variant-numeric: tabular-nums;
   overflow: hidden;
   text-align: center;

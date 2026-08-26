@@ -74,7 +74,7 @@ tab: Complexity
   "variables": {
     "branchingFactor": {
       "symbol": "b",
-      "description": "successors generated per expanded state; treated as fixed by each plotted curve"
+      "description": "fixed successors per expanded state, b > 1"
     },
     "parameterD": {
       "symbol": "d",
@@ -99,7 +99,7 @@ tab: Complexity
         },
         {
           "kind": "operation",
-          "operation": "Typical",
+          "operation": "Estimate",
           "bounds": [
             {
               "kind": "text",
@@ -113,9 +113,10 @@ tab: Complexity
           "operation": "Worst",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Time (node expansions)",
-              "formula": "O(b^d) for uniform edge costs"
+              "formula": "O(b^d) for uniform edge costs",
+              "curveId": "exponential"
             }
           ]
         }
@@ -138,7 +139,7 @@ tab: Complexity
         },
         {
           "kind": "operation",
-          "operation": "Typical",
+          "operation": "Estimate",
           "bounds": [
             {
               "kind": "text",
@@ -152,9 +153,10 @@ tab: Complexity
           "operation": "Worst",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Auxiliary space",
-              "formula": "O(b^d)"
+              "formula": "O(b^d)",
+              "curveId": "exponential"
             }
           ]
         }
@@ -196,6 +198,8 @@ An admissible but **inconsistent** `h` keeps optimality for the tree-search form
 
 > [!EXAMPLE]- C# implementation
 >
+> This close-once implementation assumes nonnegative edge weights and a consistent heuristic.
+>
 > ```csharp
 > public static IReadOnlyList<int>? AStar(
 >     int source,
@@ -218,7 +222,7 @@ An admissible but **inconsistent** `h` keeps optimality for the tree-search form
 >
 >         if (!closed.Add(u))
 >         {
->             continue; // the optimal copy of u was already expanded
+>             continue; // with a consistent heuristic, u's best g-score was already expanded
 >         }
 >
 >         foreach (var (v, w) in neighbors(u))

@@ -15,7 +15,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font: 500 0.98rem var(--_font-mono);
+  font: 600 0.98rem var(--_font-mono);
   color: var(--_text);
   border-right: 1px solid color-mix(in srgb, var(--_text) 13%, transparent);
   transition:
@@ -40,11 +40,11 @@
 }
 .steptrace__pcell[data-end="l"] {
   color: var(--_blue);
-  font-weight: 700;
+  font-weight: 600;
 }
 .steptrace__pcell[data-end="r"] {
   color: var(--_violet);
-  font-weight: 700;
+  font-weight: 600;
 }
 .steptrace__pcell[data-state="match"][data-end] {
   color: var(--_green);

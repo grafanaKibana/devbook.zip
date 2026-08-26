@@ -184,7 +184,7 @@
   top: 50%;
   transform: translate(-50%, -50%);
   color: var(--_on-accent);
-  font: 800 0.68rem/1 var(--_font-head);
+  font: 600 0.68rem/1 var(--_font-body);
   text-shadow: 0 1px 2px color-mix(in srgb, var(--_text) 45%, transparent);
   font-size: 0.68rem;
 }
@@ -228,7 +228,7 @@
 }
 .steptrace__bar[data-lane="active"] .steptrace__num {
   color: var(--_text);
-  font-weight: 750;
+  font-weight: 600;
 }
 .steptrace__bar[data-hole="1"] .steptrace__fill {
   background: transparent;
@@ -302,7 +302,7 @@
   transform: translateX(-50%) rotate(45deg);
 }
 .steptrace__marker-label {
-  font: 700 clamp(0.58rem, 1.8vw, 0.68rem) / 1 var(--_font-head);
+  font: 600 clamp(0.58rem, 1.8vw, 0.68rem) / 1 var(--_font-body);
   color: var(--_on-accent);
 }
 .steptrace__marker[data-placing="1"] .steptrace__marker-body {

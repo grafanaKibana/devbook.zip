@@ -38,7 +38,7 @@
   --steptrace-array-outline: var(--_blue);
 
   color: var(--_blue);
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .steptrace .steptrace__heap-stream .steptrace__pcell[data-state="winner"] {
@@ -215,7 +215,7 @@
 
 .steptrace .steptrace__heap-root-label {
   fill: var(--_muted);
-  font: 600 0.52rem/1 var(--_font-head);
+  font: 600 0.52rem/1 var(--_font-body);
 }
 
 .steptrace .steptrace__heap-selection:not(.steptrace__two-heaps) .steptrace__heap-root-label {
@@ -223,13 +223,7 @@
 }
 
 .steptrace .steptrace__heap-swatch {
-  inline-size: 0.58rem;
-  block-size: 0.58rem;
-  border: 1.5px solid;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  flex: none;
+  color: var(--_surface);
 }
 
 .steptrace .steptrace__heap-swatch svg {
@@ -246,24 +240,19 @@
 }
 
 .steptrace .steptrace__heap-swatch--current {
-  border-color: var(--_blue);
-  background: color-mix(in srgb, var(--_blue) 20%, transparent);
+  background: var(--_blue);
 }
 
 .steptrace .steptrace__heap-swatch--winner {
-  border: 0;
-  color: var(--_surface);
   background: var(--_green);
 }
 
 .steptrace .steptrace__heap-swatch--weakest {
-  border-color: var(--_amber);
-  background: color-mix(in srgb, var(--_amber) 20%, transparent);
+  background: var(--_amber);
 }
 
 .steptrace .steptrace__heap-swatch--rejected {
-  border-color: var(--_red);
-  color: var(--_red);
+  background: var(--_red);
 }
 
 @container steptrace-heap-selection (max-width: 36rem) {

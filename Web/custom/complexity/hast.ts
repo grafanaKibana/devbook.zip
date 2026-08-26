@@ -159,7 +159,13 @@ function renderResourceHast(resource: ComplexityResourceViewModel, index: number
                 },
                 [
                   element("span", { className: ["complexity__legend-swatch"], ariaHidden: "true" }),
-                  text(item.label),
+                  element("span", { className: ["complexity__legend-label"] }, [
+                    text(item.semanticLabel),
+                  ]),
+                  text(": "),
+                  element("span", { className: ["complexity__legend-formula"] }, [
+                    text(item.formula),
+                  ]),
                 ],
               ),
             ]),
@@ -249,20 +255,6 @@ export function renderComplexityHast(view: ComplexityViewModel): RootContent {
     },
     [
       element("span", { hidden: true }, [text(view.label)]),
-      ...(view.variables.length > 0
-        ? [
-            element(
-              "dl",
-              { className: ["complexity__variables"] },
-              view.variables.map((variable) =>
-                element("div", { className: ["complexity__variable"] }, [
-                  element("dt", {}, [element("var", {}, [text(variable.symbol)])]),
-                  element("dd", {}, [text(variable.description)]),
-                ]),
-              ),
-            ),
-          ]
-        : []),
       ...(view.resources.length > 1
         ? [
             element(
@@ -291,6 +283,20 @@ export function renderComplexityHast(view: ComplexityViewModel): RootContent {
         { className: ["complexity__resources"] },
         view.resources.map(renderResourceHast),
       ),
+      ...(view.variables.length > 0
+        ? [
+            element(
+              "dl",
+              { className: ["complexity__variables"] },
+              view.variables.map((variable) =>
+                element("div", { className: ["complexity__variable"] }, [
+                  element("dt", {}, [element("var", {}, [text(variable.symbol)])]),
+                  element("dd", {}, [text(variable.description)]),
+                ]),
+              ),
+            ),
+          ]
+        : []),
     ],
   )
 }

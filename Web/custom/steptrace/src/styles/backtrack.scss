@@ -1,9 +1,34 @@
 /* ---- backtrack: chess board + persistent decision tree ---- */
+.steptrace.steptrace--backtrack {
+  container: steptrace-backtrack-shell / inline-size;
+}
+
 .steptrace__bt {
   container: steptrace-backtrack / inline-size;
   width: 100%;
   min-width: 0;
   margin: 0.4rem auto;
+}
+
+@container steptrace-backtrack-shell (max-width: 47rem) {
+  .steptrace--backtrack .steptrace__body {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+    block-size: auto;
+  }
+
+  .steptrace--backtrack .steptrace__rail {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    padding-left: 0;
+    border-top: 1px solid var(--_hair);
+    border-left: 0;
+    overflow: visible;
+  }
+
+  .steptrace--backtrack .steptrace__trace {
+    margin-top: 0;
+  }
 }
 
 .steptrace__bt-layout {
@@ -76,7 +101,7 @@
 .steptrace__btcell[data-state="solved"] {
   background: color-mix(in srgb, var(--_green) 40%, transparent);
 }
-.steptrace__bt-success {
+.steptrace__btcell > .steptrace__bt-success {
   position: absolute;
   inset-block-start: 0.18rem;
   inset-inline-end: 0.18rem;
@@ -148,13 +173,13 @@
 .steptrace__btslot[data-state="on"] {
   background: color-mix(in srgb, var(--_green) 20%, transparent);
   color: var(--_green);
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .steptrace__btslot[data-state="try"] {
   background: color-mix(in srgb, var(--_blue) 20%, transparent);
   color: var(--_blue);
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .steptrace__btslot[data-state="reject"] {
@@ -165,7 +190,7 @@
 .steptrace__btslot[data-state="remove"] {
   background: color-mix(in srgb, var(--_amber) 34%, transparent);
   color: var(--_amber);
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .steptrace__bt-tree {

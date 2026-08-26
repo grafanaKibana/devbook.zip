@@ -178,7 +178,7 @@
 .steptrace .steptrace__dp thead th,
 .steptrace .steptrace__dp tbody th {
   position: static !important;
-  font-family: var(--_font-head) !important;
+  font-family: var(--_font-body) !important;
   font-size: var(--_type-small) !important;
   line-height: 1.2 !important;
   font-weight: 400 !important;
@@ -385,7 +385,7 @@
   align-items: center;
   min-width: 0;
   color: var(--_matrix-text);
-  font: 400 var(--_type-small) / 1.2 var(--_font-head);
+  font: 400 var(--_type-small) / 1.2 var(--_font-body);
   font-variant-numeric: tabular-nums;
 }
 
@@ -425,7 +425,7 @@
 }
 
 .steptrace .steptrace__matrix-role-legend {
-  font: 600 var(--_type-small) / 1.2 var(--_font-head);
+  font: 600 var(--_type-small) / 1.2 var(--_font-body);
   min-width: 0;
 }
 

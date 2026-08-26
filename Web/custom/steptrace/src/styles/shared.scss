@@ -1,5 +1,12 @@
 /* Shared StepTrace tokens and card chrome. Renderer-specific rules live beside
    this file. index.scss defines their cascade order for both hosts. */
+$steptrace-play-gradient: linear-gradient(
+  90deg,
+  color-mix(in srgb, var(--_accent) 82%, var(--_on-accent)) 0%,
+  var(--_accent) 50%,
+  color-mix(in srgb, var(--_accent) 82%, var(--_text)) 100%
+);
+
 .steptrace {
   --_amber: var(--st-state-amber, #d97706);
   --_violet: var(--st-state-violet, #7c3aed);
@@ -16,10 +23,9 @@
   --_panel-shadow: var(--st-panel-shadow, rgb(0 0 0 / 0.12));
   --_held-bg: var(--st-held-bg, #92400e);
   --_held-fg: var(--st-held-fg, #ffffff);
-  /* font tokens — hosts bind these to their own families (Quartz: --headerFont
-     /--bodyFont/--codeFont; Obsidian: --font-interface/--font-text/--font-monospace).
+  /* Font tokens — hosts bind these to their body and code families (Quartz:
+     --bodyFont/--codeFont; Obsidian: --font-text/--font-monospace).
      Fallbacks name the design's own faces for standalone use. */
-  --_font-head: var(--st-font-head, "Schibsted Grotesk", ui-sans-serif, system-ui, sans-serif);
   --_font-body: var(
     --st-font-body,
     "Source Sans 3",
@@ -29,6 +35,7 @@
     sans-serif
   );
   --_font-mono: var(--st-font-mono, "IBM Plex Mono", ui-monospace, monospace);
+  --_play-gradient: #{$steptrace-play-gradient};
   --_hair: color-mix(in srgb, var(--_text) 14%, transparent);
   --_hover: color-mix(in srgb, var(--_text) 7%, transparent);
   /* ---- motion tokens: one duration scale + a small curve vocabulary. Roles
@@ -185,9 +192,9 @@
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  font-family: var(--_font-head);
+  font-family: var(--_font-body);
   font-size: 0.82rem;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--_muted);
   letter-spacing: 0.01em;
 }
@@ -210,7 +217,7 @@
   justify-self: end;
   font-family: var(--_font-mono);
   font-size: 0.72rem;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--_muted);
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
@@ -371,7 +378,7 @@
   width: 100%;
   margin-top: 0.1rem;
   color: var(--_muted);
-  font: 600 0.7rem/1.25 var(--_font-head);
+  font: 600 0.7rem/1.25 var(--_font-body);
   text-align: center;
 }
 .steptrace__legend-row {
@@ -393,6 +400,14 @@
 .steptrace__legend-swatch .steptrace__success-marker {
   inline-size: 0.75rem;
   block-size: 0.75rem;
+}
+.steptrace .steptrace__legend-swatch:not([data-carrier]) {
+  inline-size: 0.75rem !important;
+  block-size: 0.75rem !important;
+  flex-basis: 0.75rem !important;
+  border: 0 !important;
+  border-radius: 50% !important;
+  transform: none !important;
 }
 @container steptrace-wide-stage (max-width: 34rem) {
   .steptrace__legend {
@@ -434,7 +449,7 @@
   flex-direction: column;
 }
 .steptrace__rail-label {
-  font-family: var(--_font-head);
+  font-family: var(--_font-body);
   font-size: 0.62rem;
   font-weight: 600;
   letter-spacing: 0.08em;
@@ -490,7 +505,7 @@
   flex-direction: column;
   justify-content: flex-start;
   gap: 0.55rem;
-  font-family: var(--_font-mono);
+  font-family: var(--_font-body);
   font-size: 0.72rem;
   line-height: 1.4;
   overflow: hidden;
@@ -516,8 +531,9 @@
   flex: none;
   color: var(--_muted);
   opacity: 0.5;
-  font-weight: 500;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
+  font-family: var(--_font-mono);
 }
 .steptrace__log-text {
   color: var(--_muted);
@@ -543,7 +559,7 @@
   align-items: center;
   gap: 0.5rem;
   height: 2em;
-  font-family: var(--_font-mono);
+  font-family: var(--_font-body);
   font-size: 0.72rem;
   border-bottom: 1px solid var(--_hair);
   border-radius: 0.25rem;
@@ -567,6 +583,7 @@
   color: var(--_text);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
+  font-family: var(--_font-mono);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -584,7 +601,7 @@
   background: var(--st-page, var(--_surface));
   box-shadow: 0 3px 10px color-mix(in srgb, var(--_text) 18%, transparent);
   color: var(--_text);
-  font: 500 0.75rem/1.35 var(--_font-body);
+  font: 600 0.75rem/1.35 var(--_font-body);
   overflow-wrap: anywhere;
   white-space: normal;
   opacity: 0;
@@ -650,14 +667,14 @@
 .steptrace__insight-label {
   display: block;
   margin-bottom: 0.22rem;
-  font: 700 0.58rem/1.2 var(--_font-head);
+  font: 600 0.58rem/1.2 var(--_font-body);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--_muted);
 }
 .steptrace__insight-text {
   display: block;
-  font: 600 0.72rem/1.45 var(--_font-mono);
+  font: 600 0.72rem/1.45 var(--_font-body);
   color: var(--_text);
 }
 
@@ -784,7 +801,7 @@
   color: var(--st-page, #fff);
   background: var(--_text);
   box-shadow: 0 4px 12px color-mix(in srgb, var(--_text) 16%, transparent);
-  font: 650 0.6rem/1 var(--_font-mono);
+  font: 600 0.6rem/1 var(--_font-mono);
   opacity: 0;
   visibility: hidden;
   white-space: nowrap;
@@ -845,7 +862,7 @@
   height: 2.5rem;
   place-items: center;
   color: var(--_muted);
-  font: 650 0.72rem/1 var(--_font-mono);
+  font: 600 0.72rem/1 var(--_font-mono);
   font-variant-numeric: tabular-nums;
 }
 .steptrace__btn {
@@ -876,7 +893,7 @@
 }
 .steptrace__btn--play {
   background-color: var(--_accent);
-  background-image: var(--st-accent-gradient, none);
+  background-image: var(--_play-gradient);
   color: var(--_on-accent);
   width: 2.5rem;
   height: 2.5rem;
@@ -887,7 +904,7 @@
    glyph keeps --_on-accent, leaving it invisible against either theme's page. */
 .steptrace__btn--play:hover {
   background-color: var(--_accent);
-  background-image: var(--st-accent-gradient, none);
+  background-image: var(--_play-gradient);
   filter: brightness(1.12);
 }
 .steptrace__btn--play svg {
@@ -945,7 +962,7 @@
   transform: translateY(0);
 }
 .steptrace__menu-h {
-  font-family: var(--_font-head);
+  font-family: var(--_font-body);
   font-size: 0.58rem;
   font-weight: 600;
   letter-spacing: 0.06em;
@@ -962,7 +979,7 @@
   margin: 0;
   padding: 0.45rem 0.55rem;
   border-radius: 6px;
-  font: 500 0.8rem var(--_font-body);
+  font: 600 0.8rem var(--_font-body);
   color: var(--_text);
   cursor: pointer;
   background: transparent;
@@ -1072,7 +1089,7 @@
   padding: 0.55rem 1.8rem 0.55rem 0.6rem;
   border: 1px solid var(--_border);
   border-radius: 6px;
-  font: 500 0.8rem var(--_font-body);
+  font: 600 0.8rem var(--_font-body);
   color: var(--_text);
   background-color: transparent;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath d='M2 4l3 3 3-3' fill='none' stroke='%23888' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
@@ -1152,7 +1169,7 @@
   border-radius: 0.25rem;
   background-color: var(--st-page, var(--_surface));
   color: var(--_text);
-  font: 500 0.75rem/1.2 var(--_font-head);
+  font: 600 0.75rem/1.2 var(--_font-body);
   text-align: center;
   cursor: pointer;
   transition:

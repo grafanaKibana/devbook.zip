@@ -47,13 +47,13 @@
   grid-area: value;
   padding-inline: 0.5rem;
   color: var(--_text);
-  font: 650 0.8rem/1 var(--_font-mono);
+  font: 600 0.8rem/1 var(--_font-mono);
 }
 
 .steptrace__range-block-op {
   grid-area: op;
   color: var(--_muted);
-  font: 700 0.68rem/1 var(--_font-mono);
+  font: 600 0.68rem/1 var(--_font-mono);
 }
 
 .steptrace__range-block-range {

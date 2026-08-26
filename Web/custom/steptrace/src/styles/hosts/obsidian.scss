@@ -26,7 +26,6 @@
   --st-state-green: #4c8000;
   --st-held-bg: #92400e;
   --st-held-fg: #ffffff;
-  --st-font-head: var(--font-interface);
   --st-font-body: var(--font-text);
   --st-font-mono: var(--font-monospace);
 }
@@ -126,16 +125,10 @@
 .steptrace button.steptrace__btn {
   appearance: none;
   border: 0;
-  background: transparent;
+  background-color: transparent;
   box-shadow: none;
 }
 
 .steptrace button.steptrace__btn:hover {
-  background: var(--_hover);
-}
-
-.steptrace button.steptrace__btn--play,
-.steptrace button.steptrace__btn--play:hover {
-  background-color: var(--cx-accent);
-  background-image: var(--st-accent-gradient, none);
+  background-color: var(--_hover);
 }

@@ -16,6 +16,7 @@ import {
   semanticSourceSentinels,
   semanticSentinelSnapshot,
   structuralExclusions,
+  visualContractInventory,
 } from "./steptrace.semantic-inventory.mjs"
 import { startWatcher } from "./watch.mjs"
 
@@ -305,6 +306,16 @@ function withFakeDocument(run) {
     getBoundingClientRect() {
       return { width: 620, height: 320 }
     }
+    cloneNode(deep = false) {
+      const clone = new FakeNode(this.tagName)
+      clone.textContent = this.textContent
+      clone.innerHTML = this.innerHTML
+      clone.attributes = new Map(this.attributes)
+      clone.dataset = { ...this.dataset }
+      clone.className = this.className
+      if (deep) clone.children = this.children.map((child) => child.cloneNode?.(true) ?? child)
+      return clone
+    }
   }
   const previousDocument = globalThis.document
   globalThis.document = {
@@ -324,7 +335,10 @@ function withFakeDocument(run) {
 }
 
 const normalizeSemanticSource = (value) =>
-  value.replace(/\/\*[\s\S]*?\*\//g, " ").replace(/\s+/g, " ").trim()
+  value
+    .replace(/\/\*[\s\S]*?\*\//g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
 
 const semanticDatasetAssignment =
   /([A-Za-z_$][\w$]*(?:\[[^\]]+\])?)\.dataset\.(state|roles|role|result|target|current|active|selected|found|matched|visited|success|decision)\s*=\s*/g
@@ -369,9 +383,7 @@ function dynamicAssignmentSites(owner, source) {
       start: match.index,
       valueStart: match.index + match[0].length,
       valueEnd: end,
-      expression: normalizeSemanticSource(
-        source.slice(match.index + match[0].length, end),
-      ),
+      expression: normalizeSemanticSource(source.slice(match.index + match[0].length, end)),
       siteId: `${owner}::${primitive}#${occurrence}`,
     })
   }
@@ -385,9 +397,7 @@ function assertInventoryDynamicObservations(observations) {
     ...readdirSync(familyRoot)
       .filter((entry) => entry.endsWith(".ts"))
       .map((entry) => join(familyRoot, entry)),
-  ].flatMap((path) =>
-    dynamicAssignmentSites(relative(repoRoot, path), readFileSync(path, "utf8")),
-  )
+  ].flatMap((path) => dynamicAssignmentSites(relative(repoRoot, path), readFileSync(path, "utf8")))
   const dynamicCarriers = semanticInventory
     .flatMap(({ carriers }) => carriers)
     .filter(({ carrierKind }) => carrierKind === "dynamic-assignment")
@@ -422,7 +432,7 @@ function assertInventoryDynamicObservations(observations) {
     "every bounded semantic assignment site must map to inventory carriers",
   )
   assert.deepEqual(
-    sites.filter(({ siteId }) => !(observations.get(siteId)?.size)).map(({ siteId }) => siteId),
+    sites.filter(({ siteId }) => !observations.get(siteId)?.size).map(({ siteId }) => siteId),
     [],
     "every bounded semantic assignment site must execute",
   )
@@ -447,20 +457,22 @@ function instrumentDynamicAssignments(owner, source) {
 }
 
 function expandObservedDynamicSites(sites, observations, allowUnexercised = false) {
-  const unexercised = sites.filter((site) => !(observations.get(site.siteId)?.size))
+  const unexercised = sites.filter((site) => !observations.get(site.siteId)?.size)
   if (!allowUnexercised)
     assert.deepEqual(
       unexercised.map(({ siteId }) => siteId),
       [],
       "unexercised semantic assignment sites",
     )
-  return sites.filter((site) => observations.get(site.siteId)?.size).flatMap((site) => {
-    const values = [...(observations.get(site.siteId) ?? [])].sort()
-    return values.map((signal) => ({
-      category: "dynamic-assignment",
-      carrierKey: `${site.siteId}::${signal || "<empty>"}`,
-    }))
-  })
+  return sites
+    .filter((site) => observations.get(site.siteId)?.size)
+    .flatMap((site) => {
+      const values = [...(observations.get(site.siteId) ?? [])].sort()
+      return values.map((signal) => ({
+        category: "dynamic-assignment",
+        carrierKey: `${site.siteId}::${signal || "<empty>"}`,
+      }))
+    })
 }
 
 async function collectFrameDynamicObservations() {
@@ -535,7 +547,9 @@ async function collectFrameDynamicObservations() {
       const unionView = render.makeUnionFindView(unionFrames)
       unionFrames.forEach((frame, index) => unionView.paint(frame, index, unionFrames.length))
       assert.deepEqual(
-        [...(observations.get("Web/custom/steptrace/src/render.ts::arc.dataset.active#1") ?? [])].sort(),
+        [
+          ...(observations.get("Web/custom/steptrace/src/render.ts::arc.dataset.active#1") ?? []),
+        ].sort(),
         ["false", "true"],
         "legacy union-find fixture must exercise both arc activity signals",
       )
@@ -586,11 +600,17 @@ function discoverSemanticSentinels(
         /(?:data-(?:state|role|roles|result|target|current|active|selected|found|matched|visited|success|decision)|--(?:current|candidate|accepted|visited|success|sorted|found|match|rejected|invalid|active|open|closed|path|stored|selected|winner|output|terminal|created|scan|retained|popped|resolved)|success-marker|__check)/.test(
           selector,
         )
-      for (const token of new Set([...body.matchAll(/var\(--_(blue|amber|green|violet|red|neutral)\)/g)].map((item) => item[1])))
+      for (const token of new Set(
+        [...body.matchAll(/var\(--_(blue|amber|green|violet|red|neutral)\)/g)].map(
+          (item) => item[1],
+        ),
+      ))
         add("semantic-token-selector", owner, selector, token)
       if (
         semanticSelector &&
-        /box-shadow:\s*inset\s+0\s+-|text-decoration:\s*underline|border-(?:block-)?bottom\s*:/.test(body)
+        /box-shadow:\s*inset\s+0\s+-|text-decoration:\s*underline|border-(?:block-)?bottom\s*:/.test(
+          body,
+        )
       )
         add("semantic-underline", owner, selector, "underline")
     }
@@ -629,8 +649,7 @@ function discoverSemanticSentinels(
   return [
     ...sentinels,
     ...expandObservedDynamicSites(dynamicSites, observations, allowUnexercised),
-  ]
-    .sort((left, right) => left.carrierKey.localeCompare(right.carrierKey))
+  ].sort((left, right) => left.carrierKey.localeCompare(right.carrierKey))
 }
 
 function exactSetDiagnostics(expected, actual) {
@@ -675,11 +694,11 @@ function hasCompleteGeometryException(item) {
   const exception = item.geometryException
   return Boolean(
     exception?.finalPrimitive &&
-      exception?.primitiveInfeasibility &&
-      exception?.associatedResultInfeasibility &&
-      exception?.sharedEquivalentCue &&
-      exception?.automatedAssertionId &&
-      exception?.visualEvidenceCase,
+    exception?.primitiveInfeasibility &&
+    exception?.associatedResultInfeasibility &&
+    exception?.sharedEquivalentCue &&
+    exception?.automatedAssertionId &&
+    exception?.visualEvidenceCase,
   )
 }
 
@@ -775,10 +794,7 @@ test("ST-INV-001 and ST-INV-002 exactly cover the live StepTrace catalogs", () =
     )
     assert.deepEqual([...actual].sort(), [...expected].sort())
     assert.deepEqual(exactSetDiagnostics(expected, actual.slice(1)).missing, [actual[0]])
-    assert.deepEqual(
-      exactSetDiagnostics(expected, [...actual, actual[0]]).duplicates,
-      [actual[0]],
-    )
+    assert.deepEqual(exactSetDiagnostics(expected, [...actual, actual[0]]).duplicates, [actual[0]])
   }
 })
 
@@ -813,7 +829,11 @@ test("ST-INV-003 and ST-INV-004 enforce semantic inventory schema and routing", 
   ])
   const carriers = semanticInventory.flatMap(({ carriers }) => carriers)
   const carrierKeys = carriers.map(({ carrierKey }) => carrierKey)
-  assert.equal(new Set(carrierKeys).size, carrierKeys.length, "carrier keys must be globally unique")
+  assert.equal(
+    new Set(carrierKeys).size,
+    carrierKeys.length,
+    "carrier keys must be globally unique",
+  )
 
   for (const entry of semanticInventory) {
     assert.ok(entry.cohort)
@@ -823,7 +843,8 @@ test("ST-INV-003 and ST-INV-004 enforce semantic inventory schema and routing", 
     assert.ok(entry.carriers.length)
     assert.ok(entry.evidenceCase?.config?.algorithm)
     for (const id of entry.catalogIds) assert.equal(routes.get(id), entry.executionPath, id)
-    for (const owner of entry.sourceOwners) assert.equal(existsSync(join(repoRoot, owner)), true, owner)
+    for (const owner of entry.sourceOwners)
+      assert.equal(existsSync(join(repoRoot, owner)), true, owner)
   }
 
   for (const item of carriers) {
@@ -860,7 +881,10 @@ test("ST-INV-003 and ST-INV-004 enforce semantic inventory schema and routing", 
         [...item.allowedSignals].sort(),
         item.carrierKey,
       )
-      assert.equal(item.allowedSignals.some((signal) => signal.startsWith("dynamic:")), false)
+      assert.equal(
+        item.allowedSignals.some((signal) => signal.startsWith("dynamic:")),
+        false,
+      )
       for (const evidence of item.signalEvidenceCases) {
         assert.ok(evidence.evidenceCase?.config?.algorithm, item.carrierKey)
         assert.equal(evidence.sourceSentinel, item.carrierKey, item.carrierKey)
@@ -880,7 +904,9 @@ test("ST-INV-003 and ST-INV-004 enforce semantic inventory schema and routing", 
       const normalizedSignal = discoveredSignal === "<empty>" ? "" : discoveredSignal
       assert.deepEqual(item.allowedSignals, [normalizedSignal], item.carrierKey)
       assert.equal(
-        item.signalEvidenceCases.every(({ assignmentExpression }) => assignmentExpression.length > 0),
+        item.signalEvidenceCases.every(
+          ({ assignmentExpression }) => assignmentExpression.length > 0,
+        ),
         true,
         item.carrierKey,
       )
@@ -907,7 +933,11 @@ test("ST-INV-003 and ST-INV-004 enforce semantic inventory schema and routing", 
     for (const composed of item.composesWith ?? []) {
       assert.equal(carrierKeys.includes(composed), true)
       const other = carriers.find(({ carrierKey }) => carrierKey === composed)
-      assert.notEqual(item.role.kind, other.role.kind, `${item.carrierKey} must compose primary + overlay`)
+      assert.notEqual(
+        item.role.kind,
+        other.role.kind,
+        `${item.carrierKey} must compose primary + overlay`,
+      )
     }
     if (/::(?:success|found|best|path|stored|visited)(?:\b|\s)/i.test(item.carrierKey))
       assert.ok(item.ambiguousTermRationale, item.carrierKey)
@@ -940,7 +970,10 @@ test("ST-INV-003 and ST-INV-004 enforce semantic inventory schema and routing", 
     false,
     "a partial geometry exception must fail the conditional schema",
   )
-  assert.ok(carriers.some(({ composesWith }) => composesWith?.length), "composition must be explicit")
+  assert.ok(
+    carriers.some(({ composesWith }) => composesWith?.length),
+    "composition must be explicit",
+  )
   const staticCarrierGroups = new Map()
   for (const carrier of carriers) {
     if (!new Set(["semantic-token-selector", "semantic-underline"]).has(carrier.carrierKind))
@@ -950,7 +983,9 @@ test("ST-INV-003 and ST-INV-004 enforce semantic inventory schema and routing", 
     group.push(carrier)
     staticCarrierGroups.set(primitive, group)
   }
-  for (const [primitive, group] of [...staticCarrierGroups].filter(([, group]) => group.length > 1)) {
+  for (const [primitive, group] of [...staticCarrierGroups].filter(
+    ([, group]) => group.length > 1,
+  )) {
     const roleKinds = new Set(group.map(({ role }) => role.kind))
     if (roleKinds.has("primary") && roleKinds.has("overlay")) {
       for (const carrier of group) {
@@ -992,7 +1027,10 @@ test("ST-INV-003 and ST-INV-004 enforce semantic inventory schema and routing", 
     '.steptrace__match:not(.steptrace__z) .steptrace__cell[data-state="found"]',
     '.steptrace__z .steptrace__cell[data-state="match"]',
   ])
-    assert.ok(underlines.some(({ carrierKey }) => carrierKey.includes(fragment)), fragment)
+    assert.ok(
+      underlines.some(({ carrierKey }) => carrierKey.includes(fragment)),
+      fragment,
+    )
 
   const assertLocalMeaning = (expectedRole, fragments) => {
     const related = fragments.map((fragment) => {
@@ -1049,7 +1087,10 @@ const testSemanticSourceReconciliation = async () => {
     `semantic carrier reconciliation: ${JSON.stringify(reconciliation)}`,
   )
   assert.equal(new Set(mapped).size, mapped.length, "a source sentinel may map to only one carrier")
-  assert.equal(new Set(structuralExclusions.map(({ carrierKey }) => carrierKey)).size, structuralExclusions.length)
+  assert.equal(
+    new Set(structuralExclusions.map(({ carrierKey }) => carrierKey)).size,
+    structuralExclusions.length,
+  )
   for (const exclusion of structuralExclusions) {
     assert.ok(exclusion.category)
     assert.ok(exclusion.rationale)
@@ -1067,8 +1108,14 @@ const testSemanticSourceReconciliation = async () => {
     true,
   )
   const newSiteKey = "Web/custom/steptrace/src/render.ts::probe.dataset.state#1::sentinel-new-site"
-  assert.equal(newSite.some(({ carrierKey }) => carrierKey === newSiteKey), true)
-  assert.equal(semanticSourceSentinels.some(({ carrierKey }) => carrierKey === newSiteKey), false)
+  assert.equal(
+    newSite.some(({ carrierKey }) => carrierKey === newSiteKey),
+    true,
+  )
+  assert.equal(
+    semanticSourceSentinels.some(({ carrierKey }) => carrierKey === newSiteKey),
+    false,
+  )
 
   assert.match(renderSource, /cell\.dataset\.state = "found"/)
   const changedSource = renderSource.replace(
@@ -1091,7 +1138,10 @@ const testSemanticSourceReconciliation = async () => {
   const changedKeys = new Set(newSignal.map(({ carrierKey }) => carrierKey))
   assert.equal([...originalKeys].filter((key) => !changedKeys.has(key)).length, 1)
   assert.equal([...changedKeys].filter((key) => !originalKeys.has(key)).length, 1)
-  assert.equal([...changedKeys].some((key) => key.endsWith("::found-next")), true)
+  assert.equal(
+    [...changedKeys].some((key) => key.endsWith("::found-next")),
+    true,
+  )
   assert.equal(
     semanticSourceSentinels.some(({ carrierKey }) => carrierKey.endsWith("::found-next")),
     false,
@@ -1110,10 +1160,14 @@ test("ST-INV negative probes reject marker, raw-color, and underline drift", asy
     ({ role, secondaryCue }) =>
       role.value === "accepted-visited" && secondaryCue !== "shared checkmark",
   )
-  assert.equal(semanticCueViolation({ ...accepted, secondaryCue: "shared checkmark" }), "accepted-marker")
+  assert.equal(
+    semanticCueViolation({ ...accepted, secondaryCue: "shared checkmark" }),
+    "accepted-marker",
+  )
 
   const finalMarker = carriers.find(
-    ({ role, carrierKind }) => role.value === "final-success" && carrierKind === "success-marker-site",
+    ({ role, carrierKind }) =>
+      role.value === "final-success" && carrierKind === "success-marker-site",
   )
   assert.equal(semanticCueViolation({ ...finalMarker, secondaryCue: "none" }), "final-marker")
   assert.equal(
@@ -1139,7 +1193,10 @@ test("ST-INV negative probes reject marker, raw-color, and underline drift", asy
     mutated.map(({ carrierKey }) => carrierKey),
     [...mapped, ...excluded],
   ).missing
-  assert.equal(missing.some((key) => key.includes('[data-state="unallowlisted"]::underline')), true)
+  assert.equal(
+    missing.some((key) => key.includes('[data-state="unallowlisted"]::underline')),
+    true,
+  )
 })
 
 test("ST-INV-007 characterizes accepted, final, transient, and ambiguous carriers", () => {
@@ -1177,7 +1234,9 @@ test("ST-INV-008 paints independent process and overlay carriers on graph and DP
     assert.ok(found, fragment)
     return found
   }
-  const graphPrimary = carrier('.steptrace__gs-node[data-state="current"] .steptrace__gs-node-circle::blue')
+  const graphPrimary = carrier(
+    '.steptrace__gs-node[data-state="current"] .steptrace__gs-node-circle::blue',
+  )
   const graphOverlay = carrier("graph-state.ts::group.dataset.target#1::true")
   const graphOverlayToken = carrier("graph-state.scss::.steptrace .steptrace__gs-target::violet")
   assert.deepEqual(graphPrimary.role, { kind: "primary", value: "active-current" })
@@ -1264,7 +1323,7 @@ test("ST-INV-008 paints independent process and overlay carriers on graph and DP
           node.tagName === "td" &&
           node.dataset.roles?.split(" ").includes("target") &&
           node.dataset.decision === "improve",
-    )
+      )
     assert.ok(matrixTarget, "DP target overlay must survive the improve process decision")
 
     const frames = buildSourceFrames({
@@ -1278,7 +1337,10 @@ test("ST-INV-008 paints independent process and overlay carriers on graph and DP
     assert.equal(textCells.length, 4)
     assert.equal(textCells[0].dataset.state, "found")
     assert.equal(textCells.at(-1).dataset.state, "found")
-    assert.equal(textCells.every(({ dataset }) => dataset.state === "found"), true)
+    assert.equal(
+      textCells.every(({ dataset }) => dataset.state === "found"),
+      true,
+    )
     const foundUnderline = carrier(
       '.steptrace__match:not(.steptrace__z) .steptrace__cell[data-state="found"]::underline',
     )
@@ -1313,13 +1375,16 @@ test("ST-INV-008 paints independent process and overlay carriers on graph and DP
     const suffixPattern = boyerBoard.children[0].children
     const suffixText = boyerBoard.children[1].children
     const paintedPatternSuffix = suffixPattern
-      .map(({ dataset }, index) => dataset.state === "suffix" ? index : null)
+      .map(({ dataset }, index) => (dataset.state === "suffix" ? index : null))
       .filter((index) => index != null)
     const paintedTextSuffix = suffixText
-      .map(({ dataset }, index) => dataset.state === "suffix" ? index : null)
+      .map(({ dataset }, index) => (dataset.state === "suffix" ? index : null))
       .filter((index) => index != null)
     assert.ok(paintedPatternSuffix.length >= 2)
-    assert.deepEqual(paintedTextSuffix, paintedPatternSuffix.map((index) => suffixFrame.shift + index))
+    assert.deepEqual(
+      paintedTextSuffix,
+      paintedPatternSuffix.map((index) => suffixFrame.shift + index),
+    )
     assert.ok(paintedPatternSuffix[0] < paintedPatternSuffix.at(-1))
     carrier('.steptrace__bm .steptrace__cell[data-state="suffix"]::underline')
 
@@ -1687,8 +1752,14 @@ test("Boyer-Moore reuses stable non-scrolling string strips with shell-matched e
     assert.equal(compareCue.children.length, 1)
     assert.match(compareCue.children[0].innerHTML, /<svg/)
     assert.doesNotMatch(compareCue.children[0].innerHTML, /✓|×/)
-    assert.match(textRow.children[0].children[2].attributes.get("class"), /\bsteptrace__success-marker\b/)
-    assert.match(textRow.children[0].children[2].attributes.get("class"), /\bsteptrace__cell-success\b/)
+    assert.match(
+      textRow.children[0].children[2].attributes.get("class"),
+      /\bsteptrace__success-marker\b/,
+    )
+    assert.match(
+      textRow.children[0].children[2].attributes.get("class"),
+      /\bsteptrace__cell-success\b/,
+    )
     assert.match(textRow.children[0].children[2].innerHTML, /<circle/)
     assert.match(ICON.x, /<svg/)
     view.paint(frames.at(-1), frames.length - 1, frames.length)
@@ -1985,7 +2056,10 @@ test("the Z-array profile paints every frame into one stable measured-strip DOM"
       styles,
       /\.steptrace__z \.steptrace__cell\[data-state="match"\] \{\s*box-shadow: inset 0 -2px 0 var\(--_green\);/,
     )
-    assert.doesNotMatch(styles, /\.steptrace__z \.steptrace__cell\[data-state="found"\][^{]*\{[^}]*box-shadow:/)
+    assert.doesNotMatch(
+      styles,
+      /\.steptrace__z \.steptrace__cell\[data-state="found"\][^{]*\{[^}]*box-shadow:/,
+    )
     assert.match(styles, /\.steptrace__z-string \{\s*position: relative;\s*\}/)
     assert.doesNotMatch(styles, /steptrace__z-legend|steptrace__z-copy/)
     assert.match(
@@ -2404,7 +2478,10 @@ test("shared legends and success badges use the canonical render helpers", () =>
   assert.doesNotMatch(renderSource, /document\.createElement\("svg"\)/)
   assert.match(renderSource, /check\.append\(successMarker\(\)\)/)
   assert.doesNotMatch(renderSource, /matchIcon\.append\(successMarker\(\)\)/)
-  assert.match(renderSource, /cell\.append\(value, cue, successMarker\("steptrace__cell-success"\)\)/)
+  assert.match(
+    renderSource,
+    /cell\.append\(value, cue, successMarker\("steptrace__cell-success"\)\)/,
+  )
   assert.match(renderSource, /descriptor\.badge === "success"/)
   assert.doesNotMatch(renderSource, /ICON\.check|✓|✔/)
   assert.doesNotMatch(renderSource, /function makeStoryLegend|function makeMatrixRoleLegend/)
@@ -2599,7 +2676,7 @@ test("all 600 ordered Ukraine-city A* routes are reachable, admissible, and opti
 
   assert.deepEqual(typicalBound("time"), {
     kind: "operation",
-    operation: "Typical",
+    operation: "Estimate",
     bounds: [
       {
         kind: "text",
@@ -2610,7 +2687,7 @@ test("all 600 ordered Ukraine-city A* routes are reachable, admissible, and opti
   })
   assert.deepEqual(typicalBound("space"), {
     kind: "operation",
-    operation: "Typical",
+    operation: "Estimate",
     bounds: [
       {
         kind: "text",
@@ -3197,7 +3274,7 @@ test("styles are compiled from real SCSS without runtime injection", () => {
   )
   assert.match(
     obsidianHostStyles,
-    /\.steptrace button\.steptrace__btn \{[^}]*appearance: none;[^}]*border: 0;[^}]*background: transparent;[^}]*box-shadow: none;/s,
+    /\.steptrace button\.steptrace__btn \{[^}]*appearance: none;[^}]*border: 0;[^}]*background-color: transparent;[^}]*box-shadow: none;/s,
   )
   assert.match(
     obsidianHostStyles,
@@ -3302,6 +3379,168 @@ test("family SCSS leaves bar-number typography to canonical bars", () => {
     .join("\n")
 
   assert.doesNotMatch(familyStyles, /\.steptrace__num/)
+})
+
+test("shared visual contracts use two font roles, one marker geometry, and one transport ramp", () => {
+  const styleRoot = join(here, "src", "styles")
+  const sourceStyles = readdirSync(styleRoot, { recursive: true })
+    .filter((file) => file.endsWith(".scss"))
+    .map((file) => readFileSync(join(styleRoot, file), "utf8"))
+    .join("\n")
+  const quartzHostStyles = readFileSync(
+    join(here, "..", "components", "styles", "steptrace.scss"),
+    "utf8",
+  )
+  const sharedStyles = readFileSync(join(styleRoot, "shared.scss"), "utf8")
+
+  assert.doesNotMatch(`${sourceStyles}\n${quartzHostStyles}`, /_font-head|st-font-head/)
+  assert.doesNotMatch(sourceStyles, /font(?:-weight)?:\s*(?:500|650|700|750|800)\b/)
+  assert.match(sharedStyles, /\.steptrace__log\s*\{[^}]*font-family:\s*var\(--_font-body\)/s)
+  assert.match(sharedStyles, /\.steptrace__counter\s*\{[^}]*font-family:\s*var\(--_font-mono\)/s)
+  assert.match(sharedStyles, /\.steptrace__log-num\s*\{[^}]*font-family:\s*var\(--_font-mono\)/s)
+  assert.match(sharedStyles, /\.steptrace__watch-row\s*\{[^}]*font-family:\s*var\(--_font-body\)/s)
+  assert.match(sharedStyles, /\.steptrace__watch-v\s*\{[^}]*font-family:\s*var\(--_font-mono\)/s)
+  assert.match(sharedStyles, /\.steptrace__insight-text\s*\{[^}]*var\(--_font-body\)/s)
+  assert.match(sourceStyles, /--_graph-node-font:\s*600 0\.66rem\/1 var\(--_font-mono\)/)
+  assert.match(sourceStyles, /\.steptrace__stack-cell \.steptrace__contiguous-value\s*\{[^}]*var\(--_font-mono\)/s)
+  assert.match(sourceStyles, /\.steptrace__stack-pop-ghost\s*\{[^}]*var\(--_font-mono\)/s)
+  assert.match(sourceStyles, /\.steptrace__uf \.steptrace__id\s*\{[^}]*var\(--_font-mono\)/s)
+  assert.match(sourceStyles, /\.steptrace__prefix-node > text\s*\{[^}]*var\(--_font-mono\)/s)
+  assert.match(
+    sharedStyles,
+    /\$steptrace-play-gradient:\s*linear-gradient\([^;]*0%[^;]*50%[^;]*100%[^;]*\);/s,
+  )
+  assert.match(sharedStyles, /--_play-gradient:\s*#\{\$steptrace-play-gradient\};/)
+  assert.match(
+    sharedStyles,
+    /\.steptrace__btn--play\s*\{[^}]*background-image:\s*var\(--_play-gradient\)/s,
+  )
+  const obsidianHostStyles = readFileSync(join(styleRoot, "hosts", "obsidian.scss"), "utf8")
+  assert.doesNotMatch(obsidianHostStyles, /steptrace__btn--play/)
+  assert.doesNotMatch(
+    obsidianHostStyles,
+    /button\.steptrace__btn(?:\:hover)?\s*\{[^}]*background:/s,
+  )
+  assert.match(
+    sharedStyles,
+    /\.steptrace \.steptrace__legend-swatch:not\(\[data-carrier\]\)\s*\{[^}]*inline-size:\s*0\.75rem !important;[^}]*block-size:\s*0\.75rem !important;[^}]*border:\s*0 !important;[^}]*border-radius:\s*50% !important;/s,
+  )
+
+  const legendCallers = [join(here, "src", "render.ts"), join(here, "src", "families")]
+    .flatMap((path) =>
+      path.endsWith(".ts")
+        ? [path]
+        : readdirSync(path)
+            .filter((file) => file.endsWith(".ts"))
+            .map((file) => join(path, file)),
+    )
+    .filter((path) => /makeLegend\(/.test(readFileSync(path, "utf8")))
+    .map((path) => relative(repoRoot, path))
+    .sort()
+  const stylesheets = readdirSync(styleRoot)
+    .filter((file) => file.endsWith(".scss"))
+    .map((file) => relative(repoRoot, join(styleRoot, file)))
+    .sort()
+  assert.deepEqual([...visualContractInventory.legendCallers].sort(), legendCallers)
+  assert.deepEqual([...visualContractInventory.stylesheets].sort(), stylesheets)
+
+  const obsoleteMarkerBlocks = [
+    /\.steptrace__swatch\s*\{/,
+    /\.steptrace \.steptrace__gs-swatch\s*\{/,
+    /\.steptrace \.steptrace__interval-swatch\s*\{/,
+    /\.steptrace \.steptrace__linked-swatch\s*\{/,
+    /\.steptrace__prefix-swatch\s*\{/,
+    /\.steptrace \.steptrace__prefix-sum-swatch\s*\{/,
+    /\.steptrace \.steptrace__stack-sequence-swatch\s*\{/,
+    /\.steptrace \.steptrace__boundary-legend-swatch\s*\{/,
+  ]
+  for (const pattern of obsoleteMarkerBlocks) assert.doesNotMatch(sourceStyles, pattern)
+  const heapMarker = sourceStyles.match(/\.steptrace \.steptrace__heap-swatch\s*\{([^}]*)\}/)?.[1]
+  assert.ok(heapMarker)
+  assert.doesNotMatch(heapMarker, /(?:inline|block)-size|border|display|place-items|flex/)
+})
+
+test("algorithm legends title labels and reserve checks for terminal success", () => {
+  const { makeLegend, successMarker } = loadStepTraceModule("src", "render.ts")
+  const renderSource = readFileSync(join(here, "src", "render.ts"), "utf8")
+  const previousDocument = globalThis.document
+  class FakeNode {
+    constructor() {
+      this.children = []
+      this.attributes = new Map()
+      this.dataset = {}
+      this.style = { setProperty() {} }
+      this.className = ""
+      this.textContent = ""
+    }
+    setAttribute(key, value) {
+      this.attributes.set(key, String(value))
+    }
+    append(...children) {
+      this.children.push(...children)
+    }
+  }
+  globalThis.document = {
+    createElement: () => new FakeNode(),
+    createElementNS: () => new FakeNode(),
+    createTextNode: (text) => ({ textContent: text }),
+  }
+  try {
+    const legend = makeLegend(
+      [
+        { label: "Accepted", color: "green" },
+        { label: "Result", color: "green", marker: successMarker() },
+        { label: "Cycle Edge", color: "violet", carrier: "path" },
+      ],
+      "State legend",
+    )
+    assert.deepEqual(
+      legend.children.map((row) => row.children[1].textContent),
+      ["Accepted", "Result", "Cycle Edge"],
+    )
+    assert.equal(legend.children[0].children[0].children.length, 0)
+    assert.equal(legend.children[1].children[0].children.length, 1)
+    assert.equal(legend.children[2].children[0].dataset.carrier, "path")
+    assert.throws(
+      () => makeLegend([{ label: "not Title Case", color: "green" }], "Invalid legend"),
+      /Legend labels must be authored in Title Case/,
+    )
+    const forbidden = new RegExp(visualContractInventory.legendLabelForbiddenPattern)
+    assert.equal(forbidden.test("Coins on the Counter"), false)
+    assert.equal(forbidden.test("accepted / Visited"), true)
+    assert.equal(forbidden.test("Accepted / visited"), true)
+    assert.match(renderSource, /label: "Solution",[\s\S]{0,180}marker: successMarker\(\)/)
+    assert.doesNotMatch(renderSource, /cells\[0\]\[0\]\.children\[1\].*cloneNode/)
+  } finally {
+    globalThis.document = previousDocument
+  }
+})
+
+test("articulation milestones follow frame semantics and omit absent phases", () => {
+  const { buildMilestones } = loadStepTraceModule("src", "render.ts")
+  const frames = [
+    { profile: "articulation-points-and-bridges", type: "discover" },
+    { profile: "articulation-points-and-bridges", type: "discover" },
+    { profile: "articulation-points-and-bridges", type: "back-edge" },
+    { profile: "articulation-points-and-bridges", type: "cut" },
+    { profile: "articulation-points-and-bridges", type: "propagate" },
+    { profile: "articulation-points-and-bridges", type: "done" },
+  ]
+  assert.deepEqual(buildMilestones("articulation-points-and-bridges", "graph", frames), [
+    { i: 0, label: "Discover DFS Tree" },
+    { i: 2, label: "Lower via Back Edge" },
+    { i: 3, label: "Identify Cuts" },
+    { i: 4, label: "Propagate Low Links" },
+    { i: 5, label: "Result" },
+  ])
+  assert.deepEqual(
+    buildMilestones("articulation-points-and-bridges", "graph", [
+      frames[0],
+      frames[3],
+      frames[5],
+    ]).map(({ label }) => label),
+    ["Discover DFS Tree", "Identify Cuts", "Result"],
+  )
 })
 
 test("the watcher handles Chokidar add and atomic-change events", async () => {
@@ -3716,7 +3955,7 @@ test("bit tally and two pointers reuse the centered canonical strip geometry", (
   assert.match(pointerStyles, /\.steptrace__pcells\s*\{[^}]*height: 100%;[^}]*border: 1px solid/s)
   assert.match(
     pointerStyles,
-    /\.steptrace__pcell\s*\{[^}]*font: 500 0\.98rem var\(--_font-mono\);[^}]*border-right: 1px solid/s,
+    /\.steptrace__pcell\s*\{[^}]*font: 600 0\.98rem var\(--_font-mono\);[^}]*border-right: 1px solid/s,
   )
   assert.match(pointerStyles, /\.steptrace__pcell:last-child\s*\{[^}]*border-right: 0;/s)
   assert.match(
@@ -3858,6 +4097,8 @@ test("n-queens keeps a bounded persistent decision tree through branch, prune, r
   const { nQueens } = loadStepTraceModule("src", "algorithms", "n-queens.ts")
   const { BacktrackRecorder } = loadStepTraceModule("src", "recorders.ts")
   const { ICON, makeBacktrackView } = loadStepTraceModule("src", "render.ts")
+  const { GRAPH_EDGE_ARROW_GAP_PX, GRAPH_NODE_HALO_GAP_PX, GRAPH_NODE_RADIUS_PX } =
+    loadStepTraceModule("src", "graph-node.ts")
   const renderSource = readFileSync(join(here, "src", "render.ts"), "utf8")
   const styles = readFileSync(join(here, "src", "styles", "backtrack.scss"), "utf8")
   const recorder = new BacktrackRecorder()
@@ -3881,6 +4122,16 @@ test("n-queens keeps a bounded persistent decision tree through branch, prune, r
     }
     append(...children) {
       this.children.push(...children)
+    }
+    cloneNode(deep = false) {
+      const clone = new FakeNode(this.tagName)
+      clone.className = this.className
+      clone.textContent = this.textContent
+      clone.innerHTML = this.innerHTML
+      clone.attributes = new Map(this.attributes)
+      clone.dataset = { ...this.dataset }
+      if (deep) clone.children = this.children.map((child) => child.cloneNode?.(true) ?? child)
+      return clone
     }
   }
 
@@ -3911,6 +4162,9 @@ test("n-queens keeps a bounded persistent decision tree through branch, prune, r
     const treeEdge = (to) => treeEdges.find((edge) => edge.dataset.kind && edge.to === to)
     const initialNodeCount = treeNodes.length
     const initialEdgeCount = treeEdges.length
+    const initialViewBox = treeSvg.attributes.get("viewBox")
+    const [, , viewBoxWidth, viewBoxHeight] = initialViewBox.split(" ").map(Number)
+    const clearance = GRAPH_NODE_RADIUS_PX + GRAPH_NODE_HALO_GAP_PX + GRAPH_EDGE_ARROW_GAP_PX + 2
 
     assert.equal(region.attributes.get("role"), "region")
     assert.equal(region.attributes.get("aria-label"), "N-Queens search board and decision tree")
@@ -3921,6 +4175,10 @@ test("n-queens keeps a bounded persistent decision tree through branch, prune, r
     assert.match(treeKey.className, /steptrace__legend/)
     assert.match(treeKey.className, /steptrace__bt-tree-legend/)
     assert.equal(treeKey.children.length, 4)
+    assert.match(
+      treeKey.children[3].children[0].children[0].attributes.get("class"),
+      /steptrace__success-marker/,
+    )
     assert.match(ICON.chessQueen, /lucide-chess-queen/)
     assert.match(ICON.chessQueen, /M4 20a2 2 0 0 1 2-2h12/)
     assert.match(board.children[0].children[0].innerHTML, /lucide-chess-queen/)
@@ -3941,6 +4199,14 @@ test("n-queens keeps a bounded persistent decision tree through branch, prune, r
     assert.equal(treeNode("root").children[1].attributes.get("r"), "13")
     assert.match(treeNode("root").children[2].attributes.get("class"), /steptrace__id/)
     assert.match(treeNode("root").children[2].attributes.get("class"), /steptrace__rtlabel/)
+    for (const node of treeNodes) {
+      const [, x, y] = node.attributes
+        .get("transform")
+        .match(/translate\(([^ ]+) ([^)]+)\)/)
+        .map(Number)
+      assert.ok(x >= clearance && x <= viewBoxWidth - clearance, node.dataset.node)
+      assert.ok(y >= clearance && y <= viewBoxHeight - clearance, node.dataset.node)
+    }
 
     view.paint(recorder.frames[0], 0, recorder.frames.length)
     assert.equal(tree.dataset.event, "start")
@@ -4005,6 +4271,7 @@ test("n-queens keeps a bounded persistent decision tree through branch, prune, r
     assert.equal(treeEdges.find((edge) => edge.dataset.to === "d:0").dataset.collapsed, "true")
     assert.equal(treeNodes.length, initialNodeCount)
     assert.equal(treeEdges.length, initialEdgeCount)
+    assert.equal(treeSvg.attributes.get("viewBox"), initialViewBox)
   } finally {
     globalThis.document = previousDocument
   }
@@ -4033,6 +4300,10 @@ test("n-queens keeps a bounded persistent decision tree through branch, prune, r
   assert.match(styles, /\.steptrace__rtedge\[data-solution="true"\]\s*\{[^}]*var\(--_green\)/s)
   assert.match(styles, /\.steptrace__btcell:nth-child\(4n\)\s*\{[^}]*border-right: 0;/s)
   assert.match(styles, /\.steptrace__btcell:nth-last-child\(-n \+ 4\)\s*\{[^}]*border-bottom: 0;/s)
+  assert.match(
+    styles,
+    /\.steptrace__btcell > \.steptrace__bt-success\s*\{[^}]*display: none !important;/s,
+  )
   assert.doesNotMatch(renderSource, /dataset\.last(?:Column|Row)/)
   assert.match(
     renderSource,
@@ -4071,7 +4342,13 @@ test("n-queens keeps a bounded persistent decision tree through branch, prune, r
   assert.match(renderSource, /const leafGap = 36/)
   assert.match(renderSource, /const depthGap = 42/)
   assert.match(renderSource, /const leafPad = 90/)
-  assert.match(renderSource, /const leafEndPad = 10/)
+  assert.match(
+    renderSource,
+    /const fixedNodeClearance =\s*GRAPH_NODE_RADIUS_PX \+ GRAPH_NODE_HALO_GAP_PX \+ GRAPH_EDGE_ARROW_GAP_PX \+ 2/,
+  )
+  assert.match(renderSource, /const treePad = fixedNodeClearance \* 2 \+ 4/)
+  assert.match(renderSource, /const leafEndPad = treePad/)
+  assert.match(renderSource, /const depthPad = treePad/)
   assert.match(renderSource, /const guideShift = Math\.max\(0, sideGutter - 8\)/)
   assert.match(renderSource, /\(42 - guideShift\) \* unitsPerCssPixel/)
   assert.match(renderSource, /tree\.dataset\.orientation = "portrait"/)
@@ -4271,13 +4548,13 @@ test("heap-selection reuses shared strips, tree tokens, and host artifacts", () 
   assert.doesNotMatch(styles, /steptrace__heap-stream-icon/)
   assert.match(
     styles,
-    /\.steptrace \.steptrace__heap-stream \.steptrace__pcell\[data-state="current"\] \{[^}]*--steptrace-array-outline: var\(--_blue\);[^}]*color: var\(--_blue\);[^}]*font-weight: 700;/s,
+    /\.steptrace \.steptrace__heap-stream \.steptrace__pcell\[data-state="current"\] \{[^}]*--steptrace-array-outline: var\(--_blue\);[^}]*color: var\(--_blue\);[^}]*font-weight: 600;/s,
   )
   assert.match(pointerStyles, /\.steptrace__pwrap\s*\{[^}]*height: 46px;[^}]*margin: 1\.4rem 0;/s)
   assert.match(pointerStyles, /\.steptrace__pcells\s*\{[^}]*height: 100%;[^}]*border: 1px solid/s)
   assert.match(
     pointerStyles,
-    /\.steptrace__pcell\s*\{[^}]*font: 500 0\.98rem var\(--_font-mono\);[^}]*border-right: 1px solid/s,
+    /\.steptrace__pcell\s*\{[^}]*font: 600 0\.98rem var\(--_font-mono\);[^}]*border-right: 1px solid/s,
   )
   assert.match(
     sharedStyles,
@@ -4741,7 +5018,7 @@ test("graph renderers share one fixed node geometry and visual token contract", 
   assert.match(styleEntry, /@use "graph-node";/)
   assert.match(graphNodeStyles, /--_graph-node-size: 1\.625rem/)
   assert.match(graphNodeStyles, /--_graph-node-stroke-width: 1\.6px/)
-  assert.match(graphNodeStyles, /--_graph-node-font: 600 0\.66rem\/1 var\(--_font-head\)/)
+  assert.match(graphNodeStyles, /--_graph-node-font: 600 0\.66rem\/1 var\(--_font-mono\)/)
 })
 
 test("legacy graph visited nodes use accepted green without a success badge", () => {
@@ -4751,17 +5028,15 @@ test("legacy graph visited nodes use accepted green without a success badge", ()
   assert.match(renderSource, /export function successMarker/)
   assert.doesNotMatch(renderSource, /successMarker\("steptrace__nmark-success"\)/)
   assert.doesNotMatch(renderSource, /const visitedMark = successMarker/)
-  assert.doesNotMatch(
-    renderSource,
-    /label: "visited"[\s\S]{0,160}marker: successMarker\(\)/,
-  )
+  assert.doesNotMatch(renderSource, /label: "visited"[\s\S]{0,160}marker: successMarker\(\)/)
   assert.doesNotMatch(renderSource, /data-state-icon="visited"/)
   assert.doesNotMatch(styles, /\.steptrace__nmark-success/)
   assert.match(
     styles,
     /\.steptrace__node\[data-state="visited"\] \.steptrace__ncirc \{[^}]*var\(--_green\)/s,
   )
-  assert.match(styles, /\.steptrace__swatch--visited \{[^}]*border: 0;/s)
+  assert.match(styles, /\.steptrace__swatch--visited \{[^}]*background: var\(--_green\);/s)
+  assert.doesNotMatch(styles, /\.steptrace__swatch--visited \{[^}]*(?:border|border-radius)/s)
 })
 
 test("graph-state labels every edge when the graph carries weighted meaning", () => {
@@ -4791,9 +5066,18 @@ test("graph-state labels every edge when the graph carries weighted meaning", ()
   assert.match(familySource, /GRAPH_STATE_MARKER_ROLES\.map\(\(role\) =>/)
   assert.match(familySource, /markerIds\.get\(graphStateMarkerRole\(role\)\)/)
   assert.match(styles, /\.steptrace \.steptrace__gs-arrow \{[^}]*fill: var\(--_neutral\);/s)
-  assert.match(styles, /\.steptrace \.steptrace__gs-arrow\[data-role="active"\] \{[^}]*var\(--_blue\)/s)
-  assert.match(styles, /\.steptrace \.steptrace__gs-arrow\[data-role="accepted"\] \{[^}]*var\(--_green\)/s)
-  assert.match(styles, /\.steptrace \.steptrace__gs-arrow\[data-role="rejected"\] \{[^}]*var\(--_red\)/s)
+  assert.match(
+    styles,
+    /\.steptrace \.steptrace__gs-arrow\[data-role="active"\] \{[^}]*var\(--_blue\)/s,
+  )
+  assert.match(
+    styles,
+    /\.steptrace \.steptrace__gs-arrow\[data-role="accepted"\] \{[^}]*var\(--_green\)/s,
+  )
+  assert.match(
+    styles,
+    /\.steptrace \.steptrace__gs-arrow\[data-role="rejected"\] \{[^}]*var\(--_red\)/s,
+  )
   assert.doesNotMatch(styles, /context-stroke/)
 })
 
@@ -5611,7 +5895,7 @@ test("execution-tree watch, legend, and responsive styles remain compatible", ()
     sharedStyles,
     /\.steptrace__stage-col--legend\s*\{[^}]*grid-template-rows: minmax\(0, 1fr\) auto;/s,
   )
-  assert.match(styles, /\.steptrace__rtbadge[^}]*font: 600 7px\/1 var\(--_font-head\);/s)
+  assert.match(styles, /\.steptrace__rtbadge[^}]*font: 600 7px\/1 var\(--_font-body\);/s)
   assert.doesNotMatch(styles, /glow|drop-shadow/)
   assert.match(renderSource, /svg\.setAttribute\("aria-labelledby"/)
   assert.match(renderSource, /group\.setAttribute\("focusable", "false"\)/)
@@ -5710,7 +5994,7 @@ test("merge-sort execution tree uses fluid array-strip cards and merge emphasis"
   )
   assert.match(
     styles,
-    /\.steptrace__rtcell-value[^}]*fill: var\(--_text\);[^}]*font: 500 11px\/1 var\(--_font-mono\);/,
+    /\.steptrace__rtcell-value[^}]*fill: var\(--_text\);[^}]*font: 600 11px\/1 var\(--_font-mono\);/,
   )
   assert.match(
     styles,
@@ -6582,7 +6866,7 @@ test("Floyd-Warshall keeps one stable semantic footer inside its matrix table", 
   )
   assert.match(
     styles,
-    /\.steptrace \.steptrace__matrix-footer-row\s*\{[^}]*grid-template-columns: auto minmax\(0, 1fr\);[^}]*font: 400 var\(--_type-small\) \/ 1\.2 var\(--_font-head\);/s,
+    /\.steptrace \.steptrace__matrix-footer-row\s*\{[^}]*grid-template-columns: auto minmax\(0, 1fr\);[^}]*font: 400 var\(--_type-small\) \/ 1\.2 var\(--_font-body\);/s,
   )
   assert.match(renderSource, /steptrace__matrix-footer-context/)
   assert.match(renderSource, /steptrace__matrix-footer-summary/)
@@ -11477,7 +11761,10 @@ test("ST-INV-009 production mount exercises every direct semantic signal", async
   }
 })
 
-test("ST-INV-006 independently reconciles semantic source sentinels", testSemanticSourceReconciliation)
+test(
+  "ST-INV-006 independently reconciles semantic source sentinels",
+  testSemanticSourceReconciliation,
+)
 
 test("contiguous structures share one persistent direct-operation contract in both hosts", () => {
   const family = readFileSync(join(here, "src", "families", "contiguous-storage.ts"), "utf8")
@@ -12433,7 +12720,7 @@ test("prefix-character styles keep the stage stable, responsive, reduced, and Tr
   const nodeType = styles.match(/\.steptrace__prefix-node > text \{[^}]*\}/s)?.[0] || ""
   assert.doesNotMatch(family, /steptrace__prefix-edge-label/)
   assert.doesNotMatch(styles, /steptrace__prefix-edge-label/)
-  assert.match(nodeType, /font: 600 0\.66rem\/1 var\(--_font-head\)/)
+  assert.match(nodeType, /font: 600 0\.66rem\/1 var\(--_font-mono\)/)
   assert.match(family, /label\.setAttribute\("dominant-baseline", "central"\)/)
   assert.match(family, /label\.setAttribute\("dy", "0\.04em"\)/)
   assert.doesNotMatch(nodeType, /font(?:-size)?:[^;]*\d+px/)
@@ -12764,7 +13051,7 @@ test("B-tree and B+ Tree register one direct responsive multiway-tree contract i
   assert.match(family, /status/)
   assert.doesNotMatch(family, /\bPlayer\b|\btimeline\b|\bframes\b|class\s+\w+/)
   assert.match(styles, /min-block-size: 15rem/)
-  assert.match(styles, /font: 700 0\.8rem\/1 var\(--_font-mono\)/)
+  assert.match(styles, /font: 600 0\.8rem\/1 var\(--_font-mono\)/)
   assert.match(styles, /inline-size: min\(100%, 42rem\)/)
   assert.match(styles, /overflow: hidden/)
   assert.match(styles, /@container steptrace-multiway-tree \(min-width: 36rem\)/)

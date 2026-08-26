@@ -31,7 +31,7 @@
   align-items: center;
   justify-content: center;
   border-right: 1px solid color-mix(in srgb, var(--_text) 13%, transparent);
-  font: 500 0.98rem var(--_font-mono);
+  font: 600 0.98rem var(--_font-mono);
   color: var(--_text);
   transition:
     background var(--_tween) ease,
@@ -52,7 +52,7 @@
 .steptrace__cell[data-state="match"] {
   background: color-mix(in srgb, var(--_green) 22%, transparent);
   color: var(--_green);
-  font-weight: 700;
+  font-weight: 600;
   box-shadow: inset 0 -3px 0 var(--_green);
 }
 .steptrace__cell[data-state="mismatch"] {
@@ -261,7 +261,7 @@
   display: grid;
   place-items: center;
   border-block-start: 1px solid color-mix(in srgb, var(--_text) 22%, transparent);
-  font: 500 0.58rem/1 var(--_font-mono);
+  font: 600 0.58rem/1 var(--_font-mono);
   color: var(--_muted);
 }
 .steptrace__z-cell[data-box="1"]:not([data-state="probe"]):not([data-state="match"]):not(
@@ -271,13 +271,13 @@
 }
 .steptrace__z-cell[data-state="copy-source"] {
   color: var(--_amber);
-  font-weight: 700;
+  font-weight: 600;
   background: color-mix(in srgb, var(--_amber) 18%, transparent);
   box-shadow: inset 0 0 0 2px var(--_amber);
 }
 .steptrace__z-cell[data-state="copy-target"] {
   color: var(--_violet);
-  font-weight: 700;
+  font-weight: 600;
   background: color-mix(in srgb, var(--_violet) 10%, transparent);
   box-shadow: inset 0 0 0 2px var(--_violet);
 }

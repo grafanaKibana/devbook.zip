@@ -787,6 +787,7 @@ export function createMount(
       })
       if (built.family) root.dataset.visualFamily = built.family.id
       else delete root.dataset.visualFamily
+      root.classList.toggle("steptrace--backtrack", built.kind === "backtrack")
       currentGraph = built.graph || null
       currentMilestones = buildMilestones(state.algorithm, built.kind, built.frames)
       let view
@@ -962,6 +963,7 @@ export function createMount(
           "steptrace--stable-stage",
           "steptrace--compact-stage",
           "steptrace--narrow",
+          "steptrace--backtrack",
         )
       },
     }

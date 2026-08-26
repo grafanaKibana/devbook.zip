@@ -838,67 +838,67 @@ function graphStateLegend(kind: GraphStateDetail["kind"]) {
   switch (kind) {
     case "heuristic-search":
       return [
-        ["current", "current"],
-        ["open", "open"],
-        ["closed / path", "closed"],
-        ["goal", "goal"],
+        ["Current", "current"],
+        ["Open", "open"],
+        ["Closed / Path", "closed"],
+        ["Goal", "goal"],
       ] as const
     case "dual-search":
       return [
-        ["current", "current"],
-        ["frontiers", "open"],
-        ["visited / path", "closed"],
-        ["meeting", "goal"],
+        ["Current", "current"],
+        ["Frontiers", "open"],
+        ["Visited / Path", "closed"],
+        ["Meeting", "goal"],
       ] as const
     case "edge-relaxation":
       return [
-        ["active edge", "current"],
-        ["candidate", "open"],
-        ["settled", "closed"],
-        ["source", "goal"],
+        ["Active Edge", "current"],
+        ["Candidate", "open"],
+        ["Settled", "closed"],
+        ["Source", "goal"],
       ] as const
     case "component-flood":
       return [
-        ["current", "current"],
-        ["frontier", "open"],
-        ["component", "closed"],
-        ["seed", "goal"],
+        ["Current", "current"],
+        ["Frontier", "open"],
+        ["Component", "closed"],
+        ["Seed", "goal"],
       ] as const
     case "low-link-cuts":
       return [
-        ["current", "current"],
-        ["DFS frontier", "open"],
-        ["visited", "closed"],
-        ["cut", "goal"],
+        ["Current", "current"],
+        ["DFS Frontier", "open"],
+        ["Visited", "closed"],
+        ["Cut", "goal"],
       ] as const
     case "low-link-components":
       return [
-        ["current", "current"],
-        ["stack", "open"],
-        ["component", "closed"],
-        ["root", "goal"],
+        ["Current", "current"],
+        ["Stack", "open"],
+        ["Component", "closed"],
+        ["Root", "goal"],
       ] as const
     case "mst-scan":
     case "mst-round":
       return [
-        ["active edge", "current"],
-        ["candidate", "open"],
-        ["tree", "closed"],
-        ["rejected", "rejected"],
+        ["Active Edge", "current"],
+        ["Candidate", "open"],
+        ["Tree", "closed"],
+        ["Rejected", "rejected"],
       ] as const
     case "path-backtrack":
       return [
-        ["current", "current"],
-        ["candidate", "open"],
-        ["path", "closed"],
-        ["rejected", "rejected"],
+        ["Current", "current"],
+        ["Candidate", "open"],
+        ["Path", "closed"],
+        ["Rejected", "rejected"],
       ] as const
     case "residual-flow":
       return [
-        ["active edge", "current"],
-        ["residual", "open"],
-        ["flow", "closed"],
-        ["cut", "goal"],
+        ["Active Edge", "current"],
+        ["Residual", "open"],
+        ["Flow", "closed"],
+        ["Cut", "goal"],
       ] as const
   }
 }

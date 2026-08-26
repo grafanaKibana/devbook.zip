@@ -36,7 +36,7 @@
 .steptrace .steptrace__interval-tick {
   justify-self: start;
   translate: -50% 0;
-  font: 500 0.62rem/1 var(--_font-mono);
+  font: 600 0.62rem/1 var(--_font-mono);
   color: var(--_muted);
 }
 
@@ -154,13 +154,6 @@
 .steptrace .steptrace__interval-band--current[data-visible="1"],
 .steptrace .steptrace__interval-band--output[data-visible="1"] {
   opacity: 1;
-}
-
-.steptrace .steptrace__interval-swatch {
-  inline-size: 0.52rem;
-  block-size: 0.52rem;
-  border-radius: 50%;
-  flex: none;
 }
 
 .steptrace .steptrace__interval-swatch--candidate {

@@ -39,12 +39,6 @@
   background: color-mix(in srgb, var(--_green) 18%, transparent);
 }
 
-.steptrace .steptrace__prefix-sum-swatch {
-  inline-size: 0.52rem;
-  block-size: 0.52rem;
-  border-radius: 50%;
-}
-
 .steptrace .steptrace__prefix-sum-swatch--build {
   background: var(--_blue);
 }

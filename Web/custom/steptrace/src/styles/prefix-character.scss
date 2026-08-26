@@ -86,7 +86,7 @@
 
 .steptrace__prefix-node > text {
   fill: var(--_text);
-  font: 600 0.66rem/1 var(--_font-head);
+  font: 600 0.66rem/1 var(--_font-mono);
 }
 
 .steptrace__prefix-edge[data-state="active"],
@@ -154,27 +154,20 @@
   background: color-mix(in srgb, var(--_green) 10%, transparent);
 }
 
-.steptrace__prefix-swatch {
-  width: 0.55rem;
-  height: 0.55rem;
-  border: 2px solid var(--_neutral);
-  border-radius: 50%;
-}
-
 .steptrace__prefix-swatch[data-state="active"] {
-  border-color: var(--_blue);
+  background: var(--_blue);
 }
 
 .steptrace__prefix-swatch[data-state="reused"] {
-  border-color: var(--_green);
+  background: var(--_green);
 }
 
 .steptrace__prefix-swatch[data-state="created"] {
-  border-color: var(--_amber);
+  background: var(--_amber);
 }
 
 .steptrace__prefix-swatch[data-state="terminal"] {
-  border-color: var(--_green);
+  background: var(--_green);
 }
 
 @media (max-width: 560px) {

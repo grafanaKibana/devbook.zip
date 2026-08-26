@@ -164,7 +164,7 @@
 
 .steptrace .steptrace__rtcell-value {
   fill: var(--_text);
-  font: 500 11px/1 var(--_font-mono);
+  font: 600 11px/1 var(--_font-mono);
 }
 
 .steptrace .steptrace__rtnode .steptrace__rtring {
@@ -208,7 +208,7 @@
 
 .steptrace .steptrace__rtnode .steptrace__rtbadge {
   fill: var(--_muted);
-  font: 600 7px/1 var(--_font-head);
+  font: 600 7px/1 var(--_font-body);
   letter-spacing: 0.03em;
   text-transform: uppercase;
 }
