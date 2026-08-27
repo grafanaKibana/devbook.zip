@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.511Z
-modified: 2026-08-26T11:43:28.111Z
-published: 2026-08-26T11:43:28.111Z
+modified: 2026-08-26T18:31:47.960Z
+published: 2026-08-26T18:31:47.960Z
 topic:
   - Computer Science
 subtopic:
@@ -105,9 +105,11 @@ tab: Complexity
           "operation": "Estimate",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Time (node expansions)",
-              "formula": "between Θ(d) and O(b^d) for uniform edge costs"
+              "formula": "between Θ(d) and O(b^d) for uniform edge costs",
+              "curveFrom": "linear",
+              "curveTo": "exponential"
             }
           ]
         },
