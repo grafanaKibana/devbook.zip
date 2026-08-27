@@ -96,11 +96,7 @@ const rewriteSocialUrls = (child: ComponentChild, canonical?: string): Component
 
   const node = child as VNode<Record<string, unknown>>
   const property = node.props.property
-  if (
-    canonical &&
-    node.type === "meta" &&
-    (property === "og:url" || property === "twitter:url")
-  ) {
+  if (canonical && node.type === "meta" && (property === "og:url" || property === "twitter:url")) {
     return cloneElement(node, { content: canonical })
   }
   if (

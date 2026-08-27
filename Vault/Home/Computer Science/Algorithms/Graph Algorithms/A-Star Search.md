@@ -102,9 +102,11 @@ tab: Complexity
           "operation": "Estimate",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Time (node expansions)",
-              "formula": "between Θ(d) and O(b^d) for uniform edge costs"
+              "formula": "between Θ(d) and O(b^d) for uniform edge costs",
+              "curveFrom": "linear",
+              "curveTo": "exponential"
             }
           ]
         },

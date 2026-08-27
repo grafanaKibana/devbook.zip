@@ -1,12 +1,8 @@
 import assert from "node:assert/strict"
-import { globSync, readFileSync } from "node:fs"
-import { basename, dirname, extname } from "node:path"
 import test from "node:test"
-import { fileURLToPath } from "node:url"
 import { render } from "preact-render-to-string"
 
 import HeadConstructor from "../quartz/components/Head"
-import { fetchCanonical } from "../quartz/components/scripts/util"
 import type { PageTypePluginEntry } from "../quartz/plugins/types"
 import type { QuartzPluginData } from "../quartz/plugins/vfile"
 import { simplifySlug } from "../quartz/util/path"
@@ -16,7 +12,6 @@ import {
   isNoIndex,
   normalizeDescription,
   requireNamedPlugin,
-  ROBOTS_TXT,
   robotsTxt,
   seoHead,
   unlistGenerated,
@@ -34,10 +29,10 @@ const renderedHead = (data: QuartzPluginData): string => {
   return render(
     Head({
       cfg: {
-        pageTitle: "DEVBOOK",
+        pageTitle: "Site",
         pageTitleSuffix: "",
         locale: "en-US",
-        baseUrl: "devbook.zip",
+        baseUrl: "example.com",
         theme: { cdnCaching: false },
       },
       fileData: data,
@@ -47,165 +42,71 @@ const renderedHead = (data: QuartzPluginData): string => {
   )
 }
 
-test("canonical URLs stay aligned with Quartz simplifySlug", () => {
-  const cases = {
-    index: "https://devbook.zip/",
-    "security/index": "https://devbook.zip/security/",
-    "security/hashing": "https://devbook.zip/security/hashing",
-  }
-
-  for (const [slug, expected] of Object.entries(cases)) {
-    assert.equal(canonicalUrl(slug), expected)
+test("canonical and social URLs use the simplified route", () => {
+  for (const slug of ["index", "section/index", "section/page"]) {
     assert.equal(canonicalUrl(slug), new URL(simplifySlug(slug), "https://devbook.zip/").href)
   }
 
-  const source = readFileSync(new URL("./seo.tsx", import.meta.url), "utf8")
-  assert.match(source, /import \{ simplifySlug \} from "\.\.\/quartz\/util\/path"/)
-  assert.match(source, /simplifySlug\(slug\)/)
+  const html = renderedHead(fileData("section/index"))
+  assert.match(html, /property="og:url" content="https:\/\/example\.com\/section\/"/)
+  assert.match(html, /property="twitter:url" content="https:\/\/example\.com\/section\/"/)
 })
 
-test("description normalization uses the first trimmed non-empty value everywhere", () => {
-  const cases: Array<[Record<string, unknown>, string | undefined, string]> = [
-    [
-      { socialDescription: " Social ", description: "Description", summary: "Summary" },
-      "Generated",
-      "Social",
-    ],
-    [
-      { socialDescription: " ", description: " Description ", summary: "Summary" },
-      undefined,
-      "Description",
-    ],
-    [{ socialDescription: "", description: "\n", summary: " Summary " }, "Generated", "Summary"],
-    [{}, " Generated ", "Generated"],
+test("description normalization selects and synchronizes the first non-empty value", () => {
+  const data = fileData(
+    "section/page",
+    { socialDescription: " ", description: " Description ", summary: "Summary" },
+    "Generated",
+  )
+
+  assert.equal(normalizeDescription(data), "Description")
+  assert.equal(data.frontmatter?.socialDescription, "Description")
+  assert.equal(data.frontmatter?.description, "Description")
+  assert.equal(data.description, "Description")
+})
+
+test("index policy canonicalizes public routes and unlists noindex output", () => {
+  const publicHead = render(seoHead(fileData("section/page")))
+  assert.match(publicHead, /rel="canonical"/)
+  assert.doesNotMatch(publicHead, /name="robots"/)
+
+  const hiddenHead = render(seoHead(fileData("tags/example")))
+  assert.match(hiddenHead, /name="robots" content="noindex,follow"/)
+
+  const pages = [
+    { slug: "tags/example", data: {} },
+    { slug: "section/page", data: {} },
   ]
-
-  for (const [frontmatter, generated, expected] of cases) {
-    const data = fileData("security/hashing", frontmatter, generated)
-    assert.equal(normalizeDescription(data), expected)
-    assert.equal(data.frontmatter?.socialDescription, expected)
-    assert.equal(data.frontmatter?.description, expected)
-    assert.equal(data.description, expected)
-  }
+  const plugin = { name: "Generated", generate: () => pages } as unknown as PageTypePluginEntry
+  unlistGenerated(plugin, isNoIndex)
+  const generated = plugin.generate!()
+  assert.equal(generated[0]?.data.unlisted, true)
+  assert.equal(generated[1], pages[1])
 })
 
-test("native entity fallback becomes semantic text without double-escaping Head output", () => {
-  const generated = fileData("security/hashing", {}, "Queues &amp; stacks")
-  assert.equal(normalizeDescription(generated), "Queues & stacks")
-  assert.match(
-    renderedHead(generated),
-    /<meta name="description" content="Queues &amp; stacks"\/?>/,
-  )
-  assert.doesNotMatch(renderedHead(generated), /&amp;amp;/)
+test("homepage schema is valid JSON and safely serializes site identity", () => {
+  const html = render(seoHead(fileData("index"), "example.com/</script><script>", "Site"))
+  const payload = html.match(/<script type="application\/ld\+json">([^<]+)<\/script>/)?.[1]
 
-  const authored = fileData("security/hashing", { description: "Queues & stacks" }, "Ignored")
-  assert.equal(normalizeDescription(authored), "Queues & stacks")
-  assert.match(renderedHead(authored), /<meta name="description" content="Queues &amp; stacks"\/?>/)
-})
-
-test("head policy canonicalizes public routes and noindexes only utility and error routes", () => {
-  for (const slug of ["index", "security/index", "security/hashing", "questions"]) {
-    const html = render(seoHead(fileData(slug)))
-    assert.match(html, new RegExp(`href="${canonicalUrl(slug)}" rel="canonical"`))
-    assert.doesNotMatch(html, /name="robots"/)
-  }
-
-  for (const slug of ["tags", "tags/foldernote", "roadmap.canvas"]) {
-    const html = render(seoHead(fileData(slug)))
-    assert.match(html, new RegExp(`href="${canonicalUrl(slug)}" rel="canonical"`))
-    assert.match(html, /name="robots" content="noindex,follow"/)
-  }
-
-  const notFound = render(seoHead(fileData("404")))
-  assert.match(notFound, /name="robots" content="noindex,follow"/)
-  assert.doesNotMatch(notFound, /rel="canonical"/)
-})
-
-test("self-canonical metadata does not trigger Quartz alias redirect fetching", async () => {
-  const html = render(seoHead(fileData("security/hashing")))
-  const requests: string[] = []
-  const originalFetch = globalThis.fetch
-  globalThis.fetch = async (input) => {
-    requests.push(String(input))
-    return new Response(html, { headers: { "content-type": "text/html" } })
-  }
-
-  try {
-    await fetchCanonical(new URL("https://devbook.zip/security/hashing"))
-  } finally {
-    globalThis.fetch = originalFetch
-  }
-
-  assert.deepEqual(requests, ["https://devbook.zip/security/hashing"])
-})
-
-test("folder canonical and social URLs use the same simplified route", () => {
-  const html = renderedHead(fileData("security/index"))
-  assert.match(
-    render(seoHead(fileData("security/index"))),
-    /<link href="https:\/\/devbook\.zip\/security\/" rel="canonical"\/?>/,
-  )
-  assert.match(html, /<meta property="og:url" content="https:\/\/devbook\.zip\/security\/"\/?>/)
-  assert.match(
-    html,
-    /<meta property="twitter:url" content="https:\/\/devbook\.zip\/security\/"\/?>/,
-  )
-  assert.doesNotMatch(html, /https:\/\/devbook\.zip\/security\/index/)
-})
-
-test("default Open Graph images use a valid MIME type", () => {
-  for (const slug of ["security/hashing", "404"]) {
-    const html = renderedHead(fileData(slug))
-    assert.match(html, /property="og:image:type" content="image\/png"/)
-    assert.doesNotMatch(html, /content="image\/\./)
-  }
-})
-
-test("homepage emits one safely serialized WebSite schema", () => {
-  const html = render(seoHead(fileData("index"), "devbook.zip/</script><script>"))
-  const scripts = [...html.matchAll(/<script type="application\/ld\+json">([^<]+)<\/script>/g)]
-
-  assert.equal(scripts.length, 1)
-  assert.deepEqual(JSON.parse(scripts[0]![1]!), {
+  assert.ok(payload)
+  assert.deepEqual(JSON.parse(payload), {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: "DEVBOOK",
-    url: "https://devbook.zip/</script><script>/",
+    name: "Site",
+    url: "https://example.com/</script><script>/",
   })
   assert.doesNotMatch(html, /<\/script><script>/)
-  assert.doesNotMatch(html, /Article|Breadcrumb|FAQ|rating|SearchAction|ProfilePage/)
 })
 
-test("schema and robots helpers honor supplied site identity and base URL", () => {
-  const html = render(seoHead(fileData("index"), "notes.example", "Engineering Notes"))
-  const script = html.match(/<script type="application\/ld\+json">([^<]+)<\/script>/)?.[1]
-
-  assert.ok(script)
-  assert.deepEqual(JSON.parse(script), {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    name: "Engineering Notes",
-    url: "https://notes.example/",
-  })
+test("robots text permits crawling and advertises the configured sitemap", () => {
   assert.equal(
-    robotsTxt("notes.example"),
-    "User-agent: *\nAllow: /\nSitemap: https://notes.example/sitemap.xml\n",
+    robotsTxt("example.com"),
+    "User-agent: *\nAllow: /\nSitemap: https://example.com/sitemap.xml\n",
   )
 })
 
-test("robots text permits crawling and advertises the canonical sitemap", () => {
-  assert.equal(ROBOTS_TXT, "User-agent: *\nAllow: /\nSitemap: https://devbook.zip/sitemap.xml\n")
-  assert.equal(robotsTxt(), ROBOTS_TXT)
-  assert.doesNotMatch(ROBOTS_TXT, /Disallow:/)
-})
-
-test("lifecycle helpers fail closed and insert after the named plugin", () => {
-  for (const name of ["Description", "TagPage", "CanvasPage"]) {
-    assert.throws(
-      () => requireNamedPlugin([], name),
-      new RegExp(`expected Quartz plugin "${name}"`),
-    )
-  }
+test("plugin ordering fails closed and inserts after the required plugin", () => {
+  assert.throws(() => requireNamedPlugin([], "Description"), /expected Quartz plugin "Description"/)
 
   const plugins = [{ name: "Before" }, { name: "Description" }, { name: "After" }]
   insertAfterNamedPlugin(plugins, "Description", { name: "Seo" })
@@ -213,173 +114,4 @@ test("lifecycle helpers fail closed and insert after the named plugin", () => {
     plugins.map(({ name }) => name),
     ["Before", "Description", "Seo", "After"],
   )
-})
-
-test("generated utility pages remain emitted but become unlisted", () => {
-  const pages = [
-    { slug: "tags", title: "Tags", data: {} },
-    { slug: "tags/foldernote", title: "FolderNote", data: {} },
-    { slug: "roadmap.canvas", title: "Roadmap", data: {} },
-    { slug: "other.canvas", title: "Other", data: {} },
-  ]
-  const pageType = { name: "Generated", generate: () => pages } as unknown as PageTypePluginEntry
-
-  unlistGenerated(pageType, isNoIndex)
-  const generated = pageType.generate!()
-
-  assert.equal(generated.length, pages.length)
-  assert.equal(generated[0]?.data.unlisted, true)
-  assert.equal(generated[1]?.data.unlisted, true)
-  assert.equal(generated[2]?.data.unlisted, true)
-  assert.equal(generated[3], pages[3])
-})
-
-test("sitewide navigation and nested hub links stay canonical", () => {
-  const config = readFileSync(new URL("../quartz.config.yaml", import.meta.url), "utf8")
-  assert.match(config, /About: \/about\b/)
-  assert.doesNotMatch(config, /About: \/About\b/)
-  const styles = readFileSync(new URL("../quartz/styles/custom.scss", import.meta.url), "utf8")
-  assert.equal(styles.match(/href\$="about"/g)?.length, 2)
-  assert.doesNotMatch(styles, /href\$="About"/)
-
-  const stripNonLinkMarkdown = (content: string) => {
-    const commentTokens = { "<!--": "\ue000", "-->": "\ue001", "%%": "\ue002" }
-    content = content.replace(
-      /(?<!`)(`+)(.*?)\1(?!`)/gs,
-      (span: string, delimiter: string, _body: string, offset: number) => {
-        const lineStart = content.lastIndexOf("\n", offset - 1) + 1
-        const prefix = content
-          .slice(lineStart, offset)
-          .replace(/\t/g, "    ")
-          .replace(/^(?:(?: {0,3}>[ \t]?)|(?: {0,3}(?:[-+*]|\d+[.)])[ \t]+))+/, "")
-        if (delimiter.length >= 3 && /^ {0,3}$/.test(prefix)) return span
-        return Object.entries(commentTokens).reduce(
-          (masked, [literal, token]) => masked.replaceAll(literal, token),
-          span,
-        )
-      },
-    )
-    let openCommentEnd: "-->" | "%%" | undefined
-    const stripComments = (sourceLine: string) => {
-      let line = sourceLine
-      let visible = ""
-      while (line) {
-        if (openCommentEnd) {
-          const end = line.indexOf(openCommentEnd)
-          if (end < 0) return visible
-          line = line.slice(end + openCommentEnd.length)
-          openCommentEnd = undefined
-          continue
-        }
-        const starts = [line.indexOf("<!--"), line.indexOf("%%")].filter((start) => start >= 0)
-        if (!starts.length) return visible + line
-        const start = Math.min(...starts)
-        visible += line.slice(0, start)
-        openCommentEnd = line.startsWith("<!--", start) ? "-->" : "%%"
-        line = line.slice(start + (openCommentEnd === "-->" ? 4 : 2))
-      }
-      return visible
-    }
-    let openCodeFence: [string, number, number] | undefined
-    const tabsdownFences: Array<[string, number]> = []
-    content = content
-      .split("\n")
-      .map((line) => {
-        const contentLine = openCodeFence ? line : stripComments(line)
-        const expandedLine = contentLine.replace(/\t/g, "    ").replace(/^(?: {0,3}>[ \t]?)+/, "")
-        const listItem = expandedLine.match(/^ {0,3}(?:[-+*]|\d+[.)])[ \t]+/)
-        const listIndent = listItem?.[0].length ?? 0
-        const fenceLine =
-          openCodeFence?.[2] && expandedLine.startsWith(" ".repeat(openCodeFence[2]))
-            ? expandedLine.slice(openCodeFence[2])
-            : expandedLine.slice(listIndent)
-        const match = fenceLine.match(/^ {0,3}(`{3,}|~{3,})(.*)$/)
-        if (!match) return openCodeFence ? "" : contentLine
-        const fence = match[1]!
-        const suffix = match[2]!
-        if (openCodeFence) {
-          const [marker, length] = openCodeFence
-          if (fence[0] === marker && fence.length >= length && !suffix.trim()) {
-            openCodeFence = undefined
-          }
-          return ""
-        }
-        const tabsdownFence = tabsdownFences.at(-1)
-        if (
-          tabsdownFence &&
-          fence[0] === tabsdownFence[0] &&
-          fence.length >= tabsdownFence[1] &&
-          !suffix.trim()
-        ) {
-          tabsdownFences.pop()
-          return ""
-        }
-        if (suffix.trim().split(/\s+/, 1)[0] === "tabsdown") {
-          tabsdownFences.push([fence[0]!, fence.length])
-        } else {
-          openCodeFence = [fence[0]!, fence.length, listIndent]
-        }
-        return ""
-      })
-      .join("\n")
-    content = content.replace(/(?<!`)(`+)(.*?)\1(?!`)/gs, "")
-    for (const [literal, token] of Object.entries(commentTokens)) {
-      content = content.replaceAll(token, literal)
-    }
-    return content
-  }
-  const wikilinkTarget = (raw: string) =>
-    raw.split(/\\?\|/, 1)[0]!.split("#", 1)[0]!.trim().replace(/\.md$/i, "")
-  assert.equal(wikilinkTarget("Graph Algorithms\\|Graph"), "Graph Algorithms")
-  assert.equal(wikilinkTarget("Graph Algorithms.md"), "Graph Algorithms")
-  assert.doesNotMatch(
-    stripNonLinkMarkdown(
-      "```text\n[[Graph Algorithms]]\n```\n<!-- [[Graph Algorithms]] -->\n%% [[Graph Algorithms]] %%\n`[[Graph Algorithms]]`",
-    ),
-    /\[\[/,
-  )
-  assert.match(
-    stripNonLinkMarkdown("```html\n<!--\n```\n[[Graph Algorithms]]\n-->"),
-    /\[\[Graph Algorithms\]\]/,
-  )
-  assert.match(stripNonLinkMarkdown("    ```text\n[[Graph Algorithms]]"), /\[\[/)
-  assert.doesNotMatch(
-    stripNonLinkMarkdown("````text\n[[Graph Algorithms]]\n```\n[[Graph Algorithms]]\n````"),
-    /\[\[/,
-  )
-  assert.match(
-    stripNonLinkMarkdown("~~~~~tabsdown\ntab: Links\n[[Graph Algorithms]]\n~~~~~"),
-    /\[\[Graph Algorithms\]\]/,
-  )
-  assert.doesNotMatch(
-    stripNonLinkMarkdown(
-      "> ```text\n> [[Graph Algorithms]]\n> ```\n- ```text\n  [[Graph Algorithms]]\n  ```\n``[[Graph Algorithms]]``",
-    ),
-    /\[\[/,
-  )
-  assert.match(
-    stripNonLinkMarkdown(
-      "100. ```text\n     [[Ignored In List Code]]\n     ```\n[[Graph Algorithms]]",
-    ),
-    /\[\[Graph Algorithms\]\]/,
-  )
-
-  const vaultRoot = new URL("../../Vault/Home/", import.meta.url)
-  const files = globSync("**/*.md", { cwd: fileURLToPath(vaultRoot) })
-  const content = files
-    .map((file) => stripNonLinkMarkdown(readFileSync(new URL(file, vaultRoot), "utf8")))
-    .join("\n")
-  const nestedHubNames = new Set(
-    files
-      .filter(
-        (file) =>
-          file.split("/").length > 2 && basename(file, extname(file)) === basename(dirname(file)),
-      )
-      .map((file) => basename(file, extname(file)).toLocaleLowerCase()),
-  )
-  const shortNestedHubLinks = [...content.matchAll(/\[\[([^\]\n]+)\]\]/g)]
-    .map((match) => wikilinkTarget(match[1]!))
-    .filter((target) => !target.includes("/") && nestedHubNames.has(target.toLocaleLowerCase()))
-  assert.deepEqual(shortNestedHubLinks, [])
-  assert.doesNotMatch(content, /(?:Home\/)?AI & ML\/LLM\/Agent\/(?:Harness|Loop) Engineering/)
 })

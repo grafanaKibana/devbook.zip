@@ -482,8 +482,7 @@ export function mountMultiwayTree(
     }
 
     for (const { line, parentId, childId } of renderedEdges)
-      line.dataset.state =
-        state.path.has(parentId) && state.path.has(childId) ? "path" : "neutral"
+      line.dataset.state = state.path.has(parentId) && state.path.has(childId) ? "path" : "neutral"
     for (const { path, fromId, toId } of renderedLinks)
       path.dataset.state = state.links.has(`${fromId}->${toId}`) ? "active" : "neutral"
     for (const { group, nodeId } of renderedNodes) {

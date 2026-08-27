@@ -163,7 +163,9 @@ for (const pageLayout of Object.values(layout.byPageType)) {
 const pageContribute = PageContribute()
 
 // Preserve the configured community footer and add per-page sharing inside it.
-const siteFooter = SiteFooter({ footer: layout.defaults.footer })
+const footer = layout.defaults.footer
+if (!footer) throw new Error("SiteFooter requires an enabled footer component")
+const siteFooter = SiteFooter({ footer })
 layout.defaults.footer = siteFooter
 for (const pageLayout of Object.values(layout.byPageType)) {
   pageLayout.footer = siteFooter

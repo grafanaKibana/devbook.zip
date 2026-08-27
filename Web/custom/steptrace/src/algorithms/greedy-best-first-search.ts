@@ -23,7 +23,10 @@ function parse(config: StepTraceConfig): GraphStateConfig {
 function visibleQueue(queue: readonly QueueEntry[]) {
   return queue
     .slice()
-    .sort((left, right) => left.h - right.h || left.order - right.order || left.id.localeCompare(right.id))
+    .sort(
+      (left, right) =>
+        left.h - right.h || left.order - right.order || left.id.localeCompare(right.id),
+    )
     .map(({ id, g, h, f }) => ({ id, g, h, f }))
 }
 
@@ -34,19 +37,24 @@ function runGreedyBestFirst(config: GraphStateConfig, ops: GraphStateOperations)
   const parent: Record<string, string> = {}
   const visited = new Set([config.start])
   const closed: string[] = []
-  const queue: QueueEntry[] = [{
-    id: config.start,
-    g: 0,
-    h: heuristic.get(config.start)!,
-    f: heuristic.get(config.start)!,
-    order: 0,
-  }]
+  const queue: QueueEntry[] = [
+    {
+      id: config.start,
+      g: 0,
+      h: heuristic.get(config.start)!,
+      f: heuristic.get(config.start)!,
+      order: 0,
+    },
+  ]
   let order = 1
 
   ops.init(pathCost, visibleQueue(queue), `Seed OPEN with ${config.start}; rank it by h alone.`)
 
   while (queue.length) {
-    queue.sort((left, right) => left.h - right.h || left.order - right.order || left.id.localeCompare(right.id))
+    queue.sort(
+      (left, right) =>
+        left.h - right.h || left.order - right.order || left.id.localeCompare(right.id),
+    )
     const current = queue.shift()!
     closed.push(current.id)
     ops.expand(
@@ -61,7 +69,11 @@ function runGreedyBestFirst(config: GraphStateConfig, ops: GraphStateOperations)
       const path = [current.id]
       while (path[0] !== config.start) path.unshift(parent[path[0]])
       const greedyCost = pathCost[config.target]
-      const optimalCost = graphStateShortestDistances(config.nodes, config.edges, config.target).get(config.start)!
+      const optimalCost = graphStateShortestDistances(
+        config.nodes,
+        config.edges,
+        config.target,
+      ).get(config.start)!
       ops.path(path, pathCost, `Reconstruct Greedy's first route ${path.join(" → ")}.`)
       ops.done(
         path,
@@ -109,9 +121,4 @@ export const greedyBestFirstSearch = {
   meta: { label: "Greedy Best-First Search" },
   parse,
   run: runGreedyBestFirst,
-} satisfies FamilyAlgorithmDefinition<
-  "graph",
-  GraphStateConfig,
-  GraphStateOperations,
-  unknown
->
+} satisfies FamilyAlgorithmDefinition<"graph", GraphStateConfig, GraphStateOperations, unknown>

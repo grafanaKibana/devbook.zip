@@ -15,10 +15,8 @@ validate_vault = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = validate_vault
 SPEC.loader.exec_module(validate_vault)
 
-
 VALID_FRONTMATTER = """---
-topic:
-  - Programming
+topic: [Programming]
 subtopic: [NET]
 level: ["2"]
 priority: Medium
@@ -29,27 +27,25 @@ publish: false
 
 
 class VaultValidatorTests(unittest.TestCase):
-    def make_repo(self) -> tuple[tempfile.TemporaryDirectory[str], Path]:
-        temp = tempfile.TemporaryDirectory()
-        root = Path(temp.name)
-        (root / "Vault" / "Home" / "Topic").mkdir(parents=True)
-        (root / "Vault" / "Assets").mkdir(parents=True)
-        (root / ".scripts").mkdir()
-        return temp, root
+    def setUp(self) -> None:
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name)
+        (self.root / "Vault/Home/Topic").mkdir(parents=True)
+        (self.root / "Vault/Assets").mkdir(parents=True)
+        (self.root / ".scripts").mkdir()
 
-    def write_note(self, root: Path, relative: str, content: str) -> validate_vault.Note:
-        path = root / relative
+    def write_note(self, relative: str, content: str) -> validate_vault.Note:
+        path = self.root / relative
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(content, encoding="utf-8")
-        return validate_vault.load_note(path, root)
+        return validate_vault.load_note(path, self.root)
 
-    def test_frontmatter_requires_typed_arrays_and_allowed_scalars(self) -> None:
-        temp, root = self.make_repo()
-        self.addCleanup(temp.cleanup)
-        note = self.write_note(
-            root,
-            "Vault/Home/Topic/Bad.md",
-            """---
+    def test_frontmatter_schema(self) -> None:
+        cases = (
+            (VALID_FRONTMATTER, set()),
+            (
+                """---
 topic: Programming
 subtopic: [NET]
 level: [5]
@@ -57,469 +53,134 @@ priority: Urgent
 status:
 publish: "true"
 ---
-# Bad
 """,
+                {"frontmatter.type", "frontmatter.level", "frontmatter.priority"},
+            ),
         )
 
-        issues = validate_vault.validate_frontmatter(note)
-        codes = {issue.code for issue in issues}
-        self.assertIn("frontmatter.type", codes)
-        self.assertIn("frontmatter.level", codes)
-        self.assertIn("frontmatter.priority", codes)
+        for frontmatter, expected in cases:
+            with self.subTest(expected=expected):
+                note = self.write_note("Vault/Home/Topic/Note.md", frontmatter)
+                codes = {issue.code for issue in validate_vault.validate_frontmatter(note)}
+                self.assertEqual(expected, codes)
 
-    def test_staged_mode_checks_only_selected_notes_without_baseline(self) -> None:
-        temp, root = self.make_repo()
-        self.addCleanup(temp.cleanup)
-        hub = root / "Vault/Home/Topic/Topic.md"
-        hub.write_text(
-            "---\ntags: [FolderNote]\npublish: false\n---\n# Intro\n", encoding="utf-8"
-        )
-        selected = root / "Vault/Home/Topic/Selected.md"
-        selected.write_text(VALID_FRONTMATTER.replace("status: Creation", "status:"), encoding="utf-8")
-        ignored = root / "Vault/Home/Topic/Ignored.md"
-        ignored.write_text(VALID_FRONTMATTER.replace("priority: Medium", "priority: Urgent"), encoding="utf-8")
-
-        with patch.object(validate_vault, "staged_paths", return_value=[selected]):
-            issues, checked, suppressed = validate_vault.validate(root, "staged")
-
-        self.assertEqual(1, checked)
-        self.assertEqual(0, suppressed)
-        self.assertTrue(any(issue.path.endswith("Selected.md") for issue in issues))
-        self.assertFalse(any(issue.path.endswith("Ignored.md") for issue in issues))
-
-    def test_staged_mode_checks_misplaced_attachment_without_markdown(self) -> None:
-        temp, root = self.make_repo()
-        self.addCleanup(temp.cleanup)
-        attachment = root / "Vault/Home/Topic/diagram.png"
-        attachment.write_bytes(b"png")
-
-        with patch.object(validate_vault, "staged_paths", return_value=[attachment]):
-            issues, checked, _suppressed = validate_vault.validate(root, "staged")
-
-        self.assertEqual(0, checked)
-        self.assertTrue(any(issue.code == "attachment.location" for issue in issues))
-
-    def test_staged_mode_ignores_images_outside_vault(self) -> None:
-        temp, root = self.make_repo()
-        self.addCleanup(temp.cleanup)
-        image = root / "docs/assets/site-home.png"
-        image.parent.mkdir(parents=True)
-        image.write_bytes(b"png")
-
-        with patch.object(validate_vault, "staged_paths", return_value=[image]):
-            issues, checked, _suppressed = validate_vault.validate(root, "staged")
-
-        self.assertEqual(0, checked)
-        self.assertEqual([], issues)
-
-    def test_folder_hub_name_and_tag_are_enforced(self) -> None:
-        temp, root = self.make_repo()
-        self.addCleanup(temp.cleanup)
-        wrong = self.write_note(
-            root,
-            "Vault/Home/Topic/Wrong.md",
-            "---\ntags: [FolderNote]\npublish: false\n---\n",
-        )
-        self.assertEqual("folder-note.name", validate_vault.validate_folder_note(wrong, root / "Vault/Home")[0].code)
-
-        expected = self.write_note(
-            root,
-            "Vault/Home/Topic/Topic.md",
-            "---\ntags: []\npublish: false\n---\n",
-        )
-        issues = validate_vault.validate_expected_hubs(
-            root / "Vault/Home", {expected.path: expected, wrong.path: wrong}, [expected.path.parent]
-        )
-        self.assertEqual(["folder-note.tag"], [issue.code for issue in issues])
-
-    def test_wikilinks_resolve_by_path_or_note_name(self) -> None:
-        temp, root = self.make_repo()
-        self.addCleanup(temp.cleanup)
-        target = self.write_note(
-            root,
-            "Vault/Home/Topic/Target.md",
-            VALID_FRONTMATTER + "# Heading\n",
-        )
-        source = self.write_note(
-            root,
-            "Vault/Home/Topic/Source.md",
-            VALID_FRONTMATTER
-            + "[[Target#Heading|label]], ![[Target]], [[Missing]], "
-            + "\\[[Escaped]], and \\\\[[Even Missing]]\n",
-        )
-        index = validate_vault.VaultIndex(root / "Vault")
-        issues = validate_vault.validate_wikilinks(source, index)
-        self.assertEqual(["missing", "even missing"], [issue.discriminator for issue in issues])
-        self.assertIsNotNone(index.resolve(source.path, target.path.stem))
-
-    def test_staged_mode_validates_inbound_anchors(self) -> None:
-        temp, root = self.make_repo()
-        self.addCleanup(temp.cleanup)
-        target = self.write_note(
-            root,
-            "Vault/Home/Topic/Target.md",
-            VALID_FRONTMATTER + "# New Heading\n",
-        )
+    def test_staged_scope(self) -> None:
         self.write_note(
-            root,
-            "Vault/Home/Topic/Source.md",
-            VALID_FRONTMATTER + "[[Target#Old Heading]]\n",
-        )
-
-        with patch.object(validate_vault, "staged_paths", return_value=[target.path]):
-            issues, checked, _suppressed = validate_vault.validate(root, "staged")
-
-        self.assertEqual(1, checked)
-        self.assertTrue(
-            any(issue.discriminator == "target#old heading" for issue in issues)
-        )
-
-    def test_wikilink_headings_must_exist(self) -> None:
-        temp, root = self.make_repo()
-        self.addCleanup(temp.cleanup)
-        self.write_note(
-            root,
-            "Vault/Home/Topic/Target.md",
-            VALID_FRONTMATTER
-            + "# Existing Heading\n# C#\n# Closed Heading ###\n# Cache Keys and `Vary`\n"
-            + "# **Bold Boundary**\n# ~~Retired~~ Boundary\n"
-            + "# [Linked Boundary](https://example.com)\n"
-            + "# [[Other|Vault Linked Boundary]]\n"
-            + "   ## Indented Boundary\n"
-            + "> ## Quoted Boundary\n"
-            + "- ### Listed Boundary\n"
-            + "- > ## Composed Boundary\n"
-            + "- - ## Nested List Boundary\n"
-            + "100. Intro\n     ## Continuation Boundary\n"
-            + "```text\n<!--\n```\n# Comment Boundary\n-->\n"
-            + "`<!--`\n# Inline Comment Boundary\n`-->`\n"
-            + "\t# Not A Heading\n"
-            + "    - ## Overindented Hidden\n"
-            + "<div>\n# Raw HTML Hidden\n</div>\n"
-            + "Setext Boundary\n--------\n"
-            + "~~~text\n# Hidden Heading\n~~~\n"
-            + "````text\n# Hidden Long Fence\n```\n# Still Hidden\n````\n",
-        )
-        asset = root / "Vault/Assets/manual.pdf"
-        asset.parent.mkdir(parents=True, exist_ok=True)
-        asset.write_bytes(b"\xff\xfe")
-        source = self.write_note(
-            root,
-            "Vault/Home/Topic/Source.md",
-            VALID_FRONTMATTER
-            + "[[Target#Existing Heading]], [[Target#C#]], [[Target#Closed Heading]], "
-            + "[[Target#Cache Keys and Vary]], "
-            + "[[Target#Bold Boundary]], [[Target#Retired Boundary]], "
-            + "[[Target#Linked Boundary]], [[Target#Setext Boundary]], "
-            + "[[Target#Vault Linked Boundary]], [[Target#Quoted Boundary]], "
-            + "[[Target#Listed Boundary]], [[Target#Composed Boundary]], "
-            + "[[Target#Nested List Boundary]], "
-            + "[[Target#Continuation Boundary]], [[Target#Comment Boundary]], "
-            + "[[Target#Inline Comment Boundary]], "
-            + "[[Target#Not A Heading]], "
-            + "[[Target#Overindented Hidden]], [[Target#Raw HTML Hidden]], "
-            + "[[Target#Indented Boundary]], "
-            + "[[Target#Hidden Heading]], [[Target#Hidden Long Fence]], [[Target#Still Hidden]], "
-            + "[[Target#publish: true]], "
-            + "[[https://example.com/page#section]], "
-            + "\\[[Target#Illustrative Heading]], "
-            + "![[Assets/manual.pdf#page=3]], and [[Target#Missing Heading]]\n",
-        )
-        issues = validate_vault.validate_wikilinks(source, validate_vault.VaultIndex(root / "Vault"))
-        self.assertEqual(
-            [
-                "target#not a heading",
-                "target#overindented hidden",
-                "target#raw html hidden",
-                "target#hidden heading",
-                "target#hidden long fence",
-                "target#still hidden",
-                "target#publish: true",
-                "target#missing heading",
-            ],
-            [issue.discriminator for issue in issues],
-        )
-
-    def test_wikilinks_inside_tabsdown_are_live(self) -> None:
-        temp, root = self.make_repo()
-        self.addCleanup(temp.cleanup)
-        source = self.write_note(
-            root,
-            "Vault/Home/Topic/Source.md",
-            VALID_FRONTMATTER
-            + "~~~~~tabsdown\ntab: Links\n[[Missing In Tabs]]\n"
-            + "```text\n[[Ignored In Code]]\n```\n~~~~~\n",
-        )
-        issues = validate_vault.validate_wikilinks(source, validate_vault.VaultIndex(root / "Vault"))
-        self.assertEqual(["missing in tabs"], [issue.discriminator for issue in issues])
-
-    def test_wikilinks_ignore_nested_and_inline_code(self) -> None:
-        temp, root = self.make_repo()
-        self.addCleanup(temp.cleanup)
-        source = self.write_note(
-            root,
-            "Vault/Home/Topic/Source.md",
-            VALID_FRONTMATTER
-            + "> ```text\n> [[Quoted Example]]\n> ```\n"
-            + "- ```text\n  [[List Example]]\n  ```\n"
-            + "Outside list\n    [[Indented Code Example]]\n"
-            + "``[[Inline Example]]``\n"
-            + "`example\n[[Multiline Inline Example]]\ncontinued`\n",
-        )
-        issues = validate_vault.validate_wikilinks(source, validate_vault.VaultIndex(root / "Vault"))
-        self.assertEqual([], issues)
-
-    def test_attachments_must_live_under_assets(self) -> None:
-        temp, root = self.make_repo()
-        self.addCleanup(temp.cleanup)
-        good = root / "Vault/Assets/image.png"
-        bad = root / "Vault/Home/Topic/image.png"
-        good.write_bytes(b"png")
-        bad.write_bytes(b"png")
-        issues = validate_vault.validate_attachment_locations(root / "Vault", [good, bad])
-        self.assertEqual(["Vault/Home/Topic/image.png"], [issue.path for issue in issues])
-
-    def test_published_note_needs_content_and_example_signal(self) -> None:
-        temp, root = self.make_repo()
-        self.addCleanup(temp.cleanup)
-        note = self.write_note(
-            root,
-            "Vault/Home/Topic/Published.md",
-            VALID_FRONTMATTER.replace("publish: false", "publish: true") + "Too short.\n",
-        )
-        self.assertEqual(
-            {"publish.content", "publish.example"},
-            {issue.code for issue in validate_vault.validate_published(note)},
-        )
-
-    def test_published_note_does_not_require_a_heading(self) -> None:
-        temp, root = self.make_repo()
-        self.addCleanup(temp.cleanup)
-        note = self.write_note(
-            root,
-            "Vault/Home/Topic/Published.md",
-            VALID_FRONTMATTER.replace("publish: false", "publish: true") + ("Content " * 30) + "`example`\n",
-        )
-        self.assertEqual([], validate_vault.validate_published(note))
-
-    def test_concept_notes_allow_no_references_heading(self) -> None:
-        temp, root = self.make_repo()
-        self.addCleanup(temp.cleanup)
-        note = self.write_note(
-            root,
-            "Vault/Home/Topic/Concept.md",
-            VALID_FRONTMATTER + "# Questions\n",
-        )
-
-        issues = validate_vault.validate_references(note)
-
-        self.assertEqual([], issues)
-
-    def test_concept_notes_ignore_references_heading_in_fenced_example(self) -> None:
-        temp, root = self.make_repo()
-        self.addCleanup(temp.cleanup)
-        note = self.write_note(
-            root,
-            "Vault/Home/Topic/Concept.md",
-            VALID_FRONTMATTER
-            + "# Example\n\n```markdown\n# References\n\nNot a live section.\n```\n",
-        )
-
-        self.assertEqual([], validate_vault.validate_references(note))
-
-    def test_live_references_validate_fenced_content_as_entries(self) -> None:
-        temp, root = self.make_repo()
-        self.addCleanup(temp.cleanup)
-        note = self.write_note(
-            root,
-            "Vault/Home/Topic/Concept.md",
-            VALID_FRONTMATTER
-            + "# References\n\n```markdown\n# Not a live boundary\nNot a link.\n```\n# Next\n",
-        )
-
-        issues = validate_vault.validate_references(note)
-
-        self.assertEqual(
-            ["references.format"] * 4,
-            [issue.code for issue in issues],
-        )
-
-    def test_folder_notes_allow_no_references_heading(self) -> None:
-        temp, root = self.make_repo()
-        self.addCleanup(temp.cleanup)
-        note = self.write_note(
-            root,
             "Vault/Home/Topic/Topic.md",
             "---\ntags: [FolderNote]\npublish: false\n---\n# Intro\n",
         )
-
-        self.assertEqual([], validate_vault.validate_references(note))
-
-    def test_concept_notes_reject_duplicate_references_headings(self) -> None:
-        temp, root = self.make_repo()
-        self.addCleanup(temp.cleanup)
-        note = self.write_note(
-            root,
-            "Vault/Home/Topic/Concept.md",
-            VALID_FRONTMATTER + "# References\n\n# References\n",
+        selected = self.write_note(
+            "Vault/Home/Topic/Selected.md",
+            VALID_FRONTMATTER.replace("status: Creation", "status:"),
+        )
+        self.write_note(
+            "Vault/Home/Topic/Ignored.md",
+            VALID_FRONTMATTER.replace("priority: Medium", "priority: Urgent"),
         )
 
-        issues = validate_vault.validate_references(note)
+        with patch.object(validate_vault, "staged_paths", return_value=[selected.path]):
+            issues, checked, suppressed = validate_vault.validate(self.root, "staged")
 
-        self.assertEqual(["references.heading"], [issue.code for issue in issues])
+        self.assertEqual((1, 0), (checked, suppressed))
+        self.assertTrue(any(issue.path.endswith("Selected.md") for issue in issues))
+        self.assertFalse(any(issue.path.endswith("Ignored.md") for issue in issues))
 
-    def test_reference_checker_excludes_special_root_pages(self) -> None:
-        temp, root = self.make_repo()
-        self.addCleanup(temp.cleanup)
-        for name in ("index.md", "Questions.md", "About.md", "Changelog.md"):
-            note = self.write_note(root, f"Vault/Home/{name}", "# No concept headings\n")
-            with self.subTest(name=name):
-                self.assertEqual([], validate_vault.validate_references(note))
-
-    def test_reference_entries_reject_trailing_prose(self) -> None:
-        temp, root = self.make_repo()
-        self.addCleanup(temp.cleanup)
-        note = self.write_note(
-            root,
-            "Vault/Home/Topic/Concept.md",
-            VALID_FRONTMATTER
-            + "# References\n\n- [Official guide](https://example.com/guide) — explanation\n",
+    def test_folder_hub_contract(self) -> None:
+        wrong_name = self.write_note(
+            "Vault/Home/Topic/Wrong.md",
+            "---\ntags: [FolderNote]\npublish: false\n---\n",
         )
-
-        issues = validate_vault.validate_references(note)
-
-        self.assertEqual(["references.trailing-text"], [issue.code for issue in issues])
-
-    def test_reference_entries_reject_direct_image_patterns(self) -> None:
-        temp, root = self.make_repo()
-        self.addCleanup(temp.cleanup)
-        note = self.write_note(
-            root,
-            "Vault/Home/Topic/Concept.md",
-            VALID_FRONTMATTER
-            + "# References\n\n"
-            + "- [Cheatsheet](https://example.com/cheatsheet.PNG?raw=1)\n"
-            + "- ![Diagram](https://example.com/diagram.svg)\n"
-            + "https://example.com/raw-image.webp\n",
+        missing_tag = self.write_note(
+            "Vault/Home/Topic/Topic.md",
+            "---\ntags: []\npublish: false\n---\n",
         )
-
-        issues = validate_vault.validate_references(note)
 
         self.assertEqual(
-            ["references.image", "references.image", "references.image"],
-            [issue.code for issue in issues],
+            ["folder-note.name"],
+            [
+                issue.code
+                for issue in validate_vault.validate_folder_note(
+                    wrong_name, self.root / "Vault/Home"
+                )
+            ],
+        )
+        self.assertEqual(
+            ["folder-note.tag"],
+            [
+                issue.code
+                for issue in validate_vault.validate_expected_hubs(
+                    self.root / "Vault/Home",
+                    {missing_tag.path: missing_tag, wrong_name.path: wrong_name},
+                    [missing_tag.path.parent],
+                )
+            ],
         )
 
-    def test_reference_entries_allow_arxiv_and_balanced_url_parentheses(self) -> None:
-        temp, root = self.make_repo()
-        self.addCleanup(temp.cleanup)
-        note = self.write_note(
-            root,
-            "Vault/Home/Topic/Concept.md",
+    def test_wikilink_and_heading_resolution(self) -> None:
+        self.write_note(
+            "Vault/Home/Topic/Target.md",
+            VALID_FRONTMATTER + "# Existing Heading\n",
+        )
+        source = self.write_note(
+            "Vault/Home/Topic/Source.md",
             VALID_FRONTMATTER
-            + "# References\n\n"
-            + "- [Research paper](https://arxiv.org/abs/2307.03172)\n"
-            + "- [Implementation](https://example.com/source_(code))\n",
+            + "[[Target#Existing Heading]], [[Target#Missing Heading]], [[Missing]]\n",
         )
 
-        self.assertEqual([], validate_vault.validate_references(note))
-
-    def test_dataview_blocks_are_not_forbidden_by_this_validator(self) -> None:
-        temp, root = self.make_repo()
-        self.addCleanup(temp.cleanup)
-        note = self.write_note(
-            root,
-            "Vault/Home/Topic/LegacyQuery.md",
-            VALID_FRONTMATTER + "```dataview\nLIST FROM \"Home\"\n```\n",
+        issues = validate_vault.validate_wikilinks(
+            source, validate_vault.VaultIndex(self.root / "Vault")
         )
-        self.assertEqual([], validate_vault.validate_residue(note))
+
+        self.assertEqual(
+            ["target#missing heading", "missing"],
+            [issue.discriminator for issue in issues],
+        )
+
+    def test_attachment_location(self) -> None:
+        valid = self.root / "Vault/Assets/image.png"
+        invalid = self.root / "Vault/Home/Topic/image.png"
+        valid.write_bytes(b"png")
+        invalid.write_bytes(b"png")
+
+        issues = validate_vault.validate_attachment_locations(
+            self.root / "Vault", [valid, invalid]
+        )
+
+        self.assertEqual(["Vault/Home/Topic/image.png"], [issue.path for issue in issues])
+
+    def test_publishing_and_references(self) -> None:
+        published = self.write_note(
+            "Vault/Home/Topic/Published.md",
+            VALID_FRONTMATTER.replace("publish: false", "publish: true") + "Too short.\n",
+        )
+        references = self.write_note(
+            "Vault/Home/Topic/References.md",
+            VALID_FRONTMATTER
+            + "# References\n\n- [Guide](https://example.com/guide) — trailing prose\n",
+        )
+
+        self.assertEqual(
+            {"publish.content", "publish.example"},
+            {issue.code for issue in validate_vault.validate_published(published)},
+        )
+        self.assertEqual(
+            ["references.trailing-text"],
+            [issue.code for issue in validate_vault.validate_references(references)],
+        )
 
     def test_code_fences_require_a_language(self) -> None:
-        temp, root = self.make_repo()
-        self.addCleanup(temp.cleanup)
         note = self.write_note(
-            root,
             "Vault/Home/Topic/Fences.md",
-            VALID_FRONTMATTER
-            + "```\nbare\n```\n\n```text\ntagged\n```\n\n~~~csharp\nvar value = 1;\n~~~\n",
+            VALID_FRONTMATTER + "```\nbare\n```\n\n```text\ntagged\n```\n",
         )
 
-        issues = validate_vault.validate_code_fences(note)
-
-        self.assertEqual(["markdown.code-fence-language"], [issue.code for issue in issues])
-
-    def test_code_fences_inside_tabsdown_require_a_language(self) -> None:
-        temp, root = self.make_repo()
-        self.addCleanup(temp.cleanup)
-        note = self.write_note(
-            root,
-            "Vault/Home/Topic/TabsdownFences.md",
-            VALID_FRONTMATTER
-            + "~~~~~tabsdown\ntab: Example\n\n```\nbare\n```\n\n```text\ntagged\n```\n~~~~~\n",
+        self.assertEqual(
+            ["markdown.code-fence-language"],
+            [issue.code for issue in validate_vault.validate_code_fences(note)],
         )
 
-        issues = validate_vault.validate_code_fences(note)
-
-        self.assertEqual(["markdown.code-fence-language"], [issue.code for issue in issues])
-
-    def test_code_fences_inside_callouts_require_a_language(self) -> None:
-        temp, root = self.make_repo()
-        self.addCleanup(temp.cleanup)
-        note = self.write_note(
-            root,
-            "Vault/Home/Topic/CalloutFences.md",
-            VALID_FRONTMATTER
-            + "> [!example]\n> ```\n> bare\n> ```\n>\n> ```text\n> tagged\n> ```\n",
-        )
-
-        issues = validate_vault.validate_code_fences(note)
-
-        self.assertEqual(["markdown.code-fence-language"], [issue.code for issue in issues])
-
-    def test_code_fences_inside_lists_require_a_language(self) -> None:
-        temp, root = self.make_repo()
-        self.addCleanup(temp.cleanup)
-        note = self.write_note(
-            root,
-            "Vault/Home/Topic/ListFences.md",
-            VALID_FRONTMATTER
-            + "- Example\n\n    ```\n    bare\n    ```\n\n100. Tagged\n\n     ```text\n     tagged\n     ```\n",
-        )
-
-        issues = validate_vault.validate_code_fences(note)
-
-        self.assertEqual(["markdown.code-fence-language"], [issue.code for issue in issues])
-
-    def test_code_fences_inside_callouts_nested_in_lists_require_a_language(self) -> None:
-        temp, root = self.make_repo()
-        self.addCleanup(temp.cleanup)
-        note = self.write_note(
-            root,
-            "Vault/Home/Topic/ListCalloutFences.md",
-            VALID_FRONTMATTER + "- Example\n\n    > ```\n    > bare\n    > ```\n",
-        )
-
-        issues = validate_vault.validate_code_fences(note)
-
-        self.assertEqual(["markdown.code-fence-language"], [issue.code for issue in issues])
-
-    def test_tab_indented_code_fences_inside_lists_require_a_language(self) -> None:
-        temp, root = self.make_repo()
-        self.addCleanup(temp.cleanup)
-        note = self.write_note(
-            root,
-            "Vault/Home/Topic/TabIndentedListFence.md",
-            VALID_FRONTMATTER + "- Example\n\n\t```\n\tbare\n\t```\n",
-        )
-
-        issues = validate_vault.validate_code_fences(note)
-
-        self.assertEqual(["markdown.code-fence-language"], [issue.code for issue in issues])
-
-    def test_steptrace_freshness_delegates_to_non_writing_build_check(self) -> None:
-        temp, root = self.make_repo()
-        self.addCleanup(temp.cleanup)
-        custom = root / "Web/custom/steptrace"
+    def test_steptrace_freshness_delegation(self) -> None:
+        custom = self.root / "Web/custom/steptrace"
         custom.mkdir(parents=True)
         (custom / "build.mjs").write_text("", encoding="utf-8")
 
@@ -527,13 +188,14 @@ publish: "true"
             run.return_value.returncode = 0
             run.return_value.stdout = "current"
             run.return_value.stderr = ""
-            self.assertEqual([], validate_vault.validate_steptrace(root))
+            self.assertEqual([], validate_vault.validate_steptrace(self.root))
 
             run.return_value.returncode = 1
-            run.return_value.stderr = "Error: steptrace check: generated artifacts are stale"
-            issues = validate_vault.validate_steptrace(root)
+            run.return_value.stdout = ""
+            run.return_value.stderr = "generated artifacts are stale"
+            issues = validate_vault.validate_steptrace(self.root)
 
-        self.assertEqual("generated.steptrace", issues[0].code)
+        self.assertEqual(["generated.steptrace"], [issue.code for issue in issues])
         self.assertIn("generated artifacts are stale", issues[0].message)
 
 

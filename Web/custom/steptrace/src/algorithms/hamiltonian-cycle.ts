@@ -23,9 +23,11 @@ const edges: GraphStateEdge[] = [
   { from: "A", to: "C", weight: 1 },
 ]
 const edgeKey = (left: string, right: string) => {
-  const edge = edges.find((candidate) =>
-    (candidate.from === left && candidate.to === right) ||
-    (candidate.from === right && candidate.to === left))
+  const edge = edges.find(
+    (candidate) =>
+      (candidate.from === left && candidate.to === right) ||
+      (candidate.from === right && candidate.to === left),
+  )
   return edge ? `${edge.from}|${edge.to}` : ""
 }
 
@@ -45,9 +47,15 @@ class Recorder {
     rejectedEdge: readonly [string, string] | null = null,
   ) {
     const nodeState: Record<string, GraphStateNodeRole> = {}
-    path.forEach((id) => { nodeState[id] = "accepted" })
-    candidates.forEach((id) => { nodeState[id] = "frontier" })
-    rejected.forEach((id) => { nodeState[id] = "rejected" })
+    path.forEach((id) => {
+      nodeState[id] = "accepted"
+    })
+    candidates.forEach((id) => {
+      nodeState[id] = "frontier"
+    })
+    rejected.forEach((id) => {
+      nodeState[id] = "rejected"
+    })
     if (path.length) nodeState[path[path.length - 1]] = "active"
     const edgeState: Record<string, GraphStateEdgeRole> = {}
     for (let index = 1; index < path.length; index++) {
@@ -95,10 +103,22 @@ export const hamiltonianCycle = {
     recorder.add("Start at A; try unused neighbours in the order C, B, D.", ["A"], ["C", "B", "D"])
     recorder.add("Choose C first.", ["A", "C"], ["B", "D"])
     recorder.add("Choose B from C.", ["A", "C", "B"], [])
-    recorder.add("Dead end: B cannot reach the only unused vertex D.", ["A", "C", "B"], [], ["D"], ["B", "D"])
+    recorder.add(
+      "Dead end: B cannot reach the only unused vertex D.",
+      ["A", "C", "B"],
+      [],
+      ["D"],
+      ["B", "D"],
+    )
     recorder.add("Backtrack from B to C.", ["A", "C"], ["D"], ["B"])
     recorder.add("Choose D from C.", ["A", "C", "D"], [])
-    recorder.add("Dead end: D cannot reach the only unused vertex B.", ["A", "C", "D"], [], ["B"], ["D", "B"])
+    recorder.add(
+      "Dead end: D cannot reach the only unused vertex B.",
+      ["A", "C", "D"],
+      [],
+      ["B"],
+      ["D", "B"],
+    )
     recorder.add("Backtrack from D to C.", ["A", "C"], [], ["D"])
     recorder.add("Both C branches failed; backtrack to A.", ["A"], ["B", "D"], ["C"])
     recorder.add("Choose B from A.", ["A", "B"], ["C"])

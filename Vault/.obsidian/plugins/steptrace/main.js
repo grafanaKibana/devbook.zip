@@ -6027,10 +6027,14 @@ function runCount(config, heuristic) {
   const h = new Map(config.nodes.map((node2) => [node2.id, heuristic ? node2.h : 0]));
   const g = { [config.start]: 0 };
   const closed = /* @__PURE__ */ new Set();
-  const queue2 = [{ id: config.start, g: 0, h: h.get(config.start), f: h.get(config.start), order: 0 }];
+  const queue2 = [
+    { id: config.start, g: 0, h: h.get(config.start), f: h.get(config.start), order: 0 }
+  ];
   let order = 1;
   while (queue2.length) {
-    queue2.sort((left, right) => left.f - right.f || left.h - right.h || left.order - right.order || left.id.localeCompare(right.id));
+    queue2.sort(
+      (left, right) => left.f - right.f || left.h - right.h || left.order - right.order || left.id.localeCompare(right.id)
+    );
     const current = queue2.shift();
     if (closed.has(current.id) || current.g !== g[current.id]) continue;
     closed.add(current.id);
@@ -6040,7 +6044,13 @@ function runCount(config, heuristic) {
       const tentative = current.g + edge.weight;
       if (tentative >= (g[edge.to] ?? Number.POSITIVE_INFINITY)) continue;
       g[edge.to] = tentative;
-      queue2.push({ id: edge.to, g: tentative, h: h.get(edge.to), f: tentative + h.get(edge.to), order: order++ });
+      queue2.push({
+        id: edge.to,
+        g: tentative,
+        h: h.get(edge.to),
+        f: tentative + h.get(edge.to),
+        order: order++
+      });
     }
   }
   return closed.size;
@@ -6052,7 +6062,9 @@ function visibleQueue(queue2, closed) {
     const current = best.get(entry.id);
     if (!current || entry.g < current.g) best.set(entry.id, entry);
   }
-  return [...best.values()].sort((left, right) => left.f - right.f || left.h - right.h || left.order - right.order || left.id.localeCompare(right.id)).map(({ id, g, h, f }) => ({ id, g, h, f }));
+  return [...best.values()].sort(
+    (left, right) => left.f - right.f || left.h - right.h || left.order - right.order || left.id.localeCompare(right.id)
+  ).map(({ id, g, h, f }) => ({ id, g, h, f }));
 }
 function runAStar(config, ops) {
   const neighbours = graphStateAdjacency(config);
@@ -6061,17 +6073,21 @@ function runAStar(config, ops) {
   const parent = {};
   const closed = /* @__PURE__ */ new Set();
   const closedOrder = [];
-  const queue2 = [{
-    id: config.start,
-    g: 0,
-    h: h.get(config.start),
-    f: h.get(config.start),
-    order: 0
-  }];
+  const queue2 = [
+    {
+      id: config.start,
+      g: 0,
+      h: h.get(config.start),
+      f: h.get(config.start),
+      order: 0
+    }
+  ];
   let order = 1;
   ops.init(g, visibleQueue(queue2, closed), `Seed OPEN with ${config.start}; rank it by f = g + h.`);
   while (queue2.length) {
-    queue2.sort((left, right) => left.f - right.f || left.h - right.h || left.order - right.order || left.id.localeCompare(right.id));
+    queue2.sort(
+      (left, right) => left.f - right.f || left.h - right.h || left.order - right.order || left.id.localeCompare(right.id)
+    );
     const current = queue2.shift();
     if (closed.has(current.id) || current.g !== g[current.id]) continue;
     closed.add(current.id);
@@ -6129,7 +6145,13 @@ function runAStar(config, ops) {
       );
     }
   }
-  ops.done([], g, closed.size, runCount(config, false), `${config.target} is unreachable from ${config.start}.`);
+  ops.done(
+    [],
+    g,
+    closed.size,
+    runCount(config, false),
+    `${config.target} is unreachable from ${config.start}.`
+  );
 }
 var aStar;
 var init_a_star = __esm({
@@ -6710,26 +6732,80 @@ function run(_, recorder) {
   const bridges = [];
   const visit = (id, time, parent) => {
     disc[id] = low[id] = time;
-    recorder.record("discover", id, parent ? [parent, id] : null, disc, low, cuts, bridges, `Discover ${id}: disc ${time}, low ${time}.`);
+    recorder.record(
+      "discover",
+      id,
+      parent ? [parent, id] : null,
+      disc,
+      low,
+      cuts,
+      bridges,
+      `Discover ${id}: disc ${time}, low ${time}.`
+    );
   };
   visit("0", 0, null);
   visit("1", 1, "0");
   visit("2", 2, "1");
   low["2"] = 0;
-  recorder.record("back-edge", "2", ["2", "0"], disc, low, cuts, bridges, "Back edge 2—0 lowers low[2] to 0.");
+  recorder.record(
+    "back-edge",
+    "2",
+    ["2", "0"],
+    disc,
+    low,
+    cuts,
+    bridges,
+    "Back edge 2—0 lowers low[2] to 0."
+  );
   visit("3", 3, "2");
   visit("4", 4, "3");
   bridges.push(["3", "4"]);
   if (!cuts.includes("3")) cuts.push("3");
-  recorder.record("cut", "3", ["3", "4"], disc, low, cuts, bridges, "low[4] > disc[3]: 3—4 is a bridge and 3 is a cut vertex.");
+  recorder.record(
+    "cut",
+    "3",
+    ["3", "4"],
+    disc,
+    low,
+    cuts,
+    bridges,
+    "low[4] > disc[3]: 3—4 is a bridge and 3 is a cut vertex."
+  );
   low["3"] = Math.min(low["3"], low["4"]);
   bridges.push(["2", "3"]);
   if (!cuts.includes("2")) cuts.push("2");
-  recorder.record("cut", "2", ["2", "3"], disc, low, cuts, bridges, "low[3] > disc[2]: 2—3 is a bridge and 2 is a cut vertex.");
+  recorder.record(
+    "cut",
+    "2",
+    ["2", "3"],
+    disc,
+    low,
+    cuts,
+    bridges,
+    "low[3] > disc[2]: 2—3 is a bridge and 2 is a cut vertex."
+  );
   low["1"] = Math.min(low["1"], low["2"]);
-  recorder.record("propagate", "1", ["1", "2"], disc, low, cuts, bridges, "Propagate low[2] = 0 to vertex 1; the triangle remains connected.");
+  recorder.record(
+    "propagate",
+    "1",
+    ["1", "2"],
+    disc,
+    low,
+    cuts,
+    bridges,
+    "Propagate low[2] = 0 to vertex 1; the triangle remains connected."
+  );
   low["0"] = Math.min(low["0"], low["1"]);
-  recorder.record("done", null, null, disc, low, cuts, bridges, "Cut vertices: 2, 3. Bridges: 2—3, 3—4.");
+  recorder.record(
+    "done",
+    null,
+    null,
+    disc,
+    low,
+    cuts,
+    bridges,
+    "Cut vertices: 2, 3. Bridges: 2—3, 3—4."
+  );
 }
 var Recorder, family, articulationPointsAndBridges;
 var init_articulation_points_and_bridges = __esm({
@@ -6745,7 +6821,13 @@ var init_articulation_points_and_bridges = __esm({
         const visited = new Set(Object.keys(discovery));
         const cuts = new Set(articulationPoints);
         const bridgeKeys = new Set(bridges.flatMap(([a, b]) => [`${a}|${b}`, `${b}|${a}`]));
-        const detail = { kind: "low-link-cuts", discovery: { ...discovery }, low: { ...low }, articulationPoints: [...articulationPoints], bridges: bridges.map((edge) => [...edge]) };
+        const detail = {
+          kind: "low-link-cuts",
+          discovery: { ...discovery },
+          low: { ...low },
+          articulationPoints: [...articulationPoints],
+          bridges: bridges.map((edge) => [...edge])
+        };
         this.frames.push({
           type,
           profile: "articulation-points-and-bridges",
@@ -6757,8 +6839,18 @@ var init_articulation_points_and_bridges = __esm({
           currentNode,
           currentEdge,
           selectedEdges: [...bridgeKeys],
-          nodeState: Object.fromEntries(this.config.nodes.map(({ id }) => [id, cuts.has(id) ? "accepted" : id === currentNode ? "active" : visited.has(id) ? "closed" : "neutral"])),
-          edgeState: Object.fromEntries(this.config.edges.map(({ from, to }) => [`${from}|${to}`, bridgeKeys.has(`${from}|${to}`) ? "cut" : currentEdge && (from === currentEdge[0] && to === currentEdge[1] || from === currentEdge[1] && to === currentEdge[0]) ? "active" : "neutral"])),
+          nodeState: Object.fromEntries(
+            this.config.nodes.map(({ id }) => [
+              id,
+              cuts.has(id) ? "accepted" : id === currentNode ? "active" : visited.has(id) ? "closed" : "neutral"
+            ])
+          ),
+          edgeState: Object.fromEntries(
+            this.config.edges.map(({ from, to }) => [
+              `${from}|${to}`,
+              bridgeKeys.has(`${from}|${to}`) ? "cut" : currentEdge && (from === currentEdge[0] && to === currentEdge[1] || from === currentEdge[1] && to === currentEdge[0]) ? "active" : "neutral"
+            ])
+          ),
           message,
           detail
         });
@@ -7012,16 +7104,34 @@ function run2(config, recorder) {
       const candidate = distances[edge.from] + edge.weight;
       const changed2 = Number.isFinite(candidate) && candidate < before;
       if (changed2) distances[edge.to] = candidate;
-      recorder.record(pass, [edge.from, edge.to], distances, changed2, changed2 ? `Pass ${pass}: ${edge.from}→${edge.to} lowers dist[${edge.to}] from ${before} to ${candidate}.` : `Pass ${pass}: ${edge.from}→${edge.to} cannot improve dist[${edge.to}].`);
+      recorder.record(
+        pass,
+        [edge.from, edge.to],
+        distances,
+        changed2,
+        changed2 ? `Pass ${pass}: ${edge.from}→${edge.to} lowers dist[${edge.to}] from ${before} to ${candidate}.` : `Pass ${pass}: ${edge.from}→${edge.to} cannot improve dist[${edge.to}].`
+      );
     }
   }
   let changed = false;
   for (const edge of config.edges) {
     const relaxes = Number.isFinite(distances[edge.from]) && distances[edge.from] + edge.weight < distances[edge.to];
     changed ||= relaxes;
-    recorder.record(4, [edge.from, edge.to], distances, relaxes, `Check ${edge.from}→${edge.to}: ${relaxes ? "it still relaxes" : "no change"}.`);
+    recorder.record(
+      4,
+      [edge.from, edge.to],
+      distances,
+      relaxes,
+      `Check ${edge.from}→${edge.to}: ${relaxes ? "it still relaxes" : "no change"}.`
+    );
   }
-  recorder.record(4, null, distances, changed, "The confirming sweep changes nothing; no reachable negative cycle exists.");
+  recorder.record(
+    4,
+    null,
+    distances,
+    changed,
+    "The confirming sweep changes nothing; no reachable negative cycle exists."
+  );
 }
 var Recorder2, family2, bellmanFord;
 var init_bellman_ford = __esm({
@@ -7034,8 +7144,16 @@ var init_bellman_ford = __esm({
       config;
       frames = [];
       record(pass, edge, distances, changed, message) {
-        const reachable = new Set(Object.entries(distances).filter(([, value]) => Number.isFinite(value)).map(([id]) => id));
-        const detail = { kind: "edge-relaxation", pass, edge, distances: { ...distances }, changed };
+        const reachable = new Set(
+          Object.entries(distances).filter(([, value]) => Number.isFinite(value)).map(([id]) => id)
+        );
+        const detail = {
+          kind: "edge-relaxation",
+          pass,
+          edge,
+          distances: { ...distances },
+          changed
+        };
         this.frames.push({
           type: edge ? "relax" : pass ? "done" : "init",
           profile: "bellman-ford",
@@ -7047,14 +7165,28 @@ var init_bellman_ford = __esm({
           currentNode: edge?.[0] ?? null,
           currentEdge: edge,
           selectedEdges: [],
-          nodeState: Object.fromEntries(this.config.nodes.map(({ id }) => [id, id === edge?.[0] ? "active" : reachable.has(id) ? "closed" : "neutral"])),
-          edgeState: Object.fromEntries(this.config.edges.map(({ from, to }) => [`${from}|${to}`, edge?.[0] === from && edge[1] === to ? "active" : "neutral"])),
+          nodeState: Object.fromEntries(
+            this.config.nodes.map(({ id }) => [
+              id,
+              id === edge?.[0] ? "active" : reachable.has(id) ? "closed" : "neutral"
+            ])
+          ),
+          edgeState: Object.fromEntries(
+            this.config.edges.map(({ from, to }) => [
+              `${from}|${to}`,
+              edge?.[0] === from && edge[1] === to ? "active" : "neutral"
+            ])
+          ),
           message,
           detail
         });
       }
     };
-    family2 = { id: "graph-state", createRecorder: (config) => new Recorder2(config), createView: makeGraphStateView };
+    family2 = {
+      id: "graph-state",
+      createRecorder: (config) => new Recorder2(config),
+      createView: makeGraphStateView
+    };
     bellmanFord = {
       id: "bellman-ford",
       kind: "graph",
@@ -11119,10 +11251,7 @@ function mountBinomialQueue(root, _config) {
         { value: null, label: "B₂", ariaLabel: "order two empty" }
       ]
     );
-    shell.setCounter(
-      phase === 2 ? "1" : phase === 1 ? "2" : "3",
-      phase === 2 ? " tree" : " roots"
-    );
+    shell.setCounter(phase === 2 ? "1" : phase === 1 ? "2" : "3", phase === 2 ? " tree" : " roots");
     shell.status.textContent = message || "Meld the 3-value forest with the singleton; equal orders link and carry right.";
     meld.textContent = phase === 0 ? "Meld" : phase === 1 ? "Continue carry" : "Melded";
     meld.disabled = phase === 2;
@@ -11875,20 +12004,54 @@ var init_boruvka = __esm({
         const accepted = [];
         recorder.add("Begin round 1 with four singleton components.", components, choices, accepted);
         choices.push(ab);
-        recorder.add("Component A chooses its cheapest outgoing edge A—B (1).", components, choices, accepted, ab);
-        recorder.add("Component B chooses the same cheapest edge B—A (1).", components, choices, accepted, ab);
+        recorder.add(
+          "Component A chooses its cheapest outgoing edge A—B (1).",
+          components,
+          choices,
+          accepted,
+          ab
+        );
+        recorder.add(
+          "Component B chooses the same cheapest edge B—A (1).",
+          components,
+          choices,
+          accepted,
+          ab
+        );
         choices.push(bc);
         recorder.add("Component C chooses B—C (2).", components, choices, accepted, bc);
         choices.push(cd);
         recorder.add("Component D chooses C—D (3).", components, choices, accepted, cd);
-        recorder.add("Deduplicate A—B; three distinct safe candidates remain.", components, choices, accepted);
+        recorder.add(
+          "Deduplicate A—B; three distinct safe candidates remain.",
+          components,
+          choices,
+          accepted
+        );
         accepted.push(ab);
         recorder.add("Accept A—B; A and B merge.", [["A", "B"], ["C"], ["D"]], choices, accepted, ab);
         accepted.push(bc);
-        recorder.add("Accept B—C; C joins the component.", [["A", "B", "C"], ["D"]], choices, accepted, bc);
+        recorder.add(
+          "Accept B—C; C joins the component.",
+          [["A", "B", "C"], ["D"]],
+          choices,
+          accepted,
+          bc
+        );
         accepted.push(cd);
-        recorder.add("Accept C—D; all vertices are connected.", [["A", "B", "C", "D"]], choices, accepted, cd);
-        recorder.add("The MST is complete in one effective round with total weight 6.", [["A", "B", "C", "D"]], choices, accepted);
+        recorder.add(
+          "Accept C—D; all vertices are connected.",
+          [["A", "B", "C", "D"]],
+          choices,
+          accepted,
+          cd
+        );
+        recorder.add(
+          "The MST is complete in one effective round with total weight 6.",
+          [["A", "B", "C", "D"]],
+          choices,
+          accepted
+        );
       }
     };
   }
@@ -14123,11 +14286,7 @@ var init_comb_sort = __esm({
               `Compare ${leftValue} at index ${left} with ${rightValue} at index ${right}.`
             );
             if (leftValue <= rightValue) continue;
-            ops.swapGapPair(
-              left,
-              right,
-              `${leftValue} > ${rightValue}: swap the gap-${gap} pair.`
-            );
+            ops.swapGapPair(left, right, `${leftValue} > ${rightValue}: swap the gap-${gap} pair.`);
             swapped = true;
           }
           ops.endGap(
@@ -14212,14 +14371,30 @@ function run4(_, recorder) {
   const groups = [];
   const flood = (component, order) => {
     const frontier = [order[0]];
-    recorder.record(component, order[0], frontier, visited, groups, `Start component ${component} at unvisited vertex ${order[0]}.`);
+    recorder.record(
+      component,
+      order[0],
+      frontier,
+      visited,
+      groups,
+      `Start component ${component} at unvisited vertex ${order[0]}.`
+    );
     for (const id of order) {
       frontier.splice(frontier.indexOf(id), 1);
       if (!visited.includes(id)) visited.push(id);
-      const next = order.filter((candidate) => !visited.includes(candidate) && !frontier.includes(candidate));
+      const next = order.filter(
+        (candidate) => !visited.includes(candidate) && !frontier.includes(candidate)
+      );
       frontier.push(...next.slice(0, 1));
       const currentGroup = order.filter((member) => visited.includes(member));
-      recorder.record(component, id, frontier, visited, [...groups, currentGroup], `Assign ${id} to component ${component}.`);
+      recorder.record(
+        component,
+        id,
+        frontier,
+        visited,
+        [...groups, currentGroup],
+        `Assign ${id} to component ${component}.`
+      );
     }
     groups.push([...order]);
   };
@@ -14239,7 +14414,13 @@ var init_connected_components = __esm({
       config;
       frames = [];
       record(component, current, frontier, visited, groups, message) {
-        const detail = { kind: "component-flood", component, frontier: [...frontier], visited: [...visited], groups: groups.map((group) => [...group]) };
+        const detail = {
+          kind: "component-flood",
+          component,
+          frontier: [...frontier],
+          visited: [...visited],
+          groups: groups.map((group) => [...group])
+        };
         this.frames.push({
           type: current ? "visit" : "done",
           profile: "connected-components",
@@ -14251,14 +14432,28 @@ var init_connected_components = __esm({
           currentNode: current,
           currentEdge: null,
           selectedEdges: [],
-          nodeState: Object.fromEntries(this.config.nodes.map(({ id }) => [id, id === current ? "active" : frontier.includes(id) ? "frontier" : visited.includes(id) ? "accepted" : "neutral"])),
-          edgeState: Object.fromEntries(this.config.edges.map(({ from, to }) => [`${from}|${to}`, visited.includes(from) && visited.includes(to) ? "accepted" : "neutral"])),
+          nodeState: Object.fromEntries(
+            this.config.nodes.map(({ id }) => [
+              id,
+              id === current ? "active" : frontier.includes(id) ? "frontier" : visited.includes(id) ? "accepted" : "neutral"
+            ])
+          ),
+          edgeState: Object.fromEntries(
+            this.config.edges.map(({ from, to }) => [
+              `${from}|${to}`,
+              visited.includes(from) && visited.includes(to) ? "accepted" : "neutral"
+            ])
+          ),
           message,
           detail
         });
       }
     };
-    family5 = { id: "graph-state", createRecorder: (config) => new Recorder5(config), createView: makeGraphStateView };
+    family5 = {
+      id: "graph-state",
+      createRecorder: (config) => new Recorder5(config),
+      createView: makeGraphStateView
+    };
     connectedComponents = {
       id: "connected-components",
       kind: "graph",
@@ -14302,7 +14497,9 @@ var init_counting_sort = __esm({
             `Read input[${index}] = ${key4} from the tail; decrement its end position, then write output there.`
           );
         }
-        ops.done(`Every key is in its value block. Tail-first placement kept equal keys in input order.`);
+        ops.done(
+          `Every key is in its value block. Tail-first placement kept equal keys in input order.`
+        );
       }
     };
   }
@@ -14333,7 +14530,9 @@ var init_cyclic_sort = __esm({
       meta: { label: "Cyclic sort" },
       parse: parseCyclicSortConfig,
       run(_input, ops) {
-        ops.init("Cyclic sort — value v belongs at index v − 1; keep the cursor still until its value is home.");
+        ops.init(
+          "Cyclic sort — value v belongs at index v − 1; keep the cursor still until its value is home."
+        );
         let cursor = 0;
         while (cursor < ops.value.length) {
           const value = ops.value[cursor];
@@ -14513,8 +14712,7 @@ function parse5(config) {
   const edgeKeys = /* @__PURE__ */ new Set();
   for (const edge of edges5) {
     const key4 = edge.directed ? `${edge.from}|${edge.to}` : [edge.from, edge.to].sort().join("|");
-    if (edgeKeys.has(key4))
-      throw new Error("steptrace: dijkstra parallel edges are not supported.");
+    if (edgeKeys.has(key4)) throw new Error("steptrace: dijkstra parallel edges are not supported.");
     edgeKeys.add(key4);
   }
   return {
@@ -17761,7 +17959,9 @@ function parse6(config) {
   };
 }
 function visibleQueue2(queue2) {
-  return queue2.slice().sort((left, right) => left.h - right.h || left.order - right.order || left.id.localeCompare(right.id)).map(({ id, g, h, f }) => ({ id, g, h, f }));
+  return queue2.slice().sort(
+    (left, right) => left.h - right.h || left.order - right.order || left.id.localeCompare(right.id)
+  ).map(({ id, g, h, f }) => ({ id, g, h, f }));
 }
 function runGreedyBestFirst(config, ops) {
   const neighbours = graphStateAdjacency(config);
@@ -17770,17 +17970,21 @@ function runGreedyBestFirst(config, ops) {
   const parent = {};
   const visited = /* @__PURE__ */ new Set([config.start]);
   const closed = [];
-  const queue2 = [{
-    id: config.start,
-    g: 0,
-    h: heuristic.get(config.start),
-    f: heuristic.get(config.start),
-    order: 0
-  }];
+  const queue2 = [
+    {
+      id: config.start,
+      g: 0,
+      h: heuristic.get(config.start),
+      f: heuristic.get(config.start),
+      order: 0
+    }
+  ];
   let order = 1;
   ops.init(pathCost, visibleQueue2(queue2), `Seed OPEN with ${config.start}; rank it by h alone.`);
   while (queue2.length) {
-    queue2.sort((left, right) => left.h - right.h || left.order - right.order || left.id.localeCompare(right.id));
+    queue2.sort(
+      (left, right) => left.h - right.h || left.order - right.order || left.id.localeCompare(right.id)
+    );
     const current = queue2.shift();
     closed.push(current.id);
     ops.expand(
@@ -17794,7 +17998,11 @@ function runGreedyBestFirst(config, ops) {
       const path = [current.id];
       while (path[0] !== config.start) path.unshift(parent[path[0]]);
       const greedyCost = pathCost[config.target];
-      const optimalCost = graphStateShortestDistances(config.nodes, config.edges, config.target).get(config.start);
+      const optimalCost = graphStateShortestDistances(
+        config.nodes,
+        config.edges,
+        config.target
+      ).get(config.start);
       ops.path(path, pathCost, `Reconstruct Greedy's first route ${path.join(" → ")}.`);
       ops.done(
         path,
@@ -18340,7 +18548,9 @@ var init_hamiltonian_cycle = __esm({
       { from: "A", to: "C", weight: 1 }
     ];
     edgeKey2 = (left, right) => {
-      const edge = edges2.find((candidate) => candidate.from === left && candidate.to === right || candidate.from === right && candidate.to === left);
+      const edge = edges2.find(
+        (candidate) => candidate.from === left && candidate.to === right || candidate.from === right && candidate.to === left
+      );
       return edge ? `${edge.from}|${edge.to}` : "";
     };
     Recorder7 = class {
@@ -18401,10 +18611,22 @@ var init_hamiltonian_cycle = __esm({
         recorder.add("Start at A; try unused neighbours in the order C, B, D.", ["A"], ["C", "B", "D"]);
         recorder.add("Choose C first.", ["A", "C"], ["B", "D"]);
         recorder.add("Choose B from C.", ["A", "C", "B"], []);
-        recorder.add("Dead end: B cannot reach the only unused vertex D.", ["A", "C", "B"], [], ["D"], ["B", "D"]);
+        recorder.add(
+          "Dead end: B cannot reach the only unused vertex D.",
+          ["A", "C", "B"],
+          [],
+          ["D"],
+          ["B", "D"]
+        );
         recorder.add("Backtrack from B to C.", ["A", "C"], ["D"], ["B"]);
         recorder.add("Choose D from C.", ["A", "C", "D"], []);
-        recorder.add("Dead end: D cannot reach the only unused vertex B.", ["A", "C", "D"], [], ["B"], ["D", "B"]);
+        recorder.add(
+          "Dead end: D cannot reach the only unused vertex B.",
+          ["A", "C", "D"],
+          [],
+          ["B"],
+          ["D", "B"]
+        );
         recorder.add("Backtrack from D to C.", ["A", "C"], [], ["D"]);
         recorder.add("Both C branches failed; backtrack to A.", ["A"], ["B", "D"], ["C"]);
         recorder.add("Choose B from A.", ["A", "B"], ["C"]);
@@ -18912,18 +19134,72 @@ var init_kruskal = __esm({
       parse: () => ({ nodes: nodes3, edges: edges3 }),
       run(_config, recorder) {
         const accepted = [];
-        recorder.add("Sort edges by weight: AB 1, BC 2, AC 3, CD 4.", [["A"], ["B"], ["C"], ["D"]], edges3, accepted);
-        recorder.add("Inspect A—B (1): its endpoints are in different components.", [["A"], ["B"], ["C"], ["D"]], edges3, accepted, edges3[0]);
+        recorder.add(
+          "Sort edges by weight: AB 1, BC 2, AC 3, CD 4.",
+          [["A"], ["B"], ["C"], ["D"]],
+          edges3,
+          accepted
+        );
+        recorder.add(
+          "Inspect A—B (1): its endpoints are in different components.",
+          [["A"], ["B"], ["C"], ["D"]],
+          edges3,
+          accepted,
+          edges3[0]
+        );
         accepted.push(edges3[0]);
-        recorder.add("Accept A—B and merge A with B.", [["A", "B"], ["C"], ["D"]], edges3.slice(1), accepted, edges3[0]);
-        recorder.add("Inspect B—C (2): it joins two components.", [["A", "B"], ["C"], ["D"]], edges3.slice(1), accepted, edges3[1]);
+        recorder.add(
+          "Accept A—B and merge A with B.",
+          [["A", "B"], ["C"], ["D"]],
+          edges3.slice(1),
+          accepted,
+          edges3[0]
+        );
+        recorder.add(
+          "Inspect B—C (2): it joins two components.",
+          [["A", "B"], ["C"], ["D"]],
+          edges3.slice(1),
+          accepted,
+          edges3[1]
+        );
         accepted.push(edges3[1]);
-        recorder.add("Accept B—C and merge C into the tree.", [["A", "B", "C"], ["D"]], edges3.slice(2), accepted, edges3[1]);
-        recorder.add("Inspect A—C (3): both endpoints already share a component.", [["A", "B", "C"], ["D"]], edges3.slice(2), accepted, edges3[2]);
-        recorder.add("Reject A—C because it would close a cycle.", [["A", "B", "C"], ["D"]], edges3.slice(3), accepted, edges3[2], edges3[2]);
-        recorder.add("Inspect C—D (4): D is still separate.", [["A", "B", "C"], ["D"]], edges3.slice(3), accepted, edges3[3]);
+        recorder.add(
+          "Accept B—C and merge C into the tree.",
+          [["A", "B", "C"], ["D"]],
+          edges3.slice(2),
+          accepted,
+          edges3[1]
+        );
+        recorder.add(
+          "Inspect A—C (3): both endpoints already share a component.",
+          [["A", "B", "C"], ["D"]],
+          edges3.slice(2),
+          accepted,
+          edges3[2]
+        );
+        recorder.add(
+          "Reject A—C because it would close a cycle.",
+          [["A", "B", "C"], ["D"]],
+          edges3.slice(3),
+          accepted,
+          edges3[2],
+          edges3[2]
+        );
+        recorder.add(
+          "Inspect C—D (4): D is still separate.",
+          [["A", "B", "C"], ["D"]],
+          edges3.slice(3),
+          accepted,
+          edges3[3]
+        );
         accepted.push(edges3[3]);
-        recorder.add("Accept C—D; V − 1 edges complete the MST with total weight 7.", [["A", "B", "C", "D"]], [], accepted, edges3[3]);
+        recorder.add(
+          "Accept C—D; V − 1 edges complete the MST with total weight 7.",
+          [["A", "B", "C", "D"]],
+          [],
+          accepted,
+          edges3[3]
+        );
       }
     };
   }
@@ -19486,17 +19762,39 @@ var init_maximum_flow = __esm({
           "a|t": 0,
           "b|t": 0
         };
-        recorder.add("Begin with zero flow and unit residual capacity on every forward edge.", ["s"], flow, 0);
+        recorder.add(
+          "Begin with zero flow and unit residual capacity on every forward edge.",
+          ["s"],
+          flow,
+          0
+        );
         recorder.add("DFS chooses s → a.", ["s", "a"], flow, 0);
         recorder.add("Continue through a → b.", ["s", "a", "b"], flow, 0);
         recorder.add("Reach t through b → t; the bottleneck is 1.", ["s", "a", "b", "t"], flow, 0, 1);
         flow = { ...flow, "s|a": 1, "a|b": 1, "b|t": 1 };
         recorder.add("Augment s → a → b → t by 1; total flow is 1.", ["s", "a", "b", "t"], flow, 1, 1);
         recorder.add("The next search starts with the remaining edge s → b.", ["s", "b"], flow, 1);
-        recorder.add("Use residual edge b → a to retract the earlier a → b unit.", ["s", "b", "a"], flow, 1);
-        recorder.add("Continue through the free edge a → t; bottleneck is 1.", ["s", "b", "a", "t"], flow, 1, 1);
+        recorder.add(
+          "Use residual edge b → a to retract the earlier a → b unit.",
+          ["s", "b", "a"],
+          flow,
+          1
+        );
+        recorder.add(
+          "Continue through the free edge a → t; bottleneck is 1.",
+          ["s", "b", "a", "t"],
+          flow,
+          1,
+          1
+        );
         flow = { ...flow, "s|b": 1, "a|b": 0, "a|t": 1 };
-        recorder.add("Augment s → b → a → t: cancel a → b and raise total flow to 2.", ["s", "b", "a", "t"], flow, 2, 1);
+        recorder.add(
+          "Augment s → b → a → t: cancel a → b and raise total flow to 2.",
+          ["s", "b", "a", "t"],
+          flow,
+          2,
+          1
+        );
         recorder.add("No residual s → t path remains; the maximum flow is 2.", [], flow, 2);
       }
     };
@@ -21139,26 +21437,89 @@ function run6(_, recorder) {
   const visit = (id, time, parent) => {
     disc[id] = low[id] = time;
     stack2.push(id);
-    recorder.record("discover", id, parent ? [parent, id] : null, disc, low, stack2, components, `Push ${id}: disc ${time}, low ${time}.`);
+    recorder.record(
+      "discover",
+      id,
+      parent ? [parent, id] : null,
+      disc,
+      low,
+      stack2,
+      components,
+      `Push ${id}: disc ${time}, low ${time}.`
+    );
   };
   visit("A", 0, null);
   visit("B", 1, "A");
   visit("C", 2, "B");
   low["C"] = 0;
-  recorder.record("back-edge", "C", ["C", "A"], disc, low, stack2, components, "C→A reaches an active ancestor; low[C] becomes 0.");
+  recorder.record(
+    "back-edge",
+    "C",
+    ["C", "A"],
+    disc,
+    low,
+    stack2,
+    components,
+    "C→A reaches an active ancestor; low[C] becomes 0."
+  );
   visit("D", 3, "C");
   visit("E", 4, "D");
   low["E"] = 3;
-  recorder.record("back-edge", "E", ["E", "D"], disc, low, stack2, components, "E→D reaches an active ancestor; low[E] becomes 3.");
+  recorder.record(
+    "back-edge",
+    "E",
+    ["E", "D"],
+    disc,
+    low,
+    stack2,
+    components,
+    "E→D reaches an active ancestor; low[E] becomes 3."
+  );
   low["D"] = Math.min(low["D"], low["E"]);
-  recorder.record("propagate", "D", ["D", "E"], disc, low, stack2, components, "Propagate low[E] = 3 to D.");
+  recorder.record(
+    "propagate",
+    "D",
+    ["D", "E"],
+    disc,
+    low,
+    stack2,
+    components,
+    "Propagate low[E] = 3 to D."
+  );
   components.push([stack2.pop(), stack2.pop()]);
-  recorder.record("component", "D", null, disc, low, stack2, components, "low[D] = disc[D]; pop E and D as one SCC.");
+  recorder.record(
+    "component",
+    "D",
+    null,
+    disc,
+    low,
+    stack2,
+    components,
+    "low[D] = disc[D]; pop E and D as one SCC."
+  );
   low["B"] = low["C"];
-  recorder.record("propagate", "B", ["B", "C"], disc, low, stack2, components, "Propagate low[C] = 0 through B.");
+  recorder.record(
+    "propagate",
+    "B",
+    ["B", "C"],
+    disc,
+    low,
+    stack2,
+    components,
+    "Propagate low[C] = 0 through B."
+  );
   low["A"] = low["B"];
   components.push([stack2.pop(), stack2.pop(), stack2.pop()]);
-  recorder.record("component", "A", null, disc, low, stack2, components, "low[A] = disc[A]; pop C, B, A as one SCC.");
+  recorder.record(
+    "component",
+    "A",
+    null,
+    disc,
+    low,
+    stack2,
+    components,
+    "low[A] = disc[A]; pop C, B, A as one SCC."
+  );
   recorder.record("done", null, null, disc, low, stack2, components, "SCCs: {D,E} and {A,B,C}.");
 }
 var Recorder10, family10, stronglyConnectedComponents;
@@ -21173,7 +21534,13 @@ var init_strongly_connected_components = __esm({
       frames = [];
       record(type, current, edge, discovery, low, stack2, components, message) {
         const emitted = new Set(components.flat());
-        const detail = { kind: "low-link-components", discovery: { ...discovery }, low: { ...low }, stack: [...stack2], components: components.map((component) => [...component]) };
+        const detail = {
+          kind: "low-link-components",
+          discovery: { ...discovery },
+          low: { ...low },
+          stack: [...stack2],
+          components: components.map((component) => [...component])
+        };
         this.frames.push({
           type,
           profile: "strongly-connected-components",
@@ -21185,14 +21552,28 @@ var init_strongly_connected_components = __esm({
           currentNode: current,
           currentEdge: edge,
           selectedEdges: [],
-          nodeState: Object.fromEntries(this.config.nodes.map(({ id }) => [id, id === current ? "active" : emitted.has(id) ? "accepted" : stack2.includes(id) ? "frontier" : id in discovery ? "closed" : "neutral"])),
-          edgeState: Object.fromEntries(this.config.edges.map(({ from, to }) => [`${from}|${to}`, edge?.[0] === from && edge[1] === to ? "active" : components.some((component) => component.includes(from) && component.includes(to)) ? "accepted" : "neutral"])),
+          nodeState: Object.fromEntries(
+            this.config.nodes.map(({ id }) => [
+              id,
+              id === current ? "active" : emitted.has(id) ? "accepted" : stack2.includes(id) ? "frontier" : id in discovery ? "closed" : "neutral"
+            ])
+          ),
+          edgeState: Object.fromEntries(
+            this.config.edges.map(({ from, to }) => [
+              `${from}|${to}`,
+              edge?.[0] === from && edge[1] === to ? "active" : components.some((component) => component.includes(from) && component.includes(to)) ? "accepted" : "neutral"
+            ])
+          ),
           message,
           detail
         });
       }
     };
-    family10 = { id: "graph-state", createRecorder: (config) => new Recorder10(config), createView: makeGraphStateView };
+    family10 = {
+      id: "graph-state",
+      createRecorder: (config) => new Recorder10(config),
+      createView: makeGraphStateView
+    };
     stronglyConnectedComponents = {
       id: "strongly-connected-components",
       kind: "graph",
@@ -21772,7 +22153,9 @@ function parseTernarySearchTreeConfig(config) {
     operations,
     rootNode,
     ternaryNodes: Object.freeze(
-      Object.fromEntries(Object.entries(nodes5).map(([id, node2]) => [id, Object.freeze({ ...node2 })]))
+      Object.fromEntries(
+        Object.entries(nodes5).map(([id, node2]) => [id, Object.freeze({ ...node2 })])
+      )
     ),
     nodes: built.nodes,
     edges: built.edges
@@ -21784,8 +22167,19 @@ function traverse(input, ops, operation, key4) {
   let current = input.rootNode;
   const rootEdge = edgeId("root", "eq", current);
   if (ops.hasVisibleEdge(rootEdge))
-    ops.reuseEdge(rootEdge, current, index, `Enter root character ${input.ternaryNodes[current].character}.`);
-  else ops.createNode(rootEdge, current, index, `Create root character ${input.ternaryNodes[current].character}.`);
+    ops.reuseEdge(
+      rootEdge,
+      current,
+      index,
+      `Enter root character ${input.ternaryNodes[current].character}.`
+    );
+  else
+    ops.createNode(
+      rootEdge,
+      current,
+      index,
+      `Create root character ${input.ternaryNodes[current].character}.`
+    );
   while (current) {
     const node2 = input.ternaryNodes[current];
     const character = key4[index];
@@ -21817,7 +22211,8 @@ function traverse(input, ops, operation, key4) {
       current = next;
     }
   }
-  if (operation === "search") ops.completeSearch(false, `Search "${key4}" stopped before a terminal.`);
+  if (operation === "search")
+    ops.completeSearch(false, `Search "${key4}" stopped before a terminal.`);
 }
 var edgeId, ternarySearchTree;
 var init_ternary_search_tree = __esm({
@@ -21995,7 +22390,11 @@ var init_run_stack = __esm({
         this.pushFrame("detect", message);
       }
       reverse(run7, message) {
-        this.array.splice(run7.start, run7.length, ...this.array.slice(run7.start, run7.start + run7.length).reverse());
+        this.array.splice(
+          run7.start,
+          run7.length,
+          ...this.array.slice(run7.start, run7.start + run7.length).reverse()
+        );
         this.current = { ...run7 };
         this.pushFrame("reverse", message);
       }
@@ -22131,7 +22530,9 @@ var init_tim_sort = __esm({
       parse: parseTimSortConfig,
       run(input, ops) {
         const n = ops.value.length;
-        ops.init(`Scan natural runs, extend short runs to minrun ${input.minrun}, then merge the run stack.`);
+        ops.init(
+          `Scan natural runs, extend short runs to minrun ${input.minrun}, then merge the run stack.`
+        );
         function mergeCollapse() {
           while (true) {
             const stack2 = ops.frames.at(-1)?.stack || [];
@@ -22222,7 +22623,9 @@ var init_tim_sort = __esm({
             `Force final merge of adjacent runs ${runLabel2(stack2[index].start, stack2[index].length)} and ${runLabel2(stack2[index + 1].start, stack2[index + 1].length)}.`
           );
         }
-        ops.done(`One run remains: sorted stably after ${ops.frames.at(-1)?.merges || 0} adjacent merges.`);
+        ops.done(
+          `One run remains: sorted stably after ${ops.frames.at(-1)?.merges || 0} adjacent merges.`
+        );
       }
     };
   }

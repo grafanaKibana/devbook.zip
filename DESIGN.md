@@ -35,7 +35,7 @@ This is the repository-wide design contract. Keep it limited to verified cross-v
 | Home dashboard                             | `Vault/Home/index.md`                                                          | Datacore JSX                                         | Frozen HTML/CSS plus `homepage-fit.tsx`      | Current                                          |
 | Questions                                  | `[!QUESTION]` callouts in `Vault/Home/`                                        | Datacore index                                       | `QuestionsIndex`                             | Current; equivalent outcome, different renderers |
 | StepTrace                                  | `Web/custom/steptrace/src/` and its local `DESIGN.md`                          | Generated Obsidian plugin                            | Generated Quartz assets and host integration | Current                                          |
-| Complexity charts                          | `complexity` fences and `Web/custom/complexity/`                               | Shared model rendered to DOM by the StepTrace plugin | Shared model rendered to HAST                | Current contract; 87 DSA charts plus standalone Big O |
+| Complexity charts                          | `complexity` fences and `Web/custom/complexity/`                               | Shared model rendered to DOM by the StepTrace plugin | Shared model rendered to HAST                | Current contract; 97 DSA v2 charts plus standalone Big O |
 | Quartz shell                               | `Web/quartz.config.yaml`, `Web/quartz.ts`, sanctioned styles and `Web/custom/` | Not applicable                                       | Generated `Web/public/`                      | Current                                          |
 | Obsidian shell                             | `.obsidian` appearance, enabled snippets, theme, and Style Settings            | Native app UI                                        | Not applicable                               | Current                                          |
 
@@ -290,22 +290,10 @@ Run the smallest applicable gate first.
 | Vault structure/content | `python3 .scripts/tests/test_validate_vault.py`                                       | Obsidian rendering when affected                                   |
 | Cards and dashboards    | Vault validation, then `npm run check` from `Web/`                                    | Obsidian and Quartz; light/dark; desktop/mobile                    |
 | StepTrace               | `npm run steptrace:test`, `steptrace:typecheck`, `steptrace:build`, `steptrace:check` | Both hosts; initial/active/final; narrow; reduced motion; teardown |
-| Complexity              | `npm run complexity:test`, then the visual gate below                                 | Both hosts; independent legends; narrow scroll; light/dark; keyboard |
+| Complexity              | `npm run complexity:test`, then `npm run check`                                       | Both hosts; independent legends; narrow scroll; light/dark; keyboard |
 | Quartz shell            | `npm run check`, then a Quartz build when appropriate                                 | Hard load, SPA navigation, focus, and responsive shell             |
 
-Run the Complexity visual gate from `Web/`:
-
-Terminal 1:
-
-```bash
-npm run serve
-```
-
-Terminal 2:
-
-```bash
-npm run complexity:visual -- --base-url http://127.0.0.1:8085
-```
+Complexity runtime QA is task-scoped: when visual behavior changes, inspect representative version 1 and version 2 schemas in both hosts at relevant widths and themes. Unit tests cover generic schema, model, accessibility, rendering, and transformer invariants; they do not encode named notes or screenshot matrices.
 
 Committed screenshots are durable evidence. `.omx/artifacts/` are run artifacts and must not be the only proof of a lasting contract.
 

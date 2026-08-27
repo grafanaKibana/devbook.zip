@@ -65,7 +65,13 @@ const hexToRgb = (hex: string | undefined): string => {
   if (!hex) return DEFAULT_ACCENT
   const m = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(hex.trim())
   if (!m) return DEFAULT_ACCENT
-  const h = m[1].length === 3 ? m[1].split("").map((c) => c + c).join("") : m[1]
+  const h =
+    m[1].length === 3
+      ? m[1]
+          .split("")
+          .map((c) => c + c)
+          .join("")
+      : m[1]
   const n = parseInt(h, 16)
   return `${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}`
 }
@@ -139,8 +145,7 @@ export const QuestionsIndex: QuartzComponentConstructor = () => {
       if (slug.endsWith("/index")) {
         const folderSlug = slug.slice(0, -"/index".length)
         const fm = f.frontmatter as
-          | { title?: string; color?: string; icon?: string; order?: number | string }
-          | undefined
+          { title?: string; color?: string; icon?: string; order?: number | string } | undefined
         const order =
           fm?.order != null && !Number.isNaN(Number(fm.order)) ? Number(fm.order) : undefined
         if (fm?.title || fm?.color || fm?.icon || order != null) {

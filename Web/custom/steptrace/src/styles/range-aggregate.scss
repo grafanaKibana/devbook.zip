@@ -13,8 +13,7 @@
 }
 
 .steptrace__range-block {
-  grid-column: var(--steptrace-range-start) /
-    span var(--steptrace-range-span);
+  grid-column: var(--steptrace-range-start) / span var(--steptrace-range-span);
   grid-row: var(--steptrace-range-level);
   display: grid;
   grid-template:
@@ -98,10 +97,7 @@
 .steptrace__segment-blocks {
   display: grid;
   grid-template-columns: repeat(var(--steptrace-range-size), minmax(0, 1fr));
-  grid-template-rows: repeat(
-    var(--steptrace-range-levels),
-    minmax(2.65rem, auto)
-  );
+  grid-template-rows: repeat(var(--steptrace-range-levels), minmax(2.65rem, auto));
   gap: 0.35rem 0.25rem;
   min-width: 0;
 }
@@ -132,7 +128,6 @@
     padding-inline: 0.3rem;
     font-size: 0.72rem;
   }
-
 }
 
 @media (prefers-reduced-motion: reduce) {
