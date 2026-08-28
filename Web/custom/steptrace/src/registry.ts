@@ -1,4 +1,12 @@
 import { normalizeGraph, type GraphConfig } from "./graph"
+import { indexedPointerWindowFamily } from "./families/indexed-pointer-window"
+import {
+  lcsMatrixGridFamily,
+  legacyArraySortFamily,
+  legacyGraphStateFamily,
+  legacyIndexedArraySearchFamily,
+} from "./families/legacy-adapters"
+import { stringMatchFamily } from "./families/string-match"
 import {
   BacktrackRecorder,
   BitsRecorder,
@@ -57,6 +65,8 @@ interface RegisteredAlgorithm<TRun, TProfile = never> {
   meta: AlgorithmMeta
   run: TRun
   profile?: TProfile
+  family?: BuiltFrames["family"]
+  legacyRenderer?: BuiltFrames["legacyRenderer"]
 }
 
 type FamilyDefinition = FamilyAlgorithmDefinition<AlgorithmKind, unknown, unknown, unknown>
@@ -85,31 +95,31 @@ export function createRegistry(builtIns: readonly BuiltInAlgorithm[]): RegistryA
 
   const api: RegistryApi = {
     registerSort(id, meta, run) {
-      sortRegistry.set(id, { meta, run })
+      sortRegistry.set(id, { meta, run, family: legacyArraySortFamily })
     },
     registerGraph(id, meta, run) {
-      graphRegistry.set(id, { meta, run })
+      graphRegistry.set(id, { meta, run, family: legacyGraphStateFamily })
     },
     registerSearch(id, meta, run) {
-      searchRegistry.set(id, { meta, run })
+      searchRegistry.set(id, { meta, run, family: legacyIndexedArraySearchFamily })
     },
     registerString(id, meta, run, profile) {
-      stringRegistry.set(id, { meta, run, profile })
+      stringRegistry.set(id, { meta, run, profile, family: stringMatchFamily })
     },
     registerPointer(id, meta, run) {
-      pointerRegistry.set(id, { meta, run })
+      pointerRegistry.set(id, { meta, run, family: indexedPointerWindowFamily })
     },
     registerDP(id, meta, run) {
-      dpRegistry.set(id, { meta, run })
+      dpRegistry.set(id, { meta, run, family: lcsMatrixGridFamily })
     },
     registerUnionFind(id, meta, run) {
       unionFindRegistry.set(id, { meta, run })
     },
     registerBits(id, meta, run) {
-      bitsRegistry.set(id, { meta, run })
+      bitsRegistry.set(id, { meta, run, legacyRenderer: "bit-grid" })
     },
     registerBacktrack(id, meta, run) {
-      backtrackRegistry.set(id, { meta, run })
+      backtrackRegistry.set(id, { meta, run, legacyRenderer: "backtrack-board" })
     },
     registerRecTree(id, meta, run) {
       recTreeRegistry.set(id, { meta, run })
@@ -162,7 +172,7 @@ export function createRegistry(builtIns: readonly BuiltInAlgorithm[]): RegistryA
       if (sort) {
         const recorder = new SortRecorder(config.array)
         sort.run(input, recorder)
-        return { kind: "sort", frames: recorder.frames }
+        return { kind: "sort", family: sort.family, frames: recorder.frames }
       }
 
       const graphAlgorithm = graphRegistry.get(config.algorithm)
@@ -172,6 +182,7 @@ export function createRegistry(builtIns: readonly BuiltInAlgorithm[]): RegistryA
         graphAlgorithm.run({ ...input, start: graph.start }, recorder, graph)
         return {
           kind: "graph",
+          family: graphAlgorithm.family,
           frames: recorder.frames,
           graph,
           frontierLabel: graphAlgorithm.meta.frontierLabel,
@@ -182,14 +193,14 @@ export function createRegistry(builtIns: readonly BuiltInAlgorithm[]): RegistryA
       if (search) {
         const recorder = new SearchRecorder(config.array, config.target)
         search.run(input, recorder)
-        return { kind: "search", frames: recorder.frames }
+        return { kind: "search", family: search.family, frames: recorder.frames }
       }
 
       const string = stringRegistry.get(config.algorithm)
       if (string) {
         const recorder = new StringRecorder(config.text, config.pattern, string.profile)
         string.run(input, recorder)
-        return { kind: "string", frames: recorder.frames }
+        return { kind: "string", family: string.family, frames: recorder.frames }
       }
 
       const pointer = pointerRegistry.get(config.algorithm)
@@ -200,14 +211,14 @@ export function createRegistry(builtIns: readonly BuiltInAlgorithm[]): RegistryA
             : config.array,
         )
         pointer.run(input, recorder)
-        return { kind: "pointers", frames: recorder.frames }
+        return { kind: "pointers", family: pointer.family, frames: recorder.frames }
       }
 
       const dp = dpRegistry.get(config.algorithm)
       if (dp) {
         const recorder = new DPRecorder()
         dp.run(input, recorder)
-        return { kind: "dp", frames: recorder.frames }
+        return { kind: "dp", family: dp.family, frames: recorder.frames }
       }
 
       const unionFind = unionFindRegistry.get(config.algorithm)
@@ -221,14 +232,18 @@ export function createRegistry(builtIns: readonly BuiltInAlgorithm[]): RegistryA
       if (bits) {
         const recorder = new BitsRecorder(config.width || 8)
         bits.run(input, recorder)
-        return { kind: "bits", frames: recorder.frames }
+        return { kind: "bits", legacyRenderer: bits.legacyRenderer, frames: recorder.frames }
       }
 
       const backtrack = backtrackRegistry.get(config.algorithm)
       if (backtrack) {
         const recorder = new BacktrackRecorder()
         backtrack.run(input, recorder)
-        return { kind: "backtrack", frames: recorder.frames }
+        return {
+          kind: "backtrack",
+          legacyRenderer: backtrack.legacyRenderer,
+          frames: recorder.frames,
+        }
       }
 
       const recTree = recTreeRegistry.get(config.algorithm)
@@ -243,6 +258,35 @@ export function createRegistry(builtIns: readonly BuiltInAlgorithm[]): RegistryA
   }
 
   for (const definition of builtIns) {
+    if ("adapter" in definition) {
+      switch (definition.kind) {
+        case "sort":
+          api.registerSort(definition.id, definition.meta, definition.run)
+          sortRegistry.get(definition.id)!.family = definition.family
+          break
+        case "graph":
+          api.registerGraph(definition.id, definition.meta, definition.run)
+          graphRegistry.get(definition.id)!.family = definition.family
+          break
+        case "search":
+          api.registerSearch(definition.id, definition.meta, definition.run)
+          searchRegistry.get(definition.id)!.family = definition.family
+          break
+        case "string":
+          api.registerString(definition.id, definition.meta, definition.run, definition.profile)
+          stringRegistry.get(definition.id)!.family = definition.family
+          break
+        case "pointers":
+          api.registerPointer(definition.id, definition.meta, definition.run)
+          pointerRegistry.get(definition.id)!.family = definition.family
+          break
+        case "dp":
+          api.registerDP(definition.id, definition.meta, definition.run)
+          dpRegistry.get(definition.id)!.family = definition.family
+          break
+      }
+      continue
+    }
     if ("family" in definition) {
       familyRegistry.set(definition.id, definition)
       continue
@@ -271,9 +315,15 @@ export function createRegistry(builtIns: readonly BuiltInAlgorithm[]): RegistryA
         break
       case "bits":
         api.registerBits(definition.id, definition.meta, definition.run)
+        if (definition.legacyRenderer) {
+          bitsRegistry.get(definition.id)!.legacyRenderer = definition.legacyRenderer
+        }
         break
       case "backtrack":
         api.registerBacktrack(definition.id, definition.meta, definition.run)
+        if (definition.legacyRenderer) {
+          backtrackRegistry.get(definition.id)!.legacyRenderer = definition.legacyRenderer
+        }
         break
       case "rectree":
         api.registerRecTree(definition.id, definition.meta, definition.run)

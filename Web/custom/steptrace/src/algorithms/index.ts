@@ -1,4 +1,23 @@
-import type { BuiltInAlgorithm } from "../types"
+import { indexedPointerWindowFamily } from "../families/indexed-pointer-window"
+import {
+  lcsMatrixGridFamily,
+  legacyArraySortFamily,
+  legacyGraphStateFamily,
+  legacyIndexedArraySearchFamily,
+} from "../families/legacy-adapters"
+import { stringMatchFamily } from "../families/string-match"
+import type {
+  BuiltInAlgorithm,
+  DPAlgorithmDefinition,
+  FamilyAdapterAlgorithmDefinition,
+  FamilyAdapterDefinition,
+  FamilyAdapterVisualFamily,
+  GraphAlgorithmDefinition,
+  PointerAlgorithmDefinition,
+  SearchAlgorithmDefinition,
+  SortAlgorithmDefinition,
+  StringAlgorithmDefinition,
+} from "../types"
 import { activitySelection } from "./activity-selection"
 import { avlTree } from "./avl-tree"
 import { aStar } from "./a-star"
@@ -97,6 +116,41 @@ import { ternarySearchTree } from "./ternary-search-tree"
 import { timSort } from "./tim-sort"
 import { zAlgorithm } from "./z-algorithm"
 
+function familyAdapter(
+  definition: SortAlgorithmDefinition,
+  family: FamilyAdapterVisualFamily<"sort">,
+): FamilyAdapterAlgorithmDefinition<"sort">
+function familyAdapter(
+  definition: GraphAlgorithmDefinition,
+  family: FamilyAdapterVisualFamily<"graph">,
+): FamilyAdapterAlgorithmDefinition<"graph">
+function familyAdapter(
+  definition: SearchAlgorithmDefinition,
+  family: FamilyAdapterVisualFamily<"search">,
+): FamilyAdapterAlgorithmDefinition<"search">
+function familyAdapter(
+  definition: StringAlgorithmDefinition,
+  family: FamilyAdapterVisualFamily<"string">,
+): FamilyAdapterAlgorithmDefinition<"string">
+function familyAdapter(
+  definition: PointerAlgorithmDefinition,
+  family: FamilyAdapterVisualFamily<"pointers">,
+): FamilyAdapterAlgorithmDefinition<"pointers">
+function familyAdapter(
+  definition: DPAlgorithmDefinition,
+  family: FamilyAdapterVisualFamily<"dp">,
+): FamilyAdapterAlgorithmDefinition<"dp">
+function familyAdapter(
+  definition: FamilyAdapterDefinition,
+  family: FamilyAdapterVisualFamily<FamilyAdapterDefinition["kind"]>,
+) {
+  return {
+    ...definition,
+    adapter: true,
+    family,
+  }
+}
+
 export const builtInAlgorithms = [
   activitySelection,
   aStar,
@@ -110,7 +164,7 @@ export const builtInAlgorithms = [
   kruskal,
   maximumFlow,
   stronglyConnectedComponents,
-  bubbleSort,
+  familyAdapter(bubbleSort, legacyArraySortFamily),
   cocktailShakerSort,
   gnomeSort,
   bogoSort,
@@ -118,11 +172,11 @@ export const builtInAlgorithms = [
   cycleSort,
   oddEvenSort,
   stoogeSort,
-  insertionSort,
-  selectionSort,
-  quickSort,
-  heapSort,
-  mergeSort,
+  familyAdapter(insertionSort, legacyArraySortFamily),
+  familyAdapter(selectionSort, legacyArraySortFamily),
+  familyAdapter(quickSort, legacyArraySortFamily),
+  familyAdapter(heapSort, legacyArraySortFamily),
+  familyAdapter(mergeSort, legacyArraySortFamily),
   mergeSortTree,
   mergeIntervals,
   shellSort,
@@ -139,23 +193,23 @@ export const builtInAlgorithms = [
   jumpSearch,
   ternarySearch,
   binarySearchOnAnswer,
-  bfs,
-  dfs,
+  familyAdapter(bfs, legacyGraphStateFamily),
+  familyAdapter(dfs, legacyGraphStateFamily),
   dijkstra,
-  prim,
+  familyAdapter(prim, legacyGraphStateFamily),
   prefixSum,
-  topologicalSort,
+  familyAdapter(topologicalSort, legacyGraphStateFamily),
   topKElements,
   twoHeaps,
-  binarySearch,
-  linearSearch,
-  kmp,
-  rabinKarp,
-  zAlgorithm,
-  boyerMoore,
-  twoPointers,
-  slidingWindow,
-  lcs,
+  familyAdapter(binarySearch, legacyIndexedArraySearchFamily),
+  familyAdapter(linearSearch, legacyIndexedArraySearchFamily),
+  familyAdapter(kmp, stringMatchFamily),
+  familyAdapter(rabinKarp, stringMatchFamily),
+  familyAdapter(zAlgorithm, stringMatchFamily),
+  familyAdapter(boyerMoore, stringMatchFamily),
+  familyAdapter(twoPointers, indexedPointerWindowFamily),
+  familyAdapter(slidingWindow, indexedPointerWindowFamily),
+  familyAdapter(lcs, lcsMatrixGridFamily),
   ...dynamicProgrammingAlgorithms,
   floydWarshall,
   fastAndSlowPointers,

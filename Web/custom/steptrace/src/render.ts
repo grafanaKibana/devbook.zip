@@ -322,7 +322,7 @@ function createBarTracker(stage, bars, markers) {
       const read = reads[m]
       const mk = markers[m]
       if (read === MARKER_ABSENT) {
-        mk.el.style.opacity = "0"
+        mk.el.dataset.visible = "false"
         sx[m] = null
         sy[m] = null
         vx[m] = 0
@@ -362,7 +362,7 @@ function createBarTracker(stage, bars, markers) {
         moving = true
       px[m] = target
       mk.el.style.transform = `translate(${sx[m].toFixed(2)}px, ${sy[m].toFixed(2)}px)`
-      mk.el.style.opacity = "1"
+      mk.el.dataset.visible = "true"
     }
     // advance swap choreographies before the hero loop so a travel beat's release
     // takes effect this frame. Reduced motion cancels staging outright — the fly
@@ -387,7 +387,7 @@ function createBarTracker(stage, bars, markers) {
         fvx[b] = 0
         foHold[b] = false
         bar.style.transform = ""
-        bar.style.zIndex = ""
+        delete bar.dataset.flying
         delete bar.dataset.stage
         continue
       }
@@ -395,7 +395,7 @@ function createBarTracker(stage, bars, markers) {
         // anticipation: hold at the FLIP origin (dx) while the fill winds up; the
         // travel beat releases the latch. Keep the loop awake meanwhile.
         bar.style.transform = `translateX(${fox[b].toFixed(2)}px)`
-        bar.style.zIndex = "2"
+        bar.dataset.flying = "true"
         moving = true
         continue
       }
@@ -412,10 +412,10 @@ function createBarTracker(stage, bars, markers) {
         fvx[b] = 0
         foHold[b] = false
         bar.style.transform = ""
-        bar.style.zIndex = ""
+        delete bar.dataset.flying
       } else {
         bar.style.transform = `translateX(${fox[b].toFixed(2)}px)`
-        bar.style.zIndex = "2"
+        bar.dataset.flying = "true"
         moving = true
       }
     }
@@ -579,9 +579,11 @@ export function makeSearchView(
       b.num.textContent = frame.array[k]
       b.bar.dataset.state = semantics.stateForIndex(frame, k)
     }
-    status.innerHTML =
-      escapeHtml(frame.message) +
-      ` <span class="steptrace__counts">· ${frame.comparisons} probe${frame.comparisons === 1 ? "" : "s"} · step ${i + 1}/${total}</span>`
+    setStatus(
+      status,
+      frame.message,
+      `· ${frame.comparisons} probe${frame.comparisons === 1 ? "" : "s"} · step ${i + 1}/${total}`,
+    )
   }
 
   function watch(frame) {
@@ -766,9 +768,11 @@ export function makeBoundarySearchView(frames, descriptor: BoundarySearchViewDes
       packageTokens(row.packages, lane?.items || [])
     }
 
-    status.innerHTML =
-      escapeHtml(frame.message) +
-      ` <span class="steptrace__counts">· ${frame.probes} check${frame.probes === 1 ? "" : "s"} · step ${index + 1}/${totalFrames}</span>`
+    setStatus(
+      status,
+      frame.message,
+      `· ${frame.probes} check${frame.probes === 1 ? "" : "s"} · step ${index + 1}/${totalFrames}`,
+    )
   }
 
   return {
@@ -846,8 +850,7 @@ export function makeMatchView(frames) {
       tcells[frame.cmpT].dataset.state = frame.cmpResult || "probe"
     if (frame.cmpP != null && pcells[frame.cmpP])
       pcells[frame.cmpP].dataset.state = frame.cmpResult || "probe"
-    status.innerHTML =
-      escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${i + 1}/${total}</span>`
+    setStatus(status, frame.message, `· step ${i + 1}/${total}`)
   }
 
   function watch(frame) {
@@ -941,9 +944,7 @@ function makeBoyerMooreView(frames) {
     )
       for (const cell of patternCells) cell.dataset.state = "found"
     applyGeom()
-    status.innerHTML =
-      escapeHtml(frame.message) +
-      ` <span class="steptrace__counts">· step ${index + 1}/${total}</span>`
+    setStatus(status, frame.message, `· step ${index + 1}/${total}`)
   }
 
   function watch(frame) {
@@ -1162,9 +1163,7 @@ function makeZArrayView(frames) {
       stringCells[frame.compare.candidate].dataset.state = state
     }
     syncLayout()
-    status.innerHTML =
-      escapeHtml(frame.message) +
-      ` <span class="steptrace__counts">· step ${index + 1}/${total}</span>`
+    setStatus(status, frame.message, `· step ${index + 1}/${total}`)
   }
 
   function watch(frame) {
@@ -1259,16 +1258,16 @@ export function makePointerView(frames) {
       c.dataset.end = win && k === win[0] ? "l" : win && k === win[1] ? "r" : ""
     }
     if (!win) {
-      brackets.style.display = "none"
+      brackets.hidden = true
     } else {
-      brackets.style.display = ""
+      brackets.hidden = false
       brL.style.left = (win[0] / n) * 100 + "%"
       brR.style.left = ((win[1] + 1) / n) * 100 + "%"
       brL.dataset.round = win[0] === 0 ? "1" : "0"
       brR.dataset.round = win[1] === n - 1 ? "1" : "0"
       brackets.dataset.match = matched ? "1" : "0"
     }
-    status.innerHTML = escapeHtml(frame.message)
+    setStatus(status, frame.message)
   }
 
   function watch(frame) {
@@ -1613,9 +1612,7 @@ function makeCoinChangeStoryView(frames) {
       paintAttempts(frame)
       paintMemo(frame)
       paintAmounts(frame)
-      status.innerHTML =
-        escapeHtml(frame.message) +
-        ` <span class="steptrace__counts">· step ${index + 1}/${total}</span>`
+      setStatus(status, frame.message, `· step ${index + 1}/${total}`)
     },
     watch(frame) {
       const plan = frame.selected.length
@@ -1852,9 +1849,7 @@ function makeGridPathStoryView(frames) {
               ? `route cost ${frame.routeCost}`
               : `best route ${frame.bestCost}`
       footerRow.setAttribute("aria-label", `${footerStart.textContent}; ${footerEnd.textContent}`)
-      status.innerHTML =
-        escapeHtml(frame.message) +
-        ` <span class="steptrace__counts">· step ${index + 1}/${total}</span>`
+      setStatus(status, frame.message, `· step ${index + 1}/${total}`)
     },
     watch(frame) {
       const current = frame.current ? `R${frame.current[0] + 1}C${frame.current[1] + 1}` : "—"
@@ -2064,8 +2059,7 @@ export function makeDPView(frames, semantics = lcsMatrixGridSemantics) {
         td.setAttribute("aria-label", semantics.cellLabel(frame, r, c))
       }
     }
-    status.innerHTML =
-      escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${i + 1}/${total}</span>`
+    setStatus(status, frame.message, `· step ${i + 1}/${total}`)
   }
 
   function watch(frame) {
@@ -2091,13 +2085,7 @@ export function makeUnionFindView(frames) {
   const width = MX * 2 + Math.max(0, n - 1) * SP + UR * 2
   const height = 180
   const cx = (i) => MX + UR + i * SP
-  const PALETTE = [
-    "var(--_blue)",
-    "var(--_violet)",
-    "var(--_amber)",
-    "var(--_green)",
-    "var(--_muted)",
-  ]
+  const PALETTE_SIZE = 5
 
   const svg = document.createElementNS(SVGNS, "svg")
   svg.setAttribute("class", "steptrace__svg steptrace__uf")
@@ -2139,15 +2127,12 @@ export function makeUnionFindView(frames) {
 
   function paint(frame, i, total) {
     const uniqueRoots = [...new Set(frame.roots as PropertyKey[])]
-    const rootColor: Record<PropertyKey, string> = {}
-    uniqueRoots.forEach((r, idx) => (rootColor[r] = PALETTE[idx % PALETTE.length]))
+    const rootColor = new Map(uniqueRoots.map((root, index) => [root, index % PALETTE_SIZE]))
     const hl = new Set(frame.highlight)
     const ae = frame.activeEdge
     for (let k = 0; k < n; k++) {
       const ne = nodeEls[k]
-      const col = rootColor[frame.roots[k]]
-      ne.circle.style.stroke = col
-      ne.circle.style.fill = `color-mix(in srgb, ${col} 22%, transparent)`
+      ne.g.dataset.set = String(rootColor.get(frame.roots[k]))
       ne.g.dataset.root = frame.parent[k] === k ? "true" : "false"
       ne.g.dataset.hl = hl.has(k) ? "true" : "false"
     }
@@ -2161,13 +2146,11 @@ export function makeUnionFindView(frames) {
       const arc = document.createElementNS(SVGNS, "path")
       arc.setAttribute("class", "steptrace__ufarc")
       arc.setAttribute("d", `M ${x1} ${BASE - UR} Q ${midX} ${TOP} ${x2} ${BASE - UR}`)
-      arc.setAttribute("fill", "none")
       const active = (ae && ae[0] === k && ae[1] === p) || (hl.has(k) && hl.has(p))
       arc.dataset.active = active ? "true" : "false"
       arcLayer.append(arc)
     }
-    status.innerHTML =
-      escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${i + 1}/${total}</span>`
+    setStatus(status, frame.message, `· step ${i + 1}/${total}`)
   }
 
   function watch(frame) {
@@ -2268,9 +2251,7 @@ export function makeBitsView(frames) {
         c.dataset.state = data.state[bi] || ""
       }
     }
-    status.innerHTML =
-      escapeHtml(frame.message) +
-      ` <span class="steptrace__counts">· step ${i + 1}/${stepTotal}</span>`
+    setStatus(status, frame.message, `· step ${i + 1}/${stepTotal}`)
   }
 
   // exactly 3 rows every frame ⇒ constant footer height (no jitter)
@@ -2806,7 +2787,7 @@ export function makeBacktrackView(frames) {
         visible && !onPath && !onSolution && !returning ? "true" : "false"
       edge.element.setAttribute("marker-start", returning ? `url(#${returnMarkerId})` : "none")
     }
-    status.innerHTML = escapeHtml(frame.message)
+    setStatus(status, frame.message)
   }
 
   // exactly 3 rows every frame ⇒ constant footer height (depth up-then-down = a backtrack)
@@ -3274,9 +3255,7 @@ export function makeExecutionTreeView(frames, descriptor: ExecutionTreeViewDescr
       edge.element.dataset.related =
         model.active === edge.from && related.has(edge.to) ? "true" : "false"
     }
-    status.innerHTML =
-      escapeHtml(frame.message) +
-      ` <span class="steptrace__counts">· step ${index + 1}/${total}</span>`
+    setStatus(status, frame.message, `· step ${index + 1}/${total}`)
   }
 
   function watch(frame) {
@@ -3439,8 +3418,8 @@ export function makeGraphView(frames, graph, frontierLabel) {
     mark.setAttribute("viewBox", "0 0 24 24")
     mark.setAttribute("aria-hidden", "true")
     mark.innerHTML =
-      '<rect data-state-icon="current" x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/>' +
-      '<path data-state-icon="frontier" d="m12 3 9 9-9 9-9-9Z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/>'
+      '<rect data-state-icon="current" x="6" y="6" width="12" height="12" rx="2"/>' +
+      '<path data-state-icon="frontier" d="m12 3 9 9-9 9-9-9Z"/>'
     g.append(back, circle, id, dist, mark)
     svg.append(g)
     nodeEls[n.id] = { g, dist, mark }
@@ -3511,9 +3490,7 @@ export function makeGraphView(frames, graph, frontierLabel) {
       e.el.dataset.selected = sel ? "true" : "false"
       e.el.dataset.dim = selected.length && !sel ? "true" : "false"
     }
-    status.innerHTML =
-      escapeHtml(frame.message) +
-      ` <span class="steptrace__counts">· ${frame.visited.length} visited · step ${i + 1}/${total}</span>`
+    setStatus(status, frame.message, `· ${frame.visited.length} visited · step ${i + 1}/${total}`)
   }
 
   function watch(frame) {
@@ -3540,6 +3517,14 @@ export function statusEl() {
   status.setAttribute("role", "status")
   status.setAttribute("aria-live", "polite")
   return status
+}
+
+export function setStatus(status, message, counts = null) {
+  status.replaceChildren(document.createTextNode(message))
+  if (counts == null) return
+  const count = el("span", "steptrace__counts")
+  count.textContent = counts
+  status.append(" ", count)
 }
 
 export function makeLegend(items, ariaLabel, extraClass = "") {
@@ -3576,12 +3561,6 @@ export function el(tag, cls = "") {
   if (cls) n.className = cls
   return n
 }
-export function escapeHtml(s) {
-  return String(s).replace(
-    /[&<>"]/g,
-    (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c],
-  )
-}
 export function stripTags(s) {
   return String(s).replace(/<[^>]*>/g, "")
 }
@@ -3608,14 +3587,14 @@ export const ICON = {
     '<svg class="lucide lucide-pause" viewBox="0 0 24 24"><rect x="14" y="3" width="5" height="18" rx="1"/><rect x="5" y="3" width="5" height="18" rx="1"/></svg>',
   kebab:
     '<svg class="lucide lucide-ellipsis" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>',
-  x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg>',
+  x: '<svg viewBox="0 0 24 24"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg>',
   compare:
     '<svg class="steptrace__cue-compare" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 16-4-4 4-4"/><path d="M3 12h18"/><path d="m17 8 4 4-4 4"/></svg>',
   swap: '<svg class="steptrace__cue-swap" viewBox="0 0 24 24" aria-hidden="true"><path d="m2 9 3-3 3 3"/><path d="M13 18H7a2 2 0 0 1-2-2V6"/><path d="m22 15-3 3-3-3"/><path d="M11 6h6a2 2 0 0 1 2 2v10"/></svg>',
   search:
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.2 15.2 4.8 4.8"/></svg>',
+    '<svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.2 15.2 4.8 4.8"/></svg>',
   chessQueen:
-    '<svg class="lucide lucide-chess-queen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v1a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/><path d="m12.474 5.943 1.567 5.34a1 1 0 0 0 1.75.328l2.616-3.402"/><path d="m20 9-3 9"/><path d="m5.594 8.209 2.615 3.403a1 1 0 0 0 1.75-.329l1.567-5.34"/><path d="M7 18 4 9"/><circle cx="12" cy="4" r="2"/><circle cx="20" cy="7" r="2"/><circle cx="4" cy="7" r="2"/></svg>',
+    '<svg class="lucide lucide-chess-queen" viewBox="0 0 24 24"><path d="M4 20a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v1a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/><path d="m12.474 5.943 1.567 5.34a1 1 0 0 0 1.75.328l2.616-3.402"/><path d="m20 9-3 9"/><path d="m5.594 8.209 2.615 3.403a1 1 0 0 0 1.75-.329l1.567-5.34"/><path d="M7 18 4 9"/><circle cx="12" cy="4" r="2"/><circle cx="20" cy="7" r="2"/><circle cx="4" cy="7" r="2"/></svg>',
 }
 export function iconBtn(label, svg, extra = "") {
   const b = document.createElement("button")

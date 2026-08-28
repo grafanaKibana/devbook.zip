@@ -45,13 +45,14 @@
 }
 
 .steptrace .steptrace__linked-node {
+  /* steptrace-exception: linked-node-position | category=geometry | rationale=maps node coordinates into the linked board | evidence=.omx/evidence/steptrace-design-system-refactor/visual/candidate/g005-candidate-k/summary.json | properties=inset-inline-start,inset-block-start */
   position: absolute;
   inset-inline-start: calc(var(--_linked-x) * 1%);
   inset-block-start: calc(var(--_linked-y) / 70 * 100%);
   inline-size: var(--_graph-node-size);
   block-size: var(--_graph-node-size);
   border: var(--_graph-node-stroke-width) solid var(--_graph-node-stroke);
-  border-radius: 50%;
+  border-radius: var(--_radius-pill);
   display: grid;
   place-items: center;
   color: var(--_text);
@@ -86,6 +87,7 @@
 
 .steptrace .steptrace__linked-node-result {
   position: absolute;
+  /* steptrace-exception: linked-result-badge-offset | category=geometry | rationale=anchors the result badge outside the node corner | evidence=.omx/evidence/steptrace-design-system-refactor/visual/candidate/g005-candidate-k/summary.json */
   inset: -0.3rem -0.3rem auto auto;
   inline-size: 1rem;
   block-size: 1rem;
@@ -97,21 +99,22 @@
 }
 
 .steptrace .steptrace__linked-pointer {
+  /* steptrace-exception: linked-pointer-position | category=geometry | rationale=maps pointer coordinates into the linked board | evidence=.omx/evidence/steptrace-design-system-refactor/visual/candidate/g005-candidate-k/summary.json | properties=inset-inline-start,inset-block-start */
   position: absolute;
   z-index: 3;
   inset-inline-start: calc(var(--_linked-x) * 1%);
   inset-block-start: calc(var(--_linked-y) / 70 * 100%);
   min-inline-size: 2.35rem;
   block-size: 1.35rem;
-  border: 1px solid currentColor;
-  border-radius: 0.35rem;
-  padding-inline: 0.28rem;
+  border: var(--_stroke-hair) solid currentColor;
+  border-radius: var(--_radius-sm);
+  padding-inline: var(--_space-2);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.18rem;
+  gap: var(--_space-1);
   background: var(--_surface);
-  font: 600 0.67rem/1 var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-sm)/var(--_leading-solid) var(--_font-mono);
   transition:
     inset-inline-start var(--_dur-move) var(--_spring-soft),
     inset-block-start var(--_dur-move) var(--_spring-soft),
@@ -157,14 +160,14 @@
 @media (max-width: 560px) {
   .steptrace .steptrace__linked-pointer {
     min-inline-size: 1.8rem;
-    padding-inline: 0.2rem;
+    padding-inline: var(--_space-1);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .steptrace .steptrace__linked-pointer,
   .steptrace .steptrace__linked-node {
-    transition-duration: 0ms;
+    transition-duration: var(--_dur-instant);
   }
 }
 
@@ -175,7 +178,8 @@
 }
 
 .steptrace .steptrace__linked-list-board {
-  --steptrace-linked-gap: clamp(0.65rem, 2vw, 1.2rem);
+  /* steptrace-exception: linked-list-gap | category=responsive | rationale=scales pointer length with available board width | evidence=.omx/evidence/steptrace-design-system-refactor/visual/candidate/g005-candidate-k/summary.json */
+  --steptrace-linked-gap: clamp(var(--_space-4), 2vw, var(--_space-6));
   inline-size: min(100%, 36rem);
   min-inline-size: 0;
   min-block-size: calc(44px + 1.35rem);
@@ -202,7 +206,7 @@
   position: absolute;
   z-index: 3;
   inset: 0;
-  border: 1px solid color-mix(in srgb, var(--_text) 22%, transparent);
+  border: var(--_stroke-hair) solid color-mix(in srgb, var(--_text) 22%, transparent);
   border-radius: inherit;
   pointer-events: none;
   content: "";
@@ -229,12 +233,12 @@
 .steptrace .steptrace__linked-list-pointer {
   position: relative;
   min-width: 0;
-  padding: 0.15rem;
+  padding: var(--_space-0);
   display: grid;
   place-items: center;
   overflow: hidden;
-  color: var(--_muted);
-  font: 600 0.48rem/1 var(--_font-mono);
+  color: var(--_context-text);
+  font: var(--_weight-strong) var(--_type-micro)/var(--_leading-solid) var(--_font-mono);
   white-space: nowrap;
   text-overflow: ellipsis;
 }
@@ -242,14 +246,14 @@
 .steptrace .steptrace__linked-list-pointer::before {
   position: absolute;
   inset-block-start: 0;
-  inset-inline: 1px;
-  border-block-start: 1px solid var(--_border);
+  inset-inline: var(--_stroke-hair);
+  border-block-start: var(--_stroke-hair) solid var(--_border);
   content: "";
 }
 
 .steptrace .steptrace__linked-list-value-field {
   grid-template-rows: auto auto;
-  gap: 0.12rem;
+  gap: var(--_space-0);
 }
 
 .steptrace .steptrace__linked-list-value {
@@ -257,8 +261,8 @@
 }
 
 .steptrace .steptrace__linked-list-address {
-  color: var(--_muted);
-  font: 600 0.48rem/1 var(--_font-mono);
+  color: var(--_context-text);
+  font: var(--_weight-strong) var(--_type-micro)/var(--_leading-solid) var(--_font-mono);
 }
 
 .steptrace .steptrace__linked-list-link {
@@ -273,6 +277,7 @@
 
 .steptrace .steptrace__linked-list-link::after {
   position: absolute;
+  /* steptrace-exception: linked-arrowhead-offset | category=geometry | rationale=centers the fitted triangle on its pointer stroke | evidence=.omx/evidence/steptrace-design-system-refactor/visual/candidate/g005-candidate-k/summary.json */
   inset-block-start: -4.75px;
   inline-size: 0;
   block-size: 0;
@@ -282,34 +287,39 @@
 
 .steptrace .steptrace__linked-list-link[data-pointer="next"] {
   inset-inline-end: calc(-1 * var(--steptrace-linked-gap));
+  /* steptrace-exception: linked-next-position | category=geometry | rationale=aligns the next pointer with the node connector | evidence=.omx/evidence/steptrace-design-system-refactor/visual/candidate/g005-candidate-k/summary.json */
   inset-block-start: 83.333%;
 }
 
 .steptrace
   .steptrace__linked-list-board[data-variant="doubly"]
   .steptrace__linked-list-link[data-pointer="next"] {
+  /* steptrace-exception: linked-doubly-next-position | category=geometry | rationale=aligns the next pointer within the split connector lane | evidence=.omx/evidence/steptrace-design-system-refactor/visual/candidate/g005-candidate-k/summary.json */
   inset-block-start: 87.5%;
 }
 
 .steptrace .steptrace__linked-list-link[data-pointer="next"]::after {
-  inset-inline-end: -1px;
+  inset-inline-end: calc(-1 * var(--_stroke-hair));
+  /* steptrace-exception: link-arrowhead-start | category=geometry | rationale=triangle border width defines the accepted arrowhead silhouette | evidence=.omx/evidence/steptrace-design-system-refactor/visual/candidate/g005-candidate-k/summary.json */
   border-inline-start: 6px solid currentColor;
 }
 
 .steptrace .steptrace__linked-list-link[data-pointer="prev"] {
   inset-inline-start: calc(-1 * var(--steptrace-linked-gap));
+  /* steptrace-exception: linked-prev-position | category=geometry | rationale=aligns the previous pointer within the split connector lane | evidence=.omx/evidence/steptrace-design-system-refactor/visual/candidate/g005-candidate-k/summary.json */
   inset-block-start: 62.5%;
 }
 
 .steptrace .steptrace__linked-list-link[data-pointer="prev"]::after {
-  inset-inline-start: -1px;
+  inset-inline-start: calc(-1 * var(--_stroke-hair));
+  /* steptrace-exception: link-arrowhead-end | category=geometry | rationale=triangle border width defines the accepted arrowhead silhouette | evidence=.omx/evidence/steptrace-design-system-refactor/visual/candidate/g005-candidate-k/summary.json */
   border-inline-end: 6px solid currentColor;
 }
 
 .steptrace
   .steptrace__linked-list-node-card[data-relinked="1"]
   .steptrace__linked-list-pointer[data-pointer="next"] {
-  color: var(--_green);
+  color: var(--_strong-fill-text);
   background: color-mix(in srgb, var(--_green) 16%, var(--_surface));
 }
 
@@ -326,11 +336,11 @@
 .steptrace
   .steptrace__linked-list-node-card[data-appended="1"]
   > .steptrace__contiguous-array::after {
-  border: 2px solid var(--_green);
+  border: var(--_stroke-emphasis) solid var(--_green);
 }
 
 .steptrace .steptrace__linked-list-node-card[data-moved="1"] > .steptrace__contiguous-array::after {
-  border: 2px solid var(--_green);
+  border: var(--_stroke-emphasis) solid var(--_green);
 }
 
 .steptrace .steptrace__linked-list-node-card[data-moved="1"] > .steptrace__contiguous-array {
@@ -340,6 +350,7 @@
 @keyframes steptrace-linked-list-append {
   from {
     opacity: 0;
+    /* steptrace-exception: link-enter-travel | category=motion | rationale=preserves directional node-entry travel | evidence=.omx/evidence/steptrace-design-system-refactor/visual/candidate/g005-candidate-k/summary.json */
     transform: translateX(0.75rem);
   }
 }
@@ -355,7 +366,7 @@
   min-block-size: 15rem;
   display: grid;
   align-content: center;
-  gap: 0.35rem;
+  gap: var(--_space-2);
 }
 
 .steptrace .steptrace__lru-map,
@@ -364,7 +375,7 @@
 }
 
 .steptrace .steptrace__lru-map .steptrace__contiguous-value {
-  font-size: 0.62rem;
+  font-size: var(--_type-xs);
 }
 
 .steptrace .steptrace__lru-map .steptrace__contiguous-cell[data-active="1"] {

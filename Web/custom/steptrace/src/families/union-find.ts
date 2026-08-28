@@ -176,11 +176,11 @@ export function mountUnionFind(root: HTMLElement, config: UnionFindConfig): Moun
           parent[index] === index ? ", root" : ""
         }`,
       )
-      rootLabel.style.display = parent[index] === index ? "" : "none"
+      rootLabel.toggleAttribute("hidden", parent[index] !== index)
 
       const edge = edgeNodes[index]
       if (parent[index] === index) {
-        edge.style.display = "none"
+        edge.toggleAttribute("hidden", true)
         return
       }
       const target = positions[parent[index]]
@@ -191,7 +191,7 @@ export function mountUnionFind(root: HTMLElement, config: UnionFindConfig): Moun
       const startY = position.y + (dy * NODE_RADIUS) / distance
       const endX = target.x - (dx * (NODE_RADIUS + 5)) / distance
       const endY = target.y - (dy * (NODE_RADIUS + 5)) / distance
-      edge.style.display = ""
+      edge.toggleAttribute("hidden", false)
       edge.dataset.active = String(highlighted.has(index))
       edge.setAttribute(
         "d",

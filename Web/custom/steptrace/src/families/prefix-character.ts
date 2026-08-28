@@ -1,4 +1,4 @@
-import { el, escapeHtml, makeLegend, statusEl, successMarker } from "../render"
+import { el, makeLegend, setStatus, statusEl, successMarker } from "../render"
 import type { StepTraceConfig, StepTraceView, VisualFamily } from "../types"
 
 export type PrefixCharacterOperation = "insert" | "prefix" | "search" | "build failures" | "scan"
@@ -529,7 +529,7 @@ export function makePrefixCharacterView(
         elements.role.dataset.state = state
       }
     }
-    status.innerHTML = `${escapeHtml(frame.message)} <span class="steptrace__counts">· step ${index + 1}/${total}</span>`
+    setStatus(status, frame.message, `· step ${index + 1}/${total}`)
   }
 
   function watch(frame: PrefixCharacterFrame) {

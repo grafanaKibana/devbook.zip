@@ -4,6 +4,7 @@ import type { BacktrackAlgorithmDefinition } from "../types"
 export const nQueens = {
   id: "n-queens",
   kind: "backtrack",
+  legacyRenderer: "backtrack-board",
   meta: { label: "N-Queens (backtracking)" },
   run: (input, ops) => {
     const n = Math.min(Math.max(input.n || 4, 4), 6)

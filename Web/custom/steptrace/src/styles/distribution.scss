@@ -2,14 +2,15 @@
   --_distribution-border: var(--st-table-border, var(--_border));
   --_distribution-cell: var(--st-table-cell, var(--st-page, var(--_surface)));
   --_distribution-header: var(--st-table-header, var(--_surface));
-  --_distribution-radius: 0.5625rem;
+  --_distribution-radius: var(--_radius-container);
 
   container: steptrace-distribution / inline-size;
   display: grid;
   align-content: stretch;
-  gap: clamp(0.3rem, 0.8vh, 0.45rem);
+  /* steptrace-exception: distribution-stage-gap | category=responsive | rationale=scales lane separation with available stage height | evidence=.omx/evidence/steptrace-design-system-refactor/visual/candidate/g005-candidate-k/summary.json */
+  gap: clamp(var(--_space-2), 0.8vh, var(--_space-3));
   min-height: 0;
-  padding: 0.05rem 0;
+  padding: var(--_space-hair) 0;
 }
 
 .steptrace__distribution-band {
@@ -21,12 +22,12 @@
 }
 
 .steptrace__distribution-band[data-section="source"] {
-  padding-bottom: 0.9rem;
+  padding-bottom: var(--_space-5);
 }
 
 .steptrace__distribution-band[data-section="source"] + .steptrace__distribution-band {
-  padding-top: 0.9rem;
-  border-top: 1px solid var(--_hair);
+  padding-top: var(--_space-5);
+  border-top: var(--_stroke-hair) solid var(--_hair);
 }
 
 .steptrace__distribution-label {
@@ -36,7 +37,8 @@
 .steptrace__distribution-bars {
   height: clamp(4.6rem, 16vh, 6.5rem);
   min-width: 0;
-  gap: clamp(0.28rem, 1vw, 0.5rem);
+  /* steptrace-exception: distribution-bar-gap | category=responsive | rationale=scales bar separation with available stage width | evidence=.omx/evidence/steptrace-design-system-refactor/visual/candidate/g005-candidate-k/summary.json */
+  gap: clamp(var(--_space-2), 1vw, var(--_space-3));
 }
 
 .steptrace__distribution-bars .steptrace__bar {
@@ -70,18 +72,18 @@
 
 .steptrace__distribution--buckets[data-profile="bucket"]
   .steptrace__distribution-band:nth-child(2) {
-  padding-bottom: 0.9rem;
+  padding-bottom: var(--_space-5);
 }
 
 .steptrace__distribution--buckets[data-profile="bucket"]
   .steptrace__distribution-band:nth-child(3) {
-  padding-top: 0.9rem;
-  border-top: 1px solid var(--_hair);
+  padding-top: var(--_space-5);
+  border-top: var(--_stroke-hair) solid var(--_hair);
 }
 
 .steptrace__distribution[data-profile="radix"] .steptrace__distribution-band:first-child {
   grid-template-rows: auto minmax(0, 1fr);
-  row-gap: 0.5rem;
+  row-gap: var(--_space-3);
   align-self: stretch;
 }
 
@@ -90,17 +92,17 @@
   .steptrace__distribution-bars {
   align-self: end;
   block-size: 100%;
-  min-block-size: 0;
+  min-block-size: var(--_space-4);
   overflow: hidden;
 }
 
 .steptrace__distribution[data-profile="radix"] .steptrace__distribution-band:nth-child(3) {
-  padding-top: 0.9rem;
-  border-top: 1px solid var(--_hair);
+  padding-top: var(--_space-5);
+  border-top: var(--_stroke-hair) solid var(--_hair);
 }
 
 .steptrace__distribution[data-profile="radix"] .steptrace__distribution-band:nth-child(2) {
-  padding-bottom: 0.9rem;
+  padding-bottom: var(--_space-5);
 }
 
 .steptrace__distribution-bars--output .steptrace__bar[data-empty="1"] .steptrace__fill {
@@ -122,7 +124,7 @@
   min-width: 0;
   overflow-x: auto;
   overflow-y: hidden;
-  border: 1px solid var(--_distribution-border);
+  border: var(--_stroke-hair) solid var(--_distribution-border);
   border-radius: var(--_distribution-radius);
   background: var(--_distribution-cell);
 }
@@ -140,7 +142,7 @@
 }
 
 .steptrace__distribution-bucket {
-  border-inline-end: 1px solid var(--_distribution-border);
+  border-inline-end: var(--_stroke-hair) solid var(--_distribution-border);
 }
 
 .steptrace__distribution-bucket:last-child {
@@ -150,7 +152,9 @@
 .steptrace__distribution-entry,
 .steptrace__distribution-entry-label,
 .steptrace__distribution-entry-value {
-  font: 600 clamp(0.56rem, 1.5vw, 0.66rem) / 1.15 var(--_font-mono);
+  /* steptrace-exception: distribution-count-fit | category=responsive | rationale=fits counts across distribution lane widths | evidence=.omx/evidence/steptrace-design-system-refactor/visual/candidate/g005-candidate-k/summary.json */
+  font: var(--_weight-strong) clamp(var(--_type-2xs), 1.5vw, var(--_type-sm)) /
+    var(--_leading-readable) var(--_font-mono);
   font-variant-numeric: tabular-nums;
 }
 
@@ -158,23 +162,23 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.35rem;
+  gap: var(--_space-2);
   min-width: 0;
-  padding: 0.1rem 0.28rem;
+  padding: var(--_space-0) var(--_space-2);
 }
 
 .steptrace__distribution-entry--key {
-  border-block-end: 1px solid var(--_hair);
+  border-block-end: var(--_stroke-hair) solid var(--_hair);
   background: var(--_distribution-header);
 }
 
 .steptrace__distribution-entry-label {
-  color: var(--_muted);
+  color: var(--_context-text);
 }
 
 .steptrace__distribution-entry-value {
   color: var(--_text);
-  font-weight: 600;
+  font-weight: var(--_weight-strong);
   text-align: end;
   white-space: nowrap;
 }
@@ -203,13 +207,13 @@
 }
 
 .steptrace__distribution-bucket:first-child[data-active="1"]::after {
-  border-start-start-radius: calc(var(--_distribution-radius) - 1px);
-  border-end-start-radius: calc(var(--_distribution-radius) - 1px);
+  border-start-start-radius: calc(var(--_distribution-radius) - var(--_stroke-hair));
+  border-end-start-radius: calc(var(--_distribution-radius) - var(--_stroke-hair));
 }
 
 .steptrace__distribution-bucket:last-child[data-active="1"]::after {
-  border-start-end-radius: calc(var(--_distribution-radius) - 1px);
-  border-end-end-radius: calc(var(--_distribution-radius) - 1px);
+  border-start-end-radius: calc(var(--_distribution-radius) - var(--_stroke-hair));
+  border-end-end-radius: calc(var(--_distribution-radius) - var(--_stroke-hair));
 }
 
 .steptrace__distribution-bucket[data-previous="1"] .steptrace__distribution-details {
@@ -228,7 +232,7 @@
   block-size: clamp(7rem, 17vh, 8.5rem);
   min-width: 0;
   overflow: hidden;
-  border: 1px solid var(--_distribution-border);
+  border: var(--_stroke-hair) solid var(--_distribution-border);
   border-radius: var(--_distribution-radius);
   background: var(--_distribution-cell);
 }
@@ -239,7 +243,7 @@
   grid-template-rows: 1.7rem minmax(0, 1fr);
   min-block-size: 0;
   min-width: 0;
-  border-inline-end: 1px solid var(--_distribution-border);
+  border-inline-end: var(--_stroke-hair) solid var(--_distribution-border);
   background: var(--_distribution-cell);
 }
 
@@ -250,11 +254,13 @@
 .steptrace__distribution-lane-header {
   display: grid;
   place-items: center;
-  padding-inline: 0.3rem;
-  border-block-end: 1px solid var(--_distribution-border);
+  padding-inline: var(--_space-2);
+  border-block-end: var(--_stroke-hair) solid var(--_distribution-border);
   background: var(--_distribution-header);
   color: var(--_muted);
-  font: 600 clamp(0.55rem, 1.4vw, 0.64rem) / 1 var(--_font-mono);
+  /* steptrace-exception: distribution-lane-header-fit | category=responsive | rationale=fits headers across distribution lane widths | evidence=.omx/evidence/steptrace-design-system-refactor/visual/candidate/g005-candidate-k/summary.json */
+  font: var(--_weight-strong) clamp(var(--_type-2xs), 1.4vw, var(--_type-xs)) /
+    var(--_leading-solid) var(--_font-mono);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
@@ -264,10 +270,10 @@
   grid-template-columns: repeat(var(--_bucket-columns, 1), minmax(0, 1fr));
   grid-auto-rows: minmax(1.25rem, max-content);
   align-content: end;
-  gap: 0.18rem;
+  gap: var(--_space-1);
   min-height: 0;
   overflow: hidden;
-  padding: 0.28rem;
+  padding: var(--_space-2);
 }
 
 .steptrace__distribution-lane[data-empty="1"] .steptrace__distribution-lane-body {
@@ -279,7 +285,7 @@
   place-self: center;
   color: var(--_muted);
   content: "—";
-  font: 600 0.66rem / 1 var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-sm) / var(--_leading-solid) var(--_font-mono);
   opacity: 0.55;
 }
 
@@ -288,12 +294,14 @@
   place-items: center;
   min-width: 0;
   min-height: 0;
-  padding: 0.12rem 0.18rem;
-  border: 1px solid var(--_hair);
-  border-radius: 0.25rem;
+  padding: var(--_space-0) var(--_space-1);
+  border: var(--_stroke-hair) solid var(--_hair);
+  border-radius: var(--_radius-xs);
   background: var(--_surface);
   color: var(--_text);
-  font: 600 clamp(0.58rem, 1.45vw, 0.68rem) / 1.15 var(--_font-mono);
+  /* steptrace-exception: distribution-token-fit | category=responsive | rationale=fits tokens across distribution lane widths | evidence=.omx/evidence/steptrace-design-system-refactor/visual/candidate/g005-candidate-k/summary.json */
+  font: var(--_weight-strong) clamp(var(--_type-2xs), 1.45vw, var(--_type-sm)) /
+    var(--_leading-readable) var(--_font-mono);
   font-variant-numeric: tabular-nums;
   overflow: hidden;
   text-align: center;
@@ -329,13 +337,13 @@
 }
 
 .steptrace__distribution-lane:first-child[data-active="1"]::after {
-  border-start-start-radius: calc(var(--_distribution-radius) - 1px);
-  border-end-start-radius: calc(var(--_distribution-radius) - 1px);
+  border-start-start-radius: calc(var(--_distribution-radius) - var(--_stroke-hair));
+  border-end-start-radius: calc(var(--_distribution-radius) - var(--_stroke-hair));
 }
 
 .steptrace__distribution-lane:last-child[data-active="1"]::after {
-  border-start-end-radius: calc(var(--_distribution-radius) - 1px);
-  border-end-end-radius: calc(var(--_distribution-radius) - 1px);
+  border-start-end-radius: calc(var(--_distribution-radius) - var(--_stroke-hair));
+  border-end-end-radius: calc(var(--_distribution-radius) - var(--_stroke-hair));
 }
 
 @media (max-width: 560px) {
@@ -364,7 +372,7 @@
   .steptrace[data-visual-family="distribution-sort"] .steptrace__watch {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    column-gap: 0.5rem;
+    column-gap: var(--_space-3);
     min-height: calc(2 * 2.75rem);
   }
 
@@ -385,7 +393,7 @@
   }
 
   .steptrace__distribution[data-profile="radix"] .steptrace__distribution-lane:nth-child(-n + 5) {
-    border-block-end: 1px solid var(--_distribution-border);
+    border-block-end: var(--_stroke-hair) solid var(--_distribution-border);
   }
 
   .steptrace__distribution[data-profile="radix"] .steptrace__distribution-lane:nth-child(5) {
@@ -396,13 +404,13 @@
     grid-template-columns: repeat(var(--_bucket-columns, 1), minmax(0, 1fr));
     grid-auto-rows: minmax(0, 1fr);
     align-content: stretch;
-    gap: 0.08rem;
+    gap: var(--_space-hair);
     overflow: hidden;
-    padding: 0.1rem;
+    padding: var(--_space-0);
   }
 
   .steptrace__distribution[data-profile="radix"] .steptrace__distribution-token {
-    padding: 0 0.08rem;
+    padding: 0 var(--_space-hair);
   }
 
   .steptrace__distribution[data-profile="radix"]
@@ -412,12 +420,12 @@
 
   .steptrace__distribution[data-profile="radix"]
     .steptrace__distribution-lane:nth-child(5)[data-active="1"]::after {
-    border-start-end-radius: calc(var(--_distribution-radius) - 1px);
+    border-start-end-radius: calc(var(--_distribution-radius) - var(--_stroke-hair));
   }
 
   .steptrace__distribution[data-profile="radix"]
     .steptrace__distribution-lane:nth-child(6)[data-active="1"]::after {
-    border-end-start-radius: calc(var(--_distribution-radius) - 1px);
+    border-end-start-radius: calc(var(--_distribution-radius) - var(--_stroke-hair));
   }
 
   .steptrace__distribution[data-profile="radix"]

@@ -6,7 +6,7 @@
   inline-size: 100%;
   min-inline-size: 0;
   display: grid;
-  gap: 0.75rem;
+  gap: var(--_space-4);
 }
 
 .steptrace .steptrace__interval-section {
@@ -14,12 +14,12 @@
 }
 
 .steptrace .steptrace__interval-section + .steptrace__interval-section {
-  border-top: 1px solid var(--_hair);
-  padding-top: 0.75rem;
+  border-top: var(--_stroke-hair) solid var(--_hair);
+  padding-top: var(--_space-4);
 }
 
 .steptrace .steptrace__interval-label {
-  margin-bottom: 0.45rem;
+  margin-bottom: var(--_space-3);
 }
 
 .steptrace .steptrace__interval-axis {
@@ -30,13 +30,13 @@
 .steptrace .steptrace__interval-axis {
   min-block-size: 1rem;
   align-items: end;
-  border-bottom: 1px solid var(--_hair);
+  border-bottom: var(--_stroke-hair) solid var(--_hair);
 }
 
 .steptrace .steptrace__interval-tick {
   justify-self: start;
   translate: -50% 0;
-  font: 600 0.62rem/1 var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-xs)/var(--_leading-solid) var(--_font-mono);
   color: var(--_muted);
 }
 
@@ -45,14 +45,14 @@
   display: block;
   inline-size: 1px;
   block-size: 0.25rem;
-  margin: 0.16rem auto 0;
+  margin: var(--_space-0) auto 0;
   background: var(--_hair);
 }
 
 .steptrace .steptrace__interval-board {
   position: relative;
   block-size: calc(var(--_interval-rows) * 1.55rem);
-  margin-top: 0.35rem;
+  margin-top: var(--_space-2);
 }
 
 .steptrace .steptrace__interval-row {
@@ -71,21 +71,22 @@
 }
 
 .steptrace .steptrace__interval-band {
+  /* steptrace-exception: interval-band-position | category=geometry | rationale=maps interval coordinates into the lane | evidence=.omx/evidence/steptrace-design-system-refactor/visual/candidate/g005-candidate-k/summary.json | properties=inset-block-start,inset-inline-start */
   position: absolute;
   inset-block-start: 50%;
   inset-inline-start: calc(var(--_interval-start) / var(--_interval-columns) * 100%);
   inline-size: calc(var(--_interval-span) / var(--_interval-columns) * 100%);
   block-size: 1.2rem;
-  border: 1px solid var(--_border);
-  border-radius: 0.35rem;
-  padding-inline: 0.35rem;
+  border: var(--_stroke-hair) solid var(--_border);
+  border-radius: var(--_radius-sm);
+  padding-inline: var(--_space-2);
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
   color: var(--_text);
   background: color-mix(in srgb, var(--_neutral) 12%, var(--_surface));
-  font: 600 0.68rem/1 var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-sm)/var(--_leading-solid) var(--_font-mono);
   white-space: nowrap;
   transform: translateY(-50%);
   transition:
@@ -118,7 +119,7 @@
 }
 
 .steptrace .steptrace__interval-band[data-state="rejected"] {
-  border-color: var(--_red);
+  border-color: var(--_red-text);
   background: color-mix(in srgb, var(--_red) 10%, var(--_surface));
   opacity: 0.42;
 }
@@ -184,14 +185,14 @@
 
   .steptrace .steptrace__interval-band {
     block-size: 1.05rem;
-    padding-inline: 0.2rem;
-    font-size: 0.58rem;
+    padding-inline: var(--_space-1);
+    font-size: var(--_type-2xs);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .steptrace .steptrace__interval-row,
   .steptrace .steptrace__interval-band {
-    transition-duration: 0ms;
+    transition-duration: var(--_dur-instant);
   }
 }

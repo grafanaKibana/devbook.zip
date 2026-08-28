@@ -1,11 +1,11 @@
 .steptrace .steptrace__boundary {
-  --_boundary-radius: 0.5625rem;
+  --_boundary-radius: var(--_radius-container);
   --_boundary-border: var(--st-table-border, var(--_border));
   --_boundary-cell: var(--st-table-cell, var(--st-page, var(--_surface)));
   --_boundary-head: var(--st-table-header, var(--_surface));
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
-  gap: 0.75rem;
+  gap: var(--_space-4);
   width: 100%;
   min-height: 23rem;
   container: steptrace-boundary / inline-size;
@@ -15,7 +15,7 @@
 .steptrace .steptrace__boundary-evaluation {
   min-width: 0;
   overflow: hidden;
-  border: 1px solid var(--_boundary-border);
+  border: var(--_stroke-hair) solid var(--_boundary-border);
   border-radius: var(--_boundary-radius);
   background: var(--_boundary-cell);
 }
@@ -30,16 +30,16 @@
   min-height: 2.5rem;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
-  padding: 0.55rem 0.7rem;
-  border-bottom: 1px solid var(--_boundary-border);
+  gap: var(--_space-4);
+  padding: var(--_space-3) var(--_space-4);
+  border-bottom: var(--_stroke-hair) solid var(--_boundary-border);
   background: var(--_boundary-head);
-  font: 600 0.75rem/1.2 var(--_font-body);
+  font: var(--_weight-strong) var(--_type-ui) / var(--_leading-readable) var(--_font-body);
 }
 
 .steptrace .steptrace__boundary-section-label,
 .steptrace .steptrace__boundary-section-value {
-  color: var(--_muted);
+  color: var(--_context-text);
 }
 
 .steptrace .steptrace__boundary-section-value {
@@ -58,15 +58,17 @@
   display: grid;
   min-width: 0;
   place-items: center;
-  border-right: 1px solid var(--_boundary-border);
+  border-right: var(--_stroke-hair) solid var(--_boundary-border);
   background: var(--_boundary-cell);
   color: var(--_text);
-  font: 600 clamp(0.62rem, 1.8cqi, 0.78rem) / 1 var(--_font-mono);
+  /* steptrace-exception: boundary-cell-label-fit | category=responsive | rationale=fits values inside container-sized boundary cells | evidence=.omx/evidence/steptrace-design-system-refactor/visual/candidate/g005-candidate-k/summary.json */
+  font: var(--_weight-strong) clamp(var(--_type-xs), 1.8cqi, var(--_type-lg)) /
+    var(--_leading-solid) var(--_font-mono);
   font-variant-numeric: tabular-nums;
   transition:
-    background-color var(--_motion-state, 120ms) ease,
-    color var(--_motion-state, 120ms) ease,
-    opacity var(--_motion-state, 120ms) ease;
+    background-color var(--_motion-state, var(--_dur-base)) ease,
+    color var(--_motion-state, var(--_dur-base)) ease,
+    opacity var(--_motion-state, var(--_dur-base)) ease;
 }
 
 .steptrace .steptrace__boundary-tick:last-child {
@@ -81,7 +83,7 @@
       color-mix(in srgb, var(--_red) 14%, transparent) 0.35rem 0.42rem
     ),
     color-mix(in srgb, var(--_red) 8%, var(--_boundary-cell));
-  color: var(--_muted);
+  color: var(--_strong-fill-text);
 }
 
 .steptrace .steptrace__boundary-tick[data-state="feasible"] {
@@ -91,12 +93,12 @@
 .steptrace .steptrace__boundary-tick[data-state="answer"] {
   background: color-mix(in srgb, var(--_green) 24%, var(--_boundary-cell));
   color: var(--_text);
-  font-weight: 600;
+  font-weight: var(--_weight-strong);
 }
 .steptrace .steptrace__boundary-answer-marker {
   position: absolute;
-  inset-block-start: 0.25rem;
-  inset-inline-end: 0.25rem;
+  inset-block-start: var(--_space-1);
+  inset-inline-end: var(--_space-1);
   display: none;
   inline-size: 0.8rem;
   block-size: 0.8rem;
@@ -115,33 +117,33 @@
 
 .steptrace .steptrace__boundary-verdict {
   min-width: 8.5rem;
-  color: var(--_muted);
+  color: var(--_context-text);
   text-align: right;
 }
 
 .steptrace .steptrace__boundary-verdict[data-state="feasible"] {
-  color: var(--_green);
+  color: var(--_green-text);
 }
 
 .steptrace .steptrace__boundary-verdict[data-state="infeasible"] {
-  color: var(--_red);
+  color: var(--_red-text);
 }
 
 .steptrace .steptrace__boundary-lanes {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.6rem;
+  gap: var(--_space-4);
   align-content: stretch;
-  padding: 0.65rem;
+  padding: var(--_space-4);
 }
 
 .steptrace .steptrace__boundary-lane {
   display: grid;
   grid-template-rows: auto minmax(2.4rem, 1fr) auto;
-  gap: 0.45rem;
+  gap: var(--_space-3);
   min-width: 0;
-  padding: 0.55rem;
-  border: 1px solid var(--_boundary-border);
+  padding: var(--_space-3);
+  border: var(--_stroke-hair) solid var(--_boundary-border);
   border-radius: var(--_boundary-radius);
   background: color-mix(in srgb, var(--_boundary-cell) 94%, var(--_text));
 }
@@ -161,27 +163,27 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.45rem;
+  gap: var(--_space-3);
 }
 
 .steptrace .steptrace__boundary-overflow-row {
   min-height: 1.9rem;
-  border-top: 1px solid color-mix(in srgb, var(--_boundary-border) 70%, transparent);
-  padding-top: 0.35rem;
+  border-top: var(--_stroke-hair) solid color-mix(in srgb, var(--_boundary-border) 70%, transparent);
+  padding-top: var(--_space-2);
 }
 
 .steptrace .steptrace__boundary-lane-label,
 .steptrace .steptrace__boundary-overflow-label {
   flex: none;
-  color: var(--_muted);
-  font: 600 0.7rem/1.2 var(--_font-body);
+  color: var(--_context-text);
+  font: var(--_weight-strong) var(--_type-md)/var(--_leading-readable) var(--_font-body);
 }
 
 .steptrace .steptrace__boundary-lane-total {
   min-width: 0;
   overflow: hidden;
-  color: var(--_muted);
-  font: 400 0.68rem/1.2 var(--_font-mono);
+  color: var(--_context-text);
+  font: var(--_weight-regular) var(--_type-sm)/var(--_leading-readable) var(--_font-mono);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -192,7 +194,7 @@
   flex-wrap: wrap;
   align-content: center;
   justify-content: flex-start;
-  gap: 0.25rem;
+  gap: var(--_space-1);
 }
 
 .steptrace .steptrace__boundary-package {
@@ -200,21 +202,21 @@
   min-width: 1.55rem;
   min-height: 1.55rem;
   place-items: center;
-  border: 1px solid color-mix(in srgb, var(--_blue) 42%, var(--_boundary-border));
-  border-radius: 0.25rem;
+  border: var(--_stroke-hair) solid color-mix(in srgb, var(--_blue) 42%, var(--_boundary-border));
+  border-radius: var(--_radius-xs);
   background: color-mix(in srgb, var(--_blue) 10%, var(--_boundary-cell));
-  font: 600 0.7rem/1 var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-md)/var(--_leading-solid) var(--_font-mono);
 }
 
 .steptrace .steptrace__boundary-empty {
   color: var(--_muted);
-  font: 400 0.68rem/1.2 var(--_font-body);
+  font: var(--_weight-regular) var(--_type-sm)/var(--_leading-readable) var(--_font-body);
 }
 
 .steptrace .steptrace__boundary-meter {
   height: 0.35rem;
   overflow: hidden;
-  border-radius: 999px;
+  border-radius: var(--_radius-pill);
   background: color-mix(in srgb, var(--_text) 9%, transparent);
 }
 
@@ -252,9 +254,9 @@
   .steptrace[data-visual-family="monotone-boundary"] .steptrace__rail {
     margin-top: 0;
     padding-top: 0;
-    padding-left: 1.4rem;
+    padding-left: var(--_space-6);
     border-top: 0;
-    border-left: 1px solid var(--_hair);
+    border-left: var(--_stroke-hair) solid var(--_hair);
   }
 }
 
@@ -266,7 +268,7 @@
   .steptrace .steptrace__boundary-section-head {
     align-items: flex-start;
     flex-direction: column;
-    gap: 0.2rem;
+    gap: var(--_space-1);
   }
 
   .steptrace .steptrace__boundary-verdict {

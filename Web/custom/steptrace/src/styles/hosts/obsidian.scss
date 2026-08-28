@@ -1,3 +1,5 @@
+@use "../tokens";
+
 @use "../index";
 @use "../../../../complexity/styles";
 
@@ -6,7 +8,7 @@
   --st-surface: var(--background-secondary);
   --st-text: var(--text-normal);
   --st-muted: var(--text-muted);
-  --st-border: var(--background-modifier-border);
+  --st-border: var(--background-modifier-border-hover);
   --st-table-cell: var(--background-primary);
   --st-table-header: var(--background-secondary);
   --st-table-border: var(--background-modifier-border);
@@ -18,26 +20,39 @@
     var(--interactive-accent-hover)
   );
   --st-on-accent: var(--text-on-accent);
-  --st-panel-shadow: rgb(0 0 0 / 0.12);
+  --st-panel-shadow: #{tokens.$panel-shadow-light};
   --st-neutral: var(--text-faint);
-  --st-state-amber: #d97706;
-  --st-state-violet: #7c3aed;
-  --st-state-blue: #2563eb;
-  --st-state-green: #4c8000;
-  --st-held-bg: #92400e;
-  --st-held-fg: #ffffff;
+  --st-state-amber: #{tokens.$amber-light};
+  --st-state-violet: #{tokens.$violet-light};
+  --st-state-blue: #{tokens.$blue-light};
+  --st-state-green: #{tokens.$green-light};
+  --st-state-red: #{tokens.$red};
+  --st-context-text: #{tokens.$context-text-light};
+  --st-state-amber-text: #{tokens.$amber-text-light};
+  --st-state-green-text: #{tokens.$green-text-light};
+  --st-state-red-text: #{tokens.$red};
+  --st-strong-fill-text: var(--text-normal);
+  --st-on-red: var(--background-secondary);
+  --st-held-bg: #{tokens.$held-bg-light};
+  --st-held-fg: #{tokens.$on-accent};
   --st-font-body: var(--font-text);
   --st-font-mono: var(--font-monospace);
 }
 
 .theme-dark .steptrace {
-  --st-panel-shadow: rgb(0 0 0 / 0.32);
-  --st-state-amber: #f59e0b;
-  --st-state-violet: #a78bfa;
-  --st-state-blue: #60a5fa;
-  --st-state-green: #84cc16;
-  --st-held-bg: #fbbf24;
-  --st-held-fg: #1f2937;
+  --st-panel-shadow: #{tokens.$panel-shadow-dark};
+  --st-state-amber: #{tokens.$amber-dark};
+  --st-state-violet: #{tokens.$violet-dark};
+  --st-state-blue: #{tokens.$blue-dark};
+  --st-state-green: #{tokens.$green-dark};
+  --st-context-text: #{tokens.$context-text-dark};
+  --st-state-amber-text: #{tokens.$amber-dark};
+  --st-state-green-text: #{tokens.$green-dark};
+  --st-state-red-text: #{tokens.$red-text-dark};
+  --st-strong-fill-text: #{tokens.$context-text-dark};
+  --st-on-red: #{tokens.$on-red-dark};
+  --st-held-bg: #{tokens.$held-bg-dark};
+  --st-held-fg: #{tokens.$held-fg-dark};
 }
 
 .complexity {
@@ -99,6 +114,7 @@
   }
 
   button.complexity__legend-button {
+    /* steptrace-exception: complexity-legend-padding | category=host-parity | rationale=restores the reviewed Complexity-owned Obsidian padding | evidence=.omx/evidence/steptrace-design-system-refactor/quality-gate/g008-final-j/code-review/report.md */
     padding: 0.2rem 0.45rem;
     border-bottom: 2px solid color-mix(in srgb, var(--complexity-color) 42%, transparent);
   }
@@ -120,15 +136,4 @@
   button.complexity__legend-button.is-selected {
     border-bottom-color: var(--complexity-color);
   }
-}
-
-.steptrace button.steptrace__btn {
-  appearance: none;
-  border: 0;
-  background-color: transparent;
-  box-shadow: none;
-}
-
-.steptrace button.steptrace__btn:hover {
-  background-color: var(--_hover);
 }

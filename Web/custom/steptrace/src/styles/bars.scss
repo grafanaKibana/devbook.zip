@@ -7,9 +7,10 @@
   height: 200px;
   display: flex;
   align-items: flex-end;
-  gap: 8px;
+  gap: var(--_space-3);
 }
 .steptrace__stage--pins {
+  /* steptrace-exception: pins-marker-reserve | category=geometry | rationale=reserves the fitted marker pin height | evidence=.omx/evidence/steptrace-design-system-refactor/visual/candidate/g005-candidate-k/summary.json */
   padding-top: 42px;
 }
 .steptrace__bar {
@@ -20,7 +21,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
-  gap: 5px;
+  gap: var(--_space-2);
   /* mount reveal only; swap travel is the JS spring, so nothing overrides this */
   animation: steptrace-enter var(--_tween) var(--_spring) both;
   animation-delay: calc(var(--_i, 0) * var(--_stagger));
@@ -28,7 +29,7 @@
 @keyframes steptrace-enter {
   from {
     opacity: 0;
-    transform: translateY(9px);
+    transform: translateY(var(--_space-3));
   }
   to {
     opacity: 1;
@@ -39,7 +40,7 @@
   position: relative;
   width: 100%;
   min-height: 1.8rem;
-  border-radius: 3px 3px 1px 1px;
+  border-radius: var(--_radius-xs) var(--_radius-xs) var(--_stroke-hair) var(--_stroke-hair);
   background: var(--_neutral);
   opacity: 0.55;
   display: flex;
@@ -106,7 +107,7 @@
   stroke-linejoin: round;
 }
 .steptrace__num {
-  font: 600 0.72rem/1 var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-md)/var(--_leading-solid) var(--_font-mono);
   color: var(--_muted);
   font-variant-numeric: tabular-nums;
 }
@@ -117,7 +118,7 @@
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  color: #fff;
+  color: var(--_on-accent);
 }
 .steptrace__check {
   width: 0.95rem;
@@ -184,9 +185,9 @@
   top: 50%;
   transform: translate(-50%, -50%);
   color: var(--_on-accent);
-  font: 600 0.68rem/1 var(--_font-body);
+  font: var(--_weight-strong) var(--_type-sm)/var(--_leading-solid) var(--_font-body);
   text-shadow: 0 1px 2px color-mix(in srgb, var(--_text) 45%, transparent);
-  font-size: 0.68rem;
+  font-size: var(--_type-sm);
 }
 .steptrace__bar[data-state="candidate"] .steptrace__fill::before {
   content: "◆";
@@ -228,7 +229,7 @@
 }
 .steptrace__bar[data-lane="active"] .steptrace__num {
   color: var(--_text);
-  font-weight: 600;
+  font-weight: var(--_weight-strong);
 }
 .steptrace__bar[data-hole="1"] .steptrace__fill {
   background: transparent;
@@ -245,6 +246,9 @@
 .steptrace__bar[data-hole="1"] .steptrace__num {
   color: var(--_amber);
 }
+.steptrace__bar[data-flying="true"] {
+  z-index: 2;
+}
 .steptrace__marker {
   position: absolute;
   left: 0;
@@ -257,6 +261,9 @@
   transition: opacity var(--_dur-quick) var(--_ease-decelerate);
   will-change: transform;
   z-index: 2;
+}
+.steptrace__marker[data-visible="true"] {
+  opacity: 1;
 }
 .steptrace__marker--a {
   color: var(--_blue);
@@ -281,10 +288,10 @@
   display: inline-flex;
   align-items: center;
   min-height: 1.35rem;
-  padding: 0.18rem 0.42rem;
-  border: 1px solid currentColor;
-  border-radius: 0.38rem;
-  background: color-mix(in srgb, currentColor 88%, var(--_surface));
+  padding: var(--_space-1) var(--_space-2);
+  border: var(--_stroke-hair) solid currentColor;
+  border-radius: var(--_radius-sm);
+  background: currentColor;
   box-shadow: 0 2px 6px color-mix(in srgb, var(--_text) 18%, transparent);
   transform: translate(-50%, calc(-100% - 7px));
   white-space: nowrap;
@@ -296,13 +303,15 @@
   bottom: -5px;
   width: 8px;
   height: 8px;
-  border-right: 1px solid currentColor;
-  border-bottom: 1px solid currentColor;
+  border-right: var(--_stroke-hair) solid currentColor;
+  border-bottom: var(--_stroke-hair) solid currentColor;
   background: inherit;
   transform: translateX(-50%) rotate(45deg);
 }
 .steptrace__marker-label {
-  font: 600 clamp(0.58rem, 1.8vw, 0.68rem) / 1 var(--_font-body);
+  /* steptrace-exception: marker-label-fit | category=responsive | rationale=fits marker labels across stage widths | evidence=.omx/evidence/steptrace-design-system-refactor/visual/candidate/g005-candidate-k/summary.json */
+  font: var(--_weight-strong) clamp(var(--_type-2xs), 1.8vw, var(--_type-sm)) /
+    var(--_leading-solid) var(--_font-body);
   color: var(--_on-accent);
 }
 .steptrace__marker[data-placing="1"] .steptrace__marker-body {
@@ -327,6 +336,7 @@
 }
 .steptrace__bar[data-state="eliminated"] .steptrace__fill {
   opacity: 0.22;
+  /* steptrace-exception: bar-hatch-stop | category=geometry | rationale=keeps the accepted diagonal hatch cadence | evidence=.omx/evidence/steptrace-design-system-refactor/visual/candidate/g005-candidate-k/summary.json */
   background-image: repeating-linear-gradient(
     135deg,
     transparent 0 4px,

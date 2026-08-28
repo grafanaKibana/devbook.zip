@@ -9,18 +9,18 @@
 .steptrace .steptrace__dp-stage,
 .steptrace .steptrace__dp-wrap,
 .steptrace .steptrace__matrix-role-legend {
-  --_type-small: 0.75rem;
-  --_type-main: 0.875rem;
-  --_motion-state: 90ms;
+  --_type-small: var(--_type-ui);
+  --_type-main: var(--_type-base);
+  --_motion-state: var(--_dur-base);
   --_role-badge-size: 1.125rem;
-  --_matrix-radius: 0.5625rem;
+  --_matrix-radius: var(--_radius-container);
   --_matrix-cell: var(--st-table-cell, var(--st-page, var(--_surface)));
   --_matrix-header: var(--st-table-header, var(--_surface));
   --_matrix-border-color: var(--st-table-border, var(--_border));
   --_matrix-text: var(--st-table-text, var(--_text));
-  --_matrix-border: 1px solid var(--_matrix-border-color);
+  --_matrix-border: var(--_stroke-hair) solid var(--_matrix-border-color);
   font-size: var(--_type-main);
-  font-weight: 600;
+  font-weight: var(--_weight-strong);
 }
 
 .steptrace .steptrace__dp-stage--guided {
@@ -59,7 +59,7 @@
   border-spacing: 0 !important;
   border-collapse: separate !important;
   background: var(--_matrix-cell);
-  font: 400 var(--_type-main) / 1.2 var(--_font-mono);
+  font: var(--_weight-regular) var(--_type-main) / var(--_leading-readable) var(--_font-mono);
 }
 
 .steptrace .steptrace__dp--guided {
@@ -71,6 +71,7 @@
   width: 1px;
   height: 1px;
   padding: 0;
+  /* steptrace-exception: sr-only-clip-offset | category=accessibility | rationale=keeps hidden text inside the one-pixel clipping box | evidence=.omx/evidence/steptrace-design-system-refactor/visual/candidate/g005-candidate-k/summary.json */
   margin: -1px;
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
@@ -122,13 +123,13 @@
 }
 
 .steptrace .steptrace__dp tr > * + * {
-  border-left: 1px solid var(--_matrix-border-color) !important;
+  border-left: var(--_stroke-hair) solid var(--_matrix-border-color) !important;
 }
 
 .steptrace .steptrace__dp tbody tr:first-child > *,
 .steptrace .steptrace__dp thead tr + tr > *,
 .steptrace .steptrace__dp tbody tr + tr > * {
-  border-top: 1px solid var(--_matrix-border-color) !important;
+  border-top: var(--_stroke-hair) solid var(--_matrix-border-color) !important;
 }
 
 .steptrace .steptrace__dp:not(.steptrace__dp--guided) td::after {
@@ -136,7 +137,7 @@
   top: 0.125rem;
   right: 0.1875rem;
   color: currentColor;
-  font: 600 var(--_type-small) / 1 var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-small) / var(--_leading-solid) var(--_font-mono);
 }
 
 .steptrace .steptrace__dp:not(.steptrace__dp--guided) td[data-state="dep"]::after {
@@ -157,8 +158,8 @@
 }
 
 .steptrace .steptrace__dp th {
-  padding: 0.3125rem 0.5625rem !important;
-  color: var(--_muted);
+  padding: var(--_space-2) var(--_space-3) !important;
+  color: var(--_context-text);
   background: var(--_matrix-header);
 }
 
@@ -168,11 +169,11 @@
   color: var(--_matrix-text);
   font-family: var(--_font-mono) !important;
   font-size: var(--_type-main) !important;
-  line-height: 1.2 !important;
-  font-weight: 400 !important;
+  line-height: var(--_leading-readable) !important;
+  font-weight: var(--_weight-regular) !important;
   transition:
     background-color var(--_tween) ease,
-    color 0.22s ease;
+    color var(--_dur-move) ease;
 }
 
 .steptrace .steptrace__dp thead th,
@@ -180,8 +181,8 @@
   position: static !important;
   font-family: var(--_font-body) !important;
   font-size: var(--_type-small) !important;
-  line-height: 1.2 !important;
-  font-weight: 400 !important;
+  line-height: var(--_leading-readable) !important;
+  font-weight: var(--_weight-regular) !important;
   font-style: normal !important;
   letter-spacing: 0 !important;
   text-align: center !important;
@@ -208,13 +209,13 @@
 }
 
 .steptrace .steptrace__dp-corner {
-  line-height: 1.2;
+  line-height: var(--_leading-readable);
   white-space: normal;
 }
 
 .steptrace .steptrace__dp--guided th[data-role="stage-row"],
 .steptrace .steptrace__dp--guided th[data-role="stage-column"] {
-  color: var(--_violet);
+  color: var(--_strong-fill-text);
   background: color-mix(in srgb, var(--_violet) 14%, var(--_matrix-header));
 }
 
@@ -224,7 +225,7 @@
   z-index: 1;
   display: grid;
   place-items: center;
-  font-weight: 400;
+  font-weight: var(--_weight-regular);
   font-variant-numeric: tabular-nums;
   pointer-events: none;
 }
@@ -236,7 +237,7 @@
   right: 0.1875rem;
   display: flex;
   flex: none;
-  gap: 0.125rem;
+  gap: var(--_space-0);
   pointer-events: none;
 }
 
@@ -247,10 +248,10 @@
   height: var(--_role-badge-size);
   place-items: center;
   border: 1.5px solid currentColor;
-  border-radius: 999px;
+  border-radius: var(--_radius-pill);
   background: var(--_matrix-cell);
   opacity: 1;
-  font: 600 var(--_type-small) / 1 var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-small) / var(--_leading-solid) var(--_font-mono);
 }
 
 .steptrace .steptrace__dp td[data-roles~="stage-axis"] {
@@ -263,8 +264,8 @@
 
 .steptrace .steptrace__dp td[data-roles~="path"] {
   background: color-mix(in srgb, var(--_green) 13%, var(--_matrix-cell));
-  color: var(--_green);
-  font-weight: 600 !important;
+  color: var(--_strong-fill-text);
+  font-weight: var(--_weight-strong) !important;
 }
 
 .steptrace .steptrace__dp td[data-roles~="operand-a"] {
@@ -293,7 +294,7 @@
 
 .steptrace .steptrace__dp td[data-roles~="target"][data-decision="improve"] {
   background: color-mix(in srgb, var(--_green) 18%, var(--_matrix-cell));
-  color: var(--_green);
+  color: var(--_strong-fill-text);
 }
 
 .steptrace .steptrace__dp td[data-roles~="target"][data-decision="keep"] {
@@ -310,7 +311,7 @@
   .steptrace__dp--guided
   td:is([data-roles~="stage-axis"], [data-roles~="operand-b"]):not([data-roles~="target"])
   .steptrace__dp-value {
-  font-weight: 600;
+  font-weight: var(--_weight-strong);
 }
 
 .steptrace
@@ -331,7 +332,7 @@
 }
 
 .steptrace .steptrace__matrix-role-badge[data-role="operand-a"] {
-  color: var(--_amber);
+  color: var(--_amber-text);
 }
 
 .steptrace .steptrace__matrix-role-badge[data-role="operand-b"],
@@ -363,29 +364,29 @@
 
 .steptrace .steptrace__dp:not(.steptrace__dp--guided) td[data-state="cur"] {
   background: color-mix(in srgb, var(--_blue) 20%, var(--_matrix-cell));
-  color: var(--_blue);
+  color: var(--_strong-fill-text);
 }
 
 .steptrace .steptrace__dp:not(.steptrace__dp--guided) td[data-state="path"] {
   background: color-mix(in srgb, var(--_green) 22%, var(--_matrix-cell));
-  color: var(--_green);
+  color: var(--_strong-fill-text);
 }
 
 .steptrace .steptrace__matrix-footer > tr > td {
   height: 2.75rem;
-  padding: 0 0.625rem !important;
-  border-top: 1px solid var(--_matrix-border-color) !important;
+  padding: 0 var(--_space-4) !important;
+  border-top: var(--_stroke-hair) solid var(--_matrix-border-color) !important;
   background: var(--_matrix-header);
 }
 
 .steptrace .steptrace__matrix-footer-row {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
-  gap: 0.625rem;
+  gap: var(--_space-4);
   align-items: center;
   min-width: 0;
   color: var(--_matrix-text);
-  font: 400 var(--_type-small) / 1.2 var(--_font-body);
+  font: var(--_weight-regular) var(--_type-small) / var(--_leading-readable) var(--_font-body);
   font-variant-numeric: tabular-nums;
 }
 
@@ -393,7 +394,7 @@
   min-width: 0;
   max-width: 100%;
   overflow: hidden;
-  color: var(--_muted);
+  color: var(--_context-text);
   justify-self: start;
   text-align: left;
   text-overflow: ellipsis;
@@ -403,7 +404,7 @@
 .steptrace .steptrace__matrix-footer-summary {
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: var(--_space-1);
   min-width: 0;
   max-width: 100%;
   overflow: hidden;
@@ -425,7 +426,7 @@
 }
 
 .steptrace .steptrace__matrix-role-legend {
-  font: 600 var(--_type-small) / 1.2 var(--_font-body);
+  font: var(--_weight-strong) var(--_type-small) / var(--_leading-readable) var(--_font-body);
   min-width: 0;
 }
 

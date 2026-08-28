@@ -1,11 +1,11 @@
 /* ---- shared: status + toolbar ---- */
 .steptrace__status {
   min-height: 2.6em;
-  padding: 0.5rem 0.65rem;
-  border-radius: 8px;
+  padding: var(--_space-3) var(--_space-4);
+  border-radius: var(--_radius-md);
   background: var(--_surface);
   color: var(--_text);
-  font-size: 13px;
+  font-size: var(--_type-lg);
 }
 .steptrace__status .steptrace__counts {
   color: var(--_muted);
@@ -13,26 +13,26 @@
 }
 .steptrace__key {
   color: var(--_blue);
-  font-weight: 600;
+  font-weight: var(--_weight-strong);
 }
 .steptrace__toolbar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.4rem 0.5rem;
+  gap: var(--_space-2) var(--_space-3);
 }
 .steptrace__toolbar button,
 .steptrace__toolbar select {
   font: inherit;
-  font-size: 13px;
+  font-size: var(--_type-lg);
   color: var(--_text);
-  background: var(--st-page, #fff);
-  border: 1px solid var(--_border);
-  border-radius: 7px;
-  padding: 0.32rem 0.6rem;
+  background: var(--st-page, var(--_surface));
+  border: var(--_stroke-hair) solid var(--_border);
+  border-radius: var(--_radius-md);
+  padding: var(--_space-2) var(--_space-4);
   cursor: pointer;
-  min-height: 34px;
-  min-width: 34px;
+  min-height: var(--_target-size);
+  min-width: var(--_target-size);
 }
 .steptrace__toolbar button:hover,
 .steptrace__toolbar select:hover {
@@ -42,25 +42,25 @@
   background: var(--_accent);
   color: var(--_on-accent);
   border-color: var(--_accent);
-  font-weight: 600;
+  font-weight: var(--_weight-strong);
 }
 .steptrace__toolbar :focus-visible {
-  outline: 2px solid var(--_blue);
-  outline-offset: 2px;
+  outline: var(--_focus-ring);
+  outline-offset: var(--_stroke-emphasis);
 }
 .steptrace__spacer {
   flex: 1 1 auto;
 }
 .steptrace__step {
-  font: 600 12px/1 var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-ui) / var(--_leading-solid) var(--_font-mono);
   color: var(--_muted);
   font-variant-numeric: tabular-nums;
 }
 .steptrace__speed {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  font-size: 12px;
+  gap: var(--_space-2);
+  font-size: var(--_type-ui);
   color: var(--_muted);
 }
 .steptrace__speed input {

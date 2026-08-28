@@ -1,4 +1,4 @@
-import { barHeightStyle, el, escapeHtml, makeLegend, statusEl } from "../render"
+import { barHeightStyle, el, makeLegend, setStatus, statusEl } from "../render"
 import type { StepTraceView, VisualFamily, WatchRow } from "../types"
 import {
   distributionLabel,
@@ -429,9 +429,7 @@ export function makeBucketDistributionView(frames: readonly BucketDistributionFr
           : `output index ${outputIndex}, value ${token.value}`,
       )
     })
-    status.innerHTML =
-      escapeHtml(frame.message) +
-      ` <span class="steptrace__counts">· ${phaseLabel(frame)} · step ${index + 1}/${total}</span>`
+    setStatus(status, frame.message, `· ${phaseLabel(frame)} · step ${index + 1}/${total}`)
   }
 
   return {

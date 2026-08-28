@@ -16,7 +16,7 @@
   min-block-size: 0;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
+  gap: var(--_space-5);
 }
 
 .steptrace .steptrace__two-heaps-side {
@@ -26,8 +26,8 @@
 }
 
 .steptrace .steptrace__heap-tree-label {
-  padding-top: 0.9rem;
-  border-top: 1px solid var(--_hair);
+  padding-top: var(--_space-5);
+  border-top: var(--_stroke-hair) solid var(--_hair);
 }
 
 .steptrace .steptrace__heap-stream .steptrace__pcell {
@@ -38,7 +38,7 @@
   --steptrace-array-outline: var(--_blue);
 
   color: var(--_blue);
-  font-weight: 600;
+  font-weight: var(--_weight-strong);
 }
 
 .steptrace .steptrace__heap-stream .steptrace__pcell[data-state="winner"] {
@@ -83,7 +83,7 @@
 
 .steptrace .steptrace__heap-node-meta {
   fill: var(--_muted);
-  font: 600 0.48rem/1 var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-micro)/var(--_leading-solid) var(--_font-mono);
 }
 
 .steptrace .steptrace__heap-mark {
@@ -94,10 +94,10 @@
 
 .steptrace .steptrace__heap-rule {
   min-block-size: 2.25rem;
-  padding: 0.65rem 0.75rem;
-  border-top: 1px solid var(--_hair);
+  padding: var(--_space-4) var(--_space-4);
+  border-top: var(--_stroke-hair) solid var(--_hair);
   color: var(--_muted);
-  font: 600 0.72rem/1.3 var(--_font-body);
+  font: var(--_weight-strong) var(--_type-md)/var(--_leading-readable) var(--_font-body);
   text-align: center;
 }
 
@@ -119,13 +119,13 @@
 }
 
 .steptrace .steptrace__heap-array-label {
-  padding-top: 0.7rem;
-  border-top: 1px solid var(--_hair);
+  padding-top: var(--_space-4);
+  border-top: var(--_stroke-hair) solid var(--_hair);
 }
 
 .steptrace .steptrace__heap-empty {
   color: var(--_muted);
-  font: 600 0.75rem/1 var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-ui) / var(--_leading-solid) var(--_font-mono);
 }
 
 .steptrace .steptrace__heap-svg {
@@ -215,11 +215,11 @@
 
 .steptrace .steptrace__heap-root-label {
   fill: var(--_muted);
-  font: 600 0.52rem/1 var(--_font-body);
+  font: var(--_weight-strong) var(--_type-micro)/var(--_leading-solid) var(--_font-body);
 }
 
 .steptrace .steptrace__heap-selection:not(.steptrace__two-heaps) .steptrace__heap-root-label {
-  fill: var(--_amber);
+  fill: var(--_amber-text);
 }
 
 .steptrace .steptrace__heap-swatch {
@@ -269,7 +269,7 @@
   }
 
   .steptrace .steptrace__heap-root-label {
-    font-size: 0.48rem;
+    font-size: var(--_type-micro);
   }
 
   .steptrace .steptrace__heap-variant,
@@ -291,6 +291,6 @@
   .steptrace .steptrace__heap-edge,
   .steptrace .steptrace__heap-root-label,
   .steptrace .steptrace__heap-node .steptrace__ncirc {
-    transition-duration: 0ms;
+    transition-duration: var(--_dur-instant);
   }
 }

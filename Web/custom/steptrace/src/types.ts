@@ -32,6 +32,7 @@ export type VisualFamilyId =
   | "graph-state"
   | "heap-selection"
   | "indexed-array-search"
+  | "indexed-pointer-window"
   | "interval-track"
   | "linked-topology"
   | "matrix-grid"
@@ -40,6 +41,7 @@ export type VisualFamilyId =
   | "prefix-sum"
   | "run-stack"
   | "stack-sequence"
+  | "string-match"
   | "contiguous-storage"
   | "hash-index"
   | "graph-representation"
@@ -123,11 +125,19 @@ export interface WatchRow {
   hint?: string
 }
 
-export interface VisualFamily<TConfig, TRecorder, TFrame> {
+declare const visualRendererFrame: unique symbol
+
+export interface VisualRendererFamily<TFrame> {
+  readonly [visualRendererFrame]?: TFrame
   id: VisualFamilyId
-  createRecorder(config: TConfig): TRecorder
-  createView(frames: readonly TFrame[]): StepTraceView<TFrame>
+  createView(frames: readonly TFrame[], built?: BuiltFrames): StepTraceView<TFrame>
 }
+
+export interface VisualFamily<TConfig, TRecorder, TFrame> extends VisualRendererFamily<TFrame> {
+  createRecorder(config: TConfig): TRecorder
+}
+
+export type LegacyRendererId = "bit-grid" | "backtrack-board"
 
 export interface InteractiveStructureDefinition<TConfig = unknown> {
   id: string
@@ -171,12 +181,125 @@ export interface StringAlgorithmDefinition extends AlgorithmDefinition<"string",
 }
 export type PointerAlgorithmDefinition = AlgorithmDefinition<"pointers", PointerRecorder>
 export type DPAlgorithmDefinition = AlgorithmDefinition<"dp", DPRecorder>
+export type FamilyAdapterKind = "sort" | "graph" | "search" | "string" | "pointers" | "dp"
+export interface SortRecorderFrame {
+  readonly [key: string]: unknown
+  type: string
+  array: number[]
+  sorted: number[]
+  active: number[]
+  comparisons: number
+  swaps: number
+  message: string
+}
+export interface GraphRecorderFrame {
+  readonly [key: string]: unknown
+  type: string
+  visited: string[]
+  frontier: string[]
+  message: string
+}
+export interface SearchRecorderFrame {
+  readonly [key: string]: unknown
+  type: string
+  array: number[]
+  lo: number
+  hi: number
+  comparisons: number
+  message: string
+}
+export interface StringRecorderFrame {
+  readonly [key: string]: unknown
+  type: string
+  text: string
+  pattern: string
+  shift: number
+  found: number[]
+  message: string
+}
+export interface PointerRecorderFrame {
+  readonly [key: string]: unknown
+  type: string
+  array: unknown[]
+  pointers: Record<string, number>
+  message: string
+}
+export interface DPRecorderFrame {
+  readonly [key: string]: unknown
+  type: string
+  rowLabels: string[]
+  colLabels: string[]
+  grid: unknown[][]
+  message: string
+}
+
+declare module "./recorders" {
+  interface SortRecorder {
+    frames: SortRecorderFrame[]
+  }
+  interface GraphRecorder {
+    frames: GraphRecorderFrame[]
+  }
+  interface SearchRecorder {
+    frames: SearchRecorderFrame[]
+  }
+  interface StringRecorder {
+    frames: StringRecorderFrame[]
+  }
+  interface PointerRecorder {
+    frames: PointerRecorderFrame[]
+  }
+  interface DPRecorder {
+    frames: DPRecorderFrame[]
+  }
+}
+
+export type FamilyAdapterFrame<TKind extends FamilyAdapterKind> = {
+  sort: SortRecorder["frames"][number]
+  graph: GraphRecorder["frames"][number]
+  search: SearchRecorder["frames"][number]
+  string: StringRecorder["frames"][number]
+  pointers: PointerRecorder["frames"][number]
+  dp: DPRecorder["frames"][number]
+}[TKind]
+export type FamilyAdapterDefinition<TKind extends FamilyAdapterKind = FamilyAdapterKind> = {
+  sort: SortAlgorithmDefinition
+  graph: GraphAlgorithmDefinition
+  search: SearchAlgorithmDefinition
+  string: StringAlgorithmDefinition
+  pointers: PointerAlgorithmDefinition
+  dp: DPAlgorithmDefinition
+}[TKind]
+type FamilyAdapterId<TKind extends FamilyAdapterKind> = {
+  sort: "array-sort"
+  graph: "graph-state"
+  search: "indexed-array-search"
+  string: "string-match"
+  pointers: "indexed-pointer-window"
+  dp: "matrix-grid"
+}[TKind]
+export type FamilyAdapterVisualFamily<TKind extends FamilyAdapterKind> =
+  TKind extends FamilyAdapterKind
+    ? VisualRendererFamily<FamilyAdapterFrame<TKind>> & { id: FamilyAdapterId<TKind> }
+    : never
+export type FamilyAdapterAlgorithmDefinition<TKind extends FamilyAdapterKind = FamilyAdapterKind> =
+  TKind extends FamilyAdapterKind
+    ? FamilyAdapterDefinition<TKind> & {
+        adapter: true
+        family: FamilyAdapterVisualFamily<TKind>
+      }
+    : never
 export type UnionFindAlgorithmDefinition = AlgorithmDefinition<"unionfind", UnionFindRecorder>
-export type BitsAlgorithmDefinition = AlgorithmDefinition<"bits", BitsRecorder>
-export type BacktrackAlgorithmDefinition = AlgorithmDefinition<"backtrack", BacktrackRecorder>
+export type BitsAlgorithmDefinition = AlgorithmDefinition<"bits", BitsRecorder> & {
+  legacyRenderer?: "bit-grid"
+}
+export type BacktrackAlgorithmDefinition = AlgorithmDefinition<"backtrack", BacktrackRecorder> & {
+  legacyRenderer?: "backtrack-board"
+}
 export type RecTreeAlgorithmDefinition = AlgorithmDefinition<"rectree", RecTreeRecorder>
 
 export type BuiltInAlgorithm =
+  | FamilyAdapterAlgorithmDefinition
   | SortAlgorithmDefinition
   | FamilyAlgorithmDefinition<AlgorithmKind, unknown, unknown, unknown>
   | GraphAlgorithmDefinition
@@ -192,7 +315,8 @@ export type BuiltInAlgorithm =
 export interface BuiltFrames {
   kind: AlgorithmKind
   frames: any[]
-  family?: VisualFamily<unknown, unknown, unknown>
+  family?: VisualRendererFamily<unknown>
+  legacyRenderer?: LegacyRendererId
   graph?: StepTraceGraph
   frontierLabel?: string
   endpointSettings?: EndpointSettings
