@@ -81,7 +81,8 @@ export function seoHead(
     null,
     // Quartz's SPA reserves the rel-first serialization for alias redirects.
     canonical && h("link", { href: canonical, rel: "canonical" }),
-    isNoIndex(slug) && h("meta", { name: "robots", content: "noindex,follow" }),
+    (fileData.unlisted === true || isNoIndex(slug)) &&
+      h("meta", { name: "robots", content: "noindex,follow" }),
     website &&
       h("script", {
         type: "application/ld+json",

@@ -40,7 +40,7 @@ Generation parameters change how the next token is selected. Their effects show 
 
 **`stop`** sequences terminate generation when the model produces a matching string. Useful for structured prompts where a delimiter signals the end of the useful output.
 
-**`seed`** requests best-effort repeatability. The same seed and identical inputs may reproduce an output, but provider infrastructure changes can still alter it. Response fingerprints help distinguish a sampling change from a backend change.
+**`seed`** requests best-effort repeatability. The same seed and identical inputs may reproduce an output, but provider infrastructure changes can still alter it. Record the exact model identifier and any provider-supplied backend metadata when investigating drift.
 
 **`logprobs`** / **`top_logprobs`** expose token-level probabilities. They help explain ambiguous classifications and unstable token choices. They are signals from the model's distribution, not calibrated confidence in factual truth.
 
@@ -57,7 +57,7 @@ The grounding contract defines the rules the model must follow:
 - If evidence is insufficient or conflicting, abstain rather than guess
 - Do not combine source material with parametric knowledge
 
-**Citation generation:** the model tags a claim with its supporting source. Anthropic's Citations API returns structured citation objects with character-level source locations. Other providers may require citation tags in the output followed by post-processing validation.
+**Citation generation:** the model tags a claim with its supporting source. Anthropic's Citations API returns structured locations whose form depends on the document: character ranges for plain text, page ranges for PDFs, and block ranges for custom content. Other providers may require citation tags in the output followed by post-processing validation.
 
 **Claim verification:** generation is followed by splitting the answer into claims and checking each one against its cited source. Natural Language Inference (NLI) is one practical approach: a smaller model classifies each claim-source pair as entailed, neutral, or contradicted. Azure AI Content Safety offers managed groundedness detection, while MiniCheck provides an open-source verifier.
 

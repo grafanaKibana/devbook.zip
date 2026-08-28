@@ -2,5 +2,42 @@
   "installCommand": "cd Web && npm ci",
   "buildCommand": "cd Web && npm run steptrace:build && npm run steptrace:check && npm run quartz -- plugin install --from-config && npm run quartz -- build",
   "outputDirectory": "Web/public",
-  "cleanUrls": true
+  "cleanUrls": true,
+  "redirects": [
+    {
+      "source": "/ai--and--ml/tooling",
+      "destination": "/ai--and--ml/llm/harness-engineering/tooling",
+      "permanent": true
+    },
+    {
+      "source": "/ai--and--ml/tooling/agent-instructions",
+      "destination": "/ai--and--ml/llm/harness-engineering/tooling/agent-instructions",
+      "permanent": true
+    },
+    {
+      "source": "/ai--and--ml/tooling/coding-agents",
+      "destination": "/ai--and--ml/llm/harness-engineering/tooling/coding-agents",
+      "permanent": true
+    },
+    {
+      "source": "/ai--and--ml/tooling/hooks",
+      "destination": "/ai--and--ml/llm/harness-engineering/tooling/hooks",
+      "permanent": true
+    },
+    {
+      "source": "/ai--and--ml/tooling/plugins",
+      "destination": "/ai--and--ml/llm/harness-engineering/tooling/plugins",
+      "permanent": true
+    },
+    {
+      "source": "/ai--and--ml/tooling/skills",
+      "destination": "/ai--and--ml/llm/harness-engineering/tooling/skills",
+      "permanent": true
+    },
+    {
+      "source": "/ai--and--ml/llm/harness-engineering/tools",
+      "destination": "/ai--and--ml/llm/harness-engineering/tooling/tool-design",
+      "permanent": true
+    }
+  ]
 }

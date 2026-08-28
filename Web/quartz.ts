@@ -53,6 +53,7 @@ unlistGenerated(
   requireNamedPlugin(config.plugins.pageTypes, "CanvasPage"),
   (slug) => slug === "roadmap.canvas",
 )
+unlistGenerated(requireNamedPlugin(config.plugins.pageTypes, "ExcalidrawPage"), () => true)
 
 // Clean Syncer's committed markdown/HTML for the flattened web build.
 const linkIdx = config.plugins.transformers.findIndex((t) => t.name === "LinkProcessing")

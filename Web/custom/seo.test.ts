@@ -82,6 +82,18 @@ test("index policy canonicalizes public routes and unlists noindex output", () =
   const generated = plugin.generate!()
   assert.equal(generated[0]?.data.unlisted, true)
   assert.equal(generated[1], pages[1])
+
+  const drawingPages = [{ slug: "assets/excalidraw/diagram.excalidraw", data: {} }]
+  const drawingPlugin = {
+    name: "ExcalidrawPage",
+    generate: () => drawingPages,
+  } as unknown as PageTypePluginEntry
+  unlistGenerated(drawingPlugin, () => true)
+  const drawing = drawingPlugin.generate!()[0]!
+  assert.equal(drawing.data.unlisted, true)
+  const drawingData = fileData(drawing.slug)
+  drawingData.unlisted = drawing.data.unlisted
+  assert.match(render(seoHead(drawingData)), /name="robots" content="noindex,follow"/)
 })
 
 test("homepage schema is valid JSON and safely serializes site identity", () => {
