@@ -1162,16 +1162,20 @@
 .steptrace--narrow .steptrace__foot {
   grid-template-columns: auto minmax(0, 1fr) auto;
   grid-template-areas: "phase phase phase" "timeline timeline timeline" "transport . utility";
-  gap: var(--_space-3);
+  gap: var(--_space-1);
+  padding: var(--_space-3) 0;
 }
 .steptrace--narrow .steptrace__transport,
 .steptrace--narrow .steptrace__utility {
   gap: var(--_space-1);
 }
 .steptrace--narrow .steptrace__btn,
-.steptrace--narrow .steptrace__btn--play,
-.steptrace--narrow .steptrace__speed-indicator {
+.steptrace--narrow .steptrace__btn--play {
   width: var(--_target-size);
+  height: var(--_target-size);
+}
+.steptrace--narrow .steptrace__speed-indicator {
+  width: var(--_control-size);
   height: var(--_target-size);
 }
 .steptrace--narrow .steptrace__btn {
