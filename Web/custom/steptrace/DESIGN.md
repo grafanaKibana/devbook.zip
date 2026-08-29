@@ -218,7 +218,7 @@ Rules:
 ## Responsive behavior
 
 - `mount.ts` measures the mounted root and enters compact mode below `704px` inline size.
-- Compact mode stacks the stage and rail, exposes Trace/Watch as a nullable exclusive detail switch, gives the timeline its own row, and preserves `44px` controls.
+- Compact mode stacks the stage and rail, exposes Trace/Watch as a nullable exclusive detail switch, gives the timeline its own row, and keeps the footer at most `128px` tall without horizontal overflow. Interactive controls and the scrubber preserve `44px` targets; only the non-interactive speed indicator may narrow.
 - **Direction:** New or changed family-level adaptations use container queries or measured component state. Existing family viewport-width rules are legacy behavior; do not copy them into new work.
 - Media queries remain appropriate for input capabilities such as coarse pointer or reduced motion.
 - Focus remains on a useful control when responsive mode changes.

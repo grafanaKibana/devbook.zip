@@ -551,7 +551,19 @@ body {
     top: var(--site-header-height);
     height: calc(100dvh - var(--site-header-height));
     max-height: calc(100dvh - var(--site-header-height));
+    display: flex;
+    flex-direction: column;
     padding: 0 var(--explorer-panel-inset) 2rem;
+  }
+
+  .page > #quartz-body > .sidebar.left .explorer-content > .explorer-ul {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+  }
+
+  .page > #quartz-body > .sidebar.right .graph {
+    display: none;
   }
 
   // Same defaulting bug as the tablet drawer (see the `aria-expanded` note in
@@ -1891,6 +1903,18 @@ footer > ul a:focus-visible {
   outline: 2px solid var(--secondary);
   outline-offset: 2px;
   border-radius: 2px;
+}
+
+@media all and ($mobile) {
+  footer.site-footer:has(> .site-footer-share) > ul {
+    flex-wrap: nowrap;
+  }
+  footer.site-footer:has(> .site-footer-share) > ul a {
+    gap: 0;
+  }
+  footer.site-footer:not(:has(> .site-footer-share)) > ul {
+    justify-content: center;
+  }
 }
 
 // Only the four known links carry an icon; a link without a `--footer-icon`

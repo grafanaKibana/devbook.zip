@@ -188,9 +188,10 @@ Their main jobs are to find a topic, understand its scope, inspect the mechanism
 
 ### Quartz shell
 
-- `SiteFooter` wraps the configured community footer instead of replacing its links. Informational links stay left-aligned; per-page sharing sits opposite them from `768px` and stacks as a second, right-aligned row below that breakpoint.
+- `SiteFooter` wraps the configured community footer instead of replacing its links. Informational links stay left-aligned opposite per-page sharing; below `768px`, shareable pages collapse those labels to their existing icons so both groups stay on one row, while pages without sharing keep the labels visible and centered.
 - Share actions remain static-first canonical anchors. Copy enhances its same-page link only when the Clipboard API is available, shows a transient check state, and resets after navigation or its timeout; the other links open native X, LinkedIn, and Reddit share targets.
 - Share icons are decorative SVGs behind accessible link names. Footer links use the shared compact spacing, accent hover, and visible accent focus outline; informational links retain normal text color while the Share group stays subtle until interaction.
+- Below `768px`, Graph View is hidden while Backlinks remains available. The Explorer panel gives its tree the remaining drawer height as the single scroll owner so every expanded item stays reachable.
 
 ### Cards and dashboards
 
@@ -204,6 +205,7 @@ Their main jobs are to find a topic, understand its scope, inspect the mechanism
 ### Visualizations
 
 - StepTrace is for state over time. Its consistency and style rules are in [`Web/custom/steptrace/DESIGN.md`](Web/custom/steptrace/DESIGN.md).
+- Below `704px` mounted width, StepTrace keeps phase, timeline, Trace/Watch, and transport visible in a compact footer no taller than `128px`; interactive controls and the scrubber remain `44px` targets.
 - Complexity is for comparing growth classes, cases, or operation families—not per-step execution.
 - Every DSA Visualization panel is visual-first. An ordinary panel begins with its `steptrace` fence; a multi-variant panel begins with inner Tabsdown, and each variant begins with its own `steptrace` fence. Quadtree's authored static image is the sole image-first exception. Each owning visualization unit may contain at most one optional `####` support section after its visual; shared and per-variant headings never coexist.
 - Every DSA Complexity panel begins with exactly one `complexity` fence and contains no heading or Markdown table. Concise unheaded prose may follow only when it supplies a chart-missing assumption, model or resource distinction, or decision-changing failure boundary. Complexity headings, tables, and claims do not appear outside the panel.
@@ -244,9 +246,9 @@ Their main jobs are to find a topic, understand its scope, inspect the mechanism
 | Surface      | Current contract                                                                                     |
 | ------------ | ---------------------------------------------------------------------------------------------------- |
 | Home cards   | 12-column span rules; narrow spans below `760px`; one column at `430px`                              |
-| Quartz shell | Site footer stacks below `768px`; informational links stay left and Share stays right above it       |
+| Quartz shell | Mobile footer one row; no-share labels center; Graph hides; Explorer scrolls                         |
 | Home fit     | Enabled from `768px` with sufficient height; desktop range begins at `1201px`                        |
-| StepTrace    | Mounted-instance compact mode below `704px` inline size                                              |
+| StepTrace    | Mounted-instance compact mode below `704px`; footer fits `320px` without shrinking `44px` controls    |
 | Complexity   | One resource panel at full width at every size; the tab strip scrolls before it wraps, and the figure never gains a horizontal scroller |
 | Folder maps  | Content-sized wrapping cards; compact treatment in narrow containers                                 |
 | Questions    | Two independent columns collapse to one ordered column                                               |
