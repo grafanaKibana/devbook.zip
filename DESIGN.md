@@ -7,7 +7,7 @@ This is the repository-wide design contract. Keep it limited to verified cross-v
 ## Source of truth
 
 - **Status:** Active
-- **Last refreshed:** 2026-08-10
+- **Last refreshed:** 2026-08-26
 - **Current:** observed in the repository.
 - **Direction:** a rule to preserve or move toward.
 - **Open:** a decision or evidence gap the repository does not settle.
@@ -35,7 +35,7 @@ This is the repository-wide design contract. Keep it limited to verified cross-v
 | Home dashboard                             | `Vault/Home/index.md`                                                          | Datacore JSX                                         | Frozen HTML/CSS plus `homepage-fit.tsx`      | Current                                          |
 | Questions                                  | `[!QUESTION]` callouts in `Vault/Home/`                                        | Datacore index                                       | `QuestionsIndex`                             | Current; equivalent outcome, different renderers |
 | StepTrace                                  | `Web/custom/steptrace/src/` and its local `DESIGN.md`                          | Generated Obsidian plugin                            | Generated Quartz assets and host integration | Current                                          |
-| Complexity charts                          | `complexity` fences and `Web/custom/complexity/`                               | Shared model rendered to DOM by the StepTrace plugin | Shared model rendered to HAST                | Current contract; 87 DSA charts plus standalone Big O |
+| Complexity charts                          | `complexity` fences and `Web/custom/complexity/`                               | Shared model rendered to DOM by the StepTrace plugin | Shared model rendered to HAST                | Current contract; 97 DSA v2 charts plus standalone Big O |
 | Quartz shell                               | `Web/quartz.config.yaml`, `Web/quartz.ts`, sanctioned styles and `Web/custom/` | Not applicable                                       | Generated `Web/public/`                      | Current                                          |
 | Obsidian shell                             | `.obsidian` appearance, enabled snippets, theme, and Style Settings            | Native app UI                                        | Not applicable                               | Current                                          |
 
@@ -131,6 +131,7 @@ Their main jobs are to find a topic, understand its scope, inspect the mechanism
 - Body: Source Sans 3 in Obsidian; Source Sans Pro on Quartz.
 - Code, aligned values, counts, and algorithm state: IBM Plex Mono.
 - Use monospace only when alignment, code, state, or numeric comparison benefits.
+- Embedded visualizations use exactly two rendered roles: the body sans face for human UI and narrative, and the mono face for formulas, machine state, and aligned data. Their shared hierarchy uses weights `400` and `600`; geometry-fitted labels may vary size only when the available shape requires it.
 
 ### Spacing and layout rhythm
 
@@ -212,6 +213,8 @@ Their main jobs are to find a topic, understand its scope, inspect the mechanism
 - **Current:** One model feeds the Obsidian DOM renderer and Quartz HAST renderer.
 - Every line is the curve itself, sampled from `n = 0` and drawn as a spline: no straight run from the axis to a first sample, because that junction meets the curve at its own slope and is the corner smoothing cannot remove. The `0` tick is the axis and `1` sits one band above it; that band is exactly wide enough that a straight run across it leaves at the log branch's own slope, so a curve crosses `1` without bending and reaches the origin at `0`. A narrower band has to accelerate into that slope and bends every line into an S. The log rungs are shifted to `log(1 + n)` so every rung is defined and climbing across the whole axis; unshifted they are negative below `n = 1` and undefined at `0`, which left them riding the axis while their neighbours climbed. Where a curve leaves the origin is then the curve's own cost, not an artifact: `n`, `n log n`, `n²` and `log n` are `0` at `n = 0` and start at the origin, while `1`, `2ⁿ` and `n!` are all exactly `1` there and start on the `1` line, because one unit of work is what they cost.
 - The chart owns its plots, resource labels, endpoint labels, and legends. A highlighted endpoint uses the authored formula when every highlighted path sharing that curve geometry agrees; otherwise it falls back to the canonical curve label. When highlighted paths coincide, the topmost active path owns the endpoint colour, including after hover or selection, so the label always matches the visible stroke. Bounds without canonical curve geometry stay out of the SVG and appear as noninteractive text without control chrome. Plotted legend controls are borderless and use an underline as their affordance. Untitled legends center those controls in one row; labeled operation legends use compact left-label/right-entry rows with separators, and a clickable row label selects every plotted bound in that row. Hover previews the hovered item or every plotted bound in the hovered row, then restores the clicked selection on leave. Chart and legend labels remain readable at the note's normal type scale. The figure has an accessible name but no visible global title and no case filters. Its one tab strip switches resources and nothing else; it is a renderer-owned control, so authored Tabsdown structure still belongs to Tabsdown, and it borrows Tabsdown's underline personality—equal-width transparent tabs, accent text and accent underline on the selected one—so a chart's inner tabs read as the same control as the panel tabs above them.
+- The variable definitions render once, immediately after the resources container, so they remain adjacent to the currently visible resource legend in both hosts. When every operation in a resource has exactly one bound, its legend becomes one unlabeled row whose items use the operation names; any multi-bound operation retains labeled rows.
+- A chart plots only a bound that is a function of its declared horizontal variable. A bound in independent variables stays semantic-only unless the configuration declares an honest derived axis or a provable floor/ceiling range; operation ranges use the same validated band grammar as comparisons.
 - The complexity configuration owns the plotted and semantic Time/Space bounds. Supporting prose explains only important context the chart cannot carry; it does not restate rows or rebuild a second complexity table.
 - Complexity figures have no top margin and retain bottom separation from following content.
 - A visualization needs initial, active, final, invalid, narrow, light/dark, keyboard, and reduced-motion states when those states apply.
@@ -287,22 +290,10 @@ Run the smallest applicable gate first.
 | Vault structure/content | `python3 .scripts/tests/test_validate_vault.py`                                       | Obsidian rendering when affected                                   |
 | Cards and dashboards    | Vault validation, then `npm run check` from `Web/`                                    | Obsidian and Quartz; light/dark; desktop/mobile                    |
 | StepTrace               | `npm run steptrace:test`, `steptrace:typecheck`, `steptrace:build`, `steptrace:check` | Both hosts; initial/active/final; narrow; reduced motion; teardown |
-| Complexity              | `npm run complexity:test`, then the visual gate below                                 | Both hosts; independent legends; narrow scroll; light/dark; keyboard |
+| Complexity              | `npm run complexity:test`, then `npm run check`                                       | Both hosts; independent legends; narrow scroll; light/dark; keyboard |
 | Quartz shell            | `npm run check`, then a Quartz build when appropriate                                 | Hard load, SPA navigation, focus, and responsive shell             |
 
-Run the Complexity visual gate from `Web/`:
-
-Terminal 1:
-
-```bash
-npm run serve
-```
-
-Terminal 2:
-
-```bash
-npm run complexity:visual -- --base-url http://127.0.0.1:8085
-```
+Complexity runtime QA is task-scoped: when visual behavior changes, inspect representative version 1 and version 2 schemas in both hosts at relevant widths and themes. Unit tests cover generic schema, model, accessibility, rendering, and transformer invariants; they do not encode named notes or screenshot matrices.
 
 Committed screenshots are durable evidence. `.omx/artifacts/` are run artifacts and must not be the only proof of a lasting contract.
 

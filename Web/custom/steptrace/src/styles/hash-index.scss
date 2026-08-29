@@ -3,7 +3,7 @@
   grid-template-rows: 3rem 11rem;
   block-size: 14.65rem;
   min-width: 0;
-  gap: 0.65rem;
+  gap: var(--_space-4);
 }
 
 .steptrace__hash-operation {
@@ -12,20 +12,20 @@
   grid-template-columns: auto minmax(0, 1fr);
   min-height: 3rem;
   align-items: center;
-  gap: 0.7rem;
-  padding: 0.45rem 0.65rem;
-  border: 1px solid color-mix(in srgb, var(--_text) 14%, transparent);
-  border-radius: 8px;
+  gap: var(--_space-4);
+  padding: var(--_space-3) var(--_space-4);
+  border: var(--_stroke-hair) solid color-mix(in srgb, var(--_text) 14%, transparent);
+  border-radius: var(--_radius-md);
   background: color-mix(in srgb, var(--_surface) 78%, transparent);
 }
 
 .steptrace__hash-token,
 .steptrace__hash-chain-slot {
-  border: 1px solid color-mix(in srgb, var(--_accent) 45%, var(--_border));
-  border-radius: 6px;
-  background: var(--st-page, #fff);
+  border: var(--_stroke-hair) solid color-mix(in srgb, var(--_accent) 45%, var(--_border));
+  border-radius: var(--_radius-sm);
+  background: var(--st-page, var(--_surface));
   color: var(--_text);
-  font: 700 0.66rem/1 var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-sm) / var(--_leading-solid) var(--_font-mono);
 }
 
 .steptrace__hash-token {
@@ -39,8 +39,8 @@
   height: var(--steptrace-token-height, auto);
   overflow: hidden;
   place-items: center;
-  padding: var(--steptrace-token-padding, 0.35rem 0.45rem);
-  border-radius: var(--steptrace-token-radius, 6px);
+  padding: var(--_space-2) var(--_space-3);
+  border-radius: var(--_radius-sm);
   text-align: center;
   text-overflow: ellipsis;
   transform: translate3d(var(--steptrace-token-x, 0), var(--steptrace-token-y, 0), 0);
@@ -58,13 +58,15 @@
   display: grid;
   place-items: center;
   color: var(--_text);
-  line-height: 1.05;
+  line-height: var(--_leading-solid);
   opacity: 0;
   white-space: nowrap;
 }
 
 .steptrace__hash-token[data-motion="arrival"] {
   max-width: none;
+  padding: 0;
+  border-radius: var(--_radius-sm);
   opacity: 0.78;
 }
 
@@ -78,15 +80,20 @@
 
 .steptrace__hash-token[data-motion="return"] {
   max-width: none;
+  padding: var(--_space-2) var(--_space-2);
   opacity: 0;
 }
 
 .steptrace__hash-token[data-motion="success"] {
+  padding: 0;
+  border-radius: var(--_radius-sm);
   border-color: var(--_blue);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--_blue) 18%, transparent);
 }
 
 .steptrace__hash-token[data-motion="extract"] {
+  padding: 0;
+  border-radius: var(--_radius-sm);
   opacity: 0;
 }
 
@@ -102,7 +109,7 @@
 .steptrace__hash-calculation {
   min-width: 0;
   color: var(--_muted);
-  font: 600 0.66rem/1.3 var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-sm) / var(--_leading-readable) var(--_font-mono);
 }
 
 .steptrace__hash-canvas {
@@ -127,8 +134,8 @@
   display: flex;
   min-width: 0;
   flex-direction: column-reverse;
-  gap: 0.28rem;
-  padding: 0.2rem 0.08rem 0.28rem;
+  gap: var(--_space-2);
+  padding: var(--_space-1) var(--_space-hair) var(--_space-2);
 }
 
 .steptrace__hash-chain-slot {
@@ -141,11 +148,12 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.06rem;
-  padding: 0.12rem 0.04rem;
+  gap: var(--_space-hair);
+  padding: var(--_space-0) var(--_space-hair);
   border-color: transparent;
   background: transparent;
-  font-size: clamp(0.4rem, 1.25cqi, 0.56rem);
+  /* steptrace-exception: hash-chain-label-fit | category=responsive | rationale=fits labels inside container-sized chain slots | evidence=.omx/evidence/steptrace-design-system-refactor/visual/candidate/g005-candidate-k/summary.json */
+  font-size: clamp(0.4rem, 1.25cqi, var(--_type-2xs));
 }
 
 .steptrace__hash-chain-slot[data-filled="1"] {
@@ -157,7 +165,7 @@
   gap: 0;
   padding: 0;
   border-color: color-mix(in srgb, var(--_accent) 40%, var(--_border));
-  background: var(--st-page, #fff);
+  background: var(--st-page, var(--_surface));
 }
 
 .steptrace__hash-chain-slot[data-filled="1"] > .steptrace__hash-key,
@@ -166,11 +174,11 @@
   width: 100%;
   min-height: 0;
   place-items: center;
-  padding: 0.08rem 0.03rem;
+  padding: var(--_space-hair);
 }
 
 .steptrace__hash-chain-slot[data-filled="1"] > .steptrace__hash-value {
-  border-block-start: 1px solid color-mix(in srgb, var(--_text) 22%, transparent);
+  border-block-start: var(--_stroke-hair) solid color-mix(in srgb, var(--_text) 22%, transparent);
 }
 
 .steptrace__hash-chain-slot[data-path="1"] {
@@ -197,8 +205,8 @@
   min-width: 0;
   align-self: end;
   overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--_text) 22%, transparent);
-  border-radius: 9px;
+  border: var(--_stroke-hair) solid color-mix(in srgb, var(--_text) 22%, transparent);
+  border-radius: var(--_radius-container);
 }
 
 .steptrace__hash-buckets[data-strategy="closed-addressing"] {
@@ -214,7 +222,7 @@
   grid-template-rows: repeat(2, minmax(0, 1fr));
   block-size: 4rem;
   min-width: 0;
-  border-inline-end: 1px solid color-mix(in srgb, var(--_text) 13%, transparent);
+  border-inline-end: var(--_stroke-hair) solid color-mix(in srgb, var(--_text) 13%, transparent);
   transition:
     background-color var(--_dur-quick) var(--_ease-decelerate),
     box-shadow var(--_dur-quick) var(--_ease-decelerate);
@@ -227,7 +235,8 @@
 
 .steptrace__hash-buckets[data-strategy="bits"] .steptrace__hash-cell-value {
   color: var(--_accent);
-  font-size: clamp(0.58rem, 1.7cqi, 0.78rem);
+  /* steptrace-exception: hash-bits-label-fit | category=responsive | rationale=fits values inside container-sized bit cells | evidence=.omx/evidence/steptrace-design-system-refactor/visual/candidate/g005-candidate-k/summary.json */
+  font-size: clamp(var(--_type-2xs), 1.7cqi, var(--_type-lg));
 }
 
 .steptrace__hash-buckets[data-strategy="closed-addressing"] .steptrace__hash-cell-value {
@@ -240,7 +249,7 @@
 
 .steptrace__hash-buckets[data-strategy="buckets"]
   .steptrace__hash-cell:nth-child(3n):not(:last-child) {
-  border-inline-end-width: 2px;
+  border-inline-end-width: var(--_stroke-emphasis);
   border-inline-end-color: color-mix(in srgb, var(--_text) 28%, transparent);
 }
 
@@ -282,9 +291,11 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.1rem;
-  padding: 0.2rem 0.08rem;
-  font: 700 clamp(0.46rem, 1.45cqi, 0.68rem) / 1.05 var(--_font-mono);
+  gap: var(--_space-0);
+  padding: var(--_space-1) var(--_space-hair);
+  /* steptrace-exception: hash-cell-label-fit | category=responsive | rationale=fits keys and values inside container-sized hash cells | evidence=.omx/evidence/steptrace-design-system-refactor/visual/candidate/g005-candidate-k/summary.json */
+  font: var(--_weight-strong) clamp(var(--_type-micro), 1.45cqi, var(--_type-sm)) /
+    var(--_leading-solid) var(--_font-mono);
 }
 
 .steptrace__hash-key,
@@ -296,7 +307,11 @@
 }
 
 .steptrace__hash-key {
-  color: var(--_accent);
+  color: var(--_green-text);
+}
+
+[data-structure="hash-set"] .steptrace__hash-cell[data-probe="visited"] .steptrace__hash-key {
+  color: var(--_green-text);
 }
 
 .steptrace__hash-value {
@@ -312,9 +327,11 @@
   min-block-size: 0;
   min-width: 0;
   place-items: center;
-  border-block-start: 1px solid color-mix(in srgb, var(--_text) 22%, transparent);
+  border-block-start: var(--_stroke-hair) solid color-mix(in srgb, var(--_text) 22%, transparent);
   color: var(--_muted);
-  font: 600 clamp(0.43rem, 1.25cqi, 0.58rem) / 1 var(--_font-mono);
+  /* steptrace-exception: hash-index-label-fit | category=responsive | rationale=fits index labels inside container-sized hash cells | evidence=.omx/evidence/steptrace-design-system-refactor/visual/candidate/g005-candidate-k/summary.json */
+  font: var(--_weight-strong) clamp(0.43rem, 1.25cqi, var(--_type-2xs)) / var(--_leading-solid)
+    var(--_font-mono);
 }
 
 .steptrace__hash-buckets[data-strategy="closed-addressing"] .steptrace__hash-index-label {
@@ -370,13 +387,13 @@
 
 @container steptrace-structure (max-width: 36rem) {
   .steptrace__hash-operation {
-    gap: 0.45rem;
-    padding-inline: 0.45rem;
+    gap: var(--_space-3);
+    padding-inline: var(--_space-3);
   }
 
   .steptrace__hash-token,
   .steptrace__hash-calculation {
-    font-size: 0.58rem;
+    font-size: var(--_type-2xs);
   }
 
   .steptrace__hash-actions {

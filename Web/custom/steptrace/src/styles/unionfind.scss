@@ -1,12 +1,37 @@
 /* ---- union-find: nodes + arcs share the GRAPH styling (opaque backing, tinted
-      fill, thin constant stroke; arcs change colour, not thickness). Nodes are
-      coloured by set — stroke + fill tint set inline per frame. ---- */
+      fill, thin constant stroke; arcs change colour, not thickness). ---- */
+.steptrace__uf {
+  --steptrace-uf-set-0: var(--_blue);
+  --steptrace-uf-set-1: var(--_violet);
+  --steptrace-uf-set-2: var(--_amber);
+  --steptrace-uf-set-3: var(--_green);
+  --steptrace-uf-set-4: var(--_muted);
+}
+.steptrace__uf .steptrace__ufnode {
+  --steptrace-uf-set: var(--_neutral);
+}
+.steptrace__uf .steptrace__ufnode[data-set="0"] {
+  --steptrace-uf-set: var(--steptrace-uf-set-0);
+}
+.steptrace__uf .steptrace__ufnode[data-set="1"] {
+  --steptrace-uf-set: var(--steptrace-uf-set-1);
+}
+.steptrace__uf .steptrace__ufnode[data-set="2"] {
+  --steptrace-uf-set: var(--steptrace-uf-set-2);
+}
+.steptrace__uf .steptrace__ufnode[data-set="3"] {
+  --steptrace-uf-set: var(--steptrace-uf-set-3);
+}
+.steptrace__uf .steptrace__ufnode[data-set="4"] {
+  --steptrace-uf-set: var(--steptrace-uf-set-4);
+}
 .steptrace__uf .steptrace__ufnode .steptrace__nback {
   fill: var(--st-page, var(--_surface));
   stroke: none;
 }
 .steptrace__uf .steptrace__ufnode .steptrace__ncirc {
-  stroke: var(--_neutral);
+  fill: color-mix(in srgb, var(--steptrace-uf-set) 22%, transparent);
+  stroke: var(--steptrace-uf-set);
   stroke-width: 1.6;
   transition:
     stroke var(--_tween) ease,
@@ -14,7 +39,7 @@
 }
 .steptrace__uf .steptrace__id {
   fill: var(--_text);
-  font: 600 13px var(--_font-head);
+  font: var(--_weight-strong) var(--_type-lg) var(--_font-mono);
 }
 .steptrace__ufarc {
   stroke: var(--_neutral);
@@ -38,7 +63,7 @@
   --steptrace-uf-set-6: color-mix(in srgb, var(--_violet) 62%, var(--_amber));
   display: grid;
   min-width: 0;
-  gap: 0.75rem;
+  gap: var(--_space-4);
 }
 
 .steptrace__union-find-forest {
@@ -64,6 +89,11 @@
     opacity var(--_dur-quick) var(--_ease-decelerate);
 }
 
+.steptrace__union-find-edge[hidden],
+.steptrace__union-find-root-label[hidden] {
+  display: none;
+}
+
 .steptrace__union-find-edge[data-active="true"] {
   stroke: var(--_blue);
 }
@@ -83,7 +113,7 @@
 
 .steptrace__union-find-node > text:not(.steptrace__union-find-root-label) {
   fill: var(--_text);
-  font: 650 0.76rem/1 var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-ui)/var(--_leading-solid) var(--_font-mono);
 }
 
 .steptrace__union-find-node[data-selected="true"] circle {
@@ -100,8 +130,8 @@
 
 .steptrace__union-find-root-label {
   fill: var(--_muted);
-  font: 600 0.5rem/1 var(--_font-head);
-  letter-spacing: 0.04em;
+  font: var(--_weight-strong) var(--_type-micro) / var(--_leading-solid) var(--_font-body);
+  letter-spacing: var(--_tracking-caps);
   text-transform: uppercase;
 }
 
@@ -110,8 +140,8 @@
 }
 
 .steptrace__union-find-parent-label {
-  padding-top: 0.75rem;
-  border-top: 1px solid var(--_hair);
+  padding-top: var(--_space-4);
+  border-top: var(--_stroke-hair) solid var(--_hair);
 }
 
 .steptrace__union-find-parent {
@@ -121,6 +151,6 @@
 @media (prefers-reduced-motion: reduce) {
   .steptrace__union-find-edge,
   .steptrace__union-find-node circle {
-    transition-duration: 0ms;
+    transition-duration: var(--_dur-instant);
   }
 }

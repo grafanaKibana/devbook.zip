@@ -141,15 +141,15 @@ export function makePrefixSumView(
   const legend = makeLegend(
     [
       {
-        label: "running total",
+        label: "Running Total",
         swatchClass: "steptrace__prefix-sum-swatch steptrace__prefix-sum-swatch--build",
       },
       {
-        label: "cancelled prefix",
+        label: "Cancelled Prefix",
         swatchClass: "steptrace__prefix-sum-swatch steptrace__prefix-sum-swatch--cancel",
       },
       {
-        label: "requested range",
+        label: "Requested Range",
         swatchClass: "steptrace__prefix-sum-swatch steptrace__prefix-sum-swatch--range",
       },
     ],

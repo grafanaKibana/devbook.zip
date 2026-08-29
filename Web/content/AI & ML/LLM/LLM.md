@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.496Z
-modified: 2026-08-25T13:45:27.891Z
-published: 2026-08-25T13:45:27.891Z
+modified: 2026-08-26T08:47:40.285Z
+published: 2026-08-26T08:47:40.285Z
 tags:
   - FolderNote
 topic:
@@ -41,6 +41,10 @@ flowchart LR
 | [[AI & ML/LLM/Loop Engineering/Loop Engineering\|Loop Engineering]] | Runtime across turns | How does work iterate, verify, recover, and stop? |
 
 [[AI & ML/LLM/Evaluation/Evaluation|Evaluation]] and [[AI & ML/LLM/Safety/Safety|Safety]] span every route. Model-level choices sit underneath them: [[AI & ML/LLM/Generation|generation]] controls decoding, [[AI & ML/LLM/Embeddings|embeddings]] represent inputs for retrieval, [[AI & ML/LLM/Fine-tuning|fine-tuning]] adapts behavior, and [[AI & ML/LLM/Model Selection and Routing|model selection and routing]] chooses which model serves a request.
+
+At the application level, these disciplines become connected runtime subsystems rather than isolated techniques. This intentionally broad sketch shows one possible composition of request routing, retrieval, shared model access, agents, memory, tools, ingestion, and cross-cutting controls.
+
+![[Assets/Excalidraw/Imaginary AI System Architecture.excalidraw|1200|center]]
 
 # Transformer Foundations and Training
 

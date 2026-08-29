@@ -10,7 +10,7 @@
     font-family: $family;
     font-style: $style;
     font-weight: $weight;
-    font-display: block;
+    font-display: swap;
     src: url("/static/fonts/#{$file}") format("truetype");
   }
 }
@@ -1294,12 +1294,11 @@ body[data-slug="about"] .page[data-frame="default"] > #quartz-body > .sidebar.ri
 }
 
 @media all and (min-width: 1201px) and (min-height: 32rem) {
-  // Gated on [data-home-fit]: the HomepageFit controller owns the one-viewport
-  // fill on desktop just as it does on tablet, so it can hide whole tiers
-  // (summaries → counters → bars) uniformly instead of letting cards clip
-  // raggedly. Without the attribute (JS off, or the controller bailed because
-  // nothing fits) the page keeps its normal scrolling layout — a safe fallback.
-  body[data-slug="index"][data-home-fit] {
+  // Gated on the stable body activation marker: HomepageFit owns the one-viewport
+  // fill on desktop while dashboard-local candidates hide whole tiers uniformly.
+  // Without the marker (JS off, or no candidate fits) the page keeps its normal
+  // scrolling layout — a safe fallback.
+  body[data-slug="index"][data-home-fit-active] {
     // Columns, areas, and the hidden right sidebar come from the height-independent
     // block above; here we only add the one-viewport fill: fix to 100dvh, clip
     // overflow, and make the center row the flexible track.
@@ -1531,14 +1530,15 @@ body[data-slug="about"] .page[data-frame="default"] > #quartz-body > .sidebar.ri
 
 // ---------------------------------------------------------------------------
 // Tablet one-viewport fit (768–1200px). The client-side HomepageFit controller
-// sets the first dashboard-wide state whose COMPLETE retained elements fit:
+// activates the page-wide layout, then sets the first dashboard candidate whose
+// COMPLETE retained elements fit:
 // full → summaries hidden → counters hidden → bars hidden. CSS owns only the
 // complete states; it never clips a summary/title or shrinks a retained footer.
 // This block is the tablet-specific LAYOUT; the degraded states themselves are
 // shared with desktop below. Mobile stays on its normal scrolling branch.
 // ---------------------------------------------------------------------------
 @media all and ($tablet) and (min-height: 32rem) {
-  body[data-slug="index"][data-home-fit] {
+  body[data-slug="index"][data-home-fit-active] {
     --home-card-pad: clamp(0.65rem, 1.2vh, 0.85rem) clamp(0.75rem, 1.5vw, 1rem);
 
     .page > #quartz-body {
@@ -1624,22 +1624,21 @@ body[data-slug="about"] .page[data-frame="default"] > #quartz-body > .sidebar.ri
 
 // ---------------------------------------------------------------------------
 // Shared degraded states for BOTH one-viewport fits (tablet 768–1200px and
-// desktop ≥1201px). The HomepageFit controller sets one dashboard-wide state in
-// whichever range is active, hiding a whole tier at a time — summaries, then
-// counters, then bars — so a card is never left with a half-clipped line. These
-// are viewport-independent: [data-home-fit] is only present while a fill is
-// engaged, so no media-query gate is needed.
+// desktop ≥1201px). HomepageFit stores the changing candidate on the dashboard,
+// hiding a whole tier at a time — summaries, then counters, then bars — so a
+// card is never left with a half-clipped line. The stable body marker owns the
+// page-wide fill separately, so no media-query gate is needed here.
 // ---------------------------------------------------------------------------
-body[data-slug="index"][data-home-fit="summary-hidden"],
-body[data-slug="index"][data-home-fit="counter-hidden"],
-body[data-slug="index"][data-home-fit="bar-hidden"] {
+body[data-slug="index"] .dc-topic-dashboard[data-home-fit="summary-hidden"],
+body[data-slug="index"] .dc-topic-dashboard[data-home-fit="counter-hidden"],
+body[data-slug="index"] .dc-topic-dashboard[data-home-fit="bar-hidden"] {
   .dc-topic-grid .db-card-summary {
     display: none;
   }
 }
 
-body[data-slug="index"][data-home-fit="counter-hidden"],
-body[data-slug="index"][data-home-fit="bar-hidden"] {
+body[data-slug="index"] .dc-topic-dashboard[data-home-fit="counter-hidden"],
+body[data-slug="index"] .dc-topic-dashboard[data-home-fit="bar-hidden"] {
   .dc-topic-grid .dc-topic-cap {
     display: none;
   }
@@ -1648,14 +1647,14 @@ body[data-slug="index"][data-home-fit="bar-hidden"] {
   }
 }
 
-body[data-slug="index"][data-home-fit="bar-hidden"] {
+body[data-slug="index"] .dc-topic-dashboard[data-home-fit="bar-hidden"] {
   .dc-topic-grid .dc-topic-bar {
     display: none;
   }
 }
 
 @media all and (min-width: 768px) and (min-height: 32rem) and (max-height: 35.999rem) {
-  body[data-slug="index"][data-home-fit] {
+  body[data-slug="index"][data-home-fit-active] {
     .dc-progress-hero {
       --dc-radial-size: 5.5rem;
     }

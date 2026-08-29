@@ -182,8 +182,9 @@ No generated file or build-order file changes.
 
 ## Change styling
 
+- Shared fallback values and the Quartz light/dark palette: edit `src/styles/_tokens.scss`.
 - Shared card or renderer styling: edit the owning file under `src/styles/`.
-- Obsidian token bindings: edit `src/styles/hosts/obsidian.scss`.
+- Obsidian token bindings: edit `src/styles/hosts/obsidian.scss`; bind surfaces, text, borders, accents, and fonts to native Obsidian variables while reusing the shared state palette.
 - Quartz token bindings: edit `custom/components/styles/steptrace.scss`.
 
 The build emits real `.css` files. StepTrace does not serialize SCSS into JavaScript and does not create runtime `<style>` elements.

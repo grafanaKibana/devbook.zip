@@ -34,7 +34,9 @@ export const timSort = {
   parse: parseTimSortConfig,
   run(input, ops) {
     const n = ops.value.length
-    ops.init(`Scan natural runs, extend short runs to minrun ${input.minrun}, then merge the run stack.`)
+    ops.init(
+      `Scan natural runs, extend short runs to minrun ${input.minrun}, then merge the run stack.`,
+    )
 
     function mergeCollapse() {
       while (true) {
@@ -129,6 +131,8 @@ export const timSort = {
         `Force final merge of adjacent runs ${runLabel(stack[index].start, stack[index].length)} and ${runLabel(stack[index + 1].start, stack[index + 1].length)}.`,
       )
     }
-    ops.done(`One run remains: sorted stably after ${ops.frames.at(-1)?.merges || 0} adjacent merges.`)
+    ops.done(
+      `One run remains: sorted stably after ${ops.frames.at(-1)?.merges || 0} adjacent merges.`,
+    )
   },
 } satisfies FamilyAlgorithmDefinition<"sort", RunStackConfig, RunStackRecorder, RunStackFrame>

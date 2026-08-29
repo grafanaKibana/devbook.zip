@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.626Z
-modified: 2026-08-20T20:41:15.626Z
-published: 2026-08-20T20:41:15.626Z
+modified: 2026-08-28T08:17:49.292Z
+published: 2026-08-28T08:17:49.292Z
 tags:
   - FolderNote
 topic:
@@ -13,7 +13,7 @@ summary: Tracks file changes over time, enabling collaboration, branching, mergi
 level:
   - "4"
 priority: High
-status: Creation
+status: Ready to Repeat
 ---
 
 A version control system (VCS) records versions of tracked files so a team can compare, branch, merge, and restore repository history. Git is distributed: a normal clone contains a local object database and refs, so most history operations do not depend on the hosting service.

@@ -41,6 +41,10 @@ flowchart LR
 
 [[Home/AI & ML/LLM/Evaluation/Evaluation|Evaluation]] and [[Home/AI & ML/LLM/Safety/Safety|Safety]] span every route. Model-level choices sit underneath them: [[Home/AI & ML/LLM/Generation|generation]] controls decoding, [[Home/AI & ML/LLM/Embeddings|embeddings]] represent inputs for retrieval, [[Home/AI & ML/LLM/Fine-tuning|fine-tuning]] adapts behavior, and [[Home/AI & ML/LLM/Model Selection and Routing|model selection and routing]] chooses which model serves a request.
 
+At the application level, these disciplines become connected runtime subsystems rather than isolated techniques. This intentionally broad sketch shows one possible composition of request routing, retrieval, shared model access, agents, memory, tools, ingestion, and cross-cutting controls.
+
+![[Assets/Excalidraw/Imaginary AI System Architecture.excalidraw|1200|center]]
+
 # Transformer Foundations and Training
 
 An LLM checkpoint comes from one architecture, tokenizer, objective, and training pipeline. Its weights are not a self-describing program. A compatible runtime must rebuild the expected computation graph, interpret the stored tensors correctly, apply the matching tokenization rules, and provide every operator required by the architecture and quantization scheme.

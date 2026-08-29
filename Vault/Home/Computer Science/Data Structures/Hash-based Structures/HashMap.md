@@ -91,7 +91,7 @@ tab: Complexity
             },
             {
               "kind": "curve",
-              "role": "Typical",
+              "role": "Average",
               "formula": "O(1) average",
               "curveId": "constant"
             },
@@ -115,7 +115,7 @@ tab: Complexity
             },
             {
               "kind": "curve",
-              "role": "Typical",
+              "role": "Amortized / Average",
               "formula": "O(1) amortized / average",
               "curveId": "constant"
             },
@@ -139,7 +139,7 @@ tab: Complexity
             },
             {
               "kind": "curve",
-              "role": "Typical",
+              "role": "Average",
               "formula": "O(1) average",
               "curveId": "constant"
             },
@@ -155,12 +155,6 @@ tab: Complexity
           "kind": "operation",
           "operation": "Resize (rehash all)",
           "bounds": [
-            {
-              "kind": "curve",
-              "role": "Typical",
-              "formula": "O(1) amortized per insert",
-              "curveId": "constant"
-            },
             {
               "kind": "curve",
               "role": "Worst single operation",

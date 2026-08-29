@@ -81,7 +81,8 @@ export function seoHead(
     null,
     // Quartz's SPA reserves the rel-first serialization for alias redirects.
     canonical && h("link", { href: canonical, rel: "canonical" }),
-    isNoIndex(slug) && h("meta", { name: "robots", content: "noindex,follow" }),
+    (fileData.unlisted === true || isNoIndex(slug)) &&
+      h("meta", { name: "robots", content: "noindex,follow" }),
     website &&
       h("script", {
         type: "application/ld+json",
@@ -96,11 +97,7 @@ const rewriteSocialUrls = (child: ComponentChild, canonical?: string): Component
 
   const node = child as VNode<Record<string, unknown>>
   const property = node.props.property
-  if (
-    canonical &&
-    node.type === "meta" &&
-    (property === "og:url" || property === "twitter:url")
-  ) {
+  if (canonical && node.type === "meta" && (property === "og:url" || property === "twitter:url")) {
     return cloneElement(node, { content: canonical })
   }
   if (

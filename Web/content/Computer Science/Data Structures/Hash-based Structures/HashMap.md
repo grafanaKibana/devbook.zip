@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.598Z
-modified: 2026-08-20T20:41:15.598Z
-published: 2026-08-20T20:41:15.598Z
+modified: 2026-08-27T16:38:55.301Z
+published: 2026-08-27T16:38:55.301Z
 topic:
   - Computer Science
 subtopic:
@@ -94,7 +94,7 @@ tab: Complexity
             },
             {
               "kind": "curve",
-              "role": "Typical",
+              "role": "Average",
               "formula": "O(1) average",
               "curveId": "constant"
             },
@@ -118,7 +118,7 @@ tab: Complexity
             },
             {
               "kind": "curve",
-              "role": "Typical",
+              "role": "Amortized / Average",
               "formula": "O(1) amortized / average",
               "curveId": "constant"
             },
@@ -142,7 +142,7 @@ tab: Complexity
             },
             {
               "kind": "curve",
-              "role": "Typical",
+              "role": "Average",
               "formula": "O(1) average",
               "curveId": "constant"
             },
@@ -158,12 +158,6 @@ tab: Complexity
           "kind": "operation",
           "operation": "Resize (rehash all)",
           "bounds": [
-            {
-              "kind": "curve",
-              "role": "Typical",
-              "formula": "O(1) amortized per insert",
-              "curveId": "constant"
-            },
             {
               "kind": "curve",
               "role": "Worst single operation",

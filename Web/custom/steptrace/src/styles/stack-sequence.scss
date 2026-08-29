@@ -5,7 +5,7 @@
 .steptrace .steptrace__stack-sequence {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
-  gap: 1rem;
+  gap: var(--_space-5);
   min-block-size: 0;
 }
 
@@ -17,8 +17,8 @@
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   min-block-size: 0;
-  padding-top: 0.9rem;
-  border-top: 1px solid var(--_hair);
+  padding-top: var(--_space-5);
+  border-top: var(--_stroke-hair) solid var(--_hair);
 }
 
 .steptrace .steptrace__stack-sequence-label {
@@ -27,15 +27,15 @@
 
 .steptrace .steptrace__stack-sequence-scan {
   block-size: 3.35rem;
-  margin: 0.45rem 0 0;
+  margin: var(--_space-3) 0 0;
 }
 
 .steptrace .steptrace__stack-sequence-scan .steptrace__pcell {
   position: relative;
   min-inline-size: 0;
   flex-direction: column;
-  gap: 0.12rem;
-  padding: 0.32rem 0.12rem 0.24rem;
+  gap: var(--_space-0);
+  padding: var(--_space-2) var(--_space-0) var(--_space-1);
   outline: 2px solid transparent;
   outline-offset: -2px;
   transition:
@@ -48,15 +48,15 @@
 .steptrace .steptrace__stack-sequence-answer {
   max-inline-size: 100%;
   overflow: hidden;
-  color: var(--_muted);
-  font: 600 0.54rem/1.1 var(--_font-mono);
+  color: var(--_strong-fill-text);
+  font: var(--_weight-strong) var(--_type-2xs)/var(--_leading-solid) var(--_font-mono);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .steptrace .steptrace__stack-sequence-icon {
   position: absolute;
-  inset: 0.18rem 0.18rem auto auto;
+  inset: var(--_space-1) var(--_space-1) auto auto;
   inline-size: 0.62rem;
   block-size: 0.62rem;
   color: var(--_blue);
@@ -105,7 +105,8 @@
   display: flex;
   flex-direction: column-reverse;
   justify-content: flex-start;
-  gap: clamp(0.18rem, 0.6cqi, 0.32rem);
+  /* steptrace-exception: stack-cell-gap | category=responsive | rationale=scales stacked-cell separation with container width | evidence=.omx/evidence/steptrace-design-system-refactor/visual/candidate/g005-candidate-k/summary.json */
+  gap: clamp(var(--_space-1), 0.6cqi, var(--_space-2));
 }
 
 .steptrace .steptrace__stack-sequence-stack-cell {
@@ -113,14 +114,14 @@
   min-inline-size: 0;
   min-block-size: 1.25rem;
   max-block-size: 1.8rem;
-  padding: 0.28rem 0.4rem;
-  border: 1px solid transparent;
-  border-radius: 0.42rem;
+  padding: var(--_space-2) var(--_space-2);
+  border: var(--_stroke-hair) solid transparent;
+  border-radius: var(--_radius-sm);
   display: grid;
   place-items: center;
   color: var(--_text);
   background: transparent;
-  font: 700 0.64rem/1 var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-xs)/var(--_leading-solid) var(--_font-mono);
   text-align: center;
   opacity: 0;
   transform: translateY(0.35rem);
@@ -139,13 +140,6 @@
 
 .steptrace .steptrace__stack-sequence-stack-cell[data-top="1"] {
   background: color-mix(in srgb, var(--_amber) 22%, var(--_surface));
-}
-
-.steptrace .steptrace__stack-sequence-swatch {
-  inline-size: 0.52rem;
-  block-size: 0.52rem;
-  border-radius: 50%;
-  flex: none;
 }
 
 .steptrace .steptrace__stack-sequence-swatch--scan {
@@ -168,12 +162,12 @@
 
 @container steptrace-stack-sequence (max-width: 36rem) {
   .steptrace .steptrace__stack-sequence-answer {
-    font-size: 0.48rem;
+    font-size: var(--_type-micro);
   }
 
   .steptrace .steptrace__stack-sequence-stack-cell {
-    padding-inline: 0.25rem;
-    font-size: 0.6rem;
+    padding-inline: var(--_space-1);
+    font-size: var(--_type-2xs);
   }
 }
 
@@ -181,7 +175,7 @@
   .steptrace .steptrace__stack-sequence-scan .steptrace__pcell,
   .steptrace .steptrace__stack-sequence-stack-cell {
     animation: none;
-    transition-duration: 0ms;
+    transition-duration: var(--_dur-instant);
   }
 }
 
@@ -200,8 +194,8 @@
   inline-size: clamp(7.5rem, 34cqi, 10.5rem);
   flex-direction: column;
   overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--_text) 22%, transparent);
-  border-radius: 9px;
+  border: var(--_stroke-hair) solid color-mix(in srgb, var(--_text) 22%, transparent);
+  border-radius: var(--_radius-container);
 }
 
 .steptrace .steptrace__stack-cell {
@@ -209,7 +203,7 @@
   flex: 0 0 2.35rem;
   grid-template-rows: minmax(0, 1fr) 0.85rem;
   border-inline-end: 0;
-  border-block-end: 1px solid color-mix(in srgb, var(--_text) 13%, transparent);
+  border-block-end: var(--_stroke-hair) solid color-mix(in srgb, var(--_text) 13%, transparent);
   transform-origin: bottom center;
 }
 
@@ -218,17 +212,17 @@
 }
 
 .steptrace .steptrace__stack-cell .steptrace__contiguous-value {
-  padding: 0.18rem 0.4rem;
-  font: 650 0.82rem/1.1 var(--_font-body);
+  padding: var(--_space-1) var(--_space-2);
+  font: var(--_weight-strong) var(--_type-lg)/var(--_leading-solid) var(--_font-mono);
 }
 
 .steptrace .steptrace__stack-cell .steptrace__contiguous-index {
-  font: 600 0.55rem/1 var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-2xs)/var(--_leading-solid) var(--_font-mono);
 }
 
 .steptrace .steptrace__stack-cell[data-top="1"] .steptrace__contiguous-index {
-  color: var(--_accent);
-  font-weight: 750;
+  color: var(--_green-text);
+  font-weight: var(--_weight-strong);
 }
 
 .steptrace .steptrace__stack-cell[data-empty="1"] .steptrace__contiguous-value {
@@ -242,17 +236,18 @@
 .steptrace .steptrace__stack-pop-ghost {
   position: absolute;
   z-index: 1;
-  inset: 0.18rem 0.4rem 0.85rem;
+  inset: var(--_space-1) var(--_space-2) var(--_space-5);
   display: grid;
   place-items: center;
   color: var(--_text);
-  font: 650 0.82rem/1.1 var(--_font-body);
+  font: var(--_weight-strong) var(--_type-lg)/var(--_leading-solid) var(--_font-mono);
   opacity: 0;
   pointer-events: none;
 }
 
 .steptrace .steptrace__stack-cell[data-operation="pop"] .steptrace__stack-pop-ghost {
-  animation: steptrace-stack-pop var(--_dur-move) var(--_ease-accelerate) forwards;
+  /* steptrace-exception: stack-pop-easing | category=motion | rationale=preserves the accelerated stack-pop exit curve | evidence=.omx/evidence/steptrace-design-system-refactor/visual/candidate/g005-candidate-k/summary.json */
+  animation: steptrace-stack-pop var(--_dur-move) cubic-bezier(0.4, 0, 1, 1) forwards;
 }
 
 .steptrace .steptrace__stack-cell[data-operation="peek"] {
@@ -310,7 +305,7 @@
 
   .steptrace__stack-controls .steptrace__structure-action {
     inline-size: 100%;
-    padding-inline: 0.35rem;
+    padding-inline: var(--_space-2);
   }
 }
 

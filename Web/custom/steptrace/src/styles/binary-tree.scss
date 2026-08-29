@@ -93,22 +93,25 @@
 }
 
 .steptrace .steptrace__binary-tree-node[data-color="red"] .steptrace__ncirc {
-  fill: var(--st-state-red, #b42318);
+  fill: var(--_red);
 }
 
-.steptrace .steptrace__binary-tree-node[data-color="black"] .steptrace__id,
-.steptrace .steptrace__binary-tree-node[data-color="red"] .steptrace__id {
+.steptrace .steptrace__binary-tree-node[data-color="black"] .steptrace__id {
   fill: var(--_surface);
+}
+
+.steptrace .steptrace__binary-tree-node[data-color="red"] .steptrace__id {
+  fill: var(--_on-red);
 }
 
 .steptrace .steptrace__binary-tree-meta {
   fill: var(--_muted);
-  font: 600 0.48rem/1 var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-micro)/var(--_leading-solid) var(--_font-mono);
 }
 
 .steptrace .steptrace__binary-tree-empty {
   color: var(--_muted);
-  font: 600 0.75rem/1 var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-ui) / var(--_leading-solid) var(--_font-mono);
 }
 
 .steptrace .steptrace__binary-tree-success {

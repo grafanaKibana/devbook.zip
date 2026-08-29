@@ -9,8 +9,7 @@ export function parseSegmentTreeConfig(config: StepTraceConfig): SegmentTreeConf
     values.length < 4 ||
     values.length > 8 ||
     values.some(
-      (value) =>
-        typeof value !== "number" || !Number.isFinite(value) || !Number.isInteger(value),
+      (value) => typeof value !== "number" || !Number.isFinite(value) || !Number.isInteger(value),
     )
   )
     throw new Error(`steptrace: segment-tree requires 4 to 8 finite integer values.`)

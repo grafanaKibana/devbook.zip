@@ -1,7 +1,7 @@
 .steptrace .steptrace__graph-representation {
   display: grid;
   min-block-size: 21rem;
-  gap: 0.65rem;
+  gap: var(--_space-4);
 }
 
 .steptrace .steptrace__graph-rep-topology {
@@ -56,7 +56,7 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   align-items: start;
-  gap: 0.75rem;
+  gap: var(--_space-4);
 }
 
 .steptrace .steptrace__graph-rep-group,
@@ -67,15 +67,15 @@
 .steptrace .steptrace__graph-rep-lists {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 3fr);
-  gap: 0.75rem;
+  gap: var(--_space-4);
 }
 
 .steptrace .steptrace__graph-rep-heading {
   margin: 0;
-  padding: 0 0.2rem 0.35rem;
+  padding: 0 var(--_space-1) var(--_space-2);
   color: var(--_muted);
-  font: 700 0.65rem/1 var(--_font-head);
-  letter-spacing: 0.04em;
+  font: var(--_weight-strong) var(--_type-sm)/var(--_leading-solid) var(--_font-body);
+  letter-spacing: var(--_tracking-caps);
   text-transform: uppercase;
 }
 
@@ -88,8 +88,8 @@
 }
 
 .steptrace .steptrace__graph-rep-matrix-cell[data-value="1"] .steptrace__dp-value {
-  color: var(--_green);
-  font-weight: 800;
+  color: var(--_green-text);
+  font-weight: var(--_weight-strong);
 }
 
 .steptrace .steptrace__graph-rep-matrix-cell[data-changed="1"] {
@@ -118,14 +118,18 @@
 
 .steptrace .steptrace__graph-rep-list-row .steptrace__contiguous-value,
 .steptrace .steptrace__graph-rep-edge-row .steptrace__contiguous-value {
-  padding: 0.2rem;
-  font-size: 0.72rem;
+  padding: var(--_space-1);
+  font-size: var(--_type-md);
   white-space: nowrap;
+}
+
+.steptrace .steptrace__graph-rep-edge-row .steptrace__contiguous-value {
+  padding-inline: var(--_space-0);
 }
 
 .steptrace .steptrace__graph-rep-list-row .steptrace__contiguous-index,
 .steptrace .steptrace__graph-rep-edge-row .steptrace__contiguous-index {
-  font-size: 0.5rem;
+  font-size: var(--_type-micro);
 }
 
 @container steptrace-structure (max-width: 36rem) {

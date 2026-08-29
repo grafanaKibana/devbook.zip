@@ -519,12 +519,12 @@ export function createMount(
       }
       // sub-pixel heights throughout: offsetHeight rounds, and rounding two history
       // rows down is enough to clip the top line by a pixel.
-      const PROBE =
-        "position:absolute;visibility:hidden;pointer-events:none;left:0;right:0;height:auto"
       const tall = (node) => node.getBoundingClientRect().height
       const probes = player.frames.map((frame) => {
-        const probe = el("li", "steptrace__log-line steptrace__log-line--cur")
-        probe.style.cssText = PROBE
+        const probe = el(
+          "li",
+          "steptrace__log-line steptrace__log-line--cur steptrace__measure-probe",
+        )
         const number = el("span", "steptrace__log-num")
         number.textContent = "00"
         const text = el("span", "steptrace__log-text")
@@ -534,7 +534,7 @@ export function createMount(
       })
       const resultProbe = insight.cloneNode(true)
       resultProbe.hidden = false
-      resultProbe.style.cssText = PROBE
+      resultProbe.classList.add("steptrace__measure-probe")
       log.append(...probes, resultProbe)
       let maxRow = tall(resultProbe)
       for (const probe of probes) maxRow = Math.max(maxRow, tall(probe))
@@ -645,7 +645,8 @@ export function createMount(
         ll.num.textContent = pad2(fi + 1)
         ll.txt.textContent = stripTags(player.frames[fi].message)
         ll.line.classList.toggle("steptrace__log-line--cur", cur)
-        ll.line.style.opacity = cur ? "" : String(fadeFor(i - fi))
+        if (cur) ll.line.style.removeProperty("--_history-opacity")
+        else ll.line.style.setProperty("--_history-opacity", String(fadeFor(i - fi)))
       }
       fitLog(terminal)
       // brief scroll between steps: the block eases in from a small offset in the
@@ -654,11 +655,10 @@ export function createMount(
       const dir = lastRailI == null ? 0 : Math.sign(i - lastRailI)
       lastRailI = i
       if (dir !== 0) {
-        log.style.transition = "none"
-        log.style.transform = `translateY(${dir > 0 ? "0.55rem" : "-0.55rem"})`
+        log.classList.remove("steptrace__log--moving")
+        log.dataset.motionDirection = dir > 0 ? "forward" : "backward"
         void log.offsetHeight // register the start offset before animating home
-        log.style.transition = "transform 0.26s var(--_spring)"
-        log.style.transform = "translateY(0)"
+        log.classList.add("steptrace__log--moving")
       }
       const chapter = milestoneAt(currentMilestones, i)
       phaseName.textContent = chapter ? chapter.label : "Step"
@@ -729,7 +729,7 @@ export function createMount(
         row.setAttribute("aria-describedby", hintId)
         if (r.sw) {
           const sw = el("span", "steptrace__watch-sw")
-          sw.style.background = r.sw
+          sw.style.setProperty("--_watch-color", r.sw)
           row.append(sw)
         }
         const kk = el("span", "steptrace__watch-k")
@@ -787,10 +787,13 @@ export function createMount(
       })
       if (built.family) root.dataset.visualFamily = built.family.id
       else delete root.dataset.visualFamily
+      if (built.legacyRenderer) root.dataset.legacyRenderer = built.legacyRenderer
+      else delete root.dataset.legacyRenderer
+      root.classList.toggle("steptrace--backtrack", built.kind === "backtrack")
       currentGraph = built.graph || null
       currentMilestones = buildMilestones(state.algorithm, built.kind, built.frames)
       let view
-      if (built.family) view = built.family.createView(built.frames)
+      if (built.family) view = built.family.createView(built.frames, built)
       else if (built.kind === "graph")
         view = makeGraphView(built.frames, built.graph, built.frontierLabel)
       else if (built.kind === "search") view = makeSearchView(built.frames)
@@ -811,7 +814,13 @@ export function createMount(
       root.classList.toggle(
         "steptrace--compact-stage",
         built.family
-          ? ["monotone-boundary", "prefix-sum", "stack-sequence"].includes(built.family.id)
+          ? [
+              "indexed-pointer-window",
+              "monotone-boundary",
+              "prefix-sum",
+              "stack-sequence",
+              "string-match",
+            ].includes(built.family.id)
           : ["bits", "pointers", "string"].includes(built.kind),
       )
       stageCol.classList.toggle("steptrace__stage-col--bottom", stageAlignment === "bottom")
@@ -962,6 +971,7 @@ export function createMount(
           "steptrace--stable-stage",
           "steptrace--compact-stage",
           "steptrace--narrow",
+          "steptrace--backtrack",
         )
       },
     }

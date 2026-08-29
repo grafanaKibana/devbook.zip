@@ -1,6 +1,10 @@
+@use "../../steptrace/src/styles/tokens";
+
 // Quartz-only token bindings. Shared StepTrace styling is emitted lazily as
 // /static/steptrace/engine.css so pages without a visualizer do not pay for it.
 .steptrace {
+  @include tokens.light-theme;
+
   --st-page: var(--light);
   --st-surface: var(--lightgray);
   --st-text: var(--darkgray);
@@ -13,24 +17,12 @@
   --st-accent: var(--secondary);
   --st-accent-gradient: var(--accent-gradient);
   --st-on-accent: var(--light);
-  --st-panel-shadow: rgb(0 0 0 / 0.12);
-  --st-neutral: var(--gray);
-  --st-state-amber: #d97706;
-  --st-state-violet: #7c3aed;
-  --st-state-blue: #2563eb;
-  --st-state-green: var(--secondary);
-  --st-held-bg: #92400e;
-  --st-held-fg: #ffffff;
-  --st-font-head: var(--headerFont, "Schibsted Grotesk", sans-serif);
   --st-font-body: var(--bodyFont, "Source Sans Pro", sans-serif);
   --st-font-mono: var(--codeFont, "IBM Plex Mono", monospace);
 }
 
 :root[saved-theme="dark"] .steptrace {
-  --st-panel-shadow: rgb(0 0 0 / 0.32);
-  --st-state-amber: #f59e0b;
-  --st-state-violet: #a78bfa;
-  --st-state-blue: #60a5fa;
-  --st-held-bg: #fbbf24;
-  --st-held-fg: #1f2937;
+  @include tokens.dark-theme;
+
+  --st-context-text: #{tokens.$context-text-dark};
 }

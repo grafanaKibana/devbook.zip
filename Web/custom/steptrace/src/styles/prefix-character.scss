@@ -17,7 +17,7 @@
 }
 
 .steptrace__prefix-character:focus-visible {
-  border-radius: 0.5rem;
+  border-radius: var(--_radius-md);
   box-shadow: 0 0 0 2px var(--_blue);
 }
 
@@ -62,8 +62,9 @@
 .steptrace__prefix-edge-role {
   fill: var(--_muted);
   font-family: var(--_font-mono);
-  font-size: clamp(0.62rem, 2.5vw, 0.72rem);
-  font-weight: 600;
+  /* steptrace-exception: prefix-edge-label-fit | category=responsive | rationale=fits edge roles across graph widths | evidence=.omx/evidence/steptrace-design-system-refactor/visual/candidate/g005-candidate-k/summary.json */
+  font-size: clamp(var(--_type-xs), 2.5vw, var(--_type-md));
+  font-weight: var(--_weight-strong);
 }
 
 .steptrace__prefix-edge-role[data-state="active"] {
@@ -86,7 +87,7 @@
 
 .steptrace__prefix-node > text {
   fill: var(--_text);
-  font: 600 0.66rem/1 var(--_font-head);
+  font: var(--_weight-strong) var(--_type-sm)/var(--_leading-solid) var(--_font-mono);
 }
 
 .steptrace__prefix-edge[data-state="active"],
@@ -120,9 +121,9 @@
 .steptrace__prefix-text {
   display: flex;
   justify-content: center;
-  gap: 0.22rem;
+  gap: var(--_space-1);
   min-height: 1.8rem;
-  margin-bottom: 0.2rem;
+  margin-bottom: var(--_space-1);
   transition: opacity var(--_dur-quick) var(--_ease-decelerate);
 }
 
@@ -136,9 +137,9 @@
   width: 1.55rem;
   height: 1.55rem;
   place-items: center;
-  border: 1px solid var(--_border);
-  border-radius: 0.3rem;
-  font: 600 0.8rem/1 var(--_font-mono);
+  border: var(--_stroke-hair) solid var(--_border);
+  border-radius: var(--_radius-xs);
+  font: var(--_weight-strong) var(--_type-lg)/var(--_leading-solid) var(--_font-mono);
   transition:
     background var(--_dur-quick) var(--_ease-decelerate),
     border-color var(--_dur-quick) var(--_ease-decelerate);
@@ -154,27 +155,20 @@
   background: color-mix(in srgb, var(--_green) 10%, transparent);
 }
 
-.steptrace__prefix-swatch {
-  width: 0.55rem;
-  height: 0.55rem;
-  border: 2px solid var(--_neutral);
-  border-radius: 50%;
-}
-
 .steptrace__prefix-swatch[data-state="active"] {
-  border-color: var(--_blue);
+  background: var(--_blue);
 }
 
 .steptrace__prefix-swatch[data-state="reused"] {
-  border-color: var(--_green);
+  background: var(--_green);
 }
 
 .steptrace__prefix-swatch[data-state="created"] {
-  border-color: var(--_amber);
+  background: var(--_amber);
 }
 
 .steptrace__prefix-swatch[data-state="terminal"] {
-  border-color: var(--_green);
+  background: var(--_green);
 }
 
 @media (max-width: 560px) {

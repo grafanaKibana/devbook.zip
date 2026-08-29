@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.516Z
-modified: 2026-08-20T20:41:15.517Z
-published: 2026-08-20T20:41:15.517Z
+modified: 2026-08-26T18:31:48.315Z
+published: 2026-08-26T18:31:48.315Z
 topic:
   - Computer Science
 subtopic:
@@ -43,11 +43,11 @@ tab: Complexity
   "variables": {
     "branchingFactor": {
       "symbol": "b",
-      "description": "search-tree branching factor"
+      "description": "fixed search-tree branching factor, b > 1"
     },
     "secondarySize": {
       "symbol": "m",
-      "description": "maximum search depth"
+      "description": "maximum search depth; the horizontal axis samples m"
     }
   },
   "resources": {
@@ -59,20 +59,23 @@ tab: Complexity
           "operation": "Best",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Nodes generated or expanded",
-              "formula": "O(b·m)"
+              "formula": "O(b·m)",
+              "curveId": "linear"
             }
           ]
         },
         {
           "kind": "operation",
-          "operation": "Typical",
+          "operation": "Estimate",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Nodes generated or expanded",
-              "formula": "distribution-dependent; between O(b·m) and O(b^m)"
+              "formula": "distribution-dependent; between O(b·m) and O(b^m)",
+              "curveFrom": "linear",
+              "curveTo": "exponential"
             }
           ]
         },
@@ -81,9 +84,10 @@ tab: Complexity
           "operation": "Worst",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Nodes generated or expanded",
-              "formula": "O(b^m)"
+              "formula": "O(b^m)",
+              "curveId": "exponential"
             }
           ]
         }
@@ -97,20 +101,23 @@ tab: Complexity
           "operation": "Best",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Auxiliary space",
-              "formula": "O(b·m)"
+              "formula": "O(b·m)",
+              "curveId": "linear"
             }
           ]
         },
         {
           "kind": "operation",
-          "operation": "Typical",
+          "operation": "Estimate",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Auxiliary space",
-              "formula": "up to O(b^m)"
+              "formula": "distribution-dependent; between O(b·m) and O(b^m)",
+              "curveFrom": "linear",
+              "curveTo": "exponential"
             }
           ]
         },
@@ -119,9 +126,10 @@ tab: Complexity
           "operation": "Worst",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Auxiliary space",
-              "formula": "O(b^m)"
+              "formula": "O(b^m)",
+              "curveId": "exponential"
             }
           ]
         }

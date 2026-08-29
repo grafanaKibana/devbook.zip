@@ -374,7 +374,7 @@ function createBarTracker(stage, bars, markers) {
       const read = reads[m];
       const mk = markers[m];
       if (read === MARKER_ABSENT) {
-        mk.el.style.opacity = "0";
+        mk.el.dataset.visible = "false";
         sx[m] = null;
         sy[m] = null;
         vx[m] = 0;
@@ -410,7 +410,7 @@ function createBarTracker(stage, bars, markers) {
         moving = true;
       px[m] = target;
       mk.el.style.transform = `translate(${sx[m].toFixed(2)}px, ${sy[m].toFixed(2)}px)`;
-      mk.el.style.opacity = "1";
+      mk.el.dataset.visible = "true";
     }
     for (let s = sequences.length - 1; s >= 0; s--) {
       if (reduced) {
@@ -430,13 +430,13 @@ function createBarTracker(stage, bars, markers) {
         fvx[b] = 0;
         foHold[b] = false;
         bar.style.transform = "";
-        bar.style.zIndex = "";
+        delete bar.dataset.flying;
         delete bar.dataset.stage;
         continue;
       }
       if (foHold[b]) {
         bar.style.transform = `translateX(${fox[b].toFixed(2)}px)`;
-        bar.style.zIndex = "2";
+        bar.dataset.flying = "true";
         moving = true;
         continue;
       }
@@ -453,10 +453,10 @@ function createBarTracker(stage, bars, markers) {
         fvx[b] = 0;
         foHold[b] = false;
         bar.style.transform = "";
-        bar.style.zIndex = "";
+        delete bar.dataset.flying;
       } else {
         bar.style.transform = `translateX(${fox[b].toFixed(2)}px)`;
-        bar.style.zIndex = "2";
+        bar.dataset.flying = "true";
         moving = true;
       }
     }
@@ -571,7 +571,11 @@ function makeSearchView(frames, semantics = legacySearchViewSemantics) {
       b.num.textContent = frame.array[k];
       b.bar.dataset.state = semantics.stateForIndex(frame, k);
     }
-    status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· ${frame.comparisons} probe${frame.comparisons === 1 ? "" : "s"} · step ${i + 1}/${total}</span>`;
+    setStatus(
+      status,
+      frame.message,
+      `· ${frame.comparisons} probe${frame.comparisons === 1 ? "" : "s"} · step ${i + 1}/${total}`
+    );
   }
   function watch(frame) {
     return semantics.watchRows(frame, frames);
@@ -659,10 +663,10 @@ function makeBoundarySearchView(frames, descriptor) {
   root.append(domain, evaluation);
   const legend = makeLegend(
     [
-      ["range", "unknown candidate"],
-      ["infeasible", "known too small"],
-      ["feasible", "known feasible"],
-      ["probe", "current check"]
+      ["range", "Unknown Candidate"],
+      ["infeasible", "Known Too Small"],
+      ["feasible", "Known Feasible"],
+      ["probe", "Current Check"]
     ].map(([state, label]) => ({
       state,
       label,
@@ -721,7 +725,11 @@ function makeBoundarySearchView(frames, descriptor) {
       row.rowLabel.textContent = lane ? `Day ${model.allowed + extraIndex + 1}` : "—";
       packageTokens(row.packages, lane?.items || []);
     }
-    status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· ${frame.probes} check${frame.probes === 1 ? "" : "s"} · step ${index + 1}/${totalFrames}</span>`;
+    setStatus(
+      status,
+      frame.message,
+      `· ${frame.probes} check${frame.probes === 1 ? "" : "s"} · step ${index + 1}/${totalFrames}`
+    );
   }
   return {
     nodes: [root, legend, status],
@@ -783,7 +791,7 @@ function makeMatchView(frames) {
       tcells[frame.cmpT].dataset.state = frame.cmpResult || "probe";
     if (frame.cmpP != null && pcells[frame.cmpP])
       pcells[frame.cmpP].dataset.state = frame.cmpResult || "probe";
-    status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${i + 1}/${total}</span>`;
+    setStatus(status, frame.message, `· step ${i + 1}/${total}`);
   }
   function watch(frame) {
     const rows = [
@@ -866,7 +874,7 @@ function makeBoyerMooreView(frames) {
     if (frame.type === "match" || frame.shiftDecision?.winner === "full-match" && frame.found.includes(frame.shift))
       for (const cell of patternCells) cell.dataset.state = "found";
     applyGeom();
-    status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${index + 1}/${total}</span>`;
+    setStatus(status, frame.message, `· step ${index + 1}/${total}`);
   }
   function watch(frame) {
     const suffix = frame.matchedFrom == null || frame.matchedFrom >= pattern.length ? "—" : pattern.slice(frame.matchedFrom);
@@ -1046,7 +1054,7 @@ function makeZArrayView(frames) {
       stringCells[frame.compare.candidate].dataset.state = state;
     }
     syncLayout();
-    status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${index + 1}/${total}</span>`;
+    setStatus(status, frame.message, `· step ${index + 1}/${total}`);
   }
   function watch(frame) {
     const box = frame.box || [0, 0];
@@ -1122,16 +1130,16 @@ function makePointerView(frames) {
       c.dataset.end = win && k === win[0] ? "l" : win && k === win[1] ? "r" : "";
     }
     if (!win) {
-      brackets.style.display = "none";
+      brackets.hidden = true;
     } else {
-      brackets.style.display = "";
+      brackets.hidden = false;
       brL.style.left = win[0] / n * 100 + "%";
       brR.style.left = (win[1] + 1) / n * 100 + "%";
       brL.dataset.round = win[0] === 0 ? "1" : "0";
       brR.dataset.round = win[1] === n - 1 ? "1" : "0";
       brackets.dataset.match = matched ? "1" : "0";
     }
-    status.innerHTML = escapeHtml(frame.message);
+    setStatus(status, frame.message);
   }
   function watch(frame) {
     const color = {
@@ -1264,20 +1272,20 @@ function makeCoinChangeStoryView(frames) {
     stage.append(amountBoard);
   }
   const legendItems = first.approach === "memoization" ? [
-    ["active", "coin being tried"],
-    ["selected", "current branch"],
-    ["stored", "saved remainder"],
-    ["hit", "answer reused"]
+    ["active", "Coin Being Tried"],
+    ["selected", "Current Branch"],
+    ["stored", "Saved Remainder"],
+    ["hit", "Answer Reused"]
   ] : first.approach === "tabulation" ? [
-    ["current", "amount being written"],
-    ["dependency", "smaller amount read"],
-    ["stored", "solved amount"],
-    ["best", "optimal amount chain"]
+    ["current", "Amount Being Written"],
+    ["dependency", "Smaller Amount Read"],
+    ["stored", "Solved Amount"],
+    ["best", "Optimal Amount Chain"]
   ] : [
-    ["active", "coin being tried"],
-    ["selected", "coins on the counter"],
-    ["repeated", "repeated subproblem"],
-    ["best", "best exact change"]
+    ["active", "Coin Being Tried"],
+    ["selected", "Coins on the Counter"],
+    ["repeated", "Repeated Subproblem"],
+    ["best", "Best Exact Change"]
   ];
   const legend = makeLegend(
     legendItems.map(([state, label]) => ({
@@ -1361,7 +1369,7 @@ function makeCoinChangeStoryView(frames) {
       paintAttempts(frame);
       paintMemo(frame);
       paintAmounts(frame);
-      status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${index + 1}/${total}</span>`;
+      setStatus(status, frame.message, `· step ${index + 1}/${total}`);
     },
     watch(frame) {
       const plan = frame.selected.length ? frame.selected.map((coin) => `${coin}¢`).join(" + ") : "—";
@@ -1504,20 +1512,20 @@ function makeGridPathStoryView(frames) {
   table.append(tfoot);
   const status = statusEl();
   const legendItems = first.approach === "memoization" ? [
-    ["current", "tile being evaluated"],
-    ["stored", "saved remaining cost"],
-    ["repeated", "saved answer reused"],
-    ["best", "best complete route"]
+    ["current", "Tile Being Evaluated"],
+    ["stored", "Saved Remaining Cost"],
+    ["repeated", "Saved Answer Reused"],
+    ["best", "Best Complete Route"]
   ] : first.approach === "tabulation" ? [
-    ["current", "tile being written"],
-    ["dependency", "written neighbour read"],
-    ["stored", "remaining cost stored"],
-    ["best", "optimal route"]
+    ["current", "Tile Being Written"],
+    ["dependency", "Written Neighbour Read"],
+    ["stored", "Remaining Cost Stored"],
+    ["best", "Optimal Route"]
   ] : [
-    ["current", "tile being considered"],
-    ["path", "current route"],
-    ["repeated", "tile reached again"],
-    ["best", "best complete route"]
+    ["current", "Tile Being Considered"],
+    ["path", "Current Route"],
+    ["repeated", "Tile Reached Again"],
+    ["best", "Best Complete Route"]
   ];
   const legend = makeLegend(
     legendItems.map(([state, label]) => ({
@@ -1555,7 +1563,7 @@ function makeGridPathStoryView(frames) {
       footerStart.textContent = frame.approach === "greedy" ? "Greedy route" : frame.approach === "naive" ? "Recursive routes" : frame.approach === "memoization" ? "Memoized route" : "Fill from the goal";
       footerEnd.textContent = frame.approach === "memoization" ? `${storedCount} answers saved` : frame.approach === "tabulation" ? `${storedCount}/${cells.length * cells[0].length} tiles written` : frame.bestCost == null ? `route cost ${frame.routeCost}` : `best route ${frame.bestCost}`;
       footerRow.setAttribute("aria-label", `${footerStart.textContent}; ${footerEnd.textContent}`);
-      status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${index + 1}/${total}</span>`;
+      setStatus(status, frame.message, `· step ${index + 1}/${total}`);
     },
     watch(frame) {
       const current = frame.current ? `R${frame.current[0] + 1}C${frame.current[1] + 1}` : "—";
@@ -1753,7 +1761,7 @@ function makeDPView(frames, semantics = lcsMatrixGridSemantics) {
         td.setAttribute("aria-label", semantics.cellLabel(frame, r, c));
       }
     }
-    status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${i + 1}/${total}</span>`;
+    setStatus(status, frame.message, `· step ${i + 1}/${total}`);
   }
   function watch(frame) {
     return semantics.watchRows(frame);
@@ -1775,13 +1783,7 @@ function makeUnionFindView(frames) {
   const width = MX * 2 + Math.max(0, n - 1) * SP + UR * 2;
   const height2 = 180;
   const cx = (i) => MX + UR + i * SP;
-  const PALETTE = [
-    "var(--_blue)",
-    "var(--_violet)",
-    "var(--_amber)",
-    "var(--_green)",
-    "var(--_muted)"
-  ];
+  const PALETTE_SIZE = 5;
   const svg = document.createElementNS(SVGNS, "svg");
   svg.setAttribute("class", "steptrace__svg steptrace__uf");
   svg.setAttribute("viewBox", `0 0 ${width} ${height2}`);
@@ -1819,15 +1821,12 @@ function makeUnionFindView(frames) {
   const status = statusEl();
   function paint(frame, i, total) {
     const uniqueRoots = [...new Set(frame.roots)];
-    const rootColor = {};
-    uniqueRoots.forEach((r, idx) => rootColor[r] = PALETTE[idx % PALETTE.length]);
+    const rootColor = new Map(uniqueRoots.map((root, index) => [root, index % PALETTE_SIZE]));
     const hl = new Set(frame.highlight);
     const ae = frame.activeEdge;
     for (let k = 0; k < n; k++) {
       const ne = nodeEls[k];
-      const col = rootColor[frame.roots[k]];
-      ne.circle.style.stroke = col;
-      ne.circle.style.fill = `color-mix(in srgb, ${col} 22%, transparent)`;
+      ne.g.dataset.set = String(rootColor.get(frame.roots[k]));
       ne.g.dataset.root = frame.parent[k] === k ? "true" : "false";
       ne.g.dataset.hl = hl.has(k) ? "true" : "false";
     }
@@ -1841,12 +1840,11 @@ function makeUnionFindView(frames) {
       const arc = document.createElementNS(SVGNS, "path");
       arc.setAttribute("class", "steptrace__ufarc");
       arc.setAttribute("d", `M ${x1} ${BASE - UR} Q ${midX} ${TOP3} ${x2} ${BASE - UR}`);
-      arc.setAttribute("fill", "none");
       const active = ae && ae[0] === k && ae[1] === p || hl.has(k) && hl.has(p);
       arc.dataset.active = active ? "true" : "false";
       arcLayer.append(arc);
     }
-    status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${i + 1}/${total}</span>`;
+    setStatus(status, frame.message, `· step ${i + 1}/${total}`);
   }
   function watch(frame) {
     const sets = new Set(frame.roots).size;
@@ -1930,7 +1928,7 @@ function makeBitsView(frames) {
         c.dataset.state = data.state[bi] || "";
       }
     }
-    status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${i + 1}/${stepTotal}</span>`;
+    setStatus(status, frame.message, `· step ${i + 1}/${stepTotal}`);
   }
   function watch(frame) {
     return [
@@ -2080,9 +2078,11 @@ function makeBacktrackView(frames) {
   function makeTreeLayout() {
     const leafGap = 36;
     const depthGap = 42;
+    const fixedNodeClearance = GRAPH_NODE_RADIUS_PX + GRAPH_NODE_HALO_GAP_PX + GRAPH_EDGE_ARROW_GAP_PX + 2;
+    const treePad = fixedNodeClearance * 2 + 4;
     const leafPad = 90;
-    const leafEndPad = 10;
-    const depthPad = 20;
+    const leafEndPad = treePad;
+    const depthPad = treePad;
     const positions = Object.fromEntries(
       treeNodes.map((node2) => {
         const leaf = leafSlots.get(node2.id);
@@ -2202,10 +2202,15 @@ function makeBacktrackView(frames) {
   treeCanvas.append(treeSvg);
   const treeLegend = makeLegend(
     [
-      { label: "branch", state: "split", swatchClass: "steptrace__swatch steptrace__rtswatch" },
-      { label: "prune", state: "prune", swatchClass: "steptrace__swatch steptrace__rtswatch" },
-      { label: "return", state: "return", swatchClass: "steptrace__swatch steptrace__rtswatch" },
-      { label: "solution", state: "combine", swatchClass: "steptrace__swatch steptrace__rtswatch" }
+      { label: "Branch", state: "split", swatchClass: "steptrace__swatch steptrace__rtswatch" },
+      { label: "Prune", state: "prune", swatchClass: "steptrace__swatch steptrace__rtswatch" },
+      { label: "Return", state: "return", swatchClass: "steptrace__swatch steptrace__rtswatch" },
+      {
+        label: "Solution",
+        state: "combine",
+        swatchClass: "steptrace__swatch steptrace__rtswatch",
+        marker: successMarker()
+      }
     ],
     "Decision tree state legend",
     "steptrace__bt-tree-legend"
@@ -2394,7 +2399,7 @@ function makeBacktrackView(frames) {
       edge.element.dataset.collapsed = visible && !onPath && !onSolution && !returning ? "true" : "false";
       edge.element.setAttribute("marker-start", returning ? `url(#${returnMarkerId})` : "none");
     }
-    status.innerHTML = escapeHtml(frame.message);
+    setStatus(status, frame.message);
   }
   function watch(frame) {
     const cur = frame.cursor;
@@ -2776,7 +2781,7 @@ function makeExecutionTreeView(frames, descriptor) {
       edge.element.dataset.path = path.has(edge.from) && path.has(edge.to) ? "true" : "false";
       edge.element.dataset.related = model.active === edge.from && related.has(edge.to) ? "true" : "false";
     }
-    status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· step ${index + 1}/${total}</span>`;
+    setStatus(status, frame.message, `· step ${index + 1}/${total}`);
   }
   function watch(frame) {
     const model = descriptor.frameModel(frame);
@@ -2881,16 +2886,16 @@ function makeGraphView(frames, graph, frontierLabel) {
     mark.setAttribute("height", "12");
     mark.setAttribute("viewBox", "0 0 24 24");
     mark.setAttribute("aria-hidden", "true");
-    mark.innerHTML = '<rect data-state-icon="current" x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/><path data-state-icon="frontier" d="m12 3 9 9-9 9-9-9Z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/>';
+    mark.innerHTML = '<rect data-state-icon="current" x="6" y="6" width="12" height="12" rx="2"/><path data-state-icon="frontier" d="m12 3 9 9-9 9-9-9Z"/>';
     g.append(back, circle, id, dist, mark);
     svg.append(g);
     nodeEls[n.id] = { g, dist, mark };
   }
   const legend = makeLegend(
     [
-      { label: "current", swatchClass: "steptrace__swatch steptrace__swatch--current" },
-      { label: "frontier", swatchClass: "steptrace__swatch steptrace__swatch--frontier" },
-      { label: "visited", swatchClass: "steptrace__swatch steptrace__swatch--visited" }
+      { label: "Current", swatchClass: "steptrace__swatch steptrace__swatch--current" },
+      { label: "Frontier", swatchClass: "steptrace__swatch steptrace__swatch--frontier" },
+      { label: "Visited", swatchClass: "steptrace__swatch steptrace__swatch--visited" }
     ],
     "Graph state legend"
   );
@@ -2941,7 +2946,7 @@ function makeGraphView(frames, graph, frontierLabel) {
       e.el.dataset.selected = sel ? "true" : "false";
       e.el.dataset.dim = selected.length && !sel ? "true" : "false";
     }
-    status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· ${frame.visited.length} visited · step ${i + 1}/${total}</span>`;
+    setStatus(status, frame.message, `· ${frame.visited.length} visited · step ${i + 1}/${total}`);
   }
   function watch(frame) {
     return [
@@ -2965,11 +2970,23 @@ function statusEl() {
   status.setAttribute("aria-live", "polite");
   return status;
 }
+function setStatus(status, message, counts = null) {
+  status.replaceChildren(document.createTextNode(message));
+  if (counts == null) return;
+  const count = el("span", "steptrace__counts");
+  count.textContent = counts;
+  status.append(" ", count);
+}
 function makeLegend(items, ariaLabel, extraClass = "") {
   const legend = el("div", `steptrace__legend${extraClass ? ` ${extraClass}` : ""}`);
   legend.setAttribute("role", "list");
   legend.setAttribute("aria-label", ariaLabel);
   for (const item of items) {
+    if (/(^|[\s/()–-])(?!(?:a|an|and|as|at|by|for|from|in|of|on|or|the|to|with)(?=$|[\s/()–-]))[a-z]/.test(
+      item.label
+    )) {
+      throw new Error(`Legend labels must be authored in Title Case: ${item.label}`);
+    }
     const row = el("span", "steptrace__legend-row");
     row.setAttribute("role", "listitem");
     const swatch = el(
@@ -2978,6 +2995,7 @@ function makeLegend(items, ariaLabel, extraClass = "") {
     );
     if (item.state) swatch.dataset.state = item.state;
     if (item.role) swatch.dataset.role = item.role;
+    if (item.carrier) swatch.dataset.carrier = item.carrier;
     if (item.color) swatch.style.setProperty("--_legend-color", item.color);
     if (item.marker) swatch.append(item.marker);
     row.append(swatch, document.createTextNode(item.label));
@@ -2989,12 +3007,6 @@ function el(tag, cls = "") {
   const n = document.createElement(tag);
   if (cls) n.className = cls;
   return n;
-}
-function escapeHtml(s) {
-  return String(s).replace(
-    /[&<>"]/g,
-    (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]
-  );
 }
 function stripTags(s) {
   return String(s).replace(/<[^>]*>/g, "");
@@ -3031,7 +3043,8 @@ function buildMilestones(algorithm, kind, frames) {
   const familyProfile = frames[0]?.profile;
   const firstDistributionPass = frames.find((frame) => frame.type === "pass");
   const prefixOperation = (frame) => frame.operation && frame.key ? `${frame.operation[0].toUpperCase()}${frame.operation.slice(1)} ${frame.key}` : null;
-  const initial = kind === "sort" ? firstGap != null ? `Gap ${firstGap}` : familyProfile === "cyclic" ? "Place values" : familyProfile === "counting" ? "Tally keys" : familyProfile === "radix" ? `${firstDistributionPass?.passLabel || "Digit"} pass` : familyProfile === "bucket" ? "Scatter ranges" : familyProfile === "introsort" ? "Quicksort" : algorithm === "bubble-sort" ? "Pass 1" : algorithm === "insertion-sort" ? "Prefix 1" : algorithm === "selection-sort" ? "Select 1" : algorithm === "heap-sort" ? "Build heap" : algorithm === "merge-sort" ? "Runs of 1" : "Partition" : kind === "search" ? familyProfile === "exponential" ? "Gallop" : familyProfile === "interpolation" ? "Estimate" : familyProfile === "jump" ? "Jump blocks" : familyProfile === "ternary" ? "Narrow peak" : familyProfile === "shipping-capacity" ? "Answer range" : "Search range" : kind === "string" ? familyProfile === "z-array" ? "Initialize Z" : familyProfile === "boyer-moore" ? "Preprocess rules" : ["trie", "aho-corasick", "ternary-search-tree"].includes(familyProfile) ? prefixOperation(frames[0]) : "Shift 0" : kind === "backtrack" ? "Depth 0" : kind === "rectree" ? familyProfile === "divide-and-conquer" ? "Whole problem" : familyProfile === "branch-and-bound" ? "Root bound 116" : familyProfile === "merge-sort" ? "Whole array" : familyProfile === "memoization" ? "Empty cache" : familyProfile === "coin-change-top-down" ? "Amount 30¢" : familyProfile === "grid-path-top-down" ? "Loading bay" : "Call tree" : kind === "pointers" && ["merge-intervals", "activity-selection"].includes(familyProfile) ? "Input order" : kind === "pointers" && familyProfile === "fast-slow-pointers" ? "Start together" : "Initialize";
+  let initial = kind === "sort" ? firstGap != null ? `Gap ${firstGap}` : familyProfile === "cyclic" ? "Place values" : familyProfile === "counting" ? "Tally keys" : familyProfile === "radix" ? `${firstDistributionPass?.passLabel || "Digit"} pass` : familyProfile === "bucket" ? "Scatter ranges" : familyProfile === "introsort" ? "Quicksort" : algorithm === "bubble-sort" ? "Pass 1" : algorithm === "insertion-sort" ? "Prefix 1" : algorithm === "selection-sort" ? "Select 1" : algorithm === "heap-sort" ? "Build heap" : algorithm === "merge-sort" ? "Runs of 1" : "Partition" : kind === "search" ? familyProfile === "exponential" ? "Gallop" : familyProfile === "interpolation" ? "Estimate" : familyProfile === "jump" ? "Jump blocks" : familyProfile === "ternary" ? "Narrow peak" : familyProfile === "shipping-capacity" ? "Answer range" : "Search range" : kind === "string" ? familyProfile === "z-array" ? "Initialize Z" : familyProfile === "boyer-moore" ? "Preprocess rules" : ["trie", "aho-corasick", "ternary-search-tree"].includes(familyProfile) ? prefixOperation(frames[0]) : "Shift 0" : kind === "backtrack" ? "Depth 0" : kind === "rectree" ? familyProfile === "divide-and-conquer" ? "Whole problem" : familyProfile === "branch-and-bound" ? "Root bound 116" : familyProfile === "merge-sort" ? "Whole array" : familyProfile === "memoization" ? "Empty cache" : familyProfile === "coin-change-top-down" ? "Amount 30¢" : familyProfile === "grid-path-top-down" ? "Loading bay" : "Call tree" : kind === "pointers" && ["merge-intervals", "activity-selection"].includes(familyProfile) ? "Input order" : kind === "pointers" && familyProfile === "fast-slow-pointers" ? "Start together" : "Initialize";
+  if (familyProfile === "articulation-points-and-bridges") initial = "Discover DFS Tree";
   push(0, initial);
   let lastRange = "";
   let lastGap = firstGap;
@@ -3075,6 +3088,10 @@ function buildMilestones(algorithm, kind, frames) {
         push(i, algorithm === "bubble-sort" ? `Pass ${count}` : `${word} ${count}`);
       }
       lastRange = range || lastRange;
+    } else if (familyProfile === "articulation-points-and-bridges") {
+      if (f.type === "back-edge") push(i, "Lower via Back Edge");
+      else if (f.type === "cut") push(i, "Identify Cuts");
+      else if (f.type === "propagate") push(i, "Propagate Low Links");
     } else if (kind === "graph" && (f.type === "visit" || f.type === "expand") && f.current != null) {
       const word = algorithm === "a-star" ? "Expand" : algorithm === "dijkstra" ? "Settle" : algorithm === "topological-sort" ? "Output" : "Visit";
       push(i, `${word} ${f.current}`);
@@ -3440,9 +3457,9 @@ var init_render = __esm({
       minSvgWidth: 320,
       stateLabels: {},
       legend: [
-        { state: "compute", label: "compute" },
-        { state: "miss", label: "store (miss)" },
-        { state: "hit", label: "reuse (hit)" }
+        { state: "compute", label: "Compute" },
+        { state: "miss", label: "Store (Miss)" },
+        { state: "hit", label: "Reuse (Hit)" }
       ],
       frameModel(frame) {
         return {
@@ -3478,11 +3495,67 @@ var init_render = __esm({
       play: '<svg class="lucide lucide-play" viewBox="0 0 24 24"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></svg>',
       pause: '<svg class="lucide lucide-pause" viewBox="0 0 24 24"><rect x="14" y="3" width="5" height="18" rx="1"/><rect x="5" y="3" width="5" height="18" rx="1"/></svg>',
       kebab: '<svg class="lucide lucide-ellipsis" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>',
-      x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg>',
+      x: '<svg viewBox="0 0 24 24"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg>',
       compare: '<svg class="steptrace__cue-compare" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 16-4-4 4-4"/><path d="M3 12h18"/><path d="m17 8 4 4-4 4"/></svg>',
       swap: '<svg class="steptrace__cue-swap" viewBox="0 0 24 24" aria-hidden="true"><path d="m2 9 3-3 3 3"/><path d="M13 18H7a2 2 0 0 1-2-2V6"/><path d="m22 15-3 3-3-3"/><path d="M11 6h6a2 2 0 0 1 2 2v10"/></svg>',
-      search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.2 15.2 4.8 4.8"/></svg>',
-      chessQueen: '<svg class="lucide lucide-chess-queen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v1a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/><path d="m12.474 5.943 1.567 5.34a1 1 0 0 0 1.75.328l2.616-3.402"/><path d="m20 9-3 9"/><path d="m5.594 8.209 2.615 3.403a1 1 0 0 0 1.75-.329l1.567-5.34"/><path d="M7 18 4 9"/><circle cx="12" cy="4" r="2"/><circle cx="20" cy="7" r="2"/><circle cx="4" cy="7" r="2"/></svg>'
+      search: '<svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.2 15.2 4.8 4.8"/></svg>',
+      chessQueen: '<svg class="lucide lucide-chess-queen" viewBox="0 0 24 24"><path d="M4 20a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v1a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/><path d="m12.474 5.943 1.567 5.34a1 1 0 0 0 1.75.328l2.616-3.402"/><path d="m20 9-3 9"/><path d="m5.594 8.209 2.615 3.403a1 1 0 0 0 1.75-.329l1.567-5.34"/><path d="M7 18 4 9"/><circle cx="12" cy="4" r="2"/><circle cx="20" cy="7" r="2"/><circle cx="4" cy="7" r="2"/></svg>'
+    };
+  }
+});
+
+// custom/steptrace/src/families/indexed-pointer-window.ts
+var indexedPointerWindowFamily;
+var init_indexed_pointer_window = __esm({
+  "custom/steptrace/src/families/indexed-pointer-window.ts"() {
+    init_render();
+    indexedPointerWindowFamily = {
+      id: "indexed-pointer-window",
+      createView: makePointerView
+    };
+  }
+});
+
+// custom/steptrace/src/families/legacy-adapters.ts
+var legacyArraySortFamily, legacyGraphStateFamily, legacyIndexedArraySearchFamily, lcsMatrixGridFamily;
+var init_legacy_adapters = __esm({
+  "custom/steptrace/src/families/legacy-adapters.ts"() {
+    init_render();
+    legacyArraySortFamily = {
+      id: "array-sort",
+      createView(frames) {
+        return makeSortView(frames);
+      }
+    };
+    legacyGraphStateFamily = {
+      id: "graph-state",
+      createView(frames, built) {
+        return makeGraphView(frames, built.graph, built.frontierLabel);
+      }
+    };
+    legacyIndexedArraySearchFamily = {
+      id: "indexed-array-search",
+      createView(frames) {
+        return makeSearchView(frames);
+      }
+    };
+    lcsMatrixGridFamily = {
+      id: "matrix-grid",
+      createView(frames) {
+        return makeDPView(frames);
+      }
+    };
+  }
+});
+
+// custom/steptrace/src/families/string-match.ts
+var stringMatchFamily;
+var init_string_match = __esm({
+  "custom/steptrace/src/families/string-match.ts"() {
+    init_render();
+    stringMatchFamily = {
+      id: "string-match",
+      createView: makeMatchView
     };
   }
 });
@@ -3582,14 +3655,14 @@ function makeIntervalTrackView(frames) {
   });
   outputSection.append(outputLabel, outputLane);
   const legendItems = scheduling ? [
-    ["next meeting", "candidate"],
-    ["last accepted", "current"],
-    ["accepted", "output"],
-    ["rejected overlap", "rejected"]
+    ["Next Meeting", "candidate"],
+    ["Last Accepted", "current"],
+    ["Accepted", "output"],
+    ["Rejected Overlap", "rejected"]
   ] : [
-    ["next interval", "candidate"],
-    ["current merged block", "current"],
-    ["emitted output", "output"]
+    ["Next Interval", "candidate"],
+    ["Current Merged Block", "current"],
+    ["Emitted Output", "output"]
   ];
   const legend = makeLegend(
     legendItems.map(([label, state]) => ({
@@ -3872,6 +3945,61 @@ var init_activity_selection = __esm({
 });
 
 // custom/steptrace/src/families/interactive-structure.ts
+function controlLabel(control) {
+  return control.getAttribute("aria-label") || control.textContent || "";
+}
+function usefulControl(control) {
+  return !control.disabled && !control.hidden && !control.closest('[hidden], [aria-hidden="true"]') && control.getClientRects().length > 0;
+}
+function restoreOperationFocus(controls, trigger, label = controlLabel(trigger)) {
+  let cancelled = false;
+  let observer = null;
+  const cleanup = () => {
+    cancelled = true;
+    observer?.disconnect();
+    observer = null;
+  };
+  const restore = () => {
+    if (cancelled) {
+      cleanup();
+      return true;
+    }
+    const active = document.activeElement;
+    if (active && active !== document.body && active !== trigger) {
+      cleanup();
+      return true;
+    }
+    const candidates = Array.from(
+      controls.querySelectorAll("button, input, select, textarea, [tabindex]")
+    ).filter(usefulControl);
+    const target = candidates.find((candidate) => candidate === trigger) || candidates.find(
+      (candidate) => candidate.tagName === trigger.tagName && controlLabel(candidate) === label
+    ) || candidates[0];
+    if (!target) return false;
+    target.focus();
+    cleanup();
+    return true;
+  };
+  queueMicrotask(() => {
+    if (restore()) return;
+    observer = new MutationObserver(restore);
+    observer.observe(controls, {
+      attributes: true,
+      attributeFilter: ["aria-hidden", "disabled", "hidden"],
+      childList: true,
+      subtree: true
+    });
+  });
+  return cleanup;
+}
+function withOperationFocus(controls, trigger, event, listener) {
+  const preserveFocus = event instanceof MouseEvent && event.detail === 0 && document.activeElement === trigger;
+  const label = controlLabel(trigger);
+  listener.call(trigger, event);
+  if (!preserveFocus || document.activeElement === trigger && !trigger.disabled && trigger.isConnected)
+    return null;
+  return restoreOperationFocus(controls, trigger, label);
+}
 function createStructureShell(root, id, label, ariaLabel, family11 = "contiguous-storage", stageClass = "steptrace__contiguous") {
   root.classList.add("steptrace", "steptrace--structure");
   root.dataset.visualFamily = family11;
@@ -3901,6 +4029,7 @@ function createStructureShell(root, id, label, ariaLabel, family11 = "contiguous
   status.setAttribute("aria-live", "polite");
   status.setAttribute("aria-atomic", "true");
   const cleanups = [];
+  let cancelFocusRestore = null;
   root.replaceChildren(head, body, controls);
   applyMotion();
   return {
@@ -3950,8 +4079,16 @@ function createStructureShell(root, id, label, ariaLabel, family11 = "contiguous
       return button;
     },
     listen(node2, type, listener) {
-      node2.addEventListener(type, listener);
-      cleanups.push(() => node2.removeEventListener(type, listener));
+      const wrapped = type === "click" && node2.tagName === "BUTTON" ? (event) => {
+        const trigger = node2;
+        const pending = withOperationFocus(controls, trigger, event, listener);
+        if (pending) {
+          cancelFocusRestore?.();
+          cancelFocusRestore = pending;
+        }
+      } : listener;
+      node2.addEventListener(type, wrapped);
+      cleanups.push(() => node2.removeEventListener(type, wrapped));
     },
     reducedMotion() {
       return media.matches;
@@ -3960,6 +4097,7 @@ function createStructureShell(root, id, label, ariaLabel, family11 = "contiguous
       controls.append(status);
       return {
         destroy() {
+          cancelFocusRestore?.();
           for (const cleanup of cleanups) cleanup();
           media.removeEventListener("change", applyMotion);
           root.replaceChildren();
@@ -5450,67 +5588,67 @@ function graphStateLegend(kind) {
   switch (kind) {
     case "heuristic-search":
       return [
-        ["current", "current"],
-        ["open", "open"],
-        ["closed / path", "closed"],
-        ["goal", "goal"]
+        ["Current", "current"],
+        ["Open", "open"],
+        ["Closed / Path", "closed"],
+        ["Goal", "goal"]
       ];
     case "dual-search":
       return [
-        ["current", "current"],
-        ["frontiers", "open"],
-        ["visited / path", "closed"],
-        ["meeting", "goal"]
+        ["Current", "current"],
+        ["Frontiers", "open"],
+        ["Visited / Path", "closed"],
+        ["Meeting", "goal"]
       ];
     case "edge-relaxation":
       return [
-        ["active edge", "current"],
-        ["candidate", "open"],
-        ["settled", "closed"],
-        ["source", "goal"]
+        ["Active Edge", "current"],
+        ["Candidate", "open"],
+        ["Settled", "closed"],
+        ["Source", "goal"]
       ];
     case "component-flood":
       return [
-        ["current", "current"],
-        ["frontier", "open"],
-        ["component", "closed"],
-        ["seed", "goal"]
+        ["Current", "current"],
+        ["Frontier", "open"],
+        ["Component", "closed"],
+        ["Seed", "goal"]
       ];
     case "low-link-cuts":
       return [
-        ["current", "current"],
-        ["DFS frontier", "open"],
-        ["visited", "closed"],
-        ["cut", "goal"]
+        ["Current", "current"],
+        ["DFS Frontier", "open"],
+        ["Visited", "closed"],
+        ["Cut", "goal"]
       ];
     case "low-link-components":
       return [
-        ["current", "current"],
-        ["stack", "open"],
-        ["component", "closed"],
-        ["root", "goal"]
+        ["Current", "current"],
+        ["Stack", "open"],
+        ["Component", "closed"],
+        ["Root", "goal"]
       ];
     case "mst-scan":
     case "mst-round":
       return [
-        ["active edge", "current"],
-        ["candidate", "open"],
-        ["tree", "closed"],
-        ["rejected", "rejected"]
+        ["Active Edge", "current"],
+        ["Candidate", "open"],
+        ["Tree", "closed"],
+        ["Rejected", "rejected"]
       ];
     case "path-backtrack":
       return [
-        ["current", "current"],
-        ["candidate", "open"],
-        ["path", "closed"],
-        ["rejected", "rejected"]
+        ["Current", "current"],
+        ["Candidate", "open"],
+        ["Path", "closed"],
+        ["Rejected", "rejected"]
       ];
     case "residual-flow":
       return [
-        ["active edge", "current"],
-        ["residual", "open"],
-        ["flow", "closed"],
-        ["cut", "goal"]
+        ["Active Edge", "current"],
+        ["Residual", "open"],
+        ["Flow", "closed"],
+        ["Cut", "goal"]
       ];
   }
 }
@@ -6009,10 +6147,14 @@ function runCount(config, heuristic) {
   const h = new Map(config.nodes.map((node2) => [node2.id, heuristic ? node2.h : 0]));
   const g = { [config.start]: 0 };
   const closed = /* @__PURE__ */ new Set();
-  const queue2 = [{ id: config.start, g: 0, h: h.get(config.start), f: h.get(config.start), order: 0 }];
+  const queue2 = [
+    { id: config.start, g: 0, h: h.get(config.start), f: h.get(config.start), order: 0 }
+  ];
   let order = 1;
   while (queue2.length) {
-    queue2.sort((left, right) => left.f - right.f || left.h - right.h || left.order - right.order || left.id.localeCompare(right.id));
+    queue2.sort(
+      (left, right) => left.f - right.f || left.h - right.h || left.order - right.order || left.id.localeCompare(right.id)
+    );
     const current = queue2.shift();
     if (closed.has(current.id) || current.g !== g[current.id]) continue;
     closed.add(current.id);
@@ -6022,7 +6164,13 @@ function runCount(config, heuristic) {
       const tentative = current.g + edge.weight;
       if (tentative >= (g[edge.to] ?? Number.POSITIVE_INFINITY)) continue;
       g[edge.to] = tentative;
-      queue2.push({ id: edge.to, g: tentative, h: h.get(edge.to), f: tentative + h.get(edge.to), order: order++ });
+      queue2.push({
+        id: edge.to,
+        g: tentative,
+        h: h.get(edge.to),
+        f: tentative + h.get(edge.to),
+        order: order++
+      });
     }
   }
   return closed.size;
@@ -6034,7 +6182,9 @@ function visibleQueue(queue2, closed) {
     const current = best.get(entry.id);
     if (!current || entry.g < current.g) best.set(entry.id, entry);
   }
-  return [...best.values()].sort((left, right) => left.f - right.f || left.h - right.h || left.order - right.order || left.id.localeCompare(right.id)).map(({ id, g, h, f }) => ({ id, g, h, f }));
+  return [...best.values()].sort(
+    (left, right) => left.f - right.f || left.h - right.h || left.order - right.order || left.id.localeCompare(right.id)
+  ).map(({ id, g, h, f }) => ({ id, g, h, f }));
 }
 function runAStar(config, ops) {
   const neighbours = graphStateAdjacency(config);
@@ -6043,17 +6193,21 @@ function runAStar(config, ops) {
   const parent = {};
   const closed = /* @__PURE__ */ new Set();
   const closedOrder = [];
-  const queue2 = [{
-    id: config.start,
-    g: 0,
-    h: h.get(config.start),
-    f: h.get(config.start),
-    order: 0
-  }];
+  const queue2 = [
+    {
+      id: config.start,
+      g: 0,
+      h: h.get(config.start),
+      f: h.get(config.start),
+      order: 0
+    }
+  ];
   let order = 1;
   ops.init(g, visibleQueue(queue2, closed), `Seed OPEN with ${config.start}; rank it by f = g + h.`);
   while (queue2.length) {
-    queue2.sort((left, right) => left.f - right.f || left.h - right.h || left.order - right.order || left.id.localeCompare(right.id));
+    queue2.sort(
+      (left, right) => left.f - right.f || left.h - right.h || left.order - right.order || left.id.localeCompare(right.id)
+    );
     const current = queue2.shift();
     if (closed.has(current.id) || current.g !== g[current.id]) continue;
     closed.add(current.id);
@@ -6111,7 +6265,13 @@ function runAStar(config, ops) {
       );
     }
   }
-  ops.done([], g, closed.size, runCount(config, false), `${config.target} is unreachable from ${config.start}.`);
+  ops.done(
+    [],
+    g,
+    closed.size,
+    runCount(config, false),
+    `${config.target} is unreachable from ${config.start}.`
+  );
 }
 var aStar;
 var init_a_star = __esm({
@@ -6307,22 +6467,22 @@ function makePrefixCharacterView(frames) {
     [
       {
         state: "active",
-        label: "active path",
+        label: "Active Path",
         swatchClass: "steptrace__swatch steptrace__prefix-swatch"
       },
       {
         state: "reused",
-        label: "reused edge",
+        label: "Reused Edge",
         swatchClass: "steptrace__swatch steptrace__prefix-swatch"
       },
       {
         state: "created",
-        label: "new node",
+        label: "New Node",
         swatchClass: "steptrace__swatch steptrace__prefix-swatch"
       },
       {
         state: "terminal",
-        label: "terminal key",
+        label: "Terminal Key",
         swatchClass: "steptrace__swatch steptrace__prefix-swatch",
         marker: successMarker()
       }
@@ -6370,7 +6530,7 @@ function makePrefixCharacterView(frames) {
         elements.role.dataset.state = state;
       }
     }
-    status.innerHTML = `${escapeHtml(frame.message)} <span class="steptrace__counts">· step ${index + 1}/${total}</span>`;
+    setStatus(status, frame.message, `· step ${index + 1}/${total}`);
   }
   function watch(frame) {
     const character = frame.text && frame.textCursor != null ? frame.text[frame.textCursor] || "—" : frame.profile === "ternary-search-tree" && frame.cursor != null ? frame.key[frame.cursor] || "—" : frame.cursor && frame.cursor > 0 ? frame.key[frame.cursor - 1] || "—" : frame.key[0] || "—";
@@ -6692,26 +6852,80 @@ function run(_, recorder) {
   const bridges = [];
   const visit = (id, time, parent) => {
     disc[id] = low[id] = time;
-    recorder.record("discover", id, parent ? [parent, id] : null, disc, low, cuts, bridges, `Discover ${id}: disc ${time}, low ${time}.`);
+    recorder.record(
+      "discover",
+      id,
+      parent ? [parent, id] : null,
+      disc,
+      low,
+      cuts,
+      bridges,
+      `Discover ${id}: disc ${time}, low ${time}.`
+    );
   };
   visit("0", 0, null);
   visit("1", 1, "0");
   visit("2", 2, "1");
   low["2"] = 0;
-  recorder.record("back-edge", "2", ["2", "0"], disc, low, cuts, bridges, "Back edge 2—0 lowers low[2] to 0.");
+  recorder.record(
+    "back-edge",
+    "2",
+    ["2", "0"],
+    disc,
+    low,
+    cuts,
+    bridges,
+    "Back edge 2—0 lowers low[2] to 0."
+  );
   visit("3", 3, "2");
   visit("4", 4, "3");
   bridges.push(["3", "4"]);
   if (!cuts.includes("3")) cuts.push("3");
-  recorder.record("cut", "3", ["3", "4"], disc, low, cuts, bridges, "low[4] > disc[3]: 3—4 is a bridge and 3 is a cut vertex.");
+  recorder.record(
+    "cut",
+    "3",
+    ["3", "4"],
+    disc,
+    low,
+    cuts,
+    bridges,
+    "low[4] > disc[3]: 3—4 is a bridge and 3 is a cut vertex."
+  );
   low["3"] = Math.min(low["3"], low["4"]);
   bridges.push(["2", "3"]);
   if (!cuts.includes("2")) cuts.push("2");
-  recorder.record("cut", "2", ["2", "3"], disc, low, cuts, bridges, "low[3] > disc[2]: 2—3 is a bridge and 2 is a cut vertex.");
+  recorder.record(
+    "cut",
+    "2",
+    ["2", "3"],
+    disc,
+    low,
+    cuts,
+    bridges,
+    "low[3] > disc[2]: 2—3 is a bridge and 2 is a cut vertex."
+  );
   low["1"] = Math.min(low["1"], low["2"]);
-  recorder.record("propagate", "1", ["1", "2"], disc, low, cuts, bridges, "Propagate low[2] = 0 to vertex 1; the triangle remains connected.");
+  recorder.record(
+    "propagate",
+    "1",
+    ["1", "2"],
+    disc,
+    low,
+    cuts,
+    bridges,
+    "Propagate low[2] = 0 to vertex 1; the triangle remains connected."
+  );
   low["0"] = Math.min(low["0"], low["1"]);
-  recorder.record("done", null, null, disc, low, cuts, bridges, "Cut vertices: 2, 3. Bridges: 2—3, 3—4.");
+  recorder.record(
+    "done",
+    null,
+    null,
+    disc,
+    low,
+    cuts,
+    bridges,
+    "Cut vertices: 2, 3. Bridges: 2—3, 3—4."
+  );
 }
 var Recorder, family, articulationPointsAndBridges;
 var init_articulation_points_and_bridges = __esm({
@@ -6727,7 +6941,13 @@ var init_articulation_points_and_bridges = __esm({
         const visited = new Set(Object.keys(discovery));
         const cuts = new Set(articulationPoints);
         const bridgeKeys = new Set(bridges.flatMap(([a, b]) => [`${a}|${b}`, `${b}|${a}`]));
-        const detail = { kind: "low-link-cuts", discovery: { ...discovery }, low: { ...low }, articulationPoints: [...articulationPoints], bridges: bridges.map((edge) => [...edge]) };
+        const detail = {
+          kind: "low-link-cuts",
+          discovery: { ...discovery },
+          low: { ...low },
+          articulationPoints: [...articulationPoints],
+          bridges: bridges.map((edge) => [...edge])
+        };
         this.frames.push({
           type,
           profile: "articulation-points-and-bridges",
@@ -6739,8 +6959,18 @@ var init_articulation_points_and_bridges = __esm({
           currentNode,
           currentEdge,
           selectedEdges: [...bridgeKeys],
-          nodeState: Object.fromEntries(this.config.nodes.map(({ id }) => [id, cuts.has(id) ? "accepted" : id === currentNode ? "active" : visited.has(id) ? "closed" : "neutral"])),
-          edgeState: Object.fromEntries(this.config.edges.map(({ from, to }) => [`${from}|${to}`, bridgeKeys.has(`${from}|${to}`) ? "cut" : currentEdge && (from === currentEdge[0] && to === currentEdge[1] || from === currentEdge[1] && to === currentEdge[0]) ? "active" : "neutral"])),
+          nodeState: Object.fromEntries(
+            this.config.nodes.map(({ id }) => [
+              id,
+              cuts.has(id) ? "accepted" : id === currentNode ? "active" : visited.has(id) ? "closed" : "neutral"
+            ])
+          ),
+          edgeState: Object.fromEntries(
+            this.config.edges.map(({ from, to }) => [
+              `${from}|${to}`,
+              bridgeKeys.has(`${from}|${to}`) ? "cut" : currentEdge && (from === currentEdge[0] && to === currentEdge[1] || from === currentEdge[1] && to === currentEdge[0]) ? "active" : "neutral"
+            ])
+          ),
           message,
           detail
         });
@@ -6994,16 +7224,34 @@ function run2(config, recorder) {
       const candidate = distances[edge.from] + edge.weight;
       const changed2 = Number.isFinite(candidate) && candidate < before;
       if (changed2) distances[edge.to] = candidate;
-      recorder.record(pass, [edge.from, edge.to], distances, changed2, changed2 ? `Pass ${pass}: ${edge.from}→${edge.to} lowers dist[${edge.to}] from ${before} to ${candidate}.` : `Pass ${pass}: ${edge.from}→${edge.to} cannot improve dist[${edge.to}].`);
+      recorder.record(
+        pass,
+        [edge.from, edge.to],
+        distances,
+        changed2,
+        changed2 ? `Pass ${pass}: ${edge.from}→${edge.to} lowers dist[${edge.to}] from ${before} to ${candidate}.` : `Pass ${pass}: ${edge.from}→${edge.to} cannot improve dist[${edge.to}].`
+      );
     }
   }
   let changed = false;
   for (const edge of config.edges) {
     const relaxes = Number.isFinite(distances[edge.from]) && distances[edge.from] + edge.weight < distances[edge.to];
     changed ||= relaxes;
-    recorder.record(4, [edge.from, edge.to], distances, relaxes, `Check ${edge.from}→${edge.to}: ${relaxes ? "it still relaxes" : "no change"}.`);
+    recorder.record(
+      4,
+      [edge.from, edge.to],
+      distances,
+      relaxes,
+      `Check ${edge.from}→${edge.to}: ${relaxes ? "it still relaxes" : "no change"}.`
+    );
   }
-  recorder.record(4, null, distances, changed, "The confirming sweep changes nothing; no reachable negative cycle exists.");
+  recorder.record(
+    4,
+    null,
+    distances,
+    changed,
+    "The confirming sweep changes nothing; no reachable negative cycle exists."
+  );
 }
 var Recorder2, family2, bellmanFord;
 var init_bellman_ford = __esm({
@@ -7016,8 +7264,16 @@ var init_bellman_ford = __esm({
       config;
       frames = [];
       record(pass, edge, distances, changed, message) {
-        const reachable = new Set(Object.entries(distances).filter(([, value]) => Number.isFinite(value)).map(([id]) => id));
-        const detail = { kind: "edge-relaxation", pass, edge, distances: { ...distances }, changed };
+        const reachable = new Set(
+          Object.entries(distances).filter(([, value]) => Number.isFinite(value)).map(([id]) => id)
+        );
+        const detail = {
+          kind: "edge-relaxation",
+          pass,
+          edge,
+          distances: { ...distances },
+          changed
+        };
         this.frames.push({
           type: edge ? "relax" : pass ? "done" : "init",
           profile: "bellman-ford",
@@ -7029,14 +7285,28 @@ var init_bellman_ford = __esm({
           currentNode: edge?.[0] ?? null,
           currentEdge: edge,
           selectedEdges: [],
-          nodeState: Object.fromEntries(this.config.nodes.map(({ id }) => [id, id === edge?.[0] ? "active" : reachable.has(id) ? "closed" : "neutral"])),
-          edgeState: Object.fromEntries(this.config.edges.map(({ from, to }) => [`${from}|${to}`, edge?.[0] === from && edge[1] === to ? "active" : "neutral"])),
+          nodeState: Object.fromEntries(
+            this.config.nodes.map(({ id }) => [
+              id,
+              id === edge?.[0] ? "active" : reachable.has(id) ? "closed" : "neutral"
+            ])
+          ),
+          edgeState: Object.fromEntries(
+            this.config.edges.map(({ from, to }) => [
+              `${from}|${to}`,
+              edge?.[0] === from && edge[1] === to ? "active" : "neutral"
+            ])
+          ),
           message,
           detail
         });
       }
     };
-    family2 = { id: "graph-state", createRecorder: (config) => new Recorder2(config), createView: makeGraphStateView };
+    family2 = {
+      id: "graph-state",
+      createRecorder: (config) => new Recorder2(config),
+      createView: makeGraphStateView
+    };
     bellmanFord = {
       id: "bellman-ford",
       kind: "graph",
@@ -9266,7 +9536,6 @@ function createHashIndexSurface(root, options) {
   });
   const board = el("div", "steptrace__hash-buckets");
   board.dataset.strategy = options.strategy;
-  board.style.setProperty("--steptrace-hash-size", String(options.size));
   board.setAttribute("role", "list");
   board.setAttribute("aria-label", `${options.label}, ${options.size} indexed cells`);
   boardWrap.append(chainLane, board);
@@ -9479,9 +9748,7 @@ function mountHashTable(root, config, content) {
       "--steptrace-token-x",
       "--steptrace-token-y",
       "--steptrace-token-width",
-      "--steptrace-token-height",
-      "--steptrace-token-radius",
-      "--steptrace-token-padding"
+      "--steptrace-token-height"
     ])
       token.style.removeProperty(property);
   }
@@ -9512,8 +9779,6 @@ function mountHashTable(root, config, content) {
     if (motion === "return") {
       token.style.setProperty("--steptrace-token-width", `${nextWidth}px`);
       token.style.setProperty("--steptrace-token-height", `${nextHeight}px`);
-      token.style.setProperty("--steptrace-token-radius", "6px");
-      token.style.setProperty("--steptrace-token-padding", "5px 7px");
     }
     token.dataset.motion = motion;
     const animation = nativeAnimation(
@@ -9523,16 +9788,12 @@ function mountHashTable(root, config, content) {
           transform: `translate3d(${tokenX}px, ${tokenY}px, 0)`,
           width: `${fromWidth}px`,
           height: `${fromHeight}px`,
-          borderRadius: "5px",
-          padding: "0px",
           opacity: 0.78
         },
         {
           transform: `translate3d(${next.x}px, ${next.y}px, 0)`,
           width: `${nextWidth}px`,
           height: `${nextHeight}px`,
-          borderRadius: "6px",
-          padding: "5px 7px",
           opacity: 0
         }
       ] : [
@@ -9563,8 +9824,6 @@ function mountHashTable(root, config, content) {
     setTokenPosition(next.x, next.y);
     token.style.setProperty("--steptrace-token-width", `${next.width}px`);
     token.style.setProperty("--steptrace-token-height", `${next.height}px`);
-    token.style.setProperty("--steptrace-token-radius", "5px");
-    token.style.setProperty("--steptrace-token-padding", "0px");
     token.dataset.motion = "arrival";
     const geometry = nativeAnimation(
       token,
@@ -9573,16 +9832,12 @@ function mountHashTable(root, config, content) {
           transform: `translate3d(${tokenX}px, ${tokenY}px, 0)`,
           width: `${fromWidth}px`,
           height: `${fromHeight}px`,
-          borderRadius: "6px",
-          padding: "5px 7px",
           opacity: 0.92
         },
         {
           transform: `translate3d(${next.x}px, ${next.y}px, 0)`,
           width: `${next.width}px`,
           height: `${next.height}px`,
-          borderRadius: "5px",
-          padding: "0px",
           opacity: 0.78
         }
       ],
@@ -10442,17 +10697,17 @@ function makeHeapSelectionView(frames) {
   rejected.innerHTML = ICON.x;
   const legend = makeLegend(
     [
-      { label: "incoming", swatchClass: "steptrace__heap-swatch steptrace__heap-swatch--current" },
+      { label: "Incoming", swatchClass: "steptrace__heap-swatch steptrace__heap-swatch--current" },
       {
-        label: "retained winner",
+        label: "Retained Winner",
         swatchClass: "steptrace__heap-swatch steptrace__heap-swatch--winner"
       },
       {
-        label: "weakest root",
+        label: "Weakest Root",
         swatchClass: "steptrace__heap-swatch steptrace__heap-swatch--weakest"
       },
       {
-        label: "rejected / evicted",
+        label: "Rejected / Evicted",
         swatchClass: "steptrace__heap-swatch steptrace__heap-swatch--rejected",
         marker: rejected
       }
@@ -11101,10 +11356,7 @@ function mountBinomialQueue(root, _config) {
         { value: null, label: "B₂", ariaLabel: "order two empty" }
       ]
     );
-    shell.setCounter(
-      phase === 2 ? "1" : phase === 1 ? "2" : "3",
-      phase === 2 ? " tree" : " roots"
-    );
+    shell.setCounter(phase === 2 ? "1" : phase === 1 ? "2" : "3", phase === 2 ? " tree" : " roots");
     shell.status.textContent = message || "Meld the 3-value forest with the singleton; equal orders link and carry right.";
     meld.textContent = phase === 0 ? "Meld" : phase === 1 ? "Continue carry" : "Melded";
     meld.disabled = phase === 2;
@@ -11857,20 +12109,54 @@ var init_boruvka = __esm({
         const accepted = [];
         recorder.add("Begin round 1 with four singleton components.", components, choices, accepted);
         choices.push(ab);
-        recorder.add("Component A chooses its cheapest outgoing edge A—B (1).", components, choices, accepted, ab);
-        recorder.add("Component B chooses the same cheapest edge B—A (1).", components, choices, accepted, ab);
+        recorder.add(
+          "Component A chooses its cheapest outgoing edge A—B (1).",
+          components,
+          choices,
+          accepted,
+          ab
+        );
+        recorder.add(
+          "Component B chooses the same cheapest edge B—A (1).",
+          components,
+          choices,
+          accepted,
+          ab
+        );
         choices.push(bc);
         recorder.add("Component C chooses B—C (2).", components, choices, accepted, bc);
         choices.push(cd);
         recorder.add("Component D chooses C—D (3).", components, choices, accepted, cd);
-        recorder.add("Deduplicate A—B; three distinct safe candidates remain.", components, choices, accepted);
+        recorder.add(
+          "Deduplicate A—B; three distinct safe candidates remain.",
+          components,
+          choices,
+          accepted
+        );
         accepted.push(ab);
         recorder.add("Accept A—B; A and B merge.", [["A", "B"], ["C"], ["D"]], choices, accepted, ab);
         accepted.push(bc);
-        recorder.add("Accept B—C; C joins the component.", [["A", "B", "C"], ["D"]], choices, accepted, bc);
+        recorder.add(
+          "Accept B—C; C joins the component.",
+          [["A", "B", "C"], ["D"]],
+          choices,
+          accepted,
+          bc
+        );
         accepted.push(cd);
-        recorder.add("Accept C—D; all vertices are connected.", [["A", "B", "C", "D"]], choices, accepted, cd);
-        recorder.add("The MST is complete in one effective round with total weight 6.", [["A", "B", "C", "D"]], choices, accepted);
+        recorder.add(
+          "Accept C—D; all vertices are connected.",
+          [["A", "B", "C", "D"]],
+          choices,
+          accepted,
+          cd
+        );
+        recorder.add(
+          "The MST is complete in one effective round with total weight 6.",
+          [["A", "B", "C", "D"]],
+          choices,
+          accepted
+        );
       }
     };
   }
@@ -11949,10 +12235,10 @@ var init_execution_tree = __esm({
       ...executionTreeCardMetrics,
       stateLabels,
       legend: [
-        { state: "split", label: "split subproblem" },
-        { state: "base", label: "base case" },
-        { state: "return", label: "returned result" },
-        { state: "combine", label: "combined result" }
+        { state: "split", label: "Split Subproblem" },
+        { state: "base", label: "Base Case" },
+        { state: "return", label: "Returned Result" },
+        { state: "combine", label: "Combined Result" }
       ],
       frameModel,
       nodeLines(node2) {
@@ -11997,10 +12283,10 @@ var init_execution_tree = __esm({
       ...executionTreeCardMetrics,
       stateLabels,
       legend: [
-        { state: "split", label: "expand new state" },
-        { state: "base", label: "base result" },
-        { state: "store", label: "store first result" },
-        { state: "cache", label: "cache hit; skip branch" }
+        { state: "split", label: "Expand New State" },
+        { state: "base", label: "Base Result" },
+        { state: "store", label: "Store First Result" },
+        { state: "cache", label: "Cache Hit; Skip Branch" }
       ],
       frameModel,
       nodeLines(node2) {
@@ -12042,10 +12328,10 @@ var init_execution_tree = __esm({
       ...executionTreeCardMetrics,
       stateLabels,
       legend: [
-        { state: "split", label: "expand uncached state" },
-        { state: "base", label: "base case" },
-        { state: "store", label: "store result" },
-        { state: "cache", label: "reuse cached result" }
+        { state: "split", label: "Expand Uncached State" },
+        { state: "base", label: "Base Case" },
+        { state: "store", label: "Store Result" },
+        { state: "cache", label: "Reuse Cached Result" }
       ],
       frameModel,
       nodeLines(node2) {
@@ -12090,10 +12376,10 @@ var init_execution_tree = __esm({
       showStateBadge: true,
       stateLabels,
       legend: [
-        { state: "split", label: "expand decision" },
-        { state: "incumbent", label: "new incumbent" },
-        { state: "infeasible", label: "over capacity" },
-        { state: "prune", label: "bound cannot win" }
+        { state: "split", label: "Expand Decision" },
+        { state: "incumbent", label: "New Incumbent" },
+        { state: "infeasible", label: "Over Capacity" },
+        { state: "prune", label: "Bound Cannot Win" }
       ],
       frameModel,
       nodeLines(node2) {
@@ -12961,7 +13247,7 @@ function makeDistributionSortView(frames) {
         placed == null ? `output index ${slotIndex}, empty` : `output index ${slotIndex}, value ${placed}, token ${labels[origin ?? 0]}`
       );
     });
-    status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· ${phaseLabel(frame.type)} · step ${index + 1}/${total}</span>`;
+    setStatus(status, frame.message, `· ${phaseLabel(frame.type)} · step ${index + 1}/${total}`);
   }
   return {
     nodes: [stage, status],
@@ -13181,9 +13467,9 @@ function makeBucketDistributionView(frames) {
   );
   const legend = makeLegend(
     [
-      { label: "active bucket", color: "var(--_blue)" },
-      { label: "local comparison", color: "var(--_blue)" },
-      { label: "gathered output", color: "var(--_green)" }
+      { label: "Active Bucket", color: "var(--_blue)" },
+      { label: "Local Comparison", color: "var(--_blue)" },
+      { label: "Gathered Output", color: "var(--_green)" }
     ],
     "Distribution state legend",
     "steptrace__distribution-legend"
@@ -13235,7 +13521,7 @@ function makeBucketDistributionView(frames) {
         token == null ? `output index ${outputIndex}, empty` : `output index ${outputIndex}, value ${token.value}`
       );
     });
-    status.innerHTML = escapeHtml(frame.message) + ` <span class="steptrace__counts">· ${phaseLabel2(frame)} · step ${index + 1}/${total}</span>`;
+    setStatus(status, frame.message, `· ${phaseLabel2(frame)} · step ${index + 1}/${total}`);
   }
   return {
     nodes: [stage, legend, status],
@@ -14105,11 +14391,7 @@ var init_comb_sort = __esm({
               `Compare ${leftValue} at index ${left} with ${rightValue} at index ${right}.`
             );
             if (leftValue <= rightValue) continue;
-            ops.swapGapPair(
-              left,
-              right,
-              `${leftValue} > ${rightValue}: swap the gap-${gap} pair.`
-            );
+            ops.swapGapPair(left, right, `${leftValue} > ${rightValue}: swap the gap-${gap} pair.`);
             swapped = true;
           }
           ops.endGap(
@@ -14194,14 +14476,30 @@ function run4(_, recorder) {
   const groups = [];
   const flood = (component, order) => {
     const frontier = [order[0]];
-    recorder.record(component, order[0], frontier, visited, groups, `Start component ${component} at unvisited vertex ${order[0]}.`);
+    recorder.record(
+      component,
+      order[0],
+      frontier,
+      visited,
+      groups,
+      `Start component ${component} at unvisited vertex ${order[0]}.`
+    );
     for (const id of order) {
       frontier.splice(frontier.indexOf(id), 1);
       if (!visited.includes(id)) visited.push(id);
-      const next = order.filter((candidate) => !visited.includes(candidate) && !frontier.includes(candidate));
+      const next = order.filter(
+        (candidate) => !visited.includes(candidate) && !frontier.includes(candidate)
+      );
       frontier.push(...next.slice(0, 1));
       const currentGroup = order.filter((member) => visited.includes(member));
-      recorder.record(component, id, frontier, visited, [...groups, currentGroup], `Assign ${id} to component ${component}.`);
+      recorder.record(
+        component,
+        id,
+        frontier,
+        visited,
+        [...groups, currentGroup],
+        `Assign ${id} to component ${component}.`
+      );
     }
     groups.push([...order]);
   };
@@ -14221,7 +14519,13 @@ var init_connected_components = __esm({
       config;
       frames = [];
       record(component, current, frontier, visited, groups, message) {
-        const detail = { kind: "component-flood", component, frontier: [...frontier], visited: [...visited], groups: groups.map((group) => [...group]) };
+        const detail = {
+          kind: "component-flood",
+          component,
+          frontier: [...frontier],
+          visited: [...visited],
+          groups: groups.map((group) => [...group])
+        };
         this.frames.push({
           type: current ? "visit" : "done",
           profile: "connected-components",
@@ -14233,14 +14537,28 @@ var init_connected_components = __esm({
           currentNode: current,
           currentEdge: null,
           selectedEdges: [],
-          nodeState: Object.fromEntries(this.config.nodes.map(({ id }) => [id, id === current ? "active" : frontier.includes(id) ? "frontier" : visited.includes(id) ? "accepted" : "neutral"])),
-          edgeState: Object.fromEntries(this.config.edges.map(({ from, to }) => [`${from}|${to}`, visited.includes(from) && visited.includes(to) ? "accepted" : "neutral"])),
+          nodeState: Object.fromEntries(
+            this.config.nodes.map(({ id }) => [
+              id,
+              id === current ? "active" : frontier.includes(id) ? "frontier" : visited.includes(id) ? "accepted" : "neutral"
+            ])
+          ),
+          edgeState: Object.fromEntries(
+            this.config.edges.map(({ from, to }) => [
+              `${from}|${to}`,
+              visited.includes(from) && visited.includes(to) ? "accepted" : "neutral"
+            ])
+          ),
           message,
           detail
         });
       }
     };
-    family5 = { id: "graph-state", createRecorder: (config) => new Recorder5(config), createView: makeGraphStateView };
+    family5 = {
+      id: "graph-state",
+      createRecorder: (config) => new Recorder5(config),
+      createView: makeGraphStateView
+    };
     connectedComponents = {
       id: "connected-components",
       kind: "graph",
@@ -14284,7 +14602,9 @@ var init_counting_sort = __esm({
             `Read input[${index}] = ${key4} from the tail; decrement its end position, then write output there.`
           );
         }
-        ops.done(`Every key is in its value block. Tail-first placement kept equal keys in input order.`);
+        ops.done(
+          `Every key is in its value block. Tail-first placement kept equal keys in input order.`
+        );
       }
     };
   }
@@ -14315,7 +14635,9 @@ var init_cyclic_sort = __esm({
       meta: { label: "Cyclic sort" },
       parse: parseCyclicSortConfig,
       run(_input, ops) {
-        ops.init("Cyclic sort — value v belongs at index v − 1; keep the cursor still until its value is home.");
+        ops.init(
+          "Cyclic sort — value v belongs at index v − 1; keep the cursor still until its value is home."
+        );
         let cursor = 0;
         while (cursor < ops.value.length) {
           const value = ops.value[cursor];
@@ -14495,8 +14817,7 @@ function parse5(config) {
   const edgeKeys = /* @__PURE__ */ new Set();
   for (const edge of edges5) {
     const key4 = edge.directed ? `${edge.from}|${edge.to}` : [edge.from, edge.to].sort().join("|");
-    if (edgeKeys.has(key4))
-      throw new Error("steptrace: dijkstra parallel edges are not supported.");
+    if (edgeKeys.has(key4)) throw new Error("steptrace: dijkstra parallel edges are not supported.");
     edgeKeys.add(key4);
   }
   return {
@@ -15085,16 +15406,16 @@ var init_dp_problems = __esm({
       }
     };
     coinRoles = [
-      { role: "operand-a", badge: "A", label: "predecessor amount" },
-      { role: "operand-b", badge: "B", label: "another predecessor" },
-      { role: "target", badge: "T", label: "amount being solved" },
-      { role: "path", badge: "success", label: "optimal amount chain" }
+      { role: "operand-a", badge: "A", label: "Predecessor Amount" },
+      { role: "operand-b", badge: "B", label: "Another Predecessor" },
+      { role: "target", badge: "T", label: "Amount Being Solved" },
+      { role: "path", badge: "success", label: "Optimal Amount Chain" }
     ];
     gridRoles = [
-      { role: "operand-a", badge: "R", label: "right neighbour" },
-      { role: "operand-b", badge: "D", label: "down neighbour" },
-      { role: "target", badge: "T", label: "tile being solved" },
-      { role: "path", badge: "success", label: "optimal route" }
+      { role: "operand-a", badge: "R", label: "Right Neighbour" },
+      { role: "operand-b", badge: "D", label: "Down Neighbour" },
+      { role: "target", badge: "T", label: "Tile Being Solved" },
+      { role: "path", badge: "success", label: "Optimal Route" }
     ];
     coinTableSemantics = {
       tableLabel: `Bottom-up coin-change table for a ${coinChangeProblem.target}-cent payment`,
@@ -16546,12 +16867,12 @@ var init_matrix_grid = __esm({
     init_recorders();
     init_render();
     matrixGridRoleLegend = [
-      { role: "operand-a", badge: "A", label: "dist[i][k]" },
-      { role: "operand-b", badge: "B", label: "dist[k][j]" },
-      { role: "target", badge: "T", label: "dist[i][j]" },
-      { role: "keep", badge: "K", label: "keep target" },
-      { role: "write", badge: "W", label: "write target" },
-      { role: "stage-axis", badge: "k", label: "active intermediate row/column" }
+      { role: "operand-a", badge: "A", label: "Dist[i][k]" },
+      { role: "operand-b", badge: "B", label: "Dist[k][j]" },
+      { role: "target", badge: "T", label: "Dist[i][j]" },
+      { role: "keep", badge: "K", label: "Keep Target" },
+      { role: "write", badge: "W", label: "Write Target" },
+      { role: "stage-axis", badge: "k", label: "Active Intermediate Row/Column" }
     ];
     matrixGridViewSemantics = {
       tableLabel: "Floyd-Warshall distance matrix. Rows are source nodes and columns are destination nodes.",
@@ -17094,19 +17415,20 @@ function makeLinkedTopologyView(frames) {
   const legend = makeLegend(
     [
       {
-        label: "slow / cycle pointer",
+        label: "Slow / Cycle Pointer",
         swatchClass: "steptrace__linked-swatch steptrace__linked-swatch--slow"
       },
       {
-        label: "fast / head pointer",
+        label: "Fast / Head Pointer",
         swatchClass: "steptrace__linked-swatch steptrace__linked-swatch--fast"
       },
       {
-        label: "cycle edge",
-        swatchClass: "steptrace__linked-swatch steptrace__linked-swatch--cycle"
+        label: "Cycle Edge",
+        swatchClass: "steptrace__linked-swatch steptrace__linked-swatch--cycle",
+        carrier: "path"
       },
       {
-        label: "cycle entry",
+        label: "Cycle Entry",
         swatchClass: "steptrace__linked-swatch steptrace__linked-swatch--entry"
       }
     ],
@@ -17742,7 +18064,9 @@ function parse6(config) {
   };
 }
 function visibleQueue2(queue2) {
-  return queue2.slice().sort((left, right) => left.h - right.h || left.order - right.order || left.id.localeCompare(right.id)).map(({ id, g, h, f }) => ({ id, g, h, f }));
+  return queue2.slice().sort(
+    (left, right) => left.h - right.h || left.order - right.order || left.id.localeCompare(right.id)
+  ).map(({ id, g, h, f }) => ({ id, g, h, f }));
 }
 function runGreedyBestFirst(config, ops) {
   const neighbours = graphStateAdjacency(config);
@@ -17751,17 +18075,21 @@ function runGreedyBestFirst(config, ops) {
   const parent = {};
   const visited = /* @__PURE__ */ new Set([config.start]);
   const closed = [];
-  const queue2 = [{
-    id: config.start,
-    g: 0,
-    h: heuristic.get(config.start),
-    f: heuristic.get(config.start),
-    order: 0
-  }];
+  const queue2 = [
+    {
+      id: config.start,
+      g: 0,
+      h: heuristic.get(config.start),
+      f: heuristic.get(config.start),
+      order: 0
+    }
+  ];
   let order = 1;
   ops.init(pathCost, visibleQueue2(queue2), `Seed OPEN with ${config.start}; rank it by h alone.`);
   while (queue2.length) {
-    queue2.sort((left, right) => left.h - right.h || left.order - right.order || left.id.localeCompare(right.id));
+    queue2.sort(
+      (left, right) => left.h - right.h || left.order - right.order || left.id.localeCompare(right.id)
+    );
     const current = queue2.shift();
     closed.push(current.id);
     ops.expand(
@@ -17775,7 +18103,11 @@ function runGreedyBestFirst(config, ops) {
       const path = [current.id];
       while (path[0] !== config.start) path.unshift(parent[path[0]]);
       const greedyCost = pathCost[config.target];
-      const optimalCost = graphStateShortestDistances(config.nodes, config.edges, config.target).get(config.start);
+      const optimalCost = graphStateShortestDistances(
+        config.nodes,
+        config.edges,
+        config.target
+      ).get(config.start);
       ops.path(path, pathCost, `Reconstruct Greedy's first route ${path.join(" → ")}.`);
       ops.done(
         path,
@@ -18321,7 +18653,9 @@ var init_hamiltonian_cycle = __esm({
       { from: "A", to: "C", weight: 1 }
     ];
     edgeKey2 = (left, right) => {
-      const edge = edges2.find((candidate) => candidate.from === left && candidate.to === right || candidate.from === right && candidate.to === left);
+      const edge = edges2.find(
+        (candidate) => candidate.from === left && candidate.to === right || candidate.from === right && candidate.to === left
+      );
       return edge ? `${edge.from}|${edge.to}` : "";
     };
     Recorder7 = class {
@@ -18382,10 +18716,22 @@ var init_hamiltonian_cycle = __esm({
         recorder.add("Start at A; try unused neighbours in the order C, B, D.", ["A"], ["C", "B", "D"]);
         recorder.add("Choose C first.", ["A", "C"], ["B", "D"]);
         recorder.add("Choose B from C.", ["A", "C", "B"], []);
-        recorder.add("Dead end: B cannot reach the only unused vertex D.", ["A", "C", "B"], [], ["D"], ["B", "D"]);
+        recorder.add(
+          "Dead end: B cannot reach the only unused vertex D.",
+          ["A", "C", "B"],
+          [],
+          ["D"],
+          ["B", "D"]
+        );
         recorder.add("Backtrack from B to C.", ["A", "C"], ["D"], ["B"]);
         recorder.add("Choose D from C.", ["A", "C", "D"], []);
-        recorder.add("Dead end: D cannot reach the only unused vertex B.", ["A", "C", "D"], [], ["B"], ["D", "B"]);
+        recorder.add(
+          "Dead end: D cannot reach the only unused vertex B.",
+          ["A", "C", "D"],
+          [],
+          ["B"],
+          ["D", "B"]
+        );
         recorder.add("Backtrack from D to C.", ["A", "C"], [], ["D"]);
         recorder.add("Both C branches failed; backtrack to A.", ["A"], ["B", "D"], ["C"]);
         recorder.add("Choose B from A.", ["A", "B"], ["C"]);
@@ -18717,6 +19063,7 @@ var init_kernighan_popcount = __esm({
     kernighanPopcount = {
       id: "kernighan-popcount",
       kind: "bits",
+      legacyRenderer: "bit-grid",
       meta: { label: "Kernighan population count" },
       run: (input, ops) => {
         let x = Number(input.value) >>> 0 & ops.mask;
@@ -18893,18 +19240,72 @@ var init_kruskal = __esm({
       parse: () => ({ nodes: nodes3, edges: edges3 }),
       run(_config, recorder) {
         const accepted = [];
-        recorder.add("Sort edges by weight: AB 1, BC 2, AC 3, CD 4.", [["A"], ["B"], ["C"], ["D"]], edges3, accepted);
-        recorder.add("Inspect A—B (1): its endpoints are in different components.", [["A"], ["B"], ["C"], ["D"]], edges3, accepted, edges3[0]);
+        recorder.add(
+          "Sort edges by weight: AB 1, BC 2, AC 3, CD 4.",
+          [["A"], ["B"], ["C"], ["D"]],
+          edges3,
+          accepted
+        );
+        recorder.add(
+          "Inspect A—B (1): its endpoints are in different components.",
+          [["A"], ["B"], ["C"], ["D"]],
+          edges3,
+          accepted,
+          edges3[0]
+        );
         accepted.push(edges3[0]);
-        recorder.add("Accept A—B and merge A with B.", [["A", "B"], ["C"], ["D"]], edges3.slice(1), accepted, edges3[0]);
-        recorder.add("Inspect B—C (2): it joins two components.", [["A", "B"], ["C"], ["D"]], edges3.slice(1), accepted, edges3[1]);
+        recorder.add(
+          "Accept A—B and merge A with B.",
+          [["A", "B"], ["C"], ["D"]],
+          edges3.slice(1),
+          accepted,
+          edges3[0]
+        );
+        recorder.add(
+          "Inspect B—C (2): it joins two components.",
+          [["A", "B"], ["C"], ["D"]],
+          edges3.slice(1),
+          accepted,
+          edges3[1]
+        );
         accepted.push(edges3[1]);
-        recorder.add("Accept B—C and merge C into the tree.", [["A", "B", "C"], ["D"]], edges3.slice(2), accepted, edges3[1]);
-        recorder.add("Inspect A—C (3): both endpoints already share a component.", [["A", "B", "C"], ["D"]], edges3.slice(2), accepted, edges3[2]);
-        recorder.add("Reject A—C because it would close a cycle.", [["A", "B", "C"], ["D"]], edges3.slice(3), accepted, edges3[2], edges3[2]);
-        recorder.add("Inspect C—D (4): D is still separate.", [["A", "B", "C"], ["D"]], edges3.slice(3), accepted, edges3[3]);
+        recorder.add(
+          "Accept B—C and merge C into the tree.",
+          [["A", "B", "C"], ["D"]],
+          edges3.slice(2),
+          accepted,
+          edges3[1]
+        );
+        recorder.add(
+          "Inspect A—C (3): both endpoints already share a component.",
+          [["A", "B", "C"], ["D"]],
+          edges3.slice(2),
+          accepted,
+          edges3[2]
+        );
+        recorder.add(
+          "Reject A—C because it would close a cycle.",
+          [["A", "B", "C"], ["D"]],
+          edges3.slice(3),
+          accepted,
+          edges3[2],
+          edges3[2]
+        );
+        recorder.add(
+          "Inspect C—D (4): D is still separate.",
+          [["A", "B", "C"], ["D"]],
+          edges3.slice(3),
+          accepted,
+          edges3[3]
+        );
         accepted.push(edges3[3]);
-        recorder.add("Accept C—D; V − 1 edges complete the MST with total weight 7.", [["A", "B", "C", "D"]], [], accepted, edges3[3]);
+        recorder.add(
+          "Accept C—D; V − 1 edges complete the MST with total weight 7.",
+          [["A", "B", "C", "D"]],
+          [],
+          accepted,
+          edges3[3]
+        );
       }
     };
   }
@@ -19467,17 +19868,39 @@ var init_maximum_flow = __esm({
           "a|t": 0,
           "b|t": 0
         };
-        recorder.add("Begin with zero flow and unit residual capacity on every forward edge.", ["s"], flow, 0);
+        recorder.add(
+          "Begin with zero flow and unit residual capacity on every forward edge.",
+          ["s"],
+          flow,
+          0
+        );
         recorder.add("DFS chooses s → a.", ["s", "a"], flow, 0);
         recorder.add("Continue through a → b.", ["s", "a", "b"], flow, 0);
         recorder.add("Reach t through b → t; the bottleneck is 1.", ["s", "a", "b", "t"], flow, 0, 1);
         flow = { ...flow, "s|a": 1, "a|b": 1, "b|t": 1 };
         recorder.add("Augment s → a → b → t by 1; total flow is 1.", ["s", "a", "b", "t"], flow, 1, 1);
         recorder.add("The next search starts with the remaining edge s → b.", ["s", "b"], flow, 1);
-        recorder.add("Use residual edge b → a to retract the earlier a → b unit.", ["s", "b", "a"], flow, 1);
-        recorder.add("Continue through the free edge a → t; bottleneck is 1.", ["s", "b", "a", "t"], flow, 1, 1);
+        recorder.add(
+          "Use residual edge b → a to retract the earlier a → b unit.",
+          ["s", "b", "a"],
+          flow,
+          1
+        );
+        recorder.add(
+          "Continue through the free edge a → t; bottleneck is 1.",
+          ["s", "b", "a", "t"],
+          flow,
+          1,
+          1
+        );
         flow = { ...flow, "s|b": 1, "a|b": 0, "a|t": 1 };
-        recorder.add("Augment s → b → a → t: cancel a → b and raise total flow to 2.", ["s", "b", "a", "t"], flow, 2, 1);
+        recorder.add(
+          "Augment s → b → a → t: cancel a → b and raise total flow to 2.",
+          ["s", "b", "a", "t"],
+          flow,
+          2,
+          1
+        );
         recorder.add("No residual s → t path remains; the maximum flow is 2.", [], flow, 2);
       }
     };
@@ -19738,15 +20161,15 @@ function makeStackSequenceView(frames) {
   const legend = makeLegend(
     [
       {
-        label: "scanning",
+        label: "Scanning",
         swatchClass: "steptrace__stack-sequence-swatch steptrace__stack-sequence-swatch--scan"
       },
       {
-        label: "retained candidate",
+        label: "Retained Candidate",
         swatchClass: "steptrace__stack-sequence-swatch steptrace__stack-sequence-swatch--retained"
       },
       {
-        label: "resolved pop",
+        label: "Resolved Pop",
         swatchClass: "steptrace__stack-sequence-swatch steptrace__stack-sequence-swatch--popped"
       }
     ],
@@ -19943,6 +20366,7 @@ var init_n_queens = __esm({
     nQueens = {
       id: "n-queens",
       kind: "backtrack",
+      legacyRenderer: "backtrack-board",
       meta: { label: "N-Queens (backtracking)" },
       run: (input, ops) => {
         const n = Math.min(Math.max(input.n || 4, 4), 6);
@@ -20161,15 +20585,15 @@ function makePrefixSumView(frames) {
   const legend = makeLegend(
     [
       {
-        label: "running total",
+        label: "Running Total",
         swatchClass: "steptrace__prefix-sum-swatch steptrace__prefix-sum-swatch--build"
       },
       {
-        label: "cancelled prefix",
+        label: "Cancelled Prefix",
         swatchClass: "steptrace__prefix-sum-swatch steptrace__prefix-sum-swatch--cancel"
       },
       {
-        label: "requested range",
+        label: "Requested Range",
         swatchClass: "steptrace__prefix-sum-swatch steptrace__prefix-sum-swatch--range"
       }
     ],
@@ -21120,26 +21544,89 @@ function run6(_, recorder) {
   const visit = (id, time, parent) => {
     disc[id] = low[id] = time;
     stack2.push(id);
-    recorder.record("discover", id, parent ? [parent, id] : null, disc, low, stack2, components, `Push ${id}: disc ${time}, low ${time}.`);
+    recorder.record(
+      "discover",
+      id,
+      parent ? [parent, id] : null,
+      disc,
+      low,
+      stack2,
+      components,
+      `Push ${id}: disc ${time}, low ${time}.`
+    );
   };
   visit("A", 0, null);
   visit("B", 1, "A");
   visit("C", 2, "B");
   low["C"] = 0;
-  recorder.record("back-edge", "C", ["C", "A"], disc, low, stack2, components, "C→A reaches an active ancestor; low[C] becomes 0.");
+  recorder.record(
+    "back-edge",
+    "C",
+    ["C", "A"],
+    disc,
+    low,
+    stack2,
+    components,
+    "C→A reaches an active ancestor; low[C] becomes 0."
+  );
   visit("D", 3, "C");
   visit("E", 4, "D");
   low["E"] = 3;
-  recorder.record("back-edge", "E", ["E", "D"], disc, low, stack2, components, "E→D reaches an active ancestor; low[E] becomes 3.");
+  recorder.record(
+    "back-edge",
+    "E",
+    ["E", "D"],
+    disc,
+    low,
+    stack2,
+    components,
+    "E→D reaches an active ancestor; low[E] becomes 3."
+  );
   low["D"] = Math.min(low["D"], low["E"]);
-  recorder.record("propagate", "D", ["D", "E"], disc, low, stack2, components, "Propagate low[E] = 3 to D.");
+  recorder.record(
+    "propagate",
+    "D",
+    ["D", "E"],
+    disc,
+    low,
+    stack2,
+    components,
+    "Propagate low[E] = 3 to D."
+  );
   components.push([stack2.pop(), stack2.pop()]);
-  recorder.record("component", "D", null, disc, low, stack2, components, "low[D] = disc[D]; pop E and D as one SCC.");
+  recorder.record(
+    "component",
+    "D",
+    null,
+    disc,
+    low,
+    stack2,
+    components,
+    "low[D] = disc[D]; pop E and D as one SCC."
+  );
   low["B"] = low["C"];
-  recorder.record("propagate", "B", ["B", "C"], disc, low, stack2, components, "Propagate low[C] = 0 through B.");
+  recorder.record(
+    "propagate",
+    "B",
+    ["B", "C"],
+    disc,
+    low,
+    stack2,
+    components,
+    "Propagate low[C] = 0 through B."
+  );
   low["A"] = low["B"];
   components.push([stack2.pop(), stack2.pop(), stack2.pop()]);
-  recorder.record("component", "A", null, disc, low, stack2, components, "low[A] = disc[A]; pop C, B, A as one SCC.");
+  recorder.record(
+    "component",
+    "A",
+    null,
+    disc,
+    low,
+    stack2,
+    components,
+    "low[A] = disc[A]; pop C, B, A as one SCC."
+  );
   recorder.record("done", null, null, disc, low, stack2, components, "SCCs: {D,E} and {A,B,C}.");
 }
 var Recorder10, family10, stronglyConnectedComponents;
@@ -21154,7 +21641,13 @@ var init_strongly_connected_components = __esm({
       frames = [];
       record(type, current, edge, discovery, low, stack2, components, message) {
         const emitted = new Set(components.flat());
-        const detail = { kind: "low-link-components", discovery: { ...discovery }, low: { ...low }, stack: [...stack2], components: components.map((component) => [...component]) };
+        const detail = {
+          kind: "low-link-components",
+          discovery: { ...discovery },
+          low: { ...low },
+          stack: [...stack2],
+          components: components.map((component) => [...component])
+        };
         this.frames.push({
           type,
           profile: "strongly-connected-components",
@@ -21166,14 +21659,28 @@ var init_strongly_connected_components = __esm({
           currentNode: current,
           currentEdge: edge,
           selectedEdges: [],
-          nodeState: Object.fromEntries(this.config.nodes.map(({ id }) => [id, id === current ? "active" : emitted.has(id) ? "accepted" : stack2.includes(id) ? "frontier" : id in discovery ? "closed" : "neutral"])),
-          edgeState: Object.fromEntries(this.config.edges.map(({ from, to }) => [`${from}|${to}`, edge?.[0] === from && edge[1] === to ? "active" : components.some((component) => component.includes(from) && component.includes(to)) ? "accepted" : "neutral"])),
+          nodeState: Object.fromEntries(
+            this.config.nodes.map(({ id }) => [
+              id,
+              id === current ? "active" : emitted.has(id) ? "accepted" : stack2.includes(id) ? "frontier" : id in discovery ? "closed" : "neutral"
+            ])
+          ),
+          edgeState: Object.fromEntries(
+            this.config.edges.map(({ from, to }) => [
+              `${from}|${to}`,
+              edge?.[0] === from && edge[1] === to ? "active" : components.some((component) => component.includes(from) && component.includes(to)) ? "accepted" : "neutral"
+            ])
+          ),
           message,
           detail
         });
       }
     };
-    family10 = { id: "graph-state", createRecorder: (config) => new Recorder10(config), createView: makeGraphStateView };
+    family10 = {
+      id: "graph-state",
+      createRecorder: (config) => new Recorder10(config),
+      createView: makeGraphStateView
+    };
     stronglyConnectedComponents = {
       id: "strongly-connected-components",
       kind: "graph",
@@ -21451,10 +21958,10 @@ function mountUnionFind(root, config) {
         "aria-label",
         `element ${index}, parent ${parent[index]}, representative ${root2}${parent[index] === index ? ", root" : ""}`
       );
-      rootLabel.style.display = parent[index] === index ? "" : "none";
+      rootLabel.toggleAttribute("hidden", parent[index] !== index);
       const edge = edgeNodes[index];
       if (parent[index] === index) {
-        edge.style.display = "none";
+        edge.toggleAttribute("hidden", true);
         return;
       }
       const target = positions[parent[index]];
@@ -21465,7 +21972,7 @@ function mountUnionFind(root, config) {
       const startY = position.y + dy * NODE_RADIUS / distance2;
       const endX = target.x - dx * (NODE_RADIUS + 5) / distance2;
       const endY = target.y - dy * (NODE_RADIUS + 5) / distance2;
-      edge.style.display = "";
+      edge.toggleAttribute("hidden", false);
       edge.dataset.active = String(highlighted.has(index));
       edge.setAttribute(
         "d",
@@ -21753,7 +22260,9 @@ function parseTernarySearchTreeConfig(config) {
     operations,
     rootNode,
     ternaryNodes: Object.freeze(
-      Object.fromEntries(Object.entries(nodes5).map(([id, node2]) => [id, Object.freeze({ ...node2 })]))
+      Object.fromEntries(
+        Object.entries(nodes5).map(([id, node2]) => [id, Object.freeze({ ...node2 })])
+      )
     ),
     nodes: built.nodes,
     edges: built.edges
@@ -21765,8 +22274,19 @@ function traverse(input, ops, operation, key4) {
   let current = input.rootNode;
   const rootEdge = edgeId("root", "eq", current);
   if (ops.hasVisibleEdge(rootEdge))
-    ops.reuseEdge(rootEdge, current, index, `Enter root character ${input.ternaryNodes[current].character}.`);
-  else ops.createNode(rootEdge, current, index, `Create root character ${input.ternaryNodes[current].character}.`);
+    ops.reuseEdge(
+      rootEdge,
+      current,
+      index,
+      `Enter root character ${input.ternaryNodes[current].character}.`
+    );
+  else
+    ops.createNode(
+      rootEdge,
+      current,
+      index,
+      `Create root character ${input.ternaryNodes[current].character}.`
+    );
   while (current) {
     const node2 = input.ternaryNodes[current];
     const character = key4[index];
@@ -21798,7 +22318,8 @@ function traverse(input, ops, operation, key4) {
       current = next;
     }
   }
-  if (operation === "search") ops.completeSearch(false, `Search "${key4}" stopped before a terminal.`);
+  if (operation === "search")
+    ops.completeSearch(false, `Search "${key4}" stopped before a terminal.`);
 }
 var edgeId, ternarySearchTree;
 var init_ternary_search_tree = __esm({
@@ -21976,7 +22497,11 @@ var init_run_stack = __esm({
         this.pushFrame("detect", message);
       }
       reverse(run7, message) {
-        this.array.splice(run7.start, run7.length, ...this.array.slice(run7.start, run7.start + run7.length).reverse());
+        this.array.splice(
+          run7.start,
+          run7.length,
+          ...this.array.slice(run7.start, run7.start + run7.length).reverse()
+        );
         this.current = { ...run7 };
         this.pushFrame("reverse", message);
       }
@@ -22112,7 +22637,9 @@ var init_tim_sort = __esm({
       parse: parseTimSortConfig,
       run(input, ops) {
         const n = ops.value.length;
-        ops.init(`Scan natural runs, extend short runs to minrun ${input.minrun}, then merge the run stack.`);
+        ops.init(
+          `Scan natural runs, extend short runs to minrun ${input.minrun}, then merge the run stack.`
+        );
         function mergeCollapse() {
           while (true) {
             const stack2 = ops.frames.at(-1)?.stack || [];
@@ -22203,7 +22730,9 @@ var init_tim_sort = __esm({
             `Force final merge of adjacent runs ${runLabel2(stack2[index].start, stack2[index].length)} and ${runLabel2(stack2[index + 1].start, stack2[index + 1].length)}.`
           );
         }
-        ops.done(`One run remains: sorted stably after ${ops.frames.at(-1)?.merges || 0} adjacent merges.`);
+        ops.done(
+          `One run remains: sorted stably after ${ops.frames.at(-1)?.merges || 0} adjacent merges.`
+        );
       }
     };
   }
@@ -22301,9 +22830,19 @@ var init_z_algorithm = __esm({
 });
 
 // custom/steptrace/src/algorithms/index.ts
+function familyAdapter(definition, family11) {
+  return {
+    ...definition,
+    adapter: true,
+    family: family11
+  };
+}
 var builtInAlgorithms, interactiveStructures;
 var init_algorithms = __esm({
   "custom/steptrace/src/algorithms/index.ts"() {
+    init_indexed_pointer_window();
+    init_legacy_adapters();
+    init_string_match();
     init_activity_selection();
     init_avl_tree();
     init_a_star();
@@ -22414,7 +22953,7 @@ var init_algorithms = __esm({
       kruskal,
       maximumFlow,
       stronglyConnectedComponents,
-      bubbleSort,
+      familyAdapter(bubbleSort, legacyArraySortFamily),
       cocktailShakerSort,
       gnomeSort,
       bogoSort,
@@ -22422,11 +22961,11 @@ var init_algorithms = __esm({
       cycleSort,
       oddEvenSort,
       stoogeSort,
-      insertionSort,
-      selectionSort,
-      quickSort,
-      heapSort,
-      mergeSort,
+      familyAdapter(insertionSort, legacyArraySortFamily),
+      familyAdapter(selectionSort, legacyArraySortFamily),
+      familyAdapter(quickSort, legacyArraySortFamily),
+      familyAdapter(heapSort, legacyArraySortFamily),
+      familyAdapter(mergeSort, legacyArraySortFamily),
       mergeSortTree,
       mergeIntervals,
       shellSort,
@@ -22443,23 +22982,23 @@ var init_algorithms = __esm({
       jumpSearch,
       ternarySearch,
       binarySearchOnAnswer,
-      bfs,
-      dfs,
+      familyAdapter(bfs, legacyGraphStateFamily),
+      familyAdapter(dfs, legacyGraphStateFamily),
       dijkstra,
-      prim,
+      familyAdapter(prim, legacyGraphStateFamily),
       prefixSum,
-      topologicalSort,
+      familyAdapter(topologicalSort, legacyGraphStateFamily),
       topKElements,
       twoHeaps,
-      binarySearch,
-      linearSearch,
-      kmp,
-      rabinKarp,
-      zAlgorithm,
-      boyerMoore,
-      twoPointers,
-      slidingWindow,
-      lcs,
+      familyAdapter(binarySearch, legacyIndexedArraySearchFamily),
+      familyAdapter(linearSearch, legacyIndexedArraySearchFamily),
+      familyAdapter(kmp, stringMatchFamily),
+      familyAdapter(rabinKarp, stringMatchFamily),
+      familyAdapter(zAlgorithm, stringMatchFamily),
+      familyAdapter(boyerMoore, stringMatchFamily),
+      familyAdapter(twoPointers, indexedPointerWindowFamily),
+      familyAdapter(slidingWindow, indexedPointerWindowFamily),
+      familyAdapter(lcs, lcsMatrixGridFamily),
       ...dynamicProgrammingAlgorithms,
       floydWarshall,
       fastAndSlowPointers,
@@ -23117,11 +23656,12 @@ function createMount(registry2, structures = []) {
         log.style.minHeight = height2;
         return;
       }
-      const PROBE = "position:absolute;visibility:hidden;pointer-events:none;left:0;right:0;height:auto";
       const tall = (node2) => node2.getBoundingClientRect().height;
       const probes = player.frames.map((frame) => {
-        const probe = el("li", "steptrace__log-line steptrace__log-line--cur");
-        probe.style.cssText = PROBE;
+        const probe = el(
+          "li",
+          "steptrace__log-line steptrace__log-line--cur steptrace__measure-probe"
+        );
         const number = el("span", "steptrace__log-num");
         number.textContent = "00";
         const text = el("span", "steptrace__log-text");
@@ -23131,7 +23671,7 @@ function createMount(registry2, structures = []) {
       });
       const resultProbe = insight.cloneNode(true);
       resultProbe.hidden = false;
-      resultProbe.style.cssText = PROBE;
+      resultProbe.classList.add("steptrace__measure-probe");
       log.append(...probes, resultProbe);
       let maxRow = tall(resultProbe);
       for (const probe of probes) maxRow = Math.max(maxRow, tall(probe));
@@ -23226,17 +23766,17 @@ function createMount(registry2, structures = []) {
         ll.num.textContent = pad2(fi + 1);
         ll.txt.textContent = stripTags(player.frames[fi].message);
         ll.line.classList.toggle("steptrace__log-line--cur", cur);
-        ll.line.style.opacity = cur ? "" : String(fadeFor(i - fi));
+        if (cur) ll.line.style.removeProperty("--_history-opacity");
+        else ll.line.style.setProperty("--_history-opacity", String(fadeFor(i - fi)));
       }
       fitLog(terminal);
       const dir = lastRailI == null ? 0 : Math.sign(i - lastRailI);
       lastRailI = i;
       if (dir !== 0) {
-        log.style.transition = "none";
-        log.style.transform = `translateY(${dir > 0 ? "0.55rem" : "-0.55rem"})`;
+        log.classList.remove("steptrace__log--moving");
+        log.dataset.motionDirection = dir > 0 ? "forward" : "backward";
         void log.offsetHeight;
-        log.style.transition = "transform 0.26s var(--_spring)";
-        log.style.transform = "translateY(0)";
+        log.classList.add("steptrace__log--moving");
       }
       const chapter = milestoneAt(currentMilestones, i);
       phaseName.textContent = chapter ? chapter.label : "Step";
@@ -23302,7 +23842,7 @@ function createMount(registry2, structures = []) {
         row.setAttribute("aria-describedby", hintId);
         if (r.sw) {
           const sw = el("span", "steptrace__watch-sw");
-          sw.style.background = r.sw;
+          sw.style.setProperty("--_watch-color", r.sw);
           row.append(sw);
         }
         const kk = el("span", "steptrace__watch-k");
@@ -23357,10 +23897,13 @@ function createMount(registry2, structures = []) {
       });
       if (built.family) root.dataset.visualFamily = built.family.id;
       else delete root.dataset.visualFamily;
+      if (built.legacyRenderer) root.dataset.legacyRenderer = built.legacyRenderer;
+      else delete root.dataset.legacyRenderer;
+      root.classList.toggle("steptrace--backtrack", built.kind === "backtrack");
       currentGraph = built.graph || null;
       currentMilestones = buildMilestones(state.algorithm, built.kind, built.frames);
       let view;
-      if (built.family) view = built.family.createView(built.frames);
+      if (built.family) view = built.family.createView(built.frames, built);
       else if (built.kind === "graph")
         view = makeGraphView(built.frames, built.graph, built.frontierLabel);
       else if (built.kind === "search") view = makeSearchView(built.frames);
@@ -23379,7 +23922,13 @@ function createMount(registry2, structures = []) {
       root.classList.toggle("steptrace--stable-stage", view.stableStage === true);
       root.classList.toggle(
         "steptrace--compact-stage",
-        built.family ? ["monotone-boundary", "prefix-sum", "stack-sequence"].includes(built.family.id) : ["bits", "pointers", "string"].includes(built.kind)
+        built.family ? [
+          "indexed-pointer-window",
+          "monotone-boundary",
+          "prefix-sum",
+          "stack-sequence",
+          "string-match"
+        ].includes(built.family.id) : ["bits", "pointers", "string"].includes(built.kind)
       );
       stageCol.classList.toggle("steptrace__stage-col--bottom", stageAlignment === "bottom");
       stageCol.classList.toggle("steptrace__stage-col--center", stageAlignment === "center");
@@ -23507,7 +24056,8 @@ function createMount(registry2, structures = []) {
           "steptrace--reduced",
           "steptrace--stable-stage",
           "steptrace--compact-stage",
-          "steptrace--narrow"
+          "steptrace--narrow",
+          "steptrace--backtrack"
         );
       }
     };
@@ -23589,31 +24139,31 @@ function createRegistry(builtIns) {
   const recTreeRegistry = /* @__PURE__ */ new Map();
   const api = {
     registerSort(id, meta, run7) {
-      sortRegistry.set(id, { meta, run: run7 });
+      sortRegistry.set(id, { meta, run: run7, family: legacyArraySortFamily });
     },
     registerGraph(id, meta, run7) {
-      graphRegistry.set(id, { meta, run: run7 });
+      graphRegistry.set(id, { meta, run: run7, family: legacyGraphStateFamily });
     },
     registerSearch(id, meta, run7) {
-      searchRegistry.set(id, { meta, run: run7 });
+      searchRegistry.set(id, { meta, run: run7, family: legacyIndexedArraySearchFamily });
     },
     registerString(id, meta, run7, profile) {
-      stringRegistry.set(id, { meta, run: run7, profile });
+      stringRegistry.set(id, { meta, run: run7, profile, family: stringMatchFamily });
     },
     registerPointer(id, meta, run7) {
-      pointerRegistry.set(id, { meta, run: run7 });
+      pointerRegistry.set(id, { meta, run: run7, family: indexedPointerWindowFamily });
     },
     registerDP(id, meta, run7) {
-      dpRegistry.set(id, { meta, run: run7 });
+      dpRegistry.set(id, { meta, run: run7, family: lcsMatrixGridFamily });
     },
     registerUnionFind(id, meta, run7) {
       unionFindRegistry.set(id, { meta, run: run7 });
     },
     registerBits(id, meta, run7) {
-      bitsRegistry.set(id, { meta, run: run7 });
+      bitsRegistry.set(id, { meta, run: run7, legacyRenderer: "bit-grid" });
     },
     registerBacktrack(id, meta, run7) {
-      backtrackRegistry.set(id, { meta, run: run7 });
+      backtrackRegistry.set(id, { meta, run: run7, legacyRenderer: "backtrack-board" });
     },
     registerRecTree(id, meta, run7) {
       recTreeRegistry.set(id, { meta, run: run7 });
@@ -23658,7 +24208,7 @@ function createRegistry(builtIns) {
       if (sort) {
         const recorder = new SortRecorder(config.array);
         sort.run(input, recorder);
-        return { kind: "sort", frames: recorder.frames };
+        return { kind: "sort", family: sort.family, frames: recorder.frames };
       }
       const graphAlgorithm = graphRegistry.get(config.algorithm);
       if (graphAlgorithm) {
@@ -23667,6 +24217,7 @@ function createRegistry(builtIns) {
         graphAlgorithm.run({ ...input, start: graph.start }, recorder, graph);
         return {
           kind: "graph",
+          family: graphAlgorithm.family,
           frames: recorder.frames,
           graph,
           frontierLabel: graphAlgorithm.meta.frontierLabel
@@ -23676,13 +24227,13 @@ function createRegistry(builtIns) {
       if (search) {
         const recorder = new SearchRecorder(config.array, config.target);
         search.run(input, recorder);
-        return { kind: "search", frames: recorder.frames };
+        return { kind: "search", family: search.family, frames: recorder.frames };
       }
       const string = stringRegistry.get(config.algorithm);
       if (string) {
         const recorder = new StringRecorder(config.text, config.pattern, string.profile);
         string.run(input, recorder);
-        return { kind: "string", frames: recorder.frames };
+        return { kind: "string", family: string.family, frames: recorder.frames };
       }
       const pointer = pointerRegistry.get(config.algorithm);
       if (pointer) {
@@ -23690,13 +24241,13 @@ function createRegistry(builtIns) {
           config.algorithm === "sliding-window" ? Array.from(typeof config.text === "string" ? config.text : "") : config.array
         );
         pointer.run(input, recorder);
-        return { kind: "pointers", frames: recorder.frames };
+        return { kind: "pointers", family: pointer.family, frames: recorder.frames };
       }
       const dp = dpRegistry.get(config.algorithm);
       if (dp) {
         const recorder = new DPRecorder();
         dp.run(input, recorder);
-        return { kind: "dp", frames: recorder.frames };
+        return { kind: "dp", family: dp.family, frames: recorder.frames };
       }
       const unionFind2 = unionFindRegistry.get(config.algorithm);
       if (unionFind2) {
@@ -23708,13 +24259,17 @@ function createRegistry(builtIns) {
       if (bits) {
         const recorder = new BitsRecorder(config.width || 8);
         bits.run(input, recorder);
-        return { kind: "bits", frames: recorder.frames };
+        return { kind: "bits", legacyRenderer: bits.legacyRenderer, frames: recorder.frames };
       }
       const backtrack = backtrackRegistry.get(config.algorithm);
       if (backtrack) {
         const recorder = new BacktrackRecorder();
         backtrack.run(input, recorder);
-        return { kind: "backtrack", frames: recorder.frames };
+        return {
+          kind: "backtrack",
+          legacyRenderer: backtrack.legacyRenderer,
+          frames: recorder.frames
+        };
       }
       const recTree = recTreeRegistry.get(config.algorithm);
       if (recTree) {
@@ -23726,6 +24281,35 @@ function createRegistry(builtIns) {
     }
   };
   for (const definition of builtIns) {
+    if ("adapter" in definition) {
+      switch (definition.kind) {
+        case "sort":
+          api.registerSort(definition.id, definition.meta, definition.run);
+          sortRegistry.get(definition.id).family = definition.family;
+          break;
+        case "graph":
+          api.registerGraph(definition.id, definition.meta, definition.run);
+          graphRegistry.get(definition.id).family = definition.family;
+          break;
+        case "search":
+          api.registerSearch(definition.id, definition.meta, definition.run);
+          searchRegistry.get(definition.id).family = definition.family;
+          break;
+        case "string":
+          api.registerString(definition.id, definition.meta, definition.run, definition.profile);
+          stringRegistry.get(definition.id).family = definition.family;
+          break;
+        case "pointers":
+          api.registerPointer(definition.id, definition.meta, definition.run);
+          pointerRegistry.get(definition.id).family = definition.family;
+          break;
+        case "dp":
+          api.registerDP(definition.id, definition.meta, definition.run);
+          dpRegistry.get(definition.id).family = definition.family;
+          break;
+      }
+      continue;
+    }
     if ("family" in definition) {
       familyRegistry.set(definition.id, definition);
       continue;
@@ -23754,9 +24338,15 @@ function createRegistry(builtIns) {
         break;
       case "bits":
         api.registerBits(definition.id, definition.meta, definition.run);
+        if (definition.legacyRenderer) {
+          bitsRegistry.get(definition.id).legacyRenderer = definition.legacyRenderer;
+        }
         break;
       case "backtrack":
         api.registerBacktrack(definition.id, definition.meta, definition.run);
+        if (definition.legacyRenderer) {
+          backtrackRegistry.get(definition.id).legacyRenderer = definition.legacyRenderer;
+        }
         break;
       case "rectree":
         api.registerRecTree(definition.id, definition.meta, definition.run);
@@ -23768,6 +24358,9 @@ function createRegistry(builtIns) {
 var init_registry = __esm({
   "custom/steptrace/src/registry.ts"() {
     init_graph();
+    init_indexed_pointer_window();
+    init_legacy_adapters();
+    init_string_match();
     init_recorders();
   }
 });
@@ -24332,6 +24925,8 @@ function finishResource(key4, label, labelId, mode, highlighted, semanticBounds)
         pathId: path.id,
         category: path.category,
         label: endpointFormulas.get(path.curveId) === path.formula ? path.legendLabel : `${path.legendLabel}: ${path.formula}`,
+        semanticLabel: path.legendLabel,
+        formula: path.formula,
         color: path.color,
         banded: Boolean(path.bandTo)
       }
@@ -24343,6 +24938,8 @@ function finishResource(key4, label, labelId, mode, highlighted, semanticBounds)
         kind: "semantic",
         category: bound.category,
         label: `${bound.role}: ${bound.formula}`,
+        semanticLabel: bound.role,
+        formula: bound.formula,
         color: bound.color
       }
     }))
@@ -24470,6 +25067,7 @@ function buildResource(rawEntries, mode, pathPrefix, key4, label, labelId, versi
     });
   } else {
     const seenOperations = /* @__PURE__ */ new Set();
+    let flattenOperations = true;
     rawEntries.forEach((raw, operationIndex) => {
       const path = `${pathPrefix}entries[${operationIndex}]`;
       const entry = objectAt(raw, path);
@@ -24480,6 +25078,7 @@ function buildResource(rawEntries, mode, pathPrefix, key4, label, labelId, versi
       if (!Array.isArray(entry.bounds) || entry.bounds.length === 0) {
         fail(`${path}.bounds`, "must be a non-empty array");
       }
+      flattenOperations &&= entry.bounds.length === 1;
       const seenRoles = /* @__PURE__ */ new Set();
       entry.bounds.forEach((rawBound, boundIndex) => {
         const boundPath = `${path}.bounds[${boundIndex}]`;
@@ -24488,7 +25087,7 @@ function buildResource(rawEntries, mode, pathPrefix, key4, label, labelId, versi
         if (bound.kind === plottedKind) {
           rejectUnknown(
             bound,
-            version === 2 ? ["kind", "curveId", "formula", "role"] : ["kind", "curveId", "role"],
+            version === 2 ? ["kind", "curveId", "curveFrom", "curveTo", "formula", "role"] : ["kind", "curveId", "role"],
             boundPath
           );
         } else if (version === 2 && bound.kind === "samples") {
@@ -24526,11 +25125,12 @@ function buildResource(rawEntries, mode, pathPrefix, key4, label, labelId, versi
           });
           return;
         }
-        const curveId = curveIdAt(bound.curveId, `${boundPath}.curveId`);
+        const { curveId, bandTo } = version === 2 ? bandAt(bound, boundPath) : { curveId: curveIdAt(bound.curveId, `${boundPath}.curveId`) };
         const formula = version === 2 ? textAt(bound.formula, `${boundPath}.formula`) : curves[curveId].formula;
         highlighted.push({
           id: pathId(labelId, `${operation}-${role}`, operationIndex * 100 + boundIndex),
           curveId,
+          bandTo,
           formula,
           category: categoryFor(role),
           label: `${operation} — ${role}: ${formula}`,
@@ -24541,6 +25141,16 @@ function buildResource(rawEntries, mode, pathPrefix, key4, label, labelId, versi
         });
       });
     });
+    if (flattenOperations) {
+      for (const path of highlighted) {
+        path.legendLabel = path.legendGroup ?? path.legendLabel;
+        path.legendGroup = void 0;
+      }
+      for (const bound of semanticBounds) {
+        bound.role = bound.operation ?? bound.role;
+        bound.operation = void 0;
+      }
+    }
   }
   return finishResource(key4, label, labelId, mode, highlighted, semanticBounds);
 }
@@ -24825,7 +25435,13 @@ function renderResourceDom(document2, resource, index) {
       const swatch = document2.createElement("span");
       swatch.className = "complexity__legend-swatch";
       swatch.setAttribute("aria-hidden", "true");
-      entry.append(swatch, document2.createTextNode(legendItem.label));
+      const label = document2.createElement("span");
+      label.className = "complexity__legend-label";
+      label.textContent = legendItem.semanticLabel;
+      const formula = document2.createElement("span");
+      formula.className = "complexity__legend-formula";
+      formula.textContent = legendItem.formula;
+      entry.append(swatch, label, document2.createTextNode(": "), formula);
       item.append(entry);
       items.append(item);
     }
@@ -24844,21 +25460,6 @@ function renderComplexityDom(root, view) {
   figure.setAttribute("aria-label", view.label);
   const hiddenLabel = appendText(document2, figure, "span", view.label);
   hiddenLabel.hidden = true;
-  if (view.variables.length > 0) {
-    const variables = document2.createElement("dl");
-    variables.className = "complexity__variables";
-    for (const variable of view.variables) {
-      const item = document2.createElement("div");
-      item.className = "complexity__variable";
-      const term = document2.createElement("dt");
-      appendText(document2, term, "var", variable.symbol);
-      const description = document2.createElement("dd");
-      description.textContent = variable.description;
-      item.append(term, description);
-      variables.append(item);
-    }
-    figure.append(variables);
-  }
   if (view.resources.length > 1) {
     const tabs = document2.createElement("div");
     tabs.className = "complexity__tabs";
@@ -24882,6 +25483,21 @@ function renderComplexityDom(root, view) {
     (resource, index) => resources.append(renderResourceDom(document2, resource, index))
   );
   figure.append(resources);
+  if (view.variables.length > 0) {
+    const variables = document2.createElement("dl");
+    variables.className = "complexity__variables";
+    for (const variable of view.variables) {
+      const item = document2.createElement("div");
+      item.className = "complexity__variable";
+      const term = document2.createElement("dt");
+      appendText(document2, term, "var", variable.symbol);
+      const description = document2.createElement("dd");
+      description.textContent = variable.description;
+      item.append(term, description);
+      variables.append(item);
+    }
+    figure.append(variables);
+  }
   root.replaceChildren(figure);
   const interaction = typeof figure.querySelectorAll === "function" ? mountComplexityFigure(figure) : { destroy() {
   } };

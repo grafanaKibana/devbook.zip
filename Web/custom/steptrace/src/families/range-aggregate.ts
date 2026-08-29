@@ -1,10 +1,6 @@
 import { el } from "../render"
 import type { MountHandle } from "../types"
-import {
-  createIndexedBoard,
-  createStructureShell,
-  onEnter,
-} from "./interactive-structure"
+import { createIndexedBoard, createStructureShell, onEnter } from "./interactive-structure"
 
 export interface FenwickTreeConfig {
   values: number[]
@@ -14,13 +10,7 @@ export interface SegmentTreeConfig {
   values: number[]
 }
 
-type BlockRole =
-  | "idle"
-  | "update"
-  | "query"
-  | "prefix-right"
-  | "prefix-left"
-  | "cancelled"
+type BlockRole = "idle" | "update" | "query" | "prefix-right" | "prefix-left" | "cancelled"
 
 interface RangeBlock {
   block: HTMLElement
@@ -192,13 +182,13 @@ export function mountFenwickTree(root: HTMLElement, config: FenwickTreeConfig): 
     })
     shell.setCounter(String(values.length), " values")
     shell.status.textContent =
-      message ||
-      "Add a delta to one value, or query a range to see which stored blocks compose it."
+      message || "Add a delta to one value, or query a range to see which stored blocks compose it."
   }
 
   function onUpdate() {
     const index = Number(updateIndex.value)
-    const parsed = delta.value.trim() === "" ? Math.floor(Math.random() * 9) + 1 : Number(delta.value)
+    const parsed =
+      delta.value.trim() === "" ? Math.floor(Math.random() * 9) + 1 : Number(delta.value)
     if (!Number.isFinite(parsed) || !Number.isInteger(parsed)) {
       shell.status.textContent = "Delta must be a finite integer."
       return
@@ -399,8 +389,7 @@ export function mountSegmentTree(root: HTMLElement, config: SegmentTreeConfig): 
     }
     shell.setCounter(String(values.length), " values")
     shell.status.textContent =
-      message ||
-      "Set one source value, or query a range to reveal its canonical covering nodes."
+      message || "Set one source value, or query a range to reveal its canonical covering nodes."
   }
 
   function onUpdate() {

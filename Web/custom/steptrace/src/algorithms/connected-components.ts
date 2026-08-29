@@ -1,13 +1,34 @@
-import { makeGraphStateView, type GraphStateEdge, type GraphStateFrame, type GraphStateNode } from "../families/graph-state"
+import {
+  makeGraphStateView,
+  type GraphStateEdge,
+  type GraphStateFrame,
+  type GraphStateNode,
+} from "../families/graph-state"
 import type { FamilyAlgorithmDefinition, GraphStateDetail, VisualFamily } from "../types"
 
-interface Config { nodes: GraphStateNode[]; edges: GraphStateEdge[] }
+interface Config {
+  nodes: GraphStateNode[]
+  edges: GraphStateEdge[]
+}
 
 class Recorder {
   readonly frames: GraphStateFrame[] = []
   constructor(private readonly config: Config) {}
-  record(component: number, current: string | null, frontier: readonly string[], visited: readonly string[], groups: readonly (readonly string[])[], message: string) {
-    const detail: GraphStateDetail = { kind: "component-flood", component, frontier: [...frontier], visited: [...visited], groups: groups.map((group) => [...group]) }
+  record(
+    component: number,
+    current: string | null,
+    frontier: readonly string[],
+    visited: readonly string[],
+    groups: readonly (readonly string[])[],
+    message: string,
+  ) {
+    const detail: GraphStateDetail = {
+      kind: "component-flood",
+      component,
+      frontier: [...frontier],
+      visited: [...visited],
+      groups: groups.map((group) => [...group]),
+    }
     this.frames.push({
       type: current ? "visit" : "done",
       profile: "connected-components",
@@ -19,15 +40,35 @@ class Recorder {
       currentNode: current,
       currentEdge: null,
       selectedEdges: [],
-      nodeState: Object.fromEntries(this.config.nodes.map(({ id }) => [id, id === current ? "active" : frontier.includes(id) ? "frontier" : visited.includes(id) ? "accepted" : "neutral"])),
-      edgeState: Object.fromEntries(this.config.edges.map(({ from, to }) => [`${from}|${to}`, visited.includes(from) && visited.includes(to) ? "accepted" : "neutral"])),
+      nodeState: Object.fromEntries(
+        this.config.nodes.map(({ id }) => [
+          id,
+          id === current
+            ? "active"
+            : frontier.includes(id)
+              ? "frontier"
+              : visited.includes(id)
+                ? "accepted"
+                : "neutral",
+        ]),
+      ),
+      edgeState: Object.fromEntries(
+        this.config.edges.map(({ from, to }) => [
+          `${from}|${to}`,
+          visited.includes(from) && visited.includes(to) ? "accepted" : "neutral",
+        ]),
+      ),
       message,
       detail,
     })
   }
 }
 
-const family: VisualFamily<Config, Recorder, GraphStateFrame> = { id: "graph-state", createRecorder: (config) => new Recorder(config), createView: makeGraphStateView }
+const family: VisualFamily<Config, Recorder, GraphStateFrame> = {
+  id: "graph-state",
+  createRecorder: (config) => new Recorder(config),
+  createView: makeGraphStateView,
+}
 
 function parse(): Config {
   return {
@@ -53,14 +94,30 @@ function run(_: Config, recorder: Recorder) {
   const groups: string[][] = []
   const flood = (component: number, order: readonly string[]) => {
     const frontier = [order[0]]
-    recorder.record(component, order[0], frontier, visited, groups, `Start component ${component} at unvisited vertex ${order[0]}.`)
+    recorder.record(
+      component,
+      order[0],
+      frontier,
+      visited,
+      groups,
+      `Start component ${component} at unvisited vertex ${order[0]}.`,
+    )
     for (const id of order) {
       frontier.splice(frontier.indexOf(id), 1)
       if (!visited.includes(id)) visited.push(id)
-      const next = order.filter((candidate) => !visited.includes(candidate) && !frontier.includes(candidate))
+      const next = order.filter(
+        (candidate) => !visited.includes(candidate) && !frontier.includes(candidate),
+      )
       frontier.push(...next.slice(0, 1))
       const currentGroup = order.filter((member) => visited.includes(member))
-      recorder.record(component, id, frontier, visited, [...groups, currentGroup], `Assign ${id} to component ${component}.`)
+      recorder.record(
+        component,
+        id,
+        frontier,
+        visited,
+        [...groups, currentGroup],
+        `Assign ${id} to component ${component}.`,
+      )
     }
     groups.push([...order])
   }

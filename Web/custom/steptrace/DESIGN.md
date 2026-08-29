@@ -7,7 +7,7 @@ This document owns StepTrace-specific design, consistency, and review rules. The
 ## Source of truth
 
 - **Status:** Active
-- **Last refreshed:** 2026-08-14
+- **Last refreshed:** 2026-08-28
 - **Product surface:** `steptrace` fenced blocks rendered in Obsidian and Quartz.
 - **Source:** `Web/custom/steptrace/src/`.
 - **Generated artifacts:** `Web/custom/steptrace/generated/` and `Vault/.obsidian/plugins/steptrace/`.
@@ -84,6 +84,17 @@ Direct-manipulation structures may replace playback controls with native inputs,
 
 Do not build frames or family DOM inside an algorithm descriptor. Do not copy a family renderer to change one label or state.
 
+### Layered style ownership
+
+- `src/styles/_tokens.scss` is the only compile-time source for fallback semantic values and the Quartz light/dark palette mixins.
+- `src/styles/shared.scss` owns runtime aliases, scales, state paint, shell chrome, and shared mechanical primitives. A shared primitive must replace the same contract in at least two production consumers.
+- Family SCSS owns concept geometry, layout, and semantic-role selectors; TypeScript selects roles and retains measured/data-driven geometry, but does not paint them.
+- Quartz and Obsidian host files bind the same semantic roles without owning family selectors, state paint, or primitives. Quartz applies the canonical web light/dark palette; Obsidian resolves surfaces, borders, text, accents, and fonts from the active Obsidian theme while reusing the accessible shared state palette.
+
+Mechanically equivalent and close values canonicalize to the shared role even when this causes a small visual shift. A genuinely independent local value uses this exact one-line comment immediately before its declaration: `/* steptrace-exception: <kebab-name> | category=<category> | rationale=<concise text> | evidence=<repo-relative path> */`. Several governed declarations in one rule may share one exception only when they have the same category and rationale: put the comment first inside the rule and append `| properties=<comma-separated-properties>`. Each listed property must occur exactly once as a direct declaration in that rule; the allowlist does not cover unlisted declarations. `<category>` is `semantic`, `responsive`, `geometry`, `accessibility`, `motion`, `interaction`, or `host-parity`; `<kebab-name>` is unique within StepTrace; and `evidence` names a regular file whose real path remains inside the StepTrace evidence root. Enforcement pairs single annotations with the next declaration, rejects malformed, orphaned, duplicate, ambiguous, or missing grouped properties, and keeps excepted values in the raw-value inventory without treating them as shared authority. File-level exceptions do not exist.
+
+The radius, typography, spacing, and motion inventory is exhaustive across authored declarations, local custom properties, Sass variables, and fallback literals regardless of formatting. A nonzero raw literal in those categories must use a shared role or carry the adjacent exception above; generic custom-property and Sass aliases cannot hide it. Every governed shared role lives in `shared.scss` and has at least two real consumers, including consumers reached through semantic aliases. Unique governed values remain local with validated adjacent exceptions. CSS reset keywords and unitless zero do not create a competing style decision.
+
 ### Family reuse
 
 Choose the existing family that matches the data shape:
@@ -111,6 +122,19 @@ Choose the existing family that matches the data shape:
 | Disjoint sets                                         | `union-find`                                |
 
 Add a family only when an existing family would misrepresent the structure, not because an algorithm needs different colors, copy, or one local marker.
+
+### Legacy resolution
+
+Nineteen typed adapters preserve the public registration API while routing old descriptors into shared families:
+
+- `array-sort`: Bubble, Insertion, Selection, Quick, Heap, and Merge Sort.
+- `graph-state`: BFS, DFS, Prim, and Topological Sort.
+- `indexed-array-search`: Binary and Linear Search.
+- `string-match`: KMP, Rabin–Karp, Z Algorithm, and Boyer–Moore.
+- `indexed-pointer-window`: Two Pointers and Sliding Window.
+- `matrix-grid`: LCS.
+
+Exactly two descriptor-owned legacy renderers remain: Kernighan Popcount uses `bit-grid`, and N-Queens uses `backtrack-board`. Expected routing is a test oracle only; actual ownership comes from adapter family metadata or `legacyRenderer` on the descriptor.
 
 ### Canonical primitives
 
@@ -140,7 +164,9 @@ Related algorithms share semantic roles and cues even when their concept shapes 
 
 A primitive has one primary process role. An independent goal, target, range, or similar overlay may compose with it without replacing that primary role. Reinforce color with text, stroke, fill pattern, shape, badge, or position. Final markers and other semantic children are created with stable primitive topology and shown by state; state-only paint must not recreate geometry or append duplicate markers.
 
-The local legend translates algorithm terminology into this shared grammar; it does not redefine the grammar. `steptrace.semantic-inventory.mjs` and its StepTrace tests enforce exact source carriers, roles, marker associations, compositions, and explicit exclusions. Production changes belong in `src/`; generated Quartz and Obsidian projections are updated only through `npm run steptrace:build` and are never hand-edited.
+The local legend translates algorithm terminology into this shared grammar; it does not redefine the grammar. Generic StepTrace tests enforce the public API, catalog shape, registry routing, transport, mount teardown, and watcher lifecycle without encoding named algorithms, notes, or exact source carriers. `npm run steptrace:check` owns host-artifact freshness. Production changes belong in `src/`; generated Quartz and Obsidian projections are updated only through `npm run steptrace:build` and are never hand-edited.
+
+Algorithm legends use one default marker: a `0.75rem` circular solid semantic fill with no decorative border and a Title Case label. Terminal success adds the canonical shared check to green; accepted, visited, closed, path, and stored-progress green remain plain. Line, bar, band, edge, and path carriers are exceptions only when their geometry communicates the algorithmic relationship.
 
 ## Visual style
 
@@ -154,10 +180,10 @@ The local legend translates algorithm terminology into this shared grammar; it d
 
 ### Typography
 
-- Headings and interface hierarchy use `--_font-head`.
-- Trace prose and labels use `--_font-body`.
-- Values, indices, addresses, counters, and aligned state use `--_font-mono`.
-- Do not introduce family-specific font stacks.
+- Human UI, headings, trace prose, and narrative labels use `--_font-body`.
+- Formulas, values, indices, addresses, counters, and aligned machine state use `--_font-mono`.
+- Shared hierarchy uses weights `400` and `600`; a geometry-fitted data label may use a different size only when the available node, cell, or track requires it.
+- Do not introduce a third rendered font role or family-specific font stack.
 - Keep labels short enough to remain readable without shrinking below the shared scale.
 
 ### Spacing and geometry
@@ -166,6 +192,7 @@ The local legend translates algorithm terminology into this shared grammar; it d
 - Keep controls at least `44px` on compact or coarse-pointer surfaces.
 - Align values and repeated structures to a visible grid.
 - Reserve geometry for the largest expected normal state when that prevents frame-to-frame layout shift.
+- Tree and graph view bounds include node radius, terminal halos, stroke width, arrowheads, and a small visual gutter on all four sides. Preserve intentional clipping only after those rendered extents fit at compact-boundary and wide widths.
 - Prefer reflow, wrapping, and family container queries over scaling the whole visualization.
 - Use horizontal scrolling only when reflow or compression would falsify the spatial relationship.
 
@@ -259,6 +286,8 @@ Both hosts must share:
 - Tabsdown-authored outer and inner panel structure.
 - Lazy mounting and visibility-driven pause, conditional resume, and state retention.
 
+Host parity means the same role and state semantics, not identical computed colors. Obsidian should look native to the active Obsidian theme; Quartz should retain the web palette.
+
 Host-specific code may provide:
 
 - Native loading and lifecycle integration.
@@ -279,12 +308,15 @@ A host-specific difference is acceptable only when the same operation, state, re
 | Authored tab interaction     | Tabsdown                                           |
 | Panel visibility lifecycle   | `src/mount.ts`                                     |
 | Family DOM and geometry      | `src/families/`, `src/render.ts`                   |
+| Fallback and Quartz palette  | `src/styles/_tokens.scss`                          |
 | Shared tokens and chrome     | `src/styles/shared.scss`                           |
 | Family styling               | the matching file under `src/styles/`              |
 | Obsidian token binding       | `src/styles/hosts/obsidian.scss`                   |
 | Quartz token binding         | `Web/custom/components/styles/steptrace.scss`      |
 | Shipped order                | `src/algorithms/index.ts`                          |
-| Generated artifacts          | `build.mjs`; never hand-edited                     |
+| Generated projections        | `build.mjs`; never hand-edited                     |
+
+`npm run steptrace:build` is the sole writer for the six projections: Quartz `generated/engine.js` and `generated/engine.css`, plus Obsidian `main.js`, `styles.css`, `manifest.json`, and `.hotreload`. `npm run steptrace:check` compares all six byte-for-byte with an in-memory build.
 
 ## Change checklist
 
@@ -315,6 +347,20 @@ For a changed visual family, capture:
 - Desktop and compact.
 - Initial, representative active, and final state.
 - Reduced motion when motion behavior changed.
+
+### Capture, review, promote
+
+Visual proof is a two-phase immutable-candidate protocol. Candidate capture writes a sealed tree once, records product failures separately from pending visual approvals, and never reads approvals. Independent review may then append ledger entries without changing or recapturing the candidate. Promotion uses `--mode=verify-candidate --run-id=<id>` to revalidate the sealed artifacts, exact capture inputs and environment, product status, and current approval ledger; its closure receipt lives outside the candidate directory.
+
+Every visual mode runs through `steptrace.visual.launcher.mjs`; direct harness execution is rejected. The launcher hashes itself, the visual harness, and every imported local executable module before import, then passes a manifest that the harness verifies immediately. Candidate capture requires `--run-id` and `--producer-agent-id`. Promotion requires the same run id plus `--quartz-receipt` and `--obsidian-receipt`. The launch-manifest hash and exact executable bytes remain part of both pre/post capture snapshots, the candidate seal, and the external capture anchor.
+
+The exclusive capture anchor is `quality-gate/g008-promotion-protocol/capture-anchors/<run-id>.json`. Each screenshot has one canonical contained candidate path; promotion retains its validated bytes and hashes through classification and approval matching, then rechecks the complete anchored candidate tree immediately before the exclusive closure receipt write.
+
+Every current v2 approval requires an exclusive external anchor at `quality-gate/g008-promotion-protocol/review-anchors/<run-id>/<reviewer-agent-id>.json`. It binds the external capture-anchor path and hash, producer agent and harness identity, a distinct reviewer agent and evidence-owned tool identity, an allowed reviewer role, exact review artifacts and hashes, and the complete approval identity set. Path-only reviews and legacy approvals are not trusted.
+
+Current-run real-host receipts are written by the evidence-owned G008 adapters under `quality-gate/g008-promotion-protocol/runners/` to `real-host/g008/<run-id>/<host>/receipt.json`. Quartz uses runner `steptrace-g008-quartz-v1` with `playwright-cli`; Obsidian uses `steptrace-g008-obsidian-v1` with `obsidian-cli`. Promotion accepts only canonical schema-v2 PASS receipts with current runner-file hashes, exact capture/input/source/generated bindings, concrete check and artifact manifests, zero errors, and successful cleanup. Product failures are independently rederived before host or review evidence is consulted.
+
+**Architect WATCH:** review consolidation and real-host execution remain separate evidence lanes. They may exclusively create their anchors and receipts later, but they must not rewrite candidate, baseline, ledger, generated, or promotion artifacts. Raster equivalence retains the strict existing tolerance and never uses recapture consensus.
 
 Automated tests prove contracts; screenshots prove composition. Neither replaces keyboard and interaction checks.
 

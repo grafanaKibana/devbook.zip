@@ -290,8 +290,7 @@ function paintForest(
     flat.push(node)
     for (const child of node.children) {
       const line = svgEl("line", "steptrace__edge steptrace__heap-edge")
-      line.dataset.path =
-        options.active?.has(node.id) && options.active.has(child.id) ? "1" : "0"
+      line.dataset.path = options.active?.has(node.id) && options.active.has(child.id) ? "1" : "0"
       svg.append(line)
       edges.push({ line, from: node, to: child })
       visit(child)
@@ -423,8 +422,7 @@ export function mountBinomialQueue(root: HTMLElement, _config: HeapVariantConfig
             : phase === 1
               ? new Set(["a1", "carry1"])
               : new Set(["r2", "r1", "r0"]),
-        settled:
-          phase === 2 ? new Set(["r2"]) : phase === 1 ? new Set(["carry1"]) : undefined,
+        settled: phase === 2 ? new Set(["r2"]) : phase === 1 ? new Set(["carry1"]) : undefined,
         rootMeta,
         ariaLabel:
           phase === 0
@@ -457,24 +455,20 @@ export function mountBinomialQueue(root: HTMLElement, _config: HeapVariantConfig
               },
               { value: null, label: "B₂", ariaLabel: "order two empty" },
             ]
-        : [
-            {
-              value: "7 + 3",
-              label: "B₀",
-              active: true,
-              ariaLabel: "two order zero trees collide",
-            },
-            { value: "2", label: "B₁", ariaLabel: "one order one tree rooted at 2" },
-            { value: null, label: "B₂", ariaLabel: "order two empty" },
-          ],
+          : [
+              {
+                value: "7 + 3",
+                label: "B₀",
+                active: true,
+                ariaLabel: "two order zero trees collide",
+              },
+              { value: "2", label: "B₁", ariaLabel: "one order one tree rooted at 2" },
+              { value: null, label: "B₂", ariaLabel: "order two empty" },
+            ],
     )
-    shell.setCounter(
-      phase === 2 ? "1" : phase === 1 ? "2" : "3",
-      phase === 2 ? " tree" : " roots",
-    )
+    shell.setCounter(phase === 2 ? "1" : phase === 1 ? "2" : "3", phase === 2 ? " tree" : " roots")
     shell.status.textContent =
-      message ||
-      "Meld the 3-value forest with the singleton; equal orders link and carry right."
+      message || "Meld the 3-value forest with the singleton; equal orders link and carry right."
     meld.textContent = phase === 0 ? "Meld" : phase === 1 ? "Continue carry" : "Melded"
     meld.disabled = phase === 2
   }
@@ -816,10 +810,7 @@ function forestBinary(node: BinaryHeapNode): ForestNode {
   }
 }
 
-function mountMergeHeap(
-  root: HTMLElement,
-  mode: "leftist" | "skew",
-): MountHandle {
+function mountMergeHeap(root: HTMLElement, mode: "leftist" | "skew"): MountHandle {
   const label = mode === "leftist" ? "leftist heap" : "skew heap"
   const shell = createStructureShell(
     root,

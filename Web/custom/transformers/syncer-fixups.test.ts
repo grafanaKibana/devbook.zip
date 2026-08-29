@@ -3,17 +3,8 @@ import test from "node:test"
 
 import { rootAssetData } from "./syncer-fixups"
 
-test("Syncer SVG assets resolve from the published asset root", () => {
-  assert.equal(
-    rootAssetData("assets/computer-science/quadtree.svg"),
-    "/assets/computer-science/quadtree.svg",
-  )
-  assert.equal(
-    rootAssetData("/assets/computer-science/quadtree.svg"),
-    "/assets/computer-science/quadtree.svg",
-  )
-  assert.equal(
-    rootAssetData("https://example.com/quadtree.svg"),
-    "https://example.com/quadtree.svg",
-  )
+test("rootAssetData normalizes local assets and preserves external URLs", () => {
+  assert.equal(rootAssetData("assets/fixture.svg"), "/assets/fixture.svg")
+  assert.equal(rootAssetData("/assets/fixture.svg"), "/assets/fixture.svg")
+  assert.equal(rootAssetData("https://example.com/fixture.svg"), "https://example.com/fixture.svg")
 })
