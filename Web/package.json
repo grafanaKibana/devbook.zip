@@ -16,7 +16,7 @@
     "serve": "node ./quartz/bootstrap-cli.mjs build --serve --port 8085 --wsPort 3002",
     "readme:image": "playwright install chromium && node ./scripts/generate-readme-image.mjs",
     "docs": "node ./quartz/bootstrap-cli.mjs build --serve -d docs",
-    "check": "npm run complexity:test && npm run steptrace:test && npm run steptrace:typecheck && npm run steptrace:check && tsc --noEmit && npx prettier . --check",
+    "check": "npm run complexity:test && npm run mermaid-flow:test && npm run mermaid-flow:typecheck && npm run mermaid-flow:check && npm run steptrace:test && npm run steptrace:typecheck && npm run steptrace:check && tsc --noEmit --incremental false && npx prettier . --check",
     "format": "npx prettier . --write",
     "test": "tsx --test",
     "profile": "0x -D prof ./quartz/bootstrap-cli.mjs build --concurrency=1",
@@ -32,7 +32,11 @@
     "steptrace:visual:verify": "node ./custom/steptrace/steptrace.visual.launcher.mjs --mode=verify-candidate",
     "steptrace:visual": "node ./custom/steptrace/steptrace.visual.launcher.mjs --mode=candidate",
     "steptrace:watch": "node ./custom/steptrace/watch.mjs",
-    "complexity:test": "node --import tsx --test ./custom/complexity/complexity.test.ts"
+    "complexity:test": "node --import tsx --test ./custom/complexity/complexity.test.ts",
+    "mermaid-flow:build": "node ./custom/mermaid-flow/build.mjs",
+    "mermaid-flow:check": "node ./custom/mermaid-flow/build.mjs --check",
+    "mermaid-flow:typecheck": "tsc --noEmit -p ./custom/mermaid-flow/tsconfig.json",
+    "mermaid-flow:test": "node --import tsx --test ./custom/mermaid-flow/*.test.ts ./custom/mermaid-flow/phase0/phase0.test.mjs ./custom/transformers/mermaid-flow-block.test.ts"
   },
   "engines": {
     "npm": ">=10.9.2",

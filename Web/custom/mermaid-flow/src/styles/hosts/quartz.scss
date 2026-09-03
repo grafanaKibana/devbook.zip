@@ -1,0 +1,7 @@
+@use "../index";
+
+.mermaid-flow-runtime {
+  --mermaid-flow-border: var(--lightgray);
+  --mermaid-flow-focus: var(--secondary);
+  --mermaid-flow-text: var(--darkgray);
+}

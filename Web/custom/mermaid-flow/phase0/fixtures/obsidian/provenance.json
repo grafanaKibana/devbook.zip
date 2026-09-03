@@ -1,0 +1,9 @@
+{
+  "host": "Obsidian",
+  "hostVersion": "1.12.7",
+  "mermaidSource": "Obsidian 1.12.7 bundled Mermaid renderer (internal package version not exposed)",
+  "diagramSourceSha256": "10235040549e8b4f9a8482d3e25713bb3aab55d45fca6bd5903bc5c5af1873d0",
+  "capturedAt": "2026-08-31T06:48:27.625Z",
+  "procedure": "New isolated Obsidian profile and fixture vault; open Phase0.md in reading view; wait for three native Mermaid SVGs; serialize outerHTML; remove embedded style elements and volatile root style.",
+  "themes": ["light", "dark"]
+}

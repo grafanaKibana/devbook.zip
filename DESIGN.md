@@ -27,17 +27,18 @@ This is the repository-wide design contract. Keep it limited to verified cross-v
 
 ### Authority and host parity
 
-| Surface                                    | Authority                                                                      | Obsidian projection                                  | Quartz projection                            | Current status                                   |
-| ------------------------------------------ | ------------------------------------------------------------------------------ | ---------------------------------------------------- | -------------------------------------------- | ------------------------------------------------ |
-| Notes, hierarchy, metadata, topic identity | `Vault/Home/`                                                                  | Markdown and frontmatter                             | Generated `Web/content/`                     | Current                                          |
-| Shared cards                               | `Vault/Assets/components/devbook-card.jsx`                                     | Datacore JSX                                         | Frozen HTML/CSS                              | Current                                          |
-| FolderNote maps                            | `Vault/Assets/components/devbook-folder-map.jsx`                               | Datacore JSX                                         | Frozen HTML/CSS                              | Current                                          |
-| Home dashboard                             | `Vault/Home/index.md`                                                          | Datacore JSX                                         | Frozen HTML/CSS plus `homepage-fit.tsx`      | Current                                          |
-| Questions                                  | `[!QUESTION]` callouts in `Vault/Home/`                                        | Datacore index                                       | `QuestionsIndex`                             | Current; equivalent outcome, different renderers |
-| StepTrace                                  | `Web/custom/steptrace/src/` and its local `DESIGN.md`                          | Generated Obsidian plugin                            | Generated Quartz assets and host integration | Current                                          |
-| Complexity charts                          | `complexity` fences and `Web/custom/complexity/`                               | Shared model rendered to DOM by the StepTrace plugin | Shared model rendered to HAST                | Current contract; 97 DSA v2 charts plus standalone Big O |
-| Quartz shell                               | `Web/quartz.config.yaml`, `Web/quartz.ts`, sanctioned styles and `Web/custom/` | Not applicable                                       | Generated `Web/public/`                      | Current                                          |
-| Obsidian shell                             | `.obsidian` appearance, enabled snippets, theme, and Style Settings            | Native app UI                                        | Not applicable                               | Current                                          |
+| Surface                                    | Authority                                                                      | Obsidian projection                                  | Quartz projection                               | Current status                                                  |
+| ------------------------------------------ | ------------------------------------------------------------------------------ | ---------------------------------------------------- | ----------------------------------------------- | --------------------------------------------------------------- |
+| Notes, hierarchy, metadata, topic identity | `Vault/Home/`                                                                  | Markdown and frontmatter                             | Generated `Web/content/`                        | Current                                                         |
+| Shared cards                               | `Vault/Assets/components/devbook-card.jsx`                                     | Datacore JSX                                         | Frozen HTML/CSS                                 | Current                                                         |
+| FolderNote maps                            | `Vault/Assets/components/devbook-folder-map.jsx`                               | Datacore JSX                                         | Frozen HTML/CSS                                 | Current                                                         |
+| Home dashboard                             | `Vault/Home/index.md`                                                          | Datacore JSX                                         | Frozen HTML/CSS plus `homepage-fit.tsx`         | Current                                                         |
+| Questions                                  | `[!QUESTION]` callouts in `Vault/Home/`                                        | Datacore index                                       | `QuestionsIndex`                                | Current; equivalent outcome, different renderers                |
+| StepTrace                                  | `Web/custom/steptrace/src/` and its local `DESIGN.md`                          | Generated Obsidian plugin                            | Generated Quartz assets and host integration    | Current                                                         |
+| Complexity charts                          | `complexity` fences and `Web/custom/complexity/`                               | Shared model rendered to DOM by the StepTrace plugin | Shared model rendered to HAST                   | Current contract; 97 DSA v2 charts plus standalone Big O        |
+| Mermaid flow overlay                       | `Web/custom/mermaid-flow/src/` and its local `DESIGN.md`                       | Generated Obsidian plugin                            | Lazy generated assets and `afterDOMLoaded` host | Current; adjacent `mermaid` + strict JSON `mermaid-flow` fences |
+| Quartz shell                               | `Web/quartz.config.yaml`, `Web/quartz.ts`, sanctioned styles and `Web/custom/` | Not applicable                                       | Generated `Web/public/`                         | Current                                                         |
+| Obsidian shell                             | `.obsidian` appearance, enabled snippets, theme, and Style Settings            | Native app UI                                        | Not applicable                                  | Current                                                         |
 
 Host parity means the same useful reading outcome, not identical markup or host chrome.
 
@@ -185,6 +186,7 @@ Their main jobs are to find a topic, understand its scope, inspect the mechanism
 | Page reveal and Home fit    | Readiness and whole-card responsive fallback  | `Web/custom/components/`                                               |
 | StepTrace                   | Algorithm playback and interactive structures | `Web/custom/steptrace/`                                                |
 | Complexity chart            | Growth curves, plot, and legend               | `Web/custom/complexity/`                                               |
+| Mermaid flow overlay        | Request particles over native Mermaid edges   | `Web/custom/mermaid-flow/`                                             |
 
 ### Quartz shell
 
@@ -204,6 +206,7 @@ Their main jobs are to find a topic, understand its scope, inspect the mechanism
 
 ### Visualizations
 
+- Mermaid Flow pairs a marked `mermaid` fence with an immediately adjacent strict JSON `mermaid-flow` fence. Mermaid owns topology, labels, geometry, routing, and layout; the shared runtime adds configured particles, metrics, semantic states, and native controls in both hosts, removes continuous travel under reduced motion, and tears every addition down cleanly.
 - StepTrace is for state over time. Its consistency and style rules are in [`Web/custom/steptrace/DESIGN.md`](Web/custom/steptrace/DESIGN.md).
 - Below `704px` mounted width, StepTrace keeps phase, timeline, Trace/Watch, and transport visible in a compact footer no taller than `128px`; interactive controls and the scrubber remain `44px` targets.
 - Complexity is for comparing growth classes, cases, or operation families—not per-step execution.

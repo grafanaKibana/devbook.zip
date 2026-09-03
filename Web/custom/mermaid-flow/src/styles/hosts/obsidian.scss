@@ -1,0 +1,7 @@
+@use "../index";
+
+.mermaid-flow-runtime {
+  --mermaid-flow-border: var(--background-modifier-border);
+  --mermaid-flow-focus: var(--interactive-accent);
+  --mermaid-flow-text: var(--text-normal);
+}
