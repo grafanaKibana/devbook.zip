@@ -9,8 +9,12 @@ using Microsoft.Extensions.AI.Evaluation;
 /// here — the chat transcript only carries the question and the produced answer.
 /// </summary>
 public sealed class AnswerCaseContext(RagGoldenCase answerCase)
-    : EvaluationContext(nameof(AnswerCaseContext), new TextContent(answerCase.Query))
+    : EvaluationContext(nameof(AnswerCaseContext), BuildContents(answerCase))
 {
     /// <summary>Gets the scored case.</summary>
     public RagGoldenCase Case { get; } = answerCase;
+
+    private static TextContent BuildContents(RagGoldenCase answerCase)
+        => new(answerCase.ReferenceAnswer
+               ?? string.Join("\n\n", answerCase.Expected.Select(chunk => $"[{chunk.CitationLabel}] {chunk.Text}")));
 }

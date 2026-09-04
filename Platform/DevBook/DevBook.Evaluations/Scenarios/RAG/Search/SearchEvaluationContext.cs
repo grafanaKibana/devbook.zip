@@ -9,7 +9,7 @@ using Microsoft.Extensions.AI.Evaluation;
 /// <param name="prediction">The prediction to evaluate.</param>
 /// <param name="topK">Maximum rank cutoff used for primary metrics.</param>
 public sealed class SearchEvaluationContext(SearchPrediction prediction, int topK)
-    : EvaluationContext(nameof(SearchEvaluationContext), new TextContent(prediction.Query))
+    : EvaluationContext(nameof(SearchEvaluationContext), BuildContents(prediction))
 {
     /// <summary>
     /// Gets the prediction evaluated by this context.
@@ -20,4 +20,8 @@ public sealed class SearchEvaluationContext(SearchPrediction prediction, int top
     /// Gets the maximum number of results requested.
     /// </summary>
     public int TopK { get; } = topK;
+
+    private static TextContent BuildContents(SearchPrediction prediction)
+        => new(string.Join("\n", prediction.ExpectedDocuments.Select(document =>
+            document.Heading is null ? document.SourcePath : $"{document.SourcePath} § {document.Heading}")));
 }

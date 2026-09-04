@@ -28,7 +28,7 @@
     "Run Dataset Generation - Search - Mini": {
       "commandName": "Executable",
       "executablePath": "dotnet",
-      "commandLineArgs": "run Platform/DevBook/DevBook.Evaluations/RunDatasetGeneration.cs -- --dataset search --label mini --max-groups 10",
+      "commandLineArgs": "run Platform/DevBook/DevBook.Evaluations/RunDatasetGeneration.cs -- --dataset search --mini",
       "workingDirectory": "../../.."
     },
     "Run Dataset Generation - Answer": {

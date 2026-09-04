@@ -33,8 +33,13 @@ public sealed class JudgeEvaluator<TInput, TContext>(
         CancellationToken cancellationToken = default)
     {
         var context = additionalContext?.OfType<TContext>().FirstOrDefault();
-        return context is null
-            ? MetricFactory.MissingContext(judge.Metrics, typeof(TContext).Name)
-            : await judge.JudgeAsync(toInput(context, modelResponse), cancellationToken);
+        if (context is null)
+        {
+            return MetricFactory.MissingContext(judge.Metrics, typeof(TContext).Name);
+        }
+
+        var result = await judge.JudgeAsync(toInput(context, modelResponse), cancellationToken);
+        result.AddOrUpdateContextInAllMetrics(context);
+        return result;
     }
 }
