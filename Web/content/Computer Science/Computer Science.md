@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.589Z
-modified: 2026-08-28T08:17:48.729Z
-published: 2026-08-28T08:17:48.729Z
+modified: 2026-08-28T10:09:45.614Z
+published: 2026-08-28T10:09:45.614Z
 tags:
   - FolderNote
 icon: flask-round
@@ -14,7 +14,7 @@ subtopic: []
 summary: "Core CS reasoning for software engineering: data structures, algorithms, complexity analysis, and operating-system mechanisms."
 level:
   - "4"
-status: Ready to Repeat
+status: Creation
 priority: High
 ---
 

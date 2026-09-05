@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.680Z
-modified: 2026-08-25T13:45:27.886Z
-published: 2026-08-25T13:45:27.886Z
+modified: 2026-09-04T20:47:27.685Z
+published: 2026-09-04T20:47:27.685Z
 topic:
   - Software Architecture
 subtopic:
@@ -20,40 +20,59 @@ That separation is Kafka's defining property. A slow or offline consumer does no
 
 # Core Architecture
 
-```mermaid
-flowchart LR
-    P1[Producer A] --> PR[Partitioner chooses partition]
-    P2[Producer B] --> PR
+The simulation splits an illustrative total input of 0–30 r/s evenly between two producers, then distributes it across three partitions. Each partition can receive up to 10 r/s while its consumer can process at most 4 r/s. The number beside each in-node bar shows current rate over maximum capacity. Partition counters accumulate queued records when arrivals exceed capacity and drain them when spare capacity returns; consumer counters accumulate processed records. Reset clears both counters.
 
-    subgraph Topic[Topic orders]
-      T1[Partition 0]
-      T2[Partition 1]
-      T3[Partition 2]
+```mermaid
+%%{init: {"flowchart":{"curve":"basis"}}}%%
+flowchart LR
+    P1["Producer: Order API<br/><span>5 r/s</span>"]
+    P2["Producer: Admin API<br/><span>5 r/s</span>"]
+    PR[Partitioner: round robin]
+
+    subgraph Topic[Topic: orders]
+      direction TB
+      T1["Partition 0: broker 1 leader<br/><span>0 queued</span>"]
+      T2["Partition 1: broker 2 leader<br/><span>0 queued</span>"]
+      T3["Partition 2: broker 3 leader<br/><span>0 queued</span>"]
     end
 
+    subgraph CG[Consumer group: billing]
+      direction TB
+      C1["Consumer: worker A<br/><span>0 consumed</span>"]
+      C2["Consumer: worker B<br/><span>0 consumed</span>"]
+      C3["Consumer: worker C<br/><span>0 consumed</span>"]
+    end
+
+    P1 --> PR
+    P2 --> PR
     PR --> T1
     PR --> T2
     PR --> T3
+    T1 --> C1
+    T2 --> C2
+    T3 --> C3
+  %% flowmaid
+  %% controls:
+  %%   input:
+  %%     label: Input rate
+  %%     min: 0
+  %%     max: 30
+  %%     value: 10
+  %%     step: 1
+  %%     unit: r/s
+  %% sources:
+  %%   - rate: input
+  %%     nodes: [P1, P2]
+  %% distribution:
+  %%   PR:
+  %%     strategy: roundRobin
+  %% queues:
+  %%   T1: { capacity: 4 }
+  %%   T2: { capacity: 4 }
+  %%   T3: { capacity: 4 }
+  %% dots: { radius: 3, durationMs: 500 }
+  %% /flowmaid
 
-    subgraph BrokerCluster[Kafka brokers]
-      B1[Broker 1 leader P0]
-      B2[Broker 2 leader P1]
-      B3[Broker 3 leader P2]
-    end
-
-    T1 --> B1
-    T2 --> B2
-    T3 --> B3
-
-    subgraph CG[Consumer Group orders service]
-      C1[Consumer 1]
-      C2[Consumer 2]
-      C3[Consumer 3]
-    end
-
-    B1 --> C1
-    B2 --> C2
-    B3 --> C3
 ```
 
 ## Topics
