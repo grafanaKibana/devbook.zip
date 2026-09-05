@@ -1,0 +1,41 @@
+flowchart LR
+  P1[Producer: Order API]
+  P2[Producer: Admin API]
+  PR[Partitioner: round robin]
+  T1[Partition 0]
+  T2[Partition 1]
+  T3[Partition 2]
+  C1[Consumer A]
+  C2[Consumer B]
+  C3[Consumer C]
+
+  P1 --> PR
+  P2 --> PR
+  PR --> T1
+  PR --> T2
+  PR --> T3
+  T1 --> C1
+  T2 --> C2
+  T3 --> C3
+
+  %% flowmaid
+  %% controls:
+  %%   input:
+  %%     label: Input rate
+  %%     min: 0
+  %%     max: 30
+  %%     value: 10
+  %%     step: 1
+  %%     unit: r/s
+  %% sources:
+  %%   - rate: input
+  %%     nodes: [P1, P2]
+  %% distribution:
+  %%   PR:
+  %%     strategy: roundRobin
+  %% queues:
+  %%   T1: { capacity: 4 }
+  %%   T2: { capacity: 4 }
+  %%   T3: { capacity: 4 }
+  %% dots: { radius: 3, durationMs: 500 }
+  %% /flowmaid

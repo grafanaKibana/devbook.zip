@@ -1,9 +1,0 @@
-{
-  "id": "mermaid-flow",
-  "name": "Mermaid Flow",
-  "version": "1.0.0",
-  "minAppVersion": "1.4.0",
-  "description": "Adds opt-in request particles over native Mermaid flowchart connectors.",
-  "author": "grafanaKibana",
-  "isDesktopOnly": false
-}

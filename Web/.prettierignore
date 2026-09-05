@@ -6,5 +6,5 @@ content
 quartz
 # Generated artifacts are verified byte-for-byte by `npm run steptrace:check`.
 custom/steptrace/generated
-# Generated artifacts are verified byte-for-byte by `npm run mermaid-flow:check`.
-custom/mermaid-flow/generated
+# Generated artifacts are verified byte-for-byte by `npm run flowmaid:check`.
+custom/flowmaid/generated/

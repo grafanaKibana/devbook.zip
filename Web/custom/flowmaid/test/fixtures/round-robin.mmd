@@ -1,0 +1,20 @@
+flowchart LR
+  api[API] --> workerA[Worker A]
+  api --> workerB[Worker B]
+
+  %% flowmaid
+  %% controls:
+  %%   input:
+  %%     label: Input rate
+  %%     min: 0
+  %%     max: 90
+  %%     value: 30
+  %%     step: 1
+  %%     unit: r/s
+  %% sources:
+  %%   - rate: input
+  %%     nodes: [api]
+  %% distribution:
+  %%   api:
+  %%     strategy: roundRobin
+  %% /flowmaid

@@ -6,7 +6,7 @@ import { Complexity } from "./custom/components/complexity"
 import { ExplorerOrder } from "./custom/components/explorer-order"
 import { FloatingButtons } from "./custom/components/floating-buttons"
 import { HomepageFit } from "./custom/components/homepage-fit"
-import { MermaidFlow } from "./custom/components/mermaid-flow"
+import { Flowmaid } from "./custom/flowmaid/src/hosts/quartz/component"
 import { NavScopeDropdown } from "./custom/components/nav-scope-dropdown"
 import { PageContribute } from "./custom/components/page-contribute"
 import { PageReveal } from "./custom/components/page-reveal"
@@ -16,11 +16,11 @@ import { SiteHeader } from "./custom/components/site-header"
 import { SiteMarquee } from "./custom/components/site-marquee"
 import { Steptrace } from "./custom/components/steptrace"
 import { ExcalidrawStatic } from "./custom/emitters/excalidraw-static"
-import { MermaidFlowStatic } from "./custom/emitters/mermaid-flow-static"
+import { FlowmaidStatic } from "./custom/flowmaid/src/hosts/quartz/emitter"
 import { StepTraceStatic } from "./custom/emitters/steptrace-static"
 import { ClickableImages } from "./custom/transformers/clickable-images"
 import { ComplexityBlock } from "./custom/transformers/complexity-block"
-import { MermaidFlowBlock, MermaidFlowPairMarkers } from "./custom/transformers/mermaid-flow-block"
+import { FlowmaidBlock } from "./custom/flowmaid/src/hosts/quartz/transformer"
 import { QuestionCollector } from "./custom/transformers/question-collector"
 import { SyncerFixups } from "./custom/transformers/syncer-fixups"
 import { SteptraceBlock } from "./custom/transformers/steptrace-block"
@@ -87,17 +87,7 @@ config.plugins.transformers.splice(
   syntaxHighlightingIdx === -1 ? config.plugins.transformers.length : syntaxHighlightingIdx,
   0,
   ComplexityBlock(),
-  MermaidFlowBlock(),
-)
-const syntaxHighlightingAfterPairIdx = config.plugins.transformers.findIndex(
-  (t) => t.name === "SyntaxHighlighting",
-)
-config.plugins.transformers.splice(
-  syntaxHighlightingAfterPairIdx === -1
-    ? config.plugins.transformers.length
-    : syntaxHighlightingAfterPairIdx + 1,
-  0,
-  MermaidFlowPairMarkers(),
+  FlowmaidBlock(),
 )
 
 // Rewrite ```steptrace fences (committed raw by Syncer — not on its freeze
@@ -111,7 +101,7 @@ config.plugins.transformers.push(ClickableImages())
 // Emit the generated engine from the sanctioned custom/ surface. This avoids
 // placing DevBook-owned code under Quartz's upgrade-owned quartz/static tree.
 config.plugins.emitters.push(StepTraceStatic())
-config.plugins.emitters.push(MermaidFlowStatic())
+config.plugins.emitters.push(FlowmaidStatic())
 config.plugins.emitters.push(ExcalidrawStatic())
 config.plugins.emitters.push(Robots())
 
@@ -145,7 +135,7 @@ for (const pageLayout of Object.values(layout.byPageType)) {
 const steptrace = Steptrace()
 const complexity = Complexity()
 const homepageFit = HomepageFit()
-const mermaidFlow = MermaidFlow()
+const flowmaid = Flowmaid()
 const excalidrawEnhance = ExcalidrawEnhance()
 const excalidrawExport = ExcalidrawExport()
 const pageReveal = PageReveal()
@@ -154,7 +144,7 @@ layout.defaults.afterBody = [
   steptrace,
   complexity,
   homepageFit,
-  mermaidFlow,
+  flowmaid,
   excalidrawEnhance,
   excalidrawExport,
   pageReveal,
@@ -165,7 +155,7 @@ for (const pageLayout of Object.values(layout.byPageType)) {
     steptrace,
     complexity,
     homepageFit,
-    mermaidFlow,
+    flowmaid,
     excalidrawEnhance,
     excalidrawExport,
     pageReveal,

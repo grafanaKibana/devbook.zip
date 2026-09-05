@@ -18,15 +18,14 @@ That separation is Kafka's defining property. A slow or offline consumer does no
 
 # Core Architecture
 
-The simulation splits an illustrative total input of 0–90 r/s evenly between two producers, then distributes it across three partitions. Each partition can receive up to 30 r/s while its consumer can process at most 20 r/s. The number beside each in-node bar shows current rate over maximum capacity. Partition counters accumulate queued records when arrivals exceed capacity and drain them when spare capacity returns; consumer counters accumulate processed records. Reset clears both counters.
+The simulation splits an illustrative total input of 0–30 r/s evenly between two producers, then distributes it across three partitions. Each partition can receive up to 10 r/s while its consumer can process at most 4 r/s. The number beside each in-node bar shows current rate over maximum capacity. Partition counters accumulate queued records when arrivals exceed capacity and drain them when spare capacity returns; consumer counters accumulate processed records. Reset clears both counters.
 
 ```mermaid
-%% mermaid-flow: kafka-core
 %%{init: {"flowchart":{"curve":"basis"}}}%%
 flowchart LR
-    P1["Producer: Order API<br/><span>15 r/s</span>"]
-    P2["Producer: Admin API<br/><span>15 r/s</span>"]
-    PR[Partitioner: hash orderId]
+    P1["Producer: Order API<br/><span>5 r/s</span>"]
+    P2["Producer: Admin API<br/><span>5 r/s</span>"]
+    PR[Partitioner: round robin]
 
     subgraph Topic[Topic: orders]
       direction TB
@@ -50,131 +49,28 @@ flowchart LR
     T1 --> C1
     T2 --> C2
     T3 --> C3
+  %% flowmaid
+  %% controls:
+  %%   input:
+  %%     label: Input rate
+  %%     min: 0
+  %%     max: 30
+  %%     value: 10
+  %%     step: 1
+  %%     unit: r/s
+  %% sources:
+  %%   - rate: input
+  %%     nodes: [P1, P2]
+  %% distribution:
+  %%   PR:
+  %%     strategy: roundRobin
+  %% queues:
+  %%   T1: { capacity: 4 }
+  %%   T2: { capacity: 4 }
+  %%   T3: { capacity: 4 }
+  %% dots: { radius: 3, durationMs: 500 }
+  %% /flowmaid
 
-```
-
-```mermaid-flow
-{
-  "version": 1,
-  "for": "kafka-core",
-  "defaults": {
-    "nodes": {
-      "P1": { "metric": "15 r/s", "state": "normal" },
-      "P2": { "metric": "15 r/s", "state": "normal" },
-      "T1": { "metric": "0 queued", "state": "normal" },
-      "T2": { "metric": "0 queued", "state": "normal" },
-      "T3": { "metric": "0 queued", "state": "normal" },
-      "C1": { "metric": "0 consumed", "state": "normal" },
-      "C2": { "metric": "0 consumed", "state": "normal" },
-      "C3": { "metric": "0 consumed", "state": "normal" }
-    },
-    "edges": {
-      "0": { "radius": 2, "particlesPerCycle": 15, "travelMs": 1000, "state": "normal" },
-      "1": { "radius": 2, "particlesPerCycle": 15, "travelMs": 1000, "state": "normal" },
-      "2": { "radius": 2, "particlesPerCycle": 10, "travelMs": 1000, "state": "normal" },
-      "3": { "radius": 2, "particlesPerCycle": 10, "travelMs": 1000, "state": "normal" },
-      "4": { "radius": 2, "particlesPerCycle": 10, "travelMs": 1000, "state": "normal" },
-      "5": { "radius": 2, "particlesPerCycle": 10, "travelMs": 1000, "state": "normal" },
-      "6": { "radius": 2, "particlesPerCycle": 10, "travelMs": 1000, "state": "normal" },
-      "7": { "radius": 2, "particlesPerCycle": 10, "travelMs": 1000, "state": "normal" }
-    }
-  },
-  "controls": [
-    {
-      "id": "traffic",
-      "type": "range",
-      "label": "Input rate",
-      "min": 0,
-      "max": 90,
-      "step": 6,
-      "default": 30
-    },
-    { "id": "reset", "type": "reset", "label": "Reset" }
-  ],
-  "bindings": [
-    {
-      "control": "traffic",
-      "target": { "node": "P1", "property": "metric" },
-      "format": "{value} r/s",
-      "transform": { "scale": 0.5, "round": true }
-    },
-    {
-      "control": "traffic",
-      "target": { "node": "P2", "property": "metric" },
-      "format": "{value} r/s",
-      "transform": { "scale": 0.5, "round": true }
-    },
-    {
-      "control": "traffic",
-      "target": { "edge": "0", "property": "particlesPerCycle" },
-      "transform": { "scale": 0.5, "max": 45, "round": true }
-    },
-    {
-      "control": "traffic",
-      "target": { "edge": "1", "property": "particlesPerCycle" },
-      "transform": { "scale": 0.5, "max": 45, "round": true }
-    },
-    {
-      "control": "traffic",
-      "target": { "edge": "2", "property": "particlesPerCycle" },
-      "transform": { "scale": 0.3333333333333333, "max": 30, "round": true }
-    },
-    {
-      "control": "traffic",
-      "target": { "edge": "3", "property": "particlesPerCycle" },
-      "transform": { "scale": 0.3333333333333333, "max": 30, "round": true }
-    },
-    {
-      "control": "traffic",
-      "target": { "edge": "4", "property": "particlesPerCycle" },
-      "transform": { "scale": 0.3333333333333333, "max": 30, "round": true }
-    },
-    {
-      "control": "traffic",
-      "target": { "edge": "5", "property": "particlesPerCycle" },
-      "transform": { "scale": 0.3333333333333333, "max": 20, "round": true }
-    },
-    {
-      "control": "traffic",
-      "target": { "edge": "6", "property": "particlesPerCycle" },
-      "transform": { "scale": 0.3333333333333333, "max": 20, "round": true }
-    },
-    {
-      "control": "traffic",
-      "target": { "edge": "7", "property": "particlesPerCycle" },
-      "transform": { "scale": 0.3333333333333333, "max": 20, "round": true }
-    }
-  ],
-  "queues": [
-    {
-      "control": "traffic",
-      "arrival": { "scale": 0.3333333333333333 },
-      "capacityPerSecond": 20,
-      "queueNode": "T1",
-      "consumerNode": "C1",
-      "queueFormat": "{value} queued",
-      "consumerFormat": "{value} consumed"
-    },
-    {
-      "control": "traffic",
-      "arrival": { "scale": 0.3333333333333333 },
-      "capacityPerSecond": 20,
-      "queueNode": "T2",
-      "consumerNode": "C2",
-      "queueFormat": "{value} queued",
-      "consumerFormat": "{value} consumed"
-    },
-    {
-      "control": "traffic",
-      "arrival": { "scale": 0.3333333333333333 },
-      "capacityPerSecond": 20,
-      "queueNode": "T3",
-      "consumerNode": "C3",
-      "queueFormat": "{value} queued",
-      "consumerFormat": "{value} consumed"
-    }
-  ]
-}
 ```
 
 ## Topics

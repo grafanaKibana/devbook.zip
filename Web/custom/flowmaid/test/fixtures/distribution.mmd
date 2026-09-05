@@ -1,0 +1,28 @@
+flowchart LR
+  RoundRobinLB --> WorkerA
+  RoundRobinLB --> WorkerB
+  WeightedLB --> WorkerA
+  WeightedLB --> WorkerB
+  WeightedLB --> WorkerC
+  RandomLB --> WorkerA
+  RandomLB --> WorkerB
+  Fanout --> WorkerA
+  Fanout --> WorkerB
+
+  %% flowmaid
+  %% sources:
+  %%   - { rate: 1, nodes: [RoundRobinLB, WeightedLB, RandomLB, Fanout] }
+  %% distribution:
+  %%   RoundRobinLB:
+  %%     strategy: roundRobin
+  %%   WeightedLB:
+  %%     strategy: weightedRoundRobin
+  %%     weights:
+  %%       WorkerA: 5
+  %%       WorkerB: 3
+  %%       WorkerC: 2
+  %%   RandomLB:
+  %%     strategy: random
+  %%   Fanout:
+  %%     strategy: broadcast
+  %% /flowmaid

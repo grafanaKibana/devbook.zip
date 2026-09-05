@@ -36,7 +36,7 @@ This is the repository-wide design contract. Keep it limited to verified cross-v
 | Questions                                  | `[!QUESTION]` callouts in `Vault/Home/`                                        | Datacore index                                       | `QuestionsIndex`                                | Current; equivalent outcome, different renderers                |
 | StepTrace                                  | `Web/custom/steptrace/src/` and its local `DESIGN.md`                          | Generated Obsidian plugin                            | Generated Quartz assets and host integration    | Current                                                         |
 | Complexity charts                          | `complexity` fences and `Web/custom/complexity/`                               | Shared model rendered to DOM by the StepTrace plugin | Shared model rendered to HAST                   | Current contract; 97 DSA v2 charts plus standalone Big O        |
-| Mermaid flow overlay                       | `Web/custom/mermaid-flow/src/` and its local `DESIGN.md`                       | Generated Obsidian plugin                            | Lazy generated assets and `afterDOMLoaded` host | Current; adjacent `mermaid` + strict JSON `mermaid-flow` fences |
+| Flowmaid                                   | `Web/custom/flowmaid/` and its local `DESIGN.md`                               | Generated Obsidian plugin                            | Lazy generated assets and isolated Quartz host  | Current; versionless same-fence YAML in `mermaid` fences        |
 | Quartz shell                               | `Web/quartz.config.yaml`, `Web/quartz.ts`, sanctioned styles and `Web/custom/` | Not applicable                                       | Generated `Web/public/`                         | Current                                                         |
 | Obsidian shell                             | `.obsidian` appearance, enabled snippets, theme, and Style Settings            | Native app UI                                        | Not applicable                                  | Current                                                         |
 
@@ -186,7 +186,7 @@ Their main jobs are to find a topic, understand its scope, inspect the mechanism
 | Page reveal and Home fit    | Readiness and whole-card responsive fallback  | `Web/custom/components/`                                               |
 | StepTrace                   | Algorithm playback and interactive structures | `Web/custom/steptrace/`                                                |
 | Complexity chart            | Growth curves, plot, and legend               | `Web/custom/complexity/`                                               |
-| Mermaid flow overlay        | Request particles over native Mermaid edges   | `Web/custom/mermaid-flow/`                                             |
+| Flowmaid                    | Simulated flow over native Mermaid topology   | `Web/custom/flowmaid/`                                                 |
 
 ### Quartz shell
 
@@ -206,7 +206,7 @@ Their main jobs are to find a topic, understand its scope, inspect the mechanism
 
 ### Visualizations
 
-- Mermaid Flow pairs a marked `mermaid` fence with an immediately adjacent strict JSON `mermaid-flow` fence. Mermaid owns topology, labels, geometry, routing, and layout; the shared runtime adds configured particles, metrics, semantic states, and native controls in both hosts, removes continuous travel under reduced motion, and tears every addition down cleanly.
+- Flowmaid reads versionless YAML from a `%% flowmaid` block inside the same `mermaid` fence. Mermaid owns topology, labels, geometry, routing, and layout; shared host-neutral semantics drive simulation and removable augmentation, while isolated Obsidian and Quartz adapters own loading and lifecycle. Component rules live in [`Web/custom/flowmaid/DESIGN.md`](Web/custom/flowmaid/DESIGN.md).
 - StepTrace is for state over time. Its consistency and style rules are in [`Web/custom/steptrace/DESIGN.md`](Web/custom/steptrace/DESIGN.md).
 - Below `704px` mounted width, StepTrace keeps phase, timeline, Trace/Watch, and transport visible in a compact footer no taller than `128px`; interactive controls and the scrubber remain `44px` targets.
 - Complexity is for comparing growth classes, cases, or operation families—not per-step execution.

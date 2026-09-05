@@ -1,0 +1,6 @@
+@use "shared";
+
+.flowmaid-mount {
+  --flowmaid-focus: var(--interactive-accent);
+  --flowmaid-text: var(--text-normal);
+}

@@ -1,0 +1,212 @@
+.flowmaid-mount {
+  container-type: inline-size;
+}
+
+.flowmaid-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 0.5rem;
+  inline-size: 100%;
+  min-inline-size: 0;
+  margin-block-start: 0.75rem;
+}
+
+.flowmaid-control-fields {
+  display: flex;
+  flex: 1 1 100%;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  min-inline-size: 0;
+}
+
+.flowmaid-control-field {
+  display: grid;
+  gap: 0.25rem;
+  min-inline-size: 8rem;
+}
+
+.flowmaid-control-range {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1 1 100%;
+  min-inline-size: 0;
+  max-inline-size: none;
+}
+
+.flowmaid-control-range > .slider,
+.flowmaid-control-range > input[type="range"] {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+}
+
+.flowmaid-control-value {
+  min-inline-size: 5ch;
+  color: var(--flowmaid-text, currentColor);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.flowmaid-control-range input.flowmaid-range-fallback {
+  -webkit-appearance: none;
+  appearance: none;
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  block-size: 44px;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  background-color: transparent;
+  background-image: linear-gradient(
+    var(--flowmaid-border, currentColor),
+    var(--flowmaid-border, currentColor)
+  );
+  background-repeat: no-repeat;
+  background-position: 0 50%;
+  background-size: 100% 2px;
+  border: 0;
+  box-shadow: none;
+}
+
+.flowmaid-control-range input.flowmaid-range-fallback::-webkit-slider-runnable-track {
+  -webkit-appearance: none;
+  appearance: none;
+  block-size: 44px;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+.flowmaid-control-range input.flowmaid-range-fallback::-moz-range-track {
+  block-size: 44px;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+.flowmaid-control-range input.flowmaid-range-fallback::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  inline-size: 12px;
+  block-size: 12px;
+  margin-block-start: 16px;
+  background: var(--flowmaid-focus, Highlight);
+  border: 0;
+  border-radius: 999px;
+  box-shadow: none;
+}
+
+.flowmaid-control-range input.flowmaid-range-fallback::-moz-range-thumb {
+  inline-size: 12px;
+  block-size: 12px;
+  background: var(--flowmaid-focus, Highlight);
+  border: 0;
+  border-radius: 999px;
+  box-shadow: none;
+}
+
+.flowmaid-control-actions {
+  display: flex;
+  flex: 1 1 100%;
+  align-items: center;
+  inline-size: 100%;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-inline-start: auto;
+}
+
+.flowmaid-controls button {
+  min-block-size: 44px;
+}
+
+.flowmaid-controls :focus-visible {
+  outline: 2px solid var(--flowmaid-focus, Highlight);
+  outline-offset: 2px;
+}
+
+.flowmaid-live {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+[data-flowmaid-owned="particle"] circle {
+  fill: currentColor;
+  filter: none;
+}
+
+[data-flowmaid-metric] {
+  color: var(--flowmaid-text, currentColor);
+  font-size: 0.8em;
+}
+
+.flowmaid-node-metric,
+.flowmaid-node-load-label {
+  fill: var(--flowmaid-text, currentColor) !important;
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+}
+
+.flowmaid-node-load-track {
+  fill: currentColor !important;
+  stroke: none !important;
+  opacity: 0.16;
+}
+
+.flowmaid-node-load-fill {
+  fill: var(--flowmaid-focus, Highlight) !important;
+  stroke: none !important;
+}
+
+[data-flowmaid-owned="node"][data-flowmaid-overloaded] .flowmaid-node-load-fill {
+  fill: var(--flowmaid-overloaded, #b42318) !important;
+}
+
+[data-flowmaid-state="busy"] {
+  color: var(--flowmaid-busy, #0969da);
+}
+
+[data-flowmaid-state="warning"] {
+  color: var(--flowmaid-warning, #9a6700);
+}
+
+[data-flowmaid-state="overloaded"] {
+  color: var(--flowmaid-overloaded, #b42318);
+}
+
+[data-flowmaid-state="inactive"] {
+  opacity: 0.55;
+}
+
+@container (min-width: 32.001rem) {
+  .flowmaid-controls {
+    flex-wrap: nowrap;
+    align-items: center;
+  }
+
+  .flowmaid-control-fields {
+    flex: 1 1 auto;
+    flex-wrap: nowrap;
+  }
+
+  .flowmaid-control-range {
+    flex: 0 1 22rem;
+    max-inline-size: 22rem;
+  }
+
+  .flowmaid-control-actions {
+    flex: 0 0 auto;
+    inline-size: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-flowmaid-owned="particle"] {
+    display: none;
+  }
+}
