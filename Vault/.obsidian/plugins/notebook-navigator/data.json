@@ -233,8 +233,7 @@
   "folderSortOrder": "alpha-asc",
   "enableFolderNotes": true,
   "folderNoteType": "markdown",
-  "folderNoteName": "",
-  "folderNoteNamePattern": "",
+  "folderNoteNamePattern": "{{folder}}",
   "folderNoteTemplate": "Templates/Pages/Template - Index.md",
   "enableFolderNoteLinks": true,
   "hideFolderNoteInList": true,
@@ -654,7 +653,7 @@
     "#404040",
     "#404040"
   ],
-  "lastShownVersion": "3.3.3",
+  "lastShownVersion": "3.3.4",
   "rootFolderOrder": [
     "Home",
     "Assets",

@@ -13,6 +13,7 @@ import { SiteFooter } from "./custom/components/site-footer"
 import { SiteHeader } from "./custom/components/site-header"
 import { SiteMarquee } from "./custom/components/site-marquee"
 import { Steptrace } from "./custom/components/steptrace"
+import { ExcalidrawStatic } from "./custom/emitters/excalidraw-static"
 import { StepTraceStatic } from "./custom/emitters/steptrace-static"
 import { ClickableImages } from "./custom/transformers/clickable-images"
 import { ComplexityBlock } from "./custom/transformers/complexity-block"
@@ -89,6 +90,7 @@ config.plugins.transformers.push(ClickableImages())
 // Emit the generated engine from the sanctioned custom/ surface. This avoids
 // placing DevBook-owned code under Quartz's upgrade-owned quartz/static tree.
 config.plugins.emitters.push(StepTraceStatic())
+config.plugins.emitters.push(ExcalidrawStatic())
 config.plugins.emitters.push(Robots())
 
 const layout = await loadQuartzLayout()
