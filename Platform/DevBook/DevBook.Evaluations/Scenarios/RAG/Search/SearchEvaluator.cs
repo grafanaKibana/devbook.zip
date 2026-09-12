@@ -14,6 +14,7 @@ using Microsoft.Extensions.AI.Evaluation;
 public sealed class SearchEvaluator : IEvaluator
 {
     private const string EmptyResultRateMetricName = "EmptyResultRate";
+    private const string RetrievalOutcomeMetricName = "RetrievalOutcome";
     private const string ScoreAverageMetricName = "ScoreAverage";
     private const string RecallAtRMetricName = "RecallAtR";
     private const string SectionRecallAtRMetricName = "SectionRecallAtR";
@@ -50,10 +51,14 @@ public sealed class SearchEvaluator : IEvaluator
         var metrics = SearchMetricCalculator.ScoreQuery(context.Prediction, context.TopK);
         var rankingMetrics = CreateRankingMetrics(metrics, RagRetrievalPolicy.MaxTopK).ToArray();
 
-        return ValueTask.FromResult(new EvaluationResult([
+        var result = new EvaluationResult([
             ..rankingMetrics,
             CreateScoreMetric(metrics),
-        ]));
+            CreateOutcomeMetric(metrics),
+        ]);
+
+        result.AddOrUpdateContextInAllMetrics(context);
+        return ValueTask.FromResult(result);
     }
 
     /// <summary>
@@ -162,6 +167,22 @@ public sealed class SearchEvaluator : IEvaluator
     }
 
 
+    // Categorical counterpart to the numeric ranking metrics: one label per case, so cases can be grouped
+    // by outcome in the report instead of read one score at a time. "Miss" and "NoResults" both score 0
+    // everywhere, and only this label separates "retrieval ranked the wrong chunks" from "retrieval
+    // returned nothing at all" — the two have completely different causes.
+    private static StringMetric CreateOutcomeMetric(SearchQueryMetrics metrics)
+    {
+        var outcome = metrics switch
+        {
+            { IsEmptyResult: true } => "NoResults",
+            { ReciprocalRank: > 0 } => $"Hit@{(int)Math.Round(1 / metrics.ReciprocalRank)}",
+            _ => "Miss",
+        };
+
+        return new StringMetric(RetrievalOutcomeMetricName, outcome, CreateMetricReason(RetrievalOutcomeMetricName));
+    }
+
     private static NumericMetric CreateScoreMetric(SearchQueryMetrics metrics)
     {
         var value = metrics.ScoreAverage is null ? 0 : RoundScore(metrics.ScoreAverage.Value);
@@ -181,6 +202,7 @@ public sealed class SearchEvaluator : IEvaluator
     {
         if (name == RecallAtRMetricName) return "Recall@R is the share of expected evidence chunks found within the first R retrieved chunks, where R is the number of expected evidence chunks for the case. Read 1.000 as all required evidence found within the evidence budget, 0.500 as half found, and 0.000 as none found. This is the primary retrieval gate because the answer step cannot use evidence that retrieval missed.";
         if (name == SectionRecallAtRMetricName) return "SectionRecall@R repeats Recall@R after collapsing expected chunks by source path and heading. Use it when several expected chunks come from the same note section: it shows whether retrieval reached the right section even if chunk-level matching over-penalizes sibling chunks. Read 1.000 as every expected section reached, and 0.000 as no expected section reached.";
+        if (name == RetrievalOutcomeMetricName) return "Categorical retrieval outcome for the case: NoResults when the query returned no chunks at all, Hit@N when the first credited evidence chunk came back at rank N, and Miss when chunks were returned but none were credited.";
         if (name == SectionHitRateAt1MetricName) return "SectionHitRate@1 checks whether the first result lands in any expected source section after section deduplication. Read 1.000 as the top result is from the right section and 0.000 as the top result starts in the wrong section.";
         if (name.StartsWith("SectionMRRAt", StringComparison.Ordinal)) return "SectionMRR@10 is reciprocal rank for the first matching expected section after section deduplication. Read 1.000 as the first result is from the right section, 0.500 as the first matching section is rank 2, and 0.000 as no expected section appears in the top-10.";
         if (name.StartsWith("SectionMAPAt", StringComparison.Ordinal)) return "SectionMAP@10 averages precision at each rank where a new expected section appears. It rewards finding multiple expected sections early; 1.000 means all expected sections appear before any off-section result within top-10, and 0.000 means none appear.";
@@ -308,6 +330,7 @@ public sealed class SearchEvaluator : IEvaluator
         NdcgMetricName(primaryCutoff),
         SectionNdcgMetricName(primaryCutoff),
         ScoreAverageMetricName,
+        RetrievalOutcomeMetricName,
     ];
 
     private static string HitRateMetricName(int cutoff) => $"HitRateAt{cutoff}";

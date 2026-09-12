@@ -3,8 +3,8 @@
 #:package Microsoft.Extensions.Configuration.Json@10.0.8
 #:package Microsoft.Extensions.Configuration.UserSecrets@10.0.8
 #:property UserSecretsId=25549d38-b8d5-4e6e-b351-636ad02ea3b4
-#:package MongoDB.Driver@3.9.0
-#:package OpenAI@2.11.0
+#:package MongoDB.Driver@3.11.1
+#:package OpenAI@2.13.0
 
 #pragma warning disable IL2026, IL3050
 
@@ -672,11 +672,15 @@ sealed record RunOptions(
 
     public static RunOptions Parse(string[] args, string repoRoot)
     {
+        // --mini is the small variant: the "mini" label plus a group cap sized for ~100 cases
+        // (roughly 4 cases per group). --label / --max-groups still win when passed explicitly.
+        var mini = args.Contains("--mini", StringComparer.OrdinalIgnoreCase);
+
         return new RunOptions(
             GetString(args, "--repo-root") ?? repoRoot,
-            GetString(args, "--label") ?? string.Empty,
+            GetString(args, "--label") ?? (mini ? "mini" : string.Empty),
             ParseDatasets(args),
-            GetInt(args, "--max-groups", 120),
+            GetInt(args, "--max-groups", mini ? 25 : 120),
             GetInt(args, "--min-section-chars", 200),
             GetInt(args, "--sections-per-note", 3),
             GetInt(args, "--max-sections-per-group", 10),

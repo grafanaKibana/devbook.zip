@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.680Z
-modified: 2026-08-25T13:45:27.886Z
-published: 2026-08-25T13:45:27.886Z
+modified: 2026-09-04T20:47:27.685Z
+published: 2026-09-04T20:47:27.685Z
 topic:
   - Software Architecture
 subtopic:
@@ -22,38 +22,30 @@ That separation is Kafka's defining property. A slow or offline consumer does no
 
 ```mermaid
 flowchart LR
-    P1[Producer A] --> PR[Partitioner chooses partition]
-    P2[Producer B] --> PR
+    P1[Producer: Order API]
+    P2[Producer: Admin API]
+    PR[Partitioner]
 
-    subgraph Topic[Topic orders]
-      T1[Partition 0]
-      T2[Partition 1]
-      T3[Partition 2]
+    subgraph Topic[Topic: orders]
+      direction TB
+      T1[Partition 0: broker 1 leader]
+      T2[Partition 1: broker 2 leader]
+      T3[Partition 2: broker 3 leader]
+    end
+
+    subgraph CG[Consumer group: billing]
+      direction TB
+      C1[Consumer: worker A]
+      C2[Consumer: worker B]
+      C3[Consumer: worker C]
     end
 
     PR --> T1
     PR --> T2
     PR --> T3
-
-    subgraph BrokerCluster[Kafka brokers]
-      B1[Broker 1 leader P0]
-      B2[Broker 2 leader P1]
-      B3[Broker 3 leader P2]
-    end
-
-    T1 --> B1
-    T2 --> B2
-    T3 --> B3
-
-    subgraph CG[Consumer Group orders service]
-      C1[Consumer 1]
-      C2[Consumer 2]
-      C3[Consumer 3]
-    end
-
-    B1 --> C1
-    B2 --> C2
-    B3 --> C3
+    T1 --> C1
+    T2 --> C2
+    T3 --> C3
 ```
 
 ## Topics
