@@ -2,7 +2,7 @@
 .steptrace__graph {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--_space-3);
   align-items: center;
   justify-content: center;
   width: 100%;
@@ -39,7 +39,7 @@
 }
 .steptrace__edge-label {
   fill: var(--_muted);
-  font: 600 11px var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-sm) var(--_font-mono);
 }
 .steptrace__node .steptrace__nback {
   fill: var(--st-page, var(--_surface));
@@ -67,7 +67,7 @@
 }
 .steptrace__node .steptrace__d {
   fill: var(--_muted);
-  font: 600 10px var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-xs) var(--_font-mono);
 }
 .steptrace__node .steptrace__nmark {
   color: var(--_muted);
@@ -75,6 +75,15 @@
 }
 .steptrace__node .steptrace__nmark [data-state-icon] {
   display: none;
+}
+.steptrace__node .steptrace__nmark [data-state-icon="current"] {
+  fill: currentColor;
+}
+.steptrace__node .steptrace__nmark [data-state-icon="frontier"] {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linejoin: round;
 }
 .steptrace__node .steptrace__nmark[data-state="current"] [data-state-icon="current"],
 .steptrace__node .steptrace__nmark[data-state="frontier"] [data-state-icon="frontier"] {
@@ -103,31 +112,19 @@
   flex: 0 1 auto;
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
+  gap: var(--_space-4);
   min-width: 130px;
 }
 .steptrace__legend-row {
-  font: 500 11.5px var(--_font-head);
+  font: var(--_weight-strong) var(--_type-md) var(--_font-body);
   color: var(--_muted);
 }
-.steptrace__swatch {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  flex: none;
-  border: 1.5px solid;
-}
 .steptrace__swatch--current {
-  background: color-mix(in srgb, var(--_blue) 22%, transparent);
-  border-color: var(--_blue);
-  border-radius: 2px;
+  background: var(--_blue);
 }
 .steptrace__swatch--frontier {
-  background: color-mix(in srgb, var(--_amber) 18%, transparent);
-  border-color: var(--_amber);
-  border-style: dashed;
-  transform: rotate(45deg) scale(0.86);
+  background: var(--_amber);
 }
 .steptrace__swatch--visited {
-  border: 0;
+  background: var(--_green);
 }

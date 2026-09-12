@@ -45,7 +45,9 @@ class Recorder {
       nodeState[edge.to] = "accepted"
     })
     const edgeState: Record<string, GraphStateEdgeRole> = {}
-    accepted.forEach((edge) => { edgeState[key(edge)] = "accepted" })
+    accepted.forEach((edge) => {
+      edgeState[key(edge)] = "accepted"
+    })
     if (current && !accepted.includes(current)) edgeState[key(current)] = "active"
     if (rejected) edgeState[key(rejected)] = "rejected"
     this.frames.push({
@@ -87,17 +89,71 @@ export const kruskal = {
   parse: () => ({ nodes, edges }),
   run(_config, recorder) {
     const accepted: GraphStateEdge[] = []
-    recorder.add("Sort edges by weight: AB 1, BC 2, AC 3, CD 4.", [["A"], ["B"], ["C"], ["D"]], edges, accepted)
-    recorder.add("Inspect A—B (1): its endpoints are in different components.", [["A"], ["B"], ["C"], ["D"]], edges, accepted, edges[0])
+    recorder.add(
+      "Sort edges by weight: AB 1, BC 2, AC 3, CD 4.",
+      [["A"], ["B"], ["C"], ["D"]],
+      edges,
+      accepted,
+    )
+    recorder.add(
+      "Inspect A—B (1): its endpoints are in different components.",
+      [["A"], ["B"], ["C"], ["D"]],
+      edges,
+      accepted,
+      edges[0],
+    )
     accepted.push(edges[0])
-    recorder.add("Accept A—B and merge A with B.", [["A", "B"], ["C"], ["D"]], edges.slice(1), accepted, edges[0])
-    recorder.add("Inspect B—C (2): it joins two components.", [["A", "B"], ["C"], ["D"]], edges.slice(1), accepted, edges[1])
+    recorder.add(
+      "Accept A—B and merge A with B.",
+      [["A", "B"], ["C"], ["D"]],
+      edges.slice(1),
+      accepted,
+      edges[0],
+    )
+    recorder.add(
+      "Inspect B—C (2): it joins two components.",
+      [["A", "B"], ["C"], ["D"]],
+      edges.slice(1),
+      accepted,
+      edges[1],
+    )
     accepted.push(edges[1])
-    recorder.add("Accept B—C and merge C into the tree.", [["A", "B", "C"], ["D"]], edges.slice(2), accepted, edges[1])
-    recorder.add("Inspect A—C (3): both endpoints already share a component.", [["A", "B", "C"], ["D"]], edges.slice(2), accepted, edges[2])
-    recorder.add("Reject A—C because it would close a cycle.", [["A", "B", "C"], ["D"]], edges.slice(3), accepted, edges[2], edges[2])
-    recorder.add("Inspect C—D (4): D is still separate.", [["A", "B", "C"], ["D"]], edges.slice(3), accepted, edges[3])
+    recorder.add(
+      "Accept B—C and merge C into the tree.",
+      [["A", "B", "C"], ["D"]],
+      edges.slice(2),
+      accepted,
+      edges[1],
+    )
+    recorder.add(
+      "Inspect A—C (3): both endpoints already share a component.",
+      [["A", "B", "C"], ["D"]],
+      edges.slice(2),
+      accepted,
+      edges[2],
+    )
+    recorder.add(
+      "Reject A—C because it would close a cycle.",
+      [["A", "B", "C"], ["D"]],
+      edges.slice(3),
+      accepted,
+      edges[2],
+      edges[2],
+    )
+    recorder.add(
+      "Inspect C—D (4): D is still separate.",
+      [["A", "B", "C"], ["D"]],
+      edges.slice(3),
+      accepted,
+      edges[3],
+    )
     accepted.push(edges[3])
-    recorder.add("Accept C—D; V − 1 edges complete the MST with total weight 7.", [["A", "B", "C", "D"]], [], accepted, edges[3])
+    recorder.add(
+      "Accept C—D; V − 1 edges complete the MST with total weight 7.",
+      [["A", "B", "C", "D"]],
+      [],
+      accepted,
+      edges[3],
+    )
   },
 } satisfies FamilyAlgorithmDefinition<"graph", Config, Recorder, GraphStateFrame>

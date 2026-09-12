@@ -183,10 +183,10 @@ export const executionTreeViewDescriptor: ExecutionTreeViewDescriptor = {
   ...executionTreeCardMetrics,
   stateLabels,
   legend: [
-    { state: "split", label: "split subproblem" },
-    { state: "base", label: "base case" },
-    { state: "return", label: "returned result" },
-    { state: "combine", label: "combined result" },
+    { state: "split", label: "Split Subproblem" },
+    { state: "base", label: "Base Case" },
+    { state: "return", label: "Returned Result" },
+    { state: "combine", label: "Combined Result" },
   ],
   frameModel,
   nodeLines(node: ExecutionTreeNode) {
@@ -233,10 +233,10 @@ export const memoizationTreeViewDescriptor: ExecutionTreeViewDescriptor = {
   ...executionTreeCardMetrics,
   stateLabels,
   legend: [
-    { state: "split", label: "expand new state" },
-    { state: "base", label: "base result" },
-    { state: "store", label: "store first result" },
-    { state: "cache", label: "cache hit; skip branch" },
+    { state: "split", label: "Expand New State" },
+    { state: "base", label: "Base Result" },
+    { state: "store", label: "Store First Result" },
+    { state: "cache", label: "Cache Hit; Skip Branch" },
   ],
   frameModel,
   nodeLines(node: ExecutionTreeNode) {
@@ -279,10 +279,10 @@ export const dynamicProgrammingTreeViewDescriptor: ExecutionTreeViewDescriptor =
   ...executionTreeCardMetrics,
   stateLabels,
   legend: [
-    { state: "split", label: "expand uncached state" },
-    { state: "base", label: "base case" },
-    { state: "store", label: "store result" },
-    { state: "cache", label: "reuse cached result" },
+    { state: "split", label: "Expand Uncached State" },
+    { state: "base", label: "Base Case" },
+    { state: "store", label: "Store Result" },
+    { state: "cache", label: "Reuse Cached Result" },
   ],
   frameModel,
   nodeLines(node: ExecutionTreeNode) {
@@ -328,10 +328,10 @@ export const branchAndBoundTreeViewDescriptor: ExecutionTreeViewDescriptor = {
   showStateBadge: true,
   stateLabels,
   legend: [
-    { state: "split", label: "expand decision" },
-    { state: "incumbent", label: "new incumbent" },
-    { state: "infeasible", label: "over capacity" },
-    { state: "prune", label: "bound cannot win" },
+    { state: "split", label: "Expand Decision" },
+    { state: "incumbent", label: "New Incumbent" },
+    { state: "infeasible", label: "Over Capacity" },
+    { state: "prune", label: "Bound Cannot Win" },
   ],
   frameModel,
   nodeLines(node: ExecutionTreeNode) {

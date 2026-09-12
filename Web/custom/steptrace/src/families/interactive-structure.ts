@@ -30,6 +30,90 @@ export interface StructureShell {
   finish(): MountHandle
 }
 
+type FocusableControl = HTMLElement & { disabled?: boolean }
+
+function controlLabel(control: HTMLElement) {
+  return control.getAttribute("aria-label") || control.textContent || ""
+}
+
+function usefulControl(control: FocusableControl) {
+  return (
+    !control.disabled &&
+    !control.hidden &&
+    !control.closest('[hidden], [aria-hidden="true"]') &&
+    control.getClientRects().length > 0
+  )
+}
+
+function restoreOperationFocus(
+  controls: HTMLElement,
+  trigger: HTMLButtonElement,
+  label = controlLabel(trigger),
+) {
+  let cancelled = false
+  let observer: MutationObserver | null = null
+  const cleanup = () => {
+    cancelled = true
+    observer?.disconnect()
+    observer = null
+  }
+  const restore = () => {
+    if (cancelled) {
+      cleanup()
+      return true
+    }
+    const active = document.activeElement
+    if (active && active !== document.body && active !== trigger) {
+      cleanup()
+      return true
+    }
+    const candidates = Array.from(
+      controls.querySelectorAll<FocusableControl>("button, input, select, textarea, [tabindex]"),
+    ).filter(usefulControl)
+    const target =
+      candidates.find((candidate) => candidate === trigger) ||
+      candidates.find(
+        (candidate) => candidate.tagName === trigger.tagName && controlLabel(candidate) === label,
+      ) ||
+      candidates[0]
+    if (!target) return false
+    target.focus()
+    cleanup()
+    return true
+  }
+
+  queueMicrotask(() => {
+    if (restore()) return
+    observer = new MutationObserver(restore)
+    observer.observe(controls, {
+      attributes: true,
+      attributeFilter: ["aria-hidden", "disabled", "hidden"],
+      childList: true,
+      subtree: true,
+    })
+  })
+
+  return cleanup
+}
+
+export function withOperationFocus(
+  controls: HTMLElement,
+  trigger: HTMLButtonElement,
+  event: Event,
+  listener: EventListener,
+) {
+  const preserveFocus =
+    event instanceof MouseEvent && event.detail === 0 && document.activeElement === trigger
+  const label = controlLabel(trigger)
+  listener.call(trigger, event)
+  if (
+    !preserveFocus ||
+    (document.activeElement === trigger && !trigger.disabled && trigger.isConnected)
+  )
+    return null
+  return restoreOperationFocus(controls, trigger, label)
+}
+
 export function createStructureShell(
   root: HTMLElement,
   id: string,
@@ -71,6 +155,7 @@ export function createStructureShell(
   status.setAttribute("aria-atomic", "true")
 
   const cleanups: Array<() => void> = []
+  let cancelFocusRestore: (() => void) | null = null
   root.replaceChildren(head, body, controls)
   applyMotion()
 
@@ -121,8 +206,19 @@ export function createStructureShell(
       return button
     },
     listen(node, type, listener) {
-      node.addEventListener(type, listener)
-      cleanups.push(() => node.removeEventListener(type, listener))
+      const wrapped: EventListener =
+        type === "click" && node.tagName === "BUTTON"
+          ? (event) => {
+              const trigger = node as HTMLButtonElement
+              const pending = withOperationFocus(controls, trigger, event, listener)
+              if (pending) {
+                cancelFocusRestore?.()
+                cancelFocusRestore = pending
+              }
+            }
+          : listener
+      node.addEventListener(type, wrapped)
+      cleanups.push(() => node.removeEventListener(type, wrapped))
     },
     reducedMotion() {
       return media.matches
@@ -131,6 +227,7 @@ export function createStructureShell(
       controls.append(status)
       return {
         destroy() {
+          cancelFocusRestore?.()
           for (const cleanup of cleanups) cleanup()
           media.removeEventListener("change", applyMotion)
           root.replaceChildren()

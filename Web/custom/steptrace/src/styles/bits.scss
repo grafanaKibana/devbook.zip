@@ -3,8 +3,8 @@
 .steptrace__bits {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  margin: 0.4rem 0;
+  gap: var(--_space-2);
+  margin: var(--_space-2) 0;
 }
 /* tally: one square per set bit of the ORIGINAL value (count known upfront ⇒
    fixed width, zero jitter). Squares fill left→right as bits are cleared. */
@@ -12,25 +12,25 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 9px;
+  gap: var(--_space-3);
   height: 22px;
-  margin-bottom: 2px;
+  margin-bottom: var(--_space-0);
 }
 .steptrace__btally-lead {
   flex: 0 0 72px;
   text-align: right;
-  font: 600 0.62rem var(--_font-mono);
-  letter-spacing: 0.02em;
+  font: var(--_weight-strong) var(--_type-xs) var(--_font-mono);
+  letter-spacing: var(--_tracking-label);
   color: var(--_muted);
 }
 .steptrace__btally-boxes {
   display: flex;
-  gap: 5px;
+  gap: var(--_space-2);
 }
 .steptrace__btally-box {
   width: 14px;
   height: 14px;
-  border-radius: 3px;
+  border-radius: var(--_radius-xs);
   border: 1.5px solid color-mix(in srgb, var(--_text) 26%, transparent);
   transition:
     background var(--_tween) var(--_spring),
@@ -46,15 +46,15 @@
   transform: scale(1.18);
 }
 .steptrace__btally-count {
-  margin-left: 4px;
-  font: 600 0.68rem var(--_font-mono);
+  margin-left: var(--_space-1);
+  font: var(--_weight-strong) var(--_type-sm) var(--_font-mono);
   font-variant-numeric: tabular-nums;
   color: var(--_text);
 }
 .steptrace__brow {
   display: flex;
   align-items: stretch;
-  gap: 9px;
+  gap: var(--_space-3);
   transition: opacity var(--_tween) ease;
 }
 .steptrace__brow::after {
@@ -70,23 +70,23 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 4px;
-  font: 600 0.66rem var(--_font-mono);
+  gap: var(--_space-1);
+  font: var(--_weight-strong) var(--_type-sm) var(--_font-mono);
   color: var(--_muted);
   white-space: nowrap;
 }
 /* the operator that turns the row above into this row (− 1, &) reads as arithmetic */
 .steptrace__bop {
   color: var(--_accent);
-  font-weight: 700;
+  font-weight: var(--_weight-strong);
 }
 .steptrace__bcells {
   display: flex;
   flex: 1 1 0;
   min-width: 0;
   height: 44px;
-  border: 1px solid color-mix(in srgb, var(--_text) 22%, transparent);
-  border-radius: 9px;
+  border: var(--_stroke-hair) solid color-mix(in srgb, var(--_text) 22%, transparent);
+  border-radius: var(--_radius-container);
   overflow: hidden; /* clip cell tints flush to the rounded frame */
 }
 .steptrace__brow--idx {
@@ -104,7 +104,7 @@
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  font: 600 0.62rem var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-xs) var(--_font-mono);
   color: var(--_muted);
   font-variant-numeric: tabular-nums;
 }
@@ -114,13 +114,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-right: 1px solid color-mix(in srgb, var(--_text) 13%, transparent);
-  font: 500 0.95rem var(--_font-mono);
+  border-right: var(--_stroke-hair) solid var(--_divider);
+  font: var(--_weight-strong) var(--_type-xl) var(--_font-mono);
   color: var(--_muted);
   transition:
     background var(--_tween) ease,
-    color 0.22s ease,
-    box-shadow 0.22s ease;
+    color var(--_dur-move) ease,
+    box-shadow var(--_dur-move) ease;
 }
 .steptrace__bcell:last-child {
   border-right: 0;
@@ -129,7 +129,7 @@
 .steptrace__bcell[data-bit="1"] {
   background: color-mix(in srgb, var(--_text) 12%, transparent);
   color: var(--_text);
-  font-weight: 600;
+  font-weight: var(--_weight-strong);
 }
 /* Three states only (source-ordered AFTER the data-bit rule so they win on set
    cells). die = the lowest 1 being cleared (blue); borrow = the zeros it flips
@@ -139,12 +139,12 @@
   background: color-mix(in srgb, var(--_blue) 26%, transparent);
   box-shadow: inset 0 0 0 2px var(--_blue);
   color: var(--_blue);
-  font-weight: 700;
+  font-weight: var(--_weight-strong);
 }
 .steptrace__bcell[data-state="borrow"] {
   background: color-mix(in srgb, var(--_blue) 22%, transparent);
   color: var(--_blue);
-  font-weight: 700;
+  font-weight: var(--_weight-strong);
 }
 .steptrace__bcell[data-state="gone"] {
   background: color-mix(in srgb, var(--_muted) 8%, transparent);

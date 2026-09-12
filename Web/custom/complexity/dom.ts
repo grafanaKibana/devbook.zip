@@ -237,7 +237,13 @@ function renderResourceDom(
       const swatch = document.createElement("span")
       swatch.className = "complexity__legend-swatch"
       swatch.setAttribute("aria-hidden", "true")
-      entry.append(swatch, document.createTextNode(legendItem.label))
+      const label = document.createElement("span")
+      label.className = "complexity__legend-label"
+      label.textContent = legendItem.semanticLabel
+      const formula = document.createElement("span")
+      formula.className = "complexity__legend-formula"
+      formula.textContent = legendItem.formula
+      entry.append(swatch, label, document.createTextNode(": "), formula)
       item.append(entry)
       items.append(item)
     }
@@ -260,21 +266,6 @@ export function renderComplexityDom(
   figure.setAttribute("aria-label", view.label)
   const hiddenLabel = appendText(document, figure, "span", view.label)
   hiddenLabel.hidden = true
-  if (view.variables.length > 0) {
-    const variables = document.createElement("dl")
-    variables.className = "complexity__variables"
-    for (const variable of view.variables) {
-      const item = document.createElement("div")
-      item.className = "complexity__variable"
-      const term = document.createElement("dt")
-      appendText(document, term, "var", variable.symbol)
-      const description = document.createElement("dd")
-      description.textContent = variable.description
-      item.append(term, description)
-      variables.append(item)
-    }
-    figure.append(variables)
-  }
   if (view.resources.length > 1) {
     const tabs = document.createElement("div")
     tabs.className = "complexity__tabs"
@@ -298,6 +289,21 @@ export function renderComplexityDom(
     resources.append(renderResourceDom(document, resource, index)),
   )
   figure.append(resources)
+  if (view.variables.length > 0) {
+    const variables = document.createElement("dl")
+    variables.className = "complexity__variables"
+    for (const variable of view.variables) {
+      const item = document.createElement("div")
+      item.className = "complexity__variable"
+      const term = document.createElement("dt")
+      appendText(document, term, "var", variable.symbol)
+      const description = document.createElement("dd")
+      description.textContent = variable.description
+      item.append(term, description)
+      variables.append(item)
+    }
+    figure.append(variables)
+  }
   root.replaceChildren(figure)
 
   const interaction =

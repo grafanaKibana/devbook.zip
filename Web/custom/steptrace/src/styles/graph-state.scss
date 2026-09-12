@@ -7,7 +7,7 @@
   min-block-size: 0;
   display: grid;
   grid-template-rows: minmax(0, 1fr);
-  gap: 0.55rem;
+  gap: var(--_space-3);
 }
 
 .steptrace .steptrace__gs-graph {
@@ -58,11 +58,11 @@
 
 .steptrace .steptrace__gs-edge-label {
   pointer-events: none;
-  fill: var(--_muted);
+  fill: var(--_context-text);
   stroke: var(--_surface);
   stroke-width: 4px;
   paint-order: stroke;
-  font: 600 0.56rem/1 var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-2xs)/var(--_leading-solid) var(--_font-mono);
   text-anchor: middle;
   dominant-baseline: central;
 }
@@ -217,53 +217,41 @@
 .steptrace .steptrace__gs-map-label,
 .steptrace .steptrace__gs-road-direction {
   fill: var(--_muted);
-  font: 600 0.56rem/1 var(--_font-head);
+  font: var(--_weight-strong) var(--_type-2xs)/var(--_leading-solid) var(--_font-body);
   text-anchor: middle;
   dominant-baseline: central;
 }
 
+.steptrace .steptrace__gs-map-label {
+  fill: var(--_strong-fill-text);
+}
+
 .steptrace .steptrace__gs-city-label {
-  font-size: 0.54rem;
+  font-size: var(--_type-2xs);
 }
 
 .steptrace .steptrace__gs-road-direction {
   font-family: var(--_font-mono);
 }
 
-.steptrace .steptrace__gs-swatch {
-  inline-size: 0.58rem;
-  block-size: 0.58rem;
-  border: 1.5px solid;
-  border-radius: 50%;
-}
-
 .steptrace .steptrace__gs-swatch--current {
-  border-color: var(--_blue);
-  border-radius: 2px;
-  background: color-mix(in srgb, var(--_blue) 22%, transparent);
+  background: var(--_blue);
 }
 
 .steptrace .steptrace__gs-swatch--open {
-  border-color: var(--_amber);
-  border-style: dashed;
-  background: color-mix(in srgb, var(--_amber) 18%, transparent);
-  transform: rotate(45deg) scale(0.86);
+  background: var(--_amber);
 }
 
 .steptrace .steptrace__gs-swatch--closed {
-  border-color: var(--_green);
-  background: color-mix(in srgb, var(--_green) 20%, transparent);
+  background: var(--_green);
 }
 
 .steptrace .steptrace__gs-swatch--goal {
-  border-color: var(--_violet);
-  border-style: dashed;
+  background: var(--_violet);
 }
 
 .steptrace .steptrace__gs-swatch--rejected {
-  border-color: var(--_red);
-  border-style: dashed;
-  background: color-mix(in srgb, var(--_red) 10%, transparent);
+  background: var(--_red);
 }
 
 .steptrace--reduced .steptrace__gs-edge,

@@ -86,7 +86,11 @@ export class RunStackRecorder implements RunStackOperations {
   }
 
   reverse(run: RunSpan, message: string) {
-    this.array.splice(run.start, run.length, ...this.array.slice(run.start, run.start + run.length).reverse())
+    this.array.splice(
+      run.start,
+      run.length,
+      ...this.array.slice(run.start, run.start + run.length).reverse(),
+    )
     this.current = { ...run }
     this.pushFrame("reverse", message)
   }
@@ -128,7 +132,7 @@ export class RunStackRecorder implements RunStackOperations {
       x,
       y,
       z,
-      holds: x == null || y == null ? null : (y > x && (z == null || z > y + x)),
+      holds: x == null || y == null ? null : y > x && (z == null || z > y + x),
     }
     this.pushFrame("check", message)
   }
@@ -277,11 +281,16 @@ export function makeRunStackView(frames: readonly RunStackFrame[]): StepTraceVie
         index >= frame.current.start &&
         index < frame.current.start + frame.current.length
       const isInsert = !isSorted && frame.insertion?.target === index
-      bar.bar.dataset.current =
-        isCurrent ? "1" : "0"
+      bar.bar.dataset.current = isCurrent ? "1" : "0"
       bar.bar.dataset.insert = isInsert ? "1" : "0"
       bar.bar.dataset.motion = frame.type === "insert" && isInsert ? "insert" : ""
-      bar.bar.dataset.state = isSorted ? "sorted" : isInsert ? "candidate" : isCurrent ? "compare" : ""
+      bar.bar.dataset.state = isSorted
+        ? "sorted"
+        : isInsert
+          ? "candidate"
+          : isCurrent
+            ? "compare"
+            : ""
       bar.bar.setAttribute(
         "aria-label",
         `Index ${index}, value ${frame.array[index]}${runIndex >= 0 ? `, run ${runIndex + 1}` : ""}`,
@@ -300,7 +309,8 @@ export function makeRunStackView(frames: readonly RunStackFrame[]): StepTraceVie
       card.values.textContent = `[${frame.array.slice(run.start, run.start + run.length).join(", ")}]`
       card.card.dataset.active = frame.current?.start === run.start ? "1" : "0"
       card.card.dataset.merged =
-        frame.mergeIndex != null && (stackIndex === frame.mergeIndex || stackIndex === frame.mergeIndex + 1)
+        frame.mergeIndex != null &&
+        (stackIndex === frame.mergeIndex || stackIndex === frame.mergeIndex + 1)
           ? "1"
           : "0"
       card.card.dataset.run = String(stackIndex % 4)

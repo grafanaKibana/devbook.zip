@@ -155,11 +155,8 @@ function parse(config: StepTraceConfig): Config {
   })
   const edgeKeys = new Set<string>()
   for (const edge of edges) {
-    const key = edge.directed
-      ? `${edge.from}|${edge.to}`
-      : [edge.from, edge.to].sort().join("|")
-    if (edgeKeys.has(key))
-      throw new Error("steptrace: dijkstra parallel edges are not supported.")
+    const key = edge.directed ? `${edge.from}|${edge.to}` : [edge.from, edge.to].sort().join("|")
+    if (edgeKeys.has(key)) throw new Error("steptrace: dijkstra parallel edges are not supported.")
     edgeKeys.add(key)
   }
   return {

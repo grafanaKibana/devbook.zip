@@ -3,13 +3,13 @@
   min-width: 0;
   flex-direction: column;
   justify-content: center;
-  gap: 0.75rem;
+  gap: var(--_space-4);
 }
 
 .steptrace__contiguous-array {
   display: grid;
   grid-template-columns: repeat(var(--steptrace-capacity, 6), minmax(0, 1fr));
-  border: 1px solid color-mix(in srgb, var(--_text) 22%, transparent);
+  border: var(--_stroke-hair) solid color-mix(in srgb, var(--_text) 22%, transparent);
 }
 
 .steptrace__contiguous-cell {
@@ -18,7 +18,7 @@
   grid-template-rows: 2fr 1fr;
   min-width: 0;
   block-size: calc(44px + 1.35rem);
-  border-inline-end: 1px solid color-mix(in srgb, var(--_text) 13%, transparent);
+  border-inline-end: var(--_stroke-hair) solid var(--_divider);
   transition:
     background-color var(--_dur-quick) var(--_ease-decelerate),
     box-shadow var(--_dur-quick) var(--_ease-decelerate);
@@ -52,8 +52,8 @@
   max-width: 100%;
   place-items: center;
   overflow: hidden;
-  padding: 0.4rem;
-  font: 650 0.82rem/1.2 var(--_font-mono);
+  padding: var(--_space-2);
+  font: var(--_weight-strong) var(--_type-lg)/var(--_leading-readable) var(--_font-mono);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -67,17 +67,17 @@
   min-block-size: 0;
   place-items: center;
   overflow: hidden;
-  padding-inline: 0.2rem;
-  border-block-start: 1px solid color-mix(in srgb, var(--_text) 22%, transparent);
-  color: var(--_muted);
-  font: 600 0.58rem/1 var(--_font-mono);
+  padding-inline: var(--_space-1);
+  border-block-start: var(--_stroke-hair) solid color-mix(in srgb, var(--_text) 22%, transparent);
+  color: var(--_context-text);
+  font: var(--_weight-strong) var(--_type-2xs)/var(--_leading-solid) var(--_font-mono);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 @container steptrace-structure (max-width: 36rem) {
   .steptrace__contiguous-value {
-    font-size: 0.75rem;
+    font-size: var(--_type-ui);
   }
 }
 

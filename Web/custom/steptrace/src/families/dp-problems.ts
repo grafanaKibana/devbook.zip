@@ -313,17 +313,17 @@ export const dpStoryFamily = {
 } satisfies VisualFamily<DPStoryConfig, DPStoryRecorder, DPStoryFrame>
 
 const coinRoles = [
-  { role: "operand-a", badge: "A", label: "predecessor amount" },
-  { role: "operand-b", badge: "B", label: "another predecessor" },
-  { role: "target", badge: "T", label: "amount being solved" },
-  { role: "path", badge: "success", label: "optimal amount chain" },
+  { role: "operand-a", badge: "A", label: "Predecessor Amount" },
+  { role: "operand-b", badge: "B", label: "Another Predecessor" },
+  { role: "target", badge: "T", label: "Amount Being Solved" },
+  { role: "path", badge: "success", label: "Optimal Amount Chain" },
 ] satisfies readonly MatrixGridRoleDescriptor[]
 
 const gridRoles = [
-  { role: "operand-a", badge: "R", label: "right neighbour" },
-  { role: "operand-b", badge: "D", label: "down neighbour" },
-  { role: "target", badge: "T", label: "tile being solved" },
-  { role: "path", badge: "success", label: "optimal route" },
+  { role: "operand-a", badge: "R", label: "Right Neighbour" },
+  { role: "operand-b", badge: "D", label: "Down Neighbour" },
+  { role: "target", badge: "T", label: "Tile Being Solved" },
+  { role: "path", badge: "success", label: "Optimal Route" },
 ] satisfies readonly MatrixGridRoleDescriptor[]
 
 function rolesForCell(frame: DPTableFrame, row: number, column: number) {

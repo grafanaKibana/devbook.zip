@@ -45,8 +45,12 @@ class Recorder {
       nodeState[edge.to] = "accepted"
     })
     const edgeState: Record<string, GraphStateEdgeRole> = {}
-    choices.forEach((edge) => { edgeState[key(edge)] = "candidate" })
-    accepted.forEach((edge) => { edgeState[key(edge)] = "accepted" })
+    choices.forEach((edge) => {
+      edgeState[key(edge)] = "candidate"
+    })
+    accepted.forEach((edge) => {
+      edgeState[key(edge)] = "accepted"
+    })
     if (current) edgeState[key(current)] = accepted.includes(current) ? "accepted" : "active"
     this.frames.push({
       type: "boruvka",
@@ -92,19 +96,53 @@ export const boruvka = {
     const accepted: GraphStateEdge[] = []
     recorder.add("Begin round 1 with four singleton components.", components, choices, accepted)
     choices.push(ab)
-    recorder.add("Component A chooses its cheapest outgoing edge A—B (1).", components, choices, accepted, ab)
-    recorder.add("Component B chooses the same cheapest edge B—A (1).", components, choices, accepted, ab)
+    recorder.add(
+      "Component A chooses its cheapest outgoing edge A—B (1).",
+      components,
+      choices,
+      accepted,
+      ab,
+    )
+    recorder.add(
+      "Component B chooses the same cheapest edge B—A (1).",
+      components,
+      choices,
+      accepted,
+      ab,
+    )
     choices.push(bc)
     recorder.add("Component C chooses B—C (2).", components, choices, accepted, bc)
     choices.push(cd)
     recorder.add("Component D chooses C—D (3).", components, choices, accepted, cd)
-    recorder.add("Deduplicate A—B; three distinct safe candidates remain.", components, choices, accepted)
+    recorder.add(
+      "Deduplicate A—B; three distinct safe candidates remain.",
+      components,
+      choices,
+      accepted,
+    )
     accepted.push(ab)
     recorder.add("Accept A—B; A and B merge.", [["A", "B"], ["C"], ["D"]], choices, accepted, ab)
     accepted.push(bc)
-    recorder.add("Accept B—C; C joins the component.", [["A", "B", "C"], ["D"]], choices, accepted, bc)
+    recorder.add(
+      "Accept B—C; C joins the component.",
+      [["A", "B", "C"], ["D"]],
+      choices,
+      accepted,
+      bc,
+    )
     accepted.push(cd)
-    recorder.add("Accept C—D; all vertices are connected.", [["A", "B", "C", "D"]], choices, accepted, cd)
-    recorder.add("The MST is complete in one effective round with total weight 6.", [["A", "B", "C", "D"]], choices, accepted)
+    recorder.add(
+      "Accept C—D; all vertices are connected.",
+      [["A", "B", "C", "D"]],
+      choices,
+      accepted,
+      cd,
+    )
+    recorder.add(
+      "The MST is complete in one effective round with total weight 6.",
+      [["A", "B", "C", "D"]],
+      choices,
+      accepted,
+    )
   },
 } satisfies FamilyAlgorithmDefinition<"graph", Config, Recorder, GraphStateFrame>

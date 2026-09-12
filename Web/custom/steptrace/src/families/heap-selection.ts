@@ -465,17 +465,17 @@ export function makeHeapSelectionView(
   rejected.innerHTML = ICON.x
   const legend = makeLegend(
     [
-      { label: "incoming", swatchClass: "steptrace__heap-swatch steptrace__heap-swatch--current" },
+      { label: "Incoming", swatchClass: "steptrace__heap-swatch steptrace__heap-swatch--current" },
       {
-        label: "retained winner",
+        label: "Retained Winner",
         swatchClass: "steptrace__heap-swatch steptrace__heap-swatch--winner",
       },
       {
-        label: "weakest root",
+        label: "Weakest Root",
         swatchClass: "steptrace__heap-swatch steptrace__heap-swatch--weakest",
       },
       {
-        label: "rejected / evicted",
+        label: "Rejected / Evicted",
         swatchClass: "steptrace__heap-swatch steptrace__heap-swatch--rejected",
         marker: rejected,
       },

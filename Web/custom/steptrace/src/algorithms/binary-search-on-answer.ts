@@ -8,9 +8,7 @@ import {
 import { BoundarySearchRecorder } from "../recorders"
 import type { FamilyAlgorithmDefinition, StepTraceConfig } from "../types"
 
-export function parseBinarySearchOnAnswerConfig(
-  config: StepTraceConfig,
-): MonotoneBoundaryConfig {
+export function parseBinarySearchOnAnswerConfig(config: StepTraceConfig): MonotoneBoundaryConfig {
   const { weights, days } = config
 
   if (!Array.isArray(weights) || weights.length === 0)

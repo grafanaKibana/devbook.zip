@@ -73,13 +73,13 @@
 
 .steptrace .steptrace__multiway-tree-key {
   fill: var(--_text);
-  font: 700 0.8rem/1 var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-lg)/var(--_leading-solid) var(--_font-mono);
   pointer-events: none;
 }
 
 .steptrace .steptrace__multiway-tree-id {
   fill: var(--_muted);
-  font: 600 0.48rem/1 var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-micro)/var(--_leading-solid) var(--_font-mono);
 }
 
 .steptrace .steptrace__multiway-tree-link {

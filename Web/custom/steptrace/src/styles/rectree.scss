@@ -8,7 +8,7 @@
 }
 
 .steptrace .steptrace__rectree:focus-visible {
-  outline: 2px solid var(--_blue);
+  outline: var(--_stroke-emphasis) solid var(--_blue);
   outline-offset: 0.2rem;
 }
 
@@ -50,7 +50,7 @@
   }
 
   .steptrace .steptrace__rectree[data-compact="true"] .steptrace__rtlabel {
-    font-size: 10px;
+    font-size: var(--_type-xs);
     transform: translateY(4px);
   }
 
@@ -154,17 +154,17 @@
 
 .steptrace .steptrace__rtdivider {
   stroke: var(--_hair);
-  stroke-width: 1;
+  stroke-width: var(--_stroke-hair);
 }
 
 .steptrace .steptrace__rtcell-separator {
   stroke: color-mix(in srgb, var(--_text) 13%, transparent);
-  stroke-width: 1;
+  stroke-width: var(--_stroke-hair);
 }
 
 .steptrace .steptrace__rtcell-value {
   fill: var(--_text);
-  font: 500 11px/1 var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-sm)/var(--_leading-solid) var(--_font-mono);
 }
 
 .steptrace .steptrace__rtnode .steptrace__rtring {
@@ -181,35 +181,35 @@
 
 .steptrace .steptrace__rtnode .steptrace__rtlabel {
   fill: var(--_text);
-  font: 600 12px/1 var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-ui)/var(--_leading-solid) var(--_font-mono);
 }
 
 .steptrace .steptrace__rtnode .steptrace__rtdetail {
   fill: var(--_muted);
-  font: 400 10.5px/1 var(--_font-mono);
+  font: var(--_weight-regular) var(--_type-sm)/var(--_leading-solid) var(--_font-mono);
 }
 
 .steptrace
   .steptrace__rectree[data-profile="branch-and-bound"]
   .steptrace__rtnode
   .steptrace__rtdetail {
-  font-size: 9.5px;
+  font-size: var(--_type-2xs);
 }
 
 .steptrace .steptrace__rectree[data-profile="merge-sort"] .steptrace__rtnode .steptrace__rtlabel {
   fill: var(--_muted);
-  font: 400 9px/1 var(--_font-mono);
+  font: var(--_weight-regular) var(--_type-2xs)/var(--_leading-solid) var(--_font-mono);
 }
 
 .steptrace .steptrace__rtnode .steptrace__rtval {
   fill: var(--_text);
-  font: 600 10px/1 var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-xs)/var(--_leading-solid) var(--_font-mono);
 }
 
 .steptrace .steptrace__rtnode .steptrace__rtbadge {
   fill: var(--_muted);
-  font: 600 7px/1 var(--_font-head);
-  letter-spacing: 0.03em;
+  font: var(--_weight-strong) var(--_type-micro) / var(--_leading-solid) var(--_font-body);
+  letter-spacing: var(--_tracking-label);
   text-transform: uppercase;
 }
 

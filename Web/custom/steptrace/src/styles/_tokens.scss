@@ -1,0 +1,71 @@
+$amber-light: #d97706;
+$amber-dark: #f59e0b;
+$violet-light: #7c3aed;
+$violet-dark: #a78bfa;
+$blue-light: #2563eb;
+$blue-dark: #60a5fa;
+$green-light: #4c8000;
+$green-dark: #84cc16;
+$red: #b42318;
+$context-text-light: #626875;
+$context-text-dark: #a3aab5;
+$amber-text-light: #b36205;
+$green-text-light: #457400;
+$red-text-dark: #d0756e;
+$on-red-dark: #d4d6d8;
+$neutral: #8a9a73;
+$surface: #eef1e6;
+$text: #29301f;
+$muted: #6e785e;
+$border: #c3cbaf;
+$border-dark: #5c6571;
+$on-accent: #fff;
+$mask-opaque: #000;
+$held-bg-light: #92400e;
+$held-bg-dark: #fbbf24;
+$held-fg-dark: #1f2937;
+$panel-shadow-light: rgb(0 0 0 / 0.12);
+$panel-shadow-dark: rgb(0 0 0 / 0.32);
+
+@mixin light-theme {
+  --st-state-amber: #{$amber-light};
+  --st-state-violet: #{$violet-light};
+  --st-state-blue: #{$blue-light};
+  --st-state-green: #{$green-light};
+  --st-state-red: #{$red};
+  --st-divider: color-mix(in srgb, var(--st-text, #{$text}) 13%, transparent);
+  --st-divider-faint: color-mix(in srgb, var(--st-text, #{$text}) 10%, transparent);
+  --st-context-text: #{$context-text-light};
+  --st-state-amber-text: #{$amber-text-light};
+  --st-state-green-text: #{$green-text-light};
+  --st-state-red-text: #{$red};
+  --st-strong-fill-text: var(--st-text, #{$text});
+  --st-on-red: var(--st-surface, #{$surface});
+  --st-neutral: #{$neutral};
+  --st-mask-opaque: #{$mask-opaque};
+  --st-held-bg: #{$held-bg-light};
+  --st-held-fg: #{$on-accent};
+  --st-panel-shadow: #{$panel-shadow-light};
+}
+
+@mixin dark-theme {
+  --st-state-amber: #{$amber-dark};
+  --st-state-violet: #{$violet-dark};
+  --st-state-blue: #{$blue-dark};
+  --st-state-green: #{$green-dark};
+  --st-state-red: #{$red};
+  --st-divider: var(--st-border, #{$border-dark});
+  --st-divider-faint: var(--st-border, #{$border-dark});
+  --st-context-text: var(--st-muted, #{$muted});
+  --st-state-amber-text: #{$amber-dark};
+  --st-state-green-text: #{$green-dark};
+  --st-state-red-text: #{$red-text-dark};
+  --st-strong-fill-text: var(--st-context-text, #{$context-text-dark});
+  --st-on-red: #{$on-red-dark};
+  --st-border-strong: #{$border-dark};
+  --st-neutral: #{$neutral};
+  --st-mask-opaque: #{$mask-opaque};
+  --st-held-bg: #{$held-bg-dark};
+  --st-held-fg: #{$held-fg-dark};
+  --st-panel-shadow: #{$panel-shadow-dark};
+}

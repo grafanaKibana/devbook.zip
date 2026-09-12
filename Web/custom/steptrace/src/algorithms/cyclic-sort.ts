@@ -13,9 +13,9 @@ export function parseCyclicSortConfig(config: StepTraceConfig): CyclicSortConfig
   if (!Array.isArray(array) || array.length < 2)
     invalidConfig('requires an "array" with at least two integers.')
   if (!array.every((value) => Number.isInteger(value) && value >= 1 && value <= array.length))
-    invalidConfig('requires every value to be an integer in the range 1..array.length.')
+    invalidConfig("requires every value to be an integer in the range 1..array.length.")
   if (new Set(array).size !== array.length)
-    invalidConfig('requires a permutation with no duplicate values.')
+    invalidConfig("requires a permutation with no duplicate values.")
 
   return { array: array.slice(), profile: "cyclic" }
 }
@@ -27,7 +27,9 @@ export const cyclicSort = {
   meta: { label: "Cyclic sort" },
   parse: parseCyclicSortConfig,
   run(_input, ops) {
-    ops.init("Cyclic sort — value v belongs at index v − 1; keep the cursor still until its value is home.")
+    ops.init(
+      "Cyclic sort — value v belongs at index v − 1; keep the cursor still until its value is home.",
+    )
     let cursor = 0
     while (cursor < ops.value.length) {
       const value = ops.value[cursor]

@@ -98,12 +98,12 @@ export function matrixGridRolesForCell(frame: MatrixGridFrame, row: number, colu
 }
 
 export const matrixGridRoleLegend = [
-  { role: "operand-a", badge: "A", label: "dist[i][k]" },
-  { role: "operand-b", badge: "B", label: "dist[k][j]" },
-  { role: "target", badge: "T", label: "dist[i][j]" },
-  { role: "keep", badge: "K", label: "keep target" },
-  { role: "write", badge: "W", label: "write target" },
-  { role: "stage-axis", badge: "k", label: "active intermediate row/column" },
+  { role: "operand-a", badge: "A", label: "Dist[i][k]" },
+  { role: "operand-b", badge: "B", label: "Dist[k][j]" },
+  { role: "target", badge: "T", label: "Dist[i][j]" },
+  { role: "keep", badge: "K", label: "Keep Target" },
+  { role: "write", badge: "W", label: "Write Target" },
+  { role: "stage-axis", badge: "k", label: "Active Intermediate Row/Column" },
 ] satisfies readonly MatrixGridRoleDescriptor[]
 
 export function matrixGridFooterModel(frame: MatrixGridFrame): MatrixGridFooterModel {

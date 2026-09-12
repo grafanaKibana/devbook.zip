@@ -36,7 +36,9 @@ export const countingSort = {
         `Read input[${index}] = ${key} from the tail; decrement its end position, then write output there.`,
       )
     }
-    ops.done(`Every key is in its value block. Tail-first placement kept equal keys in input order.`)
+    ops.done(
+      `Every key is in its value block. Tail-first placement kept equal keys in input order.`,
+    )
   },
 } satisfies FamilyAlgorithmDefinition<
   "sort",

@@ -4,6 +4,7 @@ import type { BitsAlgorithmDefinition } from "../types"
 export const kernighanPopcount = {
   id: "kernighan-popcount",
   kind: "bits",
+  legacyRenderer: "bit-grid",
   meta: { label: "Kernighan population count" },
   run: (input, ops) => {
     let x = (Number(input.value) >>> 0) & ops.mask

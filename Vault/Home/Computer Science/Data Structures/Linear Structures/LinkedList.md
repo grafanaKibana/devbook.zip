@@ -91,7 +91,7 @@ tab: Complexity
             },
             {
               "kind": "curve",
-              "role": "Typical",
+              "role": "Average",
               "formula": "O(n)",
               "curveId": "linear"
             },
@@ -109,19 +109,7 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best",
-              "formula": "O(1)",
-              "curveId": "constant"
-            },
-            {
-              "kind": "curve",
-              "role": "Typical",
-              "formula": "O(1)",
-              "curveId": "constant"
-            },
-            {
-              "kind": "curve",
-              "role": "Worst",
+              "role": "All executions",
               "formula": "O(1)",
               "curveId": "constant"
             }
@@ -139,7 +127,7 @@ tab: Complexity
             },
             {
               "kind": "curve",
-              "role": "Typical",
+              "role": "Average",
               "formula": "O(n)",
               "curveId": "linear"
             },
@@ -157,19 +145,7 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best",
-              "formula": "O(1)",
-              "curveId": "constant"
-            },
-            {
-              "kind": "curve",
-              "role": "Typical",
-              "formula": "O(1)",
-              "curveId": "constant"
-            },
-            {
-              "kind": "curve",
-              "role": "Worst",
+              "role": "All executions",
               "formula": "O(1)",
               "curveId": "constant"
             }
@@ -181,19 +157,7 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Best",
-              "formula": "O(n)",
-              "curveId": "linear"
-            },
-            {
-              "kind": "curve",
-              "role": "Typical",
-              "formula": "O(n)",
-              "curveId": "linear"
-            },
-            {
-              "kind": "curve",
-              "role": "Worst",
+              "role": "All executions",
               "formula": "O(n)",
               "curveId": "linear"
             }
@@ -210,8 +174,8 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Structure space",
-              "formula": "O(1) auxiliary (inserting a value allocates one node; a removed node becomes GC-eligible only when unreachable)",
+              "role": "Auxiliary space",
+              "formula": "O(1); inserting a value allocates one persistent node, while a removed node remains alive until unreachable",
               "curveId": "constant"
             }
           ]
@@ -222,8 +186,8 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Structure space",
-              "formula": "O(1) auxiliary (a value insert allocates one node)",
+              "role": "Auxiliary space",
+              "formula": "O(1); inserting a value allocates one persistent node",
               "curveId": "constant"
             }
           ]
@@ -234,8 +198,8 @@ tab: Complexity
           "bounds": [
             {
               "kind": "curve",
-              "role": "Structure space",
-              "formula": "O(1) new node",
+              "role": "Persistent change",
+              "formula": "O(1), one new node",
               "curveId": "constant"
             }
           ]

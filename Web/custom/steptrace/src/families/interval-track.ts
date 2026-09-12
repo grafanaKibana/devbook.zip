@@ -289,15 +289,15 @@ export function makeIntervalTrackView(
 
   const legendItems = scheduling
     ? ([
-        ["next meeting", "candidate"],
-        ["last accepted", "current"],
-        ["accepted", "output"],
-        ["rejected overlap", "rejected"],
+        ["Next Meeting", "candidate"],
+        ["Last Accepted", "current"],
+        ["Accepted", "output"],
+        ["Rejected Overlap", "rejected"],
       ] as const)
     : ([
-        ["next interval", "candidate"],
-        ["current merged block", "current"],
-        ["emitted output", "output"],
+        ["Next Interval", "candidate"],
+        ["Current Merged Block", "current"],
+        ["Emitted Output", "output"],
       ] as const)
   const legend = makeLegend(
     legendItems.map(([label, state]) => ({

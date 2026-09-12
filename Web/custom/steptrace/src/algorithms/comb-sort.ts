@@ -49,11 +49,7 @@ export const combSort = {
           `Compare ${leftValue} at index ${left} with ${rightValue} at index ${right}.`,
         )
         if (leftValue <= rightValue) continue
-        ops.swapGapPair(
-          left,
-          right,
-          `${leftValue} > ${rightValue}: swap the gap-${gap} pair.`,
-        )
+        ops.swapGapPair(left, right, `${leftValue} > ${rightValue}: swap the gap-${gap} pair.`)
         swapped = true
       }
       ops.endGap(

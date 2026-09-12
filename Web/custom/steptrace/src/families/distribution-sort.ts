@@ -1,4 +1,4 @@
-import { barHeightStyle, el, escapeHtml, makeBars, statusEl } from "../render"
+import { barHeightStyle, el, makeBars, setStatus, statusEl } from "../render"
 import type { StepTraceConfig, StepTraceView, VisualFamily } from "../types"
 
 export interface DistributionSortConfig {
@@ -322,9 +322,7 @@ export function makeDistributionSortView(frames: readonly DistributionSortFrame[
           : `output index ${slotIndex}, value ${placed}, token ${labels[origin ?? 0]}`,
       )
     })
-    status.innerHTML =
-      escapeHtml(frame.message) +
-      ` <span class="steptrace__counts">· ${phaseLabel(frame.type)} · step ${index + 1}/${total}</span>`
+    setStatus(status, frame.message, `· ${phaseLabel(frame.type)} · step ${index + 1}/${total}`)
   }
 
   return {

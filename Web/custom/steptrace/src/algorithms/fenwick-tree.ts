@@ -9,8 +9,7 @@ export function parseFenwickTreeConfig(config: StepTraceConfig): FenwickTreeConf
     values.length < 4 ||
     values.length > 8 ||
     values.some(
-      (value) =>
-        typeof value !== "number" || !Number.isFinite(value) || !Number.isInteger(value),
+      (value) => typeof value !== "number" || !Number.isFinite(value) || !Number.isInteger(value),
     )
   )
     throw new Error(`steptrace: fenwick-tree requires 4 to 8 finite integer values.`)

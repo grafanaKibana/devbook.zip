@@ -64,7 +64,7 @@ tab: Complexity
         },
         {
           "kind": "operation",
-          "operation": "Typical",
+          "operation": "Estimate",
           "bounds": [
             {
               "kind": "text",
@@ -91,31 +91,7 @@ tab: Complexity
       "entries": [
         {
           "kind": "operation",
-          "operation": "Best",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Auxiliary space",
-              "formula": "O(n)",
-              "curveId": "linear"
-            }
-          ]
-        },
-        {
-          "kind": "operation",
-          "operation": "Typical",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Auxiliary space",
-              "formula": "O(n)",
-              "curveId": "linear"
-            }
-          ]
-        },
-        {
-          "kind": "operation",
-          "operation": "Worst",
+          "operation": "All executions",
           "bounds": [
             {
               "kind": "curve",

@@ -43,7 +43,7 @@ tab: Complexity
   "variables": {
     "branchingFactor": {
       "symbol": "b",
-      "description": "search-tree branching factor"
+      "description": "fixed search-tree branching factor, b > 1"
     },
     "edgeCount": {
       "symbol": "m",
@@ -51,7 +51,7 @@ tab: Complexity
     },
     "parameterD": {
       "symbol": "d",
-      "description": "source-to-target solution depth"
+      "description": "source-to-target solution depth; the horizontal axis samples d"
     },
     "vertexCount": {
       "symbol": "n",
@@ -76,24 +76,24 @@ tab: Complexity
         },
         {
           "kind": "operation",
-          "operation": "Model estimate",
+          "operation": "Estimate",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Time",
-              "formula": "O(b^(d/2))"
+              "formula": "O(b^(d/2))",
+              "curveId": "exponential"
             }
           ]
         },
         {
           "kind": "operation",
-          "operation": "General worst",
+          "operation": "Worst",
           "bounds": [
             {
-              "kind": "curve",
+              "kind": "text",
               "role": "Time",
-              "formula": "O(n + m)",
-              "curveId": "linear"
+              "formula": "O(n + m)"
             }
           ]
         }
@@ -116,24 +116,24 @@ tab: Complexity
         },
         {
           "kind": "operation",
-          "operation": "Model estimate",
+          "operation": "Estimate",
           "bounds": [
             {
-              "kind": "text",
+              "kind": "curve",
               "role": "Auxiliary space",
-              "formula": "O(b^(d/2))"
+              "formula": "O(b^(d/2))",
+              "curveId": "exponential"
             }
           ]
         },
         {
           "kind": "operation",
-          "operation": "General worst",
+          "operation": "Worst",
           "bounds": [
             {
-              "kind": "curve",
+              "kind": "text",
               "role": "Auxiliary space",
-              "formula": "O(n)",
-              "curveId": "linear"
+              "formula": "O(n)"
             }
           ]
         }

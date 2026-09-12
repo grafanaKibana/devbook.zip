@@ -53,6 +53,8 @@ export type ComplexityLegendItem =
       pathId: string
       category: ComplexityCategory
       label: string
+      semanticLabel: string
+      formula: string
       color: string
       banded: boolean
     }
@@ -60,6 +62,8 @@ export type ComplexityLegendItem =
       kind: "semantic"
       category: ComplexityCategory
       label: string
+      semanticLabel: string
+      formula: string
       color: string
     }
 
@@ -623,6 +627,8 @@ function finishResource(
           endpointFormulas.get(path.curveId) === path.formula
             ? path.legendLabel
             : `${path.legendLabel}: ${path.formula}`,
+        semanticLabel: path.legendLabel,
+        formula: path.formula,
         color: path.color,
         banded: Boolean(path.bandTo),
       },
@@ -634,6 +640,8 @@ function finishResource(
         kind: "semantic" as const,
         category: bound.category,
         label: `${bound.role}: ${bound.formula}`,
+        semanticLabel: bound.role,
+        formula: bound.formula,
         color: bound.color,
       },
     })),
@@ -773,6 +781,7 @@ function buildResource(
     })
   } else {
     const seenOperations = new Set<string>()
+    let flattenOperations = true
     rawEntries.forEach((raw, operationIndex) => {
       const path = `${pathPrefix}entries[${operationIndex}]`
       const entry = objectAt(raw, path)
@@ -783,6 +792,7 @@ function buildResource(
       if (!Array.isArray(entry.bounds) || entry.bounds.length === 0) {
         fail(`${path}.bounds`, "must be a non-empty array")
       }
+      flattenOperations &&= entry.bounds.length === 1
       const seenRoles = new Set<string>()
       entry.bounds.forEach((rawBound, boundIndex) => {
         const boundPath = `${path}.bounds[${boundIndex}]`
@@ -791,7 +801,9 @@ function buildResource(
         if (bound.kind === plottedKind) {
           rejectUnknown(
             bound,
-            version === 2 ? ["kind", "curveId", "formula", "role"] : ["kind", "curveId", "role"],
+            version === 2
+              ? ["kind", "curveId", "curveFrom", "curveTo", "formula", "role"]
+              : ["kind", "curveId", "role"],
             boundPath,
           )
         } else if (version === 2 && bound.kind === "samples") {
@@ -829,12 +841,16 @@ function buildResource(
           })
           return
         }
-        const curveId = curveIdAt(bound.curveId, `${boundPath}.curveId`)
+        const { curveId, bandTo } =
+          version === 2
+            ? bandAt(bound, boundPath)
+            : { curveId: curveIdAt(bound.curveId, `${boundPath}.curveId`) }
         const formula =
           version === 2 ? textAt(bound.formula, `${boundPath}.formula`) : curves[curveId].formula
         highlighted.push({
           id: pathId(labelId, `${operation}-${role}`, operationIndex * 100 + boundIndex),
           curveId,
+          bandTo,
           formula,
           category: categoryFor(role),
           label: `${operation} — ${role}: ${formula}`,
@@ -845,6 +861,16 @@ function buildResource(
         })
       })
     })
+    if (flattenOperations) {
+      for (const path of highlighted) {
+        path.legendLabel = path.legendGroup ?? path.legendLabel
+        path.legendGroup = undefined
+      }
+      for (const bound of semanticBounds) {
+        bound.role = bound.operation ?? bound.role
+        bound.operation = undefined
+      }
+    }
   }
   return finishResource(key, label, labelId, mode, highlighted, semanticBounds)
 }

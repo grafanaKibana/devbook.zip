@@ -115,7 +115,6 @@ function createHashIndexSurface(root: HTMLElement, options: HashIndexSurfaceOpti
 
   const board = el("div", "steptrace__hash-buckets")
   board.dataset.strategy = options.strategy
-  board.style.setProperty("--steptrace-hash-size", String(options.size))
   board.setAttribute("role", "list")
   board.setAttribute("aria-label", `${options.label}, ${options.size} indexed cells`)
   boardWrap.append(chainLane, board)
@@ -380,8 +379,6 @@ function mountHashTable(
       "--steptrace-token-y",
       "--steptrace-token-width",
       "--steptrace-token-height",
-      "--steptrace-token-radius",
-      "--steptrace-token-padding",
     ])
       token.style.removeProperty(property)
   }
@@ -430,8 +427,6 @@ function mountHashTable(
     if (motion === "return") {
       token.style.setProperty("--steptrace-token-width", `${nextWidth}px`)
       token.style.setProperty("--steptrace-token-height", `${nextHeight}px`)
-      token.style.setProperty("--steptrace-token-radius", "6px")
-      token.style.setProperty("--steptrace-token-padding", "5px 7px")
     }
     token.dataset.motion = motion
 
@@ -443,16 +438,12 @@ function mountHashTable(
               transform: `translate3d(${tokenX}px, ${tokenY}px, 0)`,
               width: `${fromWidth}px`,
               height: `${fromHeight}px`,
-              borderRadius: "5px",
-              padding: "0px",
               opacity: 0.78,
             },
             {
               transform: `translate3d(${next.x}px, ${next.y}px, 0)`,
               width: `${nextWidth}px`,
               height: `${nextHeight}px`,
-              borderRadius: "6px",
-              padding: "5px 7px",
               opacity: 0,
             },
           ]
@@ -485,8 +476,6 @@ function mountHashTable(
     setTokenPosition(next.x, next.y)
     token.style.setProperty("--steptrace-token-width", `${next.width}px`)
     token.style.setProperty("--steptrace-token-height", `${next.height}px`)
-    token.style.setProperty("--steptrace-token-radius", "5px")
-    token.style.setProperty("--steptrace-token-padding", "0px")
     token.dataset.motion = "arrival"
     const geometry = nativeAnimation(
       token,
@@ -495,16 +484,12 @@ function mountHashTable(
           transform: `translate3d(${tokenX}px, ${tokenY}px, 0)`,
           width: `${fromWidth}px`,
           height: `${fromHeight}px`,
-          borderRadius: "6px",
-          padding: "5px 7px",
           opacity: 0.92,
         },
         {
           transform: `translate3d(${next.x}px, ${next.y}px, 0)`,
           width: `${next.width}px`,
           height: `${next.height}px`,
-          borderRadius: "5px",
-          padding: "0px",
           opacity: 0.78,
         },
       ],

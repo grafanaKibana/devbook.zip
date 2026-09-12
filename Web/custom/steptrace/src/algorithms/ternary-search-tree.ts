@@ -101,7 +101,9 @@ export function parseTernarySearchTreeConfig(config: StepTraceConfig): TernarySe
     operations,
     rootNode,
     ternaryNodes: Object.freeze(
-      Object.fromEntries(Object.entries(nodes).map(([id, node]) => [id, Object.freeze({ ...node })])),
+      Object.fromEntries(
+        Object.entries(nodes).map(([id, node]) => [id, Object.freeze({ ...node })]),
+      ),
     ),
     nodes: built.nodes,
     edges: built.edges,
@@ -119,8 +121,19 @@ function traverse(
   let current = input.rootNode
   const rootEdge = edgeId("root", "eq", current)
   if (ops.hasVisibleEdge(rootEdge))
-    ops.reuseEdge(rootEdge, current, index, `Enter root character ${input.ternaryNodes[current].character}.`)
-  else ops.createNode(rootEdge, current, index, `Create root character ${input.ternaryNodes[current].character}.`)
+    ops.reuseEdge(
+      rootEdge,
+      current,
+      index,
+      `Enter root character ${input.ternaryNodes[current].character}.`,
+    )
+  else
+    ops.createNode(
+      rootEdge,
+      current,
+      index,
+      `Create root character ${input.ternaryNodes[current].character}.`,
+    )
 
   while (current) {
     const node = input.ternaryNodes[current]
@@ -153,7 +166,8 @@ function traverse(
       current = next
     }
   }
-  if (operation === "search") ops.completeSearch(false, `Search "${key}" stopped before a terminal.`)
+  if (operation === "search")
+    ops.completeSearch(false, `Search "${key}" stopped before a terminal.`)
 }
 
 export const ternarySearchTree = {

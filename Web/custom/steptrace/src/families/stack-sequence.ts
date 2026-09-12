@@ -286,15 +286,15 @@ export function makeStackSequenceView(
   const legend = makeLegend(
     [
       {
-        label: "scanning",
+        label: "Scanning",
         swatchClass: "steptrace__stack-sequence-swatch steptrace__stack-sequence-swatch--scan",
       },
       {
-        label: "retained candidate",
+        label: "Retained Candidate",
         swatchClass: "steptrace__stack-sequence-swatch steptrace__stack-sequence-swatch--retained",
       },
       {
-        label: "resolved pop",
+        label: "Resolved Pop",
         swatchClass: "steptrace__stack-sequence-swatch steptrace__stack-sequence-swatch--popped",
       },
     ],
