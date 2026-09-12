@@ -1,3 +1,4 @@
+import { ExcalidrawExport } from "./custom/components/excalidraw-export"
 import { ExcalidrawEnhance } from "./custom/components/excalidraw-enhance"
 import { ExplorerIcons } from "./custom/components/explorer-icons"
 import { ContentMetaRow } from "./custom/components/content-meta-row"
@@ -31,10 +32,15 @@ import {
 import { componentRegistry } from "./quartz/components/registry"
 import type { QuartzComponent, QuartzComponentConstructor } from "./quartz/components/types"
 import { PageTypes } from "./quartz/plugins"
+import type { ExplorerOptions } from "./.quartz/plugins"
 import { loadQuartzConfig, loadQuartzLayout } from "./quartz/plugins/loader/config-loader"
 
 // DevBook customizations live here (the sanctioned Quartz override entrypoint)
 // and under ./custom — no engine files under quartz/ are modified.
+const explorerFilter: NonNullable<ExplorerOptions["filterFn"]> = (node) =>
+  node.slugSegment !== "tags" && !(node.slugSegment === "assets" && node.slugSegments?.length === 1)
+componentRegistry.setOptionOverrides("explorer", { filterFn: explorerFilter })
+
 const config = await loadQuartzConfig()
 
 insertAfterNamedPlugin(config.plugins.transformers, "Description", Seo())
@@ -47,6 +53,7 @@ unlistGenerated(
   requireNamedPlugin(config.plugins.pageTypes, "CanvasPage"),
   (slug) => slug === "roadmap.canvas",
 )
+unlistGenerated(requireNamedPlugin(config.plugins.pageTypes, "ExcalidrawPage"), () => true)
 
 // Clean Syncer's committed markdown/HTML for the flattened web build.
 const linkIdx = config.plugins.transformers.findIndex((t) => t.name === "LinkProcessing")
@@ -124,6 +131,7 @@ const steptrace = Steptrace()
 const complexity = Complexity()
 const homepageFit = HomepageFit()
 const excalidrawEnhance = ExcalidrawEnhance()
+const excalidrawExport = ExcalidrawExport()
 const pageReveal = PageReveal()
 layout.defaults.afterBody = [
   ...(layout.defaults.afterBody ?? []),
@@ -131,6 +139,7 @@ layout.defaults.afterBody = [
   complexity,
   homepageFit,
   excalidrawEnhance,
+  excalidrawExport,
   pageReveal,
 ]
 for (const pageLayout of Object.values(layout.byPageType)) {
@@ -140,6 +149,7 @@ for (const pageLayout of Object.values(layout.byPageType)) {
     complexity,
     homepageFit,
     excalidrawEnhance,
+    excalidrawExport,
     pageReveal,
   ]
 }
@@ -154,7 +164,9 @@ for (const pageLayout of Object.values(layout.byPageType)) {
 const pageContribute = PageContribute()
 
 // Preserve the configured community footer and add per-page sharing inside it.
-const siteFooter = SiteFooter({ footer: layout.defaults.footer })
+const footer = layout.defaults.footer
+if (!footer) throw new Error("SiteFooter requires an enabled footer component")
+const siteFooter = SiteFooter({ footer })
 layout.defaults.footer = siteFooter
 for (const pageLayout of Object.values(layout.byPageType)) {
   pageLayout.footer = siteFooter
