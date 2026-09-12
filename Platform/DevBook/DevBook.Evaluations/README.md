@@ -92,6 +92,7 @@ The LLM model comes from `GoldenDatasetGeneratorOptions:ModelId` (default `gpt-5
 | --- | --- | --- |
 | Which dataset(s) to generate | `--dataset search\|answer\|all` | Default `all` — one combined LLM pass writes both. `search` → `chunks-shared.json`; `answer` → `answers-shared.json` (adds reference answers); the flag *narrows* the default. Accepts a comma list (`--dataset search,answer`). |
 | Bigger / smaller dataset | `--max-groups` | Hard cap on groups sent to the LLM. ~120 groups ≈ 450 cases; ~10 ≈ 30–40 cases. The main size dial and the main LLM-cost dial. |
+| Small run for iteration | `--mini` | Shorthand for `--label mini --max-groups 25` (~100 cases). Explicit `--label` / `--max-groups` still override it. |
 | Separate sizes that coexist | `--label <name>` | Suffixes all output files (`chunks-shared-<name>.json`, `shared-<name>.groups.json`, `summary-<name>.json`). Empty label = the default *full* names. Used for the **mini** variant so it never overwrites full. |
 | Section selectivity | `--min-section-chars` | Higher = only longer sections become evidence. |
 | Cross-page richness | `--max-linked-notes`, `--sections-per-note`, `--max-sections-per-group` | Control how many notes/sections compose a group → how multi-page the questions can be. |
@@ -115,8 +116,8 @@ dotnet run Platform/DevBook/DevBook.Evaluations/RunDatasetGeneration.cs -- --dat
 # Answer dataset only (answers-shared.json, adds reference answers)
 dotnet run Platform/DevBook/DevBook.Evaluations/RunDatasetGeneration.cs -- --dataset answer --max-groups 120
 
-# Mini search dataset (writes chunks-shared-mini.json etc., coexists with full)
-dotnet run Platform/DevBook/DevBook.Evaluations/RunDatasetGeneration.cs -- --dataset search --label mini --max-groups 10
+# Mini search dataset (~100 cases, writes chunks-shared-mini.json etc., coexists with full)
+dotnet run Platform/DevBook/DevBook.Evaluations/RunDatasetGeneration.cs -- --dataset search --mini
 
 # Dry run: grouping + summary only, no LLM cost
 dotnet run Platform/DevBook/DevBook.Evaluations/RunDatasetGeneration.cs -- --dataset all --dry-run --max-groups 120

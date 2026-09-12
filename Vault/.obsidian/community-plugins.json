@@ -14,8 +14,8 @@
   "datacore",
   "obsidian-excalidraw-plugin",
   "hot-reload",
-  "quartz-syncer",
   "steptrace",
   "obsidian-linter",
-  "tabsdown"
+  "tabsdown",
+  "quartz-syncer"
 ]
