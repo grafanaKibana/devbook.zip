@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.684Z
-modified: 2026-08-20T20:41:15.685Z
-published: 2026-08-20T20:41:15.685Z
+modified: 2026-08-25T13:45:27.887Z
+published: 2026-08-25T13:45:27.887Z
 tags:
   - FolderNote
 topic:
@@ -26,7 +26,7 @@ The three notes in this folder address different boundaries. [[Software Architec
 
 Start with the decision being made. Request-response and publish-subscribe describe interaction. Streaming, batching, and ETL describe movement and visibility of data. Event Sourcing governs how state is recorded. Orchestration assigns ownership of a multi-step process. These choices can coexist because they operate at different layers.
 
-![[Assets/Software Architecture/Software Architecture-Architectural Patterns-18120000-1.png]]
+![[Assets/Software Architecture/Software Architecture-Architectural Patterns-18120000-1.png|theme-aware]]
 
 | Need | Prefer | Coupling and ordering | Failure owner | Operational cost |
 |---|---|---|---|---|
@@ -43,7 +43,7 @@ Failure ownership is the useful selection test. A workable design can say where 
 
 The families below overlap too. One service may use hexagonal boundaries internally, publish events, expose a client-server API, and still deploy inside a monolith. Naming a pattern says little about independent deployment or fault isolation unless the runtime boundaries support it.
 
-![[Assets/Software Architecture/Software Architecture-Architectural Patterns-18120000.png]]
+![[Assets/Software Architecture/Software Architecture-Architectural Patterns-18120000.png|theme-aware]]
 
 | Pattern | Primary boundary | Change cost it reduces | Cost it introduces | Use when |
 |---|---|---|---|---|

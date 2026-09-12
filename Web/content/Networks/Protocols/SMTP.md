@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.634Z
-modified: 2026-08-20T20:41:15.634Z
-published: 2026-08-20T20:41:15.634Z
+modified: 2026-08-25T13:45:27.882Z
+published: 2026-08-25T13:45:27.882Z
 topic:
   - Networks
 subtopic:
@@ -34,7 +34,7 @@ SMTP response classes:
 
 A timeout leaves the sender uncertain. The remote server may have accepted the message and lost only the response, so a retry can create a duplicate.
 
-![[Assets/Networks/Networks-SMTP-18120000.jpg]]
+![[Assets/Networks/Networks-SMTP-18120000.jpg|theme-aware]]
 
 # Email Authentication
 

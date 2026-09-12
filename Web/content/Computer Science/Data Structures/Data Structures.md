@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.591Z
-modified: 2026-08-20T20:41:15.591Z
-published: 2026-08-20T20:41:15.591Z
+modified: 2026-08-25T13:45:27.893Z
+published: 2026-08-25T13:45:27.893Z
 tags:
   - FolderNote
 topic:
@@ -38,7 +38,7 @@ Start from the operation that dominates the workload, then account for ordering,
 | Spatial candidates on a one-dimensional index | [[Computer Science/Data Structures/Geohash\|Geohash]] | Turns fixed-grid cells into sortable prefixes | Adjacent points can cross a prefix boundary. Exact filtering is still required |
 | Cheap negative membership tests | Bloom filter | Avoids expensive downstream lookups with compact state | False positives are possible. Deletions need a variant |
 
-![[Assets/Computer Science/Computer Science-Data Structures-18120000.png]]
+![[Assets/Computer Science/Computer Science-Data Structures-18120000.png|theme-aware]]
 
 The visual is an example inventory, not a selector. The table above is authoritative because the same structure can be right or wrong depending on the dominant operation and storage boundary.
 

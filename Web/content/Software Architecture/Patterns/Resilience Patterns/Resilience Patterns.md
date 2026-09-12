@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.702Z
-modified: 2026-08-20T20:41:15.702Z
-published: 2026-08-20T20:41:15.702Z
+modified: 2026-08-25T13:45:27.889Z
+published: 2026-08-25T13:45:27.889Z
 tags:
   - FolderNote
 topic:
@@ -24,7 +24,7 @@ Each mechanism answers a different signal. [[Software Architecture/Patterns/Resi
 
 # Choose a Response by Failure and Overload
 
-![[Assets/Software Architecture/Software Architecture-Resilience Patterns-18120000.jpg]]
+![[Assets/Software Architecture/Software Architecture-Resilience Patterns-18120000.jpg|theme-aware]]
 
 | Signal | Response | Failure contained | New cost |
 |---|---|---|---|

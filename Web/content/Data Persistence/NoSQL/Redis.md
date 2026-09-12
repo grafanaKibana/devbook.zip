@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.616Z
-modified: 2026-08-20T20:41:15.617Z
-published: 2026-08-20T20:41:15.617Z
+modified: 2026-08-25T13:45:27.876Z
+published: 2026-08-25T13:45:27.876Z
 topic:
   - Data Persistence
 subtopic:
@@ -39,7 +39,7 @@ XADD orders * orderId o-1842 status accepted
 
 Each command is atomic by itself. The sequence does not create a transaction with an external database, and a successful response says nothing about disk or replica acknowledgement unless the deployment contract requires those guarantees.
 
-![[Assets/Data Persistence/Data Persistence-Redis-18120000.png]]
+![[Assets/Data Persistence/Data Persistence-Redis-18120000.png|theme-aware]]
 
 > [!WARNING] Use-case inventory, not a safety contract
 > The visual maps structures to possible workloads, but a string does not by itself make a safe distributed lock or global ID service, and a list is not a durable queue contract. Use fencing for coordination, define durability and replay for messaging, and test every workload against failover and eviction.

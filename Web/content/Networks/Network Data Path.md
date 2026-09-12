@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.628Z
-modified: 2026-08-20T20:41:15.628Z
-published: 2026-08-20T20:41:15.628Z
+modified: 2026-08-25T13:45:27.879Z
+published: 2026-08-25T13:45:27.879Z
 topic:
   - Networks
 subtopic: []
@@ -29,7 +29,7 @@ Suppose a service writes a 4 KiB response to an established TCP socket:
 6. **Receive NIC → kernel.** The receiving NIC DMA-writes bytes into memory and signals work. Linux NAPI polls batches from the receive ring, reducing interrupt overhead under load.
 7. **Decapsulation and delivery.** The kernel validates headers, applies policy, reassembles the TCP stream, acknowledges bytes, and queues in-order data in the socket receive buffer. The receiving process gets those bytes only when `read()`/`recv()` runs.
 
-![[Assets/Networks/Networks-Network Data Path-18120000.png]]
+![[Assets/Networks/Networks-Network Data Path-18120000.png|theme-aware]]
 
 The 4 KiB write is not a 4 KiB packet. With a 1500-byte Ethernet MTU, IPv4 and TCP headers often leave an MSS near 1460 bytes, so TCP sends several segments. TCP options, tunnels, IPv6, or a smaller downstream MTU change that value. Path MTU discovery lets the sender size packets for the path and avoids depending on IPv4 fragmentation.
 

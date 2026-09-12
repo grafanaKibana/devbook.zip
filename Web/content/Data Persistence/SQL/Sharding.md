@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.621Z
-modified: 2026-08-20T20:41:15.622Z
-published: 2026-08-20T20:41:15.622Z
+modified: 2026-08-25T13:45:27.872Z
+published: 2026-08-25T13:45:27.872Z
 topic:
   - Data Persistence
 subtopic:
@@ -33,7 +33,7 @@ The shard key is the long-lived decision. It must distribute load, appear in rou
 
 The strategy defines ownership. An application, proxy, coordinator, or database-native layer performs routing. For example, `tenant_id = 42` can map to logical bucket 2 while a versioned map places that bucket on shard C. The query still carries `tenant_id = 42`, allowing the destination to enforce its ownership boundary.
 
-![[Assets/Data Persistence/Data Persistence-Sharding-18120000.png]]
+![[Assets/Data Persistence/Data Persistence-Sharding-18120000.png|theme-aware]]
 
 Consistent hashing limits movement compared with changing a modulo divisor. If `N` equal-capacity nodes own balanced shares and one equal node is added, the new node's expected final share—and therefore the expected movement—is about `1 / (N + 1)` of keys. Sparse or uneven tokens can move much more or less. Virtual nodes reduce that variance. The arithmetic says nothing about safe cutover.
 
@@ -56,7 +56,7 @@ Vertical scaling adds CPU, memory, or I/O to one server. Replication copies the 
 
 Figma first separated PostgreSQL tables by product area, reducing contention between independent workloads. Large tables later exceeded one instance, so the team added horizontal sharding, a database proxy, and hash-derived shard keys. Functional decomposition reduced coupling and bought time. Sharding addressed the remaining per-table ceiling.
 
-![[Assets/Data Persistence/Data Persistence-Sharding-18120000-1.png]]
+![[Assets/Data Persistence/Data Persistence-Sharding-18120000-1.png|theme-aware]]
 
 The picture is an escalation map, not proof that partitioning alone creates 100× headroom. Capacity came from decomposition, routing, migration tooling, and operational controls together.
 

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.517Z
-modified: 2026-08-20T20:41:15.517Z
-published: 2026-08-20T20:41:15.517Z
+modified: 2026-08-27T16:38:55.177Z
+published: 2026-08-27T16:38:55.177Z
 topic:
   - Computer Science
 subtopic:
@@ -60,7 +60,7 @@ tab: Complexity
         },
         {
           "kind": "operation",
-          "operation": "Typical",
+          "operation": "Estimate",
           "bounds": [
             {
               "kind": "text",
@@ -88,31 +88,7 @@ tab: Complexity
       "entries": [
         {
           "kind": "operation",
-          "operation": "Best",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Auxiliary space",
-              "formula": "O(n)",
-              "curveId": "linear"
-            }
-          ]
-        },
-        {
-          "kind": "operation",
-          "operation": "Typical",
-          "bounds": [
-            {
-              "kind": "curve",
-              "role": "Auxiliary space",
-              "formula": "O(n)",
-              "curveId": "linear"
-            }
-          ]
-        },
-        {
-          "kind": "operation",
-          "operation": "Worst",
+          "operation": "All executions",
           "bounds": [
             {
               "kind": "curve",

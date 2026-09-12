@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.650Z
-modified: 2026-08-20T20:41:15.650Z
-published: 2026-08-20T20:41:15.650Z
+modified: 2026-08-25T13:45:27.886Z
+published: 2026-08-25T13:45:27.886Z
 tags:
   - FolderNote
 topic:
@@ -45,7 +45,7 @@ Parallel.For(
 
 That is useful only when `Sharpen` does enough computation to repay partitioning and scheduling overhead. For socket waits, adding worker threads consumes resources without making the remote service respond sooner.
 
-![[Assets/Programming/Programming-Concurrency and Parallelism-18120000.png]]
+![[Assets/Programming/Programming-Concurrency and Parallelism-18120000.png|theme-aware]]
 
 > [!WARNING] Diagram caveat
 > The “not concurrent, parallel” quadrant does not fit these definitions. Simultaneous execution is necessarily concurrent. The visual is useful only for contrasting interleaving with simultaneous execution.

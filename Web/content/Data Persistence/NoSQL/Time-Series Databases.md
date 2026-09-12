@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.617Z
-modified: 2026-08-20T20:41:15.617Z
-published: 2026-08-20T20:41:15.617Z
+modified: 2026-08-25T13:45:27.874Z
+published: 2026-08-25T13:45:27.874Z
 topic:
   - Data Persistence
 subtopic:
@@ -36,7 +36,7 @@ Changing one label value creates another series. Bounded labels such as `service
 | Rollups | Persist lower-resolution aggregates | Long dashboards repeatedly scan raw samples |
 | Late data | Define an allowed lateness window | Old samples rewrite sealed chunks or disappear from aggregates |
 
-![[Assets/Data Persistence/Data Persistence-Time-Series Databases-18120000.jpg]]
+![[Assets/Data Persistence/Data Persistence-Time-Series Databases-18120000.jpg|theme-aware]]
 
 The diagram is a workload selector. A metrics system does not automatically need a dedicated TSDB. Measured series cardinality, ingest rate, retention volume, and query windows decide.
 

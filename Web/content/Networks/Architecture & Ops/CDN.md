@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.627Z
-modified: 2026-08-20T20:41:15.627Z
-published: 2026-08-20T20:41:15.627Z
+modified: 2026-08-25T13:45:27.887Z
+published: 2026-08-25T13:45:27.887Z
 topic:
   - Networks
 subtopic:
@@ -33,7 +33,7 @@ flowchart LR
 
 With **anycast**, several sites announce the same address and routing selects a path. With **GeoDNS**, the resolver receives an address chosen from request context. Neither method guarantees the geographically closest site. Routing policy, resolver location, health, and capacity all affect the decision. See [[Networks/Protocols/DNS|DNS as a traffic director]].
 
-![[Assets/Networks/Networks-CDN-18120000.png]]
+![[Assets/Networks/Networks-CDN-18120000.png|theme-aware]]
 
 > [!WARNING] Diagram caveat
 > The provider list is historical—Google Stadia is discontinued—and it mixes general regional serverless products such as Azure Functions with edge runtimes. Treat edge compute as code executed at or near a provider point of presence under that product's documented placement, state, latency, and runtime limits.
@@ -51,7 +51,7 @@ An origin outage therefore affects misses differently from hits. Fresh cached ob
 
 A slippy map turns a viewport and zoom level into versioned tile coordinates such as `/tiles/v2026-07/12/1204/1538.webp`. Panning requests adjacent coordinates. Zooming changes the level segment. Including the dataset version makes each URL immutable, so public tiles are good CDN objects: the edge either returns the exact tile or fetches it from object storage through the origin path.
 
-![[Assets/Networks/Networks-CDN-18120000-1.png]]
+![[Assets/Networks/Networks-CDN-18120000-1.png|theme-aware]]
 
 The CDN does not geocode an address, select a route, or rank traffic-aware alternatives. Those are separate services whose results tell the client which tiles and overlays to request. Keeping that boundary explicit prevents a cache layer from becoming an imaginary navigation service.
 

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.683Z
-modified: 2026-08-20T20:41:15.683Z
-published: 2026-08-20T20:41:15.683Z
+modified: 2026-08-25T13:45:27.881Z
+published: 2026-08-25T13:45:27.881Z
 topic:
   - Software Architecture
 subtopic:
@@ -52,7 +52,7 @@ Persist before fan-out. Online devices receive the event through their gateway. 
 
 A phone and laptop advance delivery independently, so each device needs its own cursor. The read position usually belongs to the user. On reconnect, a device requests `after_sequence=1084`, replays the missing events, and then rejoins the live stream.
 
-![[Assets/Software Architecture/Software Architecture-System Design Examples-18120000-2.jpg]]
+![[Assets/Software Architecture/Software Architecture-System Design Examples-18120000-2.jpg|theme-aware]]
 
 The topology leaves two hard questions open: who owns the partition, and where duplicates are suppressed. Presence stays outside that durable path. A heartbeat may renew `user_7/device_phone -> gateway_3` for 45 seconds, yet a short network pause can still make an online user appear offline. Presence can guide fan-out. Message existence cannot depend on it. Last-seen data also needs an explicit privacy policy.
 
@@ -92,7 +92,7 @@ notification_73 ORDER_SHIPPED user_9 expires=18:00Z
 
 Separate queues by channel or priority when a slow provider could delay urgent work. Workers reuse a stable provider idempotency key where the provider supports one. Retry delays stop at the intent expiry, and permanent failures enter a dead-letter workflow with a named owner.
 
-![[Assets/Software Architecture/Software Architecture-System Design Examples-18120000-1.png]]
+![[Assets/Software Architecture/Software Architecture-System Design Examples-18120000-1.png|theme-aware]]
 
 A device token is a rotating route to one app installation. It is not the user's identity. Keep multiple tokens per user, remove one only after a documented terminal response, and never place provider credentials in a client. TTL answers whether a delayed push is still useful. Collapse identifiers replace obsolete provider messages. Deduplication of the business intent happens earlier.
 
@@ -100,7 +100,7 @@ Provider acceptance closes one state: the provider took the request. Device deli
 
 # Priority Fan-Out Case Study
 
-![[Assets/Software Architecture/Software Architecture-System Design Examples-18120000.png]]
+![[Assets/Software Architecture/Software Architecture-System Design Examples-18120000.png|theme-aware]]
 
 Netflix described an event-management layer feeding priority queues and processing clusters, with provider-specific adapters at the edge. That separation keeps a security or account event from waiting behind bulk recommendations. The diagram does not establish exactly-once delivery or document current product internals. Each adapter still needs explicit TTL, retry, receipt, and deduplication rules.
 
@@ -120,7 +120,7 @@ retry -> [(doc_7, title, 1), (doc_12, body, 4)]
 
 Sharding by document ID usually spreads writes well. A query fans out to the relevant shards, and the coordinator merges each shard's local candidates into a distributed top-k. Replicas add read capacity and availability. During an index rollout, every response still needs to name the index version it actually used.
 
-![[Assets/Software Architecture/Software Architecture-System Design Examples-18120000-5.png]]
+![[Assets/Software Architecture/Software Architecture-System Design Examples-18120000-5.png|theme-aware]]
 
 At query time, normalize the query, apply versioned spelling or synonym rules, retrieve candidates, enforce access filters, and score the survivors. Record enough versioned context to explain the decision: index, query rules, ranking or model, features, authorization policy, and request scope. This is a traceability invariant, not a promise of byte-for-byte reproduction. A safe cache key binds every input that can change eligibility or ranking. Leaving one out can serve results across a policy boundary.
 
@@ -144,7 +144,7 @@ An accepted order carries the participant, instrument, side, type, price, quanti
 
 For a fixed input journal, engine version, and configuration, replay must reconstruct the same book and executions. Checkpoints shorten recovery, while the execution log records the decisions emitted by the live engine. Admission is idempotent: a reconnect retry with the same participant and client-order ID cannot create a second order.
 
-![[Assets/Software Architecture/Software Architecture-System Design Examples-18120000-3.png]]
+![[Assets/Software Architecture/Software Architecture-System Design Examples-18120000-3.png|theme-aware]]
 
 The visual separates the critical order path from market-data and reporting flows. Broker examples and component placement are illustrative. The venue protocol and operating rules define the actual participants and controls.
 
@@ -152,7 +152,7 @@ The visual separates the critical order path from market-data and reporting flow
 
 Every network hop, serialization boundary, lock, and cache miss spends latency and adds jitter. A single-threaded matching loop can beat a shared concurrent book because it removes lock arbitration and fixes the mutation order. Collocated processes and memory-mapped transport cut transfer cost when one failure domain is acceptable.
 
-![[Assets/Software Architecture/Software Architecture-System Design Examples-18120000-4.jpg]]
+![[Assets/Software Architecture/Software Architecture-System Design Examples-18120000-4.jpg|theme-aware]]
 
 One physical host concentrates the availability and recovery risk. The durable artifacts are the input journal, replicated checkpoints or snapshots, and the execution log. Deterministic replay proves that a fixed journal, engine version, and configuration can reconstruct state. It does not prove operational recovery. Failover drills and recovery-under-load tests provide that evidence, backed by disciplined clocks and enough spare capacity. Blocking reporting or database writes stay off the matching loop, and acknowledgement never runs ahead of the durability guarantee the venue publishes.
 

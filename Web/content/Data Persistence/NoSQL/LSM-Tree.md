@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.615Z
-modified: 2026-08-20T20:41:15.615Z
-published: 2026-08-20T20:41:15.615Z
+modified: 2026-08-25T13:45:27.877Z
+published: 2026-08-25T13:45:27.877Z
 topic:
   - Data Persistence
 subtopic:
@@ -80,7 +80,7 @@ The comparison with a [[Computer Science/Data Structures/Trees/B-tree|B-tree]] e
 
 Neither structure is universally better. B-trees favor predictable point reads and range scans. LSM trees favor write-heavy ingestion and often compress dense immutable files well, while accepting multi-run reads and background compaction.
 
-![[Assets/Data Persistence/Data Persistence-LSM-Tree-18120000.png]]
+![[Assets/Data Persistence/Data Persistence-LSM-Tree-18120000.png|theme-aware]]
 
 # Complexity
 

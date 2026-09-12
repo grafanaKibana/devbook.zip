@@ -1,8 +1,9 @@
 ---
 publish: true
+title: Branching Strategies
 created: 2026-08-20T20:41:15.625Z
-modified: 2026-08-20T20:41:15.625Z
-published: 2026-08-20T20:41:15.625Z
+modified: 2026-08-28T08:17:49.001Z
+published: 2026-08-28T08:17:49.001Z
 topic:
   - DevOps
 subtopic:

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.667Z
-modified: 2026-08-20T20:41:15.667Z
-published: 2026-08-20T20:41:15.667Z
+modified: 2026-08-25T13:45:27.887Z
+published: 2026-08-25T13:45:27.887Z
 topic:
   - Security
 subtopic:
@@ -29,7 +29,7 @@ The models describe different sources of policy facts and can be composed. RBAC 
 | ABAC | Subject, resource, action, and environment attributes evaluated by policy | Central policy owners plus attribute authorities | Multi-tenant and context-sensitive decisions | Stale attributes and opaque policies make failures difficult to explain |
 | ReBAC | Relationships in a graph, such as owner, member, parent, or viewer | Relationship owners plus central constraints | Documents, repositories, teams, and nested collaboration | Graph traversal, caching, and relationship consistency become security boundaries |
 
-![[Assets/Security/Security-Authorization Models-18120000.png]]
+![[Assets/Security/Security-Authorization Models-18120000.png|theme-aware]]
 
 # One Invoice, Three Decisions
 

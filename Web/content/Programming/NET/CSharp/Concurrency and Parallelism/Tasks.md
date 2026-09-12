@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.653Z
-modified: 2026-08-20T20:41:15.654Z
-published: 2026-08-20T20:41:15.654Z
+modified: 2026-08-28T08:17:49.638Z
+published: 2026-08-28T08:17:49.638Z
 topic:
   - Programming
 subtopic:
@@ -96,7 +96,7 @@ public async Task SyncAllAsync(CancellationToken cancellationToken)
 
 ## Processing Tasks as They Finish
 
-Repeatedly calling `WhenAny` over a shrinking list adds coordination work and makes early-exit cleanup easy to forget. On .NET 10+, `Task.WhenEach` yields each task after it completes. If several tasks finish together, their exact enumeration order is unspecified:
+Repeatedly calling `WhenAny` over a shrinking list adds coordination work and makes early-exit cleanup easy to forget. On .NET 9+, `Task.WhenEach` yields each task after it completes. If several tasks finish together, their exact enumeration order is unspecified:
 
 ```csharp
 await foreach (var finished in Task.WhenEach(tasks))

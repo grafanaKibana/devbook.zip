@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.704Z
-modified: 2026-08-20T20:41:15.704Z
-published: 2026-08-20T20:41:15.704Z
+modified: 2026-08-25T13:45:27.879Z
+published: 2026-08-25T13:45:27.879Z
 topic:
   - Software Architecture
 subtopic:
@@ -43,7 +43,7 @@ The process may be reused, so clients and connection pools can be reused too. Co
 
 Functions usually start from an HTTP request, timer, queue, object notification, or event bus. Serverless containers run ordinary images with provider-managed capacity. Managed databases and queues remove host management while keeping their own quotas, retention rules, consistency models, and prices.
 
-![[Assets/Software Architecture/Software Architecture-Serverless Architecture-18120000.png]]
+![[Assets/Software Architecture/Software Architecture-Serverless Architecture-18120000.png|theme-aware]]
 
 The visual is a dated fleet model rather than an AWS compatibility contract. The stable idea is an isolated execution environment that the provider may initialize, reuse, freeze, reset, or remove.
 

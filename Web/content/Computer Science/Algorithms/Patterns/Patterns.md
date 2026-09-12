@@ -1,8 +1,9 @@
 ---
 publish: true
+title: Algorithm Patterns
 created: 2026-08-20T20:41:15.531Z
-modified: 2026-08-20T20:41:15.531Z
-published: 2026-08-20T20:41:15.531Z
+modified: 2026-08-25T10:26:27.193Z
+published: 2026-08-25T10:26:27.193Z
 tags:
   - FolderNote
 topic:

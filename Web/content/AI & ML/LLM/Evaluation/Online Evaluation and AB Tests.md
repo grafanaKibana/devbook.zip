@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.491Z
-modified: 2026-08-20T20:41:15.492Z
-published: 2026-08-20T20:41:15.492Z
+modified: 2026-08-25T13:45:27.892Z
+published: 2026-08-25T13:45:27.892Z
 topic:
   - AI & ML
 subtopic:
@@ -83,7 +83,7 @@ Monitoring catches drift and outages, including provider-side changes. Randomiza
 
 An experiment platform makes a randomized decision reproducible. Its control plane binds the hypothesis and eligibility rules to assignment, exposure, metrics, and analysis under one immutable experiment version. Without that record, a dashboard can compare unexposed users or recompute the primary metric under rules introduced after traffic ran.
 
-![[Assets/AI & ML/AI & ML-Online Evaluation and AB Tests-18120000.jpg]]
+![[Assets/AI & ML/AI & ML-Online Evaluation and AB Tests-18120000.jpg|theme-aware]]
 
 ## Configuration Lifecycle
 

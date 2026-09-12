@@ -1,8 +1,9 @@
 ---
 publish: true
+title: Machine Learning Types
 created: 2026-08-20T20:41:15.507Z
-modified: 2026-08-20T20:41:15.507Z
-published: 2026-08-20T20:41:15.507Z
+modified: 2026-08-25T10:26:26.779Z
+published: 2026-08-25T10:26:26.779Z
 tags:
   - FolderNote
 topic:

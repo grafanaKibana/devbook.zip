@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.635Z
-modified: 2026-08-20T20:41:15.640Z
-published: 2026-08-20T20:41:15.640Z
+modified: 2026-08-25T13:45:27.881Z
+published: 2026-08-25T13:45:27.881Z
 topic:
   - Networks
 subtopic:
@@ -24,7 +24,7 @@ scheme         authority          path       query     fragment
 
 The authority contains optional user information, a host, and an optional port separated by `:`. An IPv6 literal must be bracketed: `https://[2001:db8::7]:8443/`. The fragment is interpreted by the client and is not sent in an HTTP request. Query syntax is owned by the application. `?a=1&a=2`, parameter order, and `+` decoding do not have one universal meaning outside the chosen form or API contract.
 
-![[Assets/Networks/Networks-URL-18120000.png]]
+![[Assets/Networks/Networks-URL-18120000.png|theme-aware]]
 
 # Parsing and Encoding
 

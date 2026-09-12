@@ -1,8 +1,9 @@
 ---
 publish: true
+title: C# Types
 created: 2026-08-20T20:41:15.660Z
-modified: 2026-08-20T20:41:15.660Z
-published: 2026-08-20T20:41:15.660Z
+modified: 2026-08-25T10:26:26.883Z
+published: 2026-08-25T10:26:26.883Z
 tags:
   - FolderNote
 topic:

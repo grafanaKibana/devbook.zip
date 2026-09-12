@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.668Z
-modified: 2026-08-20T20:41:15.668Z
-published: 2026-08-20T20:41:15.668Z
+modified: 2026-08-25T13:45:27.890Z
+published: 2026-08-25T13:45:27.890Z
 topic:
   - Security
 subtopic:
@@ -71,7 +71,7 @@ HMAC authenticates a message within a group that shares one secret. Every verifi
 
 Request-authentication protocols also define canonical request bytes and freshness data such as timestamps or nonces. Those rules belong to [[Security/Authentication/Authentication|API authentication]]. Signing arbitrary bytes without them does not stop replay.
 
-![[Assets/Security/Security-Digital Signature-18120000.png]]
+![[Assets/Security/Security-Digital Signature-18120000.png|theme-aware]]
 
 # Pitfalls
 

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.681Z
-modified: 2026-08-20T20:41:15.681Z
-published: 2026-08-20T20:41:15.681Z
+modified: 2026-08-25T13:45:27.884Z
+published: 2026-08-25T13:45:27.884Z
 tags:
   - FolderNote
 topic:
@@ -185,7 +185,7 @@ Patterns combine. A video upload can publish a claim-check message to a competin
 
 # Choosing a Broker
 
-![[Assets/Software Architecture/Software Architecture-Message Queues-18120000.png]]
+![[Assets/Software Architecture/Software Architecture-Message Queues-18120000.png|theme-aware]]
 
 Choose from replay, routing, ordering, delivery, retention, managed-service, and operating requirements rather than popularity.
 
