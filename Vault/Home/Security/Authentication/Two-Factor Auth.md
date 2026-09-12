@@ -70,7 +70,7 @@ RP: consume the challenge once and create or elevate a session
 
 Origin and RP-ID binding provide phishing resistance: a credential registered for `example.com` will not sign for `examp1e.com`. A fresh challenge and one-time server state stop replay. A device PIN or biometric can activate the authenticator and set user verification. Biometric data stays local to the authenticator or device.
 
-![[Security/Security-Two-Factor Auth-18120000.png]]
+![[Security/Security-Two-Factor Auth-18120000.png|theme-aware]]
 
 # Passkey, Sync, and Attestation Choices
 

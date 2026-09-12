@@ -1,4 +1,5 @@
 ---
+title: ASP.NET Core Dependency Injection
 topic:
   - Programming
 subtopic:

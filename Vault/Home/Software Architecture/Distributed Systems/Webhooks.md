@@ -86,7 +86,7 @@ The signed input must match the provider contract. Many providers sign `timestam
 
 # Delivery Contract
 
-![[Software Architecture/Software Architecture-Webhooks-18120000.png]]
+![[Software Architecture/Software Architecture-Webhooks-18120000.png|theme-aware]]
 
 The visual shows direction, not reliability. Long polling intervals and conditional requests can make polling cheap. Webhook delivery can become expensive when slow endpoints trigger concurrent retries.
 

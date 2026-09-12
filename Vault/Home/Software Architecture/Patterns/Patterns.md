@@ -1,4 +1,5 @@
 ---
+title: Software Architecture Patterns
 topic:
   - Software Architecture
 subtopic:

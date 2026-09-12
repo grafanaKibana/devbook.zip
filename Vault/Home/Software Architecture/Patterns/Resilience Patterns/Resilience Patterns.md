@@ -23,7 +23,7 @@ return FolderStructureMap;
 
 # Choose a Response by Failure and Overload
 
-![[Software Architecture/Software Architecture-Resilience Patterns-18120000.jpg]]
+![[Software Architecture/Software Architecture-Resilience Patterns-18120000.jpg|theme-aware]]
 
 | Signal | Response | Failure contained | New cost |
 |---|---|---|---|

@@ -123,11 +123,11 @@ Uncontrolled dual writes create two sources of truth. If a transition cannot avo
 
 Stop when the next candidate lacks a measurable constraint. One monolith beside a few services can be a stable architecture. The visuals below show Airbnb's historical migration rather than a universal sequence.
 
-![[Software Architecture/Software Architecture-Microservices-18120000-3.png]]
+![[Software Architecture/Software Architecture-Microservices-18120000-3.png|theme-aware]]
 
 Airbnb's multi-year evolution shows services being extracted as organizational and scaling pressure appeared. It does not support a target service count.
 
-![[Software Architecture/Software Architecture-Microservices-18120000-4.jpg]]
+![[Software Architecture/Software Architecture-Microservices-18120000-4.jpg|theme-aware]]
 
 Its later use of both microservices and larger macroservices shows that service size should follow ownership and change coupling.
 
@@ -135,17 +135,17 @@ Its later use of both microservices and larger macroservices shows that service 
 
 A service boundary is credible only when one team can change and operate it without a lockstep release. Shared writable tables or paired deployments create a distributed monolith even when the processes run separately. A mandatory synchronous chain can do the same.
 
-![[Software Architecture/Software Architecture-Microservices-18120000.png]]
+![[Software Architecture/Software Architecture-Microservices-18120000.png|theme-aware]]
 
 This capability map is a menu. Gateways and meshes answer specific operating needs. Containers and separate databases do not create sound domain boundaries by themselves.
 
-![[Software Architecture/Software Architecture-Microservices-18120000-2.png]]
+![[Software Architecture/Software Architecture-Microservices-18120000-2.png|theme-aware]]
 
 Ownership and explicit failure behavior are the baseline. Cross-boundary telemetry shows whether those promises hold once requests and messages leave a process.
 
 # Production Platform Capabilities Are Conditional
 
-![[Software Architecture/Software Architecture-Microservices-18120000-1.png]]
+![[Software Architecture/Software Architecture-Microservices-18120000-1.png|theme-aware]]
 
 The pictured components answer observed failure modes or platform constraints. None is a prerequisite for a microservice architecture.
 

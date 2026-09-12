@@ -1,4 +1,5 @@
 ---
+title: Algorithm Patterns
 topic:
   - Computer Science
 subtopic:

@@ -10,7 +10,7 @@ priority: High
 tags: [FolderNote]
 
 publish: true
-status: Creation
+status: Ready to Repeat
 ---
 
 A version control system (VCS) records versions of tracked files so a team can compare, branch, merge, and restore repository history. Git is distributed: a normal clone contains a local object database and refs, so most history operations do not depend on the hosting service.

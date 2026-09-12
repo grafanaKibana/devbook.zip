@@ -48,7 +48,7 @@ Consistent hashing | Maps an application key onto a ring. | Cache locality or sh
 Least latency or least response time | Uses recent response measurements, often with in-flight work. | Backend performance varies and measurements remain fresh. | Delayed signals can make traffic chase a temporary winner.
 Session affinity | Constrains future requests to a prior backend. | Local session state must survive during a legacy migration. | Failover weakens and existing hotspots persist.
 
-![[Software Architecture/Software Architecture-Load Balancing-18120000.png]]
+![[Software Architecture/Software Architecture-Load Balancing-18120000.png|theme-aware]]
 
 The visual is an orientation map. Sticky round robin is affinity layered over a base algorithm. IP or URL hashing is not a consistent-hash ring. Health eligibility still comes first. No selection policy can compensate for a pool containing backends that cannot serve.
 

@@ -1,4 +1,5 @@
 ---
+title: RAG Caching
 topic:
   - AI & ML
 subtopic:
@@ -117,7 +118,7 @@ LLM response caching operates at two levels that solve different problems.
 **Provider-level prompt caching (KV reuse).**
 
 - OpenAI and Anthropic cache the key-value attention tensors computed during the prefill phase. When a new request shares a long prefix with a previous request (system prompt, few-shot examples, retrieved context), the provider skips recomputing attention for the cached prefix and starts generation from the first divergent token.
-- OpenAI applies prompt caching automatically to eligible prompts of at least 1024 tokens. Retention behavior depends on the model and caching mode documented by the provider. Anthropic supports automatic caching through top-level `cache_control`, with a five-minute default and an optional one-hour duration, as well as explicit breakpoints for finer control.
+- OpenAI applies prompt caching automatically on supported models. The minimum cacheable prompt is model-dependent: 1,024 visible input tokens for GPT-5.6 and later, and 2,048 for older models, which may occasionally cache shorter prefixes. Retention behavior depends on the model and caching mode documented by the provider. Anthropic supports automatic caching through top-level `cache_control`, with a five-minute default and an optional one-hour duration, as well as explicit breakpoints for finer control.
 - Savings are provider-specific. Anthropic prices cached prefix reads below ordinary input, while OpenAI discounts eligible cached input tokens. Current pricing belongs in provider documentation. In both cases, the prefix must be long, stable, and shared.
 
 **Application-level response caching (exact or semantic match).**
@@ -159,6 +160,6 @@ Response caches fail when an input is missing from the key.
 
 - [Prompt caching (OpenAI API docs)](https://developers.openai.com/docs/guides/prompt-caching)
 - [SemanticCache with RedisVL](https://redis.io/docs/latest/develop/ai/redisvl/0.7.0/user_guide/llmcache/)
-- [Caching embeddings (LangChain CacheBackedEmbeddings)](https://python.langchain.com/docs/how_to/caching_embeddings)
+- [Caching embeddings (LangChain integrations)](https://docs.langchain.com/oss/python/integrations/embeddings)
 - [Semantic cache with Azure Cosmos DB](https://learn.microsoft.com/en-us/azure/cosmos-db/gen-ai/semantic-cache)
 - [RAGOps: Operating and Managing RAG Pipelines](https://arxiv.org/abs/2506.03401)

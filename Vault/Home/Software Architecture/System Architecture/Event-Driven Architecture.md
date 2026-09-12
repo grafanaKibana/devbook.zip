@@ -108,7 +108,7 @@ The outbox closes one local database-to-broker gap. It does not create a global 
 
 # Governance and Data Pipelines
 
-![[Software Architecture/Software Architecture-Event-Driven Architecture-18120000-1.png]]
+![[Software Architecture/Software Architecture-Event-Driven Architecture-18120000-1.png|theme-aware]]
 
 The governance visual shows one organization's topology. Its useful boundary is simpler: the platform owns compatibility and telemetry guardrails, while domains own event meaning.
 
@@ -119,7 +119,7 @@ The governance visual shows one organization's topology. Its useful boundary is 
 
 For `MenuItemPriceChanged`, the Restaurant domain owns the meaning and producer SLO. CI checks its schema against the registry. A global consumer must still accept delayed or duplicate records after regional replication.
 
-![[Software Architecture/Software Architecture-Event-Driven Architecture-18120000.png]]
+![[Software Architecture/Software Architecture-Event-Driven Architecture-18120000.png|theme-aware]]
 
 The pipeline visual names conceptual stages. A real batch or streaming path may combine them. For `checkout-42`, the record moves through these boundaries:
 

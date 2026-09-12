@@ -69,7 +69,7 @@ With asynchronous acknowledgement, the leader confirms a write without waiting f
 
 Single-leader replication can offload only reads whose consistency contract the selected follower can satisfy. Writes, write-capable transactions, and work with unknown intent stay on the primary. An explicitly read-only transaction pins one eligible follower. A read that must observe a prior commit uses the primary or a follower whose replay position has reached that commit token. Middleware can classify statements, but the application usually knows whether a causal dependency exists.
 
-![[Data Persistence/Data Persistence-Replication-18120000-1.png]]
+![[Data Persistence/Data Persistence-Replication-18120000-1.png|theme-aware]]
 
 The diagram shows the middleware topology but not its lag or transaction boundary. A safe routing contract is stricter:
 
@@ -96,7 +96,7 @@ replica  = 0/16B6D10  -> eligible
 
 WAL positions are ordered values, not strings for lexicographic comparison. A later `pg_current_wal_lsn()` is conservative when concurrent commits advance the primary beyond the target commit. `pg_last_wal_replay_lsn()` reports a standby's replay boundary.
 
-![[Data Persistence/Data Persistence-Replication-18120000.png]]
+![[Data Persistence/Data Persistence-Replication-18120000.png|theme-aware]]
 
 The topology image still omits the causal condition: a replica is eligible for a read-after-write request only after replay reaches that request's token.
 

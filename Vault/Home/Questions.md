@@ -1,9 +1,12 @@
 ---
+title: Interview Questions
 summary: Browse interview and review questions extracted from DevBook notes, grouped by topic.
 tags: [FolderNote, MetricsIgnore]
 publish: true
 icon: circle-help
 ---
+
+A topic-grouped index of interview and review questions across .NET, computer science, architecture, AI, data, networks, security, and engineering practice. Each answer links back to the note that establishes the underlying mechanism and tradeoffs.
 
 ```datacorejsx
 // Questions index — Datacore port of the former DataviewJS aggregation (issue #69).

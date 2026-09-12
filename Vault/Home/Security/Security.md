@@ -45,7 +45,7 @@ Start with one abuse case, not a catalog of controls. For a payroll export, iden
 7. **Detection:** record authentication, authorization, administrative, and sensitive-data events with safe metadata. Alert on an attack pattern rather than one expected denial.
 8. **Response and recovery:** assign incident owners, preserve evidence, revoke compromised access, communicate under the applicable obligations, and restore from a tested recovery path.
 
-![[Security/Security-Security-18120000.png]]
+![[Security/Security-Security-18120000.png|theme-aware]]
 
 A checklist becomes evidence only when its failure paths are exercised. The payroll export should reject another tenant, a missing policy, a revoked job identity, and a stale signing key. Operations should also know what happens when audit delivery fails or the only clean backup predates the incident.
 

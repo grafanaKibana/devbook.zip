@@ -37,7 +37,7 @@ const answer = instance.exports.add(20, 22);
 
 Numbers cross this boundary directly. Strings, arrays, and objects usually require an ABI: the caller writes bytes into linear memory and passes an address and length, or generated bindings do that work. Frequent fine-grained crossings can cost more than one coarse call over a larger buffer.
 
-![[Programming/Programming-WebAssembly-18120000.jpg]]
+![[Programming/Programming-WebAssembly-18120000.jpg|theme-aware]]
 
 The image captures the compile-and-host relationship but oversimplifies both sides. Modern JavaScript engines also interpret and optimize/JIT code. C++ and Rust are compiled into Wasm instructions, not browser-native machine code shipped unchanged. Wasm can approach native throughput for suitable compute kernels, but it is not automatically faster than JavaScript.
 

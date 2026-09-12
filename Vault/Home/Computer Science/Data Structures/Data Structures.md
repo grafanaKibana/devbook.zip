@@ -34,7 +34,7 @@ Start from the operation that dominates the workload, then account for ordering,
 | Spatial candidates on a one-dimensional index | [[Home/Computer Science/Data Structures/Geohash|Geohash]] | Turns fixed-grid cells into sortable prefixes | Adjacent points can cross a prefix boundary. Exact filtering is still required |
 | Cheap negative membership tests | Bloom filter | Avoids expensive downstream lookups with compact state | False positives are possible. Deletions need a variant |
 
-![[Computer Science/Computer Science-Data Structures-18120000.png]]
+![[Computer Science/Computer Science-Data Structures-18120000.png|theme-aware]]
 
 The visual is an example inventory, not a selector. The table above is authoritative because the same structure can be right or wrong depending on the dominant operation and storage boundary.
 

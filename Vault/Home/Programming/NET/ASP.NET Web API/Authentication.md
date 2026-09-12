@@ -1,4 +1,5 @@
 ---
+title: ASP.NET Core Authentication
 topic:
   - Programming
 subtopic:
