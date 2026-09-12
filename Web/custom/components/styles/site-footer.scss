@@ -61,6 +61,33 @@
   }
 }
 
+@media (max-width: 767px) {
+  .site-footer:has(> .site-footer-share) {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.5rem;
+
+    > ul {
+      flex-wrap: nowrap;
+      gap: 0.25rem;
+
+      a {
+        gap: 0;
+        font-size: 0;
+
+        &::before {
+          font-size: 1rem;
+          width: 1rem;
+          height: 1rem;
+        }
+      }
+    }
+  }
+
+  .site-footer:not(:has(> .site-footer-share)) > ul {
+    justify-content: center;
+  }
+}
+
 @media (min-width: 768px) {
   .site-footer {
     grid-template-columns: minmax(0, 1fr) auto;

@@ -37,6 +37,39 @@
   max-block-size: 85dvh;
 }
 
+body.theme-dark :is(.markdown-preview-view, .markdown-source-view.is-live-preview)
+  .image-embed:is(
+    [src$=".jxl" i],
+    [src$=".png" i],
+    [src$=".jpg" i],
+    [src$=".jpeg" i],
+    [src$=".gif" i],
+    [src$=".bmp" i],
+    [src$=".webp" i],
+    [src$=".svg" i]
+  ):is([alt="theme-aware"], [width][alt$="|theme-aware"]) img {
+  background: transparent;
+  box-shadow: none;
+  filter: hue-rotate(180deg) invert(1);
+  transition: none;
+}
+
+/* Obsidian's native lightbox preserves the alias on its cloned image. Keep the
+ * clone at its final position while Obsidian clears its opening transform. */
+@keyframes theme-aware-lightbox-settle {
+  from,
+  to {
+    transform: none;
+  }
+}
+
+body.theme-dark .lightbox img:is([alt="theme-aware"], [alt$="|theme-aware"]) {
+  background: transparent;
+  box-shadow: none;
+  filter: hue-rotate(180deg) invert(1);
+  animation: theme-aware-lightbox-settle 250ms linear !important;
+}
+
 /* Excalidraw's default inline preview is 500px wide. Explicitly resized
  * drawings may grow wider, but still obey the same pane and viewport caps as
  * other content images. */

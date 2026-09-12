@@ -34,7 +34,8 @@ const script = `
 
   function gridFits(grid) {
     if (grid.scrollWidth > grid.clientWidth + 1) return false;
-    // Offset geometry ignores the cards' temporary entrance transforms.
+    // Offset geometry ignores the cards' temporary entrance transforms;
+    // dashboard.scrollHeight includes that visual overflow.
     var cards = grid.querySelectorAll(":scope > .dc-topic-card");
     for (var i = 0; i < cards.length; i += 1) {
       var card = cards[i];
@@ -76,7 +77,7 @@ const script = `
     var quartzRect = quartzBody.getBoundingClientRect();
     var footerRect = footer.getBoundingClientRect();
     if (quartzRect.bottom > viewportHeight + 1 || footerRect.bottom > viewportHeight + 1) return false;
-    if (!scrollFits(quartzBody) || !scrollFits(center) || !scrollFits(dashboard) || !gridFits(grid)) return false;
+    if (!scrollFits(quartzBody) || !scrollFits(center) || !gridFits(grid)) return false;
 
     var cards = grid.querySelectorAll(".dc-topic-card");
     if (!cards.length) return false;
@@ -106,30 +107,37 @@ const script = `
       var quartzBody = body.querySelector('.page > #quartz-body');
       var isHome = body.dataset.slug === "index";
 
+      observe(null);
+
       if (!isHome || !fit.matches || !dashboard || !quartzBody) {
-        body.removeAttribute("data-home-fit");
+        body.removeAttribute("data-home-fit-active");
         body.removeAttribute("data-home-fit-overflow");
-        observe(null);
+        if (dashboard) dashboard.removeAttribute("data-home-fit");
         return;
       }
 
-      observe(quartzBody);
+      if (!body.hasAttribute("data-home-fit-active")) {
+        body.setAttribute("data-home-fit-active", "");
+      }
       body.removeAttribute("data-home-fit-overflow");
 
       for (var i = 0; i < states.length; i += 1) {
-        body.dataset.homeFit = states[i];
+        dashboard.dataset.homeFit = states[i];
         // Force style and layout after each complete visibility state. Retained
         // elements are measured whole; none are shortened to make a state pass.
         void quartzBody.offsetHeight;
-        if (fits(quartzBody, dashboard)) return;
+        if (fits(quartzBody, dashboard)) {
+          observe(quartzBody);
+          return;
+        }
       }
 
       // If no complete state fits, the one-viewport contract is impossible at
       // this height. Restore the existing scrolling tablet layout rather than
       // leaving retained content inside the fit mode's clipped 100dvh frame.
-      body.removeAttribute("data-home-fit");
+      body.removeAttribute("data-home-fit-active");
+      dashboard.removeAttribute("data-home-fit");
       body.dataset.homeFitOverflow = "true";
-      observe(null);
     } finally {
       window.__devbookPageReveal && window.__devbookPageReveal.initial();
     }
@@ -155,8 +163,9 @@ const script = `
     resizeObserver.disconnect();
     observed = element;
     if (!element) return;
-    observedWidth = element.clientWidth;
-    observedHeight = element.clientHeight;
+    var style = getComputedStyle(element);
+    observedWidth = element.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+    observedHeight = element.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom);
     resizeObserver.observe(element);
   }
 
