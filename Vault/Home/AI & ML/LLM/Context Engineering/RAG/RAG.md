@@ -44,7 +44,7 @@ Each stage limits the next. When translation is used, retrieval cannot repair a 
 - Put each added pattern behind a feature flag. Compare [[Monitoring#Retrieval Quality Metrics|retrieval precision]] and [[Monitoring#LLM-as-Judge Metrics|generation faithfulness]] with latency p95 and cost per query.
 - Cap iterative and agentic retrieval. A retry budget bounds latency. Unsupported output should fail closed instead of looping until it sounds plausible.
 - Watch query drift between retrieval rounds. Semantic similarity to the original query makes gradual topic changes visible.
-- Cache expensive stable work such as query rewrites, multi-query results, contextual chunk enrichment, and read-only tool results scoped to the caller's authorization. Mutating tool calls need [[Home/Software Architecture/Distributed Systems/Idempotency|idempotency]], not response caching. [[Home/AI & ML/LLM/Context Engineering/RAG/Caching|Caching]] covers keys and invalidation.
+- Cache expensive stable work such as query rewrites, multi-query results, contextual chunk enrichment, and read-only tool results scoped to the caller's authorization. Mutating tool calls need [[Home/Software Architecture/Distributed Systems/Idempotency|idempotency]], not response caching. [[Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching|Caching]] covers keys and invalidation.
 - Route simple questions through the cheapest path. Multi-hop retrieval is wasted work on a single-hop lookup.
 
 # RAG Vs Fine-Tuning

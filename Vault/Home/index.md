@@ -14,20 +14,35 @@ const { icon } = await dc.require("Assets/components/devbook-icons.jsx");
 return function TopicDashboard() {
   const ROOT = (dc.useCurrentFile()?.$path || "Home").split("/")[0];
 
-  const STATUS_PROGRESS = { "not-started": 0, "creation": 33, "ready to repeat": 66, "done": 100 };
-  // `mix` is the accent-vs-surface blend for each status segment. Solid tints
-  // (not opacity) keep segments crisp on dark backgrounds and over the Quartz
-  // dot grid, where a faded alpha would let the background bleed through.
-  const STATUS_RAMP = [
+  // The one lifecycle table: `weight` is a note's contribution to progress and
+  // drives every printed %, bar width and ring arc. `mix` is the accent-vs-surface
+  // blend for each segment; solid tints (not opacity) keep segments crisp on dark
+  // backgrounds and over the Quartz dot grid, where a faded alpha would let the
+  // background bleed through. Not-Started adds no fill, so it has no tone: it is
+  // the bar's empty track. A status outside the table counts as Other, weight 0.
+  const LIFECYCLE = [
     { key: "done", tone: "done", label: "Done", weight: 100, mix: 100 },
-    { key: "ready to repeat", tone: "ready", label: "Ready", weight: 66, mix: 58 },
-    { key: "creation", tone: "creation", label: "in Creation", weight: 33, mix: 30 },
+    { key: "repetition", tone: "repetition", label: "Repetition", weight: 83, mix: 79 },
+    { key: "ready to repeat", tone: "ready", label: "Ready to Repeat", weight: 66, mix: 58 },
+    { key: "creation", tone: "creation", label: "Creation", weight: 33, mix: 30 },
+    { key: "not-started", label: "Not-Started", weight: 0 },
   ];
+  const OTHER = { key: "other", label: "Other", weight: 0 };
+  const STAGE = Object.fromEntries(LIFECYCLE.map((seg) => [seg.key, seg]));
+  const STATUS_RAMP = LIFECYCLE.filter((seg) => seg.tone);
+  const stagesFor = (byStatus) => (byStatus.other ? [...LIFECYCLE, OTHER] : LIFECYCLE);
+  const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
   const tint = (mix) =>
     mix >= 100
       ? "rgb(var(--topic-rgb))"
       : `color-mix(in srgb, rgb(var(--topic-rgb)) ${mix}%, var(--background-primary, var(--light, #ffffff)))`;
   const heroTint = (seg) => `var(--dc-progress-${seg.tone})`;
+  const swatch = (seg) =>
+    seg.tone
+      ? { background: heroTint(seg) }
+      : { background: "var(--background-primary, var(--light, #ffffff))", boxShadow: "inset 0 0 0 1px rgba(var(--topic-rgb), 0.5)" };
+  const lifecycleText = (byStatus) => stagesFor(byStatus).map((seg) => `${byStatus[seg.key] ?? 0} ${seg.label}`).join(", ");
+  const progressLabel = (pct, byStatus) => `${pct}% progress: ${lifecycleText(byStatus)}`;
 
   const firstString = (v) =>
     Array.isArray(v) ? (v.length ? String(v[0]).trim() : "") : (v == null ? "" : String(v).trim());
@@ -45,17 +60,16 @@ return function TopicDashboard() {
   const statsFor = (dir) => {
     const prefix = `${dir}/`;
     const byStatus = {};
-    let total = 0, points = 0, done = 0;
+    let total = 0, points = 0;
     for (const p of pages) {
       if (!p.$path.startsWith(prefix)) continue;
       if (hasTag(p, "FolderNote") || hasTag(p, "MetricsIgnore")) continue;
-      const key = firstString(p.value("status")).toLowerCase();
+      const stage = STAGE[firstString(p.value("status")).toLowerCase()] ?? OTHER;
       total += 1;
-      points += STATUS_PROGRESS[key] ?? 0;
-      if (key === "done") done += 1;
-      byStatus[key] = (byStatus[key] ?? 0) + 1;
+      points += stage.weight;
+      byStatus[stage.key] = (byStatus[stage.key] ?? 0) + 1;
     }
-    return { pct: total > 0 ? Math.round(points / total) : 0, done, total, points, byStatus };
+    return { pct: total > 0 ? Math.round(points / total) : 0, total, points, byStatus };
   };
 
   // Topics are the direct-child folders of ROOT — their FolderNote sits two path
@@ -105,10 +119,10 @@ return function TopicDashboard() {
     spanNarrow: fillSpan(index, 1, 12, 6),
   }));
 
-  let oDone = 0, oTotal = 0, oPoints = 0;
+  let oTotal = 0, oPoints = 0;
   const oByStatus = {};
   for (const c of cards) {
-    oDone += c.done; oTotal += c.total; oPoints += c.points;
+    oTotal += c.total; oPoints += c.points;
     for (const k of Object.keys(c.byStatus)) oByStatus[k] = (oByStatus[k] ?? 0) + c.byStatus[k];
   }
   const oPct = oTotal > 0 ? Math.round(oPoints / oTotal) : 0;
@@ -167,11 +181,13 @@ return function TopicDashboard() {
 .dc-topic-chip svg { display: block; width: 1.3rem; height: 1.3rem; }
 .dc-topic-spacer { flex: 1 0 auto; min-height: 0.55em; }
 .dc-topic-foot { display: flex; flex-direction: column; gap: 4px; }
-.dc-topic-cap { font-size: 0.72rem; display: flex; justify-content: space-between; align-items: baseline; color: var(--text-muted, var(--darkgray, #5f6b7a)); }
+.dc-topic-grid p.db-card-summary { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden; }
+.dc-topic-cap { font-size: 0.8125rem; line-height: 1.3; font-variant-numeric: tabular-nums; display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem; color: var(--text-muted, var(--darkgray, #5f6b7a)); }
+.dc-topic-cap strong { color: var(--text-normal, var(--dark, #1f2937)); font-weight: 600; }
 .dc-topic-bar { box-sizing: border-box; position: relative; width: 100%; height: 11px; margin-top: 0.15rem; padding: 2px; border-radius: 999px; border: 1px solid rgba(var(--topic-rgb), 0.5); background: var(--background-primary, var(--light, #ffffff)); overflow: hidden; }
 .dc-topic-bar-track { box-sizing: border-box; position: relative; height: 100%; border-radius: 999px; overflow: hidden; }
-.dc-progress-hero { --topic-rgb: 76, 128, 0; --card-accent: 76, 128, 0; --dc-progress-done: #4c8000; --dc-progress-ready: #70a322; --dc-progress-creation: #9cbd66; --dc-radial-size: clamp(6.75rem, 24cqi, 8rem); overflow: hidden; container-type: inline-size; margin: 0 0 clamp(1rem, 2vw, 1.4rem); animation: db-card-in var(--dur-3, 220ms) var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)) backwards; }
-.theme-dark .dc-progress-hero, :root[saved-theme="dark"] .dc-progress-hero { --topic-rgb: 132, 204, 22; --card-accent: 132, 204, 22; --dc-progress-done: #84cc16; --dc-progress-ready: #a3db53; --dc-progress-creation: #c1e88a; }
+.dc-progress-hero { --topic-rgb: 76, 128, 0; --card-accent: 76, 128, 0; --dc-progress-done: #4c8000; --dc-progress-repetition: #5e9211; --dc-progress-ready: #70a322; --dc-progress-creation: #9cbd66; --dc-radial-size: clamp(6.75rem, 24cqi, 8rem); overflow: hidden; container-type: inline-size; margin: 0 0 clamp(1rem, 2vw, 1.4rem); animation: db-card-in var(--dur-3, 220ms) var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)) backwards; }
+.theme-dark .dc-progress-hero, :root[saved-theme="dark"] .dc-progress-hero { --topic-rgb: 132, 204, 22; --card-accent: 132, 204, 22; --dc-progress-done: #84cc16; --dc-progress-repetition: #94d434; --dc-progress-ready: #a3db53; --dc-progress-creation: #c1e88a; }
 .dc-progress-hero:hover, .dc-progress-hero:focus-within { border-color: var(--background-modifier-border, var(--lightgray, #d8dee9)); background-color: var(--background-primary, var(--light, #ffffff)); box-shadow: none; transform: none; }
 .dc-progress-hero:hover::before, .dc-progress-hero:focus-within::before { opacity: 0.78; }
 .dc-progress-hero .db-card-body { display: grid; gap: clamp(1rem, 3cqi, 2rem); align-items: center; padding: clamp(1rem, 3cqi, 2rem); }
@@ -181,15 +197,15 @@ p.dc-progress-eyebrow { margin: 0 0 0.45rem; color: rgb(var(--topic-rgb)); font-
 .dc-progress-title, .dc-progress-mobile-value { color: var(--text-normal, var(--dark, #1f2937)); font-size: clamp(1rem, 5cqi, 1.75rem); font-weight: 700; line-height: 1.08; letter-spacing: -0.04em; white-space: nowrap; }
 .dc-progress-title { min-width: 0; margin: 0; }
 .dc-progress-mobile-value { flex: 0 0 auto; }
-ul.dc-progress-statuses { display: none; flex-wrap: wrap; gap: 0.55rem 1.1rem; margin: 1rem 0 0; padding: 0; list-style: none; color: var(--text-muted, var(--darkgray, #5f6b7a)); font-size: 0.875rem; }
+ul.dc-progress-statuses { display: flex; flex-wrap: wrap; gap: 0.55rem 1.1rem; margin: 1rem 0 0; padding: 0; list-style: none; color: var(--text-muted, var(--darkgray, #5f6b7a)); font-size: 0.875rem; }
 .dc-progress-statuses li { display: inline-flex; min-width: max-content; align-items: baseline; gap: 0.35rem; }
 /* Obsidian's own list indent (.markdown-rendered ul/li) outranks the rules
    above, so the row lands short of the title's left edge. Kill the indent from
-   a selector that outranks it, on both the list and the item, and keep it off
-   the display cascade so the container query still governs visibility. */
+   a selector that outranks it, on both the list and the item. */
 .dc-progress-copy ul.dc-progress-statuses, .dc-progress-copy ul.dc-progress-statuses li { margin-inline-start: 0; padding-inline-start: 0; text-indent: 0; }
 .dc-progress-statuses strong { color: var(--text-normal, var(--dark, #1f2937)); font-family: var(--codeFont, var(--font-monospace, monospace)); font-size: 0.9rem; }
 .dc-progress-statuses i { width: 0.55rem; height: 0.55rem; border-radius: 2px; flex: 0 0 auto; }
+p.dc-progress-note { margin: 0.6rem 0 0; color: var(--text-muted, var(--darkgray, #5f6b7a)); font-size: 0.8125rem; line-height: 1.45; }
 .dc-progress-visual { display: grid; width: 100%; place-self: stretch; }
 .dc-progress-visual svg { display: none; }
 .dc-progress-ring { fill: none; stroke-linecap: round; }
@@ -205,7 +221,6 @@ ul.dc-progress-statuses { display: none; flex-wrap: wrap; gap: 0.55rem 1.1rem; m
   .dc-progress-summary { display: block; }
   .dc-progress-title { font-size: clamp(1.75rem, 4cqi, 2.25rem); }
   .dc-progress-mobile-value { display: none; }
-  ul.dc-progress-statuses { display: flex; }
   .dc-progress-visual { position: relative; width: var(--dc-radial-size); aspect-ratio: 1; gap: 0; padding-top: 0; place-self: center; place-items: center; }
   .dc-progress-visual svg { position: absolute; inset: 0; display: block; width: 100%; height: 100%; overflow: visible; transform: rotate(-90deg); }
   /* Everything inside the ring scales off --dc-radial-size, not the card's cqi:
@@ -222,9 +237,9 @@ ul.dc-progress-statuses { display: none; flex-wrap: wrap; gap: 0.55rem 1.1rem; m
    The fills reveal by scaling, not by animating width: the segment widths are
    inline percentages, and scaleX(0->1) with a left origin lands on exactly that
    inline width while staying on the compositor.
-   --ease-out, never --ease-spring: the track is overflow:hidden, so a curve that
+   --ease-out, never an overshooting curve: the track is overflow:hidden, so one that
    overshoots would clip a near-full bar flat at 100% and then visibly retreat to
-   its real value, which reads as a bug. All three stacked segments share one
+   its real value, which reads as a bug. All stacked segments share one
    easing and one delay so their z-ordered boundaries stay put every frame. */
 @keyframes dc-topic-bar-fill { from { transform: scaleX(0); } }
 .dc-topic-bar-track span { transform-origin: left center; animation: dc-topic-bar-fill var(--dur-3, 220ms) var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)) backwards; }
@@ -245,19 +260,20 @@ ${spanRules("dsk")}
           <div class="dc-progress-copy">
             <p class="dc-progress-eyebrow">Learning overview</p>
             <div class="dc-progress-summary">
-              <p class="dc-progress-title" id="dc-progress-title" role="heading" aria-level="2">{oTotal} notes across {N} topics</p>
+              <p class="dc-progress-title" id="dc-progress-title" role="heading" aria-level="2">{plural(oTotal, "note")} across {plural(N, "topic")}</p>
               <span class="dc-progress-mobile-value" aria-hidden="true">{oPct}%</span>
             </div>
             <ul class="dc-progress-statuses" aria-label="Note lifecycle totals">
-              {STATUS_RAMP.map((seg) => (
+              {stagesFor(oByStatus).map((seg) => (
                 <li>
-                  <i aria-hidden="true" style={{ background: heroTint(seg) }} />
+                  <i aria-hidden="true" style={swatch(seg)} />
                   <strong>{oByStatus[seg.key] ?? 0}</strong> {seg.label}
                 </li>
               ))}
             </ul>
+            <p class="dc-progress-note">Progress weights each note by stage: {stagesFor(oByStatus).map((seg) => `${seg.label} ${seg.weight}%`).join(", ")}.</p>
           </div>
-          <div class="dc-progress-visual" role="img" aria-label={`Progress ${oPct} percent. ${oDone} Done, ${oByStatus["ready to repeat"] ?? 0} Ready, and ${oByStatus.creation ?? 0} in Creation.`}>
+          <div class="dc-progress-visual" role="img" aria-label={`${oPct}% overall progress`}>
             <svg viewBox="0 0 120 120" aria-hidden="true">
               <circle class="dc-progress-ring dc-progress-ring--track" cx="60" cy="60" r="50" pathLength="100" />
               {STATUS_RAMP.slice().reverse().map((seg) => (
@@ -280,11 +296,11 @@ ${spanRules("dsk")}
               {c.desc ? <p class="db-card-summary">{c.desc}</p> : null}
               <div class="dc-topic-spacer" />
               <div class="dc-topic-foot">
-                <div class="dc-topic-cap"><span>{c.done}/{c.total} done</span><span>{c.pct}%</span></div>
-                <div class="dc-topic-bar"><div class="dc-topic-bar-track">{segments(c.byStatus, c.total)}</div></div>
+                <div class="dc-topic-cap"><span>{plural(c.total, "note")}</span>{" "}<strong>{c.pct}%</strong></div>
+                <div class="dc-topic-bar" role="img" aria-label={progressLabel(c.pct, c.byStatus)}><div class="dc-topic-bar-track">{segments(c.byStatus, c.total)}</div></div>
               </div>
             </div>
-            {c.fn ? <span class="db-card-hit"><dc.Link link={c.fn.$link} /></span> : null}
+            <span class="db-card-hit"><dc.Link link={c.fn.$link} /></span>
           </div>
         ))}
       </div>
