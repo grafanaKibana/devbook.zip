@@ -266,7 +266,7 @@
   display: grid;
   place-items: center;
   border-block-start: var(--_stroke-hair) solid color-mix(in srgb, var(--_text) 22%, transparent);
-  font: var(--_weight-strong) var(--_type-2xs)/var(--_leading-solid) var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-xs)/var(--_leading-solid) var(--_font-mono);
   color: var(--_strong-fill-text);
 }
 .steptrace__z-cell[data-box="1"]:not([data-state="probe"]):not([data-state="match"]):not(

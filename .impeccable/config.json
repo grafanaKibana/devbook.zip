@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "text-occlusion",
+        "value": "*",
+        "files": [
+          "**/*/"
+        ],
+        "createdAt": "2026-10-02T05:43:32.911Z",
+        "reason": "Home and FolderNote card maps (pages served at trailing-slash URLs) use a full-card stretched link (.db-card-hit a, font-size 0) that DESIGN.md requires; the detector reads it as text covering the card"
+      }
+    ]
+  }
+}

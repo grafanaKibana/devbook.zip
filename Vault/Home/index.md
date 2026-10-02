@@ -103,20 +103,48 @@ return function TopicDashboard() {
       };
     });
 
+  // Card width follows topic size, never a positional pattern. Cards keep topic
+  // order and fill the fewest rows the breakpoint's minimum span allows; every
+  // row sums to the 12 columns. Of those layouts, the row breaks and spare
+  // columns that land each card closest to its share of the grid win. Every
+  // card carries the same title, summary and progress foot, so a share grows
+  // only with the log of the note count: a big topic reads wider without
+  // leaving its card hollow.
   const N = baseCards.length;
-  const fillSpan = (index, hero, heroSpan, baseSpan) => {
-    if (index < hero) return heroSpan;
-    const perRow = 12 / baseSpan;
-    const rest = N - hero;
-    const remainder = rest % perRow;
-    if (remainder !== 0 && index - hero >= rest - remainder) return 12 / remainder;
-    return baseSpan;
+  const room = baseCards.map((c) => Math.log1p(c.total));
+  const roomTotal = room.reduce((sum, r) => sum + r, 0) || 1;
+  const spansFor = (minSpan) => {
+    const perRow = Math.floor(12 / minSpan);
+    const rows = Math.ceil(N / perRow);
+    const share = room.map((r) => (rows * 12 * r) / roomTotal);
+    const fitRow = (from, to) => {
+      const spans = Array(to - from).fill(minSpan);
+      for (let spare = 12 - spans.length * minSpan; spare > 0; spare--) {
+        let pick = 0;
+        spans.forEach((span, i) => { if (share[from + i] - span > share[from + pick] - spans[pick]) pick = i; });
+        spans[pick] += 1;
+      }
+      return { spans, miss: spans.reduce((sum, span, i) => sum + (span - share[from + i]) ** 2, 0) };
+    };
+    const plan = (from, row) => {
+      if (from === N) return { spans: [], miss: 0 };
+      let best = null;
+      for (let to = from + 1; to <= Math.min(N, from + perRow); to++) {
+        if (N - to > (rows - row - 1) * perRow) continue;
+        const head = fitRow(from, to);
+        const rest = plan(to, row + 1);
+        if (!best || head.miss + rest.miss < best.miss) best = { spans: [...head.spans, ...rest.spans], miss: head.miss + rest.miss };
+      }
+      return best;
+    };
+    return plan(0, 0).spans;
   };
+  const desktop = spansFor(3), medium = spansFor(4), narrow = spansFor(6);
   const cards = baseCards.map((c, index) => ({
     ...c,
-    spanDesktop: fillSpan(index, 3, 4, 3),
-    spanMedium: fillSpan(index, 2, 6, 4),
-    spanNarrow: fillSpan(index, 1, 12, 6),
+    spanDesktop: desktop[index],
+    spanMedium: medium[index],
+    spanNarrow: narrow[index],
   }));
 
   let oTotal = 0, oPoints = 0;

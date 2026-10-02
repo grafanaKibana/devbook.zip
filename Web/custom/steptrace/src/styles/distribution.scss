@@ -153,7 +153,7 @@
 .steptrace__distribution-entry-label,
 .steptrace__distribution-entry-value {
   /* steptrace-exception: distribution-count-fit | category=responsive | rationale=fits counts across distribution lane widths | evidence=.omx/evidence/steptrace-design-system-refactor/visual/candidate/g005-candidate-k/summary.json */
-  font: var(--_weight-strong) clamp(var(--_type-2xs), 1.5vw, var(--_type-sm)) /
+  font: var(--_weight-strong) clamp(var(--_type-xs), 1.5vw, var(--_type-sm)) /
     var(--_leading-readable) var(--_font-mono);
   font-variant-numeric: tabular-nums;
 }
@@ -258,9 +258,7 @@
   border-block-end: var(--_stroke-hair) solid var(--_distribution-border);
   background: var(--_distribution-header);
   color: var(--_muted);
-  /* steptrace-exception: distribution-lane-header-fit | category=responsive | rationale=fits headers across distribution lane widths | evidence=.omx/evidence/steptrace-design-system-refactor/visual/candidate/g005-candidate-k/summary.json */
-  font: var(--_weight-strong) clamp(var(--_type-2xs), 1.4vw, var(--_type-xs)) /
-    var(--_leading-solid) var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-xs) / var(--_leading-solid) var(--_font-mono);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
@@ -285,7 +283,7 @@
   place-self: center;
   color: var(--_muted);
   content: "—";
-  font: var(--_weight-strong) var(--_type-sm) / var(--_leading-solid) var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-xs) / var(--_leading-solid) var(--_font-mono);
   opacity: 0.55;
 }
 
@@ -300,7 +298,7 @@
   background: var(--_surface);
   color: var(--_text);
   /* steptrace-exception: distribution-token-fit | category=responsive | rationale=fits tokens across distribution lane widths | evidence=.omx/evidence/steptrace-design-system-refactor/visual/candidate/g005-candidate-k/summary.json */
-  font: var(--_weight-strong) clamp(var(--_type-2xs), 1.45vw, var(--_type-sm)) /
+  font: var(--_weight-strong) clamp(var(--_type-xs), 1.45vw, var(--_type-sm)) /
     var(--_leading-readable) var(--_font-mono);
   font-variant-numeric: tabular-nums;
   overflow: hidden;

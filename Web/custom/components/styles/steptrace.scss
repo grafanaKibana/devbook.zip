@@ -8,7 +8,9 @@
   --st-page: var(--light);
   --st-surface: var(--lightgray);
   --st-text: var(--darkgray);
-  --st-muted: var(--gray);
+  // The site gray sits just under 4.5:1 on the page in both themes; a tenth of
+  // the text color lifts StepTrace's small secondary text over the AA line.
+  --st-muted: color-mix(in srgb, var(--gray) 90%, var(--darkgray));
   --st-border: var(--gray);
   --st-table-cell: var(--light);
   --st-table-header: var(--lightgray);

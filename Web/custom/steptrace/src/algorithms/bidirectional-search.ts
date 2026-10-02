@@ -23,6 +23,7 @@ class Recorder {
     meeting: string | null,
     path: readonly string[],
     message: string,
+    milestone?: string,
   ) {
     const visited = [...new Set([...forward, ...backward])]
     const detail: GraphStateDetail = {
@@ -71,6 +72,7 @@ class Recorder {
         ]),
       ),
       message,
+      ...(milestone ? { milestone } : {}),
       detail,
     })
   }
@@ -140,6 +142,7 @@ function run(_: Config, recorder: Recorder) {
     ["b", "m", "forward"],
   ] as const) {
     ;(side === "forward" ? forward : backward).push(to)
+    const direction = side === "forward" ? "Forward" : "Backward"
     recorder.record(
       "expand",
       to,
@@ -148,7 +151,8 @@ function run(_: Config, recorder: Recorder) {
       backward,
       null,
       [],
-      `${side === "forward" ? "Forward" : "Backward"} BFS reaches ${to} from ${from}.`,
+      `${direction} BFS reaches ${to} from ${from}.`,
+      `${direction} ${to}`,
     )
   }
   backward.push("m")
@@ -161,6 +165,7 @@ function run(_: Config, recorder: Recorder) {
     "m",
     [],
     "Backward BFS reaches m, already visited by the forward search.",
+    "Meet m",
   )
   const path = ["s", "a", "b", "m", "c", "d", "t"]
   recorder.record(

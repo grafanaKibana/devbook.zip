@@ -41,6 +41,7 @@ class Recorder {
     selectedEdges: readonly string[],
     changed: boolean,
     message: string,
+    previous?: number,
   ) {
     const frontier = new Set(
       this.config.nodes
@@ -74,10 +75,12 @@ class Recorder {
     ) as Record<string, GraphStateEdgeRole>
     const detail: GraphStateDetail = {
       kind: "edge-relaxation",
+      policy: "dijkstra",
       pass: settled.size,
       edge: currentEdge,
       distances: { ...distances },
       changed,
+      ...(previous === undefined ? {} : { previous }),
     }
     this.frames.push({
       type,
@@ -93,6 +96,7 @@ class Recorder {
       nodeState,
       edgeState,
       message,
+      ...(type === "expand" && currentNode ? { milestone: `Settle ${currentNode}` } : {}),
       detail,
     })
   }
@@ -244,6 +248,7 @@ function run(config: Config, recorder: Recorder) {
         changed
           ? `Relax ${current} → ${edge.to}: ${candidate} improves ${Number.isFinite(before) ? before : "∞"}.`
           : `Keep dist[${edge.to}] = ${before}; ${candidate} is not shorter.`,
+        before,
       )
     }
   }
@@ -272,7 +277,7 @@ function run(config: Config, recorder: Recorder) {
     settled,
     selectedEdges,
     false,
-    `Shortest path ${path.join(" → ")} — total cost ${distances[config.target]}.`,
+    `Path ${path.join(" → ")} · cost ${distances[config.target]}.`,
   )
 }
 

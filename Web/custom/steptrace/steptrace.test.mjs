@@ -813,6 +813,128 @@ test("the player keeps navigation inside the frame sequence", () => {
   assert.equal(player.timer, null)
 })
 
+test("frames that name a milestone advance the phase until the next one", () => {
+  const { buildMilestones, milestoneAt } = loadModule("src", "render.ts")
+  const frames = [
+    { type: "init" },
+    { type: "expand", milestone: "Settle A" },
+    { type: "relax" },
+    { type: "expand", milestone: "Settle B" },
+    { type: "relax" },
+    { type: "done" },
+  ]
+
+  const marks = buildMilestones("unit-graph", "graph", frames)
+
+  assert.deepEqual(
+    frames.map((_, index) => milestoneAt(marks, index).label),
+    ["Initialize", "Settle A", "Settle A", "Settle B", "Settle B", "Result"],
+  )
+})
+
+test("graph-state recorders name the phase of every step frame", () => {
+  const { steptrace: api } = loadModule("src", "engine.ts")
+  const { buildMilestones, milestoneAt } = loadModule("src", "render.ts")
+  const stepTypes = new Set(["visit", "expand", "relax"])
+  const fixtures = loadCatalogFixtures().fixtures.filter(
+    ({ descriptorType, kind }) => descriptorType === "frame" && kind === "graph",
+  )
+  let covered = 0
+
+  for (const { id, config } of fixtures) {
+    const { kind, frames } = api.buildFrames(config)
+    const stepIndexes = frames.flatMap(({ type }, index) =>
+      index > 0 && stepTypes.has(type) ? [index] : [],
+    )
+    if (stepIndexes.length < 3) continue
+    covered += 1
+    const marks = buildMilestones(config.algorithm, kind, frames)
+    const labels = marks.map(({ label }) => label)
+
+    assert.ok(labels.length > 3, `${id} names more than one phase between start and result`)
+    assert.equal(labels.at(-1), "Result", `${id} closes on the result`)
+    for (const index of stepIndexes) {
+      assert.notEqual(milestoneAt(marks, index).label, labels[0], `${id} frame ${index} phase`)
+    }
+  }
+
+  assert.ok(covered >= 6, "the invariant covers the step-based graph algorithms")
+})
+
+test("graph relaxation Watch keeps settle-order frames to the active values", () => {
+  const { edgeRelaxationWatch } = loadModule("src", "families", "graph-state.ts")
+  const ids = ["a", "b", "c", "d", "e", "f"]
+  const distances = { a: 0, b: 1, c: 4, d: 2, e: 7, f: Infinity }
+  const frame = (policy, overrides = {}) => ({
+    type: "relax",
+    nodes: ids.map((id) => ({ id, label: id, x: 0, y: 0 })),
+    currentNode: "b",
+    currentEdge: ["b", "e"],
+    nodeState: { a: "closed", b: "active", c: "frontier", d: "frontier", e: "frontier" },
+    detail: {
+      kind: "edge-relaxation",
+      policy,
+      pass: 2,
+      edge: ["b", "e"],
+      distances,
+      changed: true,
+      previous: Infinity,
+    },
+    ...overrides,
+  })
+  const byKey = (rows) => Object.fromEntries(rows.map((row) => [row.k, row]))
+
+  const relax = byKey(edgeRelaxationWatch(frame("dijkstra")))
+  assert.deepEqual(Object.keys(relax), ["edge", "change", "frontier", "distances"])
+  assert.equal(relax.edge.v, "b → e")
+  assert.equal(relax.change.v, "∞ → 7")
+  assert.equal(relax.frontier.v, "d:2 · c:4 · e:7")
+  assert.equal(relax.distances.v, "2 of 6 settled")
+  assert.equal(relax.distances.hint, "All distances: a:0 · b:1 · d:2 · c:4 · e:7 · f:∞.")
+
+  const crowded = byKey(
+    edgeRelaxationWatch(
+      frame("dijkstra", {
+        nodeState: {
+          a: "closed",
+          b: "active",
+          c: "frontier",
+          d: "frontier",
+          e: "frontier",
+          f: "frontier",
+        },
+      }),
+    ),
+  )
+  assert.equal(crowded.frontier.v, "d:2 · c:4 · e:7 · +1 more")
+
+  const kept = byKey(
+    edgeRelaxationWatch(
+      frame("dijkstra", { detail: { ...frame("dijkstra").detail, changed: false, previous: 7 } }),
+    ),
+  )
+  assert.equal(kept.change.v, "7 kept")
+
+  const settle = byKey(
+    edgeRelaxationWatch(
+      frame("dijkstra", {
+        type: "expand",
+        currentEdge: null,
+        detail: { ...frame("dijkstra").detail, edge: null, changed: false, previous: undefined },
+      }),
+    ),
+  )
+  assert.equal(settle.edge.v, "—")
+  assert.equal(settle.change.v, "settled at 1")
+
+  const passes = edgeRelaxationWatch(frame("bellman-ford"))
+  assert.deepEqual(
+    passes.map((row) => row.k),
+    ["distances", "pass", "edge", "change"],
+  )
+  assert.equal(passes[0].v, "a:0 · b:1 · c:4 · d:2 · e:7 · f:∞")
+})
+
 test("mount reports invalid input locally and destroys cleanly", () => {
   const { createMount } = loadModule("src", "mount.ts")
   const root = {
@@ -903,8 +1025,8 @@ test("renderers keep presentation in Sass", () => {
   const sharedPath = join(here, "src", "styles", "shared.scss")
   const styleSources = stylePaths.map((path) => ({ path, source: readFileSync(path, "utf8") }))
   const styleSystem = inspectStyleSystem(styleSources, sharedPath)
-  assert.equal(styleSystem.governedExceptions, 32)
-  assert.equal(styleSystem.annotations.length, 33)
+  assert.equal(styleSystem.governedExceptions, 29)
+  assert.equal(styleSystem.annotations.length, 30)
   for (const [property, value] of [
     ["border-radius", "8px"],
     ["font-size", "13px"],
@@ -1427,6 +1549,24 @@ test("keyboard operation focus survives hash locks and disabling heap renders", 
     )
     await Promise.resolve()
     assert.equal(globalThis.document.activeElement, resetHeap, "heap merge advances to Reset")
+
+    const keyField = { ...control("Key"), tagName: "INPUT" }
+    const lockedPut = control("Put")
+    globalThis.document.activeElement = keyField
+    withOperationFocus(controls(keyField, lockedPut), keyField, new Event("keydown"), () => {
+      keyField.disabled = true
+      lockedPut.disabled = true
+      globalThis.document.activeElement = body
+    })
+    await Promise.resolve()
+    keyField.disabled = false
+    lockedPut.disabled = false
+    observers.at(-1).trigger()
+    assert.equal(
+      globalThis.document.activeElement,
+      keyField,
+      "Enter in an input returns focus to it once the operation lock lifts",
+    )
 
     const external = {}
     const lockedAdd = control("Add")

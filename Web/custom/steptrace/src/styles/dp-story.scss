@@ -25,7 +25,7 @@
   border-bottom: var(--_stroke-hair) solid var(--_story-border);
   background: var(--_story-header);
   color: var(--_muted);
-  font-size: var(--_type-ui);
+  font-size: var(--_type-xs);
 }
 
 .steptrace .steptrace__dp-story-context-start,
@@ -94,7 +94,7 @@
 .steptrace .steptrace__coin-tray-label {
   margin-right: auto;
   color: var(--_muted);
-  font-size: var(--_type-ui);
+  font-size: var(--_type-xs);
 }
 
 .steptrace .steptrace__coin {
@@ -107,7 +107,7 @@
   border-radius: var(--_radius-pill);
   background: var(--_story-cell);
   color: var(--_text);
-  font: var(--_weight-strong) var(--_type-ui) / var(--_leading-solid) var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-xs) / var(--_leading-solid) var(--_font-mono);
   transition:
     border-color var(--_tween) ease,
     background-color var(--_tween) ease,
@@ -146,7 +146,7 @@
   gap: var(--_space-5);
   padding: var(--_space-2) var(--_space-4);
   background: var(--_story-cell);
-  font-size: var(--_type-ui);
+  font-size: var(--_type-xs);
 }
 
 .steptrace .steptrace__coin-attempt + .steptrace__coin-attempt {
@@ -248,11 +248,11 @@
 
 .steptrace .steptrace__amount-label {
   color: var(--_context-text);
-  font-size: var(--_type-sm);
+  font-size: var(--_type-xs);
 }
 
 .steptrace .steptrace__amount-value {
-  font: var(--_weight-strong) var(--_type-ui) / var(--_leading-solid) var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-xs) / var(--_leading-solid) var(--_font-mono);
 }
 
 .steptrace .steptrace__amount-cell[data-state="current"] {
@@ -289,7 +289,7 @@
   border-radius: var(--_story-radius);
   background: var(--_story-cell);
   color: var(--_text);
-  font: var(--_weight-regular) var(--_type-ui) / var(--_leading-readable) var(--_font-body);
+  font: var(--_weight-regular) var(--_type-xs) / var(--_leading-readable) var(--_font-body);
 }
 
 .steptrace .steptrace__warehouse-matrix th,
@@ -334,13 +334,13 @@
 .steptrace .steptrace__warehouse-cell-name {
   display: block;
   color: var(--_context-text);
-  font-size: var(--_type-sm);
+  font-size: var(--_type-xs);
 }
 
 .steptrace .steptrace__warehouse-cell-cost {
   display: block;
   margin-top: var(--_space-0);
-  font: var(--_weight-regular) var(--_type-ui) / var(--_leading-solid) var(--_font-mono);
+  font: var(--_weight-regular) var(--_type-xs) / var(--_leading-solid) var(--_font-mono);
   font-variant-numeric: tabular-nums;
 }
 
@@ -348,7 +348,7 @@
   display: block;
   margin-top: var(--_space-1);
   color: var(--_green-text);
-  font: var(--_weight-strong) var(--_type-sm)/var(--_leading-solid) var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-xs)/var(--_leading-solid) var(--_font-mono);
 }
 
 .steptrace .steptrace__warehouse-cell-stored:empty {

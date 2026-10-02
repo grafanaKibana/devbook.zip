@@ -99,8 +99,10 @@ p.db-card-summary {
   background: transparent !important;
   font-size: 0;
 }
+/* The site accent, never the topic hue: several topic colours fall under 3:1
+   on the card fill, and one ring colour keeps focus recognisable across a grid. */
 .db-card-hit a:focus-visible {
-  outline: 2px solid rgb(${ACCENT});
+  outline: 2px solid var(--interactive-accent, var(--secondary, #437100));
   outline-offset: -0.3rem;
 }
 /* Entrance for the two grids that are destinations rather than pass-throughs.
@@ -120,7 +122,7 @@ p.db-card-summary {
 }
 .dc-topic-grid .db-card,
 .folder-map-children .db-card {
-  animation: db-card-in var(--dur-3, 220ms) var(--ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)) backwards;
+  animation: db-card-in var(--dur-3, 220ms) var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)) backwards;
 }
 /* Stagger capped at 6 steps so the tail stays constant no matter how many cards
    a grid holds: 6 * 28ms + 220ms = 388ms, inside the 400ms responsiveness bound. */

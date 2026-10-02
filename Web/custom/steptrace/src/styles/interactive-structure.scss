@@ -27,7 +27,7 @@
   border: var(--_stroke-hair) solid var(--_border);
   border-radius: var(--steptrace-structure-control-radius);
   box-shadow: none;
-  font: var(--_weight-strong) var(--_type-ui) / var(--_leading-solid) var(--_font-body);
+  font: var(--_weight-strong) var(--_type-base) / var(--_leading-solid) var(--_font-body);
 }
 
 .steptrace__structure-input {
@@ -75,7 +75,7 @@
 .steptrace .steptrace__structure-controls .steptrace__structure-input:focus-visible,
 .steptrace .steptrace__structure-controls .steptrace__structure-action:focus-visible,
 .steptrace .steptrace__structure-controls .steptrace__select:focus-visible {
-  border-color: var(--_blue);
+  border-color: var(--_accent);
   outline: var(--_focus-ring);
   outline-offset: calc(-1 * var(--_stroke-hair));
   box-shadow: none;
@@ -86,7 +86,7 @@
   min-height: 1.2rem;
   padding-inline: var(--_space-1);
   color: var(--_muted);
-  font: var(--_weight-strong) var(--_type-sm)/var(--_leading-readable) var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-base) / var(--_leading-readable) var(--_font-body);
 }
 
 @container steptrace-structure (max-width: 36rem) {

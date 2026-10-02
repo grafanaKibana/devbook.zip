@@ -21,10 +21,6 @@
         },
         {
           "type": "note",
-          "path": "Home/Questions.md"
-        },
-        {
-          "type": "note",
           "path": "Home/Roadmap.canvas"
         },
         {
@@ -164,6 +160,7 @@
   "narrowSidebarCustomWidth": 350,
   "showTooltips": false,
   "showTooltipPath": true,
+  "showTooltipTags": false,
   "showTooltipWordCount": false,
   "desktopBackground": "separate",
   "desktopScale": 1,
@@ -194,12 +191,17 @@
   "dateFormat": "MMM D, YYYY",
   "timeFormat": "h:mm a",
   "calendarTemplateFolder": "Templates",
+  "templateEngine": "automatic",
+  "folderTemplates": {},
+  "showFolderTemplateIcons": true,
+  "templateCommands": [],
   "confirmBeforeDelete": true,
   "deleteAttachments": "ask",
   "moveFileConflicts": "ask",
   "externalIconProviders": {
     "fontawesome-solid": false
   },
+  "showReleaseNotes": true,
   "checkForUpdatesOnStart": true,
   "pinNavigationBanner": true,
   "showNoteCount": true,
@@ -267,6 +269,7 @@
   "confirmBeforeManualSort": true,
   "revealFileOnListChanges": true,
   "listPaneTitle": "header",
+  "colorListPaneTitle": false,
   "noteGrouping": "folder",
   "showSelectedNavigationPills": false,
   "stickyGroupHeaders": true,
@@ -653,7 +656,7 @@
     "#404040",
     "#404040"
   ],
-  "lastShownVersion": "3.3.4",
+  "lastShownVersion": "3.4.3",
   "rootFolderOrder": [
     "Home",
     "Assets",

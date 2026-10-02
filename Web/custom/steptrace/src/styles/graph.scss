@@ -39,7 +39,7 @@
 }
 .steptrace__edge-label {
   fill: var(--_muted);
-  font: var(--_weight-strong) var(--_type-sm) var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-xs) var(--_font-mono);
 }
 .steptrace__node .steptrace__nback {
   fill: var(--st-page, var(--_surface));
@@ -116,7 +116,7 @@
   min-width: 130px;
 }
 .steptrace__legend-row {
-  font: var(--_weight-strong) var(--_type-md) var(--_font-body);
+  font: var(--_weight-strong) var(--_type-sm) var(--_font-body);
   color: var(--_muted);
 }
 .steptrace__swatch--current {

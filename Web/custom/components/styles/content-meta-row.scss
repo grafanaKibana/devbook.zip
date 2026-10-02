@@ -14,6 +14,33 @@
   }
 }
 
+.content-meta-lead {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.75rem;
+}
+
+.content-status {
+  display: inline-block;
+  padding: 0.1rem 0.6rem 0.1rem 0.45rem;
+  border-radius: 999px;
+  background-color: var(--lightgray);
+  color: var(--darkgray);
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+
+  svg {
+    width: 1em;
+    height: 1em;
+    margin-right: 0.3rem;
+    vertical-align: -0.15em;
+    color: var(--gray);
+  }
+}
+
 .page-contribute {
   display: inline-flex;
   align-items: center;
