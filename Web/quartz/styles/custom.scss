@@ -355,9 +355,26 @@ pre > code:focus-visible {
   display: none;
 }
 
-// Wider view port 300px > 400px
+// Keep the reading frame capped while desktop rails use the viewport gutters.
 .page {
-  max-width: calc(#{map.get($breakpoints, desktop)} + 400px);
+  --page-max-width: calc(#{map.get($breakpoints, desktop)} + 400px);
+  max-width: var(--page-max-width);
+}
+
+@media all and (min-width: 1201px) {
+  .page[data-frame="default"] > #quartz-body {
+    --sidebar-outset: max(0px, calc((100vw - var(--page-max-width)) / 2));
+
+    // Each margin pair sums to zero: reserve the existing tracks so the article,
+    // header and footer stay put. Margins also preserve viewport-fixed overlays.
+    & > .sidebar.left {
+      margin-inline: calc(-1 * var(--sidebar-outset)) var(--sidebar-outset);
+    }
+
+    & > .sidebar.right {
+      margin-inline: var(--sidebar-outset) calc(-1 * var(--sidebar-outset));
+    }
+  }
 }
 
 // ============================================================================

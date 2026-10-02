@@ -425,8 +425,8 @@ test("topic selection switches the selected topic and resets its scope", () => {
   assert.equal(textOf(realHarness.nodes("h2")[0]), topic.root)
   assert.equal(realHarness.nodes("select")[0].props.value, topic.root)
   assert.equal(
-    textOf(realHarness.nodes("span").find((node) => node.props.class === "dc-qi-result-count")!),
-    `${topic.count} question${topic.count === 1 ? "" : "s"}`,
+    realHarness.nodes("div").filter((node) => node.props.class === "dc-qi-question").length,
+    topic.count,
   )
 })
 
@@ -528,13 +528,16 @@ test("retains a chosen deep scope while a progressive refresh rebuilds it", asyn
   contents.set(deepPath, wait.promise)
   harness.refresh()
   await harness.settle(
-    () => harness.html().includes("Updating…") && harness.html().includes("Filler-23"),
+    () => harness.html().includes('aria-busy="true"') && harness.html().includes("Filler-23"),
   )
   wait.resolve(question)
   await harness.settle()
 
   assert.equal(harness.nodes("select")[0].props.value, "Programming/NET/C#/Concurrency")
-  assert.match(harness.html(), />1 question<\/span>/)
+  assert.equal(
+    harness.nodes("div").filter((node) => node.props.class === "dc-qi-question").length,
+    1,
+  )
   assert.match(harness.html(), />Programming \/ NET \/ C# \/ Concurrency<\/p>/)
 })
 

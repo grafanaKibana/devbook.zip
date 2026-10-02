@@ -190,6 +190,7 @@ Their main jobs are to find a topic, understand its scope, inspect the mechanism
 
 ### Quartz shell
 
+- The desktop reading frame keeps its existing 1600px cap and content geometry. Above that width, the 320px sidebars move into the viewport gutters with their existing 2rem edge inset; their grid tracks stay reserved. Tablet and mobile keep the existing Explorer drawer and content flow.
 - `SiteFooter` wraps the configured community footer instead of replacing its links. Informational links stay left-aligned opposite per-page sharing; below `768px`, shareable pages collapse those labels to their existing icons so both groups stay on one row. Pages without sharing keep the labels visible and centered at every width. Every footer owns the same `--lightgray` top border and `1.5rem` vertical padding, with no added horizontal padding; its height follows its content. Separation from content stays outside the footer, with no empty grid row or trailing margin.
 - Share actions remain static-first canonical anchors. Copy enhances its same-page link only when the Clipboard API is available, shows a transient check state, and resets after navigation or its timeout; the other links open native X, LinkedIn, and Reddit share targets.
 - Share icons are decorative SVGs behind accessible link names. Footer links use the shared compact spacing, accent hover, and visible accent focus outline; informational links retain normal text color while the Share label and icons use the same subtle color until interaction.

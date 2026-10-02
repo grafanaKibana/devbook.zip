@@ -205,14 +205,9 @@ export const QuestionsIndex: QuartzComponentConstructor = () => {
                   {renderOptions(topic, [topic.title])}
                 </select>
               </div>
-              <div class="qi-results-head">
-                <h2 id={`qi-title-${topic.slugId}`} class="qi-title">
-                  {topic.title}
-                </h2>
-                <span class="qi-scope-count" aria-live="polite">
-                  {countItems(topic)} questions
-                </span>
-              </div>
+              <h2 id={`qi-title-${topic.slugId}`} class="qi-title">
+                {topic.title}
+              </h2>
               <p class="qi-path" hidden />
               <div id={`qi-results-${topic.slugId}`}>
                 {countItems(topic) === 0 && <p>No questions in this topic yet.</p>}
@@ -232,9 +227,6 @@ export const QuestionsIndex: QuartzComponentConstructor = () => {
 .questions-index .qi-scope-control { display: grid; grid-template-columns: 5rem minmax(0, 1fr); align-items: center; gap: 0.75rem; padding: 1rem 0; border-block: 1px solid var(--lightgray); margin-bottom: 1.5rem; }
 .questions-index .qi-scope-control label { color: var(--darkgray); font-size: 0.85rem; }
 .questions-index .qi-scope-control select { width: 100%; min-width: 0; max-width: 100%; min-height: 2.75rem; padding: 0.5rem; border: 1px solid var(--lightgray); border-radius: 0.3rem; background: var(--light); color: var(--dark); font: inherit; font-size: 0.9rem; }
-.questions-index .qi-results-head { display: flex; align-items: baseline; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap; }
-.questions-index .qi-title { margin: 0; font-size: 1.3rem; }
-.questions-index .qi-scope-count { color: var(--darkgray); font-size: 0.8rem; }
 .questions-index .qi-path { margin: 0.5rem 0 1rem; color: var(--darkgray); font-size: 0.85rem; overflow-wrap: anywhere; }
 .questions-index .qi-section { scroll-margin-top: 2rem; }
 .questions-index .qi-section-title { font-size: 1rem; margin: 1.5rem 0 0.5rem; }
@@ -270,8 +262,6 @@ export const QuestionsIndex: QuartzComponentConstructor = () => {
         section.hidden = folder !== option.value && !folder.startsWith(option.value + "/");
       });
       panel.querySelector(".qi-title").textContent = option.dataset.qiTitle;
-      var count = Number(option.dataset.qiCount);
-      panel.querySelector(".qi-scope-count").textContent = count + (count === 1 ? " question" : " questions");
       var breadcrumb = panel.querySelector(".qi-path");
       breadcrumb.textContent = option.dataset.qiTrail;
       breadcrumb.hidden = option.value === panel.dataset.qiTopic;

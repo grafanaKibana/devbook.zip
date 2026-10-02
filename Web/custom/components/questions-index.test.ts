@@ -156,7 +156,6 @@ test("client mounts real Tabsdown topics and preserves hash-scoped navigation", 
 
   const makePanel = (topic: string, label: string, count: number, child?: string) => {
     const title = { textContent: label }
-    const scopeCount = { textContent: "" }
     const breadcrumb = { textContent: "", hidden: true }
     const sections = [
       { dataset: { qiPath: topic }, hidden: false },
@@ -167,7 +166,6 @@ test("client mounts real Tabsdown topics and preserves hash-scoped navigation", 
       querySelector: (selector: string) => {
         if (selector === "select") return panel.select
         if (selector === ".qi-title") return title
-        if (selector === ".qi-scope-count") return scopeCount
         if (selector === ".qi-path") return breadcrumb
         return null
       },

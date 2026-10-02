@@ -26,6 +26,10 @@
         {
           "type": "note",
           "path": "Home/Topics.base"
+        },
+        {
+          "type": "note",
+          "path": "Home/Questions.md"
         }
       ],
       "propertyKeys": [

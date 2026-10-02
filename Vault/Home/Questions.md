@@ -133,7 +133,6 @@ return function QuestionsIndex() {
     }
     return node;
   };
-  const plural = (count, singular) => `${count} ${singular}${count === 1 ? "" : "s"}`;
 
   const topicHubs = pages
     .filter((page) => {
@@ -325,12 +324,7 @@ return function QuestionsIndex() {
           </select>
         </div>
         <section class="dc-qi-results" aria-label={`${scopeLabel} questions`}>
-          <div class={`dc-qi-results-head${isDeepScope ? " has-path" : ""}`}>
-            <h2>{scopePath.split("/").pop()}</h2>
-            <span class="dc-qi-result-count" role="status" aria-live="polite" aria-atomic="true">
-              {plural(scopeCount, "question")}{!done ? " · Updating…" : ""}
-            </span>
-          </div>
+          <h2>{scopePath.split("/").pop()}</h2>
           {isDeepScope ? <p class="dc-qi-path">{scopeLabel}</p> : null}
           {!done && countItems(tree) === 0 ? (
             <p class="dc-qi-loading">Loading questions…</p>
