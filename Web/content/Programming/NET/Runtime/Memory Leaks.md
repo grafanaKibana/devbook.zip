@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.662Z
-modified: 2026-10-02T08:03:00.452Z
-published: 2026-10-02T08:03:00.452Z
+created: 2026-10-02T08:17:35.320Z
+modified: 2026-10-02T08:17:35.320Z
+published: 2026-10-02T08:17:35.320Z
 topic:
   - Programming
 subtopic:
@@ -346,7 +346,7 @@ A finalizer cannot repair a managed retention bug. If a root still reaches the o
 Current .NET applications add several lifetime traps that may present as memory growth or adjacent resource exhaustion:
 
 - **`HttpClient` connection exhaustion** — creating and disposing a client for every request can churn connection pools and exhaust ephemeral ports because underlying TCP connections are not released immediately. This is resource exhaustion rather than a managed-memory leak. Use a correctly configured `IHttpClientFactory` client or a long-lived client with an appropriate handler lifetime.
-- **DI captive dependencies** — a singleton that captures a scoped service extends that service to singleton lifetime. The built-in container can reject this when scope validation is enabled. Disposable transient or scoped services resolved from the root container are also retained for later disposal. Create an explicit scope with `IServiceScopeFactory` when a singleton must perform scoped work. See [[Programming/NET/ASP NET Web API/Dependency Injection|Dependency Injection]].
+- **DI captive dependencies** — a singleton that captures a scoped service extends that service to singleton lifetime. The built-in container can reject this when scope validation is enabled. Disposable transient or scoped services resolved from the root container are also retained for later disposal. Create an explicit scope with `IServiceScopeFactory` when a singleton must perform scoped work. See [[Programming/NET/ASP.NET Web API/Dependency Injection|Dependency Injection]].
 - **Pooled-buffer ownership errors** — a rented `ArrayPool<T>` or `MemoryPool<T>` buffer must be returned or disposed according to its pool contract. Failing to return it defeats reuse and increases allocation pressure. Continuing to use it after return violates ownership and can corrupt another operation's data.
 - **Ambient-state retention** — `AsyncLocal<T>` values flow with `ExecutionContext`, so a captured context can retain a value beyond one logical operation. `ThreadLocal<T>` values are tied to participating threads and should be disposed with their owner. Large graphs should not be stored in either without a clear lifetime boundary.
 - **Incomplete asynchronous operations** — an incomplete `TaskCompletionSource` does not root itself, but any long-lived owner that retains its task, continuations, or captured state can keep the entire operation graph alive. Cancellation and timeout paths must complete the ownership protocol.

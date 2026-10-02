@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.617Z
-modified: 2026-10-02T08:03:00.440Z
-published: 2026-10-02T08:03:00.440Z
+created: 2026-10-02T08:17:35.318Z
+modified: 2026-10-02T08:17:35.318Z
+published: 2026-10-02T08:17:35.318Z
 topic:
   - Data Persistence
 subtopic:
@@ -65,7 +65,7 @@ var orders = await db.Orders
 ```
 
 > [!WARNING]
-> **`DbContext` is a unit of work, not a singleton.** It is not thread-safe, and EF Core does not support parallel operations on one instance. `AddDbContext` registers it as scoped by default in ASP.NET Core, which often aligns one context with one request. A request can still contain several units of work, and background or parallel work needs a fresh context from `IDbContextFactory<T>`. See the captive-dependency boundary in [[Programming/NET/ASP NET Web API/Dependency Injection|Dependency Injection]]. `AddDbContextPool` can reuse reset context instances, but mutable per-request state such as a tenant identifier must be re-established safely.
+> **`DbContext` is a unit of work, not a singleton.** It is not thread-safe, and EF Core does not support parallel operations on one instance. `AddDbContext` registers it as scoped by default in ASP.NET Core, which often aligns one context with one request. A request can still contain several units of work, and background or parallel work needs a fresh context from `IDbContextFactory<T>`. See the captive-dependency boundary in [[Programming/NET/ASP.NET Web API/Dependency Injection|Dependency Injection]]. `AddDbContextPool` can reuse reset context instances, but mutable per-request state such as a tenant identifier must be re-established safely.
 
 ## Transactions and Concurrency
 
