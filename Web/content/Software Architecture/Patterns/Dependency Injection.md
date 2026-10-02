@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.686Z
-modified: 2026-08-20T20:41:15.687Z
-published: 2026-08-20T20:41:15.687Z
+modified: 2026-10-02T08:03:00.462Z
+published: 2026-10-02T08:03:00.462Z
 topic:
   - Software Architecture
 subtopic:
@@ -16,7 +16,7 @@ status: Done
 
 Dependency Injection (DI) moves object construction to a composition boundary. A class declares the services it needs, and something outside the class supplies them. This is a practical form of Inversion of Control (IoC): business code describes the collaboration while the application decides which implementations participate. The result is explicit dependencies and components that can be replaced without rewriting their consumers.
 
-DI does not require a container. The composition root is the application startup boundary, typically `Program.cs` in .NET, where object graphs are assembled. It may connect objects directly with constructors and factories or delegate that work to a container. ASP.NET Core uses its built-in container at this boundary. [[Programming/NET/ASP.NET Web API/Dependency Injection|ASP.NET Core Dependency Injection]] covers the framework-specific mechanics.
+DI does not require a container. The composition root is the application startup boundary, typically `Program.cs` in .NET, where object graphs are assembled. It may connect objects directly with constructors and factories or delegate that work to a container. ASP.NET Core uses its built-in container at this boundary. [[Programming/NET/ASP NET Web API/Dependency Injection|ASP.NET Core Dependency Injection]] covers the framework-specific mechanics.
 
 # How It Works
 
