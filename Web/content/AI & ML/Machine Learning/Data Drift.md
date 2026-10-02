@@ -7,7 +7,7 @@ topic:
   - AI & ML
 subtopic:
   - Machine Learning
-summary: When input data shifts away from the training distribution, silently degrading model predictions.
+summary: When production inputs shift away from training data, potentially weakening model predictions without an obvious error.
 level:
   - "1"
 priority: Low

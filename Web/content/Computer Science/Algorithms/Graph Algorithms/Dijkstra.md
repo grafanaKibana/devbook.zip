@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.514Z
-modified: 2026-08-20T20:41:15.515Z
-published: 2026-08-20T20:41:15.515Z
+created: 2026-10-02T06:14:57.771Z
+modified: 2026-10-02T07:17:52.167Z
+published: 2026-10-02T07:17:52.167Z
 topic:
   - Computer Science
 subtopic:
@@ -37,7 +37,7 @@ tab: Cities
 ~~~~
 
 
-Midtown makes direction and cost visible: Dijkstra expands from Seventh Avenue and West 47th Street in increasing accumulated street cost, respects one-way roads and the West 44th Street closure, and finishes by highlighting the cheapest route to Sixth Avenue and West 42nd Street. The Cities view runs the same distance-first search over a larger weighted network. In both views, Watch retains the complete distance array while the map shows the current node, active edge, settled region, and final path. No heuristic steers either search.
+Midtown makes direction and cost visible: Dijkstra expands from Seventh Avenue and West 47th Street in increasing accumulated street cost, respects one-way roads and the West 44th Street closure, and finishes by highlighting the cheapest route to Sixth Avenue and West 42nd Street. The Cities view runs the same distance-first search over a larger weighted network. In both views, Watch shows the current node, the edge being relaxed, the resulting distance change or settled distance, the nearest frontier entries, and how many nodes are settled; hovering or focusing the distances row lists every tentative distance. The map marks the current node, the active edge, the settled region, and the final path. No heuristic steers either search.
 
 
 The loop maintains one invariant: when an unsettled node leaves the priority queue, its tentative distance already equals its true shortest-path distance. Later stale entries for that settled node do not make it settle again.
@@ -151,7 +151,7 @@ tab: Complexity
 
 A single negative edge violates settle-once. Take edges `A→B = 2`, `A→C = 3`, and `C→B = −2`. Dijkstra relaxes `A` to reach `B` at 2 and `C` at 3, extracts and settles `B` at 2, then extracts `C` at 3 and relaxes `C→B` to `3 + (−2) = 1`. `B` is already settled, so that improvement is discarded and `B` is reported at 2, while the true shortest distance `A→C→B` is 1. Nothing throws — the output is simply not a shortest-path tree. Weights that can be negative need [[Computer Science/Algorithms/Graph Algorithms/Bellman-Ford|Bellman-Ford]], which relaxes all edges `V − 1` times and drops the finalization assumption.
 
-A negative _cycle_ has no shortest path at all: a route can loop it repeatedly to drive its cost below any bound, so no single-source algorithm returns a finite answer. The condition has to be detected rather than solved, which Bellman-Ford also does.
+A negative _cycle_ makes a destination's shortest distance unbounded only when the source can reach the cycle and the cycle can reach that destination. Such a route can loop the cycle repeatedly before continuing to the destination, driving its cost below any bound. Other reachable vertices can still have finite shortest distances. Bellman-Ford detects cycles reachable from the source.
 
 The second boundary is internal to the implementation. Standard binary heaps (including .NET's `PriorityQueue<TElement, TPriority>`) offer no `decrease-key`, so a relaxation pushes a fresh `(distance, node)` pair and leaves the older, larger one in the heap. A vertex still settles only once, but the queue can pop it repeatedly. The `if settled[node] continue` guard skips those stale entries before they rescan outgoing edges. Omitting the guard does not corrupt distances under the non-negative-weight precondition—the stale distance is larger than the one already processed—but every stale pop scans that vertex's outgoing adjacency again and repeats relaxations that already ran.
 
