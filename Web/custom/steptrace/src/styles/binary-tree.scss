@@ -106,12 +106,12 @@
 
 .steptrace .steptrace__binary-tree-meta {
   fill: var(--_muted);
-  font: var(--_weight-strong) var(--_type-micro)/var(--_leading-solid) var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-xs)/var(--_leading-solid) var(--_font-mono);
 }
 
 .steptrace .steptrace__binary-tree-empty {
   color: var(--_muted);
-  font: var(--_weight-strong) var(--_type-ui) / var(--_leading-solid) var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-xs) / var(--_leading-solid) var(--_font-mono);
 }
 
 .steptrace .steptrace__binary-tree-success {

@@ -7,7 +7,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
-summary: One model grades another's output against an explicit rubric, by absolute scoring or pairwise preference.
+summary: A model grades candidate output with anchored scorecards or pairwise preference, then human labels calibrate the judge.
 level:
   - "3"
 priority: Medium

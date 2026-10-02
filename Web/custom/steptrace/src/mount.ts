@@ -28,13 +28,42 @@ import type {
   MountHandle,
   StepTraceConfig,
   StepTraceHost,
+  WatchRow,
 } from "./types"
 import { watchHintFor } from "./watch-hints"
 
 const LOG_ROWS = 10
+const SPEEDS = [0.5, 1, 1.5, 2]
 const COMPACT_INLINE_SIZE = 704
 const fadeFor = (age: number) => Math.max(0.1, 0.5 * Math.pow(0.62, age - 1))
+const WATCH_ENTRY_SEPARATOR = " · "
 let mountSerial = 0
+
+// Multi-entry values ("A:0 · B:4 · C:∞") may wrap only between entries, never
+// inside one such as "6-42:∞", whose hyphen is otherwise a break opportunity.
+function watchRowParts(row: WatchRow) {
+  const parts: HTMLElement[] = []
+  if (row.sw) {
+    const swatch = el("span", "steptrace__watch-sw")
+    swatch.style.setProperty("--_watch-color", row.sw)
+    parts.push(swatch)
+  }
+  const key = el("span", "steptrace__watch-k")
+  key.textContent = row.k
+  const value = el("span", "steptrace__watch-v")
+  const entries = (row.v == null ? "" : String(row.v)).split(WATCH_ENTRY_SEPARATOR)
+  if (entries.length === 1) value.textContent = entries[0]
+  else
+    entries.forEach((entry, index) => {
+      const item = el("span", "steptrace__watch-entry")
+      item.textContent =
+        index < entries.length - 1 ? entry + WATCH_ENTRY_SEPARATOR.trimEnd() : entry
+      value.append(item)
+      if (index < entries.length - 1) value.append(" ")
+    })
+  parts.push(key, value)
+  return parts
+}
 
 // ==========================================================================
 //  7. MOUNT  —  assemble a card into `root` from a flat config, wire the
@@ -95,7 +124,6 @@ export function createMount(
     let currentView = null
     let currentGraph = null
     let currentMilestones = []
-    let speedControlHandle = null
     const hasHostTabs = typeof host.mountTabs === "function"
 
     // --- card chrome: head (breadcrumb + counter) / body (stage | rail) / foot ---
@@ -108,8 +136,11 @@ export function createMount(
     const crumbAlgo = el("span", "steptrace__crumb-algo")
     crumbAlgo.textContent = state.algorithm
     crumb.append(el("span", "steptrace__crumb-dot"), crumbKind, crumbSep, crumbAlgo)
+    const phaseName = el("span", "steptrace__phase-name")
     const counter = el("div", "steptrace__counter")
-    head.append(crumb, counter)
+    const headEnd = el("div", "steptrace__head-end")
+    headEnd.append(phaseName, counter)
+    head.append(crumb, headEnd)
 
     const stageCol = el("div", "steptrace__stage-col")
     const rail = el("div", "steptrace__rail")
@@ -184,9 +215,8 @@ export function createMount(
     const milestoneLayer = el("div", "steptrace__milestones")
     scrub.append(el("div", "steptrace__scrub-track"), scrubFill, milestoneLayer, scrubDot)
     const phase = el("div", "steptrace__phase")
-    const phaseName = el("span", "steptrace__phase-name")
     const phaseCopy = el("span", "steptrace__phase-copy")
-    phase.append(phaseName, phaseCopy)
+    phase.append(phaseCopy)
     const timeline = el("div", "steptrace__timeline")
     timeline.append(scrub)
 
@@ -200,55 +230,22 @@ export function createMount(
     btnMenu.setAttribute("aria-haspopup", "true")
     btnMenu.setAttribute("aria-expanded", "false")
     const menu = el("div", "steptrace__menu")
-    const speedHead = el("div", "steptrace__menu-h")
-    speedHead.textContent = "Speed"
-    const speedIndicator = el("span", "steptrace__speed-indicator")
-    speedIndicator.setAttribute("aria-hidden", "true")
-    const speedSection = el("div", "steptrace__menu-section")
-    const speedRow = el("div", "steptrace__speed-row")
-    const speedControl = el("div", "steptrace__speed-control")
-    speedRow.append(speedControl)
-    const fmtSpeed = (v) => Number(v).toFixed(2) + "×" // fixed width: "1.50×", never resizes the menu
+    const btnSpeed = el("button", "steptrace__btn steptrace__btn--speed")
+    btnSpeed.type = "button"
     const applySpeed = (value) => {
       const v = Number(value)
       state.speed = v
-      speedIndicator.textContent = `${v}×`
+      btnSpeed.textContent = `${v}×`
+      btnSpeed.setAttribute("aria-label", `Playback speed ${v}×. Change speed`)
+      btnSpeed.title = "Change playback speed"
       // transitions must fit inside the step interval (baseDelay / speed), else
       // 2× bleeds each animation into the next frame and 0.5× freezes mid-step
       root.style.setProperty("--_tween", `${Math.round(107 / v)}ms`)
       if (player) player.setSpeed(v)
     }
-    if (host && typeof host.createSpeedSlider === "function") {
-      speedControlHandle = host.createSpeedSlider(speedControl, {
-        min: 0.5,
-        max: 2,
-        step: 0.25,
-        value: state.speed,
-        label: "Playback speed",
-        format: fmtSpeed,
-        onChange: applySpeed,
-      })
-    } else {
-      const speedInput = el("input", "steptrace__range")
-      speedInput.type = "range"
-      speedInput.min = "0.5"
-      speedInput.max = "2"
-      speedInput.step = "0.25"
-      speedInput.value = String(state.speed)
-      speedInput.setAttribute("aria-label", "Playback speed")
-      speedInput.setAttribute("aria-valuetext", fmtSpeed(state.speed))
-      const speedVal = el("span", "steptrace__speed-val")
-      speedVal.textContent = fmtSpeed(state.speed)
-      speedInput.addEventListener("input", () => {
-        applySpeed(speedInput.value)
-        speedVal.textContent = fmtSpeed(speedInput.value)
-        speedInput.setAttribute("aria-valuetext", fmtSpeed(speedInput.value))
-      })
-      speedControl.append(speedInput)
-      speedRow.append(speedVal)
-    }
-    speedSection.append(speedHead, speedRow)
-    menu.append(speedSection)
+    btnSpeed.addEventListener("click", () => {
+      applySpeed(SPEEDS.find((speed) => speed > state.speed) ?? SPEEDS[0])
+    })
     applySpeed(state.speed)
     let endpointSection = null
     let startHead = null
@@ -330,11 +327,12 @@ export function createMount(
       menu.append(section)
     }
     menuWrap.append(btnMenu, menu)
+    menuWrap.hidden = menu.children.length === 0
 
     const transport = el("div", "steptrace__transport")
     transport.append(btnReset, btnBack, btnPlay, btnFwd)
     const utility = el("div", "steptrace__utility")
-    utility.append(speedIndicator, menuWrap)
+    utility.append(btnSpeed, menuWrap)
     foot.append(phase, transport, timeline, utility)
 
     root.replaceChildren(head, body, foot)
@@ -462,11 +460,18 @@ export function createMount(
       const previousMode = layoutMode
       layoutMode = nextMode
       root.classList.toggle("steptrace--narrow", nextMode === "compact")
+      // The other mode's reservation no longer applies; a panel hidden by the
+      // new mode is reserved again when it is shown.
+      watchEl.style.minHeight = ""
       renderRailMode(previousMode, previousMode !== "unknown")
     }
 
     function refitCompactTrace() {
-      if (!player || layoutMode !== "compact" || compactPanel !== "trace") return
+      if (!player || layoutMode !== "compact") return
+      if (compactPanel !== "trace") {
+        reserveWatchHeight()
+        return
+      }
       sizeRail()
       renderRail()
     }
@@ -508,6 +513,7 @@ export function createMount(
     // resolve them in one layout pass.
     function sizeRail() {
       if (!player) return
+      reserveWatchHeight()
       if (layoutMode === "compact") {
         const logCS = getComputedStyle(log)
         const lineHeight = parseFloat(logCS.lineHeight) || 0
@@ -515,6 +521,7 @@ export function createMount(
         const height = Math.ceil(lineHeight * 3 + gap * 2) + "px"
         log.style.height = height
         log.style.minHeight = height
+        traceWrap.style.minHeight = ""
         return
       }
       // sub-pixel heights throughout: offsetHeight rounds, and rounding two history
@@ -545,9 +552,14 @@ export function createMount(
       // History rows now hug their message, so reserve their two-line ceiling
       // rather than measuring whatever the current step happens to render.
       const hist = (parseFloat(logCS.lineHeight) || 0) * 2
-      const h = Math.ceil(hist * 2 + gap * 2 + maxRow) + "px"
+      const h = Math.ceil(hist * 2 + gap * 2 + maxRow)
       log.style.height = "auto"
-      if (log.style.minHeight !== h) log.style.minHeight = h
+      if (log.style.minHeight !== h + "px") log.style.minHeight = h + "px"
+      // A tall WATCH block must not squeeze the trace below its pinned log, or the
+      // log would slide under WATCH; the rail scrolls instead.
+      const labelGap = parseFloat(getComputedStyle(traceLabel).marginBottom) || 0
+      const floor = Math.ceil(tall(traceLabel) + labelGap + h) + "px"
+      if (traceWrap.style.minHeight !== floor) traceWrap.style.minHeight = floor
     }
     // Walk the rendered rows bottom-up and keep only those that fit whole inside
     // the log's pinned height — a step half-cut by the overflow reads as a bug.
@@ -727,18 +739,32 @@ export function createMount(
         row.setAttribute("role", "group")
         row.setAttribute("aria-label", `${r.k}: ${String(r.v)}`)
         row.setAttribute("aria-describedby", hintId)
-        if (r.sw) {
-          const sw = el("span", "steptrace__watch-sw")
-          sw.style.setProperty("--_watch-color", r.sw)
-          row.append(sw)
-        }
-        const kk = el("span", "steptrace__watch-k")
-        kk.textContent = r.k
-        const vv = el("span", "steptrace__watch-v")
-        vv.textContent = r.v
-        row.append(kk, vv, hint)
+        row.append(...watchRowParts(r), hint)
         watchEl.append(row)
       }
+    }
+    // Wrapped values make a frame's WATCH height depend on its text, so reserve
+    // the tallest frame's block at the current width; a hidden compact panel keeps
+    // its last reservation until it can be measured again.
+    function reserveWatchHeight() {
+      if (!player || !hasWatch || !currentView?.watch || !watchEl.getClientRects().length) return
+      const probes = player.frames.map((frame) => {
+        const probe = el("div", "steptrace__watch steptrace__measure-probe")
+        for (const r of currentView.watch(frame) || []) {
+          const row = el("div", "steptrace__watch-row")
+          row.append(...watchRowParts(r))
+          probe.append(row)
+        }
+        return probe
+      })
+      watchWrap.append(...probes)
+      let tallest = 0
+      for (const probe of probes) tallest = Math.max(tallest, probe.getBoundingClientRect().height)
+      for (const probe of probes) probe.remove()
+      // A panel's enter transform adds float noise to the rect; snap to the 1/64px
+      // layout unit so the reservation does not round up a whole pixel.
+      const height = Math.ceil(Math.round(tallest * 64) / 64) + "px"
+      if (watchEl.style.minHeight !== height) watchEl.style.minHeight = height
     }
 
     // --- scrubber seek (click + drag + keyboard) ---
@@ -959,7 +985,6 @@ export function createMount(
         destroyHostTabs()
         if (player) player.destroy()
         if (currentView && currentView.destroy) currentView.destroy()
-        if (speedControlHandle && speedControlHandle.destroy) speedControlHandle.destroy()
         if (railRO) railRO.disconnect()
         mq.removeEventListener("change", applyMotion)
         root.removeEventListener("keydown", onKey)

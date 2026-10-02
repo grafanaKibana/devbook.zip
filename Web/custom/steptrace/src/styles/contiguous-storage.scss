@@ -53,7 +53,7 @@
   place-items: center;
   overflow: hidden;
   padding: var(--_space-2);
-  font: var(--_weight-strong) var(--_type-lg)/var(--_leading-readable) var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-sm)/var(--_leading-readable) var(--_font-mono);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -70,14 +70,14 @@
   padding-inline: var(--_space-1);
   border-block-start: var(--_stroke-hair) solid color-mix(in srgb, var(--_text) 22%, transparent);
   color: var(--_context-text);
-  font: var(--_weight-strong) var(--_type-2xs)/var(--_leading-solid) var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-xs)/var(--_leading-solid) var(--_font-mono);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 @container steptrace-structure (max-width: 36rem) {
   .steptrace__contiguous-value {
-    font-size: var(--_type-ui);
+    font-size: var(--_type-xs);
   }
 }
 

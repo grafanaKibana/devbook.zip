@@ -239,7 +239,13 @@ export class StackSequenceRecorder implements StackSequenceOperations {
 function answerLabel(frame: StackSequenceFrame, index: number) {
   const answer = frame.answers[index]
   if (answer != null) return `→ ${frame.array[answer]}`
-  return frame.type === "done" ? "→ none" : "waiting"
+  return frame.type === "done" ? "none" : "…"
+}
+
+function spokenAnswer(frame: StackSequenceFrame, index: number) {
+  const answer = frame.answers[index]
+  if (answer != null) return `answer ${frame.array[answer]}`
+  return frame.type === "done" ? "no answer" : "answer pending"
 }
 
 export function makeStackSequenceView(
@@ -321,7 +327,7 @@ export function makeStackSequenceView(
       answer.textContent = answerLabel(frame, index)
       cell.setAttribute(
         "aria-label",
-        `Index ${index}, value ${frame.array[index]}, ${answer.textContent}`,
+        `Index ${index}, value ${frame.array[index]}, ${spokenAnswer(frame, index)}`,
       )
     })
 

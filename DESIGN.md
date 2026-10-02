@@ -7,7 +7,7 @@ This is the repository-wide design contract. Keep it limited to verified cross-v
 ## Source of truth
 
 - **Status:** Active
-- **Last refreshed:** 2026-08-26
+- **Last refreshed:** 2026-10-02
 - **Current:** observed in the repository.
 - **Direction:** a rule to preserve or move toward.
 - **Open:** a decision or evidence gap the repository does not settle.
@@ -27,17 +27,17 @@ This is the repository-wide design contract. Keep it limited to verified cross-v
 
 ### Authority and host parity
 
-| Surface                                    | Authority                                                                      | Obsidian projection                                  | Quartz projection                               | Current status                                                  |
-| ------------------------------------------ | ------------------------------------------------------------------------------ | ---------------------------------------------------- | ----------------------------------------------- | --------------------------------------------------------------- |
-| Notes, hierarchy, metadata, topic identity | `Vault/Home/`                                                                  | Markdown and frontmatter                             | Generated `Web/content/`                        | Current                                                         |
-| Shared cards                               | `Vault/Assets/components/devbook-card.jsx`                                     | Datacore JSX                                         | Frozen HTML/CSS                                 | Current                                                         |
-| FolderNote maps                            | `Vault/Assets/components/devbook-folder-map.jsx`                               | Datacore JSX                                         | Frozen HTML/CSS                                 | Current                                                         |
-| Home dashboard                             | `Vault/Home/index.md`                                                          | Datacore JSX                                         | Frozen HTML/CSS plus `homepage-fit.tsx`         | Current                                                         |
-| Questions                                  | `[!QUESTION]` callouts in `Vault/Home/`                                        | Datacore index                                       | `QuestionsIndex`                                | Current; equivalent outcome, different renderers                |
-| StepTrace                                  | `Web/custom/steptrace/src/` and its local `DESIGN.md`                          | Generated Obsidian plugin                            | Generated Quartz assets and host integration    | Current                                                         |
-| Complexity charts                          | `complexity` fences and `Web/custom/complexity/`                               | Shared model rendered to DOM by the StepTrace plugin | Shared model rendered to HAST                   | Current contract; 97 DSA v2 charts plus standalone Big O        |
-| Quartz shell                               | `Web/quartz.config.yaml`, `Web/quartz.ts`, sanctioned styles and `Web/custom/` | Not applicable                                       | Generated `Web/public/`                         | Current                                                         |
-| Obsidian shell                             | `.obsidian` appearance, enabled snippets, theme, and Style Settings            | Native app UI                                        | Not applicable                                  | Current                                                         |
+| Surface                                    | Authority                                                                      | Obsidian projection                                  | Quartz projection                            | Current status                                           |
+| ------------------------------------------ | ------------------------------------------------------------------------------ | ---------------------------------------------------- | -------------------------------------------- | -------------------------------------------------------- |
+| Notes, hierarchy, metadata, topic identity | `Vault/Home/`                                                                  | Markdown and frontmatter                             | Generated `Web/content/`                     | Current                                                  |
+| Shared cards                               | `Vault/Assets/components/devbook-card.jsx`                                     | Datacore JSX                                         | Frozen HTML/CSS                              | Current                                                  |
+| FolderNote maps                            | `Vault/Assets/components/devbook-folder-map.jsx`                               | Datacore JSX                                         | Frozen HTML/CSS                              | Current                                                  |
+| Home dashboard                             | `Vault/Home/index.md`                                                          | Datacore JSX                                         | Frozen HTML/CSS                              | Current                                                  |
+| Questions                                  | `[!QUESTION]` callouts in `Vault/Home/`                                        | Datacore index                                       | `QuestionsIndex`                             | Current; equivalent outcome, different renderers         |
+| StepTrace                                  | `Web/custom/steptrace/src/` and its local `DESIGN.md`                          | Generated Obsidian plugin                            | Generated Quartz assets and host integration | Current                                                  |
+| Complexity charts                          | `complexity` fences and `Web/custom/complexity/`                               | Shared model rendered to DOM by the StepTrace plugin | Shared model rendered to HAST                | Current contract; 97 DSA v2 charts plus standalone Big O |
+| Quartz shell                               | `Web/quartz.config.yaml`, `Web/quartz.ts`, sanctioned styles and `Web/custom/` | Not applicable                                       | Generated `Web/public/`                      | Current                                                  |
+| Obsidian shell                             | `.obsidian` appearance, enabled snippets, theme, and Style Settings            | Native app UI                                        | Not applicable                               | Current                                                  |
 
 Host parity means the same useful reading outcome, not identical markup or host chrome.
 
@@ -90,9 +90,9 @@ Their main jobs are to find a topic, understand its scope, inspect the mechanism
 ## Information architecture
 
 - **Home:** whole-vault progress followed by topic cards.
-- **FolderNote:** introductory prose, one direct-child card map, retained useful content, annotated references, and optional questions when they teach something.
-- **Concept note:** explanation, concrete example, required questions, annotated references, and optional explanatory devices such as visualizations.
-- **Questions:** cross-vault aggregation grouped by the topic hierarchy.
+- **FolderNote:** introductory prose, one direct-child card map, retained useful content, and optional Questions and References when they carry useful content.
+- **Concept note:** opening content that makes the operating idea and its boundary recoverable, with no mandatory body section; examples, visualizations, Questions, References, and other explanatory devices appear only when the topic earns them. References, where present, are bare descriptive link bullets; `AGENTS.md` owns this note contract.
+- **Questions:** cross-vault aggregation with root topics rendered by Tabsdown in both readers. Topic tabs wrap across rows, and all topic questions load when the page opens. One active topic and a native Subtopic selector narrow visibility to that scope and its descendants. Options expose every hierarchy level with full ancestry and counts; answers and source links retain their existing renderers.
 - **Roadmap:** generated spatial overview; never hand-edited.
 
 ### Navigation rules
@@ -137,8 +137,10 @@ Their main jobs are to find a topic, understand its scope, inspect the mechanism
 
 - Use `0.25rem` to `1rem` spacing inside cards and controls; use larger gaps between page sections.
 - Cards align title, summary, and footer regions without forcing equal content.
-- Home uses a 12-column grid with span changes at `1600px` and `760px`, then one column at `430px`.
+- Home starts with its learning overview, without a welcome heading. Ten topic cards form three, four, and three cards in complete desktop rows. Other inventories use balanced complete rows in topic/keyboard order. The dashboard container switches from one column to paired cards at `28rem`, three-card rows at `42rem`, and up to four cards at `62rem`. Content sets row height; titles and summaries wrap without clamping, and progress stays at the bottom. The page scrolls, and the desktop grid keeps its `2rem` end gutter. Search is centred over the main content track: pages without a right rail share that track's desktop offset, and tablet content has symmetric outer margins.
 - FolderNote maps wrap content-sized cards instead of truncating long titles.
+- Pages without a right rail (FolderNotes, tag pages, Questions, About) give their content the full track; on desktop that track keeps a `2rem` end gutter mirroring the sidebar inset.
+- Callout bodies never widen past the callout: wide code, tables, and diagrams scroll inside their own box.
 - Visualizations keep stage geometry stable across state changes.
 
 ### Shape and elevation
@@ -146,14 +148,14 @@ Their main jobs are to find a topic, understand its scope, inspect the mechanism
 - Use medium rounded rectangles for cards and controls.
 - Use circles only for circular data or play/progress controls, and pills only for compact tracks or state chips.
 - Shared cards use one border, a modest radius, one soft accent glow, and a small hover/focus lift.
-- `[!QUESTION]-` is a collapsed FAQ disclosure, not a card: clear internal padding, a divider, and a plus/minus control expose its behavior; Obsidian uses native app tokens, while Quartz uses DevBook typography and green accent details.
+- `[!QUESTION]-` is a collapsed FAQ disclosure, not a card, in notes and on the Questions index alike: clear internal padding, a divider, and a plus/minus control expose its behavior; Obsidian uses native app tokens, while Quartz uses DevBook typography and green accent details.
 - Visualization stages remain unboxed like diagrams; only functional control surfaces may be raised.
 
 ### Motion
 
 - Quartz motion roles are `90ms`, `140ms`, `220ms`, and `340ms`, with a `28ms` stagger.
 - Card entrance staggering must settle quickly even in a large grid.
-- Use deceleration for entering and acceleration for leaving.
+- Use deceleration for entering and acceleration for leaving; entrances never overshoot.
 - Do not add whole-page loaders. Gate only the region that is not ready, then fail open.
 - Reduced motion removes positional travel and entrance effects. Short color or opacity transitions may remain when they clarify state.
 
@@ -182,24 +184,29 @@ Their main jobs are to find a topic, understand its scope, inspect the mechanism
 | Questions index             | Cross-vault question navigation               | `Vault/Home/Questions.md`, `Web/custom/components/questions-index.tsx` |
 | Site header and Explorer    | Global Quartz navigation                      | `Web/custom/components/`                                               |
 | Site footer and sharing     | Global Quartz links and per-page sharing      | `Web/custom/components/site-footer.tsx`                                |
-| Page reveal and Home fit    | Readiness and whole-card responsive fallback  | `Web/custom/components/`                                               |
+| Page reveal                 | First-paint readiness and entrance motion     | `Web/custom/components/`                                               |
 | StepTrace                   | Algorithm playback and interactive structures | `Web/custom/steptrace/`                                                |
 | Complexity chart            | Growth curves, plot, and legend               | `Web/custom/complexity/`                                               |
 
 ### Quartz shell
 
-- `SiteFooter` wraps the configured community footer instead of replacing its links. Informational links stay left-aligned opposite per-page sharing; below `768px`, shareable pages collapse those labels to their existing icons so both groups stay on one row, while pages without sharing keep the labels visible and centered.
+- The desktop reading frame keeps its existing 1600px cap and content geometry. Above that width, the 320px sidebars move into the viewport gutters with their existing 2rem edge inset; their grid tracks stay reserved. Tablet and mobile keep the existing Explorer drawer and content flow.
+- `SiteFooter` wraps the configured community footer instead of replacing its links. Informational links stay left-aligned opposite per-page sharing; below `768px`, shareable pages collapse those labels to their existing icons so both groups stay on one row. Pages without sharing keep the labels visible and centered at every width. Every footer owns the same `--lightgray` top border and `1.5rem` vertical padding, with no added horizontal padding; its height follows its content. Separation from content stays outside the footer, with no empty grid row or trailing margin.
 - Share actions remain static-first canonical anchors. Copy enhances its same-page link only when the Clipboard API is available, shows a transient check state, and resets after navigation or its timeout; the other links open native X, LinkedIn, and Reddit share targets.
-- Share icons are decorative SVGs behind accessible link names. Footer links use the shared compact spacing, accent hover, and visible accent focus outline; informational links retain normal text color while the Share group stays subtle until interaction.
+- Share icons are decorative SVGs behind accessible link names. Footer links use the shared compact spacing, accent hover, and visible accent focus outline; informational links retain normal text color while the Share label and icons use the same subtle color until interaction.
+- Unfinished notes are marked in place, not site-wide: `Not-Started` and `Creation` lead the article meta row with one static `In progress` state chip beside the modified date and Edit/Report links. `Ready to Repeat` and later show nothing, and lifecycle state never uses motion, banners, or a second issue link.
+- The 404 page uses the default frame, so the header, search, and skip link stay available; its copy says nothing is published at the address and points to search and Home.
+- The desktop search pill shows the platform's search shortcut (`⌘K` or `Ctrl K`); touch and mobile widths omit it.
+- Below `768px`, header icon buttons keep `44px` hit areas at their `20px` glyph size and embedded documents shrink to the column. At every width, the scroll buttons step aside while they would cover a StepTrace or Excalidraw surface.
 - Below `768px`, Graph View is hidden while Backlinks remains available. The Explorer panel gives its tree the remaining drawer height as the single scroll owner so every expanded item stays reachable.
 
 ### Cards and dashboards
 
 - `db-card` owns shared chrome; consumers own layout and genuinely local additions.
 - Full-card hit areas are semantic links with visible focus.
-- Home orders progress first and topic cards second.
-- Lifecycle progress is derived as Not-Started `0`, Creation `33`, Ready to Repeat `66`, and Done `100`.
-- Home fit degrades by whole features, then returns to normal scrolling; it never clips the page to preserve one screen.
+- Home opens with its page title as a visible, quiet `h1`, then orders progress first and topic cards second.
+- Lifecycle progress weights each note by its stage (Not-Started, Creation, Ready to Repeat, Repetition, Done, rising in that order); the weights are defined only in the `LIFECYCLE` table in `Vault/Home/index.md`, and a status outside it counts as Other with weight `0`.
+- Home never hides a topic's counts, percentage, or bar to fit one screen. Each card states its note count and progress percentage, each bar is labelled with its percentage and lifecycle totals, and the hero legend lists every stage, plus Other when present, beside the weights that produce the percentage.
 - Questions shares topic metadata and icon language but uses disclosure/navigation appropriate to that page.
 
 ### Visualizations
@@ -233,7 +240,11 @@ Their main jobs are to find a topic, understand its scope, inspect the mechanism
 
 - **Target:** WCAG 2.2 AA for new or changed UI. This is a direction, not a claim that the whole repository is audited.
 - Full-card links, disclosures, tabs, transport controls, scrubbers, and native option controls must be keyboard reachable.
-- Use visible `:focus-visible` outlines.
+- Foldable callouts are disclosure buttons: Enter and Space toggle them, `aria-expanded` reports the state, and a folded body is inert.
+- Explorer toggles report `aria-expanded` for the state actually shown, and a collapsed list, closed drawer, or closed folder leaves the tab order and the accessibility tree. Escape closes an open drawer and returns focus to its toggle.
+- Every Quartz page opens with a skip link as its first tab stop, and the content column is the `main` landmark.
+- Every focusable control shows the `2px` accent `:focus-visible` ring; a component may restyle it but never leave the browser default or remove it. Topic-coloured cards and chips keep the accent ring, not their topic hue. Where a clipping or scrolling container would cut an outset ring, draw it inset, or ring the clipping container itself, as a foldable callout does from its focused title. The site default ring sits in the `quartz-base` cascade layer with component `.css` at minimal specificity, so a component's own ring rule refines it; a layered component that clears the outline must restore an indicator from unlayered `custom.scss`. Plugin stylesheets such as Tabsdown's and the code-block buttons' load unlayered after `custom.scss`, so overriding them takes extra specificity.
+- Text meets `4.5:1` and meaningful marks `3:1` in both themes on the surface they actually sit on. Fix the shared token or owner rather than a single element: muted `--gray` holds `4.5:1` on the page fill, the light accent holds it on the internal-link chip, and callout titles pull their hue toward the text colour.
 - Color is never the only state signal.
 - Decorative icons and SVGs are hidden; data graphics have labels or equivalent text.
 - Progress exposes percentage and lifecycle totals as text.
@@ -243,15 +254,15 @@ Their main jobs are to find a topic, understand its scope, inspect the mechanism
 
 ## Responsive behavior
 
-| Surface      | Current contract                                                                                     |
-| ------------ | ---------------------------------------------------------------------------------------------------- |
-| Home cards   | 12-column span rules; narrow spans below `760px`; one column at `430px`                              |
-| Quartz shell | Mobile footer one row; no-share labels center; Graph hides; Explorer scrolls                         |
-| Home fit     | Enabled from `768px` with sufficient height; desktop range begins at `1201px`                        |
-| StepTrace    | Mounted-instance compact mode below `704px`; footer fits `320px` without shrinking `44px` controls    |
-| Complexity   | One resource panel at full width at every size; the tab strip scrolls before it wraps, and the figure never gains a horizontal scroller |
-| Folder maps  | Content-sized wrapping cards; compact treatment in narrow containers                                 |
-| Questions    | Two independent columns collapse to one ordered column                                               |
+| Surface      | Current contract                                                                                                                                                                             |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Home cards   | Balanced complete rows, 3–4–3 for ten desktop topics; container breakpoints at `28rem`, `42rem`, and `62rem`; full content wraps                                                             |
+| Quartz shell | Mobile footer one row; no-share labels center; Graph hides; Explorer scrolls                                                                                                                 |
+| Home page    | Scrolls at every size; all summaries, counts, bars, and the legend stay visible                                                                                                              |
+| StepTrace    | Mounted-instance compact mode below `704px`; footer fits `320px` without shrinking `44px` controls                                                                                           |
+| Complexity   | One resource panel at full width at every size; the tab strip scrolls before it wraps, and the figure never gains a horizontal scroller                                                      |
+| Folder maps  | Content-sized wrapping cards; compact treatment in narrow containers                                                                                                                         |
+| Questions    | Tabsdown topic tabs wrap across rows without horizontal scrolling; the native Subtopic selector stacks below its label. Topic and subtopic choices scope the same questions in both readers. |
 
 Prefer container queries or mounted-instance measurement for content components. Use viewport media queries only for true page-shell behavior.
 
@@ -287,13 +298,13 @@ Prefer container queries or mounted-instance measurement for content components.
 
 Run the smallest applicable gate first.
 
-| Surface                 | Automated gate                                                                        | Required manual evidence when behavior changes                     |
-| ----------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| Vault structure/content | `python3 .scripts/tests/test_validate_vault.py`                                       | Obsidian rendering when affected                                   |
-| Cards and dashboards    | Vault validation, then `npm run check` from `Web/`                                    | Obsidian and Quartz; light/dark; desktop/mobile                    |
-| StepTrace               | `npm run steptrace:test`, `steptrace:typecheck`, `steptrace:build`, `steptrace:check` | Both hosts; initial/active/final; narrow; reduced motion; teardown |
+| Surface                 | Automated gate                                                                        | Required manual evidence when behavior changes                       |
+| ----------------------- | ------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| Vault structure/content | `python3 .scripts/tests/test_validate_vault.py`                                       | Obsidian rendering when affected                                     |
+| Cards and dashboards    | Vault validation, then `npm run check` from `Web/`                                    | Obsidian and Quartz; light/dark; desktop/mobile                      |
+| StepTrace               | `npm run steptrace:test`, `steptrace:typecheck`, `steptrace:build`, `steptrace:check` | Both hosts; initial/active/final; narrow; reduced motion; teardown   |
 | Complexity              | `npm run complexity:test`, then `npm run check`                                       | Both hosts; independent legends; narrow scroll; light/dark; keyboard |
-| Quartz shell            | `npm run check`, then a Quartz build when appropriate                                 | Hard load, SPA navigation, focus, and responsive shell             |
+| Quartz shell            | `npm run check`, then a Quartz build when appropriate                                 | Hard load, SPA navigation, focus, and responsive shell               |
 
 Complexity runtime QA is task-scoped: when visual behavior changes, inspect representative version 1 and version 2 schemas in both hosts at relevant widths and themes. Unit tests cover generic schema, model, accessibility, rendering, and transformer invariants; they do not encode named notes or screenshot matrices.
 

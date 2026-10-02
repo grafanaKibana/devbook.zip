@@ -61,8 +61,9 @@
   fill: var(--_context-text);
   stroke: var(--_surface);
   stroke-width: 4px;
+  stroke-linejoin: round;
   paint-order: stroke;
-  font: var(--_weight-strong) var(--_type-2xs)/var(--_leading-solid) var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-xs)/var(--_leading-solid) var(--_font-mono);
   text-anchor: middle;
   dominant-baseline: central;
 }
@@ -217,7 +218,7 @@
 .steptrace .steptrace__gs-map-label,
 .steptrace .steptrace__gs-road-direction {
   fill: var(--_muted);
-  font: var(--_weight-strong) var(--_type-2xs)/var(--_leading-solid) var(--_font-body);
+  font: var(--_weight-strong) var(--_type-xs)/var(--_leading-solid) var(--_font-body);
   text-anchor: middle;
   dominant-baseline: central;
 }
@@ -226,12 +227,75 @@
   fill: var(--_strong-fill-text);
 }
 
-.steptrace .steptrace__gs-city-label {
-  font-size: var(--_type-2xs);
-}
-
 .steptrace .steptrace__gs-road-direction {
   font-family: var(--_font-mono);
+}
+
+.steptrace .steptrace__gs-axis-label {
+  fill: var(--_muted);
+  font: var(--_weight-strong) var(--_type-xs)/var(--_leading-solid) var(--_font-body);
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+.steptrace .steptrace__gs-axis-label--street {
+  text-anchor: end;
+}
+
+.steptrace .steptrace__gs-node-tag {
+  display: none;
+  pointer-events: none;
+  fill: var(--_text);
+  stroke: var(--_surface);
+  stroke-width: calc(4px * var(--_gs-text-scale, 1));
+  stroke-linejoin: round;
+  paint-order: stroke;
+  font: var(--_weight-strong) var(--_type-xs)/var(--_leading-solid) var(--_font-mono);
+  dominant-baseline: central;
+}
+
+.steptrace .steptrace__gs-node[data-tagged="true"] .steptrace__gs-node-tag {
+  display: block;
+}
+
+.steptrace .steptrace__gs-node-tag[data-side="left"] {
+  text-anchor: end;
+}
+
+.steptrace .steptrace__gs-node-tag:is([data-side="above"], [data-side="below"]) {
+  text-anchor: middle;
+}
+
+.steptrace .steptrace__gs-node--city .steptrace__gs-node-tag {
+  font-family: var(--_font-body);
+}
+
+/* The map fills the stage at its own aspect; the view supplies SVG units per
+   CSS pixel so every label renders at the fitted-label floor at any width. */
+.steptrace .steptrace__graph-state[data-profile="midtown-map"] .steptrace__gs-graph {
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.steptrace .steptrace__graph-state[data-profile="midtown-map"] .steptrace__gs-svg {
+  max-block-size: none;
+}
+
+/* Text the viewBox scales with the stage; counter-scaled nodes already render
+   their own labels at a fixed size. */
+.steptrace
+  .steptrace__gs-svg
+  :is(
+    .steptrace__gs-edge-labels,
+    .steptrace__gs-decor,
+    .steptrace__gs-node--map,
+    .steptrace__gs-node--city
+  )
+  text {
+  font-size: calc(var(--_type-xs) * var(--_gs-text-scale));
+}
+
+.steptrace .steptrace__gs-svg .steptrace__gs-edge-label {
+  stroke-width: calc(4px * var(--_gs-text-scale, 1));
 }
 
 .steptrace .steptrace__gs-swatch--current {

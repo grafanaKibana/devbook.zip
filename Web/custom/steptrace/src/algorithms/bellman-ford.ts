@@ -20,6 +20,7 @@ class Recorder {
     distances: Readonly<Record<string, number>>,
     changed: boolean,
     message: string,
+    milestone?: string,
   ) {
     const reachable = new Set(
       Object.entries(distances)
@@ -28,6 +29,7 @@ class Recorder {
     )
     const detail: GraphStateDetail = {
       kind: "edge-relaxation",
+      policy: "bellman-ford",
       pass,
       edge,
       distances: { ...distances },
@@ -57,6 +59,7 @@ class Recorder {
         ]),
       ),
       message,
+      ...(milestone ? { milestone } : {}),
       detail,
     })
   }
@@ -89,7 +92,7 @@ function run(config: Config, recorder: Recorder) {
   const distances: Record<string, number> = { "0": 0, "1": Infinity, "2": Infinity, "3": Infinity }
   recorder.record(0, null, distances, false, "Set dist[0] = 0; all other distances start at ∞.")
   for (let pass = 1; pass <= 3; pass++) {
-    for (const edge of config.edges) {
+    for (const [index, edge] of config.edges.entries()) {
       const before = distances[edge.to]
       const candidate = distances[edge.from] + edge.weight
       const changed = Number.isFinite(candidate) && candidate < before
@@ -102,11 +105,12 @@ function run(config: Config, recorder: Recorder) {
         changed
           ? `Pass ${pass}: ${edge.from}→${edge.to} lowers dist[${edge.to}] from ${before} to ${candidate}.`
           : `Pass ${pass}: ${edge.from}→${edge.to} cannot improve dist[${edge.to}].`,
+        index === 0 ? `Pass ${pass}` : undefined,
       )
     }
   }
   let changed = false
-  for (const edge of config.edges) {
+  for (const [index, edge] of config.edges.entries()) {
     const relaxes =
       Number.isFinite(distances[edge.from]) &&
       distances[edge.from] + edge.weight < distances[edge.to]
@@ -117,6 +121,7 @@ function run(config: Config, recorder: Recorder) {
       distances,
       relaxes,
       `Check ${edge.from}→${edge.to}: ${relaxes ? "it still relaxes" : "no change"}.`,
+      index === 0 ? "Cycle check" : undefined,
     )
   }
   recorder.record(

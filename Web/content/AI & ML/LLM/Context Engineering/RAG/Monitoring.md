@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.482Z
-modified: 2026-08-20T20:41:15.482Z
-published: 2026-08-20T20:41:15.482Z
+modified: 2026-09-21T08:40:06.210Z
+published: 2026-09-21T08:40:06.210Z
 topic:
   - AI & ML
 subtopic:
@@ -135,7 +135,7 @@ Semantic scoring runs asynchronously on a sample of production traffic. Binary p
 
 **Token usage** records input and output tokens through `gen_ai.client.token.usage`. Per-query and daily totals expose cost. A sudden rise usually points to prompt growth or oversized context.
 
-**Cache hit rate** belongs to each [[AI & ML/LLM/Context Engineering/RAG/Caching|Caching]] layer. A drop after a corpus update is expected. A sustained drop on stable data points to key design or invalidation.
+**Cache hit rate** belongs to each [[AI & ML/LLM/Context Engineering/RAG/RAG Caching|Caching]] layer. A drop after a corpus update is expected. A sustained drop on stable data points to key design or invalidation. Provider [[AI & ML/LLM/LLM Caching#Prompt Caching|Prompt Caching]] needs separate read-token, write-volume, and cost measurements; an application response-cache hit skips the model call entirely. Missing provider usage is unknown, not a measured zero.
 
 **Error rate** counts failed requests and assigns them to the stage that failed. Model API errors should not be mixed with retrieval timeouts or response parsing defects.
 

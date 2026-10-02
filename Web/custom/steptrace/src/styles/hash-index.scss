@@ -109,7 +109,7 @@
 .steptrace__hash-calculation {
   min-width: 0;
   color: var(--_muted);
-  font: var(--_weight-strong) var(--_type-sm) / var(--_leading-readable) var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-base) / var(--_leading-readable) var(--_font-mono);
 }
 
 .steptrace__hash-canvas {
@@ -152,8 +152,7 @@
   padding: var(--_space-0) var(--_space-hair);
   border-color: transparent;
   background: transparent;
-  /* steptrace-exception: hash-chain-label-fit | category=responsive | rationale=fits labels inside container-sized chain slots | evidence=.omx/evidence/steptrace-design-system-refactor/visual/candidate/g005-candidate-k/summary.json */
-  font-size: clamp(0.4rem, 1.25cqi, var(--_type-2xs));
+  font-size: var(--_type-xs);
 }
 
 .steptrace__hash-chain-slot[data-filled="1"] {
@@ -236,7 +235,7 @@
 .steptrace__hash-buckets[data-strategy="bits"] .steptrace__hash-cell-value {
   color: var(--_accent);
   /* steptrace-exception: hash-bits-label-fit | category=responsive | rationale=fits values inside container-sized bit cells | evidence=.omx/evidence/steptrace-design-system-refactor/visual/candidate/g005-candidate-k/summary.json */
-  font-size: clamp(var(--_type-2xs), 1.7cqi, var(--_type-lg));
+  font-size: clamp(var(--_type-xs), 1.7cqi, var(--_type-sm));
 }
 
 .steptrace__hash-buckets[data-strategy="closed-addressing"] .steptrace__hash-cell-value {
@@ -294,7 +293,7 @@
   gap: var(--_space-0);
   padding: var(--_space-1) var(--_space-hair);
   /* steptrace-exception: hash-cell-label-fit | category=responsive | rationale=fits keys and values inside container-sized hash cells | evidence=.omx/evidence/steptrace-design-system-refactor/visual/candidate/g005-candidate-k/summary.json */
-  font: var(--_weight-strong) clamp(var(--_type-micro), 1.45cqi, var(--_type-sm)) /
+  font: var(--_weight-strong) clamp(var(--_type-xs), 1.45cqi, var(--_type-sm)) /
     var(--_leading-solid) var(--_font-mono);
 }
 
@@ -329,9 +328,7 @@
   place-items: center;
   border-block-start: var(--_stroke-hair) solid color-mix(in srgb, var(--_text) 22%, transparent);
   color: var(--_muted);
-  /* steptrace-exception: hash-index-label-fit | category=responsive | rationale=fits index labels inside container-sized hash cells | evidence=.omx/evidence/steptrace-design-system-refactor/visual/candidate/g005-candidate-k/summary.json */
-  font: var(--_weight-strong) clamp(0.43rem, 1.25cqi, var(--_type-2xs)) / var(--_leading-solid)
-    var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-xs) / var(--_leading-solid) var(--_font-mono);
 }
 
 .steptrace__hash-buckets[data-strategy="closed-addressing"] .steptrace__hash-index-label {
@@ -347,7 +344,8 @@
     "status";
   grid-template-rows:
     var(--steptrace-structure-control-size) var(--steptrace-structure-control-size)
-    1.4rem;
+    var(--steptrace-hash-status-size);
+  --steptrace-hash-status-size: calc(2em * var(--_leading-readable));
 }
 
 .steptrace__hash-fields,
@@ -378,11 +376,9 @@
 
 .steptrace__hash-controls > .steptrace__structure-status {
   grid-area: status;
-  block-size: 1.4rem;
   min-height: 0;
   width: 100%;
   overflow: hidden;
-  white-space: nowrap;
 }
 
 @container steptrace-structure (max-width: 36rem) {
@@ -393,7 +389,7 @@
 
   .steptrace__hash-token,
   .steptrace__hash-calculation {
-    font-size: var(--_type-2xs);
+    font-size: var(--_type-xs);
   }
 
   .steptrace__hash-actions {
@@ -405,7 +401,9 @@
   }
 
   .steptrace__hash-controls {
-    grid-template-rows: var(--steptrace-structure-control-size) 6.05rem 1.4rem;
+    grid-template-rows: var(--steptrace-structure-control-size) 6.05rem var(
+        --steptrace-hash-status-size
+      );
   }
 
   .steptrace__hash-fields > .steptrace__structure-input:first-child {

@@ -7,7 +7,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
-summary: Non-LLM tests that cheaply validate outputs for schema, safety, and policy before any LLM judge.
+summary: Executable checks that reject malformed or policy-violating output before semantic evaluation.
 level:
   - "3"
 priority: Medium

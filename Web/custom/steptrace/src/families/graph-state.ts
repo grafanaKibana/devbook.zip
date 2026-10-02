@@ -95,6 +95,16 @@ const GRAPH_STATE_MARKER_ROLES = [
   "cut",
 ] as const
 type GraphStateMarkerRole = (typeof GRAPH_STATE_MARKER_ROLES)[number]
+type NodeTagSide = NonNullable<GraphStateNode["tagSide"]>
+const NODE_TAG_OFFSETS: Record<NodeTagSide, readonly [number, number]> = {
+  left: [-18, 0],
+  right: [18, 0],
+  above: [0, -18],
+  below: [0, 18],
+}
+const FRONTIER_WATCH_LIMIT = 3
+// Characters that stay on the key's line in the 312px wide-mode rail.
+const WATCH_LIST_CHARS = 26
 
 function invalid(message: string): never {
   throw new Error(`steptrace: a-star ${message}`)
@@ -249,6 +259,21 @@ const CITY_NODE_OFFSETS: Readonly<Record<string, readonly [number, number]>> = {
   Zaporizhzhia: [4, 5],
 }
 
+const CITY_TAG_SIDES: Readonly<Record<string, NodeTagSide>> = {
+  Uzhhorod: "below",
+  Lutsk: "left",
+  Chernivtsi: "below",
+  Khmelnytskyi: "right",
+  Vinnytsia: "below",
+  Poltava: "below",
+  Odesa: "below",
+  Kherson: "below",
+  Simferopol: "below",
+  Dnipro: "right",
+  Zaporizhzhia: "below",
+  Donetsk: "below",
+}
+
 function haversine(a: { lat: number; lon: number }, b: { lat: number; lon: number }) {
   const radians = (degrees: number) => (degrees * Math.PI) / 180
   const dLat = radians(b.lat - a.lat)
@@ -304,47 +329,14 @@ function cityScenario(start: string, target: string): GraphStateConfig {
     x: city.x,
     y: city.y,
     h: Math.floor(haversine(city, goal)),
-  }))
-  const offsets: Record<string, [number, number]> = {
-    Uzhhorod: [0, 14],
-    Lviv: [-9, -10],
-    Lutsk: [-8, -10],
-    Rivne: [10, 13],
-    Ternopil: [28, 6],
-    "Ivano-Frankivsk": [-30, 18],
-    Chernivtsi: [8, 18],
-    Khmelnytskyi: [30, -12],
-    Vinnytsia: [-13, 13],
-    Zhytomyr: [-13, -10],
-    Kyiv: [11, -10],
-    Chernihiv: [8, -10],
-    Cherkasy: [13, 13],
-    Kropyvnytskyi: [0, 14],
-    Odesa: [-9, 13],
-    Mykolaiv: [12, -10],
-    Kherson: [12, 13],
-    Simferopol: [0, 14],
-    Poltava: [10, -10],
-    Sumy: [0, -10],
-    Dnipro: [-11, 13],
-    Zaporizhzhia: [14, 13],
-    Kharkiv: [0, -10],
-    Donetsk: [0, 14],
-    Luhansk: [0, -10],
-  }
-  const decor: GraphStateDecor[] = nodes.map((city) => ({
-    kind: "text",
-    className: "steptrace__gs-map-label steptrace__gs-city-label",
-    x: city.x + offsets[city.id][0],
-    y: city.y + offsets[city.id][1],
-    text: city.label,
+    tagSide: CITY_TAG_SIDES[city.id] ?? "above",
   }))
   return {
     profile: "ukraine-cities",
     policy: "a-star",
     nodes,
     edges,
-    decor,
+    decor: [],
     start: safeStart,
     target: safeTarget,
     endpointSettings: {
@@ -361,30 +353,31 @@ function cityScenario(start: string, target: string): GraphStateConfig {
 
 function buildingScenario(): GraphStateConfig {
   const nodes = [
-    ["S", "Studio door", 45, 155],
-    ["W", "West hall", 100, 155],
-    ["D1", "Meeting threshold", 180, 155],
-    ["J1", "West junction", 280, 155],
-    ["J2", "Fire door west", 340, 155],
-    ["J3", "Fire door east", 380, 155],
-    ["J4", "East junction", 421, 155],
-    ["EU", "East stair", 510, 155],
-    ["X", "Emergency exit", 575, 155],
-    ["WL", "West lower turn", 100, 215],
-    ["ML", "Lower hall west", 280, 215],
-    ["D5", "Lower junction", 350, 215],
-    ["EL", "Lower hall east", 421, 215],
-    ["ER", "East lower turn", 510, 215],
-    ["D2", "Kitchen threshold", 280, 130],
-    ["D3", "Archive threshold", 421, 130],
-    ["D4", "Ops threshold", 510, 240],
-    ["D6", "Reception threshold", 100, 130],
-  ].map(([id, label, x, y]) => ({
+    ["S", 45, 155, "below"],
+    ["W", 100, 155, "below"],
+    ["D1", 180, 155, "below"],
+    ["J1", 280, 155, "below"],
+    ["J2", 340, 155, "below"],
+    ["J3", 380, 155, "below"],
+    ["J4", 421, 155, "below"],
+    ["EU", 510, 155, "below"],
+    ["X", 575, 155, "below"],
+    ["WL", 100, 215, "below"],
+    ["ML", 280, 215, "below"],
+    ["D5", 350, 215, "below"],
+    ["EL", 421, 215, "below"],
+    ["ER", 510, 215, "right"],
+    ["D2", 280, 130, "above"],
+    ["D3", 421, 130, "above"],
+    ["D4", 510, 240, "right"],
+    ["D6", 100, 130, "above"],
+  ].map(([id, x, y, tagSide]) => ({
     id: String(id),
-    label: String(label),
+    label: String(id),
     x: Number(x),
     y: Number(y),
     h: 0,
+    tagSide: tagSide as NodeTagSide,
   }))
   const pairs = [
     ["S", "W"],
@@ -406,10 +399,17 @@ function buildingScenario(): GraphStateConfig {
     ["W", "D6"],
   ]
   const byId = new Map(nodes.map((node) => [node.id, node]))
+  // Keep the two vertical weights clear of the corridor nodes' tags.
+  const labelAt: Record<string, number> = { "W>WL": 0.8, "ER>EU": 0.2 }
   const edges = pairs.map(([from, to]) => {
     const a = byId.get(from)!
     const b = byId.get(to)!
-    return { from, to, weight: Math.max(1, Math.ceil(distance(a, b) / 40)) }
+    return {
+      from,
+      to,
+      weight: Math.max(1, Math.ceil(distance(a, b) / 40)),
+      labelAt: labelAt[`${from}>${to}`],
+    }
   })
   const remaining = graphStateShortestDistances(nodes, edges, "X")
   nodes.forEach((node) => (node.h = remaining.get(node.id)!))
@@ -458,21 +458,41 @@ function buildingScenario(): GraphStateConfig {
   }
 }
 
+const DEFAULT_VIEW_BOX = "0 0 620 320"
+const PROFILE_VIEW_BOX: Partial<Record<GraphStateProfile, string>> = {
+  "midtown-map": "0 0 480 400",
+}
+
 function midtownScenario(): GraphStateConfig {
-  const rows: Record<number, number> = { 47: 48, 46: 92, 45: 136, 44: 180, 43: 224, 42: 268 }
-  const nodes: GraphStateHeuristicNode[] = []
-  for (const [street, y] of Object.entries(rows)) {
-    nodes.push({ id: `6-${street}`, label: `Sixth & W${street}`, x: 170, y, h: 0 })
-    nodes.push({ id: `7-${street}`, label: `Seventh & W${street}`, x: 405, y, h: 0 })
+  // Edge costs come from the surveyed street geometry; `place` only fits that
+  // survey into the stage and leaves room for the avenue and street axes.
+  const place = (x: number, y: number) => ({ x: 50 + (x - 55) * 0.8, y: 40 + (y - 18) * 1.25 })
+  const spanX = (width: number) => width * 0.8
+  const spanY = (height: number) => height * 1.25
+  const segment = (x1: number, y1: number, x2: number, y2: number) => {
+    const from = place(x1, y1)
+    const to = place(x2, y2)
+    return `M${from.x} ${from.y} L${to.x} ${to.y}`
   }
-  for (const [id, x, y] of [
-    ["B47", 310, 28],
-    ["B46", 356, 81],
-    ["B44", 437, 175],
-    ["B43", 480, 224],
-    ["B42", 518, 268],
+  const rows: Record<number, number> = { 47: 48, 46: 92, 45: 136, 44: 180, 43: 224, 42: 268 }
+  const survey = new Map<string, { x: number; y: number }>()
+  const nodes: GraphStateHeuristicNode[] = []
+  const addNode = (id: string, x: number, y: number, tagSide: GraphStateNode["tagSide"]) => {
+    survey.set(id, { x, y })
+    nodes.push({ id, label: id, ...place(x, y), h: 0, tagSide })
+  }
+  for (const [street, y] of Object.entries(rows)) {
+    addNode(`6-${street}`, 170, y, "left")
+    addNode(`7-${street}`, 405, y, street === "44" || street === "43" ? "left" : "right")
+  }
+  for (const [id, x, y, tagSide] of [
+    ["B47", 310, 28, "above"],
+    ["B46", 356, 81, "above"],
+    ["B44", 437, 175, "right"],
+    ["B43", 480, 224, "right"],
+    ["B42", 518, 268, "right"],
   ] as const) {
-    nodes.push({ id, label: `Broadway ${id.slice(1)}`, x, y, h: 0 })
+    addNode(id, x, y, tagSide)
   }
   const pairs: Array<[string, string, boolean?]> = []
   for (let street = 47; street > 42; street--) {
@@ -497,36 +517,34 @@ function midtownScenario(): GraphStateConfig {
     ["6-43", "7-43", true],
     ["7-42", "6-42", true],
   )
-  const byId = new Map(nodes.map((node) => [node.id, node]))
+  // Near 7th Av and W46/W45 three weights and a tag share a block; at the
+  // label floor on a phone-width stage, these two slide clear along their edges.
+  const labelAt: Record<string, number> = { "7-46>B46": 0.38, "B46>B44": 0.3 }
   const edges = pairs.map(([from, to, directed]) => ({
     from,
     to,
     directed,
-    weight: Math.max(1, Math.ceil(distance(byId.get(from)!, byId.get(to)!) / 45)),
+    weight: Math.max(1, Math.ceil(distance(survey.get(from)!, survey.get(to)!) / 45)),
+    labelAt: labelAt[`${from}>${to}`],
   }))
   const remaining = graphStateShortestDistances(nodes, edges, "6-42")
   nodes.forEach((node) => (node.h = remaining.get(node.id) ?? 0))
   const decor: GraphStateDecor[] = [
-    { kind: "path", className: "steptrace__gs-street", d: "M170 18 L170 300" },
-    { kind: "path", className: "steptrace__gs-street", d: "M405 18 L405 300" },
+    { kind: "path", className: "steptrace__gs-street", d: segment(170, 18, 170, 300) },
+    { kind: "path", className: "steptrace__gs-street", d: segment(405, 18, 405, 300) },
     ...Object.values(rows).map((y) => ({
       kind: "path" as const,
       className: "steptrace__gs-street",
-      d: `M55 ${y} L575 ${y}`,
+      d: segment(55, y, 575, y),
     })),
-    { kind: "path", className: "steptrace__gs-street", d: "M310 28 L540 292" },
+    { kind: "path", className: "steptrace__gs-street", d: segment(310, 28, 540, 292) },
   ]
-  for (const y of [61, 105, 149, 193, 237]) {
-    decor.push({
-      kind: "rect",
-      className: "steptrace__gs-building",
-      x: 70,
-      y,
-      width: 80,
-      height: 18,
-    })
-  }
   for (const [x, y, width] of [
+    [70, 61, 80],
+    [70, 105, 80],
+    [70, 149, 80],
+    [70, 193, 80],
+    [70, 237, 80],
     [190, 61, 120],
     [190, 105, 158],
     [190, 149, 195],
@@ -538,22 +556,43 @@ function midtownScenario(): GraphStateConfig {
     [480, 193, 85],
     [520, 237, 45],
   ] as const) {
-    decor.push({ kind: "rect", className: "steptrace__gs-building", x, y, width, height: 18 })
+    decor.push({
+      kind: "rect",
+      className: "steptrace__gs-building",
+      ...place(x, y),
+      width: spanX(width),
+      height: spanY(18),
+    })
   }
+  const text = (className: string, x: number, y: number, label: string) => ({
+    kind: "text" as const,
+    className,
+    ...place(x, y),
+    text: label,
+  })
   decor.push(
     {
       kind: "rect",
       className: "steptrace__gs-closure",
-      x: 272,
-      y: 167,
-      width: 62,
-      height: 26,
+      ...place(222.5, 167),
+      width: spanX(100),
+      height: spanY(26),
       rx: 3,
     },
-    { kind: "text", className: "steptrace__gs-map-label", x: 303, y: 184, text: "W44 CLOSED" },
-    { kind: "text", className: "steptrace__gs-road-direction", x: 150, y: 113, text: "↑" },
-    { kind: "text", className: "steptrace__gs-road-direction", x: 425, y: 113, text: "↓" },
-    { kind: "text", className: "steptrace__gs-road-direction", x: 452, y: 199, text: "↘" },
+    text("steptrace__gs-map-label", 272.5, 180, "CLOSED"),
+    text("steptrace__gs-road-direction", 150, 113, "↑"),
+    text("steptrace__gs-road-direction", 425, 113, "↓"),
+    text("steptrace__gs-road-direction", 444, 208, "↘"),
+    text("steptrace__gs-axis-label", 170, -4, "6th Av"),
+    text("steptrace__gs-axis-label", 310, -4, "Broadway"),
+    text("steptrace__gs-axis-label", 405, -4, "7th Av"),
+    ...Object.entries(rows).map(([street, y]) => ({
+      kind: "text" as const,
+      className: "steptrace__gs-axis-label steptrace__gs-axis-label--street",
+      x: 42,
+      y: place(0, y).y,
+      text: `W${street}`,
+    })),
   )
   return {
     profile: "midtown-map",
@@ -668,6 +707,7 @@ export class GraphStateRecorder implements GraphStateOperations {
         nodeState: Object.freeze(nodeState),
         edgeState: Object.freeze(edgeState),
         message,
+        ...(type === "expand" && current ? { milestone: `Expand ${current}` } : {}),
         detail,
       }),
     )
@@ -834,8 +874,79 @@ export function graphStateSummary(frame: GraphStateFrame) {
   }
 }
 
-function graphStateLegend(kind: GraphStateDetail["kind"]) {
-  switch (kind) {
+function formatDistance(value: number | undefined) {
+  return value != null && Number.isFinite(value) ? String(value) : "∞"
+}
+
+function watchSlice(entries: readonly string[]) {
+  const shown: string[] = []
+  for (const entry of entries.slice(0, FRONTIER_WATCH_LIMIT)) {
+    const rest = entries.length - shown.length - 1
+    const line = [...shown, entry, ...(rest ? [`+${rest} more`] : [])].join(" · ")
+    if (shown.length && line.length > WATCH_LIST_CHARS) break
+    shown.push(entry)
+  }
+  if (entries.length > shown.length) shown.push(`+${entries.length - shown.length} more`)
+  return shown.join(" · ")
+}
+
+export function edgeRelaxationWatch(frame: GraphStateFrame): WatchRow[] {
+  const { detail } = frame
+  if (detail.kind !== "edge-relaxation") return []
+  const { distances } = detail
+  const entry = (id: string) => `${id}:${formatDistance(distances[id])}`
+  const edge = { k: "edge", v: detail.edge?.join(" → ") || "—", sw: "var(--_blue)" }
+  const ids = frame.nodes.map(({ id }) => id)
+  if (detail.policy === "bellman-ford") {
+    const distanceWatch = ids.map(entry).join(" · ")
+    return [
+      { k: "distances", v: distanceWatch, sw: "var(--_blue)", hint: distanceWatch },
+      { k: "pass", v: String(detail.pass), sw: "var(--_violet)" },
+      edge,
+      {
+        k: "change",
+        v: detail.changed ? "updated" : "kept",
+        sw: detail.changed ? "var(--_green)" : "var(--_neutral)",
+      },
+    ]
+  }
+  const byDistance = (left: string, right: string) =>
+    (distances[left] ?? Infinity) - (distances[right] ?? Infinity) || left.localeCompare(right)
+  const frontier = ids.filter((id) => frame.nodeState[id] === "frontier").sort(byDistance)
+  const settled = ids.filter((id) => ["active", "closed"].includes(frame.nodeState[id])).length
+  const relaxed = detail.edge?.[1]
+  const settling = frame.type === "expand" && frame.currentNode != null
+  return [
+    edge,
+    {
+      k: "change",
+      v:
+        relaxed != null && detail.previous !== undefined
+          ? detail.changed
+            ? `${formatDistance(detail.previous)} → ${formatDistance(distances[relaxed])}`
+            : `${formatDistance(detail.previous)} kept`
+          : settling
+            ? `settled at ${formatDistance(distances[frame.currentNode!])}`
+            : "—",
+      sw: detail.changed || settling ? "var(--_green)" : "var(--_neutral)",
+    },
+    {
+      k: "frontier",
+      v: watchSlice(frontier.map(entry)) || "—",
+      sw: "var(--_amber)",
+      hint: "Reached, unsettled nodes by tentative distance; the first one settles next.",
+    },
+    {
+      k: "distances",
+      v: `${settled} of ${ids.length} settled`,
+      sw: "var(--_green)",
+      hint: `All distances: ${ids.slice().sort(byDistance).map(entry).join(" · ")}.`,
+    },
+  ]
+}
+
+function graphStateLegend(detail: GraphStateDetail) {
+  switch (detail.kind) {
     case "heuristic-search":
       return [
         ["Current", "current"],
@@ -851,12 +962,17 @@ function graphStateLegend(kind: GraphStateDetail["kind"]) {
         ["Meeting", "goal"],
       ] as const
     case "edge-relaxation":
-      return [
-        ["Active Edge", "current"],
-        ["Candidate", "open"],
-        ["Settled", "closed"],
-        ["Source", "goal"],
-      ] as const
+      return detail.policy === "dijkstra"
+        ? ([
+            ["Current", "current"],
+            ["Frontier", "open"],
+            ["Settled / Path", "closed"],
+            ["Target", "goal"],
+          ] as const)
+        : ([
+            ["Active Edge", "current"],
+            ["Reached", "closed"],
+          ] as const)
     case "component-flood":
       return [
         ["Current", "current"],
@@ -920,7 +1036,7 @@ export function makeGraphStateView(
   const graph = el("div", "steptrace__gs-graph")
   const svg = svgElement("svg", {
     class: "steptrace__gs-svg",
-    viewBox: "0 0 620 320",
+    viewBox: PROFILE_VIEW_BOX[first.profile as GraphStateProfile] ?? DEFAULT_VIEW_BOX,
     role: "img",
     "aria-label": "Graph algorithm state",
   })
@@ -963,10 +1079,14 @@ export function makeGraphStateView(
   const mapMarkers = first.profile === "ukraine-cities" || compactMapNodes
   const nodeRadius =
     first.profile === "ukraine-cities" ? 5 : compactMapNodes ? 6 : GRAPH_NODE_RADIUS_PX
+  // Twenty-five cities leave no room for weights at the label floor; Trace and
+  // Watch carry the cost of every edge the current step uses.
   const weighted =
-    ["heuristic-search", "edge-relaxation", "mst-scan", "mst-round", "residual-flow"].includes(
+    first.profile !== "ukraine-cities" &&
+    (["heuristic-search", "edge-relaxation", "mst-scan", "mst-round", "residual-flow"].includes(
       first.detail.kind,
-    ) || first.edges.some((edge) => edge.weight !== 1 || edge.label != null)
+    ) ||
+      first.edges.some((edge) => edge.weight !== 1 || edge.label != null))
   const edgeElements = first.edges.map((edge) => {
     const from = positions.get(edge.from)!
     const to = positions.get(edge.to)!
@@ -979,11 +1099,12 @@ export function makeGraphStateView(
     })
     if (edge.showDirection) line.setAttribute("marker-end", `url(#${markerIds.get("neutral")!})`)
     edgeLayer.append(line)
+    const at = edge.labelAt ?? 0.5
     const label = weighted
       ? svgElement("text", {
           class: "steptrace__gs-edge-label",
-          x: (from.x + to.x) / 2,
-          y: (from.y + to.y) / 2 - 7,
+          x: from.x + (to.x - from.x) * at,
+          y: from.y + (to.y - from.y) * at - 7,
         })
       : null
     if (label) {
@@ -1011,6 +1132,17 @@ export function makeGraphStateView(
       const label = svgElement("text", { class: "steptrace__gs-node-label", x: 0, y: 0 })
       label.textContent = node.label
       group.append(title, halo, circle, label)
+      if (node.tagSide) {
+        const offset = NODE_TAG_OFFSETS[node.tagSide]
+        const tag = svgElement("text", {
+          class: "steptrace__gs-node-tag",
+          "data-side": node.tagSide,
+          x: offset[0],
+          y: offset[1],
+        })
+        tag.textContent = node.label
+        group.append(tag)
+      }
       nodeLayer.append(group)
       return [node.id, group] as const
     }),
@@ -1037,9 +1169,12 @@ export function makeGraphStateView(
           applyEdgeGeometry(GRAPH_NODE_RADIUS_PX * unitsPerCssPixel, true)
         },
       )
+  const textScale = observeFixedSvgNodes(svg, [], (unitsPerCssPixel) => {
+    svg.style.setProperty("--_gs-text-scale", String(unitsPerCssPixel))
+  })
 
   const legend = makeLegend(
-    graphStateLegend(first.detail.kind).map(([label, state]) => ({
+    graphStateLegend(first.detail).map(([label, state]) => ({
       label,
       swatchClass: `steptrace__gs-swatch steptrace__gs-swatch--${state}`,
     })),
@@ -1054,7 +1189,14 @@ export function makeGraphStateView(
     const groupByNode = new Map(
       groups.flatMap((members, index) => members.map((id) => [id, index + 1] as const)),
     )
+    const tagged = new Set([
+      frame.start,
+      frame.target,
+      frame.currentNode,
+      ...(frame.currentEdge ?? []),
+    ])
     for (const [id, group] of nodeElements) {
+      group.dataset.tagged = String(tagged.has(id))
       const role = frame.nodeState[id] || "neutral"
       const component = groupByNode.get(id)
       group.dataset.group = component ? String(component) : ""
@@ -1115,6 +1257,7 @@ export function makeGraphStateView(
     const current = currentId ? positions.get(currentId)! : null
     const rows: WatchRow[] = [{ k: "current", v: current?.label || "—", sw: "var(--_blue)" }]
     if (frame.detail.kind === "heuristic-search") {
+      const greedy = frame.detail.policy === "greedy"
       const g = frame.currentNode ? frame.detail.costs[frame.currentNode] : null
       const h = frame.currentNode ? frame.detail.heuristic[frame.currentNode] : null
       rows.push(
@@ -1130,14 +1273,27 @@ export function makeGraphStateView(
         },
         {
           k: "open",
-          v: frame.detail.open.map((entry) => entry.id).join(" · ") || "—",
+          v: watchSlice(frame.detail.open.map((entry) => entry.id)) || "—",
           sw: "var(--_amber)",
+          hint: `OPEN by priority: ${
+            frame.detail.open
+              .map(({ id, h, f }) => `${id} ${greedy ? `h ${h}` : `f ${f}`}`)
+              .join(" · ") || "empty"
+          }.`,
         },
-        {
-          k: "closed",
-          v: frame.detail.closed.join(" · ") || "—",
-          sw: "var(--_green)",
-        },
+        frame.selectedEdges.length
+          ? {
+              k: "path",
+              v: `${frame.detail.closed.length} nodes`,
+              sw: "var(--_green)",
+              hint: `Path: ${frame.detail.closed.join(" → ")}.`,
+            }
+          : {
+              k: "closed",
+              v: `${frame.detail.closed.length} of ${frame.nodes.length}`,
+              sw: "var(--_green)",
+              hint: `CLOSED in expansion order: ${frame.detail.closed.join(" · ") || "none yet"}.`,
+            },
       )
     }
     if (
@@ -1163,31 +1319,9 @@ export function makeGraphStateView(
           { k: "meeting", v: frame.detail.meeting || "—", sw: "var(--_violet)" },
         )
         break
-      case "edge-relaxation": {
-        const distances = frame.detail.distances
-        const distanceWatch = frame.nodes
-          .map(({ id }) => {
-            const value = distances[id]
-            return `${id}:${Number.isFinite(value) ? value : "∞"}`
-          })
-          .join(" · ")
-        rows.push(
-          {
-            k: "distances",
-            v: distanceWatch,
-            sw: "var(--_blue)",
-            hint: distanceWatch,
-          },
-          { k: "pass", v: String(frame.detail.pass), sw: "var(--_violet)" },
-          { k: "edge", v: frame.detail.edge?.join(" → ") || "—", sw: "var(--_blue)" },
-          {
-            k: "change",
-            v: frame.detail.changed ? "updated" : "kept",
-            sw: frame.detail.changed ? "var(--_green)" : "var(--_neutral)",
-          },
-        )
+      case "edge-relaxation":
+        rows.push(...edgeRelaxationWatch(frame))
         break
-      }
       case "component-flood":
         rows.push(
           { k: "component", v: String(frame.detail.component), sw: "var(--_violet)" },
@@ -1278,7 +1412,10 @@ export function makeGraphStateView(
     paint,
     watch,
     summary: graphStateSummary,
-    destroy: () => geometry?.destroy(),
+    destroy: () => {
+      geometry?.destroy()
+      textScale.destroy()
+    },
   }
 }
 

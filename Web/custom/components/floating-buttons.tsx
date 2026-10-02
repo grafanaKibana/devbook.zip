@@ -24,9 +24,39 @@ const script = `
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   var scrollTicking = false;
   var resizeTicking = false;
+  // Interactive surfaces with their own controls along the right edge; on a
+  // narrow screen the cluster's corner lands on them.
+  var AVOID = ".steptrace, .excalidraw-page";
 
   function container() {
     return document.querySelector(".floating-buttons");
+  }
+
+  // Rides up with the site footer instead of covering its share links.
+  function liftAboveFooter(el) {
+    var footer = document.querySelector(".site-footer");
+    var lift = parseFloat(el.style.getPropertyValue("--floating-lift")) || 0;
+    var box = el.getBoundingClientRect();
+    var next = 0;
+    if (footer) {
+      var r = footer.getBoundingClientRect();
+      if (r.left < box.right && r.right > box.left) {
+        next = Math.max(0, box.bottom + lift + 8 - r.top);
+      }
+    }
+    if (next !== lift) el.style.setProperty("--floating-lift", next + "px");
+  }
+
+  function coversControls(el) {
+    var box = el.getBoundingClientRect();
+    var surfaces = document.querySelectorAll(AVOID);
+    for (var i = 0; i < surfaces.length; i++) {
+      var r = surfaces[i].getBoundingClientRect();
+      if (r.top < box.bottom && r.bottom > box.top && r.left < box.right && r.right > box.left) {
+        return true;
+      }
+    }
+    return false;
   }
 
   function update() {
@@ -37,8 +67,9 @@ const script = `
     var maxScroll = docEl.scrollHeight - docEl.clientHeight;
     var isScrollable = docEl.scrollHeight > docEl.clientHeight + 32;
     var revealThreshold = Math.min(400, window.innerHeight * 0.5);
+    liftAboveFooter(el);
 
-    if (isScrollable && scrollY > revealThreshold) {
+    if (isScrollable && scrollY > revealThreshold && !coversControls(el)) {
       el.setAttribute("data-visible", "true");
     } else {
       el.removeAttribute("data-visible");
@@ -64,7 +95,7 @@ const script = `
   }
 
   // Resize can flip isScrollable / change the reveal threshold, so recompute —
-  // rAF-throttled like onScroll (mirrors HomepageFit's resize handling).
+  // rAF-throttled like onScroll.
   function onResize() {
     if (resizeTicking) return;
     resizeTicking = true;

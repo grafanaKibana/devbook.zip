@@ -83,7 +83,7 @@
 
 .steptrace .steptrace__heap-node-meta {
   fill: var(--_muted);
-  font: var(--_weight-strong) var(--_type-micro)/var(--_leading-solid) var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-xs)/var(--_leading-solid) var(--_font-mono);
 }
 
 .steptrace .steptrace__heap-mark {
@@ -97,7 +97,7 @@
   padding: var(--_space-4) var(--_space-4);
   border-top: var(--_stroke-hair) solid var(--_hair);
   color: var(--_muted);
-  font: var(--_weight-strong) var(--_type-md)/var(--_leading-readable) var(--_font-body);
+  font: var(--_weight-strong) var(--_type-sm)/var(--_leading-readable) var(--_font-body);
   text-align: center;
 }
 
@@ -125,7 +125,7 @@
 
 .steptrace .steptrace__heap-empty {
   color: var(--_muted);
-  font: var(--_weight-strong) var(--_type-ui) / var(--_leading-solid) var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-xs) / var(--_leading-solid) var(--_font-mono);
 }
 
 .steptrace .steptrace__heap-svg {
@@ -215,7 +215,7 @@
 
 .steptrace .steptrace__heap-root-label {
   fill: var(--_muted);
-  font: var(--_weight-strong) var(--_type-micro)/var(--_leading-solid) var(--_font-body);
+  font: var(--_weight-strong) var(--_type-xs)/var(--_leading-solid) var(--_font-body);
 }
 
 .steptrace .steptrace__heap-selection:not(.steptrace__two-heaps) .steptrace__heap-root-label {
@@ -266,10 +266,6 @@
 
   .steptrace .steptrace__heap-svg {
     inline-size: min(100%, 17rem);
-  }
-
-  .steptrace .steptrace__heap-root-label {
-    font-size: var(--_type-micro);
   }
 
   .steptrace .steptrace__heap-variant,

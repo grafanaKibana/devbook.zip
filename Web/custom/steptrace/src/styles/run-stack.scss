@@ -176,7 +176,7 @@
 
 .steptrace__run-stack-title {
   color: var(--_text);
-  font: var(--_weight-strong) var(--_type-sm)/var(--_leading-readable) var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-xs)/var(--_leading-readable) var(--_font-mono);
 }
 .steptrace__run-stack-values {
   color: var(--_muted);
@@ -190,7 +190,7 @@
   border-inline-start: 2px solid var(--_neutral);
   background: color-mix(in srgb, var(--_run-cell) 86%, var(--_surface));
   color: var(--_muted);
-  font: var(--_weight-strong) var(--_type-sm)/var(--_leading-readable) var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-xs)/var(--_leading-readable) var(--_font-mono);
   font-variant-numeric: tabular-nums;
 }
 

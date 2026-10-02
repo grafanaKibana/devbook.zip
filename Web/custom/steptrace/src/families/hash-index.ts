@@ -44,6 +44,13 @@ const CHAIN_CAPACITY = 3
 const HOP_MS = 320
 const FINISH_MS = 180
 const RETURN_MS = 180
+// The first two keys share home cell 2 (mod 12) and bucket 2 (mod 4), so every
+// strategy opens on a resolved collision instead of an empty table.
+const MAP_SEED = [
+  { key: 14, value: "A" },
+  { key: 26, value: "B" },
+  { key: 31, value: "C" },
+] as const
 
 function indexFor(key: number, size: number) {
   return ((key % size) + size) % size
@@ -1033,17 +1040,30 @@ function mountHashTable(
     }
   }
 
+  function putPlan(key: number, value: string) {
+    return config.strategy === "closed-addressing"
+      ? closedPut(key, value)
+      : config.strategy === "open-addressing"
+        ? openPut(key, value)
+        : bucketPut(key, value)
+  }
+
+  function seed() {
+    for (const { key, value } of MAP_SEED) putPlan(key, value).commit?.()
+    const [first, second] = MAP_SEED
+    const count = `Seeded ${MAP_SEED.length} entries`
+    if (config.strategy === "closed-addressing")
+      return `${count}; keys ${first.key} and ${second.key} collide in bucket ${indexFor(first.key, SIZE)}'s chain.`
+    if (config.strategy === "open-addressing")
+      return `${count}; ${second.key} collided with ${first.key} at cell ${indexFor(second.key, SIZE)} and probed to cell ${slots.findIndex((entry) => entry?.key === second.key)}.`
+    return `${count}; keys ${first.key} and ${second.key} share bucket ${indexFor(first.key, SIZE / BUCKET_SIZE)}.`
+  }
+
   function onPut() {
     const key = suppliedPutKey()
     if (key == null) return
     const value = content === "map" ? suppliedPutValue() : ""
-    run(
-      config.strategy === "closed-addressing"
-        ? closedPut(key, value)
-        : config.strategy === "open-addressing"
-          ? openPut(key, value)
-          : bucketPut(key, value),
-    )
+    run(putPlan(key, value))
   }
 
   function onSearch(removeEntry = false) {
@@ -1074,12 +1094,13 @@ function mountHashTable(
     clearTransientState()
     keyInput.value = ""
     if (valueInput) valueInput.value = ""
+    if (content === "map") seed()
     calculation.textContent = initialCalculation
     restoreGenericToken()
     settleToken()
     shell.status.textContent =
       content === "map"
-        ? `${label[0].toUpperCase()}${label.slice(1)} table reset.`
+        ? `${label[0].toUpperCase()}${label.slice(1)} table reset to its seeded entries.`
         : "Hash set reset."
     paint()
   }
@@ -1088,9 +1109,9 @@ function mountHashTable(
   shell.listen(search, "click", () => onSearch(false))
   shell.listen(remove, "click", () => onSearch(true))
   shell.listen(reset, "click", onReset)
-  onEnter(shell, valueInput ?? keyInput, onPut)
-  shell.status.textContent =
-    content === "map" ? `Fixed 12-cell ${label} table ready.` : "Fixed 12-cell hash set ready."
+  onEnter(shell, keyInput, onPut)
+  if (valueInput) onEnter(shell, valueInput, onPut)
+  shell.status.textContent = content === "map" ? seed() : "Fixed 12-cell hash set ready."
   paint()
   const base = shell.finish()
   return {

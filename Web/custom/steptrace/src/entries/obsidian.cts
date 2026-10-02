@@ -3,18 +3,11 @@
  * code-block processor and tears mounted cards down with the render child.
  */
 
-import type {
-  HostControlHandle,
-  HostTabsHandle,
-  HostTabsOptions,
-  MountHandle,
-  SpeedSliderOptions,
-  StepTraceConfig,
-} from "../types"
+import type { HostTabsHandle, HostTabsOptions, MountHandle, StepTraceConfig } from "../types"
 import { renderComplexityDom } from "../../../complexity/dom"
 import { buildComplexityViewModel } from "../../../complexity/model"
 
-const { Plugin, MarkdownRenderChild, Notice, SliderComponent } = require("obsidian")
+const { Plugin, MarkdownRenderChild, Notice } = require("obsidian")
 const { steptrace } = require("../engine") as typeof import("../engine")
 
 interface ObsidianElement extends HTMLElement {
@@ -27,34 +20,6 @@ interface MarkdownContext {
 
 interface TabsdownApi {
   mountTabs(container: HTMLElement, options: HostTabsOptions): HostTabsHandle
-}
-
-function createSpeedSlider(container: HTMLElement, options: SpeedSliderOptions): HostControlHandle {
-  const slider = new SliderComponent(container).setLimits(options.min, options.max, options.step)
-
-  // Preserve live dragging on Obsidian versions that expose it (since 1.6.6).
-  if (typeof slider.setInstant === "function") slider.setInstant(true)
-
-  // Current Obsidian renders the formatted value beside its native slider.
-  // Older supported versions retain their native dynamic tooltip instead.
-  if (typeof slider.setDisplayFormat === "function") slider.setDisplayFormat(options.format)
-  else if (typeof slider.setDynamicTooltip === "function") slider.setDynamicTooltip()
-
-  slider.setValue(options.value)
-  slider.sliderEl.setAttribute("aria-label", options.label)
-  slider.sliderEl.setAttribute("aria-valuetext", options.format(options.value))
-  slider.onChange((value: number) => {
-    slider.sliderEl.setAttribute("aria-valuetext", options.format(value))
-    options.onChange(value)
-  })
-
-  return {
-    destroy() {
-      // SliderComponent has no unload API; clear its wrapper so the current
-      // inline value sibling is removed together with the input.
-      container.replaceChildren()
-    },
-  }
 }
 
 class RenderChild extends MarkdownRenderChild {
@@ -90,7 +55,6 @@ class SteptracePlugin extends Plugin {
         const mountTabs =
           typeof tabsdown?.mountTabs === "function" ? tabsdown.mountTabs.bind(tabsdown) : null
         const handle = steptrace.mount(root, config, {
-          createSpeedSlider,
           ...(mountTabs ? { mountTabs } : {}),
         })
         ctx.addChild(new RenderChild(el, handle))
