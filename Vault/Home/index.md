@@ -1,5 +1,5 @@
 ---
-title: Welcome to DevBook!
+title: Home
 summary: A .NET and AI engineering knowledge base with notes, examples, and questions.
 tags:
   - FolderNote
@@ -103,49 +103,23 @@ return function TopicDashboard() {
       };
     });
 
-  // Card width follows topic size, never a positional pattern. Cards keep topic
-  // order and fill the fewest rows the breakpoint's minimum span allows; every
-  // row sums to the 12 columns. Of those layouts, the row breaks and spare
-  // columns that land each card closest to its share of the grid win. Every
-  // card carries the same title, summary and progress foot, so a share grows
-  // only with the log of the note count: a big topic reads wider without
-  // leaving its card hollow.
-  const N = baseCards.length;
-  const room = baseCards.map((c) => Math.log1p(c.total));
-  const roomTotal = room.reduce((sum, r) => sum + r, 0) || 1;
-  const spansFor = (minSpan) => {
-    const perRow = Math.floor(12 / minSpan);
-    const rows = Math.ceil(N / perRow);
-    const share = room.map((r) => (rows * 12 * r) / roomTotal);
-    const fitRow = (from, to) => {
-      const spans = Array(to - from).fill(minSpan);
-      for (let spare = 12 - spans.length * minSpan; spare > 0; spare--) {
-        let pick = 0;
-        spans.forEach((span, i) => { if (share[from + i] - span > share[from + pick] - spans[pick]) pick = i; });
-        spans[pick] += 1;
+  // Balance complete rows in topic order: ten desktop cards form 3–4–3.
+  // Intrinsic row heights let every title, summary and progress footer fit.
+  const cards = baseCards;
+  const bentoFor = (minSpan) => {
+    const tiles = [];
+    const rows = Math.ceil(cards.length / Math.floor(12 / minSpan));
+    let from = 0;
+    for (let row = 1; row <= rows; row++) {
+      const count = Math.round((cards.length - from) / (rows - row + 1));
+      const width = 12 / count;
+      for (let column = 0; column < count; column++) {
+        tiles.push({ column: column * width + 1, row, width, height: 1 });
       }
-      return { spans, miss: spans.reduce((sum, span, i) => sum + (span - share[from + i]) ** 2, 0) };
-    };
-    const plan = (from, row) => {
-      if (from === N) return { spans: [], miss: 0 };
-      let best = null;
-      for (let to = from + 1; to <= Math.min(N, from + perRow); to++) {
-        if (N - to > (rows - row - 1) * perRow) continue;
-        const head = fitRow(from, to);
-        const rest = plan(to, row + 1);
-        if (!best || head.miss + rest.miss < best.miss) best = { spans: [...head.spans, ...rest.spans], miss: head.miss + rest.miss };
-      }
-      return best;
-    };
-    return plan(0, 0).spans;
+      from += count;
+    }
+    return tiles;
   };
-  const desktop = spansFor(3), medium = spansFor(4), narrow = spansFor(6);
-  const cards = baseCards.map((c, index) => ({
-    ...c,
-    spanDesktop: desktop[index],
-    spanMedium: medium[index],
-    spanNarrow: narrow[index],
-  }));
 
   let oTotal = 0, oPoints = 0;
   const oByStatus = {};
@@ -182,11 +156,10 @@ return function TopicDashboard() {
     });
   };
 
-  // Safari/WebKit does not resolve a var() used as the count in `grid-column: span var(--x)`;
-  // it drops the declaration and falls back to `span 1`, breaking the grid. Emit static
-  // `grid-column: span N` utility classes instead (works in every browser).
-  const spanRules = (cls) =>
-    Array.from({ length: 12 }, (_, i) => `.dc-topic-card.${cls}-${i + 1} { grid-column: span ${i + 1}; }`).join(" ");
+  // Emit literal grid coordinates for Safari and Syncer's static HTML.
+  const tileRules = (minSpan) => bentoFor(minSpan).map((tile, index) =>
+    `.dc-topic-grid .tile-${index} { grid-column: ${tile.column} / span ${tile.width}; grid-row: ${tile.row} / span ${tile.height}; }`
+  ).join(" ");
 
   // Layout + the home-only "1c" card treatment (claude.ai design "DevBook Page B
   // - Glow"). The card's base chrome (.db-card border, radius, neutral surface and
@@ -200,17 +173,18 @@ return function TopicDashboard() {
   // Each card sets --card-accent for the base chrome and --topic-rgb for the chip,
   // capsule, and Quartz's opaque backing in custom.scss (both = c.rgb).
   const CSS = `
-.dc-topic-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 1rem; width: 100%; }
-.dc-topic-card { overflow: hidden; cursor: pointer; min-width: 0; min-height: 6.75rem; margin: 0; display: flex; flex-direction: column; }
-.dc-topic-card .db-card-body { flex: 1 0 auto; }
-.dc-topic-card .db-card-title { font-size: 1.04rem; }
+.dc-topic-dashboard { container: dc-home / inline-size; }
+.dc-topic-grid { display: grid; grid-template-columns: 1fr; grid-auto-rows: minmax(min-content, auto); gap: 1rem; width: 100%; }
+.dc-topic-card { overflow: hidden; cursor: pointer; min-width: 0; min-height: 6.75rem; overflow-wrap: anywhere; margin: 0; display: flex; flex-direction: column; }
+.dc-topic-card .db-card-body { flex: 1; min-width: 0; }
+.dc-topic-card .db-card-title { min-width: 0; font-size: 1.04rem; }
 .dc-topic-title { display: flex; gap: 0.6rem; align-items: center; line-height: 1.25; }
 .dc-topic-chip { display: grid; place-items: center; flex: 0 0 auto; width: 2.25rem; height: 2.25rem; border-radius: 0.625rem; background: rgba(var(--topic-rgb), 0.13); color: rgb(var(--topic-rgb)); }
 .dc-topic-chip svg { display: block; width: 1.3rem; height: 1.3rem; }
 .dc-topic-spacer { flex: 1 0 auto; min-height: 0.55em; }
 .dc-topic-foot { display: flex; flex-direction: column; gap: 4px; }
-.dc-topic-grid p.db-card-summary { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden; }
-.dc-topic-cap { font-size: 0.8125rem; line-height: 1.3; font-variant-numeric: tabular-nums; display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem; color: var(--text-muted, var(--darkgray, #5f6b7a)); }
+.dc-topic-grid p.db-card-summary { display: block; overflow-wrap: anywhere; }
+.dc-topic-cap { font-size: 0.8125rem; line-height: 1.3; font-variant-numeric: tabular-nums; display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 0.5rem; color: var(--text-muted, var(--darkgray, #5f6b7a)); }
 .dc-topic-cap strong { color: var(--text-normal, var(--dark, #1f2937)); font-weight: 600; }
 .dc-topic-bar { box-sizing: border-box; position: relative; width: 100%; height: 11px; margin-top: 0.15rem; padding: 2px; border-radius: 999px; border: 1px solid rgba(var(--topic-rgb), 0.5); background: var(--background-primary, var(--light, #ffffff)); overflow: hidden; }
 .dc-topic-bar-track { box-sizing: border-box; position: relative; height: 100%; border-radius: 999px; overflow: hidden; }
@@ -274,10 +248,14 @@ p.dc-progress-note { margin: 0.6rem 0 0; color: var(--text-muted, var(--darkgray
 /* Needed on its own: this file's CSS is inlined per-page and custom.scss is not
    loaded at all inside Obsidian, so the --dur-* collapse cannot reach here. */
 @media (prefers-reduced-motion: reduce) { .dc-topic-bar-track span, .dc-progress-ring--arc, .dc-progress-hero { animation: none; } }
-${spanRules("dsk")}
-@media (max-width: 1600px) { ${spanRules("med")} }
-@media (max-width: 760px) { ${spanRules("nar")} }
-@media (max-width: 430px) { .dc-topic-grid { grid-template-columns: 1fr; } .dc-topic-grid .dc-topic-card { grid-column: span 1; } }
+@container dc-home (min-width: 28rem) {
+  .dc-topic-grid { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+  ${tileRules(6)}
+}
+@container dc-home (min-width: 42rem) {
+  ${tileRules(4)}
+}
+@container dc-home (min-width: 62rem) { ${tileRules(3)} }
 `;
 
   return (
@@ -288,7 +266,7 @@ ${spanRules("dsk")}
           <div class="dc-progress-copy">
             <p class="dc-progress-eyebrow">Learning overview</p>
             <div class="dc-progress-summary">
-              <p class="dc-progress-title" id="dc-progress-title" role="heading" aria-level="2">{plural(oTotal, "note")} across {plural(N, "topic")}</p>
+              <p class="dc-progress-title" id="dc-progress-title" role="heading" aria-level="2">{plural(oTotal, "note")} across {plural(cards.length, "topic")}</p>
               <span class="dc-progress-mobile-value" aria-hidden="true">{oPct}%</span>
             </div>
             <ul class="dc-progress-statuses" aria-label="Note lifecycle totals">
@@ -314,8 +292,8 @@ ${spanRules("dsk")}
         </div>
       </section>
       <div class="dc-topic-grid">
-        {cards.map((c) => (
-          <div class={`db-card dc-topic-card dsk-${c.spanDesktop} med-${c.spanMedium} nar-${c.spanNarrow}`} style={{ "--card-accent": c.rgb, "--topic-rgb": c.rgb }}>
+        {cards.map((c, index) => (
+          <div class={`db-card dc-topic-card tile-${index}`} style={{ "--card-accent": c.rgb, "--topic-rgb": c.rgb }}>
             <div class="db-card-body">
               <div class="dc-topic-title">
                 <span class="dc-topic-chip" dangerouslySetInnerHTML={{ __html: c.iconSvg }} />

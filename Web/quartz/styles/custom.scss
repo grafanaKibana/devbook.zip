@@ -1013,6 +1013,7 @@ body {
   // Drop the 320px left column from the tablet grid: the Explorer no longer
   // takes part in the flow — it's a fixed hamburger plus an overlaid drawer.
   .page > #quartz-body {
+    margin-inline: 0;
     grid-template-columns: auto;
     grid-template-rows: auto auto auto auto;
     grid-template-areas:
@@ -1311,29 +1312,14 @@ body[data-slug$="/index"]:not([data-slug="tags/index"]) .page-listing {
 // ============================================================================
 // Home (index) — dashboard-first layout.
 //
-// The article title stays as the page's h1, then the Topics dashboard; the
-// prose that used to follow the dashboard (welcome heading, intro, "Why this
-// exists") now lives in About.md, linked from the footer.
-//
-// Gated on `body[data-slug="index"]`, so no other page is touched, and it's a
-// Quartz-only concern — Obsidian renders the same note as an ordinary page.
-//
-// Home scrolls like any other page at every size. Cards keep their content
-// height: the note clamps summaries to three lines, so cards sharing a row stay
-// near-equal and the note's `.dc-topic-spacer` only pins the progress foot to
-// the card's bottom. Nothing is hidden to make the dashboard fit one screen.
+// Root home omits ArticleTitle through its configured not-index condition.
+// The Datacore note owns the rectangular card grid in both readers:
+// balanced 3–4–3 rows and content-sized tracks. Home always scrolls.
+// Shell changes below stay scoped to the root home.
 // ============================================================================
 body[data-slug="index"] {
   // Card chrome tightens as the viewport shrinks — one knob for every branch.
   --home-card-pad: clamp(0.7rem, 1.5vh, 1rem) clamp(0.8rem, 1.3vw, 1.1rem);
-
-  // A quiet h1: the progress hero below carries the page's visual weight.
-  .page-header .article-title {
-    margin: 0;
-    font-size: clamp(1.25rem, 1rem + 1vw, 1.5rem);
-    line-height: 1.2;
-    letter-spacing: -0.02em;
-  }
 
   // The afterBody block can't be display:none: it now carries the position:fixed
   // floating scroll buttons, and display:none on this wrapper hides them too
@@ -1350,9 +1336,6 @@ body[data-slug="index"] {
   }
   .dc-topic-card::before {
     opacity: 1;
-  }
-  .dc-topic-card .db-card-body {
-    height: 100%;
   }
 }
 
@@ -1440,6 +1423,22 @@ body:is([data-slug="questions"], [data-slug="about"]) .page[data-frame="default"
   }
 }
 
+// Search shares the main content's centre on pages without a right rail.
+// Absolute insets avoid transforming an ancestor of the fixed search overlay.
+@media all and (min-width: 1201px) {
+  body[data-slug="index"],
+  body:is([data-slug="questions"], [data-slug="about"]),
+  body:has(.page[data-frame="default"] > #quartz-body > .sidebar.right:empty) {
+    .site-header-search {
+      position: absolute;
+      left: calc(#{$sidePanelWidth} + 5px - 2rem);
+      right: 0;
+      width: 32rem;
+      margin-inline: auto;
+    }
+  }
+}
+
 // Tablet (768–1200px): the sidebars are out of flow (the Explorer is a fixed
 // hamburger, the right sidebar is empty), so the dashboard spans the page and
 // its gaps grow with the width.
@@ -1464,13 +1463,8 @@ body:is([data-slug="questions"], [data-slug="about"]) .page[data-frame="default"
 }
 
 // ---------------------------------------------------------------------------
-// Mobile (<768px): the note owns the columns — its narrow spans pair the cards
-// below 760px and its 430px rule stacks them in one column. Cards keep their
-// content height, and the progress bar stays pinned to the bottom of each card
-// (via the note's spacer), so it never clips when a two-word topic ("Computer
-// Science", "Software Architecture") wraps to two lines. Descriptions drop to
-// save room; counts, bars, and the hero legend stay, and the 44px hit target
-// (.db-card-hit) is untouched.
+// Mobile (<768px): container-sized cards retain complete summaries and grow
+// with their content. Compact icons leave more room for wrapping titles.
 // ---------------------------------------------------------------------------
 @media all and ($mobile) {
   body[data-slug="index"] {
@@ -1484,10 +1478,6 @@ body:is([data-slug="questions"], [data-slug="about"]) .page[data-frame="default"
     }
     .dc-topic-grid .dc-topic-card {
       min-height: 4.75rem;
-    }
-    // Outranks the note's three-line clamp, which sets its own display.
-    .dc-topic-grid .db-card-summary {
-      display: none;
     }
     // On phones the tinted chip tile collapses to a bare inline glyph (design:
     // the mobile tiles revert to a small inline icon) so the 2-up cards stay

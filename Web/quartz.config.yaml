@@ -176,6 +176,7 @@ plugins:
     layout:
       position: beforeBody
       priority: 10
+      condition: not-index
   - source: github:quartz-community/content-meta
     enabled: true
     # Enabled (installed + registered) but no `layout`: rendered by ContentMetaRow

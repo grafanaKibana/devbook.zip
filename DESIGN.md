@@ -7,7 +7,7 @@ This is the repository-wide design contract. Keep it limited to verified cross-v
 ## Source of truth
 
 - **Status:** Active
-- **Last refreshed:** 2026-10-01
+- **Last refreshed:** 2026-10-02
 - **Current:** observed in the repository.
 - **Direction:** a rule to preserve or move toward.
 - **Open:** a decision or evidence gap the repository does not settle.
@@ -137,7 +137,7 @@ Their main jobs are to find a topic, understand its scope, inspect the mechanism
 
 - Use `0.25rem` to `1rem` spacing inside cards and controls; use larger gaps between page sections.
 - Cards align title, summary, and footer regions without forcing equal content.
-- Home uses a 12-column grid with span changes at `1600px` and `760px`, then one column at `430px`. Card width follows topic size, never a positional pattern, though a card's exact span still depends on the neighbours sharing its row: cards keep topic order, each breakpoint's minimum span (`3`, `4`, `6` columns) sets the fewest rows, every row fills all twelve columns, and spare columns go to the larger topics in proportion to the log of their note count, so a bigger topic reads wider without hollowing its card. Rows keep their content height (summaries clamp at three lines), the page scrolls rather than stretching or hollowing cards, and on desktop the grid keeps the `2rem` end gutter.
+- Home starts with its learning overview, without a welcome heading. Ten topic cards form three, four, and three cards in complete desktop rows. Other inventories use balanced complete rows in topic/keyboard order. The dashboard container switches from one column to paired cards at `28rem`, three-card rows at `42rem`, and up to four cards at `62rem`. Content sets row height; titles and summaries wrap without clamping, and progress stays at the bottom. The page scrolls, and the desktop grid keeps its `2rem` end gutter. Search is centred over the main content track: pages without a right rail share that track's desktop offset, and tablet content has symmetric outer margins.
 - FolderNote maps wrap content-sized cards instead of truncating long titles.
 - Pages without a right rail (FolderNotes, tag pages, Questions, About) give their content the full track; on desktop that track keeps a `2rem` end gutter mirroring the sidebar inset.
 - Callout bodies never widen past the callout: wide code, tables, and diagrams scroll inside their own box.
@@ -256,9 +256,9 @@ Their main jobs are to find a topic, understand its scope, inspect the mechanism
 
 | Surface      | Current contract                                                                                                                                                                             |
 | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Home cards   | 12-column span rules; narrow spans below `760px`; one column at `430px`                                                                                                                      |
+| Home cards   | Balanced complete rows, 3–4–3 for ten desktop topics; container breakpoints at `28rem`, `42rem`, and `62rem`; full content wraps                                                             |
 | Quartz shell | Mobile footer one row; no-share labels center; Graph hides; Explorer scrolls                                                                                                                 |
-| Home page    | Scrolls at every size; below `768px` summaries drop while counts, bars, and the legend stay                                                                                                  |
+| Home page    | Scrolls at every size; all summaries, counts, bars, and the legend stay visible                                                                                                              |
 | StepTrace    | Mounted-instance compact mode below `704px`; footer fits `320px` without shrinking `44px` controls                                                                                           |
 | Complexity   | One resource panel at full width at every size; the tab strip scrolls before it wraps, and the figure never gains a horizontal scroller                                                      |
 | Folder maps  | Content-sized wrapping cards; compact treatment in narrow containers                                                                                                                         |
