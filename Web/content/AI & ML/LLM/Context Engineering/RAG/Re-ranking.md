@@ -7,7 +7,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
-summary: A second-stage pass that reorders retrieval candidates with a more accurate model to boost precision.
+summary: A second-stage pass that rescores, fuses, or diversifies retrieval candidates before context assembly.
 level:
   - "2"
 priority: High

@@ -1,9 +1,9 @@
 ---
 publish: true
 title: ASP.NET Core Authentication
-created: 2026-08-20T20:41:15.644Z
-modified: 2026-08-25T10:26:27.399Z
-published: 2026-08-25T10:26:27.399Z
+created: 2026-09-12T17:17:13.845Z
+modified: 2026-09-12T17:17:13.846Z
+published: 2026-09-12T17:17:13.846Z
 topic:
   - Programming
 subtopic:

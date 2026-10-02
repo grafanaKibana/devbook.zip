@@ -7,7 +7,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
-summary: Public task suites scoring multi-step tool use; useful to shortlist models, not to decide.
+summary: Public task suites scoring multi-step tool use. Useful to shortlist models, not to decide.
 level:
   - "3"
 priority: Medium
