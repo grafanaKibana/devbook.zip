@@ -9,6 +9,8 @@ level:
 priority: High
 status: Done
 publish: true
+qard-deck: "AI & ML"
+qard-topic: "LLM/Generation"
 ---
 
 Generation turns a prompt and its context into output. Producing text is easy. Producing text that is reliable, grounded, and usable by the next system is the engineering problem. Sampling controls affect token choice, evidence limits what the answer may claim, and structure determines whether another program can consume it.
@@ -129,10 +131,10 @@ Mitigation: validate semantic content in addition to schema compliance. For crit
 
 # Questions
 
-> [!QUESTION]- Why is adjusting temperature and top_p simultaneously discouraged?
+> [!qard]- Why is adjusting temperature and top_p simultaneously discouraged?
 > Both reshape the token distribution through different mechanisms. Temperature sharpens or flattens logits, while top_p truncates candidates at a cumulative-mass threshold. Changing both makes an observed output shift harder to attribute. Tuning one and leaving the other at its default keeps evaluation legible.
 
-> [!QUESTION]- Why can a grounded response still contain unsupported claims despite citation tags?
+> [!qard]- Why can a grounded response still contain unsupported claims despite citation tags?
 > Citation markers do not verify entailment. A cited passage may be related to the topic without supporting the exact claim. Grounding therefore needs a separate claim-to-source check, using NLI or another verifier, before the citation can be trusted.
 
 # References

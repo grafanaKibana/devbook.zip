@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.480Z
-modified: 2026-08-20T20:41:15.481Z
-published: 2026-08-20T20:41:15.481Z
+created: 2026-10-12T09:19:58.215Z
+modified: 2026-10-12T09:19:58.216Z
+published: 2026-10-12T09:19:58.216Z
 topic:
   - AI & ML
 subtopic:
@@ -12,6 +12,8 @@ level:
   - "2"
 priority: High
 status: Done
+qard-deck: AI & ML
+qard-topic: LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics
 ---
 
 RAG evaluation needs separate views of retrieval and generation. Retrieval metrics test whether the right evidence arrived. Generation metrics test whether the answer used that evidence correctly. End-to-end outcomes then show whether the task was solved. Mixing the layers turns every regression into guesswork: a faithful answer over irrelevant documents needs a retrieval fix, while ignored evidence points at generation.
@@ -110,10 +112,10 @@ Binary judgments often calibrate more reliably than broad numeric scales. Check 
 
 # Questions
 
-> [!QUESTION]- Why can aggregate retrieval metrics improve while individual user segments degrade?
+> [!qard]- Why can aggregate retrieval metrics improve while individual user segments degrade?
 > An average hides which queries improved and which regressed. A gain on a large, easy segment can outweigh a severe drop for one tenant or language. Slice metrics along dimensions that change the retrieval distribution, and treat a material segment drop as a failure. The useful granularity is the smallest one with enough labeled examples to produce a stable signal.
 
-> [!QUESTION]- Given high Faithfulness (0.91) and low Context Recall (0.54), which pipeline layer should be fixed first, and why?
+> [!qard]- Given high Faithfulness (0.91) and low Context Recall (0.54), which pipeline layer should be fixed first, and why?
 > Faithfulness of 0.91 says the model usually uses the context it receives. Context Recall of 0.54 says retrieval omits much of the required evidence, so retrieval is the first bottleneck to test. Review filters, hybrid search, k, and embedding fit before changing generation prompts. Re-measure both scores afterward because higher recall can add noise and lower faithfulness, which may then justify re-ranking.
 
 # References

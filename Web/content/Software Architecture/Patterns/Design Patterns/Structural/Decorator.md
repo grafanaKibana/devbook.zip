@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.697Z
-modified: 2026-08-20T20:41:15.697Z
-published: 2026-08-20T20:41:15.697Z
+created: 2026-10-12T09:19:58.304Z
+modified: 2026-10-12T09:19:58.304Z
+published: 2026-10-12T09:19:58.304Z
 topic:
   - Software Architecture
 subtopic:
@@ -12,6 +12,8 @@ level:
   - "3"
 priority: High
 status: Done
+qard-deck: Software Architecture
+qard-topic: Patterns/Design Patterns/Structural/Decorator
 ---
 
 Pizza toppings work as layers over one base. Each layer changes the result without changing the dough underneath, and different combinations can be assembled from the same pieces.
@@ -239,13 +241,13 @@ Decorator fits optional behaviors that share a contract and need explicit compos
 
 # Questions
 
-> [!QUESTION]- How does ASP.NET Core Middleware implement the Decorator pattern?
+> [!qard]- How does ASP.NET Core Middleware implement the Decorator pattern?
 > Each middleware receives a `RequestDelegate` for the remaining pipeline. It can run logic before delegation, after delegation, or stop the chain. Startup composition fixes the wrapper order, so ordering mistakes appear as runtime behavior rather than type errors.
 
-> [!QUESTION]- When should Decorator replace inheritance for added behavior?
+> [!qard]- When should Decorator replace inheritance for added behavior?
 > Decorator suits optional behavior assembled at composition time, especially around sealed or third-party types. Inheritance suits a stable subtype relationship. A decorator avoids coupling behavior to a base-class implementation, but introduces another object and call boundary.
 
-> [!QUESTION]- What's the performance cost of a deep decorator chain?
+> [!qard]- What's the performance cost of a deep decorator chain?
 > Each decorator adds a call boundary and may add asynchronous state-machine work if its method awaits. I/O usually dominates that cost. A CPU-bound hot path still deserves measurement. If wrapper overhead appears in profiles, collapsing layers on that path may be reasonable.
 
 # References

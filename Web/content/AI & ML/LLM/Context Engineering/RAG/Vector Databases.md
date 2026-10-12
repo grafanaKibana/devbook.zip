@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.486Z
-modified: 2026-09-21T08:40:06.211Z
-published: 2026-09-21T08:40:06.211Z
+created: 2026-10-12T09:19:58.223Z
+modified: 2026-10-12T09:19:58.224Z
+published: 2026-10-12T09:19:58.224Z
 topic:
   - AI & ML
 subtopic:
@@ -12,6 +12,8 @@ level:
   - "2"
 priority: High
 status: Done
+qard-deck: AI & ML
+qard-topic: LLM/Context Engineering/RAG/Vector Databases
 ---
 
 A vector database stores [[Embeddings]] with metadata and searches them by proximity. It sits under dense [[Retrieval]], where the indexed [[Chunking|chunks]] must be searched in milliseconds even when the collection contains millions of vectors.
@@ -120,7 +122,7 @@ HNSW is a practical starting point for a typical text corpus. IVF or IVF-PQ beco
 
 # Questions
 
-> [!QUESTION]- Why do vector databases use approximate nearest-neighbor search instead of exact search?
+> [!qard]- Why do vector databases use approximate nearest-neighbor search instead of exact search?
 > Exact search scores the query against every stored vector, so its work grows linearly with the collection. An ANN index organizes the vectors so a query visits only the most promising parts of the search space, which cuts latency and compute. The tradeoff is that it can miss some true nearest neighbors, so recall must be compared with brute-force ground truth at the required latency.
 
 # References

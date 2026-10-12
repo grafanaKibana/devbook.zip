@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.685Z
-modified: 2026-08-20T20:41:15.685Z
-published: 2026-08-20T20:41:15.685Z
+created: 2026-10-12T09:19:58.286Z
+modified: 2026-10-12T09:19:58.286Z
+published: 2026-10-12T09:19:58.286Z
 topic:
   - Software Architecture
 subtopic:
@@ -12,6 +12,8 @@ level:
   - "2"
 priority: High
 status: Ready to Repeat
+qard-deck: Software Architecture
+qard-topic: Patterns/Architectural Patterns/Domain-Driven Design
 ---
 
 Domain-Driven Design (DDD) organizes software around business language and rules. Its strategic patterns separate models that assign different meanings to the same words. Tactical patterns express one model's invariants in code.
@@ -122,7 +124,7 @@ Use tactical patterns where invariants need a clear consistency boundary. Use Bo
 
 # Questions
 
-> [!QUESTION]- When is full DDD the wrong choice?
+> [!qard]- When is full DDD the wrong choice?
 > A system with straightforward CRUD and little business behavior gains little from aggregates, repositories, and context mapping. Strategic boundaries may still help a large organization, but tactical machinery should follow real invariants rather than project size alone.
 
 # References

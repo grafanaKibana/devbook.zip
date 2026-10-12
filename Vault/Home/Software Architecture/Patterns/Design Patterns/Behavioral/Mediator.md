@@ -9,6 +9,8 @@ level:
 priority: High
 status: Ready to Repeat
 publish: true
+qard-deck: "Software Architecture"
+qard-topic: "Patterns/Design Patterns/Behavioral/Mediator"
 ---
 
 Air traffic control is a useful Mediator analogy. Pilots coordinate through the tower instead of maintaining direct conversations with every aircraft nearby. A new plane joins one coordination system rather than a web of peer relationships.
@@ -141,10 +143,10 @@ Cross-cutting fraud screening can sit in a pipeline behavior shared by every rel
 
 # Questions
 
-> [!QUESTION]- What are the signs that a mediator is adding indirection without reducing coupling?
+> [!qard]- What are the signs that a mediator is adding indirection without reducing coupling?
 > A mediator should route work, not become the place where business rules accumulate. Moving a 300-line workflow from a controller into one handler changes its location without reducing its complexity or dependencies. For a simple, stable interaction, a direct dependency is usually clearer.
 
-> [!QUESTION]- How do MediatR pipeline behaviors implement the Chain of Responsibility pattern?
+> [!qard]- How do MediatR pipeline behaviors implement the Chain of Responsibility pattern?
 > Each `IPipelineBehavior<TRequest, TResponse>` wraps the next delegate. It calls `next()` to continue or returns its own response to stop. DI registration supplies the order, so the chain is less visible than explicit `SetNext()` calls but centralized in application composition.
 
 # References

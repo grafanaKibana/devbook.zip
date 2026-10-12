@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-09-12T17:17:13.846Z
-modified: 2026-09-12T17:17:13.846Z
-published: 2026-09-12T17:17:13.846Z
+created: 2026-10-12T09:19:58.258Z
+modified: 2026-10-12T09:19:58.258Z
+published: 2026-10-12T09:19:58.258Z
 tags:
   - FolderNote
 topic:
@@ -14,6 +14,8 @@ priority: High
 status: Creation
 level:
   - "4"
+qard-deck: Programming
+qard-topic: NET/CSharp/Concurrency and Parallelism/Concurrency and Parallelism
 ---
 
 Concurrency describes program structure: several operations can be in progress during the same period. Parallelism describes execution: several operations run at the same instant. A single core can interleave concurrent work but cannot execute it in parallel.
@@ -129,10 +131,10 @@ A short synchronous critical section belongs behind a [[Programming/NET/CSharp/C
 
 # Questions
 
-> [!QUESTION]- What is the difference between concurrency and parallelism in practice?
+> [!qard]- What is the difference between concurrency and parallelism in practice?
 > Concurrency means several operations are in progress during the same period, even if one thread takes turns running them. Parallelism means operations execute at the same time on multiple cores. Asynchronous I/O uses concurrency so a thread is not blocked while an external operation is pending. CPU-bound work uses parallelism when splitting the calculation across cores reduces its elapsed time.
 
-> [!QUESTION]- What should be checked before choosing `Task`, `lock`, `Parallel`, or `Channel`?
+> [!qard]- What should be checked before choosing `Task`, `lock`, `Parallel`, or `Channel`?
 > First check what the work spends time doing and who is responsible for finishing it. I/O-bound work usually needs asynchronous APIs so threads are not blocked. CPU-bound work may benefit from measured parallelism. Shared mutable state needs synchronization or a single owner, while background work needs a queue with a clear lifetime and failure policy. The primitive follows from those requirements.
 
 # References

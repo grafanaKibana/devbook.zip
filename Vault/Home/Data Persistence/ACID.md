@@ -8,6 +8,8 @@ level:
 priority: High
 status: Ready to Repeat
 publish: true
+qard-deck: "Data Persistence"
+qard-topic: "ACID"
 ---
 
 ACID describes what a database transaction protects. A **transaction** groups reads and writes behind one commit decision. Atomicity prevents partial commit, consistency preserves declared invariants, isolation constrains concurrent histories, and durability defines what survives after commit.
@@ -161,7 +163,7 @@ await db.SaveChangesAsync();
 
 # Questions
 
-> [!QUESTION]- What determines the isolation level needed for a read-modify-write transaction?
+> [!qard]- What determines the isolation level needed for a read-modify-write transaction?
 > The required protection depends on the invariant and on every row or predicate used to make the decision. Repeatable Read stabilizes repeated reads and may protect an update to the same row under the database engine's rules, but it does not generally prevent write skew. A financial or inventory decision that spans rows or a predicate needs Serializable isolation or explicit locks over the full set. Optimistic row-version checks reduce contention only when the transaction validates every record that influenced the decision.
 
 # References

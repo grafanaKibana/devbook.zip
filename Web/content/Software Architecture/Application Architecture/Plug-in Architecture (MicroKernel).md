@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.675Z
-modified: 2026-08-20T20:41:15.675Z
-published: 2026-08-20T20:41:15.675Z
+created: 2026-10-12T09:19:58.279Z
+modified: 2026-10-12T09:19:58.280Z
+published: 2026-10-12T09:19:58.280Z
 topic:
   - Software Architecture
 subtopic:
@@ -12,6 +12,8 @@ level:
   - "3"
 priority: High
 status: Ready to Repeat
+qard-deck: Software Architecture
+qard-topic: Application Architecture/Plug-in Architecture (MicroKernel)
 ---
 
 Plug-in (Microkernel) architecture puts stable product behavior in a small **core** and exposes contracts that **plug-ins** implement. The core can run without knowing any concrete extension. Features are selected at deployment or discovered at runtime, which fits products that vary by customer or accept third-party extensions.
@@ -110,10 +112,10 @@ Use plug-in architecture when extensions must ship independently of the core or 
 
 # Questions
 
-> [!QUESTION]- How can plug-ins use different versions of the same dependency without breaking the host contract?
+> [!qard]- How can plug-ins use different versions of the same dependency without breaking the host contract?
 > Each plug-in can load its private dependencies through its own `AssemblyLoadContext`. Plug-in A may then resolve `Newtonsoft.Json` 12.x while plug-in B resolves 13.x. The extension contract must still come from the host's default context. If a plug-in loads another copy of that contract assembly, its types have a different identity even when the name and source code match. Values should cross the boundary through the shared contract types and plain data.
 
-> [!QUESTION]- When is plug-in architecture the wrong choice?
+> [!qard]- When is plug-in architecture the wrong choice?
 > It is the wrong choice when one team owns all features and releases them with the host. Dynamic loading and contract compatibility add failure modes without creating independent delivery. A modular monolith with feature flags handles that case with fewer moving parts. Plug-ins earn their cost when an extension must evolve without changing or rebuilding the core.
 
 # References

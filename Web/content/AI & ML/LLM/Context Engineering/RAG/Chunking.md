@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.479Z
-modified: 2026-08-20T20:41:15.479Z
-published: 2026-08-20T20:41:15.479Z
+created: 2026-10-12T09:19:58.215Z
+modified: 2026-10-12T09:19:58.215Z
+published: 2026-10-12T09:19:58.215Z
 topic:
   - AI & ML
 subtopic:
@@ -12,6 +12,8 @@ level:
   - "2"
 priority: High
 status: Done
+qard-deck: AI & ML
+qard-topic: LLM/Context Engineering/RAG/Chunking
 ---
 
 Chunking sets the unit of retrieval. Large chunks carry more surrounding text but waste context on noise. Small chunks match precisely, yet can separate a rule from the condition that changes it. A useful chunk keeps one recoverable idea together and retains enough source metadata to trace it.
@@ -219,13 +221,13 @@ The table describes steady-state behavior. A practical rollout starts with recur
 
 # Questions
 
-> [!QUESTION]- Why does parent-child chunking often improve answer completeness over child-only retrieval?
+> [!qard]- Why does parent-child chunking often improve answer completeness over child-only retrieval?
 > Small children give the retriever a precise target, but a child may omit an adjacent exception or prerequisite. Expanding a match to its parent restores that surrounding evidence before generation. The price is more context and possibly more noise, so parent size still needs evaluation.
 
-> [!QUESTION]- When should a team move from recursive to structure-aware chunking?
+> [!qard]- When should a team move from recursive to structure-aware chunking?
 > Move when failed queries repeatedly trace to broken tables, code blocks, or clause-and-exception pairs. Recursive splitting understands separators, not the source format's actual structure. A parser is justified once that blind spot costs more than maintaining it.
 
-> [!QUESTION]- Why is semantic chunking not always superior to simpler rule-based approaches?
+> [!qard]- Why is semantic chunking not always superior to simpler rule-based approaches?
 > It embeds spans during ingestion and relies on a threshold whose distribution changes with the model and corpus. Reliable headings already provide cheaper boundaries. Semantic splitting is useful when topic changes are real but structural markers are absent.
 
 # References

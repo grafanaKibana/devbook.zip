@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.674Z
-modified: 2026-08-20T20:41:15.674Z
-published: 2026-08-20T20:41:15.674Z
+created: 2026-10-12T09:19:58.277Z
+modified: 2026-10-12T09:19:58.277Z
+published: 2026-10-12T09:19:58.277Z
 topic:
   - Software Architecture
 subtopic:
@@ -12,6 +12,8 @@ level:
   - "3"
 priority: High
 status: Ready to Repeat
+qard-deck: Software Architecture
+qard-topic: Application Architecture/Clean Architecture
 ---
 
 Clean Architecture, popularized by Robert C. Martin, keeps business policy independent of delivery technology. Its Dependency Rule is strict: source dependencies point inward, so inner policy code cannot name a web framework, database adapter, or UI type. That separation keeps domain behavior testable while outer details change. It earns its cost in systems with substantial business rules and a longer life than the current infrastructure stack.
@@ -250,7 +252,7 @@ Start with a simpler layered or vertical-slice structure when the domain is shal
 
 # Questions
 
-> [!QUESTION]- How does Clean Architecture differ from traditional N Layer, and when does the extra indirection pay off?
+> [!qard]- How does Clean Architecture differ from traditional N Layer, and when does the extra indirection pay off?
 > Traditional N Layer commonly points dependencies from UI through business logic to data access. Clean Architecture points source dependencies toward policy instead, so inner layers own the contracts that outer adapters implement. The extra boundary pays off when business rules are valuable, isolated tests matter, or infrastructure is likely to change. A short-lived service with shallow rules usually pays the wiring cost without receiving much protection.
 
 # References

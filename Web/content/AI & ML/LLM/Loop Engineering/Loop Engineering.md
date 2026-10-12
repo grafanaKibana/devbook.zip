@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.497Z
-modified: 2026-08-20T20:41:15.498Z
-published: 2026-08-20T20:41:15.498Z
+created: 2026-10-12T09:19:58.231Z
+modified: 2026-10-12T09:19:58.231Z
+published: 2026-10-12T09:19:58.231Z
 tags:
   - FolderNote
 topic:
@@ -14,6 +14,8 @@ level:
   - "3"
 priority: Medium
 status: Done
+qard-deck: AI & ML
+qard-topic: LLM/Loop Engineering/Loop Engineering
 ---
 
 Loop engineering designs the runtime around repeated model calls. It controls the observe → decide → act cycle, defines when work is finished, checks progress between steps, and hands uncertain decisions to a person.
@@ -52,13 +54,13 @@ Each iteration adds calls and results to the history. Without intervention, cont
 
 # Questions
 
-> [!QUESTION]- What does loop engineering add on top of a model with tools, and why is it its own discipline?
+> [!qard]- What does loop engineering add on top of a model with tools, and why is it its own discipline?
 > A model with tools can still be a single call. Loop engineering adds the runtime that repeats observe → decide → act until a checkable stop condition. It owns budgets and verification between turns, which determines whether an early mistake is corrected or amplified.
 
-> [!QUESTION]- What are the main ways to bound a loop, and why are prompt-level stop instructions not enough?
+> [!qard]- What are the main ways to bound a loop, and why are prompt-level stop instructions not enough?
 > The runtime needs a hard iteration cap, a cumulative token or cost budget, and a stop condition it can verify. Prompt instructions are advisory, so they cannot replace those limits. At the cap, return an explicit partial result or escalate instead of truncating silently. The unbounded run documented in [[Agent Loop]] shows the failure mode: 369 repeated tool calls consumed 9.7M tokens without converging.
 
-> [!QUESTION]- How do loop engineering and context engineering divide the work of managing a long run's history?
+> [!qard]- How do loop engineering and context engineering divide the work of managing a long run's history?
 > Context engineering decides what belongs in the window and what a summary must preserve. Loop engineering decides when to compact, offload artifacts, or stop. Durable state such as a plan file bridges them by surviving compaction and keeping later iterations tied to the original goal.
 
 # References

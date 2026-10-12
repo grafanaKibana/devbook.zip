@@ -9,6 +9,8 @@ level:
 priority: Medium
 status: Ready to Repeat
 publish: true
+qard-deck: "AI & ML"
+qard-topic: "LLM/Graph Engineering"
 ---
 
 Graph engineering is an emerging name for designing an agentic system as an executable graph: which units perform work, which transitions are legal, what state crosses each boundary, and where execution can stop, pause, or recover. The label is new; the mechanics come from established workflow engines, state machines, and graph-processing runtimes.
@@ -89,13 +91,13 @@ Production traces need node identity, edge decisions, state and workflow version
 
 # Questions
 
-> [!QUESTION]- What does graph engineering add beyond loop engineering and workflow patterns?
+> [!qard]- What does graph engineering add beyond loop engineering and workflow patterns?
 > Loop engineering controls progress, verification, budgets, and termination across repeated work. Workflow patterns name reusable shapes such as routing or evaluator-optimizer. Graph engineering makes the chosen shape executable by defining nodes, legal transitions, shared state, merge rules, scheduling assumptions, checkpoints, and recovery behavior. A loop can remain inside one node or appear as a cycle across several nodes.
 
-> [!QUESTION]- Why does an explicit graph not make an agentic system deterministic?
+> [!qard]- Why does an explicit graph not make an agentic system deterministic?
 > Fixed edges constrain which paths are legal, and deterministic guards can make some transitions reproducible. Nodes may still contain model calls, external APIs, mutable data, or concurrent work whose results vary. The graph makes control flow more inspectable; it does not guarantee the quality or repeatability of the work inside each node.
 
-> [!QUESTION]- Why does checkpointing require idempotent node design?
+> [!qard]- Why does checkpointing require idempotent node design?
 > A runtime normally checkpoints at a step boundary rather than after every instruction inside a node. If a process stops after performing a side effect but before committing the checkpoint, resume can execute that side effect again. Idempotency keys, upserts, or read-before-write checks make re-execution safe; a checkpoint alone does not provide exactly-once delivery.
 
 # References

@@ -10,6 +10,8 @@ priority: High
 level:
   - "2"
 status: Done
+qard-deck: "Software Architecture"
+qard-topic: "Distributed Systems/Message Queues/Message Queues"
 ---
 
 Message queues decouple producers from consumers by buffering messages until consumers are ready. They absorb spikes, isolate failures, and keep systems working when downstream services slow. Use queues for webhook ingestion and background work.
@@ -198,7 +200,7 @@ Queue depth alone hides whether one old message is stuck or fresh traffic is arr
 
 # Questions
 
-> [!QUESTION]- How do Kafka and RabbitMQ fit different messaging workloads in a .NET service?
+> [!qard]- How do Kafka and RabbitMQ fit different messaging workloads in a .NET service?
 > Kafka fits high-throughput event streams that must be retained and replayed. RabbitMQ fits low-latency work queues and messages that need flexible routing. For either broker, the design still needs a clear ordering boundary, such as a Kafka partition or a RabbitMQ queue, and the decision must include operating cost and the team's experience.
 
 # References

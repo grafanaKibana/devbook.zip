@@ -9,6 +9,8 @@ level:
 priority: High
 status: Done
 publish: true
+qard-deck: "AI & ML"
+qard-topic: "LLM/Context Engineering/RAG/Query Translation"
 ---
 
 Query translation changes a user's wording before search so that retrieval sees language closer to the corpus. Someone asks, "Can partners burst above limits now?" The relevant document is titled "Q3 Quota Policy Update — Partner Tier Burst Allowance." Both describe the same policy, but a single query embedding may place them in different neighborhoods. Translation searches more of that space without changing the corpus or the [[Embeddings|embedding model]].
@@ -138,11 +140,11 @@ Direct retrieval provides the control. Multi-query or RAG-Fusion earns its cost 
 
 # Questions
 
-> [!QUESTION]- Why does query translation often improve recall but sometimes hurt precision, and how can the tradeoff be detected?
+> [!qard]- Why does query translation often improve recall but sometimes hurt precision, and how can the tradeoff be detected?
 > Query translation raises recall by searching more phrasings, but it lowers precision when a rewrite adds concepts or changes constraints.
 > Measure Recall@k and Precision@k before and after translation, split by query type. If Recall@20 rises while Precision@5 falls, coverage improved but the generator receives worse evidence. Keep the original query in the candidate set and reject variants that change material constraints.
 
-> [!QUESTION]- When is decomposition a better choice than multi-query, and when does it hurt?
+> [!qard]- When is decomposition a better choice than multi-query, and when does it hurt?
 > Decomposition fits distinct sub-problems that need different evidence, such as a comparison or a timeline assembled from several sources. Multi-query fits one intent expressed with uncertain vocabulary.
 > Decomposition hurts when the split removes the constraints connecting the pieces. It fits only when each sub-question can be answered independently and those answers can support the original request. It also adds a synthesis call, while multi-query adds only retrieval work.
 

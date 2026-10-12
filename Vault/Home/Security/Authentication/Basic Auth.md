@@ -10,6 +10,8 @@ priority: High
 status: Ready to Repeat
 
 publish: true
+qard-deck: "Security"
+qard-topic: "Authentication/Basic Auth"
 ---
 
 HTTP Basic authentication sends a reusable user identifier and password in the `Authorization` header. Base64 makes the bytes safe for the header syntax. It provides no confidentiality. RFC 7617 defines the scheme and its protection-space behavior.
@@ -100,10 +102,10 @@ Basic earns its place when interoperability requires it and its coarse credentia
 
 # Questions
 
-> [!QUESTION]- Why is Basic Auth unsafe over HTTP?
+> [!qard]- Why is Basic Auth unsafe over HTTP?
 > Base64 is reversible encoding. Without TLS, every observer on the path can recover the reusable password. TLS protects it only to the termination point. The credential remains exposed to the client, verifier, trusted proxies, and any system that records the header.
 
-> [!QUESTION]- When is Basic Auth acceptable in production?
+> [!qard]- When is Basic Auth acceptable in production?
 > It can be acceptable for a constrained integration that requires Basic and supports TLS across every hop, a unique vaulted credential, narrow authorization, rotation, rate limiting, and header redaction. A shared password across many clients or an interactive user's primary password creates an unnecessarily large compromise boundary.
 
 # References

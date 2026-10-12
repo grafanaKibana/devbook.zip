@@ -20,12 +20,13 @@ For Interview Questions, the confirmed primary job is to see the whole topic lan
 
 ## Operating Context
 
-Notes are authored in `Vault/Home/` and published through Quartz Syncer to the Quartz website. Interview questions come from question callouts in those notes. The Obsidian dashboard and the web QuestionsIndex use different renderers.
+Notes are authored in `Vault/Home/` and published through Quartz Syncer to the Quartz website. Interview questions are authored once as Qard callouts in those notes; compatible generic Question callouts remain readable. The Obsidian dashboard and the web QuestionsIndex use different renderers over the same source bank.
 
 ## Capabilities and Constraints
 
 - Folders and FolderNote metadata own the topic hierarchy, labels, ordering, icons, and colors.
 - Question navigation must reflect actual source content and preserve links back to the notes.
+- Qard deck/topic metadata organizes study cards without replacing folder-derived dashboard grouping; valid logical overrides and per-card locations remain authoritative.
 - `Vault/` owns authored content; `Web/content/` and `Web/public/` are generated projections.
 - `AGENTS.md` owns repository and publishing rules. `DESIGN.md` owns the established visual system.
 - Interview Questions preloads every topic’s questions on page open, with wrapping Tabsdown topic tabs and a native Subtopic selector to narrow the displayed questions. Full ancestry disambiguates repeated subtopic names.

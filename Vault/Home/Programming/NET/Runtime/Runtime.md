@@ -10,6 +10,8 @@ status: Creation
 priority: High
 level:
   - "4"
+qard-deck: "Programming"
+qard-topic: "NET/Runtime/Runtime"
 ---
 
 The .NET runtime executes managed code and supplies the machinery around it: code generation, type loading, garbage collection, exception dispatch, and shared threading services. These mechanisms shape startup, throughput, latency, and memory use, but a symptom attributed to “the runtime” often begins with an application lifetime or blocking decision.
@@ -23,7 +25,7 @@ return FolderStructureMap;
 
 # Questions
 
-> [!QUESTION]- What does the CLR do when an application starts, and why does startup behavior matter?
+> [!qard]- What does the CLR do when an application starts, and why does startup behavior matter?
 > A native host selects and starts the runtime, then the loader resolves the entry assembly and dependencies. Executed methods use ReadyToRun code when available or are JIT-compiled. Tiering can replace those bodies later. Assembly loading, static initialization, JIT work, and dependency setup can all appear in cold-start latency, so traces must separate them.
 
 # References

@@ -1,9 +1,9 @@
 ---
 publish: true
 title: ASP.NET Core Authentication
-created: 2026-09-12T17:17:13.845Z
-modified: 2026-09-12T17:17:13.846Z
-published: 2026-09-12T17:17:13.846Z
+created: 2026-10-12T09:19:58.252Z
+modified: 2026-10-12T09:19:58.252Z
+published: 2026-10-12T09:19:58.252Z
 topic:
   - Programming
 subtopic:
@@ -13,6 +13,8 @@ level:
   - "1"
 priority: Medium
 status: Ready to Repeat
+qard-deck: Programming
+qard-topic: NET/ASP NET Web API/Authentication
 ---
 
 Authentication turns request credentials into an identity. In ASP.NET Core, a registered authentication handler validates the credential for its scheme and, on success, supplies the `ClaimsPrincipal` exposed through `HttpContext.User`. Authorization evaluates that principal later in the pipeline. [[Authorization]] covers that separate decision.
@@ -151,7 +153,7 @@ Keep lifetime validation enabled. Short access-token lifetimes bound exposure. A
 
 # Questions
 
-> [!QUESTION]- What does `ValidateIssuerSigningKey = true` control during JWT validation?
+> [!qard]- What does `ValidateIssuerSigningKey = true` control during JWT validation?
 > For a signed token, the handler uses a resolved key to verify the signature. This flag tells the default validation path to also validate that signing key itself. It does not enable issuer, audience, lifetime, or algorithm validation, and a custom `IssuerSigningKeyValidator` runs regardless of the flag. The rest of the JWT validation settings still have to form one coherent trust configuration.
 
 # References

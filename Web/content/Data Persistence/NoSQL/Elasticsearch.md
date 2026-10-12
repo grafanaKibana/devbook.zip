@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-09-12T17:17:13.834Z
-modified: 2026-09-12T17:17:13.835Z
-published: 2026-09-12T17:17:13.835Z
+created: 2026-10-12T09:19:58.243Z
+modified: 2026-10-12T09:19:58.243Z
+published: 2026-10-12T09:19:58.243Z
 topic:
   - Data Persistence
 subtopic:
@@ -12,6 +12,8 @@ level:
   - "3"
 priority: High
 status: Ready to Repeat
+qard-deck: Data Persistence
+qard-topic: NoSQL/Elasticsearch
 ---
 
 Elasticsearch is a distributed search and analytics engine built on Apache Lucene. It belongs beside the system of record when a read path needs relevance-ranked full-text search, faceting, geospatial predicates, or aggregations over indexed events. Applications write JSON documents, mappings define field types, analyzers turn text into terms, and Lucene stores those terms and document references in immutable segments.
@@ -109,7 +111,7 @@ Use PostgreSQL full-text search when one relational data set needs modest search
 
 # Questions
 
-> [!QUESTION]- Why use both `text` and `keyword` for one field?
+> [!qard]- Why use both `text` and `keyword` for one field?
 > `text` is analyzed into terms for relevance-ranked full-text matching. `keyword` keeps the exact value for equality filters, sorting, and aggregations. One representation cannot efficiently provide both semantics.
 
 # References

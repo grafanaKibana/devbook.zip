@@ -9,6 +9,8 @@ level:
 priority: High
 status: Creation
 publish: true
+qard-deck: "Programming"
+qard-topic: "NET/CSharp/Concurrency and Parallelism/Channels"
 ---
 
 `Channel<T>` is an in-memory handoff between producers and consumers. Both sides can wait asynchronously, and a bounded channel makes overload behavior explicit. One common shape is an HTTP endpoint that queues a thumbnail job while a `BackgroundService` drains the work.
@@ -113,13 +115,13 @@ Use a bounded `Channel<T>` for asynchronous producer-consumer work that belongs 
 
 # Questions
 
-> [!QUESTION]- What does a bounded `Channel<T>` provide that `SemaphoreSlim` does not?
+> [!qard]- What does a bounded `Channel<T>` provide that `SemaphoreSlim` does not?
 > A bounded channel stores queued work and lets producers wait asynchronously when the buffer is full. Consumers receive items in accepted FIFO order. `SemaphoreSlim` only limits how many callers may enter at once; it does not store work and provides no fairness guarantee. A channel therefore fits producer-consumer handoff, while a semaphore fits throttling access to an operation.
 
-> [!QUESTION]- Why is `Channel.CreateUnbounded<T>()` a risky default?
+> [!qard]- Why is `Channel.CreateUnbounded<T>()` a risky default?
 > An unbounded channel never slows a producer because of capacity. If producers stay faster than consumers, queued items keep accumulating and memory use can grow until the process is under pressure. A bounded channel forces an overload policy: either producers wait for space or the channel drops items according to an explicit rule.
 
-> [!QUESTION]- When is `BoundedChannelFullMode.DropOldest` a reasonable policy?
+> [!qard]- When is `BoundedChannelFullMode.DropOldest` a reasonable policy?
 > It is reasonable when the newest value replaces older state, such as a progress update or sampled metric. When the buffer is full, the oldest queued value is discarded so a newer one can be accepted, and that loss should be observable. It is not suitable when every item represents separate work or a business obligation that must be processed.
 
 # References

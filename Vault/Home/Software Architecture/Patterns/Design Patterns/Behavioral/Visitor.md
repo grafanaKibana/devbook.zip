@@ -9,6 +9,8 @@ level:
 priority: High
 status: Ready to Repeat
 publish: true
+qard-deck: "Software Architecture"
+qard-topic: "Patterns/Design Patterns/Behavioral/Visitor"
 ---
 
 A museum can keep the same exhibits while offering a new audio tour. Each tour performs a different operation over the fixed exhibit set. Adding a tour is cheap. Adding an exhibit forces every tour to decide what to do with it.
@@ -219,13 +221,13 @@ Visitor fits a stable element set that receives new cross-cutting operations. Pa
 
 # Questions
 
-> [!QUESTION]- What is double dispatch and why does Visitor need it?
+> [!qard]- What is double dispatch and why does Visitor need it?
 > Normal virtual dispatch selects a method from the runtime type of the receiver. Overload resolution still uses the argument's compile-time type. `Accept` first dispatches to the concrete element, where `this` has that concrete type. `visitor.Visit(this)` can then select the corresponding overload and dispatch to the concrete visitor implementation. The two calls encode both dimensions.
 
-> [!QUESTION]- When does EF Core use ExpressionVisitor, and what does it do?
+> [!qard]- When does EF Core use ExpressionVisitor, and what does it do?
 > EF Core receives a LINQ expression tree and passes it through multiple visitor-based phases that normalize, expand, translate, and shape the query. A method or member fails translation when the provider has no supported server-side mapping for that expression in its current context. The failure is broader than a missing `Visit` overload because providers often visit the node successfully but cannot translate its semantics.
 
-> [!QUESTION]- When is pattern matching a better fit than Visitor?
+> [!qard]- When is pattern matching a better fit than Visitor?
 > Pattern matching is usually clearer for a small hierarchy or a short operation because it needs no `Accept` method or visitor interface. Its exhaustiveness depends on the type shape: an interface hierarchy with a discard arm does not warn when a new implementation appears. Visitor earns its ceremony when the element hierarchy is stable and compile-time pressure to update every operation is an important part of the design.
 
 # References

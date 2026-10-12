@@ -10,6 +10,8 @@ priority: High
 status: Ready to Repeat
 
 publish: true
+qard-deck: "Networks"
+qard-topic: "Protocols/HTTP"
 ---
 
 HTTP is the message contract behind browsers, APIs, webhooks, and service health checks. A request names a target and carries a method, fields, and optional content. The response reports an outcome and may carry a representation.
@@ -247,7 +249,7 @@ Dispose `HttpResponseMessage` and stream large bodies with `HttpCompletionOption
 
 # Questions
 
-> [!QUESTION]- Why is an idempotent HTTP method not automatically safe to retry?
+> [!qard]- Why is an idempotent HTTP method not automatically safe to retry?
 > Idempotency constrains the intended effect of repeating the method. A request can still carry a one-time credential, trigger downstream work, consume deadline budget, or have an unknown first outcome. Automatic retry needs an end-to-end replay contract, not the method label alone.
 
 # References

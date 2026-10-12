@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.503Z
-modified: 2026-08-20T20:41:15.503Z
-published: 2026-08-20T20:41:15.503Z
+created: 2026-10-12T09:19:58.235Z
+modified: 2026-10-12T09:19:58.236Z
+published: 2026-10-12T09:19:58.236Z
 topic:
   - AI & ML
 subtopic:
@@ -12,6 +12,8 @@ level:
   - "3"
 priority: Medium
 status: Done
+qard-deck: AI & ML
+qard-topic: LLM/Safety/OWASP vulnerabilities on AI LLM
 ---
 
 The OWASP Top 10 for LLM Applications (2025 edition) is a risk catalog for systems that embed language models. Its central boundary is awkward: untrusted natural language influences a probabilistic model, and the result may drive deterministic code, retrieval, or tool calls. Prompts can mix data with instructions. Model output is therefore untrusted input to the next component.
@@ -145,10 +147,10 @@ Privilege separation is the baseline because it limits harm even when the model 
 
 # Questions
 
-> [!QUESTION]- Why is prompt injection fundamentally harder to prevent than SQL injection?
+> [!qard]- Why is prompt injection fundamentally harder to prevent than SQL injection?
 > Parameterized SQL gives the database a deterministic split between code and data. A language model interprets both through the same learned behavior, so a delimiter cannot provide the same guarantee. The practical defense contains successful injections with narrow permissions and validated downstream operations.
 
-> [!QUESTION]- Why should system prompts be treated as public rather than secret?
+> [!qard]- Why should system prompts be treated as public rather than secret?
 > Prompt extraction cannot be ruled out, so secrecy is an unsafe dependency. A disclosed prompt should reveal no credential and grant no permission. RBAC and tool authorization remain effective even when every instruction is known.
 
 # References

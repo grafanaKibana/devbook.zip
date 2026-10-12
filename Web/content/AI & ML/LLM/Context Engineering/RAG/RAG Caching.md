@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-09-21T08:40:40.686Z
-modified: 2026-09-21T08:43:52.494Z
-published: 2026-09-21T08:43:52.494Z
+created: 2026-10-12T09:19:58.219Z
+modified: 2026-10-12T09:19:58.219Z
+published: 2026-10-12T09:19:58.219Z
 topic:
   - AI & ML
 subtopic:
@@ -12,6 +12,8 @@ level:
   - "2"
 priority: High
 status: Done
+qard-deck: AI & ML
+qard-topic: LLM/Context Engineering/RAG/RAG Caching
 ---
 
 A RAG request can repeat the same expensive work: embed the query, search the index, and generate an answer. Caches remove that work only when their keys capture every input that affects the result.
@@ -131,7 +133,7 @@ Fast-changing evidence may justify caching embeddings and retrieval results with
 
 # Questions
 
-> [!QUESTION]- Why should retrieval cache keys be based on processed query text instead of raw embeddings?
+> [!qard]- Why should retrieval cache keys be based on processed query text instead of raw embeddings?
 > Processed query text and its transformation version are readable, deterministic inputs. Raw embedding bytes change with the model and hide why two entries differ. A translation-version change should produce a new key, and the embedding model version still belongs in the retrieval key because it affects ranking.
 
 # References

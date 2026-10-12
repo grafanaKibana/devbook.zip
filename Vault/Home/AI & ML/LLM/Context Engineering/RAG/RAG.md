@@ -10,6 +10,8 @@ level:
   - "2"
 publish: true
 status: Done
+qard-deck: "AI & ML"
+qard-topic: "LLM/Context Engineering/RAG/RAG"
 ---
 
 Retrieval-Augmented Generation (RAG) retrieves evidence from a corpus and gives it to the model for generation. Knowledge can then change without retraining the model, and the answer can point back to the source that supported it.
@@ -69,10 +71,10 @@ The two techniques can work together. Fine-tuning can stabilize format or refusa
 
 # Questions
 
-> [!QUESTION]- Why should advanced RAG patterns be introduced incrementally instead of all at once?
+> [!qard]- Why should advanced RAG patterns be introduced incrementally instead of all at once?
 > Every added stage creates another place for quality, latency, or cost to regress. Introduce one pattern against a measured baseline, then keep it only if it fixes a frequent failure. Shipping several together makes attribution difficult and often leaves expensive machinery with no proven benefit.
 
-> [!QUESTION]- How can retrieval and generation failures be separated when a RAG answer is wrong?
+> [!qard]- How can retrieval and generation failures be separated when a RAG answer is wrong?
 > The first check is the context that reached the model. If the relevant evidence is missing, the problem is in retrieval, such as chunking, filtering, or ranking. If the evidence is present but the answer ignores or contradicts it, the problem is in generation and faithfulness. These stages need separate metrics because their fixes are different, while one end-to-end score only shows that the final answer failed.
 
 # References

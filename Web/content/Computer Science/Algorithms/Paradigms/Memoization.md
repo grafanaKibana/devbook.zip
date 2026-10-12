@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.524Z
-modified: 2026-08-20T20:41:15.525Z
-published: 2026-08-20T20:41:15.525Z
+created: 2026-10-12T09:19:58.239Z
+modified: 2026-10-12T09:19:58.239Z
+published: 2026-10-12T09:19:58.239Z
 topic:
   - Computer Science
 subtopic:
@@ -12,6 +12,8 @@ level:
   - "4"
 priority: Medium
 status: Ready to Repeat
+qard-deck: Computer Science
+qard-topic: Algorithms/Paradigms/Memoization
 ---
 
 Naive recursive `fib(50)` makes over 40 billion calls even though the recurrence has only 51 argument values from `0` through `50`. The recursion keeps forgetting that it already solved states such as `fib(48)`. Memoization fixes that repetition by caching each result under its arguments. A repeated call returns the stored value instead of entering the same subtree again.
@@ -157,13 +159,13 @@ Memoization fits a naturally recursive recurrence when only a fraction of the po
 
 # Questions
 
-> [!QUESTION]- What is the relationship between memoization and dynamic programming?
+> [!qard]- What is the relationship between memoization and dynamic programming?
 > Memoization is DP's top-down implementation: write the recurrence and cache each subproblem's result. Bottom-up tabulation solves the same dependency graph iteratively. Memoization evaluates only states reached by recursion, while tabulation usually fills a planned table in dependency order. Repeated states make the cache useful. Optimal substructure is a separate requirement for optimization problems.
 
-> [!QUESTION]- Why must a memoised function be pure, and what breaks if it isn't?
+> [!qard]- Why must a memoised function be pure, and what breaks if it isn't?
 > A cache hit returns a stored result without running the function again. If the output also depends on a global value, the clock, or an I/O read, the stored result may describe conditions that no longer hold. Any expected side effect is skipped as well. Safe memoization therefore requires same-input-same-output behavior and no observable side effects.
 
-> [!QUESTION]- What is the most common correctness bug when memoising a recurrence?
+> [!qard]- What is the most common correctness bug when memoising a recurrence?
 > An incomplete cache key. If a `(i, capacity)` knapsack state is cached on `i` alone, two different subproblems map to the same entry and the second lookup can return the wrong value. The key must represent the full state, which is the same requirement DP calls state design.
 
 # References

@@ -9,6 +9,8 @@ level:
 priority: Medium
 status: Ready to Repeat
 publish: true
+qard-deck: "Programming"
+qard-topic: "NET/CSharp/Fundamentals/Types/Events"
 ---
 
 An event is a delegate-backed member with restricted access. Code outside the declaring type may subscribe with `+=` or unsubscribe with `-=`, but it cannot raise the event or replace its invocation list. The publisher keeps control of notification, which is the reason public APIs expose events instead of delegate fields.
@@ -111,10 +113,10 @@ public sealed class Listener : IDisposable
 
 # Questions
 
-> [!QUESTION]- What is the difference between an event and a public delegate field?
+> [!qard]- What is the difference between an event and a public delegate field?
 > Outside code can only subscribe to or unsubscribe from an event. The type that declares the event keeps control over when it is raised. A public delegate field also lets outside code invoke the delegate, replace its handlers, or set it to `null`, which can break the publisher's notification logic.
 
-> [!QUESTION]- Why can event subscriptions cause memory leaks, and how can they be prevented?
+> [!qard]- Why can event subscriptions cause memory leaks, and how can they be prevented?
 > The publisher stores each handler, and the handler normally holds a strong reference to its subscriber. If the publisher lives longer, that reference keeps the subscriber alive even when the rest of the application no longer uses it. The subscription should be removed when the subscriber's lifetime ends, commonly through `Dispose`. Weak-event patterns or scoped subscription helpers are alternatives when explicit ownership is difficult.
 
 # References

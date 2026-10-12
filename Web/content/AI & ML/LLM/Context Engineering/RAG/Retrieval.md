@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.485Z
-modified: 2026-08-22T16:25:28.113Z
-published: 2026-08-22T16:25:28.113Z
+created: 2026-10-12T09:19:58.223Z
+modified: 2026-10-12T09:19:58.223Z
+published: 2026-10-12T09:19:58.223Z
 topic:
   - AI & ML
 subtopic:
@@ -12,6 +12,8 @@ level:
   - "2"
 priority: High
 status: Done
+qard-deck: AI & ML
+qard-topic: LLM/Context Engineering/RAG/Retrieval
 ---
 
 Retrieval decides which evidence reaches the prompt. Missing evidence caps what a grounded answer can claim, even though prompts and generation models can still improve how fixed evidence is used. The practical problem is to recover enough relevant material without filling the context window with noise or spending the entire latency budget on search.
@@ -141,7 +143,7 @@ Start with hybrid retrieval using RRF and a conservative top-k, often 5–20. Th
 
 # Questions
 
-> [!QUESTION]- When does hybrid retrieval perform worse than single-mode retrieval?
+> [!qard]- When does hybrid retrieval perform worse than single-mode retrieval?
 > It loses when the weaker path adds more noise than useful evidence. A homogeneous scientific corpus may already suit vector search, while keyword results pull marginal matches into the fused list. The extra system earns its cost only if it beats both single-mode baselines on real queries.
 
 # References

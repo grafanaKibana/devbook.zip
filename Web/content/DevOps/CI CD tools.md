@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.622Z
-modified: 2026-08-20T20:41:15.622Z
-published: 2026-08-20T20:41:15.622Z
+created: 2026-10-12T09:19:58.247Z
+modified: 2026-10-12T09:19:58.247Z
+published: 2026-10-12T09:19:58.247Z
 topic:
   - DevOps
 subtopic: []
@@ -11,6 +11,8 @@ level:
   - "3"
 priority: High
 status: Ready to Repeat
+qard-deck: DevOps
+qard-topic: CI CD tools
 ---
 
 CI/CD turns a source change into a traceable release decision. Continuous integration (CI) combines small changes frequently and verifies them while the context is fresh. Continuous delivery keeps a verified artifact releasable. Continuous deployment releases qualifying changes without a routine human approval.
@@ -69,7 +71,7 @@ Repository workflow files are not the whole control plane. GitHub Actions can at
 
 # Questions
 
-> [!QUESTION]- What separates continuous delivery from continuous deployment?
+> [!qard]- What separates continuous delivery from continuous deployment?
 > Both approaches keep a tested artifact ready for production. With continuous delivery, releasing that artifact is still a separate decision, often an approval or a business-controlled step. With continuous deployment, every change that passes the required automated checks is released automatically.
 
 # References

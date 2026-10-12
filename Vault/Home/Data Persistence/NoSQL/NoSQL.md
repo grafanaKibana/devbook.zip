@@ -11,6 +11,8 @@ tags: [FolderNote]
 
 publish: true
 priority: High
+qard-deck: "Data Persistence"
+qard-topic: "NoSQL/NoSQL"
 ---
 
 NoSQL names a loose group of data stores rather than one database model. It covers key-value, document, wide-column, and graph stores, while search and time-series engines are often grouped beside them. Product boundaries overlap. A document store may enforce schemas, a key-value service may expose secondary indexes, and either may support transactions within a documented scope.
@@ -54,7 +56,7 @@ Data is often shaped around known reads because keeping related values in one pa
 
 # Questions
 
-> [!QUESTION]- When is NoSQL a bad idea?
+> [!qard]- When is NoSQL a bad idea?
 > It is a poor trade when the core model depends on relational constraints, multi-entity transactions, or queries that change faster than the storage model can be redesigned. If the selected engine cannot enforce those guarantees, application code inherits them. Keeping SQL and adding a cache, replica, or purpose-built read model is often cheaper.
 
 # References

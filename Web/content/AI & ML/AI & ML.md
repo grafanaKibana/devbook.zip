@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.466Z
-modified: 2026-08-20T20:41:15.467Z
-published: 2026-08-20T20:41:15.467Z
+created: 2026-10-12T09:19:58.208Z
+modified: 2026-10-12T09:19:58.209Z
+published: 2026-10-12T09:19:58.209Z
 tags:
   - FolderNote
 icon: astroid
@@ -16,6 +16,8 @@ level:
   - "3"
 priority: High
 status: Creation
+qard-deck: AI & ML
+qard-topic: AI & ML
 ---
 
 AI & ML covers the engineering around systems that learn from data or use trained models. The section moves from classic machine learning to LLM applications and the tooling used to build them. Model choice matters, but production results usually turn on the data and on how the system is evaluated and operated. A gradient-boosted tree and an LLM can fail for the same reason: an impressive model cannot rescue weak evidence or missing monitoring.
@@ -24,7 +26,7 @@ AI & ML covers the engineering around systems that learn from data or use traine
 
 # Questions
 
-> [!QUESTION]- When is classic machine learning a better fit than an LLM?
+> [!qard]- When is classic machine learning a better fit than an LLM?
 > Classic ML fits a well-defined prediction problem with representative labeled data, such as classification, regression, or ranking. It usually has lower latency and unit cost, and its behavior is easier to measure at scale. An LLM fits open-ended language work or early product discovery, where a prompt can describe the task before a training set exists. That choice can change as traffic grows or output variability becomes a problem. At that point, a rule-based system or a smaller trained model may be the better option.
 
 # References

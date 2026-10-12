@@ -18,7 +18,7 @@ Web/public/  →  devbook.zip
 ```
 
 - **Author** notes in Obsidian under `Vault/Home/`. Only `publish: true` notes ever leave the vault.
-- **Publish** with the Quartz Syncer plugin — it renders in-note Dataview/Datacore/Bases to static HTML and commits into `Web/content/`. Treat that folder as generated output; edit notes in `Vault/`.
+- **Publish** with the Quartz Syncer plugin — it renders in-note Dataview/Datacore/Bases to static HTML and commits into `Web/content/`. Treat that folder as generated output; edit notes in `Vault/` and regenerate the projection through Syncer.
 - **Build & deploy** — Vercel runs the Quartz build from `Web/` on each push; production deploys from `main`.
 
 ## Local development
@@ -54,15 +54,23 @@ Do **not** edit anything else under `quartz/` — `npx quartz upgrade` overwrite
 The vault's old DataviewJS dashboards are handled two ways on the static site:
 
 - **Topics dashboard** (homepage) — an in-note `datacorejsx` block in `Home/index.md` that Quartz Syncer renders to static HTML at publish. No component.
-- **Questions** — a Quartz component (`custom/components/questions-index.tsx`) fed by a transformer, because `[!QUESTION]` callout aggregation needs the build's full-content access.
+- **Questions** — a Quartz component (`custom/components/questions-index.tsx`) fed by a transformer, because cross-vault `[!qard]` interview and compatible `[!QUESTION]` callout aggregation needs the build's full-content access. Folder paths still own topic and subtopic grouping.
 
 Local transformers/components in `custom/` (wired in `quartz.ts`):
 
 | File                                 | Role                                                                                                                                                                             |
 | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `transformers/syncer-fixups.ts`      | strips raw dataview/datacore query fences + the frozen Questions `dc-questions-index` block, and normalizes the vault-absolute `Home/…` links Syncer leaves in rendered Datacore |
-| `transformers/question-collector.ts` | collects `[!QUESTION]` callouts across notes for the Questions page                                                                                                              |
+| `transformers/question-collector.ts` | collects Qard and compatible Question callouts once across notes; accepts guarded raw-Markdown `blockquote.callout` and Syncer-frozen `div.callout` shapes                       |
 | `components/questions-index.tsx`     | renders the Questions aggregation page                                                                                                                                           |
+
+Canonical interview authoring uses collapsed `[!qard]-` callouts in the owning `Vault/Home/` note. The generic `[!QUESTION]` path remains distinct, while both dashboard readers accept both keys. Note-level `qard-deck` and `qard-topic` are initial study-organization seeds only when missing; valid overrides and per-card `qard-location` remain authoritative. Stock Qard owns hidden card IDs and writes them only through its native study/edit behavior.
+
+Native Obsidian keeps its existing disclosure behavior for Question and Qard callouts: click/touch and FAQ styling remain equivalent, while titles lack keyboard focus, Enter/Space toggling, `aria-expanded`, and inert collapsed bodies. Quartz adds keyboard and ARIA disclosure behavior through `CalloutDisclosure`. The migration explicitly accepts this host difference; it does not add an Obsidian accessibility integration.
+
+This pipeline covers Qard cards authored in current `Vault/Home` notes. Stock standalone or AI creation defaults to `Qard/Standalone Deck.md`; Qard exposes a Card Folder setting, but its placement remains owner-configured and outside this pipeline until set deliberately.
+
+The Questions page has one web renderer. Syncer may freeze the in-note Datacore dashboard, but `SyncerFixups` removes the complete `dc-questions-index` wrapper before `QuestionsIndex` collects source callouts. `Web/content/` must come from the actual Syncer export path; do not reproduce or hand-edit that projection.
 
 ## Deploy
 

@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.656Z
-modified: 2026-08-20T20:41:15.656Z
-published: 2026-08-20T20:41:15.656Z
+created: 2026-10-12T09:19:58.263Z
+modified: 2026-10-12T09:19:58.263Z
+published: 2026-10-12T09:19:58.263Z
 topic:
   - Programming
 subtopic:
@@ -12,6 +12,8 @@ level:
   - "4"
 priority: Medium
 status: Ready to Repeat
+qard-deck: Programming
+qard-topic: NET/CSharp/Fundamentals/Generics
 ---
 
 Generics parameterize code by type. `List<T>` can store any `T` while the compiler still checks every read and write. That is a stronger contract than accepting `object` and recovering the real type with casts. For value types, generic collections also avoid the boxing required by older object-based APIs.
@@ -115,15 +117,15 @@ var list = Activator.CreateInstance(closed);
 
 # Questions
 
-> [!QUESTION]- Why does `IEnumerable<string>` assign to `IEnumerable<object>`, but `List<string>` does not assign to `List<object>`?
+> [!qard]- Why does `IEnumerable<string>` assign to `IEnumerable<object>`, but `List<string>` does not assign to `List<object>`?
 > `IEnumerable<out T>` only produces values, so treating a sequence of strings as a sequence of objects is safe. `List<T>` also accepts values. If a `List<string>` could masquerade as `List<object>`, a caller could insert a non-string and break the original list's contract.
 
-> [!QUESTION]- When should a generic interface type parameter be marked as `out` or `in`?
+> [!qard]- When should a generic interface type parameter be marked as `out` or `in`?
 > Mark a type parameter as `out` when the interface only produces values of that type. This is why a producer of strings can safely be used where a producer of objects is expected. Mark it as `in` when the interface only consumes the type, so a consumer that accepts any object can also accept strings.
 >
 > If the interface both accepts and returns the type, it must remain invariant because either conversion could make a read or write unsafe. Variance applies only to reference-type substitutions.
 
-> [!QUESTION]- A generic method uses `default(T)` as a fallback value. Why can this be dangerous in production code?
+> [!qard]- A generic method uses `default(T)` as a fallback value. Why can this be dangerous in production code?
 > `default(T)` may be `0`, `DateTime.MinValue`, a zeroed struct, or `null`. Those values can be valid domain data, so a failed lookup becomes indistinguishable from a real result. A `Try*` contract, nullable result, or explicit result type keeps the distinction visible.
 
 # References

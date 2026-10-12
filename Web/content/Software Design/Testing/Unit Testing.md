@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.710Z
-modified: 2026-08-20T20:41:15.711Z
-published: 2026-08-20T20:41:15.711Z
+created: 2026-10-12T09:19:58.317Z
+modified: 2026-10-12T09:19:58.318Z
+published: 2026-10-12T09:19:58.318Z
 topic:
   - Software Design
 subtopic:
@@ -12,6 +12,8 @@ level:
   - "4"
 priority: High
 status: Ready to Repeat
+qard-deck: Software Design
+qard-topic: Testing/Unit Testing
 ---
 
 A unit test verifies one small behavior without crossing slow or nondeterministic process boundaries. The unit may be one method, one class, or a small group of collaborating objects. Databases, remote HTTP, the filesystem, and uncontrolled time stay outside the test. Ordinary in-memory collaborators do not need to be mocked merely to satisfy a definition.
@@ -151,10 +153,10 @@ Choose the lowest-cost layer that can expose the failure faithfully. Determinist
 
 # Questions
 
-> [!QUESTION]- What is the difference between a stub and a mock?
+> [!qard]- What is the difference between a stub and a mock?
 > A stub supplies answers needed to reach the behavior. A mock is configured with interaction expectations and verifies them. A spy records calls for later assertions, while a fake provides a working simplified implementation. Frameworks often let one object play several roles, so the distinction is about how the test uses the double. Prefer result assertions when they expose the behavior, and interaction assertions when the command itself is the observable contract.
 
-> [!QUESTION]- When is a unit test the wrong testing layer?
+> [!qard]- When is a unit test the wrong testing layer?
 > A unit test adds little value when it only repeats language or framework behavior, such as an uncustomized property accessor. Failures in visual rendering, dependency registration, configuration binding, or database-provider behavior need a component or integration test that can observe that boundary. Exploratory code may start without tests, but behavior kept in production still needs evidence that matches its risk. The best layer is the cheapest one that can catch the realistic failure.
 
 # References

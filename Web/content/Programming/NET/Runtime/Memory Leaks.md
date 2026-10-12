@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-10-02T08:17:35.320Z
-modified: 2026-10-02T08:17:35.320Z
-published: 2026-10-02T08:17:35.320Z
+created: 2026-10-12T09:19:58.271Z
+modified: 2026-10-12T11:08:57.038Z
+published: 2026-10-12T11:08:57.038Z
 topic:
   - Programming
 subtopic:
@@ -12,6 +12,8 @@ level:
   - "4"
 priority: High
 status: Ready to Repeat
+qard-deck: Programming
+qard-topic: NET/Runtime/Memory Leaks
 ---
 
 In managed code, a memory leak is usually a lifetime bug: an object has stopped being useful, but a path from a GC root still reaches it. The collector is working correctly. It cannot infer that a reachable object is logically dead. Native allocations and operating-system handles form a second category because the GC does not release them directly.
@@ -346,7 +348,7 @@ A finalizer cannot repair a managed retention bug. If a root still reaches the o
 Current .NET applications add several lifetime traps that may present as memory growth or adjacent resource exhaustion:
 
 - **`HttpClient` connection exhaustion** — creating and disposing a client for every request can churn connection pools and exhaust ephemeral ports because underlying TCP connections are not released immediately. This is resource exhaustion rather than a managed-memory leak. Use a correctly configured `IHttpClientFactory` client or a long-lived client with an appropriate handler lifetime.
-- **DI captive dependencies** — a singleton that captures a scoped service extends that service to singleton lifetime. The built-in container can reject this when scope validation is enabled. Disposable transient or scoped services resolved from the root container are also retained for later disposal. Create an explicit scope with `IServiceScopeFactory` when a singleton must perform scoped work. See [[Programming/NET/ASP.NET Web API/Dependency Injection|Dependency Injection]].
+- **DI captive dependencies** — a singleton that captures a scoped service extends that service to singleton lifetime. The built-in container can reject this when scope validation is enabled. Disposable transient or scoped services resolved from the root container are also retained for later disposal. Create an explicit scope with `IServiceScopeFactory` when a singleton must perform scoped work. See [[Programming/NET/ASP NET Web API/Dependency Injection|Dependency Injection]].
 - **Pooled-buffer ownership errors** — a rented `ArrayPool<T>` or `MemoryPool<T>` buffer must be returned or disposed according to its pool contract. Failing to return it defeats reuse and increases allocation pressure. Continuing to use it after return violates ownership and can corrupt another operation's data.
 - **Ambient-state retention** — `AsyncLocal<T>` values flow with `ExecutionContext`, so a captured context can retain a value beyond one logical operation. `ThreadLocal<T>` values are tied to participating threads and should be disposed with their owner. Large graphs should not be stored in either without a clear lifetime boundary.
 - **Incomplete asynchronous operations** — an incomplete `TaskCompletionSource` does not root itself, but any long-lived owner that retains its task, continuations, or captured state can keep the entire operation graph alive. Cancellation and timeout paths must complete the ownership protocol.
@@ -371,22 +373,22 @@ The governing rule is ownership, not syntax. Each subscription, cache entry, tim
 
 # Questions
 
-> [!QUESTION]- Can a .NET application leak memory even though it has garbage collection?
+> [!qard]- Can a .NET application leak memory even though it has garbage collection?
 > Yes. The GC reclaims managed objects only after they become unreachable. If a static cache, event subscription, or long-lived collection still points to an object that is no longer useful, the object and everything it references remain alive. The collector is doing its job, but the application is keeping the object alive for too long.
 >
 > The GC does not own native memory or operating-system handles. They leak when their owner never releases them, usually through `Dispose()` or a safe wrapper such as `SafeHandle`. Repeated process growth is a reason to investigate, but a managed root path or an unreleased native allocation is what proves the leak.
 
-> [!QUESTION]- Why is `using` needed when .NET already has garbage collection?
+> [!qard]- Why is `using` needed when .NET already has garbage collection?
 > The GC manages managed memory and decides for itself when to run. Resources such as file handles, sockets, operating-system handles, and unmanaged buffers often need to be released as soon as their owner is finished with them.
 >
 > A `using` statement gives that cleanup a clear scope. It has `try`/`finally` semantics, so `Dispose()` is called when control leaves the scope, including when an exception is thrown.
 
-> [!QUESTION]- How do `IDisposable` and a finalizer differ?
+> [!qard]- How do `IDisposable` and a finalizer differ?
 > `IDisposable` provides explicit cleanup through `Dispose()`. The owner can call it directly or use `using`, so the resource is released at a known point.
 >
 > A finalizer is a fallback that the runtime may run after the object becomes unreachable. Its timing is unpredictable, and it is not guaranteed during abrupt process termination. A custom finalizer is normally needed only when a type directly owns an unmanaged resource and no suitable `SafeHandle` exists. After explicit cleanup succeeds, `Dispose()` calls `GC.SuppressFinalize(this)` to avoid the extra finalization work.
 
-> [!QUESTION]- How does the .NET dispose pattern work?
+> [!qard]- How does the .NET dispose pattern work?
 > `Dispose()` releases the resources owned by the object and must be safe to call more than once. In an inheritable type, the public method normally calls a protected `Dispose(bool disposing)` method and then suppresses finalization. The `disposing` flag is `true` during explicit cleanup, when owned managed disposables can also be released.
 >
 > A finalizer is added only when the type directly owns an unmanaged resource that cannot be delegated to a safe wrapper. Its path calls `Dispose(false)`, which releases only that unmanaged state because other managed objects may already have been finalized.

@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.693Z
-modified: 2026-08-20T20:41:15.693Z
-published: 2026-08-20T20:41:15.693Z
+created: 2026-10-12T09:19:58.299Z
+modified: 2026-10-12T09:19:58.299Z
+published: 2026-10-12T09:19:58.299Z
 tags:
   - FolderNote
 topic:
@@ -14,6 +14,8 @@ level:
   - "3"
 priority: High
 status: Done
+qard-deck: Software Architecture
+qard-topic: Patterns/Design Patterns/Creational/Creational
 ---
 
 Creational patterns move object-construction decisions away from the code that uses the result. The pressure is not the `new` keyword itself. It is construction knowledge that is repeated, varies by context, or must preserve an invariant across several objects. Factory Method and Abstract Factory choose implementations, Builder stages complex assembly, Prototype copies an existing configuration, and Singleton constrains lifetime and access.
@@ -34,7 +36,7 @@ The patterns solve different construction problems. The condition in the last co
 
 # Questions
 
-> [!QUESTION]- How do Factory Method and Abstract Factory differ?
+> [!qard]- How do Factory Method and Abstract Factory differ?
 > Factory Method uses inheritance: a creator subclass chooses one product implementation for a step in its workflow. Abstract Factory uses composition: an injected factory creates several related products as one family. Factory Method fits when one creation step varies. Abstract Factory fits when a whole compatible set must change together.
 
 # References

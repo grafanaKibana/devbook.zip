@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.709Z
-modified: 2026-08-20T20:41:15.709Z
-published: 2026-08-20T20:41:15.709Z
+created: 2026-10-12T09:19:58.317Z
+modified: 2026-10-12T09:19:58.317Z
+published: 2026-10-12T09:19:58.317Z
 topic:
   - Software Design
 subtopic:
@@ -12,6 +12,8 @@ level:
   - "4"
 priority: High
 status: Ready to Repeat
+qard-deck: Software Design
+qard-topic: Testing/Test-Driven Development
 ---
 
 Test-Driven Development (TDD) grows behavior through a short test-first loop. Select the next example from a test list, write a test that fails for the expected reason, make it pass with the simplest sufficient production change, then improve both code and tests while the suite remains green. The loop supplies regression evidence and makes the caller-facing interface visible before implementation choices harden.
@@ -111,10 +113,10 @@ Use TDD when the next behavior can be stated as an example and early caller feed
 
 # Questions
 
-> [!QUESTION]- How can TDD improve design beyond increasing test coverage?
+> [!qard]- How can TDD improve design beyond increasing test coverage?
 > The test is the first concrete caller, so construction, inputs, outputs, and failure semantics must be expressed before implementation details dominate. Difficult setup is a design signal worth investigating, not proof that a class must be split. The benefit comes from selecting the next useful example and refactoring after it passes. A test that begins green may document existing behavior, but it does not prove that the intended production change was necessary.
 
-> [!QUESTION]- When is TDD not worth the overhead?
+> [!qard]- When is TDD not worth the overhead?
 > The loop has little leverage when the work is a disposable experiment, a mechanical declaration already guaranteed by a framework, or a visual exploration whose useful feedback comes from rendering rather than a code-level example. That does not remove the need for verification before the behavior becomes durable. There is no universal percentage cost: the tradeoff depends on domain familiarity, test level, tooling, and how much change the code will absorb.
 
 # References

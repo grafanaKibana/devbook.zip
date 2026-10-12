@@ -9,6 +9,8 @@ level:
 priority: Medium
 status: Ready to Repeat
 publish: true
+qard-deck: "Programming"
+qard-topic: "NET/CSharp/Fundamentals/Exception Handling"
 ---
 
 Exceptions carry failures across method boundaries when normal execution cannot continue. A `try` block marks code whose failure may be handled nearby. A matching `catch` decides whether recovery is possible, and `finally` protects cleanup that must happen while the stack unwinds. For disposable resources, `using` and `await using` usually express that cleanup more directly.
@@ -124,16 +126,16 @@ Unhandled exceptions need an application boundary that records the failure and c
 
 # Questions
 
-> [!QUESTION]- What is the difference between `throw;` and `throw ex;` inside a `catch` block?
+> [!qard]- What is the difference between `throw;` and `throw ex;` inside a `catch` block?
 > `throw;` rethrows the current exception without changing its original stack trace. `throw ex;` throws the same exception object from the current line and resets the stack trace, which hides the calls that led to the original failure. Use `throw;` when the same exception is rethrown from its `catch` block.
 
-> [!QUESTION]- When should an exception be wrapped instead of rethrown directly?
+> [!qard]- When should an exception be wrapped instead of rethrown directly?
 > Wrap an exception when code crosses a boundary and the caller needs context that the original failure does not provide. For example, a repository can translate a database exception into an order-saving exception that the application layer understands. The original exception should remain in `InnerException` so its stack trace and details are still available. If the wrapper adds no useful meaning, `throw;` is clearer.
 
-> [!QUESTION]- Why is throwing from `finally` considered dangerous?
+> [!qard]- Why is throwing from `finally` considered dangerous?
 > If the `try` block throws one exception and `finally` throws another, the exception from `finally` can replace the original failure. The caller then sees the cleanup error while the real cause is hidden. A `finally` block should normally perform cleanup that is safe to run during stack unwinding, while failure handling stays in `catch` or at a higher boundary.
 
-> [!QUESTION]- When might `finally` not execute?
+> [!qard]- When might `finally` not execute?
 > `finally` normally runs when control leaves the protected block, including during exception-driven stack unwinding. It may not run when the process stops without normal unwinding, such as an operating-system kill, `Environment.FailFast()`, a severe runtime failure, or a `StackOverflowException`. It is an in-process cleanup guarantee, not a crash-recovery mechanism.
 
 # References

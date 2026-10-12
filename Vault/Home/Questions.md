@@ -10,7 +10,7 @@ A topic-grouped index of interview and review questions across .NET, computer sc
 
 ```datacorejsx
 // Questions index — Datacore port of the former DataviewJS aggregation (issue #69).
-// Walks every note under this folder, pulls out the `[!QUESTION]` callouts, and
+// Walks every note under this folder, pulls out Question/Qard callouts, and
 // presents one selected topic or subtopic at a time. Root topic order comes from
 // FolderNote frontmatter, matching the Home dashboard; Tabsdown owns the tabs.
 //
@@ -133,6 +133,113 @@ return function QuestionsIndex() {
     }
     return node;
   };
+  const isQuestionCalloutHeader = (line) => {
+    const match = /^>\s*\[!([^\]]+)\](?:[+-])?(?:\s|$)/i.exec(line);
+    if (!match) return false;
+    const type = match[1].trim().toLowerCase();
+    return type === "question" || type === "qard";
+  };
+  const matchingInlineCodeEnd = (line, start, length) => {
+    let cursor = start + length;
+    while (cursor < line.length) {
+      const candidate = line.indexOf("`", cursor);
+      if (candidate < 0) return -1;
+      let end = candidate;
+      while (line[end] === "`") end++;
+      if (end - candidate === length) return end;
+      cursor = end;
+    }
+    return -1;
+  };
+  const visibleLine = (line, state) => {
+    const structural = line.replace(/^>\s?/, "").trimStart();
+    if (state.fence) {
+      const closing = /^(`{3,}|~{3,})(.*)$/.exec(structural);
+      if (
+        closing &&
+        closing[1][0] === state.fence.marker &&
+        closing[1].length >= state.fence.length &&
+        closing[2].trim() === ""
+      ) {
+        state.fence = null;
+      }
+      return "";
+    }
+    if (!state.htmlComment && !state.obsidianComment) {
+      const opening = /^(`{3,}|~{3,})(.*)$/.exec(structural);
+      if (opening && (opening[1][0] === "~" || !opening[2].includes("`"))) {
+        state.fence = { marker: opening[1][0], length: opening[1].length };
+        return "";
+      }
+    }
+
+    let visible = "";
+    let cursor = 0;
+    while (cursor < line.length) {
+      if (state.htmlComment) {
+        const end = line.indexOf("-->", cursor);
+        if (end < 0) return visible;
+        state.htmlComment = false;
+        cursor = end + 3;
+        continue;
+      }
+      if (state.obsidianComment) {
+        const end = line.indexOf("%%", cursor);
+        if (end < 0) return visible;
+        state.obsidianComment = false;
+        cursor = end + 2;
+        continue;
+      }
+      if (line.startsWith("<!--", cursor)) {
+        state.htmlComment = true;
+        cursor += 4;
+        continue;
+      }
+      if (line.startsWith("%%", cursor)) {
+        state.obsidianComment = true;
+        cursor += 2;
+        continue;
+      }
+      if (line[cursor] === "`") {
+        let runEnd = cursor;
+        while (line[runEnd] === "`") runEnd++;
+        const end = matchingInlineCodeEnd(line, cursor, runEnd - cursor);
+        if (end >= 0) {
+          visible += line.slice(cursor, end);
+          cursor = end;
+          continue;
+        }
+        visible += line.slice(cursor, runEnd);
+        cursor = runEnd;
+        continue;
+      }
+      visible += line[cursor];
+      cursor++;
+    }
+
+    return visible;
+  };
+  const questionCallouts = (content) => {
+    const lines = content.split("\n");
+    const callouts = [];
+    const state = { fence: null, obsidianComment: false, htmlComment: false };
+
+    for (let index = 0; index < lines.length; index++) {
+      const line = lines[index];
+      const visible = visibleLine(line, state);
+      if (!isQuestionCalloutHeader(line) || !isQuestionCalloutHeader(visible)) continue;
+      let block = line;
+      let next = index + 1;
+      while (next < lines.length && /^>/.test(lines[next])) {
+        block += "\n" + lines[next];
+        visibleLine(lines[next], state);
+        next++;
+      }
+      callouts.push(block);
+      index = next - 1;
+    }
+    return callouts;
+  };
 
   const topicHubs = pages
     .filter((page) => {
@@ -200,20 +307,7 @@ return function QuestionsIndex() {
             try {
               const content = await dc.app.vault.cachedRead(file);
               if (content) {
-                const lines = content.split("\n");
-                const callouts = [];
-                for (let index = 0; index < lines.length; index++) {
-                  if (/^>\s*\[!QUESTION\]/i.test(lines[index])) {
-                    let block = lines[index];
-                    let next = index + 1;
-                    while (next < lines.length && /^>/.test(lines[next])) {
-                      block += "\n" + lines[next];
-                      next++;
-                    }
-                    callouts.push(block);
-                    index = next - 1;
-                  }
-                }
+                const callouts = questionCallouts(content);
                 if (callouts.length) insert(path, name, callouts);
               }
             } catch (error) {

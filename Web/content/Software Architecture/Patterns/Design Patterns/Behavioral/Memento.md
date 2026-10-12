@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.690Z
-modified: 2026-08-20T20:41:15.690Z
-published: 2026-08-20T20:41:15.690Z
+created: 2026-10-12T09:19:58.292Z
+modified: 2026-10-12T09:19:58.293Z
+published: 2026-10-12T09:19:58.293Z
 topic:
   - Software Architecture
 subtopic:
@@ -12,6 +12,8 @@ level:
   - "1"
 priority: High
 status: Ready to Repeat
+qard-deck: Software Architecture
+qard-topic: Patterns/Design Patterns/Behavioral/Memento
 ---
 
 A video-game save point is a memento. It captures enough state to restore a particular moment after a failed attempt. The save system stores that snapshot without needing to understand every internal object that produced it.
@@ -155,10 +157,10 @@ This compact example keeps `CartMemento` public, so opacity is conventional rath
 
 # Questions
 
-> [!QUESTION]- How can memento history be kept from growing without limit?
+> [!qard]- How can memento history be kept from growing without limit?
 > Keep a fixed number of snapshots or set a memory budget. Long-lived recovery may need only the latest snapshot, while an editor can keep a limited undo window. A full audit history should store durable events or changes instead of keeping an unlimited stack of object copies.
 
-> [!QUESTION]- When is Memento overkill compared to simpler approaches?
+> [!qard]- When is Memento overkill compared to simpler approaches?
 > A full snapshot is wasteful when undo can be represented as one small delta. If restoring a removed item needs only that item and its position, store those values. Memento earns the extra copy when state is interdependent or restoration must survive across sessions.
 
 # References

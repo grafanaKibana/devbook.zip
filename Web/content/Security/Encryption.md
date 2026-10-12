@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.668Z
-modified: 2026-08-20T20:41:15.669Z
-published: 2026-08-20T20:41:15.669Z
+created: 2026-10-12T09:19:58.273Z
+modified: 2026-10-12T09:19:58.273Z
+published: 2026-10-12T09:19:58.273Z
 topic:
   - Security
 subtopic:
@@ -12,6 +12,8 @@ level:
   - "4"
 priority: High
 status: Ready to Repeat
+qard-deck: Security
+qard-topic: Encryption
 ---
 
 Encryption transforms plaintext into ciphertext under a key. The security boundary is the set of workloads and people able to obtain that key. Encryption alone targets confidentiality. Authenticated encryption also detects changes to ciphertext and authenticated metadata, but it does not attach a public identity to the sender. That requires a [[Security/Digital Signature|digital signature]] or a protocol with an authenticated peer.
@@ -85,7 +87,7 @@ In .NET, `HttpClient` negotiates TLS for HTTPS endpoints. An ASP.NET Core deploy
 
 # Questions
 
-> [!QUESTION]- How are symmetric and asymmetric cryptography used together in a real system?
+> [!qard]- How are symmetric and asymmetric cryptography used together in a real system?
 > Symmetric authenticated encryption handles bulk data because it is efficient and protects both confidentiality and integrity. Public-key encryption is limited to the small payloads and protocols it was designed for. Signatures provide public verification, while authenticated key agreement establishes a fresh shared secret. Protocols such as TLS and envelope encryption combine these roles instead of choosing one family for the whole job.
 
 # References

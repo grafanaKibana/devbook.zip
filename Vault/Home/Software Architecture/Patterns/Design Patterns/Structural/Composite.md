@@ -9,6 +9,8 @@ level:
 priority: High
 status: Ready to Repeat
 publish: true
+qard-deck: "Software Architecture"
+qard-topic: "Patterns/Design Patterns/Structural/Composite"
 ---
 
 A military command tree illustrates Composite. An order sent to a division flows through its child units until it reaches individual soldiers. The caller uses the same command operation at every level and leaves recursion to the hierarchy.
@@ -197,10 +199,10 @@ Composite fits a genuine part-whole tree when callers need the same operation on
 
 # Questions
 
-> [!QUESTION]- How does Composite relate to the Visitor pattern?
+> [!qard]- How does Composite relate to the Visitor pattern?
 > Composite gives leaves and groups one interface, and each group can recurse through its children. Visitor adds an operation across the node types without putting that operation on every node. They work well together when the tree structure belongs to Composite, the set of node types is stable, and operations change more often than the nodes.
 
-> [!QUESTION]- When does a Composite tree become a performance problem?
+> [!qard]- When does a Composite tree become a performance problem?
 > Cost grows with the number of visited nodes. A bundle containing 10,000 SKUs makes `GetPrice()` visit those nodes on each uncached call. Profiling should decide whether to cache totals or update an aggregate during mutation. Either choice introduces an invalidation rule.
 
 # References

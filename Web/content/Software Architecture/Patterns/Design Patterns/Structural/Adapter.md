@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.695Z
-modified: 2026-08-20T20:41:15.696Z
-published: 2026-08-20T20:41:15.696Z
+created: 2026-10-12T09:19:58.303Z
+modified: 2026-10-12T09:19:58.303Z
+published: 2026-10-12T09:19:58.303Z
 topic:
   - Software Architecture
 subtopic:
@@ -12,6 +12,8 @@ level:
   - "2"
 priority: High
 status: Done
+qard-deck: Software Architecture
+qard-topic: Patterns/Design Patterns/Structural/Adapter
 ---
 
 A travel plug adapter lets a US charger connect to a European outlet. It changes neither device. The small piece between them translates one physical interface into the other.
@@ -183,7 +185,7 @@ Replacing the legacy system now requires a new adapter. `OrderService` stays unc
 
 # Questions
 
-> [!QUESTION]- How can an Adapter be distinguished from a Facade when both wrap another system?
+> [!qard]- How can an Adapter be distinguished from a Facade when both wrap another system?
 > An Adapter translates an incompatible interface into the contract a client expects. A Facade gives clients a smaller, workflow-oriented API and may coordinate several subsystem calls. For example, a wrapper that exposes three business operations over twenty legacy calls is acting as a Facade, even if some translation also happens inside it.
 
 # References

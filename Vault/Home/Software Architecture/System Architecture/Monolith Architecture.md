@@ -9,6 +9,8 @@ level:
 priority: Medium
 status: Ready to Repeat
 publish: true
+qard-deck: "Software Architecture"
+qard-topic: "System Architecture/Monolith Architecture"
 ---
 
 A monolith has one deployment boundary. Its modules are versioned, released, and rolled back together. One process and one database are common, but neither defines the style.
@@ -97,7 +99,7 @@ Moving a module out of process changes the failure model. A method call that onc
 
 # Questions
 
-> [!QUESTION]- What evidence justifies extracting a service?
+> [!qard]- What evidence justifies extracting a service?
 > A stable boundary should already exist, and the module should repeatedly need an independent release cadence, runtime isolation, or scaling profile. Extraction without those pressures usually trades visible code coupling for harder operational coupling.
 
 # References

@@ -1,9 +1,9 @@
 ---
 publish: true
 title: ASP.NET Core Dependency Injection
-created: 2026-09-12T17:17:13.846Z
-modified: 2026-09-12T17:17:13.846Z
-published: 2026-09-12T17:17:13.846Z
+created: 2026-10-12T09:19:58.252Z
+modified: 2026-10-12T09:19:58.252Z
+published: 2026-10-12T09:19:58.252Z
 topic:
   - Programming
 subtopic:
@@ -13,6 +13,8 @@ level:
   - "1"
 priority: Medium
 status: Ready to Repeat
+qard-deck: Programming
+qard-topic: NET/ASP NET Web API/Dependency Injection
 ---
 
 ASP.NET Core's built-in container maps service types to creation rules. Registrations in `Program.cs` define the implementation and lifetime. Framework activation then supplies those services to controllers, middleware, filters, and hosted services.
@@ -146,13 +148,13 @@ The container owns disposal for instances it creates. Scoped disposables are rel
 
 # Questions
 
-> [!QUESTION]- What is a captive dependency and why is it dangerous?
+> [!qard]- What is a captive dependency and why is it dangerous?
 > A captive dependency appears when a long-lived service holds a dependency that was meant to live for less time. For example, a singleton that captures a scoped `DbContext` keeps it beyond one request and may share that non-thread-safe object across concurrent operations. A transient captured by a singleton also lives as long as the singleton, which is safe only if it can handle that lifetime and concurrency.
 
-> [!QUESTION]- How can a scoped service be used safely from a singleton?
+> [!qard]- How can a scoped service be used safely from a singleton?
 > The singleton should not keep the scoped service. Inject `IServiceScopeFactory`, create a new scope for each operation, resolve and use the service inside that scope, then dispose the scope. A background worker normally repeats this for every iteration instead of keeping one scope for the worker's lifetime.
 
-> [!QUESTION]- What is the difference between `GetService<T>` and `GetRequiredService<T>`?
+> [!qard]- What is the difference between `GetService<T>` and `GetRequiredService<T>`?
 > `GetService<T>` returns `null` when no registration exists. `GetRequiredService<T>` throws `InvalidOperationException` at the point of resolution. Startup validation can move some failures earlier, but calling `GetRequiredService` alone does not guarantee startup-time failure.
 
 # References
