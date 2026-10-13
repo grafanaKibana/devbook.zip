@@ -2,13 +2,6 @@
    this file. index.scss defines their cascade order for both hosts. */
 @use "tokens";
 
-$steptrace-play-gradient: linear-gradient(
-  90deg,
-  color-mix(in srgb, var(--_accent) 82%, var(--_on-accent)) 0%,
-  var(--_accent) 50%,
-  color-mix(in srgb, var(--_accent) 82%, var(--_text)) 100%
-);
-
 .steptrace {
   --_amber: var(--st-state-amber, #{tokens.$amber-light});
   --_violet: var(--st-state-violet, #{tokens.$violet-light});
@@ -60,14 +53,9 @@ $steptrace-play-gradient: linear-gradient(
   --_radius-md: 0.5rem;
   --_radius-container: 0.5625rem;
   --_radius-pill: 999px;
-  --_type-micro: 0.5rem;
-  --_type-2xs: 0.58rem;
-  --_type-xs: 0.62rem;
-  --_type-sm: 0.66rem;
-  --_type-md: 0.72rem;
-  --_type-lg: 0.8rem;
-  --_type-ui: 0.75rem;
-  --_type-base: 14px;
+  --_type-xs: 0.75rem;
+  --_type-sm: 0.8125rem;
+  --_type-base: 0.875rem;
   --_type-xl: 1rem;
   --_weight-regular: 400;
   --_weight-strong: 600;
@@ -79,18 +67,16 @@ $steptrace-play-gradient: linear-gradient(
   --_stroke-hair: 1px;
   --_stroke-emphasis: 2px;
   --_stroke-strong: 3px;
-  --_control-size: 2.5rem;
   --_target-size: 44px;
-  --_focus-ring: var(--_stroke-emphasis) solid var(--_blue);
+  --_btn-size: calc(var(--_target-size) - 2 * var(--_space-2));
+  --_focus-ring: var(--_stroke-emphasis) solid var(--_accent);
   --_array-radius: var(--_radius-container);
   --_legend-marker-size: 0.75rem;
   --_icon-size: 15px;
   --_play-icon-size: 14px;
   --_icon-stroke: 1.7;
-  --_shadow-float: 0 3px 10px color-mix(in srgb, var(--_text) 18%, transparent);
-  --_shadow-tooltip: 0 4px 12px color-mix(in srgb, var(--_text) 16%, transparent);
-  --_shadow-panel: 0 8px 24px var(--_panel-shadow);
-  --_play-gradient: #{$steptrace-play-gradient};
+  --_shadow-float: 0 3px 10px var(--_panel-shadow);
+  --_shadow-tooltip: 0 4px 12px var(--_panel-shadow);
   --_hair: color-mix(in srgb, var(--_text) 14%, transparent);
   --_hover: color-mix(in srgb, var(--_text) 7%, transparent);
   /* ---- motion tokens: one duration scale + a small curve vocabulary. Roles
@@ -247,7 +233,7 @@ $steptrace-play-gradient: linear-gradient(
   align-items: center;
   gap: var(--_space-3);
   font-family: var(--_font-body);
-  font-size: var(--_type-lg);
+  font-size: var(--_type-sm);
   font-weight: var(--_weight-strong);
   color: var(--_muted);
   letter-spacing: var(--_tracking-label);
@@ -268,10 +254,30 @@ $steptrace-play-gradient: linear-gradient(
   color: var(--_text);
   font-weight: var(--_weight-strong);
 }
+.steptrace__head-end {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: var(--_space-4);
+  min-width: 0;
+}
+.steptrace__phase-name {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--_text);
+  font: var(--_weight-strong) var(--_type-sm) / var(--_leading-solid) var(--_font-body);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.steptrace__phase-name:not(:empty)::after {
+  margin-left: var(--_space-4);
+  color: var(--_muted);
+  content: "·";
+}
 .steptrace__counter {
   justify-self: end;
   font-family: var(--_font-mono);
-  font-size: var(--_type-md);
+  font-size: var(--_type-sm);
   font-weight: var(--_weight-strong);
   color: var(--_muted);
   white-space: nowrap;
@@ -433,7 +439,7 @@ $steptrace-play-gradient: linear-gradient(
   width: 100%;
   margin-top: var(--_space-0);
   color: var(--_muted);
-  font: var(--_weight-strong) var(--_type-md) / var(--_leading-readable) var(--_font-body);
+  font: var(--_weight-strong) var(--_type-sm) / var(--_leading-readable) var(--_font-body);
   text-align: center;
 }
 .steptrace__legend-row {
@@ -467,7 +473,7 @@ $steptrace-play-gradient: linear-gradient(
 @container steptrace-wide-stage (max-width: 34rem) {
   .steptrace__legend {
     gap: var(--_space-2) var(--_space-4);
-    font-size: var(--_type-sm);
+    font-size: var(--_type-xs);
   }
 }
 .steptrace .steptrace__success-marker {
@@ -546,6 +552,7 @@ $steptrace-play-gradient: linear-gradient(
   margin: 0 0 var(--_space-5);
 }
 .steptrace__watch-wrap {
+  position: relative;
   flex: 0 0 auto;
   padding-top: var(--_space-5);
   border-top: var(--_stroke-hair) solid var(--_hair);
@@ -587,7 +594,7 @@ $steptrace-play-gradient: linear-gradient(
   justify-content: flex-start;
   gap: var(--_space-3);
   font-family: var(--_font-body);
-  font-size: var(--_type-md);
+  font-size: var(--_type-base);
   line-height: var(--_leading-readable);
   overflow: hidden;
 }
@@ -649,20 +656,26 @@ $steptrace-play-gradient: linear-gradient(
   color: var(--_text);
   font-weight: var(--_weight-strong);
 }
-/* watch rows: key … value, hairline between */
+/* watch rows: key … value, hairline between. A value too long for the key's line
+   wraps onto its own line below it at entry boundaries; mount.ts then reserves
+   the tallest frame's block so wrapping never resizes the rail. */
 .steptrace__watch {
   display: flex;
   flex-direction: column;
-  min-height: calc(var(--steptrace-watch-rows, 0) * 1.44rem);
+  min-height: calc(var(--steptrace-watch-rows, 0) * 2em);
+  font-size: var(--_type-base);
 }
 .steptrace__watch-row {
   position: relative;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: var(--_space-3);
-  height: 2em;
+  gap: 0 var(--_space-3);
+  min-height: 2em;
+  padding-block: var(--_space-1);
   font-family: var(--_font-body);
-  font-size: var(--_type-md);
+  font-size: var(--_type-base);
+  line-height: var(--_leading-readable);
   border-bottom: var(--_stroke-hair) solid var(--_hair);
   border-radius: var(--_radius-xs);
   outline: none;
@@ -682,13 +695,15 @@ $steptrace-play-gradient: linear-gradient(
   flex: none;
 }
 .steptrace__watch-v {
+  min-width: 0;
   margin-left: auto;
   color: var(--_text);
   font-weight: var(--_weight-strong);
   font-variant-numeric: tabular-nums;
   font-family: var(--_font-mono);
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow-wrap: anywhere;
+}
+.steptrace__watch-entry {
   white-space: nowrap;
 }
 .steptrace__watch-hint {
@@ -704,7 +719,7 @@ $steptrace-play-gradient: linear-gradient(
   background: var(--st-page, var(--_surface));
   box-shadow: var(--_shadow-float);
   color: var(--_text);
-  font: var(--_weight-strong) var(--_type-md) / var(--_leading-readable) var(--_font-body);
+  font: var(--_weight-strong) var(--_type-base) / var(--_leading-readable) var(--_font-body);
   overflow-wrap: anywhere;
   white-space: normal;
   opacity: 0;
@@ -730,8 +745,7 @@ $steptrace-play-gradient: linear-gradient(
 
 /* The last row of the log on the terminal frame: it stands where the current step
    line would be, so the TRACE eyebrow and the preceding steps stay in place and
-   only the live line gives way to the answer. It restates the card's own 14px so
-   its em-based box does not shrink against the log's 0.72rem text. */
+   only the live line gives way to the answer. */
 .steptrace__insight {
   position: relative;
   display: block;
@@ -771,14 +785,14 @@ $steptrace-play-gradient: linear-gradient(
 .steptrace__insight-label {
   display: block;
   margin-bottom: var(--_space-1);
-  font: var(--_weight-strong) var(--_type-2xs) / var(--_leading-readable) var(--_font-body);
+  font: var(--_weight-strong) var(--_type-xs) / var(--_leading-readable) var(--_font-body);
   letter-spacing: var(--_tracking-caps);
   text-transform: uppercase;
   color: var(--_context-text);
 }
 .steptrace__insight-text {
   display: block;
-  font: var(--_weight-strong) var(--_type-md) / var(--_leading-body) var(--_font-body);
+  font: var(--_weight-strong) var(--_type-base) / var(--_leading-body) var(--_font-body);
   color: var(--_text);
 }
 
@@ -786,9 +800,7 @@ $steptrace-play-gradient: linear-gradient(
 .steptrace__foot {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
-  grid-template-areas:
-    "phase phase phase"
-    "transport timeline utility";
+  grid-template-areas: "transport timeline utility";
   align-items: center;
   gap: var(--_space-3) var(--_space-4);
   margin-top: var(--_space-5);
@@ -796,7 +808,6 @@ $steptrace-play-gradient: linear-gradient(
   border: var(--_stroke-hair) solid var(--_border);
   border-radius: var(--_radius-container);
   background: var(--st-page, #{tokens.$on-accent});
-  box-shadow: var(--_shadow-panel);
 }
 .steptrace__timeline {
   grid-area: timeline;
@@ -905,7 +916,7 @@ $steptrace-play-gradient: linear-gradient(
   color: var(--st-page, #{tokens.$on-accent});
   background: var(--_text);
   box-shadow: var(--_shadow-tooltip);
-  font: var(--_weight-strong) var(--_type-2xs)/var(--_leading-solid) var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-xs)/var(--_leading-solid) var(--_font-mono);
   opacity: 0;
   visibility: hidden;
   white-space: nowrap;
@@ -929,21 +940,15 @@ $steptrace-play-gradient: linear-gradient(
   }
 }
 .steptrace__phase {
+  display: none;
   grid-area: phase;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--_space-4);
   min-width: 0;
-  padding-inline: var(--_space-1);
-  font: var(--_weight-strong) var(--_type-sm) / var(--_leading-readable) var(--_font-mono);
+  padding-inline: var(--_space-4);
+  font: var(--_weight-strong) var(--_type-base) / var(--_leading-readable) var(--_font-body);
   color: var(--_muted);
 }
-.steptrace__phase-name {
-  flex: 0 0 auto;
-  color: var(--_text);
-}
 .steptrace__phase-copy {
+  display: block;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -960,33 +965,44 @@ $steptrace-play-gradient: linear-gradient(
   align-items: center;
   gap: var(--_space-2);
 }
-.steptrace__speed-indicator {
-  display: grid;
-  width: var(--_control-size);
-  height: var(--_control-size);
-  place-items: center;
-  color: var(--_muted);
-  font: var(--_weight-strong) var(--_type-md) / var(--_leading-solid) var(--_font-mono);
-  font-variant-numeric: tabular-nums;
-}
 .steptrace__btn {
   appearance: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: var(--_control-size);
-  height: var(--_control-size);
-  flex: 0 0 var(--_control-size);
+  position: relative;
+  width: var(--_btn-size);
+  height: var(--_btn-size);
+  flex: 0 0 var(--_btn-size);
+  margin: var(--_space-2);
   border: 0;
-  border-radius: var(--_radius-md);
+  border-radius: var(--_radius-pill);
   background: transparent;
-  color: var(--_text);
+  color: var(--_muted);
   cursor: pointer;
   padding: 0;
   box-shadow: none;
+  transition:
+    background-color var(--_dur-quick) var(--_ease-decelerate),
+    color var(--_dur-quick) var(--_ease-decelerate);
+}
+/* The margin keeps the 44px footprint; this restores it as the hit area. */
+.steptrace__btn::before {
+  position: absolute;
+  inset: calc(var(--_space-2) * -1);
+  content: "";
 }
 .steptrace__btn:hover {
   background: var(--_hover);
+  color: var(--_text);
+}
+.steptrace__btn--speed {
+  width: auto;
+  min-width: var(--_btn-size);
+  flex: 0 0 auto;
+  padding-inline: var(--_space-3);
+  font: var(--_weight-strong) var(--_type-sm) / var(--_leading-solid) var(--_font-mono);
+  font-variant-numeric: tabular-nums;
 }
 .steptrace__btn svg {
   width: var(--_icon-size);
@@ -999,18 +1015,21 @@ $steptrace-play-gradient: linear-gradient(
 }
 .steptrace__btn--play {
   background-color: var(--_accent);
-  background-image: var(--_play-gradient);
   color: var(--_on-accent);
-  width: var(--_control-size);
-  height: var(--_control-size);
-  border-radius: var(--_radius-pill);
+  width: var(--_target-size);
+  height: var(--_target-size);
+  flex-basis: var(--_target-size);
   margin: 0;
+  border-radius: var(--_radius-pill);
+}
+.steptrace__btn--play::before {
+  display: none;
 }
 /* The generic :hover above would swap the fill for a faint text wash while the
    glyph keeps --_on-accent, leaving it invisible against either theme's page. */
 .steptrace__btn--play:hover {
   background-color: var(--_accent);
-  background-image: var(--_play-gradient);
+  color: var(--_on-accent);
   filter: brightness(1.12);
 }
 .steptrace__btn--play svg {
@@ -1018,6 +1037,47 @@ $steptrace-play-gradient: linear-gradient(
   stroke: currentColor;
   width: var(--_play-icon-size);
   height: var(--_play-icon-size);
+}
+/* Hosts style bare <button> elements with a raised fill, shadow, and fixed
+   height (Obsidian does); the extra element selector outranks those resets. */
+.steptrace button.steptrace__btn,
+.steptrace button.steptrace__menu-item {
+  appearance: none;
+  border: 0;
+  background-color: transparent;
+  box-shadow: none;
+}
+.steptrace button.steptrace__btn {
+  height: var(--_btn-size);
+  margin: var(--_space-2);
+  padding: 0;
+  border-radius: var(--_radius-pill);
+  color: var(--_muted);
+}
+.steptrace button.steptrace__btn--speed {
+  padding-inline: var(--_space-3);
+}
+.steptrace button.steptrace__menu-item {
+  justify-content: flex-start;
+  height: auto;
+  margin: 0;
+}
+.steptrace button.steptrace__btn:hover:not(:disabled),
+.steptrace button.steptrace__menu-item:hover {
+  background-color: var(--_hover);
+  box-shadow: none;
+}
+.steptrace button.steptrace__btn:hover:not(:disabled) {
+  color: var(--_text);
+}
+.steptrace button.steptrace__btn--play {
+  height: var(--_target-size);
+  margin: 0;
+}
+.steptrace button.steptrace__btn--play,
+.steptrace button.steptrace__btn--play:hover:not(:disabled) {
+  background-color: var(--_accent);
+  color: var(--_on-accent);
 }
 .steptrace__btn:disabled {
   opacity: 0.35;
@@ -1069,7 +1129,7 @@ $steptrace-play-gradient: linear-gradient(
 }
 .steptrace__menu-h {
   font-family: var(--_font-body);
-  font-size: var(--_type-2xs);
+  font-size: var(--_type-xs);
   font-weight: var(--_weight-strong);
   letter-spacing: var(--_tracking-caps);
   text-transform: uppercase;
@@ -1085,7 +1145,7 @@ $steptrace-play-gradient: linear-gradient(
   margin: 0;
   padding: var(--_space-3) var(--_space-3);
   border-radius: var(--_radius-sm);
-  font: var(--_weight-strong) var(--_type-lg) var(--_font-body);
+  font: var(--_weight-strong) var(--_type-base) var(--_font-body);
   color: var(--_text);
   cursor: pointer;
   background: transparent;
@@ -1100,91 +1160,6 @@ $steptrace-play-gradient: linear-gradient(
   color: var(--_accent);
   font-weight: var(--_weight-strong);
 }
-/* speed slider row: host-native in Obsidian, HTML range fallback on the web */
-.steptrace__speed-row {
-  display: flex;
-  align-items: center;
-  gap: var(--_space-3);
-  min-width: 0;
-  margin: 0;
-  padding: 0;
-}
-.steptrace__speed-control {
-  display: flex;
-  align-items: center;
-  gap: var(--_space-3);
-  flex: 1 1 auto;
-  min-width: 0;
-}
-.steptrace__speed-control > input {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-/* Quartz fallback: draw a consistent rail because browser-native range metrics
-   differ. The Obsidian SliderComponent deliberately does not receive this class. */
-.steptrace input.steptrace__range {
-  -webkit-appearance: none;
-  appearance: none;
-  flex: 1 1 auto;
-  min-width: 0; /* a flex item must be allowed to shrink or it overflows the menu */
-  height: 16px;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  box-shadow: none;
-  cursor: pointer;
-  vertical-align: middle;
-  background-color: transparent;
-  background-image: linear-gradient(var(--_hair), var(--_hair));
-  background-size: 100% 2px;
-  background-position: 0 50%;
-  background-repeat: no-repeat;
-}
-.steptrace input.steptrace__range::-webkit-slider-runnable-track {
-  -webkit-appearance: none;
-  height: 16px;
-  border: 0;
-  background: transparent;
-  box-shadow: none;
-}
-.steptrace input.steptrace__range::-moz-range-track {
-  height: 16px;
-  border: 0;
-  background: transparent;
-  box-shadow: none;
-}
-/* margin-top = (track 16 − thumb 12) / 2 — webkit offsets the thumb from the
-   track's top edge; Firefox centres it for us. */
-.steptrace input.steptrace__range::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 12px;
-  height: 12px;
-  margin-top: var(--_space-0);
-  border: 0;
-  box-shadow: none;
-  border-radius: var(--_radius-pill);
-  background: var(--_accent);
-}
-.steptrace input.steptrace__range::-moz-range-thumb {
-  width: 12px;
-  height: 12px;
-  border: 0;
-  box-shadow: none;
-  border-radius: var(--_radius-pill);
-  background: var(--_accent);
-}
-.steptrace input.steptrace__range:focus-visible {
-  outline: var(--_focus-ring);
-  outline-offset: 3px;
-}
-.steptrace__speed-val {
-  min-width: 5ch; /* fits "1.25×" — the label can never resize the menu */
-  text-align: right;
-  font: var(--_weight-strong) var(--_type-lg) var(--_font-body);
-  color: var(--_text);
-  font-variant-numeric: tabular-nums;
-}
 /* native-looking dropdown (start node / search target), themed via tokens */
 .steptrace__select {
   -webkit-appearance: none;
@@ -1196,7 +1171,7 @@ $steptrace-play-gradient: linear-gradient(
   padding: var(--_space-3) 1.8rem var(--_space-3) var(--_space-4);
   border: var(--_stroke-hair) solid var(--_border);
   border-radius: var(--_radius-sm);
-  font: var(--_weight-strong) var(--_type-lg) var(--_font-body);
+  font: var(--_weight-strong) var(--_type-base) var(--_font-body);
   color: var(--_text);
   background-color: transparent;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath d='M2 4l3 3 3-3' fill='none' stroke='%23888' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
@@ -1211,15 +1186,6 @@ $steptrace-play-gradient: linear-gradient(
 }
 
 @media (hover: none), (pointer: coarse) {
-  .steptrace__btn,
-  .steptrace__btn--play,
-  .steptrace__speed-indicator {
-    width: var(--_target-size);
-    height: var(--_target-size);
-  }
-  .steptrace__btn {
-    flex-basis: var(--_target-size);
-  }
   .steptrace__menu-item {
     min-height: var(--_target-size);
   }
@@ -1227,7 +1193,6 @@ $steptrace-play-gradient: linear-gradient(
     min-height: calc(var(--steptrace-watch-rows, 0) * var(--_target-size));
   }
   .steptrace__watch-row {
-    height: auto;
     min-height: var(--_target-size);
   }
 }
@@ -1276,7 +1241,7 @@ $steptrace-play-gradient: linear-gradient(
   border-radius: var(--_radius-xs);
   background-color: var(--st-page, var(--_surface));
   color: var(--_text);
-  font: var(--_weight-strong) var(--_type-md) / var(--_leading-readable) var(--_font-body);
+  font: var(--_weight-strong) var(--_type-base) / var(--_leading-readable) var(--_font-body);
   text-align: center;
   cursor: pointer;
   transition:
@@ -1299,8 +1264,8 @@ $steptrace-play-gradient: linear-gradient(
   background-color: var(--_accent);
 }
 .steptrace--narrow .steptrace__detail-button:focus-visible {
-  outline: var(--_stroke-hair) solid var(--_blue);
-  outline-offset: var(--_stroke-hair);
+  outline: var(--_focus-ring);
+  outline-offset: var(--_stroke-emphasis);
 }
 .steptrace--narrow
   .steptrace__rail-region--fallback
@@ -1331,11 +1296,10 @@ $steptrace-play-gradient: linear-gradient(
   border-top: 0;
 }
 .steptrace--narrow .steptrace__watch {
-  min-height: 0 !important;
+  min-height: 0;
 }
 .steptrace--narrow .steptrace__watch-row {
-  height: 2.25rem;
-  min-height: 0;
+  min-height: 2.25rem;
 }
 .steptrace--narrow .steptrace__scrub {
   height: var(--_target-size);
@@ -1349,24 +1313,15 @@ $steptrace-play-gradient: linear-gradient(
     "phase phase phase"
     "timeline timeline timeline"
     "transport . utility";
-  gap: var(--_space-1);
-  padding: var(--_space-3) 0;
+  gap: var(--_space-0);
+  padding: var(--_space-2) 0;
+}
+.steptrace--narrow .steptrace__phase {
+  display: block;
 }
 .steptrace--narrow .steptrace__transport,
 .steptrace--narrow .steptrace__utility {
   gap: var(--_space-1);
-}
-.steptrace--narrow .steptrace__btn,
-.steptrace--narrow .steptrace__btn--play {
-  width: var(--_target-size);
-  height: var(--_target-size);
-}
-.steptrace--narrow .steptrace__speed-indicator {
-  width: var(--_control-size);
-  height: var(--_target-size);
-}
-.steptrace--narrow .steptrace__btn {
-  flex-basis: var(--_target-size);
 }
 .steptrace--narrow .steptrace__milestone-label {
   display: none;

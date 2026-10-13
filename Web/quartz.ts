@@ -1,21 +1,22 @@
 import { ExcalidrawExport } from "./custom/components/excalidraw-export"
 import { ExcalidrawEnhance } from "./custom/components/excalidraw-enhance"
+import { ExplorerDisclosure } from "./custom/components/explorer-disclosure"
 import { ExplorerIcons } from "./custom/components/explorer-icons"
 import { ContentMetaRow } from "./custom/components/content-meta-row"
 import { Complexity } from "./custom/components/complexity"
 import { ExplorerOrder } from "./custom/components/explorer-order"
 import { FloatingButtons } from "./custom/components/floating-buttons"
-import { HomepageFit } from "./custom/components/homepage-fit"
 import { NavScopeDropdown } from "./custom/components/nav-scope-dropdown"
 import { PageContribute } from "./custom/components/page-contribute"
 import { PageReveal } from "./custom/components/page-reveal"
 import { QuestionsIndex } from "./custom/components/questions-index"
 import { SiteFooter } from "./custom/components/site-footer"
 import { SiteHeader } from "./custom/components/site-header"
-import { SiteMarquee } from "./custom/components/site-marquee"
+import { SkipLink } from "./custom/components/skip-link"
 import { Steptrace } from "./custom/components/steptrace"
 import { ExcalidrawStatic } from "./custom/emitters/excalidraw-static"
 import { StepTraceStatic } from "./custom/emitters/steptrace-static"
+import { CalloutDisclosure } from "./custom/transformers/callout-disclosure"
 import { ClickableImages } from "./custom/transformers/clickable-images"
 import { ComplexityBlock } from "./custom/transformers/complexity-block"
 import { QuestionCollector } from "./custom/transformers/question-collector"
@@ -30,6 +31,7 @@ import {
   withCanonicalSocialUrls,
 } from "./custom/seo"
 import { componentRegistry } from "./quartz/components/registry"
+import { i18n } from "./quartz/i18n"
 import type { QuartzComponent, QuartzComponentConstructor } from "./quartz/components/types"
 import { PageTypes } from "./quartz/plugins"
 import type { ExplorerOptions } from "./.quartz/plugins"
@@ -55,12 +57,29 @@ unlistGenerated(
 )
 unlistGenerated(requireNamedPlugin(config.plugins.pageTypes, "ExcalidrawPage"), () => true)
 
+// The built-in 404 body reads its copy from the locale table, so the site's
+// wording replaces those strings rather than the engine's page component.
+Object.assign(i18n(config.configuration.locale).pages.error, {
+  notFound:
+    "Nothing is published at this address. The note may have moved, been renamed, or not be published yet — search for it from the header.",
+  home: "Back to Home",
+})
+
 // Clean Syncer's committed markdown/HTML for the flattened web build.
 const linkIdx = config.plugins.transformers.findIndex((t) => t.name === "LinkProcessing")
 config.plugins.transformers.splice(
   linkIdx === -1 ? config.plugins.transformers.length : linkIdx,
   0,
   SyncerFixups(),
+)
+
+// Foldable callout titles only exist as hast after the Obsidian-flavored-markdown
+// plugin's rehype-raw pass, and must be marked before QuestionCollector clones them.
+const ofmIdx = config.plugins.transformers.findIndex((t) => t.name === "ObsidianFlavoredMarkdown")
+config.plugins.transformers.splice(
+  ofmIdx === -1 ? config.plugins.transformers.length : ofmIdx + 1,
+  0,
+  CalloutDisclosure(),
 )
 
 // Collect [!QUESTION] callouts across the vault. Appended after the built-in
@@ -70,9 +89,9 @@ config.plugins.transformers.push(QuestionCollector())
 
 // Note: `status`, `icon` and `order` frontmatter used to be restored here from
 // the Vault source note (Syncer once stripped them on publish). Quartz Syncer
-// now publishes these properties into content/ directly, so the status-gated
-// SiteMarquee and the Explorer's icon/order decorations read them straight from
-// each note's frontmatter — no backfill transformers needed.
+// now publishes these properties into content/ directly, so ContentMetaRow's
+// lifecycle chip and the Explorer's icon/order decorations read them straight
+// from each note's frontmatter — no backfill transformers needed.
 
 // Render ```complexity fences before syntax highlighting wraps them in its own
 // figure markup. The transformer supplies the static first paint; the client-only
@@ -106,17 +125,13 @@ for (const pageLayout of Object.values(layout.byPageType)) {
   if (pageLayout.head) pageLayout.head = withCanonicalSocialUrls(pageLayout.head)
 }
 
-const siteMarquee = SiteMarquee()
-layout.defaults.beforeBody = [siteMarquee, ...(layout.defaults.beforeBody ?? [])]
-for (const pageLayout of Object.values(layout.byPageType)) {
-  pageLayout.beforeBody = [siteMarquee, ...(pageLayout.beforeBody ?? [])]
-}
-
-// Inject the Explorer file-tree icons, topic ordering and the top-level scope selector.
+// Inject the Explorer file-tree icons, topic ordering, the top-level scope
+// selector, and the toggles' expanded state.
 const explorerIcons = ExplorerIcons()
 const explorerOrder = ExplorerOrder()
 const navScopeDropdown = NavScopeDropdown()
-const explorerDecorators = [explorerIcons, explorerOrder, navScopeDropdown]
+const explorerDisclosure = ExplorerDisclosure()
+const explorerDecorators = [explorerIcons, explorerOrder, navScopeDropdown, explorerDisclosure]
 layout.defaults.left = [...(layout.defaults.left ?? []), ...explorerDecorators]
 for (const pageLayout of Object.values(layout.byPageType)) {
   if (Array.isArray(pageLayout.left) && pageLayout.left.length > 0) {
@@ -125,11 +140,9 @@ for (const pageLayout of Object.values(layout.byPageType)) {
 }
 
 // Client-only helpers render nothing themselves. Steptrace ships its engine
-// loader/theme binding; HomepageFit measures the frozen home dashboard and
-// selects the least-degraded tablet state that fits one viewport.
+// loader/theme binding.
 const steptrace = Steptrace()
 const complexity = Complexity()
-const homepageFit = HomepageFit()
 const excalidrawEnhance = ExcalidrawEnhance()
 const excalidrawExport = ExcalidrawExport()
 const pageReveal = PageReveal()
@@ -137,7 +150,6 @@ layout.defaults.afterBody = [
   ...(layout.defaults.afterBody ?? []),
   steptrace,
   complexity,
-  homepageFit,
   excalidrawEnhance,
   excalidrawExport,
   pageReveal,
@@ -147,7 +159,6 @@ for (const pageLayout of Object.values(layout.byPageType)) {
     ...(pageLayout.afterBody ?? []),
     steptrace,
     complexity,
-    homepageFit,
     excalidrawEnhance,
     excalidrawExport,
     pageReveal,
@@ -205,6 +216,19 @@ for (const pageLayout of Object.values(layout.byPageType)) {
   pageLayout.header = [siteHeader, ...(pageLayout.header ?? [])]
 }
 
+// The skip link must be the first tab stop. The left sidebar precedes .center in
+// the frame's DOM, so it heads that slot, or the header where a page type clears it.
+const skipLink = SkipLink()
+layout.defaults.left = [skipLink, ...(layout.defaults.left ?? [])]
+for (const pageLayout of Object.values(layout.byPageType)) {
+  if (!Array.isArray(pageLayout.left)) continue
+  if (pageLayout.left.length > 0) {
+    pageLayout.left = [skipLink, ...pageLayout.left]
+  } else {
+    pageLayout.header = [skipLink, ...(pageLayout.header ?? [])]
+  }
+}
+
 // Edit/Report links ride the article's content-meta row — date/reading-time on
 // the left.
 const contentMetaRow = ContentMetaRow({
@@ -212,7 +236,9 @@ const contentMetaRow = ContentMetaRow({
   contribute: pageContribute,
 })
 layout.defaults.beforeBody = [...(layout.defaults.beforeBody ?? []), contentMetaRow]
-for (const pageLayout of Object.values(layout.byPageType)) {
+for (const [pageType, pageLayout] of Object.entries(layout.byPageType)) {
+  // A missing page has no date, reading time, or source file to edit.
+  if (pageType === "404") continue
   pageLayout.beforeBody = [...(pageLayout.beforeBody ?? []), contentMetaRow]
 }
 

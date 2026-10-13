@@ -2676,10 +2676,10 @@
           valueCells.push(value);
         }
       } else {
-        label.setAttribute("y", descriptor.showStateBadge ? "-10" : "-4");
-        detail.setAttribute("y", descriptor.showStateBadge ? "3" : "9");
+        label.setAttribute("y", descriptor.showStateBadge ? "-11" : "-5");
+        detail.setAttribute("y", descriptor.showStateBadge ? "3" : "10");
         if (descriptor.showStateBadge) {
-          badge.setAttribute("y", "16");
+          badge.setAttribute("y", "17");
           badge.setAttribute("text-anchor", "middle");
         }
       }
@@ -3148,7 +3148,9 @@
     let lastDepth = null;
     for (let i = 1; i < frames.length - 1; i++) {
       const f = frames[i];
-      if (kind === "sort") {
+      if (typeof f.milestone === "string") {
+        push(i, f.milestone);
+      } else if (kind === "sort") {
         if (familyProfile === "counting" && f.type === "prefix" && frames[i - 1].type !== "prefix") {
           push(i, "Reserve output ranges");
         } else if (familyProfile === "counting" && f.type === "place" && frames[i - 1].type !== "place") {
@@ -3924,7 +3926,8 @@
     return cleanup;
   }
   function withOperationFocus(controls, trigger, event, listener) {
-    const preserveFocus = event instanceof MouseEvent && event.detail === 0 && document.activeElement === trigger;
+    const fromKeyboard = event.type === "keydown" || event instanceof MouseEvent && event.detail === 0;
+    const preserveFocus = fromKeyboard && document.activeElement === trigger;
     const label = controlLabel(trigger);
     listener.call(trigger, event);
     if (!preserveFocus || document.activeElement === trigger && !trigger.disabled && trigger.isConnected)
@@ -4010,9 +4013,9 @@
         return button;
       },
       listen(node2, type, listener) {
-        const wrapped = type === "click" && node2.tagName === "BUTTON" ? (event) => {
-          const trigger = node2;
-          const pending = withOperationFocus(controls, trigger, event, listener);
+        const operation = type === "click" && node2.tagName === "BUTTON" || type === "keydown" && node2.tagName === "INPUT";
+        const wrapped = operation ? (event) => {
+          const pending = withOperationFocus(controls, node2, event, listener);
           if (pending) {
             cancelFocusRestore?.();
             cancelFocusRestore = pending;
@@ -5014,6 +5017,14 @@
     "rejected",
     "cut"
   ];
+  var NODE_TAG_OFFSETS = {
+    left: [-18, 0],
+    right: [18, 0],
+    above: [0, -18],
+    below: [0, 18]
+  };
+  var FRONTIER_WATCH_LIMIT = 3;
+  var WATCH_LIST_CHARS = 26;
   function invalid(message) {
     throw new Error(`steptrace: a-star ${message}`);
   }
@@ -5154,6 +5165,20 @@
     Dnipro: [-4, 4],
     Zaporizhzhia: [4, 5]
   };
+  var CITY_TAG_SIDES = {
+    Uzhhorod: "below",
+    Lutsk: "left",
+    Chernivtsi: "below",
+    Khmelnytskyi: "right",
+    Vinnytsia: "below",
+    Poltava: "below",
+    Odesa: "below",
+    Kherson: "below",
+    Simferopol: "below",
+    Dnipro: "right",
+    Zaporizhzhia: "below",
+    Donetsk: "below"
+  };
   function haversine(a, b) {
     const radians = (degrees) => degrees * Math.PI / 180;
     const dLat = radians(b.lat - a.lat);
@@ -5197,48 +5222,15 @@
       label: city.label,
       x: city.x,
       y: city.y,
-      h: Math.floor(haversine(city, goal))
-    }));
-    const offsets = {
-      Uzhhorod: [0, 14],
-      Lviv: [-9, -10],
-      Lutsk: [-8, -10],
-      Rivne: [10, 13],
-      Ternopil: [28, 6],
-      "Ivano-Frankivsk": [-30, 18],
-      Chernivtsi: [8, 18],
-      Khmelnytskyi: [30, -12],
-      Vinnytsia: [-13, 13],
-      Zhytomyr: [-13, -10],
-      Kyiv: [11, -10],
-      Chernihiv: [8, -10],
-      Cherkasy: [13, 13],
-      Kropyvnytskyi: [0, 14],
-      Odesa: [-9, 13],
-      Mykolaiv: [12, -10],
-      Kherson: [12, 13],
-      Simferopol: [0, 14],
-      Poltava: [10, -10],
-      Sumy: [0, -10],
-      Dnipro: [-11, 13],
-      Zaporizhzhia: [14, 13],
-      Kharkiv: [0, -10],
-      Donetsk: [0, 14],
-      Luhansk: [0, -10]
-    };
-    const decor = nodes5.map((city) => ({
-      kind: "text",
-      className: "steptrace__gs-map-label steptrace__gs-city-label",
-      x: city.x + offsets[city.id][0],
-      y: city.y + offsets[city.id][1],
-      text: city.label
+      h: Math.floor(haversine(city, goal)),
+      tagSide: CITY_TAG_SIDES[city.id] ?? "above"
     }));
     return {
       profile: "ukraine-cities",
       policy: "a-star",
       nodes: nodes5,
       edges: edges5,
-      decor,
+      decor: [],
       start: safeStart,
       target: safeTarget,
       endpointSettings: {
@@ -5254,30 +5246,31 @@
   }
   function buildingScenario() {
     const nodes5 = [
-      ["S", "Studio door", 45, 155],
-      ["W", "West hall", 100, 155],
-      ["D1", "Meeting threshold", 180, 155],
-      ["J1", "West junction", 280, 155],
-      ["J2", "Fire door west", 340, 155],
-      ["J3", "Fire door east", 380, 155],
-      ["J4", "East junction", 421, 155],
-      ["EU", "East stair", 510, 155],
-      ["X", "Emergency exit", 575, 155],
-      ["WL", "West lower turn", 100, 215],
-      ["ML", "Lower hall west", 280, 215],
-      ["D5", "Lower junction", 350, 215],
-      ["EL", "Lower hall east", 421, 215],
-      ["ER", "East lower turn", 510, 215],
-      ["D2", "Kitchen threshold", 280, 130],
-      ["D3", "Archive threshold", 421, 130],
-      ["D4", "Ops threshold", 510, 240],
-      ["D6", "Reception threshold", 100, 130]
-    ].map(([id, label, x, y]) => ({
+      ["S", 45, 155, "below"],
+      ["W", 100, 155, "below"],
+      ["D1", 180, 155, "below"],
+      ["J1", 280, 155, "below"],
+      ["J2", 340, 155, "below"],
+      ["J3", 380, 155, "below"],
+      ["J4", 421, 155, "below"],
+      ["EU", 510, 155, "below"],
+      ["X", 575, 155, "below"],
+      ["WL", 100, 215, "below"],
+      ["ML", 280, 215, "below"],
+      ["D5", 350, 215, "below"],
+      ["EL", 421, 215, "below"],
+      ["ER", 510, 215, "right"],
+      ["D2", 280, 130, "above"],
+      ["D3", 421, 130, "above"],
+      ["D4", 510, 240, "right"],
+      ["D6", 100, 130, "above"]
+    ].map(([id, x, y, tagSide]) => ({
       id: String(id),
-      label: String(label),
+      label: String(id),
       x: Number(x),
       y: Number(y),
-      h: 0
+      h: 0,
+      tagSide
     }));
     const pairs = [
       ["S", "W"],
@@ -5299,10 +5292,16 @@
       ["W", "D6"]
     ];
     const byId = new Map(nodes5.map((node2) => [node2.id, node2]));
+    const labelAt = { "W>WL": 0.8, "ER>EU": 0.2 };
     const edges5 = pairs.map(([from, to]) => {
       const a = byId.get(from);
       const b = byId.get(to);
-      return { from, to, weight: Math.max(1, Math.ceil(distance(a, b) / 40)) };
+      return {
+        from,
+        to,
+        weight: Math.max(1, Math.ceil(distance(a, b) / 40)),
+        labelAt: labelAt[`${from}>${to}`]
+      };
     });
     const remaining = graphStateShortestDistances(nodes5, edges5, "X");
     nodes5.forEach((node2) => node2.h = remaining.get(node2.id));
@@ -5350,21 +5349,38 @@
       cityMode: false
     };
   }
+  var DEFAULT_VIEW_BOX = "0 0 620 320";
+  var PROFILE_VIEW_BOX = {
+    "midtown-map": "0 0 480 400"
+  };
   function midtownScenario() {
+    const place = (x, y) => ({ x: 50 + (x - 55) * 0.8, y: 40 + (y - 18) * 1.25 });
+    const spanX = (width) => width * 0.8;
+    const spanY = (height2) => height2 * 1.25;
+    const segment = (x1, y1, x2, y2) => {
+      const from = place(x1, y1);
+      const to = place(x2, y2);
+      return `M${from.x} ${from.y} L${to.x} ${to.y}`;
+    };
     const rows = { 47: 48, 46: 92, 45: 136, 44: 180, 43: 224, 42: 268 };
+    const survey = /* @__PURE__ */ new Map();
     const nodes5 = [];
+    const addNode = (id, x, y, tagSide) => {
+      survey.set(id, { x, y });
+      nodes5.push({ id, label: id, ...place(x, y), h: 0, tagSide });
+    };
     for (const [street, y] of Object.entries(rows)) {
-      nodes5.push({ id: `6-${street}`, label: `Sixth & W${street}`, x: 170, y, h: 0 });
-      nodes5.push({ id: `7-${street}`, label: `Seventh & W${street}`, x: 405, y, h: 0 });
+      addNode(`6-${street}`, 170, y, "left");
+      addNode(`7-${street}`, 405, y, street === "44" || street === "43" ? "left" : "right");
     }
-    for (const [id, x, y] of [
-      ["B47", 310, 28],
-      ["B46", 356, 81],
-      ["B44", 437, 175],
-      ["B43", 480, 224],
-      ["B42", 518, 268]
+    for (const [id, x, y, tagSide] of [
+      ["B47", 310, 28, "above"],
+      ["B46", 356, 81, "above"],
+      ["B44", 437, 175, "right"],
+      ["B43", 480, 224, "right"],
+      ["B42", 518, 268, "right"]
     ]) {
-      nodes5.push({ id, label: `Broadway ${id.slice(1)}`, x, y, h: 0 });
+      addNode(id, x, y, tagSide);
     }
     const pairs = [];
     for (let street = 47; street > 42; street--) {
@@ -5389,36 +5405,32 @@
       ["6-43", "7-43", true],
       ["7-42", "6-42", true]
     );
-    const byId = new Map(nodes5.map((node2) => [node2.id, node2]));
+    const labelAt = { "7-46>B46": 0.38, "B46>B44": 0.3 };
     const edges5 = pairs.map(([from, to, directed]) => ({
       from,
       to,
       directed,
-      weight: Math.max(1, Math.ceil(distance(byId.get(from), byId.get(to)) / 45))
+      weight: Math.max(1, Math.ceil(distance(survey.get(from), survey.get(to)) / 45)),
+      labelAt: labelAt[`${from}>${to}`]
     }));
     const remaining = graphStateShortestDistances(nodes5, edges5, "6-42");
     nodes5.forEach((node2) => node2.h = remaining.get(node2.id) ?? 0);
     const decor = [
-      { kind: "path", className: "steptrace__gs-street", d: "M170 18 L170 300" },
-      { kind: "path", className: "steptrace__gs-street", d: "M405 18 L405 300" },
+      { kind: "path", className: "steptrace__gs-street", d: segment(170, 18, 170, 300) },
+      { kind: "path", className: "steptrace__gs-street", d: segment(405, 18, 405, 300) },
       ...Object.values(rows).map((y) => ({
         kind: "path",
         className: "steptrace__gs-street",
-        d: `M55 ${y} L575 ${y}`
+        d: segment(55, y, 575, y)
       })),
-      { kind: "path", className: "steptrace__gs-street", d: "M310 28 L540 292" }
+      { kind: "path", className: "steptrace__gs-street", d: segment(310, 28, 540, 292) }
     ];
-    for (const y of [61, 105, 149, 193, 237]) {
-      decor.push({
-        kind: "rect",
-        className: "steptrace__gs-building",
-        x: 70,
-        y,
-        width: 80,
-        height: 18
-      });
-    }
     for (const [x, y, width] of [
+      [70, 61, 80],
+      [70, 105, 80],
+      [70, 149, 80],
+      [70, 193, 80],
+      [70, 237, 80],
       [190, 61, 120],
       [190, 105, 158],
       [190, 149, 195],
@@ -5430,22 +5442,43 @@
       [480, 193, 85],
       [520, 237, 45]
     ]) {
-      decor.push({ kind: "rect", className: "steptrace__gs-building", x, y, width, height: 18 });
+      decor.push({
+        kind: "rect",
+        className: "steptrace__gs-building",
+        ...place(x, y),
+        width: spanX(width),
+        height: spanY(18)
+      });
     }
+    const text = (className, x, y, label) => ({
+      kind: "text",
+      className,
+      ...place(x, y),
+      text: label
+    });
     decor.push(
       {
         kind: "rect",
         className: "steptrace__gs-closure",
-        x: 272,
-        y: 167,
-        width: 62,
-        height: 26,
+        ...place(222.5, 167),
+        width: spanX(100),
+        height: spanY(26),
         rx: 3
       },
-      { kind: "text", className: "steptrace__gs-map-label", x: 303, y: 184, text: "W44 CLOSED" },
-      { kind: "text", className: "steptrace__gs-road-direction", x: 150, y: 113, text: "↑" },
-      { kind: "text", className: "steptrace__gs-road-direction", x: 425, y: 113, text: "↓" },
-      { kind: "text", className: "steptrace__gs-road-direction", x: 452, y: 199, text: "↘" }
+      text("steptrace__gs-map-label", 272.5, 180, "CLOSED"),
+      text("steptrace__gs-road-direction", 150, 113, "↑"),
+      text("steptrace__gs-road-direction", 425, 113, "↓"),
+      text("steptrace__gs-road-direction", 444, 208, "↘"),
+      text("steptrace__gs-axis-label", 170, -4, "6th Av"),
+      text("steptrace__gs-axis-label", 310, -4, "Broadway"),
+      text("steptrace__gs-axis-label", 405, -4, "7th Av"),
+      ...Object.entries(rows).map(([street, y]) => ({
+        kind: "text",
+        className: "steptrace__gs-axis-label steptrace__gs-axis-label--street",
+        x: 42,
+        y: place(0, y).y,
+        text: `W${street}`
+      }))
     );
     return {
       profile: "midtown-map",
@@ -5530,6 +5563,7 @@
           nodeState: Object.freeze(nodeState),
           edgeState: Object.freeze(edgeState),
           message,
+          ...type === "expand" && current ? { milestone: `Expand ${current}` } : {},
           detail
         })
       );
@@ -5631,8 +5665,68 @@
         return `Maximum flow ${frame.detail.totalFlow}.`;
     }
   }
-  function graphStateLegend(kind) {
-    switch (kind) {
+  function formatDistance(value) {
+    return value != null && Number.isFinite(value) ? String(value) : "∞";
+  }
+  function watchSlice(entries) {
+    const shown = [];
+    for (const entry of entries.slice(0, FRONTIER_WATCH_LIMIT)) {
+      const rest = entries.length - shown.length - 1;
+      const line = [...shown, entry, ...rest ? [`+${rest} more`] : []].join(" · ");
+      if (shown.length && line.length > WATCH_LIST_CHARS) break;
+      shown.push(entry);
+    }
+    if (entries.length > shown.length) shown.push(`+${entries.length - shown.length} more`);
+    return shown.join(" · ");
+  }
+  function edgeRelaxationWatch(frame) {
+    const { detail } = frame;
+    if (detail.kind !== "edge-relaxation") return [];
+    const { distances } = detail;
+    const entry = (id) => `${id}:${formatDistance(distances[id])}`;
+    const edge = { k: "edge", v: detail.edge?.join(" → ") || "—", sw: "var(--_blue)" };
+    const ids = frame.nodes.map(({ id }) => id);
+    if (detail.policy === "bellman-ford") {
+      const distanceWatch = ids.map(entry).join(" · ");
+      return [
+        { k: "distances", v: distanceWatch, sw: "var(--_blue)", hint: distanceWatch },
+        { k: "pass", v: String(detail.pass), sw: "var(--_violet)" },
+        edge,
+        {
+          k: "change",
+          v: detail.changed ? "updated" : "kept",
+          sw: detail.changed ? "var(--_green)" : "var(--_neutral)"
+        }
+      ];
+    }
+    const byDistance = (left, right) => (distances[left] ?? Infinity) - (distances[right] ?? Infinity) || left.localeCompare(right);
+    const frontier = ids.filter((id) => frame.nodeState[id] === "frontier").sort(byDistance);
+    const settled = ids.filter((id) => ["active", "closed"].includes(frame.nodeState[id])).length;
+    const relaxed = detail.edge?.[1];
+    const settling = frame.type === "expand" && frame.currentNode != null;
+    return [
+      edge,
+      {
+        k: "change",
+        v: relaxed != null && detail.previous !== void 0 ? detail.changed ? `${formatDistance(detail.previous)} → ${formatDistance(distances[relaxed])}` : `${formatDistance(detail.previous)} kept` : settling ? `settled at ${formatDistance(distances[frame.currentNode])}` : "—",
+        sw: detail.changed || settling ? "var(--_green)" : "var(--_neutral)"
+      },
+      {
+        k: "frontier",
+        v: watchSlice(frontier.map(entry)) || "—",
+        sw: "var(--_amber)",
+        hint: "Reached, unsettled nodes by tentative distance; the first one settles next."
+      },
+      {
+        k: "distances",
+        v: `${settled} of ${ids.length} settled`,
+        sw: "var(--_green)",
+        hint: `All distances: ${ids.slice().sort(byDistance).map(entry).join(" · ")}.`
+      }
+    ];
+  }
+  function graphStateLegend(detail) {
+    switch (detail.kind) {
       case "heuristic-search":
         return [
           ["Current", "current"],
@@ -5648,11 +5742,14 @@
           ["Meeting", "goal"]
         ];
       case "edge-relaxation":
-        return [
+        return detail.policy === "dijkstra" ? [
+          ["Current", "current"],
+          ["Frontier", "open"],
+          ["Settled / Path", "closed"],
+          ["Target", "goal"]
+        ] : [
           ["Active Edge", "current"],
-          ["Candidate", "open"],
-          ["Settled", "closed"],
-          ["Source", "goal"]
+          ["Reached", "closed"]
         ];
       case "component-flood":
         return [
@@ -5713,7 +5810,7 @@
     const graph = el("div", "steptrace__gs-graph");
     const svg = svgElement("svg", {
       class: "steptrace__gs-svg",
-      viewBox: "0 0 620 320",
+      viewBox: PROFILE_VIEW_BOX[first.profile] ?? DEFAULT_VIEW_BOX,
       role: "img",
       "aria-label": "Graph algorithm state"
     });
@@ -5754,9 +5851,9 @@
     const compactMapNodes = first.profile === "building-floor" || first.profile === "midtown-map";
     const mapMarkers = first.profile === "ukraine-cities" || compactMapNodes;
     const nodeRadius = first.profile === "ukraine-cities" ? 5 : compactMapNodes ? 6 : GRAPH_NODE_RADIUS_PX;
-    const weighted = ["heuristic-search", "edge-relaxation", "mst-scan", "mst-round", "residual-flow"].includes(
+    const weighted = first.profile !== "ukraine-cities" && (["heuristic-search", "edge-relaxation", "mst-scan", "mst-round", "residual-flow"].includes(
       first.detail.kind
-    ) || first.edges.some((edge) => edge.weight !== 1 || edge.label != null);
+    ) || first.edges.some((edge) => edge.weight !== 1 || edge.label != null));
     const edgeElements = first.edges.map((edge) => {
       const from = positions.get(edge.from);
       const to = positions.get(edge.to);
@@ -5769,10 +5866,11 @@
       });
       if (edge.showDirection) line.setAttribute("marker-end", `url(#${markerIds.get("neutral")})`);
       edgeLayer.append(line);
+      const at = edge.labelAt ?? 0.5;
       const label = weighted ? svgElement("text", {
         class: "steptrace__gs-edge-label",
-        x: (from.x + to.x) / 2,
-        y: (from.y + to.y) / 2 - 7
+        x: from.x + (to.x - from.x) * at,
+        y: from.y + (to.y - from.y) * at - 7
       }) : null;
       if (label) {
         label.textContent = edge.label ?? String(edge.weight);
@@ -5799,6 +5897,17 @@
         const label = svgElement("text", { class: "steptrace__gs-node-label", x: 0, y: 0 });
         label.textContent = node2.label;
         group.append(title, halo, circle, label);
+        if (node2.tagSide) {
+          const offset = NODE_TAG_OFFSETS[node2.tagSide];
+          const tag = svgElement("text", {
+            class: "steptrace__gs-node-tag",
+            "data-side": node2.tagSide,
+            x: offset[0],
+            y: offset[1]
+          });
+          tag.textContent = node2.label;
+          group.append(tag);
+        }
         nodeLayer.append(group);
         return [node2.id, group];
       })
@@ -5823,8 +5932,11 @@
         applyEdgeGeometry(GRAPH_NODE_RADIUS_PX * unitsPerCssPixel, true);
       }
     );
+    const textScale = observeFixedSvgNodes(svg, [], (unitsPerCssPixel) => {
+      svg.style.setProperty("--_gs-text-scale", String(unitsPerCssPixel));
+    });
     const legend = makeLegend(
-      graphStateLegend(first.detail.kind).map(([label, state]) => ({
+      graphStateLegend(first.detail).map(([label, state]) => ({
         label,
         swatchClass: `steptrace__gs-swatch steptrace__gs-swatch--${state}`
       })),
@@ -5838,7 +5950,14 @@
       const groupByNode = new Map(
         groups.flatMap((members, index) => members.map((id) => [id, index + 1]))
       );
+      const tagged = /* @__PURE__ */ new Set([
+        frame.start,
+        frame.target,
+        frame.currentNode,
+        ...frame.currentEdge ?? []
+      ]);
       for (const [id, group] of nodeElements) {
+        group.dataset.tagged = String(tagged.has(id));
         const role = frame.nodeState[id] || "neutral";
         const component = groupByNode.get(id);
         group.dataset.group = component ? String(component) : "";
@@ -5881,6 +6000,7 @@
       const current = currentId ? positions.get(currentId) : null;
       const rows = [{ k: "current", v: current?.label || "—", sw: "var(--_blue)" }];
       if (frame.detail.kind === "heuristic-search") {
+        const greedy = frame.detail.policy === "greedy";
         const g = frame.currentNode ? frame.detail.costs[frame.currentNode] : null;
         const h = frame.currentNode ? frame.detail.heuristic[frame.currentNode] : null;
         rows.push(
@@ -5891,13 +6011,20 @@
           },
           {
             k: "open",
-            v: frame.detail.open.map((entry) => entry.id).join(" · ") || "—",
-            sw: "var(--_amber)"
+            v: watchSlice(frame.detail.open.map((entry) => entry.id)) || "—",
+            sw: "var(--_amber)",
+            hint: `OPEN by priority: ${frame.detail.open.map(({ id, h: h2, f }) => `${id} ${greedy ? `h ${h2}` : `f ${f}`}`).join(" · ") || "empty"}.`
           },
-          {
+          frame.selectedEdges.length ? {
+            k: "path",
+            v: `${frame.detail.closed.length} nodes`,
+            sw: "var(--_green)",
+            hint: `Path: ${frame.detail.closed.join(" → ")}.`
+          } : {
             k: "closed",
-            v: frame.detail.closed.join(" · ") || "—",
-            sw: "var(--_green)"
+            v: `${frame.detail.closed.length} of ${frame.nodes.length}`,
+            sw: "var(--_green)",
+            hint: `CLOSED in expansion order: ${frame.detail.closed.join(" · ") || "none yet"}.`
           }
         );
       }
@@ -5920,29 +6047,9 @@
             { k: "meeting", v: frame.detail.meeting || "—", sw: "var(--_violet)" }
           );
           break;
-        case "edge-relaxation": {
-          const distances = frame.detail.distances;
-          const distanceWatch = frame.nodes.map(({ id }) => {
-            const value = distances[id];
-            return `${id}:${Number.isFinite(value) ? value : "∞"}`;
-          }).join(" · ");
-          rows.push(
-            {
-              k: "distances",
-              v: distanceWatch,
-              sw: "var(--_blue)",
-              hint: distanceWatch
-            },
-            { k: "pass", v: String(frame.detail.pass), sw: "var(--_violet)" },
-            { k: "edge", v: frame.detail.edge?.join(" → ") || "—", sw: "var(--_blue)" },
-            {
-              k: "change",
-              v: frame.detail.changed ? "updated" : "kept",
-              sw: frame.detail.changed ? "var(--_green)" : "var(--_neutral)"
-            }
-          );
+        case "edge-relaxation":
+          rows.push(...edgeRelaxationWatch(frame));
           break;
-        }
         case "component-flood":
           rows.push(
             { k: "component", v: String(frame.detail.component), sw: "var(--_violet)" },
@@ -6032,7 +6139,10 @@
       paint,
       watch,
       summary: graphStateSummary,
-      destroy: () => geometry?.destroy()
+      destroy: () => {
+        geometry?.destroy();
+        textScale.destroy();
+      }
     };
   }
   var graphStateFamily = {
@@ -7071,12 +7181,13 @@
       __publicField(this, "config", config);
       __publicField(this, "frames", []);
     }
-    record(pass, edge, distances, changed, message) {
+    record(pass, edge, distances, changed, message, milestone) {
       const reachable = new Set(
         Object.entries(distances).filter(([, value]) => Number.isFinite(value)).map(([id]) => id)
       );
       const detail = {
         kind: "edge-relaxation",
+        policy: "bellman-ford",
         pass,
         edge,
         distances: { ...distances },
@@ -7106,6 +7217,7 @@
           ])
         ),
         message,
+        ...milestone ? { milestone } : {},
         detail
       });
     }
@@ -7135,7 +7247,7 @@
     const distances = { "0": 0, "1": Infinity, "2": Infinity, "3": Infinity };
     recorder.record(0, null, distances, false, "Set dist[0] = 0; all other distances start at ∞.");
     for (let pass = 1; pass <= 3; pass++) {
-      for (const edge of config.edges) {
+      for (const [index, edge] of config.edges.entries()) {
         const before = distances[edge.to];
         const candidate = distances[edge.from] + edge.weight;
         const changed2 = Number.isFinite(candidate) && candidate < before;
@@ -7145,12 +7257,13 @@
           [edge.from, edge.to],
           distances,
           changed2,
-          changed2 ? `Pass ${pass}: ${edge.from}→${edge.to} lowers dist[${edge.to}] from ${before} to ${candidate}.` : `Pass ${pass}: ${edge.from}→${edge.to} cannot improve dist[${edge.to}].`
+          changed2 ? `Pass ${pass}: ${edge.from}→${edge.to} lowers dist[${edge.to}] from ${before} to ${candidate}.` : `Pass ${pass}: ${edge.from}→${edge.to} cannot improve dist[${edge.to}].`,
+          index === 0 ? `Pass ${pass}` : void 0
         );
       }
     }
     let changed = false;
-    for (const edge of config.edges) {
+    for (const [index, edge] of config.edges.entries()) {
       const relaxes = Number.isFinite(distances[edge.from]) && distances[edge.from] + edge.weight < distances[edge.to];
       changed || (changed = relaxes);
       recorder.record(
@@ -7158,7 +7271,8 @@
         [edge.from, edge.to],
         distances,
         relaxes,
-        `Check ${edge.from}→${edge.to}: ${relaxes ? "it still relaxes" : "no change"}.`
+        `Check ${edge.from}→${edge.to}: ${relaxes ? "it still relaxes" : "no change"}.`,
+        index === 0 ? "Cycle check" : void 0
       );
     }
     recorder.record(
@@ -9300,6 +9414,11 @@
   var HOP_MS = 320;
   var FINISH_MS = 180;
   var RETURN_MS = 180;
+  var MAP_SEED = [
+    { key: 14, value: "A" },
+    { key: 26, value: "B" },
+    { key: 31, value: "C" }
+  ];
   function indexFor(key4, size) {
     return (key4 % size + size) % size;
   }
@@ -10088,13 +10207,24 @@
         } : void 0
       };
     }
+    function putPlan(key4, value) {
+      return config.strategy === "closed-addressing" ? closedPut(key4, value) : config.strategy === "open-addressing" ? openPut(key4, value) : bucketPut(key4, value);
+    }
+    function seed() {
+      for (const { key: key4, value } of MAP_SEED) putPlan(key4, value).commit?.();
+      const [first, second] = MAP_SEED;
+      const count = `Seeded ${MAP_SEED.length} entries`;
+      if (config.strategy === "closed-addressing")
+        return `${count}; keys ${first.key} and ${second.key} collide in bucket ${indexFor(first.key, SIZE)}'s chain.`;
+      if (config.strategy === "open-addressing")
+        return `${count}; ${second.key} collided with ${first.key} at cell ${indexFor(second.key, SIZE)} and probed to cell ${slots.findIndex((entry) => entry?.key === second.key)}.`;
+      return `${count}; keys ${first.key} and ${second.key} share bucket ${indexFor(first.key, SIZE / BUCKET_SIZE)}.`;
+    }
     function onPut() {
       const key4 = suppliedPutKey();
       if (key4 == null) return;
       const value = content === "map" ? suppliedPutValue() : "";
-      run7(
-        config.strategy === "closed-addressing" ? closedPut(key4, value) : config.strategy === "open-addressing" ? openPut(key4, value) : bucketPut(key4, value)
-      );
+      run7(putPlan(key4, value));
     }
     function onSearch(removeEntry = false) {
       const key4 = content === "map" ? suppliedKey(true) : (() => {
@@ -10116,18 +10246,20 @@
       clearTransientState();
       keyInput.value = "";
       if (valueInput) valueInput.value = "";
+      if (content === "map") seed();
       calculation.textContent = initialCalculation;
       restoreGenericToken();
       settleToken();
-      shell.status.textContent = content === "map" ? `${label[0].toUpperCase()}${label.slice(1)} table reset.` : "Hash set reset.";
+      shell.status.textContent = content === "map" ? `${label[0].toUpperCase()}${label.slice(1)} table reset to its seeded entries.` : "Hash set reset.";
       paint();
     }
     shell.listen(put, "click", onPut);
     shell.listen(search, "click", () => onSearch(false));
     shell.listen(remove, "click", () => onSearch(true));
     shell.listen(reset, "click", onReset);
-    onEnter(shell, valueInput ?? keyInput, onPut);
-    shell.status.textContent = content === "map" ? `Fixed 12-cell ${label} table ready.` : "Fixed 12-cell hash set ready.";
+    onEnter(shell, keyInput, onPut);
+    if (valueInput) onEnter(shell, valueInput, onPut);
+    shell.status.textContent = content === "map" ? seed() : "Fixed 12-cell hash set ready.";
     paint();
     const base = shell.finish();
     return {
@@ -11525,7 +11657,7 @@
       __publicField(this, "config", config);
       __publicField(this, "frames", []);
     }
-    record(type, current, edge, forward, backward, meeting, path, message) {
+    record(type, current, edge, forward, backward, meeting, path, message, milestone) {
       const visited = [.../* @__PURE__ */ new Set([...forward, ...backward])];
       const detail = {
         kind: "dual-search",
@@ -11563,6 +11695,7 @@
           ])
         ),
         message,
+        ...milestone ? { milestone } : {},
         detail
       });
     }
@@ -11630,6 +11763,7 @@
     ]) {
       ;
       (side === "forward" ? forward : backward).push(to);
+      const direction = side === "forward" ? "Forward" : "Backward";
       recorder.record(
         "expand",
         to,
@@ -11638,7 +11772,8 @@
         backward,
         null,
         [],
-        `${side === "forward" ? "Forward" : "Backward"} BFS reaches ${to} from ${from}.`
+        `${direction} BFS reaches ${to} from ${from}.`,
+        `${direction} ${to}`
       );
     }
     backward.push("m");
@@ -11650,7 +11785,8 @@
       backward,
       "m",
       [],
-      "Backward BFS reaches m, already visited by the forward search."
+      "Backward BFS reaches m, already visited by the forward search.",
+      "Meet m"
     );
     const path = ["s", "a", "b", "m", "c", "d", "t"];
     recorder.record(
@@ -12193,7 +12329,7 @@
         {
           id: "root",
           label: "start",
-          detail: "0/7 · 0 · bound 116",
+          detail: "0/7 · 0 · ≤116",
           values: [],
           x: 636,
           y: 28,
@@ -12205,7 +12341,7 @@
         {
           id: "a+",
           label: "take A",
-          detail: "2/7 · 40 · bound 116",
+          detail: "2/7 · 40 · ≤116",
           values: [],
           x: 352,
           y: 100,
@@ -12217,7 +12353,7 @@
         {
           id: "a-",
           label: "skip A",
-          detail: "0/7 · 0 · bound 102",
+          detail: "0/7 · 0 · ≤102",
           values: [],
           x: 920,
           y: 100,
@@ -12229,7 +12365,7 @@
         {
           id: "ab+",
           label: "take B",
-          detail: "5/7 · 90 · bound 116",
+          detail: "5/7 · 90 · ≤116",
           values: [],
           x: 139,
           y: 172,
@@ -12241,7 +12377,7 @@
         {
           id: "ab-",
           label: "skip B",
-          detail: "2/7 · 40 · bound 105",
+          detail: "2/7 · 40 · ≤105",
           values: [],
           x: 565,
           y: 172,
@@ -12253,7 +12389,7 @@
         {
           id: "abc+",
           label: "take C",
-          detail: "10/7 · 155 · infeasible",
+          detail: "10/7 · 155",
           values: [],
           x: 68,
           y: 244,
@@ -12265,7 +12401,7 @@
         {
           id: "abc-",
           label: "skip C",
-          detail: "5/7 · 90 · bound 107.5",
+          detail: "5/7 · 90 · ≤107.5",
           values: [],
           x: 210,
           y: 244,
@@ -12277,7 +12413,7 @@
         {
           id: "ac+",
           label: "take C",
-          detail: "7/7 · 105 · bound 105",
+          detail: "7/7 · 105 · ≤105",
           values: [],
           x: 423,
           y: 244,
@@ -12289,7 +12425,7 @@
         {
           id: "ac-",
           label: "skip C",
-          detail: "2/7 · 40 · bound 75",
+          detail: "2/7 · 40 · ≤75",
           values: [],
           x: 707,
           y: 244,
@@ -12301,7 +12437,7 @@
         {
           id: "abcd+",
           label: "take D",
-          detail: "9/7 · 125 · infeasible",
+          detail: "9/7 · 125",
           values: [],
           x: 68,
           y: 316,
@@ -12313,7 +12449,7 @@
         {
           id: "abcd-",
           label: "skip D",
-          detail: "5/7 · 90 · bound 90",
+          detail: "5/7 · 90 · ≤90",
           values: [],
           x: 210,
           y: 316,
@@ -12325,7 +12461,7 @@
         {
           id: "acd+",
           label: "take D",
-          detail: "11/7 · 140 · infeasible",
+          detail: "11/7 · 140",
           values: [],
           x: 352,
           y: 316,
@@ -12337,7 +12473,7 @@
         {
           id: "acd-",
           label: "skip D",
-          detail: "7/7 · 105 · bound 105",
+          detail: "7/7 · 105 · ≤105",
           values: [],
           x: 494,
           y: 316,
@@ -12349,7 +12485,7 @@
         {
           id: "ac-d+",
           label: "take D",
-          detail: "6/7 · 75 · bound 75",
+          detail: "6/7 · 75 · ≤75",
           values: [],
           x: 636,
           y: 316,
@@ -12361,7 +12497,7 @@
         {
           id: "ac-d-",
           label: "skip D",
-          detail: "2/7 · 40 · bound 40",
+          detail: "2/7 · 40 · ≤40",
           values: [],
           x: 778,
           y: 316,
@@ -12373,7 +12509,7 @@
         {
           id: "a-b+",
           label: "take B",
-          detail: "3/7 · 50 · bound 102",
+          detail: "3/7 · 50 · ≤102",
           values: [],
           x: 849,
           y: 172,
@@ -12385,7 +12521,7 @@
         {
           id: "a-b-",
           label: "skip B",
-          detail: "0/7 · 0 · bound 82.5",
+          detail: "0/7 · 0 · ≤82.5",
           values: [],
           x: 991,
           y: 172,
@@ -14170,6 +14306,7 @@
           ])
         ),
         message,
+        ...current ? { milestone: `Component ${component}` } : {},
         detail
       });
     }
@@ -14422,7 +14559,7 @@
       __publicField(this, "config", config);
       __publicField(this, "frames", []);
     }
-    record(type, currentNode, currentEdge, distances, settled, selectedEdges, changed, message) {
+    record(type, currentNode, currentEdge, distances, settled, selectedEdges, changed, message, previous) {
       const frontier = new Set(
         this.config.nodes.map(({ id }) => id).filter((id) => Number.isFinite(distances[id]) && !settled.has(id))
       );
@@ -14443,10 +14580,12 @@
       );
       const detail = {
         kind: "edge-relaxation",
+        policy: "dijkstra",
         pass: settled.size,
         edge: currentEdge,
         distances: { ...distances },
-        changed
+        changed,
+        ...previous === void 0 ? {} : { previous }
       };
       this.frames.push({
         type,
@@ -14462,6 +14601,7 @@
         nodeState,
         edgeState,
         message,
+        ...type === "expand" && currentNode ? { milestone: `Settle ${currentNode}` } : {},
         detail
       });
     }
@@ -14599,7 +14739,8 @@
           settled,
           [],
           changed,
-          changed ? `Relax ${current} → ${edge.to}: ${candidate} improves ${Number.isFinite(before) ? before : "∞"}.` : `Keep dist[${edge.to}] = ${before}; ${candidate} is not shorter.`
+          changed ? `Relax ${current} → ${edge.to}: ${candidate} improves ${Number.isFinite(before) ? before : "∞"}.` : `Keep dist[${edge.to}] = ${before}; ${candidate} is not shorter.`,
+          before
         );
       }
     }
@@ -14627,7 +14768,7 @@
       settled,
       selectedEdges,
       false,
-      `Shortest path ${path.join(" → ")} — total cost ${distances[config.target]}.`
+      `Path ${path.join(" → ")} · cost ${distances[config.target]}.`
     );
   }
   var dijkstra = {
@@ -16379,12 +16520,12 @@
     });
     return { nodes: nodes5.slice(), edges: parsedEdges, profile: "floyd-warshall" };
   }
-  function formatDistance(value) {
+  function formatDistance2(value) {
     return value == null ? "∞" : String(value);
   }
   function distanceLabel(frame, cell) {
     const [row, column] = cell;
-    return `dist[${frame.rowLabels[row]}][${frame.colLabels[column]}] = ${formatDistance(frame.grid[row][column])}`;
+    return `dist[${frame.rowLabels[row]}][${frame.colLabels[column]}] = ${formatDistance2(frame.grid[row][column])}`;
   }
   function stageIndex(frame) {
     return frame.k == null ? -1 : frame.rowLabels.indexOf(String(frame.k));
@@ -16434,8 +16575,8 @@
       };
     }
     if (frame.type === "relax" && frame.cur) {
-      const previous = formatDistance(frame.previous);
-      const result = formatDistance(frame.result);
+      const previous = formatDistance2(frame.previous);
+      const result = formatDistance2(frame.result);
       return {
         context: `Stage k = ${frame.k}`,
         summary: frame.decision === "improve" ? { role: "write", text: `Write ${result} · ${previous} → ${result}` } : { role: "keep", text: `Keep ${previous} · via ${frame.k} is not shorter` }
@@ -16452,14 +16593,14 @@
     cornerLabel: "from ↓ / to →",
     stageLayout: "fill",
     formatValue(value) {
-      return formatDistance(value);
+      return formatDistance2(value);
     },
     cellLabel(frame, row, column) {
       const base = distanceLabel(frame, [row, column]);
       const roles = matrixGridRolesForCell(frame, row, column);
       if (!roles.includes("target"))
         return roles.length ? `${base}; roles: ${roles.join(", ")}` : base;
-      return `${base}; roles: ${roles.join(", ")}; previous ${formatDistance(frame.previous)}; candidate ${formatDistance(frame.candidate)}; decision ${frame.decision}; result ${formatDistance(frame.result)}`;
+      return `${base}; roles: ${roles.join(", ")}; previous ${formatDistance2(frame.previous)}; candidate ${formatDistance2(frame.candidate)}; decision ${frame.decision}; result ${formatDistance2(frame.result)}`;
     },
     stateForCell(frame, row, column) {
       if (frame.cur?.[0] === row && frame.cur?.[1] === column) return "cur";
@@ -16477,10 +16618,10 @@
     footerModel: matrixGridFooterModel,
     roleLegend: matrixGridRoleLegend,
     watchRows(frame) {
-      const current = frame.cur ? `dist[${frame.rowLabels[frame.cur[0]]}][${frame.colLabels[frame.cur[1]]}] = ${formatDistance(frame.previous)} before this relaxation` : "—";
-      const left = frame.deps[0] ? `dist[${frame.rowLabels[frame.deps[0][0]]}][${frame.colLabels[frame.deps[0][1]]}] = ${formatDistance(frame.operandA)}` : "—";
-      const right = frame.deps[1] ? `dist[${frame.rowLabels[frame.deps[1][0]]}][${frame.colLabels[frame.deps[1][1]]}] = ${formatDistance(frame.operandB)}` : "—";
-      const candidate = frame.candidate == null || !frame.deps[0] || !frame.deps[1] ? "—" : `${formatDistance(frame.operandA)} + ${formatDistance(frame.operandB)} = ${frame.candidate}`;
+      const current = frame.cur ? `dist[${frame.rowLabels[frame.cur[0]]}][${frame.colLabels[frame.cur[1]]}] = ${formatDistance2(frame.previous)} before this relaxation` : "—";
+      const left = frame.deps[0] ? `dist[${frame.rowLabels[frame.deps[0][0]]}][${frame.colLabels[frame.deps[0][1]]}] = ${formatDistance2(frame.operandA)}` : "—";
+      const right = frame.deps[1] ? `dist[${frame.rowLabels[frame.deps[1][0]]}][${frame.colLabels[frame.deps[1][1]]}] = ${formatDistance2(frame.operandB)}` : "—";
+      const candidate = frame.candidate == null || !frame.deps[0] || !frame.deps[1] ? "—" : `${formatDistance2(frame.operandA)} + ${formatDistance2(frame.operandB)} = ${frame.candidate}`;
       const rows = [
         { k: "stage k", v: frame.k == null ? "—" : String(frame.k), sw: "var(--_violet)" },
         { k: "dist[i][j]", v: current, sw: "var(--_blue)" },
@@ -16489,7 +16630,7 @@
         { k: "candidate", v: candidate, sw: "var(--_violet)" },
         {
           k: "decision",
-          v: frame.decision === "improve" ? `write ${formatDistance(frame.previous)} → ${formatDistance(frame.result)}` : frame.decision === "keep" ? `keep ${formatDistance(frame.previous)}` : "—",
+          v: frame.decision === "improve" ? `write ${formatDistance2(frame.previous)} → ${formatDistance2(frame.result)}` : frame.decision === "keep" ? `keep ${formatDistance2(frame.previous)}` : "—",
           sw: frame.decision === "improve" ? "var(--_green)" : "var(--_neutral)"
         }
       ];
@@ -17831,7 +17972,7 @@
       row.dataset.empty = "0";
       const neighbors = el("span", "steptrace__contiguous-value");
       const vertexIndex = el("span", "steptrace__contiguous-index");
-      vertexIndex.textContent = `vertex ${vertex}`;
+      vertexIndex.textContent = String(vertex);
       row.append(neighbors, vertexIndex);
       list.append(row);
       listRows.set(vertex, { row, neighbors, neighborCell: row });
@@ -19567,7 +19708,12 @@
   function answerLabel(frame, index) {
     const answer = frame.answers[index];
     if (answer != null) return `→ ${frame.array[answer]}`;
-    return frame.type === "done" ? "→ none" : "waiting";
+    return frame.type === "done" ? "none" : "…";
+  }
+  function spokenAnswer(frame, index) {
+    const answer = frame.answers[index];
+    if (answer != null) return `answer ${frame.array[answer]}`;
+    return frame.type === "done" ? "no answer" : "answer pending";
   }
   function makeStackSequenceView(frames) {
     const first = frames[0];
@@ -19632,7 +19778,7 @@
         answer.textContent = answerLabel(frame, index);
         cell.setAttribute(
           "aria-label",
-          `Index ${index}, value ${frame.array[index]}, ${answer.textContent}`
+          `Index ${index}, value ${frame.array[index]}, ${spokenAnswer(frame, index)}`
         );
       });
       stackCells.forEach((cell, slot) => {
@@ -22320,9 +22466,33 @@
 
   // custom/steptrace/src/mount.ts
   var LOG_ROWS = 10;
+  var SPEEDS = [0.5, 1, 1.5, 2];
   var COMPACT_INLINE_SIZE = 704;
   var fadeFor = (age) => Math.max(0.1, 0.5 * Math.pow(0.62, age - 1));
+  var WATCH_ENTRY_SEPARATOR = " · ";
   var mountSerial = 0;
+  function watchRowParts(row) {
+    const parts = [];
+    if (row.sw) {
+      const swatch = el("span", "steptrace__watch-sw");
+      swatch.style.setProperty("--_watch-color", row.sw);
+      parts.push(swatch);
+    }
+    const key4 = el("span", "steptrace__watch-k");
+    key4.textContent = row.k;
+    const value = el("span", "steptrace__watch-v");
+    const entries = (row.v == null ? "" : String(row.v)).split(WATCH_ENTRY_SEPARATOR);
+    if (entries.length === 1) value.textContent = entries[0];
+    else
+      entries.forEach((entry, index) => {
+        const item = el("span", "steptrace__watch-entry");
+        item.textContent = index < entries.length - 1 ? entry + WATCH_ENTRY_SEPARATOR.trimEnd() : entry;
+        value.append(item);
+        if (index < entries.length - 1) value.append(" ");
+      });
+    parts.push(key4, value);
+    return parts;
+  }
   function createMount(registry2, structures = []) {
     const { kindOf, listAlgorithms, buildFrames } = registry2;
     const structureRegistry = new Map(structures.map((structure) => [structure.id, structure]));
@@ -22361,7 +22531,6 @@
       let currentView = null;
       let currentGraph = null;
       let currentMilestones = [];
-      let speedControlHandle = null;
       const hasHostTabs = typeof host.mountTabs === "function";
       const head = el("div", "steptrace__head");
       const crumb = el("div", "steptrace__crumb");
@@ -22372,8 +22541,11 @@
       const crumbAlgo = el("span", "steptrace__crumb-algo");
       crumbAlgo.textContent = state.algorithm;
       crumb.append(el("span", "steptrace__crumb-dot"), crumbKind, crumbSep, crumbAlgo);
+      const phaseName = el("span", "steptrace__phase-name");
       const counter = el("div", "steptrace__counter");
-      head.append(crumb, counter);
+      const headEnd = el("div", "steptrace__head-end");
+      headEnd.append(phaseName, counter);
+      head.append(crumb, headEnd);
       const stageCol = el("div", "steptrace__stage-col");
       const rail = el("div", "steptrace__rail");
       const railRegion = el("div", "steptrace__rail-region");
@@ -22437,9 +22609,8 @@
       const milestoneLayer = el("div", "steptrace__milestones");
       scrub.append(el("div", "steptrace__scrub-track"), scrubFill, milestoneLayer, scrubDot);
       const phase = el("div", "steptrace__phase");
-      const phaseName = el("span", "steptrace__phase-name");
       const phaseCopy = el("span", "steptrace__phase-copy");
-      phase.append(phaseName, phaseCopy);
+      phase.append(phaseCopy);
       const timeline = el("div", "steptrace__timeline");
       timeline.append(scrub);
       const btnReset = iconBtn("Restart", ICON.reset);
@@ -22451,53 +22622,20 @@
       btnMenu.setAttribute("aria-haspopup", "true");
       btnMenu.setAttribute("aria-expanded", "false");
       const menu = el("div", "steptrace__menu");
-      const speedHead = el("div", "steptrace__menu-h");
-      speedHead.textContent = "Speed";
-      const speedIndicator = el("span", "steptrace__speed-indicator");
-      speedIndicator.setAttribute("aria-hidden", "true");
-      const speedSection = el("div", "steptrace__menu-section");
-      const speedRow = el("div", "steptrace__speed-row");
-      const speedControl = el("div", "steptrace__speed-control");
-      speedRow.append(speedControl);
-      const fmtSpeed = (v) => Number(v).toFixed(2) + "×";
+      const btnSpeed = el("button", "steptrace__btn steptrace__btn--speed");
+      btnSpeed.type = "button";
       const applySpeed = (value) => {
         const v = Number(value);
         state.speed = v;
-        speedIndicator.textContent = `${v}×`;
+        btnSpeed.textContent = `${v}×`;
+        btnSpeed.setAttribute("aria-label", `Playback speed ${v}×. Change speed`);
+        btnSpeed.title = "Change playback speed";
         root.style.setProperty("--_tween", `${Math.round(107 / v)}ms`);
         if (player) player.setSpeed(v);
       };
-      if (host && typeof host.createSpeedSlider === "function") {
-        speedControlHandle = host.createSpeedSlider(speedControl, {
-          min: 0.5,
-          max: 2,
-          step: 0.25,
-          value: state.speed,
-          label: "Playback speed",
-          format: fmtSpeed,
-          onChange: applySpeed
-        });
-      } else {
-        const speedInput = el("input", "steptrace__range");
-        speedInput.type = "range";
-        speedInput.min = "0.5";
-        speedInput.max = "2";
-        speedInput.step = "0.25";
-        speedInput.value = String(state.speed);
-        speedInput.setAttribute("aria-label", "Playback speed");
-        speedInput.setAttribute("aria-valuetext", fmtSpeed(state.speed));
-        const speedVal = el("span", "steptrace__speed-val");
-        speedVal.textContent = fmtSpeed(state.speed);
-        speedInput.addEventListener("input", () => {
-          applySpeed(speedInput.value);
-          speedVal.textContent = fmtSpeed(speedInput.value);
-          speedInput.setAttribute("aria-valuetext", fmtSpeed(speedInput.value));
-        });
-        speedControl.append(speedInput);
-        speedRow.append(speedVal);
-      }
-      speedSection.append(speedHead, speedRow);
-      menu.append(speedSection);
+      btnSpeed.addEventListener("click", () => {
+        applySpeed(SPEEDS.find((speed) => speed > state.speed) ?? SPEEDS[0]);
+      });
       applySpeed(state.speed);
       let endpointSection = null;
       let startHead = null;
@@ -22579,10 +22717,11 @@
         menu.append(section);
       }
       menuWrap.append(btnMenu, menu);
+      menuWrap.hidden = menu.children.length === 0;
       const transport = el("div", "steptrace__transport");
       transport.append(btnReset, btnBack, btnPlay, btnFwd);
       const utility = el("div", "steptrace__utility");
-      utility.append(speedIndicator, menuWrap);
+      utility.append(btnSpeed, menuWrap);
       foot.append(phase, transport, timeline, utility);
       root.replaceChildren(head, body, foot);
       let layoutMode = "unknown";
@@ -22686,10 +22825,15 @@
         const previousMode = layoutMode;
         layoutMode = nextMode;
         root.classList.toggle("steptrace--narrow", nextMode === "compact");
+        watchEl.style.minHeight = "";
         renderRailMode(previousMode, previousMode !== "unknown");
       }
       function refitCompactTrace() {
-        if (!player || layoutMode !== "compact" || compactPanel !== "trace") return;
+        if (!player || layoutMode !== "compact") return;
+        if (compactPanel !== "trace") {
+          reserveWatchHeight();
+          return;
+        }
         sizeRail();
         renderRail();
       }
@@ -22720,6 +22864,7 @@
       document.addEventListener("click", onDocClick);
       function sizeRail() {
         if (!player) return;
+        reserveWatchHeight();
         if (layoutMode === "compact") {
           const logCS2 = getComputedStyle(log);
           const lineHeight = parseFloat(logCS2.lineHeight) || 0;
@@ -22727,6 +22872,7 @@
           const height2 = Math.ceil(lineHeight * 3 + gap2 * 2) + "px";
           log.style.height = height2;
           log.style.minHeight = height2;
+          traceWrap.style.minHeight = "";
           return;
         }
         const tall = (node2) => node2.getBoundingClientRect().height;
@@ -22753,9 +22899,12 @@
         const logCS = getComputedStyle(log);
         const gap = parseFloat(logCS.rowGap) || 0;
         const hist = (parseFloat(logCS.lineHeight) || 0) * 2;
-        const h = Math.ceil(hist * 2 + gap * 2 + maxRow) + "px";
+        const h = Math.ceil(hist * 2 + gap * 2 + maxRow);
         log.style.height = "auto";
-        if (log.style.minHeight !== h) log.style.minHeight = h;
+        if (log.style.minHeight !== h + "px") log.style.minHeight = h + "px";
+        const labelGap = parseFloat(getComputedStyle(traceLabel).marginBottom) || 0;
+        const floor = Math.ceil(tall(traceLabel) + labelGap + h) + "px";
+        if (traceWrap.style.minHeight !== floor) traceWrap.style.minHeight = floor;
       }
       function fitLog(terminal) {
         const logCS = getComputedStyle(log);
@@ -22913,18 +23062,27 @@
           row.setAttribute("role", "group");
           row.setAttribute("aria-label", `${r.k}: ${String(r.v)}`);
           row.setAttribute("aria-describedby", hintId);
-          if (r.sw) {
-            const sw = el("span", "steptrace__watch-sw");
-            sw.style.setProperty("--_watch-color", r.sw);
-            row.append(sw);
-          }
-          const kk = el("span", "steptrace__watch-k");
-          kk.textContent = r.k;
-          const vv = el("span", "steptrace__watch-v");
-          vv.textContent = r.v;
-          row.append(kk, vv, hint);
+          row.append(...watchRowParts(r), hint);
           watchEl.append(row);
         }
+      }
+      function reserveWatchHeight() {
+        if (!player || !hasWatch || !currentView?.watch || !watchEl.getClientRects().length) return;
+        const probes = player.frames.map((frame) => {
+          const probe = el("div", "steptrace__watch steptrace__measure-probe");
+          for (const r of currentView.watch(frame) || []) {
+            const row = el("div", "steptrace__watch-row");
+            row.append(...watchRowParts(r));
+            probe.append(row);
+          }
+          return probe;
+        });
+        watchWrap.append(...probes);
+        let tallest = 0;
+        for (const probe of probes) tallest = Math.max(tallest, probe.getBoundingClientRect().height);
+        for (const probe of probes) probe.remove();
+        const height2 = Math.ceil(Math.round(tallest * 64) / 64) + "px";
+        if (watchEl.style.minHeight !== height2) watchEl.style.minHeight = height2;
       }
       function seekFromEvent(e) {
         const r = scrub.getBoundingClientRect();
@@ -23118,7 +23276,6 @@
           destroyHostTabs();
           if (player) player.destroy();
           if (currentView && currentView.destroy) currentView.destroy();
-          if (speedControlHandle && speedControlHandle.destroy) speedControlHandle.destroy();
           if (railRO) railRO.disconnect();
           mq.removeEventListener("change", applyMotion);
           root.removeEventListener("keydown", onKey);

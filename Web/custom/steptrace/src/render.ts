@@ -3075,10 +3075,10 @@ export function makeExecutionTreeView(frames, descriptor: ExecutionTreeViewDescr
         valueCells.push(value)
       }
     } else {
-      label.setAttribute("y", descriptor.showStateBadge ? "-10" : "-4")
-      detail.setAttribute("y", descriptor.showStateBadge ? "3" : "9")
+      label.setAttribute("y", descriptor.showStateBadge ? "-11" : "-5")
+      detail.setAttribute("y", descriptor.showStateBadge ? "3" : "10")
       if (descriptor.showStateBadge) {
-        badge.setAttribute("y", "16")
+        badge.setAttribute("y", "17")
         badge.setAttribute("text-anchor", "middle")
       }
     }
@@ -3701,7 +3701,9 @@ export function buildMilestones(algorithm, kind, frames) {
   let lastDepth = null
   for (let i = 1; i < frames.length - 1; i++) {
     const f = frames[i]
-    if (kind === "sort") {
+    if (typeof f.milestone === "string") {
+      push(i, f.milestone)
+    } else if (kind === "sort") {
       if (familyProfile === "counting" && f.type === "prefix" && frames[i - 1].type !== "prefix") {
         push(i, "Reserve output ranges")
       } else if (

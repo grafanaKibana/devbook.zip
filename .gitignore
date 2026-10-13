@@ -21,6 +21,7 @@ _site/
 .omc/
 .opencode
 .claude/launch.json
+.impeccable/
 
 # Obsidian
 **/.obsidian/workspace.json

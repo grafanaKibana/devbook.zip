@@ -8,7 +8,7 @@
 }
 
 .steptrace .steptrace__rectree:focus-visible {
-  outline: var(--_stroke-emphasis) solid var(--_blue);
+  outline: var(--_focus-ring);
   outline-offset: 0.2rem;
 }
 
@@ -50,14 +50,13 @@
   }
 
   .steptrace .steptrace__rectree[data-compact="true"] .steptrace__rtlabel {
-    font-size: var(--_type-xs);
-    transform: translateY(4px);
+    transform: translateY(5px);
   }
 
   .steptrace
     .steptrace__rectree[data-profile="branch-and-bound"][data-compact="true"]
     .steptrace__rtlabel {
-    transform: translateY(10px);
+    transform: translateY(11px);
   }
 }
 
@@ -164,7 +163,7 @@
 
 .steptrace .steptrace__rtcell-value {
   fill: var(--_text);
-  font: var(--_weight-strong) var(--_type-sm)/var(--_leading-solid) var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-xs)/var(--_leading-solid) var(--_font-mono);
 }
 
 .steptrace .steptrace__rtnode .steptrace__rtring {
@@ -181,24 +180,17 @@
 
 .steptrace .steptrace__rtnode .steptrace__rtlabel {
   fill: var(--_text);
-  font: var(--_weight-strong) var(--_type-ui)/var(--_leading-solid) var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-xs)/var(--_leading-solid) var(--_font-mono);
 }
 
 .steptrace .steptrace__rtnode .steptrace__rtdetail {
   fill: var(--_muted);
-  font: var(--_weight-regular) var(--_type-sm)/var(--_leading-solid) var(--_font-mono);
-}
-
-.steptrace
-  .steptrace__rectree[data-profile="branch-and-bound"]
-  .steptrace__rtnode
-  .steptrace__rtdetail {
-  font-size: var(--_type-2xs);
+  font: var(--_weight-regular) var(--_type-xs)/var(--_leading-solid) var(--_font-mono);
 }
 
 .steptrace .steptrace__rectree[data-profile="merge-sort"] .steptrace__rtnode .steptrace__rtlabel {
   fill: var(--_muted);
-  font: var(--_weight-regular) var(--_type-2xs)/var(--_leading-solid) var(--_font-mono);
+  font: var(--_weight-regular) var(--_type-xs)/var(--_leading-solid) var(--_font-mono);
 }
 
 .steptrace .steptrace__rtnode .steptrace__rtval {
@@ -208,7 +200,7 @@
 
 .steptrace .steptrace__rtnode .steptrace__rtbadge {
   fill: var(--_muted);
-  font: var(--_weight-strong) var(--_type-micro) / var(--_leading-solid) var(--_font-body);
+  font: var(--_weight-strong) var(--_type-xs) / var(--_leading-solid) var(--_font-body);
   letter-spacing: var(--_tracking-label);
   text-transform: uppercase;
 }

@@ -39,7 +39,7 @@
 }
 .steptrace__uf .steptrace__id {
   fill: var(--_text);
-  font: var(--_weight-strong) var(--_type-lg) var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-sm) var(--_font-mono);
 }
 .steptrace__ufarc {
   stroke: var(--_neutral);
@@ -113,7 +113,7 @@
 
 .steptrace__union-find-node > text:not(.steptrace__union-find-root-label) {
   fill: var(--_text);
-  font: var(--_weight-strong) var(--_type-ui)/var(--_leading-solid) var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-xs)/var(--_leading-solid) var(--_font-mono);
 }
 
 .steptrace__union-find-node[data-selected="true"] circle {
@@ -130,7 +130,7 @@
 
 .steptrace__union-find-root-label {
   fill: var(--_muted);
-  font: var(--_weight-strong) var(--_type-micro) / var(--_leading-solid) var(--_font-body);
+  font: var(--_weight-strong) var(--_type-xs) / var(--_leading-solid) var(--_font-body);
   letter-spacing: var(--_tracking-caps);
   text-transform: uppercase;
 }

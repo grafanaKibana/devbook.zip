@@ -22,9 +22,6 @@ const css = `
 @keyframes page-reveal-footer-in {
   from { opacity: 0; transform: translateY(4px); }
 }
-@keyframes page-reveal-fade-in {
-  from { opacity: 0; }
-}
 :root[data-page-reveal-first-paint="pending"] article,
 :root[data-page-reveal-first-paint="pending"] .center > hr,
 :root[data-page-reveal-first-paint="pending"] .page > #quartz-body > footer {
@@ -84,9 +81,6 @@ body[data-slug="index"]:has(article[data-reveal="initial"]) .page > #quartz-body
   body:has(article[data-reveal="initial"])
     :is(.site-header, .page-header > .popover-hint, .sidebar.right) > :nth-child(4) {
     --page-reveal-order: 3;
-  }
-  body:has(article[data-reveal="initial"]) .page-header > .popover-hint > .site-marquee {
-    animation-name: page-reveal-fade-in;
   }
   body:has(article[data-reveal="initial"]) .sidebar.left .explorer button.desktop-explorer {
     animation-delay: var(--stagger);
@@ -171,9 +165,8 @@ const script = `
 
   // spa.inline.ts dispatches its first nav at module scope, which this handler
   // is too late to hear. The initial path waits for fonts and browser idle;
-  // SPA navigation keeps using the immediate listener above. HomepageFit starts
-  // the initial reveal after it has chosen a complete dashboard state.
-  if (!document.body || document.body.dataset.slug !== "index") initial();
+  // SPA navigation keeps using the immediate listener above.
+  initial();
 })();
 `
 

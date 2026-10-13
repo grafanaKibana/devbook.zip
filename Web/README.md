@@ -62,9 +62,7 @@ Local transformers/components in `custom/` (wired in `quartz.ts`):
 | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `transformers/syncer-fixups.ts`      | strips raw dataview/datacore query fences + the frozen Questions `dc-questions-index` block, and normalizes the vault-absolute `Home/…` links Syncer leaves in rendered Datacore |
 | `transformers/question-collector.ts` | collects `[!QUESTION]` callouts across notes for the Questions page                                                                                                              |
-| `transformers/status-backfill.ts`    | restores the `status` frontmatter Syncer drops on publish, so status-gated components can read it                                                                                |
 | `components/questions-index.tsx`     | renders the Questions aggregation page                                                                                                                                           |
-| `components/site-marquee.tsx`        | "under construction" banner shown on in-progress (non-`Done`) notes                                                                                                              |
 
 ## Deploy
 

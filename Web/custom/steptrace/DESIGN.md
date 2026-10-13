@@ -7,7 +7,7 @@ This document owns StepTrace-specific design, consistency, and review rules. The
 ## Source of truth
 
 - **Status:** Active
-- **Last refreshed:** 2026-08-28
+- **Last refreshed:** 2026-09-29
 - **Product surface:** `steptrace` fenced blocks rendered in Obsidian and Quartz.
 - **Source:** `Web/custom/steptrace/src/`.
 - **Generated artifacts:** `Web/custom/steptrace/generated/` and `Vault/.obsidian/plugins/steptrace/`.
@@ -59,15 +59,17 @@ It is not:
 
 For frame-based visualizations, use this order:
 
-1. **Head:** breadcrumb/algorithm label and step counter.
+1. **Head:** breadcrumb/algorithm label, phase name, and step counter.
 2. **Stage:** the primary structure and active state.
 3. **Trace and Watch:** the current operation and values needed to understand it.
-4. **Phase and timeline:** position within the larger algorithm.
-5. **Transport and utilities:** step, play/pause, speed, and applicable options.
+4. **Timeline:** position within the larger algorithm.
+5. **Transport and utilities:** step, play/pause, a speed button that cycles `0.5×`, `1×`, `1.5×`, `2×`, and an options menu only when the algorithm has options.
 
 The stage is primary. Trace and Watch explain it. Controls remain last.
 
 On terminal frames, a concise Result replaces the live trace message instead of adding another panel.
+
+The phase name sits beside the step counter in the head. The footer's trace copy appears only in compact mode, where Trace can be collapsed; wide mode already shows the same text in the rail. The footer carries a hairline border only: no shadow. Transport buttons are flat circular ghosts and play is a flat accent fill; Obsidian's host file overrides its default raised button styling to match.
 
 Direct-manipulation structures may replace playback controls with native inputs, selects, actions, and a live result/status area. They still reuse StepTrace tokens, state language, targets, and family primitives.
 
@@ -75,7 +77,7 @@ Direct-manipulation structures may replace playback controls with native inputs,
 
 ### Algorithm, recorder, and renderer boundaries
 
-- Algorithm descriptors own semantic operations and labels.
+- Algorithm descriptors own semantic operations and labels. A recorder names a phase change by setting `milestone` on the frame that starts it; renderer-side milestone inference is the legacy fallback.
 - Recorders convert operations into immutable frames.
 - Visual families own DOM structure, geometry, and painting.
 - `mount.ts` owns the shared shell, responsive mode, keyboard behavior, playback controls, and teardown.
@@ -182,14 +184,16 @@ Algorithm legends use one default marker: a `0.75rem` circular solid semantic fi
 
 - Human UI, headings, trace prose, and narrative labels use `--_font-body`.
 - Formulas, values, indices, addresses, counters, and aligned machine state use `--_font-mono`.
-- Shared hierarchy uses weights `400` and `600`; a geometry-fitted data label may use a different size only when the available node, cell, or track requires it.
+- Shared hierarchy uses weights `400` and `600` on a four-step rem scale in `shared.scss`: `--_type-xs` `0.75rem`, `--_type-sm` `0.8125rem`, `--_type-base` `0.875rem`, and `--_type-xl` `1rem`.
+- Human text — Trace, Watch, status, phase, Result, and control labels — uses `--_type-base`. Geometry-fitted labels (indices, edge weights, ids, badges, eyebrows, compact cell values) never compute below `--_type-xs`, including at the low end of a `clamp()` or inside a container query. Text inside a scaled SVG `viewBox` counts at its rendered size, not its computed size: counter-scale it against the rendered viewBox scale, as every graph-state view does with `--_gs-text-scale`. A map too dense to name every node at the floor names only the nodes the current step involves (endpoints, current node, active edge) and leaves the rest to Trace and Watch.
 - Do not introduce a third rendered font role or family-specific font stack.
-- Keep labels short enough to remain readable without shrinking below the shared scale.
+- When a label does not fit at the floor, shorten its copy or refit the geometry (wider track, taller cell, a second line); never shrink it below the scale.
+- Watch values wrap between `·` entries instead of truncating; `mount.ts` reserves the tallest frame's Watch block so wrapping never resizes the rail.
 
 ### Spacing and geometry
 
 - Use shared shell spacing before family-local spacing.
-- Keep controls at least `44px` on compact or coarse-pointer surfaces.
+- Keep interactive controls, including transport buttons, at least `44px` on every surface.
 - Align values and repeated structures to a visible grid.
 - Reserve geometry for the largest expected normal state when that prevents frame-to-frame layout shift.
 - Tree and graph view bounds include node radius, terminal halos, stroke width, arrowheads, and a small visual gutter on all four sides. Preserve intentional clipping only after those rendered extents fit at compact-boundary and wide widths.
@@ -218,7 +222,7 @@ Rules:
 ## Responsive behavior
 
 - `mount.ts` measures the mounted root and enters compact mode below `704px` inline size.
-- Compact mode stacks the stage and rail, exposes Trace/Watch as a nullable exclusive detail switch, gives the timeline its own row, and keeps the footer at most `128px` tall without horizontal overflow. Interactive controls and the scrubber preserve `44px` targets; only the non-interactive speed indicator may narrow.
+- Compact mode stacks the stage and rail, exposes Trace/Watch as a nullable exclusive detail switch, gives the timeline its own row, and keeps the footer at most `128px` tall without horizontal overflow. Interactive controls and the scrubber preserve `44px` targets.
 - **Direction:** New or changed family-level adaptations use container queries or measured component state. Existing family viewport-width rules are legacy behavior; do not copy them into new work.
 - Media queries remain appropriate for input capabilities such as coarse pointer or reduced motion.
 - Focus remains on a useful control when responsive mode changes.
@@ -255,7 +259,9 @@ Rules:
 
 - Target WCAG 2.2 AA for changed StepTrace UI.
 - All transport, scrubbers, detail switches, native options, and structure actions are keyboard reachable. Tabsdown owns keyboard interaction for authored tabs.
-- Use visible focus outlines and native disabled semantics.
+- Use visible focus outlines and native disabled semantics. Focus uses `--_focus-ring`: a `2px` outline in the host accent (Quartz `--secondary`, Obsidian `--interactive-accent`), never the blue state carrier.
+- Submitting a structure input with Enter keeps focus in that input once the operation lock lifts.
+- Muted secondary text meets `4.5:1` against the page in both themes; a host binding lifts a host gray that falls short.
 - Tabsdown supplies tablist/tab/tabpanel roles, roving tab index, and isolated arrow/Home/End navigation for outer and inner authored groups.
 - Scrubbers expose current, minimum, maximum, and readable phase/step values.
 - Decorative SVG content is hidden. The stage has equivalent labels, Trace, Watch, or result text.
@@ -268,7 +274,8 @@ Rules:
 
 - Name the real operation: “Relax B from 8 to 5,” not “Process node.”
 - Trace says what changed in the current frame.
-- Watch shows only values needed to understand that frame.
+- Watch shows only values needed to understand that frame. When the complete state is long, such as every node's distance, the row shows the frame's slice or a count and its hint carries the complete list.
+- Stage labels, Trace, Watch, Result, legend, and endpoint options name a node, edge, or state the same way. When a stage needs coordinates to make an id legible, label the axes rather than inventing a second name.
 - Phase names the larger algorithm stage.
 - Result states the outcome without repeating the entire trace.
 - Labels use the algorithm's terminology, not generic UI language.
@@ -292,7 +299,6 @@ Host-specific code may provide:
 
 - Native loading and lifecycle integration.
 - Host token bindings.
-- Obsidian's native slider.
 - Tabsdown-mounted compact Trace/Watch switches in Obsidian and Quartz, with the shared switch only as a missing-plugin fallback.
 - Quartz lazy asset loading and SPA teardown.
 

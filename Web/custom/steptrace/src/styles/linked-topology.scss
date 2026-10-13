@@ -114,7 +114,7 @@
   justify-content: center;
   gap: var(--_space-1);
   background: var(--_surface);
-  font: var(--_weight-strong) var(--_type-sm)/var(--_leading-solid) var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-xs)/var(--_leading-solid) var(--_font-mono);
   transition:
     inset-inline-start var(--_dur-move) var(--_spring-soft),
     inset-block-start var(--_dur-move) var(--_spring-soft),
@@ -227,7 +227,8 @@
 }
 
 .steptrace .steptrace__linked-list-board[data-variant="doubly"] .steptrace__linked-list-cell {
-  grid-template-rows: 2fr 1fr 1fr;
+  grid-template-rows: minmax(0, 1fr) auto auto;
+  block-size: calc(44px + 2rem);
 }
 
 .steptrace .steptrace__linked-list-pointer {
@@ -238,7 +239,7 @@
   place-items: center;
   overflow: hidden;
   color: var(--_context-text);
-  font: var(--_weight-strong) var(--_type-micro)/var(--_leading-solid) var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-xs)/var(--_leading-solid) var(--_font-mono);
   white-space: nowrap;
   text-overflow: ellipsis;
 }
@@ -262,7 +263,26 @@
 
 .steptrace .steptrace__linked-list-address {
   color: var(--_context-text);
-  font: var(--_weight-strong) var(--_type-micro)/var(--_leading-solid) var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-xs)/var(--_leading-solid) var(--_font-mono);
+}
+
+/* Narrow boards give each pointer two lines ("next" over its address) so the
+   address stays whole instead of truncating. */
+@container steptrace-structure (max-width: 36rem) {
+  .steptrace .steptrace__linked-list-pointer {
+    grid-template-columns: min-content;
+    place-content: center;
+    white-space: normal;
+    text-align: center;
+  }
+
+  .steptrace .steptrace__linked-list-board[data-variant="singly"] .steptrace__linked-list-cell {
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+
+  .steptrace .steptrace__linked-list-board[data-variant="doubly"] .steptrace__linked-list-cell {
+    block-size: calc(44px + 3rem);
+  }
 }
 
 .steptrace .steptrace__linked-list-link {

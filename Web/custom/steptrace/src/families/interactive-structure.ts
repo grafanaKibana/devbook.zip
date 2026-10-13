@@ -47,7 +47,7 @@ function usefulControl(control: FocusableControl) {
 
 function restoreOperationFocus(
   controls: HTMLElement,
-  trigger: HTMLButtonElement,
+  trigger: FocusableControl,
   label = controlLabel(trigger),
 ) {
   let cancelled = false
@@ -98,12 +98,13 @@ function restoreOperationFocus(
 
 export function withOperationFocus(
   controls: HTMLElement,
-  trigger: HTMLButtonElement,
+  trigger: FocusableControl,
   event: Event,
   listener: EventListener,
 ) {
-  const preserveFocus =
-    event instanceof MouseEvent && event.detail === 0 && document.activeElement === trigger
+  const fromKeyboard =
+    event.type === "keydown" || (event instanceof MouseEvent && event.detail === 0)
+  const preserveFocus = fromKeyboard && document.activeElement === trigger
   const label = controlLabel(trigger)
   listener.call(trigger, event)
   if (
@@ -206,17 +207,18 @@ export function createStructureShell(
       return button
     },
     listen(node, type, listener) {
-      const wrapped: EventListener =
-        type === "click" && node.tagName === "BUTTON"
-          ? (event) => {
-              const trigger = node as HTMLButtonElement
-              const pending = withOperationFocus(controls, trigger, event, listener)
-              if (pending) {
-                cancelFocusRestore?.()
-                cancelFocusRestore = pending
-              }
+      const operation =
+        (type === "click" && node.tagName === "BUTTON") ||
+        (type === "keydown" && node.tagName === "INPUT")
+      const wrapped: EventListener = operation
+        ? (event) => {
+            const pending = withOperationFocus(controls, node, event, listener)
+            if (pending) {
+              cancelFocusRestore?.()
+              cancelFocusRestore = pending
             }
-          : listener
+          }
+        : listener
       node.addEventListener(type, wrapped)
       cleanups.push(() => node.removeEventListener(type, wrapped))
     },

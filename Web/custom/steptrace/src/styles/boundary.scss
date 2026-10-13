@@ -34,7 +34,7 @@
   padding: var(--_space-3) var(--_space-4);
   border-bottom: var(--_stroke-hair) solid var(--_boundary-border);
   background: var(--_boundary-head);
-  font: var(--_weight-strong) var(--_type-ui) / var(--_leading-readable) var(--_font-body);
+  font: var(--_weight-strong) var(--_type-xs) / var(--_leading-readable) var(--_font-body);
 }
 
 .steptrace .steptrace__boundary-section-label,
@@ -62,7 +62,7 @@
   background: var(--_boundary-cell);
   color: var(--_text);
   /* steptrace-exception: boundary-cell-label-fit | category=responsive | rationale=fits values inside container-sized boundary cells | evidence=.omx/evidence/steptrace-design-system-refactor/visual/candidate/g005-candidate-k/summary.json */
-  font: var(--_weight-strong) clamp(var(--_type-xs), 1.8cqi, var(--_type-lg)) /
+  font: var(--_weight-strong) clamp(var(--_type-xs), 1.8cqi, var(--_type-sm)) /
     var(--_leading-solid) var(--_font-mono);
   font-variant-numeric: tabular-nums;
   transition:
@@ -176,14 +176,14 @@
 .steptrace .steptrace__boundary-overflow-label {
   flex: none;
   color: var(--_context-text);
-  font: var(--_weight-strong) var(--_type-md)/var(--_leading-readable) var(--_font-body);
+  font: var(--_weight-strong) var(--_type-sm)/var(--_leading-readable) var(--_font-body);
 }
 
 .steptrace .steptrace__boundary-lane-total {
   min-width: 0;
   overflow: hidden;
   color: var(--_context-text);
-  font: var(--_weight-regular) var(--_type-sm)/var(--_leading-readable) var(--_font-mono);
+  font: var(--_weight-regular) var(--_type-xs)/var(--_leading-readable) var(--_font-mono);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -205,12 +205,12 @@
   border: var(--_stroke-hair) solid color-mix(in srgb, var(--_blue) 42%, var(--_boundary-border));
   border-radius: var(--_radius-xs);
   background: color-mix(in srgb, var(--_blue) 10%, var(--_boundary-cell));
-  font: var(--_weight-strong) var(--_type-md)/var(--_leading-solid) var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-sm)/var(--_leading-solid) var(--_font-mono);
 }
 
 .steptrace .steptrace__boundary-empty {
   color: var(--_muted);
-  font: var(--_weight-regular) var(--_type-sm)/var(--_leading-readable) var(--_font-body);
+  font: var(--_weight-regular) var(--_type-xs)/var(--_leading-readable) var(--_font-body);
 }
 
 .steptrace .steptrace__boundary-meter {

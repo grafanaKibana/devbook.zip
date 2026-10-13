@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.496Z
-modified: 2026-08-20T20:41:15.496Z
-published: 2026-08-20T20:41:15.496Z
+modified: 2026-09-21T08:40:06.208Z
+published: 2026-09-21T08:40:06.208Z
 topic:
   - AI & ML
 subtopic:
@@ -117,7 +117,7 @@ Caching applies at two different boundaries: tool results and model-input prefix
 
 **Tool results.** A read-only call may be cached by function name, normalized arguments, caller scope, and any other input that affects visibility. The TTL follows the source's freshness requirement. In the [[Agent Loop]], caching can avoid repeated I/O, but loop detection should still stop a model that keeps making the same call without progress.
 
-**Prompt prefixes.** Stable system instructions and tool definitions are good candidates for provider prompt caching. This can reduce billed input and latency on repeated prefixes, though the exact savings depend on provider rules and cache hits. Tool order and schema text need to remain stable for the prefix to match.
+**Prompt prefixes.** Stable system instructions and tool definitions are good candidates for provider prompt caching. This can reduce billed input and latency on repeated prefixes, though the exact savings depend on provider rules and cache hits. Tool order and schema text need to remain stable for the prefix to match. [[AI & ML/LLM/LLM Caching#Prompt Caching|Prompt Caching]] covers boundary placement and checks that SDK serialization preserves the cache configuration.
 
 Do not cache a mutation as if it were a read. A repeated `create_ticket` call needs idempotent execution semantics, not a cached success message. For reads, the cache key must include tenant and authorization context or it can leak data between callers.
 

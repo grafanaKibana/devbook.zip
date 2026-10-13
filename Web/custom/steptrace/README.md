@@ -193,7 +193,7 @@ The build emits real `.css` files. StepTrace does not serialize SCSS into JavaSc
 
 ### Obsidian
 
-Obsidian loads `Vault/.obsidian/plugins/steptrace/main.js` and `styles.css` natively. The plugin entry registers the `steptrace` code-block processor, delegates rendering to `steptrace.mount()`, supplies the native `SliderComponent` and Tabsdown-backed compact Trace/Watch switch, and attaches the returned teardown handle to `MarkdownRenderChild`.
+Obsidian loads `Vault/.obsidian/plugins/steptrace/main.js` and `styles.css` natively. The plugin entry registers the `steptrace` code-block processor, delegates rendering to `steptrace.mount()`, supplies the Tabsdown-backed compact Trace/Watch switch, and attaches the returned teardown handle to `MarkdownRenderChild`.
 
 After rebuilding, reload the StepTrace plugin through the command palette. With the Hot Reload community plugin installed, the generated `.hotreload` marker enables automatic reload.
 

@@ -109,7 +109,7 @@ The original query remains one of the retrieval variants. Translation prompts pr
 
 Translation adds a serial model call before retrieval. Even with concurrent searches, end-to-end latency is the translator plus the slowest search. That is the number the p95 budget must absorb.
 
-A hard budget of two to four variants bounds the cost. Searches run concurrently, and stable rewrites can be reused through [[Home/AI & ML/LLM/Context Engineering/RAG/Caching|caching]]. Production-like concurrency exposes queueing and tail latency that a single-query benchmark hides.
+A hard budget of two to four variants bounds the cost. Searches run concurrently, and stable rewrites can be reused through [[Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching|caching]]. Production-like concurrency exposes queueing and tail latency that a single-query benchmark hides.
 
 ## HyDE Hallucination Amplification
 

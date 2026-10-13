@@ -74,7 +74,7 @@
   margin: 0;
   padding: 0 var(--_space-1) var(--_space-2);
   color: var(--_muted);
-  font: var(--_weight-strong) var(--_type-sm)/var(--_leading-solid) var(--_font-body);
+  font: var(--_weight-strong) var(--_type-xs)/var(--_leading-solid) var(--_font-body);
   letter-spacing: var(--_tracking-caps);
   text-transform: uppercase;
 }
@@ -119,7 +119,7 @@
 .steptrace .steptrace__graph-rep-list-row .steptrace__contiguous-value,
 .steptrace .steptrace__graph-rep-edge-row .steptrace__contiguous-value {
   padding: var(--_space-1);
-  font-size: var(--_type-md);
+  font-size: var(--_type-sm);
   white-space: nowrap;
 }
 
@@ -129,7 +129,7 @@
 
 .steptrace .steptrace__graph-rep-list-row .steptrace__contiguous-index,
 .steptrace .steptrace__graph-rep-edge-row .steptrace__contiguous-index {
-  font-size: var(--_type-micro);
+  font-size: var(--_type-xs);
 }
 
 @container steptrace-structure (max-width: 36rem) {

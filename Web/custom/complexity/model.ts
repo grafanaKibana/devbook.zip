@@ -539,6 +539,19 @@ function assertUnique(seen: Set<string>, value: string, path: string): void {
   seen.add(value)
 }
 
+// Beside its row label, a qualifier that only repeats that label is noise:
+// "Average: O(1) average" reads as "Average: O(1)". Other qualifiers stay.
+function legendFormula(role: string, formula: string): string {
+  const match = /^(\S*?\((?:[^()]|\([^()]*\))*\))\s+(.+)$/.exec(formula)
+  if (!match) return formula
+  const words = (text: string) =>
+    text
+      .toLowerCase()
+      .match(/[^\s/]+/g)
+      ?.join(" ")
+  return words(match[2]) === words(role) ? match[1] : formula
+}
+
 interface HighlightedPath {
   id: string
   curveId: CurveId
@@ -616,35 +629,41 @@ function finishResource(
   const endpointFormulas = new Map(endpointLabels.map((label) => [label.curveId, label.formula]))
   const legend: ComplexityLegendGroup[] = []
   const legendEntries = [
-    ...highlightedPaths.map((path, index) => ({
-      order: plotted[index].order,
-      group: path.legendGroup,
-      item: {
-        kind: "plotted" as const,
-        pathId: path.id,
-        category: path.category,
-        label:
-          endpointFormulas.get(path.curveId) === path.formula
-            ? path.legendLabel
-            : `${path.legendLabel}: ${path.formula}`,
-        semanticLabel: path.legendLabel,
-        formula: path.formula,
-        color: path.color,
-        banded: Boolean(path.bandTo),
-      },
-    })),
-    ...semanticBounds.map((bound) => ({
-      order: bound.order,
-      group: bound.operation,
-      item: {
-        kind: "semantic" as const,
-        category: bound.category,
-        label: `${bound.role}: ${bound.formula}`,
-        semanticLabel: bound.role,
-        formula: bound.formula,
-        color: bound.color,
-      },
-    })),
+    ...highlightedPaths.map((path, index) => {
+      const formula = legendFormula(path.legendLabel, path.formula)
+      return {
+        order: plotted[index].order,
+        group: path.legendGroup,
+        item: {
+          kind: "plotted" as const,
+          pathId: path.id,
+          category: path.category,
+          label:
+            endpointFormulas.get(path.curveId) === path.formula
+              ? path.legendLabel
+              : `${path.legendLabel}: ${formula}`,
+          semanticLabel: path.legendLabel,
+          formula,
+          color: path.color,
+          banded: Boolean(path.bandTo),
+        },
+      }
+    }),
+    ...semanticBounds.map((bound) => {
+      const formula = legendFormula(bound.role, bound.formula)
+      return {
+        order: bound.order,
+        group: bound.operation,
+        item: {
+          kind: "semantic" as const,
+          category: bound.category,
+          label: `${bound.role}: ${formula}`,
+          semanticLabel: bound.role,
+          formula,
+          color: bound.color,
+        },
+      }
+    }),
   ].sort((left, right) => left.order - right.order)
   for (const { group: groupLabel, item } of legendEntries) {
     const group = legend.find((candidate) => candidate.label === groupLabel)

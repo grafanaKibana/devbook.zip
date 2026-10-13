@@ -24,17 +24,17 @@ configuration:
       lightMode:
         light: "#fafbf8"
         lightgray: "#e5e9de"
-        gray: "#6e785e"
+        gray: "#687257"
         darkgray: "#29301f"
         dark: "#14180f"
-        secondary: "#4c8000"
-        tertiary: "#3f6212"
-        highlight: rgba(76, 128, 0, 0.20)
+        secondary: "#437100"
+        tertiary: "#365410"
+        highlight: rgba(67, 113, 0, 0.14)
         textHighlight: "#eab30855"
       darkMode:
         light: "#0e100f"
         lightgray: "#282a25"
-        gray: "#7c7c6f"
+        gray: "#838376"
         darkgray: "#d8d5bc"
         dark: "#fffce1"
         secondary: "#84cc16"
@@ -176,6 +176,7 @@ plugins:
     layout:
       position: beforeBody
       priority: 10
+      condition: not-index
   - source: github:quartz-community/content-meta
     enabled: true
     # Enabled (installed + registered) but no `layout`: rendered by ContentMetaRow
@@ -262,6 +263,7 @@ layout:
       gap: 0.5rem
   byPageType:
     "404":
+      template: default
       positions:
         beforeBody: []
         left: []

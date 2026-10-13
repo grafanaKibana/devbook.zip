@@ -205,14 +205,12 @@
     opacity 140ms ease;
 }
 
+// Reference rungs stay in muted ink at full strength so their names remain
+// readable; weight and the curve colour mark the active ones.
 .complexity__endpoint-label.is-active {
   fill: var(--complexity-label-color);
   font-weight: 600;
   opacity: 1;
-}
-
-.complexity__endpoint-label.is-subtle {
-  opacity: 0.42;
 }
 
 .complexity__legend {

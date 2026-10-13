@@ -296,3 +296,39 @@ test("the transformer replaces only valid complexity fences", () => {
   assert.equal(tree.children[2].tagName, "pre")
   assert.match(textOf(tree.children[2] as RootContent), /{invalid/)
 })
+
+test("legend formulas drop a qualifier that only repeats the row label", () => {
+  const entries = [
+    {
+      kind: "operation",
+      operation: "Insert",
+      bounds: [
+        {
+          kind: "curve",
+          role: "Amortized / Average",
+          formula: "O(1) amortized / average",
+          curveId: "constant",
+        },
+        { kind: "curve", role: "Adjacency list", formula: "O(1) amortized", curveId: "constant" },
+        { kind: "text", role: "Average", formula: "O(1) average" },
+      ],
+    },
+  ]
+  const view = buildComplexityViewModel(
+    {
+      version: 2,
+      label: "Qualifiers",
+      variables: resources.variables,
+      resources: {
+        time: { mode: "operations", entries },
+        space: { mode: "operations", entries },
+      },
+    },
+    "qualifiers",
+  )
+  const legend = view.resources[0].legend.flatMap((group) => group.items)
+  assert.deepEqual(
+    legend.map(({ semanticLabel, formula }) => `${semanticLabel}: ${formula}`),
+    ["Amortized / Average: O(1)", "Adjacency list: O(1) amortized", "Average: O(1)"],
+  )
+})

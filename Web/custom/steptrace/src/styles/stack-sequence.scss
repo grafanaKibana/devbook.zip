@@ -49,7 +49,7 @@
   max-inline-size: 100%;
   overflow: hidden;
   color: var(--_strong-fill-text);
-  font: var(--_weight-strong) var(--_type-2xs)/var(--_leading-solid) var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-xs)/var(--_leading-solid) var(--_font-mono);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -162,12 +162,12 @@
 
 @container steptrace-stack-sequence (max-width: 36rem) {
   .steptrace .steptrace__stack-sequence-answer {
-    font-size: var(--_type-micro);
+    font-size: var(--_type-xs);
   }
 
   .steptrace .steptrace__stack-sequence-stack-cell {
     padding-inline: var(--_space-1);
-    font-size: var(--_type-2xs);
+    font-size: var(--_type-xs);
   }
 }
 
@@ -213,11 +213,11 @@
 
 .steptrace .steptrace__stack-cell .steptrace__contiguous-value {
   padding: var(--_space-1) var(--_space-2);
-  font: var(--_weight-strong) var(--_type-lg)/var(--_leading-solid) var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-sm)/var(--_leading-solid) var(--_font-mono);
 }
 
 .steptrace .steptrace__stack-cell .steptrace__contiguous-index {
-  font: var(--_weight-strong) var(--_type-2xs)/var(--_leading-solid) var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-xs)/var(--_leading-solid) var(--_font-mono);
 }
 
 .steptrace .steptrace__stack-cell[data-top="1"] .steptrace__contiguous-index {
@@ -240,7 +240,7 @@
   display: grid;
   place-items: center;
   color: var(--_text);
-  font: var(--_weight-strong) var(--_type-lg)/var(--_leading-solid) var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-sm)/var(--_leading-solid) var(--_font-mono);
   opacity: 0;
   pointer-events: none;
 }

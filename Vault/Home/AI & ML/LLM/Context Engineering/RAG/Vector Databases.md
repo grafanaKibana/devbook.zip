@@ -101,7 +101,7 @@ If Postgres already owns the data and the corpus is modest, **pgvector** can kee
 
 **Why it happens**: different embedding models occupy different vector spaces. Their vectors are not comparable.
 
-**How to avoid it**: re-embed the full corpus for every model change. Key the [[Home/AI & ML/LLM/Context Engineering/RAG/Caching|embedding cache]] by model version, validate the replacement index, then cut over with a collection alias.
+**How to avoid it**: re-embed the full corpus for every model change. Key the [[Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching|embedding cache]] by model version, validate the replacement index, then cut over with a collection alias.
 
 # Tradeoffs
 

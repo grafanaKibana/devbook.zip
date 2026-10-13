@@ -7,7 +7,7 @@ topic:
   - AI & ML
 subtopic:
   - LLM
-summary: Golden sets give broad regression coverage; targeted suites catch specific high-risk failures. You need both.
+summary: Golden sets detect broad regressions. Targeted suites isolate specific high-risk failures.
 level:
   - "3"
 priority: Medium

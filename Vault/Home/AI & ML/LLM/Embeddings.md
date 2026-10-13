@@ -77,7 +77,7 @@ The repair depends on the failure. Domain adaptation can improve semantic placem
 
 Changing the embedding model — even a minor version — invalidates every stored vector. The new model produces vectors in a different geometric space. Cosine similarity between old and new vectors is meaningless.
 
-This means re-embedding the entire corpus: for a 10M-chunk index at $0.02/1M tokens and 500 tokens/chunk average, that is ~$100 and hours of ingestion time. Key the [[Home/AI & ML/LLM/Context Engineering/RAG/Caching|embedding cache]] by model name + version to prevent serving stale vectors.
+This means re-embedding the entire corpus: for a 10M-chunk index at $0.02/1M tokens and 500 tokens/chunk average, that is ~$100 and hours of ingestion time. Key the [[Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching|embedding cache]] by model name + version to prevent serving stale vectors.
 
 ## Benchmark Leaderboard Overfitting
 

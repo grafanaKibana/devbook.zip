@@ -335,6 +335,7 @@ export interface GraphStateNode {
   label: string
   x: number
   y: number
+  tagSide?: "left" | "right" | "above" | "below"
 }
 
 export interface GraphStateEdge {
@@ -343,6 +344,7 @@ export interface GraphStateEdge {
   weight: number
   directed?: boolean
   label?: string
+  labelAt?: number
   showDirection?: boolean
 }
 
@@ -398,10 +400,12 @@ export type GraphStateDetail =
     }
   | {
       kind: "edge-relaxation"
+      policy: "dijkstra" | "bellman-ford"
       pass: number
       edge: readonly [string, string] | null
       distances: Readonly<Record<string, number>>
       changed: boolean
+      previous?: number
     }
   | {
       kind: "component-flood"
@@ -466,17 +470,8 @@ export interface GraphStateFrame {
   nodeState: Readonly<Record<string, GraphStateNodeRole>>
   edgeState: Readonly<Record<string, GraphStateEdgeRole>>
   message: string
+  milestone?: string
   detail: GraphStateDetail
-}
-
-export interface SpeedSliderOptions {
-  min: number
-  max: number
-  step: number
-  value: number
-  label: string
-  format(value: number): string
-  onChange(value: number): void
 }
 
 export interface HostControlHandle {
@@ -501,7 +496,6 @@ export interface HostTabsHandle extends HostControlHandle {
 }
 
 export interface StepTraceHost {
-  createSpeedSlider?(container: HTMLElement, options: SpeedSliderOptions): HostControlHandle
   mountTabs?(container: HTMLElement, options: HostTabsOptions): HostTabsHandle
 }
 

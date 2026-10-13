@@ -107,7 +107,7 @@
   stroke-linejoin: round;
 }
 .steptrace__num {
-  font: var(--_weight-strong) var(--_type-md)/var(--_leading-solid) var(--_font-mono);
+  font: var(--_weight-strong) var(--_type-xs)/var(--_leading-solid) var(--_font-mono);
   color: var(--_muted);
   font-variant-numeric: tabular-nums;
 }
@@ -185,9 +185,9 @@
   top: 50%;
   transform: translate(-50%, -50%);
   color: var(--_on-accent);
-  font: var(--_weight-strong) var(--_type-sm)/var(--_leading-solid) var(--_font-body);
+  font: var(--_weight-strong) var(--_type-xs)/var(--_leading-solid) var(--_font-body);
   text-shadow: 0 1px 2px color-mix(in srgb, var(--_text) 45%, transparent);
-  font-size: var(--_type-sm);
+  font-size: var(--_type-xs);
 }
 .steptrace__bar[data-state="candidate"] .steptrace__fill::before {
   content: "◆";
@@ -310,8 +310,8 @@
 }
 .steptrace__marker-label {
   /* steptrace-exception: marker-label-fit | category=responsive | rationale=fits marker labels across stage widths | evidence=.omx/evidence/steptrace-design-system-refactor/visual/candidate/g005-candidate-k/summary.json */
-  font: var(--_weight-strong) clamp(var(--_type-2xs), 1.8vw, var(--_type-sm)) /
-    var(--_leading-solid) var(--_font-body);
+  font: var(--_weight-strong) clamp(var(--_type-xs), 1.8vw, var(--_type-sm)) / var(--_leading-solid)
+    var(--_font-body);
   color: var(--_on-accent);
 }
 .steptrace__marker[data-placing="1"] .steptrace__marker-body {

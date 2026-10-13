@@ -20,7 +20,7 @@ export const branchAndBound = {
       {
         id: "root",
         label: "start",
-        detail: "0/7 · 0 · bound 116",
+        detail: "0/7 · 0 · ≤116",
         values: [],
         x: 636,
         y: 28,
@@ -32,7 +32,7 @@ export const branchAndBound = {
       {
         id: "a+",
         label: "take A",
-        detail: "2/7 · 40 · bound 116",
+        detail: "2/7 · 40 · ≤116",
         values: [],
         x: 352,
         y: 100,
@@ -44,7 +44,7 @@ export const branchAndBound = {
       {
         id: "a-",
         label: "skip A",
-        detail: "0/7 · 0 · bound 102",
+        detail: "0/7 · 0 · ≤102",
         values: [],
         x: 920,
         y: 100,
@@ -56,7 +56,7 @@ export const branchAndBound = {
       {
         id: "ab+",
         label: "take B",
-        detail: "5/7 · 90 · bound 116",
+        detail: "5/7 · 90 · ≤116",
         values: [],
         x: 139,
         y: 172,
@@ -68,7 +68,7 @@ export const branchAndBound = {
       {
         id: "ab-",
         label: "skip B",
-        detail: "2/7 · 40 · bound 105",
+        detail: "2/7 · 40 · ≤105",
         values: [],
         x: 565,
         y: 172,
@@ -80,7 +80,7 @@ export const branchAndBound = {
       {
         id: "abc+",
         label: "take C",
-        detail: "10/7 · 155 · infeasible",
+        detail: "10/7 · 155",
         values: [],
         x: 68,
         y: 244,
@@ -92,7 +92,7 @@ export const branchAndBound = {
       {
         id: "abc-",
         label: "skip C",
-        detail: "5/7 · 90 · bound 107.5",
+        detail: "5/7 · 90 · ≤107.5",
         values: [],
         x: 210,
         y: 244,
@@ -104,7 +104,7 @@ export const branchAndBound = {
       {
         id: "ac+",
         label: "take C",
-        detail: "7/7 · 105 · bound 105",
+        detail: "7/7 · 105 · ≤105",
         values: [],
         x: 423,
         y: 244,
@@ -116,7 +116,7 @@ export const branchAndBound = {
       {
         id: "ac-",
         label: "skip C",
-        detail: "2/7 · 40 · bound 75",
+        detail: "2/7 · 40 · ≤75",
         values: [],
         x: 707,
         y: 244,
@@ -128,7 +128,7 @@ export const branchAndBound = {
       {
         id: "abcd+",
         label: "take D",
-        detail: "9/7 · 125 · infeasible",
+        detail: "9/7 · 125",
         values: [],
         x: 68,
         y: 316,
@@ -140,7 +140,7 @@ export const branchAndBound = {
       {
         id: "abcd-",
         label: "skip D",
-        detail: "5/7 · 90 · bound 90",
+        detail: "5/7 · 90 · ≤90",
         values: [],
         x: 210,
         y: 316,
@@ -152,7 +152,7 @@ export const branchAndBound = {
       {
         id: "acd+",
         label: "take D",
-        detail: "11/7 · 140 · infeasible",
+        detail: "11/7 · 140",
         values: [],
         x: 352,
         y: 316,
@@ -164,7 +164,7 @@ export const branchAndBound = {
       {
         id: "acd-",
         label: "skip D",
-        detail: "7/7 · 105 · bound 105",
+        detail: "7/7 · 105 · ≤105",
         values: [],
         x: 494,
         y: 316,
@@ -176,7 +176,7 @@ export const branchAndBound = {
       {
         id: "ac-d+",
         label: "take D",
-        detail: "6/7 · 75 · bound 75",
+        detail: "6/7 · 75 · ≤75",
         values: [],
         x: 636,
         y: 316,
@@ -188,7 +188,7 @@ export const branchAndBound = {
       {
         id: "ac-d-",
         label: "skip D",
-        detail: "2/7 · 40 · bound 40",
+        detail: "2/7 · 40 · ≤40",
         values: [],
         x: 778,
         y: 316,
@@ -200,7 +200,7 @@ export const branchAndBound = {
       {
         id: "a-b+",
         label: "take B",
-        detail: "3/7 · 50 · bound 102",
+        detail: "3/7 · 50 · ≤102",
         values: [],
         x: 849,
         y: 172,
@@ -212,7 +212,7 @@ export const branchAndBound = {
       {
         id: "a-b-",
         label: "skip B",
-        detail: "0/7 · 0 · bound 82.5",
+        detail: "0/7 · 0 · ≤82.5",
         values: [],
         x: 991,
         y: 172,

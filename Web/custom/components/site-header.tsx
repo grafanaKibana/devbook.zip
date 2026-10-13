@@ -41,6 +41,23 @@ export const SiteHeader = ((opts?: SiteHeaderOptions) => {
         </div>
         <div class="site-header-search">
           <Search {...props} />
+          <kbd class="site-header-kbd" aria-hidden="true">
+            <span class="site-header-kbd-mac">
+              <svg
+                viewBox="2 2 20 20"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3" />
+              </svg>
+              K
+            </span>
+            <span class="site-header-kbd-other">Ctrl K</span>
+          </kbd>
         </div>
         <div class="site-header-actions">
           <Darkmode {...props} />
@@ -49,6 +66,14 @@ export const SiteHeader = ((opts?: SiteHeaderOptions) => {
       </div>
     )
   }
+
+  // Runs before first paint, so the shortcut hint never flips labels.
+  Header.beforeDOMLoaded = `
+document.documentElement.setAttribute(
+  "data-kbd",
+  /Mac|iPhone|iPad|iPod/.test(navigator.platform || navigator.userAgent) ? "mac" : "other"
+);
+`
 
   return Header
 }) satisfies QuartzComponentConstructor<SiteHeaderOptions>

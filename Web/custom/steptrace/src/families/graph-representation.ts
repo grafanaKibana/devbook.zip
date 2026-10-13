@@ -162,7 +162,7 @@ export function mountGraphRepresentation(root: HTMLElement): MountHandle {
     row.dataset.empty = "0"
     const neighbors = el("span", "steptrace__contiguous-value")
     const vertexIndex = el("span", "steptrace__contiguous-index")
-    vertexIndex.textContent = `vertex ${vertex}`
+    vertexIndex.textContent = String(vertex)
     row.append(neighbors, vertexIndex)
     list.append(row)
     listRows.set(vertex, { row, neighbors, neighborCell: row })

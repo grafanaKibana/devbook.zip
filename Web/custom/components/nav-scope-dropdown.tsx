@@ -348,7 +348,7 @@ const script = `
           '<span class="ns-chev">' + svg("chevron-down", "ns-chev-svg") + '</span>' +
         '</button>' +
         '<div class="ns-menu">' +
-          '<div class="ns-menu-list" role="listbox" tabindex="-1"></div>' +
+          '<div class="ns-menu-list" role="listbox" aria-label="Sections" tabindex="-1"></div>' +
         '</div>';
       place.parent.insertBefore(scope, place.anchor);
       wireSelector(explorer, scope);
@@ -496,15 +496,17 @@ const script = `
     var chip = scope.querySelector(".ns-trigger-chip");
     var name = scope.querySelector(".ns-name");
     var list = scope.querySelector(".ns-menu-list");
+    var label = isAll ? "Home" : cur.name;
     if (isAll) {
       scope.style.setProperty("--ns-topic", "var(--gray)");
       if (chip) chip.innerHTML = svg("house", "ns-chip-svg");
-      if (name) name.textContent = "Home";
     } else {
       scope.style.setProperty("--ns-topic", cur.color || "var(--secondary)");
       if (chip) chip.innerHTML = svg(cur.icon, "ns-chip-svg");
-      if (name) name.textContent = cur.name;
     }
+    if (name) name.textContent = label;
+    var trigger = scope.querySelector(".ns-trigger");
+    if (trigger) trigger.setAttribute("aria-label", "Section: " + label);
     if (list) list.innerHTML = buildMenu(entries, isAll ? ALL : current);
     return scope;
   }

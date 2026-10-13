@@ -59,6 +59,7 @@ class Recorder {
         ]),
       ),
       message,
+      ...(current ? { milestone: `Component ${component}` } : {}),
       detail,
     })
   }
