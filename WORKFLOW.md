@@ -13,6 +13,8 @@ Every unit of work starts as a GitHub issue, filed from one of two templates ([`
 
 Both templates force the same shape: **Problem → Affected → Instructions for the agent → Acceptance criteria** — written so a coding agent (Claude, Codex, whoever) can pick it up and act without follow-up questions.
 
+The approved [recurring DevBook-improvement queue](docs/devbook-improvement.md) is the narrow exception: one ongoing maintenance system processes small topic batches without filing an issue per batch. Its draft PRs, durable state, and owner feedback provide the audit trail; every PR still follows the branch, title, review, validation, and manual-merge rules below.
+
 **Labels drive everything downstream:**
 
 - `type:*` — `bug` / `feature` / `notes` / `docs` / `maintenance`. Missing one? The [`Issue Management`](.github/workflows/issue-management.yml) workflow auto-tags it `needs:triage`.
@@ -46,6 +48,8 @@ Direct pushes to `main` are blocked by a branch ruleset; every change lands thro
 | **Breaking changes** | A `!` title parks a `major-approval` check as pending; reply `/approve-major` to confirm or `/no-major` to drop it. See [`Major Release Approval`](.github/workflows/major-approval.yml). |
 | **Merge** | Merge commit only (commits are preserved) — required for the release automation to read individual commit prefixes. |
 
+Recurring improvement PRs additionally maintain one machine-marked cumulative section with scope, note changes, question changes, significant before/after wording and identity implications, feedback, and validation. Updates replace only that section and preserve manual or Haiku-authored text outside it.
+
 ## 5. Automations at a glance
 
 | Workflow | Trigger | Does |
@@ -55,6 +59,7 @@ Direct pushes to `main` are blocked by a branch ruleset; every change lands thro
 | [`major-approval.yml`](.github/workflows/major-approval.yml) | PR opened/edited, or `/approve-major` \| `/no-major` comment | Gates breaking (`!`) releases behind explicit approval |
 | [`release.yml`](.github/workflows/release.yml) | Push to `main` | Computes next version from commit prefixes + PR title, tags, publishes a GitHub Release with generated notes |
 | Dependabot ([`dependabot.yml`](.github/dependabot.yml)) | Weekly | Groups all npm updates into one `maintenance:` PR |
+| [`devbook-improvement.yml`](.github/workflows/devbook-improvement.yml) | Every six hours at minute 23, or manual | Runs a credential-free demo until separately activated; then proposes bounded topic note improvements in draft PRs, never merges them |
 
 ## 6. Releases
 

@@ -1,0 +1,43 @@
+"""Deterministic core for recurring DevBook note maintenance."""
+
+from .core import (
+    DEFAULT_CONFIG,
+    ProposalError,
+    apply_proposal,
+    branch_for,
+    cooldown_active,
+    digest,
+    ingest_feedback,
+    inventory,
+    new_state,
+    record_outcome,
+    render_summary,
+    rules_version,
+    select_batch,
+    set_cooldown,
+    sync_prs,
+    topic_for,
+    topic_id,
+    update_managed_body,
+)
+
+__all__ = [
+    "DEFAULT_CONFIG",
+    "ProposalError",
+    "apply_proposal",
+    "branch_for",
+    "cooldown_active",
+    "digest",
+    "ingest_feedback",
+    "inventory",
+    "new_state",
+    "record_outcome",
+    "render_summary",
+    "rules_version",
+    "select_batch",
+    "set_cooldown",
+    "sync_prs",
+    "topic_for",
+    "topic_id",
+    "update_managed_body",
+]
