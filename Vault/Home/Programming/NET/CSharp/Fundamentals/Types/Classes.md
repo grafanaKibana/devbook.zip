@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Programming"
 qard-topic: "NET/CSharp/Fundamentals/Types/Classes"
+flashcard_uid: "0928b940"
 ---
 
 A class defines a reference type with object identity. Assignment copies a reference, so two variables can point at the same instance and observe the same mutations. Shared identity fits services and mutable domain entities. But it also creates aliasing bugs when ownership is unclear.
@@ -211,36 +212,30 @@ Default to `sealed` when inheritance is not part of the design. Use a `record cl
 
 # Questions
 
+<!-- qard-id: 4102b2b9-4b17-458b-b927-b8b6b4559709 -->
 > [!qard]- What is the difference between an abstract class and an interface with default members, and when is an abstract class a better fit?
-> Both can contain implemented members. An abstract class can also store instance state, define constructors, and expose protected members, but a class can inherit from only one base class. An interface has no instance fields, and a class can implement several interfaces. An abstract class fits when derived types must share state or initialization rules. An interface fits when callers only need a common capability and the implementations do not belong in one inheritance hierarchy.
+> Both can define implemented behavior. An abstract class can also own instance state, constructors, and protected members, but a class has only one base class. An interface expresses a capability that a type can combine with other interfaces. Use an abstract class when shared state or construction rules are part of the hierarchy. [Microsoft: class types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/classes) · [Microsoft: interfaces](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/interfaces)
 
-> [!qard]- Why can't a static class implement an interface?
-> An interface normally describes behavior on an object. A static class has no instances, so no object can be assigned to an interface variable. When an implementation needs to be injected or replaced, use a regular class and choose its lifetime through dependency injection. A generic algorithm that needs operations on the type itself can use static abstract interface members with a constrained type parameter.
+<!-- qard-id: dc25ff5d-eca3-41ea-9cc4-57d12dd45b00 -->
+> [!qard]- Why can’t a static class implement an interface?
+> A static class has no instances to convert to an instance interface contract, and C# does not allow a static class declaration to implement an interface. Static abstract interface members serve a different model: a non-static type supplies type-level operations consumed through a constrained generic parameter. [Microsoft: static abstract interface members](https://learn.microsoft.com/en-us/dotnet/csharp/advanced-topics/interface-implementation/static-virtual-interface-members) [Microsoft: supporting documentation](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/classes)
 
-> [!qard]- A `sealed override` stops further overriding, but can a derived class use `new` to hide the sealed method? What happens at runtime?
-> Yes, `new` compiles and hides the sealed method. But the behavior depends on the variable's compile-time type:
-> ```csharp
-> class Base { public virtual void Do() => Console.WriteLine("Base"); }
-> class Middle : Base { public sealed override void Do() => Console.WriteLine("Middle"); }
-> class Bottom : Middle { public new void Do() => Console.WriteLine("Bottom"); }
->
-> Bottom b = new Bottom();
-> b.Do();           // "Bottom" — resolved at compile time as Bottom.Do
-> Middle m = b;
-> m.Do();           // "Middle" — virtual dispatch resolves to Middle.Do (sealed)
-> Base x = b;
-> x.Do();           // "Middle" — same virtual dispatch
-> ```
-> The hidden method is selected only when the compile-time receiver exposes `Bottom.Do`. Calls through `Middle` or `Base` stay on the sealed virtual slot and invoke `Middle.Do`. Hiding therefore does not replace polymorphic behavior. It creates a second member with type-dependent call semantics.
+<!-- qard-id: 2ce5d743-bc95-4281-b813-22ab81daa88b -->
+> [!qard]- A `sealed override` stops further overriding. Can a derived class use `new` to hide it, and what happens at runtime?
+> Yes. `new` can declare a separate hidden member, but it does not reopen the sealed virtual slot. A call through the derived type can select the hidden member by compile-time lookup; a call through the base type still dispatches to the sealed override. [Microsoft: class types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/classes)
 
-> [!qard]- Can a C# type be both abstract and sealed, and how are static classes represented in metadata?
-> C# rejects that modifier pair on an ordinary class. A C# static class is represented in metadata with both flags, which prevents construction and inheritance. Reflection therefore reports `typeof(Math).IsAbstract && typeof(Math).IsSealed` as `true`.
 
-> [!qard]- Why can `partial` be dangerous with source generators? Give a concrete scenario.
-> The generated part is the same type, so it can add interface implementations or members that are absent from the handwritten file. A generator and handwritten code that both declare `Validate()` cause a compile-time collision. An optional partial-method hook may disappear entirely when no implementing declaration is generated. Generated output should be inspectable, and tests should cover the behavior that depends on it.
 
-> [!qard]- Why do two separately created class instances with equal fields compare unequal with `==`, and how should value equality be added?
-> A class uses reference equality for `==` unless it overloads the operator, so two separately created instances are different references. A value-like conventional class should implement `IEquatable<T>`, override `Equals` and `GetHashCode`, and overload `==`/`!=` if operator equality belongs to its API. A `record class` is the shorter choice when generated value equality matches the domain.
+<!-- qard-id: ac96d48c-e482-40ca-b6e4-0d4ea17347a0 -->
+> [!qard]- How can a source generator using `partial` cause a compile-time collision?
+> The generated part is the same type, so it can add interface implementations or members that are absent from the handwritten file. If the generator and handwritten code both declare `Validate()`, compilation fails with a member collision. Generated output should be inspectable, and tests should cover behavior that depends on it.
+<!-- qard-id: b4aee68b-efc1-4bf7-8374-1ab7ba8b0fdd -->
+> [!qard]- When can an optional partial-method hook disappear from a generated `partial` type?
+> An optional partial-method hook may disappear entirely when no implementing declaration is generated. Generated output should be inspectable, and tests should cover the behavior that depends on it.
+
+<!-- qard-id: f4c9ae99-2c35-4108-8f4f-199349060aeb -->
+> [!qard]- When a class does not overload `==`, why do two separately created instances with equal fields compare unequal, and how can value equality be added?
+> Without an overloaded `==`, a class uses reference equality for that operator, so two separately created instances are different references even when their fields are equal. A value-like conventional class should implement `IEquatable<T>`, override `Equals` and `GetHashCode`, and overload `==`/`!=` if operator equality belongs to its API. A `record class` is the shorter choice when its generated value equality matches the domain.
 
 # References
 

@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Application Architecture/Presentation Architecture Variants"
+flashcard_uid: "864352fa"
 ---
 
 Presentation patterns separate a UI from the state and decisions behind it. Their real differences are ownership: who receives input, where screen state lives, what causes a render, and who chooses the next screen. The patterns fit different interaction models. They are not a maturity ladder, and the smallest boundary that keeps domain behavior out of the UI framework is usually enough.
@@ -160,8 +161,9 @@ A view-model becomes a second controller when it owns data access or domain rule
 
 # Questions
 
+<!-- qard-id: 0fe15750-bc1e-470f-bcae-0356e989b2da -->
 > [!qard]- What is the key difference between MVC and MVVM?
-> MVC uses a controller to handle a request and select a response view. MVVM exposes observable state and commands to a long-lived bound view. MVC keeps a stateless request path explicit. MVVM accepts binding and notification machinery in exchange for persistent screen state without direct view manipulation.
+> In MVC, a controller handles input, works with the model, and selects a response view. In MVVM, the view binds to state and commands exposed by a view-model, which notifies the view when that state changes. MVC makes request handling explicit; MVVM trades binding and notification machinery for a direct model of persistent screen state. [ASP.NET Core MVC](https://learn.microsoft.com/en-us/aspnet/core/mvc/overview?view=aspnetcore-10.0) · [.NET MAUI: MVVM](https://learn.microsoft.com/en-us/dotnet/architecture/maui/mvvm)
 
 # References
 

@@ -12,6 +12,7 @@ priority: Medium
 status: Done
 qard-deck: "AI & ML"
 qard-topic: "LLM/Loop Engineering/Loop Engineering"
+flashcard_uid: "3d544ed9"
 ---
 
 Loop engineering designs the runtime around repeated model calls. It controls the observe → decide → act cycle, defines when work is finished, checks progress between steps, and hands uncertain decisions to a person.
@@ -53,14 +54,14 @@ Each iteration adds calls and results to the history. Without intervention, cont
 
 # Questions
 
-> [!qard]- What does loop engineering add on top of a model with tools, and why is it its own discipline?
-> A model with tools can still be a single call. Loop engineering adds the runtime that repeats observe → decide → act until a checkable stop condition. It owns budgets and verification between turns, which determines whether an early mistake is corrected or amplified.
+> [!qard]- What does a tool-using model need from a runtime to operate as a loop?
+> The runtime executes requested tools, returns observations to the model, and decides whether another turn runs. It owns the completion check and operational bounds; the model’s final text alone does not prove the task succeeded. A one-call tool request becomes a loop only when the runtime sends its result back for another decision. [Claude tool-use loop](https://platform.claude.com/docs/en/agents-and-tools/tool-use/how-tool-use-works)
 
-> [!qard]- What are the main ways to bound a loop, and why are prompt-level stop instructions not enough?
-> The runtime needs a hard iteration cap, a cumulative token or cost budget, and a stop condition it can verify. Prompt instructions are advisory, so they cannot replace those limits. At the cap, return an explicit partial result or escalate instead of truncating silently. The unbounded run documented in [[Agent Loop]] shows the failure mode: 369 repeated tool calls consumed 9.7M tokens without converging.
+> [!qard]- What should a runtime report when its loop budget expires before the task is complete?
+> Return an explicit partial result and identify the unmet completion condition; budget exhaustion is not success. If the runtime supports a configured continuation or human escalation path, hand off the partial state and what remains unresolved. Anthropic task budgets may leave a partial result when a task exceeds the available budget, and OpenAI Agents SDK supports a max-turn error handler for a run that reaches its limit. [Anthropic task budgets](https://platform.claude.com/docs/en/build-with-claude/task-budgets) · [OpenAI Agents SDK running agents](https://openai.github.io/openai-agents-python/running_agents/)
 
-> [!qard]- How do loop engineering and context engineering divide the work of managing a long run's history?
-> Context engineering decides what belongs in the window and what a summary must preserve. Loop engineering decides when to compact, offload artifacts, or stop. Durable state such as a plan file bridges them by surviving compaction and keeping later iterations tied to the original goal.
+> [!qard]- How do context selection and loop control divide long-run compaction work?
+> Context engineering decides what information the model needs and what a summary must preserve. Loop engineering decides when to compact, offload an artifact, or stop before the next request. OpenAI Responses API compaction carries selected prior state in a smaller context; durable plans and external artifacts remain application-managed state. [OpenAI compaction](https://developers.openai.com/api/docs/guides/compaction)
 
 # References
 

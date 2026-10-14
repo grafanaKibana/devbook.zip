@@ -11,6 +11,7 @@ status: Done
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Behavioral/State"
+flashcard_uid: "79f8c824"
 ---
 
 A vending machine responds to the same button differently while idle, holding credit, or out of stock. The input stays the same. Its current state decides what the input means.
@@ -207,8 +208,9 @@ State earns its classes when state-dependent rules are scattered across several 
 
 # Questions
 
+<!-- qard-id: 1c479114-9836-446c-88c8-e0ea73be8a6e -->
 > [!qard]- How does a compiler-generated async state machine relate to the State pattern?
-> The compiler emits an `IAsyncStateMachine` implementation with a numeric state field. `MoveNext()` branches on that field, saves a continuation when an awaiter is incomplete, and later resumes from the saved point. Locals that must survive suspension become fields. This is a compiler state machine, but it does not use the pattern's usual family of state objects.
+> An async method is lowered to compiler-managed state that saves the continuation and locals needed across an incomplete `await`, then resumes execution. The GoF State pattern instead delegates behavior to state objects. Both make behavior depend on current state, but the compiler-generated control-flow machine is not the object pattern. [C#: async scenarios](https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/async-scenarios) · [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/State#Solution|State pattern implementation]] · [Stephen Toub: How async/await really works](https://devblogs.microsoft.com/dotnet/how-async-await-really-works/)
 
 # References
 

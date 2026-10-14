@@ -13,6 +13,7 @@ level:
   - "4"
 qard-deck: "Programming"
 qard-topic: "NET/CSharp/Fundamentals/Types/Types"
+flashcard_uid: "a5c39ae2"
 ---
 
 A C# type defines what values exist, which operations are valid, and what assignment copies. Value types copy their contained value. Reference types copy a reference to one object. That distinction controls aliasing and equality long before stack-versus-heap details matter.
@@ -74,14 +75,17 @@ The direct `h.Counter.Inc()` call compiles, but it mutates the temporary value r
 
 # Questions
 
+<!-- qard-id: d8eb59cf-ad2d-43be-954f-44db23f34d38 -->
 > [!qard]- Why might changing a struct inside `foreach` not update the collection, and how can it be fixed?
-> A `foreach` variable normally contains a copy of the struct, so changing that copy does not change the element stored in the collection. Properties and ordinary indexers can return the same kind of copy. A safe fix is to create the changed value and assign the whole element back. A ref-returning API is appropriate only when the collection deliberately supports in-place mutation.
+> In an ordinary by-value `foreach`, the iteration variable is not a writable reference to the collection slot. A struct element is copied, so changing that value does not write it back; assign the updated value through an index or use an API that deliberately returns the element by reference. [Microsoft: value types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/value-types) · [Microsoft: iteration statements](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/iteration-statements)
 
+<!-- qard-id: b89f32ef-f23d-488d-a26a-78ebe0051826 -->
 > [!qard]- Where does boxing commonly happen, and how can it be reduced?
-> Boxing commonly happens when a value type is converted to `object` or an interface, stored in a non-generic collection, or passed through `params object[]`. Each box creates a heap object and copies the value into it. Generic APIs such as `List<T>` and constrained generic calls can keep the value in its concrete type. Profiling should confirm that the boxing occurs often enough to matter before the API is made more complex.
+> Boxing occurs when a value type is converted to `object` or an implemented interface, creating an object containing a copy of the value. Generic APIs preserve the concrete type, and constrained generic calls can avoid boxing for applicable value-type operations. Optimize only when profiling shows boxing matters. [Microsoft: boxing and unboxing](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/types/boxing-and-unboxing) · [Microsoft: generic types](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/types/generics) · [Microsoft: `constrained.` opcode](https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.constrained?view=net-10.0)
 
+<!-- qard-id: d5bda60c-1799-4e4a-ab36-7624ae085e3a -->
 > [!qard]- When should a type be a `struct`, `class`, or `record class`?
-> Start with assignment and equality semantics. A `struct` fits a small logical value that should be copied as a whole. A conventional class fits an entity whose identity stays the same while its state changes. A `record class` fits reference-typed data whose contents define equality. After that, size, mutation, boxing, and measured allocation cost can rule out a choice that looked correct from the data model alone.
+> Start with assignment and equality semantics. A `struct` represents a value copied as a whole; a conventional `class` provides shared reference identity; a `record class` is a reference type whose contents define generated equality. Choose the form that matches the domain contract, then check copying, mutation, and measured allocation costs. [Microsoft: value types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/value-types) · [Microsoft: class types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/classes) · [Microsoft: records](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record)
 
 # References
 

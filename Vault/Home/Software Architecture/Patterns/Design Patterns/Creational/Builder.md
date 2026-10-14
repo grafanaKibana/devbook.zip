@@ -11,6 +11,7 @@ status: Done
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Creational/Builder"
+flashcard_uid: "ad1872ad"
 ---
 
 A complex object often cannot be created sensibly in one constructor call. Some inputs are optional, others interact, and derived values should never be supplied by callers.
@@ -233,7 +234,7 @@ Priority shipping can become a named builder operation without changing callers 
 | Required field enforcement | Runtime (in `Build()`) | Compile-time (`required` keyword) | Compile-time |
 | Optional parameters | Named methods, self-documenting | Named properties, self-documenting | Combinatorial explosion |
 | Validation | Centralized in `Build()` | Must use custom setter or factory | Scattered across overloads |
-| Computed fields | Encapsulated in `Build()` | Caller's responsibility | Caller's responsibility |
+| Computed fields | Encapsulated in `Build()` | Caller's responsibility | Can be computed in the constructor |
 | Fluent chaining | Yes | No | No |
 | Complexity | High | Low | Medium |
 
@@ -241,11 +242,13 @@ Start with a constructor or object initializer. Builder earns a separate type wh
 
 # Questions
 
+<!-- qard-id: 7ef0df00-358b-46be-9bed-4de8aff6ce01 -->
 > [!qard]- When is a Builder worth using instead of a constructor?
-> A Builder is useful when inputs arrive across several steps and the complete object must be checked before it is created. `Build()` can validate relationships between those inputs and calculate values that callers should not supply. A constructor is still better when all required values fit in one clear call and it can enforce the same invariants directly. Async initialization usually belongs in an asynchronous factory because a conventional `Build()` cannot be awaited.
+> A Builder is useful when construction accumulates across steps or needs cross-input validation and derived values before the object is created. A constructor remains clearer when the required values fit in one call and it can enforce the same invariants. [[Home/Software Architecture/Patterns/Design Patterns/Creational/Builder#Solution|Builder implementation]] · [Microsoft: WebApplicationBuilder](https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.builder.webapplicationbuilder?view=aspnetcore-10.0)
 
+<!-- qard-id: a219c123-c1e0-4eae-96fc-228367900e40 -->
 > [!qard]- Why does `WebApplicationBuilder` use a builder instead of a constructor with parameters?
-> Hosting configuration arrives from several extension points before the application can be assembled. The builder gives those registrations one mutable setup phase, then `Build()` creates the service provider and host. Most dependency completeness remains a runtime property, so startup validation still matters.
+> `WebApplicationBuilder` exposes configuration, service, host, and web-host setup before `Build()` creates the `WebApplication`. That staged composition lets extensions contribute registrations before the app is assembled; a constructor with a fixed parameter list would not provide the same setup surface. [Microsoft: WebApplicationBuilder API](https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.builder.webapplicationbuilder?view=aspnetcore-10.0)
 
 # References
 

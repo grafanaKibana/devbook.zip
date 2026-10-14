@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Behavioral/Mediator"
+flashcard_uid: "f5019297"
 ---
 
 Air traffic control is a useful Mediator analogy. Pilots coordinate through the tower instead of maintaining direct conversations with every aircraft nearby. A new plane joins one coordination system rather than a web of peer relationships.
@@ -143,11 +144,13 @@ Cross-cutting fraud screening can sit in a pipeline behavior shared by every rel
 
 # Questions
 
+<!-- qard-id: 9213f8d0-8fbd-499c-910e-e820fc7509f7 -->
 > [!qard]- What are the signs that a mediator is adding indirection without reducing coupling?
-> A mediator should route work, not become the place where business rules accumulate. Moving a 300-line workflow from a controller into one handler changes its location without reducing its complexity or dependencies. For a simple, stable interaction, a direct dependency is usually clearer.
+> A warning is extra routing without a useful shared dispatch, policy, or coordination boundary: callers still know concrete participants, duplicated coordination remains, or a central mediator accumulates unrelated rules. Moving a workflow into a handler does not simplify that workflow, although it can decouple the caller. Direct calls fit simple, stable interactions. [Microsoft: mapping requests to responses](https://learn.microsoft.com/en-us/dotnet/architecture/modern-web-apps-azure/develop-asp-net-core-mvc-apps#mapping-requests-to-responses)
 
+<!-- qard-id: 6810a433-655b-49d5-b427-e57a278149ba -->
 > [!qard]- How do MediatR pipeline behaviors implement the Chain of Responsibility pattern?
-> Each `IPipelineBehavior<TRequest, TResponse>` wraps the next delegate. It calls `next()` to continue or returns its own response to stop. DI registration supplies the order, so the chain is less visible than explicit `SetNext()` calls but centralized in application composition.
+> Each `IPipelineBehavior<TRequest,TResponse>` receives the next delegate and can run logic before or after it, call it to continue, or return early. Registered behavior order determines how wrappers compose around the handler. [MediatR: behaviors](https://github.com/LuckyPennySoftware/MediatR/wiki/Behaviors)
 
 # References
 

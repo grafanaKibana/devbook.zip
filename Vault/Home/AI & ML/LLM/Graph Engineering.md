@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Graph Engineering"
+flashcard_uid: "ef968013"
 ---
 
 Graph engineering is an emerging name for designing an agentic system as an executable graph: which units perform work, which transitions are legal, what state crosses each boundary, and where execution can stop, pause, or recover. The label is new; the mechanics come from established workflow engines, state machines, and graph-processing runtimes.
@@ -55,7 +56,7 @@ Cycles need the same safeguards as any [[Home/AI & ML/LLM/Loop Engineering/Agent
 
 A checkpoint persists enough execution state to resume a run after a failure or interruption. It enables long-running work, inspection, time-travel debugging, and human approval before a consequential action. It also changes the programming model.
 
-When checkpointing is configured, the graph runtimes in LangGraph and Microsoft Agent Framework capture state at superstep boundaries. Recovery after a process restart also requires a durable checkpoint backend; in-memory storage survives only the current process. If execution stops inside work that was not committed, resuming may run that work again. Side effects therefore need idempotency keys, upserts, or a read-before-write check. Sending an email, charging a card, or publishing a document cannot rely on the checkpoint to provide exactly-once behavior.
+When checkpointing is configured, the graph runtimes in LangGraph and Microsoft Agent Framework capture state at superstep boundaries. Recovery after a process restart also requires a durable checkpoint backend; in-memory storage survives only the current process. If execution stops inside work that was not committed, resuming may run that work again. Side effects therefore need an idempotent operation or atomic deduplication; a separate read-before-write check alone is insufficient. Sending an email, charging a card, or publishing a document cannot rely on the checkpoint to provide exactly-once behavior.
 
 Human-in-the-loop control also needs a real resume protocol. The runtime persists state, records the pending request, waits without holding the model call open, validates the response, and resumes from an authorized continuation. An instruction such as “ask before publishing” is not equivalent to an interrupt enforced by the runtime.
 
@@ -91,14 +92,14 @@ Production traces need node identity, edge decisions, state and workflow version
 
 # Questions
 
-> [!qard]- What does graph engineering add beyond loop engineering and workflow patterns?
-> Loop engineering controls progress, verification, budgets, and termination across repeated work. Workflow patterns name reusable shapes such as routing or evaluator-optimizer. Graph engineering makes the chosen shape executable by defining nodes, legal transitions, shared state, merge rules, scheduling assumptions, checkpoints, and recovery behavior. A loop can remain inside one node or appear as a cycle across several nodes.
+> [!qard]- What does an explicit execution graph define in an agent workflow?
+> An explicit execution graph defines work as nodes, allowed transitions as edges, and state passed between steps. Nodes perform work; direct or conditional edges route execution; shared state carries results under the runtime’s merge rules. A graph can contain a loop inside one node or as a cycle across nodes. Scheduling and checkpoint behavior remain framework-specific. [Microsoft Agent Framework workflows](https://learn.microsoft.com/en-us/agent-framework/journey/workflows) · [Microsoft Agent Framework checkpoints](https://learn.microsoft.com/en-us/agent-framework/workflows/checkpoints)
 
 > [!qard]- Why does an explicit graph not make an agentic system deterministic?
-> Fixed edges constrain which paths are legal, and deterministic guards can make some transitions reproducible. Nodes may still contain model calls, external APIs, mutable data, or concurrent work whose results vary. The graph makes control flow more inspectable; it does not guarantee the quality or repeatability of the work inside each node.
+> Fixed edges constrain which control-flow paths are legal, and deterministic guards can make some routing decisions repeatable. Model calls, external services, mutable inputs, and concurrent work inside nodes can still vary. A graph makes the application’s routing easier to inspect; it does not guarantee repeatable results. When reproduction matters, capture the inputs, state, node outputs, and routing decisions. [Microsoft Agent Framework workflow edges](https://learn.microsoft.com/en-us/agent-framework/concepts/workflows/edges)
 
 > [!qard]- Why does checkpointing require idempotent node design?
-> A runtime normally checkpoints at a step boundary rather than after every instruction inside a node. If a process stops after performing a side effect but before committing the checkpoint, resume can execute that side effect again. Idempotency keys, upserts, or read-before-write checks make re-execution safe; a checkpoint alone does not provide exactly-once delivery.
+> Microsoft Agent Framework checkpoints a workflow after a superstep completes. If a node performs a side effect after the last durable checkpoint and the process stops before the next checkpoint is saved, resuming can run that node again. Use an idempotent operation or atomic deduplication to prevent a replay from repeating the effect; a checkpoint does not provide exactly-once side effects. [Microsoft Agent Framework checkpoints](https://learn.microsoft.com/en-us/agent-framework/workflows/checkpoints) · [Making retries safe with idempotent APIs](https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/)
 
 # References
 

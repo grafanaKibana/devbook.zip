@@ -12,6 +12,7 @@ status: Done
 publish: true
 qard-deck: "Data Persistence"
 qard-topic: "SQL/Normalization Denormalization"
+flashcard_uid: "ab5a8eb2"
 ---
 
 Normalization uses functional, multivalued, and join dependencies to separate facts that have different keys. The goal is not to remove every repeated value. It is to prevent insertion, update, and deletion anomalies by giving each fact one authoritative dependency boundary. If a customer's current address is one fact, changing it should not require finding every order row that happened to repeat it.
@@ -205,7 +206,7 @@ Position and home address change on different timelines, so the combined relatio
 
 | Emp No. | Time | Position |
 | --- | --- | --- |
-| 6575 | 01-01-2000:10-02-2003 | mechanic |
+| 6575 | 01-01-2000:15-06-2006 | mechanic |
 | 6575 | 16-06-2006:05-03-2009 | foreman |
 
 **Home addresses**
@@ -213,7 +214,7 @@ Position and home address change on different timelines, so the combined relatio
 | Emp No. | Time | Home address |
 | --- | --- | --- |
 | 6575 | 01-01-2000:10-02-2003 | Lenin St, 10 |
-| 6575 | 11-02-2003:15-06-2006 | Soviet St, 22 |
+| 6575 | 11-02-2003:05-03-2009 | Soviet St, 22 |
 
 # Denormalization
 
@@ -266,14 +267,21 @@ Start an OLTP design by writing candidate keys and functional dependencies, then
 
 # Questions
 
-> [!qard]- What is normalization and why do most systems stop at 3NF/BCNF?
-> Normalization decomposes relations according to their dependencies so that one update cannot leave conflicting versions of the same fact. 3NF and BCNF cover ordinary functional dependencies. 4NF and 5NF matter when the domain contains independent multivalued facts or a genuine join dependency. 6NF is mainly a temporal modeling tool. The stopping point follows the domain's dependencies, not a universal target number.
+<!-- qard-id: 490485e5-5ecc-4738-8ff1-c06c00b82234 -->
+> [!qard]- What problem does normalization solve in a relational schema?
+> Normalization decomposes relations so each fact is represented according to its dependencies rather than repeated in unrelated rows. That reduces insert, update, and delete anomalies caused by duplicate facts. Decomposition must preserve the intended information without losing valid rows, and constraints still need to be enforceable. A measured read path may justify a duplicate representation, with an explicit source of truth and refresh/reconciliation plan. [Codd: Further Normalization of the Data Base Relational Model](https://apollo.inf.upol.cz/~urbanec/teaching/2021/data2/files/codd2.pdf)
 
+<!-- qard-id: 0655df3d-3076-45b4-b318-fe908c8ee76d -->
+> [!qard]- When can normalization requirements go beyond functional dependencies?
+> Functional-dependency normal forms such as 3NF and BCNF address facts determined by keys or other attributes. Higher forms matter when independent multivalued facts or a genuine join dependency remain; decomposition must still be lossless and preserve the constraints the application needs. Use the dependencies that actually hold in the domain to choose a design, not a fixed normal-form target. [Codd: Further Normalization of the Data Base Relational Model](https://apollo.inf.upol.cz/~urbanec/teaching/2021/data2/files/codd2.pdf) · [Fagin: Multivalued Dependencies and a New Normal Form for Relational Databases](https://www.comp.nus.edu.sg/~lingtw/papers/fagin.pdf) · [Fagin: Project-Join Normal Form](https://citeseerx.ist.psu.edu/document?doi=4735fc168eb72ef96817384aa5d40d5b6016d713&repid=rep1&type=pdf)
+
+<!-- qard-id: 61f5acfa-1113-408f-9deb-acd3b5e6b958 -->
 > [!qard]- What conditions justify denormalizing a table, and what risks does it introduce?
-> Denormalization is justified when a specific read path misses its latency or resource target and storing the result is cheaper than rebuilding it from source facts on every read. The duplicate adds another update path and can introduce lag, write contention, and repair work. The design must identify the source of truth, acceptable freshness, how updates are applied, and how the duplicate is reconciled when it drifts.
+> Denormalize when a named read path misses its latency or resource target and storing a derived result costs less than rebuilding it on every read. The duplicate creates an update path that can lag or drift. Identify its source of truth, acceptable freshness, update mechanism, and reconciliation path. [PostgreSQL: Materialized views](https://www.postgresql.org/docs/current/rules-materializedviews.html)
 
-> [!qard]- How can 2NF and 3NF violations be distinguished?
-> 2NF removes partial dependencies of a non-prime attribute on part of a composite candidate key. A make-level discount repeated in rows keyed by `{Make, Model}` violates it. 3NF additionally constrains dependencies whose determinant is not a superkey. A store phone determined by `Store` inside a table keyed by `Model` is the usual transitive shape. A repair separates the facts only when the decomposition is lossless and preserves the constraints the system needs.
+<!-- qard-id: 5b6ce553-cc6a-41a8-a22d-da5fc5fb740c -->
+> [!qard]- How do 2NF and 3NF differ?
+> A relation is in 2NF when no non-prime attribute depends on a proper subset of a candidate key; this matters for composite keys. 3NF additionally requires, for each nontrivial functional dependency, that its determinant be a superkey or its dependent attribute be prime. A decomposition should be lossless; preserving dependencies is a separate design tradeoff. [Codd: Further Normalization of the Data Base Relational Model](https://apollo.inf.upol.cz/~urbanec/teaching/2021/data2/files/codd2.pdf)
 
 # References
 

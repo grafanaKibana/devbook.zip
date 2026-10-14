@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "System Architecture/Modular Monolith"
+flashcard_uid: "63d5a8b8"
 ---
 
 A modular monolith keeps one process and one deployment while dividing the codebase into modules that own distinct business capabilities. It captures much of what teams want from [[Home/Software Architecture/System Architecture/Microservices]]: clearer ownership and safer parallel change, without turning every boundary into a network call. For most growing products, that is the sensible default. Strengthen boundaries inside the application first. Distribute a module only when delivery, scaling, or isolation pressure justifies the operating cost.
@@ -249,8 +250,9 @@ Default to a modular monolith for a product that needs durable boundaries but ca
 
 # Questions
 
+<!-- qard-id: 77e3a78b-e6d8-4560-9399-33f66b9fc20b -->
 > [!qard]- When is a modular monolith a better fit than microservices, and what signals justify extracting a module?
-> A modular monolith fits while business domains stay cleanly separated into modules and one deployment remains reliable. Extraction becomes worthwhile when one module repeatedly needs its own scaling, release cadence, or isolation policy. The domain contract can remain familiar, but the remote interaction must be redesigned around deadlines, retries, observability, and local transactions.
+> A modular monolith fits when module boundaries are valuable but one deployment and local transactions still work well. Extract when a module repeatedly needs independent release, scaling, or isolation. The familiar business contract does not make a remote call local: deadlines, retries, observability, and local transaction/outbox behavior must be designed explicitly. [Azure: microservices architecture style](https://learn.microsoft.com/en-us/azure/architecture/guide/architecture-styles/microservices) · [Azure: saga pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/saga)
 
 # References
 

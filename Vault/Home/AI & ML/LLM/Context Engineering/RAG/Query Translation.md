@@ -11,6 +11,7 @@ status: Done
 publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Context Engineering/RAG/Query Translation"
+flashcard_uid: "cffd0779"
 ---
 
 Query translation changes a user's wording before search so that retrieval sees language closer to the corpus. Someone asks, "Can partners burst above limits now?" The relevant document is titled "Q3 Quota Policy Update — Partner Tier Burst Allowance." Both describe the same policy, but a single query embedding may place them in different neighborhoods. Translation searches more of that space without changing the corpus or the [[Embeddings|embedding model]].
@@ -109,7 +110,7 @@ The original query remains one of the retrieval variants. Translation prompts pr
 
 ## Latency Multiplication
 
-Translation adds a serial model call before retrieval. Even with concurrent searches, end-to-end latency is the translator plus the slowest search. That is the number the p95 budget must absorb.
+Translation adds a serial model call before retrieval. Even with concurrent searches, the translation-and-retrieval portion of latency is the translator plus the slowest search. That is the number the p95 budget must absorb.
 
 A hard budget of two to four variants bounds the cost. Searches run concurrently, and stable rewrites can be reused through [[Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching|caching]]. Production-like concurrency exposes queueing and tail latency that a single-query benchmark hides.
 
@@ -140,13 +141,14 @@ Direct retrieval provides the control. Multi-query or RAG-Fusion earns its cost 
 
 # Questions
 
-> [!qard]- Why does query translation often improve recall but sometimes hurt precision, and how can the tradeoff be detected?
-> Query translation raises recall by searching more phrasings, but it lowers precision when a rewrite adds concepts or changes constraints.
-> Measure Recall@k and Precision@k before and after translation, split by query type. If Recall@20 rises while Precision@5 falls, coverage improved but the generator receives worse evidence. Keep the original query in the candidate set and reject variants that change material constraints.
+> [!qard]- What does query translation change in a RAG retrieval pipeline, and what can it not fix?
+> Query translation rewrites or decomposes a user's request before retrieval, then searches the resulting query or queries for candidate documents. It changes the retrieval inputs, not the corpus. It can help when query wording differs from the corpus, but it cannot create missing evidence or repair bad chunking, embeddings, or an index. The candidate lists still need evaluation and may need fusion, reranking, or synthesis depending on the technique. [Query Rewriting for Retrieval-Augmented Large Language Models](https://arxiv.org/html/2305.14283)
 
-> [!qard]- When is decomposition a better choice than multi-query, and when does it hurt?
-> Decomposition fits distinct sub-problems that need different evidence, such as a comparison or a timeline assembled from several sources. Multi-query fits one intent expressed with uncertain vocabulary.
-> Decomposition hurts when the split removes the constraints connecting the pieces. It fits only when each sub-question can be answered independently and those answers can support the original request. It also adds a synthesis call, while multi-query adds only retrieval work.
+> [!qard]- How can query translation change retrieval quality, and how should that change be evaluated?
+> Query translation searches rewritten versions of a request, which can recover documents missed because the corpus uses different wording. A rewrite that changes entities or constraints can also retrieve irrelevant candidates. Compare direct retrieval with translated retrieval on labeled queries, separating query classes and measuring metrics such as Recall@k and Precision@k. A Recall@20 increase with a Precision@5 decrease means more relevant candidates appeared at depth 20 while the top five became less precise; it does not by itself show what survives reranking or reaches the generator. Keep the original query available and reject rewrites that alter material constraints. [Query Rewriting for Retrieval-Augmented Large Language Models](https://arxiv.org/html/2305.14283)
+
+> [!qard]- When should a RAG system decompose a question instead of generating multiple query phrasings?
+> Use decomposition when distinct parts of the request need different evidence, such as comparing two systems or assembling a timeline. Use multi-query when one information need is clear but its wording may not match the corpus. Decomposition fails when subquestions lose constraints from the original request; carry those constraints into retrieval and synthesis. Independent subquestions may run concurrently, while multi-hop questions can depend on earlier answers and need sequential work. Both techniques add query-generation work; decomposition also needs answer synthesis. [Sub Question Query Engine](https://developers.llamaindex.ai/python/examples/query_engine/sub_question_query_engine/)
 
 # References
 

@@ -12,6 +12,7 @@ priority: High
 status: Creation
 qard-deck: "AI & ML"
 qard-topic: "LLM/LLM"
+flashcard_uid: "1eb55a0b"
 ---
 
 A large language model (LLM) is a neural language model trained at enough scale to handle a broad range of language tasks. The name says little about the exact architecture. Decoder-only models continue text causally, encoder-decoder models generate from an encoded source, and encoder-only models produce contextual representations instead of open-ended text.
@@ -150,7 +151,7 @@ The DeepSeek-V3 report describes routed experts, shared experts, and an auxiliar
 # Questions
 
 > [!qard]- How should prompting, RAG, and fine-tuning be chosen for an LLM system?
-> The choice starts with the type of gap shown by evaluation. Prompting is the simplest option when clearer instructions or examples can stabilize the task. RAG fits gaps in current or private knowledge and cases where answers need source evidence. Fine-tuning fits a stable behavior gap, such as format, policy, style, or a narrow task, after prompting has been tested and is still inconsistent. The techniques can be combined: fine-tuning can shape behavior while RAG supplies facts that change.
+> Use evaluation to identify the gap. Improve prompts when clearer instructions or examples can stabilize the behavior. Add RAG when answers need current, private, or source-backed information. Consider fine-tuning when behavior such as format, style, or task consistency remains unstable after prompt work. The techniques can compose: fine-tuning can shape behavior while retrieval supplies changing facts. This is a diagnostic starting point, not a mandatory sequence; compare changes on the same representative evaluation set. [OpenAI: Optimizing LLM accuracy](https://developers.openai.com/api/docs/guides/optimizing-llm-accuracy)
 
 # References
 

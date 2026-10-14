@@ -13,6 +13,7 @@ publish: true
 status: Done
 qard-deck: "AI & ML"
 qard-topic: "LLM/Context Engineering/RAG/Evaluation/Evaluation"
+flashcard_uid: "4c492fb9"
 ---
 
 RAG can fail before generation starts. It can also retrieve the right evidence and still produce a bad answer. Evaluation therefore separates retrieval from generation, then checks the finished system against the user's task. One blended quality score cannot show which part needs repair.
@@ -38,11 +39,11 @@ return FolderStructureMap;
 
 # Questions
 
-> [!qard]- Why decompose RAG evaluation into separate retrieval, generation, and end-to-end layers?
-> The layers fail for different reasons and need different fixes. Retrieval scoring shows whether relevant evidence arrived. Generation scoring checks whether the answer follows that evidence, while the end-to-end score records whether the task was solved. This separates a model that ignores a good context from one that faithfully summarizes irrelevant chunks. A single score makes both failures look the same.
+> [!qard]- What do retrieval, response, and end-to-end RAG evaluations tell you?
+> Retrieval evaluation asks whether useful evidence was found and selected. Response evaluation asks whether the answer is correct or grounded given the evidence supplied. End-to-end evaluation asks whether the complete system met the task's outcome criteria. Separate results localize likely failure: a good response over bad context points upstream, while good context with a bad answer points toward generation. End-to-end failure establishes a user-visible miss but does not identify its cause. [RAG evaluators](https://learn.microsoft.com/en-us/azure/foundry/concepts/evaluation-evaluators/rag-evaluators?view=foundry)
 
-> [!qard]- What belongs in RAG evaluation specifically versus general LLM evaluation?
-> RAG adds retrieval relevance, ranking quality, and faithfulness to the evidence placed in context. It also needs labels for queries with several acceptable chunks. Golden sets, deterministic checks, semantic judges, and online experiments remain general LLM evaluation machinery. Reusing that shared layer prevents every RAG pipeline from inventing its own evaluation system.
+> [!qard]- Which evaluation concerns are specific to RAG, and which can reuse general LLM evaluation methods?
+> RAG adds retrieval-specific questions: did the system find relevant evidence, rank it well, and supply enough valid evidence to answer? The dataset must account for multiple acceptable or complementary chunks. Groundedness is useful whenever an answer is constrained by provided evidence, not only in RAG. Golden sets, deterministic checks, model judges and online evaluation are reusable methods; choose the evaluator for the measured claim and verify its labels and limits. [RAGAS: Automated Evaluation of Retrieval Augmented Generation](https://aclanthology.org/2024.eacl-demo.16.pdf) · [Evaluation types](https://docs.langchain.com/langsmith/evaluation-types)
 
 # References
 

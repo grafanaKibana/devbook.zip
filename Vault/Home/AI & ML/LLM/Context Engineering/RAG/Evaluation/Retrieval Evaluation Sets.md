@@ -11,6 +11,7 @@ status: Done
 publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Context Engineering/RAG/Evaluation/Retrieval Evaluation Sets"
+flashcard_uid: "476f3199"
 ---
 
 A retrieval evaluation set pairs queries with chunks judged relevant to them so [[Evaluation Metrics|retrieval metrics]] have ground truth. [[Building an Evaluation Set]] covers general dataset construction. This note focuses on the retrieval-specific part: deciding which chunks count, then avoiding distortions introduced by chunk-anchored synthetic questions.
@@ -62,11 +63,11 @@ The structure fits retrieval metrics directly: a query goes in, and the source c
 
 # Questions
 
-> [!qard]- When several chunks are relevant to one query, how should the retrieval metric be chosen?
-> Classify the evidence relationship first. Substitutable chunks need HitRate@k and often MRR because any early hit succeeds. Complementary chunks need Recall@k or Context Recall because the whole required set matters. If usefulness varies, graded labels and nDCG@k preserve that distinction. The cutoff must match what generation consumes and cannot be smaller than a complementary ground-truth set.
+> [!qard]- How should retrieval metrics and cutoffs change when evidence chunks vary in usefulness?
+> For substitutable evidence, retrieving any one valid chunk may be enough, so Hit Rate or MRR can capture whether a useful result appears early. For complementary evidence, measure coverage with Recall@k; graded relevance can be evaluated with nDCG. Measure first-stage Recall@N to see whether candidates enter reranking, then evaluate the final assembled top-k because only that evidence reaches generation. The cutoff and relevance labels must match the system's actual stages. [InformationRetrievalEvaluator](https://sbert.net/docs/package_reference/sentence_transformer/evaluation.html#informationretrievalevaluator) · [RAG evaluators](https://learn.microsoft.com/en-us/azure/foundry/concepts/evaluation-evaluators/rag-evaluators?view=foundry)
 
-> [!qard]- Why do synthetically generated retrieval eval sets often report worse recall than the system delivers in production?
-> Chunk-anchored generation initially labels only its source, even when duplicated or summary chunks also answer the question. Retrieval can return valid evidence that the labels call wrong, depressing the score and even reversing model rankings. Retrieve a candidate set, judge other valid answers, and expand the qrels or discard ambiguous cases. Lexical leakage creates the opposite bias by copying rare source terms and making exact match unrealistically easy.
+> [!qard]- How can chunk-generated questions produce misleading retrieval evaluation labels?
+> When a question is generated from one chunk, that chunk is an initial positive label, but a duplicate, summary, or other passage may also answer it. If those alternatives are absent from the relevance judgments, a valid result can be scored as wrong and model comparisons may be distorted. Sample retrieved candidates, assess additional relevant passages, and expand the judgments or remove ambiguous questions. Also inspect whether generation copied distinctive wording that makes lexical matching unrepresentatively easy; neither effect is inevitable. [Test set generation](https://docs.ragas.io/en/v0.3.1/getstarted/rag_testset_generation/)
 
 # References
 

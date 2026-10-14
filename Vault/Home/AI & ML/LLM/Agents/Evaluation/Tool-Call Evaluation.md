@@ -11,6 +11,7 @@ status: Done
 publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Agents/Evaluation/Tool-Call Evaluation"
+flashcard_uid: "1d83d54c"
 ---
 
 A tool call is where an agent stops describing an action and asks a system to perform it. Failures at this boundary are concrete: the agent can name the wrong tool, send the wrong value in valid JSON, invent a function, or repeat a call that changed nothing.
@@ -49,7 +50,7 @@ flowchart TD
 | Redundant-call rate | Duplicate or no-progress calls per task | Deterministic (hash of tool+args) + judge |
 | Calls-per-task | Total calls vs the minimum a clean solve needs | Counter |
 
-Keep selection and argument accuracy separate. If selection is 95% and argument accuracy is 70%, the immediate problem is value grounding. Averaging them to 82.5% destroys that diagnosis.
+Keep selection and argument accuracy separate. If selection is 95% and argument accuracy is 70%, argument handling is the first area to investigate. Averaging them to 82.5% destroys that diagnosis.
 
 # Ground Truth
 
@@ -101,7 +102,7 @@ The riskiest call may be perfectly valid: real tool, valid schema, wrong account
 # Questions
 
 > [!qard]- Why should tool selection and argument accuracy be measured separately?
-> They fail for different reasons. Choosing the wrong tool usually points to routing or unclear tool descriptions. Choosing the right tool but passing the wrong order ID, filter, or date points to grounding or schema problems. Separate metrics make a result such as 95% selection accuracy and 70% argument accuracy actionable instead of hiding it inside one average. Identifiers and enums can usually be checked against exact references, while free-text arguments often need a semantic check.
+> They measure different decisions: whether the system chose the appropriate tool and whether it supplied correct arguments. Separate results make failure patterns easier to investigate, though they do not prove the root cause. Exact checks fit identifiers and enums with a defined value; semantic checks fit free text only when the contract allows equivalent wording. [Berkeley Function Calling Leaderboard](https://gorilla.cs.berkeley.edu/leaderboard)
 
 # References
 

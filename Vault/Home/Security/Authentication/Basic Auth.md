@@ -12,6 +12,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Security"
 qard-topic: "Authentication/Basic Auth"
+flashcard_uid: "ebb77730"
 ---
 
 HTTP Basic authentication sends a reusable user identifier and password in the `Authorization` header. Base64 makes the bytes safe for the header syntax. It provides no confidentiality. RFC 7617 defines the scheme and its protection-space behavior.
@@ -103,10 +104,10 @@ Basic earns its place when interoperability requires it and its coarse credentia
 # Questions
 
 > [!qard]- Why is Basic Auth unsafe over HTTP?
-> Base64 is reversible encoding. Without TLS, every observer on the path can recover the reusable password. TLS protects it only to the termination point. The credential remains exposed to the client, verifier, trusted proxies, and any system that records the header.
+> Basic Auth sends a reusable username/password value encoded with Base64; Base64 is reversible and provides no confidentiality. Without TLS, an observer on the path can recover credentials and replay them. TLS protects only up to its termination point, so logs and trusted intermediaries remain separate exposure boundaries. [RFC 7617: Basic authentication](https://www.rfc-editor.org/rfc/rfc7617)
 
 > [!qard]- When is Basic Auth acceptable in production?
-> It can be acceptable for a constrained integration that requires Basic and supports TLS across every hop, a unique vaulted credential, narrow authorization, rotation, rate limiting, and header redaction. A shared password across many clients or an interactive user's primary password creates an unnecessarily large compromise boundary.
+> Only for a constrained integration whose protocol requires it and whose credentials can be protected across every hop: use a distinct, narrowly authorized credential per client, rotate and revoke it, and keep the header out of logs. These are operational safeguards around a reusable password scheme, not guarantees supplied by Basic itself. [RFC 7617: Basic authentication](https://www.rfc-editor.org/rfc/rfc7617)
 
 # References
 

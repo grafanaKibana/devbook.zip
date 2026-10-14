@@ -11,6 +11,7 @@ status: Done
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Structural/Decorator"
+flashcard_uid: "a1eefa19"
 ---
 
 Pizza toppings work as layers over one base. Each layer changes the result without changing the dough underneath, and different combinations can be assembled from the same pieces.
@@ -238,14 +239,17 @@ Decorator fits optional behaviors that share a contract and need explicit compos
 
 # Questions
 
+<!-- qard-id: b1ec2977-973b-48db-bb3b-05f0458c246d -->
 > [!qard]- How does ASP.NET Core Middleware implement the Decorator pattern?
-> Each middleware receives a `RequestDelegate` for the remaining pipeline. It can run logic before delegation, after delegation, or stop the chain. Startup composition fixes the wrapper order, so ordering mistakes appear as runtime behavior rather than type errors.
+> Each ASP.NET Core middleware receives a `RequestDelegate` for the remainder of the pipeline. It can run before and after that delegate, or end the chain without calling it. The application composes middleware in order, so order changes request/response behavior. [ASP.NET Core 10 middleware](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/middleware/?view=aspnetcore-10.0)
 
+<!-- qard-id: 3e762d01-9459-47e1-bc64-481597348c90 -->
 > [!qard]- When should Decorator replace inheritance for added behavior?
-> Decorator suits optional behavior assembled at composition time, especially around sealed or third-party types. Inheritance suits a stable subtype relationship. A decorator avoids coupling behavior to a base-class implementation, but introduces another object and call boundary.
+> Decorator fits behavior that should be optionally composed around an existing contract, including sealed or third-party types. Inheritance fits a stable subtype relationship. A decorator avoids tying the behavior to a base-class implementation but adds another object and delegation boundary. [[Home/Software Architecture/Patterns/Design Patterns/Structural/Decorator#Solution|Decorator solution]]
 
+<!-- qard-id: 9f76db55-9738-4abe-9446-a565d621dc2d -->
 > [!qard]- What's the performance cost of a deep decorator chain?
-> Each decorator adds a call boundary and may add asynchronous state-machine work if its method awaits. I/O usually dominates that cost. A CPU-bound hot path still deserves measurement. If wrapper overhead appears in profiles, collapsing layers on that path may be reasonable.
+> Each decorator adds another call and delegation step; an `async` wrapper that awaits can add asynchronous execution work as well. Whether that is material depends on the path: profile CPU-bound hot paths before collapsing layers, while I/O may dominate in many request workflows. [C#: async scenarios](https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/async-scenarios) · [[Home/Software Architecture/Patterns/Design Patterns/Structural/Decorator#Solution|Decorator solution]]
 
 # References
 

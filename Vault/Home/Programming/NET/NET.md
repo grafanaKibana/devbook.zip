@@ -12,6 +12,7 @@ level:
 priority: High
 qard-deck: "Programming"
 qard-topic: "NET/NET"
+flashcard_uid: "f0f708ed"
 ---
 
 .NET is a cross-platform application stack built from a runtime, base libraries, SDK tooling, languages, and higher-level frameworks. The runtime executes managed code and owns services such as garbage collection. The SDK restores, builds, tests, and publishes projects. C# and F# target the same runtime model, while ASP.NET Core and other frameworks add application-specific abstractions.
@@ -27,8 +28,9 @@ return FolderStructureMap;
 
 # Questions
 
+<!-- qard-id: 290f9386-ef5a-4148-8677-71811ce19253 -->
 > [!qard]- What are the main layers of .NET, and why does it help to separate them?
-> The main layers are the language and compiler, the runtime and base libraries, and the application frameworks and SDK tooling. Separating them makes diagnosis more precise. A C# allocation decision can create pressure that appears in the GC, while an ASP.NET Core middleware decision can tie up thread-pool workers. Identifying the layer that owns the behavior narrows where to measure and fix it.
+> A useful model separates language/compiler and SDK tooling, the runtime and base libraries, and application frameworks. They cooperate, but they own different behavior: the runtime executes managed code and provides services such as garbage collection, while frameworks add application-level pipelines. Naming the layer narrows which component owns a symptom. [Microsoft: .NET overview](https://learn.microsoft.com/en-us/dotnet/) · [Microsoft: CLR overview](https://learn.microsoft.com/en-us/dotnet/standard/clr)
 
 # References
 

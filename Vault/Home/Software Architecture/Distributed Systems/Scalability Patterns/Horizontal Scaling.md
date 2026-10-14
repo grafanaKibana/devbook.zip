@@ -11,6 +11,7 @@ status: Creation
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Distributed Systems/Scalability Patterns/Horizontal Scaling"
+flashcard_uid: "07349cc0"
 ---
 
 Horizontal scaling (scale-out) adds service instances and divides work among them. [[Home/Software Architecture/Distributed Systems/Scalability Patterns/Vertical Scaling]] instead gives one instance more resources. Scale-out can increase capacity and reduce the effect of one instance failing, but only while another component does not become the bottleneck.
@@ -86,11 +87,13 @@ Horizontal scaling earns its complexity when measured capacity grows enough to m
 
 # Questions
 
+<!-- qard-id: 3519a1dc-d268-4d95-bb60-6ad491ba0d75 -->
 > [!qard]- What architectural prerequisites must be met before horizontal scaling works?
-> Work must be divisible, routing must reach an eligible owner, and state must have a sharing or partition-ownership rule. Stateless handlers satisfy those constraints by externalizing shared state. A [[Home/Software Architecture/Distributed Systems/Load Balancing|load balancer]] can distribute requests, while stateful services also need replication, ownership, and failover coordination.
+> Work must be divisible across instances, and routing must reach an instance able to own or process it. Shared durable state must live outside interchangeable workers, or stateful work needs explicit partition ownership and routing. Stateless processes are a simpler case because any replica can take the next unit; they do not mean the application has no persistent state. [The Twelve-Factor App: Processes](https://12factor.net/processes) · [The Twelve-Factor App: Concurrency](https://12factor.net/concurrency)
 
+<!-- qard-id: 410b3f2e-b17c-4be8-82e4-a5a5e81f6ef2 -->
 > [!qard]- Why can horizontal scaling fail even with many instances?
-> More replicas can move saturation to the database, a connection pool, or an external quota. Local state can make replicas inconsistent, while sticky sessions or hot keys create uneven load. Startup delay also means new replicas may arrive after the overload has already caused failures.
+> More application replicas can shift saturation to a database, connection pool, or external quota. Local state may not be available on another replica, while hot keys or sticky routing can leave work unevenly distributed. Autoscaling reacts through measured control loops, so useful capacity may arrive after demand rises; it cannot fix the wrong bottleneck or missing state design. [The Twelve-Factor App: Processes](https://12factor.net/processes) · [Microsoft: Autoscaling guidance](https://learn.microsoft.com/en-us/azure/architecture/best-practices/auto-scaling) · [Kubernetes: Horizontal Pod Autoscaling](https://kubernetes.io/docs/concepts/workloads/autoscaling/horizontal-pod-autoscale/)
 
 # References
 

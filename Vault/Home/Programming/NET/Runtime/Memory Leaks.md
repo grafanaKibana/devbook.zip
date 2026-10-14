@@ -12,6 +12,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Programming"
 qard-topic: "NET/Runtime/Memory Leaks"
+flashcard_uid: "e5a2c1b5"
 ---
 
 In managed code, a memory leak is usually a lifetime bug: an object has stopped being useful, but a path from a GC root still reaches it. The collector is working correctly. It cannot infer that a reachable object is logically dead. Native allocations and operating-system handles form a second category because the GC does not release them directly.
@@ -371,25 +372,21 @@ The governing rule is ownership, not syntax. Each subscription, cache entry, tim
 
 # Questions
 
+<!-- qard-id: fd0bb1da-7714-4709-b6a3-752467733b71 -->
 > [!qard]- Can a .NET application leak memory even though it has garbage collection?
-> Yes. The GC reclaims managed objects only after they become unreachable. If a static cache, event subscription, or long-lived collection still points to an object that is no longer useful, the object and everything it references remain alive. The collector is doing its job, but the application is keeping the object alive for too long.
->
-> The GC does not own native memory or operating-system handles. They leak when their owner never releases them, usually through `Dispose()` or a safe wrapper such as `SafeHandle`. Repeated process growth is a reason to investigate, but a managed root path or an unreleased native allocation is what proves the leak.
+> Yes. The GC reclaims managed objects only after they become unreachable, so a root path such as an unbounded cache or lingering event subscription can retain an object that is no longer useful. Native memory and OS handles have separate ownership and release rules that the GC does not manage. Growth is a signal to investigate, not proof of a leak; the retained reference path or unreleased native allocation establishes the cause. [Microsoft: GC fundamentals](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/fundamentals) · [Microsoft: diagnose memory leaks](https://learn.microsoft.com/en-us/dotnet/core/diagnostics/debug-memory-leak)
 
+<!-- qard-id: 1bdc896e-a0a2-42f6-94be-29c7f63cf28b -->
 > [!qard]- Why is `using` needed when .NET already has garbage collection?
-> The GC manages managed memory and decides for itself when to run. Resources such as file handles, sockets, operating-system handles, and unmanaged buffers often need to be released as soon as their owner is finished with them.
->
-> A `using` statement gives that cleanup a clear scope. It has `try`/`finally` semantics, so `Dispose()` is called when control leaves the scope, including when an exception is thrown.
+> The GC controls managed-memory reclamation, but it does not release every resource at the time its owner is finished. `using` gives an `IDisposable` resource a lexical lifetime and lowers to cleanup that calls `Dispose` when control leaves the scope, including on exceptions. [Microsoft: using statement](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/using) · [Microsoft: dispose pattern](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose)
 
+<!-- qard-id: 5e311685-41d1-44ae-baf9-516faaecaf4d -->
 > [!qard]- How do `IDisposable` and a finalizer differ?
-> `IDisposable` provides explicit cleanup through `Dispose()`. The owner can call it directly or use `using`, so the resource is released at a known point.
->
-> A finalizer is a fallback that the runtime may run after the object becomes unreachable. Its timing is unpredictable, and it is not guaranteed during abrupt process termination. A custom finalizer is normally needed only when a type directly owns an unmanaged resource and no suitable `SafeHandle` exists. After explicit cleanup succeeds, `Dispose()` calls `GC.SuppressFinalize(this)` to avoid the extra finalization work.
+> `Dispose` is explicit cleanup that an owner can call at a known point. A finalizer is a delayed fallback after an object becomes unreachable; its timing is nondeterministic and it is not a shutdown guarantee. Prefer `SafeHandle` for native handles, and add a finalizer only when the type directly owns an unmanaged resource that cannot be delegated to a safe wrapper. [Microsoft: dispose pattern](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose) · [Microsoft: finalizers](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/finalizers) · [Microsoft: SafeHandle](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.safehandle)
 
+<!-- qard-id: 56cd4094-8fef-44ac-9e9c-50873f2193f8 -->
 > [!qard]- How does the .NET dispose pattern work?
-> `Dispose()` releases the resources owned by the object and must be safe to call more than once. In an inheritable type, the public method normally calls a protected `Dispose(bool disposing)` method and then suppresses finalization. The `disposing` flag is `true` during explicit cleanup, when owned managed disposables can also be released.
->
-> A finalizer is added only when the type directly owns an unmanaged resource that cannot be delegated to a safe wrapper. Its path calls `Dispose(false)`, which releases only that unmanaged state because other managed objects may already have been finalized.
+> The public `Dispose()` method releases owned resources and, for an inheritable type, normally calls `Dispose(true)` and then `GC.SuppressFinalize`. `Dispose(bool)` is idempotent: explicit disposal may release managed and unmanaged resources, while a finalizer path calls `Dispose(false)` and releases only directly owned unmanaged state. Add a finalizer only when ownership cannot be handled by `SafeHandle`. [Microsoft: dispose pattern](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose) · [Microsoft: finalizers](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/finalizers)
 
 # References
 

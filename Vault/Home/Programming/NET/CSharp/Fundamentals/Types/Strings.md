@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Programming"
 qard-topic: "NET/CSharp/Fundamentals/Types/Strings"
+flashcard_uid: "d65a72cc"
 ---
 
 `string` is the C# alias for the sealed reference type `System.String`. Its contents are immutable. Assignment copies a reference, while an operation that changes text produces a different string. That boundary explains most string behavior, including when concatenation is clear and when incremental construction starts wasting allocations.
@@ -93,11 +94,13 @@ Hot paths sometimes need construction without intermediate strings:
 
 # Questions
 
+<!-- qard-id: e73d1e16-6636-4fa5-966c-6c12bab1222c -->
 > [!qard]- When is `StringBuilder` a better choice than string concatenation?
-> `StringBuilder` is useful when text is built through many appends, especially in a loop, because it avoids allocating a new string for every intermediate result. For one expression with a small number of values, interpolation or concatenation is usually clearer and the compiler can optimize it well. In a hot path, the choice should be measured; when `StringBuilder` wins and the final size is roughly known, setting its capacity reduces buffer growth and copying.
+> `StringBuilder` is useful when text grows through repeated appends, especially in a loop, because it avoids creating a new intermediate string for each step. Interpolation or concatenation is clearer for a small one-off expression. Choose a builder when repeated construction makes allocation cost matter; capacity is useful when the final size is reasonably known. [Microsoft: StringBuilder](https://learn.microsoft.com/en-us/dotnet/standard/base-types/stringbuilder)
 
-> [!qard]- Why can `ReferenceEquals(a, b)` be `false` when `a == b` is `true` for strings?
-> String equality with `==` compares the characters, while `ReferenceEquals` checks whether both variables point to the same object. Two separately created strings can contain the same text and therefore be equal without sharing an object. Business comparisons should use string equality with the required `StringComparison`; reference equality is mainly useful when object identity or allocation behavior is being inspected.
+<!-- qard-id: cbfb80da-9ddd-4625-8352-7a13aa6b2474 -->
+> [!qard]- Why can `ReferenceEquals(a, b)` be false when `a == b` is true for strings?
+> String `==` compares string values, while `ReferenceEquals` checks whether both variables identify the same object. Two separate string instances can therefore contain equal text without sharing identity. Use the comparison rule the data needs, such as ordinal for protocol keys or culture-aware comparison for natural language. [Microsoft: string equality](https://learn.microsoft.com/en-us/dotnet/api/system.string.op_equality?view=net-10.0) · [Microsoft: string comparison best practices](https://learn.microsoft.com/en-us/dotnet/standard/base-types/best-practices-strings)
 
 # References
 

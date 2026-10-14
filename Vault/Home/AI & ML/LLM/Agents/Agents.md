@@ -12,6 +12,7 @@ status: Creation
 priority: High
 qard-deck: "AI & ML"
 qard-topic: "LLM/Agents/Agents"
+flashcard_uid: "ef9c99bb"
 ---
 
 An agentic system gives an LLM control over part of a workflow: calling tools, making decisions, or directing other LLMs. The term "agent" is used loosely, so system design starts with one practical boundary:
@@ -30,7 +31,7 @@ return FolderStructureMap;
 
 # The Augmented LLM
 
-Every agentic system starts with an LLM enhanced with retrieval, [[Tool Design|tools]], and memory. The model decides what to say or which tool to request. The surrounding harness builds the context, validates and runs tool calls, enforces operational limits, and carries selected state into later calls. [[Agent Loop]] follows that boundary across repeated decisions. This single-agent unit should work well before orchestration is added. Model choice, prompts, and clear tool contracts usually matter more than another control layer.
+An augmented LLM can use retrieval, [[Tool Design|tools]], and memory. The model decides what to say or which tool to request. The surrounding harness builds the context, validates and runs tool calls, enforces operational limits, and carries selected state into later calls. [[Agent Loop]] follows that boundary across repeated decisions. This single-agent unit should work well before orchestration is added. Model choice, prompts, and clear tool contracts usually matter more than another control layer.
 
 [[Model Context Protocol|Model Context Protocol (MCP)]] standardizes how an augmented LLM connects to external tools and data sources.
 
@@ -87,13 +88,13 @@ Memory systems usually repeat three operations: `record → recall → consolida
 # Questions
 
 > [!qard]- When does a workflow fit better than an autonomous agent?
-> A workflow fits predictable steps with explicit inputs and outputs. Its fixed control flow is cheaper to run and easier to debug. Autonomy is justified when the steps are not known in advance and the system has a checkable success signal that can catch drift.
+> A workflow fits when the steps and branches can be defined in advance; code controls the path. An agent fits when the next action must adapt to intermediate results, often through tool use. That flexibility adds model calls and failure paths, so use it when the task needs dynamic decisions and the value outweighs the added cost and risk. A measurable outcome helps evaluate either design. [Building Effective AI Agents](https://www.anthropic.com/engineering/building-effective-agents)
 
-> [!qard]- How does an autonomous agent accumulate error, and what bounds it?
-> Each step consumes state produced by earlier steps, so one bad assumption can shape the rest of the run. Iteration caps bound cost, validation gates reject invalid progress, and an escalation path stops the loop when recovery needs outside input. Decision and tool traces make the original divergence visible.
+> [!qard]- How can an autonomous agent accumulate error, and what bounds the run?
+> Each action uses state produced by earlier actions, so an incorrect assumption can influence later decisions and compound. A task-specific step or cost limit bounds the run; checks against expected outcomes can catch some bad progress; and a recovery or escalation path defines what happens when the system cannot proceed safely. Traces help locate divergence, but these controls reduce risk rather than guarantee recovery. [Building Effective AI Agents](https://www.anthropic.com/engineering/building-effective-agents) · [Effective context engineering for AI agents](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents)
 
 > [!qard]- What makes a task a good fit for an autonomous agent?
-> The control flow must be genuinely open-ended, and progress must still be checkable. Tests, resolution criteria, or source-backed claims give the loop feedback. Vague or delayed outcomes do not. The agent can keep moving while getting further from the goal.
+> An agent is useful when the path cannot be fully specified in advance and intermediate results must influence the next action. The outcome still needs criteria that can eventually determine success or failure; delayed feedback can work when execution has a timeout, checkpoints, and a recovery plan. If success stays vague, the system cannot tell whether another action helped. [Building Effective AI Agents](https://www.anthropic.com/engineering/building-effective-agents)
 
 # References
 

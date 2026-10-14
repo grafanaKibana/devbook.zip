@@ -11,6 +11,7 @@ status: Done
 publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Embeddings"
+flashcard_uid: "485a25d5"
 ---
 
 Embeddings turn text into vectors so that related meanings occupy nearby points. That geometry lets retrieval match "throttle partner API traffic" with a document about "rate limiting for partner plan" even when the wording does not overlap.
@@ -107,10 +108,13 @@ Start with the simplest model that establishes a credible recall baseline. Fine-
 
 # Questions
 
-> [!qard]- How do Matryoshka embeddings reduce vector storage, and how should the smaller size be validated?
-> Matryoshka training makes shorter prefixes of the full vector useful on their own, so a model with a `dimensions` option can return 256 or 512 values instead of the full size. Indexing 256 rather than 1536 float values cuts raw ANN vector storage by about six times and also reduces similarity work. Recall is not guaranteed, so the same labeled queries must be compared at several dimensions using Recall@k and latency. If full vectors are used for reranking, retaining or recomputing them adds storage, API cost, or latency outside the smaller index.
+> [!qard]- What is an embedding, and how does it support semantic retrieval?
+> An embedding represents text as a numeric vector. A model maps both indexed chunks and a query into compatible vectors; a similarity or distance measure ranks nearby candidates for retrieval. The score is a relevance signal, not proof that a chunk answers the question, so downstream retrieval still needs evaluation. [Vector embeddings](https://developers.openai.com/api/docs/guides/embeddings) · [Vector search overview](https://learn.microsoft.com/en-us/azure/search/vector-search-overview)
 
-> [!qard]- Why can switching to a higher-scoring embedding model cause recall to drop on existing queries?
+> [!qard]- How do Matryoshka embeddings reduce vector storage, and how should a shorter vector be validated?
+> Matryoshka Representation Learning trains a representation so shorter prefixes remain useful at lower dimensions. Some providers expose that through a model-specific `dimensions` option; OpenAI's `text-embedding-3` models support shortened outputs. At the same data type, 256 rather than 1536 float values uses one-sixth the raw vector payload, not one-sixth of the whole index. Shorter vectors can also reduce similarity work, but retrieval recall may fall. Compare dimensions on the same labeled queries with Recall@k and latency; if full vectors are needed for reranking, retaining or recomputing them adds storage, API cost, or latency. [OpenAI embeddings guide](https://developers.openai.com/api/docs/guides/embeddings) · [Matryoshka Representation Learning](https://arxiv.org/abs/2205.13147)
+
+> [!qard]- What happens to retrieval when queries use embeddings from a new model but the corpus still has vectors from the old model?
 > Each model defines its own vector space. Comparing a query from the new model with stored vectors from the old one produces meaningless distances and broken rankings. Build the new corpus index before switching query traffic, and include the model name and version in embedding-cache keys.
 
 # References

@@ -12,6 +12,7 @@ level:
 status: Creation
 qard-deck: "Data Persistence"
 qard-topic: "SQL/SQL"
+flashcard_uid: "af026b91"
 ---
 
 The relational model stores facts as rows, connects them through keys, and enforces declared constraints at the database boundary. SQL states the required result rather than an access path. The optimizer chooses scans, seeks, join order, and physical operators that preserve the query's semantics. A relational database is a strong default when integrity constraints, multi-row transactions, and new query combinations matter more than storing one access pattern in its final read shape.
@@ -83,17 +84,24 @@ No physical join is universally fastest. Input size, ordering, row width, indexe
 
 # Questions
 
-> [!qard]- What is the difference between WHERE and HAVING?
-> `WHERE` filters source rows before grouping and cannot use aggregate results. `HAVING` filters groups after `GROUP BY` and can test aggregates such as `COUNT(*)`. A non-aggregate predicate belongs in `WHERE` when it can reduce the rows entering the grouping step without changing semantics.
+<!-- qard-id: d063901b-80b1-4d4e-8182-db595534d76a -->
+> [!qard]- What is the difference between `WHERE` and `HAVING`?
+> `WHERE` filters rows before grouping; `HAVING` filters groups after grouping and can test aggregates for those groups. A `WHERE` predicate cannot use an aggregate result from its own query block, although a subquery can contain an aggregate. Put non-aggregate filters in `WHERE` when that preserves the intended result and reduces rows entering grouping. [PostgreSQL: SELECT](https://www.postgresql.org/docs/current/sql-select.html)
 
-> [!qard]- What is the difference between a stored procedure and a function?
-> A stored procedure runs as a separate database operation. It can execute several statements, change data, and return result sets or output parameters. A function returns a scalar or table value and can be used inside a query, so the database limits what it can do. SQL Server may inline an eligible scalar UDF. Otherwise, the function may run once per row and limit plan choices such as parallelism.
+<!-- qard-id: 55e3e309-6041-4b3c-8761-2ddb27b8e336 -->
+> [!qard]- In SQL Server, how do stored procedures and user-defined functions differ?
+> A stored procedure is invoked as a database operation; it can change data and return result sets, output parameters, or a return status. A T-SQL user-defined function returns a scalar or table value for use in an expression or query, and SQL Server restricts its side effects and result behavior. Eligible scalar UDFs may be inlined by SQL Server 2019 and later, but inlining depends on eligibility and context. [SQL Server: CREATE PROCEDURE](https://learn.microsoft.com/en-us/sql/t-sql/statements/create-procedure-transact-sql?view=sql-server-ver15) · [SQL Server: Create user-defined functions](https://learn.microsoft.com/en-us/sql/relational-databases/user-defined-functions/create-user-defined-functions-database-engine) · [Scalar UDF inlining](https://learn.microsoft.com/sql/relational-databases/user-defined-functions/scalar-udf-inlining)
 
-> [!qard]- What is a Common Table Expression (CTE), and when is a temp table a better fit?
-> A CTE gives a name to a query result for one statement. It does not automatically store the result or guarantee that repeated references reuse the same work. A temp table is usually better when the intermediate result must be inspected, indexed, reused across statements, or optimized with its own statistics.
+<!-- qard-id: a9422bb2-6447-46cf-8be9-efd38e475b30 -->
+> [!qard]- In SQL Server, when is a temp table a better fit than a CTE?
+> A SQL Server CTE names a result for one following statement; it does not promise materialization. Repeated outer references can cause the CTE query to be re-executed. A temp table can be inspected, indexed, reused across statements, and given its own statistics, at the cost of writing and managing an intermediate object. [Microsoft: WITH common table expression](https://learn.microsoft.com/en-us/sql/t-sql/queries/with-common-table-expression-transact-sql?view=sql-server-ver17)
 
-> [!qard]- What are SQL Server transaction isolation levels?
-> SQL Server provides `READ UNCOMMITTED`, `READ COMMITTED`, `REPEATABLE READ`, `SERIALIZABLE`, and `SNAPSHOT`. Enabling Read Committed Snapshot Isolation changes `READ COMMITTED` reads to statement-level row versions. `NOLOCK` is not a general performance switch: it permits observations of rolled-back work and can return missing or duplicate rows while data changes concurrently.
+<!-- qard-id: 6f3bbda3-3f75-4425-bce6-80ce372ac614 -->
+> [!qard]- Which isolation levels does SQL Server provide, and what does enabling Read Committed Snapshot Isolation change about READ COMMITTED reads?
+> SQL Server provides `READ UNCOMMITTED`, `READ COMMITTED`, `REPEATABLE READ`, `SERIALIZABLE`, and `SNAPSHOT`. Enabling Read Committed Snapshot Isolation changes `READ COMMITTED` reads to statement-level row versions.
+<!-- qard-id: 7eefc702-f9a2-474d-b88e-1fa86d8701b2 -->
+> [!qard]- In SQL Server, why is `NOLOCK` not a general performance switch, and what can it return while data changes concurrently?
+> `NOLOCK` is not a general performance switch: it permits observations of rolled-back work and can return missing or duplicate rows while data changes concurrently.
 
 # References
 

@@ -11,6 +11,7 @@ status: Done
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Creational/Factory Method"
+flashcard_uid: "33124e08"
 ---
 
 Sometimes a base workflow knows when it needs a collaborator but cannot choose the concrete implementation. A notification workflow can save an order and send a confirmation while a subtype decides whether the sender uses email or SMS.
@@ -166,11 +167,13 @@ Slack can be added as another creator subtype without changing the order workflo
 
 # Questions
 
+<!-- qard-id: 387e21f5-e2c0-481e-bb89-cf3370a20ffb -->
 > [!qard]- When does Factory Method become the wrong choice?
-> It is the wrong fit when no creator algorithm needs an overridable construction hook. A static factory or DI registration is smaller for simple selection. When several product types must vary together, an Abstract Factory makes that family boundary explicit.
+> Factory Method adds little when no creator workflow needs an overridable construction hook. A static factory or DI registration is simpler for straightforward selection; use Abstract Factory when several related products must vary together. [GoF: Factory Method and Abstract Factory](https://www.oreilly.com/library/view/design-patterns-elements/0201633612/) · [.NET dependency injection](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection/overview)
 
+<!-- qard-id: 6ba2a5be-041f-4ac2-ad2a-c3f3cd810ee2 -->
 > [!qard]- How does Factory Method support the Open/Closed Principle?
-> The shared creator algorithm can remain unchanged while a new subtype supplies another product. This protects only the creation variation anticipated by the abstraction. A change to the workflow or product contract still modifies existing code. If subtypes exist solely to return different constructors, a registry or DI registration may express the variation with fewer classes.
+> The creator algorithm can stay unchanged when a new creator subtype supplies a product through the anticipated hook. That protects this variation point only: changing the shared workflow or product contract can still require edits to existing code. [GoF: Factory Method](https://www.oreilly.com/library/view/design-patterns-elements/0201633612/)
 
 # References
 

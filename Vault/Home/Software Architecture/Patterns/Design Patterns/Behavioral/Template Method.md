@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Behavioral/Template Method"
+flashcard_uid: "93eeaf03"
 ---
 
 Tea and coffee can share a preparation sequence while varying the brewing step. The sequence belongs in one place. Subclasses fill the deliberate gaps.
@@ -193,11 +194,13 @@ It fits poorly when behavior must change at runtime or when inheritance exists o
 
 # Questions
 
+<!-- qard-id: 1cb407d0-9794-4cf3-8019-5f9e34d0c19d -->
 > [!qard]- What should determine whether algorithm variation uses Template Method or Strategy?
-> Template Method fits a stable workflow whose hooks make sense only inside one base class. Strategy fits a behavior that is useful on its own or must be replaced at runtime. Template Method couples variants through inheritance. Strategy adds another dependency and needs a clear selection rule.
+> Use Template Method when a base type owns a stable sequence and subclasses vary selected steps. Use Strategy when the varying algorithm is a separate collaborator that can be replaced or selected independently. Template Method couples variation to inheritance; Strategy adds composition and selection. [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Template Method#Solution|Template Method implementation]] · [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Strategy#Solution|Strategy implementation]]
 
+<!-- qard-id: 6f925cbd-8e7f-4f10-a0f2-f6cc3294b014 -->
 > [!qard]- What is the "Hollywood Principle," and how does Template Method apply it?
-> The principle means that the framework controls the flow and calls application code at defined extension points. Template Method applies that rule inside a class: the base method fixes the order, then calls subclass hooks for the steps that may vary. This protects the sequence, but every subtype becomes coupled to that calling protocol.
+> The Hollywood Principle means the framework or base class owns the control flow and calls supplied extension points. Template Method applies it by fixing the algorithm’s sequence while subclasses implement selected hooks; subclasses follow that protocol instead of driving the whole operation. [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Template Method#Solution|Template Method implementation]]
 
 # References
 

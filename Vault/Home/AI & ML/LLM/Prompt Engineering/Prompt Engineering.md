@@ -12,6 +12,7 @@ publish: true
 priority: Medium
 qard-deck: "AI & ML"
 qard-topic: "LLM/Prompt Engineering/Prompt Engineering"
+flashcard_uid: "008ceb7e"
 ---
 
 Prompt engineering turns an intention into a task the model can execute and the system can test. Small changes in wording or generation settings can shift output quality because an LLM samples from a probability distribution rather than following a fixed program.
@@ -141,14 +142,13 @@ Strict output shape needs structured output or schema validation. Examples can c
 
 # Questions
 
-> [!qard]- Why must prompt structure and model settings be designed together?
-> The prompt defines the task, context, constraints, and expected output, while model settings control sampling and output limits. Clear instructions can still produce unstable results when sampling is too random for the task. Conservative settings cannot repair an ambiguous instruction or a missing output contract. Both parts should be tested together on the same task-specific evaluation set because changing either one can change quality, consistency, latency, and cost.
+> [!qard]- Why must prompt instructions and generation settings be evaluated together?
+> The prompt defines task, context, constraints, and requested output; supported generation settings shape how the selected model produces it. A low-variation setting cannot repair an ambiguous task, and a clear prompt cannot make an unsupported parameter take effect. Test prompt and settings together on a task-specific evaluation set because endpoint and model support varies. [OpenAI prompt engineering](https://developers.openai.com/api/docs/guides/prompt-engineering) · [OpenAI reasoning best practices](https://developers.openai.com/api/docs/guides/reasoning-best-practices)
 
-> [!qard]- When is few-shot prompting a better fit than pure instruction prompting?
-> Few-shot prompting is useful when the expected meaning, label boundary, or output convention is easier to demonstrate than to describe. A small set of representative examples can show how close cases should be handled and make repeated outputs more consistent. Examples do not replace a schema when the shape must be strict. Start with the smallest set that improves held-out results, then add edge cases only when evaluation shows a real gap because every example consumes context.
 
-> [!qard]- How can an accurate but verbose and expensive prompt be tightened?
-> First identify whether the cost comes from repeated instructions, unnecessary examples, oversized context, or a verbose output contract. Remove duplicated input and state the required length and shape directly. `max_tokens` is a safety cap rather than the main way to request a concise answer because a low cap can truncate a valid response; stop sequences help only when the output has a reliable delimiter. Compare token usage, task quality, and truncation or failure rates after each change so a cheaper prompt does not quietly become less accurate.
+
+> [!qard]- How should output-token caps control cost without truncating a valid answer?
+> Remove repeated instructions, irrelevant context, or examples first, and state the desired answer shape directly. A token cap is a hard ceiling, not a reliable request for concise wording; too little headroom can cut off a valid response. OpenAI Responses uses `max_output_tokens`, while Chat Completions uses `max_completion_tokens`; supported stop controls also depend on endpoint and model. [OpenAI token counting](https://developers.openai.com/api/docs/guides/token-counting)
 
 # References
 

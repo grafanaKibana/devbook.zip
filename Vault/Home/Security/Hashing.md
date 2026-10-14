@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Security"
 qard-topic: "Hashing"
+flashcard_uid: "bca46ee1"
 ---
 
 A cryptographic hash maps an arbitrary-length byte string to a fixed-length digest. A secure general-purpose hash is designed to resist finding an input for a chosen digest and finding two inputs with the same digest. There is no decryption key. Inputs from a small or predictable domain can still be guessed and hashed, which is why a digest is not a way to hide passwords or identifiers.
@@ -100,13 +101,13 @@ SHA-256 is a common fingerprint when the protocol permits it. HMAC fits a shared
 # Questions
 
 > [!qard]- Why is SHA-256 alone unsuitable for password storage?
-> SHA-256 is fast and gives an offline attacker a cheap guess test. Password verifiers need a unique salt and an adaptive password-hashing function whose CPU and memory costs are tuned for the deployment and raised as hardware improves.
+> SHA-256 is designed to be fast, so a stolen verifier table lets an attacker test password guesses cheaply offline. Store a unique salt with each verifier and use an adaptive password-hashing function with deployment-appropriate work and memory cost. [OWASP: Password Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html)
 
 > [!qard]- How do a hash, an HMAC, and a digital signature differ?
-> A hash is keyless. Adversarial integrity depends on authenticating the expected digest. HMAC authenticates within a shared-secret group, where every verifier can also create tags. A digital signature gives one private-key holder the signing capability while allowing public verification, provided the verification key is trusted.
+> A hash is keyless and produces a digest, so adversarial integrity requires authenticating the expected digest separately. HMAC uses a shared secret: every holder that verifies a tag can also create one. A digital signature uses a private signing key and a public verification key; the verifier must trust the key-to-identity binding. [NIST: Secure Hash Standard](https://csrc.nist.gov/pubs/fips/180-4/upd1/final) · [RFC 2104: HMAC](https://www.rfc-editor.org/rfc/rfc2104) · [NIST: Digital Signature Standard](https://csrc.nist.gov/pubs/fips/186-5/final)
 
 > [!qard]- What does a salt protect against, and why must it be unique per user?
-> A salt prevents one precomputed table or one computed guess from being reused across many stored verifiers. It is public and stored with the verifier. Each credential needs a distinct random salt so equal passwords do not produce equal stored values.
+> A salt is public data stored with the password verifier. A distinct salt makes equal passwords produce different verifiers and prevents one precomputed result from being reused across accounts. It does not stop a targeted guess against one stolen verifier; the password KDF supplies the per-guess cost. [OWASP: Password Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html)
 
 # References
 

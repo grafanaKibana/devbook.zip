@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Programming"
 qard-topic: "NET/CSharp/Fundamentals/Types/Records"
+flashcard_uid: "c03985b0"
 ---
 
 Records are C# types for models whose contents define equality. The compiler supplies value-based equality and a useful `ToString`. Positional records also get properties and deconstruction. A `with` expression creates a copy with selected members changed. This fits DTOs, messages, and other data that should compare by value instead of object identity.
@@ -207,7 +208,7 @@ Use a record when value equality and data-carrier members are part of the contra
 # `required` and Validation
 
 - Combine records with **`required`** to force a nominal property without a positional parameter: `public record User { public required string Email { get; init; } }`.
-- Validate by adding logic in a property initializer or a body block on a positional parameter:
+- Validate by adding logic in a property initializer:
 
   ```csharp
   public record Email(string Value)
@@ -241,21 +242,27 @@ Console.WriteLine(a.Items.Count); // 3 — same list instance
 
 # Questions
 
+<!-- qard-id: 40d90777-69d9-4746-901b-68d334cae949 -->
 > [!qard]- In `record Wrapper(List<int> Items)`, if `var b = a with { };` and an item is added to `b.Items`, does `a` observe the change, and why?
-> Yes. The copy is shallow, so both properties hold the same `List<int>` reference. Record equality also delegates to the list's equality, which remains reference-based before and after the mutation. A model that needs structural collection equality must choose a suitable immutable value or implement that equality explicitly.
+> Yes. The `with` copy is shallow: `a.Items` and `b.Items` hold the same `List<int>` reference, so adding an item through `b.Items` changes the list visible through `a.Items` too.
+<!-- qard-id: 003b8f0c-ee5e-4a60-ac02-067b2fcef925 -->
+> [!qard]- Given `record Wrapper(List<int> Items)` and `var b = a with { };`, are `a` and `b` equal before and after an item is added to `b.Items`? Why?
+> They remain equal both before and after the mutation. Record equality delegates to the list's equality, which is reference-based; `a.Items` and `b.Items` still refer to the same list after the item is added.
+<!-- qard-id: 13eb1fca-847d-4f86-8bf6-c4720c859178 -->
+> [!qard]- When a record contains a collection but the model requires structural collection equality, what must it choose or implement?
+> A record containing `List<T>` delegates equality to the list, whose equality is reference-based. For structural collection equality, the model must choose a suitable immutable value or implement that equality explicitly.
 
+<!-- qard-id: 6ceafb8f-9a7c-4ebf-8ae5-7739e4e828aa -->
 > [!qard]- When is `record class` a better choice than `readonly record struct`?
-> A `record class` is a reference type, so assignment copies a reference instead of the whole value. It is a better fit when inheritance or natural `null` semantics are needed, or when copying a large value would be expensive.
-> 
-> A `readonly record struct` fits a small logical value when whole-value copies are cheap and inheritance is unnecessary. Boxing and frequent copies can remove its allocation advantage, so the real call path still needs measurement. Reference members do not decide the choice by themselves; either form can contain references to separately allocated objects.
+> Both provide record-style value equality. A `record class` has reference semantics: assignment shares an object reference and it can participate in class inheritance. A `readonly record struct` has value semantics and copies its value on assignment. Choose based on identity, nullability, and copying behavior; measure allocation or copy costs when they drive the decision. [Microsoft: records](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record) · [Microsoft: value types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/value-types)
 
-> [!qard]- If `Equals` on a positional record is overridden to ignore one property, does `GetHashCode` still include that property, and what breaks?
-> Yes, unless `GetHashCode` is overridden as well. Two records can then be equal according to `Equals` but produce different hash codes because the ignored property still affects the synthesized hash. Hash-based collections may fail to find an equal key or place equal values in different buckets. C# reports CS8851 for this mismatch, so both methods should use the same equality components.
+<!-- qard-id: 3a52f8c2-f1a4-4c9e-960f-6461e184a661 -->
+> [!qard]- If record equality is customized, why must `GetHashCode` stay consistent with it?
+> Equal objects must produce equal hash codes. If custom `Equals` ignores a property while `GetHashCode` still includes it, equal records can land in different hash buckets and lookups can fail. Keep both methods based on the same equality components; the compiler reports CS8851 for certain record overrides that omit the matching hash override. [Microsoft: record declaration errors](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-messages/record-declaration-errors) · [Microsoft: Object.GetHashCode](https://learn.microsoft.com/en-us/dotnet/api/system.object.gethashcode?view=net-10.0)
 
+<!-- qard-id: 7c90c152-1919-4c74-84a3-c9cb621d3255 -->
 > [!qard]- Can a record struct be used safely as a `Dictionary` key, and what can make it unsafe?
-> Yes. A dictionary copies a struct key when it is inserted, so changing the caller's local variable later does not change the stored key. The stored key is safe only while every value observed by its equality and hash code remains stable.
->
-> A reference field is the main risk because the stored copy and the caller's copy still point to the same object. If custom equality or a comparer hashes that object's mutable contents, changing the object changes the hash seen for the stored key and can make the entry unreachable in its original bucket. A comparer whose results change over time causes the same problem. A `readonly record struct` prevents direct field reassignment, but it does not freeze referenced objects. Stable value-semantic members and a stable comparer make the type safe to use as a key.
+> Yes, if the equality and hash result for the stored key remain stable. A struct copy does not deep-copy referenced members: if equality or a comparer observes mutable referenced state, changing that state can change the key’s hash while it is stored and make lookup unreliable. `readonly` prevents direct reassignment of struct fields but does not freeze referenced objects. [Microsoft: records](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record) · [Microsoft: Object.GetHashCode](https://learn.microsoft.com/en-us/dotnet/api/system.object.gethashcode?view=net-10.0)
 
 # References
 

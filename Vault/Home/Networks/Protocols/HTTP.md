@@ -12,6 +12,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Networks"
 qard-topic: "Protocols/HTTP"
+flashcard_uid: "bf424dee"
 ---
 
 HTTP is the message contract behind browsers, APIs, webhooks, and service health checks. A request names a target and carries a method, fields, and optional content. The response reports an outcome and may carry a representation.
@@ -197,7 +198,7 @@ Treat trust-store modification as privileged configuration. Certificate pinning 
 
 ## Lifetime and DNS
 
-Long-lived clients can be created directly or through `IHttpClientFactory`. Creating and disposing one client per request destroys connection pools, forces fresh handshakes, and leaves closed TCP connections in `TIME_WAIT`.
+Long-lived clients can be created directly or through `IHttpClientFactory`. Creating and disposing one client with its own disposable handler per request destroys connection pools, forces fresh handshakes, and leaves closed TCP connections in `TIME_WAIT`.
 
 ```csharp
 var handler = new SocketsHttpHandler
@@ -249,8 +250,8 @@ Dispose `HttpResponseMessage` and stream large bodies with `HttpCompletionOption
 
 # Questions
 
-> [!qard]- Why is an idempotent HTTP method not automatically safe to retry?
-> Idempotency constrains the intended effect of repeating the method. A request can still carry a one-time credential, trigger downstream work, consume deadline budget, or have an unknown first outcome. Automatic retry needs an end-to-end replay contract, not the method label alone.
+> [!qard]- What does HTTP idempotency guarantee when a retry is considered?
+> An idempotent method has the same intended effect on the server when the same request is repeated as when it is sent once. That permits retrying after a communication failure even when the first outcome is unknown; it does not promise identical responses or erase unrelated side effects. The request must still be replayable within its deadline, with credentials and application effects handled safely. [RFC 9110: Idempotent methods](https://www.rfc-editor.org/rfc/rfc9110.html#section-9.2.2)
 
 # References
 

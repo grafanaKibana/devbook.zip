@@ -11,6 +11,7 @@ status: Done
 publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Context Engineering/RAG/Vector Databases"
+flashcard_uid: "797606ed"
 ---
 
 A vector database stores [[Embeddings]] with metadata and searches them by proximity. It sits under dense [[Retrieval]], where the indexed [[Chunking|chunks]] must be searched in milliseconds even when the collection contains millions of vectors.
@@ -119,8 +120,11 @@ HNSW is a practical starting point for a typical text corpus. IVF or IVF-PQ beco
 
 # Questions
 
-> [!qard]- Why do vector databases use approximate nearest-neighbor search instead of exact search?
-> Exact search scores the query against every stored vector, so its work grows linearly with the collection. An ANN index organizes the vectors so a query visits only the most promising parts of the search space, which cuts latency and compute. The tradeoff is that it can miss some true nearest neighbors, so recall must be compared with brute-force ground truth at the required latency.
+> [!qard]- What role does a vector database play in a RAG system?
+> An embedding model creates numeric representations; a vector database or search index stores and indexes them, then retrieves nearby vectors for a query. The service can return associated IDs or fields and apply metadata filters; application code resolves the results to source text and assembles prompt context. Vector similarity finds candidates, but does not prove relevance or replace an authorization check. [Vector search overview](https://learn.microsoft.com/en-us/azure/search/vector-search-overview)
+
+> [!qard]- Why do vector indexes use approximate nearest-neighbor search instead of exact search?
+> Exact search compares the query with every stored vector. For N vectors of dimension d, that requires distance work across roughly N × d components. An approximate index narrows which vectors are examined, often reducing query work at the cost of possibly missing true neighbors. Measure recall against exact-search ground truth at realistic filters and query slices, then choose an operating point that meets the latency and recall requirements. [Faiss index guide](https://github.com/facebookresearch/faiss/wiki/Faiss-indexes)
 
 # References
 

@@ -11,6 +11,7 @@ status: Done
 publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Context Engineering/RAG/Chunking"
+flashcard_uid: "6bf1b415"
 ---
 
 Chunking sets the unit of retrieval. Large chunks carry more surrounding text but waste context on noise. Small chunks match precisely, yet can separate a rule from the condition that changes it. A useful chunk keeps one recoverable idea together and retains enough source metadata to trace it.
@@ -83,7 +84,7 @@ It is a good fit for:
 The separator hierarchy can still be wrong for the source format.
 
 - **Tables and code blocks can still be split** if the separator hierarchy is text-centric. A markdown table has no `\n\n` between rows, so the splitter treats the whole table as continuous text and may cut mid-row. Add custom separators for table and code block delimiters, or pre-extract these as atomic units before recursive splitting.
-- **Separator ordering is format-dependent.** The default hierarchy assumes markdown-style headings. HTML, PDF-extracted text, or Slack exports need different separator lists. A wrong hierarchy degrades to character-level splitting silently.
+- **Separator ordering is format-dependent.** The generic LangChain default uses paragraph breaks, newlines, spaces, and finally individual characters. HTML, PDF-extracted text, or Slack exports need different separator lists. A wrong hierarchy degrades to character-level splitting silently.
 
 ## Structure-Aware Chunking
 
@@ -146,7 +147,7 @@ Parent-child chunking separates the search unit from the generation unit.
 
 - Create small child chunks as precise retrieval units (100-200 tokens) and map them to larger parent spans (500-1000 tokens) from the source document.
 - Retrieval searches the smaller children for precision. A match expands to its parent before generation, restoring context that the child alone may lack.
-- The parent-child mapping is stored as metadata. Each child stores its parent ID. Expansion is a metadata lookup, not a second retrieval call.
+- The parent-child mapping is stored as metadata. Each child stores its parent ID. Expansion uses a parent lookup rather than another similarity search.
 
 ```mermaid
 flowchart TD
@@ -218,14 +219,17 @@ The table describes steady-state behavior. A practical rollout starts with recur
 
 # Questions
 
-> [!qard]- Why does parent-child chunking often improve answer completeness over child-only retrieval?
-> Small children give the retriever a precise target, but a child may omit an adjacent exception or prerequisite. Expanding a match to its parent restores that surrounding evidence before generation. The price is more context and possibly more noise, so parent size still needs evaluation.
+> [!qard]- How should chunking be chosen for a RAG corpus?
+> Chunking determines the text units retrieval can return. Large chunks preserve surrounding relationships but may add irrelevant context; small chunks can improve targeting while separating a rule from its exception. There is no universally best splitter: start with boundaries that fit the source, inspect retrieval and answer failures, then add structure-aware, parent-child, or semantic handling only when evaluation shows the benefit is worth the extra ingestion and maintenance work. [Chunk documents](https://learn.microsoft.com/en-us/azure/search/vector-search-how-to-chunk-documents)
+
+> [!qard]- How does parent-child chunking change the context returned for a matching passage?
+> The retriever can match a small child passage, then the application can use its parent identifier to fetch a larger surrounding section. That may restore a nearby prerequisite or exception omitted from the child, but adds tokens and can introduce irrelevant text. Evaluate whether the added parent context improves retrieval and end-to-end answers for the corpus. [Chunk documents](https://learn.microsoft.com/en-us/azure/search/vector-search-how-to-chunk-documents) · [Index projections](https://learn.microsoft.com/en-us/azure/search/search-how-to-define-index-projections)
 
 > [!qard]- When should a team move from recursive to structure-aware chunking?
-> Move when failed queries repeatedly trace to broken tables, code blocks, or clause-and-exception pairs. Recursive splitting understands separators, not the source format's actual structure. A parser is justified once that blind spot costs more than maintaining it.
+> Move when repeated retrieval failures trace to structure the current splitter breaks, such as tables, code blocks, or clause-and-exception pairs. A generic recursive splitter applies a priority-ordered separator list; it does not parse a document format's semantic structure. Add a parser when measured retrieval or answer gains justify its ingestion and maintenance cost. [Chunk documents](https://learn.microsoft.com/en-us/azure/search/vector-search-how-to-chunk-documents) · [RecursiveCharacterTextSplitter implementation](https://github.com/langchain-ai/langchain/blob/master/libs/text-splitters/langchain_text_splitters/character.py)
 
 > [!qard]- Why is semantic chunking not always superior to simpler rule-based approaches?
-> It embeds spans during ingestion and relies on a threshold whose distribution changes with the model and corpus. Reliable headings already provide cheaper boundaries. Semantic splitting is useful when topic changes are real but structural markers are absent.
+> A semantic splitter embeds text spans, compares adjacent-span similarity or distance scores, and places boundaries using a configured breakpoint rule. The score distribution depends on the embedding model and corpus, so breakpoint behavior needs evaluation after those inputs change. If reliable headings already mark useful boundaries, a simpler splitter may be enough; semantic splitting earns its embedding and tuning cost when topic changes matter and structural markers are absent. [SemanticChunker implementation](https://github.com/langchain-ai/langchain-experimental/blob/main/libs/experimental/langchain_experimental/text_splitter.py) · [Chunk documents](https://learn.microsoft.com/en-us/azure/search/vector-search-how-to-chunk-documents)
 
 # References
 

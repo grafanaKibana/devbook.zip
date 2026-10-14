@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Programming"
 qard-topic: "NET/CSharp/Fundamentals/Generics"
+flashcard_uid: "3fc98b91"
 ---
 
 Generics parameterize code by type. `List<T>` can store any `T` while the compiler still checks every read and write. That is a stronger contract than accepting `object` and recovering the real type with casts. For value types, generic collections also avoid the boxing required by older object-based APIs.
@@ -114,16 +115,21 @@ var list = Activator.CreateInstance(closed);
 
 # Questions
 
+<!-- qard-id: 051626ec-488b-484a-affe-9b09e168fb5e -->
+> [!qard]- What do generics add to a C# API?
+> A type parameter lets one implementation work with different types while preserving compile-time checking of values passed through that API. Constraints narrow the allowed types and tell the compiler which operations or members are safe to use. [Microsoft: generic types and methods](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/types/generics) · [Microsoft: constraints on type parameters](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/generics/constraints-on-type-parameters)
+
+<!-- qard-id: 96d2fdb0-3c95-4eb1-91da-258a4574cde2 -->
 > [!qard]- Why does `IEnumerable<string>` assign to `IEnumerable<object>`, but `List<string>` does not assign to `List<object>`?
-> `IEnumerable<out T>` only produces values, so treating a sequence of strings as a sequence of objects is safe. `List<T>` also accepts values. If a `List<string>` could masquerade as `List<object>`, a caller could insert a non-string and break the original list's contract.
+> `IEnumerable<T>` is covariant because it only produces `T`: a sequence of strings can safely be read as objects. `List<T>` is invariant because it also accepts values; treating `List<string>` as `List<object>` would allow inserting a non-string into the original list. [Microsoft: covariance and contravariance](https://learn.microsoft.com/en-us/dotnet/standard/generics/covariance-and-contravariance)
 
-> [!qard]- When should a generic interface type parameter be marked as `out` or `in`?
-> Mark a type parameter as `out` when the interface only produces values of that type. This is why a producer of strings can safely be used where a producer of objects is expected. Mark it as `in` when the interface only consumes the type, so a consumer that accepts any object can also accept strings.
->
-> If the interface both accepts and returns the type, it must remain invariant because either conversion could make a read or write unsafe. Variance applies only to reference-type substitutions.
+<!-- qard-id: 222e6ef2-bb7d-4c83-b731-ffd892537b23 -->
+> [!qard]- When should a generic interface type parameter be marked `out` or `in`?
+> Use `out` when the interface produces the type and `in` when it consumes it. If it both accepts and returns the type, it must be invariant because either conversion can make a read or write unsafe. C# variance conversions apply only to reference-type substitutions. [Microsoft: covariance and contravariance](https://learn.microsoft.com/en-us/dotnet/standard/generics/covariance-and-contravariance)
 
-> [!qard]- A generic method uses `default(T)` as a fallback value. Why can this be dangerous in production code?
-> `default(T)` may be `0`, `DateTime.MinValue`, a zeroed struct, or `null`. Those values can be valid domain data, so a failed lookup becomes indistinguishable from a real result. A `Try*` contract, nullable result, or explicit result type keeps the distinction visible.
+<!-- qard-id: dd86df45-1404-46cf-8c09-84cb046ef4f3 -->
+> [!qard]- A generic method uses `default(T)` as a fallback. Why can this be dangerous?
+> `default(T)` depends on the type: it may be `null` or a zero-initialized value that is valid domain data. If the fallback also represents a successful result, the caller cannot distinguish absence or failure from a real value. Use an explicit `Try` result, nullable contract, or result type when that distinction matters. [Microsoft: default values](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/default)
 
 # References
 

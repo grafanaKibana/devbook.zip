@@ -11,6 +11,7 @@ status: Done
 publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Context Engineering/RAG/RAG Patterns"
+flashcard_uid: "fb2f007d"
 ---
 
 RAG patterns are repairs for observed retrieval failures. The order below is an adoption guide rather than a popularity ranking. The first working pipeline remains in place until [[Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation|evaluation]] identifies a failure that the cheaper design cannot fix. Each pattern buys something and creates a new way to fail. The surrounding pipeline is described in [[Home/AI & ML/LLM/Context Engineering/RAG/RAG|RAG]].
@@ -265,8 +266,8 @@ This family fits high-risk systems that can calibrate evidence evaluators or tra
 
 # Questions
 
-> [!qard]- When is GraphRAG a better fit than plain vector retrieval?
-> GraphRAG earns its cost when answers depend on explicit entity relations or paths across many documents. Compliance tracing and architecture impact analysis are examples. Plain vector retrieval remains better for independent fact lookup because it avoids a graph extraction pipeline.
+> [!qard]- What kind of RAG question can justify adding a knowledge graph to vector retrieval?
+> A graph is useful when the answer depends on explicit entities and relations, paths, or synthesis across many documents rather than finding a few semantically similar passages. Microsoft Research's GraphRAG work targets corpus-wide, query-focused summarization using extracted entities, relationships and community summaries. Graph construction adds extraction and maintenance work, so measure it against a vector baseline on representative questions. For direct fact lookup, vector retrieval may be sufficient without that graph pipeline. [From Local to Global: A Graph RAG Approach to Query-Focused Summarization](https://www.microsoft.com/en-us/research/publication/from-local-to-global-a-graph-rag-approach-to-query-focused-summarization/)
 
 # References
 

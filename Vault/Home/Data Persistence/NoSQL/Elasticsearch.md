@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Data Persistence"
 qard-topic: "NoSQL/Elasticsearch"
+flashcard_uid: "97b928ee"
 ---
 
 Elasticsearch is a distributed search and analytics engine built on Apache Lucene. It belongs beside the system of record when a read path needs relevance-ranked full-text search, faceting, geospatial predicates, or aggregations over indexed events. Applications write JSON documents, mappings define field types, analyzers turn text into terms, and Lucene stores those terms and document references in immutable segments.
@@ -108,8 +109,9 @@ Use PostgreSQL full-text search when one relational data set needs modest search
 
 # Questions
 
-> [!qard]- Why use both `text` and `keyword` for one field?
-> `text` is analyzed into terms for relevance-ranked full-text matching. `keyword` keeps the exact value for equality filters, sorting, and aggregations. One representation cannot efficiently provide both semantics.
+<!-- qard-id: fc591795-e2d6-468f-8923-de04b6ff8463 -->
+> [!qard]- Why might Elasticsearch map one logical value as both `text` and `keyword`?
+> A `text` field is analyzed into terms for full-text matching; a `keyword` field keeps an exact value for term filters, sorting, and aggregations. A multi-field can index the same source value in both forms, so the application can use each operation’s intended semantics. [Elasticsearch: text fields](https://www.elastic.co/guide/en/elasticsearch/reference/current/text.html) · [Elasticsearch: keyword fields](https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/keyword)
 
 # References
 

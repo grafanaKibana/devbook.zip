@@ -14,6 +14,7 @@ level:
 status: Creation
 qard-deck: "Data Persistence"
 qard-topic: "Data Persistence"
+flashcard_uid: "d03cdcde"
 ---
 
 Data persistence is the part of a system that must survive process and machine restarts. A storage choice fixes more than where bytes live: it sets the available consistency guarantees, the shape of efficient queries, and much of the operating cost. A weak isolation choice can corrupt business state under concurrency. An unnecessary cache creates a stale-read path that the original system never had.
@@ -103,10 +104,9 @@ The categories overlap. CQRS may use materialized views, event sourcing may feed
 
 # Questions
 
-> [!qard]- What factors determine whether a new service should use SQL or a NoSQL store?
-> The decision starts with the data model, required guarantees, and main access patterns. Relational storage fits when constraints, multi-record transactions, joins, or changing queries matter. A document, key-value, graph, or other specialized store fits when its access pattern clearly dominates and its consistency and query limits are acceptable.
->
-> Scale alone does not settle the choice. A well-indexed relational database handles more load than most services need, so a specialized store should solve a measured problem. A relational source of truth with one specialized read or hot path is often safer than forcing every workload into one model.
+<!-- qard-id: dcef06ab-abdb-45d7-9cad-1d74f4b02856 -->
+> [!qard]- What determines whether a service should use relational or non-relational storage?
+> Start with the invariants, transaction scope, and queries the service must support. Relational storage is a strong fit when constraints, joins, multi-record transactions, or changing query combinations matter. A specialized store fits when its access pattern clearly dominates and its consistency, query, recovery, and operational limits are acceptable. A relational source of truth plus a specialized read path can be useful when the latter solves a measured need and its synchronization cost is owned. [Microsoft: Understand data store models](https://learn.microsoft.com/en-us/azure/architecture/data-guide/technology-choices/understand-data-store-models)
 
 # References
 

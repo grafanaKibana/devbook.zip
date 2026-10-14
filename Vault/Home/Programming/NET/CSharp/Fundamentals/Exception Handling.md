@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Programming"
 qard-topic: "NET/CSharp/Fundamentals/Exception Handling"
+flashcard_uid: "6e5f7fa4"
 ---
 
 Exceptions carry failures across method boundaries when normal execution cannot continue. A `try` block marks code whose failure may be handled nearby. A matching `catch` decides whether recovery is possible, and `finally` protects cleanup that must happen while the stack unwinds. For disposable resources, `using` and `await using` usually express that cleanup more directly.
@@ -126,17 +127,21 @@ Unhandled exceptions need an application boundary that records the failure and c
 
 # Questions
 
+<!-- qard-id: 47c1a77e-18c3-47f2-beec-be36bdb47219 -->
 > [!qard]- What is the difference between `throw;` and `throw ex;` inside a `catch` block?
-> `throw;` rethrows the current exception without changing its original stack trace. `throw ex;` throws the same exception object from the current line and resets the stack trace, which hides the calls that led to the original failure. Use `throw;` when the same exception is rethrown from its `catch` block.
+> `throw;` rethrows the current exception while preserving its original stack trace. `throw ex;` starts the visible stack at the rethrow site and loses the original path. [Microsoft: exception handling statements](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/exception-handling-statements)
 
+<!-- qard-id: 0d4bb361-db0d-4d8f-b57e-1ec0c12ca36e -->
 > [!qard]- When should an exception be wrapped instead of rethrown directly?
-> Wrap an exception when code crosses a boundary and the caller needs context that the original failure does not provide. For example, a repository can translate a database exception into an order-saving exception that the application layer understands. The original exception should remain in `InnerException` so its stack trace and details are still available. If the wrapper adds no useful meaning, `throw;` is clearer.
+> Wrap an exception when crossing a boundary requires meaningful context or translation to a stable failure contract. Preserve the original as the inner exception so its cause remains available. If the wrapper adds no useful meaning, use `throw;` in the catch block. [Microsoft: exception best practices](https://learn.microsoft.com/en-us/dotnet/standard/exceptions/best-practices-for-exceptions)
 
-> [!qard]- Why is throwing from `finally` considered dangerous?
-> If the `try` block throws one exception and `finally` throws another, the exception from `finally` can replace the original failure. The caller then sees the cleanup error while the real cause is hidden. A `finally` block should normally perform cleanup that is safe to run during stack unwinding, while failure handling stays in `catch` or at a higher boundary.
+<!-- qard-id: d8eb2954-a6b6-4720-b753-13e6f473ae67 -->
+> [!qard]- Why is throwing from `finally` dangerous?
+> If the protected operation throws and cleanup in `finally` also throws, the cleanup exception can replace the exception already in flight. The caller may then lose the original failure as the one that surfaces. Keep cleanup from masking the primary failure. [Microsoft: exception handling statements](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/exception-handling-statements)
 
+<!-- qard-id: 9ffe22a9-8db4-43a7-acea-929d5baa0d53 -->
 > [!qard]- When might `finally` not execute?
-> `finally` normally runs when control leaves the protected block, including during exception-driven stack unwinding. It may not run when the process stops without normal unwinding, such as an operating-system kill, `Environment.FailFast()`, a severe runtime failure, or a `StackOverflowException`. It is an in-process cleanup guarantee, not a crash-recovery mechanism.
+> `finally` runs during normal control transfer and exception unwinding while the process is executing. It cannot guarantee cleanup after abrupt termination such as `Environment.FailFast`, because the process stops without normal unwinding. Treat it as in-process cleanup, not crash recovery. [Microsoft: exception handling statements](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/exception-handling-statements) · [Microsoft: Environment.FailFast](https://learn.microsoft.com/en-us/dotnet/api/system.environment.failfast?view=net-10.0)
 
 # References
 

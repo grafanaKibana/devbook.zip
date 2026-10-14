@@ -10,6 +10,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Networks"
 qard-topic: "OSI Model"
+flashcard_uid: "0dc6300d"
 ---
 
 The OSI model is a seven-layer reference model for separating communication responsibilities. It provides vocabulary for standards and diagnosis. It is not the implementation architecture of the Internet. Production stacks follow the [[TCP IP|TCP/IP]] suite and often cross or collapse OSI boundaries.
@@ -64,12 +65,12 @@ The operating layer bounds what infrastructure can observe and change:
 # Questions
 
 > [!qard]- What's the practical difference between a Layer 4 and a Layer 7 load balancer?
-> An L4 balancer selects a backend at the transport-connection boundary, so it cannot independently distribute streams inside one HTTP/2 connection. An L7 proxy terminates and parses HTTP, which enables request- or stream-aware routing, retries, and header policy. The extra capability also adds application-protocol state and processing.
+> An L4 balancer selects a backend using transport-level connection information, such as addresses and ports. It cannot inspect an HTTP path or route individual requests inside a multiplexed connection. An L7 proxy terminates and parses HTTP, so it can apply request-level host, path, or header rules. That inspection adds protocol state and processing; configured retries still need an application-safe replay contract. [AWS: How Elastic Load Balancing works](https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/how-elastic-load-balancing-works.html) · [AWS: Application Load Balancers](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/application-load-balancers.html)
 
-> [!qard]- How does the OSI model map onto the actual TCP/IP stack?
-> The common four-layer view maps application protocols to OSI 5–7, TCP and UDP to transport, IP to the Internet layer, and local network access to the link layer. It is an approximate conceptual mapping because real protocols can cross the reference boundaries.
+> [!qard]- How does the OSI model map onto the TCP/IP stack?
+> In the common four-layer TCP/IP view, OSI layers 5–7 are grouped as application, layer 4 maps to transport, layer 3 to Internet, and layers 1–2 to link. This is a teaching and diagnostic mapping, not a strict protocol-by-protocol equivalence: real protocols can span or blur those responsibilities. [RFC 1122: Internet architecture](https://www.rfc-editor.org/rfc/rfc1122.html#section-1.1.3) · [ISO/IEC 7498-1: OSI reference model](https://www.iso.org/standard/20269.html)
 
-> [!qard]- At which layer do IP addresses, ports, and MAC addresses each operate?
+> [!qard]- What roles do MAC addresses, IP addresses, and transport ports play in delivery or endpoint selection, and which local and remote values identify a TCP connection?
 > A link-layer address identifies an interface within the current link's delivery scope. An IP address is routed across networks. A transport port selects an endpoint within the host's transport namespace. For TCP, the local and remote IP addresses and ports identify a connection within the relevant network namespace.
 
 # References
