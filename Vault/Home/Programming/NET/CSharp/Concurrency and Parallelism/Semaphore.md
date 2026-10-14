@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Programming"
 qard-topic: "NET/CSharp/Concurrency and Parallelism/Semaphore"
+flashcard_uid: "d136a9b7"
 ---
 
 A semaphore represents a fixed number of permits. At most N callers may hold one at the same time, which makes the primitive useful for bounded concurrency rather than single-owner exclusion. `SemaphoreSlim` is the usual in-process choice in .NET because waiting can be asynchronous through `WaitAsync`. The operating-system-backed `Semaphore` exists for synchronous and named cross-process coordination.
@@ -78,8 +79,9 @@ finally
 
 # Questions
 
+<!-- qard-id: 6d43729c-6478-465f-afd9-5b432d9ad3ae -->
 > [!qard]- When is `SemaphoreSlim` a better fit than `lock`?
-> `SemaphoreSlim` fits asynchronous work or a resource that may allow more than one operation at a time. `WaitAsync` lets a caller wait for a permit without blocking a thread, and the permit can be released after an `await`. A `lock` is better for a short synchronous critical section that allows only one thread at a time. Because a semaphore has no owner, its acquire and release still need one clear `try/finally` boundary.
+> Use `SemaphoreSlim` when callers may wait asynchronously or when up to N operations may proceed at once. `WaitAsync` releases the waiting thread while no permit is available. A `lock` gives synchronous single-owner exclusion for a short critical section. A semaphore has no owner identity, so pair each successful wait with one release in `finally`. [SemaphoreSlim API](https://learn.microsoft.com/en-us/dotnet/api/system.threading.semaphoreslim?view=net-10.0) · [C# `lock` statement](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/lock)
 
 # References
 

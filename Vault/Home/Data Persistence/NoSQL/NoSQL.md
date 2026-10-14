@@ -13,6 +13,7 @@ publish: true
 priority: High
 qard-deck: "Data Persistence"
 qard-topic: "NoSQL/NoSQL"
+flashcard_uid: "96ca4645"
 ---
 
 NoSQL names a loose group of data stores rather than one database model. It covers key-value, document, wide-column, and graph stores, while search and time-series engines are often grouped beside them. Product boundaries overlap. A document store may enforce schemas, a key-value service may expose secondary indexes, and either may support transactions within a documented scope.
@@ -56,8 +57,9 @@ Data is often shaped around known reads because keeping related values in one pa
 
 # Questions
 
-> [!qard]- When is NoSQL a bad idea?
-> It is a poor trade when the core model depends on relational constraints, multi-entity transactions, or queries that change faster than the storage model can be redesigned. If the selected engine cannot enforce those guarantees, application code inherits them. Keeping SQL and adding a cache, replica, or purpose-built read model is often cheaper.
+<!-- qard-id: 510a2738-ff3d-447d-a2eb-c48661cd012d -->
+> [!qard]- When is a non-relational store a poor fit for a service?
+> It is a poor fit when the service depends on constraints, transactions across related records, or changing queries that the chosen engine cannot support within its guarantees. If the database cannot enforce an invariant, the application inherits that work. “NoSQL” does not specify one transaction or consistency model, so evaluate the concrete engine and operation scope. [Microsoft: Understand data store models](https://learn.microsoft.com/en-us/azure/architecture/data-guide/technology-choices/understand-data-store-models)
 
 # References
 

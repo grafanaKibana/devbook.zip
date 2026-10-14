@@ -11,6 +11,7 @@ status: Creation
 publish: true
 qard-deck: "Programming"
 qard-topic: "NET/CSharp/Concurrency and Parallelism/Locking"
+flashcard_uid: "15275eaf"
 ---
 
 `lock` gives one thread at a time access to a synchronous critical section. It fits small in-process state changes such as updating a counter or taking a snapshot of a shared dictionary. Awaited I/O should normally happen outside that mutation and publish its result inside a short lock. When an invariant genuinely must span asynchronous work, `SemaphoreSlim.WaitAsync` can gate that bounded span; cross-process coordination needs [[Mutex]], and N concurrent holders need [[Semaphore]] rather than mutual exclusion.
@@ -93,17 +94,21 @@ For short synchronous state changes inside one process, `lock` is the smallest c
 
 # Questions
 
-> [!qard]- What does `lock (obj) { ... }` compile to?
-> `Monitor.Enter(obj, ref lockTaken)` surrounds the body with a `try/finally`, and the `finally` calls `Monitor.Exit` only when `lockTaken` is true. This preserves release on every normal or exceptional exit without releasing an unowned monitor.
+<!-- qard-id: e403b36e-6e7b-4f41-826c-e2e258743019 -->
+> [!qard]- When `lock` targets an ordinary object, what does the compiler ensure around the critical section?
+> The compiler acquires the monitor with `Monitor.Enter(obj, ref lockTaken)`, runs the body inside `try`, and exits in `finally` only if acquisition succeeded. This releases ownership on normal and exceptional exits without exiting a monitor the thread never acquired. The specialized `System.Threading.Lock` path in C# 13 uses `EnterScope` instead. [Microsoft: `lock` statement](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/lock) · [Monitor.Enter](https://learn.microsoft.com/en-us/dotnet/api/system.threading.monitor.enter?view=net-10.0)
 
-> [!qard]- Why can't a `lock` block contain `await`?
-> `Monitor` ownership belongs to the acquiring thread. Since an async continuation may resume elsewhere, the compiler rejects `await` in a `lock` block with CS1996. `SemaphoreSlim.WaitAsync` models asynchronous waiting without monitor ownership.
+<!-- qard-id: 2c0335e4-1efa-4aa3-b33b-605b74456ccc -->
+> [!qard]- Why can’t a `lock` block contain `await`?
+> `Monitor` ownership belongs to the thread that entered it, but an awaited continuation may resume on a different thread. C# therefore rejects `await` inside a `lock` block. Use an async-aware primitive such as `SemaphoreSlim.WaitAsync` when an invariant must remain gated across an await, and pair acquisition/release in `try/finally`. [Microsoft: `lock` statement](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/lock) · [SemaphoreSlim API](https://learn.microsoft.com/en-us/dotnet/api/system.threading.semaphoreslim?view=net-10.0)
 
-> [!qard]- What does `System.Threading.Lock` improve over locking on a plain `object` in .NET 9+?
-> A dedicated `Lock` field makes its purpose clear and avoids reusing an arbitrary object that other code may also lock or expose. The compiler recognizes the type and lowers the block to its scoped `EnterScope` API instead of the usual `Monitor.Enter` and `Monitor.Exit` pattern. It is still a synchronous lock, so it does not make `await` valid inside the block.
+<!-- qard-id: 9e14d6f6-6dc4-4b82-bda7-880929057d58 -->
+> [!qard]- What does `System.Threading.Lock` change about `lock` in C# 13 and .NET 9+?
+> `System.Threading.Lock` gives the compiler a dedicated synchronization type instead of an arbitrary object. In C# 13, `lock` on that type lowers to an `EnterScope()` guard that releases when the scope exits, rather than the ordinary `Monitor.Enter`/`Exit` pattern. It remains synchronous and cannot span `await`; the type does not promise a universal speedup. [Microsoft: `lock` statement](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/lock)
 
+<!-- qard-id: 0fdc576b-ea0a-41ce-9613-4ec6f7fe0d57 -->
 > [!qard]- How does reentrancy differ between `lock`/`Monitor` and `SemaphoreSlim`?
-> `lock` and `Monitor` track the owning thread and a recursion count, so the same thread can enter the same lock again and must exit it the same number of times. `SemaphoreSlim` tracks permits, not an owner or recursion count. If code holding the only permit waits on that semaphore again, the second wait blocks and can deadlock the operation.
+> `Monitor` tracks an owning thread and recursion count, so the same thread can enter again and must exit the same number of times. `SemaphoreSlim` tracks permits, not ownership or recursion. Code that holds its only permit and waits on it again blocks itself; acquire/release must have one clear owner and `finally` path. [Microsoft: `lock` statement](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/lock) · [SemaphoreSlim API](https://learn.microsoft.com/en-us/dotnet/api/system.threading.semaphoreslim?view=net-10.0)
 
 # References
 

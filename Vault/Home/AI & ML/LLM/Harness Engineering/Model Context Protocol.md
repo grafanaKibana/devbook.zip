@@ -12,6 +12,7 @@ status: Done
 publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Harness Engineering/Model Context Protocol"
+flashcard_uid: "5e1d5abd"
 ---
 
 Model Context Protocol (MCP) gives LLM applications a common way to connect to tools and external data. Without a shared protocol, every client-service pairing needs its own adapter. In the ideal case, that produces N×M integrations for N clients and M services. MCP moves the integration boundary: clients implement the protocol once, while each service exposes an MCP server. The rough shape becomes N+M, provided both sides implement compatible versions and capabilities.
@@ -61,8 +62,8 @@ Function calling is the model-facing mechanism for requesting a structured opera
 | --- | --- | --- |
 | Best for | App-specific business logic used by one agent | Shared integrations used across multiple clients |
 | Tool definitions live in | Application code | Standalone MCP server |
-| Reusability | One app only | Any MCP-compatible client |
-| Discovery | Static — defined at dev time | Dynamic — server advertises capabilities at runtime |
+| Reusability | Application-managed; shared code or services can reuse it | Any MCP-compatible client |
+| Discovery | Application supplies or loads tools at runtime | Dynamic — server advertises capabilities at runtime |
 | Infrastructure | None extra — part of the application's LLM API call | Server process per integration |
 
 A useful first question is whether the integration must work across clients. Shared integrations are a good MCP fit. App-specific business logic is usually simpler as an in-process function tool. The security boundary matters too: moving a function into an MCP server adds process or network communication and a separately managed trust relationship.
@@ -95,7 +96,7 @@ Run servers with the smallest useful set of credentials and file permissions. Va
 
 | Approach | Reusability | Setup Cost | Security Surface | Best for |
 | --- | --- | --- | --- | --- |
-| Direct function calling | One app only | Lowest — inline with application code | Smallest — controlled by the application | App-specific tools and business logic |
+| Direct function calling | Application-managed reuse | Lowest — inline with application code | Smallest — controlled by the application | App-specific tools and business logic |
 | MCP with stdio transport | Any local MCP client | Moderate — write or install a server | Local transport — no MCP network listener | Local tools shared across editors and agents |
 | MCP with HTTP transport | Any MCP client anywhere | Highest — server infra plus auth | Largest — network exposed with OAuth | Remote services and multi-user deployments |
 | REST API wrapper without MCP | Any HTTP client | Moderate — standard API design | Standard web security model | When consumers are not LLM clients |
@@ -104,11 +105,11 @@ MCP earns its overhead when several clients need the same integration or when ca
 
 # Questions
 
-> [!qard]- When should a tool remain an in-process function instead of becoming an MCP server?
-> Function calling and MCP are not direct alternatives, because an MCP tool can still be presented to the model as a function. The real decision is whether the tool needs a separate reusable server boundary. Keeping it in process is simpler when it belongs to one application, depends on private application state, or would expose sensitive business logic through a broader interface.
+> [!qard]- When should a tool remain an in-process function instead of being exposed through an MCP server?
+> Function calling is a model-facing interface: the model returns a structured request and the application executes it. MCP is a client/server protocol for exposing reusable tools and other capabilities. A host can adapt MCP tools into the function-call format its model provider accepts; that mapping belongs to the host or SDK, not to function calling itself. Keep a tool in-process when it is private to one application or depends on its private state. Use an MCP server when multiple compatible clients need a separately managed capability boundary. [OpenAI function calling](https://developers.openai.com/api/docs/guides/function-calling) · [MCP server primitives](https://modelcontextprotocol.io/specification/draft/server/index)
 
-> [!qard]- What additional security risks appear when a model uses tools from an MCP server?
-> An MCP server still has the usual API risks, but its tool names and descriptions also become model context, and the model may request an operation after reading untrusted content. With HTTP, MCP authorization can restrict access to the server and enforce OAuth audience and scopes; insufficient scope can trigger another authorization step. Those scopes do not automatically define whether a caller may run each business operation or access a particular tenant's data. The server still needs per-tool authorization, input validation, tenant isolation, rate limits, and audit logging.
+> [!qard]- What security boundary remains when an MCP server uses HTTP authorization?
+> For Streamable HTTP, MCP authorization protects access to the server and requires the server to validate that an access token was issued for that resource. That does not decide whether the authenticated caller may invoke a particular business operation or access a tenant’s data. The server still needs operation-level authorization and must validate tool inputs before using them. Treat tool names, descriptions, and results as untrusted model context, not as enforcement. [MCP authorization](https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization) · [MCP tools](https://modelcontextprotocol.io/specification/2026-07-28/server/tools)
 
 # References
 

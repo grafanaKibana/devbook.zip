@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/CQS"
+flashcard_uid: "1bbc667f"
 ---
 
 Command-Query Separation (CQS) divides operations by contract. A command changes state and traditionally returns no result. A query returns data without observable side effects. Bertrand Meyer introduced the rule so a call's shape reveals whether it can mutate the system.
@@ -98,11 +99,13 @@ Return only the outcome the caller needs, often an identifier or version, and st
 
 # Questions
 
+<!-- qard-id: ee1d4f87-1ac1-440e-aa72-b31354d7308a -->
 > [!qard]- Why does CQS make code easier to reason about?
-> The contract separates observation from mutation. Queries can be repeated or cached only when their no-side-effect promise holds. Commands expose the paths that need authorization, transaction boundaries, and retry analysis. The distinction reduces the amount of implementation detail required to judge a call site.
+> CQS makes an operation’s contract indicate whether it observes state or changes it: a query returns information without side effects, while a command changes state. That separation makes mutation paths and their retry/transaction consequences easier to see. Repeating or caching a query is safe only when it actually honors the no-side-effect contract. [Martin Fowler: Command Query Separation](https://martinfowler.com/bliki/CommandQuerySeparation.html)
 
+<!-- qard-id: 6343f47f-4ceb-4b9e-a1ba-7af48b818bba -->
 > [!qard]- When is it pragmatic to violate CQS?
-> A combined operation is justified when separation breaks a coherent transition or adds a wasteful round trip. `Stack.Pop()` is the classic single-threaded shape; `ConcurrentStack<T>.TryPop()` supplies the atomic concurrent form. A create command returning its generated identifier is another. The exception should keep mutation, retry safety, and returned data explicit.
+> Combine a read and mutation when they form one coherent or atomic operation, or when a separate read would add a pointless round trip. `Stack<T>.Pop()` is a simple example; concurrent code needs an atomic API such as `ConcurrentStack<T>.TryPop(out item)`. A create operation can also return its generated identifier. Keep the state change and returned result explicit. [.NET: ConcurrentStack<T>.TryPop](https://learn.microsoft.com/en-us/dotnet/api/system.collections.concurrent.concurrentstack-1.trypop?view=net-10.0)
 
 # References
 

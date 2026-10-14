@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "System Architecture/Service-Oriented Architecture"
+flashcard_uid: "fad3bcad"
 ---
 
 Service-Oriented Architecture (SOA) exposes business capabilities through explicit network contracts. It became common in enterprise integration because SAP, mainframes, custom applications, and later SaaS products could cooperate without sharing an implementation stack.
@@ -96,8 +97,9 @@ Many estates use both styles. Existing systems meet through governed integration
 
 # Questions
 
+<!-- qard-id: e94992f0-b946-4aac-9616-e0916d028264 -->
 > [!qard]- Which part of SOA remains useful without SOAP, WSDL, or an ESB?
-> The durable part is the explicit service contract around a business capability. Consumers depend on that contract instead of importing the service's internal code or writing directly to its database. This allows systems built on different technology stacks to change independently as long as the contract stays compatible. SOAP, WSDL, and ESBs were common ways to implement or govern that boundary, but the boundary still matters when the transport is HTTP, gRPC, or messaging.
+> The durable idea is an explicit contract around a cohesive business capability: consumers depend on the published boundary, not the service’s internal code or direct writes to its data. SOAP/WSDL or an ESB were implementation/governance choices; HTTP, gRPC, or messaging can also carry the contract if compatibility is managed. [SOA Manifesto](https://soa-manifesto.org/default.html)
 
 # References
 

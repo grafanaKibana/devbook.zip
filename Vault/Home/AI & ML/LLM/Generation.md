@@ -11,6 +11,7 @@ status: Done
 publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Generation"
+flashcard_uid: "b145e45f"
 ---
 
 Generation turns a prompt and its context into output. Producing text is easy. Producing text that is reliable, grounded, and usable by the next system is the engineering problem. Sampling controls affect token choice, evidence limits what the answer may claim, and structure determines whether another program can consume it.
@@ -85,9 +86,9 @@ For RAG-specific context assembly patterns, see [[Home/AI & ML/LLM/Context Engin
 
 Structured output asks the model for data another program can parse, such as JSON, function arguments, or an enum value. The available mechanisms solve different problems.
 
-**Constrained decoding (Structured Outputs):** the provider masks tokens that would violate a JSON schema during decoding. The resulting output is structurally valid by construction. OpenAI's `response_format: { type: "json_schema" }` and Azure's equivalent use this approach. The schema may still encode the wrong contract, and valid JSON can carry nonsense values. Deeply nested schemas can also hurt output quality.
+**Constrained decoding (Structured Outputs):** the provider masks tokens that would violate a JSON schema during decoding. A completed, non-refusal response is constrained to the supported schema; refusals and incomplete responses need separate handling. OpenAI's `response_format: { type: "json_schema" }` and Azure's equivalent use this approach. The schema may still encode the wrong contract, and valid JSON can carry nonsense values. Deeply nested schemas can also hurt output quality.
 
-**JSON mode:** guarantees valid JSON without enforcing a particular schema. It fits exploratory output whose shape can vary. A consumer expecting fixed fields still needs validation because any JSON object satisfies the mode.
+**JSON mode:** produces valid JSON without enforcing a particular schema when generation completes normally; incomplete responses still need handling. It fits exploratory output whose shape can vary. A consumer expecting fixed fields still needs validation because any JSON object satisfies the mode.
 
 **Function calling:** the model selects a function from a supplied list and returns structured arguments. It fits tool use because the decision includes which action to take. Schema-valid arguments can still name the wrong function or carry semantically wrong values.
 
@@ -131,11 +132,11 @@ Mitigation: validate semantic content in addition to schema compliance. For crit
 
 # Questions
 
-> [!qard]- Why is adjusting temperature and top_p simultaneously discouraged?
-> Both reshape the token distribution through different mechanisms. Temperature sharpens or flattens logits, while top_p truncates candidates at a cumulative-mass threshold. Changing both makes an observed output shift harder to attribute. Tuning one and leaving the other at its default keeps evaluation legible.
+> [!qard]- Why is adjusting temperature and top_p at the same time discouraged?
+> Temperature rescales the token logits before sampling; top_p restricts sampling to tokens within a cumulative probability mass. The Transformers generation utilities implement these controls as logits processing/warping steps. Changing both makes it harder to attribute an output shift to one control. OpenAI currently recommends changing one sampling parameter at a time, but availability and guidance vary by provider and model; follow the deployed API's documentation and evaluate on the task. [Chat Completions API reference](https://developers.openai.com/api/reference/resources/chat/subresources/completions/methods/create) · [Transformers generation](https://huggingface.co/docs/transformers/main_classes/text_generation)
 
-> [!qard]- Why can a grounded response still contain unsupported claims despite citation tags?
-> Citation markers do not verify entailment. A cited passage may be related to the topic without supporting the exact claim. Grounding therefore needs a separate claim-to-source check, using NLI or another verifier, before the citation can be trusted.
+> [!qard]- Why can a response with valid citation markers still contain unsupported claims?
+> A citation marker can identify where cited material came from without proving that the passage entails the attached claim. Verify claim-to-source support separately, using a human or automated check appropriate to the risk. Natural Language Inference is one option, but its decisions also need validation and calibration. [Anthropic citations](https://platform.claude.com/docs/en/build-with-claude/citations) · [MiniCheck](https://aclanthology.org/2024.emnlp-main.499/)
 
 # References
 

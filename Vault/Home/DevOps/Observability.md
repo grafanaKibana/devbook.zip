@@ -10,6 +10,7 @@ status: Done
 publish: true
 qard-deck: "DevOps"
 qard-topic: "Observability"
+flashcard_uid: "75262be6"
 ---
 
 Observability is the ability to infer a system's internal state from the signals it emits. Metrics reveal changes in scale and health, logs preserve discrete events, and traces reconstruct causal work across service boundaries. An alert may expose a symptom; correlation turns that symptom into a defensible explanation.
@@ -99,8 +100,11 @@ Instrumentation should preserve:
 
 # Questions
 
+> [!qard]- How do metrics, logs, and traces answer different observability questions?
+> Metrics summarize measurements across time to show the scale and shape of a problem. Logs record discrete events and application state. Traces connect timed spans to show where one operation spent time or failed across boundaries. Correlating them lets an aggregate symptom lead to a specific execution and its relevant events; each signal still needs its own retention and access policy. [Prometheus: Instrumentation](https://prometheus.io/docs/practices/instrumentation/) · [OpenTelemetry Logs data model](https://opentelemetry.io/docs/specs/otel/logs/data-model/) · [OpenTelemetry traces](https://opentelemetry.io/docs/concepts/signals/traces/) · [W3C Trace Context](https://www.w3.org/TR/trace-context/)
+
 > [!qard]- Why should request or user IDs not be metric labels?
-> Each unique label combination creates another time series. Unbounded identifiers can multiply storage and query work with traffic volume. Keep metric dimensions bounded and use the trace ID to reach access-controlled logs or traces when an individual request must be inspected.
+> Every distinct label combination creates another time series, so request IDs and user IDs can make metric storage and queries grow with traffic. Keep metric dimensions bounded. Put per-request identifiers in appropriately protected logs or traces and correlate them when investigating an event; correlation itself does not authorize access. [Prometheus: Instrumentation](https://prometheus.io/docs/practices/instrumentation/#do-not-overuse-labels) · [OpenTelemetry Logs data model](https://opentelemetry.io/docs/specs/otel/logs/data-model/) · [W3C Trace Context](https://www.w3.org/TR/trace-context/)
 
 # References
 

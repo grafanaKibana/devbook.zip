@@ -11,6 +11,7 @@ status: Done
 publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Safety/Guardrails"
+flashcard_uid: "cf9e222c"
 ---
 
 Guardrails are controls around an LLM that keep unsafe output from turning into unsafe behavior. They constrain input, accessible context, model output, and runtime actions. One filter cannot cover all four boundaries. A production system needs several independent checks so a missed attack is still contained and leaves evidence for recovery.
@@ -151,8 +152,8 @@ The parser rejects anything outside this schema. The dispatcher must still map t
 
 # Questions
 
-> [!qard]- What is the minimum useful guardrail set for a production LLM application?
-> Start with task-scoped tools, authorization outside the model, strict output parsing, request budgets, and a refusal or escalation path. Add policy classifiers and human approval where the harm warrants their latency. Prompt-injection detection is useful telemetry, but it cannot replace the permission boundary.
+> [!qard]- Which guardrails keep unsafe model output from becoming an unsafe action?
+> Expose only task-needed tools, enforce authorization in application code, validate structured output before dispatch, and bound requests or loops. A valid schema does not grant permission, and prompt-injection screening cannot replace least-privilege access. Add classifiers, monitoring, or human approval when harm and operating context justify their cost. This is a practical baseline, not a security or compliance guarantee. [OWASP prompt-injection prevention](https://cheatsheetseries.owasp.org/cheatsheets/LLM_Prompt_Injection_Prevention_Cheat_Sheet.html) · [OpenAI safety best practices](https://developers.openai.com/api/docs/guides/safety-best-practices)
 
 # References
 

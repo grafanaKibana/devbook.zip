@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Programming"
 qard-topic: "NET/CSharp/Concurrency and Parallelism/Tasks"
+flashcard_uid: "9dbbd8f8"
 ---
 
 `Task` is a handle to an operation that may finish later. It records completion, cancellation, or failure and gives other code something to await or combine. The abstraction says nothing about whether a thread is currently executing the operation.
@@ -153,17 +154,21 @@ Bound concurrency according to the scarce resource. `Parallel.ForEachAsync`, a c
 
 # Questions
 
+<!-- qard-id: f3889ce8-c8c4-492a-b4a0-d4b3be95ed90 -->
 > [!qard]- Why is `Task` not equivalent to a thread?
-> A `Task` represents an operation that may finish later and records whether it completed, failed, or was canceled. A thread is a resource that executes code. A task for asynchronous I/O can remain incomplete while no managed thread is assigned to it; a thread is needed only when code starts the operation or resumes after completion.
+> A `Task` represents an operation and its eventual result, cancellation, or failure; a thread is an execution resource. Asynchronous I/O can remain pending without occupying a managed thread, though code needs a thread when it initiates or resumes processing. [Microsoft: TAP I/O-bound tasks](https://learn.microsoft.com/en-us/dotnet/standard/asynchronous-programming-patterns/implementing-the-task-based-asynchronous-pattern#io-bound-tasks) · [Microsoft: Task-based asynchronous programming](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/task-based-asynchronous-programming)
 
+<!-- qard-id: db5bfc4e-e700-4619-8af4-682ca20127c6 -->
 > [!qard]- When is `Task.Run` appropriate in ASP.NET Core?
-> `Task.Run` can move CPU-bound work to a thread-pool thread, but it does not add CPU capacity. Under load, those extra work items compete with request processing and can reduce throughput. It should not wrap I/O APIs that are already asynchronous. Long or expensive work usually belongs behind a bounded background queue or in a separate service instead of running inside the request.
+> For an ASP.NET Core request, `Task.Run` usually adds a ThreadPool queue hop without adding CPU capacity; it does not turn synchronous I/O into asynchronous I/O. Await an API that is already asynchronous directly. Sustained CPU work needs a separately designed execution path rather than a request wrapper. [Microsoft: ASP.NET Core best practices](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/best-practices?view=aspnetcore-10.0) [Microsoft: task-based asynchronous programming](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/task-based-asynchronous-programming)
 
-> [!qard]- Why can `Task.WhenAll` reduce the elapsed time for independent async calls?
-> If the operations are started before they are awaited, their waiting time can overlap. `Task.WhenAll` then completes when all of those tasks finish, so the elapsed time is closer to the slowest call than to the sum of every call. It only coordinates tasks that have already started; it does not make synchronous work parallel, and the fan-out must still respect connection and downstream limits.
+<!-- qard-id: 55bddd1a-2bfc-482a-a86b-0be86ea885a5 -->
+> [!qard]- Why can `Task.WhenAll` reduce elapsed time for independent asynchronous calls?
+> When independent calls are started before the wait, their I/O waiting can overlap. `Task.WhenAll` completes after every supplied task completes; it coordinates those operations but does not start dormant work or make synchronous work parallel. [Microsoft: Task.WhenAll](https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.task.whenall?view=net-10.0) · [Microsoft: task-based asynchronous programming](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/task-based-asynchronous-programming)
 
+<!-- qard-id: cc606580-b441-46d2-82a6-9d4928c9c59e -->
 > [!qard]- When is `ValueTask` worth using instead of `Task`?
-> `ValueTask` is useful in a measured hot path where operations often complete synchronously and allocating a completed `Task` is a real cost. Its consumption rules are stricter: depending on what backs it, the value may be safe to await only once and should not be cached or shared directly. `Task` remains the simpler choice when the result needs to be stored, shared, or awaited more than once.
+> `ValueTask` is useful when measured allocation savings justify its stricter consumption rules. Frequent synchronous completion is one common case, but pooled sources can also complete asynchronously. A `ValueTask` may be consumed only once, depending on its backing source; convert it to `Task` when the result must be stored or shared. [Microsoft: ValueTask](https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.valuetask?view=net-10.0)
 
 # References
 

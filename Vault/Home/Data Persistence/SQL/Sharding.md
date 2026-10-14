@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Data Persistence"
 qard-topic: "SQL/Sharding"
+flashcard_uid: "7f93ffe2"
 ---
 
 Sharding is horizontal partitioning across distinct storage and ownership domains, commonly separate database instances or clusters. Each shard owns a non-overlapping subset of rows. Unlike table partitioning inside one server, sharding can distribute storage, writes, backups, and failure domains across machines.
@@ -133,8 +134,13 @@ Shard requests are retry-safe only when the operation is idempotent or deduplica
 
 # Questions
 
+<!-- qard-id: c63ffce5-ccfa-41d5-a62c-fb60c7bbb4db -->
 > [!qard]- What evidence justifies sharding a database?
-> Scale-driven sharding is justified after evidence shows that write throughput or storage exceeds one ownership domain and simpler measures cannot remove the ceiling. Hard tenant isolation, locality, or data-placement constraints can justify it earlier. Read replicas help reads, caches remove repeated reads, and in-engine partitioning improves manageability without creating cross-database transactions.
+> Scale-driven sharding is justified when measured write throughput or storage exceeds one ownership domain and query repair, vertical scaling, read replicas, caching, and in-engine partitioning do not remove the limit. Hard isolation, locality, or placement requirements can justify it sooner. Replicas add read capacity; caches serve repeated reads; in-engine partitions remain within one database ownership and transaction domain. [Microsoft: Sharding pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/sharding)
+
+<!-- qard-id: 3c8d484d-3a0c-4e2e-9e4f-29a7d608fe68 -->
+> [!qard]- What makes a shard key viable for a workload?
+> A viable key appears in the operations that must route to one owner, distributes the actual data and request load, and keeps data that must change atomically together. It must also remain stable enough for ownership to be managed. A poor key creates hot shards or turns common operations into fan-out queries even when total cluster capacity is sufficient. [Microsoft: Sharding pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/sharding)
 
 # References
 

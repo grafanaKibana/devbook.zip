@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Model Selection and Routing"
+flashcard_uid: "776eda2e"
 ---
 
 Model selection decides which models are allowed to serve a workload. Routing makes the per-request choice among them. Frontier models often handle difficult tasks well. Smaller models are usually cheaper and faster. Neither tendency is a contract. A specialized model can win on a narrow task, while a frontier model can miss a latency SLA or regress after a provider update. Production selection is empirical: the least expensive candidate that clears the workload's quality, safety, reliability, and latency gates wins.
@@ -99,14 +100,11 @@ Versions should be pinned where the provider allows it. A model change behind an
 
 # Questions
 
-> [!qard]- What matters when choosing an LLM?
-> Model size and labels such as "frontier" are only starting points. A frontier model may produce better answers but miss the latency or cost target. A smaller model may look cheap until retries and human escalation are included.
-> Candidates should be tested on the same representative workload for task quality, safety, reliability, latency, and total cost per successful task. The best choice is the least expensive model that meets all required targets.
+> [!qard]- How should candidate LLMs be compared for a production workload?
+> Compare candidates on the same representative, versioned workload. Measure task quality and safety alongside latency and full cost per successful task, including retries or escalation. Choose the least expensive candidate that clears required gates; rerun evaluation when traffic, prompts, or model versions change. [OpenAI evals](https://developers.openai.com/api/docs/guides/evals) · [OpenAI model optimization](https://developers.openai.com/api/docs/guides/model-optimization)
 
-> [!qard]- How do classifier routing and cascading differ, and when is each useful?
-> A classifier chooses a model before generation based on the predicted task type or difficulty. It is useful when those signals are reliable and generating a second answer would cost too much or take too long. Its main risk is sending a hard request to a model that cannot handle it.
-> A cascade starts with one model and decides whether to escalate after checking its answer. It works well when failures can be detected with a cheap, reliable signal, such as schema validation or a groundedness check. Failed first attempts pay for a second generation and add latency.
-> The patterns can also work together: a classifier can choose the initial route, while a cascade handles answers that fail a quality gate. The complete route should be evaluated for end-to-end quality, cost, and tail latency.
+> [!qard]- How do classifier routing and cascading differ, and how can they be combined?
+> A classifier selects an initial model before generation using request features; a cascade starts with one model and escalates only when an observable result gate fails. A weak classifier can route a hard request downward, while a failed first cascade attempt adds another call and latency. The patterns can compose, but evaluate end-to-end quality, cost, and tail latency. Microsoft Foundry Model Router is one managed, product-specific routing implementation, not a guarantee that routing suits every workload. [Microsoft Foundry Model Router](https://learn.microsoft.com/en-us/azure/ai-foundry/openai/concepts/model-router?preserve-view=true&view=foundry) · [Evals guide](https://developers.openai.com/api/docs/guides/evals) · [FrugalGPT cascade](https://arxiv.org/html/2305.05176v1#S3)
 
 # References
 

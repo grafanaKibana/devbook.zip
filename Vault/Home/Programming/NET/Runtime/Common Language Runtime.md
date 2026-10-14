@@ -12,6 +12,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Programming"
 qard-topic: "NET/Runtime/Common Language Runtime"
+flashcard_uid: "e98a40ab"
 ---
 
 The Common Language Runtime (CLR) is .NET's managed execution engine. It loads assemblies, establishes their types, executes managed methods, and supplies services such as garbage collection, exception handling, threading, and native interoperability.
@@ -122,15 +123,34 @@ Managed exception dispatch uses two logical passes. The search pass walks frames
 
 # Questions
 
+<!-- qard-id: 1df86558-fa6b-4e81-85a8-817e1ea6a4b7 -->
 > [!qard]- How do managed and unmanaged code differ, and why does interop require careful lifetime management?
-> Managed code runs under the CLR, which uses metadata to provide services such as garbage collection, type checks, and exception handling. Unmanaged code runs as native code and follows the platform's ABI. A P/Invoke or other interop signature must match that ABI, including the calling convention, data layout, and encoding. A mismatch can corrupt the arguments, returned data, or call stack.
->
-> Resource lifetime is a separate contract defined by the native API: which side allocates the resource, which side owns it, and which function releases it. The GC can track a managed wrapper, but it does not know that native ownership contract. An owned handle should normally be placed in `SafeHandle` and released through deterministic disposal. The wrapper then keeps the handle valid during native calls and releases it once with the correct native operation.
+> Managed code runs under the CLR and relies on its services, such as garbage collection of managed objects, exception handling and the runtime type system. Unmanaged (native) code runs outside those services. It follows a native platform ABI and its own ownership rules, such as explicit freeing or reference counting.
+> 
+> Interop needs careful lifetime management because the GC manages only one side of the boundary:
+> 
+> - The GC tracks managed objects only. It cannot tell when a native handle or buffer is no longer needed.
+> - A native resource is released only when code calls its native cleanup. Disposal does this deterministically when ownership ends. A finalizer on the managed wrapper can do it later, as a fallback, if disposal was missed.
+> - `SafeHandle` is the usual managed owner for a native handle. It releases the handle when disposed, or during finalization if disposal never happened.
+> 
+> If no code clearly owns a native resource, nothing may release it, and it leaks. Interop declarations must also match the native ABI, such as calling convention and data layout. That requirement affects whether a call works correctly, not how long a resource lives.
+> 
+> [Microsoft: Native interoperability ABI support](https://learn.microsoft.com/en-us/dotnet/standard/native-interop/abi-support) · [Microsoft: SafeHandle class](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.safehandle)
 
-> [!qard]- How does the CLR run IL, and when does JIT or Native AOT make more sense?
-> Most .NET builds store IL together with type metadata in an assembly. The CLR loads that assembly, and a JIT deployment compiles each method when it is first used. Tiered compilation can later replace frequently executed methods with more optimized code. This adds first-use work, but it allows runtime optimization and supports dynamic-code features.
->
-> Native AOT compiles the application at publish time, so the deployed process has no JIT compilation step. It can be a better fit when measured startup time or footprint matters, but dependencies must survive trimming and AOT analysis, and features that require runtime code generation may not work.
+<!-- qard-id: 58941e73-5fa8-4d3c-bbdf-87e201b3d6d8 -->
+> [!qard]- How does .NET turn IL into machine code, and when do JIT, ReadyToRun and Native AOT each fit?
+> Assemblies normally contain IL, which the processor cannot run directly. By default the runtime's JIT compiler turns each method into machine code when it is first needed. ReadyToRun moves part of that work to publish time while keeping the JIT. Native AOT moves all of it to publish time and ships no JIT.
+> 
+> | Aspect | JIT | ReadyToRun | Native AOT |
+> |---|---|---|---|
+> | When machine code is produced | At run time, as methods are first used. Tiered compilation can later recompile hot methods with more optimization. | At publish time for many methods. The JIT still compiles methods without usable precompiled code and can re-optimize hot ones. | Entirely at publish time. The app runs without a JIT. |
+> | Startup | Early calls pay for compilation. | Less compilation work at startup. | No JIT work at startup. |
+> | Runtime flexibility | Dynamic loading and runtime code generation work. | Same as JIT, because the IL is kept. | Restricted: no runtime code generation, and code must work with trimming. |
+> | Main cost | Compilation time on first use. | Larger assemblies built for a specific target. | Compatibility constraints and platform-specific output. |
+> 
+> JIT is the flexible default, especially when an app loads code dynamically or generates code at run time. ReadyToRun reduces startup compilation without giving up the JIT. Native AOT fits startup- and footprint-sensitive deployments whose code and dependencies work with AOT and trimming. ReadyToRun trades larger assemblies for less startup compilation, while Native AOT trades runtime flexibility for startup and footprint benefits, so the choice rests on measured startup and footprint needs and on the runtime features the app requires. Native AOT is not a universal upgrade.
+> 
+> [Microsoft: .NET application publishing overview](https://learn.microsoft.com/en-us/dotnet/core/deploying/) · [Microsoft: Native AOT deployment](https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/)
 
 # References
 

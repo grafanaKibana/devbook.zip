@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Software Design"
 qard-topic: "Testing/Test-Driven Development"
+flashcard_uid: "007a0cef"
 ---
 
 Test-Driven Development (TDD) grows behavior through a short test-first loop. Select the next example from a test list, write a test that fails for the expected reason, make it pass with the simplest sufficient production change, then improve both code and tests while the suite remains green. The loop supplies regression evidence and makes the caller-facing interface visible before implementation choices harden.
@@ -110,11 +111,13 @@ Use TDD when the next behavior can be stated as an example and early caller feed
 
 # Questions
 
+<!-- qard-id: cef12dc9-115f-4edd-880e-dc205127dd9f -->
 > [!qard]- How can TDD improve design beyond increasing test coverage?
-> The test is the first concrete caller, so construction, inputs, outputs, and failure semantics must be expressed before implementation details dominate. Difficult setup is a design signal worth investigating, not proof that a class must be split. The benefit comes from selecting the next useful example and refactoring after it passes. A test that begins green may document existing behavior, but it does not prove that the intended production change was necessary.
+> The first test is a concrete caller: it forces construction, inputs, outputs, and failure behavior into view before implementation structure hardens. The red-green-refactor loop then allows that interface to improve while behavior stays protected. Difficult setup can prompt design investigation, but does not by itself prove that a class needs splitting. [Martin Fowler: Test-Driven Development](https://martinfowler.com/bliki/TestDrivenDevelopment.html)
 
+<!-- qard-id: 0318f23a-cf63-4c25-b816-80942bc06ca6 -->
 > [!qard]- When is TDD not worth the overhead?
-> The loop has little leverage when the work is a disposable experiment, a mechanical declaration already guaranteed by a framework, or a visual exploration whose useful feedback comes from rendering rather than a code-level example. That does not remove the need for verification before the behavior becomes durable. There is no universal percentage cost: the tradeoff depends on domain familiarity, test level, tooling, and how much change the code will absorb.
+> TDD adds little during a disposable spike, for mechanical declarations already guaranteed by a framework, or when visual rendering provides the useful feedback. That does not remove the need to verify behavior that will ship; use evidence at the boundary that can expose its realistic failure. There is no universal percentage or time-cost cutoff. [Martin Fowler: Test-Driven Development](https://martinfowler.com/bliki/TestDrivenDevelopment.html) · [.NET unit-testing best practices](https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-best-practices)
 
 # References
 

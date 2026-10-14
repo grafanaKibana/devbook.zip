@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Structural/Bridge"
+flashcard_uid: "71628ab5"
 ---
 
 A remote control defines operations such as power and volume. A television brand supplies the hardware-specific implementation. Connecting the two through a stable device interface allows either side to change without rebuilding the other hierarchy.
@@ -201,17 +202,20 @@ Bridge becomes useful when both dimensions already vary or are about to vary. A 
 
 # Questions
 
-> [!qard]- When does payment-provider selection need Bridge rather than Strategy?
-> Strategy swaps one behavior behind an interface. Bridge connects two independently changing models. Provider selection alone needs Strategy. Provider selection combined with a growing set of payment operations may justify Bridge.
+<!-- qard-id: f98e706c-1721-4045-a5cf-9699a6a299a6 -->
+> [!qard]- When does Bridge add value beyond selecting a payment provider?
+> Selecting one payment provider behind an interface may be ordinary polymorphism or dependency-injection configuration. Strategy is useful when the application deliberately swaps among algorithms for one behavior. Bridge fits when two models vary independently—for example, payment operations and provider implementations—and composition connects them without a provider-by-operation class cross-product. Provider choice alone does not establish that a second abstraction axis exists. [Bridge pattern](https://www.informit.com/articles/article.aspx?p=1398603&seqNum=2) · [Strategy pattern](https://refactoring.guru/design-patterns/strategy)
 
-> [!qard]- What makes the payment example Bridge rather than ordinary provider polymorphism?
+<!-- qard-id: 70a405f4-71f6-4190-b24f-654ef48d5a1d -->
+> [!qard]- What structural feature makes a payment design with `PaymentOperation` types and `IPaymentGateway` providers Bridge rather than ordinary provider polymorphism?
 > Both sides vary. `PaymentOperation` has charge, subscription, or refund variants, while `IPaymentGateway` has Stripe, PayPal, or bank implementations. Provider implementations can grow independently, and operation variants can grow independently while they compose existing gateway primitives. A new primitive still changes the gateway contract and every provider. Injecting only one gateway behind one service interface would be ordinary polymorphism or Strategy.
 
+<!-- qard-id: 18451d39-42a6-43e9-bf28-df49b2470a9b -->
 > [!qard]- How does Bridge differ from dependency injection?
-> Dependency injection supplies an object with its dependencies. Bridge is the design decision to keep an abstraction and its implementation as separate models that can vary independently and connect through composition. DI can wire an `IPaymentGateway` into a `PaymentOperation`, but that wiring does not create the two dimensions or prove that they need to evolve separately.
+> Dependency injection is an inversion-of-control technique for providing a class with its dependencies. Bridge is a design structure that separates an abstraction from its implementation so both can vary independently. DI can wire an `IPaymentGateway` into a `PaymentOperation`, but that wiring alone creates neither a second variation axis nor a reason to use Bridge. [Dependency injection in .NET](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection/overview?source=recommendations) · [Bridge pattern](https://www.informit.com/articles/article.aspx?p=1398603&seqNum=2)
 
 # References
 
 - [Bridge pattern](https://refactoring.guru/design-patterns/bridge)
 - [Bridge Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=F1YQ7YRjttI&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc&index=11)
-- [IDistributedCache — .NET caching Bridge with multiple provider implementations](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.caching.distributed.idistributedcache)
+- [IDistributedCache — distributed cache abstraction](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.caching.distributed.idistributedcache)

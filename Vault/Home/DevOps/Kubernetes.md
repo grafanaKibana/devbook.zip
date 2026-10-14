@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "DevOps"
 qard-topic: "Kubernetes"
+flashcard_uid: "41eecc4b"
 ---
 
 Kubernetes orchestrates containerized workloads by reconciling declared API objects with observed cluster state. Controllers create or replace workload objects, the scheduler assigns Pods to nodes, and node agents start containers through a Container Runtime Interface (CRI)-compatible runtime. A stopped process is therefore replaced because the declared state still requires it, not because an operator reruns a command.
@@ -92,7 +93,7 @@ Kubernetes earns its complexity when several workloads need multi-node schedulin
 # Questions
 
 > [!qard]- What is the difference between a Pod, Deployment, and Service?
-> A Pod is the scheduled execution unit. A Deployment keeps the desired number and revision of replaceable Pods present. A Service supplies stable discovery and routes to selected ready Pods. They solve execution, reconciliation, and discovery separately.
+> A Pod is Kubernetes’ scheduled execution unit for one or more containers. A Deployment declares and reconciles a desired set of replaceable Pod replicas through ReplicaSets. A Service provides a stable network identity and selects backend endpoints for a group of Pods. They cover execution, workload reconciliation, and service discovery/routing. [Kubernetes: Pods](https://kubernetes.io/docs/concepts/workloads/pods/) · [Kubernetes: Deployments](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/) · [Kubernetes: Service API](https://kubernetes.io/docs/reference/kubernetes-api/service-resources/service-v1/)
 
 # References
 

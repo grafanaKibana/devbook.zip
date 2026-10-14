@@ -11,6 +11,7 @@ status: Done
 publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Prompt Engineering/Prompt Composition"
+flashcard_uid: "a52de874"
 ---
 
 A single prompt is often the right design. It becomes the wrong one when a task contains intermediate decisions that must be checked before later work can trust them. Prompt composition splits those decisions across calls, adds context before an answer, or uses a model to revise the prompt itself.
@@ -111,10 +112,10 @@ Meta prompting keeps a person in the revision loop. [[Automated Prompt Optimizat
 # Questions
 
 > [!qard]- When is prompt chaining a better fit than one large prompt?
-> Chaining fits when a task has real stages and an intermediate result changes what should happen next. Each stage should have a clear output contract, so invalid data can be stopped before it reaches the following call and failures can be traced to one step. That control has to justify the extra latency, token cost, and risk of errors passing between calls. If the task is simple and no intermediate result needs separate validation, one prompt is usually easier to operate.
+> Chain calls when a task has real stages and one intermediate result changes or gates the next step. Give each stage a clear output contract and validate it before downstream use. Extra calls add latency, token cost, and failure boundaries; use one prompt when no intermediate result needs separate treatment. Evaluate the complete chain against a simpler baseline. [OpenAI evals](https://developers.openai.com/api/docs/guides/evals) · [Anthropic prompt chaining](https://www.anthropic.com/engineering/building-effective-agents#workflow-prompt-chaining)
 
-> [!qard]- What is a practical meta prompting workflow for improving a weak prompt?
-> A useful workflow starts with real failures rather than a general request to make the prompt better. Group the failures by cause, then ask for a revision that addresses those causes and states a clear output contract. Compare the candidate with the current prompt on held-out cases, not only on the examples used to create it. Version the prompt and evaluator together, and keep a rollback threshold in case the revision fixes known failures but hurts normal inputs.
+> [!qard]- What is a practical meta-prompting workflow for improving a weak prompt?
+> Start with observed failures, group them by cause, and ask for a candidate revision that addresses those causes with a clear output contract. Compare it with the current prompt on representative held-out cases, not only examples used to write it. Version the prompt and evaluator together, and set a rollback threshold before deployment so a known-failure fix does not silently regress normal inputs. [OpenAI model optimization](https://developers.openai.com/api/docs/guides/model-optimization) · [OpenAI evals](https://developers.openai.com/api/docs/guides/evals)
 
 # References
 

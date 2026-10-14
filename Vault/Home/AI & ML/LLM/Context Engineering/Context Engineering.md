@@ -12,6 +12,7 @@ status: Done
 publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Context Engineering/Context Engineering"
+flashcard_uid: "0d1d06bc"
 ---
 
 Context engineering decides what the model sees and where it appears in the context window. Instructions compete with examples, retrieved evidence, conversation history, and tool traffic for the same finite budget. Once a system gains retrieval or memory, [[Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering|Prompting]] is only one part of an assembled payload.
@@ -118,11 +119,11 @@ The smallest context that answers the task is the starting point. Retrieval and 
 
 # Questions
 
-> [!qard]- Why does adding more context often make answers worse, not better?
-> Attention is uneven across a long window, so evidence buried in the middle may be underused. Added tokens also compete with the evidence already present, even when they are loosely relevant. Larger inputs cost more and take longer. The fix is signal density: keep fewer complete chunks, order them deliberately, and measure whether each increase in context improves the answer.
+> [!qard]- Why can adding more context make answers worse instead of better?
+> More text is not automatically more useful evidence. In evaluated long-context tasks, some models used information near the beginning or end more reliably than information in the middle; the effect depends on model and task. Irrelevant or redundant tokens can also compete with useful evidence. Keep complete, relevant material, place it deliberately, and measure answer quality and input cost on the actual workload. [Lost in the Middle](https://arxiv.org/abs/2307.03172) · [Latency optimization](https://developers.openai.com/api/docs/guides/latency-optimization)
 
-> [!qard]- What are the main techniques for keeping a long-running agent's context under control?
-> Context control starts with tracking the token budget on every iteration instead of waiting for the window to fill. Keep a small set of strong evidence and place the best material where the model is likely to use it. Older turns can be compacted into decisions, constraints, and pending work. Tool results should contain only the fields needed for the next step, while bulky state can live outside the window and be loaded through a reference when needed.
+> [!qard]- How can a long-running agent keep useful context within a finite window?
+> Treat context as a working set: retain the evidence and state needed for the next decision, and account for prompt, history, tool results, and response space together. Select and order relevant material; trim tool output to useful fields; and move bulky state outside the prompt when it can be reloaded by reference. Compaction can preserve decisions and open work, but it can also lose subtle details, so keep source material when exact recovery matters. [Effective context engineering for AI agents](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents)
 # References
 
 - [Lost in the Middle: How Language Models Use Long Contexts (Liu et al., 2023)](https://arxiv.org/abs/2307.03172)

@@ -11,6 +11,7 @@ status: Done
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Creational/Singleton"
+flashcard_uid: "12bb55c5"
 ---
 
 Singleton combines two decisions: keep one instance within a defined boundary and provide access to it. The boundary is easy to miss. A classical static implementation owns a process-level access point, while `.AddSingleton<T>()` reuses one instance for subsequent resolutions from a particular root service provider and registration. A second provider or direct construction can still create another instance.
@@ -170,11 +171,13 @@ Singleton services may be stateless or hold shared state. Either way, their impl
 
 # Questions
 
+<!-- qard-id: 3ccef885-1fa9-4646-9ab0-8a9a97b1da4e -->
 > [!qard]- How does a DI singleton differ from the classical Singleton pattern?
-> A classical Singleton type controls construction and exposes a global access point. A DI singleton is a container lifetime: one root provider reuses one registered instance, while consumers receive it through declared dependencies. Other providers or direct construction can still produce more instances.
+> A classical Singleton type controls construction and exposes a global access point. A DI singleton is one registered instance reused by a particular root provider and injected through declared dependencies; another provider or direct construction can create another instance. [.NET dependency injection](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection/overview) · [[Home/Software Architecture/Patterns/Design Patterns/Creational/Singleton#Problem|classical Singleton problem]] · [[Home/Software Architecture/Patterns/Design Patterns/Creational/Singleton#Singleton Lifetime in .NET|Singleton lifetime in .NET]]
 
+<!-- qard-id: 8f445829-cfc8-4081-9059-c663ca0a2d49 -->
 > [!qard]- What must be true before choosing singleton lifetime for mutable state?
-> The state must be intentionally shared across all callers in that provider, safe under concurrent access, bounded in memory, and independent of scoped data. If any condition fails, a scoped or transient lifetime is usually safer.
+> Use a singleton for mutable state only when sharing across all callers in that provider is intentional, concurrent access is safe, retained memory is bounded, and the object does not capture scoped state. Otherwise choose a shorter lifetime or a different state owner. [.NET dependency injection](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection/overview)
 
 # References
 

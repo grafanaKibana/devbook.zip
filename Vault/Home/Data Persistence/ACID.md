@@ -10,6 +10,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Data Persistence"
 qard-topic: "ACID"
+flashcard_uid: "72457a79"
 ---
 
 ACID describes what a database transaction protects. A **transaction** groups reads and writes behind one commit decision. Atomicity prevents partial commit, consistency preserves declared invariants, isolation constrains concurrent histories, and durability defines what survives after commit.
@@ -39,7 +40,7 @@ The useful test is a failure trace, not the happy path:
 | Process crashes before crediting B | A stays at $400; $100 disappeared | Recovery aborts the uncommitted transaction. A returns to $500 |
 | Both writes finish and `COMMIT` succeeds | Two unrelated writes happened to finish | Debit and credit become one committed outcome |
 
-Atomicity does not make the transfer request safe to repeat. If the client times out after the server commits, retrying the same transaction can transfer another $100. Store an idempotency key or transfer ID under a uniqueness constraint so a retry returns the first result instead of applying the business operation again.
+Atomicity does not make the transfer request safe to repeat. If the client times out after the server commits, retrying the same transaction can transfer another $100. An idempotency key or transfer ID stored under a uniqueness constraint lets a retry return the first result instead of applying the business operation again.
 
 ## Consistency
 
@@ -62,7 +63,7 @@ Isolation controls what concurrent transactions may observe and which combined h
 - **Non-repeatable read**: reading the same row twice in a transaction and getting different values because another transaction committed a change between reads.
 - **Phantom read**: a query returns different rows on two executions because another transaction inserted or deleted rows.
 
-The table gives the SQL standard's minimum guarantees. Engines may provide more. PostgreSQL maps Read Uncommitted to Read Committed, and its Repeatable Read prevents phantoms while still allowing serialization anomalies. SQL Server Read Committed can use locks or row versions, depending on configuration. Check the product documentation before relying on the generic table.
+The table gives the SQL standard's minimum guarantees. Engines may provide more. PostgreSQL maps Read Uncommitted to Read Committed, and its Repeatable Read prevents phantoms while still allowing serialization anomalies. SQL Server Read Committed can use locks or row versions, depending on configuration. Each product's documentation, not the generic table, defines the guarantees a specific engine provides.
 
 ### MVCC and Snapshot Isolation
 
@@ -80,7 +81,7 @@ The familiar dirty-read, non-repeatable-read, and phantom list misses some inval
 | Sets Alice off call | Sets Bob off call |
 | Commits because it changed only Alice | Commits because it changed only Bob |
 
-Each transaction sees another doctor on call, then updates a different row. Both local decisions look valid. The combined result is not. Protect the complete invariant with a constraint, explicit row or predicate protection, or Serializable isolation. PostgreSQL Serializable detects dangerous read/write dependencies and aborts one transaction with SQLSTATE `40001`. Retry the **whole** transaction, including every read and decision. Repeating only the final `UPDATE` reuses stale reasoning.
+Each transaction sees another doctor on call, then updates a different row. Both local decisions look valid. The combined result is not. Preventing it requires protecting the complete invariant with a constraint, explicit row or predicate protection, or Serializable isolation. PostgreSQL Serializable detects dangerous read/write dependencies and aborts one transaction with SQLSTATE `40001`. Recovery then requires retrying the **whole** transaction, including every read and decision. Repeating only the final `UPDATE` reuses stale reasoning.
 
 ## Durability
 
@@ -108,7 +109,7 @@ Concurrent transactions can also deadlock when each holds a resource the other n
 
 **Why it happens**: Read Committed is a common default, and the absence of dirty reads is mistaken for full transaction isolation.
 
-**Mitigation**: match the mechanism to the invariant. Repeatable Read generically keeps repeated row reads stable, but its implementation is engine-specific: PostgreSQL uses a transaction snapshot and prevents phantoms, while lock-based implementations can protect reread rows yet still permit phantoms. Either model may still allow serialization anomalies such as write skew. A decision spanning rows or a predicate needs Serializable isolation, complete lock coverage, an enforceable constraint, or optimistic version checks over every record that informed the decision.
+**Mitigation**: the mechanism must fit the invariant. Repeatable Read generically keeps repeated row reads stable, but its implementation is engine-specific: PostgreSQL uses a transaction snapshot and prevents phantoms, while lock-based implementations can protect reread rows yet still permit phantoms. Either model may still allow serialization anomalies such as write skew. A decision spanning rows or a predicate needs Serializable isolation, complete lock coverage, an enforceable constraint, or an application-specific optimistic protocol that protects all decision inputs, including predicate and absent-row changes.
 
 ## Long-Running Transactions
 
@@ -116,13 +117,13 @@ Concurrent transactions can also deadlock when each holds a resource the other n
 
 **Why it happens**: application code performs an HTTP call, file operation, or user wait inside the transaction.
 
-**Mitigation**: keep the transaction around only the database work that must share one commit decision. Perform unrelated external I/O before or after it, with an outbox or another explicit handoff when later work must be reliable.
+**Mitigation**: the transaction should cover only the database work that must share one commit decision. Unrelated external I/O belongs before or after it, with an outbox or another explicit handoff when later work must be reliable.
 
 # Tradeoffs
 
 **Transaction semantics**
 
-Use one transaction when several reads and writes share one invariant and one database can enforce it. Pick the weakest isolation level that prevents the histories capable of breaking that invariant. Stronger isolation spends coordination through blocking, dependency tracking, or retries. For a workflow across services, choose between distributed commit and explicit local transactions with messages and compensation.
+One transaction fits when several reads and writes share one invariant and one database can enforce it. The appropriate isolation level is the weakest one that prevents the histories capable of breaking that invariant. Stronger isolation spends coordination through blocking, dependency tracking, or retries. For a workflow across services, the choice is between distributed commit and explicit local transactions with messages and compensation.
 
 **Replication, consistency, and availability**
 
@@ -143,11 +144,11 @@ ACID does not determine replica freshness or behavior during a partition. An ACI
 | Serializable | Serialization anomalies | Highest coordination or abort rate | Predicate-spanning financial, inventory, and booking invariants |
 | Snapshot (SQL Server) | Dirty, non-repeatable, and phantom reads. Write skew remains possible | Low read-write contention (versioned) | High-read workloads whose cross-row invariants have separate protection |
 
-Read Committed is a common starting point for independent point operations, though it is not every engine's default. Repeatable Read fits work that needs stable rereads. A snapshot-based implementation such as PostgreSQL's also gives one transaction snapshot, while a lock-based implementation may expose a different phantom boundary. Explicit Snapshot isolation provides a stable versioned view but can still allow write skew. Use Serializable when a predicate-spanning invariant must hold across concurrent transactions, and design the complete transaction for retries.
+Read Committed is a common starting point for independent point operations, though it is not every engine's default. Repeatable Read fits work that needs stable rereads. A snapshot-based implementation such as PostgreSQL's also gives one transaction snapshot, while a lock-based implementation may expose a different phantom boundary. Explicit Snapshot isolation provides a stable versioned view but can still allow write skew. Serializable fits when a predicate-spanning invariant must hold across concurrent transactions, and the complete transaction must then be designed for retries.
 
 ```csharp
-// Optimistic concurrency as a lighter alternative to Serializable
-// EF Core: rowversion column prevents lost updates without table locks
+// Optimistic concurrency for one row: not a substitute for Serializable on cross-row or predicate invariants
+// EF Core: a rowversion token detects a concurrent change to this row, preventing a lost update there; the UPDATE still takes normal write locks
 public sealed class Account
 {
     public int Id { get; set; }
@@ -163,8 +164,60 @@ await db.SaveChangesAsync();
 
 # Questions
 
-> [!qard]- What determines the isolation level needed for a read-modify-write transaction?
-> The required protection depends on the invariant and on every row or predicate used to make the decision. Repeatable Read stabilizes repeated reads and may protect an update to the same row under the database engine's rules, but it does not generally prevent write skew. A financial or inventory decision that spans rows or a predicate needs Serializable isolation or explicit locks over the full set. Optimistic row-version checks reduce contention only when the transaction validates every record that influenced the decision.
+<!-- qard-id: 46fa4cf2-efe3-4a7c-a44a-eeb444d9ca02 -->
+> [!qard]- What does ACID mean for a database transaction, and where do its guarantees stop?
+> ACID names four guarantees a database gives a transaction, a group of reads and writes that ends in one commit decision. They hold only inside that database and only as strongly as its configured isolation and durability settings allow.
+> 
+> - **Atomicity:** the transaction has one outcome. Either all of its writes commit or none do, so a crash or error cannot leave a partial commit.
+> - **Consistency:** a correct transaction moves the data from one valid state to another. Database constraints such as foreign keys, uniqueness and `CHECK` enforce the rules the database can express. Application logic must enforce the rest.
+> - **Isolation:** concurrent transactions are limited in what they can observe of each other and in which combined results can commit. The configured isolation level sets how strict this is.
+> - **Durability:** once the database acknowledges a commit, the changes survive the failures its durability configuration covers, such as a crash.
+> 
+> The guarantees stop at these boundaries:
+> 
+> - **Configuration:** weaker settings narrow the guarantees. For example, PostgreSQL asynchronous commit can acknowledge a commit before it is durably logged, so a crash can lose the most recently committed transactions.
+> - **Retries:** atomicity does not make an operation safe to repeat. If a client times out after the server has committed and then retries, the work is applied twice. Making the operation idempotent prevents this, for example with a unique request ID.
+> - **Other databases and services:** a local commit cannot include writes elsewhere. Work that spans services needs a separate protocol, such as two-phase commit or a saga of local transactions.
+> 
+> [Microsoft: ACID properties](https://learn.microsoft.com/en-us/windows/win32/cossdk/acid-properties) · [PostgreSQL: Asynchronous commit](https://www.postgresql.org/docs/current/wal-async-commit.html)
+
+> [!qard]- What is write skew, and why can snapshot isolation allow it?
+> Write skew is a concurrency anomaly in which two transactions read the same data, each makes a decision that is valid for what it read, and each writes a different row. Both commit, but the combined result breaks an invariant that neither transaction broke alone.
+> 
+> Example: a rule requires at least one doctor on call, and Alice and Bob are both on call.
+> 
+> | Step | Transaction A | Transaction B |
+> |---|---|---|
+> | Read | Sees Alice and Bob on call | Sees the same state |
+> | Decide | Bob remains, so Alice may leave | Alice remains, so Bob may leave |
+> | Write | Sets Alice off call | Sets Bob off call |
+> | Commit | Succeeds | Succeeds |
+> 
+> No doctor is left on call.
+> 
+> Snapshot isolation gives each transaction a stable snapshot. Each transaction checks the rule against a snapshot that does not contain the other's change. Because they update different rows, there is no concurrent update of the same row to reject, so both commit. The problem is a read-write dependency: each transaction writes data that the other read when deciding.
+> 
+> Preventing write skew requires protecting the whole invariant: a constraint where it can be expressed, locks covering every row or the predicate the decision read, or Serializable isolation. PostgreSQL's Serializable level detects this kind of dependency and aborts one transaction with a serialization failure. The application then retries the whole transaction.
+> 
+> [PostgreSQL 18: Transaction isolation](https://www.postgresql.org/docs/18/transaction-iso.html)
+
+<!-- qard-id: d8395b28-d1ab-42ae-941b-0c2fd187ae9f -->
+> [!qard]- How should concurrency protection be chosen for a read-modify-write transaction?
+> Concurrency protection is chosen from the invariant the decision depends on, not from the row being written. The mechanism must protect every input that informed the decision: the rows read, any predicate such as 'at least one doctor on call', and rows whose absence mattered.
+> 
+> Mechanisms that can cover the whole decision:
+> 
+> - **Database constraint:** when the invariant can be expressed as a constraint, the database rejects any commit that would violate it, whatever the interleaving.
+> - **Serializable isolation:** the database commits only results that some one-at-a-time order of the transactions could have produced. It may abort a transaction to enforce this. The whole transaction, including its reads and decisions, must then be retried. Retrying only the final write would reuse stale reasoning.
+> - **Locks:** explicit locks protect the decision only when they cover every relevant row or the whole predicate.
+> - **Application-specific optimistic check:** valid only when it detects a change to any decision input, not just to the updated row.
+> 
+> Two choices that look sufficient but are not:
+> 
+> - **Repeatable Read** keeps repeated reads or the transaction snapshot stable, depending on the engine. It can still allow write skew: two transactions read the same rows, each updates a different row, and together they break the invariant.
+> - **A row-version token** on the updated entity detects a concurrent change to that row only. It misses rows inserted or deleted under the predicate and changes to other rows that were read.
+> 
+> [PostgreSQL 18: Transaction isolation](https://www.postgresql.org/docs/18/transaction-iso.html) · [Microsoft: EF Core concurrency conflicts](https://learn.microsoft.com/en-us/ef/core/saving/concurrency)
 
 # References
 

@@ -12,6 +12,7 @@ level:
   - "4"
 qard-deck: "Programming"
 qard-topic: "NET/Runtime/Runtime"
+flashcard_uid: "7ed037a5"
 ---
 
 The .NET runtime executes managed code and supplies the machinery around it: code generation, type loading, garbage collection, exception dispatch, and shared threading services. These mechanisms shape startup, throughput, latency, and memory use, but a symptom attributed to “the runtime” often begins with an application lifetime or blocking decision.
@@ -25,8 +26,9 @@ return FolderStructureMap;
 
 # Questions
 
+<!-- qard-id: 85533752-810c-478c-849a-eb6486511be8 -->
 > [!qard]- What does the CLR do when an application starts, and why does startup behavior matter?
-> A native host selects and starts the runtime, then the loader resolves the entry assembly and dependencies. Executed methods use ReadyToRun code when available or are JIT-compiled. Tiering can replace those bodies later. Assembly loading, static initialization, JIT work, and dependency setup can all appear in cold-start latency, so traces must separate them.
+> A native host starts a compatible runtime, which loads the entry assembly and its dependencies. Methods execute from usable ReadyToRun code when present or are JIT-compiled when needed; loading, static initialization, and compilation can contribute to cold-start latency. The startup path therefore affects first-request behavior even when steady-state execution is fast. [Microsoft: managed execution process](https://learn.microsoft.com/en-us/dotnet/standard/managed-execution-process) · [Microsoft: CLR overview](https://learn.microsoft.com/en-us/dotnet/standard/clr) · [Microsoft: ReadyToRun](https://learn.microsoft.com/en-us/dotnet/core/deploying/ready-to-run) · [dotnet/runtime: host components](https://github.com/dotnet/runtime/blob/main/docs/design/features/host-components.md)
 
 # References
 

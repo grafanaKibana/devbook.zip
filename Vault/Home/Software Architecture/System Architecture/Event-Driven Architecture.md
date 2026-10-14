@@ -12,6 +12,7 @@ status: Done
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "System Architecture/Event-Driven Architecture"
+flashcard_uid: "784f3460"
 ---
 
 Event-driven architecture (EDA) moves coordination from direct calls to published facts. A producer emits `OrderPlaced`, `PaymentFailed`, or `InventoryReserved`. Consumers decide what those facts mean for their own state. The producer does not name or wait for them. This removes temporal coupling when the reaction can happen later, while synchronous APIs still handle queries and decisions that need an immediate answer.
@@ -161,8 +162,9 @@ Propagate trace context, record event identity at operation boundaries, and keep
 
 # Questions
 
+<!-- qard-id: f0a2c8b0-c242-478a-aa17-246db688b537 -->
 > [!qard]- What determines whether an event-driven workflow uses orchestration or choreography?
-> The main question is whether one component must own the process from start to finish. An ordered checkout with compensation steps fits [[Home/Software Architecture/Distributed Systems/Orchestration|orchestration]] because the current step and recovery state need one visible owner. Independent reactions to `OrderPlaced`, such as email, analytics, or indexing, fit [[Home/Software Architecture/Distributed Systems/Choreography|choreography]] because no subscriber controls the others. Asynchronous messaging supports both styles; it does not force choreography.
+> Use choreography when services react independently to published events and no one component owns the whole workflow. Use orchestration when a coordinator must track ordered steps, current state, and recovery. An ordered checkout can need orchestration; independent email or analytics reactions can use choreography. Asynchronous messaging supports both. [Azure: event-driven architecture](https://learn.microsoft.com/en-us/azure/architecture/guide/architecture-styles/event-driven) · [Azure: saga pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/saga)
 
 # References
 

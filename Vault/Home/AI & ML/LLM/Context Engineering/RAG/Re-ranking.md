@@ -11,6 +11,7 @@ status: Done
 publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Context Engineering/RAG/Re-ranking"
+flashcard_uid: "16bb24ca"
 ---
 
 Re-ranking is a second-stage rescoring or reordering pass over candidates returned by [[Retrieval]]. It may use a cross-encoder or LLM, lexical scores such as BM25, rank fusion such as RRF, or a diversity rule such as MMR. First-stage retrieval is built for fast recall across a large corpus. The second stage has a narrower job: improve the short list before context reaches the generator.
@@ -155,10 +156,10 @@ Start without a reranker and measure the failures. BM25 or RRF helps when lexica
 
 # Questions
 
-> [!qard]- Why can reranking improve offline [[Monitoring#Retrieval Quality Metrics|nDCG]] without visible quality improvement for end users?
-> The changed positions may sit outside the generator's context. When generation uses only three chunks, a better ordering at positions 4–5 cannot affect the answer. Compare the actual top-k composition as well as overall [[Monitoring#Retrieval Quality Metrics|nDCG]], and check whether the evaluation queries resemble production traffic.
+> [!qard]- Why can a reranker improve retrieval metrics without improving the generated answer?
+> A reranker can improve ranking across the candidate list while leaving the final evidence assembled for generation unchanged. If the changed positions fall outside the selected context, that request's model input does not change. Compare candidate Recall@N, post-rerank ordering and the actual assembled context; then assess answer quality on representative queries. A metric gain alone does not establish user-visible benefit. [Retrieve and rerank](https://sbert.net/examples/sentence_transformer/applications/retrieve_rerank/README.html)
 
-> [!qard]- When does reranking hurt retrieval quality instead of helping?
+> [!qard]- When can reranking worsen retrieval quality, and when can it fail to improve it?
 > A reranker trained on short web passages may misjudge long technical documents or unfamiliar terminology, then demote the relevant evidence. A small candidate set creates a different failure: low first-stage recall leaves only noise to reorder. Compare [[Monitoring#Retrieval Quality Metrics|recall and precision]] before and after reranking on domain queries.
 
 # References

@@ -10,6 +10,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Data Persistence"
 qard-topic: "Connection Pooling"
+flashcard_uid: "788e9b4c"
 ---
 
 Opening a physical database connection can require a socket, a security handshake, authentication, and server-side session setup. Repeating that work for every query wastes latency and server capacity. A connection pool keeps physical connections open and lends them to callers. `SqlClient` and Npgsql enable pooling by default. The application still has to return connections promptly and keep the fleet-wide limit within what the database can serve.
@@ -86,8 +87,13 @@ Start with a conservative fleet-wide budget. Measure pool wait time alongside da
 
 # Questions
 
-> [!qard]- Why is a bigger connection pool often worse, not better?
-> Each connection consumes server resources. After the useful database concurrency is saturated, additional queries wait on CPU, I/O, or locks inside the engine, so latency rises without a matching throughput gain. Size the whole fleet against measured database capacity and the server connection limit, then divide that budget across instances.
+<!-- qard-id: c0535519-685c-48e5-9c02-919ec55d53c3 -->
+> [!qard]- When can a larger connection pool make performance worse?
+> A larger limit can allow more concurrent database work, but once the database is saturated those sessions add contention and queueing instead of useful throughput. A pool limit applies to each pool, so instance count and pool fragmentation multiply the possible sessions. Measure database capacity and pool waits, then set a fleet-wide budget and return connections promptly. [SQL Server connection pooling](https://learn.microsoft.com/en-us/sql/connect/ado-net/sql-server-connection-pooling?view=sql-server-ver17) · [SQL Server connection options](https://learn.microsoft.com/en-us/sql/connect/ado-net/connection-options?view=sql-server-ver17)
+
+<!-- qard-id: e65be66b-2817-486a-8729-013a780049b0 -->
+> [!qard]- What happens to a database connection when application code opens and disposes it?
+> With client-side pooling, opening a logical connection borrows an idle physical connection or creates one within the pool limit. When the caller closes or disposes it, the provider returns it to the pool for reuse; if the pool is full, another open waits for a connection or times out. Hold it only for database work. [SQL Server connection pooling](https://learn.microsoft.com/en-us/sql/connect/ado-net/sql-server-connection-pooling?view=sql-server-ver17)
 
 # References
 

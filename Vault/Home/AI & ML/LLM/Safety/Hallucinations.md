@@ -11,6 +11,7 @@ status: Done
 publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Safety/Hallucinations"
+flashcard_uid: "23b732e3"
 ---
 
 Hallucination is generated content that lacks support from the available evidence. It can be false, or merely impossible to verify from the supplied context. Fluency hides the failure: a language model predicts plausible tokens rather than checking each claim against reality.
@@ -89,11 +90,11 @@ For evidence-backed answers, start with retrieval and claim-to-context checks. S
 
 # Questions
 
-> [!qard]- Why can an LLM still hallucinate when using RAG?
-> RAG gives the model context, but it does not prove that the answer follows from it. The source may not contain the fact, retrieval may miss the right passage, or the model may ignore the passage and add unsupported details. Retrieval quality and answer faithfulness should be measured separately so the failing stage is clear.
+> [!qard]- Why can retrieval-augmented generation still produce a hallucinated answer?
+> Retrieval supplies evidence; it does not prove the answer is true or that every material claim follows from the passages. Retrieval can miss or return weak evidence, and generation can add unsupported details. Measure retrieval quality separately from answer faithfulness. A faithfulness score checks support in the supplied context, not whether that context is true or complete. [RAGAS faithfulness](https://docs.ragas.io/en/v0.2.5/concepts/metrics/available_metrics/faithfulness/) · [RAGAS paper](https://arxiv.org/abs/2309.15217)
 
-> [!qard]- Why can preference tuning make an answer sound better without making it more factual?
-> Preference data may reward agreement, confidence, or style without checking whether a claim is supported. The model can then produce a polished answer that accepts a false premise. Factual accuracy and calibration still need separate evaluation from preference scores.
+> [!qard]- How can preference tuning make an answer more agreeable without making it more factual?
+> Preference signals can reward answers that agree with the user or sound persuasive, even when they accept a false premise. In the studied RLHF settings, optimizing for human or model preferences sometimes favored sycophantic answers over correct ones. That is a risk, not an inevitable result of every preference-tuning setup. Evaluate factual accuracy and calibration separately from preference scores. [Anthropic sycophancy research](https://www.anthropic.com/research/towards-understanding-sycophancy-in-language-models)
 
 # References
 

@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Programming"
 qard-topic: "NET/CSharp/Fundamentals/Types/Delegates"
+flashcard_uid: "c751e8da"
 ---
 
 A delegate is a C# type that describes a callable method signature. A delegate value pairs that signature with a method and, for a closed instance method, its target object. The value can then be stored, passed around, combined with other delegates, and invoked later.
@@ -133,8 +134,9 @@ The extra local gives each iteration separate storage. This is needed whenever l
 
 # Questions
 
-> [!qard]- How is a delegate represented at runtime?
-> A delegate declaration creates a sealed type derived from `System.MulticastDelegate`. Its `Invoke` method describes the signature that compatible methods must match. A delegate instance stores a method pointer and, for an instance method, the target object; a multicast delegate also stores an invocation list. The type still has `BeginInvoke` and `EndInvoke` metadata, but calling those methods on modern .NET (6+) throws `PlatformNotSupportedException`.
+<!-- qard-id: c922b7d0-655f-4f50-89fd-bfc97950ccfa -->
+> [!qard]- What is a delegate, and what does a delegate value carry?
+> A delegate is a type-safe callable value whose type fixes the method signature. A delegate instance refers to a compatible method and, for a closed instance method, its target object; it can also represent an ordered invocation list of methods. This is the mechanism used for callbacks and event handlers. [Microsoft: delegate specification](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/delegates)
 
 # References
 

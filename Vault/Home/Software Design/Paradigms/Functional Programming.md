@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Software Design"
 qard-topic: "Paradigms/Functional Programming"
+flashcard_uid: "76f68e02"
 ---
 
 Functional programming makes data flow explicit. Calculations are expressed as functions whose results depend on their inputs, while database calls, clocks, logging, and other effects stay at the system's edges. That separation reduces the amount of code whose behavior depends on hidden state.
@@ -142,8 +143,9 @@ The practical C# pattern is a functional core with an effectful shell: read exte
 
 # Questions
 
+<!-- qard-id: 335bedbd-8894-48a7-9fe2-5318c9607cad -->
 > [!qard]- What makes a function "pure" and why does purity matter for testing?
-> For inputs in its defined domain, its observable result depends only on explicit inputs, and evaluating it does not change external state. Tests therefore pass values and assert values instead of arranging clocks, databases, or global configuration. A throwing input makes the function partial rather than supplying a substitutable result; expected invalid inputs can be modeled as returned values when totality matters. Real systems keep I/O and external state in a surrounding shell and pass their results into the pure core.
+> A pure function’s result depends on explicit inputs and evaluating it does not mutate observable external state. That makes a test a direct value-in/value-out check instead of setup for clocks, databases, or globals; I/O belongs at the surrounding boundary. Purity and totality are separate: under a formal semantics, a deterministic exception can make a computation partial, while expected invalid input can be returned as a value when total handling is useful. Microsoft’s LINQ guidance describes transformations versus state-changing procedures; Haskell 2010 §3.1 models errors/nontermination as bottom, which is a language-semantics example rather than a universal claim about C# exceptions. [.NET: functional vs. imperative programming](https://learn.microsoft.com/en-us/dotnet/standard/linq/functional-vs-imperative-programming) · [Haskell 2010 report §3.1](https://www.haskell.org/onlinereport/haskell2010/haskellch3.html#sect3.1)
 
 # References
 

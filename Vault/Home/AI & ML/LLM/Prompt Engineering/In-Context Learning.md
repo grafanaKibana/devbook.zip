@@ -11,6 +11,7 @@ status: Done
 publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Prompt Engineering/In-Context Learning"
+flashcard_uid: "a871bbf2"
 ---
 
 In-context learning changes model behavior through examples in the prompt, without updating model weights. The model still predicts the next token at inference time. Demonstrations shift that prediction by establishing the task, label space, and expected output shape.
@@ -139,10 +140,13 @@ Start zero-shot. Add one example for a stubborn output contract, then add only t
 # Questions
 
 > [!qard]- How should a task move from zero-shot to one-shot or few-shot prompting?
-> Zero-shot is the baseline when instructions and labels define the task clearly. One example is useful when the main failure is the output shape. Few-shot prompting earns its extra tokens when examples express decision boundaries better than prose. The final prompt should keep the smallest demonstration set that wins on a representative evaluation set, because every example adds cost and another artifact that can drift.
+> Use zero-shot when instructions and labels already define the task. Add one example when the main gap is output shape; use a few diverse examples when they clarify decision boundaries better than prose. Keep only examples that improve a representative evaluation set, because demonstrations consume context and can drift. Examples clarify output conventions; strict shape still needs schema enforcement or validation. [Min et al., Rethinking the Role of Demonstrations](https://arxiv.org/abs/2202.12837) · [Structured Outputs](https://developers.openai.com/api/docs/guides/structured-outputs)
 
-> [!qard]- What are the main failure modes of few-shot prompting?
-> Few-shot behavior can shift when examples are reordered, reformatted, or run on a different model. Long demonstrations also consume context, while examples that do not match production traffic create false confidence. Examples cannot reliably supply missing external facts or control a long multi-step process. Those failures call for retrieval, decomposition, or training rather than simply adding more shots.
+> [!qard]- How does in-context learning work, and how does it differ from fine-tuning and retrieval?
+> In-context learning conditions a pretrained model with examples in the prompt; inference uses them without updating model weights. Demonstrations can show task structure, label space, and output conventions. Fine-tuning changes weights, while retrieval supplies external evidence at request time. These mechanisms can be combined, but examples are not a reliable substitute for current or private source material. [Brown et al., Language Models are Few-Shot Learners](https://arxiv.org/abs/2005.14165) · [Min et al., Rethinking the Role of Demonstrations](https://arxiv.org/abs/2202.12837) · [Include relevant context information](https://developers.openai.com/api/docs/guides/prompt-engineering#include-relevant-context-information)
+
+> [!qard]- What can few-shot examples clarify, and what problems do they not solve?
+> Examples condition the model’s response to the current prompt; they do not update model weights or provide a dependable source for facts absent from supplied context. They also cannot enforce multi-step runtime limits. Example choice, format, order, and model can change behavior, while long examples use context needed for the request. Use retrieval for changing or private evidence and runtime controls for permissions or loop termination. [Min et al., Rethinking the Role of Demonstrations](https://arxiv.org/abs/2202.12837) · [OpenAI prompt engineering](https://developers.openai.com/api/docs/guides/prompt-engineering)
 
 # References
 

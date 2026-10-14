@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Programming"
 qard-topic: "NET/CSharp/Concurrency and Parallelism/Parallelism"
+flashcard_uid: "5a1bba92"
 ---
 
 Parallelism uses several cores to finish CPU-bound work sooner. .NET provides loop-based APIs, PLINQ, and lower-level partitioning tools, but the useful speedup comes from the workload rather than the API name. Small items, shared writes, or a large serial phase can make parallel code slower than the original loop.
@@ -123,17 +124,21 @@ Parallelism is not limited to running more threads:
 
 # Questions
 
+<!-- qard-id: d918b18d-d000-4609-b2ca-0a7266c4944b -->
 > [!qard]- Why can adding more parallel workers reduce performance?
-> More workers help only while useful work can run independently and the machine still has capacity. After that point, workers compete for CPU time, memory bandwidth, cache lines, and shared locks, while scheduling and coordination add more overhead. Throughput can then fall even though more tasks are running, so the useful degree of parallelism has to be measured for the actual workload.
+> Workers help only while there is enough independent work and the machine or downstream system has capacity. Beyond that point they compete for CPU, memory bandwidth, caches, locks, and dependency capacity; scheduling and coordination also grow. The extra work can reduce throughput or worsen latency, so measure the workload rather than equating worker count with speed. [Microsoft: Understanding speedup in PLINQ](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/understanding-speedup-in-plinq)
 
+<!-- qard-id: 6f1732ae-c419-4c5a-9c6e-cd54e91be456 -->
 > [!qard]- How should `MaxDegreeOfParallelism` be chosen?
-> The starting point comes from the bottleneck. For CPU-bound work, `Environment.ProcessorCount` is a reasonable first value, but memory-heavy work may reach its limit earlier. Work that calls a database or remote service should also respect that dependency's safe concurrency. The final value comes from measuring throughput, latency, and resource pressure under a realistic load.
+> Choose a limit from the bottleneck and measure it under representative load. CPU-bound work may start near available processors, but memory-heavy work can saturate earlier and database/remote calls must respect dependency capacity. Keep the value that meets throughput and tail-latency goals without exhausting those resources; `ProcessorCount` is a starting clue, not a universal default. [ParallelOptions.MaxDegreeOfParallelism](https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.paralleloptions.maxdegreeofparallelism?view=net-10.0) · [Microsoft: Understanding speedup in PLINQ](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/understanding-speedup-in-plinq)
 
+<!-- qard-id: 6b77dfe2-1eb1-4e64-a158-8563bde1f363 -->
 > [!qard]- When is PLINQ a poor fit?
-> PLINQ works best when each item can be processed independently and does enough CPU work to repay the parallel overhead. It is a poor fit when correctness depends on side-effect order, strict source ordering is required, or each item is so cheap that partitioning and merging cost more than the work. A sequential query is also easier to reason about, so parallel execution should be kept only when measurement shows a useful gain.
+> PLINQ is a poor fit when each item is too cheap to repay partition/merge overhead, correctness depends on side-effect order or shared mutable state, or source ordering is required but its preservation costs too much. It fits independent CPU work when unordered results are acceptable and measurement shows a gain. [Microsoft: PLINQ pitfalls](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/potential-pitfalls-with-plinq) · [Microsoft: Understanding speedup in PLINQ](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/understanding-speedup-in-plinq)
 
+<!-- qard-id: 7121b006-f909-4325-8fd7-53f0c9b69861 -->
 > [!qard]- Why can a parallel query be slower than a sequential query for small inputs?
-> Parallel execution has fixed costs: the input is partitioned, work is scheduled, and partial results are merged. With only a few items or very little work per item, the sequential query can finish before those costs are recovered. Parallelism becomes useful only when the amount of independent work is large enough to outweigh that setup and coordination.
+> Parallel execution pays to partition input, schedule work, and merge results. With few items or little work per item, the sequential loop can finish before those fixed costs are repaid. Parallel execution is useful only when independent work is large enough to outweigh the setup and coordination. [Microsoft: Understanding speedup in PLINQ](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/understanding-speedup-in-plinq)
 
 # References
 

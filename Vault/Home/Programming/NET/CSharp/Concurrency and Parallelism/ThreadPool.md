@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Programming"
 qard-topic: "NET/CSharp/Concurrency and Parallelism/ThreadPool"
+flashcard_uid: "fd7a2ebc"
 ---
 
 The .NET ThreadPool reuses managed worker threads for short units of work. `Task.Run`, many task continuations, timers, and queued callbacks use it. Asynchronous I/O is registered with operating-system facilities. When completion needs managed code, that code must eventually get execution time too.
@@ -135,13 +136,13 @@ var result = await _http.GetStringAsync(url);
 
 # Questions
 
-> [!qard]- What is ThreadPool starvation and how does it usually start?
-> ThreadPool starvation means queued callbacks and continuations wait too long because too few worker threads are available, even though the CPU is not fully busy doing useful work. A common cause is pool workers blocking on `.Result`, `.Wait()`, synchronous I/O, or similar waits. The work needed to complete those waits may also depend on the pool, so latency rises while the runtime adds workers. Raising the minimum can reduce that ramp-up delay, but it does not remove the blocking and may increase contention.
+<!-- qard-id: edf13b89-d008-4f64-854a-624e7253a01c -->
+> [!qard]- What is ThreadPool starvation, and how does it usually start?
+> ThreadPool starvation occurs when queued work or continuations wait because workers are unavailable, often while existing workers block on synchronous waits. The CPU can remain underused because threads are waiting rather than doing useful work. Blocking may also prevent pool work needed to complete those waits, increasing latency. [Microsoft: managed ThreadPool](https://learn.microsoft.com/en-us/dotnet/standard/threading/the-managed-thread-pool)
 
+<!-- qard-id: e9d84649-4f81-46d4-9861-0187ad750cfe -->
 > [!qard]- When is it appropriate to call `ThreadPool.SetMinThreads`?
-> `ThreadPool.SetMinThreads` is worth testing when measurements show that work is waiting for the pool to add workers during a burst. It is not a fix for CPU saturation, a slow downstream service, or workers blocked by sync-over-async code.
->
-> Change it under a representative load test and watch queue length, worker count, CPU, memory, and tail latency. The value is a threshold below which the pool can add workers without its normal delay; it does not create that many threads in advance.
+> Only consider raising the minimum after measurements show that ThreadPool worker ramp-up is delaying a burst. The minimum is a threshold for how quickly the pool may create workers; it does not pre-create that many threads. A higher threshold can increase contention and resource use, so it does not fix CPU saturation or blocked work. [Microsoft: SetMinThreads](https://learn.microsoft.com/en-us/dotnet/api/system.threading.threadpool.setminthreads?view=net-10.0) · [Microsoft: managed ThreadPool](https://learn.microsoft.com/en-us/dotnet/standard/threading/the-managed-thread-pool)
 
 # References
 

@@ -11,6 +11,7 @@ status: Creation
 publish: true
 qard-deck: "Programming"
 qard-topic: "NET/CSharp/Concurrency and Parallelism/Channels"
+flashcard_uid: "a3dbcc37"
 ---
 
 `Channel<T>` is an in-memory handoff between producers and consumers. Both sides can wait asynchronously, and a bounded channel makes overload behavior explicit. One common shape is an HTTP endpoint that queues a thumbnail job while a `BackgroundService` drains the work.
@@ -115,14 +116,21 @@ Use a bounded `Channel<T>` for asynchronous producer-consumer work that belongs 
 
 # Questions
 
+<!-- qard-id: a09669e4-9708-4a01-a2a2-f26c9e01c72f -->
+> [!qard]- What is a `Channel<T>`, and what reliability does it provide?
+> `Channel<T>` is an in-process asynchronous producer-consumer queue: writers hand items to readers, and a bounded channel can wait or apply a drop policy when full. It coordinates work inside one process but does not persist queued items across a process crash or deliver them across hosts. Durable retry/recovery requires a database, broker, or other persistent boundary. [Microsoft: Channels](https://learn.microsoft.com/en-us/dotnet/core/extensions/channels) · [Microsoft: Queued background tasks](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/host/hosted-services?view=aspnetcore-10.0)
+
+<!-- qard-id: ea5e2167-2696-4823-be5c-605359a6f69b -->
 > [!qard]- What does a bounded `Channel<T>` provide that `SemaphoreSlim` does not?
-> A bounded channel stores queued work and lets producers wait asynchronously when the buffer is full. Consumers receive items in accepted FIFO order. `SemaphoreSlim` only limits how many callers may enter at once; it does not store work and provides no fairness guarantee. A channel therefore fits producer-consumer handoff, while a semaphore fits throttling access to an operation.
+> A bounded channel stores queued work and, in `Wait` mode, asynchronously slows producers when the buffer is full. A semaphore only limits how many callers hold permits; it stores no work and promises no FIFO admission. A channel fits producer-consumer handoff, while a semaphore fits admission to an operation. With multiple consumers, dequeue order does not guarantee completion order. [Microsoft: Channels](https://learn.microsoft.com/en-us/dotnet/core/extensions/channels) · [SemaphoreSlim API](https://learn.microsoft.com/en-us/dotnet/api/system.threading.semaphoreslim?view=net-10.0)
 
+<!-- qard-id: 5eab3f2c-b214-40c6-88e8-067ae43706e4 -->
 > [!qard]- Why is `Channel.CreateUnbounded<T>()` a risky default?
-> An unbounded channel never slows a producer because of capacity. If producers stay faster than consumers, queued items keep accumulating and memory use can grow until the process is under pressure. A bounded channel forces an overload policy: either producers wait for space or the channel drops items according to an explicit rule.
+> An unbounded channel does not apply capacity backpressure. If producers continue to outpace consumers, queued items accumulate and consume memory until the process is pressured. A bounded channel forces an explicit overload choice: wait for capacity or drop according to a chosen policy. [Microsoft: Channels](https://learn.microsoft.com/en-us/dotnet/core/extensions/channels)
 
+<!-- qard-id: 2de35e05-694b-4701-b1f5-0edd419f02bd -->
 > [!qard]- When is `BoundedChannelFullMode.DropOldest` a reasonable policy?
-> It is reasonable when the newest value replaces older state, such as a progress update or sampled metric. When the buffer is full, the oldest queued value is discarded so a newer one can be accepted, and that loss should be observable. It is not suitable when every item represents separate work or a business obligation that must be processed.
+> Use it when a newer value supersedes the oldest buffered value, such as a progress snapshot or current metric. When full, the channel evicts the oldest queued item and accepts the new one, so loss should be observable. It is wrong for independent jobs or business events that must each be processed. [Microsoft: Channels](https://learn.microsoft.com/en-us/dotnet/core/extensions/channels)
 
 # References
 

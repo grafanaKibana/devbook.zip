@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Programming"
 qard-topic: "NET/NET Standart"
+flashcard_uid: "60a3e364"
 ---
 
 .NET Standard is a versioned API specification implemented by several .NET runtimes. It was the compatibility bridge among .NET Framework, .NET Core, Mono, and Xamarin. Modern libraries normally target the current .NET TFM directly. `netstandard2.0` remains useful when a library must also serve .NET Framework or older consumers.
@@ -86,8 +87,9 @@ var buffer = new byte[256];
 
 # Questions
 
+<!-- qard-id: bec5a750-95b9-4d12-a09a-76e78858812c -->
 > [!qard]- When is targeting .NET Standard still justified?
-> The decision starts with the supported consumers. `netstandard2.0` is still justified when a library must work with .NET Framework or another runtime that cannot consume a modern `netX.0` target. Multi-targeting can keep that compatibility asset while giving current .NET applications a modern build. If every supported consumer runs current .NET, targeting only the modern TFM keeps the package simpler and exposes the newer platform APIs.
+> Target .NET Standard when a library must serve consumers limited to its API contract, especially .NET Framework consumers that require `netstandard2.0`. If all consumers use a modern .NET TFM, targeting that platform directly gives a current API surface. Multi-target only when distinct consumer groups need distinct assets. [Microsoft: .NET Standard](https://learn.microsoft.com/en-us/dotnet/standard/net-standard)
 
 # References
 

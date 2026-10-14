@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Software Design"
 qard-topic: "Testing/Unit Testing"
+flashcard_uid: "897d08d1"
 ---
 
 A unit test verifies one small behavior without crossing slow or nondeterministic process boundaries. The unit may be one method, one class, or a small group of collaborating objects. Databases, remote HTTP, the filesystem, and uncontrolled time stay outside the test. Ordinary in-memory collaborators do not need to be mocked merely to satisfy a definition.
@@ -106,10 +107,15 @@ public sealed class DatabaseTests : IClassFixture<DatabaseFixture>
 ```
 
 ```csharp
+public static IEnumerable<object[]> DiscountCases => new[]
+{
+    new object[] { 0, 100m, 100m },   // no orders → no discount
+    new object[] { 10, 100m, 85m },   // exactly at threshold → discount applies
+    new object[] { 20, 200m, 170m }   // well above threshold
+};
+
 [Theory]
-[InlineData(0,   100m, 100m)]   // no orders → no discount
-[InlineData(10,  100m, 85m)]    // exactly at threshold → discount applies
-[InlineData(20,  200m, 170m)]   // well above threshold
+[MemberData(nameof(DiscountCases))]
 public void DiscountCalculation(int orderCount, decimal price, decimal expected)
 {
     var customer = new Customer("c1", orderCount);
@@ -150,11 +156,13 @@ Choose the lowest-cost layer that can expose the failure faithfully. Determinist
 
 # Questions
 
+<!-- qard-id: 50fa1ae9-ab7b-4bb7-8b43-369f01298379 -->
 > [!qard]- What is the difference between a stub and a mock?
-> A stub supplies answers needed to reach the behavior. A mock is configured with interaction expectations and verifies them. A spy records calls for later assertions, while a fake provides a working simplified implementation. Frameworks often let one object play several roles, so the distinction is about how the test uses the double. Prefer result assertions when they expose the behavior, and interaction assertions when the command itself is the observable contract.
+> A stub supplies answers the test needs to exercise behavior. A mock is configured with expected interactions and verifies that they occurred. The distinction is how the test uses the double, not which framework created it. A spy records calls and a fake is a simplified working implementation. [Martin Fowler: Mocks Aren’t Stubs](https://martinfowler.com/articles/mocksArentStubs.html)
 
+<!-- qard-id: dd734573-8233-47e9-bc3d-5fac7fc6e841 -->
 > [!qard]- When is a unit test the wrong testing layer?
-> A unit test adds little value when it only repeats language or framework behavior, such as an uncustomized property accessor. Failures in visual rendering, dependency registration, configuration binding, or database-provider behavior need a component or integration test that can observe that boundary. Exploratory code may start without tests, but behavior kept in production still needs evidence that matches its risk. The best layer is the cheapest one that can catch the realistic failure.
+> Use a unit test when the behavior is isolated and its dependencies can be represented without crossing the boundary under test. Rendering, dependency registration/configuration binding, provider SQL, and serialization failures need a component or integration test that exercises that boundary. Choose the cheapest layer that can still expose the realistic failure. [.NET unit-testing best practices](https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-best-practices)
 
 # References
 

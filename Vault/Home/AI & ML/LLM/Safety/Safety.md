@@ -12,6 +12,7 @@ priority: Medium
 status: Done
 qard-deck: "AI & ML"
 qard-topic: "LLM/Safety/Safety"
+flashcard_uid: "920e124b"
 ---
 
 Safety cuts across the whole LLM system. [[Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering|Prompt Engineering]] can expose an instruction boundary, while [[Home/AI & ML/LLM/Context Engineering/Context Engineering|Context Engineering]] can admit poisoned evidence. [[Home/AI & ML/LLM/Harness Engineering/Harness Engineering|Harness Engineering]] may expose an overpowered tool, and [[Home/AI & ML/LLM/Loop Engineering/Loop Engineering|Loop Engineering]] can let a bad action repeat. Safety belongs in every layer, much like [[Home/AI & ML/LLM/Evaluation/Evaluation|Evaluation]].
@@ -47,10 +48,10 @@ Perfection is the wrong target. The practical target is a system where failures 
 # Questions
 
 > [!qard]- How do security failures and reliability failures differ, and why does the distinction matter?
-> The [[OWASP vulnerabilities on AI LLM|OWASP Top 10]] describes conditions an adversary can exploit, so isolation and least privilege limit their impact. The same controls can contain accidentally triggered excessive agency or data disclosure. [[Hallucinations]] need no attacker. They arise when likely text outruns the available evidence. Grounding and verification address that reliability problem, though one incident may cross both categories.
+> Security failures include unauthorized disclosure, access, or actions, whether triggered by malicious input or an ordinary model mistake. Reliability failures concern incorrect or unsupported output. One incident can be both: a hallucinated tool request can cause an unauthorized action. Least privilege, authorization, and isolation limit security impact; grounding, claim checks, and evaluation address answer support. [OWASP LLM06: Excessive Agency](https://genai.owasp.org/llmrisk/llm062025-excessive-agency/) · [NIST AI 600-1](https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.600-1.pdf)
 
 > [!qard]- Why are prompt-level guardrails insufficient on their own?
-> A model instruction is advisory and can fail when untrusted data is interpreted as guidance. Durable controls live outside the model: input validation, content isolation, sandboxing, permission gates, and output checks. [[Home/AI & ML/LLM/Harness Engineering/Harness Engineering|Harness Engineering]] places critical action gates where a prompt cannot bypass them.
+> A prompt can guide behavior, but it cannot enforce permissions or safely validate every generated value. The executor must validate output for its destination and authorize each action in code or the downstream service. Least privilege and sandboxing limit impact; require human approval when the action’s consequences justify it. [OWASP LLM05: Improper Output Handling](https://genai.owasp.org/llmrisk/llm052025-improper-output-handling/) · [OWASP LLM06: Excessive Agency](https://genai.owasp.org/llmrisk/llm062025-excessive-agency/)
 
 # References
 

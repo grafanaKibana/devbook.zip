@@ -11,6 +11,7 @@ status: Done
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Creational/Prototype"
+flashcard_uid: "e5ac3c19"
 ---
 
 Prototype creates an object from an existing instance. It fits when construction starts from a configured template or when the concrete runtime type must decide how to copy itself.
@@ -142,11 +143,13 @@ New record fields participate in the compiler-generated copy automatically. Refe
 
 # Questions
 
+<!-- qard-id: 39dce427-e0c5-4393-9c82-0bdbd4a467c2 -->
 > [!qard]- When is Prototype useful instead of constructing an object directly?
-> Prototype fits when the new object starts as a variant of an existing configured instance. It also fits when code knows only an abstraction and the runtime object must copy its own concrete type. Direct construction is clearer when there is no useful template and the runtime type is already known.
+> Prototype fits when a new object should inherit an existing configured instance’s values, or when the runtime object knows its concrete type and owns its copy behavior. Direct construction is clearer when the type and values are already known and no template is useful. [GoF: Prototype](https://www.oreilly.com/library/view/design-patterns-elements/0201633612/)
 
+<!-- qard-id: ceccd6bd-3ed8-4f4d-80fa-9b805e5ee7a9 -->
 > [!qard]- Where is the boundary between a shallow and a deep copy?
-> A shallow copy duplicates the outer object's fields and preserves references to nested objects. A deep-copy policy replaces the mutable nested state that must evolve independently. Copying every reachable object is rarely the real requirement. Ownership and identity decide where copying stops.
+> A shallow copy duplicates the outer object but retains references to nested objects. A deep-copy policy duplicates the mutable nested state that must evolve independently; immutable or intentionally shared objects need not be copied. [Object.MemberwiseClone](https://learn.microsoft.com/en-us/dotnet/api/system.object.memberwiseclone?view=net-10.0)
 
 # References
 

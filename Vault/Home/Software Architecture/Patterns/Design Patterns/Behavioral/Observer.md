@@ -11,6 +11,7 @@ status: Done
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Behavioral/Observer"
+flashcard_uid: "a91c4462"
 ---
 
 A newspaper subscription has the shape of Observer. The publisher keeps a subscriber list and sends each new issue to that list. Subscribers can leave independently, and the publisher does not know how any recipient uses the issue.
@@ -84,8 +85,7 @@ public class Order
     }
 }
 
-public record OrderStatusChangedEventArgs(Guid OrderId, OrderStatus Previous, OrderStatus New)
-    : EventArgs;
+public record OrderStatusChangedEventArgs(Guid OrderId, OrderStatus Previous, OrderStatus New);
 
 // Synchronous UI subscriber
 public class StatusBadge
@@ -174,8 +174,9 @@ C# events fit synchronous UI notifications. Server-side async subscribers need a
 
 # Questions
 
+<!-- qard-id: 83b4f765-ae00-4359-8df6-6cc015fa3cd6 -->
 > [!qard]- How should event subscriptions be managed to avoid retaining subscribers after their lifetime ends?
-> A subscription should be removed when its owner is disposed or otherwise reaches the end of its lifetime. Weak events help when the publisher must live longer than its subscribers and there is no clear owner that can unsubscribe. Matching DI scopes helps only if the publisher stays in the same scope and the subscription does not escape into a singleton, static event, or another longer-lived object.
+> A publisher holds the subscribed delegate, which can keep the subscriber reachable; remove the handler when the subscription owner ends its lifetime. Weak events can help when a longer-lived publisher has no clear unsubscribe owner, but explicit ownership and unsubscription are simpler when available. [.NET events](https://learn.microsoft.com/en-us/dotnet/standard/events/)
 
 # References
 
