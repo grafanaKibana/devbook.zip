@@ -11,6 +11,7 @@ status: Done
 publish: true
 qard-deck: "AI & ML"
 qard-topic: "Machine Learning/Evaluation/ROC-AUC and PR-AUC"
+flashcard_uid: "f1d9f3dc"
 ---
 
 ROC-AUC and PR-AUC summarize how a binary classifier ranks cases while its score threshold sweeps from strict to permissive. ROC plots true-positive rate against false-positive rate. PR plots precision against recall.
@@ -136,12 +137,10 @@ Threshold selection needs a constraint rather than a visually appealing knee. A 
 # Questions
 
 > [!qard]- What does ROC-AUC show about a classifier?
-> ROC-AUC shows how well the classifier ranks positive cases above negative cases across all thresholds. For example, an ROC-AUC of 0.8 means a randomly chosen positive receives a higher score than a randomly chosen negative about 80% of the time, with a tie counted as half.
-> It does not choose a production threshold or show whether the predicted scores are calibrated probabilities.
+> Binary ROC-AUC summarizes how well scores rank positives above negatives across thresholds. An AUC of 0.8 means a randomly chosen positive scores above a randomly chosen negative about 80% of the time, counting ties as half. It does not choose a production threshold, and a score of 0.8 need not be a calibrated 80% probability. [scikit-learn ROC-AUC documentation](https://scikit-learn.org/stable/modules/model_evaluation.html) · [Hanley and McNeil on AUC interpretation](https://doi.org/10.1148/radiology.143.1.7063747)
 
-> [!qard]- What types of classification problems are better evaluated with PR-AUC than ROC-AUC?
-> PR-AUC is usually more useful when the positive class is rare and the system acts on positive predictions, as with fraud alerts or anomaly review. In these cases, false positives fill the review queue, and precision shows that cost directly.
-> The score must still be compared with the positive rate in the evaluation data because the PR-AUC baseline changes with prevalence.
+> [!qard]- When is PR-AUC especially useful alongside ROC-AUC?
+> PR evaluation is useful when positives are rare and the system acts on positive predictions: precision shows how many alerts are correct, while recall shows how many positives are found. Its baseline depends on the positive rate, so compare it with prevalence and use the population and workload that matter. State whether the reported area is average precision or another PR-AUC implementation. [Davis and Goadrich on PR and ROC curves](https://doi.org/10.1145/1143844.1143874) · [scikit-learn average precision](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.average_precision_score.html)
 
 # References
 

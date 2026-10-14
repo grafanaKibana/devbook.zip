@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Structural/Proxy"
+flashcard_uid: "1783cee9"
 ---
 
 A proxy stands between a client and another object while exposing the same contract. It can delay expensive work, return a cached result, or reject an unauthorized call before the real object runs. The client depends on the subject interface and does not need a separate calling path for those controls.
@@ -229,8 +230,9 @@ A proxy earns its indirection when access must remain transparent and one policy
 
 # Questions
 
+<!-- qard-id: 44706abc-29f7-4553-8079-bdef2d5f0d0e -->
 > [!qard]- What's the difference between a Proxy and a Decorator in terms of intent?
-> A proxy stands in for the subject to control access to it. A decorator attaches another responsibility while preserving the component contract. Their class diagrams can look identical, so the design intent and the wrapper's reason for existing settle the classification.
+> A Proxy stands in for a subject to control access, such as authorization, lazy creation, or a remote boundary. A Decorator preserves the component contract while adding composable responsibility. Their structure may look the same; the purpose of the wrapper distinguishes them. [[Home/Software Architecture/Patterns/Design Patterns/Structural/Proxy#Solution|Proxy solution]] · [[Home/Software Architecture/Patterns/Design Patterns/Structural/Decorator#Solution|Decorator solution]]
 
 # References
 

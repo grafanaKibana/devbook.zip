@@ -11,6 +11,7 @@ status: Done
 publish: true
 qard-deck: "AI & ML"
 qard-topic: "Machine Learning/Data Drift"
+flashcard_uid: "3212f70c"
 ---
 
 Data drift means production inputs no longer look like the data used to train a model. Nothing has to crash. The service can keep returning predictions while their quality slips because customers changed behavior, a new camera changed the image distribution, or an upstream pipeline started encoding a field differently.
@@ -132,7 +133,7 @@ Scheduled retraining is predictable when labels arrive on a regular cadence and 
 # Questions
 
 > [!qard]- What is the difference between data drift and concept drift?
-> Data drift changes P(X), such as a new language appearing in support traffic. Concept drift changes P(Y|X), such as yesterday's fraud cues becoming normal behavior. The first can leave the model useful. The second means its learned mapping no longer describes current outcomes. Recent labeled performance separates a harmless input shift from a model that needs updating.
+> Input or covariate drift changes P(X), the feature distribution. Concept drift changes P(Y|X), the relationship between inputs and outcomes. “Data drift” is used inconsistently, so name the distribution being monitored. An input shift alone does not prove lower model quality; check recent labeled outcomes when they become available. [Concept drift adaptation survey](https://doi.org/10.1145/2523813)
 
 # References
 

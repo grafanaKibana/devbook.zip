@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Programming"
 qard-topic: "NET/ASP NET Web API/Filters"
+flashcard_uid: "ef27222b"
 ---
 
 MVC filters wrap defined stages of controller execution. They fit cross-cutting behavior that needs action arguments, model state, controller metadata, or the action result. A correlation-ID rule tied only to selected controllers is one example. An application-wide correlation ID usually belongs in middleware.
@@ -115,12 +116,15 @@ Attributes cannot receive runtime services through their own constructors, so at
 
 # Questions
 
-> [!qard]- What is the execution order of ASP.NET Core filter types?
-> Authorization filters run first. Resource filters then wrap the rest of the MVC pipeline, action filters wrap the action, and result filters wrap execution of the selected result. The normal before path is therefore authorization, resource, action, then result, with the wrapping filters running their after logic in reverse.
->
+<!-- qard-id: b5d3f2ba-51a2-4fd2-9508-aa0de30ad608 -->
+> [!qard]- What is the normal execution order of ASP.NET Core MVC filter types?
+> Authorization filters run first. Resource filters wrap the rest of the MVC pipeline, action filters wrap the action, and result filters wrap execution of the selected result. The normal before path is authorization, resource, action, then result; wrapping filters run their after logic in reverse.
+<!-- qard-id: ec8874e5-0ca6-4d53-a3dd-6594e0a512e3 -->
+> [!qard]- Which unhandled exceptions can ASP.NET Core MVC exception filters observe, which failures do they miss, and what happens after they run?
 > Exception filters are conditional, not another before-and-after stage. They run only when an unhandled exception comes from controller creation, model binding, an action filter, or the action method. They do not catch failures from authorization filters, resource filters, result filters, or result execution. If an exception filter handles the failure and supplies a result, result processing continues; otherwise the exception leaves the MVC pipeline.
->
-> Within one filter type, lower `IOrderedFilter.Order` values run earlier on the way in and later on the way out. When order values are equal, scope normally nests global, controller, then action.
+<!-- qard-id: b115f4c1-4ffb-413c-917b-d5fcdb62cb05 -->
+> [!qard]- Within one ASP.NET Core MVC filter type, how do `IOrderedFilter.Order` and equal-order scope affect execution?
+> Lower `IOrderedFilter.Order` values run earlier on the way in and later on the way out. When order values are equal, scope normally nests global, controller, then action.
 
 # References
 

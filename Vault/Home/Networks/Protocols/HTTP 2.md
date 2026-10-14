@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Networks"
 qard-topic: "Protocols/HTTP 2"
+flashcard_uid: "6284b907"
 ---
 
 HTTP/2 carries many independent HTTP streams over one TCP connection. Its binary framing removes HTTP/1.1's response-order dependency and HPACK compresses repeated fields. TCP still delivers one ordered byte stream, so a lost segment can delay every HTTP/2 stream on that connection.
@@ -121,8 +122,11 @@ HTTP/3 keeps HTTP semantics but replaces HTTP/2's framing-over-TCP with HTTP fra
 
 # Questions
 
+> [!qard]- What does HTTP/2 multiplexing improve, and what does TCP still couple?
+> HTTP/2 interleaves frames from independent streams on one connection, removing HTTP/1.1’s response-order dependency between exchanges. The streams still share one TCP byte stream: TCP delivers bytes in order, so packet loss can delay data for every stream on that connection until recovery. [RFC 9113: HTTP/2](https://www.rfc-editor.org/rfc/rfc9113.html) · [RFC 9293: TCP](https://www.rfc-editor.org/rfc/rfc9293.html)
+
 > [!qard]- When can HTTP/1.1 be necessary or perform better than HTTP/2?
-> HTTP/1.1 remains necessary across a server or intermediary that cannot negotiate HTTP/2. On a lossy path without HTTP/3, several HTTP/1.1 connections can also isolate TCP loss better than one HTTP/2 connection, though extra connections add handshake and congestion-control cost. The choice should follow measurements across the real path.
+> HTTP/1.1 is necessary when a server or intermediary on the path cannot negotiate HTTP/2. On a lossy path, several HTTP/1.1 connections can isolate TCP loss to one connection, while loss on HTTP/2’s shared TCP connection can delay data across its streams. Extra connections add setup and resource costs, so compare both versions on the real path; HTTP/1.1 is not generally faster. [RFC 9112: HTTP/1.1](https://www.rfc-editor.org/rfc/rfc9112.html) · [RFC 9113: HTTP/2](https://www.rfc-editor.org/rfc/rfc9113.html) · [RFC 9293: TCP](https://www.rfc-editor.org/rfc/rfc9293.html)
 
 # References
 

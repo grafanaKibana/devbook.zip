@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Programming"
 qard-topic: "NET/CSharp/Concurrency and Parallelism/Deadlocks"
+flashcard_uid: "f9642578"
 ---
 
 A deadlock is a closed waiting cycle: every participant holds something another participant needs, so none can move. In .NET this can happen with ordinary locks or when synchronous code blocks an async continuation. The process may stay healthy enough to answer a liveness probe while the affected work has stopped completely.
@@ -188,14 +189,17 @@ public async Task UpdateAsync()
 
 # Questions
 
-> [!qard]- What are the four Coffman conditions and which is easiest to break in practice?
-> The four conditions are mutual exclusion, hold-and-wait, no preemption, and circular wait. In practice, circular wait is usually the easiest to remove by defining one lock order and following it everywhere. If every code path takes the locks in the same order, the cycle cannot form.
+<!-- qard-id: fedf92a4-d6ae-45c5-a26f-25debb161739 -->
+> [!qard]- What are the four Coffman conditions for a resource deadlock?
+> The conditions are mutual exclusion, hold-and-wait, no preemption, and circular wait. A classical resource deadlock requires all four. A consistent global lock order prevents circular wait when every path follows the same order, though the best prevention boundary depends on the resources and design. [Coffman, Elphick, and Shoshani: System deadlocks](https://doi.org/10.1145/356586.356588) · [Microsoft: Dynamic-link library best practices](https://learn.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-best-practices)
 
-> [!qard]- Why can calling `.Result` on a `Task` deadlock in a UI app but usually not in a console app?
-> A deadlock can happen when the task is still incomplete and its continuation needs the UI thread. `.Result` blocks that thread, while the continuation waits to get back onto it, so neither can finish. Console applications and ASP.NET Core normally run continuations on thread-pool threads, so this specific cycle is usually absent. Blocking is still harmful because it ties up a thread and can cause thread-pool starvation under load.
+<!-- qard-id: 17deb6e3-a3c1-4265-9148-1a96302dca83 -->
+> [!qard]- When does blocking on an incomplete task deadlock a UI thread?
+> If an awaited operation captures the UI SynchronizationContext, its continuation must run on the UI thread. Calling `.Result` on that same thread blocks the continuation’s only path to resume, forming a cycle. Awaiting through the call chain breaks this cycle. Without a single-thread context, this particular deadlock may not form, but blocking can still cause thread-pool starvation under load. [Microsoft: Common async bugs](https://learn.microsoft.com/en-us/dotnet/standard/asynchronous-programming-patterns/common-async-bugs) · [Microsoft: Synchronous wrappers for async methods](https://learn.microsoft.com/en-us/dotnet/standard/asynchronous-programming-patterns/synchronous-wrappers-for-asynchronous-methods)
 
-> [!qard]- What steps help diagnose a deadlock in a production .NET service?
-> Start with a process dump. Inspect thread stacks for waits in `Monitor.Enter`, `.Result`, or `.Wait()`, then check which thread owns each monitor; `syncblk` shows that ownership. For an async deadlock, find the continuation that cannot run and the context or scheduler it is waiting for. Together, those waits reveal the cycle.
+<!-- qard-id: 7c1fe64c-c539-4207-887a-8a8ad04d355b -->
+> [!qard]- How can a production .NET deadlock be diagnosed?
+> Capture a process dump and inspect thread stacks for monitor waits or synchronous task waits. For `Monitor` deadlocks, identify the owner and waiting threads; `dotnet-dump` exposes `syncblk` monitor ownership. For an async cycle, inspect the incomplete tasks and the context or scheduler needed by continuations. The diagnosis is a wait-for cycle, not simply a high thread count. [Microsoft: Diagnose .NET deadlocks](https://learn.microsoft.com/en-us/dotnet/core/diagnostics/debug-deadlock) · [Microsoft: dotnet-dump](https://learn.microsoft.com/en-us/dotnet/core/diagnostics/dotnet-dump)
 
 # References
 

@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Behavioral/Visitor"
+flashcard_uid: "ff80b76c"
 ---
 
 A museum can keep the same exhibits while offering a new audio tour. Each tour performs a different operation over the fixed exhibit set. Adding a tour is cheap. Adding an exhibit forces every tour to decide what to do with it.
@@ -52,7 +53,7 @@ Modern C# pattern matching handles small type-dispatch problems with less machin
 
 # Problem
 
-`CartService` has switch/if on item type for every calculation — adding a new calculation means editing every method:
+`CartService` has switch/if on item type for every calculation — adding a new item type means editing every calculation:
 
 ```csharp
 public class CartService
@@ -221,14 +222,17 @@ Visitor fits a stable element set that receives new cross-cutting operations. Pa
 
 # Questions
 
+<!-- qard-id: 2203e8b7-3c85-4898-a81c-24b8a34892c5 -->
 > [!qard]- What is double dispatch and why does Visitor need it?
-> Normal virtual dispatch selects a method from the runtime type of the receiver. Overload resolution still uses the argument's compile-time type. `Accept` first dispatches to the concrete element, where `this` has that concrete type. `visitor.Visit(this)` can then select the corresponding overload and dispatch to the concrete visitor implementation. The two calls encode both dimensions.
+> `Accept` uses virtual dispatch to reach the concrete element. Inside that override, the element’s concrete compile-time type lets overload resolution choose the matching `Visit` method; virtual dispatch then reaches the concrete visitor implementation. Those two dispatches encode the element type and the operation. [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Visitor#Solution|Visitor implementation]]
 
+<!-- qard-id: 60362454-c9c3-4efc-aef1-35553bd028bb -->
 > [!qard]- When does EF Core use ExpressionVisitor, and what does it do?
-> EF Core receives a LINQ expression tree and passes it through multiple visitor-based phases that normalize, expand, translate, and shape the query. A method or member fails translation when the provider has no supported server-side mapping for that expression in its current context. The failure is broader than a missing `Visit` overload because providers often visit the node successfully but cannot translate its semantics.
+> EF Core processes LINQ expression trees through visitor-based phases that reshape and translate queries. A translation error can occur even when a node is visited: the active provider may lack a server-side mapping for that expression in that query context. The failure does not by itself mean an overload is missing. [EF Core: query translation preprocessor](https://github.com/dotnet/efcore/blob/main/src/EFCore/Query/QueryTranslationPreprocessor.cs) · [EF Core: client vs. server evaluation](https://learn.microsoft.com/en-us/ef/core/querying/client-eval)
 
+<!-- qard-id: 66e5c82b-2a1f-4c67-b188-2c409f153b90 -->
 > [!qard]- When is pattern matching a better fit than Visitor?
-> Pattern matching is usually clearer for a small hierarchy or a short operation because it needs no `Accept` method or visitor interface. Its exhaustiveness depends on the type shape: an interface hierarchy with a discard arm does not warn when a new implementation appears. Visitor earns its ceremony when the element hierarchy is stable and compile-time pressure to update every operation is an important part of the design.
+> Pattern matching is often simpler for a small type set or a short operation. Visitor is useful when element types are stable and many operations are added independently; adding an element type instead requires updating the visitor contract and its implementations. [C#: pattern matching](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/patterns/pattern-matching) · [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Visitor#Solution|Visitor implementation]]
 
 # References
 

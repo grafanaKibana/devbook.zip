@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Networks"
 qard-topic: "Protocols/WebSockets"
+flashcard_uid: "d66e2a8b"
 ---
 
 WebSocket (RFC 6455) is a full-duplex, message-oriented protocol for a long-lived browser/server channel. The common opening handshake upgrades an HTTP/1.1 connection. Extended CONNECT carries the same frame protocol on one HTTP/2 stream, and RFC 9220 adapts that mechanism to HTTP/3.
@@ -113,7 +114,7 @@ Every long-lived option needs a queue policy. Bound per-client memory, coalesce 
 # Questions
 
 > [!qard]- What conditions make Server-Sent Events a better fit than WebSockets?
-> SSE fits ordered server-to-browser events when ordinary HTTP requests already cover client commands. `EventSource` reconnects and sends `Last-Event-ID`, giving the server a natural replay cursor. WebSocket fits low-latency bidirectional messages, but the application must define its own resume contract.
+> SSE fits an ordered server-to-browser event stream when client commands can use ordinary HTTP requests. `EventSource` reconnects and can send `Last-Event-ID`, but useful resume requires the server to retain and replay events; clients must tolerate duplicates or gaps. WebSocket fits full-duplex messaging, while reconnect, replay, acknowledgements, and resume remain application responsibilities. Neither protocol guarantees a particular latency. [WHATWG: Server-sent events](https://html.spec.whatwg.org/multipage/server-sent-events.html) · [RFC 6455: WebSocket](https://www.rfc-editor.org/rfc/rfc6455.html)
 
 # References
 

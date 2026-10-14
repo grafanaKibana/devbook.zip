@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Programming"
 qard-topic: "NET/CSharp/Fundamentals/Reflection"
+flashcard_uid: "a67836fc"
 ---
 
 Reflection reads .NET metadata at runtime and can use that metadata to construct objects or invoke members. It is useful when the target type is genuinely unknown until execution, as in plugin discovery or tooling. The cost is a weaker contract: a misspelled member name or incompatible signature becomes a runtime failure instead of a compiler error.
@@ -108,14 +109,17 @@ var ctor = Expression.Lambda<Func<Jobs>>(Expression.New(typeof(Jobs))).Compile()
 
 # Questions
 
-> [!qard]- Why is reflection often a bad default in performance-critical code?
-> Reflection moves member discovery, argument validation, and dispatch to runtime. That cost is often irrelevant during startup, but repeated lookup and invocation can dominate a small hot-path operation. Measure first, then cache metadata or bind a delegate when the same member is reused.
+<!-- qard-id: d8da8524-adfb-4950-ab2b-63e723b7e7bf -->
+> [!qard]- Why is reflection often a poor default in performance-critical code?
+> Reflection discovers and invokes members at runtime instead of using a compile-time member contract. Repeated lookup and late-bound invocation can add work on a hot path, but the cost depends on the operation and call frequency; measure before caching metadata or binding a delegate. [Microsoft: reflection overview](https://learn.microsoft.com/en-us/dotnet/fundamentals/reflection/overview)
 
+<!-- qard-id: 90f0caf9-8317-4634-93ef-5c2e22769e8b -->
 > [!qard]- How do attributes become behavior at runtime?
-> An attribute only stores metadata on a type, member, or other program element. A framework uses reflection to find that metadata and decide what code to run, such as registering a test or mapping an HTTP route. The attribute itself does nothing until runtime code interprets it. A source generator can perform a similar interpretation during the build and emit direct code instead.
+> An attribute stores metadata. It changes runtime behavior only when a framework or application reads that metadata and acts on it; a source generator can instead interpret attributes during the build and emit code. [Microsoft: attributes and reflection](https://learn.microsoft.com/en-us/dotnet/csharp/advanced-topics/reflection-and-attributes/) · [Microsoft: source generators](https://learn.microsoft.com/en-us/dotnet/csharp/roslyn-sdk/)
 
+<!-- qard-id: dd5d9187-17c9-4cc0-80a8-e3fae2d9b638 -->
 > [!qard]- How should code choose between reflection, interfaces or generics, and source generators?
-> Reflection fits cases where the types or members are genuinely unknown until runtime, such as loading plugins or inspecting external models. Interfaces and generics are simpler when the variation can be expressed as a compile-time contract. A source generator fits repeated metadata-driven work whose shapes are known during the build, especially when startup cost, trimming, or Native AOT makes runtime discovery a problem.
+> Use an interface or generic contract when the needed types and behavior are known at compile time. Use a source generator when repeated metadata-driven code can be produced from shapes known during compilation. Reflection fits genuine runtime discovery, such as unknown plugin types, but those paths need trimming/AOT consideration because the linker cannot always infer dynamically reached members. [Microsoft: reflection overview](https://learn.microsoft.com/en-us/dotnet/fundamentals/reflection/overview) · [Microsoft: source generators](https://learn.microsoft.com/en-us/dotnet/csharp/roslyn-sdk/) · [Microsoft: prepare libraries for trimming](https://learn.microsoft.com/en-us/dotnet/core/deploying/trimming/prepare-libraries-for-trimming)
 
 # References
 

@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Structural/Composite"
+flashcard_uid: "dfa91e71"
 ---
 
 A military command tree illustrates Composite. An order sent to a division flows through its child units until it reaches individual soldiers. The caller uses the same command operation at every level and leaves recursion to the hierarchy.
@@ -199,11 +200,13 @@ Composite fits a genuine part-whole tree when callers need the same operation on
 
 # Questions
 
+<!-- qard-id: 8f4307a0-4159-4ab4-8545-5ebb68edea67 -->
 > [!qard]- How does Composite relate to the Visitor pattern?
-> Composite gives leaves and groups one interface, and each group can recurse through its children. Visitor adds an operation across the node types without putting that operation on every node. They work well together when the tree structure belongs to Composite, the set of node types is stable, and operations change more often than the nodes.
+> Composite gives leaves and groups a common interface; a group delegates recursively to its children. Visitor adds operations across the node types without putting each operation on every node. The combination fits when the node set is stable and operations change more often than the tree structure. [[Home/Software Architecture/Patterns/Design Patterns/Structural/Composite#Solution|Composite solution]] · [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Visitor#Solution|Visitor solution]]
 
+<!-- qard-id: f0a1848f-dec9-4f37-b624-65917ba18bca -->
 > [!qard]- When does a Composite tree become a performance problem?
-> Cost grows with the number of visited nodes. A bundle containing 10,000 SKUs makes `GetPrice()` visit those nodes on each uncached call. Profiling should decide whether to cache totals or update an aggregate during mutation. Either choice introduces an invalidation rule.
+> A recursive operation visits nodes in the composite, so its work grows with the traversed tree. Measure the actual workload before caching totals or maintaining an aggregate during mutation; either optimization adds an invalidation or consistency rule. [[Home/Software Architecture/Patterns/Design Patterns/Structural/Composite#Solution|Composite solution]]
 
 # References
 

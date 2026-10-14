@@ -11,6 +11,7 @@ status: Done
 publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Prompt Engineering/Reasoning Techniques"
+flashcard_uid: "cd09ceaf"
 ---
 
 Some tasks cannot be answered reliably in one jump. Arithmetic, logic, and planning all require state to survive across several decisions. Reasoning techniques give the model or its surrounding system more room to construct, compare, and check those decisions.
@@ -97,11 +98,14 @@ Use the cheapest method that clears the evaluation target:
 
 # Questions
 
-> [!qard]- When does Chain-of-Thought help, and when can it make a result worse?
-> Chain-of-Thought can help when a task has intermediate state that can be expressed as a sequence of smaller decisions. It adds little to simple retrieval or extraction, where the extra tokens mainly create more room for drift. A wrong assumption near the start can shape the rest of the trace, and a fluent explanation still does not prove the answer is correct. The technique earns its cost when the intermediate steps improve measured results or expose something that can be checked independently.
+> [!qard]- When can Chain-of-Thought prompting help, and when can it add risk or waste?
+> Chain-of-Thought demonstrations improved some tested arithmetic, commonsense, and symbolic tasks on sufficiently large models, but the result is not universal. Longer traces add tokens and can carry an early wrong assumption forward; a fluent explanation is not proof. Some reasoning-model APIs advise against “think step by step” because those models reason internally. Evaluate on the selected model/task and check the result independently. [Wei et al., Chain-of-Thought Prompting](https://arxiv.org/abs/2201.11903) · [OpenAI reasoning best practices](https://developers.openai.com/api/docs/guides/reasoning-best-practices)
 
-> [!qard]- When does Tree of Thoughts justify its cost over Chain-of-Thought or self-consistency?
-> Tree of Thoughts fits a real search problem where candidate states can be generated, evaluated, revisited, and abandoned when they lead to a dead end. Planning and combinatorial search can have that shape; extraction usually does not. Its cost grows with the branching factor and depth, and a weak evaluator can keep the wrong branches. If a direct call or deterministic tool already meets the evaluation target, the tree adds work without improving the result.
+> [!qard]- When does Tree of Thoughts justify its search cost over a single reasoning path?
+> Tree of Thoughts makes candidate states explicit so the system can evaluate branches, continue promising paths, and backtrack from dead ends. It fits tasks with meaningful alternatives and a useful state evaluator; simple extraction usually has no search space. Branching and depth increase work, and a weak evaluator can preserve a bad branch. Self-consistency instead samples paths and aggregates comparable answers. ToT results are specific to the paper’s tested tasks. [Tree of Thoughts](https://arxiv.org/abs/2305.10601) · [Self-Consistency](https://arxiv.org/abs/2203.11171)
+
+> [!qard]- When does self-consistency help, and when can majority aggregation fail?
+> Self-consistency samples multiple reasoning paths and aggregates their final answers, often by selecting the most consistent answer. It can help when independent samples fail differently and answers can be normalized or compared. It adds model calls, and correlated errors can still make a wrong answer win; open-ended answers need a meaningful comparison rule rather than literal string voting. Evaluate it against a single-path baseline on the target task. [Self-Consistency Improves Chain of Thought Reasoning](https://arxiv.org/abs/2203.11171)
 
 # References
 

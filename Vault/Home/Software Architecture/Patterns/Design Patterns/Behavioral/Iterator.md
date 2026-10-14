@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Behavioral/Iterator"
+flashcard_uid: "49660f40"
 ---
 
 A TV remote exposes "next channel" without exposing the channel store. The source might be a local list or a live feed. The traversal control stays the same. That cursor-like boundary is the Iterator pattern.
@@ -145,11 +146,13 @@ This sample uses offset paging because the iterator boundary is the focus. Offse
 
 # Questions
 
+<!-- qard-id: d1612460-76a1-4907-9f06-d7453d721a2e -->
 > [!qard]- What should determine whether an API returns `IEnumerable<T>`, `IReadOnlyList<T>`, or `IAsyncEnumerable<T>`?
-> The return type should describe what the caller can safely rely on. `IReadOnlyList<T>` guarantees `Count` and indexed access, but it does not say whether values are computed lazily or represent a snapshot. If the method returns a materialized snapshot, that should be stated separately in the method's contract. `IEnumerable<T>` promises only synchronous enumeration, which may be lazy and repeat the underlying work when enumerated again. `IAsyncEnumerable<T>` fits a source that waits between items and should stream them instead of buffering the full result.
+> Choose the type that states the consumer’s needed access and advancement model. `IEnumerable<T>` permits synchronous enumeration; it may be lazy and another enumeration may repeat work. `IReadOnlyList<T>` adds `Count` and index access but does not promise a materialized snapshot. `IAsyncEnumerable<T>` fits a source that must await between items. State separately whether the result is buffered, repeatable, or a snapshot. [.NET: IEnumerable<T>](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.ienumerable-1?view=net-10.0) · [.NET: asynchronous streams](https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/generate-consume-asynchronous-stream)
 
+<!-- qard-id: ecca4dbc-81bf-4e5e-b0dd-dc92b3d938fc -->
 > [!qard]- What does the compiler generate for a `yield return` method?
-> The compiler generates a state-machine type that implements the enumeration contracts. Each `yield return` becomes a suspension point. `MoveNext()` resumes execution and `Current` exposes the yielded value. Locals that must survive suspension become fields on the generated object.
+> The compiler turns an iterator method into a state machine that produces values as enumeration advances. `MoveNext()` resumes at the prior suspension point and exposes the current value; locals needed across a suspension are retained in generated state. The generated type and field names are implementation details. [C#: yield statement](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/yield)
 
 # References
 

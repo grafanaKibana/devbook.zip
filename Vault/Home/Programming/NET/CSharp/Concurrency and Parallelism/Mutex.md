@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Programming"
 qard-topic: "NET/CSharp/Concurrency and Parallelism/Mutex"
+flashcard_uid: "83cc54a7"
 ---
 
 `Mutex` gives one thread ownership of an operating-system synchronization object. Its useful boundary is the process boundary: a named mutex can keep two local processes from entering the same critical section. Inside one process, `lock` or `SemaphoreSlim` is usually smaller and cheaper.
@@ -110,11 +111,13 @@ The decision follows the ownership boundary. A [[Locking|lock]] covers synchrono
 
 # Questions
 
+<!-- qard-id: 6529d8fe-c25a-46f7-94a1-c6241857a6a5 -->
 > [!qard]- When is a named `Mutex` appropriate in .NET?
-> A named `Mutex` fits mutual exclusion between processes on the same machine, for example a single-instance application or several processes writing the same local file. The thread that acquires it owns it and must release it. For coordination inside one process, `lock` is usually lighter; for distributed coordination across machines, a named mutex is not enough.
+> A named mutex is useful when separate processes on the same machine need one thread-owned critical section, such as a single-instance application or shared local file. The acquiring thread must release it. Use `lock` for in-process synchronous exclusion and a distributed coordination service for ownership across machines. [Microsoft: Mutexes](https://learn.microsoft.com/en-us/dotnet/standard/threading/mutexes) · [Mutex API](https://learn.microsoft.com/en-us/dotnet/api/system.threading.mutex?view=net-10.0)
 
+<!-- qard-id: d5b8cdd5-2b61-416f-91ab-a1584134e62e -->
 > [!qard]- What does `AbandonedMutexException` signal?
-> It means the previous owning thread ended without releasing the mutex. The waiting thread receives the exception but also acquires the mutex, so it must treat the protected state as possibly incomplete or corrupted. Recovery may require validating or rebuilding that state before the mutex is released in a `finally` block.
+> The previous owner thread terminated without releasing the mutex. The waiting thread receives `AbandonedMutexException` but acquires ownership, so it must still release the mutex. The protected state may have been left halfway through an update and should be validated or recovered before other threads enter. [Microsoft: Mutex class](https://learn.microsoft.com/en-us/dotnet/api/system.threading.mutex?view=net-10.0) · [Microsoft: Mutexes](https://learn.microsoft.com/en-us/dotnet/standard/threading/mutexes)
 
 # References
 

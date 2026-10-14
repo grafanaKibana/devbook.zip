@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Computer Science"
 qard-topic: "Algorithms/Paradigms/Memoization"
+flashcard_uid: "0f376618"
 ---
 
 Naive recursive `fib(50)` makes over 40 billion calls even though the recurrence has only 51 argument values from `0` through `50`. The recursion keeps forgetting that it already solved states such as `fib(48)`. Memoization fixes that repetition by caching each result under its arguments. A repeated call returns the stored value instead of entering the same subtree again.
@@ -35,7 +36,7 @@ The trace uses abstract states rather than tying the mechanism to one recurrence
 
 The cache is a map from *arguments* to *result*. A correct and useful cache depends on three things; failures either return a stale answer or destroy the expected hit rate:
 
-- **Purity.** The function's output must depend only on its arguments, with no side effects a caller could observe. Memoise a function that reads mutable global state or the clock, and a cache hit returns a value computed under conditions that no longer hold.
+- **Valid cached results.** Purity is a simple sufficient condition: the same arguments produce the same result, and skipping execution loses no required observable effect. If mutable external data affects the result, its version must be represented in the key or cached entries must be invalidated when it changes.
 - **A complete, stable key.** The key must capture *every* input that affects the result and must not change while stored. Omit one — memoise a two-argument recurrence on only the first argument — and two genuinely different calls collide on one cache slot, so the second read can be stale. Mutate a stored key and the entry can become unreachable. This is exactly DP's [[Home/Computer Science/Algorithms/Paradigms/Dynamic Programming|state-design]] problem: the key *is* the state.
 - **Lookup semantics that match value identity.** A cache needs equality appropriate to its store. For a `Dictionary`, equality and hashing must use the meaningful fields; a record key usually supplies both. Reference identity for logically equal arguments normally causes avoidable misses rather than wrong values, while inconsistent `Equals` and `GetHashCode` breaks dictionary lookup.
 
@@ -145,7 +146,7 @@ tab: Complexity
 >     };
 > }
 > ```
-> `Fib` seeds the base cases and recurses through `Go`, so every argument is computed at most once. Its input contract is `0 <= n <= 92`: negative values never reach a base case, and larger results overflow `long`. Production code should reject inputs outside that range or use `BigInteger` for larger indices. Later visits return from `memo`. `Memoize` works only for a genuinely pure `f`. For a multi-argument recurrence, the key becomes a tuple or record so it captures the full state.
+> `Fib` seeds the base cases and recurses through `Go`, so every argument is computed at most once. Its input contract is `0 <= n <= 92`: negative values never reach a base case, and larger results overflow `long`. Production code should reject inputs outside that range or use `BigInteger` for larger indices. Later visits return from `memo`. The simple `Memoize` wrapper assumes a pure `f`. For a multi-argument recurrence, the key becomes a tuple or record so it captures the full state.
 
 # Comparison
 
@@ -156,14 +157,17 @@ Memoization fits a naturally recursive recurrence when only a fraction of the po
 
 # Questions
 
-> [!qard]- What is the relationship between memoization and dynamic programming?
-> Memoization is DP's top-down implementation: write the recurrence and cache each subproblem's result. Bottom-up tabulation solves the same dependency graph iteratively. Memoization evaluates only states reached by recursion, while tabulation usually fills a planned table in dependency order. Repeated states make the cache useful. Optimal substructure is a separate requirement for optimization problems.
+<!-- qard-id: 8a2ffe34-cdd8-4e4c-a363-728820006ecc -->
+> [!qard]- What is dynamic programming, and what does a typical DP solution need to define?
+> Dynamic programming solves subproblems and reuses their results. A formulation defines what each subproblem represents, the result stored for it, base cases, and a recurrence that computes a result from dependencies. For a finite acyclic dependency graph, evaluate states in an order that makes each dependency available first. Reuse helps when different paths reach the same state; optimal substructure matters when the goal is to choose an optimum. [MIT 6.006: Dynamic Programming](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/28461a74f81101874a13d9679a40584d_MIT6_006S20_lec16.pdf)
 
-> [!qard]- Why must a memoised function be pure, and what breaks if it isn't?
-> A cache hit returns a stored result without running the function again. If the output also depends on a global value, the clock, or an I/O read, the stored result may describe conditions that no longer hold. Any expected side effect is skipped as well. Safe memoization therefore requires same-input-same-output behavior and no observable side effects.
+<!-- qard-id: b6bd9177-d445-429b-83b5-aadc835da419 -->
+> [!qard]- When is memoizing a function call correct?
+> Memoization is correct when the cache key captures every input that can change the result and the cached value remains valid for that key. A cache hit skips the computation, so it must not omit a required observable effect. Mutable external data may require including a version in the key or invalidating entries when it changes. [MIT 6.006: Memoization](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-fall-2011/ea1cb4a29625017bdbcaf2dfd61b179e_MIT6_006F11_lec19_orig.pdf)
 
-> [!qard]- What is the most common correctness bug when memoising a recurrence?
-> An incomplete cache key. If a `(i, capacity)` knapsack state is cached on `i` alone, two different subproblems map to the same entry and the second lookup can return the wrong value. The key must represent the full state, which is the same requirement DP calls state design.
+<!-- qard-id: d457ca1e-9e52-4889-8915-71e58d80e03e -->
+> [!qard]- Why must a memoization key include every part of a subproblem’s state?
+> Two different subproblems that map to one cache key can incorrectly share a result. In knapsack, caching only by item position is wrong if the answer also depends on remaining capacity; the key must represent both. [MIT 6.006: Dynamic Programming](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/28461a74f81101874a13d9679a40584d_MIT6_006S20_lec16.pdf) · [MIT 6.006: Memoization](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-fall-2011/ea1cb4a29625017bdbcaf2dfd61b179e_MIT6_006F11_lec19_orig.pdf)
 
 # References
 

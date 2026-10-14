@@ -11,6 +11,7 @@ status: Done
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Behavioral/Command"
+flashcard_uid: "dd0e4ff8"
 ---
 
 A restaurant ticket is a command in paper form. It records the requested meal, waits in the kitchen queue, and tells the chef what to prepare. The waiter does not cook and the chef does not take the order. The ticket keeps the request separate from its execution.
@@ -191,8 +192,9 @@ This in-memory history fits a local UI action whose execution and undo each comp
 
 # Questions
 
+<!-- qard-id: 559a25cf-a9b0-4267-850e-0575572aa65b -->
 > [!qard]- How does MediatR implement the Command pattern, and what does it add?
-> `PlaceOrderCommand` carries the request, while `PlaceOrderCommandHandler` owns execution. MediatR routes between them and can wrap handlers with pipeline behaviors. That indirection is useful when dispatch and shared policies matter across many requests. A direct service call remains clearer for a small, fixed interaction.
+> A command/request carries an operation to perform, and MediatR dispatches it to one matching handler. Pipeline behaviors can wrap that dispatch with shared policies such as validation or logging. The library adds an indirect dispatch/composition boundary; a direct service call is clearer for one small, fixed interaction. [MediatR: behaviors](https://github.com/LuckyPennySoftware/MediatR/wiki/Behaviors)
 
 # References
 

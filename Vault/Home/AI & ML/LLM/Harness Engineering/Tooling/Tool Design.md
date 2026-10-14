@@ -12,6 +12,7 @@ status: Done
 publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Harness Engineering/Tooling/Tool Design"
+flashcard_uid: "4f5034d3"
 ---
 
 Tool design turns model output into reliable operations. A tool lets an agent read current data, run a calculation, or request a side effect that text generation cannot perform on its own. A capable model still fails when its callable interfaces are ambiguous or brittle. Anthropic's SWE-bench agent work found a small interface detail with a large effect: switching one tool from relative to absolute file paths removed a recurring failure mode.
@@ -161,18 +162,18 @@ Several mechanisms contribute:
 
 | Design choice | Option A | Option B | Decision criteria |
 |---|---|---|---|
-| **Tool granularity** | Few broad tools with many parameters | Many narrow tools with focused purpose | Narrow tools are more reliable per-call (fewer hallucinated args) but increase selection confusion as count grows. Split when use cases need genuinely different descriptions. Keep together when they share context. |
+| **Tool granularity** | Few broad tools with many parameters | Many narrow tools with focused purpose | Narrow tools can simplify an individual call, while a larger catalog can increase selection difficulty; measure both on representative tasks. Split when use cases need genuinely different descriptions. Keep together when they share context. |
 | **Representation normalization** | Accept only a canonical form | Accept safe, unambiguous variants and convert them | Choose based on ambiguity and maintenance cost. Every caller still passes syntax, authorization, and business-invariant validation before execution. |
 | **Caching strategy** | Aggressive — cache all tool results with TTL | Conservative — execute every call fresh | Aggressive caching cuts latency and cost but risks stale data. Cache read-only tools with short TTLs. Never cache state-mutating tools. |
 | **Return verbosity** | Full result payload | Minimal fields needed for next step | Minimal returns save context tokens and reduce attention dilution. Full returns are only justified when the model needs to branch on fields that are hard to predict upfront. |
 
 # Questions
 
-> [!qard]- Why is tool design often more impactful than prompt engineering in agentic systems?
-> A tool contract is reused at every call site and every loop iteration. Ambiguous selection, malformed arguments, or an opaque error can redirect all later steps. Fixing the interface removes that failure mode across prompts, while a prompt workaround depends on the model remembering an exception each time.
+> [!qard]- When should repeated agent failures be fixed in a tool contract instead of the prompt?
+> Repair the tool contract when the same selection, argument, or error-handling failure recurs across requests that share the tool. Clear names and schemas, actionable errors, and useful results change the interface every call receives. A prompt can clarify task intent, but a prompt workaround remains dependent on the model remembering that exception. Evaluate the change on representative tool tasks. [Writing effective tools for AI agents](https://www.anthropic.com/engineering/writing-tools-for-agents)
 
-> [!qard]- What determines whether related operations should use one broad tool or several narrow tools?
-> Separate tools make sense when operations need different descriptions, input schemas, or permissions. Closely related actions can stay together when one clear contract covers them without a long list of unrelated optional parameters. Narrow tools make arguments easier to generate, but a large catalog makes tool selection harder. Routing or filtering can limit the tools shown for each request, and selection and argument accuracy should be measured separately.
+> [!qard]- What determines whether related operations should use one broad tool or several narrower tools?
+> Separate operations when they need different permissions, input schemas, or descriptions, or when one broad schema accumulates unrelated optional fields. A single tool can remain clearer for closely related actions that share one contract. Narrower tools can simplify each argument but enlarge the selection set; that tradeoff depends on the task distribution and exposed catalog. Measure tool selection and argument correctness separately before changing the surface. [Writing effective tools for AI agents](https://www.anthropic.com/engineering/writing-tools-for-agents)
 
 # References
 

@@ -11,6 +11,7 @@ level:
 priority: Medium
 qard-deck: "AI & ML"
 qard-topic: "LLM/Harness Engineering/Tooling/Coding Agents"
+flashcard_uid: "4e540b65"
 ---
 
 Coding agents put a language model inside a tool loop. The model reads repository state, chooses an action, observes the result, and decides what to do next. That turns code generation into an execution process rather than a one-shot answer.
@@ -85,8 +86,8 @@ Amazon Q Developer provides IDE and CLI assistance with AWS-oriented development
 
 # Questions
 
-> [!qard]- What controls reduce production risk when adopting coding agents?
-> Start by limiting the task, the tools the agent can call, and the number of iterations it can run. Destructive or external actions need code-enforced approval before execution, while hooks and CI should run deterministic checks. Repository instructions capture architectural rules that tests cannot enforce. Before merge, the diff still needs review and the claimed behavior needs fresh test or build evidence, regardless of which model produced the change.
+> [!qard]- What controls reduce risk when a coding agent can change a repository?
+> Bound the task, tools, and iteration budget; use the platform’s sandbox and permission controls for filesystem or network access. Put approval or denial for consequential actions in the runtime rather than relying on instructions. Hooks can enforce selected pre-tool decisions, while CI and review check the resulting change. These controls cover specific paths and failure modes; tests and review do not prove that every tool or behavior is safe. [GitHub Copilot hooks](https://docs.github.com/en/copilot/reference/hooks-reference)
 
 # References
 

@@ -11,6 +11,7 @@ status: Done
 publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Context Engineering/RAG/Monitoring"
+flashcard_uid: "468101be"
 ---
 
 RAG monitoring watches a deployed pipeline for regressions in answer quality, latency, and source freshness. Offline [[Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation|Evaluation]] answers whether a version is safe to ship. Monitoring asks whether that version still works on today's traffic.
@@ -227,8 +228,8 @@ The practical default is deterministic metrics on all traffic, asynchronous judg
 
 # Questions
 
-> [!qard]- How does monitoring differ from evaluation in a RAG system, and why are both needed?
-> Evaluation gates a candidate pipeline against a controlled dataset before release. Monitoring observes live traffic after release, where query distribution and source data keep changing. Production failures found through monitoring should become new evaluation cases. Without that loop, evaluation misses new incidents and monitoring keeps rediscovering old ones.
+> [!qard]- How do offline evaluation and production monitoring work together for a RAG system?
+> Offline evaluation compares a candidate pipeline against a controlled, versioned dataset before release. Production monitoring observes real requests, where traffic and source data can change, and tracks quality signals alongside latency, errors and cost. Monitoring signals need representative sampling and a valid evaluator; they are not ground truth by themselves. Triage production failures, add confirmed cases to the offline set, and use both views to catch regressions and new behavior. [Evaluation types](https://docs.langchain.com/langsmith/evaluation-types) · [GenAI semantic conventions](https://opentelemetry.io/docs/specs/semconv/registry/attributes/gen-ai/)
 
 # References
 

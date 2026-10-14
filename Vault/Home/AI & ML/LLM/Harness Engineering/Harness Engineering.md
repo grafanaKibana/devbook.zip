@@ -12,6 +12,7 @@ priority: Medium
 status: Done
 qard-deck: "AI & ML"
 qard-topic: "LLM/Harness Engineering/Harness Engineering"
+flashcard_uid: "c0ec4e2e"
 ---
 
 Harness engineering designs the boundary between a model's structured output and the systems that act on it. The boundary includes the callable operations in [[Tool Design]], the developer-facing extension surfaces in [[Home/AI & ML/LLM/Harness Engineering/Tooling/Tooling|Tooling]], the client wiring defined by [[Model Context Protocol]], and the execution environment that controls permissions and filesystem access. The model proposes a call. The harness decides what that call can reach and what happens when it runs.
@@ -52,11 +53,10 @@ The "tool quality" principle in the [[Home/AI & ML/LLM/Agents/Agents|Agents]] hu
 
 # Questions
 
-> [!qard]- What does harness engineering control that context engineering does not?
-> Context engineering decides what information the model receives. Harness engineering decides what the runtime allows the model to do with that information: which tools are exposed, what permissions they have, how calls are validated, and where execution is sandboxed or stopped for approval. Tool schemas and results connect the two areas because they consume context, but capability and permission decisions still belong to the harness. Loop engineering then controls whether another turn is allowed.
+> [!qard]- How are context, harness, and loop engineering responsibilities distinguished?
+> Context engineering decides what information the model receives. Harness engineering decides what the runtime allows the model to do with that information: which tools are exposed, what permissions those tools have, how calls are validated, and where execution is sandboxed or stopped for approval. Tool schemas and results connect context and harness engineering because they consume context, but capability and permission decisions remain with the harness. Loop engineering decides whether another turn is allowed.
 
-> [!qard]- Why does harness quality deserve as much investment as prompt quality for agent reliability?
-> Agents reuse the harness on every iteration. An ambiguous tool or vague error can redirect one step and then contaminate every later step. A precise contract helps the model recover, and repairing it improves every run that shares the surface.
+
 
 # References
 

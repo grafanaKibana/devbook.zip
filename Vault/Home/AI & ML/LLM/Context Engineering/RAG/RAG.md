@@ -12,6 +12,7 @@ publish: true
 status: Done
 qard-deck: "AI & ML"
 qard-topic: "LLM/Context Engineering/RAG/RAG"
+flashcard_uid: "33e0a516"
 ---
 
 Retrieval-Augmented Generation (RAG) retrieves evidence from a corpus and gives it to the model for generation. Knowledge can then change without retraining the model, and the answer can point back to the source that supported it.
@@ -71,11 +72,11 @@ The two techniques can work together. Fine-tuning can stabilize format or refusa
 
 # Questions
 
-> [!qard]- Why should advanced RAG patterns be introduced incrementally instead of all at once?
-> Every added stage creates another place for quality, latency, or cost to regress. Introduce one pattern against a measured baseline, then keep it only if it fixes a frequent failure. Shipping several together makes attribution difficult and often leaves expensive machinery with no proven benefit.
+> [!qard]- How should an advanced RAG stage be introduced and evaluated?
+> Start from a measured baseline and a specific failure the new stage is meant to address. Change one stage at a time where practical, then compare the same representative cases and operational measures so an observed effect can be attributed. Keep the stage only when the quality gain justifies its latency, cost and maintenance burden; a broad pipeline change may otherwise obscure which component helped or regressed. [Rules of Machine Learning](https://developers.google.com/machine-learning/guides/rules-of-ml)
 
-> [!qard]- How can retrieval and generation failures be separated when a RAG answer is wrong?
-> The first check is the context that reached the model. If the relevant evidence is missing, the problem is in retrieval, such as chunking, filtering, or ranking. If the evidence is present but the answer ignores or contradicts it, the problem is in generation and faithfulness. These stages need separate metrics because their fixes are different, while one end-to-end score only shows that the final answer failed.
+> [!qard]- A RAG answer is wrong: how do you locate the failing stage?
+> Inspect the exact assembled context and request sent to the model, then trace the stages that produced it. Missing or unsuitable evidence points toward query transformation, retrieval, filtering, ranking or context assembly; relevant evidence present but misused points toward generation or answer evaluation. Check citation handling and the reference/evaluator too before attributing the miss. Component metrics localize hypotheses, while end-to-end evaluation confirms the task outcome. [RAG evaluators](https://learn.microsoft.com/en-us/azure/foundry/concepts/evaluation-evaluators/rag-evaluators?view=foundry)
 
 # References
 

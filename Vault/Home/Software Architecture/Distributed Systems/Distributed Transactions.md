@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Distributed Systems/Distributed Transactions"
+flashcard_uid: "c508afc9"
 ---
 
 A distributed transaction coordinates a change across independently failing services or databases. Local atomic commit stops at each participant. A crash or partition between commits can therefore expose a partial result unless the protocol defines recovery.
@@ -105,11 +106,13 @@ Use 2PC only when every participant supports it and blocking during recovery fit
 
 # Questions
 
+<!-- qard-id: 1f55b33c-29a0-4777-8e34-e43c6b00b881 -->
 > [!qard]- Why is 2PC problematic in microservices?
-> Prepared participants can hold locks while waiting for the coordinator's durable decision, so network faults reduce availability and throughput. Many common service boundaries do not support XA, which prevents them from joining the protocol.
+> Two-phase commit needs a coordinator and participants that can durably prepare and later obey one global decision. A prepared participant may keep its locks until commit or rollback; if the decision is delayed, those resources stay tied up and can reduce availability or throughput. A service boundary that cannot join the same transaction protocol cannot share that atomic commit. [PostgreSQL: PREPARE TRANSACTION](https://www.postgresql.org/docs/current/sql-prepare-transaction.html)
 
+<!-- qard-id: 308353ee-bfa4-462c-8cf5-0bcd625b572b -->
 > [!qard]- How does the Outbox pattern support at-least-once event delivery?
-> The message commits in the same local transaction as the domain change. A relay retries publication until acknowledged. A crash between broker acknowledgement and marking the row processed can publish twice, so consumers remain idempotent.
+> The service writes the domain change and its event into the same local transaction, then a relay publishes the committed event and retries after failures. A crash after publication but before recording progress can send it again, so consumers need idempotent handling or deduplication. This is a local atomicity boundary, not one transaction across the service and broker. [Microsoft: transactional outbox with Azure Cosmos DB](https://learn.microsoft.com/en-us/azure/architecture/databases/guide/transactional-out-box-cosmos)
 
 # References
 

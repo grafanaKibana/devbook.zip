@@ -11,6 +11,7 @@ level:
 priority: Medium
 qard-deck: "AI & ML"
 qard-topic: "LLM/Harness Engineering/Tooling/Agent Instructions"
+flashcard_uid: "fef75b53"
 ---
 
 Agent instruction files describe how work gets done in one repository. They capture facts the code cannot reliably explain on its own: which commands are safe, where boundaries sit, what conventions matter, and how a change is proved complete.
@@ -76,8 +77,8 @@ A long architecture essay is a poor substitute. It consumes context, hides the f
 
 # Questions
 
-> [!qard]- Why do hierarchical instruction files often outperform a single giant root file?
-> The root file can hold rules that apply to the whole repository, while a local file adds the build command or dependency rule for one subtree when the runtime supports path-based loading. This keeps unrelated guidance out of the model's context and makes the active instructions more specific to the files being changed. The hierarchy works only when precedence is clear and local rules refine the root instead of silently contradicting it.
+> [!qard]- Why use path-specific instruction files, and what must be checked before relying on them?
+> In GitHub Copilot CLI, repository-wide instructions can be combined with path-specific files whose `applyTo` pattern matches the file being edited. That keeps unrelated guidance out of a task’s prompt and lets a directory add relevant constraints. Loading, precedence, and conflict handling are runtime-specific, so verify the selected agent’s documented rules; treating local guidance as a refinement of root policy is a maintainability choice, not a portable precedence guarantee. [GitHub Copilot CLI custom instructions](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-custom-instructions)
 
 # References
 

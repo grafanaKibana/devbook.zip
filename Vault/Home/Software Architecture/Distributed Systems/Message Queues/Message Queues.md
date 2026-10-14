@@ -12,6 +12,7 @@ level:
 status: Done
 qard-deck: "Software Architecture"
 qard-topic: "Distributed Systems/Message Queues/Message Queues"
+flashcard_uid: "15a348c0"
 ---
 
 Message queues decouple producers from consumers by buffering messages until consumers are ready. They absorb spikes, isolate failures, and keep systems working when downstream services slow. Use queues for webhook ingestion and background work.
@@ -200,8 +201,9 @@ Queue depth alone hides whether one old message is stuck or fresh traffic is arr
 
 # Questions
 
-> [!qard]- How do Kafka and RabbitMQ fit different messaging workloads in a .NET service?
-> Kafka fits high-throughput event streams that must be retained and replayed. RabbitMQ fits low-latency work queues and messages that need flexible routing. For either broker, the design still needs a clear ordering boundary, such as a Kafka partition or a RabbitMQ queue, and the decision must include operating cost and the team's experience.
+<!-- qard-id: 01ecda04-9e78-4b1a-b6af-f99dc23aad40 -->
+> [!qard]- For a .NET service choosing among Kafka, RabbitMQ classic/quorum queues, and RabbitMQ Streams, what workload fits each, and what ordering and operational factors still matter?
+> Kafka fits high-throughput, replayable event streams when retained logs, partitioned consumer groups, and its ecosystem are the primary model. RabbitMQ classic or quorum queues fit low-latency work such as `GenerateInvoice`, with acknowledgements and flexible routing. RabbitMQ Streams fits when RabbitMQ is already the operational center and the workload needs large fan-out, replay, or large backlogs; it provides a replicated append-only log with non-destructive consumers and offset/timestamp replay. The design needs a clear ordering boundary, such as a Kafka partition, RabbitMQ queue, or Streams super-stream partition; Streams preserves order only within each partition. Operating cost and the team's experience are decision factors.
 
 # References
 

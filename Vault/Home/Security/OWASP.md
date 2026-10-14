@@ -12,6 +12,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Security"
 qard-topic: "OWASP"
+flashcard_uid: "c892b874"
 ---
 
 The Open Worldwide Application Security Project (OWASP) publishes community-maintained security guidance and tools. Its Web Application Security Top 10 is an awareness document: ten broad risk categories selected from contributed data and community analysis. The current released edition is 2025.
@@ -93,7 +94,7 @@ Use the Top 10 to seed threat models and verification. Add architecture-specific
 # Questions
 
 > [!qard]- How should a .NET application prevent SQL injection?
-> Keep untrusted values out of SQL text by using parameterized APIs. Dynamic identifiers such as a sort column cannot normally be parameters, so map them from a closed allowlist. ORM safety depends on the exact API: LINQ and parameterizing raw-SQL methods differ from APIs that accept already constructed SQL text. Least-privilege database permissions reduce impact but do not repair concatenation.
+> Keep untrusted values out of SQL syntax by binding them as parameters. Parameters represent values, not SQL identifiers such as a column name, so choose dynamic structure from a closed allowlist and map it to known SQL. Verify that the ORM/API actually parameterizes the value rather than accepting constructed SQL text. Least privilege limits impact but does not fix concatenation. [OWASP: SQL Injection Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html)
 
 # References
 

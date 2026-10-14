@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Structural/Flyweight"
+flashcard_uid: "b517d36a"
 ---
 
 A printing press reuses one letter stamp at many positions on a page. The glyph shape stays the same. Position changes with each impression. Sharing the stable part avoids manufacturing a separate stamp for every character occurrence.
@@ -145,12 +146,13 @@ With immutable flyweights, a tax-rate change is applied by replacing the shared 
 
 # Questions
 
+<!-- qard-id: 3cc1bde5-1fdb-4c9b-9278-1a820242e881 -->
 > [!qard]- When is Flyweight not worth the complexity?
-> It is not worth using when duplicate state is a small part of the process heap or object counts stay low. A memory profiler should show many equal, retained objects before the model is split. The factory and lookup path otherwise add complexity without relieving a measured constraint.
+> Flyweight adds a shared-state model, factory, and lookup path, so use it when profiling shows many duplicate retained objects materially contribute to heap pressure. Without that evidence, direct objects are simpler and the sharing machinery may not solve a real constraint. [.NET memory-leak diagnosis](https://learn.microsoft.com/en-us/dotnet/core/diagnostics/debug-memory-leak) · [[Home/Software Architecture/Patterns/Design Patterns/Structural/Flyweight#Solution|Flyweight solution]]
 
 # References
 
 - [Flyweight pattern](https://refactoring.guru/design-patterns/flyweight)
-- [`ArrayPool<T>` — .NET's built-in Flyweight for buffer reuse](https://learn.microsoft.com/en-us/dotnet/api/system.buffers.arraypool-1)
-- [`ObjectPool<T>` — ASP.NET Core object pooling (Flyweight for expensive objects)](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.objectpool.objectpool-1)
+- [`ArrayPool<T>` — pooled buffer reuse](https://learn.microsoft.com/en-us/dotnet/api/system.buffers.arraypool-1)
+- [`ObjectPool<T>` — reusable object pooling](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.objectpool.objectpool-1)
 - [string.Intern — CLR string intern pool as a Flyweight factory](https://learn.microsoft.com/en-us/dotnet/api/system.string.intern)

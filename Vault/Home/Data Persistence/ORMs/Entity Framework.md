@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Data Persistence"
 qard-topic: "ORMs/Entity Framework"
+flashcard_uid: "920a0510"
 ---
 
 Entity Framework Core (EF Core) is a cross-platform .NET ORM. A database provider maps its model and query pipeline to a specific engine. Microsoft ships providers for SQL Server, SQLite, and Azure Cosmos DB. PostgreSQL and MySQL support comes from external provider packages with their own compatibility schedules.
@@ -209,11 +210,17 @@ Schema changes take provider-specific locks and may scan or rewrite a large tabl
 
 # Questions
 
+<!-- qard-id: dd44ad40-d794-44fa-bdc0-f28f8e0e801a -->
 > [!qard]- How does EF Core change tracking work, and when is a no-tracking query appropriate?
-> A tracking query attaches its entity instances to the context and reuses the same instance when the same entity key appears again. With the default snapshot strategy, EF Core compares current values with the tracked original values when change detection runs, normally before `SaveChanges()`. `.AsNoTracking()` fits a read-only result that will not be updated through that context. If a disconnected entity is attached later, the application must state which properties changed and how concurrency will be checked.
+> A tracking query attaches entities to the `DbContext`; for a repeated key, EF Core returns the already tracked instance. With snapshot tracking, change detection compares current values with the originals and marks changes for `SaveChanges`. `.AsNoTracking()` suits results that will not be updated through that context. A disconnected update needs explicit state/property selection and concurrency handling. [EF Core: Tracking vs. no-tracking queries](https://learn.microsoft.com/en-us/ef/core/querying/tracking) · [EF Core: Change detection](https://learn.microsoft.com/en-us/ef/core/change-tracking/change-detection)
 
+<!-- qard-id: bbf994dd-c7ce-441b-b48c-a8c58cc163ee -->
+> [!qard]- How does EF Core detect that a row changed after it was read?
+> A configured concurrency token is included in the update or delete predicate using its original value. If another write changed the token, the command affects no rows and EF Core raises `DbUpdateConcurrencyException`. Reload and merge, retry from fresh state, or report the conflict; a row token does not protect an unvalidated predicate or missing row. [EF Core: Handling concurrency conflicts](https://learn.microsoft.com/en-us/ef/core/saving/concurrency)
+
+<!-- qard-id: 5e9681ff-5093-4fb4-b6ff-b76f1501d587 -->
 > [!qard]- What is the N+1 query problem, and how can it be detected?
-> N+1 means one query loads parent rows and later navigation access issues another query for each parent. Detect it by counting database commands per operation and inspecting generated SQL in logs or tracing. Fix the query shape with a projection, an explicit include, or a deliberate second query. The choice depends on result size and consistency needs. There is no universal collection-size threshold for split queries.
+> N+1 occurs when one query loads parent rows and later navigation access triggers another query for each parent. Count commands for one operation and inspect SQL or traces. Reduce round trips with a projection, an include, or a deliberate second query chosen for the result shape and consistency needs; no one collection-size threshold selects the right strategy. [EF Core: Efficient querying](https://learn.microsoft.com/en-us/ef/core/performance/efficient-querying)
 
 # References
 

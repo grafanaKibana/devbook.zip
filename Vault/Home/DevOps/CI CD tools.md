@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "DevOps"
 qard-topic: "CI CD tools"
+flashcard_uid: "26290128"
 ---
 
 CI/CD turns a source change into a traceable release decision. Continuous integration (CI) combines small changes frequently and verifies them while the context is fresh. Continuous delivery keeps a verified artifact releasable. Continuous deployment releases qualifying changes without a routine human approval.
@@ -70,7 +71,7 @@ Repository workflow files are not the whole control plane. GitHub Actions can at
 # Questions
 
 > [!qard]- What separates continuous delivery from continuous deployment?
-> Both approaches keep a tested artifact ready for production. With continuous delivery, releasing that artifact is still a separate decision, often an approval or a business-controlled step. With continuous deployment, every change that passes the required automated checks is released automatically.
+> Both keep changes moving through automated integration and verification so a releasable artifact is available. Continuous delivery leaves the production release decision to a separate authorized step; continuous deployment releases automatically when the required gates pass. Those gates may include tests, security, policy, and rollout health, not tests alone. [AWS: Continuous delivery and deployment](https://docs.aws.amazon.com/whitepapers/latest/practicing-continuous-integration-continuous-delivery/what-is-continuous-integration-and-continuous-deliverydeployment.html)
 
 # References
 

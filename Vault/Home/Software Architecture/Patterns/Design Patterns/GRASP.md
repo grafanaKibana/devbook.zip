@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/GRASP"
+flashcard_uid: "216293bb"
 ---
 
 GRASP (General Responsibility Assignment Software Patterns) is a set of nine responsibility-assignment principles described by Craig Larman. They answer a concrete design question: which object should know, create, coordinate, or vary this behavior?
@@ -108,11 +109,13 @@ public sealed class CsvReportGenerator : IReportGenerator
 
 # Questions
 
+<!-- qard-id: 71b3b8bb-0597-491f-99ec-b6c24e7cf3ed -->
 > [!qard]- How does Information Expert reduce coupling, and when should another principle override it?
-> It places behavior beside the information it needs, so another object does not have to pull data out and reproduce the rule. Low Coupling or Pure Fabrication should override it when that placement would import infrastructure, coordinate other aggregates, or give the object unrelated responsibilities.
+> Information Expert places behavior with the object that has the information needed to perform it, avoiding callers that extract data and duplicate its rule. Move the work when that would pull infrastructure into a domain object, coordinate multiple aggregates, or create unrelated responsibilities; Low Coupling or Pure Fabrication can justify a separate collaborator. [[Home/Software Architecture/Patterns/Design Patterns/GRASP#The Nine Principles|GRASP principles]] · [[Home/Software Architecture/Patterns/Design Patterns/GRASP#Treating Information Expert as an Absolute|Information Expert limits]]
 
+<!-- qard-id: 0743ad5d-e901-45e4-8fc2-a194248e031c -->
 > [!qard]- How does GRASP differ from SOLID?
-> GRASP focuses on assigning responsibilities among collaborating objects. SOLID describes broader properties of class and dependency design. They overlap around cohesion, coupling, and variation, but GRASP starts with ownership: who should do the work?
+> GRASP is a set of guidelines for assigning responsibilities among collaborating objects—who should create, know, or coordinate the work. SOLID describes broader properties of class design and dependency direction. They overlap in concerns such as cohesion, coupling, and variation but start from different questions. [[Home/Software Architecture/Patterns/Design Patterns/GRASP#The Nine Principles|GRASP principles]] · [[Home/Software Design/Principles/SOLID|SOLID principles]]
 
 # References
 

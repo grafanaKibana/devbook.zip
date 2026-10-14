@@ -13,6 +13,7 @@ level:
 status: Done
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Patterns"
+flashcard_uid: "cfaa4058"
 ---
 
 Patterns name recurring design pressures and the tradeoffs of a known response. They give a team shared language for boundaries, dependencies, and change. A useful pattern makes variation easier to see. A premature one hides simple control flow behind indirection.
@@ -27,8 +28,9 @@ return FolderStructureMap;
 
 # Questions
 
+<!-- qard-id: 66d6574d-0bb3-4d17-b1e0-53177c19b42f -->
 > [!qard]- What evidence justifies introducing a pattern?
-> A recurring variation, responsibility boundary, or failure mode must be visible in the code. The pattern should make that pressure cheaper to handle than the direct design. Without that evidence, the extra indirection is speculative complexity.
+> Introduce a pattern when code shows recurring variation, a responsibility boundary, or a failure mode that the pattern makes cheaper to handle than the direct design. Without visible design pressure, the extra indirection is speculative. [GoF: Design Patterns](https://www.oreilly.com/library/view/design-patterns-elements/0201633612/)
 
 # References
 

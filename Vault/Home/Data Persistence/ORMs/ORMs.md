@@ -12,6 +12,7 @@ level:
 status: Creation
 qard-deck: "Data Persistence"
 qard-topic: "ORMs/ORMs"
+flashcard_uid: "e49dfe63"
 ---
 
 An Object-Relational Mapper connects an object model to a relational database. It translates queries, materializes rows as objects, tracks changes, and turns those changes into SQL. This removes repetitive data-access code. It does not remove the database's query, transaction, and schema rules.
@@ -25,11 +26,13 @@ return FolderStructureMap;
 
 # Questions
 
+<!-- qard-id: d86af7cc-5d66-4a64-a922-47d16ca7ce63 -->
 > [!qard]- When is raw SQL a better boundary than an ORM query?
-> Raw SQL fits a provider-specific query, bulk operation, or execution-plan requirement that the ORM cannot express predictably. It should be parameterized, tested against the production database engine, and kept behind a narrow data-access boundary.
+> Use raw SQL when a required provider-specific operation or measured query-plan problem cannot be expressed predictably through the ORM. Parameterize data values. SQL identifiers or fragments cannot be supplied as ordinary parameters, so validate and allow-list any dynamic pieces. Keep the query tested against the production database engine. [EF Core: SQL queries](https://learn.microsoft.com/en-us/ef/core/querying/sql-queries)
 
-> [!qard]- Why can eager loading several collections be expensive?
-> Sibling collection joins can multiply rows, duplicating parent data across the result. Split queries or purpose-built projections avoid that multiplication, but split queries add commands and may need an explicit consistency boundary.
+<!-- qard-id: 254a62e1-7311-4a83-8029-4ff00d16f442 -->
+> [!qard]- Why can eager-loading sibling collections be expensive?
+> Joining sibling collections at the same level can multiply rows: each parent row is repeated for combinations of matching children. A split query or projection can reduce that payload, but split queries add round trips and may observe changes between commands. Use a transaction/isolation boundary when the assembled result must represent one consistent database view. [EF Core: Single vs. split queries](https://learn.microsoft.com/en-us/ef/core/querying/single-split-queries)
 
 # References
 

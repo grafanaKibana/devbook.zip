@@ -11,6 +11,7 @@ status: Done
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Creational/Abstract Factory"
+flashcard_uid: "de6b36c6"
 ---
 
 An application may need a matching set of provider-specific objects: a connection, command, and adapter for one database provider, or several payment components built for the same gateway. Selecting the family once is safer than repeating the provider choice at every construction site.
@@ -196,17 +197,20 @@ Abstract Factory fits several product types that must vary together across more 
 
 # Questions
 
+<!-- qard-id: 6f975d28-4f0a-4253-9a65-ae9d44e14b87 -->
 > [!qard]- What should happen when an Abstract Factory gains a new product type such as `IFraudDetector`?
-> If every provider family must supply fraud detection, add it to the factory interface and update every concrete factory. The compile-time failures are useful because they expose incomplete families. A separate factory fits only when fraud detection varies independently. A default no-op keeps existing factories compiling, but it can make a missing security control look valid.
+> If every family must provide the new product, add it to the abstract factory contract and implement it in every concrete factory; missing implementations then surface during compilation. If the capability varies independently, model it as a separate collaborator instead. A default no-op can conceal an absent required behavior. [GoF: Abstract Factory pattern](https://www.oreilly.com/library/view/design-patterns-elements/0201633612/)
 
+<!-- qard-id: 5afe8a29-5689-48d4-9785-7b2ee30124b1 -->
 > [!qard]- When is Abstract Factory overkill compared to a simpler approach?
-> It is unnecessary when only one product varies or the products do not share a compatibility boundary. In that case, inject the product interface directly. Abstract Factory earns its indirection only when a family choice must move together.
+> Inject a product directly when only one product varies or the products do not need a coordinated compatibility choice. Abstract Factory earns its extra layer when a caller must select related products as one coherent family. [GoF: Abstract Factory pattern](https://www.oreilly.com/library/view/design-patterns-elements/0201633612/)
 
+<!-- qard-id: 3a40a979-9d08-465f-9aa9-dc46dd4aa503 -->
 > [!qard]- How does Abstract Factory relate to the DI container in modern .NET?
-> A DI container can construct the same object graph, but it is a general registry rather than a domain-specific family contract. Grouped registration methods can keep a provider family together at the composition root. A typed factory makes that boundary visible to consumers, yet ordinary interface return types still do not prove concrete-family compatibility.
+> A DI container constructs and resolves object graphs, but ordinary registrations do not prove that several product implementations form one compatible family. A typed factory makes the family choice explicit to consumers and can keep its products coordinated. [.NET dependency injection](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection/overview) · [GoF: Abstract Factory pattern](https://www.oreilly.com/library/view/design-patterns-elements/0201633612/)
 
 # References
 
 - [Abstract Factory pattern](https://refactoring.guru/design-patterns/abstract-factory)
 - [Abstract Factory Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=v-GiuMmsXj4&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc&index=5)
-- [Dependency injection in .NET — how the DI container acts as a runtime Abstract Factory](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection)
+- [Dependency injection in .NET — container-based object construction](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection)

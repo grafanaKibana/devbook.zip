@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Programming"
 qard-topic: "NET/CSharp/Fundamentals/Types/Events"
+flashcard_uid: "6b17a98d"
 ---
 
 An event is a delegate-backed member with restricted access. Code outside the declaring type may subscribe with `+=` or unsubscribe with `-=`, but it cannot raise the event or replace its invocation list. The publisher keeps control of notification, which is the reason public APIs expose events instead of delegate fields.
@@ -113,11 +114,13 @@ public sealed class Listener : IDisposable
 
 # Questions
 
+<!-- qard-id: 7cde4edd-5239-4b9f-99d2-4ae8423cf684 -->
 > [!qard]- What is the difference between an event and a public delegate field?
-> Outside code can only subscribe to or unsubscribe from an event. The type that declares the event keeps control over when it is raised. A public delegate field also lets outside code invoke the delegate, replace its handlers, or set it to `null`, which can break the publisher's notification logic.
+> An event lets outside code add or remove handlers, while the declaring type controls when it raises the notification. A public delegate field also lets outside code invoke, replace, or clear the publisher’s delegate value. [Microsoft: events](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/events/) [Microsoft: supporting documentation](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/delegates)
 
-> [!qard]- Why can event subscriptions cause memory leaks, and how can they be prevented?
-> The publisher stores each handler, and the handler normally holds a strong reference to its subscriber. If the publisher lives longer, that reference keeps the subscriber alive even when the rest of the application no longer uses it. The subscription should be removed when the subscriber's lifetime ends, commonly through `Dispose`. Weak-event patterns or scoped subscription helpers are alternatives when explicit ownership is difficult.
+<!-- qard-id: 886d70ca-8fef-4ec6-8c16-3d1101f171f9 -->
+> [!qard]- Why can event subscriptions keep an otherwise unused object alive?
+> The publisher retains the subscribed handler, and an instance handler refers to its target subscriber. If a longer-lived publisher stays reachable, that reference path keeps the subscriber reachable too. Remove the subscription when the subscriber’s lifetime ends, commonly during disposal. [Microsoft: events](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/events/) · [Microsoft: GC fundamentals](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/fundamentals)
 
 # References
 

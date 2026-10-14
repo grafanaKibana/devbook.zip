@@ -11,6 +11,7 @@ status: Done
 publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Loop Engineering/Multi-Agentic Systems"
+flashcard_uid: "743a064f"
 ---
 
 A multi-agent system gives separate LLM agents their own context and tools, then coordinates their work. [[Home/AI & ML/LLM/Agents/Agents|An individual agent]] already has its own tool loop, while [[Home/AI & ML/LLM/Agents/Workflow Patterns|workflow patterns]] arrange bounded calls under one control flow. Adding other agents creates a different problem: handoffs, shared state, and failures that cross several traces.
@@ -136,14 +137,14 @@ Multi-agent architecture should solve a measured limit in the current system. If
 
 # Questions
 
-> [!qard]- When is multi-agent coordination worth the added complexity?
-> Multi-agent coordination makes sense when separate contexts keep unrelated work apart, independent tasks can run in parallel, or specialists need tools or instructions that would conflict inside one agent. The extra agents also mean more tokens, handoffs, and traces to debug, so the design should show a clear improvement in quality or latency over a single agent.
+> [!qard]- When is multi-agent coordination worth its added complexity?
+> Use multiple agents when separate contexts keep irrelevant material out of the main task, independent work can run concurrently, or specialists need genuinely different tools or instructions. Handoffs, duplicated context, traces, and coordination increase cost and failure surface. Keep the design only when representative evaluation shows improvement in a required outcome over one agent. [Anthropic multi-agent research system](https://www.anthropic.com/engineering/multi-agent-research-system)
 
-> [!qard]- What is the benefit of keeping related context with one agent?
-> Keeping related evidence and decisions in one working context lets the agent complete connected work without rebuilding the same background after each handoff. Splitting that work between agents creates more transfers and more chances to lose details. The tradeoff is that each agent owns a broader part of the work.
+> [!qard]- What is gained by keeping related work with one agent, and when should context cross a handoff?
+> One agent can reuse related evidence and decisions without rebuilding them after each transfer. Split work when isolation, parallelism, or specialization earns the coordination cost. In OpenAI Agents SDK, a receiving agent sees the conversation history by default unless an input filter or history setting changes it; pass only the history needed when focus or data exposure requires it. [OpenAI Agents SDK handoffs](https://openai.github.io/openai-agents-python/handoffs/)
 
-> [!qard]- What makes multi-agent failures difficult to trace?
-> A bad output can pass through several agents before the failure becomes visible. A handoff may contain a false claim that looks valid, and parallel agents may repeat that claim in several places. Debugging therefore needs the full handoff history, the source of each artifact, and limits such as token or turn budgets for the whole run, not just separate agent logs.
+> [!qard]- What evidence makes failures across multi-agent handoffs traceable?
+> Record which agent produced each artifact, what was handed off, which evidence supports key claims, and the relevant routing or tool decisions. Retain enough trace to reconstruct a failure under access and retention policy; forwarding every raw message is unnecessary when structured artifacts preserve provenance. Bound the overall run as well as individual agents. [OpenAI Agents SDK tracing](https://openai.github.io/openai-agents-python/tracing/) · [OpenAI Agents SDK handoffs](https://openai.github.io/openai-agents-python/handoffs/)
 
 # References
 

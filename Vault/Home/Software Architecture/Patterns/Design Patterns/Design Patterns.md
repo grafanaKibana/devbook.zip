@@ -12,6 +12,7 @@ level:
 status: Done
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Design Patterns"
+flashcard_uid: "ddaa5e07"
 ---
 
 The Gang of Four catalog names 23 recurring object-oriented design problems and the collaborations that address them. A pattern communicates intent and consequences. It is not a ready-made class diagram. Strategy says that an algorithm varies behind a stable contract, while Observer says that an unknown set of dependents receives notifications. The name is useful only when that pressure exists in the code.
@@ -41,14 +42,17 @@ Similar structure does not imply the same pattern. Proxy and Decorator both wrap
 
 # Questions
 
+<!-- qard-id: 8c5c7210-03f3-4e93-a3d4-c5db11cfc871 -->
 > [!qard]- How is a GoF category chosen?
-> Creational patterns vary how objects come into existence. Structural patterns vary how types or objects are assembled. Behavioral patterns vary responsibility and communication. The category is a recall aid. The pattern's intent still decides whether it fits.
+> Creational patterns organize object creation; structural patterns organize how objects or types are composed; behavioral patterns organize responsibility and communication. These labels help recall the catalog, but the concrete design problem and pattern intent determine fit. [GoF: Design Patterns](https://www.oreilly.com/library/view/design-patterns-elements/0201633612/)
 
+<!-- qard-id: 374c4c3e-1864-4454-84c3-32aa6dac7319 -->
 > [!qard]- When does using a design pattern become an anti-pattern?
-> When its indirection costs more than the variation it isolates. A Factory Method with one permanent product, a Builder around two independent values, or a Singleton hiding request state adds vocabulary without removing design pressure. Concrete evidence of variation should pay for the abstraction.
+> A pattern becomes harmful when its indirection costs more than the variation or change pressure it isolates. A permanent single product or a trivial construction sequence may not justify extra types. Look for actual variation, repeated decisions, or a boundary the abstraction protects; no pattern name alone pays for its complexity. [GoF: Design Patterns](https://www.oreilly.com/library/view/design-patterns-elements/0201633612/)
 
-> [!qard]- How can two patterns with the same wrapper shape be distinguished?
-> Name the responsibility that the wrapper owns. A Decorator adds behavior, a Proxy controls access, and an Adapter translates a contract. Class shape alone cannot identify the pattern because intent and collaboration are part of its definition.
+<!-- qard-id: f29d53c2-0b44-4cdf-9181-ab4e4a3c89f1 -->
+> [!qard]- How do Adapter, Decorator, and Proxy differ despite their similar wrapper shape?
+> An Adapter translates an incompatible contract into the one a client expects. A Decorator preserves an interface while adding behavior. A Proxy preserves an interface while controlling access to the underlying object. The wrapper’s responsibility—not its class shape—distinguishes them. [[Home/Software Architecture/Patterns/Design Patterns/Design Patterns#Choose a Pattern by Intent and Cost|Choose a pattern by intent and cost]]
 
 # References
 

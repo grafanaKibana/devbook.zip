@@ -11,6 +11,7 @@ status: Done
 publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Context Engineering/RAG/RAG Caching"
+flashcard_uid: "e2208d57"
 ---
 
 A RAG request can repeat the same expensive work: embed the query, search the index, and generate an answer. Caches remove that work only when their keys capture every input that affects the result.
@@ -130,8 +131,11 @@ Fast-changing evidence may justify caching embeddings and retrieval results with
 
 # Questions
 
-> [!qard]- Why should retrieval cache keys be based on processed query text instead of raw embeddings?
-> Processed query text and its transformation version are readable, deterministic inputs. Raw embedding bytes change with the model and hide why two entries differ. A translation-version change should produce a new key, and the embedding model version still belongs in the retrieval key because it affects ranking.
+> [!qard]- What is the trade-off between processed query text and embedding bytes in a retrieval-cache key?
+> Processed query text is inspectable and works well when canonicalization and its transformation version are stable. Embedding bytes can also be a deterministic key when the encoder, model and configuration are pinned. Either representation is valid if a change that can alter the cached result changes the key; include caller authorization, corpus/index version or retrieval settings when that stage depends on them. [Cache-Aside architecture](https://learn.microsoft.com/en-us/azure/architecture/databases/architecture/cache-aside-azure-managed-redis-postgresql)
+
+> [!qard]- How do caches help a RAG pipeline, and what makes a cache hit safe?
+> Embedding caches reuse vectors, retrieval caches reuse ranked evidence, and response caches reuse generated answers; each avoids work at a different point in the RAG flow. A hit is safe only when its key or validation covers inputs that change that stage result and current authorization permits the value. Versioning, invalidation or expiry must match the source-freshness requirement. [Cache-Aside architecture](https://learn.microsoft.com/en-us/azure/architecture/databases/architecture/cache-aside-azure-managed-redis-postgresql) · [[RAG Caching#Flow|RAG cache flow]]
 
 # References
 

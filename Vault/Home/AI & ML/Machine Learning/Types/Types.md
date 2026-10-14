@@ -13,6 +13,7 @@ level:
   - "1"
 qard-deck: "AI & ML"
 qard-topic: "Machine Learning/Types/Types"
+flashcard_uid: "d3a3edaf"
 ---
 
 The useful way to classify machine learning is by its learning signal. Labels, proxy targets, rewards, or the absence of a target determine what the training loop can optimize and how its result can be evaluated. Model architecture comes later.
@@ -95,7 +96,7 @@ Reinforcement learning is the narrow branch. It needs an environment or simulato
 # Questions
 
 > [!qard]- What learning signal distinguishes supervised, self-supervised, and reinforcement learning even when all three use a neural network?
-> Supervised learning receives an external target for each example. Self-supervised learning derives a proxy target from the input itself, such as a hidden or next token. Reinforcement learning receives rewards from actions in an environment and optimizes return across a trajectory. The architecture does not determine which learning problem is being solved.
+> Supervised learning uses externally supplied labels. Self-supervised learning derives proxy targets from the input data. Reinforcement learning uses rewards from actions in an environment to optimize expected cumulative return; a reward may arrive immediately or later. The architecture does not determine the learning paradigm. [Google ML glossary](https://developers.google.com/machine-learning/glossary) · [OpenAI Spinning Up: RL concepts](https://spinningup.openai.com/en/latest/spinningup/rl_intro.html)
 
 # References
 

@@ -11,6 +11,7 @@ status: Done
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Dependency Injection"
+flashcard_uid: "a63c0ae6"
 ---
 
 Dependency Injection (DI) moves object construction to a composition boundary. A class declares the services it needs, and something outside the class supplies them. This is a practical form of Inversion of Control (IoC): business code describes the collaboration while the application decides which implementations participate. The result is explicit dependencies and components that can be replaced without rewriting their consumers.
@@ -247,15 +248,13 @@ The container cannot construct a graph in which `A` requires `B` and `B` require
 
 # Questions
 
+<!-- qard-id: ddb3e38c-cabb-4743-ac37-f7414aa541dd -->
 > [!qard]- Explain `Transient`, `Scoped`, and `Singleton` lifetimes with a safe production example each.
-> The lifetime controls how long the container reuses an instance:
-> - **Transient:** one instance per resolution, suitable for a lightweight stateless mapper.
-> - **Scoped:** one instance per scope. In ASP.NET Core, a scoped `DbContext` gives one request a coherent unit of work.
-> - **Singleton:** one instance for the application lifetime, suitable for a thread-safe cache or `IClock`.
-> Lifetime is a shared-state decision, not a performance setting. A singleton cannot safely capture a scoped service.
+> A transient is newly created for each resolution; a stateless mapper is a reasonable example. A scoped instance is reused within one scope, such as a `DbContext` for one web request/unit of work. A singleton is shared by the root provider until shutdown, so a thread-safe immutable clock or bounded concurrent cache can fit. A singleton must not capture a scoped service because it would retain that instance beyond its scope. [.NET dependency injection](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection/overview)
 
+<!-- qard-id: 023bd48a-3a64-4c74-a852-7f2cc4f897af -->
 > [!qard]- What is a captive dependency, and how can it be fixed?
-> A captive dependency appears when a longer-lived service stores a shorter-lived one, classically an `IHostedService` holding a scoped `DbContext`. The scoped object escapes its boundary, so request state may leak across work and disposal happens too late. Scope validation catches this configuration when enabled. The repair is to inject `IServiceScopeFactory`, create a short scope for the operation, resolve the scoped service inside it, and dispose the scope when the operation ends.
+> A captive dependency occurs when a longer-lived service keeps a shorter-lived service, such as a hosted singleton retaining a scoped `DbContext`. The shorter service then outlives its intended scope and may carry request-specific state into later work. A hosted service should create and dispose a fresh scope for each scoped operation, resolving the dependency inside it and disposing it when that operation ends. For a loop of independent work items, create a new scope for each item rather than holding one for the worker lifetime. A transient captured by a singleton is still one resolved instance retained by that singleton; if mutable, it is not made thread-safe by its transient registration, and concurrent callers may share it. [.NET: use scoped services within a BackgroundService](https://learn.microsoft.com/en-us/dotnet/core/extensions/scoped-service) · [.NET service lifetimes](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection/service-lifetimes) · [.NET DI guidelines](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection/guidelines) · [.NET dependency injection overview](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection/overview)
 
 # References
 

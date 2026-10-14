@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Repository & UoW"
+flashcard_uid: "54e299f5"
 ---
 
 A **Repository** presents aggregate persistence as a domain-oriented collection. A **Unit of Work** tracks changes made during one business operation and commits them through one transaction boundary. The patterns solve different problems: Repository shapes access, while Unit of Work coordinates the commit.
@@ -139,11 +140,13 @@ Start with `DbContext` unless the domain needs a narrower persistence language. 
 
 # Questions
 
+<!-- qard-id: 156ee647-9c4f-46f1-8876-d290f7b63914 -->
 > [!qard]- Why does EF Core's DbContext already implement the Unit of Work pattern?
-> `DbContext` tracks entity changes and sends the pending work through `SaveChangesAsync()`, which uses a transaction when the provider supports it. Several repositories participate in one unit only when they share the same context instance. A singleton context is unsafe, while separate transient contexts split the commit boundary.
+> `DbContext` tracks entity changes and `SaveChangesAsync()` normally wraps its changes in a transaction when the provider supports it. Repositories using the same context share its unit of work. Separate relational contexts can also participate in one transaction when they share the same `DbConnection` and `DbTransaction`; separate independent contexts otherwise have separate tracking/commit boundaries. `DbContext` is short-lived and not thread-safe, so singleton lifetime is unsafe. [EF Core: DbContext configuration](https://learn.microsoft.com/en-us/ef/core/dbcontext-configuration/) · [EF Core: transactions](https://learn.microsoft.com/en-us/ef/core/saving/transactions)
 
+<!-- qard-id: b056c1a5-0827-47b6-a0ce-30fe7c7ef432 -->
 > [!qard]- When is a generic `IRepository<T>` an anti-pattern?
-> It becomes an anti-pattern when the generic CRUD surface replaces aggregate-specific access rules. `GetAll()` may be meaningless for a large aggregate, and unrestricted updates can bypass invariants. A generic implementation can remain inside infrastructure. The domain-facing interface should describe the operations the aggregate actually supports.
+> A generic `IRepository<T>` becomes harmful when its uniform CRUD surface exposes operations that bypass aggregate invariants or do not fit the aggregate. Keep domain-facing operations meaningful to the aggregate; a generic implementation can remain inside infrastructure if it does not widen that contract. [Microsoft: DDD-oriented microservice](https://learn.microsoft.com/en-us/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/ddd-oriented-microservice)
 
 # References
 

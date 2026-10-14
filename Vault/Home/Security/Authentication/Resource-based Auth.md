@@ -12,6 +12,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Security"
 qard-topic: "Authentication/Resource-based Auth"
+flashcard_uid: "55d97186"
 ---
 
 Resource-based authorization decides whether a principal may perform an operation on one concrete resource. A role can grant document-editing capability in general. The resource check decides whether this document falls within that principal's authority.
@@ -142,7 +143,7 @@ Use `403` when authenticated callers may know that the resource exists. Use `404
 # Questions
 
 > [!qard]- What is the difference between role-based and resource-based authorization?
-> Role-based authorization evaluates assigned roles without needing the target instance. Resource-based authorization includes the loaded object's attributes or relationships in the decision. Roles work well as coarse gates. Resource checks enforce ownership, tenancy, or object state.
+> A role check evaluates whether a principal has a broad capability, such as editor. Resource-based authorization evaluates a decision against a loaded resource and its attributes or relationships, such as this document’s owner or tenant. Roles can still be a coarse gate; the object-level decision is needed when permission depends on the specific instance. [Microsoft: resource-based authorization](https://learn.microsoft.com/en-us/aspnet/core/security/authorization/resource-based?view=aspnetcore-10.0)
 
 # References
 

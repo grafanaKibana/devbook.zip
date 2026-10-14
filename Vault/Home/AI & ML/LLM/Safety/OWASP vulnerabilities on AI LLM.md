@@ -11,6 +11,7 @@ status: Done
 publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Safety/OWASP vulnerabilities on AI LLM"
+flashcard_uid: "c24fd7d3"
 ---
 
 The OWASP Top 10 for LLM Applications (2025 edition) is a risk catalog for systems that embed language models. Its central boundary is awkward: untrusted natural language influences a probabilistic model, and the result may drive deterministic code, retrieval, or tool calls. Prompts can mix data with instructions. Model output is therefore untrusted input to the next component.
@@ -144,11 +145,11 @@ Privilege separation is the baseline because it limits harm even when the model 
 
 # Questions
 
-> [!qard]- Why is prompt injection fundamentally harder to prevent than SQL injection?
-> Parameterized SQL gives the database a deterministic split between code and data. A language model interprets both through the same learned behavior, so a delimiter cannot provide the same guarantee. The practical defense contains successful injections with narrow permissions and validated downstream operations.
+> [!qard]- Why is prompt injection harder to prevent than SQL injection?
+> Parameterized SQL lets the database enforce a code/data boundary: bound values stay data. An LLM interprets instructions and untrusted text through the same language interface, so delimiters do not provide the equivalent guarantee. OWASP says foolproof prompt-injection prevention is not established; contain successful injections with least privilege and validated downstream actions. [OWASP SQL injection prevention](https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html) · [OWASP LLM01: Prompt Injection](https://genai.owasp.org/llmrisk/llm01-prompt-injection/)
 
-> [!qard]- Why should system prompts be treated as public rather than secret?
-> Prompt extraction cannot be ruled out, so secrecy is an unsafe dependency. A disclosed prompt should reveal no credential and grant no permission. RBAC and tool authorization remain effective even when every instruction is known.
+> [!qard]- Why should a system prompt not be treated as a secret or authorization boundary?
+> System prompts can be disclosed and may reveal sensitive instructions or help with further attacks. Keep credentials and authorization decisions outside the prompt: downstream code and systems must check whether each requested action is allowed. Designing for possible disclosure does not make every prompt harmless to publish. [OWASP LLM07: System Prompt Leakage](https://genai.owasp.org/llmrisk/llm072025-system-prompt-leakage/) · [OWASP LLM06: Excessive Agency](https://genai.owasp.org/llmrisk/llm062025-excessive-agency/)
 
 # References
 

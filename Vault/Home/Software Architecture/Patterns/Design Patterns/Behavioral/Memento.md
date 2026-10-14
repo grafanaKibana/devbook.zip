@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Behavioral/Memento"
+flashcard_uid: "923a41fb"
 ---
 
 A video-game save point is a memento. It captures enough state to restore a particular moment after a failed attempt. The save system stores that snapshot without needing to understand every internal object that produced it.
@@ -154,11 +155,13 @@ This compact example keeps `CartMemento` public, so opacity is conventional rath
 
 # Questions
 
+<!-- qard-id: 7e2fad33-bba2-498d-9ab0-1d8be9220e08 -->
 > [!qard]- How can memento history be kept from growing without limit?
-> Keep a fixed number of snapshots or set a memory budget. Long-lived recovery may need only the latest snapshot, while an editor can keep a limited undo window. A full audit history should store durable events or changes instead of keeping an unlimited stack of object copies.
+> Bound the number of retained snapshots or cap their memory cost; an editor can keep a rolling undo window, while recovery may need only a recent checkpoint. A full audit trail needs durable events or changes rather than an unlimited in-memory stack of object copies. [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Memento#Tradeoffs|Memento tradeoffs]]
 
+<!-- qard-id: 4c943112-f943-46a9-ab18-f23765b120e5 -->
 > [!qard]- When is Memento overkill compared to simpler approaches?
-> A full snapshot is wasteful when undo can be represented as one small delta. If restoring a removed item needs only that item and its position, store those values. Memento earns the extra copy when state is interdependent or restoration must survive across sessions.
+> A small inverse delta is simpler when it contains everything needed to reverse an isolated change, such as the removed item and its position. A Memento is more useful when one action changes interdependent state or a complete prior state must be restored. [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Memento#Tradeoffs|Memento tradeoffs]]
 
 # References
 

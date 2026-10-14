@@ -12,6 +12,7 @@ level:
   - "4"
 qard-deck: "Programming"
 qard-topic: "NET/CSharp/Concurrency and Parallelism/Concurrency and Parallelism"
+flashcard_uid: "4b1835fe"
 ---
 
 Concurrency describes program structure: several operations can be in progress during the same period. Parallelism describes execution: several operations run at the same instant. A single core can interleave concurrent work but cannot execute it in parallel.
@@ -130,11 +131,13 @@ A short synchronous critical section belongs behind a [[Home/Programming/NET/CSh
 
 # Questions
 
+<!-- qard-id: beccd0f9-7a5c-4599-a9b4-146afaadd095 -->
 > [!qard]- What is the difference between concurrency and parallelism in practice?
-> Concurrency means several operations are in progress during the same period, even if one thread takes turns running them. Parallelism means operations execute at the same time on multiple cores. Asynchronous I/O uses concurrency so a thread is not blocked while an external operation is pending. CPU-bound work uses parallelism when splitting the calculation across cores reduces its elapsed time.
+> Concurrency means multiple operations can remain in progress during the same period; a single thread can interleave their runnable steps. Parallelism means instructions execute simultaneously on multiple cores. Asynchronous I/O allows a thread to be reused while an operation is waiting, whereas CPU parallelism divides independent computation across cores. [Microsoft: Introduction to parallel programming](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/introduction-to-plinq) · [Microsoft: Task-based asynchronous programming](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/task-based-asynchronous-programming)
 
+<!-- qard-id: 5c09ef7b-cd74-4db0-949e-ea7e4e8605db -->
 > [!qard]- What should be checked before choosing `Task`, `lock`, `Parallel`, or `Channel`?
-> First check what the work spends time doing and who is responsible for finishing it. I/O-bound work usually needs asynchronous APIs so threads are not blocked. CPU-bound work may benefit from measured parallelism. Shared mutable state needs synchronization or a single owner, while background work needs a queue with a clear lifetime and failure policy. The primitive follows from those requirements.
+> Identify whether the work waits on I/O or consumes CPU, whether mutable state is shared, and who owns completion, cancellation, and failure. Async APIs let I/O wait without occupying a thread; measured parallelism can help independent CPU work. A lock protects a short shared-state transition, while a channel queues producer-consumer work with an explicit overload policy. [Microsoft: Async programming](https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/) · [Microsoft: Parallel programming](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/) · [Microsoft: Channels](https://learn.microsoft.com/en-us/dotnet/core/extensions/channels)
 
 # References
 

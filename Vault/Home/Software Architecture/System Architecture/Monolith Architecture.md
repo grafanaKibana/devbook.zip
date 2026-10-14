@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "System Architecture/Monolith Architecture"
+flashcard_uid: "4248833e"
 ---
 
 A monolith has one deployment boundary. Its modules are versioned, released, and rolled back together. One process and one database are common, but neither defines the style.
@@ -99,8 +100,9 @@ Moving a module out of process changes the failure model. A method call that onc
 
 # Questions
 
+<!-- qard-id: 221241e0-41e0-4964-8f8a-bdb66c1c129c -->
 > [!qard]- What evidence justifies extracting a service?
-> A stable boundary should already exist, and the module should repeatedly need an independent release cadence, runtime isolation, or scaling profile. Extraction without those pressures usually trades visible code coupling for harder operational coupling.
+> Extract only when a boundary has stable contract/data ownership and repeatedly needs independent release, runtime isolation, or scaling. If those needs are absent, a network hop converts visible code coupling into operational coupling without buying meaningful autonomy. [Azure: microservices architecture style](https://learn.microsoft.com/en-us/azure/architecture/guide/architecture-styles/microservices)
 
 # References
 

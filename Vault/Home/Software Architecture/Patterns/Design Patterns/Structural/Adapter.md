@@ -11,6 +11,7 @@ status: Done
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Structural/Adapter"
+flashcard_uid: "dc9183f6"
 ---
 
 A travel plug adapter lets a US charger connect to a European outlet. It changes neither device. The small piece between them translates one physical interface into the other.
@@ -182,12 +183,13 @@ Replacing the legacy system now requires a new adapter. `OrderService` stays unc
 
 # Questions
 
+<!-- qard-id: a7781445-d0b1-4c3a-94df-94013fbec7fb -->
 > [!qard]- How can an Adapter be distinguished from a Facade when both wrap another system?
-> An Adapter translates an incompatible interface into the contract a client expects. A Facade gives clients a smaller, workflow-oriented API and may coordinate several subsystem calls. For example, a wrapper that exposes three business operations over twenty legacy calls is acting as a Facade, even if some translation also happens inside it.
+> An Adapter translates an existing incompatible interface into the contract a client needs. A Facade offers a simpler workflow-oriented API over a subsystem and may coordinate several calls. A Facade can also contain translation, but compatibility is the Adapter’s defining responsibility. [[Home/Software Architecture/Patterns/Design Patterns/Structural/Adapter#Common .NET Examples|Adapter common .NET examples]] · [[Home/Software Architecture/Patterns/Design Patterns/Structural/Facade#Tradeoffs|Facade tradeoffs]]
 
 # References
 
 - [Adapter pattern](https://refactoring.guru/design-patterns/adapter)
 - [Adapter Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=2PKQtcJjYvc&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc&index=8)
 - [StreamReader — .NET's built-in Adapter for byte-to-text stream translation](https://learn.microsoft.com/en-us/dotnet/api/system.io.streamreader)
-- [DelegatingHandler — HTTP pipeline adapter pattern in .NET](https://learn.microsoft.com/en-us/dotnet/api/system.net.http.delegatinghandler)
+- [DelegatingHandler — delegating HTTP handler chains](https://learn.microsoft.com/en-us/dotnet/api/system.net.http.delegatinghandler)
