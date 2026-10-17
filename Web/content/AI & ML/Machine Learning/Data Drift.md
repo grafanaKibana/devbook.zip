@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.504Z
-modified: 2026-08-20T20:41:15.504Z
-published: 2026-08-20T20:41:15.504Z
+created: 2026-10-12T09:19:58.236Z
+modified: 2026-10-12T09:19:58.237Z
+published: 2026-10-12T09:19:58.237Z
 topic:
   - AI & ML
 subtopic:
@@ -12,6 +12,8 @@ level:
   - "1"
 priority: Low
 status: Done
+qard-deck: AI & ML
+qard-topic: Machine Learning/Data Drift
 ---
 
 Data drift means production inputs no longer look like the data used to train a model. Nothing has to crash. The service can keep returning predictions while their quality slips because customers changed behavior, a new camera changed the image distribution, or an upstream pipeline started encoding a field differently.
@@ -132,7 +134,7 @@ Scheduled retraining is predictable when labels arrive on a regular cadence and 
 
 # Questions
 
-> [!QUESTION]- What is the difference between data drift and concept drift?
+> [!qard]- What is the difference between data drift and concept drift?
 > Data drift changes P(X), such as a new language appearing in support traffic. Concept drift changes P(Y|X), such as yesterday's fraud cues becoming normal behavior. The first can leave the model useful. The second means its learned mapping no longer describes current outcomes. Recent labeled performance separates a harmless input shift from a model that needs updating.
 
 # References

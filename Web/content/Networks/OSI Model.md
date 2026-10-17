@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.629Z
-modified: 2026-08-20T20:41:15.630Z
-published: 2026-08-20T20:41:15.630Z
+created: 2026-10-12T09:19:58.250Z
+modified: 2026-10-12T09:19:58.250Z
+published: 2026-10-12T09:19:58.250Z
 topic:
   - Networks
 subtopic: []
@@ -11,6 +11,8 @@ level:
   - "3"
 priority: Medium
 status: Ready to Repeat
+qard-deck: Networks
+qard-topic: OSI Model
 ---
 
 The OSI model is a seven-layer reference model for separating communication responsibilities. It provides vocabulary for standards and diagnosis. It is not the implementation architecture of the Internet. Production stacks follow the [[TCP IP|TCP/IP]] suite and often cross or collapse OSI boundaries.
@@ -64,13 +66,13 @@ The operating layer bounds what infrastructure can observe and change:
 
 # Questions
 
-> [!QUESTION]- What's the practical difference between a Layer 4 and a Layer 7 load balancer?
+> [!qard]- What's the practical difference between a Layer 4 and a Layer 7 load balancer?
 > An L4 balancer selects a backend at the transport-connection boundary, so it cannot independently distribute streams inside one HTTP/2 connection. An L7 proxy terminates and parses HTTP, which enables request- or stream-aware routing, retries, and header policy. The extra capability also adds application-protocol state and processing.
 
-> [!QUESTION]- How does the OSI model map onto the actual TCP/IP stack?
+> [!qard]- How does the OSI model map onto the actual TCP/IP stack?
 > The common four-layer view maps application protocols to OSI 5–7, TCP and UDP to transport, IP to the Internet layer, and local network access to the link layer. It is an approximate conceptual mapping because real protocols can cross the reference boundaries.
 
-> [!QUESTION]- At which layer do IP addresses, ports, and MAC addresses each operate?
+> [!qard]- At which layer do IP addresses, ports, and MAC addresses each operate?
 > A link-layer address identifies an interface within the current link's delivery scope. An IP address is routed across networks. A transport port selects an endpoint within the host's transport namespace. For TCP, the local and remote IP addresses and ports identify a connection within the relevant network namespace.
 
 # References

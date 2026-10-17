@@ -10,6 +10,8 @@ status: Done
 tags: [FolderNote]
 publish: true
 priority: Medium
+qard-deck: "AI & ML"
+qard-topic: "LLM/Prompt Engineering/Prompt Engineering"
 ---
 
 Prompt engineering turns an intention into a task the model can execute and the system can test. Small changes in wording or generation settings can shift output quality because an LLM samples from a probability distribution rather than following a fixed program.
@@ -139,13 +141,13 @@ Strict output shape needs structured output or schema validation. Examples can c
 
 # Questions
 
-> [!QUESTION]- Why must prompt structure and model settings be designed together?
+> [!qard]- Why must prompt structure and model settings be designed together?
 > The prompt defines the task, context, constraints, and expected output, while model settings control sampling and output limits. Clear instructions can still produce unstable results when sampling is too random for the task. Conservative settings cannot repair an ambiguous instruction or a missing output contract. Both parts should be tested together on the same task-specific evaluation set because changing either one can change quality, consistency, latency, and cost.
 
-> [!QUESTION]- When is few-shot prompting a better fit than pure instruction prompting?
+> [!qard]- When is few-shot prompting a better fit than pure instruction prompting?
 > Few-shot prompting is useful when the expected meaning, label boundary, or output convention is easier to demonstrate than to describe. A small set of representative examples can show how close cases should be handled and make repeated outputs more consistent. Examples do not replace a schema when the shape must be strict. Start with the smallest set that improves held-out results, then add edge cases only when evaluation shows a real gap because every example consumes context.
 
-> [!QUESTION]- How can an accurate but verbose and expensive prompt be tightened?
+> [!qard]- How can an accurate but verbose and expensive prompt be tightened?
 > First identify whether the cost comes from repeated instructions, unnecessary examples, oversized context, or a verbose output contract. Remove duplicated input and state the required length and shape directly. `max_tokens` is a safety cap rather than the main way to request a concise answer because a low cap can truncate a valid response; stop sequences help only when the output has a reliable delimiter. Compare token usage, task quality, and truncation or failure rates after each change so a cheaper prompt does not quietly become less accurate.
 
 # References

@@ -10,6 +10,8 @@ priority: High
 level:
   - "4"
 status: Creation
+qard-deck: "Software Architecture"
+qard-topic: "Application Architecture/Application Architecture"
 ---
 
 Application architecture divides code into presentation, application, domain, and infrastructure modules, then controls which modules may call or implement which interfaces. Onion and Clean Architecture invert dependencies so the domain remains independent of the database and web framework.
@@ -63,7 +65,7 @@ This is not an API gateway. A gateway governs inbound traffic to APIs the organi
 
 # Questions
 
-> [!QUESTION]- How should a small CRUD service with simple domain rules be structured if growth is expected?
+> [!qard]- How should a small CRUD service with simple domain rules be structured if growth is expected?
 > Expected growth alone is not enough reason to start with the full ceremony of Clean Architecture. A layered structure is usually sufficient, provided domain logic does not leak into controllers or infrastructure code. Stricter inward dependency rules become useful when valuable business policy is repeatedly coupled to a framework, database, or external service. Ports and adapters should earn their cost through faster tests or clearer change isolation, not through the possibility that the service may become complex later.
 
 # References

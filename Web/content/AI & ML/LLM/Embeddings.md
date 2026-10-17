@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.486Z
-modified: 2026-09-21T08:40:06.207Z
-published: 2026-09-21T08:40:06.207Z
+created: 2026-10-12T09:19:58.224Z
+modified: 2026-10-12T09:19:58.224Z
+published: 2026-10-12T09:19:58.224Z
 topic:
   - AI & ML
 subtopic:
@@ -12,6 +12,8 @@ level:
   - "2"
 priority: High
 status: Done
+qard-deck: AI & ML
+qard-topic: LLM/Embeddings
 ---
 
 Embeddings turn text into vectors so that related meanings occupy nearby points. That geometry lets retrieval match "throttle partner API traffic" with a document about "rate limiting for partner plan" even when the wording does not overlap.
@@ -108,10 +110,10 @@ Start with the simplest model that establishes a credible recall baseline. Fine-
 
 # Questions
 
-> [!QUESTION]- How do Matryoshka embeddings reduce vector storage, and how should the smaller size be validated?
+> [!qard]- How do Matryoshka embeddings reduce vector storage, and how should the smaller size be validated?
 > Matryoshka training makes shorter prefixes of the full vector useful on their own, so a model with a `dimensions` option can return 256 or 512 values instead of the full size. Indexing 256 rather than 1536 float values cuts raw ANN vector storage by about six times and also reduces similarity work. Recall is not guaranteed, so the same labeled queries must be compared at several dimensions using Recall@k and latency. If full vectors are used for reranking, retaining or recomputing them adds storage, API cost, or latency outside the smaller index.
 
-> [!QUESTION]- Why can switching to a higher-scoring embedding model cause recall to drop on existing queries?
+> [!qard]- Why can switching to a higher-scoring embedding model cause recall to drop on existing queries?
 > Each model defines its own vector space. Comparing a query from the new model with stored vectors from the old one produces meaningless distances and broken rankings. Build the new corpus index before switching query traffic, and include the model name and version in embedding-cache keys.
 
 # References

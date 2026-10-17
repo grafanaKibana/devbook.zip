@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.690Z
-modified: 2026-08-20T20:41:15.691Z
-published: 2026-08-20T20:41:15.691Z
+created: 2026-10-12T09:19:58.294Z
+modified: 2026-10-12T09:19:58.294Z
+published: 2026-10-12T09:19:58.294Z
 topic:
   - Software Architecture
 subtopic:
@@ -12,6 +12,8 @@ level:
   - "3"
 priority: High
 status: Done
+qard-deck: Software Architecture
+qard-topic: Patterns/Design Patterns/Behavioral/State
 ---
 
 A vending machine responds to the same button differently while idle, holding credit, or out of stock. The input stays the same. Its current state decides what the input means.
@@ -208,7 +210,7 @@ State earns its classes when state-dependent rules are scattered across several 
 
 # Questions
 
-> [!QUESTION]- How does a compiler-generated async state machine relate to the State pattern?
+> [!qard]- How does a compiler-generated async state machine relate to the State pattern?
 > The compiler emits an `IAsyncStateMachine` implementation with a numeric state field. `MoveNext()` branches on that field, saves a continuation when an awaiter is incomplete, and later resumes from the saved point. Locals that must survive suspension become fields. This is a compiler state machine, but it does not use the pattern's usual family of state objects.
 
 # References

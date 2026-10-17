@@ -110,6 +110,16 @@ TEMPLATE_RESIDUE = (
     "<%*",
     "tp.hooks.on_all_templates_executed",
 )
+QARD_HEADER_RE = re.compile(
+    r"^[ \t]{0,3}>[ \t]*\[!(?P<kind>question|qard)\]"
+    r"(?P<fold>[+-]?)(?:[ \t]+(?P<title>.*))?$",
+    re.IGNORECASE,
+)
+QARD_QUOTE_RE = re.compile(r"^[ \t]{0,3}>[ \t]?(?P<text>.*)$")
+QARD_ID_RE = re.compile(r"^[ \t]*<!--[ \t]*qard-id:[ \t]*([A-Za-z0-9_-]+)[ \t]*-->[ \t]*$")
+QARD_ID_LOOSE_RE = re.compile(r"^[ \t]*<!--[ \t]*qard-id:[ \t]*(.*?)[ \t]*-->[ \t]*$")
+QARD_LOCATION_RE = re.compile(r"^[ \t]*<!--[ \t]*qard-location:[ \t]*(.+?)[ \t]*-->[ \t]*$")
+QARD_ANSWER_MARKER = "<!-- qard-answer -->"
 
 
 @dataclass(frozen=True)
@@ -609,6 +619,271 @@ def validate_code_fences(note: Note) -> list[Issue]:
     return issues
 
 
+def active_markdown_lines(lines: list[str]) -> list[bool]:
+    active: list[bool] = []
+    fence = ""
+    in_comment = False
+    in_obsidian_comment = False
+    for line in lines:
+        has_obsidian_marker = "%%" in line
+        is_active = not fence and not in_comment and not in_obsidian_comment and not has_obsidian_marker
+        active.append(is_active)
+        if in_obsidian_comment:
+            if line.count("%%") % 2 == 1:
+                in_obsidian_comment = False
+            continue
+        if has_obsidian_marker:
+            if line.count("%%") % 2 == 1:
+                in_obsidian_comment = True
+            continue
+        if fence:
+            closing = re.match(r"^[ \t]{0,3}(`+|~+)[ \t]*$", line)
+            if closing and closing.group(1)[0] == fence[0] and len(closing.group(1)) >= len(fence):
+                fence = ""
+            continue
+        if in_comment:
+            if "-->" in line:
+                in_comment = False
+            continue
+        opening = re.match(r"^[ \t]{0,3}(`{3,}|~{3,})", line)
+        if opening:
+            fence = opening.group(1)
+            continue
+        start = line.find("<!--")
+        if start >= 0 and line.find("-->", start + 4) < 0:
+            in_comment = True
+    return active
+
+
+def qard_metadata_issues(note: Note) -> list[Issue]:
+    issues: list[Issue] = []
+    content_lines = note.content.splitlines()
+    frontmatter_end = (
+        next(
+            (
+                index
+                for index in range(1, len(content_lines))
+                if content_lines[index].strip() in {"---", "..."}
+            ),
+            0,
+        )
+        if content_lines and content_lines[0].lstrip("\ufeff") == "---"
+        else 0
+    )
+    for field in ("qard-deck", "qard-topic"):
+        pattern = re.compile(
+            rf"^[ \t]*(?:{re.escape(field)}|\"{re.escape(field)}\"|'{re.escape(field)}')"
+            rf"[ \t]*:(.*)$"
+        )
+        matches = [
+            (index + 1, match.group(1).strip())
+            for index, line in enumerate(content_lines[1:frontmatter_end], start=1)
+            if (match := pattern.match(line))
+        ]
+        suspicious = [
+            index + 1
+            for index, line in enumerate(content_lines[1:frontmatter_end], start=1)
+            if re.search(
+                rf"(?<![A-Za-z0-9_-]){re.escape(field)}(?![A-Za-z0-9_-])", line
+            )
+            and not line.lstrip().startswith("#")
+        ]
+        if suspicious and not matches:
+            issues.append(
+                Issue(
+                    "qard.metadata",
+                    note.rel,
+                    suspicious[0],
+                    f"`{field}` uses an unsupported YAML form",
+                    field,
+                )
+            )
+            continue
+        if len(matches) > 1:
+            issues.append(
+                Issue(
+                    "qard.metadata",
+                    note.rel,
+                    matches[1][0],
+                    f"`{field}` must occur at most once",
+                    field,
+                )
+            )
+            continue
+        if not matches:
+            continue
+        line_number, raw = matches[0]
+        kind, value = parse_scalar(raw)
+        valid = (
+            kind == "string"
+            and isinstance(value, str)
+            and bool(value.strip())
+            and not raw.startswith(("[", "{", "|", ">", "&", "*", "!"))
+            and not re.search(r"[\r\n\x00]", value)
+            and "\\n" not in value
+            and "\\r" not in value
+        )
+        if not valid:
+            issues.append(
+                Issue(
+                    "qard.metadata",
+                    note.rel,
+                    line_number,
+                    f"`{field}` must be a nonempty scalar single-line string",
+                    field,
+                )
+            )
+    return issues
+
+
+def parse_qard_location(raw: str) -> bool:
+    try:
+        value = json.loads(raw)
+    except json.JSONDecodeError:
+        return False
+    if not isinstance(value, dict) or set(value) != {"deck", "topic"}:
+        return False
+    return all(
+        isinstance(value[key], str)
+        and bool(value[key].strip())
+        and not re.search(r"[\r\n\x00]", value[key])
+        and len(value[key]) <= 200
+        for key in ("deck", "topic")
+    )
+
+
+def qard_card_metadata(lines: list[str], header_index: int) -> tuple[str | None, str | None, bool]:
+    card_id: str | None = None
+    location: str | None = None
+    invalid_id = False
+    index = header_index - 1
+    while index >= 0 and lines[index].strip():
+        id_match = QARD_ID_RE.match(lines[index])
+        loose_id = QARD_ID_LOOSE_RE.match(lines[index])
+        location_match = QARD_LOCATION_RE.match(lines[index])
+        if id_match and card_id is None:
+            card_id = id_match.group(1)
+        elif loose_id and card_id is None:
+            invalid_id = True
+        elif location_match and location is None:
+            location = location_match.group(1)
+        else:
+            break
+        index -= 1
+    return card_id, location, invalid_id
+
+
+def validate_qard_interviews(note: Note) -> list[Issue]:
+    """Validate every Qard card and legacy syntax in ``# Questions`` sections."""
+
+    issues = qard_metadata_issues(note)
+    lines = note.body.splitlines()
+    active = active_markdown_lines(lines)
+    inside_questions = False
+    ids: dict[str, list[int]] = {}
+    index = 0
+    while index < len(lines):
+        line = lines[index]
+        if active[index] and re.fullmatch(r"# Questions[ \t]*", line):
+            inside_questions = True
+            index += 1
+            continue
+        if active[index] and inside_questions and re.match(r"^# [^#]", line):
+            inside_questions = False
+        match = QARD_HEADER_RE.match(line) if active[index] else None
+        if match is None:
+            index += 1
+            continue
+        line_number = note.body_start_line + index
+        kind = match.group("kind").casefold()
+        if kind == "question" and not inside_questions:
+            index += 1
+            continue
+        if kind == "question":
+            issues.append(
+                Issue(
+                    "qard.legacy-interview",
+                    note.rel,
+                    line_number,
+                    "interview cards under `# Questions` must use `[!qard]`; generic Question callouts remain valid elsewhere",
+                )
+            )
+        body: list[str] = []
+        end = index + 1
+        while end < len(lines):
+            quoted = QARD_QUOTE_RE.match(lines[end])
+            if quoted is None or QARD_HEADER_RE.match(lines[end]):
+                break
+            body.append(quoted.group("text"))
+            end += 1
+        if kind == "qard":
+            markers = [position for position, value in enumerate(body) if value.strip() == QARD_ANSWER_MARKER]
+            if len(markers) > 1:
+                issues.append(Issue("qard.answer-marker", note.rel, line_number, "Qard card may contain only one `qard-answer` marker"))
+                front = back = ""
+            elif markers:
+                marker = markers[0]
+                front = "\n".join([match.group("title") or "", *body[:marker]]).strip()
+                back = "\n".join(body[marker + 1 :]).strip()
+            else:
+                front = (match.group("title") or "").strip()
+                back = "\n".join(body).strip()
+            front_visible = strip_non_link_markdown(
+                front, preserve_inline_code=True
+            ).strip()
+            back_visible = strip_non_link_markdown(
+                back, preserve_inline_code=True
+            ).strip()
+            if not front_visible:
+                issues.append(Issue("qard.empty-front", note.rel, line_number, "Qard card needs a nonempty question"))
+            if not back_visible:
+                issues.append(Issue("qard.empty-back", note.rel, line_number, "Qard card needs a nonempty answer"))
+            card_id, location, invalid_id = qard_card_metadata(lines, index)
+            if invalid_id:
+                issues.append(Issue("qard.id", note.rel, line_number, "`qard-id` must contain only letters, numbers, underscores, or hyphens"))
+            if card_id:
+                ids.setdefault(card_id, []).append(line_number)
+            if location is not None and not parse_qard_location(location):
+                issues.append(Issue("qard.location", note.rel, line_number, "`qard-location` must contain nonempty scalar deck and topic strings up to 200 characters"))
+        index = end
+    for card_id, line_numbers in ids.items():
+        if len(line_numbers) > 1:
+            issues.extend(
+                Issue("qard.duplicate-id", note.rel, line, f"duplicate qard-id `{card_id}`", card_id)
+                for line in line_numbers
+            )
+    return issues
+
+
+def qard_ids(note: Note) -> list[tuple[str, int]]:
+    lines = note.body.splitlines()
+    active = active_markdown_lines(lines)
+    found: list[tuple[str, int]] = []
+    for index, line in enumerate(lines):
+        header = QARD_HEADER_RE.match(line) if active[index] else None
+        if header is None or header.group("kind").casefold() != "qard":
+            continue
+        card_id, _, _ = qard_card_metadata(lines, index)
+        if card_id:
+            found.append((card_id, note.body_start_line + index))
+    return found
+
+
+def validate_global_qard_ids(notes: Iterable[Note], selected_paths: set[Path] | None = None) -> list[Issue]:
+    found: dict[str, list[tuple[Note, int]]] = {}
+    for note in notes:
+        for card_id, line in qard_ids(note):
+            found.setdefault(card_id, []).append((note, line))
+    issues: list[Issue] = []
+    for card_id, occurrences in found.items():
+        if len(occurrences) < 2:
+            continue
+        for note, line in occurrences:
+            if selected_paths is None or note.path in selected_paths:
+                issues.append(Issue("qard.duplicate-id", note.rel, line, f"duplicate qard-id `{card_id}`", card_id))
+    return issues
+
+
 def strip_non_link_markdown(content: str, *, preserve_inline_code: bool = False) -> str:
     def preserve_lines(match: re.Match[str]) -> str:
         return "\n" * match.group(0).count("\n")
@@ -1037,6 +1312,13 @@ def validate(repo_root: Path, mode: str, use_baseline: bool = True) -> tuple[lis
         issues.extend(validate_references(note))
         issues.extend(validate_residue(note))
         issues.extend(validate_code_fences(note))
+        issues.extend(validate_qard_interviews(note))
+
+    issues.extend(
+        validate_global_qard_ids(
+            all_notes.values(), set(selected_paths) if mode == "staged" else None
+        )
+    )
 
     link_notes = all_notes.values() if mode == "staged" and selected_paths else selected_notes
     for note in link_notes:

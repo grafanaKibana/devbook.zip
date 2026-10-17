@@ -9,6 +9,8 @@ level:
 priority: Medium
 status: Ready to Repeat
 publish: true
+qard-deck: "Programming"
+qard-topic: "NET/CSharp/Fundamentals/Methods"
 ---
 
 Methods define where behavior begins and what data may cross the boundary. The parameter list is part of that contract. By-value parameters isolate the caller's variable, `ref` and `out` expose it for reassignment, and `in` exposes storage as readonly. `params` changes how an expanded argument list is collected at the call site.
@@ -221,22 +223,22 @@ Default to by-value parameters and ordinary virtual dispatch. Add by-reference s
 
 # Questions
 
-> [!QUESTION]- Why would a method need `ref` when the argument is already a reference type?
+> [!qard]- Why would a method need `ref` when the argument is already a reference type?
 > A reference-type argument still passes the reference itself by value. The method can use that copied reference to mutate the same object, but assigning a different object changes only the method's local copy. With `ref`, the method receives an alias to the caller's variable and can replace the reference stored there.
 
-> [!QUESTION]- What does an `in` parameter do, and when is it useful?
+> [!qard]- What does an `in` parameter do, and when is it useful?
 > An `in` parameter passes an argument by readonly reference. The method can read the value but cannot assign through that parameter. This can avoid copying a large struct on a measured hot path, although conversions and non-variable arguments may still create a temporary copy. It rarely helps for small values.
 
-> [!QUESTION]- How do optional parameters work in C#?
+> [!qard]- How do optional parameters work in C#?
 > An optional parameter has a default value, so the caller may leave that argument out. The compiler inserts the default into the calling code at compile time. If a library later changes the default, already compiled callers keep using the old value until they are recompiled.
 
-> [!QUESTION]- With `Animal a = new Dog();`, how can `a.Category()` call the derived implementation, and what does that mean for the base API?
+> [!qard]- With `Animal a = new Dog();`, how can `a.Category()` call the derived implementation, and what does that mean for the base API?
 > Mark `Animal.Category()` as `virtual` and implement it with `override` in `Dog`. The runtime then chooses the method from the actual object type, even though the variable is typed as `Animal`. Declaring the base method virtual also makes derived replacement part of the API's intended extension model.
 
-> [!QUESTION]- When is hiding a method with `new` appropriate instead of overriding it?
+> [!qard]- When is hiding a method with `new` appropriate instead of overriding it?
 > Use `new` only when the base member cannot or should not participate in runtime polymorphism and the result is intentionally allowed to depend on the variable's compile-time type. This sometimes preserves compatibility with an existing API. If derived behavior should still appear through a base reference, the member needs `virtual` and `override` instead.
 
-> [!QUESTION]- What can be done when a base method is not virtual but derived behavior is needed?
+> [!qard]- What can be done when a base method is not virtual but derived behavior is needed?
 > If the base type is under control and derived substitution is intended, make the method `virtual` and override it. If the base API cannot change, `new` can hide the member, but calls through the base type will still use the base implementation. Composition is usually clearer when the varying behavior does not naturally belong to the inheritance hierarchy.
 
 # References

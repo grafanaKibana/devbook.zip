@@ -10,6 +10,8 @@ priority: High
 status: Ready to Repeat
 
 publish: true
+qard-deck: "Programming"
+qard-topic: "NET/ASP NET Web API/Middlewares"
 ---
 
 ASP.NET Core middleware forms an ordered chain around endpoint execution. Each component can inspect the inbound request, call the next delegate, and then observe the outbound response. This is the right boundary for behavior that spans many endpoint types, such as exception handling, request logging, CORS, or authentication.
@@ -159,13 +161,13 @@ Use middleware when the concern belongs outside a particular endpoint model or m
 
 # Questions
 
-> [!QUESTION]- How does middleware differ from an MVC action filter?
+> [!qard]- How does middleware differ from an MVC action filter?
 > Middleware runs around the broader HTTP pipeline, so it can handle requests before an endpoint is selected or even when no controller is involved. An action filter runs inside MVC around a controller action, where it can work with bound arguments, model state, and action results. Middleware fits application-wide HTTP concerns; an action filter fits behavior that specifically needs MVC context.
 
-> [!QUESTION]- How are unhandled exceptions handled consistently across an ASP.NET Core application?
+> [!qard]- How are unhandled exceptions handled consistently across an ASP.NET Core application?
 > Exception-handling middleware is placed near the start of the pipeline so it wraps the components registered after it. When downstream code throws, `UseExceptionHandler` can log the failure and produce one safe response format, usually Problem Details. The developer exception page is useful during development, but it should not expose stack traces in production.
 
-> [!QUESTION]- How does a request move through the ASP.NET Core middleware pipeline?
+> [!qard]- How does a request move through the ASP.NET Core middleware pipeline?
 > The request enters each registered middleware in order. A middleware can handle it immediately or call the next component; routing selects an endpoint, authorization may stop the request, and the endpoint eventually creates the response. Control then returns through the earlier middleware in reverse order, which allows work such as response headers, logging, or cleanup after the endpoint runs.
 
 # References

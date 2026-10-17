@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.622Z
-modified: 2026-08-20T20:41:15.623Z
-published: 2026-08-20T20:41:15.623Z
+created: 2026-10-12T09:19:58.248Z
+modified: 2026-10-12T09:19:58.248Z
+published: 2026-10-12T09:19:58.248Z
 tags:
   - FolderNote
 topic:
@@ -14,6 +14,8 @@ status: Ready to Repeat
 priority: Medium
 level:
   - "2"
+qard-deck: DevOps
+qard-topic: Deployment Strategies/Deployment Strategies
 ---
 
 A deployment strategy decides how a new artifact replaces the old one, how users are exposed to it, and how that exposure can be reversed. The choice trades spare capacity and rollout complexity against the size and duration of a failed release.
@@ -82,7 +84,7 @@ The question is not which strategy is universally safest. It is which failure ca
 
 # Questions
 
-> [!QUESTION]- When does canary fit better than blue-green deployment, and what does each approach cost?
+> [!qard]- When does canary fit better than blue-green deployment, and what does each approach cost?
 > Canary fits when a small but representative production cohort can reveal regressions and its results can be measured separately. Blue-green fits when a complete candidate environment must be tested before one traffic switch. Canary adds gradual routing, cohort analysis, and a longer overlap between versions. Blue-green mainly adds the cost of running duplicate capacity.
 
 # References

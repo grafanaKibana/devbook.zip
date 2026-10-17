@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.523Z
-modified: 2026-08-20T20:41:15.524Z
-published: 2026-08-20T20:41:15.524Z
+created: 2026-10-12T09:19:58.238Z
+modified: 2026-10-12T09:19:58.238Z
+published: 2026-10-12T09:19:58.238Z
 topic:
   - Computer Science
 subtopic:
@@ -12,6 +12,8 @@ level:
   - "4"
 priority: High
 status: Ready to Repeat
+qard-deck: Computer Science
+qard-topic: Algorithms/Paradigms/Dynamic Programming
 ---
 
 In finite one-pass dynamic programming, a dependency graph becomes a set of stored answers. Each state is solved after the states it depends on, written once, and then reused by later transitions.
@@ -363,7 +365,7 @@ Optimization DP still needs a valid composition rule. For the same US-coin drawe
 
 # Questions
 
-> [!QUESTION]- What changes between memoization and tabulation if the recurrence is the same?
+> [!qard]- What changes between memoization and tabulation if the recurrence is the same?
 > Evaluation order and control flow. Memoization starts at the target, follows recursive dependencies, and stores states on demand. Tabulation starts at the base cases and fills states in a fixed order. Their asymptotic work matches when they visit the same states. Tabulation avoids call-stack cost, while memoization may skip states the target never reaches.
 
 # References

@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.703Z
-modified: 2026-08-20T20:41:15.703Z
-published: 2026-08-20T20:41:15.703Z
+created: 2026-10-12T09:19:58.314Z
+modified: 2026-10-12T09:19:58.314Z
+published: 2026-10-12T09:19:58.314Z
 topic:
   - Software Architecture
 subtopic:
@@ -12,6 +12,8 @@ level:
   - "3"
 priority: High
 status: Ready to Repeat
+qard-deck: Software Architecture
+qard-topic: System Architecture/Modular Monolith
 ---
 
 A modular monolith keeps one process and one deployment while dividing the codebase into modules that own distinct business capabilities. It captures much of what teams want from [[Software Architecture/System Architecture/Microservices]]: clearer ownership and safer parallel change, without turning every boundary into a network call. For most growing products, that is the sensible default. Strengthen boundaries inside the application first. Distribute a module only when delivery, scaling, or isolation pressure justifies the operating cost.
@@ -251,7 +253,7 @@ Default to a modular monolith for a product that needs durable boundaries but ca
 
 # Questions
 
-> [!QUESTION]- When is a modular monolith a better fit than microservices, and what signals justify extracting a module?
+> [!qard]- When is a modular monolith a better fit than microservices, and what signals justify extracting a module?
 > A modular monolith fits while business domains stay cleanly separated into modules and one deployment remains reliable. Extraction becomes worthwhile when one module repeatedly needs its own scaling, release cadence, or isolation policy. The domain contract can remain familiar, but the remote interaction must be redesigned around deadlines, retries, observability, and local transactions.
 
 # References

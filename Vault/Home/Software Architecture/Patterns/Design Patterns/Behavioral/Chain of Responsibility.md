@@ -9,6 +9,8 @@ level:
 priority: High
 status: Ready to Repeat
 publish: true
+qard-deck: "Software Architecture"
+qard-topic: "Patterns/Design Patterns/Behavioral/Chain of Responsibility"
 ---
 
 Airport security behaves like a Chain of Responsibility. A bag moves through a fixed sequence of checkpoints. Each one clears it, rejects it, or passes it forward. A new check can be inserted without rewriting the existing stations, and the passenger has no reason to know which checkpoint will stop the process.
@@ -235,7 +237,7 @@ Chain of Responsibility pays off when several ordered handlers can accept or rej
 
 # Questions
 
-> [!QUESTION]- How does ASP.NET Core Middleware differ from a classical Chain of Responsibility?
+> [!qard]- How does ASP.NET Core Middleware differ from a classical Chain of Responsibility?
 > Classical CoR usually links handler objects directly. ASP.NET Core composes middleware delegates into one request pipeline at startup. That pipeline is fixed after the application is built, while a conventional object chain may be rearranged at runtime. The practical boundary is startup composition versus runtime mutation.
 
 # References

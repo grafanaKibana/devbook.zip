@@ -10,6 +10,8 @@ priority: High
 level:
   - "4"
 status: Creation
+qard-deck: "Data Persistence"
+qard-topic: "ORMs/ORMs"
 ---
 
 An Object-Relational Mapper connects an object model to a relational database. It translates queries, materializes rows as objects, tracks changes, and turns those changes into SQL. This removes repetitive data-access code. It does not remove the database's query, transaction, and schema rules.
@@ -23,10 +25,10 @@ return FolderStructureMap;
 
 # Questions
 
-> [!QUESTION]- When is raw SQL a better boundary than an ORM query?
+> [!qard]- When is raw SQL a better boundary than an ORM query?
 > Raw SQL fits a provider-specific query, bulk operation, or execution-plan requirement that the ORM cannot express predictably. It should be parameterized, tested against the production database engine, and kept behind a narrow data-access boundary.
 
-> [!QUESTION]- Why can eager loading several collections be expensive?
+> [!qard]- Why can eager loading several collections be expensive?
 > Sibling collection joins can multiply rows, duplicating parent data across the result. Split queries or purpose-built projections avoid that multiplication, but split queries add commands and may need an explicit consistency boundary.
 
 # References

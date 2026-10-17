@@ -9,6 +9,8 @@ level:
 priority: Medium
 status: Done
 publish: true
+qard-deck: "AI & ML"
+qard-topic: "LLM/Safety/Hallucinations"
 ---
 
 Hallucination is generated content that lacks support from the available evidence. It can be false, or merely impossible to verify from the supplied context. Fluency hides the failure: a language model predicts plausible tokens rather than checking each claim against reality.
@@ -87,10 +89,10 @@ For evidence-backed answers, start with retrieval and claim-to-context checks. S
 
 # Questions
 
-> [!QUESTION]- Why can an LLM still hallucinate when using RAG?
+> [!qard]- Why can an LLM still hallucinate when using RAG?
 > RAG gives the model context, but it does not prove that the answer follows from it. The source may not contain the fact, retrieval may miss the right passage, or the model may ignore the passage and add unsupported details. Retrieval quality and answer faithfulness should be measured separately so the failing stage is clear.
 
-> [!QUESTION]- Why can preference tuning make an answer sound better without making it more factual?
+> [!qard]- Why can preference tuning make an answer sound better without making it more factual?
 > Preference data may reward agreement, confidence, or style without checking whether a claim is supported. The model can then produce a polished answer that accepts a false premise. Factual accuracy and calibration still need separate evaluation from preference scores.
 
 # References

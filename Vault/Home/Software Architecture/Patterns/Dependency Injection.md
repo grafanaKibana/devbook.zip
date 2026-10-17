@@ -9,11 +9,13 @@ level:
 priority: High
 status: Done
 publish: true
+qard-deck: "Software Architecture"
+qard-topic: "Patterns/Dependency Injection"
 ---
 
 Dependency Injection (DI) moves object construction to a composition boundary. A class declares the services it needs, and something outside the class supplies them. This is a practical form of Inversion of Control (IoC): business code describes the collaboration while the application decides which implementations participate. The result is explicit dependencies and components that can be replaced without rewriting their consumers.
 
-DI does not require a container. The composition root is the application startup boundary, typically `Program.cs` in .NET, where object graphs are assembled. It may connect objects directly with constructors and factories or delegate that work to a container. ASP.NET Core uses its built-in container at this boundary. [[Home/Programming/NET/ASP.NET Web API/Dependency Injection|ASP.NET Core Dependency Injection]] covers the framework-specific mechanics.
+DI does not require a container. The composition root is the application startup boundary, typically `Program.cs` in .NET, where object graphs are assembled. It may connect objects directly with constructors and factories or delegate that work to a container. ASP.NET Core uses its built-in container at this boundary. [[Home/Programming/NET/ASP NET Web API/Dependency Injection|ASP.NET Core Dependency Injection]] covers the framework-specific mechanics.
 
 # How It Works
 The container has three jobs: record registrations, build object graphs, and release the instances it owns.
@@ -245,14 +247,14 @@ The container cannot construct a graph in which `A` requires `B` and `B` require
 
 # Questions
 
-> [!QUESTION]- Explain `Transient`, `Scoped`, and `Singleton` lifetimes with a safe production example each.
+> [!qard]- Explain `Transient`, `Scoped`, and `Singleton` lifetimes with a safe production example each.
 > The lifetime controls how long the container reuses an instance:
 > - **Transient:** one instance per resolution, suitable for a lightweight stateless mapper.
 > - **Scoped:** one instance per scope. In ASP.NET Core, a scoped `DbContext` gives one request a coherent unit of work.
 > - **Singleton:** one instance for the application lifetime, suitable for a thread-safe cache or `IClock`.
 > Lifetime is a shared-state decision, not a performance setting. A singleton cannot safely capture a scoped service.
 
-> [!QUESTION]- What is a captive dependency, and how can it be fixed?
+> [!qard]- What is a captive dependency, and how can it be fixed?
 > A captive dependency appears when a longer-lived service stores a shorter-lived one, classically an `IHostedService` holding a scoped `DbContext`. The scoped object escapes its boundary, so request state may leak across work and disposal happens too late. Scope validation catches this configuration when enabled. The repair is to inject `IServiceScopeFactory`, create a short scope for the operation, resolve the scoped service inside it, and dispose the scope when the operation ends.
 
 # References

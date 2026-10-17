@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.499Z
-modified: 2026-08-20T20:41:15.499Z
-published: 2026-08-20T20:41:15.499Z
+created: 2026-10-12T09:19:58.232Z
+modified: 2026-10-12T09:19:58.233Z
+published: 2026-10-12T09:19:58.233Z
 topic:
   - AI & ML
 subtopic:
@@ -12,6 +12,8 @@ level:
   - "2"
 priority: Medium
 status: Ready to Repeat
+qard-deck: AI & ML
+qard-topic: LLM/Model Selection and Routing
 ---
 
 Model selection decides which models are allowed to serve a workload. Routing makes the per-request choice among them. Frontier models often handle difficult tasks well. Smaller models are usually cheaper and faster. Neither tendency is a contract. A specialized model can win on a narrow task, while a frontier model can miss a latency SLA or regress after a provider update. Production selection is empirical: the least expensive candidate that clears the workload's quality, safety, reliability, and latency gates wins.
@@ -100,11 +102,11 @@ Versions should be pinned where the provider allows it. A model change behind an
 
 # Questions
 
-> [!QUESTION]- What matters when choosing an LLM?
+> [!qard]- What matters when choosing an LLM?
 > Model size and labels such as "frontier" are only starting points. A frontier model may produce better answers but miss the latency or cost target. A smaller model may look cheap until retries and human escalation are included.
 > Candidates should be tested on the same representative workload for task quality, safety, reliability, latency, and total cost per successful task. The best choice is the least expensive model that meets all required targets.
 
-> [!QUESTION]- How do classifier routing and cascading differ, and when is each useful?
+> [!qard]- How do classifier routing and cascading differ, and when is each useful?
 > A classifier chooses a model before generation based on the predicted task type or difficulty. It is useful when those signals are reliable and generating a second answer would cost too much or take too long. Its main risk is sending a hard request to a model that cannot handle it.
 > A cascade starts with one model and decides whether to escalate after checking its answer. It works well when failures can be detected with a cheap, reliable signal, such as schema validation or a groundedness check. Failed first attempts pay for a second generation and add latency.
 > The patterns can also work together: a classifier can choose the initial route, while a cascade handles answers that fail a quality gate. The complete route should be evaluated for end-to-end quality, cost, and tail latency.

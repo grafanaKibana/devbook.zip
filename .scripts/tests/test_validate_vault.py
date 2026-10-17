@@ -179,6 +179,208 @@ publish: "true"
             [issue.code for issue in validate_vault.validate_code_fences(note)],
         )
 
+    def test_qard_interview_contract(self) -> None:
+        note = self.write_note(
+            "Vault/Home/Topic/Cards.md",
+            VALID_FRONTMATTER
+            + """# Generic
+
+> [!QUESTION]- A permitted generic question?
+> Generic answer.
+
+```md
+> [!QUESTION]- Fenced example ignored?
+> Fenced answer.
+```
+
+<!--
+> [!QUESTION]- Commented example ignored?
+> Commented answer.
+-->
+
+%%
+> [!QUESTION]- Obsidian-commented example ignored?
+> Obsidian-commented answer.
+%%
+
+%% > [!QUESTION]- Inline Obsidian comment ignored? %%
+
+# Questions
+
+> [!QUESTION]- Legacy interview question?
+> Legacy answer.
+
+> [!qard]- Native question?
+> Native answer.
+""",
+        )
+
+        issues = validate_vault.validate_qard_interviews(note)
+
+        self.assertEqual(["qard.legacy-interview"], [issue.code for issue in issues])
+
+    def test_qard_semantics_metadata_and_duplicate_ids(self) -> None:
+        note = self.write_note(
+            "Vault/Home/Topic/Cards.md",
+            VALID_FRONTMATTER.replace(
+                "publish: false\n",
+                "publish: false\nqard-deck: []\nqard-topic: |\n  multiline\n",
+            )
+            + """# Questions
+
+<!-- qard-id: repeated -->
+> [!qard]-
+> Answer without question.
+
+<!-- qard-id: repeated -->
+> [!qard]- Question without answer?
+
+> [!qard]- Front before marker
+> Extra front
+> <!-- qard-answer -->
+> Back after marker
+""",
+        )
+
+        issues = validate_vault.validate_qard_interviews(note)
+        codes = [issue.code for issue in issues]
+
+        self.assertIn("qard.metadata", codes)
+        self.assertIn("qard.empty-front", codes)
+        self.assertIn("qard.empty-back", codes)
+        self.assertEqual(2, codes.count("qard.duplicate-id"))
+        self.assertNotIn("qard.path-mismatch", codes)
+
+    def test_qard_valid_overrides_multiline_answer_and_location(self) -> None:
+        note = self.write_note(
+            "Vault/Home/Topic/Cards.md",
+            VALID_FRONTMATTER.replace(
+                "publish: false\n",
+                'publish: false\nqard-deck: "Logical Deck"\nqard-topic: "Logical Topic"\n',
+            )
+            + """# Questions
+
+<!-- qard-location: {"deck":"Per Card","topic":"Moved Topic"} -->
+<!-- qard-id: unique_id -->
+> [!qard]- Front line
+> More front
+> <!-- qard-answer -->
+> Back line
+""",
+        )
+
+        self.assertEqual([], validate_vault.validate_qard_interviews(note))
+
+    def test_qard_quoted_metadata_keys_are_valid(self) -> None:
+        note = self.write_note(
+            "Vault/Home/Topic/Cards.md",
+            VALID_FRONTMATTER.replace(
+                "publish: false\n",
+                'publish: false\n"qard-deck": "Logical Deck"\n\'qard-topic\': \'Logical Topic\'\n',
+            )
+            + "# Questions\n\n> [!qard]- Question?\n> Answer.\n",
+        )
+
+        self.assertEqual([], validate_vault.validate_qard_interviews(note))
+
+    def test_qard_outside_questions_is_validated_but_generic_question_is_not(self) -> None:
+        note = self.write_note(
+            "Vault/Home/Topic/Cards.md",
+            VALID_FRONTMATTER
+            + """# Notes
+
+> [!QUESTION]- Generic question remains valid?
+
+> [!qard]- Valid card outside the interview section?
+> Valid answer.
+
+<!-- qard-location: {"deck":"","topic":"Topic"} -->
+> [!qard]-
+> <!-- hidden front -->
+> <!-- qard-answer -->
+> %% hidden back %%
+""",
+        )
+
+        issues = validate_vault.validate_qard_interviews(note)
+        codes = [issue.code for issue in issues]
+
+        self.assertNotIn("qard.legacy-interview", codes)
+        self.assertEqual(1, codes.count("qard.empty-front"))
+        self.assertEqual(1, codes.count("qard.empty-back"))
+        self.assertEqual(1, codes.count("qard.location"))
+
+    def test_qard_hidden_comments_do_not_supply_basic_answer_content(self) -> None:
+        note = self.write_note(
+            "Vault/Home/Topic/Cards.md",
+            VALID_FRONTMATTER
+            + """> [!qard]- Visible question?
+> <!-- hidden HTML answer -->
+> %% hidden Obsidian answer %%
+""",
+        )
+
+        self.assertEqual(
+            ["qard.empty-back"],
+            [issue.code for issue in validate_vault.validate_qard_interviews(note)],
+        )
+
+    def test_qard_metadata_rejects_non_string_yaml_scalars(self) -> None:
+        invalid_values = ("123", "true", "!!int 5", "[Deck]", "{name: Deck}")
+        for value in invalid_values:
+            with self.subTest(value=value):
+                note = self.write_note(
+                    "Vault/Home/Topic/Cards.md",
+                    VALID_FRONTMATTER.replace(
+                        "publish: false\n", f"publish: false\nqard-deck: {value}\n"
+                    )
+                    + "> [!qard]- Question?\n> Answer.\n",
+                )
+                self.assertIn(
+                    "qard.metadata",
+                    [issue.code for issue in validate_vault.validate_qard_interviews(note)],
+                )
+
+        for value in ('"123"', "'true'", "Deck Name"):
+            with self.subTest(valid=value):
+                note = self.write_note(
+                    "Vault/Home/Topic/Cards.md",
+                    VALID_FRONTMATTER.replace(
+                        "publish: false\n", f"publish: false\nqard-deck: {value}\n"
+                    )
+                    + "> [!qard]- Question?\n> Answer.\n",
+                )
+                self.assertEqual([], validate_vault.validate_qard_interviews(note))
+
+    def test_qard_note_metadata_has_no_plugin_location_length_cap(self) -> None:
+        long_deck = "Deck " + "d" * 260
+        long_topic = "Topic " + "t" * 260
+        note = self.write_note(
+            "Vault/Home/Topic/Cards.md",
+            VALID_FRONTMATTER.replace(
+                "publish: false\n",
+                f'publish: false\nqard-deck: "{long_deck}"\nqard-topic: {long_topic}\n',
+            )
+            + "> [!qard]- Question?\n> Answer.\n",
+        )
+
+        self.assertEqual([], validate_vault.validate_qard_interviews(note))
+
+    def test_qard_location_retains_stock_plugin_length_limit(self) -> None:
+        note = self.write_note(
+            "Vault/Home/Topic/Cards.md",
+            VALID_FRONTMATTER
+            + f'''<!-- qard-location: {{"deck":"{'d' * 201}","topic":"Topic"}} -->
+> [!qard]- Question?
+> Answer.
+''',
+        )
+
+        self.assertEqual(
+            ["qard.location"],
+            [issue.code for issue in validate_vault.validate_qard_interviews(note)],
+        )
+
     def test_steptrace_freshness_delegation(self) -> None:
         custom = self.root / "Web/custom/steptrace"
         custom.mkdir(parents=True)

@@ -9,6 +9,8 @@ level:
 priority: High
 status: Done
 publish: true
+qard-deck: "AI & ML"
+qard-topic: "LLM/Evaluation/Building an Evaluation Set"
 ---
 
 An evaluation set is the common input to [[LLM-as-a-Judge]], [[Deterministic Checks]], and regression gates. If its cases do not represent the workload, a precise scorer still produces a misleading result. The set defines what is measured before any metric assigns a number.
@@ -61,7 +63,7 @@ Calibrate thresholds against human labels and product outcomes from the workload
 
 # Questions
 
-> [!QUESTION]- When should a team invest in a human-annotated golden set versus relying on synthetic generation?
+> [!qard]- When should a team invest in a human-annotated golden set versus relying on synthetic generation?
 > Synthetic cases are enough to bootstrap breadth and test the harness. Human annotation becomes necessary when labels require domain judgment, the failure cost is high, or synthetic phrasing no longer matches production traffic. A practical set combines generated coverage with reviewed incidents and a curated regression subset in [[Golden Test Set and Regression Runs]].
 
 # References

@@ -9,6 +9,8 @@ level:
 priority: High
 status: Done
 publish: true
+qard-deck: "AI & ML"
+qard-topic: "LLM/Context Engineering/RAG/RAG Patterns"
 ---
 
 RAG patterns are repairs for observed retrieval failures. The order below is an adoption guide rather than a popularity ranking. The first working pipeline remains in place until [[Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation|evaluation]] identifies a failure that the cheaper design cannot fix. Each pattern buys something and creates a new way to fail. The surrounding pipeline is described in [[Home/AI & ML/LLM/Context Engineering/RAG/RAG|RAG]].
@@ -263,7 +265,7 @@ This family fits high-risk systems that can calibrate evidence evaluators or tra
 
 # Questions
 
-> [!QUESTION]- When is GraphRAG a better fit than plain vector retrieval?
+> [!qard]- When is GraphRAG a better fit than plain vector retrieval?
 > GraphRAG earns its cost when answers depend on explicit entity relations or paths across many documents. Compliance tracing and architecture impact analysis are examples. Plain vector retrieval remains better for independent fact lookup because it avoids a graph extraction pipeline.
 
 # References

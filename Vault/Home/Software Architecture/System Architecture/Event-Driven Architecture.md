@@ -10,6 +10,8 @@ priority: High
 status: Done
 
 publish: true
+qard-deck: "Software Architecture"
+qard-topic: "System Architecture/Event-Driven Architecture"
 ---
 
 Event-driven architecture (EDA) moves coordination from direct calls to published facts. A producer emits `OrderPlaced`, `PaymentFailed`, or `InventoryReserved`. Consumers decide what those facts mean for their own state. The producer does not name or wait for them. This removes temporal coupling when the reaction can happen later, while synchronous APIs still handle queries and decisions that need an immediate answer.
@@ -159,7 +161,7 @@ Propagate trace context, record event identity at operation boundaries, and keep
 
 # Questions
 
-> [!QUESTION]- What determines whether an event-driven workflow uses orchestration or choreography?
+> [!qard]- What determines whether an event-driven workflow uses orchestration or choreography?
 > The main question is whether one component must own the process from start to finish. An ordered checkout with compensation steps fits [[Home/Software Architecture/Distributed Systems/Orchestration|orchestration]] because the current step and recovery state need one visible owner. Independent reactions to `OrderPlaced`, such as email, analytics, or indexing, fit [[Home/Software Architecture/Distributed Systems/Choreography|choreography]] because no subscriber controls the others. Asynchronous messaging supports both styles; it does not force choreography.
 
 # References

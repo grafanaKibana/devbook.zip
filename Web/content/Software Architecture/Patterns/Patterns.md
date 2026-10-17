@@ -1,9 +1,9 @@
 ---
 publish: true
 title: Software Architecture Patterns
-created: 2026-09-12T17:17:13.859Z
-modified: 2026-09-12T17:17:13.859Z
-published: 2026-09-12T17:17:13.859Z
+created: 2026-10-12T09:19:58.308Z
+modified: 2026-10-12T09:19:58.309Z
+published: 2026-10-12T09:19:58.309Z
 tags:
   - FolderNote
 topic:
@@ -15,6 +15,8 @@ priority: High
 level:
   - "4"
 status: Done
+qard-deck: Software Architecture
+qard-topic: Patterns/Patterns
 ---
 
 Patterns name recurring design pressures and the tradeoffs of a known response. They give a team shared language for boundaries, dependencies, and change. A useful pattern makes variation easier to see. A premature one hides simple control flow behind indirection.
@@ -26,7 +28,7 @@ Patterns name recurring design pressures and the tradeoffs of a known response. 
 
 # Questions
 
-> [!QUESTION]- What evidence justifies introducing a pattern?
+> [!qard]- What evidence justifies introducing a pattern?
 > A recurring variation, responsibility boundary, or failure mode must be visible in the code. The pattern should make that pressure cheaper to handle than the direct design. Without that evidence, the extra indirection is speculative complexity.
 
 # References

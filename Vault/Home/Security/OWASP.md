@@ -10,6 +10,8 @@ priority: High
 status: Ready to Repeat
 
 publish: true
+qard-deck: "Security"
+qard-topic: "OWASP"
 ---
 
 The Open Worldwide Application Security Project (OWASP) publishes community-maintained security guidance and tools. Its Web Application Security Top 10 is an awareness document: ten broad risk categories selected from contributed data and community analysis. The current released edition is 2025.
@@ -90,7 +92,7 @@ Use the Top 10 to seed threat models and verification. Add architecture-specific
 
 # Questions
 
-> [!QUESTION]- How should a .NET application prevent SQL injection?
+> [!qard]- How should a .NET application prevent SQL injection?
 > Keep untrusted values out of SQL text by using parameterized APIs. Dynamic identifiers such as a sort column cannot normally be parameters, so map them from a closed allowlist. ORM safety depends on the exact API: LINQ and parameterizing raw-SQL methods differ from APIs that accept already constructed SQL text. Least-privilege database permissions reduce impact but do not repair concatenation.
 
 # References

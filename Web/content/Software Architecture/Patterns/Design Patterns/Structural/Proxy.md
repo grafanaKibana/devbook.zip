@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.698Z
-modified: 2026-08-20T20:41:15.699Z
-published: 2026-08-20T20:41:15.699Z
+created: 2026-10-12T09:19:58.306Z
+modified: 2026-10-12T09:19:58.306Z
+published: 2026-10-12T09:19:58.306Z
 topic:
   - Software Architecture
 subtopic:
@@ -12,6 +12,8 @@ level:
   - "3"
 priority: High
 status: Ready to Repeat
+qard-deck: Software Architecture
+qard-topic: Patterns/Design Patterns/Structural/Proxy
 ---
 
 A proxy stands between a client and another object while exposing the same contract. It can delay expensive work, return a cached result, or reject an unauthorized call before the real object runs. The client depends on the subject interface and does not need a separate calling path for those controls.
@@ -230,7 +232,7 @@ A proxy earns its indirection when access must remain transparent and one policy
 
 # Questions
 
-> [!QUESTION]- What's the difference between a Proxy and a Decorator in terms of intent?
+> [!qard]- What's the difference between a Proxy and a Decorator in terms of intent?
 > A proxy stands in for the subject to control access to it. A decorator attaches another responsibility while preserving the component contract. Their class diagrams can look identical, so the design intent and the wrapper's reason for existing settle the classification.
 
 # References

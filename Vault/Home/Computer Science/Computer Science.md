@@ -12,6 +12,8 @@ level:
   - "4"
 status: Creation
 priority: High
+qard-deck: "Computer Science"
+qard-topic: "Computer Science"
 ---
 
 Computer science supplies the model behind software engineering decisions: how data is organized, how work scales ([[Home/Computer Science/Big O Notation|Big O]]), and how an operating system executes and isolates programs. Those fundamentals show up in ordinary .NET work whenever a collection is chosen, a slow path is diagnosed, or a design tradeoff needs a mechanical explanation.
@@ -27,11 +29,11 @@ return FolderStructureMap;
 
 # Questions
 
-> [!QUESTION]- When does algorithmic complexity matter less than constant factors?
+> [!qard]- When does algorithmic complexity matter less than constant factors?
 > When input sizes are small and bounded (e.g., iterating over 10 HTTP headers), constant factors and cache locality dominate. A theoretically better algorithm with higher overhead (setup cost, memory indirection) can be slower than a simpler one on small inputs.
 > This is why .NET's `Array.Sort` uses insertion sort for small subarrays inside its introspective sort implementation.
 
-> [!QUESTION]- What determines whether a performance problem needs a different data structure or a different algorithm?
+> [!qard]- What determines whether a performance problem needs a different data structure or a different algorithm?
 > The dominant operation is the starting point. A `HashSet<T>` removes repeated membership scans, while a `SortedSet<T>` keeps the set ordered as items are added or removed. If a change affects an item's sort order, remove it and add it again. The algorithm becomes the next target when the representation is fixed by an external format or the chosen structure still leaves too much work in each operation.
 
 # References

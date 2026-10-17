@@ -10,6 +10,8 @@ level:
   - "3"
 priority: Medium
 status: Done
+qard-deck: "AI & ML"
+qard-topic: "LLM/Safety/Safety"
 ---
 
 Safety cuts across the whole LLM system. [[Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering|Prompt Engineering]] can expose an instruction boundary, while [[Home/AI & ML/LLM/Context Engineering/Context Engineering|Context Engineering]] can admit poisoned evidence. [[Home/AI & ML/LLM/Harness Engineering/Harness Engineering|Harness Engineering]] may expose an overpowered tool, and [[Home/AI & ML/LLM/Loop Engineering/Loop Engineering|Loop Engineering]] can let a bad action repeat. Safety belongs in every layer, much like [[Home/AI & ML/LLM/Evaluation/Evaluation|Evaluation]].
@@ -44,10 +46,10 @@ Perfection is the wrong target. The practical target is a system where failures 
 
 # Questions
 
-> [!QUESTION]- How do security failures and reliability failures differ, and why does the distinction matter?
+> [!qard]- How do security failures and reliability failures differ, and why does the distinction matter?
 > The [[OWASP vulnerabilities on AI LLM|OWASP Top 10]] describes conditions an adversary can exploit, so isolation and least privilege limit their impact. The same controls can contain accidentally triggered excessive agency or data disclosure. [[Hallucinations]] need no attacker. They arise when likely text outruns the available evidence. Grounding and verification address that reliability problem, though one incident may cross both categories.
 
-> [!QUESTION]- Why are prompt-level guardrails insufficient on their own?
+> [!qard]- Why are prompt-level guardrails insufficient on their own?
 > A model instruction is advisory and can fail when untrusted data is interpreted as guidance. Durable controls live outside the model: input validation, content isolation, sandboxing, permission gates, and output checks. [[Home/AI & ML/LLM/Harness Engineering/Harness Engineering|Harness Engineering]] places critical action gates where a prompt cannot bypass them.
 
 # References

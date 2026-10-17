@@ -10,6 +10,8 @@ level:
   - "3"
 status: Creation
 priority: High
+qard-deck: "AI & ML"
+qard-topic: "LLM/Agents/Agents"
 ---
 
 An agentic system gives an LLM control over part of a workflow: calling tools, making decisions, or directing other LLMs. The term "agent" is used loosely, so system design starts with one practical boundary:
@@ -84,13 +86,13 @@ Memory systems usually repeat three operations: `record → recall → consolida
 
 # Questions
 
-> [!QUESTION]- When does a workflow fit better than an autonomous agent?
+> [!qard]- When does a workflow fit better than an autonomous agent?
 > A workflow fits predictable steps with explicit inputs and outputs. Its fixed control flow is cheaper to run and easier to debug. Autonomy is justified when the steps are not known in advance and the system has a checkable success signal that can catch drift.
 
-> [!QUESTION]- How does an autonomous agent accumulate error, and what bounds it?
+> [!qard]- How does an autonomous agent accumulate error, and what bounds it?
 > Each step consumes state produced by earlier steps, so one bad assumption can shape the rest of the run. Iteration caps bound cost, validation gates reject invalid progress, and an escalation path stops the loop when recovery needs outside input. Decision and tool traces make the original divergence visible.
 
-> [!QUESTION]- What makes a task a good fit for an autonomous agent?
+> [!qard]- What makes a task a good fit for an autonomous agent?
 > The control flow must be genuinely open-ended, and progress must still be checkable. Tests, resolution criteria, or source-backed claims give the loop feedback. Vague or delayed outcomes do not. The agent can keep moving while getting further from the goal.
 
 # References

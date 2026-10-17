@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.690Z
-modified: 2026-08-20T20:41:15.690Z
-published: 2026-08-20T20:41:15.690Z
+created: 2026-10-12T09:19:58.293Z
+modified: 2026-10-12T09:19:58.294Z
+published: 2026-10-12T09:19:58.294Z
 topic:
   - Software Architecture
 subtopic:
@@ -12,6 +12,8 @@ level:
   - "3"
 priority: High
 status: Done
+qard-deck: Software Architecture
+qard-topic: Patterns/Design Patterns/Behavioral/Observer
 ---
 
 A newspaper subscription has the shape of Observer. The publisher keeps a subscriber list and sends each new issue to that list. Subscribers can leave independently, and the publisher does not know how any recipient uses the issue.
@@ -175,7 +177,7 @@ C# events fit synchronous UI notifications. Server-side async subscribers need a
 
 # Questions
 
-> [!QUESTION]- How should event subscriptions be managed to avoid retaining subscribers after their lifetime ends?
+> [!qard]- How should event subscriptions be managed to avoid retaining subscribers after their lifetime ends?
 > A subscription should be removed when its owner is disposed or otherwise reaches the end of its lifetime. Weak events help when the publisher must live longer than its subscribers and there is no clear owner that can unsubscribe. Matching DI scopes helps only if the publisher stays in the same scope and the subscription does not escape into a singleton, static event, or another longer-lived object.
 
 # References

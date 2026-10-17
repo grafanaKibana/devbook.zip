@@ -9,6 +9,8 @@ level:
 priority: High
 status: Done
 publish: true
+qard-deck: "Software Architecture"
+qard-topic: "Patterns/Design Patterns/Behavioral/Strategy"
 ---
 
 A route planner can optimize the same trip for time, distance, or toll cost. The navigation workflow stays put while the routing algorithm changes.
@@ -192,10 +194,10 @@ The algorithm now lives in its own class. The selection policy still needs a det
 
 # Questions
 
-> [!QUESTION]- What determines whether a strategy should use an interface or a `Func<T, TResult>` delegate?
+> [!qard]- What determines whether a strategy should use an interface or a `Func<T, TResult>` delegate?
 > A delegate is enough when the variation is one operation and its inputs contain everything it needs. An interface becomes useful when the algorithm has several related operations, owns a lifecycle, or has dependencies that should be visible in dependency injection. State alone does not require an interface because a delegate can close over state, although doing that may hide who owns the state and how long it lives.
 
-> [!QUESTION]- How should strategy selection work when several strategies can handle the same request?
+> [!qard]- How should strategy selection work when several strategies can handle the same request?
 > Precedence has to be part of the contract. A first-match registry needs stable ordering, explicit selection needs a validated key, and a composite needs a rule for combining results. If two strategies apply with the same priority and the contract does not say what happens, that is a domain bug. Dependency-injection registration order should not decide it by accident.
 
 # References

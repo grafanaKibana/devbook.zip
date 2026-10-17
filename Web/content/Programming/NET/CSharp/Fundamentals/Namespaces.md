@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.656Z
-modified: 2026-08-20T20:41:15.657Z
-published: 2026-08-20T20:41:15.657Z
+created: 2026-10-12T09:19:58.264Z
+modified: 2026-10-12T09:19:58.264Z
+published: 2026-10-12T09:19:58.264Z
 topic:
   - Programming
 subtopic:
@@ -12,6 +12,8 @@ level:
   - "4"
 priority: Medium
 status: Ready to Repeat
+qard-deck: Programming
+qard-topic: NET/CSharp/Fundamentals/Namespaces
 ---
 
 A namespace gives a type a qualified name. `Billing.User` and `Identity.User` can coexist because the namespace is part of each type's identity. It also gives IDEs and readers a map of the API.
@@ -74,7 +76,7 @@ Keeping namespaces aligned with folders is still useful when it reflects real ow
 
 # Questions
 
-> [!QUESTION]- When is `extern alias` necessary instead of an ordinary `using` alias?
+> [!qard]- When is `extern alias` necessary instead of an ordinary `using` alias?
 > Use an ordinary alias when two types have different fully qualified names. `extern alias` is for conflicting types whose assembly-qualified identities differ but whose fully qualified type names are identical.
 
 # References

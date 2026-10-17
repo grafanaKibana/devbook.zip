@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-09-12T17:17:13.844Z
-modified: 2026-09-12T17:17:13.844Z
-published: 2026-09-12T17:17:13.844Z
+created: 2026-10-12T09:19:58.251Z
+modified: 2026-10-12T09:19:58.251Z
+published: 2026-10-12T09:19:58.251Z
 topic:
   - Networks
 subtopic:
@@ -12,6 +12,8 @@ level:
   - "3"
 priority: High
 status: Ready to Repeat
+qard-deck: Networks
+qard-topic: Protocols/WebSockets
 ---
 
 WebSocket (RFC 6455) is a full-duplex, message-oriented protocol for a long-lived browser/server channel. The common opening handshake upgrades an HTTP/1.1 connection. Extended CONNECT carries the same frame protocol on one HTTP/2 stream, and RFC 9220 adapts that mechanism to HTTP/3.
@@ -113,7 +115,7 @@ Every long-lived option needs a queue policy. Bound per-client memory, coalesce 
 
 # Questions
 
-> [!QUESTION]- What conditions make Server-Sent Events a better fit than WebSockets?
+> [!qard]- What conditions make Server-Sent Events a better fit than WebSockets?
 > SSE fits ordered server-to-browser events when ordinary HTTP requests already cover client commands. `EventSource` reconnects and sends `Last-Event-ID`, giving the server a natural replay cursor. WebSocket fits low-latency bidirectional messages, but the application must define its own resume contract.
 
 # References

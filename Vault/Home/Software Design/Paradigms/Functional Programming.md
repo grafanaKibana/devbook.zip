@@ -9,6 +9,8 @@ level:
 priority: Medium
 status: Ready to Repeat
 publish: true
+qard-deck: "Software Design"
+qard-topic: "Paradigms/Functional Programming"
 ---
 
 Functional programming makes data flow explicit. Calculations are expressed as functions whose results depend on their inputs, while database calls, clocks, logging, and other effects stay at the system's edges. That separation reduces the amount of code whose behavior depends on hidden state.
@@ -140,7 +142,7 @@ The practical C# pattern is a functional core with an effectful shell: read exte
 
 # Questions
 
-> [!QUESTION]- What makes a function "pure" and why does purity matter for testing?
+> [!qard]- What makes a function "pure" and why does purity matter for testing?
 > For inputs in its defined domain, its observable result depends only on explicit inputs, and evaluating it does not change external state. Tests therefore pass values and assert values instead of arranging clocks, databases, or global configuration. A throwing input makes the function partial rather than supplying a substitutable result; expected invalid inputs can be modeled as returned values when totality matters. Real systems keep I/O and external state in a surrounding shell and pass their results into the pure core.
 
 # References

@@ -9,6 +9,8 @@ level:
 priority: High
 status: Done
 publish: true
+qard-deck: "AI & ML"
+qard-topic: "LLM/Agents/Evaluation/Trajectory Evaluation"
 ---
 
 Trajectory evaluation scores the path from task to result: tool calls, observations, and intermediate decisions in order. Outcome scoring cannot distinguish a four-step solve from a lucky recovery after six wrong calls. [[Tool-Call Evaluation|tool-call scoring]] can flag individual mistakes, but it does not explain whether the sequence as a whole was sensible.
@@ -89,7 +91,7 @@ Visible task success can make a judge rationalize a messy path. Hide the outcome
 
 # Questions
 
-> [!QUESTION]- When is reference matching a better trajectory scorer than an LLM judge?
+> [!qard]- When is reference matching a better trajectory scorer than an LLM judge?
 > Reference matching fits tasks with a small set of knowable procedures. It is cheap, objective, and can enforce hard boundaries: subset mode proves the agent stayed within an allowed tool set, while superset mode proves required calls occurred. A judge becomes necessary when valid decompositions are too numerous to enumerate, but it adds cost and long-context bias.
 
 # References

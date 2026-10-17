@@ -10,6 +10,8 @@ priority: High
 status: Ready to Repeat
 
 publish: true
+qard-deck: "Programming"
+qard-topic: "NET/Runtime/Garbage Collector"
 ---
 
 The .NET garbage collector manages memory for objects on the managed heap. It traces references from roots known to the runtime, keeps reachable objects, and reuses space occupied by unreachable ones. Cycles need no special treatment: two objects that reference each other are still collectible when nothing reachable points to either of them.
@@ -191,10 +193,10 @@ The runtime defaults are the starting point. A mode change is justified only whe
 
 # Questions
 
-> [!QUESTION]- Why can generation 0 be collected without scanning every generation 2 object?
+> [!qard]- Why can generation 0 be collected without scanning every generation 2 object?
 > The collector starts from normal GC roots, but it also needs to find references from old objects to young ones. A write barrier records the older heap ranges where those references may have been written. During a generation 0 collection, the GC scans those recorded ranges, called dirty cards, instead of walking every generation 2 object. Young objects referenced by older ones are still preserved without paying for a full old-generation scan.
 
-> [!QUESTION]- Why can process memory remain high after a generation 2 collection?
+> [!qard]- Why can process memory remain high after a generation 2 collection?
 > A generation 2 collection removes objects that are no longer reachable; it cannot remove live object graphs held by caches, static fields, or other roots. Pinned objects and swept heap regions can also leave gaps that are free to the GC but difficult to reuse. Finally, the runtime may keep committed heap memory for later allocations instead of returning it to the operating system immediately. A completed collection therefore does not guarantee that the process working set will shrink.
 
 # References

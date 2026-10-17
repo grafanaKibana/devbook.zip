@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.657Z
-modified: 2026-08-20T20:41:15.657Z
-published: 2026-08-20T20:41:15.657Z
+created: 2026-10-12T09:19:58.264Z
+modified: 2026-10-12T09:19:58.264Z
+published: 2026-10-12T09:19:58.264Z
 topic:
   - Programming
 subtopic:
@@ -12,6 +12,8 @@ level:
   - "4"
 priority: Medium
 status: Ready to Repeat
+qard-deck: Programming
+qard-topic: NET/CSharp/Fundamentals/Reflection
 ---
 
 Reflection reads .NET metadata at runtime and can use that metadata to construct objects or invoke members. It is useful when the target type is genuinely unknown until execution, as in plugin discovery or tooling. The cost is a weaker contract: a misspelled member name or incompatible signature becomes a runtime failure instead of a compiler error.
@@ -109,13 +111,13 @@ var ctor = Expression.Lambda<Func<Jobs>>(Expression.New(typeof(Jobs))).Compile()
 
 # Questions
 
-> [!QUESTION]- Why is reflection often a bad default in performance-critical code?
+> [!qard]- Why is reflection often a bad default in performance-critical code?
 > Reflection moves member discovery, argument validation, and dispatch to runtime. That cost is often irrelevant during startup, but repeated lookup and invocation can dominate a small hot-path operation. Measure first, then cache metadata or bind a delegate when the same member is reused.
 
-> [!QUESTION]- How do attributes become behavior at runtime?
+> [!qard]- How do attributes become behavior at runtime?
 > An attribute only stores metadata on a type, member, or other program element. A framework uses reflection to find that metadata and decide what code to run, such as registering a test or mapping an HTTP route. The attribute itself does nothing until runtime code interprets it. A source generator can perform a similar interpretation during the build and emit direct code instead.
 
-> [!QUESTION]- How should code choose between reflection, interfaces or generics, and source generators?
+> [!qard]- How should code choose between reflection, interfaces or generics, and source generators?
 > Reflection fits cases where the types or members are genuinely unknown until runtime, such as loading plugins or inspecting external models. Interfaces and generics are simpler when the variation can be expressed as a compile-time contract. A source generator fits repeated metadata-driven work whose shapes are known during the build, especially when startup cost, trimming, or Native AOT makes runtime discovery a problem.
 
 # References

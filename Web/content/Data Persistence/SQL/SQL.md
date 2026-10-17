@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-09-12T17:17:13.838Z
-modified: 2026-09-12T17:17:13.838Z
-published: 2026-09-12T17:17:13.838Z
+created: 2026-10-12T09:19:58.246Z
+modified: 2026-10-12T09:19:58.246Z
+published: 2026-10-12T09:19:58.246Z
 tags:
   - FolderNote
 topic:
@@ -14,6 +14,8 @@ priority: High
 level:
   - "4"
 status: Creation
+qard-deck: Data Persistence
+qard-topic: SQL/SQL
 ---
 
 The relational model stores facts as rows, connects them through keys, and enforces declared constraints at the database boundary. SQL states the required result rather than an access path. The optimizer chooses scans, seeks, join order, and physical operators that preserve the query's semantics. A relational database is a strong default when integrity constraints, multi-row transactions, and new query combinations matter more than storing one access pattern in its final read shape.
@@ -82,16 +84,16 @@ No physical join is universally fastest. Input size, ordering, row width, indexe
 
 # Questions
 
-> [!QUESTION]- What is the difference between WHERE and HAVING?
+> [!qard]- What is the difference between WHERE and HAVING?
 > `WHERE` filters source rows before grouping and cannot use aggregate results. `HAVING` filters groups after `GROUP BY` and can test aggregates such as `COUNT(*)`. A non-aggregate predicate belongs in `WHERE` when it can reduce the rows entering the grouping step without changing semantics.
 
-> [!QUESTION]- What is the difference between a stored procedure and a function?
+> [!qard]- What is the difference between a stored procedure and a function?
 > A stored procedure runs as a separate database operation. It can execute several statements, change data, and return result sets or output parameters. A function returns a scalar or table value and can be used inside a query, so the database limits what it can do. SQL Server may inline an eligible scalar UDF. Otherwise, the function may run once per row and limit plan choices such as parallelism.
 
-> [!QUESTION]- What is a Common Table Expression (CTE), and when is a temp table a better fit?
+> [!qard]- What is a Common Table Expression (CTE), and when is a temp table a better fit?
 > A CTE gives a name to a query result for one statement. It does not automatically store the result or guarantee that repeated references reuse the same work. A temp table is usually better when the intermediate result must be inspected, indexed, reused across statements, or optimized with its own statistics.
 
-> [!QUESTION]- What are SQL Server transaction isolation levels?
+> [!qard]- What are SQL Server transaction isolation levels?
 > SQL Server provides `READ UNCOMMITTED`, `READ COMMITTED`, `REPEATABLE READ`, `SERIALIZABLE`, and `SNAPSHOT`. Enabling Read Committed Snapshot Isolation changes `READ COMMITTED` reads to statement-level row versions. `NOLOCK` is not a general performance switch: it permits observations of rolled-back work and can return missing or duplicate rows while data changes concurrently.
 
 # References

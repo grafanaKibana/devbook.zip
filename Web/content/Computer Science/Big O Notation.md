@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.576Z
-modified: 2026-08-20T20:41:15.589Z
-published: 2026-08-20T20:41:15.589Z
+created: 2026-10-12T09:19:58.240Z
+modified: 2026-10-12T09:19:58.240Z
+published: 2026-10-12T09:19:58.240Z
 topic:
   - Computer Science
 subtopic: []
@@ -11,6 +11,8 @@ level:
   - "3"
 priority: High
 status: Ready to Repeat
+qard-deck: Computer Science
+qard-topic: Big O Notation
 ---
 
 Big O notation describes how an algorithm's cost grows with its input, discarding machine-specific constants so competing approaches can be compared by growth rather than one benchmark on one machine.
@@ -183,10 +185,10 @@ Big O states an upper bound. **Big Θ** (theta) states a _tight_ bound where the
 
 # Questions
 
-> [!QUESTION]- Why does Big O drop constant factors and lower-order terms?
+> [!qard]- Why does Big O drop constant factors and lower-order terms?
 > Big O describes growth as `n → ∞`, where the fastest-growing term dominates. `n² + 100n + 500` is `O(n²)` because the quadratic term eventually outweighs the rest.
 
-> [!QUESTION]- What is the difference between average-case and amortised complexity?
+> [!qard]- What is the difference between average-case and amortised complexity?
 > Average-case complexity takes an expectation over a distribution of inputs. A hash lookup is `O(1)` average when keys spread across buckets. Amortised complexity spreads expensive operations across a sequence on one structure. Dynamic-array append is `O(1)` amortised because many cheap appends pay for the occasional `O(n)` resize.
 
 # References

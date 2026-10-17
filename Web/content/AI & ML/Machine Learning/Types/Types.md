@@ -1,9 +1,9 @@
 ---
 publish: true
 title: Machine Learning Types
-created: 2026-09-12T17:17:13.827Z
-modified: 2026-09-12T17:17:13.827Z
-published: 2026-09-12T17:17:13.827Z
+created: 2026-10-12T09:19:58.237Z
+modified: 2026-10-12T09:19:58.237Z
+published: 2026-10-12T09:19:58.237Z
 tags:
   - FolderNote
 topic:
@@ -15,6 +15,8 @@ status: Done
 priority: Low
 level:
   - "1"
+qard-deck: AI & ML
+qard-topic: Machine Learning/Types/Types
 ---
 
 The useful way to classify machine learning is by its learning signal. Labels, proxy targets, rewards, or the absence of a target determine what the training loop can optimize and how its result can be evaluated. Model architecture comes later.
@@ -93,7 +95,7 @@ Reinforcement learning is the narrow branch. It needs an environment or simulato
 
 # Questions
 
-> [!QUESTION]- What learning signal distinguishes supervised, self-supervised, and reinforcement learning even when all three use a neural network?
+> [!qard]- What learning signal distinguishes supervised, self-supervised, and reinforcement learning even when all three use a neural network?
 > Supervised learning receives an external target for each example. Self-supervised learning derives a proxy target from the input itself, such as a hidden or next token. Reinforcement learning receives rewards from actions in an environment and optimizes return across a trajectory. The architecture does not determine which learning problem is being solved.
 
 # References

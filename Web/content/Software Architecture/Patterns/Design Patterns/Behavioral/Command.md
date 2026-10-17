@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.688Z
-modified: 2026-08-20T20:41:15.688Z
-published: 2026-08-20T20:41:15.688Z
+created: 2026-10-12T09:19:58.288Z
+modified: 2026-10-12T09:19:58.288Z
+published: 2026-10-12T09:19:58.288Z
 topic:
   - Software Architecture
 subtopic:
@@ -12,6 +12,8 @@ level:
   - "2"
 priority: High
 status: Done
+qard-deck: Software Architecture
+qard-topic: Patterns/Design Patterns/Behavioral/Command
 ---
 
 A restaurant ticket is a command in paper form. It records the requested meal, waits in the kitchen queue, and tells the chef what to prepare. The waiter does not cook and the chef does not take the order. The ticket keeps the request separate from its execution.
@@ -192,7 +194,7 @@ This in-memory history fits a local UI action whose execution and undo each comp
 
 # Questions
 
-> [!QUESTION]- How does MediatR implement the Command pattern, and what does it add?
+> [!qard]- How does MediatR implement the Command pattern, and what does it add?
 > `PlaceOrderCommand` carries the request, while `PlaceOrderCommandHandler` owns execution. MediatR routes between them and can wrap handlers with pipeline behaviors. That indirection is useful when dispatch and shared policies matter across many requests. A direct service call remains clearer for a small, fixed interaction.
 
 # References

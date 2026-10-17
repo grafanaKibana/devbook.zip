@@ -9,6 +9,8 @@ level:
 priority: High
 status: Ready to Repeat
 publish: true
+qard-deck: "Software Architecture"
+qard-topic: "Distributed Systems/Distributed Transactions"
 ---
 
 A distributed transaction coordinates a change across independently failing services or databases. Local atomic commit stops at each participant. A crash or partition between commits can therefore expose a partial result unless the protocol defines recovery.
@@ -103,10 +105,10 @@ Use 2PC only when every participant supports it and blocking during recovery fit
 
 # Questions
 
-> [!QUESTION]- Why is 2PC problematic in microservices?
+> [!qard]- Why is 2PC problematic in microservices?
 > Prepared participants can hold locks while waiting for the coordinator's durable decision, so network faults reduce availability and throughput. Many common service boundaries do not support XA, which prevents them from joining the protocol.
 
-> [!QUESTION]- How does the Outbox pattern support at-least-once event delivery?
+> [!qard]- How does the Outbox pattern support at-least-once event delivery?
 > The message commits in the same local transaction as the domain change. A relay retries publication until acknowledged. A crash between broker acknowledgement and marking the row processed can publish twice, so consumers remain idempotent.
 
 # References

@@ -9,6 +9,8 @@ level:
 priority: Medium
 status: Ready to Repeat
 publish: true
+qard-deck: "Computer Science"
+qard-topic: "Algorithms/Paradigms/Backtracking"
 ---
 
 The eight-queens problem has 4,426,165,368 ways to place eight pieces on 64 squares, but only 92 valid arrangements. Generating every board before testing it wastes almost all the work on positions whose first few queens already conflict.
@@ -148,7 +150,7 @@ Appending the live buffer as a solution stores a reference that later choices ov
 
 # Questions
 
-> [!QUESTION]- What turns brute-force enumeration into backtracking?
+> [!qard]- What turns brute-force enumeration into backtracking?
 > A feasibility test on the partial candidate. Brute force waits until a configuration is complete. Backtracking checks after each choice and discards every completion that shares a rejected prefix.
 
 # References

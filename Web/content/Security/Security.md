@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-09-12T17:17:13.853Z
-modified: 2026-09-12T17:17:13.853Z
-published: 2026-09-12T17:17:13.853Z
+created: 2026-10-12T09:19:58.275Z
+modified: 2026-10-12T09:19:58.275Z
+published: 2026-10-12T09:19:58.275Z
 tags:
   - FolderNote
 icon: lock
@@ -16,6 +16,8 @@ priority: High
 level:
   - "4"
 status: Done
+qard-deck: Security
+qard-topic: Security
 ---
 
 Security keeps a system's promised behavior intact when people, software, and infrastructure fail or act maliciously. It is an engineering property of the whole service: identities, authorization, data handling, dependencies, deployment, detection, and recovery all contribute to the result.
@@ -52,7 +54,7 @@ A checklist becomes evidence only when its failure paths are exercised. The payr
 
 # Questions
 
-> [!QUESTION]- How do authentication and authorization work together when handling a request?
+> [!qard]- How do authentication and authorization work together when handling a request?
 > Authentication establishes who or what is making the request and produces a principal. Authorization then checks whether that principal may perform the requested action on the specific resource in the current context. A valid identity does not grant access to every resource, so both checks are required.
 
 # References

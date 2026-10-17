@@ -82,7 +82,7 @@ config.plugins.transformers.splice(
   CalloutDisclosure(),
 )
 
-// Collect [!QUESTION] callouts across the vault. Appended after the built-in
+// Collect legacy [!QUESTION] and native [!qard] callouts across the vault. Appended after the built-in
 // transformers so callouts (obsidian-flavored-markdown) and links (crawl-links)
 // are already resolved.
 config.plugins.transformers.push(QuestionCollector())

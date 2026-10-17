@@ -9,6 +9,8 @@ level:
 priority: Medium
 status: Done
 publish: true
+qard-deck: "AI & ML"
+qard-topic: "LLM/Prompt Engineering/Reasoning Techniques"
 ---
 
 Some tasks cannot be answered reliably in one jump. Arithmetic, logic, and planning all require state to survive across several decisions. Reasoning techniques give the model or its surrounding system more room to construct, compare, and check those decisions.
@@ -95,10 +97,10 @@ Use the cheapest method that clears the evaluation target:
 
 # Questions
 
-> [!QUESTION]- When does Chain-of-Thought help, and when can it make a result worse?
+> [!qard]- When does Chain-of-Thought help, and when can it make a result worse?
 > Chain-of-Thought can help when a task has intermediate state that can be expressed as a sequence of smaller decisions. It adds little to simple retrieval or extraction, where the extra tokens mainly create more room for drift. A wrong assumption near the start can shape the rest of the trace, and a fluent explanation still does not prove the answer is correct. The technique earns its cost when the intermediate steps improve measured results or expose something that can be checked independently.
 
-> [!QUESTION]- When does Tree of Thoughts justify its cost over Chain-of-Thought or self-consistency?
+> [!qard]- When does Tree of Thoughts justify its cost over Chain-of-Thought or self-consistency?
 > Tree of Thoughts fits a real search problem where candidate states can be generated, evaluated, revisited, and abandoned when they lead to a dead end. Planning and combinatorial search can have that shape; extraction usually does not. Its cost grows with the branching factor and depth, and a weak evaluator can keep the wrong branches. If a direct call or deterministic tool already meets the evaluation target, the tree adds work without improving the result.
 
 # References

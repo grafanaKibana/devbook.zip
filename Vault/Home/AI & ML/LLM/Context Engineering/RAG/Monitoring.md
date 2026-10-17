@@ -9,6 +9,8 @@ level:
 priority: High
 status: Done
 publish: true
+qard-deck: "AI & ML"
+qard-topic: "LLM/Context Engineering/RAG/Monitoring"
 ---
 
 RAG monitoring watches a deployed pipeline for regressions in answer quality, latency, and source freshness. Offline [[Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation|Evaluation]] answers whether a version is safe to ship. Monitoring asks whether that version still works on today's traffic.
@@ -225,7 +227,7 @@ The practical default is deterministic metrics on all traffic, asynchronous judg
 
 # Questions
 
-> [!QUESTION]- How does monitoring differ from evaluation in a RAG system, and why are both needed?
+> [!qard]- How does monitoring differ from evaluation in a RAG system, and why are both needed?
 > Evaluation gates a candidate pipeline against a controlled dataset before release. Monitoring observes live traffic after release, where query distribution and source data keep changing. Production failures found through monitoring should become new evaluation cases. Without that loop, evaluation misses new incidents and monitoring keeps rediscovering old ones.
 
 # References
