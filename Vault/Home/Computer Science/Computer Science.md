@@ -32,11 +32,25 @@ return FolderStructureMap;
 
 <!-- qard-id: af5ebbc3-c37b-4578-8c38-555874d827a4 -->
 > [!qard]- When can constant factors outweigh asymptotic complexity?
-> For small, bounded inputs, setup cost, memory access, and constant factors can outweigh an asymptotic advantage, so benchmark the workload that matters. As input grows, the growth rate can dominate. As one implementation-specific example, .NET 10 Array.Sort uses introsort and uses insertion sort for partitions of 16 or fewer; that threshold is an implementation detail, not a general algorithm rule. [Microsoft: Array.Sort (.NET 10)](https://learn.microsoft.com/en-us/dotnet/api/system.array.sort?view=net-10.0) · [dotnet/runtime ArraySortHelper source](https://github.com/dotnet/runtime/blob/df3828915ac9573c8bd0deb5d9febdd582a398c5/src/libraries/System.Private.CoreLib/src/System/Collections/Generic/ArraySortHelper.cs#L123-L168)
+> Constant factors can outweigh asymptotic complexity when inputs are small or bounded.
+> 
+> Big O describes how cost grows with input size and deliberately ignores constant factors. An `O(n log n)` bound only says the cost stays below some constant times `n log n` once `n` is large enough. An algorithm with a better growth rate but more overhead can therefore be slower below some crossover size. Typical overhead includes setup work, extra bookkeeping and poorer memory access patterns. Above the crossover, the better growth rate eventually dominates.
+> 
+> Hybrid sorting is a concrete case. The .NET 10 documentation describes `Array.Sort` as introsort, which sorts partitions of 16 or fewer elements with insertion sort. Insertion sort grows quadratically, but its low overhead suits such small partitions. The value 16 is that implementation's threshold, not a general rule.
+> 
+> The crossover depends on the implementation, hardware and data. It is therefore established by measuring the actual workload rather than inferred from Big O alone.
+> 
+> [NIST: Big-O notation](https://xlinux.nist.gov/dads/HTML/bigOnotation.html) · [Microsoft: Array.Sort (.NET 10)](https://learn.microsoft.com/en-us/dotnet/api/system.array.sort?view=net-10.0) · [dotnet/runtime ArraySortHelper source](https://github.com/dotnet/runtime/blob/df3828915ac9573c8bd0deb5d9febdd582a398c5/src/libraries/System.Private.CoreLib/src/System/Collections/Generic/ArraySortHelper.cs#L123-L168)
 
 <!-- qard-id: 0dd333e2-fd31-4b6f-ba90-c67e18806d70 -->
 > [!qard]- How can the dominant operation reveal whether a performance problem needs a different data structure or algorithm?
-> Start with the operation doing most of the work. If repeated membership scans dominate, a hash set may remove those scans; if ordered iteration or range queries matter, a sorted set maintains order as items change. Before changing comparer-relevant state, remove the item; change it, then reinsert it. Then reconsider the algorithm if the required representation still leaves too much work per operation. [Microsoft: HashSet<T>.Contains (.NET 10)](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.hashset-1.contains?view=net-10.0) · [Microsoft: SortedSet<T> (.NET 10)](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.sortedset-1?view=net-10.0)
+> The dominant operation is the step that accounts for most of the work, and it shows where the cost lies. If a data structure that performs that operation cheaply removes most of the work, the representation was the problem. If the operations the task requires remain too expensive even with a suitable structure, the algorithm has to change.
+> 
+> - **Repeated membership checks:** checking membership in a `List<T>` scans the list. Checking each item of a batch against a list of similar size inside a loop therefore costs O(n²). `HashSet<T>.Contains` takes expected O(1) time with a good hash function, so the same batch costs expected O(n) while the surrounding logic stays unchanged.
+> - **Ordered iteration or range queries:** when repeated sorting or range scanning dominates, `SortedSet<T>` keeps elements ordered as they are added and removed, and `GetViewBetween` returns a view of a range. The set positions an element when it is inserted, so changing the fields that determine its order in place is unsupported. Instead, the element is removed, changed and then added again.
+> - **Algorithm change:** sometimes the remaining cost comes from how many operations the approach performs rather than how expensive each one is. No data structure removes that cost, so the algorithm itself has to do less work.
+> 
+> [Microsoft: HashSet.Contains (.NET 10)](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.hashset-1.contains?view=net-10.0) · [Microsoft: SortedSet class (.NET 10)](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.sortedset-1?view=net-10.0)
 
 # References
 

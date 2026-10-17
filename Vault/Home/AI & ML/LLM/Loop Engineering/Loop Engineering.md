@@ -32,7 +32,7 @@ An agent loop has no natural end. It can keep calling tools for as long as the r
 
 - **Iteration caps** set a hard per-request limit on loop cycles. The cap is the final defense against an infinite tool-call sequence. [[Agent Loop]] shows concrete framework controls and the failure they prevent.
 - **Token and cost budgets** track cumulative use and stop or compact the run before it exhausts the context window or spend ceiling.
-- **Checkable stop criteria** define completion in terms the runtime can verify: no remaining tool calls, a passing test suite, or a schema-valid artifact. Instructions to stop may help, but they do not replace hard limits.
+- **Checkable stop criteria** separate stopping from success. A turn with no remaining tool calls shows only that the model has stopped requesting actions; completion needs task-specific evidence the runtime can verify, such as a passing test suite or a schema-valid artifact. Instructions to stop may help, but they do not replace hard limits.
 - **A budget fallback** determines what happens at the cap. The runtime can return the best partial result with a warning or escalate to a person. Silent truncation hides the failure.
 
 # Verification Inside the Loop
@@ -54,14 +54,35 @@ Each iteration adds calls and results to the history. Without intervention, cont
 
 # Questions
 
+<!-- qard-id: 638a8ef2-9d81-4a06-a5d4-43fd0f3c5d3e -->
 > [!qard]- What does a tool-using model need from a runtime to operate as a loop?
 > The runtime executes requested tools, returns observations to the model, and decides whether another turn runs. It owns the completion check and operational bounds; the model’s final text alone does not prove the task succeeded. A one-call tool request becomes a loop only when the runtime sends its result back for another decision. [Claude tool-use loop](https://platform.claude.com/docs/en/agents-and-tools/tool-use/how-tool-use-works)
 
+<!-- qard-id: 599da810-5eee-4ed5-ae4b-95b2737c4d8f -->
 > [!qard]- What should a runtime report when its loop budget expires before the task is complete?
-> Return an explicit partial result and identify the unmet completion condition; budget exhaustion is not success. If the runtime supports a configured continuation or human escalation path, hand off the partial state and what remains unresolved. Anthropic task budgets may leave a partial result when a task exceeds the available budget, and OpenAI Agents SDK supports a max-turn error handler for a run that reaches its limit. [Anthropic task budgets](https://platform.claude.com/docs/en/build-with-claude/task-budgets) · [OpenAI Agents SDK running agents](https://openai.github.io/openai-agents-python/running_agents/)
+> The runtime reports that the run stopped incomplete, not that it succeeded. The report names the limit that was reached, the completion condition that is still unmet, and the partial result or state produced so far.
+> 
+> - **Why it matters:** budget exhaustion is not success. If partial output is presented as a final answer or silently truncated, callers treat unfinished work as done and the failure stays hidden.
+> - **What follows:** where the application configures it, the partial state and the unresolved work pass to a continuation run or to a person. Otherwise the run ends with an explicit error.
+> 
+> Platform behavior differs. The OpenAI Agents SDK treats reaching `max_turns` as an error condition and supports a handler for that case. With Anthropic task budgets, a task that exceeds its budget can end with a partial result.
+> 
+> Sources: [OpenAI Agents SDK: Running agents](https://openai.github.io/openai-agents-python/running_agents/) · [Anthropic task budgets](https://platform.claude.com/docs/en/build-with-claude/task-budgets)
 
-> [!qard]- How do context selection and loop control divide long-run compaction work?
-> Context engineering decides what information the model needs and what a summary must preserve. Loop engineering decides when to compact, offload an artifact, or stop before the next request. OpenAI Responses API compaction carries selected prior state in a smaller context; durable plans and external artifacts remain application-managed state. [OpenAI compaction](https://developers.openai.com/api/docs/guides/compaction)
+<!-- qard-id: 29510b5e-892b-49d6-9b58-c95c4a2ba3d4 -->
+> [!qard]- In a long-running agent, how is compaction work split between deciding what context to keep and deciding when to compact?
+> Compaction needs two separate decisions. The content decision, owned by context engineering, determines what the model still needs and what a summary must preserve. The timing decision, owned by loop engineering, determines when to compact, offload an artifact or stop. Compaction typically runs at a token threshold, before the next request would overflow the window.
+> 
+> | Decision | What it settles | Failure when it is neglected |
+> |---|---|---|
+> | Content (context engineering) | Which goals, decisions, open issues and references a summary keeps | The summary drops a constraint, and later turns proceed without it |
+> | Timing (loop engineering) | When to summarize, when to move large artifacts to external storage behind lightweight references, and when to stop | The window overflows, and truncation removes old messages that may still matter |
+> 
+> Durable state sits outside both decisions. A plan or progress log stored by the application can be reread after compaction, which keeps a long run tied to its original goal. OpenAI Responses API compaction, for example, carries prior state forward as smaller, opaque compaction items. Plans and artifacts that the application must rely on remain application-managed.
+> 
+> This split is a convention for assigning responsibility, not a boundary defined by an API.
+> 
+> Source: [OpenAI: Compaction](https://developers.openai.com/api/docs/guides/compaction)
 
 # References
 

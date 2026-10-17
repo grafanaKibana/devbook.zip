@@ -212,6 +212,7 @@ The runtime defaults are the starting point. A mode change is justified only whe
 > 
 > [Microsoft: Fundamentals of garbage collection](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/fundamentals) · [dotnet/runtime: CoreCLR GC write barriers](https://github.com/dotnet/runtime/blob/1bde9a53cb55127c1e154a2e98a7332477280abf/docs/design/coreclr/jit/GC-write-barriers.md#L25-L62)
 
+<!-- qard-id: 2ba4053d-0180-4c76-895f-5d1c1d3b988a -->
 > [!qard]- How do generations make .NET garbage collection more efficient?
 > Generations let the GC collect the small, recently allocated part of the heap often and the large, long-lived part rarely. This pays off because most objects become unreachable soon after allocation. A collection limited to new objects reclaims much of the garbage while examining little of the heap.
 > 

@@ -181,6 +181,7 @@ await db.SaveChangesAsync();
 > 
 > [Microsoft: ACID properties](https://learn.microsoft.com/en-us/windows/win32/cossdk/acid-properties) · [PostgreSQL: Asynchronous commit](https://www.postgresql.org/docs/current/wal-async-commit.html)
 
+<!-- qard-id: 07f11423-b88a-4819-a0e8-eed6f352394e -->
 > [!qard]- What is write skew, and why can snapshot isolation allow it?
 > Write skew is a concurrency anomaly in which two transactions read the same data, each makes a decision that is valid for what it read, and each writes a different row. Both commit, but the combined result breaks an invariant that neither transaction broke alone.
 > 

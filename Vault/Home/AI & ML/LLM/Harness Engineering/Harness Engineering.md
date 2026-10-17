@@ -30,8 +30,8 @@ return FolderStructureMap;
 
 The tool surface is an API for a consumer that cannot inspect its implementation. A model chooses among tools from their names, descriptions, and schemas, then interprets whatever each call returns. That makes a few surface-wide decisions especially important:
 
-- **Keep the surface small.** Expose only what the current task needs. Every connected schema competes for attention on every request. Large toolsets cost tokens and reduce selection accuracy, as the MCPGauge results in [[Tool Design]] show. [[Home/AI & ML/LLM/Context Engineering/Context Engineering|Context Engineering]] manages that token cost. The harness decides which tools exist.
-- **Make the contracts consistent.** Shared naming, return shapes, and error conventions let the model reuse what it learned from one tool when it calls another. [[Tool Design]] covers the lower-level naming and consolidation patterns.
+- **Small surface.** Only the tools the current task needs are exposed. Every connected schema competes for attention on every request. Large toolsets cost tokens because their schemas enter the model's context, and overlapping tools leave more options to choose between. The MCPGauge results in [[Tool Design]] come from whole MCP-assisted runs, including retrieved content, so they show run-level token and accuracy effects rather than isolating the number of schemas. [[Home/AI & ML/LLM/Context Engineering/Context Engineering|Context Engineering]] manages that token cost. The harness decides which tools exist.
+- **Consistent contracts.** Shared naming, return shapes, and error conventions let the model reuse what it learned from one tool when it calls another. [[Tool Design]] covers the lower-level naming and consolidation patterns.
 
 Individual descriptions, parameters, compact results, and failure behavior belong in [[Tool Design]]. Skills, plugins, hooks, coding agents, and repository instructions live together under [[Home/AI & ML/LLM/Harness Engineering/Tooling/Tooling|Tooling]].
 
@@ -39,9 +39,9 @@ Individual descriptions, parameters, compact results, and failure behavior belon
 
 The execution environment takes over after the model emits a call. Since the model does not execute the operation itself, the runtime can enforce rules that no prompt or injected instruction can bypass.
 
-- **Sandbox execution.** A scoped filesystem, network allowlist, or container limits the damage from a mistaken or hostile call.
-- **Gate by risk.** Read-only operations may run automatically. State-changing or irreversible work such as deploying, deleting, sending, or paying should pass through explicit policy and least-privilege credentials.
-- **Stop for human approval.** The highest-risk actions need a person at the boundary. Too many pauses turn the agent into a form filler. Too few leave room for a poisoned tool description to exfiltrate secrets, as the attacks in [[Model Context Protocol]] demonstrate.
+- **Sandboxed execution.** A scoped filesystem, network allowlist, or container limits the damage from a mistaken or hostile call.
+- **Risk-based gating.** Read-only operations may run automatically. State-changing or irreversible work such as deploying, deleting, sending, or paying passes through explicit policy and runs with least-privilege credentials.
+- **Human approval.** The highest-risk actions need a person at the boundary. Too many pauses turn the agent into a form filler. Too few leave room for a poisoned tool description to exfiltrate secrets, as the attacks in [[Model Context Protocol]] demonstrate.
 
 These are the deterministic controls described by [[Guardrails]]. A prompt can request safe behavior. The harness can make an unsafe operation impossible or force it through review.
 
@@ -53,8 +53,19 @@ The "tool quality" principle in the [[Home/AI & ML/LLM/Agents/Agents|Agents]] hu
 
 # Questions
 
-> [!qard]- How are context, harness, and loop engineering responsibilities distinguished?
-> Context engineering decides what information the model receives. Harness engineering decides what the runtime allows the model to do with that information: which tools are exposed, what permissions those tools have, how calls are validated, and where execution is sandboxed or stopped for approval. Tool schemas and results connect context and harness engineering because they consume context, but capability and permission decisions remain with the harness. Loop engineering decides whether another turn is allowed.
+<!-- qard-id: d15112b8-f911-4f82-baa3-da3d67bbbf35 -->
+> [!qard]- How do context, harness, and loop engineering differ in what they control?
+> The three disciplines own different decisions about the same agent run. Context engineering decides what the model sees. Harness engineering decides what the model's proposed actions can reach and do. Loop engineering decides whether and how the work continues across turns.
+> 
+> | Discipline | Decision it owns | Typical controls |
+> |---|---|---|
+> | Context engineering | Which information the model receives on each call | Selecting and compacting instructions, retrieved evidence, history and tool results |
+> | Harness engineering | What the runtime allows a proposed action to do once the model emits it | Which tools exist, their permissions and credentials, call validation, sandboxing and approval gates |
+> | Loop engineering | Whether another turn happens and when the run stops | Progress and verification checks, iteration and cost budgets, and termination |
+> 
+> The boundaries touch. Tool schemas take up context and tool results feed later turns, so context engineering decides how much of them the model sees. Whether a tool such as `delete_branch` exists at all, and which policy approves its use, remains a harness decision.
+> 
+> Sources: [Anthropic: Effective context engineering for AI agents](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents)
 
 
 

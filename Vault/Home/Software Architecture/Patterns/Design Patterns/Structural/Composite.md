@@ -84,7 +84,7 @@ Adding `SubscriptionProduct` requires editing every method that branches on conc
 
 # Solution
 
-Define `IOrderComponent` for both `SingleProduct` and `ProductBundle`. Pricing then follows the tree through ordinary polymorphic calls:
+`SingleProduct` and `ProductBundle` both implement `IOrderComponent`. Pricing then follows the tree through ordinary polymorphic calls:
 
 ```csharp
 // Component interface — the uniform contract
@@ -180,9 +180,9 @@ Console.WriteLine($"Items: {workstationBundle.GetItemCount()}");
 
 # Pitfalls
 
-**Composite-only operations in the shared interface.** `Add()` and `Remove()` do not make sense for leaves. Putting them on `IOrderComponent` forces leaf implementations to reject valid-looking calls. Keep the shared contract limited to operations supported by every node, and expose child management on `ProductBundle`.
+**Composite-only operations in the shared interface.** `Add()` and `Remove()` do not make sense for leaves. Putting them on `IOrderComponent` forces leaf implementations to reject valid-looking calls. The shared contract should therefore contain only operations supported by every node, with child management exposed on `ProductBundle`.
 
-**Cycles.** A bundle that contains itself, directly or through descendants, makes recursive operations overflow the stack. Enforce acyclic structure when attaching children.
+**Cycles.** A bundle that contains itself, directly or through descendants, makes recursive operations overflow the stack. Acyclic structure must therefore be enforced when children are attached.
 
 **Repeated traversal.** `GetPrice()` walks the tree on every call. Large or frequently read trees may need cached aggregates with explicit invalidation. That optimization also makes mutation harder, so it belongs behind measurements.
 
@@ -200,13 +200,39 @@ Composite fits a genuine part-whole tree when callers need the same operation on
 
 # Questions
 
+> [!qard]- What is the Composite pattern?
+> Composite represents a part-whole tree so that clients treat a single object and a group of objects through the same interface. A leaf implements an operation directly. A composite implements the same operation by delegating to its children, which may be leaves or other composites, and combining their results.
+> 
+> Example: in a product catalog, `SingleProduct` and `ProductBundle` both implement `IOrderComponent.GetPrice()`. A product returns its own price. A bundle sums `GetPrice()` over its children and applies its discount, so a bundle of bundles is priced by the same call. A caller prices any item without checking whether it is a product or a bundle.
+> 
+> This removes repeated type checks such as `item is ProductBundle` from client code. A new leaf type, such as a subscription product, needs no changes to bundles or callers.
+> 
+> Limits:
+> 
+> - Child management such as `Add` and `Remove` makes sense only for composites. Putting it on the shared interface forces leaves to reject those calls.
+> - The tree must stay acyclic. A bundle that contains itself makes recursive operations overflow the stack.
+> - Composite fits a genuine part-whole hierarchy. A fixed model with two types may be clearer without it.
+> 
+> [[Home/Software Architecture/Patterns/Design Patterns/Structural/Composite#Solution|Composite: Solution]] · [[Home/Software Architecture/Patterns/Design Patterns/Structural/Composite#Pitfalls|Composite: Pitfalls]] · [[Home/Software Architecture/Patterns/Design Patterns/Structural/Composite#Tradeoffs|Composite: Tradeoffs]]
+
 <!-- qard-id: 8f4307a0-4159-4ab4-8545-5ebb68edea67 -->
 > [!qard]- How does Composite relate to the Visitor pattern?
-> Composite gives leaves and groups a common interface; a group delegates recursively to its children. Visitor adds operations across the node types without putting each operation on every node. The combination fits when the node set is stable and operations change more often than the tree structure. [[Home/Software Architecture/Patterns/Design Patterns/Structural/Composite#Solution|Composite solution]] · [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Visitor#Solution|Visitor solution]]
+> Composite and Visitor are complementary. Composite defines the structure of a part-whole tree, and Visitor defines operations over the node types in that tree, so the two can be combined.
+> 
+> - **Composite:** leaves and groups share one component interface. A group implements each operation by delegating to its children, so callers treat any node the same way.
+> - **Visitor:** each operation lives in a separate visitor that handles every node type, instead of being a method on every node class.
+> 
+> In a plain Composite, operations such as `GetPrice()` and `GetItemCount()` are members of the shared interface, so every node class must implement each new operation. Adding Visitor moves operations out of the nodes. That combination fits when the set of node types is stable and new operations are added more often than new node types.
+> 
+> [[Home/Software Architecture/Patterns/Design Patterns/Structural/Composite#Solution|Composite: Solution]] · [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Visitor#Solution|Visitor: Solution]]
 
 <!-- qard-id: f0a1848f-dec9-4f37-b624-65917ba18bca -->
 > [!qard]- When does a Composite tree become a performance problem?
-> A recursive operation visits nodes in the composite, so its work grows with the traversed tree. Measure the actual workload before caching totals or maintaining an aggregate during mutation; either optimization adds an invalidation or consistency rule. [[Home/Software Architecture/Patterns/Design Patterns/Structural/Composite#Solution|Composite solution]]
+> A Composite tree becomes a performance problem when recursive operations walk a large tree, or walk it very often, and measurements show that the repeated traversal is a significant cost. A call such as `GetPrice()` on a bundle visits every node below it each time it runs, so its work grows with the size of the traversed subtree.
+> 
+> One remedy is to cache an aggregate, such as a bundle's subtotal, or to keep it updated as the tree changes. That moves cost and risk to mutation: every change below a cached value must invalidate or update it, or reads return stale results. Because the optimization adds this consistency rule and makes mutation harder, measurements of the real workload justify it, not tree size alone.
+> 
+> [[Home/Software Architecture/Patterns/Design Patterns/Structural/Composite#Solution|Composite: Solution]] · [[Home/Software Architecture/Patterns/Design Patterns/Structural/Composite#Pitfalls|Composite: Pitfalls]]
 
 # References
 

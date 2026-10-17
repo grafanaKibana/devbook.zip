@@ -23,12 +23,12 @@ Those semantics are separate from the connection carrying them. HTTP/1.1, HTTP/2
 
 | Method | Intended semantics | Safe | Idempotent | Retry decision |
 |---|---|---|---|---|
-| `GET` | Transfer a current representation | Yes | Yes | Retry within the request deadline when replay is acceptable |
+| `GET` | Transfer a current representation | Yes | Yes | Retryable within the request deadline when replay is acceptable |
 | `HEAD` | Transfer GET metadata without response content | Yes | Yes | Same boundary as `GET` |
-| `POST` | Process content according to the target resource | No | No | Retry only with explicit dedupe/idempotency or proof it was not processed |
-| `PUT` | Create or replace the target state with the supplied representation | No | Yes | Preserve preconditions and reconcile an unknown first outcome |
-| `PATCH` | Apply a media-type-defined patch | No | Depends on patch | Retry only when the patch operation is idempotent or deduplicated |
-| `DELETE` | Remove the target association | No | Yes | Define repeat responses and reconcile uncertain completions |
+| `POST` | Process content according to the target resource | No | No | Retryable only with explicit dedupe/idempotency or proof it was not processed |
+| `PUT` | Create or replace the target state with the supplied representation | No | Yes | Retries keep their preconditions, and an unknown first outcome requires reconciliation |
+| `PATCH` | Apply a media-type-defined patch | No | Depends on patch | Retryable only when the patch operation is idempotent or deduplicated |
+| `DELETE` | Remove the target association | No | Yes | Repeat responses need a defined contract, and uncertain completions require reconciliation |
 
 Idempotency describes the intended server effect of repeated identical requests, not identical responses or freedom from races. If a conditional `PUT` commits but its response is lost, an identical retry can return `412 Precondition Failed` because the first request advanced the entity tag. The client should fetch or otherwise reconcile current state rather than remove `If-Match` and overwrite a concurrent change.
 
@@ -41,7 +41,7 @@ Idempotency describes the intended server effect of repeated identical requests,
 | 409 Conflict | Current resource state conflicts |
 | 412 Precondition Failed | `If-Match`/state precondition violated |
 | 422 Unprocessable Content | Syntax is understood, but the instructions cannot be processed |
-| 429 Too Many Requests | Apply retry policy and any `Retry-After` |
+| 429 Too Many Requests | Retry policy applies, and any `Retry-After` is honored |
 | 502 Bad Gateway | Gateway cannot consume upstream response |
 | 503 Service Unavailable | Server temporarily unable to handle the request, commonly overload or maintenance; `Retry-After` may bound retry timing |
 
@@ -84,10 +84,23 @@ app.MapPut("/orders/{id:long}", async (
     OrdersDb db,
     CancellationToken ct) =>
 {
-    if (!http.Headers.TryGetValue("If-Match", out var raw) ||
-        !long.TryParse(raw.ToString().Trim('"'), out var expectedVersion))
+    if (!http.Headers.TryGetValue("If-Match", out var raw))
     {
         return Results.StatusCode(StatusCodes.Status428PreconditionRequired);
+    }
+
+    // Restricted single-tag demonstration, not a complete If-Match evaluator.
+    // It accepts one canonical strong tag issued by this API, such as "17".
+    // Omitted RFC 9110 handling: a list matches when any member strongly matches
+    // the current tag, and "*" matches when the order exists. This sketch answers
+    // both forms with 412, even when full evaluation would succeed.
+    var tag = raw.ToString();
+    if (tag.Length < 3 ||
+        !long.TryParse(tag.AsSpan(1, tag.Length - 2), NumberStyles.None,
+            CultureInfo.InvariantCulture, out var expectedVersion) ||
+        tag != '"' + expectedVersion.ToString(CultureInfo.InvariantCulture) + '"')
+    {
+        return Results.StatusCode(StatusCodes.Status412PreconditionFailed);
     }
 
     var affected = await db.Database.ExecuteSqlInterpolatedAsync($"""
@@ -146,9 +159,9 @@ The primary cache key includes the target URI and method according to cache rule
 Vary: Accept-Encoding, Accept-Language
 ```
 
-Omitting a relevant field can cross-serve the wrong representation. Adding a high-cardinality field such as raw `User-Agent` can fragment the cache until reuse disappears. Normalize only according to an explicit application or intermediary contract. Arbitrary query sorting or decoding can change resource identity.
+Omitting a relevant field can cross-serve the wrong representation. Adding a high-cardinality field such as raw `User-Agent` can fragment the cache until reuse disappears. Normalization is safe only when an explicit application or intermediary contract defines it. Arbitrary query sorting or decoding can change resource identity.
 
-A shared cache normally cannot reuse a response to a request carrying `Authorization` unless the response explicitly permits shared reuse under RFC 9111. Even then, its key and representation must not mix identities. Keep private user data in a private cache, or use `no-store` when storage itself is unacceptable.
+A shared cache normally cannot reuse a response to a request carrying `Authorization` unless the response explicitly permits shared reuse under RFC 9111. Even then, its key and representation must not mix identities. Private user data belongs in a private cache, and `no-store` applies when storage itself is unacceptable.
 
 Caching pitfalls are contract failures rather than tuning details:
 
@@ -176,21 +189,21 @@ The client validates the certificate chain to a trusted root, the requested host
 
 ## Resumption and 0-RTT
 
-TLS 1.3 resumption can send early application data before the server completes the new handshake. An attacker can replay captured 0-RTT data to another accepting server instance. Reject early data or restrict it to operations whose replay is harmless under the complete application contract.
+TLS 1.3 resumption can send early application data before the server completes the new handshake. An attacker can replay captured 0-RTT data to another accepting server instance. Early data must therefore be rejected or restricted to operations whose replay is harmless under the complete application contract.
 
-HTTP method idempotency alone is insufficient. A repeated `GET` can consume a one-time token, emit an audit event, or trigger billing even though GET is defined as safe. Keep authentication, purchases, state transitions, and one-time links out of 0-RTT unless the application has explicit anti-replay state.
+HTTP method idempotency alone is insufficient. A repeated `GET` can consume a one-time token, emit an audit event, or trigger billing even though GET is defined as safe. Authentication, purchases, state transitions, and one-time links stay out of 0-RTT unless the application has explicit anti-replay state.
 
 ## HSTS and the First Visit
 
-`Strict-Transport-Security` tells a browser that received the header over valid HTTPS to rewrite future HTTP attempts to HTTPS for the stated `max-age`. `includeSubDomains` extends the policy, so enable it only when every covered host supports HTTPS.
+`Strict-Transport-Security` tells a browser that received the header over valid HTTPS to rewrite future HTTP attempts to HTTPS for the stated `max-age`. `includeSubDomains` extends the policy, so it is safe to enable only when every covered host supports HTTPS.
 
-HSTS cannot protect the first visit before the browser knows the policy. Browser preload lists close that gap for accepted domains, but preload is a long-lived operational commitment with removal delay. Redirect HTTP to HTTPS, send HSTS only over HTTPS, and treat preload readiness as a separate rollout gate.
+HSTS cannot protect the first visit before the browser knows the policy. Browser preload lists close that gap for accepted domains, but preload is a long-lived operational commitment with removal delay. A safe deployment redirects HTTP to HTTPS, sends HSTS only over HTTPS, and treats preload readiness as a separate rollout gate.
 
 ## TLS Interception and Trust Stores
 
 An enterprise or debugging proxy can inspect HTTPS only when the client trusts a CA controlled by that proxy. The proxy terminates one TLS connection and creates a second connection to the origin. The connections have different traffic keys. Hostname validation succeeds because the proxy issues a matching leaf certificate from the installed root.
 
-Treat trust-store modification as privileged configuration. Certificate pinning can narrow trust for controlled clients, but it increases rotation and recovery risk and is not a general browser defense.
+Trust-store modification is privileged configuration. Certificate pinning can narrow trust for controlled clients, but it increases rotation and recovery risk and is not a general browser defense.
 
 # Connection Pooling, DNS, and HTTP Versions in .NET
 
@@ -222,27 +235,27 @@ DNS TTL does not close an established connection. `PooledConnectionLifetime` lim
 
 ## HTTP Version Policy
 
-The default request version remains HTTP/1.1. Set both the desired version and `HttpVersionPolicy` when the application requires a specific negotiation boundary:
+The default request version remains HTTP/1.1. When the application requires a specific negotiation boundary, it sets both the desired version and `HttpVersionPolicy`:
 
 | Policy | Behavior |
 |---|---|
-| `RequestVersionExact` | Fail when the requested version cannot be used |
-| `RequestVersionOrLower` | Prefer the requested version and fall back |
-| `RequestVersionOrHigher` | Use the requested version or negotiate upward |
+| `RequestVersionExact` | Fails when the requested version cannot be used |
+| `RequestVersionOrLower` | Prefers the requested version and falls back |
+| `RequestVersionOrHigher` | Uses the requested version or negotiates upward |
 
-HTTP/2 and HTTP/3 support also depends on TLS/ALPN, operating system, server, proxy, and runtime capabilities. Record the negotiated response version when protocol behavior matters.
+HTTP/2 and HTTP/3 support also depends on TLS/ALPN, operating system, server, proxy, and runtime capabilities. When protocol behavior matters, diagnostics record the negotiated response version.
 
 ## Deadlines, Retries, and Caller Load
 
-Separate connect, request, and caller cancellation budgets. A single broad timeout hides whether time was spent waiting for a pool slot, connecting, receiving headers, or streaming content.
+Connect, request, and caller cancellation need separate budgets. A single broad timeout hides whether time was spent waiting for a pool slot, connecting, receiving headers, or streaming content.
 
 Retry policy is a contract:
 
-- Retry transient failures within one end-to-end deadline.
+- Retries of transient failures stay within one end-to-end deadline.
 - An idempotent method reduces state risk but does not prove replay safety. Request bodies, one-time credentials, downstream effects, and unknown commit results still matter.
 - Non-idempotent operations need an application idempotency key with durable deduplication before automatic retry.
 
-Dispose `HttpResponseMessage` and stream large bodies with `HttpCompletionOption.ResponseHeadersRead` so connections return to the pool after content consumption. Bound concurrency: an unbounded caller queue can overload the destination even when the handler limits open connections.
+Connections return to the pool after content consumption when `HttpResponseMessage` is disposed and large bodies are streamed with `HttpCompletionOption.ResponseHeadersRead`. Concurrency also needs a bound: an unbounded caller queue can overload the destination even when the handler limits open connections.
 
 # HTTP API Interoperability
 
@@ -250,8 +263,21 @@ Dispose `HttpResponseMessage` and stream large bodies with `HttpCompletionOption
 
 # Questions
 
-> [!qard]- What does HTTP idempotency guarantee when a retry is considered?
-> An idempotent method has the same intended effect on the server when the same request is repeated as when it is sent once. That permits retrying after a communication failure even when the first outcome is unknown; it does not promise identical responses or erase unrelated side effects. The request must still be replayable within its deadline, with credentials and application effects handled safely. [RFC 9110: Idempotent methods](https://www.rfc-editor.org/rfc/rfc9110.html#section-9.2.2)
+<!-- qard-id: 4c4c1b1f-db4e-4e7a-98e9-c9a49ac03838 -->
+> [!qard]- What does HTTP idempotency guarantee about retrying a request?
+> An idempotent HTTP method guarantees that sending the same request several times has the same intended effect on the server as sending it once. A client can therefore resend such a request after a communication failure, for example when the connection closes before the response arrives, even though the first attempt may already have succeeded.
+> 
+> `PUT`, `DELETE` and the safe methods, such as `GET` and `HEAD`, are idempotent. `POST` is not.
+> 
+> The guarantee is narrower than identical behavior:
+> 
+> - **Responses can differ.** A retried `DELETE` leaves the resource deleted, but the second response can report that the resource no longer exists.
+> - **Only the requested effect is covered.** The server can still log, audit or record history separately for each copy of the request.
+> - **Method semantics do not make a particular retry harmless.** The request body must be replayable, the retry must fit within the caller's deadline and credentials must still be valid. A request that carries a single-use value, such as a one-time token, cannot simply be replayed.
+> 
+> For a non-idempotent method such as `POST`, an automatic retry is appropriate only when the client knows the operation is idempotent for that resource or can detect that the first attempt was never applied.
+> 
+> [RFC 9110: Idempotent methods](https://www.rfc-editor.org/rfc/rfc9110.html#section-9.2.2)
 
 # References
 

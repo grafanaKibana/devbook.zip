@@ -46,13 +46,13 @@ Tool design is API design for a probabilistic caller that sees only the supplied
 
 **Naming.** The name should identify the operation and its domain. `search_company_directory` carries more selection signal than `search`. `get_weather_forecast` is clearer than `get_data`. Generic names make unrelated tools look interchangeable.
 
-**Descriptions.** State the operation, its output, and the boundary where another tool is appropriate. For example: "Search employees by name or department. Contractor records are in `search_contractor_database`." The negative boundary matters when two tools have overlapping vocabulary.
+**Descriptions.** A useful description states the operation, its output, and the boundary where another tool is appropriate. For example: "Search employees by name or department. Contractor records are in `search_contractor_database`." The negative boundary matters when two tools have overlapping vocabulary.
 
-**Parameters.** Prefer a small, flat schema. Use an enum such as `{"type": "string", "enum": ["celsius", "fahrenheit"]}` when the implementation accepts a closed set. Required fields and formats need explicit descriptions. Deeply nested inputs and overlapping optional fields create more ways to produce a syntactically valid but meaningless call.
+**Parameters.** A small, flat schema is easier to call correctly. An enum such as `{"type": "string", "enum": ["celsius", "fahrenheit"]}` fits when the implementation accepts a closed set. Required fields and formats need explicit descriptions. Deeply nested inputs and overlapping optional fields create more ways to produce a syntactically valid but meaningless call.
 
-**Return values.** Send the fields needed for the next decision, not an entire database record by default. Stable result shapes reduce parsing work across tools. Keep identifiers that a later call may need, even if they are not part of the final answer.
+**Return values.** A result carries the fields needed for the next decision, not an entire database record by default. Stable result shapes reduce parsing work across tools. Identifiers that a later call may need stay in the result, even if they are not part of the final answer.
 
-**Errors.** Return a machine-readable code plus enough detail to recover. `{"error": "invalid_date_format", "message": "Expected YYYY-MM-DD, got '12/25/2024'", "hint": "Reformat as 2024-12-25"}` gives the next [[Agent Loop|loop iteration]] a concrete repair. Internal details and secrets stay in server logs. The model receives a safe explanation.
+**Errors.** An error carries a machine-readable code plus enough detail to recover. `{"error": "invalid_date_format", "message": "Expected YYYY-MM-DD, got '12/25/2024'", "hint": "Reformat as 2024-12-25"}` gives the next [[Agent Loop|loop iteration]] a concrete repair. Internal diagnostic details stay in protected server logs, with secrets excluded or redacted before logging. The model receives a safe explanation.
 
 In the Microsoft Agent Framework (.NET), a well-designed tool looks like this:
 
@@ -94,7 +94,7 @@ Model-generated arguments will vary. A tool can normalize harmless representatio
 
 Useful patterns include:
 
-- **Canonical parsing.** Accept equivalent unambiguous formats, then convert them to one internal representation. Relative dates such as "tomorrow" require an explicit time zone and reference clock. Otherwise they should be rejected or resolved by the host first.
+- **Canonical parsing.** The tool accepts equivalent unambiguous formats, then converts them to one internal representation. Relative dates such as "tomorrow" require an explicit time zone and reference clock. Otherwise they should be rejected or resolved by the host first.
 - **Defaults.** An optional search `limit` can default to 10. Defaults should be visible in the schema and safe for cost or side effects.
 - **Boundary responses.** A request for page 999 of a 10-page result set can return an empty page with the valid range instead of an opaque exception.
 
@@ -104,13 +104,13 @@ Normalization should remove representational friction without guessing intent. V
 
 Tool failures become model input and can redirect the rest of a run. Failure must be explicit, bounded, and safe to reason about.
 
-**Structured errors.** The runtime must translate exceptions into a stable result because the model sees only serialized messages. Include the failed operation and whether retrying can help. Avoid stack traces or sensitive backend details.
+**Structured errors.** The runtime must translate exceptions into a stable result because the model sees only serialized messages. The result names the failed operation and whether retrying can help, without stack traces or sensitive backend details.
 
 **Retry safety.** A timeout leaves the caller unsure whether a side effect happened. State-changing tools should accept an idempotency key or use another deduplication mechanism so a retry cannot create a second record, email, or charge.
 
 **Timeouts.** Every external call needs a deadline. Partial results are valid only when the contract labels them clearly, for example `{"status": "partial", "results": [...], "message": "Query timed out after 5s, returning first 50 results"}`. For writes, an unknown outcome is different from failure and must be reported as such.
 
-**Validation before execution.** Check syntax, authorization, and business invariants before performing a side effect. A valid email address is not enough. The caller may also need permission to contact that recipient.
+**Validation before execution.** Syntax, authorization, and business invariants are checked before a side effect is performed. A valid email address is not enough. The caller may also need permission to contact that recipient.
 
 # Caching
 
@@ -120,13 +120,13 @@ Caching applies at two different boundaries: tool results and model-input prefix
 
 **Prompt prefixes.** Stable system instructions and tool definitions are good candidates for provider prompt caching. This can reduce billed input and latency on repeated prefixes, though the exact savings depend on provider rules and cache hits. Tool order and schema text need to remain stable for the prefix to match. [[Home/AI & ML/LLM/LLM Caching#Prompt Caching|Prompt Caching]] covers boundary placement and checks that SDK serialization preserves the cache configuration.
 
-Do not cache a mutation as if it were a read. A repeated `create_ticket` call needs idempotent execution semantics, not a cached success message. For reads, the cache key must include tenant and authorization context or it can leak data between callers.
+A mutation must not be cached as if it were a read. A repeated `create_ticket` call needs idempotent execution semantics, not a cached success message. For reads, the cache key must include tenant and authorization context or it can leak data between callers.
 
 # Pitfalls
 
 ## Over-Parameterized Tools
 
-A tool with 15 loosely related parameters is hard to call correctly. Split it when different operations need different descriptions or permission checks. Do not split mechanically: hundreds of tiny tools create a selection problem of their own.
+A tool with 15 loosely related parameters is hard to call correctly. Splitting it helps when different operations need different descriptions or permission checks. Mechanical splitting does not: hundreds of tiny tools create a selection problem of their own.
 
 ## Poor Descriptions That Mislead the Model
 
@@ -134,11 +134,11 @@ Descriptions such as "Processes data" provide no selection signal. A useful desc
 
 ## Tools with Hidden Side Effects
 
-A `get_user_profile` tool that also updates "last accessed" is not a read, despite its name. The model may call it while gathering context and trigger an unintended write. Keep query tools free of business side effects. The separation mirrors [[CQRS]].
+A `get_user_profile` tool that also updates "last accessed" is not a read, despite its name. The model may call it while gathering context and trigger an unintended write. Query tools stay free of business side effects. The separation mirrors [[CQRS]].
 
 ## Context Degradation from Large Toolsets
 
-Large tool sets consume context and make selection harder. MCPGauge (Song et al., 2025) tested six commercial models across 30 MCP tool suites and reported an average **9.5% accuracy drop** with tool context present. Code generation saw the largest drop at 17%. Input-token overhead ranged from 3.25× to 236.5× in the benchmark. These are workload-specific measurements, not universal constants, but they make indiscriminate schema injection hard to justify.
+Large tool sets consume context and make selection harder. MCPGauge (Song et al., 2025) tested six commercial models across 30 MCP tool suites and reported an average **9.5% accuracy drop** when MCP integration was added. Code generation saw the largest drop at 17%. Input-token overhead ranged from 3.25× to 236.5× in the benchmark. These measurements cover MCP integration as a whole, including the context it brought into the window, rather than tool schemas in isolation. They are workload-specific, not universal constants, but they show that tool context can carry a real accuracy and token cost.
 
 Several mechanisms contribute:
 
@@ -150,9 +150,9 @@ Several mechanisms contribute:
 
 | Technique | How it works | Best for |
 |---|---|---|
-| **On-demand tool search** | Register tools for deferred loading, then retrieve a relevant subset per request. Anthropic reports an 85% reduction in one published example, not a general guarantee. | Evaluate when the catalog reaches roughly 10 tools, schema definitions exceed about 10K tokens, or selection errors appear. Measure retrieval recall and added latency. |
+| **On-demand tool search** | Register tools for deferred loading, then retrieve a relevant subset per request. Anthropic reports an 85% reduction in one published example, not a general guarantee. | Worth evaluating once the catalog reaches roughly 10 tools, schema definitions exceed about 10K tokens, or selection errors appear. The evaluation measures retrieval recall and added latency. |
 | **RAG over tool descriptions** | Embed descriptions and retrieve top-k by semantic similarity. | Large or changing catalogs where retrieval quality can be evaluated against labeled tool-selection cases. |
-| **Middleware filtering** | Inject tools from conversation state, user role, or workflow stage. | Deterministic policy boundaries. Measure false exclusions and rule-maintenance cost. |
+| **Middleware filtering** | Inject tools from conversation state, user role, or workflow stage. | Deterministic policy boundaries, evaluated by false exclusions and rule-maintenance cost. |
 | **Tool consolidation** | Group closely related operations under one tool with an `action` enum (e.g., `github_pr` with `create\|review\|merge`). | Operations that share context and permissions without creating a wide optional-parameter schema. |
 | **Two-stage routing** | Classify the request into a tool category, then expose only that category. | Separable domains where router recall and routing latency clear the task gate. |
 | **Code generation** | Replace N tool schemas with a single `execute_code` tool + API docs. The model writes code that calls the available APIs. | Open-ended data/code tasks |
@@ -162,18 +162,46 @@ Several mechanisms contribute:
 
 | Design choice | Option A | Option B | Decision criteria |
 |---|---|---|---|
-| **Tool granularity** | Few broad tools with many parameters | Many narrow tools with focused purpose | Narrow tools can simplify an individual call, while a larger catalog can increase selection difficulty; measure both on representative tasks. Split when use cases need genuinely different descriptions. Keep together when they share context. |
-| **Representation normalization** | Accept only a canonical form | Accept safe, unambiguous variants and convert them | Choose based on ambiguity and maintenance cost. Every caller still passes syntax, authorization, and business-invariant validation before execution. |
-| **Caching strategy** | Aggressive — cache all tool results with TTL | Conservative — execute every call fresh | Aggressive caching cuts latency and cost but risks stale data. Cache read-only tools with short TTLs. Never cache state-mutating tools. |
+| **Tool granularity** | Few broad tools with many parameters | Many narrow tools with focused purpose | Narrow tools can simplify an individual call, while a larger catalog can increase selection difficulty; both are measured on representative tasks. Use cases that need genuinely different descriptions are split, and those that share context stay together. |
+| **Representation normalization** | Accept only a canonical form | Accept safe, unambiguous variants and convert them | The choice depends on ambiguity and maintenance cost. Every caller still passes syntax, authorization, and business-invariant validation before execution. |
+| **Caching strategy** | Aggressive — cache all tool results with TTL | Conservative — execute every call fresh | Aggressive caching cuts latency and cost but risks stale data. Read-only tools can be cached with short TTLs; state-mutating tools are never cached. |
 | **Return verbosity** | Full result payload | Minimal fields needed for next step | Minimal returns save context tokens and reduce attention dilution. Full returns are only justified when the model needs to branch on fields that are hard to predict upfront. |
 
 # Questions
 
+<!-- qard-id: 1ae0756c-dd19-4930-bc8c-5588680c4326 -->
 > [!qard]- When should repeated agent failures be fixed in a tool contract instead of the prompt?
-> Repair the tool contract when the same selection, argument, or error-handling failure recurs across requests that share the tool. Clear names and schemas, actionable errors, and useful results change the interface every call receives. A prompt can clarify task intent, but a prompt workaround remains dependent on the model remembering that exception. Evaluate the change on representative tool tasks. [Writing effective tools for AI agents](https://www.anthropic.com/engineering/writing-tools-for-agents)
+> A failure belongs in the tool contract when it recurs across different requests that use the same tool: the wrong tool is selected, arguments are malformed, or errors are not recovered from. A pattern that repeats across requests points to the interface, not to one request's wording. The contract is part of every call to that tool, so a change there reaches all later calls. A prompt workaround works only when the model remembers and follows the exception.
+> 
+> Reaching every call does not guarantee that the failure stops. Rerunning representative tool tasks and comparing selection, argument and recovery failures before and after the change shows whether it actually helps.
+> 
+> Contract-level fixes include:
+> 
+> - **Names and descriptions** that state what the tool does, what it returns and when a different tool fits.
+> - **Parameters** with explicit formats, enums and required fields, leaving fewer ways to produce a call that parses but means nothing.
+> - **Errors** that say what failed and how to correct the call, so the next attempt has a concrete repair.
+> - **Results** that contain the fields the next step needs, including identifiers a later call may use.
+> 
+> For example, Anthropic reported that its SWE-bench agent made mistakes with relative file paths after moving out of the root directory. It also reported that those mistakes stopped once the tool was changed to always require absolute paths.
+> 
+> The prompt remains the place for task intent and for instructions specific to one request.
+> 
+> Sources: [Writing effective tools for AI agents (Anthropic)](https://www.anthropic.com/engineering/writing-tools-for-agents) · [Building effective agents (Anthropic)](https://www.anthropic.com/engineering/building-effective-agents)
 
+<!-- qard-id: d192b24b-4e3d-4bd7-afe9-363b687b7d2f -->
 > [!qard]- What determines whether related operations should use one broad tool or several narrower tools?
-> Separate operations when they need different permissions, input schemas, or descriptions, or when one broad schema accumulates unrelated optional fields. A single tool can remain clearer for closely related actions that share one contract. Narrower tools can simplify each argument but enlarge the selection set; that tradeoff depends on the task distribution and exposed catalog. Measure tool selection and argument correctness separately before changing the surface. [Writing effective tools for AI agents](https://www.anthropic.com/engineering/writing-tools-for-agents)
+> The deciding factor is whether the operations share one contract. Operations that need different permissions, input schemas or descriptions belong in separate tools. Closely related actions that share context, permissions and arguments can stay in one tool.
+> 
+> | Signal | Points toward | Reason |
+> |---|---|---|
+> | Different permission checks | Separate tools | Each tool can be authorized and exposed on its own. |
+> | One schema collecting unrelated optional fields | Separate tools | Fewer argument combinations remain that are valid JSON but meaningless as a request. |
+> | Actions sharing context, permissions and arguments | One tool | A single description and schema cover them without unrelated options. |
+> | Many similar or overlapping tools already exposed | Fewer, clearer tools | Each additional tool is another option the model must tell apart, so selection errors can rise. |
+> 
+> Narrower tools usually simplify each call's arguments but enlarge the set the model chooses from. The net effect depends on the real task mix and the whole exposed catalog, so it is measured rather than assumed. Tracking tool-selection accuracy and argument correctness separately on representative tasks shows which failure a change actually reduces.
+> 
+> Source: [Writing effective tools for AI agents (Anthropic)](https://www.anthropic.com/engineering/writing-tools-for-agents)
 
 # References
 

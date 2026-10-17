@@ -43,7 +43,7 @@ Many systems keep a relational source of truth and add one specialized read path
 
 Block, file, and object storage differ in the unit the application controls. The workload depends on that contract, not the provider label.
 
-| Concern | Block storage | File storage | [[Home/Data Persistence/Object Storage|Object Storage]] |
+| Concern | Block storage | File storage | [[Home/Data Persistence/Object Storage\|Object Storage]] |
 | --- | --- | --- | --- |
 | Access unit | Addressed blocks presented as a volume | Files and directories through a filesystem protocol | Whole objects addressed by bucket/container and key |
 | Namespace owner | Attached host or storage-aware application formats and manages it | Filesystem manages hierarchical paths, permissions, and locks | Service manages a flat keyspace. Clients emulate folders with prefixes |
@@ -59,14 +59,14 @@ A database volume normally needs block storage for low-latency random I/O and cr
 
 # Database Performance Diagnosis before Scaling
 
-Start with the slow request and account for its time. Suppose `GET /orders/42` regresses from 80 ms to 600 ms at p95:
+Diagnosis starts with the slow request and accounts for its time. Suppose `GET /orders/42` regresses from 80 ms to 600 ms at p95:
 
-1. Split request time into pool wait, query execution, lock wait, network, serialization, and downstream calls. Correlate the same interval with CPU, memory, IOPS, connection count, cache hit rate, rows scanned, and replication lag.
-2. Capture the actual SQL and representative parameters. Use the engine's plan tooling, such as PostgreSQL `EXPLAIN (ANALYZE, BUFFERS)`, to compare estimated rows, actual rows, scans, joins, spills, and I/O.
-3. Fix the smallest demonstrated cause: return fewer columns/rows, remove an N+1 path, add or correct an index, shorten a transaction, or change a schema/query shape. Re-run the same trace and load.
-4. If requests wait for connections while the database is healthy, correct leaks and size [[Home/Data Persistence/Connection Pooling|the pool]] against the whole fleet. A larger pool does not repair saturated storage or lock contention.
-5. Add the persistence-layer [[Home/Data Persistence/Caching|cache]] or a materialized read model only when repeated reads tolerate a declared freshness window. Add [[Home/Data Persistence/SQL/Replication|read replicas]] when reads dominate and replica lag is acceptable.
-6. Scale the node after the query path is sound. Partition or [[Home/Data Persistence/SQL/Sharding|shard]] only when one node's measured capacity, data size, or failure/recovery boundary remains the limiter.
+1. Request time is split into pool wait, query execution, lock wait, network, serialization, and downstream calls. The same interval is correlated with CPU, memory, IOPS, connection count, cache hit rate, rows scanned, and replication lag.
+2. The actual SQL and representative parameters are captured. The engine's plan tooling, such as PostgreSQL `EXPLAIN (ANALYZE, BUFFERS)`, is used to compare estimated rows, actual rows, scans, joins, spills, and I/O.
+3. The fix targets the smallest demonstrated cause: returning fewer columns/rows, removing an N+1 path, adding or correcting an index, shortening a transaction, or changing a schema/query shape. The same trace and load are then re-run.
+4. If requests wait for connections while the database is healthy, the fix corrects leaks and sizes [[Home/Data Persistence/Connection Pooling|the pool]] against the whole fleet. A larger pool does not repair saturated storage or lock contention.
+5. Read offloading adds the persistence-layer [[Home/Data Persistence/Caching|cache]] or an asynchronously refreshed read model only when repeated reads tolerate a declared freshness window. A materialized view that the database updates as part of each base-table write, such as a SQL Server indexed view, stays current but makes those writes more expensive. Adding [[Home/Data Persistence/SQL/Replication|read replicas]] is justified when reads dominate and replica lag is acceptable.
+6. The node is scaled after the query path is sound. The decision to partition or [[Home/Data Persistence/SQL/Sharding|shard]] is justified only when one node's measured capacity, data size, or failure/recovery boundary remains the limiter.
 
 ![[Data Persistence/Data Persistence-Data Persistence-18120000-2.png|theme-aware]]
 
@@ -74,16 +74,16 @@ This sequence keeps the diagnosis tied to evidence. Jumping to cache, replicas, 
 
 # Database Scaling Escalation Ladder
 
-Move down this ladder only when the previous step still misses a concrete load, latency, or recovery target.
+Each step down this ladder is justified only when the previous step still misses a concrete load, latency, or recovery target.
 
 | Step | Diagnostic trigger | What it buys | Cost introduced |
 | --- | --- | --- | --- |
 | Query and access-path repair | High rows scanned, bad estimates, N+1 calls, lock waits, or unnecessary payload | More capacity from the existing system without changing its consistency model | Indexes add write/storage cost. Query/schema changes need regression tests |
 | Materialized view or denormalized read model | Stable expensive join/aggregate dominates reads | Precomputed reads with predictable shape | Refresh logic, duplicate data, and a freshness boundary |
 | Vertical scaling | CPU, RAM, or storage throughput is saturated after query repair | Same data model and transaction boundary on a larger node | Higher failure concentration, finite ceiling, and larger restart/recovery events |
-| [[Home/Data Persistence/Caching|Caching]] | Repeated reads tolerate staleness and origin load is the bottleneck | Lower read latency and fewer origin requests | Invalidation, stampedes, eviction, and stale answers |
-| [[Home/Data Persistence/SQL/Replication|Read replicas]] | Reads dominate. Primary writes are healthy | More read capacity and additional failover options | Replication lag, read-your-writes routing, promotion, and replica cost |
-| [[Home/Data Persistence/SQL/Sharding|Sharding]] | One writer or data set exceeds the largest acceptable node | Horizontal write/storage distribution | Shard-key constraints, resharding, hot shards, and cross-shard transaction/query work |
+| [[Home/Data Persistence/Caching\|Caching]] | Repeated reads tolerate staleness and origin load is the bottleneck | Lower read latency and fewer origin requests | Invalidation, stampedes, eviction, and stale answers |
+| [[Home/Data Persistence/SQL/Replication\|Read replicas]] | Reads dominate. Primary writes are healthy | More read capacity and additional failover options | Replication lag, read-your-writes routing, promotion, and replica cost |
+| [[Home/Data Persistence/SQL/Sharding\|Sharding]] | One writer or data set exceeds the largest acceptable node | Horizontal write/storage distribution | Shard-key constraints, resharding, hot shards, and cross-shard transaction/query work |
 
 Several steps may be necessary, but their guarantees accumulate. A cached read from a lagging replica has two freshness delays. A denormalized view across shards needs an explicit delivery and replay protocol.
 
@@ -91,12 +91,12 @@ Several steps may be necessary, but their guarantees accumulate. A cached read f
 
 | Need | Pattern | Mechanism | Cost to accept |
 | --- | --- | --- | --- |
-| Lower latency for repeated reads | [[Home/Data Persistence/Caching|Cache-aside]] | Read cache first. Load from the source on miss. Invalidate after source writes | Staleness window, miss storms, eviction, and another failure mode |
-| Precompute expensive derived reads | Materialized view | Store a query result or projection and refresh it on a schedule or change | Refresh lag, extra storage, and failed/duplicate update handling |
-| Separate read and write models | [[Home/Software Architecture/Patterns/Architectural Patterns/CQRS|CQRS]] | Commands update a write model. Queries use an independently shaped read model | Synchronization, messaging, and consistency boundaries |
-| Keep historical source of truth | [[Home/Software Architecture/Patterns/Architectural Patterns/Event Sourcing|Event Sourcing]] | Append events and rebuild current state by replay or snapshots | Schema evolution, replay cost, idempotency, and irreversible event history |
-| Support an alternate lookup | [[Home/Data Persistence/SQL/Indexes|Index table or secondary index]] | Maintain another key-to-record path for a known query | Every write must update it. Rebuilds and uniqueness need a protocol |
-| Distribute data and write load | [[Home/Data Persistence/SQL/Sharding|Sharding]] | Route each partition key to one shard | Cross-shard work, resharding, skew, and hot keys |
+| Lower latency for repeated reads | [[Home/Data Persistence/Caching\|Cache-aside]] | Reads check the cache first. Misses load from the source. Cache entries are invalidated after source writes | Staleness window, miss storms, eviction, and another failure mode |
+| Precompute expensive derived reads | Materialized view | A query result or projection is stored and refreshed on a schedule or change | Refresh lag, extra storage, and failed/duplicate update handling |
+| Separate read and write models | [[Home/Software Architecture/Patterns/Architectural Patterns/CQRS\|CQRS]] | Commands update a write model. Queries use an independently shaped read model | Synchronization, messaging, and consistency boundaries |
+| Keep historical source of truth | [[Home/Software Architecture/Patterns/Architectural Patterns/Event Sourcing\|Event Sourcing]] | Events are appended, and current state is rebuilt by replay or snapshots | Schema evolution, replay cost, idempotency, and irreversible event history |
+| Support an alternate lookup | [[Home/Data Persistence/SQL/Indexes\|Index table or secondary index]] | Another key-to-record path is maintained for a known query | Every write must update it. Rebuilds and uniqueness need a protocol |
+| Distribute data and write load | [[Home/Data Persistence/SQL/Sharding\|Sharding]] | Each partition key is routed to one shard | Cross-shard work, resharding, skew, and hot keys |
 
 ![[Data Persistence/Data Persistence-Data Persistence-18120000.png|theme-aware]]
 
@@ -106,7 +106,27 @@ The categories overlap. CQRS may use materialized views, event sourcing may feed
 
 <!-- qard-id: dcef06ab-abdb-45d7-9cad-1d74f4b02856 -->
 > [!qard]- What determines whether a service should use relational or non-relational storage?
-> Start with the invariants, transaction scope, and queries the service must support. Relational storage is a strong fit when constraints, joins, multi-record transactions, or changing query combinations matter. A specialized store fits when its access pattern clearly dominates and its consistency, query, recovery, and operational limits are acceptable. A relational source of truth plus a specialized read path can be useful when the latter solves a measured need and its synchronization cost is owned. [Microsoft: Understand data store models](https://learn.microsoft.com/en-us/azure/architecture/data-guide/technology-choices/understand-data-store-models)
+> Three needs determine the choice: the invariants the data must keep, the scope of the transactions that protect them, and the queries the service must answer. These needs are judged against a concrete engine's consistency, query, recovery and operational limits.
+> 
+> - **Relational storage** is the usual default when correctness depends on constraints, joins, transactions across several records, or query combinations that keep changing. The database enforces those rules close to the data, and a new query can usually be expressed without reshaping storage.
+> - **A specialized non-relational store** fits when one access pattern clearly dominates and the engine's consistency, query and recovery limits are acceptable for that workload. Typical patterns are lookup by key, reading and replacing a whole document, relationship traversal and full-text relevance.
+> - **A combination** keeps a relational source of truth and adds one specialized read path, such as a search index or cache, when that path solves a measured need. Each added store brings synchronization and recovery work that must have an owner.
+> 
+> [Microsoft: Understand data store models](https://learn.microsoft.com/en-us/azure/architecture/data-guide/technology-choices/understand-data-store-models)
+
+> [!qard]- How should a slow database-backed request be diagnosed before scaling the database?
+> Diagnosis measures where the slow request spends its time and fixes the smallest demonstrated cause. It moves to read offloading or larger infrastructure only when a measured limit remains.
+> 
+> 1. **Time breakdown:** the request's latency is split into pool wait, query execution, lock wait, network, serialization and downstream calls. The same interval is correlated with database CPU, memory, I/O, connection count, rows scanned and replication lag.
+> 2. **Actual query and plan:** the real SQL with representative parameters goes through the engine's plan tooling, such as PostgreSQL `EXPLAIN (ANALYZE, BUFFERS)`. Estimated and actual rows, scans, joins, spills and I/O show where the work goes.
+> 3. **Smallest demonstrated fix:** typical fixes return fewer rows or columns, remove an N+1 path, add or correct an index, shorten a transaction, or change the query or schema shape. The same trace and load are then rerun to confirm the effect.
+> 4. **Pool check:** connection waits while the database is healthy point to leaks, long checkouts or fleet-wide pool sizing. A larger pool does not repair saturated storage or lock contention.
+> 5. **Read offloading:** a cache, or a read model refreshed asynchronously from the source, fits only when repeated reads tolerate a declared staleness window. A materialized view that the database updates as part of each base-table write, such as a SQL Server indexed view, stays current but makes those writes more expensive. Read replicas fit when reads dominate and replica lag is acceptable.
+> 6. **Capacity changes:** the node is scaled after the query path is sound. Partitioning or sharding is justified only when one node's measured capacity, data size or recovery boundary is still the limit.
+> 
+> Jumping straight to caches, replicas or shards can improve one graph while adding stale reads or duplicated writes that hide the original defect.
+> 
+> [PostgreSQL: Using EXPLAIN](https://www.postgresql.org/docs/current/using-explain.html) · [SQL Server: Create indexed views](https://learn.microsoft.com/en-us/sql/relational-databases/views/create-indexed-views?view=sql-server-ver17)
 
 # References
 

@@ -65,7 +65,7 @@ public sealed class Order
 
 ## Treating Information Expert as an Absolute
 
-Putting every calculation on the object that holds the data can produce a domain object that also performs I/O, coordinates other aggregates, or imports infrastructure concerns. Information Expert identifies a strong candidate, not an automatic winner. Keep behavior on `Order` when it depends on `Order` state. Move cross-aggregate policy or external communication behind a separate collaborator.
+Putting every calculation on the object that holds the data can produce a domain object that also performs I/O, coordinates other aggregates, or imports infrastructure concerns. Information Expert identifies a strong candidate, not an automatic winner. Behavior that depends on `Order` state stays on `Order`. Cross-aggregate policy or external communication belongs behind a separate collaborator.
 
 # Tradeoffs
 
@@ -111,13 +111,36 @@ public sealed class CsvReportGenerator : IReportGenerator
 
 <!-- qard-id: 71b3b8bb-0597-491f-99ec-b6c24e7cf3ed -->
 > [!qard]- How does Information Expert reduce coupling, and when should another principle override it?
-> Information Expert places behavior with the object that has the information needed to perform it, avoiding callers that extract data and duplicate its rule. Move the work when that would pull infrastructure into a domain object, coordinate multiple aggregates, or create unrelated responsibilities; Low Coupling or Pure Fabrication can justify a separate collaborator. [[Home/Software Architecture/Patterns/Design Patterns/GRASP#The Nine Principles|GRASP principles]] · [[Home/Software Architecture/Patterns/Design Patterns/GRASP#Treating Information Expert as an Absolute|Information Expert limits]]
+> Information Expert assigns a responsibility to the object that already holds the information needed to perform it. This reduces coupling because callers no longer reach into that object's data to apply its rule themselves. They depend only on the result, and the rule lives in one place instead of being duplicated by each caller.
+> 
+> **Example:** `Order` owns its line items, so `Order.Total` calculates the total. An `OrderService` that summed `order.LineItems` itself would depend on the internal structure of `Order`, and other callers could repeat the same calculation.
+> 
+> Information Expert identifies a strong candidate, not an automatic winner. Another principle should prevail when keeping the behavior on the data holder would:
+> 
+> - **Pull infrastructure into a domain object:** behavior that needs I/O, such as persistence or sending email, belongs in a separate collaborator. Pure Fabrication justifies such a non-domain object, for example a mapper or a gateway.
+> - **Coordinate several aggregates:** a policy that needs information beyond one object's boundary fits a separate collaborator that coordinates them.
+> - **Add a dependency across a module or layer boundary:** Low Coupling favors keeping that dependency out of the object, even though the object has the data.
+> - **Give the object unrelated responsibilities:** High Cohesion favors keeping its responsibilities closely related.
+> 
+> Behavior that depends only on the object's own state and invariants stays with that object.
+> 
+> [Craig Larman: Applying UML and Patterns, Information Expert (sample chapter)](https://www.informit.com/content/images/0130925691/samplechapter/0130925691.pdf) · [[Home/Software Architecture/Patterns/Design Patterns/GRASP#The Nine Principles|GRASP principles]] · [[Home/Software Architecture/Patterns/Design Patterns/GRASP#Treating Information Expert as an Absolute|Information Expert limits]] · [[Home/Software Architecture/Patterns/Design Patterns/GRASP#Tradeoffs|GRASP tradeoffs]]
 
 <!-- qard-id: 0743ad5d-e901-45e4-8fc2-a194248e031c -->
 > [!qard]- How does GRASP differ from SOLID?
-> GRASP is a set of guidelines for assigning responsibilities among collaborating objects—who should create, know, or coordinate the work. SOLID describes broader properties of class design and dependency direction. They overlap in concerns such as cohesion, coupling, and variation but start from different questions. [[Home/Software Architecture/Patterns/Design Patterns/GRASP#The Nine Principles|GRASP principles]] · [[Home/Software Design/Principles/SOLID|SOLID principles]]
+> GRASP and SOLID start from different questions. GRASP, described by Craig Larman, asks which object should own a responsibility: knowing, creating, coordinating or varying a behavior. SOLID asks whether classes, interfaces and their dependencies are shaped so that change stays contained.
+> 
+> | Aspect | GRASP | SOLID |
+> |---|---|---|
+> | Starting question | Which object should be responsible for this behavior? | Are this class's responsibilities, interfaces, inheritance and dependency direction designed so that change stays contained? |
+> | Focus | Assigning responsibilities among collaborating objects while designing how they work together. | Properties of individual classes and interfaces and the direction of dependencies between them. |
+> | Content | Nine heuristics: Information Expert, Creator, Controller, Low Coupling, High Cohesion, Polymorphism, Pure Fabrication, Indirection, Protected Variations. | Five principles: Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, Dependency Inversion. |
+> | Typical decision | `Order` creates its line items and calculates its own total, because it holds that data. | A class that changes for several unrelated reasons is split, or high-level code depends on an abstraction rather than a concrete detail. |
+> 
+> The two overlap in their goals: low coupling, high cohesion and protection from expected variation. For example, Polymorphism and Protected Variations in GRASP pursue the same goal as Open/Closed in SOLID. They complement each other: GRASP helps decide where behavior goes, and SOLID helps check the shape of the resulting classes and dependencies.
+> 
+> [Craig Larman: Applying UML and Patterns (sample chapter)](https://www.informit.com/content/images/0130925691/samplechapter/0130925691.pdf) · [Robert C. Martin: SOLID course notes](https://cleancoder.com/files/solid.md) · [[Home/Software Architecture/Patterns/Design Patterns/GRASP#The Nine Principles|GRASP principles]] · [[Home/Software Architecture/Patterns/Design Patterns/GRASP#Tradeoffs|GRASP tradeoffs]] · [[Home/Software Design/Principles/SOLID|SOLID principles]]
 
 # References
 
 - [Applying UML and Patterns](https://www.oreilly.com/library/view/applying-uml-and/0131489062/)
-- [GRASP Patterns Explained (Baeldung) — practical walkthrough of all nine GRASP principles with code examples](https://www.baeldung.com/java-grasp-patterns)

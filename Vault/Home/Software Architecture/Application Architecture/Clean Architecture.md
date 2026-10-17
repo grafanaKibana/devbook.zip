@@ -249,6 +249,7 @@ A simpler layered or vertical-slice structure fits a shallow domain. Tighter dep
 
 # Questions
 
+<!-- qard-id: 81caa6e2-7b0d-463a-af9a-b48b849ac077 -->
 > [!qard]- What is Clean Architecture?
 > Clean Architecture structures an application so its business rules sit at the center, independent of frameworks, UI and databases. Its purpose is core logic that can be understood, tested and changed independently of those details.
 >

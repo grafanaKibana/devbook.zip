@@ -26,6 +26,7 @@ return FolderStructureMap;
 
 # Questions
 
+<!-- qard-id: c28d8736-4f09-48e3-9a55-a635b6e08875 -->
 > [!qard]- When is classic machine learning a better fit than an LLM?
 > Classic machine learning is the better fit when two conditions hold. First, the task is a defined prediction with representative labeled examples and a measurable objective. Second, measurement on the actual workload shows that classic ML meets that objective with a better balance of quality, latency, cost and maintenance than an LLM. The first condition makes classic ML a strong candidate. Only the second decides.
 > 
