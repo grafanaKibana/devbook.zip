@@ -110,6 +110,7 @@ Plug-in architecture fits when extensions must ship independently of the core or
 
 # Questions
 
+<!-- qard-id: 1027d3cf-cce1-4c6c-b591-a16aada18738 -->
 > [!qard]- What is plug-in architecture?
 > Plug-in architecture lets a host application gain behavior from separately built extensions through a shared contract.
 >
@@ -125,6 +126,7 @@ Plug-in architecture fits when extensions must ship independently of the core or
 >
 > [Microsoft: Create a .NET application with plugins](https://learn.microsoft.com/en-us/dotnet/core/tutorials/creating-app-with-plugin-support)
 
+<!-- qard-id: eb5e11a7-7fb2-461d-9885-68641296b08d -->
 > [!qard]- How does a plug-in add behavior through an existing host extension point?
 > A plug-in adds behavior by implementing a contract that the host already defines. The host finds that implementation, creates it and calls it through the contract, without knowing the plug-in's concrete type.
 >
@@ -142,7 +144,7 @@ Plug-in architecture fits when extensions must ship independently of the core or
 
 <!-- qard-id: 9cbbcde2-1003-4c4e-ace9-c6304bbb1fa0 -->
 > [!qard]- When is plug-in architecture the wrong choice?
-> It is usually a poor fit when one team owns the features and ships them with the host: dynamic discovery, loading, and extension-contract compatibility add work without enabling independent delivery. Ordinary modules in one application are simpler in that case. Plug-ins earn the added machinery when extensions must be developed or delivered independently of the core. [.NET plugin loading tutorial](https://learn.microsoft.com/en-us/dotnet/core/tutorials/creating-app-with-plugin-support) · [Microsoft: common web application architectures](https://learn.microsoft.com/en-us/dotnet/architecture/modern-web-apps-azure/common-web-application-architectures)
+> It is usually a poor fit when one team owns the features and ships them with the host: dynamic discovery, loading, and extension-contract compatibility add work without enabling independent delivery. [Microsoft: common web application architectures](https://learn.microsoft.com/en-us/dotnet/architecture/modern-web-apps-azure/common-web-application-architectures)
 
 # References
 

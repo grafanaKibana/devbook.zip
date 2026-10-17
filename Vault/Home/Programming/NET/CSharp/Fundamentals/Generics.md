@@ -101,11 +101,11 @@ var list = Activator.CreateInstance(closed);
 
 # Pitfalls
 
-- An unconstrained `T` exposes only operations valid for every type. Add the smallest constraint that the algorithm actually needs instead of casting internally.
+- An unconstrained `T` exposes only operations valid for every type. The smallest constraint that the algorithm actually needs makes the required operations available without internal casts.
 - **Static state belongs to each closed type.** `Cache<int>` and `Cache<string>` receive separate copies of a `static` field declared on `Cache<T>`.
-- **Value-type specialization can grow native code.** Separate value-type instantiations can produce separate JIT-compiled bodies. The specialization removes boxing and preserves value semantics, but many large instantiations increase startup and code-size costs.
+- **Value-type specialization can grow native code.** Separate value-type instantiations can produce separate JIT-compiled bodies. The specialization avoids the boxing that `object`-based storage requires and preserves value semantics, but many large instantiations increase startup and code-size costs.
 - `default(T)` is `null` for reference types and zero-initialized data for value types. Either result may look valid in a domain model, so absence should have an explicit contract.
-- A concrete base-class constraint couples the abstraction to one hierarchy. Prefer a behavioral interface when inheritance is not itself part of the requirement.
+- A concrete base-class constraint couples the abstraction to one hierarchy. A behavioral interface avoids that coupling when inheritance is not itself part of the requirement.
 
 # Tradeoffs
 
@@ -117,19 +117,57 @@ var list = Activator.CreateInstance(closed);
 
 <!-- qard-id: 051626ec-488b-484a-affe-9b09e168fb5e -->
 > [!qard]- What do generics add to a C# API?
-> A type parameter lets one implementation work with different types while preserving compile-time checking of values passed through that API. Constraints narrow the allowed types and tell the compiler which operations or members are safe to use. [Microsoft: generic types and methods](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/types/generics) · [Microsoft: constraints on type parameters](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/generics/constraints-on-type-parameters)
+> Generics let one implementation take a type as a parameter. The same code then works with many types, while the compiler still checks the type of every value that goes in or comes out.
+> 
+> Compared with an API that accepts `object`:
+> 
+> - **Type safety:** an `object`-based API needs casts on the way out, so a wrong type fails only at runtime. A `List<string>` instead rejects an `int` at compile time and returns strings without casts.
+> - **No storage boxing for value types:** an `object`-based collection boxes each `int` it stores, while `List<int>` stores the integers directly. Generic code can still box a value-type `T` through conversions, such as converting it to `object` or to an interface type.
+> 
+> **Constraints** such as `where T : IComparable<T>` narrow which type arguments are allowed. In return, the generic code may use the members that the constraint guarantees, such as `CompareTo`.
+> 
+> [Microsoft: generic types and methods](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/types/generics) · [Microsoft: constraints on type parameters](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/generics/constraints-on-type-parameters) · [C# specification: boxing conversions](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/conversions#1029-boxing-conversions)
 
 <!-- qard-id: 96d2fdb0-3c95-4eb1-91da-258a4574cde2 -->
 > [!qard]- Why does `IEnumerable<string>` assign to `IEnumerable<object>`, but `List<string>` does not assign to `List<object>`?
-> `IEnumerable<T>` is covariant because it only produces `T`: a sequence of strings can safely be read as objects. `List<T>` is invariant because it also accepts values; treating `List<string>` as `List<object>` would allow inserting a non-string into the original list. [Microsoft: covariance and contravariance](https://learn.microsoft.com/en-us/dotnet/standard/generics/covariance-and-contravariance)
+> `IEnumerable<T>` declares its type parameter covariant (`out T`), so the conversion is allowed. `List<T>` is invariant, so it is not.
+> 
+> - **`IEnumerable<string>` as `IEnumerable<object>`:** the interface only hands `T` values out. Every string read from the sequence is also an object, so reading strings as objects is safe.
+> - **`List<string>` as `List<object>`:** `List<T>` also takes `T` values in, for example through `Add`. If the conversion were allowed, code could add an `int` through the `List<object>` reference, and the original `List<string>` would then hold a non-string.
+> 
+> Variance also has to be declared, and C# allows it only on generic interfaces and delegates. A generic class such as `List<T>` is therefore always invariant, whatever its members do.
+> 
+> [Microsoft: covariance and contravariance](https://learn.microsoft.com/en-us/dotnet/standard/generics/covariance-and-contravariance)
 
 <!-- qard-id: 222e6ef2-bb7d-4c83-b731-ffd892537b23 -->
 > [!qard]- When should a generic interface type parameter be marked `out` or `in`?
-> Use `out` when the interface produces the type and `in` when it consumes it. If it both accepts and returns the type, it must be invariant because either conversion can make a read or write unsafe. C# variance conversions apply only to reference-type substitutions. [Microsoft: covariance and contravariance](https://learn.microsoft.com/en-us/dotnet/standard/generics/covariance-and-contravariance)
+> A type parameter can be marked `out` when the interface only produces `T`, and `in` when it only consumes `T`. When `T` flows both in and out, it stays invariant.
+> 
+> | Marking | Where `T` may appear | Conversion it enables |
+> |---|---|---|
+> | `out` (covariant) | Only in output positions, such as method return types | A more derived type argument can stand in for a less derived one: `IEnumerable<string>` converts to `IEnumerable<object>` |
+> | `in` (contravariant) | Only in input positions, such as method parameter types | A less derived type argument can stand in for a more derived one: `IComparer<object>` converts to `IComparer<string>` |
+> | None (invariant) | In both input and output positions | No conversion, because either direction would allow an unsafe read or write |
+> 
+> The compiler enforces these positions, so it accepts a variant marking only when the interface's members keep it safe.
+> 
+> Variance conversions work only when the type arguments are reference types. `IEnumerable<int>` does not convert to `IEnumerable<object>`, because a value-type argument makes the constructed type invariant.
+> 
+> [Microsoft: covariance and contravariance](https://learn.microsoft.com/en-us/dotnet/standard/generics/covariance-and-contravariance)
 
 <!-- qard-id: dd86df45-1404-46cf-8c09-84cb046ef4f3 -->
 > [!qard]- A generic method uses `default(T)` as a fallback. Why can this be dangerous?
-> `default(T)` depends on the type: it may be `null` or a zero-initialized value that is valid domain data. If the fallback also represents a successful result, the caller cannot distinguish absence or failure from a real value. Use an explicit `Try` result, nullable contract, or result type when that distinction matters. [Microsoft: default values](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/default)
+> `default(T)` is not one fixed value. It is `null` when `T` is a reference type, and a zero-initialized value such as `0` or `false` when `T` is a value type. Those values can also be legitimate data, so returning `default(T)` to signal that nothing was found or that something failed makes absence look like a real result.
+> 
+> For example, a `GetOrDefault<T>` method that returns `default(T)` for a missing key returns `0` when `T` is `int`. A caller then cannot tell a missing entry from a stored `0`.
+> 
+> When that distinction matters, the API reports absence separately from the value:
+> 
+> - **`Try` method:** returns `bool` for success and the value through an `out T` parameter.
+> - **Result type:** carries the success or failure state together with the value.
+> - **Nullable contract:** returns `T?`, with `null` meaning absence. This works only when `null` is never legitimate data and the return type can actually hold `null` for the type argument. For a value type that requires `Nullable<T>`, for example `T?` under a `where T : struct` constraint, whose `HasValue` separates a missing entry from a stored `0`. With an unconstrained `T`, `T?` adds no null state for a value-type argument, so `GetOrDefault<int>` would still return `0`.
+> 
+> [Microsoft: default keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/default) · [Microsoft: nullable value types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/nullable-value-types)
 
 # References
 

@@ -64,14 +64,49 @@ The operating layer bounds what infrastructure can observe and change:
 
 # Questions
 
-> [!qard]- What's the practical difference between a Layer 4 and a Layer 7 load balancer?
-> An L4 balancer selects a backend using transport-level connection information, such as addresses and ports. It cannot inspect an HTTP path or route individual requests inside a multiplexed connection. An L7 proxy terminates and parses HTTP, so it can apply request-level host, path, or header rules. That inspection adds protocol state and processing; configured retries still need an application-safe replay contract. [AWS: How Elastic Load Balancing works](https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/how-elastic-load-balancing-works.html) · [AWS: Application Load Balancers](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/application-load-balancers.html)
+<!-- qard-id: bd632caa-baae-4d34-a5e2-349468993f29 -->
+> [!qard]- What is the practical difference between a Layer 4 and a Layer 7 load balancer?
+> A Layer 4 load balancer chooses a backend once per transport connection, using connection details such as IP addresses, ports and protocol. A Layer 7 load balancer terminates and parses the application protocol, usually HTTP, so it can route each request by its content.
+> 
+> | Aspect | Layer 4 | Layer 7 |
+> |---|---|---|
+> | What it can see | Connection details only. It does not parse HTTP, so a request's host, path and headers are invisible to it. | The parsed request, including its host, path and headers. |
+> | Unit of balancing | The connection. Every request sent on that connection reaches the same backend for the connection's lifetime. | The individual request. Requests from one client connection can reach different backends. |
+> | Routing rules | Limited to connection details, so path-based or header-based routing is not possible. | Content-based rules, such as sending `/api/*` to one group of backends and other paths to another. |
+> | Cost | Forwards traffic without parsing the application protocol, so it keeps little protocol state. | Terminating and parsing HTTP adds processing, protocol state and more ways to fail. |
+> 
+> The unit of balancing matters for multiplexed protocols such as HTTP/2 and gRPC, where one long-lived connection carries many requests. An L4 balancer sends all of those requests to one backend. An L7 balancer that terminates HTTP/2 can spread them across backends.
+> 
+> Request awareness does not make retries safe. When an L7 proxy is configured to retry failed requests, a retry is safe only if the application tolerates the same request being replayed.
+> 
+> [AWS: How Elastic Load Balancing works](https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/how-elastic-load-balancing-works.html) · [AWS: Application Load Balancers](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/application-load-balancers.html) · [RFC 9110: Idempotent methods](https://www.rfc-editor.org/rfc/rfc9110.html#section-9.2.2)
 
+<!-- qard-id: 04e4e31f-c817-4c9d-a68d-77203a082c12 -->
 > [!qard]- How does the OSI model map onto the TCP/IP stack?
 > In the common four-layer TCP/IP view, OSI layers 5–7 are grouped as application, layer 4 maps to transport, layer 3 to Internet, and layers 1–2 to link. This is a teaching and diagnostic mapping, not a strict protocol-by-protocol equivalence: real protocols can span or blur those responsibilities. [RFC 1122: Internet architecture](https://www.rfc-editor.org/rfc/rfc1122.html#section-1.1.3) · [ISO/IEC 7498-1: OSI reference model](https://www.iso.org/standard/20269.html)
 
-> [!qard]- What roles do MAC addresses, IP addresses, and transport ports play in delivery or endpoint selection, and which local and remote values identify a TCP connection?
-> A link-layer address identifies an interface within the current link's delivery scope. An IP address is routed across networks. A transport port selects an endpoint within the host's transport namespace. For TCP, the local and remote IP addresses and ports identify a connection within the relevant network namespace.
+<!-- qard-id: 0cd775c4-4d95-4cfd-b76a-e5d545f21b33 -->
+> [!qard]- What do a MAC address, an IP address and a port each identify?
+> A MAC address identifies a network interface on its local link, such as an Ethernet or Wi-Fi network. An IP address identifies a host's interface across interconnected networks, and routers forward packets by it. A port identifies an endpoint, such as a listening application, inside one host for a transport protocol such as TCP.
+> 
+> The three work together when a packet travels to a server:
+> 
+> 1. The sender addresses the IP packet to the server's IP address and the TCP segment inside it to the server's port.
+> 2. On each hop, the packet travels inside a link-layer frame for that link. On an Ethernet or Wi-Fi link, the frame is addressed to the MAC address of the next device on that link, usually a router.
+> 3. Each router reads the destination IP address, chooses the next link and places the packet in a new frame for that link. When the next link also uses MAC addressing, the new frame carries new MAC addresses.
+> 4. On the destination host, TCP uses the destination port to deliver the data to the right socket.
+> 
+> A MAC address therefore matters only within one link, while the IP address guides the packet across networks. A port number is meaningful only within one host's, or one network namespace's, port space for that transport protocol.
+> 
+> [RFC 1122: Internet architecture](https://www.rfc-editor.org/rfc/rfc1122.html#section-1.1.3) · [RFC 9293: TCP](https://www.rfc-editor.org/rfc/rfc9293.html)
+
+<!-- qard-id: f316e517-3ca8-44f0-b55e-971e726e7329 -->
+> [!qard]- Which values identify a TCP connection?
+> A TCP connection is identified by four values: the local IP address and port, and the remote IP address and port. Each IP address and port pair is a socket, and the pair of sockets distinguishes one connection from every other TCP connection in the host, or network namespace, that holds it. The combination is often called the 4-tuple.
+> 
+> Because the remote address and port are part of the identity, one local socket can take part in many connections. A server listening on port 443 can hold many connections at once, because each differs by client IP address or client port. For the same reason, one client can open several connections to the same server port by using different local ports.
+> 
+> [RFC 9293: TCP](https://www.rfc-editor.org/rfc/rfc9293.html)
 
 # References
 

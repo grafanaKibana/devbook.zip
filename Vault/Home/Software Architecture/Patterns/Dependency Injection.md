@@ -235,11 +235,11 @@ Keys work well when the set of choices is small and stable. Once domain code sta
 
 ## 1) Registering `DbContext` as Singleton
 
-`DbContext` is a short-lived unit of work and is not thread-safe. A singleton registration shares its change tracker across concurrent operations and delays cleanup. Keep the default scoped registration from `AddDbContext<TContext>()`. Workers should create a scope per operation.
+`DbContext` is a short-lived unit of work and is not thread-safe. A singleton registration shares its change tracker across concurrent operations and delays cleanup. The default scoped registration from `AddDbContext<TContext>()` should be kept. Workers should create a scope per operation.
 
 ## 2) Circular Dependencies (`A -> B -> A`)
 
-The container cannot construct a graph in which `A` requires `B` and `B` requires `A`. The cycle usually exposes a confused responsibility boundary. Break it by moving the shared work to one side or by replacing the direct callback with a message.
+The container cannot construct a graph in which `A` requires `B` and `B` requires `A`. The cycle usually exposes a confused responsibility boundary. It can be broken by moving the shared work to one side or by replacing the direct callback with a message.
 
 # Tradeoffs
 
@@ -248,13 +248,80 @@ The container cannot construct a graph in which `A` requires `B` and `B` require
 
 # Questions
 
+> [!qard]- What is dependency injection, and what problem does it solve?
+> Dependency injection (DI) means a class receives the objects it depends on from outside, usually through its constructor, instead of creating them itself. It is a form of Inversion of Control: the class declares what it needs, and the application decides which implementations to supply.
+> 
+> Without DI, a class that calls `new SmtpEmailSender()` is tied to that implementation. Replacing it requires editing the class, the class must also know how to build the sender's own dependencies, and a unit test cannot substitute a fake.
+> 
+> With DI:
+> 
+> 1. The class depends on an abstraction, such as `IEmailSender`, and lists it as a constructor parameter.
+> 2. At the composition root, typically `Program.cs`, the application chooses the implementation, either by constructing the object graph directly or by registering it in a container.
+> 3. When a container is used, it builds the class's dependencies recursively and manages their lifetime and disposal.
+> 
+> The result is explicit dependencies, implementations that can change without editing their consumers, and tests that pass collaborators directly. DI does not require a container; a container automates wiring and lifetime management.
+> 
+> [.NET dependency injection overview](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection/overview)
+
 <!-- qard-id: ddb3e38c-cabb-4743-ac37-f7414aa541dd -->
-> [!qard]- Explain `Transient`, `Scoped`, and `Singleton` lifetimes with a safe production example each.
-> A transient is newly created for each resolution; a stateless mapper is a reasonable example. A scoped instance is reused within one scope, such as a `DbContext` for one web request/unit of work. A singleton is shared by the root provider until shutdown, so a thread-safe immutable clock or bounded concurrent cache can fit. A singleton must not capture a scoped service because it would retain that instance beyond its scope. [.NET dependency injection](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection/overview)
+> [!qard]- What do the `Transient`, `Scoped`, and `Singleton` service lifetimes mean in .NET dependency injection, and what is a typical use for each?
+> The lifetime controls how often the container creates a service and which consumers share an instance: `Transient` creates one per resolution, `Scoped` shares one within a scope, and `Singleton` shares one across the whole application.
+> 
+> | Lifetime | Instances and sharing | Disposal of container-created instances | Typical use |
+> |---|---|---|---|
+> | `Transient` | A new instance every time the service is resolved, even twice within the same scope. | When the scope that resolved it ends. | Lightweight stateless services, such as a mapper or formatter. |
+> | `Scoped` | One instance per scope, shared by everything resolved in that scope. ASP.NET Core creates a scope for each HTTP request. | When the scope ends, such as at the end of the request. | Per-request or unit-of-work state, such as an EF Core `DbContext`, which `AddDbContext` registers as scoped by default. |
+> | `Singleton` | One instance shared by every scope and every concurrent caller until the root provider is disposed. | When the root provider is disposed at application shutdown. | Services that are safe for concurrent use, such as a clock abstraction or a thread-safe, size-bounded cache. |
+> 
+> The uses are typical fits, not guarantees from the container: a singleton is safe only if its implementation is thread-safe.
+> 
+> Lifetimes also interact when one service holds another:
+> 
+> - **Singleton holding a scoped service:** a lifetime violation, because the scoped instance would outlive its scope.
+> - **Longer-lived service holding a transient:** valid, but the captured instance lives as long as the service that holds it. It must suit that effective lifetime: thread-safe if a singleton's concurrent callers use it, and acceptable to dispose only when that longer lifetime ends.
+> 
+> [.NET: service lifetimes](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection/service-lifetimes) · [.NET DI guidelines: thread safety](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection/guidelines#thread-safety)
 
 <!-- qard-id: 023bd48a-3a64-4c74-a852-7f2cc4f897af -->
 > [!qard]- What is a captive dependency, and how can it be fixed?
-> A captive dependency occurs when a longer-lived service keeps a shorter-lived service, such as a hosted singleton retaining a scoped `DbContext`. The shorter service then outlives its intended scope and may carry request-specific state into later work. A hosted service should create and dispose a fresh scope for each scoped operation, resolving the dependency inside it and disposing it when that operation ends. For a loop of independent work items, create a new scope for each item rather than holding one for the worker lifetime. A transient captured by a singleton is still one resolved instance retained by that singleton; if mutable, it is not made thread-safe by its transient registration, and concurrent callers may share it. [.NET: use scoped services within a BackgroundService](https://learn.microsoft.com/en-us/dotnet/core/extensions/scoped-service) · [.NET service lifetimes](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection/service-lifetimes) · [.NET DI guidelines](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection/guidelines) · [.NET dependency injection overview](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection/overview)
+> A captive dependency occurs when a longer-lived service holds a shorter-lived one, so the shorter-lived instance stays in use beyond its intended lifetime. The typical case is a singleton, such as a hosted service, that receives a scoped `DbContext` through its constructor.
+> 
+> **Consequences:**
+> 
+> - Request- or operation-specific state carries over into later, unrelated work.
+> - A scoped service that is not designed for concurrent use, such as `DbContext`, can be shared by concurrent operations and expose stale tracked state.
+> - Cleanup moves from the end of the scope to the end of the longer lifetime.
+> 
+> **Fix:** the long-lived service depends on `IServiceScopeFactory` instead of the scoped service. For each unit of work, it creates a scope, resolves the scoped service from that scope, uses it and disposes the scope. A worker that processes independent items creates a new scope per item rather than one scope for its whole lifetime.
+> 
+> ```csharp
+> await using var scope = scopeFactory.CreateAsyncScope();
+> var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+> await ProcessItemAsync(db, item, cancellationToken);
+> ```
+> 
+> **Detection:** when the host is built in the Development environment, scope validation rejects a scoped service injected into a singleton or resolved from the root provider. It does not catch every lifetime mistake. A transient captured by a singleton, for example, also lives as long as the singleton, and its transient registration does not make it thread-safe when concurrent callers share it.
+> 
+> [.NET: use scoped services within a BackgroundService](https://learn.microsoft.com/en-us/dotnet/core/extensions/scoped-service) · [.NET DI guidelines](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection/guidelines) · [.NET service lifetimes](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection/service-lifetimes) · [.NET dependency injection overview](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection/overview)
+
+> [!qard]- Why is Service Locator considered an anti-pattern in business code?
+> Service Locator hides a class's dependencies. Instead of declaring them in its constructor, the class asks a container such as `IServiceProvider` for them at runtime with `GetService<T>()` or `GetRequiredService<T>()`. In business code, this causes three problems:
+> 
+> - **Hidden requirements:** the constructor no longer shows what the class needs, so its dependencies are discovered only by reading the implementation.
+> - **Late failures:** a missing registration fails when that code path runs, not when the object graph is built or validated.
+> - **Harder tests:** a unit test must configure a container or fake provider instead of passing collaborators to the constructor.
+> 
+> ```csharp
+> public sealed class CheckoutService(IServiceProvider provider)
+> {
+>     public Task ProcessAsync() =>
+>         provider.GetRequiredService<IOrderRepository>().SaveChangesAsync();
+> }
+> ```
+> 
+> Runtime lookup still has a narrow place in infrastructure: factories that choose an implementation at runtime, middleware or framework activation code, and background services that create explicit scopes. Application and domain services declare their collaborators in their constructors instead.
+> 
+> [.NET DI guidelines](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection/guidelines) · [[Home/Software Architecture/Patterns/Dependency Injection#Service Locator Anti-pattern|Service Locator anti-pattern]]
 
 # References
 

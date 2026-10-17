@@ -221,10 +221,10 @@ The process cache stores detached immutable snapshots, including an immutable ca
 | Concern | Proxy | Direct access |
 |---|---|---|
 | Lazy loading | Defers cost to first access | Pays cost upfront or never |
-| Caching | Transparent to callers | Callers must manage cache keys |
-| Auth enforcement | Centralized, consistent | Scattered across callers |
+| Caching | Transparent to callers | No cache wrapper; any caching is explicit code rather than a subject-compatible proxy |
+| Auth enforcement | Centralized, consistent | No access-control wrapper; any authorization check is explicit code rather than a subject-compatible proxy |
 | Debugging | Extra indirection, harder to trace | Direct call, easy to trace |
-| Stale data (caching) | Risk of serving outdated results | Always fresh |
+| Stale data (caching) | Risk of serving outdated results | Avoids the staleness window added by the proxy's cache |
 
 A proxy earns its indirection when access must remain transparent and one policy applies across callers. Caching fits repeated reads of slowly changing data. Virtual proxies fit expensive objects that may never be needed, while protection proxies centralize an access decision. Deep wrapper chains are a warning sign because their order becomes part of the behavior.
 
@@ -232,7 +232,17 @@ A proxy earns its indirection when access must remain transparent and one policy
 
 <!-- qard-id: 44706abc-29f7-4553-8079-bdef2d5f0d0e -->
 > [!qard]- What's the difference between a Proxy and a Decorator in terms of intent?
-> A Proxy stands in for a subject to control access, such as authorization, lazy creation, or a remote boundary. A Decorator preserves the component contract while adding composable responsibility. Their structure may look the same; the purpose of the wrapper distinguishes them. [[Home/Software Architecture/Patterns/Design Patterns/Structural/Proxy#Solution|Proxy solution]] · [[Home/Software Architecture/Patterns/Design Patterns/Structural/Decorator#Solution|Decorator solution]]
+> Both wrap an object behind the same interface, so their structure can look identical. A Proxy exists to control access to the real subject. A Decorator exists to add a responsibility around the object it wraps.
+> 
+> | Aspect | Proxy | Decorator |
+> |---|---|---|
+> | Intent | Decides whether, when or how the real subject is reached. | Extends what a call does by adding a responsibility around the wrapped object. |
+> | Effect on the real call | Can defer creating the subject, return a cached result or reject the call before the subject runs. | Normally runs added work before or after delegating to the wrapped object. It can also end a call before delegating as part of that responsibility, as validation does when it rejects invalid input. |
+> | Typical forms | Virtual (lazy creation), caching, protection (authorization) and remote proxies. | Logging, validation and metrics layers stacked in a chosen order. |
+> 
+> Mixing both concerns in one wrapper makes ordering and failure behavior harder to reason about. Order matters even with separate wrappers: if a caching proxy wraps an authorization proxy, a cache hit can return data without the authorization check running.
+> 
+> [[Home/Software Architecture/Patterns/Design Patterns/Structural/Proxy#Solution|Proxy: Solution]] · [[Home/Software Architecture/Patterns/Design Patterns/Structural/Proxy#Pitfalls|Proxy: Pitfalls]] · [[Home/Software Architecture/Patterns/Design Patterns/Structural/Decorator#Solution|Decorator: Solution]]
 
 # References
 

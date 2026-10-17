@@ -30,7 +30,7 @@ flowchart LR
     R --> N[Reranker or generator]
 ```
 
-Consider the query "rate limit error 429 behavior in partner tier." Vector search recognizes the meaning around rate limiting, yet may lose the exact token `429`. Keyword search catches `429` and `partner tier`, while missing related passages that use different wording. Running both paths covers those two failure modes. Hybrid search is a sensible default, though the added path can introduce noise on some corpora.
+An example is the query "rate limit error 429 behavior in partner tier." Vector search recognizes the meaning around rate limiting, yet may lose the exact token `429`. Keyword search catches `429` and `partner tier`, while missing related passages that use different wording. Running both paths covers those two failure modes. Hybrid search is a sensible default, though the added path can introduce noise on some corpora.
 
 # Retrieval Modes
 
@@ -76,7 +76,7 @@ Hybrid retrieval runs full-text search, such as `WHERE body @@ to_tsquery('error
 
 How it works:
 
-- Run vector search and keyword search in parallel against the same query. Fuse the two ranked lists into a single candidate set.
+- Vector search and keyword search run in parallel against the same query, and the two ranked lists are fused into a single candidate set.
 - **[[Re-ranking|Reciprocal Rank Fusion (RRF)]]** sums `1 / (k + rank)` for each document across the input lists, with k=60 in the original method. Because it uses positions instead of scores, BM25 and vector similarity do not need a shared scale. Agreement across retrievers is rewarded.
 - **Linear combination** normalizes scores and computes `alpha * vector_score + (1 - alpha) * keyword_score`. It exposes more control, but alpha must be tuned for the domain. Identifier-heavy corpora may need more keyword weight. Conversational queries often favor the vector path.
 
@@ -86,7 +86,7 @@ Where it fits:
 
 Main risk:
 
-- **Can lose to one search mode.** A homogeneous corpus may strongly favor one retriever, leaving the other to inject noise. In one production benchmark on scientific documents, vector-only reached a 69.2% hit rate while hybrid reached 63.5%. The extra keyword path hurt. Hybrid must be tested against both single-mode baselines on the actual corpus.
+- **Can lose to one search mode.** A homogeneous corpus may strongly favor one retriever, leaving the other to inject noise. In one [published case study](https://huggingface.co/blog/charles-azam/rag) of 156 multilingual engineering and scientific queries, vector-only reached a 69.2% hit rate while hybrid reached 63.5%. The extra keyword path hurt. Hybrid must be tested against both single-mode baselines on the actual corpus.
 - **Large top-k values collect noise.** Fusing two long result lists pulls weak candidates into the tail. Without [[Re-ranking|reranking]] or deduplication, those candidates dilute the context sent to generation.
 
 # Indexing and Filtering
@@ -98,9 +98,9 @@ The vector index sets the latency-recall curve:
 
 Filtering decides which vectors are eligible:
 
-- **Pre-filtering** narrows the search space by metadata before vector search. Tenant IDs and ACLs belong here because semantic similarity cannot enforce authorization.
+- **Pre-filtering** narrows the search space by metadata before vector search, so the returned candidates already satisfy the filter. Choosing it over post-filtering is a recall and cost decision. Authorization is a separate requirement: semantic similarity cannot enforce it, so tenant and ACL boundaries hold only when unauthorized chunks are excluded before any result reaches the model or the user, whichever stage performs the exclusion.
 - **Post-filtering** removes candidates after ANN search. It is easier to bolt on, but selective filters may discard most of top-k and leave too little evidence.
-- Keep index versioning explicit. Collection aliases enable instant rollback during index rebuilds.
+- Index versions stay explicit, and collection aliases enable instant rollback during index rebuilds.
 
 # Pitfalls
 
@@ -108,25 +108,25 @@ Filtering decides which vectors are eligible:
 
 Corpus growth or distribution change can make an earlier HNSW `ef_search` setting miss more exact neighbors. The outcome depends on graph construction, filters, data distribution, implementation, and workload; latency can also move. Nothing in ordinary error-rate monitoring establishes that recall stayed stable.
 
-Detection: maintain representative queries, compare ANN results with exact search, and run [[Monitoring#Retrieval Quality Metrics|Recall@k]] checks on a schedule. Tune `ef_search`, rebuild, or change index parameters from the measured recall-versus-latency curve rather than assuming one response always restores the old operating point.
+Detection: scheduled [[Monitoring#Retrieval Quality Metrics|Recall@k]] checks compare ANN results with exact search on a maintained set of representative queries. Whether the response is tuning `ef_search`, rebuilding, or changing index parameters follows from the measured recall-versus-latency curve; no single response is assumed to restore the old operating point.
 
 ## Embedding Model Migration Debt
 
 Embedding models produce incompatible vector spaces. An upgrade therefore requires re-embedding the corpus. New query vectors cannot be compared with an old index. At scale, the migration needs parallel storage and a controlled cutover, and benchmark gains do not guarantee better domain retrieval. Provider deprecations can compress that schedule.
 
-Mitigation: treat embedding model selection as a long-term infrastructure decision. Store the model version alongside each vector. Set upgrade thresholds based on domain-specific metrics, not MTEB deltas. Use collection aliases and shadow traffic to validate before cutover.
+Mitigation: embedding model selection is a long-term infrastructure decision. Each vector is stored with its model version, upgrade thresholds come from domain-specific metrics rather than MTEB deltas, and collection aliases with shadow traffic allow validation before cutover.
 
 ## Aggregate Metrics Hiding Segment Failures
 
 An overall recall of 70% can coexist with 5% recall on a small but valuable query segment. Multi-hop or date-filtered requests may be failing while the aggregate looks acceptable. Segmentation also separates missing inventory from a retriever that cannot surface material already present.
 
-Detection: segment retrieval metrics by query type, tenant, locale, and domain. Alert on per-segment degradation, not just aggregate.
+Detection: retrieval metrics are segmented by query type, tenant, locale, and domain, and alerts fire on per-segment degradation, not just on the aggregate.
 
 ## Vector Search Failing Silently on Identifiers
 
 For identifier-heavy queries, vector search can return chunks that are topically related and operationally wrong. The evidence looks plausible enough for the model to assemble a confident answer from the wrong material.
 
-Mitigation: use hybrid retrieval for identifier-heavy corpora and include identifier queries in evaluation. If the vector path causes most failures, inspect the fusion weights. These domains often need more keyword influence.
+Mitigation: identifier-heavy corpora are a strong case for hybrid retrieval, and their evaluation includes identifier queries. If the vector path causes most failures, the fusion weights are the first place to look, because these domains often need more keyword influence.
 
 # Tradeoffs
 
@@ -137,12 +137,42 @@ Mitigation: use hybrid retrieval for identifier-heavy corpora and include identi
 | Hybrid -- RRF | Broad -- covers semantic and lexical queries | Moderate -- two parallel searches plus fusion | Higher -- two indexes and fusion logic | Mixed query patterns -- default for most production systems |
 | Hybrid -- linear combination | Tunable -- weight toward dominant search mode | Moderate -- same as RRF | Highest -- requires alpha tuning per domain | When one search mode is consistently stronger and deserves explicit weighting |
 
-Start with hybrid retrieval using RRF and a conservative top-k, often 5–20. Then compare it with both single-mode baselines on real corpus queries. Hybrid is a good starting point, not a guaranteed winner. Add [[Re-ranking|reranking]] after first-stage retrieval is stable and the remaining failures come from poor ordering near the top.
+Hybrid retrieval with RRF and a conservative top-k, often 5–20, is a reasonable first configuration. It is then compared with both single-mode baselines on real corpus queries, because hybrid is a good starting point, not a guaranteed winner. [[Re-ranking|Reranking]] fits after first-stage retrieval is stable and the remaining failures come from poor ordering near the top.
 
 # Questions
 
+> [!qard]- Why does hybrid retrieval combine keyword search and vector search?
+> Hybrid retrieval combines them because they fail in complementary ways. Keyword search matches the exact terms in a query, while vector search matches meaning even when the wording differs. Running both covers queries that either one alone would miss.
+> 
+> | Aspect | Keyword search, such as BM25 | Vector search |
+> |---|---|---|
+> | What it matches | Documents that share the query's terms, with rarer terms counting more | Documents whose embeddings are close to the query's embedding, so related meanings match |
+> | Strong on | Exact identifiers such as error codes, product names and version numbers | Paraphrases and natural-language questions worded differently from the source |
+> | Weak on | Synonyms and rephrasing with no word overlap, such as *credential validation error* for *authentication failure* | Exact tokens, which can blur inside the embedding and surface topically similar but wrong chunks |
+> | What it needs | A lexical (inverted) index | An embedding model and a vector index |
+> 
+> In a hybrid search, both queries run in parallel and their ranked lists are merged, commonly with Reciprocal Rank Fusion (RRF). RRF scores documents by their rank positions, so the two incompatible score scales never need to be normalized. For a query about *error 429 behavior for the partner tier*, keyword search can catch `429` while vector search finds rate-limiting passages phrased differently.
+> 
+> Hybrid is a common starting point rather than a guaranteed improvement over either mode alone.
+> 
+> [Hybrid search overview (Azure AI Search)](https://learn.microsoft.com/en-us/azure/search/hybrid-search-overview)
+
+<!-- qard-id: 3080dee6-c717-480c-b2ba-c0be9ba83120 -->
 > [!qard]- When can hybrid retrieval perform worse than single-mode retrieval?
-> Hybrid retrieval combines lexical and vector result lists, commonly with rank fusion. It can lose when a weaker path adds noisy candidates that displace useful results, but that is workload-dependent. Compare lexical-only, vector-only, and hybrid on representative queries using the retrieval or end-to-end metric that matches the product goal; keep the extra path only when it earns its complexity. [Hybrid search overview](https://learn.microsoft.com/en-us/azure/search/hybrid-search-overview)
+> Hybrid retrieval can perform worse when one retrieval path is much weaker on a particular corpus and query mix. Fusing its results pulls poor candidates into the top results. There they displace good results that the stronger path would have returned on its own.
+> 
+> The mechanism:
+> 
+> 1. Keyword search, such as BM25, and vector search run in parallel for the same query.
+> 2. Their ranked lists are merged, commonly with Reciprocal Rank Fusion (RRF), which scores each document from its rank positions rather than from raw scores.
+> 3. Standard RRF gives each list equal influence. For documents that appear in only one list, rank 1 in the weak list scores the same as rank 1 in the strong list, and higher than rank 3 in the strong list.
+> 4. With a small final cutoff, those weak candidates push relevant results out.
+> 
+> Whether this happens depends on the workload. In a homogeneous corpus where one mode clearly dominates, the other mode has little useful to add. A large top-k can also carry weak tail candidates into the context when no reranking or deduplication follows.
+> 
+> Hybrid is therefore justified by measurement rather than assumed. Keyword-only, vector-only and hybrid retrieval are compared on representative queries, using the retrieval or end-to-end metric that matches the product goal. When hybrid loses, the fusion can be weighted toward the stronger path, or the extra path can be dropped.
+> 
+> [Hybrid search overview (Azure AI Search)](https://learn.microsoft.com/en-us/azure/search/hybrid-search-overview)
 
 # References
 

@@ -185,7 +185,18 @@ Replacing the legacy system now requires a new adapter. `OrderService` stays unc
 
 <!-- qard-id: a7781445-d0b1-4c3a-94df-94013fbec7fb -->
 > [!qard]- How can an Adapter be distinguished from a Facade when both wrap another system?
-> An Adapter translates an existing incompatible interface into the contract a client needs. A Facade offers a simpler workflow-oriented API over a subsystem and may coordinate several calls. A Facade can also contain translation, but compatibility is the Adapter’s defining responsibility. [[Home/Software Architecture/Patterns/Design Patterns/Structural/Adapter#Common .NET Examples|Adapter common .NET examples]] · [[Home/Software Architecture/Patterns/Design Patterns/Structural/Facade#Tradeoffs|Facade tradeoffs]]
+> An Adapter makes an existing component usable through a contract that a client already expects. Its defining job is compatibility. A Facade gives clients a new, simpler interface to a complex subsystem. Its defining job is simplification, which can include coordinating several subsystem calls behind one operation.
+> 
+> | Aspect | Adapter | Facade |
+> |---|---|---|
+> | Problem it solves | The client depends on one interface, but the existing component exposes an incompatible one. | Using the subsystem directly is complex, for example because clients must know many of its components or repeat the same sequence of calls. |
+> | Interface it exposes | The target contract the client already uses, such as `IInventoryService`. | A new, higher-level interface shaped around what clients need, such as a checkout operation `PlaceOrderAsync`. |
+> | Work inside | Maps method names, reshapes data, and converts results and error codes between the two contracts. | Hides subsystem details behind that interface. When a use case needs several steps, it calls the components in the required order and owns that workflow. |
+> | Without it | The two sides cannot work together unless equivalent translation is written somewhere else, such as in the client. | Clients can still use the subsystem directly, but each one has to handle its complexity. Where a workflow is involved, each client duplicates it, and the copies can drift in sequencing or error handling. |
+> 
+> A Facade may also contain some translation. The defining responsibility separates the two: compatibility for an Adapter, simplification for a Facade.
+> 
+> [Design Patterns: Adapter/Facade (Microsoft Learn)](https://learn.microsoft.com/en-us/shows/visual-studio-toolbox/design-patterns-adapterfaade) · [[Home/Software Architecture/Patterns/Design Patterns/Structural/Adapter#Solution|Adapter: Solution]] · [[Home/Software Architecture/Patterns/Design Patterns/Structural/Facade#Problem|Facade: Problem]] · [[Home/Software Architecture/Patterns/Design Patterns/Structural/Facade#Tradeoffs|Facade: Tradeoffs]]
 
 # References
 

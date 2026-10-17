@@ -76,7 +76,7 @@ A partial refund must be implemented once per provider, and every new provider n
 
 # Solution
 
-Separate payment operations from provider implementations:
+The solution separates payment operations from provider implementations:
 
 ```csharp
 // Implementation interface — the "bridge"
@@ -203,16 +203,50 @@ Bridge becomes useful when both dimensions already vary or are about to vary. A 
 # Questions
 
 <!-- qard-id: f98e706c-1721-4045-a5cf-9699a6a299a6 -->
-> [!qard]- When does Bridge add value beyond selecting a payment provider?
-> Selecting one payment provider behind an interface may be ordinary polymorphism or dependency-injection configuration. Strategy is useful when the application deliberately swaps among algorithms for one behavior. Bridge fits when two models vary independently—for example, payment operations and provider implementations—and composition connects them without a provider-by-operation class cross-product. Provider choice alone does not establish that a second abstraction axis exists. [Bridge pattern](https://www.informit.com/articles/article.aspx?p=1398603&seqNum=2) · [Strategy pattern](https://refactoring.guru/design-patterns/strategy)
+> [!qard]- When does the Bridge pattern add value beyond choosing one implementation behind an interface?
+> Bridge adds value when a design has two dimensions that vary independently, such as payment operations and payment providers, and operations must combine freely with providers. Choosing one implementation behind one interface varies only one dimension. That is ordinary polymorphism or a dependency-injection registration, or Strategy when the implementations are interchangeable algorithms for one behavior.
+> 
+> Signals that a second dimension is real:
+> 
+> - **Both sides change:** new operation variants and new providers are both being added, or are about to be.
+> - **Code multiplies by combination:** methods differ only by provider, such as `ProcessStripeRefundAsync` and `ProcessPayPalRefundAsync`. Each new operation is then written once per provider, and each new provider repeats every operation.
+> - **Combinations are meaningful:** every operation genuinely works with every provider. If subscriptions work with only one provider, the dimensions are coupled, and a Bridge advertises flexibility the system does not have.
+> 
+> With one operation and one implementation, two hierarchies add indirection without a payoff, and a direct implementation is easier to trace.
+> 
+> [[Home/Software Architecture/Patterns/Design Patterns/Structural/Bridge#Problem|Bridge: Problem]] · [[Home/Software Architecture/Patterns/Design Patterns/Structural/Bridge#Pitfalls|Bridge: Pitfalls]] · [[Home/Software Architecture/Patterns/Design Patterns/Structural/Bridge#Tradeoffs|Bridge: Tradeoffs]]
 
-<!-- qard-id: 70a405f4-71f6-4190-b24f-654ef48d5a1d -->
-> [!qard]- What structural feature makes a payment design with `PaymentOperation` types and `IPaymentGateway` providers Bridge rather than ordinary provider polymorphism?
-> Both sides vary. `PaymentOperation` has charge, subscription, or refund variants, while `IPaymentGateway` has Stripe, PayPal, or bank implementations. Provider implementations can grow independently, and operation variants can grow independently while they compose existing gateway primitives. A new primitive still changes the gateway contract and every provider. Injecting only one gateway behind one service interface would be ordinary polymorphism or Strategy.
+> [!qard]- What is the Bridge pattern?
+> Bridge separates an abstraction from its implementation into two class hierarchies joined by composition, so each hierarchy can be extended independently. The abstraction holds a reference to an implementation interface and delegates low-level work to it, instead of inheriting from a concrete implementation.
+> 
+> Payment example:
+> 
+> - **Abstraction hierarchy:** `PaymentOperation`, with variants such as `SingleChargePayment`, `SubscriptionPayment` and `PartialRefundPayment`. Each variant defines what the operation does.
+> - **Implementation interface (the bridge):** `IPaymentGateway`, with primitives such as authorize, capture, refund and create subscription.
+> - **Concrete implementations:** `StripeGateway`, `PayPalGateway` and `BankTransferGateway`. Each maps those primitives to one provider's API.
+> 
+> An operation receives a gateway and calls its primitives. For example, a single charge authorizes and then captures. Any operation can therefore run on any provider:
+> 
+> - A new provider is one new `IPaymentGateway` implementation, and it works with every existing operation.
+> - A new operation built from existing primitives is one new `PaymentOperation` subclass, and it works with every provider.
+> 
+> Without the bridge, methods such as `ProcessStripeChargeAsync` and `ProcessPayPalRefundAsync` cover every provider-and-operation pair, and their number grows as providers × operations. If only the provider side varied, one interface with several implementations would be ordinary polymorphism. The second, abstraction-side hierarchy is what makes the design a Bridge.
+> 
+> **Limit:** Bridge prevents the cross-product, not change to the shared contract. An operation that needs a genuinely new primitive changes `IPaymentGateway` and every provider implementation.
+> 
+> [[Home/Software Architecture/Patterns/Design Patterns/Structural/Bridge#Problem|Bridge: Problem]] · [[Home/Software Architecture/Patterns/Design Patterns/Structural/Bridge#Solution|Bridge: Solution]]
 
 <!-- qard-id: 18451d39-42a6-43e9-bf28-df49b2470a9b -->
 > [!qard]- How does Bridge differ from dependency injection?
-> Dependency injection is an inversion-of-control technique for providing a class with its dependencies. Bridge is a design structure that separates an abstraction from its implementation so both can vary independently. DI can wire an `IPaymentGateway` into a `PaymentOperation`, but that wiring alone creates neither a second variation axis nor a reason to use Bridge. [Dependency injection in .NET](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection/overview?source=recommendations) · [Bridge pattern](https://www.informit.com/articles/article.aspx?p=1398603&seqNum=2)
+> Dependency injection and Bridge answer different questions. DI is an inversion-of-control technique: a class receives its dependencies from outside instead of creating them itself. Bridge is a class structure: an abstraction hierarchy and an implementation hierarchy are separated so that each can vary independently.
+> 
+> - **What each decides:** DI decides how an object obtains a collaborator. Bridge decides how a design is split into two hierarchies and where they connect.
+> - **What each requires:** DI applies to any dependency, even a single one. Bridge requires two dimensions that vary independently, such as payment operations and payment providers.
+> - **How they combine:** DI can supply the bridge, for example by injecting an `IPaymentGateway` into a `PaymentOperation`. A Bridge can also be wired by hand, as in `new SingleChargePayment(stripeGateway)`.
+> 
+> When DI selects one implementation behind one interface, such as one `IDistributedCache` provider, the result is ordinary polymorphism. It becomes Bridge-like only when a separate, independently changing abstraction composes with that implementation contract.
+> 
+> [Dependency injection in .NET](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection/overview) · [[Home/Software Architecture/Patterns/Design Patterns/Structural/Bridge#Solution|Bridge: Solution]] · [[Home/Software Architecture/Patterns/Design Patterns/Structural/Bridge#Related .NET Abstractions|Bridge: Related .NET Abstractions]]
 
 # References
 

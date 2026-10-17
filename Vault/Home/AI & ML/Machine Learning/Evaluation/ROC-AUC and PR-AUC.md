@@ -66,7 +66,7 @@ ML.NET exposes `AreaUnderRocCurve` and `AreaUnderPrecisionRecallCurve` on `Binar
 
 ## Choosing the Metric
 
-Use `ROC AUC` when the goal is pairwise ranking over both classes and the false-positive rate is meaningful at the expected prevalence. Prefer `PR AUC` when the positive class is rare and the system cares about the quality of positive alerts. For either metric, inspect the part of the curve near the actual capacity or cost constraint. A global area can reward regions that production will never use.
+`ROC AUC` fits when the goal is pairwise ranking over both classes and the false-positive rate is meaningful at the expected prevalence. `PR AUC` fits better when the positive class is rare and the system cares about the quality of positive alerts. For either metric, the informative part of the curve is near the actual capacity or cost constraint. A global area can reward regions that production will never use.
 
 ## Example
 
@@ -115,15 +115,15 @@ High ROC-AUC with weak PR-AUC can mean the broad ranking is good while the posit
 
 A random ranker has ROC-AUC 0.5. Its expected precision is the prevalence `P / (P + N)`, so the PR baseline changes when the dataset does. A perfect ranker reaches 1.0 on both areas.
 
-Threshold selection needs a constraint rather than a visually appealing knee. A review team may require precision ≥ 0.8 because false alarms consume capacity. A screening system may require recall ≥ 0.9. Sweep thresholds on validation data, choose a point that satisfies the constraint, and evaluate the frozen point on separate test data.
+Threshold selection needs a constraint rather than a visually appealing knee. A review team may require precision ≥ 0.8 because false alarms consume capacity. A screening system may require recall ≥ 0.9. The threshold is swept on validation data, a point that satisfies the constraint is chosen, and the frozen point is then evaluated on separate test data.
 
 # Pitfalls
 
-- **A strong global area can hide a weak operating region.** Check precision, recall, and queue volume near the threshold that production can afford.
+- **A strong global area can hide a weak operating region.** Precision, recall, and queue volume near the threshold that production can afford show how the model will actually behave.
 - **PR-AUC changes with prevalence.** Comparing it across datasets with different positive rates mixes model quality with dataset composition.
 - **AUC does not choose a threshold.** The operating point still comes from costs, capacity, or a safety constraint.
 - **Ranking is not [[Calibration]].** High AUC does not make a score of 0.8 mean an 80% event probability.
-- **Leakage raises every offline curve.** Use features available at inference time and a split that matches deployment.
+- **Leakage raises every offline curve.** A trustworthy offline evaluation uses only features available at inference time and a split that matches deployment.
 
 # Tradeoffs
 
@@ -136,11 +136,34 @@ Threshold selection needs a constraint rather than a visually appealing knee. A 
 
 # Questions
 
+<!-- qard-id: ee85524e-8de1-456c-8814-f0f6b88dc4bd -->
 > [!qard]- What does ROC-AUC show about a classifier?
-> Binary ROC-AUC summarizes how well scores rank positives above negatives across thresholds. An AUC of 0.8 means a randomly chosen positive scores above a randomly chosen negative about 80% of the time, counting ties as half. It does not choose a production threshold, and a score of 0.8 need not be a calibrated 80% probability. [scikit-learn ROC-AUC documentation](https://scikit-learn.org/stable/modules/model_evaluation.html) · [Hanley and McNeil on AUC interpretation](https://doi.org/10.1148/radiology.143.1.7063747)
+> ROC-AUC shows how well a binary classifier's scores rank positive cases above negative cases, summarized across all decision thresholds.
+> 
+> The ROC curve comes from sweeping the threshold from strict to permissive. Each threshold gives one point on the curve. The point plots the true-positive rate (the share of positives flagged) against the false-positive rate (the share of negatives wrongly flagged).
+> 
+> The area under this curve has a direct ranking meaning. An AUC of 0.8 means that a randomly chosen positive gets a higher score than a randomly chosen negative about 80% of the time, with ties counted as half. Random ranking gives about 0.5, and perfect ranking gives 1.0.
+> 
+> Because it summarizes ranking over every threshold, ROC-AUC does not:
+> 
+> - **choose an operating threshold:** that choice still depends on error costs, review capacity or a required precision or recall;
+> - **show calibration:** a model with a high AUC can give a case a score of 0.9 without that score meaning a 90% probability of the event.
+> 
+> [scikit-learn: ROC and model evaluation](https://scikit-learn.org/stable/modules/model_evaluation.html) · [Hanley and McNeil: The meaning and use of the area under a ROC curve](https://doi.org/10.1148/radiology.143.1.7063747)
 
+<!-- qard-id: 4c2fb4ac-42d0-41fa-a56e-0c98344f7315 -->
 > [!qard]- When is PR-AUC especially useful alongside ROC-AUC?
-> PR evaluation is useful when positives are rare and the system acts on positive predictions: precision shows how many alerts are correct, while recall shows how many positives are found. Its baseline depends on the positive rate, so compare it with prevalence and use the population and workload that matter. State whether the reported area is average precision or another PR-AUC implementation. [Davis and Goadrich on PR and ROC curves](https://doi.org/10.1145/1143844.1143874) · [scikit-learn average precision](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.average_precision_score.html)
+> PR-AUC is especially useful when positives are rare and the system acts on positive predictions, as with fraud alerts or review queues. ROC-AUC still describes overall ranking. PR-AUC adds whether the predicted positives are mostly correct, which ROC-AUC can hide.
+> 
+> - **Why ROC-AUC can look strong:** the false-positive rate divides false positives by all negatives. With many negatives, even a large number of false alarms gives a small rate. For example, with 100 positives and 100,000 negatives, catching 80 positives while flagging 1,000 negatives gives a false-positive rate of 1%, yet only 80 of the 1,080 alerts, about 7%, are correct.
+> - **What PR shows:** precision is the share of alerts that are correct, and recall is the share of positives found. Both measures focus on the positive class, so false alarms that consume review capacity stay visible.
+> 
+> Two qualifications apply when reading a PR-AUC value:
+> 
+> - **The baseline depends on prevalence:** a random ranker's expected precision equals the positive rate. A PR-AUC value is therefore meaningful only next to that rate. Comparing values across datasets with different positive rates mixes model quality with dataset composition. The evaluation set needs to match the production population and workload.
+> - **Implementations differ:** average precision, trapezoidal areas and interpolated areas under the PR curve can give different values. A reported PR-AUC is comparable only when the calculation method is known.
+> 
+> [Davis and Goadrich: The Relationship Between Precision-Recall and ROC Curves](https://doi.org/10.1145/1143844.1143874) · [scikit-learn: average_precision_score](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.average_precision_score.html)
 
 # References
 
