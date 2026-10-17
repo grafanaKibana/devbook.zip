@@ -195,6 +195,7 @@ The algorithm now lives in its own class. The selection policy still needs a det
 
 # Questions
 
+<!-- qard-id: f3cf0276-c3d0-4869-9dad-bf432e5629a0 -->
 > [!qard]- What is the Strategy pattern?
 > Strategy puts interchangeable algorithms for one step of a workflow behind a common contract. The code that runs the workflow calls the contract without knowing which algorithm it is using, so algorithms can be added or replaced independently of that workflow.
 > 

@@ -77,15 +77,15 @@ Two boundaries are easy to miss:
 
 # Pitfalls
 
-**Changing the source during enumeration.** Many mutable collections, including `List<T>` and `Dictionary<TKey,TValue>`, invalidate active enumerators after structural changes and throw `InvalidOperationException`. Apply changes after the loop or iterate an intentional snapshot.
+**Changing the source during enumeration.** Many mutable collections, including `List<T>` and `Dictionary<TKey,TValue>`, invalidate active enumerators after structural changes and throw `InvalidOperationException`. Applying changes after the loop or iterating an intentional snapshot avoids the exception.
 
 **Deferred work captures more than the item.** Since C# 5, each `foreach` iteration has its own iteration variable, so lambdas do not all observe the final item. Captured mutable state outside the loop is still shared, and closures can outlive resources used during enumeration.
 
-**Multiple enumeration.** An `IEnumerable<T>` may repeat I/O, database work, or side effects every time it is enumerated. Materialize only when a stable snapshot or repeated traversal is actually needed.
+**Multiple enumeration.** An `IEnumerable<T>` may repeat I/O, database work, or side effects every time it is enumerated. Materialization is worthwhile only when a stable snapshot or repeated traversal is actually needed.
 
 # Tradeoffs
 
-- `foreach` expresses sequential traversal without exposing indexes. Use `for` when the index itself is part of the algorithm or the collection must be updated by position.
+- `foreach` expresses sequential traversal without exposing indexes. `for` fits when the index itself is part of the algorithm or the collection must be updated by position.
 - LINQ expresses a transformation pipeline. A loop is easier to step through and can avoid iterator or delegate overhead, but performance depends on the source and operators.
 - `Span<T>` provides a stack-only view over contiguous memory. It helps APIs avoid copies and allocations. It is not an automatic reason to replace every collection loop.
 
@@ -93,11 +93,45 @@ Two boundaries are easy to miss:
 
 <!-- qard-id: 23508898-cc73-4289-ba2c-ab026d0258b2 -->
 > [!qard]- What must a type provide to work with `foreach`?
-> The compiler can use the `foreach` pattern without `IEnumerable`: `GetEnumerator()` returns an object with a Boolean `MoveNext()` and a `Current` value. The usual reusable contract is `IEnumerable<T>`; arrays also have specialized compiler handling. [Microsoft: iteration statements](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/iteration-statements)
+> A type works with `foreach` in either of two ways. It implements `IEnumerable<T>` or `IEnumerable`, or it matches the enumerator pattern that the compiler looks for. The interface is the usual reusable contract, but it is not required.
+> 
+> The pattern has two parts:
+> 
+> - **The source** has a public parameterless `GetEnumerator()` method. That method can also be an extension method.
+> - **The returned enumerator** has a public `Current` property and a public parameterless `MoveNext()` method that returns `bool`.
+> 
+> The compiler binds to these members rather than to an interface, so a type can be iterated without implementing either interface. Arrays also receive specialized compiler handling.
+> 
+> [Microsoft: iteration statements](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/iteration-statements)
 
 <!-- qard-id: cdfb0d9a-b75e-43e1-b6ed-ac7ea0da25c7 -->
 > [!qard]- How does `foreach` work under the hood?
-> The compiler lowers `foreach` according to the source type: in the general pattern it obtains an enumerator, calls `MoveNext()`, reads `Current`, and performs required disposal. Arrays can use specialized index-based code, so there is no single generated shape for every source. [Microsoft: iteration statements](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/iteration-statements)
+> The compiler rewrites `foreach` into lower-level code, and the result depends on the source type. For the general enumerator pattern, the rewrite is roughly:
+> 
+> ```csharp
+> var enumerator = source.GetEnumerator();
+> try
+> {
+>     while (enumerator.MoveNext())
+>     {
+>         var item = enumerator.Current;
+>         // loop body
+>     }
+> }
+> finally
+> {
+>     // Disposes the enumerator when it requires disposal.
+> }
+> ```
+> 
+> 1. `GetEnumerator()` is called once, before the first element.
+> 2. Each `MoveNext()` call advances to the next element and returns `false` when the sequence is exhausted.
+> 3. `Current` supplies that element, which is assigned to the iteration variable before the body runs.
+> 4. When the enumerator requires disposal, the `finally` block disposes it, including after `break` or an exception. A handwritten `while (MoveNext())` loop has to provide that cleanup itself, or the enumerator's cleanup does not run.
+> 
+> No single generated shape fits every source. Arrays, for example, can be lowered to index-based code without an enumerator.
+> 
+> [Microsoft: iteration statements](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/iteration-statements)
 
 
 

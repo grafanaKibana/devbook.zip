@@ -39,11 +39,39 @@ return FolderStructureMap;
 
 # Questions
 
-> [!qard]- What do retrieval, response, and end-to-end RAG evaluations tell you?
-> Retrieval evaluation asks whether useful evidence was found and selected. Response evaluation asks whether the answer is correct or grounded given the evidence supplied. End-to-end evaluation asks whether the complete system met the task's outcome criteria. Separate results localize likely failure: a good response over bad context points upstream, while good context with a bad answer points toward generation. End-to-end failure establishes a user-visible miss but does not identify its cause. [RAG evaluators](https://learn.microsoft.com/en-us/azure/foundry/concepts/evaluation-evaluators/rag-evaluators?view=foundry)
+<!-- qard-id: 03a585b9-616f-472a-a294-ac7bac300cb4 -->
+> [!qard]- What do retrieval, response, and end-to-end evaluations each show about a RAG system?
+> Each evaluation answers a different question, so separate results show where a RAG system failed rather than only that it failed.
+> 
+> | Evaluation | Question it answers | A failure points toward | What it cannot show |
+> |---|---|---|---|
+> | Retrieval | Was relevant evidence found, ranked well and selected for the context? | Indexing, chunking, query handling, search or ranking | Whether the answer then used good evidence correctly |
+> | Response | Given the supplied evidence, is the answer grounded in it, relevant to the question and, when a reference exists, correct? | The prompt or the generator's use of the evidence | Whether better evidence existed and was missed |
+> | End-to-end | Did the complete system meet the task's outcome criteria? | A user-visible miss somewhere in the pipeline | Which stage caused the miss |
+> 
+> Combined, the results localize a likely cause. A grounded answer built on poor or incomplete context points upstream to retrieval. Good context paired with a wrong answer points to generation.
+> 
+> Example: a support bot retrieves the correct policy but misreads its date constraint. Retrieval passes and the response check fails, so more search tuning cannot fix that answer.
+> 
+> Sources:
+> - [RAG evaluators (Microsoft Foundry)](https://learn.microsoft.com/en-us/azure/foundry/concepts/evaluation-evaluators/rag-evaluators?view=foundry)
 
+<!-- qard-id: c73e80bf-ab77-4bfc-b246-be9e3d11ce10 -->
 > [!qard]- Which evaluation concerns are specific to RAG, and which can reuse general LLM evaluation methods?
-> RAG adds retrieval-specific questions: did the system find relevant evidence, rank it well, and supply enough valid evidence to answer? The dataset must account for multiple acceptable or complementary chunks. Groundedness is useful whenever an answer is constrained by provided evidence, not only in RAG. Golden sets, deterministic checks, model judges and online evaluation are reusable methods; choose the evaluator for the measured claim and verify its labels and limits. [RAGAS: Automated Evaluation of Retrieval Augmented Generation](https://aclanthology.org/2024.eacl-demo.16.pdf) · [Evaluation types](https://docs.langchain.com/langsmith/evaluation-types)
+> RAG adds retrieval to evaluation: whether relevant evidence was found, ranked well and supplied in sufficient quantity. Retrieval metrics that score against labeled relevance judgments need relevance labels that other LLM tasks do not. Reference-free retrieval evaluation does not use such labels. Answer-quality checks and the evaluation methods themselves are largely reusable.
+> 
+> | Aspect | Specific to RAG | Reusable from general LLM evaluation |
+> |---|---|---|
+> | What is measured | Retrieval relevance, ranking quality and whether the context covers the evidence an answer needs | Correctness, relevance to the question, safety and format. Groundedness also applies to any answer constrained by supplied text, such as a summary of a given document. |
+> | Ground truth | For label-based retrieval metrics, relevance labels per query, which must allow several acceptable chunks or require a set of complementary ones | Reference answers and rubrics, built as for any task |
+> | Methods | Ranked-retrieval metrics, such as Recall@k or nDCG, over those labels | Golden datasets, deterministic checks, LLM judges, human review and online evaluation of production traces |
+> 
+> Any evaluator must match the claim being measured. Its limits need checking, as do any labels it uses. A judge reused from another task is not automatically valid for a new one.
+> 
+> Sources:
+> - [Built-in evaluators (Microsoft Foundry)](https://learn.microsoft.com/en-us/azure/foundry/concepts/built-in-evaluators)
+> - [RAGAS: Automated Evaluation of Retrieval Augmented Generation (EACL 2024)](https://aclanthology.org/2024.eacl-demo.16.pdf)
+> - [Evaluation types (LangSmith)](https://docs.langchain.com/langsmith/evaluation-types)
 
 # References
 

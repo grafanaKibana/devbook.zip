@@ -75,9 +75,9 @@ var buffer = new byte[256];
 
 # Pitfalls
 
-- A library targeting only `netstandard2.0` can miss newer APIs and platform-specific optimizations needed by modern consumers, which often pushes teams into awkward workarounds. Mitigate by adding a modern target (for example `net8.0`) and using conditional compilation only where it creates measurable value.
-- Moving to `netstandard2.1` "for more APIs" can break .NET Framework consumers immediately because .NET Framework does not implement 2.1. Detect this risk by validating consumer TFM inventory before changing targets, then choose `net8.0;netstandard2.0` when broad reach is still required.
-- Multi-targeting without a concrete compatibility requirement increases package/test complexity and can introduce behavior drift between targets. Keep a small target set, enforce CI for each TFM, and remove legacy targets once downstream constraints are gone.
+- A library targeting only `netstandard2.0` can miss newer APIs and platform-specific optimizations needed by modern consumers, which often pushes teams into awkward workarounds. Adding a modern target (for example `net8.0`) mitigates this, with conditional compilation limited to places where it creates measurable value.
+- Moving to `netstandard2.1` "for more APIs" can break .NET Framework consumers immediately because .NET Framework does not implement 2.1. Validating consumer TFM inventory before changing targets detects this risk, and `net8.0;netstandard2.0` is the choice when broad reach is still required.
+- Multi-targeting without a concrete compatibility requirement increases package/test complexity and can introduce behavior drift between targets. A small target set, CI enforced for each TFM, and removal of legacy targets once downstream constraints are gone keep that complexity and drift contained.
 
 # Tradeoffs
 
@@ -89,7 +89,20 @@ var buffer = new byte[256];
 
 <!-- qard-id: bec5a750-95b9-4d12-a09a-76e78858812c -->
 > [!qard]- When is targeting .NET Standard still justified?
-> Target .NET Standard when a library must serve consumers limited to its API contract, especially .NET Framework consumers that require `netstandard2.0`. If all consumers use a modern .NET TFM, targeting that platform directly gives a current API surface. Multi-target only when distinct consumer groups need distinct assets. [Microsoft: .NET Standard](https://learn.microsoft.com/en-us/dotnet/standard/net-standard)
+> Targeting .NET Standard is justified when one library build must be usable on more than one .NET implementation, which in practice usually means .NET Framework consumers remain. `netstandard2.0` is the highest version .NET Framework can consume, so it is the target that keeps that reach. When every consumer runs modern .NET, a modern `netX.0` target is the better default.
+> 
+> .NET Standard is a versioned API contract, not a runtime, and meeting the contract does not by itself guarantee that a library runs on a given host. Targeting a version fixes the baseline reference API surface the library compiles against. Each .NET implementation supports particular .NET Standard versions starting from particular releases, so a consumer can use the library only on an implementation release that supports the targeted version. Compatible NuGet packages can add APIs beyond that baseline, and every package dependency must then also support the consumer's platform. After .NET 5 unified the target frameworks, no new .NET Standard versions are planned beyond 2.1.
+> 
+> | Target | Consumers that can use it | Cost |
+> |---|---|---|
+> | `netstandard2.0` only | Releases of .NET Framework, .NET Core, Mono, Xamarin and modern .NET that implement 2.0 | Limited to the 2.0 baseline plus APIs from compatible packages, with no modern-target APIs or optimizations |
+> | `netstandard2.1` | Implementations and releases that support 2.1, including modern .NET, but not .NET Framework | Gives up .NET Framework reach without the full modern API set |
+> | Modern `netX.0` only | Apps on that .NET version or later | .NET Framework and older runtimes cannot load it |
+> | Multi-target, such as `net8.0;netstandard2.0` | Both groups, each receiving the assembly built for it | More builds, tests, conditional code and package metadata, justified only when distinct consumer groups need distinct assets |
+> 
+> Modern .NET implements .NET Standard 2.1 and earlier, so an existing `netstandard2.0` library can keep serving modern consumers, provided its package dependencies also support those runtimes. Retargeting is worthwhile when the library needs APIs or features that only a newer target provides.
+> 
+> Sources: [Microsoft Learn: .NET Standard](https://learn.microsoft.com/en-us/dotnet/standard/net-standard) · [.NET Blog: The future of .NET Standard](https://devblogs.microsoft.com/dotnet/the-future-of-net-standard/)
 
 # References
 

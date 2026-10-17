@@ -36,7 +36,7 @@ static decimal CalculateTaxImpure(decimal amount)
 }
 ```
 
-Pure functions are easy to test because every dependency is an argument. They can also run concurrently without coordinating shared writes. Memoization is possible when inputs have stable equality and hashing, although cache lifetime and memory growth still need an explicit policy. A function that throws outside its defined domain is partial; when totality matters, expected invalid inputs should be encoded as returned values such as `Result<T>` or an option type.
+Pure functions are easy to test because every dependency is an argument. They can also run concurrently without coordinating shared writes. Memoization is possible when inputs have stable equality and hashing, although cache lifetime and memory growth still need an explicit policy. Totality is relative to a stated input domain: a function is total on that domain when every input in it produces a result. A function that deterministically throws for some values of its parameter types is partial on the domain of those types, although it can be total on a narrower stated domain that excludes those values. When totality over the full parameter types matters, expected invalid inputs are encoded as returned values such as `Result<T>` or an option type.
 
 ## Immutability
 
@@ -107,13 +107,13 @@ The compiler reports a non-exhaustive switch expression when it can see an uncov
 
 Replacing every `List<T>` with `ImmutableList<T>` inside a tight update loop creates persistent-tree nodes on each change and can increase GC pressure. `Add` is O(log n) and copies the path to the changed node. `ImmutableArray<T>` is compact for read-heavy snapshots but copies its backing storage when changed.
 
-Use immutable collections where snapshots and safe sharing matter, such as domain events or published state. A local algorithm can build with mutable storage and expose an immutable result once construction is complete. Benchmark before changing a hot path.
+Immutable collections fit where snapshots and safe sharing matter, such as domain events or published state. A local algorithm can build with mutable storage and expose an immutable result once construction is complete. A hot path is benchmarked before it is changed.
 
 ## Chaining LINQ Without Understanding Deferred Execution
 
 Many LINQ operators use deferred execution, so each enumeration starts the pipeline again. Enumerating an `IQueryable<T>` twice may issue two database queries.
 
-Materialize with `.ToList()` or `.ToArray()` when a stable snapshot will be consumed more than once. Keep the query deferred when streaming, changing source data, or provider translation is intentional.
+Materializing with `.ToList()` or `.ToArray()` gives a stable snapshot when the results will be consumed more than once. A deferred query remains appropriate when streaming, changing source data, or provider translation is intentional.
 
 ```csharp
 // BAD: two DB round-trips if source is IQueryable
@@ -129,7 +129,7 @@ var count = items.Count;
 
 C# permits exceptions anywhere and does not require a result type for expected failure. A fluent pipeline can therefore look total while hiding validation or I/O failure. Partial state appears only after a step has already performed a side effect.
 
-Represent expected outcomes with a result type, nullable value, or small domain-specific union. Reserve exceptions for failures the current operation cannot handle, and keep side effects at a boundary where retry and partial completion are visible.
+Expected outcomes fit a result type, nullable value, or small domain-specific union. Exceptions then remain for failures the current operation cannot handle, and side effects stay at a boundary where retry and partial completion are visible.
 
 # Tradeoffs
 
@@ -145,7 +145,19 @@ The practical C# pattern is a functional core with an effectful shell: read exte
 
 <!-- qard-id: 335bedbd-8894-48a7-9fe2-5318c9607cad -->
 > [!qard]- What makes a function "pure" and why does purity matter for testing?
-> A pure function’s result depends on explicit inputs and evaluating it does not mutate observable external state. That makes a test a direct value-in/value-out check instead of setup for clocks, databases, or globals; I/O belongs at the surrounding boundary. Purity and totality are separate: under a formal semantics, a deterministic exception can make a computation partial, while expected invalid input can be returned as a value when total handling is useful. Microsoft’s LINQ guidance describes transformations versus state-changing procedures; Haskell 2010 §3.1 models errors/nontermination as bottom, which is a language-semantics example rather than a universal claim about C# exceptions. [.NET: functional vs. imperative programming](https://learn.microsoft.com/en-us/dotnet/standard/linq/functional-vs-imperative-programming) · [Haskell 2010 report §3.1](https://www.haskell.org/onlinereport/haskell2010/haskellch3.html#sect3.1)
+> A function is pure when its result depends only on its explicit arguments and evaluating it has no observable side effects. The same inputs always give the same output. The function does not read hidden state, such as the clock, a global variable or configuration. It also changes nothing outside its return value, such as shared state, a database or a log. A call can therefore be replaced by its result without changing program behavior. This property is called referential transparency.
+> 
+> For example, `CalculateTax(amount, rate) => amount * rate` is pure. A version that reads `_config.TaxRate` and writes a log entry is impure. Its result depends on hidden state, and running it has an effect.
+> 
+> Purity matters for testing because every dependency is an argument:
+> 
+> - **Direct checks:** a test passes input values and asserts on the returned value. No database, clock or global has to be arranged, faked or reset first.
+> - **Repeatable results:** the same inputs give the same result on every run and in any test order, so hidden state cannot make the test flaky.
+> - **Effects at the edges:** code that reads the clock or database and writes results stays in a thin surrounding layer. The decision logic is tested with plain values, and that layer is tested separately against its real boundary.
+> 
+> Purity and totality are separate properties. Totality is judged against a stated input domain: a function is total on that domain when every input in it produces a result. Suppose the stated domain is every value of the parameter types. A function that deterministically fails for some of those values, for example by throwing, is then partial on that domain. The same function can still be total on a narrower stated domain that excludes those values. Haskell's semantics models such an evaluation error as bottom (⊥), like non-termination. That is a language-semantics model, not a general rule for C# exceptions. When invalid input is an expected case, it can be returned as a value, such as a `Result<T>`. The function then returns a result for those inputs too. The outcome stays explicit, and a test can assert it like any other result.
+> 
+> [.NET: Functional vs. imperative programming](https://learn.microsoft.com/en-us/dotnet/standard/linq/functional-vs-imperative-programming) · [Haskell 2010 Report §3.1: Errors](https://www.haskell.org/onlinereport/haskell2010/haskellch3.html#sect3.1) · [Lean reference: Functions](https://lean-lang.org/doc/reference/latest/The-Type-System/Functions/)
 
 # References
 

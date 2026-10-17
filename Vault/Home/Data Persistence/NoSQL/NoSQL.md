@@ -59,7 +59,13 @@ Data is often shaped around known reads because keeping related values in one pa
 
 <!-- qard-id: 510a2738-ff3d-447d-a2eb-c48661cd012d -->
 > [!qard]- When is a non-relational store a poor fit for a service?
-> It is a poor fit when the service depends on constraints, transactions across related records, or changing queries that the chosen engine cannot support within its guarantees. If the database cannot enforce an invariant, the application inherits that work. “NoSQL” does not specify one transaction or consistency model, so evaluate the concrete engine and operation scope. [Microsoft: Understand data store models](https://learn.microsoft.com/en-us/azure/architecture/data-guide/technology-choices/understand-data-store-models)
+> A non-relational store is a poor fit when the service's correctness depends on guarantees that the chosen engine cannot provide within the required scope. Those guarantees are constraints, transactions across related records, or support for a changing set of queries.
+> 
+> - **Invariants move into application code.** If the database cannot enforce a rule across records, the application must enforce it, coordinate concurrent writes and repair copies that drift apart. For example, a transfer between two account records needs both balance changes to commit or fail together. An engine whose transactions are limited to one document or partition provides that atomicity only when both accounts lie inside one such scope. Under a partition-scoped transaction, two separate account documents in the same partition can still commit together. When the accounts fall outside every atomic scope the engine supports, such as in different partitions, the application must coordinate the transfer itself.
+> - **New queries can require remodeling.** Data in such stores is often shaped around known reads. A query the model was not designed for may need another index, a duplicated record or a different layout.
+> - **The label decides little.** “NoSQL” names no single consistency or transaction model. Some engines provide strong reads or transactions within a bounded scope, while others offer eventual or tunable consistency. The fit therefore depends on the concrete engine and the scope of each operation.
+> 
+> [Microsoft: Understand data store models](https://learn.microsoft.com/en-us/azure/architecture/data-guide/technology-choices/understand-data-store-models) · [Azure Cosmos DB: Database transactions and optimistic concurrency](https://learn.microsoft.com/en-us/azure/cosmos-db/database-transactions-optimistic-concurrency)
 
 # References
 

@@ -266,8 +266,16 @@ This family fits high-risk systems that can calibrate evidence evaluators or tra
 
 # Questions
 
+<!-- qard-id: a2e5357e-483e-41e0-80be-f563d42cf86b -->
 > [!qard]- What kind of RAG question can justify adding a knowledge graph to vector retrieval?
-> A graph is useful when the answer depends on explicit entities and relations, paths, or synthesis across many documents rather than finding a few semantically similar passages. Microsoft Research's GraphRAG work targets corpus-wide, query-focused summarization using extracted entities, relationships and community summaries. Graph construction adds extraction and maintenance work, so measure it against a vector baseline on representative questions. For direct fact lookup, vector retrieval may be sufficient without that graph pipeline. [From Local to Global: A Graph RAG Approach to Query-Focused Summarization](https://www.microsoft.com/en-us/research/publication/from-local-to-global-a-graph-rag-approach-to-query-focused-summarization/)
+> A knowledge graph can be justified when the answer depends on explicit relationships between entities, or on synthesis across much of a corpus, rather than on a few passages that resemble the question. A question such as *What are the main themes across these documents?* is an example: no small set of similar chunks contains its answer.
+> 
+> - **Vector retrieval** returns the top-k chunks closest to the query. That suits direct fact lookup, where one or a few passages hold the answer.
+> - **GraphRAG** uses a language model to extract entities and relationships into a graph, groups closely related entities into communities and pre-generates a summary of each community. Corpus-wide questions can then be answered from those summaries instead of from isolated chunks. Questions about dependencies or impact can follow explicit edges between entities.
+> 
+> The graph adds model-driven extraction, indexing and maintenance cost, and extraction or linking errors become wrong edges. Microsoft Research evaluated GraphRAG on corpus-wide, query-focused summarization, so its benefit for other question types has to be measured. The decision therefore rests on a comparison with a vector-retrieval baseline on representative questions.
+> 
+> [From Local to Global: A Graph RAG Approach to Query-Focused Summarization (Microsoft Research)](https://www.microsoft.com/en-us/research/publication/from-local-to-global-a-graph-rag-approach-to-query-focused-summarization/)
 
 # References
 

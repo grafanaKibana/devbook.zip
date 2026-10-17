@@ -113,7 +113,14 @@ The decision follows the ownership boundary. A [[Locking|lock]] covers synchrono
 
 <!-- qard-id: 6529d8fe-c25a-46f7-94a1-c6241857a6a5 -->
 > [!qard]- When is a named `Mutex` appropriate in .NET?
-> A named mutex is useful when separate processes on the same machine need one thread-owned critical section, such as a single-instance application or shared local file. The acquiring thread must release it. Use `lock` for in-process synchronous exclusion and a distributed coordination service for ownership across machines. [Microsoft: Mutexes](https://learn.microsoft.com/en-us/dotnet/standard/threading/mutexes) · [Mutex API](https://learn.microsoft.com/en-us/dotnet/api/system.threading.mutex?view=net-10.0)
+> A named `Mutex` fits when separate processes on the same machine must not run a critical section at the same time. Examples are a single-instance application guard and several processes writing one local file. Every process that opens the same name shares one operating-system mutex, and only one thread across those processes can own it at a time.
+> 
+> - **Thread ownership:** the thread that acquires the mutex must release it with `ReleaseMutex`; a call from any other thread throws. Acquisition and release therefore stay in one synchronous scope, not around an `await`.
+> - **Inside one process:** `lock` for synchronous code, or `SemaphoreSlim` for asynchronous code, provides exclusion without an operating-system mutex.
+> - **Across machines:** a named mutex cannot coordinate them. Ownership across machines needs a lease or lock managed by a shared database or coordination service.
+> - **Platform:** name visibility and access rules depend on the operating system. On Windows, the `Global\` and `Local\` prefixes control whether other Terminal Services sessions see the name.
+> 
+> [Microsoft: Mutexes](https://learn.microsoft.com/en-us/dotnet/standard/threading/mutexes) · [Mutex API](https://learn.microsoft.com/en-us/dotnet/api/system.threading.mutex?view=net-10.0) · [SemaphoreSlim API](https://learn.microsoft.com/en-us/dotnet/api/system.threading.semaphoreslim?view=net-10.0)
 
 <!-- qard-id: d5b8cdd5-2b61-416f-91ab-a1584134e62e -->
 > [!qard]- What does `AbandonedMutexException` signal?

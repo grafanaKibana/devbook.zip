@@ -81,13 +81,13 @@ Retrieval quality needs a labeled set of queries with known relevant documents. 
 
 **MRR (Mean Reciprocal Rank)** averages `1 / rank` for the first relevant result. It rewards putting one good document near the top. This matters when generation sees only one or two chunks. An embedding upgrade can improve Recall@10 while pushing the best result down to position three or four. MRR exposes that regression.
 
-**MAP (Mean Average Precision)** averages precision at every rank where a relevant document appears. It is more informative than MRR when the answer needs several sources. A legal assistant may have MRR of 0.88 because it finds one case early, yet MAP of 0.51 because the remaining relevant cases are missing or buried.
+**MAP (Mean Average Precision)** is the mean, across queries, of each query's average precision (AP). In the standard definition, AP sums the precision at each rank where a relevant document appears and divides by the query's total number of relevant documents, so a relevant document that is never retrieved contributes zero. It is more informative than MRR when the answer needs several sources. A legal assistant may have MRR of 0.88 because it finds one case early, yet MAP of 0.51 because the remaining relevant cases are missing or buried.
 
 **nDCG@k (Normalized Discounted Cumulative Gain)** supports graded relevance and discounts lower positions. nDCG@5 of 0.83 means the observed ranking achieved 83% of the ideal gain. A strong nDCG@10 with weak nDCG@3 says the right documents exist in the candidate set but reach the generator too late.
 
 | Metric | What it answers | When to prefer |
 | --- | --- | --- |
-| Recall@k | Were the relevant documents found? | Primary metric. Always track |
+| Recall@k | Were the relevant documents found? | Primary metric. Always tracked |
 | Precision@k | How much noise is in the context? | Context window is tight or token cost matters |
 | HitRate@k | Does any relevant doc appear? | Minimum-bar coverage check. Fast to interpret |
 | MRR | Is the best result ranked first? | Generator uses only top-1 or top-2 chunks |
@@ -112,7 +112,7 @@ Semantic scoring runs asynchronously on a sample of production traffic. Binary p
 
 **Response completeness** checks whether every requested part was answered. It needs either a reference answer or a rubric for the query type.
 
-**Noise Sensitivity** measures wrong claims induced by irrelevant retrieved chunks. Recall can stay healthy because the right evidence was present, and faithfulness can remain high because most claims were supported. The extra false claim is the failure. This metric needs a reference. Lower is better.
+**Noise Sensitivity** measures wrong claims, judged against the reference, that are attributable to retrieved chunks. A selected mode sets the attribution: relevant mode counts wrong claims attributable to relevant chunks, and irrelevant mode counts those attributable to irrelevant chunks, so a reported score names its mode. Recall can stay healthy because the right evidence was present, and faithfulness can remain high because most claims were supported. The extra false claim is the failure. Attribution locates which context supports a wrong claim but does not by itself prove that the chunk caused it. This metric needs a reference. Lower is better.
 
 **Context Entities Recall** compares entities in the reference answer with entities present in the retrieved context. It catches missing names, dates, or identifiers that a broad relevance label may overlook. A reference is required.
 
@@ -124,7 +124,7 @@ Semantic scoring runs asynchronously on a sample of production traffic. Binary p
 | Answer correctness | Does the answer actually solve the question? | Yes |
 | Citation validity | Does each citation support its attached claim? | No |
 | Response completeness | Are all aspects of the query covered? | Reference answer or query-type rubric |
-| Noise Sensitivity | Does noisy context introduce fabricated claims? | Yes |
+| Noise Sensitivity | Are incorrect claims, judged against the reference, attributable to relevant or irrelevant retrieved context, depending on the selected mode? | Yes |
 | Context Entities Recall | Are required named entities present in context? | Yes |
 
 ## Performance and Cost Metrics
@@ -168,7 +168,7 @@ Global averages hide local damage. A change can improve overall faithfulness by 
 Useful segment dimensions include:
 
 - **Tenant or user group:** multi-tenant systems must catch per-tenant regressions.
-- **Query cluster:** group similar queries by intent or embedding proximity and track metrics per cluster.
+- **Query cluster:** similar queries grouped by intent or embedding proximity, with metrics tracked per cluster.
 - **Document source type:** PDFs, wikis, APIs, and databases fail differently during chunking and retrieval.
 - **Language:** each language has its own retrieval and generation quality profile.
 
@@ -186,7 +186,7 @@ Relative thresholds work better for regression detection than one permanent numb
 | Ingestion failure rate | Exceeds 1% of scheduled ingestions | Silent data loss accumulating |
 | Token cost per query | Increases >30% from baseline | Prompt bloat, context window misuse, or upstream retrieval change |
 
-An intentional model, prompt, or index change does not erase the old baseline immediately. Keep the previous version as the control during canary or shadow comparison, then promote the accepted candidate only after its release gates pass. The same control-versus-candidate principle appears in [[Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation|Evaluation]]. Relative alerts still need a slower absolute check because gradual drift can move the baseline itself.
+An intentional model, prompt, or index change does not erase the old baseline immediately. The previous version remains the control during canary or shadow comparison, and the candidate is promoted only after its release gates pass. The same control-versus-candidate principle appears in [[Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation|Evaluation]]. Relative alerts still need a slower absolute check because gradual drift can move the baseline itself.
 
 # Pitfalls
 
@@ -228,8 +228,32 @@ The practical default is deterministic metrics on all traffic, asynchronous judg
 
 # Questions
 
+<!-- qard-id: 9bc07aa9-b2ba-4ff6-93cc-63bff49c169b -->
 > [!qard]- How do offline evaluation and production monitoring work together for a RAG system?
-> Offline evaluation compares a candidate pipeline against a controlled, versioned dataset before release. Production monitoring observes real requests, where traffic and source data can change, and tracks quality signals alongside latency, errors and cost. Monitoring signals need representative sampling and a valid evaluator; they are not ground truth by themselves. Triage production failures, add confirmed cases to the offline set, and use both views to catch regressions and new behavior. [Evaluation types](https://docs.langchain.com/langsmith/evaluation-types) · [GenAI semantic conventions](https://opentelemetry.io/docs/specs/semconv/registry/attributes/gen-ai/)
+> Offline evaluation decides whether a candidate version is good enough to release. Production monitoring checks whether the released version keeps working on real traffic. Confirmed production failures are added to the offline dataset, so later releases are tested against them.
+> 
+> | Aspect | Offline evaluation | Production monitoring |
+> |---|---|---|
+> | Data | A controlled, versioned dataset with relevance labels or reference answers | Live requests, whose query mix and source documents change over time |
+> | Timing | Before release, comparing a candidate with the current baseline | After release, continuously |
+> | Signals | Retrieval metrics against labels and answer correctness against references | Per-stage traces, latency, errors and cost, cheap checks on every request, and judge scores on a sample |
+> | Blind spot | Query patterns and data changes that the dataset does not contain | Usually no reference answer, so quality scores are only as valid as the sampling and the evaluator |
+> 
+> The feedback loop:
+> 
+> 1. A release passes offline gates against the baseline.
+> 2. Monitoring flags an anomaly, such as sampled faithfulness falling for one segment or empty results rising.
+> 3. Traces are triaged to confirm real failures and locate the failing stage.
+> 4. Confirmed cases, with verified labels, join the offline dataset.
+> 5. The fix is evaluated offline against the expanded dataset before the next release.
+> 
+> Sampled quality scores need representative or stratified sampling, and a judge whose agreement with human labels is checked. Without both, monitoring can look healthy while quality falls.
+> 
+> Sources:
+> - [Evaluation types (LangSmith)](https://docs.langchain.com/langsmith/evaluation-types)
+> - [Semantic conventions for generative AI systems (OpenTelemetry)](https://opentelemetry.io/docs/specs/semconv/gen-ai/)
+> - [[Monitoring#Sampling Bias in Quality Scoring|Monitoring: Sampling Bias in Quality Scoring]]
+> - [[Monitoring#Judge Drift Without Calibration|Monitoring: Judge Drift Without Calibration]]
 
 # References
 

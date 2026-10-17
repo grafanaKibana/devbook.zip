@@ -181,6 +181,7 @@ Big O states an upper bound. **Big Θ** (theta) states a *tight* bound where the
 
 # Questions
 
+<!-- qard-id: 8798b907-d969-43b3-aae7-3be04b553424 -->
 > [!qard]- What does Big O notation describe?
 > Big O notation describes an upper bound on how an algorithm's cost, usually running time or extra memory, grows as a function of input size `n`. It states how an approach scales, not how long it takes on a particular machine.
 > 
