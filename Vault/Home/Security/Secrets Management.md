@@ -9,6 +9,8 @@ level:
 priority: High
 status: Ready to Repeat
 publish: true
+qard-deck: "Security"
+qard-topic: "Secrets Management"
 ---
 
 A service needs a credential before it can open a database connection, call an API, or sign a token. Copying that credential into source or an image turns every clone and build artifact into another disclosure path. Replacing it without telling running consumers when to reload can instead cause an outage. Secrets management moves credentials from an issuer or store to an authorized workload, limits how long they remain useful, and removes them after expiry or compromise.
@@ -92,7 +94,7 @@ Prefer workload identity when the platform and target service can bind it narrow
 
 # Questions
 
-> [!QUESTION]- What should happen when a secret is accidentally committed and pushed?
+> [!qard]- What should happen when a secret is accidentally committed and pushed?
 > Treat the secret as compromised and revoke or rotate it immediately. Update the affected workloads through the normal secret-delivery path, then verify that the old value is rejected. Check access logs and usage for signs of abuse. Removing the value from the current file and rewriting repository history can reduce future exposure, but neither action replaces revocation because copies may already exist in clones, caches, logs, or alerts.
 
 # References

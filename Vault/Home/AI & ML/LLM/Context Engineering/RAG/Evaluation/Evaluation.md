@@ -11,6 +11,8 @@ priority: High
 tags: [FolderNote]
 publish: true
 status: Done
+qard-deck: "AI & ML"
+qard-topic: "LLM/Context Engineering/RAG/Evaluation/Evaluation"
 ---
 
 RAG can fail before generation starts. It can also retrieve the right evidence and still produce a bad answer. Evaluation therefore separates retrieval from generation, then checks the finished system against the user's task. One blended quality score cannot show which part needs repair.
@@ -36,10 +38,10 @@ return FolderStructureMap;
 
 # Questions
 
-> [!QUESTION]- Why decompose RAG evaluation into separate retrieval, generation, and end-to-end layers?
+> [!qard]- Why decompose RAG evaluation into separate retrieval, generation, and end-to-end layers?
 > The layers fail for different reasons and need different fixes. Retrieval scoring shows whether relevant evidence arrived. Generation scoring checks whether the answer follows that evidence, while the end-to-end score records whether the task was solved. This separates a model that ignores a good context from one that faithfully summarizes irrelevant chunks. A single score makes both failures look the same.
 
-> [!QUESTION]- What belongs in RAG evaluation specifically versus general LLM evaluation?
+> [!qard]- What belongs in RAG evaluation specifically versus general LLM evaluation?
 > RAG adds retrieval relevance, ranking quality, and faithfulness to the evidence placed in context. It also needs labels for queries with several acceptable chunks. Golden sets, deterministic checks, semantic judges, and online experiments remain general LLM evaluation machinery. Reusing that shared layer prevents every RAG pipeline from inventing its own evaluation system.
 
 # References

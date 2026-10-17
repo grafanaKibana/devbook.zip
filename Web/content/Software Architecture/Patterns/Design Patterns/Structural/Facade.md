@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.698Z
-modified: 2026-08-20T20:41:15.698Z
-published: 2026-08-20T20:41:15.698Z
+created: 2026-10-12T09:19:58.305Z
+modified: 2026-10-12T09:19:58.305Z
+published: 2026-10-12T09:19:58.305Z
 topic:
   - Software Architecture
 subtopic:
@@ -12,6 +12,8 @@ level:
   - "2"
 priority: High
 status: Ready to Repeat
+qard-deck: Software Architecture
+qard-topic: Patterns/Design Patterns/Structural/Facade
 ---
 
 A hotel concierge gives guests one contact for services that still run independently behind the desk. The concierge adds no new capability. The value is a simpler entry point and knowledge of the required sequence.
@@ -176,7 +178,7 @@ Fraud detection can now be inserted once in `OrderFacade.PlaceOrderAsync`, and e
 
 # Questions
 
-> [!QUESTION]- When does a Facade become a "god class" anti-pattern?
+> [!qard]- When does a Facade become a "god class" anti-pattern?
 > The shift happens when orchestration becomes ownership of business rules or mutable domain state. `OrderFacade` may call pricing and validation services in sequence. It should not become the place where those rules are implemented. Difficulty testing the facade without reproducing the whole domain is a stronger signal than a line-count threshold.
 
 # References

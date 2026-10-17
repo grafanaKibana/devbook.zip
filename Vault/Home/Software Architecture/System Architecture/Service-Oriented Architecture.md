@@ -9,6 +9,8 @@ level:
 priority: Medium
 status: Ready to Repeat
 publish: true
+qard-deck: "Software Architecture"
+qard-topic: "System Architecture/Service-Oriented Architecture"
 ---
 
 Service-Oriented Architecture (SOA) exposes business capabilities through explicit network contracts. It became common in enterprise integration because SAP, mainframes, custom applications, and later SaaS products could cooperate without sharing an implementation stack.
@@ -94,7 +96,7 @@ Many estates use both styles. Existing systems meet through governed integration
 
 # Questions
 
-> [!QUESTION]- Which part of SOA remains useful without SOAP, WSDL, or an ESB?
+> [!qard]- Which part of SOA remains useful without SOAP, WSDL, or an ESB?
 > The durable part is the explicit service contract around a business capability. Consumers depend on that contract instead of importing the service's internal code or writing directly to its database. This allows systems built on different technology stacks to change independently as long as the contract stays compatible. SOAP, WSDL, and ESBs were common ways to implement or govern that boundary, but the boundary still matters when the transport is HTTP, gRPC, or messaging.
 
 # References

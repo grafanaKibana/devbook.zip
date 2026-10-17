@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.505Z
-modified: 2026-08-20T20:41:15.506Z
-published: 2026-08-20T20:41:15.506Z
+created: 2026-10-12T09:19:58.237Z
+modified: 2026-10-12T09:19:58.237Z
+published: 2026-10-12T09:19:58.237Z
 topic:
   - AI & ML
 subtopic:
@@ -12,6 +12,8 @@ level:
   - "2"
 priority: Medium
 status: Done
+qard-deck: AI & ML
+qard-topic: Machine Learning/Evaluation/ROC-AUC and PR-AUC
 ---
 
 ROC-AUC and PR-AUC summarize how a binary classifier ranks cases while its score threshold sweeps from strict to permissive. ROC plots true-positive rate against false-positive rate. PR plots precision against recall.
@@ -136,11 +138,11 @@ Threshold selection needs a constraint rather than a visually appealing knee. A 
 
 # Questions
 
-> [!QUESTION]- What does ROC-AUC show about a classifier?
+> [!qard]- What does ROC-AUC show about a classifier?
 > ROC-AUC shows how well the classifier ranks positive cases above negative cases across all thresholds. For example, an ROC-AUC of 0.8 means a randomly chosen positive receives a higher score than a randomly chosen negative about 80% of the time, with a tie counted as half.
 > It does not choose a production threshold or show whether the predicted scores are calibrated probabilities.
 
-> [!QUESTION]- What types of classification problems are better evaluated with PR-AUC than ROC-AUC?
+> [!qard]- What types of classification problems are better evaluated with PR-AUC than ROC-AUC?
 > PR-AUC is usually more useful when the positive class is rare and the system acts on positive predictions, as with fraud alerts or anomaly review. In these cases, false positives fill the review queue, and precision shows that cost directly.
 > The score must still be compared with the positive rate in the evaluation data because the PR-AUC baseline changes with prevalence.
 

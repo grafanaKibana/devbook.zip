@@ -9,6 +9,8 @@ level:
 priority: High
 status: Ready to Repeat
 publish: true
+qard-deck: "Programming"
+qard-topic: "NET/CSharp/Fundamentals/Foreach"
 ---
 
 `foreach` asks a source for one item at a time. Most sources implement `IEnumerable<T>`, but the compiler also accepts types that expose the required enumerator pattern without implementing the interface. This is why arrays, collections, spans, and custom stack-only enumerators can all use the same loop syntax.
@@ -88,16 +90,16 @@ Two boundaries are easy to miss:
 
 # Questions
 
-> [!QUESTION]- What must a type provide to work with `foreach`?
+> [!qard]- What must a type provide to work with `foreach`?
 > A type does not have to implement `IEnumerable`. The compiler can use the enumerable pattern: a public parameterless instance `GetEnumerator` method, or a supported extension `GetEnumerator` when instance lookup does not provide one. That method must return an enumerator with a public `Current` property and a public parameterless `bool MoveNext()` method. Implementing `IEnumerable<T>` is the usual reusable contract. Arrays receive dedicated compiler handling, while `Span<T>` works through its enumerator pattern.
 
-> [!QUESTION]- How does `foreach` work under the hood?
+> [!qard]- How does `foreach` work under the hood?
 > The compiler rewrites the loop according to the source type. In the general case it obtains an enumerator, calls `MoveNext`, reads `Current`, and disposes the enumerator in a `finally` block when disposal is required. Arrays use a simpler indexed loop, so the exact generated shape is not identical for every collection.
 
-> [!QUESTION]- How does `yield return` implement an iterator?
+> [!qard]- How does `yield return` implement an iterator?
 > The compiler turns the method into a state machine that stores its current position and local state. Calling the method creates the iterator, but the body normally starts only when enumeration begins. Each `yield return` produces one value and pauses execution; the next `MoveNext` call resumes from that point. This also means work and exceptions occur during enumeration rather than when the iterator is created.
 
-> [!QUESTION]- When is `yield return` better than returning a materialized collection such as `List<T>`?
+> [!qard]- When is `yield return` better than returning a materialized collection such as `List<T>`?
 > `yield return` is useful when values can be produced one at a time, the sequence is large, or the caller may stop early. It avoids building the whole collection first, but the generation logic runs again on each enumeration and can observe changing state. A materialized collection is better when a stable snapshot, random access, a cheap `Count`, or repeated enumeration is required.
 
 # References

@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.500Z
-modified: 2026-08-20T20:41:15.501Z
-published: 2026-08-20T20:41:15.501Z
+created: 2026-10-12T09:19:58.233Z
+modified: 2026-10-12T09:19:58.233Z
+published: 2026-10-12T09:19:58.233Z
 topic:
   - AI & ML
 subtopic:
@@ -12,6 +12,8 @@ level:
   - "3"
 priority: Medium
 status: Done
+qard-deck: AI & ML
+qard-topic: LLM/Prompt Engineering/Prompt Composition
 ---
 
 A single prompt is often the right design. It becomes the wrong one when a task contains intermediate decisions that must be checked before later work can trust them. Prompt composition splits those decisions across calls, adds context before an answer, or uses a model to revise the prompt itself.
@@ -111,10 +113,10 @@ Meta prompting keeps a person in the revision loop. [[Automated Prompt Optimizat
 
 # Questions
 
-> [!QUESTION]- When is prompt chaining a better fit than one large prompt?
+> [!qard]- When is prompt chaining a better fit than one large prompt?
 > Chaining fits when a task has real stages and an intermediate result changes what should happen next. Each stage should have a clear output contract, so invalid data can be stopped before it reaches the following call and failures can be traced to one step. That control has to justify the extra latency, token cost, and risk of errors passing between calls. If the task is simple and no intermediate result needs separate validation, one prompt is usually easier to operate.
 
-> [!QUESTION]- What is a practical meta prompting workflow for improving a weak prompt?
+> [!qard]- What is a practical meta prompting workflow for improving a weak prompt?
 > A useful workflow starts with real failures rather than a general request to make the prompt better. Group the failures by cause, then ask for a revision that addresses those causes and states a clear output contract. Compare the candidate with the current prompt on held-out cases, not only on the examples used to create it. Version the prompt and evaluator together, and keep a rollback threshold in case the revision fixes known failures but hurts normal inputs.
 
 # References

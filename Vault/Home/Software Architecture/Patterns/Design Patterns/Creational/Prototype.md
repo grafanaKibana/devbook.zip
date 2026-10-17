@@ -9,6 +9,8 @@ level:
 priority: High
 status: Done
 publish: true
+qard-deck: "Software Architecture"
+qard-topic: "Patterns/Design Patterns/Creational/Prototype"
 ---
 
 Prototype creates an object from an existing instance. It fits when construction starts from a configured template or when the concrete runtime type must decide how to copy itself.
@@ -140,10 +142,10 @@ New record fields participate in the compiler-generated copy automatically. Refe
 
 # Questions
 
-> [!QUESTION]- When is Prototype useful instead of constructing an object directly?
+> [!qard]- When is Prototype useful instead of constructing an object directly?
 > Prototype fits when the new object starts as a variant of an existing configured instance. It also fits when code knows only an abstraction and the runtime object must copy its own concrete type. Direct construction is clearer when there is no useful template and the runtime type is already known.
 
-> [!QUESTION]- Where is the boundary between a shallow and a deep copy?
+> [!qard]- Where is the boundary between a shallow and a deep copy?
 > A shallow copy duplicates the outer object's fields and preserves references to nested objects. A deep-copy policy replaces the mutable nested state that must evolve independently. Copying every reachable object is rarely the real requirement. Ownership and identity decide where copying stops.
 
 # References

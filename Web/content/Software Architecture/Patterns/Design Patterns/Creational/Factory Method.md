@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.693Z
-modified: 2026-08-20T20:41:15.694Z
-published: 2026-08-20T20:41:15.694Z
+created: 2026-10-12T09:19:58.300Z
+modified: 2026-10-12T09:19:58.300Z
+published: 2026-10-12T09:19:58.300Z
 topic:
   - Software Architecture
 subtopic:
@@ -12,6 +12,8 @@ level:
   - "1"
 priority: High
 status: Done
+qard-deck: Software Architecture
+qard-topic: Patterns/Design Patterns/Creational/Factory Method
 ---
 
 Sometimes a base workflow knows when it needs a collaborator but cannot choose the concrete implementation. A notification workflow can save an order and send a confirmation while a subtype decides whether the sender uses email or SMS.
@@ -167,10 +169,10 @@ Slack can be added as another creator subtype without changing the order workflo
 
 # Questions
 
-> [!QUESTION]- When does Factory Method become the wrong choice?
+> [!qard]- When does Factory Method become the wrong choice?
 > It is the wrong fit when no creator algorithm needs an overridable construction hook. A static factory or DI registration is smaller for simple selection. When several product types must vary together, an Abstract Factory makes that family boundary explicit.
 
-> [!QUESTION]- How does Factory Method support the Open/Closed Principle?
+> [!qard]- How does Factory Method support the Open/Closed Principle?
 > The shared creator algorithm can remain unchanged while a new subtype supplies another product. This protects only the creation variation anticipated by the abstraction. A change to the workflow or product contract still modifies existing code. If subtypes exist solely to return different constructors, a registry or DI registration may express the variation with fewer classes.
 
 # References

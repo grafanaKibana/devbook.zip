@@ -9,6 +9,8 @@ level:
 priority: Medium
 status: Done
 publish: true
+qard-deck: "AI & ML"
+qard-topic: "LLM/Agents/Evaluation/Agent Benchmarks"
 ---
 
 Agent benchmarks run a model and its scaffold against a fixed public task suite. The tasks usually require several actions: edit a repository until hidden tests pass, operate a website, or combine browsing with calculation. These suites are useful for narrowing a model shortlist and checking whether an evaluation harness produces plausible results.
@@ -59,7 +61,7 @@ The example exposes missing evidence rather than a winner. System B reports repe
 
 # Questions
 
-> [!QUESTION]- Why can one base model produce very different results on the same benchmark?
+> [!qard]- Why can one base model produce very different results on the same benchmark?
 > The benchmark runs a model-plus-scaffold system. Planning logic, retry limits, prompts, tool descriptions, and context handling all affect the outcome. Scores from different scaffolds cannot isolate model quality. A fair model comparison keeps the scaffold fixed, then reruns the candidates on the same tasks.
 
 # References

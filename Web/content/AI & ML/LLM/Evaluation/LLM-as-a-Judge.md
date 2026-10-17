@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.490Z
-modified: 2026-08-20T20:41:15.491Z
-published: 2026-08-20T20:41:15.491Z
+created: 2026-10-12T09:19:58.225Z
+modified: 2026-10-12T09:19:58.225Z
+published: 2026-10-12T09:19:58.225Z
 topic:
   - AI & ML
 subtopic:
@@ -12,6 +12,8 @@ level:
   - "3"
 priority: Medium
 status: Done
+qard-deck: AI & ML
+qard-topic: LLM/Evaluation/LLM-as-a-Judge
 ---
 
 LLM-as-a-judge uses a model to grade a candidate output against an explicit rubric. It scales semantic evaluation beyond what exact-match checks can measure, but its verdict is another model output rather than ground truth. Reliability has to be measured against human labels.
@@ -121,7 +123,7 @@ Calibrate on labeled cases before trusting the aggregate. Inspect disagreements,
 
 # Questions
 
-> [!QUESTION]- When does LLM-as-a-judge fit better than a deterministic metric, and what evidence makes the judge trustworthy?
+> [!qard]- When does LLM-as-a-judge fit better than a deterministic metric, and what evidence makes the judge trustworthy?
 > Use a judge when acceptance depends on meaning that fixed rules cannot capture. Keep exact constraints in deterministic checks. Trust comes from measured agreement with human labels, stability under answer-order swaps, and repeated calibration after the judge changes.
 
 # References

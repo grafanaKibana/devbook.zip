@@ -9,6 +9,8 @@ level:
 priority: High
 status: Ready to Repeat
 publish: true
+qard-deck: "Software Architecture"
+qard-topic: "Patterns/Design Patterns/GRASP"
 ---
 
 GRASP (General Responsibility Assignment Software Patterns) is a set of nine responsibility-assignment principles described by Craig Larman. They answer a concrete design question: which object should know, create, coordinate, or vary this behavior?
@@ -106,10 +108,10 @@ public sealed class CsvReportGenerator : IReportGenerator
 
 # Questions
 
-> [!QUESTION]- How does Information Expert reduce coupling, and when should another principle override it?
+> [!qard]- How does Information Expert reduce coupling, and when should another principle override it?
 > It places behavior beside the information it needs, so another object does not have to pull data out and reproduce the rule. Low Coupling or Pure Fabrication should override it when that placement would import infrastructure, coordinate other aggregates, or give the object unrelated responsibilities.
 
-> [!QUESTION]- How does GRASP differ from SOLID?
+> [!qard]- How does GRASP differ from SOLID?
 > GRASP focuses on assigning responsibilities among collaborating objects. SOLID describes broader properties of class and dependency design. They overlap around cohesion, coupling, and variation, but GRASP starts with ownership: who should do the work?
 
 # References

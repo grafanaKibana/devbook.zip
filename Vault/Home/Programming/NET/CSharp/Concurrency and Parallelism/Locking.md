@@ -9,6 +9,8 @@ level:
 priority: High
 status: Creation
 publish: true
+qard-deck: "Programming"
+qard-topic: "NET/CSharp/Concurrency and Parallelism/Locking"
 ---
 
 `lock` gives one thread at a time access to a synchronous critical section. It fits small in-process state changes such as updating a counter or taking a snapshot of a shared dictionary. Awaited I/O should normally happen outside that mutation and publish its result inside a short lock. When an invariant genuinely must span asynchronous work, `SemaphoreSlim.WaitAsync` can gate that bounded span; cross-process coordination needs [[Mutex]], and N concurrent holders need [[Semaphore]] rather than mutual exclusion.
@@ -91,16 +93,16 @@ For short synchronous state changes inside one process, `lock` is the smallest c
 
 # Questions
 
-> [!QUESTION]- What does `lock (obj) { ... }` compile to?
+> [!qard]- What does `lock (obj) { ... }` compile to?
 > `Monitor.Enter(obj, ref lockTaken)` surrounds the body with a `try/finally`, and the `finally` calls `Monitor.Exit` only when `lockTaken` is true. This preserves release on every normal or exceptional exit without releasing an unowned monitor.
 
-> [!QUESTION]- Why can't a `lock` block contain `await`?
+> [!qard]- Why can't a `lock` block contain `await`?
 > `Monitor` ownership belongs to the acquiring thread. Since an async continuation may resume elsewhere, the compiler rejects `await` in a `lock` block with CS1996. `SemaphoreSlim.WaitAsync` models asynchronous waiting without monitor ownership.
 
-> [!QUESTION]- What does `System.Threading.Lock` improve over locking on a plain `object` in .NET 9+?
+> [!qard]- What does `System.Threading.Lock` improve over locking on a plain `object` in .NET 9+?
 > A dedicated `Lock` field makes its purpose clear and avoids reusing an arbitrary object that other code may also lock or expose. The compiler recognizes the type and lowers the block to its scoped `EnterScope` API instead of the usual `Monitor.Enter` and `Monitor.Exit` pattern. It is still a synchronous lock, so it does not make `await` valid inside the block.
 
-> [!QUESTION]- How does reentrancy differ between `lock`/`Monitor` and `SemaphoreSlim`?
+> [!qard]- How does reentrancy differ between `lock`/`Monitor` and `SemaphoreSlim`?
 > `lock` and `Monitor` track the owning thread and a recursion count, so the same thread can enter the same lock again and must exit it the same number of times. `SemaphoreSlim` tracks permits, not an owner or recursion count. If code holding the only permit waits on that semaphore again, the second wait blocks and can deadlock the operation.
 
 # References

@@ -9,6 +9,8 @@ level:
 priority: Medium
 status: Done
 publish: true
+qard-deck: "AI & ML"
+qard-topic: "LLM/Prompt Engineering/In-Context Learning"
 ---
 
 In-context learning changes model behavior through examples in the prompt, without updating model weights. The model still predicts the next token at inference time. Demonstrations shift that prediction by establishing the task, label space, and expected output shape.
@@ -136,10 +138,10 @@ Start zero-shot. Add one example for a stubborn output contract, then add only t
 
 # Questions
 
-> [!QUESTION]- How should a task move from zero-shot to one-shot or few-shot prompting?
+> [!qard]- How should a task move from zero-shot to one-shot or few-shot prompting?
 > Zero-shot is the baseline when instructions and labels define the task clearly. One example is useful when the main failure is the output shape. Few-shot prompting earns its extra tokens when examples express decision boundaries better than prose. The final prompt should keep the smallest demonstration set that wins on a representative evaluation set, because every example adds cost and another artifact that can drift.
 
-> [!QUESTION]- What are the main failure modes of few-shot prompting?
+> [!qard]- What are the main failure modes of few-shot prompting?
 > Few-shot behavior can shift when examples are reordered, reformatted, or run on a different model. Long demonstrations also consume context, while examples that do not match production traffic create false confidence. Examples cannot reliably supply missing external facts or control a long multi-step process. Those failures call for retrieval, decomposition, or training rather than simply adding more shots.
 
 # References

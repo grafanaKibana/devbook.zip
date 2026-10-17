@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.696Z
-modified: 2026-08-20T20:41:15.696Z
-published: 2026-08-20T20:41:15.696Z
+created: 2026-10-12T09:19:58.303Z
+modified: 2026-10-12T09:19:58.303Z
+published: 2026-10-12T09:19:58.303Z
 topic:
   - Software Architecture
 subtopic:
@@ -12,6 +12,8 @@ level:
   - "3"
 priority: High
 status: Ready to Repeat
+qard-deck: Software Architecture
+qard-topic: Patterns/Design Patterns/Structural/Bridge
 ---
 
 A remote control defines operations such as power and volume. A television brand supplies the hardware-specific implementation. Connecting the two through a stable device interface allows either side to change without rebuilding the other hierarchy.
@@ -202,13 +204,13 @@ Bridge becomes useful when both dimensions already vary or are about to vary. A 
 
 # Questions
 
-> [!QUESTION]- When does payment-provider selection need Bridge rather than Strategy?
+> [!qard]- When does payment-provider selection need Bridge rather than Strategy?
 > Strategy swaps one behavior behind an interface. Bridge connects two independently changing models. Provider selection alone needs Strategy. Provider selection combined with a growing set of payment operations may justify Bridge.
 
-> [!QUESTION]- What makes the payment example Bridge rather than ordinary provider polymorphism?
+> [!qard]- What makes the payment example Bridge rather than ordinary provider polymorphism?
 > Both sides vary. `PaymentOperation` has charge, subscription, or refund variants, while `IPaymentGateway` has Stripe, PayPal, or bank implementations. Provider implementations can grow independently, and operation variants can grow independently while they compose existing gateway primitives. A new primitive still changes the gateway contract and every provider. Injecting only one gateway behind one service interface would be ordinary polymorphism or Strategy.
 
-> [!QUESTION]- How does Bridge differ from dependency injection?
+> [!qard]- How does Bridge differ from dependency injection?
 > Dependency injection supplies an object with its dependencies. Bridge is the design decision to keep an abstraction and its implementation as separate models that can vary independently and connect through composition. DI can wire an `IPaymentGateway` into a `PaymentOperation`, but that wiring does not create the two dimensions or prove that they need to evolve separately.
 
 # References

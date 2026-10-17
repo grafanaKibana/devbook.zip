@@ -9,6 +9,8 @@ level:
 priority: Medium
 status: Ready to Repeat
 publish: true
+qard-deck: "Networks"
+qard-topic: "Protocols/HTTP 2"
 ---
 
 HTTP/2 carries many independent HTTP streams over one TCP connection. Its binary framing removes HTTP/1.1's response-order dependency and HPACK compresses repeated fields. TCP still delivers one ordered byte stream, so a lost segment can delay every HTTP/2 stream on that connection.
@@ -119,7 +121,7 @@ HTTP/3 keeps HTTP semantics but replaces HTTP/2's framing-over-TCP with HTTP fra
 
 # Questions
 
-> [!QUESTION]- When can HTTP/1.1 be necessary or perform better than HTTP/2?
+> [!qard]- When can HTTP/1.1 be necessary or perform better than HTTP/2?
 > HTTP/1.1 remains necessary across a server or intermediary that cannot negotiate HTTP/2. On a lossy path without HTTP/3, several HTTP/1.1 connections can also isolate TCP loss better than one HTTP/2 connection, though extra connections add handshake and congestion-control cost. The choice should follow measurements across the real path.
 
 # References

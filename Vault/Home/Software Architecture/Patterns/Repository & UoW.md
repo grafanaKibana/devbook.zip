@@ -9,6 +9,8 @@ level:
 priority: High
 status: Ready to Repeat
 publish: true
+qard-deck: "Software Architecture"
+qard-topic: "Patterns/Repository & UoW"
 ---
 
 A **Repository** presents aggregate persistence as a domain-oriented collection. A **Unit of Work** tracks changes made during one business operation and commits them through one transaction boundary. The patterns solve different problems: Repository shapes access, while Unit of Work coordinates the commit.
@@ -137,10 +139,10 @@ Start with `DbContext` unless the domain needs a narrower persistence language. 
 
 # Questions
 
-> [!QUESTION]- Why does EF Core's DbContext already implement the Unit of Work pattern?
+> [!qard]- Why does EF Core's DbContext already implement the Unit of Work pattern?
 > `DbContext` tracks entity changes and sends the pending work through `SaveChangesAsync()`, which uses a transaction when the provider supports it. Several repositories participate in one unit only when they share the same context instance. A singleton context is unsafe, while separate transient contexts split the commit boundary.
 
-> [!QUESTION]- When is a generic `IRepository<T>` an anti-pattern?
+> [!qard]- When is a generic `IRepository<T>` an anti-pattern?
 > It becomes an anti-pattern when the generic CRUD surface replaces aggregate-specific access rules. `GetAll()` may be meaningless for a large aggregate, and unrestricted updates can bypass invariants. A generic implementation can remain inside infrastructure. The domain-facing interface should describe the operations the aggregate actually supports.
 
 # References

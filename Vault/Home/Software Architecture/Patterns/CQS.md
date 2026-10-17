@@ -9,6 +9,8 @@ level:
 priority: High
 status: Ready to Repeat
 publish: true
+qard-deck: "Software Architecture"
+qard-topic: "Patterns/CQS"
 ---
 
 Command-Query Separation (CQS) divides operations by contract. A command changes state and traditionally returns no result. A query returns data without observable side effects. Bertrand Meyer introduced the rule so a call's shape reveals whether it can mutate the system.
@@ -96,10 +98,10 @@ Return only the outcome the caller needs, often an identifier or version, and st
 
 # Questions
 
-> [!QUESTION]- Why does CQS make code easier to reason about?
+> [!qard]- Why does CQS make code easier to reason about?
 > The contract separates observation from mutation. Queries can be repeated or cached only when their no-side-effect promise holds. Commands expose the paths that need authorization, transaction boundaries, and retry analysis. The distinction reduces the amount of implementation detail required to judge a call site.
 
-> [!QUESTION]- When is it pragmatic to violate CQS?
+> [!qard]- When is it pragmatic to violate CQS?
 > A combined operation is justified when separation breaks a coherent transition or adds a wasteful round trip. `Stack.Pop()` is the classic single-threaded shape; `ConcurrentStack<T>.TryPop()` supplies the atomic concurrent form. A create command returning its generated identifier is another. The exception should keep mutation, retry safety, and returned data explicit.
 
 # References

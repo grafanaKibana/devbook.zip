@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-09-12T17:17:13.861Z
-modified: 2026-09-12T17:17:13.861Z
-published: 2026-09-12T17:17:13.861Z
+created: 2026-10-12T09:19:58.313Z
+modified: 2026-10-12T09:19:58.313Z
+published: 2026-10-12T09:19:58.313Z
 topic:
   - Software Architecture
 subtopic:
@@ -12,6 +12,8 @@ level:
   - "3"
 priority: Medium
 status: Done
+qard-deck: Software Architecture
+qard-topic: System Architecture/Microservices
 ---
 
 Microservices divide a system into services that can be changed and deployed independently. Each service owns a business capability and the data behind it. The useful boundary is deployment independence: separate processes alone do not make a microservice architecture.
@@ -173,17 +175,17 @@ A useful stop rule is simple. If extracting `Catalog` creates its own pipeline, 
 
 # Questions
 
-> [!QUESTION]- Why do microservices create distributed data consistency problems, and what keeps a cross-service workflow reliable?
+> [!qard]- Why do microservices create distributed data consistency problems, and what keeps a cross-service workflow reliable?
 > Each service commits its own data, so a cross-service workflow cannot rely on one local ACID transaction. One service may commit successfully and a later step may fail. The workflow is usually split into local transactions connected by a saga. Outbox and inbox patterns make message transfer recoverable, and idempotent handlers make redelivery safe.
 >
 > If a completed step must be reversed, the saga runs a business compensation where that is possible. Its state must remain visible so the system can keep retrying, finish later, or wait for manual repair instead of leaving partial work hidden.
 
-> [!QUESTION]- What architecture usually fits a new product, and what evidence would justify moving to microservices?
+> [!qard]- What architecture usually fits a new product, and what evidence would justify moving to microservices?
 > The starting point is the release and ownership constraint, not a preferred topology. One team still discovering the domain usually gets the fastest feedback from a monolith. A modular monolith keeps changes and transactions in-process while enforcing domain boundaries.
 >
 > Microservices become justified when a stable boundary repeatedly needs independent deployment or scaling, and the team can own the added operational cost. Until that pressure is measured, distribution adds network and data-consistency problems without buying real independence.
 
-> [!QUESTION]- What evidence shows that an extracted service is independent rather than part of a distributed monolith?
+> [!qard]- What evidence shows that an extracted service is independent rather than part of a distributed monolith?
 >
 > - Its team can change, deploy, roll back, and operate it without a paired release.
 > - It owns its writable data and exposes a versioned contract. Dependency failure behavior is defined and exercised.

@@ -8,6 +8,8 @@ level:
 priority: High
 status: Ready to Repeat
 publish: true
+qard-deck: "Data Persistence"
+qard-topic: "Connection Pooling"
 ---
 
 Opening a physical database connection can require a socket, a security handshake, authentication, and server-side session setup. Repeating that work for every query wastes latency and server capacity. A connection pool keeps physical connections open and lends them to callers. `SqlClient` and Npgsql enable pooling by default. The application still has to return connections promptly and keep the fleet-wide limit within what the database can serve.
@@ -84,7 +86,7 @@ Start with a conservative fleet-wide budget. Measure pool wait time alongside da
 
 # Questions
 
-> [!QUESTION]- Why is a bigger connection pool often worse, not better?
+> [!qard]- Why is a bigger connection pool often worse, not better?
 > Each connection consumes server resources. After the useful database concurrency is saturated, additional queries wait on CPU, I/O, or locks inside the engine, so latency rises without a matching throughput gain. Size the whole fleet against measured database capacity and the server connection limit, then divide that budget across instances.
 
 # References

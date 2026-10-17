@@ -9,6 +9,8 @@ level:
 priority: High
 status: Ready to Repeat
 publish: true
+qard-deck: "AI & ML"
+qard-topic: "LLM/Fine-tuning"
 ---
 
 Fine-tuning continues a pretrained model's training on task-specific examples. The resulting behavior lives in the weights, so the same instructions do not need to travel with every request. It works well for stable output conventions, classification boundaries, tool-call reliability, and narrow-task distillation. It makes a poor knowledge store. Facts learned during training have no citation boundary and start aging immediately.
@@ -144,7 +146,7 @@ During training, validation loss and early stopping detect memorization, but shi
 
 # Questions
 
-> [!QUESTION]- Why can LoRA still cause forgetting if the base weights are frozen?
+> [!qard]- Why can LoRA still cause forgetting if the base weights are frozen?
 > The deployed output comes from the base plus the adapter’s updates. Narrow adapter training can steer that effective model away from capabilities outside the training distribution. The frozen base makes rollback easy. It does not guarantee unchanged behavior while the adapter is enabled.
 
 # References

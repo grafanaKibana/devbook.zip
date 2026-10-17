@@ -9,6 +9,8 @@ level:
 priority: High
 status: Ready to Repeat
 publish: true
+qard-deck: "Security"
+qard-topic: "Hashing"
 ---
 
 A cryptographic hash maps an arbitrary-length byte string to a fixed-length digest. A secure general-purpose hash is designed to resist finding an input for a chosen digest and finding two inputs with the same digest. There is no decryption key. Inputs from a small or predictable domain can still be guessed and hashed, which is why a digest is not a way to hide passwords or identifiers.
@@ -97,13 +99,13 @@ SHA-256 is a common fingerprint when the protocol permits it. HMAC fits a shared
 
 # Questions
 
-> [!QUESTION]- Why is SHA-256 alone unsuitable for password storage?
+> [!qard]- Why is SHA-256 alone unsuitable for password storage?
 > SHA-256 is fast and gives an offline attacker a cheap guess test. Password verifiers need a unique salt and an adaptive password-hashing function whose CPU and memory costs are tuned for the deployment and raised as hardware improves.
 
-> [!QUESTION]- How do a hash, an HMAC, and a digital signature differ?
+> [!qard]- How do a hash, an HMAC, and a digital signature differ?
 > A hash is keyless. Adversarial integrity depends on authenticating the expected digest. HMAC authenticates within a shared-secret group, where every verifier can also create tags. A digital signature gives one private-key holder the signing capability while allowing public verification, provided the verification key is trusted.
 
-> [!QUESTION]- What does a salt protect against, and why must it be unique per user?
+> [!qard]- What does a salt protect against, and why must it be unique per user?
 > A salt prevents one precomputed table or one computed guess from being reused across many stored verifiers. It is public and stored with the verifier. Each credential needs a distinct random salt so equal passwords do not produce equal stored values.
 
 # References

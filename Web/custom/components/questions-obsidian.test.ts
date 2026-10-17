@@ -100,22 +100,25 @@ const vaultFixture = () => {
   }
 }
 
+type LoadComponent = (dc: Record<string, unknown>, h: typeof import("preact").h) => () => VNode
+
+const compileQuestions = (questionsSource: string): LoadComponent => {
+  const block = /```datacorejsx\n([\s\S]*?)\n```/.exec(questionsSource)?.[1]
+  assert.ok(block, "Questions.md must contain a datacorejsx block")
+  const compiled = transformSync(`function load(dc, h) {\n${block}\n}\nmodule.exports = load`, {
+    loader: "jsx",
+    format: "cjs",
+    jsxFactory: "h",
+    jsxFragment: "Fragment",
+    target: "es2022",
+  }).code
+  const loaded = { exports: undefined as unknown }
+  new Function("module", "exports", compiled)(loaded, loaded.exports)
+  return loaded.exports as LoadComponent
+}
+
 const source = readFileSync(QUESTIONS_PATH, "utf8")
-const block = /```datacorejsx\n([\s\S]*?)\n```/.exec(source)?.[1]
-assert.ok(block, "Questions.md must contain a datacorejsx block")
-const compiled = transformSync(`function load(dc, h) {\n${block}\n}\nmodule.exports = load`, {
-  loader: "jsx",
-  format: "cjs",
-  jsxFactory: "h",
-  jsxFragment: "Fragment",
-  target: "es2022",
-}).code
-const module = { exports: undefined as unknown }
-new Function("module", "exports", compiled)(module, module.exports)
-const loadComponent = module.exports as (
-  dc: Record<string, unknown>,
-  h: typeof import("preact").h,
-) => () => VNode
+const loadComponent = compileQuestions(source)
 
 const childrenOf = (value: ComponentChildren): ComponentChildren[] =>
   Array.isArray(value)
@@ -183,6 +186,7 @@ class DatacoreHarness {
     readonly pages: Page[],
     readonly contents: Map<string, string | Promise<string>>,
     readonly tabsdown?: TabsdownPlugin,
+    loader: LoadComponent = loadComponent,
   ) {
     const dc = {
       useCurrentPath: () => "Home/Questions",
@@ -238,10 +242,12 @@ class DatacoreHarness {
         },
       },
       Markdown: ({ content }: { content: string }) =>
-        h("mock-markdown", { "data-content": content }),
+        h("mock-markdown", {
+          "data-content": content.replace(/^>\s*<!--\s*qard-answer\s*-->\s*$/gim, ""),
+        }),
       preact: { Component, createRef },
     }
-    this.component = loadComponent(dc, h)
+    this.component = loader(dc, h)
     this.render()
   }
 
@@ -314,7 +320,35 @@ const real = vaultFixture()
 const realHarness = new DatacoreHarness(real.pages, real.contents)
 await realHarness.settle()
 
-const calloutCount = (content: string) => content.match(/^>\s*\[!QUESTION\]/gim)?.length ?? 0
+const acceptedQuestionTypes = new Set(["question", "qard"])
+const calloutCount = (content: string) => {
+  let fence: string | undefined
+  let obsidianComment = false
+  let htmlComment = false
+  let count = 0
+  for (const line of content.split(/\r?\n/)) {
+    const fenceMatch = /^(?:```+|~~~+)/.exec(line.trimStart())
+    if (!obsidianComment && !htmlComment && fenceMatch) {
+      const marker = fenceMatch[0][0]
+      fence = fence === marker ? undefined : (fence ?? marker)
+      continue
+    }
+    if (fence) continue
+    const percentMarkers = (line.match(/%%/g) ?? []).length
+    if (!htmlComment && percentMarkers % 2 === 1) {
+      obsidianComment = !obsidianComment
+      continue
+    }
+    if (obsidianComment) continue
+    if (htmlComment || line.includes("<!--")) {
+      htmlComment = !line.includes("-->")
+      continue
+    }
+    const type = /^>\s*\[!([^\]]+)\]/.exec(line)?.[1].toLowerCase()
+    if (type !== undefined && acceptedQuestionTypes.has(type)) count++
+  }
+  return count
+}
 
 const expectedRootInventory = real.pages
   .filter(
@@ -377,6 +411,481 @@ test("extracts the current vault question totals for every root", () => {
     renderedRootInventory(),
     expectedRootInventory.map(({ label, count }) => ({ label, count })),
   )
+})
+
+test("production extraction accepts legacy and Qard cards once while ignoring lookalikes", async () => {
+  const hub = "---\ntags: [FolderNote]\norder: 10\n---"
+  const fixture = [
+    "> [!QUESTION] Legacy question",
+    "> Legacy answer with [[Link]] and ![[Embed.png]]",
+    "",
+    "> [!qArD]- Native question",
+    "> Native answer",
+    "",
+    "> [!qard]+ Multiline front",
+    "> Additional front context",
+    "> <!-- qard-answer -->",
+    "> Multiline answer",
+    "",
+    "> [!QUESTION]- Inline HTML <!-- editorial marker -->",
+    "> Inline HTML answer",
+    "",
+    "> [!qard]- Visible before <!-- opening marker",
+    "> still in the comment -->",
+    "> Inline multiline comment answer",
+    "",
+    "> [!QUESTION]- Mixed <!-- first --> visible <!-- second -->",
+    "> Mixed comment answer",
+    "",
+    "> [!warning] Not an interview card",
+    "> Warning body",
+    "",
+    "```text",
+    "> [!qard]- Fenced lookalike",
+    "> Not a card",
+    "```",
+    "",
+    "%%",
+    "> [!QUESTION]- Commented lookalike",
+    "> Not a card",
+    "%%",
+  ].join("\n")
+  const paths = ["Home/Programming/Programming.md", "Home/Programming/Mixed.md"]
+  const harness = new DatacoreHarness(
+    [page(paths[0], hub), page(paths[1], fixture)],
+    new Map([
+      [paths[0], hub],
+      [paths[1], fixture],
+    ]),
+  )
+  await harness.settle()
+
+  const questions = questionSnapshot(harness)
+  assert.equal(questions.length, 6, questions.map(({ question }) => question).join("\n---\n"))
+  assert.match(questions[0].question, /Legacy answer with \[\[Link\]\] and !\[\[Embed\.png\]\]/)
+  assert.match(questions[1].question, /^> \[!qArD\]- Native question/m)
+  assert.match(questions[2].question, /<!-- qard-answer -->/)
+  assert.match(questions[3].question, /Inline HTML answer/)
+  assert.match(questions[4].question, /Inline multiline comment answer/)
+  assert.match(questions[5].question, /Mixed comment answer/)
+  assert.equal(new Set(questions.map(({ key }) => key)).size, questions.length)
+  assert.doesNotMatch(harness.html(), /qard-answer/)
+})
+
+for (const [type, label] of [
+  ["QUESTION", "legacy Question"],
+  ["qard", "native Qard"],
+] as const) {
+  test(`production extraction ignores fully hidden multiline HTML ${label} cards`, async () => {
+    const hub = "---\ntags: [FolderNote]\norder: 10\n---"
+    const hidden = [`<!--`, `> [!${type}]- Hidden example?`, "> Hidden answer.", `-->`].join("\n")
+    const path = "Home/Programming/Hidden.md"
+    const harness = new DatacoreHarness(
+      [page("Home/Programming/Programming.md", hub), page(path, hidden)],
+      new Map([
+        ["Home/Programming/Programming.md", hub],
+        [path, hidden],
+      ]),
+    )
+    await harness.settle()
+    assert.equal(questionSnapshot(harness).length, 0)
+  })
+
+  test(`production extraction ignores fully hidden multiline Obsidian ${label} cards`, async () => {
+    const hub = "---\ntags: [FolderNote]\norder: 10\n---"
+    const hidden = [`%%`, `> [!${type}]- Hidden example?`, "> Hidden answer.", `%%`].join("\n")
+    const path = "Home/Programming/Hidden.md"
+    const harness = new DatacoreHarness(
+      [page("Home/Programming/Programming.md", hub), page(path, hidden)],
+      new Map([
+        ["Home/Programming/Programming.md", hub],
+        [path, hidden],
+      ]),
+    )
+    await harness.settle()
+    assert.equal(questionSnapshot(harness).length, 0)
+  })
+}
+
+test("production extraction keeps visible headers before multiline HTML and Obsidian comments", async () => {
+  const hub = "---\ntags: [FolderNote]\norder: 10\n---"
+  const fixture = [
+    "> [!QUESTION]- Visible HTML <!-- opening",
+    "> closes -->",
+    "> HTML answer",
+    "",
+    "> [!qard]- Visible Obsidian %% opening",
+    "> closes %%",
+    "> Obsidian answer",
+    "",
+    "> [!QUESTION]- Visible after both comments",
+    "> Final answer",
+  ].join("\n")
+  const path = "Home/Programming/Visible.md"
+  const harness = new DatacoreHarness(
+    [page("Home/Programming/Programming.md", hub), page(path, fixture)],
+    new Map([
+      ["Home/Programming/Programming.md", hub],
+      [path, fixture],
+    ]),
+  )
+  await harness.settle()
+  const questions = questionSnapshot(harness)
+  assert.equal(questions.length, 3, questions.map(({ question }) => question).join("\n---\n"))
+  assert.match(questions[0].question, /HTML answer/)
+  assert.match(questions[1].question, /Obsidian answer/)
+  assert.match(questions[2].question, /Visible after both comments/)
+})
+
+test("production extraction advances comment state through a captured quoted body", async () => {
+  const hub = "---\ntags: [FolderNote]\norder: 10\n---"
+  const fixture = [
+    "> [!qard]- Visible before <!-- opening",
+    "> closes -->",
+    "> First answer",
+    "",
+    "> [!QUESTION]- Second visible card",
+    "> Second answer",
+  ].join("\n")
+  const path = "Home/Programming/State.md"
+  const harness = new DatacoreHarness(
+    [page("Home/Programming/Programming.md", hub), page(path, fixture)],
+    new Map([
+      ["Home/Programming/Programming.md", hub],
+      [path, fixture],
+    ]),
+  )
+  await harness.settle()
+  const questions = questionSnapshot(harness)
+  assert.equal(questions.length, 2, questions.map(({ question }) => question).join("\n---\n"))
+  assert.match(questions[0].question, /First answer/)
+  assert.match(questions[1].question, /Second visible card/)
+})
+
+test("production extraction ignores HTML comment literals inside quoted backtick fences", async () => {
+  const hub = "---\ntags: [FolderNote]\norder: 10\n---"
+  const fixture = [
+    "> [!qard]- First fenced card",
+    "> ```html",
+    "> <!-- literal example",
+    "> ```",
+    "> First answer",
+    "",
+    "> [!QUESTION]- Second card after the fence",
+    "> Second answer",
+  ].join("\n")
+  const path = "Home/Programming/Backtick-Comment-Literal.md"
+  const harness = new DatacoreHarness(
+    [page("Home/Programming/Programming.md", hub), page(path, fixture)],
+    new Map([
+      ["Home/Programming/Programming.md", hub],
+      [path, fixture],
+    ]),
+  )
+  await harness.settle()
+
+  const questions = questionSnapshot(harness)
+  assert.equal(questions.length, 2, questions.map(({ question }) => question).join("\n---\n"))
+  assert.equal(questions[0].question, fixture.split("\n\n")[0])
+  assert.match(questions[1].question, /Second card after the fence/)
+})
+
+test("production extraction ignores Obsidian comment literals inside quoted tilde fences", async () => {
+  const hub = "---\ntags: [FolderNote]\norder: 10\n---"
+  const fixture = [
+    "> [!QUESTION]- First fenced card",
+    "> ~~~text",
+    "> %% literal example",
+    "> ~~~",
+    "> First answer",
+    "",
+    "> [!qard]- Second card after the fence",
+    "> Second answer",
+  ].join("\n")
+  const path = "Home/Programming/Tilde-Comment-Literal.md"
+  const harness = new DatacoreHarness(
+    [page("Home/Programming/Programming.md", hub), page(path, fixture)],
+    new Map([
+      ["Home/Programming/Programming.md", hub],
+      [path, fixture],
+    ]),
+  )
+  await harness.settle()
+
+  const questions = questionSnapshot(harness)
+  assert.equal(questions.length, 2, questions.map(({ question }) => question).join("\n---\n"))
+  assert.equal(questions[0].question, fixture.split("\n\n")[0])
+  assert.match(questions[1].question, /Second card after the fence/)
+})
+
+test("production extraction treats inline-code comment markers as visible text", async () => {
+  const hub = "---\ntags: [FolderNote]\norder: 10\n---"
+  const fixture = [
+    "> [!qard]- What does `<!--` mean here?",
+    "> It pairs with a literal `-->` in inline code.",
+    "",
+    "> [!QUESTION]- What does inline `%%` mean?",
+    "> It remains visible, including ``<!-- and %% -->`` together.",
+    "",
+    "> [!qard]- Final visible card",
+    "> Final answer",
+  ].join("\n")
+  const path = "Home/Programming/Inline-Code-Comment-Literals.md"
+  const harness = new DatacoreHarness(
+    [page("Home/Programming/Programming.md", hub), page(path, fixture)],
+    new Map([
+      ["Home/Programming/Programming.md", hub],
+      [path, fixture],
+    ]),
+  )
+  await harness.settle()
+
+  const questions = questionSnapshot(harness)
+  assert.equal(questions.length, 3, questions.map(({ question }) => question).join("\n---\n"))
+  assert.match(questions[0].question, /`<!--`/)
+  assert.match(questions[1].question, /inline `%%`/)
+  assert.match(questions[2].question, /Final visible card/)
+})
+
+test("production extraction does not treat a matched triple-backtick inline span as a fence", async () => {
+  const hub = "---\ntags: [FolderNote]\norder: 10\n---"
+  const fixture = [
+    "> ```code```",
+    "",
+    "> [!QUESTION]- Visible after inline code",
+    "> First answer",
+    "",
+    "> [!qard]- Native sibling",
+    "> Second answer",
+  ].join("\n")
+  const path = "Home/Programming/Triple-Inline-Code.md"
+  const harness = new DatacoreHarness(
+    [page("Home/Programming/Programming.md", hub), page(path, fixture)],
+    new Map([
+      ["Home/Programming/Programming.md", hub],
+      [path, fixture],
+    ]),
+  )
+  await harness.settle()
+
+  const questions = questionSnapshot(harness)
+  assert.equal(questions.length, 2)
+  assert.match(questions[0].question, /Visible after inline code/)
+  assert.match(questions[1].question, /Native sibling/)
+})
+
+test("production extraction does not synthesize headers by removing HTML comments", async () => {
+  const hub = "---\ntags: [FolderNote]\norder: 10\n---"
+  const fixture = [
+    "> [!qa<!-- hidden -->rd]- Split type is not a card",
+    "> Fake answer",
+    "",
+    "> <!-- hidden -->[!qard]- Shifted key is not a card",
+    "> Fake answer",
+    "",
+    "> [!QUESTION]- Real legacy card",
+    "> Legacy answer",
+    "",
+    "> [!qard]- Real native card",
+    "> Native answer",
+  ].join("\n")
+  const path = "Home/Programming/HTML-Synthesized-Headers.md"
+  const harness = new DatacoreHarness(
+    [page("Home/Programming/Programming.md", hub), page(path, fixture)],
+    new Map([
+      ["Home/Programming/Programming.md", hub],
+      [path, fixture],
+    ]),
+  )
+  await harness.settle()
+
+  const questions = questionSnapshot(harness)
+  assert.equal(questions.length, 2, questions.map(({ question }) => question).join("\n---\n"))
+  assert.match(questions[0].question, /Real legacy card/)
+  assert.match(questions[1].question, /Real native card/)
+})
+
+test("production extraction does not synthesize headers by removing Obsidian comments", async () => {
+  const hub = "---\ntags: [FolderNote]\norder: 10\n---"
+  const fixture = [
+    "> [!qa%% hidden %%rd]- Split type is not a card",
+    "> Fake answer",
+    "",
+    "> %% hidden %%[!QUESTION]- Shifted key is not a card",
+    "> Fake answer",
+    "",
+    "> [!qard]- Real native card",
+    "> Native answer",
+    "",
+    "> [!QUESTION]- Real legacy card",
+    "> Legacy answer",
+  ].join("\n")
+  const path = "Home/Programming/Obsidian-Synthesized-Headers.md"
+  const harness = new DatacoreHarness(
+    [page("Home/Programming/Programming.md", hub), page(path, fixture)],
+    new Map([
+      ["Home/Programming/Programming.md", hub],
+      [path, fixture],
+    ]),
+  )
+  await harness.settle()
+
+  const questions = questionSnapshot(harness)
+  assert.equal(questions.length, 2, questions.map(({ question }) => question).join("\n---\n"))
+  assert.match(questions[0].question, /Real native card/)
+  assert.match(questions[1].question, /Real legacy card/)
+})
+
+test("production extraction ignores comment markers in raw backtick fence info", async () => {
+  const hub = "---\ntags: [FolderNote]\norder: 10\n---"
+  const fixture = [
+    "> ```text <!-- literal info",
+    "> [!qard]- Fenced lookalike",
+    "> ```",
+    "",
+    "> [!QUESTION]- Visible after backtick fence",
+    "> Legacy answer",
+  ].join("\n")
+  const path = "Home/Programming/Backtick-Fence-Info.md"
+  const harness = new DatacoreHarness(
+    [page("Home/Programming/Programming.md", hub), page(path, fixture)],
+    new Map([
+      ["Home/Programming/Programming.md", hub],
+      [path, fixture],
+    ]),
+  )
+  await harness.settle()
+
+  const questions = questionSnapshot(harness)
+  assert.equal(questions.length, 1)
+  assert.match(questions[0].question, /Visible after backtick fence/)
+})
+
+test("production extraction ignores comment markers in raw tilde fence info", async () => {
+  const hub = "---\ntags: [FolderNote]\norder: 10\n---"
+  const fixture = [
+    "> ~~~text %% literal info",
+    "> [!QUESTION]- Fenced lookalike",
+    "> ~~~",
+    "",
+    "> [!qard]- Visible after tilde fence",
+    "> Native answer",
+  ].join("\n")
+  const path = "Home/Programming/Tilde-Fence-Info.md"
+  const harness = new DatacoreHarness(
+    [page("Home/Programming/Programming.md", hub), page(path, fixture)],
+    new Map([
+      ["Home/Programming/Programming.md", hub],
+      [path, fixture],
+    ]),
+  )
+  await harness.settle()
+
+  const questions = questionSnapshot(harness)
+  assert.equal(questions.length, 1)
+  assert.match(questions[0].question, /Visible after tilde fence/)
+})
+
+test("production extraction keeps nested answer lookalikes inside their original card", async () => {
+  const hub = "---\ntags: [FolderNote]\norder: 10\n---"
+  const fixture = [
+    "> [!qard]- Outer card",
+    "> > [!QUESTION]- Nested answer example",
+    "> > Nested content",
+    "> Outer answer",
+    "",
+    "> [!QUESTION]- Sibling card",
+    "> Sibling answer",
+  ].join("\n")
+  const path = "Home/Programming/Nested-Lookalike.md"
+  const harness = new DatacoreHarness(
+    [page("Home/Programming/Programming.md", hub), page(path, fixture)],
+    new Map([
+      ["Home/Programming/Programming.md", hub],
+      [path, fixture],
+    ]),
+  )
+  await harness.settle()
+
+  const questions = questionSnapshot(harness)
+  assert.equal(questions.length, 2)
+  assert.match(questions[0].question, /> > \[!QUESTION\]- Nested answer example/)
+  assert.match(questions[1].question, /Sibling card/)
+})
+
+test("production extraction keeps shorter nested fences inside the opening fence", async () => {
+  const hub = "---\ntags: [FolderNote]\norder: 10\n---"
+  const fixture = [
+    "````markdown",
+    "```text",
+    "> [!qard]- Hidden fenced example",
+    "> This must not be collected",
+    "```",
+    "> [!QUESTION]- Still inside the outer fence",
+    "> This must not be collected either",
+    "````",
+    "",
+    "> [!qard]- Real card",
+    "> Collected answer",
+  ].join("\n")
+  const path = "Home/Programming/Fenced.md"
+  const harness = new DatacoreHarness(
+    [page("Home/Programming/Programming.md", hub), page(path, fixture)],
+    new Map([
+      ["Home/Programming/Programming.md", hub],
+      [path, fixture],
+    ]),
+  )
+  await harness.settle()
+
+  const questions = questionSnapshot(harness)
+  assert.equal(questions.length, 1)
+  assert.match(questions[0].question, /Real card/)
+})
+
+test("production extraction does not close a tilde fence with backticks", async () => {
+  const hub = "---\ntags: [FolderNote]\norder: 10\n---"
+  const fixture = [
+    "~~~~markdown",
+    "```",
+    "> [!qard]- Hidden behind a mismatched closer",
+    "> Not collected",
+    "~~~~",
+    "> [!qard]- Visible after the matching closer",
+    "> Collected",
+  ].join("\n")
+  const path = "Home/Programming/Tilde-Fenced.md"
+  const harness = new DatacoreHarness(
+    [page("Home/Programming/Programming.md", hub), page(path, fixture)],
+    new Map([
+      ["Home/Programming/Programming.md", hub],
+      [path, fixture],
+    ]),
+  )
+  await harness.settle()
+
+  const questions = questionSnapshot(harness)
+  assert.equal(questions.length, 1)
+  assert.match(questions[0].question, /Visible after the matching closer/)
+})
+
+test("the harness is sensitive to a production predicate mutation", async () => {
+  const mutatedSource = source.replace('type === "qard"', "false")
+  assert.notEqual(mutatedSource, source, "expected the production Qard predicate to be mutable")
+  const hub = "---\ntags: [FolderNote]\norder: 10\n---"
+  const path = "Home/Programming/Qard.md"
+  const card = "> [!qard]- Native question\n> Native answer"
+  const harness = new DatacoreHarness(
+    [page("Home/Programming/Programming.md", hub), page(path, card)],
+    new Map([
+      ["Home/Programming/Programming.md", hub],
+      [path, card],
+    ]),
+    undefined,
+    compileQuestions(mutatedSource),
+  )
+  await harness.settle()
+  assert.equal(questionSnapshot(harness).length, 0)
 })
 
 test("preloads every keyed question subtree without rereading on scope changes", async () => {

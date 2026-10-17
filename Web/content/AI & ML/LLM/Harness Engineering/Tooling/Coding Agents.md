@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.495Z
-modified: 2026-08-20T20:41:15.495Z
-published: 2026-08-20T20:41:15.495Z
+created: 2026-10-12T09:19:58.229Z
+modified: 2026-10-12T09:19:58.229Z
+published: 2026-10-12T09:19:58.229Z
 topic:
   - AI & ML
 subtopic:
@@ -12,6 +12,8 @@ status: Done
 level:
   - "2"
 priority: Medium
+qard-deck: AI & ML
+qard-topic: LLM/Harness Engineering/Tooling/Coding Agents
 ---
 
 Coding agents put a language model inside a tool loop. The model reads repository state, chooses an action, observes the result, and decides what to do next. That turns code generation into an execution process rather than a one-shot answer.
@@ -86,7 +88,7 @@ Amazon Q Developer provides IDE and CLI assistance with AWS-oriented development
 
 # Questions
 
-> [!QUESTION]- What controls reduce production risk when adopting coding agents?
+> [!qard]- What controls reduce production risk when adopting coding agents?
 > Start by limiting the task, the tools the agent can call, and the number of iterations it can run. Destructive or external actions need code-enforced approval before execution, while hooks and CI should run deterministic checks. Repository instructions capture architectural rules that tests cannot enforce. Before merge, the diff still needs review and the claimed behavior needs fresh test or build evidence, regardless of which model produced the change.
 
 # References

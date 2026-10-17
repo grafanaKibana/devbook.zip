@@ -9,6 +9,8 @@ level:
 priority: High
 status: Done
 publish: true
+qard-deck: "Software Architecture"
+qard-topic: "Patterns/Design Patterns/Creational/Abstract Factory"
 ---
 
 An application may need a matching set of provider-specific objects: a connection, command, and adapter for one database provider, or several payment components built for the same gateway. Selecting the family once is safer than repeating the provider choice at every construction site.
@@ -194,13 +196,13 @@ Abstract Factory fits several product types that must vary together across more 
 
 # Questions
 
-> [!QUESTION]- What should happen when an Abstract Factory gains a new product type such as `IFraudDetector`?
+> [!qard]- What should happen when an Abstract Factory gains a new product type such as `IFraudDetector`?
 > If every provider family must supply fraud detection, add it to the factory interface and update every concrete factory. The compile-time failures are useful because they expose incomplete families. A separate factory fits only when fraud detection varies independently. A default no-op keeps existing factories compiling, but it can make a missing security control look valid.
 
-> [!QUESTION]- When is Abstract Factory overkill compared to a simpler approach?
+> [!qard]- When is Abstract Factory overkill compared to a simpler approach?
 > It is unnecessary when only one product varies or the products do not share a compatibility boundary. In that case, inject the product interface directly. Abstract Factory earns its indirection only when a family choice must move together.
 
-> [!QUESTION]- How does Abstract Factory relate to the DI container in modern .NET?
+> [!qard]- How does Abstract Factory relate to the DI container in modern .NET?
 > A DI container can construct the same object graph, but it is a general registry rather than a domain-specific family contract. Grouped registration methods can keep a provider family together at the composition root. A typed factory makes that boundary visible to consumers, yet ordinary interface return types still do not prove concrete-family compatibility.
 
 # References

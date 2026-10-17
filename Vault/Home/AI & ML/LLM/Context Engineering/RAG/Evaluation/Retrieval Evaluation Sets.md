@@ -9,6 +9,8 @@ level:
 priority: High
 status: Done
 publish: true
+qard-deck: "AI & ML"
+qard-topic: "LLM/Context Engineering/RAG/Evaluation/Retrieval Evaluation Sets"
 ---
 
 A retrieval evaluation set pairs queries with chunks judged relevant to them so [[Evaluation Metrics|retrieval metrics]] have ground truth. [[Building an Evaluation Set]] covers general dataset construction. This note focuses on the retrieval-specific part: deciding which chunks count, then avoiding distortions introduced by chunk-anchored synthetic questions.
@@ -60,10 +62,10 @@ The structure fits retrieval metrics directly: a query goes in, and the source c
 
 # Questions
 
-> [!QUESTION]- When several chunks are relevant to one query, how should the retrieval metric be chosen?
+> [!qard]- When several chunks are relevant to one query, how should the retrieval metric be chosen?
 > Classify the evidence relationship first. Substitutable chunks need HitRate@k and often MRR because any early hit succeeds. Complementary chunks need Recall@k or Context Recall because the whole required set matters. If usefulness varies, graded labels and nDCG@k preserve that distinction. The cutoff must match what generation consumes and cannot be smaller than a complementary ground-truth set.
 
-> [!QUESTION]- Why do synthetically generated retrieval eval sets often report worse recall than the system delivers in production?
+> [!qard]- Why do synthetically generated retrieval eval sets often report worse recall than the system delivers in production?
 > Chunk-anchored generation initially labels only its source, even when duplicated or summary chunks also answer the question. Retrieval can return valid evidence that the labels call wrong, depressing the score and even reversing model rankings. Retrieve a candidate set, judge other valid answers, and expand the qrels or discard ambiguous cases. Lexical leakage creates the opposite bias by copying rare source terms and making exact match unrealistically easy.
 
 # References

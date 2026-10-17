@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.650Z
-modified: 2026-08-20T20:41:15.651Z
-published: 2026-08-20T20:41:15.651Z
+created: 2026-10-12T09:19:58.259Z
+modified: 2026-10-12T09:19:58.259Z
+published: 2026-10-12T09:19:58.259Z
 topic:
   - Programming
 subtopic:
@@ -12,6 +12,8 @@ level:
   - "4"
 priority: High
 status: Ready to Repeat
+qard-deck: Programming
+qard-topic: NET/CSharp/Concurrency and Parallelism/Deadlocks
 ---
 
 A deadlock is a closed waiting cycle: every participant holds something another participant needs, so none can move. In .NET this can happen with ordinary locks or when synchronous code blocks an async continuation. The process may stay healthy enough to answer a liveness probe while the affected work has stopped completely.
@@ -191,13 +193,13 @@ public async Task UpdateAsync()
 
 # Questions
 
-> [!QUESTION]- What are the four Coffman conditions and which is easiest to break in practice?
+> [!qard]- What are the four Coffman conditions and which is easiest to break in practice?
 > The four conditions are mutual exclusion, hold-and-wait, no preemption, and circular wait. In practice, circular wait is usually the easiest to remove by defining one lock order and following it everywhere. If every code path takes the locks in the same order, the cycle cannot form.
 
-> [!QUESTION]- Why can calling `.Result` on a `Task` deadlock in a UI app but usually not in a console app?
+> [!qard]- Why can calling `.Result` on a `Task` deadlock in a UI app but usually not in a console app?
 > A deadlock can happen when the task is still incomplete and its continuation needs the UI thread. `.Result` blocks that thread, while the continuation waits to get back onto it, so neither can finish. Console applications and ASP.NET Core normally run continuations on thread-pool threads, so this specific cycle is usually absent. Blocking is still harmful because it ties up a thread and can cause thread-pool starvation under load.
 
-> [!QUESTION]- What steps help diagnose a deadlock in a production .NET service?
+> [!qard]- What steps help diagnose a deadlock in a production .NET service?
 > Start with a process dump. Inspect thread stacks for waits in `Monitor.Enter`, `.Result`, or `.Wait()`, then check which thread owns each monitor; `syncblk` shows that ownership. For an async deadlock, find the continuation that cannot run and the context or scheduler it is waiting for. Together, those waits reveal the cycle.
 
 # References

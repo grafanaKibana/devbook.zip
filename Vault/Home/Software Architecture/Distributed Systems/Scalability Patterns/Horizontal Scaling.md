@@ -9,6 +9,8 @@ level:
 priority: High
 status: Creation
 publish: true
+qard-deck: "Software Architecture"
+qard-topic: "Distributed Systems/Scalability Patterns/Horizontal Scaling"
 ---
 
 Horizontal scaling (scale-out) adds service instances and divides work among them. [[Home/Software Architecture/Distributed Systems/Scalability Patterns/Vertical Scaling]] instead gives one instance more resources. Scale-out can increase capacity and reduce the effect of one instance failing, but only while another component does not become the bottleneck.
@@ -84,10 +86,10 @@ Horizontal scaling earns its complexity when measured capacity grows enough to m
 
 # Questions
 
-> [!QUESTION]- What architectural prerequisites must be met before horizontal scaling works?
+> [!qard]- What architectural prerequisites must be met before horizontal scaling works?
 > Work must be divisible, routing must reach an eligible owner, and state must have a sharing or partition-ownership rule. Stateless handlers satisfy those constraints by externalizing shared state. A [[Home/Software Architecture/Distributed Systems/Load Balancing|load balancer]] can distribute requests, while stateful services also need replication, ownership, and failover coordination.
 
-> [!QUESTION]- Why can horizontal scaling fail even with many instances?
+> [!qard]- Why can horizontal scaling fail even with many instances?
 > More replicas can move saturation to the database, a connection pool, or an external quota. Local state can make replicas inconsistent, while sticky sessions or hot keys create uneven load. Startup delay also means new replicas may arrive after the overload has already caused failures.
 
 # References

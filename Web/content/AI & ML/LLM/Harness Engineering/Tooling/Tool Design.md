@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.496Z
-modified: 2026-09-21T08:40:06.208Z
-published: 2026-09-21T08:40:06.208Z
+created: 2026-10-12T09:19:58.229Z
+modified: 2026-10-12T09:19:58.230Z
+published: 2026-10-12T09:19:58.230Z
 topic:
   - AI & ML
 subtopic:
@@ -12,6 +12,8 @@ level:
   - "3"
 priority: Low
 status: Done
+qard-deck: AI & ML
+qard-topic: LLM/Harness Engineering/Tooling/Tool Design
 ---
 
 Tool design turns model output into reliable operations. A tool lets an agent read current data, run a calculation, or request a side effect that text generation cannot perform on its own. A capable model still fails when its callable interfaces are ambiguous or brittle. Anthropic's SWE-bench agent work found a small interface detail with a large effect: switching one tool from relative to absolute file paths removed a recurring failure mode.
@@ -168,10 +170,10 @@ Several mechanisms contribute:
 
 # Questions
 
-> [!QUESTION]- Why is tool design often more impactful than prompt engineering in agentic systems?
+> [!qard]- Why is tool design often more impactful than prompt engineering in agentic systems?
 > A tool contract is reused at every call site and every loop iteration. Ambiguous selection, malformed arguments, or an opaque error can redirect all later steps. Fixing the interface removes that failure mode across prompts, while a prompt workaround depends on the model remembering an exception each time.
 
-> [!QUESTION]- What determines whether related operations should use one broad tool or several narrow tools?
+> [!qard]- What determines whether related operations should use one broad tool or several narrow tools?
 > Separate tools make sense when operations need different descriptions, input schemas, or permissions. Closely related actions can stay together when one clear contract covers them without a long list of unrelated optional parameters. Narrow tools make arguments easier to generate, but a large catalog makes tool selection harder. Routing or filtering can limit the tools shown for each request, and selection and argument accuracy should be measured separately.
 
 # References

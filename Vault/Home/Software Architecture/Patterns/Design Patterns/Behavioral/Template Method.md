@@ -9,6 +9,8 @@ level:
 priority: High
 status: Ready to Repeat
 publish: true
+qard-deck: "Software Architecture"
+qard-topic: "Patterns/Design Patterns/Behavioral/Template Method"
 ---
 
 Tea and coffee can share a preparation sequence while varying the brewing step. The sequence belongs in one place. Subclasses fill the deliberate gaps.
@@ -191,10 +193,10 @@ It fits poorly when behavior must change at runtime or when inheritance exists o
 
 # Questions
 
-> [!QUESTION]- What should determine whether algorithm variation uses Template Method or Strategy?
+> [!qard]- What should determine whether algorithm variation uses Template Method or Strategy?
 > Template Method fits a stable workflow whose hooks make sense only inside one base class. Strategy fits a behavior that is useful on its own or must be replaced at runtime. Template Method couples variants through inheritance. Strategy adds another dependency and needs a clear selection rule.
 
-> [!QUESTION]- What is the "Hollywood Principle," and how does Template Method apply it?
+> [!qard]- What is the "Hollywood Principle," and how does Template Method apply it?
 > The principle means that the framework controls the flow and calls application code at defined extension points. Template Method applies that rule inside a class: the base method fixes the order, then calls subclass hooks for the steps that may vary. This protects the sequence, but every subtype becomes coupled to that calling protocol.
 
 # References

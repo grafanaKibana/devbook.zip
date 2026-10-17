@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.671Z
-modified: 2026-08-20T20:41:15.671Z
-published: 2026-08-20T20:41:15.671Z
+created: 2026-10-12T09:19:58.274Z
+modified: 2026-10-12T09:19:58.274Z
+published: 2026-10-12T09:19:58.274Z
 topic:
   - Security
 subtopic:
@@ -12,6 +12,8 @@ level:
   - "3"
 priority: High
 status: Ready to Repeat
+qard-deck: Security
+qard-topic: Password Storage
 ---
 
 A service needs to verify a password, not recover it. The stored record should make each offline guess expensive after a database leak and prevent equal passwords from sharing one verifier. Plaintext, reversible encryption, and fast general-purpose hashes fail that boundary.
@@ -50,7 +52,7 @@ A stolen verifier table gives an attacker an offline test with no service-side r
 
 # Questions
 
-> [!QUESTION]- What protection does a pepper add, and what does it cost?
+> [!qard]- What protection does a pepper add, and what does it cost?
 > A pepper kept outside the password table can prevent a database-only thief from testing guesses. It creates another high-value secret and a rotation problem: replacing it for an existing verifier normally requires the user's password or a reset. It cannot compensate for a fast KDF.
 
 # References

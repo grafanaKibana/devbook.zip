@@ -42,6 +42,17 @@ test("folded callouts get a collapsed button title and an inert body", () => {
   assert.equal(content(folded).properties.inert, true)
 })
 
+test("folded native Qard callouts retain keyboard and ARIA disclosure semantics", () => {
+  const folded = callout("callout qard is-collapsible is-collapsed")
+
+  transform(folded)
+
+  assert.equal(title(folded).properties.role, "button")
+  assert.equal(title(folded).properties.tabIndex, 0)
+  assert.equal(title(folded).properties.ariaExpanded, "false")
+  assert.equal(content(folded).properties.inert, true)
+})
+
 test("open foldable callouts report expanded and keep their body interactive", () => {
   const open = callout("callout example is-collapsible")
 

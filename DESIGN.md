@@ -33,7 +33,7 @@ This is the repository-wide design contract. Keep it limited to verified cross-v
 | Shared cards                               | `Vault/Assets/components/devbook-card.jsx`                                     | Datacore JSX                                         | Frozen HTML/CSS                              | Current                                                  |
 | FolderNote maps                            | `Vault/Assets/components/devbook-folder-map.jsx`                               | Datacore JSX                                         | Frozen HTML/CSS                              | Current                                                  |
 | Home dashboard                             | `Vault/Home/index.md`                                                          | Datacore JSX                                         | Frozen HTML/CSS                              | Current                                                  |
-| Questions                                  | `[!QUESTION]` callouts in `Vault/Home/`                                        | Datacore index                                       | `QuestionsIndex`                             | Current; equivalent outcome, different renderers         |
+| Questions                                  | `[!qard]` interview and `[!QUESTION]` generic callouts in `Vault/Home/`        | Datacore index                                       | `QuestionsIndex`                             | Current; one source bank, equivalent outcome             |
 | StepTrace                                  | `Web/custom/steptrace/src/` and its local `DESIGN.md`                          | Generated Obsidian plugin                            | Generated Quartz assets and host integration | Current                                                  |
 | Complexity charts                          | `complexity` fences and `Web/custom/complexity/`                               | Shared model rendered to DOM by the StepTrace plugin | Shared model rendered to HAST                | Current contract; 97 DSA v2 charts plus standalone Big O |
 | Quartz shell                               | `Web/quartz.config.yaml`, `Web/quartz.ts`, sanctioned styles and `Web/custom/` | Not applicable                                       | Generated `Web/public/`                      | Current                                                  |
@@ -148,7 +148,7 @@ Their main jobs are to find a topic, understand its scope, inspect the mechanism
 - Use medium rounded rectangles for cards and controls.
 - Use circles only for circular data or play/progress controls, and pills only for compact tracks or state chips.
 - Shared cards use one border, a modest radius, one soft accent glow, and a small hover/focus lift.
-- `[!QUESTION]-` is a collapsed FAQ disclosure, not a card, in notes and on the Questions index alike: clear internal padding, a divider, and a plus/minus control expose its behavior; Obsidian uses native app tokens, while Quartz uses DevBook typography and green accent details.
+- `[!qard]-` interview questions and compatible `[!QUESTION]-` callouts share one collapsed FAQ disclosure treatment in notes and on the Questions index: clear internal padding, a divider, and a plus/minus control expose its behavior; Obsidian uses native app tokens, while Quartz uses DevBook typography and green accent details.
 - Visualization stages remain unboxed like diagrams; only functional control surfaces may be raised.
 
 ### Motion
@@ -239,8 +239,9 @@ Their main jobs are to find a topic, understand its scope, inspect the mechanism
 ## Accessibility
 
 - **Target:** WCAG 2.2 AA for new or changed UI. This is a direction, not a claim that the whole repository is audited.
-- Full-card links, disclosures, tabs, transport controls, scrubbers, and native option controls must be keyboard reachable.
-- Foldable callouts are disclosure buttons: Enter and Space toggle them, `aria-expanded` reports the state, and a folded body is inert.
+- On Quartz, full-card links, disclosures, tabs, transport controls, scrubbers, and native option controls must be keyboard reachable.
+- Quartz foldable callouts are disclosure buttons: Enter and Space toggle them, `aria-expanded` reports the state, and a folded body is inert.
+- This migration preserves stock Obsidian's accepted Question/Qard baseline: click/touch and FAQ presentation match, but callout titles are not keyboard-focusable, Enter and Space do not toggle them, `aria-expanded` is absent, and collapsed bodies are not inert. This is documented scope rather than a passing accessibility check; the [accepted decision](.omx/execution/qard/accepted-native-accessibility-baseline.md) and [native assertions](.omx/execution/qard/visual/obsidian-assertions.json) hold the evidence.
 - Explorer toggles report `aria-expanded` for the state actually shown, and a collapsed list, closed drawer, or closed folder leaves the tab order and the accessibility tree. Escape closes an open drawer and returns focus to its toggle.
 - Every Quartz page opens with a skip link as its first tab stop, and the content column is the `main` landmark.
 - Every focusable control shows the `2px` accent `:focus-visible` ring; a component may restyle it but never leave the browser default or remove it. Topic-coloured cards and chips keep the accent ring, not their topic hue. Where a clipping or scrolling container would cut an outset ring, draw it inset, or ring the clipping container itself, as a foldable callout does from its focused title. The site default ring sits in the `quartz-base` cascade layer with component `.css` at minimal specificity, so a component's own ring rule refines it; a layered component that clears the outline must restore an indicator from unlayered `custom.scss`. Plugin stylesheets such as Tabsdown's and the code-block buttons' load unlayered after `custom.scss`, so overriding them takes extra specificity.

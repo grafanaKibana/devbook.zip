@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.657Z
-modified: 2026-08-20T20:41:15.657Z
-published: 2026-08-20T20:41:15.657Z
+created: 2026-10-12T09:19:58.265Z
+modified: 2026-10-12T09:19:58.265Z
+published: 2026-10-12T09:19:58.265Z
 topic:
   - Programming
 subtopic:
@@ -12,6 +12,8 @@ level:
   - "4"
 priority: Medium
 status: Ready to Repeat
+qard-deck: Programming
+qard-topic: NET/CSharp/Fundamentals/Types/Classes
 ---
 
 A class defines a reference type with object identity. Assignment copies a reference, so two variables can point at the same instance and observe the same mutations. Shared identity fits services and mutable domain entities. But it also creates aliasing bugs when ownership is unclear.
@@ -213,13 +215,13 @@ Default to `sealed` when inheritance is not part of the design. Use a `record cl
 
 # Questions
 
-> [!QUESTION]- What is the difference between an abstract class and an interface with default members, and when is an abstract class a better fit?
+> [!qard]- What is the difference between an abstract class and an interface with default members, and when is an abstract class a better fit?
 > Both can contain implemented members. An abstract class can also store instance state, define constructors, and expose protected members, but a class can inherit from only one base class. An interface has no instance fields, and a class can implement several interfaces. An abstract class fits when derived types must share state or initialization rules. An interface fits when callers only need a common capability and the implementations do not belong in one inheritance hierarchy.
 
-> [!QUESTION]- Why can't a static class implement an interface?
+> [!qard]- Why can't a static class implement an interface?
 > An interface normally describes behavior on an object. A static class has no instances, so no object can be assigned to an interface variable. When an implementation needs to be injected or replaced, use a regular class and choose its lifetime through dependency injection. A generic algorithm that needs operations on the type itself can use static abstract interface members with a constrained type parameter.
 
-> [!QUESTION]- A `sealed override` stops further overriding, but can a derived class use `new` to hide the sealed method? What happens at runtime?
+> [!qard]- A `sealed override` stops further overriding, but can a derived class use `new` to hide the sealed method? What happens at runtime?
 > Yes, `new` compiles and hides the sealed method. But the behavior depends on the variable's compile-time type:
 >
 > ```csharp
@@ -237,13 +239,13 @@ Default to `sealed` when inheritance is not part of the design. Use a `record cl
 >
 > The hidden method is selected only when the compile-time receiver exposes `Bottom.Do`. Calls through `Middle` or `Base` stay on the sealed virtual slot and invoke `Middle.Do`. Hiding therefore does not replace polymorphic behavior. It creates a second member with type-dependent call semantics.
 
-> [!QUESTION]- Can a C# type be both abstract and sealed, and how are static classes represented in metadata?
+> [!qard]- Can a C# type be both abstract and sealed, and how are static classes represented in metadata?
 > C# rejects that modifier pair on an ordinary class. A C# static class is represented in metadata with both flags, which prevents construction and inheritance. Reflection therefore reports `typeof(Math).IsAbstract && typeof(Math).IsSealed` as `true`.
 
-> [!QUESTION]- Why can `partial` be dangerous with source generators? Give a concrete scenario.
+> [!qard]- Why can `partial` be dangerous with source generators? Give a concrete scenario.
 > The generated part is the same type, so it can add interface implementations or members that are absent from the handwritten file. A generator and handwritten code that both declare `Validate()` cause a compile-time collision. An optional partial-method hook may disappear entirely when no implementing declaration is generated. Generated output should be inspectable, and tests should cover the behavior that depends on it.
 
-> [!QUESTION]- Why do two separately created class instances with equal fields compare unequal with `==`, and how should value equality be added?
+> [!qard]- Why do two separately created class instances with equal fields compare unequal with `==`, and how should value equality be added?
 > A class uses reference equality for `==` unless it overloads the operator, so two separately created instances are different references. A value-like conventional class should implement `IEquatable<T>`, override `Equals` and `GetHashCode`, and overload `==`/`!=` if operator equality belongs to its API. A `record class` is the shorter choice when generated value equality matches the domain.
 
 # References

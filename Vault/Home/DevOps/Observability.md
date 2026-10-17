@@ -8,6 +8,8 @@ level:
 priority: High
 status: Done
 publish: true
+qard-deck: "DevOps"
+qard-topic: "Observability"
 ---
 
 Observability is the ability to infer a system's internal state from the signals it emits. Metrics reveal changes in scale and health, logs preserve discrete events, and traces reconstruct causal work across service boundaries. An alert may expose a symptom; correlation turns that symptom into a defensible explanation.
@@ -97,7 +99,7 @@ Instrumentation should preserve:
 
 # Questions
 
-> [!QUESTION]- Why should request or user IDs not be metric labels?
+> [!qard]- Why should request or user IDs not be metric labels?
 > Each unique label combination creates another time series. Unbounded identifiers can multiply storage and query work with traffic volume. Keep metric dimensions bounded and use the trace ID to reach access-controlled logs or traces when an individual request must be inspected.
 
 # References

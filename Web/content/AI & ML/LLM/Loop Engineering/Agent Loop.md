@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-09-12T17:17:13.826Z
-modified: 2026-09-12T17:17:13.826Z
-published: 2026-09-12T17:17:13.826Z
+created: 2026-10-12T09:19:58.231Z
+modified: 2026-10-12T09:19:58.231Z
+published: 2026-10-12T09:19:58.231Z
 topic:
   - AI & ML
 subtopic:
@@ -12,6 +12,8 @@ level:
   - "3"
 priority: Medium
 status: Done
+qard-deck: AI & ML
+qard-topic: LLM/Loop Engineering/Agent Loop
 ---
 
 An agent loop gives an LLM another move after each result. Within one run, the harness builds the context, asks the model what to do next, performs the chosen action, appends the result, and repeats until a termination check ends the run. That repeated decision is what separates a tool-using agent from a single model call.
@@ -147,10 +149,10 @@ Validate the function name and arguments before execution, then return a precise
 
 # Questions
 
-> [!QUESTION]- What does ReAct add to chain-of-thought reasoning when a task needs external knowledge?
+> [!qard]- What does ReAct add to chain-of-thought reasoning when a task needs external knowledge?
 > Chain-of-thought reasoning still works with information already available to the model. ReAct can pause that reasoning to search, call an API, or run a calculation, then use the observed result in the next decision. This helps when the answer depends on current or missing evidence, but it does not guarantee a better result. Each action adds another model round trip, grows the context, and creates another place for a tool or interpretation error.
 
-> [!QUESTION]- Which safeguards must be enforced outside the model, and what failure does each contain?
+> [!qard]- Which safeguards must be enforced outside the model, and what failure does each contain?
 > A per-request iteration cap contains non-terminating behavior. Token and cost budgets stop context growth before it becomes an outage or an unexpected bill. Tool validation blocks unknown functions and malformed arguments before they reach a side-effecting boundary. Prompt instructions can help, but none of these controls can depend on the model obeying them.
 
 # References

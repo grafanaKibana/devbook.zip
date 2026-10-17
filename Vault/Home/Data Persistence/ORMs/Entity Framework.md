@@ -9,6 +9,8 @@ level:
 priority: High
 status: Ready to Repeat
 publish: true
+qard-deck: "Data Persistence"
+qard-topic: "ORMs/Entity Framework"
 ---
 
 Entity Framework Core (EF Core) is a cross-platform .NET ORM. A database provider maps its model and query pipeline to a specific engine. Microsoft ships providers for SQL Server, SQLite, and Azure Cosmos DB. PostgreSQL and MySQL support comes from external provider packages with their own compatibility schedules.
@@ -62,7 +64,7 @@ var orders = await db.Orders
 ```
 
 > [!WARNING]
-> **`DbContext` is a unit of work, not a singleton.** It is not thread-safe, and EF Core does not support parallel operations on one instance. `AddDbContext` registers it as scoped by default in ASP.NET Core, which often aligns one context with one request. A request can still contain several units of work, and background or parallel work needs a fresh context from `IDbContextFactory<T>`. See the captive-dependency boundary in [[Home/Programming/NET/ASP.NET Web API/Dependency Injection|Dependency Injection]]. `AddDbContextPool` can reuse reset context instances, but mutable per-request state such as a tenant identifier must be re-established safely.
+> **`DbContext` is a unit of work, not a singleton.** It is not thread-safe, and EF Core does not support parallel operations on one instance. `AddDbContext` registers it as scoped by default in ASP.NET Core, which often aligns one context with one request. A request can still contain several units of work, and background or parallel work needs a fresh context from `IDbContextFactory<T>`. See the captive-dependency boundary in [[Home/Programming/NET/ASP NET Web API/Dependency Injection|Dependency Injection]]. `AddDbContextPool` can reuse reset context instances, but mutable per-request state such as a tenant identifier must be re-established safely.
 
 ## Transactions and Concurrency
 
@@ -207,10 +209,10 @@ Schema changes take provider-specific locks and may scan or rewrite a large tabl
 
 # Questions
 
-> [!QUESTION]- How does EF Core change tracking work, and when is a no-tracking query appropriate?
+> [!qard]- How does EF Core change tracking work, and when is a no-tracking query appropriate?
 > A tracking query attaches its entity instances to the context and reuses the same instance when the same entity key appears again. With the default snapshot strategy, EF Core compares current values with the tracked original values when change detection runs, normally before `SaveChanges()`. `.AsNoTracking()` fits a read-only result that will not be updated through that context. If a disconnected entity is attached later, the application must state which properties changed and how concurrency will be checked.
 
-> [!QUESTION]- What is the N+1 query problem, and how can it be detected?
+> [!qard]- What is the N+1 query problem, and how can it be detected?
 > N+1 means one query loads parent rows and later navigation access issues another query for each parent. Detect it by counting database commands per operation and inspecting generated SQL in logs or tracing. Fix the query shape with a projection, an explicit include, or a deliberate second query. The choice depends on result size and consistency needs. There is no universal collection-size threshold for split queries.
 
 # References

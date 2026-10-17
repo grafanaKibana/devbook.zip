@@ -9,6 +9,8 @@ level:
 priority: High
 status: Ready to Repeat
 publish: true
+qard-deck: "Software Architecture"
+qard-topic: "Application Architecture/Layered Architecture"
 ---
 
 Layered architecture groups code by responsibility and defines which groups may depend on which. Traditional layering points dependencies downward, usually from presentation through business logic to data access. Onion and Clean variants reverse selected edges so infrastructure depends on inner policy. The useful part is the boundary: business rules stop drifting into controllers and persistence code.
@@ -142,7 +144,7 @@ This sketch only stages the entity in EF Core. A complete transaction or Unit of
 
 # Questions
 
-> [!QUESTION]- What is the difference between traditional layered and Onion/Clean Architecture?
+> [!qard]- What is the difference between traditional layered and Onion/Clean Architecture?
 > Traditional layering points from UI to Business Logic to Data Access, so the business layer consumes the lower data API. Onion and Clean move the persistence contract inward and make Infrastructure implement it. Both separate responsibilities. Only the inward form prevents source dependencies from pulling infrastructure types into policy.
 
 # References

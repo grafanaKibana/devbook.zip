@@ -9,6 +9,8 @@ level:
 priority: High
 status: Ready to Repeat
 publish: true
+qard-deck: "Programming"
+qard-topic: "NET/CSharp/Concurrency and Parallelism/ThreadPool"
 ---
 
 The .NET ThreadPool reuses managed worker threads for short units of work. `Task.Run`, many task continuations, timers, and queued callbacks use it. Asynchronous I/O is registered with operating-system facilities. When completion needs managed code, that code must eventually get execution time too.
@@ -133,10 +135,10 @@ var result = await _http.GetStringAsync(url);
 
 # Questions
 
-> [!QUESTION]- What is ThreadPool starvation and how does it usually start?
+> [!qard]- What is ThreadPool starvation and how does it usually start?
 > ThreadPool starvation means queued callbacks and continuations wait too long because too few worker threads are available, even though the CPU is not fully busy doing useful work. A common cause is pool workers blocking on `.Result`, `.Wait()`, synchronous I/O, or similar waits. The work needed to complete those waits may also depend on the pool, so latency rises while the runtime adds workers. Raising the minimum can reduce that ramp-up delay, but it does not remove the blocking and may increase contention.
 
-> [!QUESTION]- When is it appropriate to call `ThreadPool.SetMinThreads`?
+> [!qard]- When is it appropriate to call `ThreadPool.SetMinThreads`?
 > `ThreadPool.SetMinThreads` is worth testing when measurements show that work is waiting for the pool to add workers during a burst. It is not a fix for CPU saturation, a slow downstream service, or workers blocked by sync-over-async code.
 >
 > Change it under a representative load test and watch queue length, worker count, CPU, memory, and tail latency. The value is a threshold below which the pool can add workers without its normal delay; it does not create that many threads in advance.

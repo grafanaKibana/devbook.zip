@@ -9,6 +9,8 @@ status: Done
 level:
   - "2"
 priority: Medium
+qard-deck: "AI & ML"
+qard-topic: "LLM/Harness Engineering/Tooling/Agent Instructions"
 ---
 
 Agent instruction files describe how work gets done in one repository. They capture facts the code cannot reliably explain on its own: which commands are safe, where boundaries sit, what conventions matter, and how a change is proved complete.
@@ -74,7 +76,7 @@ A long architecture essay is a poor substitute. It consumes context, hides the f
 
 # Questions
 
-> [!QUESTION]- Why do hierarchical instruction files often outperform a single giant root file?
+> [!qard]- Why do hierarchical instruction files often outperform a single giant root file?
 > The root file can hold rules that apply to the whole repository, while a local file adds the build command or dependency rule for one subtree when the runtime supports path-based loading. This keeps unrelated guidance out of the model's context and makes the active instructions more specific to the files being changed. The hierarchy works only when precedence is clear and local rules refine the root instead of silently contradicting it.
 
 # References

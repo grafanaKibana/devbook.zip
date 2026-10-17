@@ -10,6 +10,8 @@ priority: Low
 status: Done
 
 publish: true
+qard-deck: "AI & ML"
+qard-topic: "LLM/Harness Engineering/Model Context Protocol"
 ---
 
 Model Context Protocol (MCP) gives LLM applications a common way to connect to tools and external data. Without a shared protocol, every client-service pairing needs its own adapter. In the ideal case, that produces N×M integrations for N clients and M services. MCP moves the integration boundary: clients implement the protocol once, while each service exposes an MCP server. The rough shape becomes N+M, provided both sides implement compatible versions and capabilities.
@@ -102,10 +104,10 @@ MCP earns its overhead when several clients need the same integration or when ca
 
 # Questions
 
-> [!QUESTION]- When should a tool remain an in-process function instead of becoming an MCP server?
+> [!qard]- When should a tool remain an in-process function instead of becoming an MCP server?
 > Function calling and MCP are not direct alternatives, because an MCP tool can still be presented to the model as a function. The real decision is whether the tool needs a separate reusable server boundary. Keeping it in process is simpler when it belongs to one application, depends on private application state, or would expose sensitive business logic through a broader interface.
 
-> [!QUESTION]- What additional security risks appear when a model uses tools from an MCP server?
+> [!qard]- What additional security risks appear when a model uses tools from an MCP server?
 > An MCP server still has the usual API risks, but its tool names and descriptions also become model context, and the model may request an operation after reading untrusted content. With HTTP, MCP authorization can restrict access to the server and enforce OAuth audience and scopes; insufficient scope can trigger another authorization step. Those scopes do not automatically define whether a caller may run each business operation or access a particular tenant's data. The server still needs per-tool authorization, input validation, tenant isolation, rate limits, and audit logging.
 
 # References

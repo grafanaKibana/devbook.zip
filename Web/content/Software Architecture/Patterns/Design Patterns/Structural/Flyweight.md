@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.698Z
-modified: 2026-08-20T20:41:15.698Z
-published: 2026-08-20T20:41:15.698Z
+created: 2026-10-12T09:19:58.306Z
+modified: 2026-10-12T09:19:58.306Z
+published: 2026-10-12T09:19:58.306Z
 topic:
   - Software Architecture
 subtopic:
@@ -12,6 +12,8 @@ level:
   - "1"
 priority: High
 status: Ready to Repeat
+qard-deck: Software Architecture
+qard-topic: Patterns/Design Patterns/Structural/Flyweight
 ---
 
 A printing press reuses one letter stamp at many positions on a page. The glyph shape stays the same. Position changes with each impression. Sharing the stable part avoids manufacturing a separate stamp for every character occurrence.
@@ -146,7 +148,7 @@ With immutable flyweights, a tax-rate change is applied by replacing the shared 
 
 # Questions
 
-> [!QUESTION]- When is Flyweight not worth the complexity?
+> [!qard]- When is Flyweight not worth the complexity?
 > It is not worth using when duplicate state is a small part of the process heap or object counts stay low. A memory profiler should show many equal, retained objects before the model is split. The factory and lookup path otherwise add complexity without relieving a measured constraint.
 
 # References

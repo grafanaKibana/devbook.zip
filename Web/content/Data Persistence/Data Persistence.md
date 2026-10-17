@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-09-12T17:17:13.834Z
-modified: 2026-09-12T17:17:13.834Z
-published: 2026-09-12T17:17:13.834Z
+created: 2026-10-12T09:19:58.242Z
+modified: 2026-10-12T09:19:58.243Z
+published: 2026-10-12T09:19:58.243Z
 tags:
   - FolderNote
 icon: database
@@ -16,6 +16,8 @@ priority: High
 level:
   - "4"
 status: Creation
+qard-deck: Data Persistence
+qard-topic: Data Persistence
 ---
 
 Data persistence is the part of a system that must survive process and machine restarts. A storage choice fixes more than where bytes live: it sets the available consistency guarantees, the shape of efficient queries, and much of the operating cost. A weak isolation choice can corrupt business state under concurrency. An unnecessary cache creates a stale-read path that the original system never had.
@@ -102,7 +104,7 @@ The categories overlap. CQRS may use materialized views, event sourcing may feed
 
 # Questions
 
-> [!QUESTION]- What factors determine whether a new service should use SQL or a NoSQL store?
+> [!qard]- What factors determine whether a new service should use SQL or a NoSQL store?
 > The decision starts with the data model, required guarantees, and main access patterns. Relational storage fits when constraints, multi-record transactions, joins, or changing queries matter. A document, key-value, graph, or other specialized store fits when its access pattern clearly dominates and its consistency and query limits are acceptable.
 >
 > Scale alone does not settle the choice. A well-indexed relational database handles more load than most services need, so a specialized store should solve a measured problem. A relational source of truth with one specialized read or hot path is often safer than forcing every workload into one model.

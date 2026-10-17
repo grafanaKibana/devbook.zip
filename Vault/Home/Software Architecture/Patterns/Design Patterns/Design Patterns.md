@@ -10,6 +10,8 @@ publish: true
 level:
   - "3"
 status: Done
+qard-deck: "Software Architecture"
+qard-topic: "Patterns/Design Patterns/Design Patterns"
 ---
 
 The Gang of Four catalog names 23 recurring object-oriented design problems and the collaborations that address them. A pattern communicates intent and consequences. It is not a ready-made class diagram. Strategy says that an algorithm varies behind a stable contract, while Observer says that an unknown set of dependents receives notifications. The name is useful only when that pressure exists in the code.
@@ -39,13 +41,13 @@ Similar structure does not imply the same pattern. Proxy and Decorator both wrap
 
 # Questions
 
-> [!QUESTION]- How is a GoF category chosen?
+> [!qard]- How is a GoF category chosen?
 > Creational patterns vary how objects come into existence. Structural patterns vary how types or objects are assembled. Behavioral patterns vary responsibility and communication. The category is a recall aid. The pattern's intent still decides whether it fits.
 
-> [!QUESTION]- When does using a design pattern become an anti-pattern?
+> [!qard]- When does using a design pattern become an anti-pattern?
 > When its indirection costs more than the variation it isolates. A Factory Method with one permanent product, a Builder around two independent values, or a Singleton hiding request state adds vocabulary without removing design pressure. Concrete evidence of variation should pay for the abstraction.
 
-> [!QUESTION]- How can two patterns with the same wrapper shape be distinguished?
+> [!qard]- How can two patterns with the same wrapper shape be distinguished?
 > Name the responsibility that the wrapper owns. A Decorator adds behavior, a Proxy controls access, and an Adapter translates a contract. Class shape alone cannot identify the pattern because intent and collaboration are part of its definition.
 
 # References

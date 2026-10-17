@@ -5,24 +5,33 @@ import { runInNewContext } from "node:vm"
 import { h } from "preact"
 import render from "preact-render-to-string"
 import type { Element } from "hast"
+import { parse } from "yaml"
 import { QuestionsIndex } from "./questions-index"
 
-const callout: Element = {
+const callout = (type = "question"): Element => ({
   type: "element",
   tagName: "blockquote",
-  properties: { className: ["callout", "question"] },
+  properties: { className: ["callout", type], dataCallout: type },
   children: [{ type: "text", value: "Question and answer" }],
-}
-const file = (slug: string, count = 0, frontmatter = {}) => ({
+})
+const file = (slug: string, count = 0, frontmatter = {}, type = "question") => ({
   slug,
   frontmatter: slug.endsWith("/index") ? { tags: ["FolderNote"], ...frontmatter } : frontmatter,
-  questionCallouts: Array.from({ length: count }, () => ({ node: callout })),
+  questionCallouts: Array.from({ length: count }, () => ({ node: callout(type) })),
 })
 const component = QuestionsIndex(undefined)
 const customStyles = readFileSync(
   new URL("../../quartz/styles/custom.scss", import.meta.url),
   "utf8",
 )
+const quartzConfig = parse(
+  readFileSync(new URL("../../quartz.config.yaml", import.meta.url), "utf8"),
+) as {
+  plugins: Array<{
+    source: string
+    options?: { includeAll?: boolean; includedProperties?: string[]; hidePropertiesView?: boolean }
+  }>
+}
 const html = (allFiles: ReturnType<typeof file>[], slug = "questions") =>
   render(h(component, { allFiles, fileData: { slug } } as never))
 
@@ -50,6 +59,32 @@ test("QuestionsIndex gates to its dashboard and has a useful empty state", () =>
   assert.equal(html([file("programming/note", 1)], "index"), "")
   assert.match(html([]), /0 questions/)
   assert.match(html([]), /No questions found/)
+})
+
+test("native Qard cards keep the existing component data shape and hide Qard metadata", () => {
+  const result = html([
+    file(
+      "programming/qard-source",
+      1,
+      { title: "Native card", "qard-deck": "Private deck", "qard-topic": "Private topic" },
+      "qard",
+    ),
+  ])
+
+  assert.match(result, /data-callout="qard"/)
+  assert.match(result, /Native card/)
+  assert.doesNotMatch(result, /qard-deck|qard-topic|Private deck|Private topic/)
+  const noteProperties = quartzConfig.plugins.find(
+    (plugin) => plugin.source === "github:quartz-community/note-properties",
+  )
+  assert.deepEqual(noteProperties?.options, {
+    includeAll: false,
+    includedProperties: ["topic", "subtopic", "status"],
+    excludedProperties: [],
+    hidePropertiesView: true,
+    delimiters: "---",
+    language: "yaml",
+  })
 })
 
 test("topic order, labels and nested counts follow folder metadata", () => {
@@ -114,6 +149,14 @@ test("Questions-only Tabsdown layout wraps with the plugin's supported variables
     /\.questions-index \.tabsdown\.tabsdown--mounted \{[^}]*--tabsdown-overflow-wrap: wrap;[^}]*--tabsdown-overflow-x: visible;[^}]*--tabsdown-equal-width-flex: 1 1 max-content;/,
   )
   assert.doesNotMatch(component.css!, /--tabsdown-overflow-wrap/)
+})
+
+test("FAQ chrome shares selectors across legacy, native, and mixed adjacent cards", () => {
+  assert.match(customStyles, /\.callout:is\(\[data-callout="question"\], \[data-callout="qard"\]\)/)
+  assert.match(
+    customStyles,
+    /:has\(\s*\+ \.callout:is\(\[data-callout="question"\], \[data-callout="qard"\]\)\s*\)/,
+  )
 })
 
 test("root-level notes are included in a selectable scope", () => {

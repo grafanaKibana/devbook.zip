@@ -9,6 +9,8 @@ level:
 priority: Medium
 status: Ready to Repeat
 publish: true
+qard-deck: "Programming"
+qard-topic: "NET/CSharp/Fundamentals/Types/Strings"
 ---
 
 `string` is the C# alias for the sealed reference type `System.String`. Its contents are immutable. Assignment copies a reference, while an operation that changes text produces a different string. That boundary explains most string behavior, including when concatenation is clear and when incremental construction starts wasting allocations.
@@ -91,10 +93,10 @@ Hot paths sometimes need construction without intermediate strings:
 
 # Questions
 
-> [!QUESTION]- When is `StringBuilder` a better choice than string concatenation?
+> [!qard]- When is `StringBuilder` a better choice than string concatenation?
 > `StringBuilder` is useful when text is built through many appends, especially in a loop, because it avoids allocating a new string for every intermediate result. For one expression with a small number of values, interpolation or concatenation is usually clearer and the compiler can optimize it well. In a hot path, the choice should be measured; when `StringBuilder` wins and the final size is roughly known, setting its capacity reduces buffer growth and copying.
 
-> [!QUESTION]- Why can `ReferenceEquals(a, b)` be `false` when `a == b` is `true` for strings?
+> [!qard]- Why can `ReferenceEquals(a, b)` be `false` when `a == b` is `true` for strings?
 > String equality with `==` compares the characters, while `ReferenceEquals` checks whether both variables point to the same object. Two separately created strings can contain the same text and therefore be equal without sharing an object. Business comparisons should use string equality with the required `StringComparison`; reference equality is mainly useful when object identity or allocation behavior is being inspected.
 
 # References

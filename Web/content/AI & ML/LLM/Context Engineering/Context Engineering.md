@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-09-12T17:17:13.821Z
-modified: 2026-09-21T08:40:06.208Z
-published: 2026-09-21T08:40:06.208Z
+created: 2026-10-12T09:19:58.213Z
+modified: 2026-10-12T09:19:58.214Z
+published: 2026-10-12T09:19:58.214Z
 tags:
   - FolderNote
 topic:
@@ -14,6 +14,8 @@ level:
   - "2"
 priority: High
 status: Done
+qard-deck: AI & ML
+qard-topic: LLM/Context Engineering/Context Engineering
 ---
 
 Context engineering decides what the model sees and where it appears in the context window. Instructions compete with examples, retrieved evidence, conversation history, and tool traffic for the same finite budget. Once a system gains retrieval or memory, [[AI & ML/LLM/Prompt Engineering/Prompt Engineering|Prompting]] is only one part of an assembled payload.
@@ -117,10 +119,10 @@ The smallest context that answers the task is the starting point. Retrieval and 
 
 # Questions
 
-> [!QUESTION]- Why does adding more context often make answers worse, not better?
+> [!qard]- Why does adding more context often make answers worse, not better?
 > Attention is uneven across a long window, so evidence buried in the middle may be underused. Added tokens also compete with the evidence already present, even when they are loosely relevant. Larger inputs cost more and take longer. The fix is signal density: keep fewer complete chunks, order them deliberately, and measure whether each increase in context improves the answer.
 
-> [!QUESTION]- What are the main techniques for keeping a long-running agent's context under control?
+> [!qard]- What are the main techniques for keeping a long-running agent's context under control?
 > Context control starts with tracking the token budget on every iteration instead of waiting for the window to fill. Keep a small set of strong evidence and place the best material where the model is likely to use it. Older turns can be compacted into decisions, constraints, and pending work. Tool results should contain only the fields needed for the next step, while bulky state can live outside the window and be loaded through a reference when needed.
 
 # References

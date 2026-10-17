@@ -9,6 +9,8 @@ level:
 priority: High
 status: Ready to Repeat
 publish: true
+qard-deck: "Software Architecture"
+qard-topic: "Patterns/Design Patterns/Behavioral/Interpreter"
 ---
 
 A calculator interprets `2 + 3 * 4` by parsing the expression into a tree and walking that tree according to precedence rules. Each node represents a grammar construct. LINQ providers use the same broad mechanism: a lambda supplied as an expression tree becomes data that a provider can inspect and translate.
@@ -197,10 +199,10 @@ Interpreter fits a small language represented as data. Stable rules are clearer 
 
 # Questions
 
-> [!QUESTION]- How does EF Core use LINQ Expression Trees as an Interpreter?
+> [!qard]- How does EF Core use LINQ Expression Trees as an Interpreter?
 > The `Queryable.Where` overload accepts an `Expression<Func<Order, bool>>`, so the compiler represents the lambda as a tree instead of only emitting an executable delegate. EF Core examines supported nodes, builds a database query, and parameterizes captured values. A custom method fails when no translator handles its expression node.
 
-> [!QUESTION]- How does Interpreter differ from Strategy when rules are selected at runtime?
+> [!qard]- How does Interpreter differ from Strategy when rules are selected at runtime?
 > Strategy selects an algorithm that already exists in code. Interpreter evaluates a rule represented as data. Strategy fits a known set of implementations. Interpreter fits rules that need to be combined or changed without writing and compiling another strategy class.
 
 # References

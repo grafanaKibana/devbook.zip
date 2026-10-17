@@ -9,6 +9,8 @@ level:
 priority: Medium
 status: Done
 publish: true
+qard-deck: "AI & ML"
+qard-topic: "LLM/Evaluation/Deterministic Checks"
 ---
 
 Deterministic checks turn explicit requirements into executable pass/fail rules. They validate structure, required fields, tool permissions, and other contracts without asking another model for an opinion. Run them before semantic scorers. There is no reason to pay for a judge when the output is malformed or an agent called a forbidden tool.
@@ -98,7 +100,7 @@ Apply permission and argument checks at the tool boundary, before execution. Out
 
 # Questions
 
-> [!QUESTION]- What is the minimum useful set of deterministic checks for a tool-using agent?
+> [!qard]- What is the minimum useful set of deterministic checks for a tool-using agent?
 > Start with the contracts that can prevent irreversible harm: tool permission, argument validation, and output schema. Add data-loss prevention, citation, rendering, or length rules only when the product contract requires them. Each rule needs an explicit failure policy.
 
 # References

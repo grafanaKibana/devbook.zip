@@ -10,6 +10,8 @@ priority: High
 status: Done
 
 publish: true
+qard-deck: "Software Architecture"
+qard-topic: "Patterns/Architectural Patterns/CQRS"
 ---
 
 CQRS (Command Query Responsibility Segregation) gives state changes and reads different models. The write side protects business rules. The read side returns data in the shape each use case needs. This separation pays off when one shared model has become a compromise, not merely because reads outnumber writes.
@@ -216,7 +218,7 @@ Use both only when authoritative history and replay are requirements of the writ
 CQRS is worth considering when write invariants and query shapes pull the shared model in different directions. Independent scaling may strengthen the case, but a ratio alone is not enough.
 # Questions
 
-> [!QUESTION]- When is CQRS useful, and when does it add unnecessary complexity?
+> [!qard]- When is CQRS useful, and when does it add unnecessary complexity?
 > CQRS is useful when the write side and the read side have clearly different needs. For example, writes may enforce order and payment rules, while reads need data prepared for fast searches and reports.
 >
 > It is not useful when the same model already handles both sides without difficulty. In that case, maintaining a separate read model and keeping it synchronized adds complexity without enough benefit.

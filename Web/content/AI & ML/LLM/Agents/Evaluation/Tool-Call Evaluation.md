@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.469Z
-modified: 2026-08-20T20:41:15.472Z
-published: 2026-08-20T20:41:15.472Z
+created: 2026-10-12T09:19:58.212Z
+modified: 2026-10-12T09:19:58.212Z
+published: 2026-10-12T09:19:58.212Z
 topic:
   - AI & ML
 subtopic:
@@ -12,6 +12,8 @@ level:
   - "3"
 priority: High
 status: Done
+qard-deck: AI & ML
+qard-topic: LLM/Agents/Evaluation/Tool-Call Evaluation
 ---
 
 A tool call is where an agent stops describing an action and asks a system to perform it. Failures at this boundary are concrete: the agent can name the wrong tool, send the wrong value in valid JSON, invent a function, or repeat a call that changed nothing.
@@ -101,7 +103,7 @@ The riskiest call may be perfectly valid: real tool, valid schema, wrong account
 
 # Questions
 
-> [!QUESTION]- Why should tool selection and argument accuracy be measured separately?
+> [!qard]- Why should tool selection and argument accuracy be measured separately?
 > They fail for different reasons. Choosing the wrong tool usually points to routing or unclear tool descriptions. Choosing the right tool but passing the wrong order ID, filter, or date points to grounding or schema problems. Separate metrics make a result such as 95% selection accuracy and 70% argument accuracy actionable instead of hiding it inside one average. Identifiers and enums can usually be checked against exact references, while free-text arguments often need a semantic check.
 
 # References

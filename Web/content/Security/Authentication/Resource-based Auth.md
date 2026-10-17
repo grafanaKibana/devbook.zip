@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.665Z
-modified: 2026-08-20T20:41:15.665Z
-published: 2026-08-20T20:41:15.665Z
+created: 2026-10-12T09:19:58.272Z
+modified: 2026-10-12T09:19:58.272Z
+published: 2026-10-12T09:19:58.272Z
 topic:
   - Security
 subtopic:
@@ -12,6 +12,8 @@ level:
   - "3"
 priority: High
 status: Ready to Repeat
+qard-deck: Security
+qard-topic: Authentication/Resource-based Auth
 ---
 
 Resource-based authorization decides whether a principal may perform an operation on one concrete resource. A role can grant document-editing capability in general. The resource check decides whether this document falls within that principal's authority.
@@ -141,7 +143,7 @@ Use `403` when authenticated callers may know that the resource exists. Use `404
 
 # Questions
 
-> [!QUESTION]- What is the difference between role-based and resource-based authorization?
+> [!qard]- What is the difference between role-based and resource-based authorization?
 > Role-based authorization evaluates assigned roles without needing the target instance. Resource-based authorization includes the loaded object's attributes or relationships in the decision. Roles work well as coarse gates. Resource checks enforce ownership, tenancy, or object state.
 
 # References
