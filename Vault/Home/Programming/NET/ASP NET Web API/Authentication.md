@@ -12,6 +12,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Programming"
 qard-topic: "NET/ASP NET Web API/Authentication"
+flashcard_uid: "9d950e14"
 ---
 
 Authentication turns request credentials into an identity. In ASP.NET Core, a registered authentication handler validates the credential for its scheme and, on success, supplies the `ClaimsPrincipal` exposed through `HttpContext.User`. Authorization evaluates that principal later in the pipeline. [[Authorization]] covers that separate decision.
@@ -114,7 +115,7 @@ public IActionResult ApiEndpoint() => Ok();
 - **External identity providers** should own token issuance and key rotation. `AddOpenIdConnect` integrates OIDC sign-in flows, while `Microsoft.Identity.Web` provides Microsoft Entra ID integration. Discovery metadata and JWKS rotation make this safer than copying an external provider's keys into hand-written `TokenValidationParameters`.
 
 > [!WARNING]
-> **Claim-type mapping can change lookup names.** Inbound mapping may translate short JWT names such as `sub` into .NET claim-type URIs, so code looking only for `"sub"` can miss the value. Set `options.MapInboundClaims = false` when the application contract uses the original JWT names, and test claim lookup against the configured handler.
+> **Claim-type mapping can change lookup names.** Inbound mapping may translate short JWT names such as `sub` into .NET claim-type URIs, so code looking only for `"sub"` can miss the value. Setting `options.MapInboundClaims = false` keeps the original JWT names when the application contract uses them, and claim lookup needs testing against the configured handler.
 
 # Pitfalls
 
@@ -124,7 +125,7 @@ public IActionResult ApiEndpoint() => Ok();
 
 Development placeholders often survive into deployment configuration.
 
-Use key material appropriate for the selected algorithm and keep it in a secret store or protected environment configuration. Rotation also needs an overlap period so tokens signed by the previous key can finish their intended lifetime.
+Key material must be appropriate for the selected algorithm and belongs in a secret store or protected environment configuration. Rotation also needs an overlap period so tokens signed by the previous key can finish their intended lifetime.
 
 ## Missing `UseAuthentication()` Before `UseAuthorization()`
 
@@ -132,7 +133,7 @@ Use key material appropriate for the selected algorithm and keep it in a secret 
 
 Middleware order is executable behavior. `UseAuthorization()` cannot evaluate the intended identity when authentication has not run.
 
-Place `app.UseAuthentication()` before `app.UseAuthorization()` in `Program.cs`. Endpoint mapping follows both in the conventional pipeline.
+`app.UseAuthentication()` must come before `app.UseAuthorization()` in `Program.cs`. Endpoint mapping follows both in the conventional pipeline.
 
 ## Not Validating Token Expiry
 
@@ -140,7 +141,7 @@ Place `app.UseAuthentication()` before `app.UseAuthorization()` in `Program.cs`.
 
 Temporary development configuration can escape into a deployed environment.
 
-Keep lifetime validation enabled. Short access-token lifetimes bound exposure. A refresh-token flow can preserve a longer session while keeping revocation state on the server.
+Lifetime validation must stay enabled. Short access-token lifetimes bound exposure. A refresh-token flow can preserve a longer session while keeping revocation state on the server.
 
 # Tradeoffs
 
@@ -150,8 +151,20 @@ Keep lifetime validation enabled. Short access-token lifetimes bound exposure. A
 
 # Questions
 
-> [!qard]- What does `ValidateIssuerSigningKey = true` control during JWT validation?
-> For a signed token, the handler uses a resolved key to verify the signature. This flag tells the default validation path to also validate that signing key itself. It does not enable issuer, audience, lifetime, or algorithm validation, and a custom `IssuerSigningKeyValidator` runs regardless of the flag. The rest of the JWT validation settings still have to form one coherent trust configuration.
+<!-- qard-id: 8de4ae9c-12bc-45dc-b06f-47f0585070c2 -->
+> [!qard]- What must an API establish before it trusts a bearer JWT?
+> Before trusting a bearer JWT, an API must confirm all of the following against its own configured trust settings:
+> 
+> - **Signature:** the token was signed with a key the API accepts, so its contents were not changed after signing.
+> - **Issuer:** the authority the API expects issued it.
+> - **Audience:** it was issued for this API rather than for another service.
+> - **Lifetime:** it has not expired.
+> 
+> Each check answers a different question, so none can stand in for another. A valid signature proves only that an accepted key signed the token. It does not show that the expected authority issued the token, that this API was the intended recipient, or that the token is still valid. Any further claims the API requires depend on its own trust configuration.
+> 
+> In ASP.NET Core, the JWT bearer handler performs these checks according to its `TokenValidationParameters`. Disabling issuer, audience or lifetime validation because the token is signed removes the protection that check provides.
+> 
+> [Microsoft: Configure JWT bearer authentication in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/configure-jwt-bearer-authentication?view=aspnetcore-10.0)
 
 # References
 

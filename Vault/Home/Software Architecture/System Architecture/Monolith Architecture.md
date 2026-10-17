@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "System Architecture/Monolith Architecture"
+flashcard_uid: "4248833e"
 ---
 
 A monolith has one deployment boundary. Its modules are versioned, released, and rolled back together. One process and one database are common, but neither defines the style.
@@ -71,7 +72,7 @@ A [[Home/Software Architecture/System Architecture/Modular Monolith]] keeps one 
 
 # When One Deployment Still Fits
 
-Start with one deployable unit and enforce module boundaries early. Split only where a boundary already behaves like a service: it has stable ownership, a clear contract, and a reason to release or scale on its own.
+One deployable unit with module boundaries enforced early is the default starting point. A split is justified only where a boundary already behaves like a service: it has stable ownership, a clear contract, and a reason to release or scale on its own.
 
 The hard part is not extracting code. It is separating data and operational responsibility without turning every request into a distributed transaction.
 
@@ -99,8 +100,25 @@ Moving a module out of process changes the failure model. A method call that onc
 
 # Questions
 
-> [!qard]- What evidence justifies extracting a service?
-> A stable boundary should already exist, and the module should repeatedly need an independent release cadence, runtime isolation, or scaling profile. Extraction without those pressures usually trades visible code coupling for harder operational coupling.
+<!-- qard-id: 221241e0-41e0-4964-8f8a-bdb66c1c129c -->
+> [!qard]- What evidence justifies extracting a service from a monolith?
+> Extraction is justified when a boundary is already able to stand alone and recurring, measured pressure requires it to. Without both conditions, extraction moves the coupling onto the network instead of removing it.
+> 
+> **The boundary is ready:**
+> 
+> - one team owns the capability and its changes;
+> - other code uses an explicit, stable contract instead of internal classes;
+> - the capability exclusively owns its data, and no other module reads or writes those tables directly.
+> 
+> **There is recurring pressure for independence:**
+> 
+> - its changes repeatedly wait for unrelated releases;
+> - its load needs to scale separately from the rest of the application;
+> - its failures or resource use need runtime isolation from other features.
+> 
+> When the pressure is missing, the network hop buys no autonomy that matters. The coupling that was visible in code becomes operational coupling, with added latency, partial failure and another deployment to run. When the boundary is not ready, shared tables or paired releases make the extracted service part of a distributed monolith.
+> 
+> [Azure: Microservices architecture style](https://learn.microsoft.com/en-us/azure/architecture/guide/architecture-styles/microservices)
 
 # References
 

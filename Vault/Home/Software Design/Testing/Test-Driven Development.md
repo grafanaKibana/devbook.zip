@@ -11,9 +11,10 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Software Design"
 qard-topic: "Testing/Test-Driven Development"
+flashcard_uid: "007a0cef"
 ---
 
-Test-Driven Development (TDD) grows behavior through a short test-first loop. Select the next example from a test list, write a test that fails for the expected reason, make it pass with the simplest sufficient production change, then improve both code and tests while the suite remains green. The loop supplies regression evidence and makes the caller-facing interface visible before implementation choices harden.
+Test-Driven Development (TDD) grows behavior through a short test-first loop. Each cycle selects the next example from a test list, adds a test that fails for the expected reason, makes it pass with the simplest sufficient production change, then improves both code and tests while the suite remains green. The loop supplies regression evidence and makes the caller-facing interface visible before implementation choices harden.
 
 TDD is a development technique, not a coverage target or a claim that every line was written test-first. Its design value depends on choosing informative examples and completing the refactoring step. A poorly chosen test can drive an awkward interface just as easily as a good test can clarify one.
 
@@ -25,7 +26,7 @@ Green → Write the simplest code that makes the test pass. No gold-plating.
 Refactor → Improve the code (extract methods, rename, remove duplication) while keeping tests green.
 ```
 
-The cycle should be small enough that the reason for failure and the production change remain obvious. Elapsed time is only a signal: a longer step may need decomposition, but compilation, infrastructure setup, or an unfamiliar domain can legitimately slow a useful cycle. Before starting, maintain a short test list and choose the next example that reveals an important behavior or design question.
+The cycle should be small enough that the reason for failure and the production change remain obvious. Elapsed time is only a signal: a longer step may need decomposition, but compilation, infrastructure setup, or an unfamiliar domain can legitimately slow a useful cycle. A short test list exists before the loop starts, and the next example is one that reveals an important behavior or design question.
 
 # Concrete Example
 
@@ -83,19 +84,19 @@ TDD does not choose the right test level or guarantee a good architecture. It ca
 
 When the next test comes from the current implementation instead of an externally visible behavior, it starts asserting private state or method call counts. A refactor then breaks the test even though the behavior is unchanged.
 
-Exercise the contract production callers use and assert returned state or externally visible effects. Verify an interaction only when sending that command is itself the behavior. Database contents are observable only in an integration test that owns the database boundary.
+A behavior-focused test exercises the contract production callers use and asserts returned state or externally visible effects. An interaction is verified only when sending that command is itself the behavior. Database contents are observable only in an integration test that owns the database boundary.
 
 ## Over-Mocking
 
 If isolation means replacing every collaborator, tests specify call choreography while real wiring and component compatibility remain untested. Reorganizing the collaboration breaks those tests even when the external behavior stays the same.
 
-Keep stable in-memory collaborators real and replace process boundaries that the unit test does not own. A fake clock is deterministic. An in-memory database provider is not a faithful substitute for relational behavior. Prove SQL, HTTP, queue, serialization, and dependency-registration contracts with integration tests using appropriate implementations.
+Stable in-memory collaborators stay real, while process boundaries that the unit test does not own are replaced. A fake clock is deterministic. An in-memory database provider is not a faithful substitute for relational behavior. SQL, HTTP, queue, serialization, and dependency-registration contracts are proven by integration tests that use appropriate implementations.
 
 ## Writing Tests After the Fact and Calling It TDD
 
 Tests written after implementation may still be valuable regression checks, but they did not participate in the design loop. Calling that work TDD confuses the resulting suite with the sequence of test, production change, and refactoring.
 
-Describe test-after work accurately and judge the tests on the failures they catch. Coverage cannot reconstruct development order. When TDD is chosen, keep the loop observable through a failing test with the expected reason, a minimal passing change, and a deliberate refactoring check.
+Such work is accurately labeled test-after, and its tests are judged by the failures they catch. Coverage cannot reconstruct development order. When TDD is chosen, the loop stays observable through a failing test with the expected reason, a minimal passing change, and a deliberate refactoring check.
 
 # Tradeoffs
 
@@ -106,15 +107,45 @@ Describe test-after work accurately and judge the tests on the failures they cat
 | Test-after | Adds regression evidence to an implementation that already exists | Cannot provide test-first interface feedback and may mirror the code | Legacy characterization, defects found in production, and straightforward adapters |
 | Exploratory spike | Optimizes learning before committing to a design | Provides no durable regression evidence | Disposable experiments that are removed or rebuilt before production use |
 
-Use TDD when the next behavior can be stated as an example and early caller feedback is valuable. Use an integration-level loop when the behavior is configuration, persistence, or protocol wiring. A spike may omit durable tests only while it remains disposable. Production behavior needs evidence at the layer that can expose its realistic failure.
+TDD fits when the next behavior can be stated as an example and early caller feedback is valuable. An integration-level loop fits when the behavior is configuration, persistence, or protocol wiring. A spike may omit durable tests only while it remains disposable. Production behavior needs evidence at the layer that can expose its realistic failure.
 
 # Questions
 
-> [!qard]- How can TDD improve design beyond increasing test coverage?
-> The test is the first concrete caller, so construction, inputs, outputs, and failure semantics must be expressed before implementation details dominate. Difficult setup is a design signal worth investigating, not proof that a class must be split. The benefit comes from selecting the next useful example and refactoring after it passes. A test that begins green may document existing behavior, but it does not prove that the intended production change was necessary.
+> [!qard]- What is test-driven development, and how does its red-green-refactor cycle work?
+> Test-driven development (TDD) builds software in short cycles. A test for the next small behavior is written first, then just enough code to pass it, and then the design is cleaned up while all tests pass.
+> 
+> 1. **Red:** a test is written for the next behavior, usually chosen from a short list of examples still to cover. It must fail, and for the expected reason. The failure shows that the test can detect the missing behavior. A compile error because a type does not exist yet can be the first red state. It is fixed quickly so that the test fails on the behavior itself rather than on setup.
+> 2. **Green:** the simplest production change that makes the test pass is written, without speculative extras. Behavior grows only as far as the examples require.
+> 3. **Refactor:** with the suite green, production and test code are reviewed for naming, duplication and boundaries, and improved where that helps. The passing tests show that behavior did not change. This step is a deliberate check; code that needs no improvement is left alone.
+> 
+> The next example is then taken from the list and the cycle repeats. Each cycle stays small enough that the reason for a failure and the production change remain obvious. The design value depends on doing the refactor step; skipping it leaves passing tests without deliberate design improvement. TDD describes the order of work, so tests written after the implementation can be useful regression checks but are not TDD.
+> 
+> [Martin Fowler: Test-Driven Development](https://martinfowler.com/bliki/TestDrivenDevelopment.html)
 
+<!-- qard-id: cef12dc9-115f-4edd-880e-dc205127dd9f -->
+> [!qard]- How can TDD improve design beyond increasing test coverage?
+> TDD improves design by making each test the first caller of the code it specifies. Because the test is written before the implementation, construction, inputs, results and failure behavior have to be decided from the caller's side. Awkward construction or unclear results then show up while they are still cheap to change.
+> 
+> The rest of the loop adds two more design effects:
+> 
+> - **Safe refactoring:** red-green-refactor leaves a passing example for each completed behavior. Names, duplication and boundaries can then be improved while those examples show that behavior is unchanged.
+> - **Decomposition:** a list of examples, worked through in small steps, breaks a large behavior into observable increments.
+> 
+> These benefits are conditional. They depend on choosing informative examples and actually doing the refactor step. A poorly chosen test can drive an awkward interface as easily as a good one clarifies it. Difficult test setup is a signal to investigate, for example for hidden time, global state or too many responsibilities. It does not by itself prove that a class needs splitting.
+> 
+> [Martin Fowler: Test-Driven Development](https://martinfowler.com/bliki/TestDrivenDevelopment.html)
+
+<!-- qard-id: 0318f23a-cf63-4c25-b816-80942bc06ca6 -->
 > [!qard]- When is TDD not worth the overhead?
-> The loop has little leverage when the work is a disposable experiment, a mechanical declaration already guaranteed by a framework, or a visual exploration whose useful feedback comes from rendering rather than a code-level example. That does not remove the need for verification before the behavior becomes durable. There is no universal percentage cost: the tradeoff depends on domain familiarity, test level, tooling, and how much change the code will absorb.
+> TDD is poor value when its test-first loop yields neither useful design feedback nor lasting regression evidence. Typical cases:
+> 
+> - **Disposable spike:** the goal is to learn whether an approach works, and the code is discarded or rebuilt before production. Durable tests would protect code that will not ship, and the loop adds overhead to exploration. The exception lasts only while the spike stays disposable.
+> - **Declarations the platform already guarantees:** the language or framework may already guarantee a plain declaration's behavior, as with an unmodified property accessor. A test for it mostly restates that guarantee. A declaration that adds custom validation, binding or serialization is no longer in this category.
+> - **Visual rendering:** when the useful feedback is how output looks, inspecting the rendered result gives that feedback more directly than a code-level red-green loop.
+> 
+> Skipping TDD does not remove the need to verify behavior that ships. That behavior still needs tests, written before or after the code, at the layer that can expose its realistic failure. Configuration, persistence and protocol wiring, for example, fit an integration-level test loop better than unit-level TDD. No universal coverage percentage or time-cost threshold decides the question.
+> 
+> [.NET unit-testing best practices](https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-best-practices)
 
 # References
 

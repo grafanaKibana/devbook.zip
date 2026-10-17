@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Application Architecture/Presentation Architecture Variants"
+flashcard_uid: "864352fa"
 ---
 
 Presentation patterns separate a UI from the state and decisions behind it. Their real differences are ownership: who receives input, where screen state lives, what causes a render, and who chooses the next screen. The patterns fit different interaction models. They are not a maturity ladder, and the smallest boundary that keeps domain behavior out of the UI framework is usually enough.
@@ -146,22 +147,34 @@ Blazor supports binding, but its native unit is a component with state, event ca
 
 MVC fits server-rendered request/response applications. MVVM fits a stateful client when the framework already provides binding, observable state, and commands. MVP is useful with a passive view, while MVU favors explicit state transitions. A coordinator earns its place when navigation has branching policy. A small form with legible state and flow does not need VIPER-sized separation.
 
-Change patterns when a boundary fails, not when a file crosses a size threshold. In WPF or .NET MAUI, code-behind should move when it duplicates presentation state or coordinates asynchronous work. Business decisions move farther inward. Event wiring that only adapts a control can stay in the view. A growing ASP.NET Core controller usually needs application behavior extracted before it needs a new presentation pattern. Razor Pages or another UI shape becomes relevant when controller-and-view routing itself is the ceremony in a page-focused flow.
+A pattern change is warranted when a boundary fails, not when a file crosses a size threshold. In WPF or .NET MAUI, code-behind should move when it duplicates presentation state or coordinates asynchronous work. Business decisions move farther inward. Event wiring that only adapts a control can stay in the view. A growing ASP.NET Core controller usually needs application behavior extracted before it needs a new presentation pattern. Razor Pages or another UI shape becomes relevant when controller-and-view routing itself is the ceremony in a page-focused flow.
 
 # Pitfalls
 
 ## Massive Controllers
 
-A controller becomes difficult to test once it owns provider calls, retry policy, or notification side effects. Keep the HTTP path to transport validation, one application operation, result mapping, and response selection.
+A controller becomes difficult to test once it owns provider calls, retry policy, or notification side effects. A testable HTTP path is limited to transport validation, one application operation, result mapping, and response selection.
 
 ## Fat View-models
 
-A view-model becomes a second controller when it owns data access or domain rules. Keep observable screen state and commands there. Application services provide business behavior, and a coordinator or navigation service owns any non-trivial flow.
+A view-model becomes a second controller when it owns data access or domain rules. Observable screen state and commands belong there. Application services provide business behavior, and a coordinator or navigation service owns any non-trivial flow.
 
 # Questions
 
+<!-- qard-id: 0fe15750-bc1e-470f-bcae-0356e989b2da -->
 > [!qard]- What is the key difference between MVC and MVVM?
-> MVC uses a controller to handle a request and select a response view. MVVM exposes observable state and commands to a long-lived bound view. MVC keeps a stateless request path explicit. MVVM accepts binding and notification machinery in exchange for persistent screen state without direct view manipulation.
+> In MVC, a controller receives each user action, works with the model, and then selects a view and supplies the data it renders. In MVVM, the view binds to properties and commands exposed by a view-model. The view-model changes its own state and raises change notifications, and the bindings refresh the view. The view-model never references the view.
+> 
+> | Aspect | MVC | MVVM |
+> |---|---|---|
+> | Handling input | The controller receives the request, calls application behavior and chooses the response. The path from input to output is explicit in the action code. | The view forwards user actions to view-model commands through bindings. The same view stays on screen and reflects the new state; navigation is handled separately. |
+> | Updating the view | The controller passes data to the selected view, which renders it for that response. | Bound controls refresh when the view-model raises a change notification, such as `PropertyChanged` from `INotifyPropertyChanged`. A missed notification leaves the screen showing stale data. |
+> | Testing | Controller logic can be unit-tested without rendering a view. | View-model state and commands can be unit-tested without creating any UI controls. |
+> | Typical fit | Request/response web applications, such as ASP.NET Core MVC. | Long-lived client screens on platforms with data binding, such as .NET MAUI. |
+> 
+> The cost of MVVM is its binding infrastructure: observable properties, commands and change notifications must be implemented and kept correct.
+> 
+> [Microsoft: Overview of ASP.NET Core MVC](https://learn.microsoft.com/en-us/aspnet/core/mvc/overview?view=aspnetcore-10.0) · [Microsoft: Model-View-ViewModel (.NET MAUI)](https://learn.microsoft.com/en-us/dotnet/architecture/maui/mvvm)
 
 # References
 

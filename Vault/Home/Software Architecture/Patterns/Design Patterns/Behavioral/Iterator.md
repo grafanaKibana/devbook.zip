@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Behavioral/Iterator"
+flashcard_uid: "49660f40"
 ---
 
 A TV remote exposes "next channel" without exposing the channel store. The source might be a local list or a live feed. The traversal control stays the same. That cursor-like boundary is the Iterator pattern.
@@ -58,7 +59,7 @@ A "load more" feature now forces pagination details into callers. The repository
 
 # Solution
 
-Expose a lazy `IAsyncEnumerable<T>` and keep paging inside the repository:
+The repository exposes a lazy `IAsyncEnumerable<T>` and keeps paging inside its implementation:
 
 ```csharp
 public class OrderRepository
@@ -137,19 +138,40 @@ This sample uses offset paging because the iterator boundary is the focus. Offse
 
 # Tradeoffs
 
-**Use it when** sequential access is enough and exposing the underlying structure would couple callers to storage. It is especially useful for large or unbounded sequences. In C#, `yield return` usually removes any reason to implement `IEnumerator<T>` by hand.
+**It fits when** sequential access is enough and exposing the underlying structure would couple callers to storage. It is especially useful for large or unbounded sequences. In C#, `yield return` usually removes any reason to implement `IEnumerator<T>` by hand.
 
-**Avoid it when** callers need indexed access or a stable `Count`. A materialized list says that more clearly. Deferred execution also moves queries and exceptions to enumeration time. A second enumeration may repeat the work.
+**It is a poor fit when** callers need indexed access or a stable `Count`. A materialized list says that more clearly. Deferred execution also moves queries and exceptions to enumeration time. A second enumeration may repeat the work.
 
 **Related patterns.** Iterator controls sequential *access*. **[[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Visitor]]** adds operations over elements, while **[[Home/Software Architecture/Patterns/Design Patterns/Structural/Composite]]** supplies a tree that may be traversed. [[Home/Programming/NET/CSharp/Fundamentals/Foreach|foreach & yield]] covers the language mechanics.
 
 # Questions
 
+<!-- qard-id: d1612460-76a1-4907-9f06-d7453d721a2e -->
 > [!qard]- What should determine whether an API returns `IEnumerable<T>`, `IReadOnlyList<T>`, or `IAsyncEnumerable<T>`?
-> The return type should describe what the caller can safely rely on. `IReadOnlyList<T>` guarantees `Count` and indexed access, but it does not say whether values are computed lazily or represent a snapshot. If the method returns a materialized snapshot, that should be stated separately in the method's contract. `IEnumerable<T>` promises only synchronous enumeration, which may be lazy and repeat the underlying work when enumerated again. `IAsyncEnumerable<T>` fits a source that waits between items and should stream them instead of buffering the full result.
+> The return type should state what consumers can do with the result: enumerate it synchronously, count and index it, or await while items arrive. None of the three, by itself, promises that the data is buffered, repeatable or a snapshot.
+> 
+> | Return type | Promises to consumers | Does not promise | Fits when |
+> |---|---|---|---|
+> | `IEnumerable<T>` | Synchronous, forward-only enumeration. | A count, indexing or materialized data. It may be lazy, so enumerating it again can repeat the work, such as a query, and see different results. | Consumers only iterate, and lazy or streamed production is acceptable. |
+> | `IReadOnlyList<T>` | `Count` and access by index, with no mutation members on the interface. | A snapshot or immutability; a producer that keeps the underlying list can still change it. | Consumers need the size or random access, usually for results already in memory. |
+> | `IAsyncEnumerable<T>` | Asynchronous streaming: `await foreach` can wait between items, for example while the next page is fetched. | Buffering or repeatability. | Producing items requires I/O, and consumers should process items as they arrive rather than wait for all of them. |
+> 
+> Buffering, repeatability and snapshot semantics form a separate contract; when they matter, the API documentation has to state them.
+> 
+> [.NET: IEnumerable<T>](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.ienumerable-1?view=net-10.0) · [.NET: asynchronous streams](https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/generate-consume-asynchronous-stream)
 
+<!-- qard-id: ecca4dbc-81bf-4e5e-b0dd-dc92b3d938fc -->
 > [!qard]- What does the compiler generate for a `yield return` method?
-> The compiler generates a state-machine type that implements the enumeration contracts. Each `yield return` becomes a suspension point. `MoveNext()` resumes execution and `Current` exposes the yielded value. Locals that must survive suspension become fields on the generated object.
+> The compiler rewrites an iterator method into a generated state-machine class that implements the returned iterator interfaces, such as `IEnumerable<T>` and `IEnumerator<T>`. The body is split at each `yield return`, and the object records where execution stopped and keeps the values that must survive between steps.
+> 
+> 1. Calling the method only creates the state-machine object. None of the body runs yet.
+> 2. The first `MoveNext()` runs the body from the start to the first `yield return`, stores the yielded value as `Current`, saves its position and returns `true`.
+> 3. Each later `MoveNext()` resumes just after the saved position and runs to the next `yield return`.
+> 4. Reaching the end of the body or a `yield break` makes `MoveNext()` return `false`.
+> 
+> Locals and parameters used across a `yield return` are kept in the generated object, so their values survive between `MoveNext()` calls. Because the body runs only during enumeration, its work and exceptions, including argument checks, happen when the sequence is consumed rather than when the method is called. The generated type and field names are compiler implementation details.
+> 
+> [C#: yield statement](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/yield)
 
 # References
 

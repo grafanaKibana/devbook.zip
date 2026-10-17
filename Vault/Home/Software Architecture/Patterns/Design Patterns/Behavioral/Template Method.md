@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Behavioral/Template Method"
+flashcard_uid: "93eeaf03"
 ---
 
 Tea and coffee can share a preparation sequence while varying the brewing step. The sequence belongs in one place. Subclasses fill the deliberate gaps.
@@ -193,11 +194,24 @@ It fits poorly when behavior must change at runtime or when inheritance exists o
 
 # Questions
 
+<!-- qard-id: 1cb407d0-9794-4cf3-8019-5f9e34d0c19d -->
 > [!qard]- What should determine whether algorithm variation uses Template Method or Strategy?
-> Template Method fits a stable workflow whose hooks make sense only inside one base class. Strategy fits a behavior that is useful on its own or must be replaced at runtime. Template Method couples variants through inheritance. Strategy adds another dependency and needs a clear selection rule.
+> The decision depends on who owns the algorithm and when the variation must be chosen. Template Method fits when a base class owns a stable sequence and subclasses vary a few steps. Strategy fits when the varying behavior is a separate collaborator that must be selected or replaced independently, including at runtime.
+> 
+> | Aspect | Template Method | Strategy |
+> |---|---|---|
+> | Who owns the algorithm | The base class runs the sequence and calls hooks that subclasses override. | The context calls a composed object or delegate that supplies the varying behavior. |
+> | When a variant is chosen | When a subclass is instantiated, so the choice is fixed for that object. | When a strategy is passed in or selected, so it can change at runtime. |
+> | Coupling | Subclasses depend on the base class's hook order and shared state, so a base-class change can affect every subtype. Inheritance also uses the class's single base-class slot. | Variation stays outside the class hierarchy, so the base-class slot remains free. |
+> | Cost | Smallest design when the base genuinely owns most of the workflow. | Adds a separate abstraction and, with several strategies, logic to select among them. |
+> 
+> Template Method fits poorly when behavior must change at runtime or when inheritance exists only to reuse a few lines.
+> 
+> [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Template Method#Tradeoffs|Template Method tradeoffs]]
 
+<!-- qard-id: 6f925cbd-8e7f-4f10-a0f2-f6cc3294b014 -->
 > [!qard]- What is the "Hollywood Principle," and how does Template Method apply it?
-> The principle means that the framework controls the flow and calls application code at defined extension points. Template Method applies that rule inside a class: the base method fixes the order, then calls subclass hooks for the steps that may vary. This protects the sequence, but every subtype becomes coupled to that calling protocol.
+> The Hollywood Principle means the framework or base class owns the control flow and calls supplied extension points. Template Method applies it by fixing the algorithm’s sequence while subclasses implement selected hooks; subclasses follow that protocol instead of driving the whole operation. [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Template Method#Solution|Template Method implementation]]
 
 # References
 

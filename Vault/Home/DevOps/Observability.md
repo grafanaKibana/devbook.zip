@@ -10,6 +10,7 @@ status: Done
 publish: true
 qard-deck: "DevOps"
 qard-topic: "Observability"
+flashcard_uid: "75262be6"
 ---
 
 Observability is the ability to infer a system's internal state from the signals it emits. Metrics reveal changes in scale and health, logs preserve discrete events, and traces reconstruct causal work across service boundaries. An alert may expose a symptom; correlation turns that symptom into a defensible explanation.
@@ -30,7 +31,7 @@ A **counter** records a cumulative total such as requests or failures. A **gauge
 
 For a service, rate, errors, and duration provide a useful minimum. Tail latency such as p95 or p99 matters because an average can hide a slow minority. Resource metrics such as CPU, queue depth, connection-pool use, and memory pressure explain constraints, but they do not replace service-level evidence.
 
-Metric labels create one series for every value combination. Bounded dimensions such as service, route template, status class, and outcome are usually safe. Request IDs, user IDs, raw URLs, and container IDs are unbounded and can make storage and queries explode; put those identifiers in controlled logs or traces instead.
+Metric labels create one series for every value combination. Bounded dimensions such as service, route template, status class, and outcome are usually safe. Request IDs, user IDs, raw URLs, and container IDs are unbounded and can make storage and queries explode; those identifiers belong in controlled logs or traces instead.
 
 ## Logs
 
@@ -76,7 +77,7 @@ application -> SDK or agent -> collector -> storage/query backend -> dashboard o
 
 The application owns stable signal names, useful attributes, context propagation, and redaction. A collector can batch, retry, sample, and route signals. The backend owns indexing, retention, queries, dashboards, and alert evaluation. OpenTelemetry standardizes instrumentation and transport across these boundaries; it is not a storage engine.
 
-Best-effort diagnostics should not exhaust memory or block production requests when the telemetry backend is unavailable. Audit, security, financial, or regulatory records are different: when policy requires durable acknowledgement, send them through a separately designed durable record or transaction path rather than treating them as disposable telemetry.
+Best-effort diagnostics should not exhaust memory or block production requests when the telemetry backend is unavailable. Audit, security, financial, or regulatory records are different: when policy requires durable acknowledgement, they belong on a separately designed durable record or transaction path rather than being treated as disposable telemetry.
 
 # Alert Quality
 
@@ -99,8 +100,31 @@ Instrumentation should preserve:
 
 # Questions
 
+<!-- qard-id: 72594425-1e47-4c8e-b495-fbb737e03c9c -->
+> [!qard]- How do metrics, logs, and traces answer different observability questions?
+> Each signal answers a different question. Metrics show whether the system is healthy and how large a problem is. Logs record exactly what happened at a point in time. Traces show where one operation spent its time or failed as it crossed services.
+> 
+> | Signal | What it records | Question it answers | Main limit |
+> |---|---|---|---|
+> | Metrics | Numeric measurements aggregated over time, such as request rate, error count or a latency distribution. | Is something wrong, since when, and how widespread is it? | Aggregation discards per-request detail, and label values must stay bounded. |
+> | Logs | Discrete, timestamped events, ideally with structured fields that describe state or errors. | What exact error or state change occurred? | High volume, sensitive data and inconsistent fields make them costly and hard to query. |
+> | Traces | A tree of timed spans for one operation, linked by a trace ID that is propagated across process boundaries. | Which step or dependency made this request slow or fail? | Every boundary must propagate the trace context, and sampling can drop the trace that matters. |
+> 
+> Correlation turns a symptom into an explanation. A metric alert identifies the affected time window and scale. A trace from that window shows the failing or slow dependency. Logs that carry the same trace ID supply the application state that the spans do not contain. Each signal still needs its own retention and access policy.
+> 
+> [Prometheus: Instrumentation](https://prometheus.io/docs/practices/instrumentation/) · [OpenTelemetry Logs data model](https://opentelemetry.io/docs/specs/otel/logs/data-model/) · [OpenTelemetry traces](https://opentelemetry.io/docs/concepts/signals/traces/) · [W3C Trace Context](https://www.w3.org/TR/trace-context/)
+
+<!-- qard-id: 57640da2-2bae-4098-b66f-012dcc4697d9 -->
 > [!qard]- Why should request or user IDs not be metric labels?
-> Each unique label combination creates another time series. Unbounded identifiers can multiply storage and query work with traffic volume. Keep metric dimensions bounded and use the trace ID to reach access-controlled logs or traces when an individual request must be inspected.
+> Each distinct combination of label values creates a separate time series. Request IDs take a new value for every request and user IDs one for every user, so the number of series grows with traffic instead of staying bounded. Memory, storage and query cost grow with it.
+> 
+> For example, an `http_requests_total` counter labeled by `route` and `status` has one series per route and status pair, such as one that counts all failed `/checkout` requests. Adding a `request_id` label creates a new series for every request, each used once. Even a simple total then has to be computed across an ever-growing number of series.
+> 
+> Metric labels suit bounded dimensions such as service, route template, method and status class, where each value is worth aggregating. Per-request identifiers belong in logs or traces, which record individual events. Trace IDs connect those records to each other, so an investigation can move from a metric spike in a time window to the matching traces and logs. That link does not grant access: the logs and traces still need their own access controls.
+> 
+> The exact cost of high cardinality depends on the metrics backend, but an unbounded label sets no upper limit on the number of series.
+> 
+> [Prometheus: Do not overuse labels](https://prometheus.io/docs/practices/instrumentation/#do-not-overuse-labels) · [OpenTelemetry Logs data model](https://opentelemetry.io/docs/specs/otel/logs/data-model/) · [W3C Trace Context](https://www.w3.org/TR/trace-context/)
 
 # References
 
