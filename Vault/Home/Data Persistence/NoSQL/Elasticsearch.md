@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Data Persistence"
 qard-topic: "NoSQL/Elasticsearch"
+flashcard_uid: "97b928ee"
 ---
 
 Elasticsearch is a distributed search and analytics engine built on Apache Lucene. It belongs beside the system of record when a read path needs relevance-ranked full-text search, faceting, geospatial predicates, or aggregations over indexed events. Applications write JSON documents, mappings define field types, analyzers turn text into terms, and Lucene stores those terms and document references in immutable segments.
@@ -95,21 +96,48 @@ The tenant filter is a correctness boundary, not only a performance hint. Every 
 | Security analytics | Search and correlation over normalized security events | Retained ingestion plus rules and case workflow | Sensitive-data controls, long retention, and feature licensing |
 | Anomaly detection | Time-series feature jobs over indexed data | Model/job cadence adds another freshness boundary | Licensed capabilities, model operations, and false-positive review |
 
-Use PostgreSQL full-text search when one relational data set needs modest search and transactionally current results. Use Elasticsearch when relevance, language analysis, faceting, log/event scale, or geospatial search justifies a separate derived system. Keep a rebuild path either way.
+PostgreSQL full-text search fits when one relational data set needs modest search and transactionally current results. Elasticsearch fits when relevance, language analysis, faceting, log/event scale, or geospatial search justifies a separate derived system. A rebuild path is needed either way.
 
 # Operational Boundaries
 
-- **Mapping explosion:** unbounded dynamic fields consume cluster state and heap. Use explicit templates, `dynamic: strict` where practical, and flatten truly arbitrary key/value payloads.
-- **Oversharding:** many tiny shards waste heap and make recovery slow. Rollover by measured size/age and consolidate cold data.
-- **Refresh pressure:** calling `_refresh` after every write creates small segments and merge load. Use refresh-on-demand only for bounded workflows that truly need it.
-- **Unbounded aggregations:** high-cardinality `terms` queries can exhaust memory. Bound bucket counts, use composite pagination, or pre-aggregate.
+- **Mapping explosion:** unbounded dynamic fields consume cluster state and heap. Explicit templates, `dynamic: strict` where practical, and flattening of truly arbitrary key/value payloads keep the field set bounded.
+- **Oversharding:** many tiny shards waste heap and make recovery slow. Rollover creates a new write index when size or age conditions set from measured data are met. Consolidating or removing cold data is a separate operation.
+- **Refresh pressure:** calling `_refresh` after every write creates small segments and merge load. Refresh-on-demand fits only bounded workflows that truly need it.
+- **Unbounded aggregations:** high-cardinality `terms` queries can exhaust memory. Bounded bucket counts, composite pagination, or pre-aggregation limit that memory use.
 - **Disk watermarks:** merge and recovery need free space. A cluster near disk capacity can stop allocating shards or block writes before raw bytes reach 100%.
-- **Schema changes:** field types generally cannot be changed in place. Create a new versioned index, reindex, validate, then switch an alias.
+- **Schema changes:** field types generally cannot be changed in place. The change path is a new versioned index, a reindex, validation, and then an alias switch.
 
 # Questions
 
-> [!qard]- Why use both `text` and `keyword` for one field?
-> `text` is analyzed into terms for relevance-ranked full-text matching. `keyword` keeps the exact value for equality filters, sorting, and aggregations. One representation cannot efficiently provide both semantics.
+<!-- qard-id: fc591795-e2d6-468f-8923-de04b6ff8463 -->
+> [!qard]- Why might Elasticsearch map one logical value as both `text` and `keyword`?
+> Full-text search and exact-value operations need different index forms, and one field type serves only one of them well. A multi-field indexes the same source value both ways, so each query can use the form that matches its intent.
+> 
+> - **`text`** passes the value through an analyzer that splits and normalizes it into terms. A standard analyzer may index `Running Shoes` as `running` and `shoes`, so a search for `shoes` matches. The index holds separate normalized terms instead of the whole original value, so `text` is a poor basis for exact filters, sorting and aggregations.
+> - **`keyword`** indexes the whole value unchanged. A term filter, a sort or an aggregation such as a facet count works on the exact value `Running Shoes`. A full-text search for `shoes` does not match it.
+> 
+> ```json
+> {
+>   "properties": {
+>     "name": { "type": "text", "fields": { "raw": { "type": "keyword" } } }
+>   }
+> }
+> ```
+> 
+> With this mapping, full-text queries target `name`, while exact filters, sorting and aggregations target `name.raw`.
+> 
+> [Elasticsearch: text fields](https://www.elastic.co/guide/en/elasticsearch/reference/current/text.html) · [Elasticsearch: keyword fields](https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/keyword)
+
+> [!qard]- Why can a newly indexed Elasticsearch document be missing from search results for a short time?
+> Elasticsearch search is near real-time. A document becomes searchable only after a refresh opens the segment that contains it, so an acknowledged write can be stored before it appears in search results.
+> 
+> 1. **Index:** the document enters an in-memory indexing buffer and the transaction log on its shard. Acknowledgement depends on the primary and replica write settings, not on search visibility.
+> 2. **Refresh:** on a periodic interval, or when explicitly requested, buffered documents become a new immutable Lucene segment that is opened for search.
+> 3. **Merge:** background merges combine small segments and discard obsolete document versions.
+> 
+> A shorter refresh interval reduces the delay but creates more small segments and more merge work. That work consumes CPU, disk bandwidth and temporary disk space. Forcing a refresh after every write is therefore a costly default and fits only bounded workflows that truly need immediate visibility.
+> 
+> [Elasticsearch near-real-time search](https://www.elastic.co/docs/manage-data/data-store/near-real-time-search) · [Elasticsearch refresh parameter](https://www.elastic.co/docs/reference/elasticsearch/rest-apis/refresh-parameter) · [Elasticsearch translog settings](https://www.elastic.co/docs/reference/elasticsearch/index-settings/translog)
 
 # References
 

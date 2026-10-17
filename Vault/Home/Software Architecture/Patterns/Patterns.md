@@ -13,6 +13,7 @@ level:
 status: Done
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Patterns"
+flashcard_uid: "cfaa4058"
 ---
 
 Patterns name recurring design pressures and the tradeoffs of a known response. They give a team shared language for boundaries, dependencies, and change. A useful pattern makes variation easier to see. A premature one hides simple control flow behind indirection.
@@ -27,8 +28,17 @@ return FolderStructureMap;
 
 # Questions
 
+<!-- qard-id: 66d6574d-0bb3-4d17-b1e0-53177c19b42f -->
 > [!qard]- What evidence justifies introducing a pattern?
-> A recurring variation, responsibility boundary, or failure mode must be visible in the code. The pattern should make that pressure cheaper to handle than the direct design. Without that evidence, the extra indirection is speculative complexity.
+> A pattern is justified when the code already shows a design pressure that the pattern handles more cheaply than the direct design. That pressure takes one of three forms:
+> 
+> - **Recurring variation:** the same point in the code repeatedly needs different behavior. A known structure for substituting or composing that behavior then pays off.
+> - **A responsibility boundary:** one concern needs to be separated from another, and the pattern makes that boundary explicit.
+> - **A failure mode:** the direct design keeps producing the same defect or cost, and the pattern makes it cheaper to handle.
+> 
+> The decision is a cost comparison. Every pattern adds indirection, such as extra types and interfaces, and its control flow is less direct. When the pattern answers a problem the code already has, it makes the variation or boundary easier to see. When the problem is only anticipated, the indirection is speculative. It hides simple control flow without solving anything yet.
+> 
+> **Example:** dependency injection behind an interface earns its place when implementations are actually substituted or composed. One concrete dependency with no variation is usually clearer as a direct call.
 
 # References
 

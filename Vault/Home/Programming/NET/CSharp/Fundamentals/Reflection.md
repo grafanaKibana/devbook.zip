@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Programming"
 qard-topic: "NET/CSharp/Fundamentals/Reflection"
+flashcard_uid: "a67836fc"
 ---
 
 Reflection reads .NET metadata at runtime and can use that metadata to construct objects or invoke members. It is useful when the target type is genuinely unknown until execution, as in plugin discovery or tooling. The cost is a weaker contract: a misspelled member name or incompatible signature becomes a runtime failure instead of a compiler error.
@@ -23,10 +24,10 @@ The CLR exposes assembly, type, and member metadata through objects such as `Typ
 
 A reflective operation normally has two phases: discover metadata, then optionally act on it.
 
-1. Obtain a `Type` from `typeof(T)`, an object's `GetType()`, or a loaded assembly.
-2. Select members with APIs such as `GetMethods`, `GetProperty`, or `GetConstructors`.
-3. Inspect signatures and attributes before invoking anything.
-4. Invoke through `MethodInfo` or construct through `Activator` only after validating the shape.
+1. A `Type` comes from `typeof(T)`, an object's `GetType()`, or a loaded assembly.
+2. Members are selected with APIs such as `GetMethods`, `GetProperty`, or `GetConstructors`.
+3. Signatures and attributes are inspected before anything is invoked.
+4. Invocation through `MethodInfo` or construction through `Activator` happens only after the shape is validated.
 
 ```csharp
 using System;
@@ -96,8 +97,8 @@ var ctor = Expression.Lambda<Func<Jobs>>(Expression.New(typeof(Jobs))).Compile()
 
 # Pitfalls
 
-- Repeating member lookup and `Invoke` inside a hot loop pays discovery, argument handling, and runtime checks each time. Cache only metadata whose lifetime and load context are understood.
-- Incomplete `BindingFlags` commonly produce an empty or surprising member set. State whether the search includes instance or static members, public or non-public members, and inherited declarations.
+- Repeating member lookup and `Invoke` inside a hot loop pays discovery, argument handling, and runtime checks each time. Caching is appropriate only for metadata whose lifetime and load context are understood.
+- Incomplete `BindingFlags` commonly produce an empty or surprising member set. Complete `BindingFlags` specify whether the search includes instance or static members, public or non-public members, and inherited declarations.
 - Trimming can remove members that are only reached by an unrecognized reflective path. `DynamicallyAccessedMembers` documents requirements for types that remain statically traceable. Truly data-driven discovery may require explicit registration or a `RequiresUnreferencedCode` boundary.
 
 # Tradeoffs
@@ -108,14 +109,55 @@ var ctor = Expression.Lambda<Func<Jobs>>(Expression.New(typeof(Jobs))).Compile()
 
 # Questions
 
-> [!qard]- Why is reflection often a bad default in performance-critical code?
-> Reflection moves member discovery, argument validation, and dispatch to runtime. That cost is often irrelevant during startup, but repeated lookup and invocation can dominate a small hot-path operation. Measure first, then cache metadata or bind a delegate when the same member is reused.
+> [!qard]- What is reflection in .NET, and what is it used for?
+> Reflection is the ability of running code to inspect .NET metadata, such as assemblies, types, members and attributes, and to use that metadata to create objects or call members that the calling code does not name at compile time.
+> 
+> It works in two phases:
+> 
+> 1. **Inspect:** code obtains a `Type`, for example through `typeof(T)`, an object's `GetType()` or a loaded assembly. Objects such as `MethodInfo`, `PropertyInfo` and `ConstructorInfo` then describe its members, signatures and attributes.
+> 2. **Act (optional):** code creates an instance of a discovered type or invokes a discovered member late-bound, for example with `Activator.CreateInstance` or `MethodInfo.Invoke`.
+> 
+> Typical uses are reading custom attributes, examining and instantiating types from an assembly, such as plug-ins that implement a known interface, and late binding to members selected at runtime.
+> 
+> The trade-off is a weaker contract. A misspelled member name or an incompatible signature is discovered only when the code runs, not by the compiler.
+> 
+> [Microsoft: reflection overview](https://learn.microsoft.com/en-us/dotnet/fundamentals/reflection/overview) · [Microsoft: attributes and reflection](https://learn.microsoft.com/en-us/dotnet/csharp/advanced-topics/reflection-and-attributes/)
 
+<!-- qard-id: d8da8524-adfb-4950-ab2b-63e723b7e7bf -->
+> [!qard]- Why is reflection often a poor default in performance-critical code?
+> Reflection replaces a call that the compiler binds once with work done while the program runs. A direct call is resolved during compilation. Reflection finds a member by inspecting metadata, often by name, and `MethodInfo.Invoke` then receives its arguments as an `object[]` and checks them against the member's signature on each call.
+> 
+> On a hot path, repeating that lookup and late-bound invocation adds work to every call. The cost depends on the operation and how often it runs, so there is no universal threshold.
+> 
+> When reflection is needed on a repeated path, the usual mitigation is to discover the member once, cache it, and bind it to a strongly typed delegate. Later calls then go through the delegate without per-call reflection. Measurement shows whether that setup cost pays off.
+> 
+> [Microsoft: reflection overview](https://learn.microsoft.com/en-us/dotnet/fundamentals/reflection/overview)
+
+<!-- qard-id: 90f0caf9-8317-4634-93ef-5c2e22769e8b -->
 > [!qard]- How do attributes become behavior at runtime?
-> An attribute only stores metadata on a type, member, or other program element. A framework uses reflection to find that metadata and decide what code to run, such as registering a test or mapping an HTTP route. The attribute itself does nothing until runtime code interprets it. A source generator can perform a similar interpretation during the build and emit direct code instead.
+> An attribute does nothing by itself. The compiler stores it as metadata on the marked type or member, and it affects runtime behavior only when some code reads that metadata and acts on it.
+> 
+> At runtime the flow is:
+> 
+> 1. The attribute and its arguments were recorded in the assembly's metadata when the code was compiled.
+> 2. A framework or the application inspects the type or member through reflection, for example with `GetCustomAttribute<T>()`.
+> 3. The consumer acts on what it finds, such as registering a handler or selecting a method to invoke.
+> 
+> An attribute that no code reads has no runtime effect. A source generator is the build-time alternative. It reads attributes during compilation and emits ordinary code, so the behavior no longer depends on runtime reflection.
+> 
+> [Microsoft: attributes and reflection](https://learn.microsoft.com/en-us/dotnet/csharp/advanced-topics/reflection-and-attributes/) · [Microsoft: source generators overview](https://learn.microsoft.com/en-us/dotnet/csharp/roslyn-sdk/source-generators-overview)
 
-> [!qard]- How should code choose between reflection, interfaces or generics, and source generators?
-> Reflection fits cases where the types or members are genuinely unknown until runtime, such as loading plugins or inspecting external models. Interfaces and generics are simpler when the variation can be expressed as a compile-time contract. A source generator fits repeated metadata-driven work whose shapes are known during the build, especially when startup cost, trimming, or Native AOT makes runtime discovery a problem.
+<!-- qard-id: dd5d9187-17c9-4cc0-80a8-e3fae2d9b638 -->
+> [!qard]- When do interfaces or generics, source generators, and reflection each fit best?
+> The deciding question is whether the code can depend on a compile-time contract or has to work from metadata. Interfaces and generics fit when the code can name the types or operations it needs. When the work is driven by metadata instead, timing separates the other two: a source generator reads metadata visible during compilation and emits ordinary code, while reflection reads metadata while the program runs. Reflection therefore covers both types that are unknown until runtime and runtime inspection of known types, such as reading their attributes.
+> 
+> | Mechanism | Fits when | Consequence |
+> |---|---|---|
+> | Interface or generic contract | The calling code can state the types or operations it needs | The compiler checks every use against the contract, and trimming can see what is used. An interface or virtual call can still select its implementation at runtime, but only among types that satisfy the compiled contract |
+> | Source generator | Repetitive code can be derived from types and attributes in the compilation, such as registration code for the project's own attributed types | The work moves to build time, and the generated code is compiled, checked and trimmed like handwritten code. Types that appear only at runtime, such as plug-ins loaded later, are invisible to it |
+> | Reflection | Code has to discover or read metadata at runtime, such as plug-ins loaded from a folder, members named by data, or attributes that a framework reads from known types | It is the most flexible option, but mistakes surface at runtime and repeated lookup and invocation cost more. In trimmed deployments, which include Native AOT, members reached only dynamically can be removed unless annotations such as `DynamicallyAccessedMembers` or explicit registration preserve them |
+> 
+> [Microsoft: reflection overview](https://learn.microsoft.com/en-us/dotnet/fundamentals/reflection/overview) · [Microsoft: attributes and reflection](https://learn.microsoft.com/en-us/dotnet/csharp/advanced-topics/reflection-and-attributes/) · [Microsoft: source generators overview](https://learn.microsoft.com/en-us/dotnet/csharp/roslyn-sdk/source-generators-overview) · [Microsoft: prepare libraries for trimming](https://learn.microsoft.com/en-us/dotnet/core/deploying/trimming/prepare-libraries-for-trimming) · [C# specification: function member invocation](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#1266-function-member-invocation)
 
 # References
 

@@ -11,6 +11,7 @@ status: Ready to Repeat
 publish: true
 qard-deck: "Computer Science"
 qard-topic: "Algorithms/Paradigms/Dynamic Programming"
+flashcard_uid: "fa8b80ea"
 ---
 
 In finite one-pass dynamic programming, a dependency graph becomes a set of stored answers. Each state is solved after the states it depends on, written once, and then reused by later transitions.
@@ -67,7 +68,7 @@ tab: Memoization (Raw)
 {"algorithm":"coin-change-top-down"}
 ```
 
-Inspect the canonical recursion tree, cache hits, and stored returns.
+The raw view shows the canonical recursion tree, cache hits, and stored returns.
 
 ~~~~
 
@@ -209,7 +210,7 @@ tab: Memoization (Raw)
 {"algorithm":"grid-path-top-down"}
 ```
 
-Inspect the canonical coordinate recursion tree and cache hits.
+The raw view shows the canonical coordinate recursion tree and cache hits.
 
 ~~~~
 
@@ -362,8 +363,24 @@ Optimization DP still needs a valid composition rule. For the same US-coin drawe
 
 # Questions
 
+<!-- qard-id: 96195e4d-ddca-4379-b065-484eedb7a520 -->
 > [!qard]- What changes between memoization and tabulation if the recurrence is the same?
-> Evaluation order and control flow. Memoization starts at the target, follows recursive dependencies, and stores states on demand. Tabulation starts at the base cases and fills states in a fixed order. Their asymptotic work matches when they visit the same states. Tabulation avoids call-stack cost, while memoization may skip states the target never reaches.
+> Memoization and tabulation evaluate the same recurrence and store one result per state. They differ in how the evaluation order is determined and which states get computed.
+> 
+> - **Memoization (top-down):** starts from the requested state, recursively follows its dependencies and caches each result the first time it is computed.
+> - **Tabulation (bottom-up):** loops fill the stored results in an order where every dependency is already available.
+> 
+> | Aspect | Memoization (top-down) | Tabulation (bottom-up) |
+> |---|---|---|
+> | Evaluation order | Recursion from the target discovers dependencies as it goes, so no order has to be written down. The dependencies must still be acyclic. | The loops must visit states in an order that solves every dependency before any state that reads it. |
+> | States computed | Only states reachable from the target are computed, so unneeded states are skipped. | Every state in the planned table is computed, including states the target never reads. |
+> | Control cost | Each call costs a function call and a cache check. Recursion depth follows the longest dependency chain, so very deep chains can overflow the call stack. | Plain loops avoid recursive calls and their stack-depth limit. |
+> 
+> When both compute the same set of states with equivalent work per state, their asymptotic time is identical: the number of states times the work per state.
+> 
+> Coin change with a `30¢` target shows the two orders. Memoization starts at `best(30)` and recurses into the smaller remaining amounts it needs. Tabulation fills `best[0]` through `best[30]` in increasing order, which works because each amount reads only smaller amounts.
+> 
+> [MIT 6.006: Dynamic Programming](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/28461a74f81101874a13d9679a40584d_MIT6_006S20_lec16.pdf) · [MIT 6.006: Memoization](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-fall-2011/ea1cb4a29625017bdbcaf2dfd61b179e_MIT6_006F11_lec19_orig.pdf)
 
 # References
 

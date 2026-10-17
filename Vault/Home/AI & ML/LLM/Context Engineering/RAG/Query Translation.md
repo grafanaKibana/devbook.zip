@@ -11,11 +11,12 @@ status: Done
 publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Context Engineering/RAG/Query Translation"
+flashcard_uid: "cffd0779"
 ---
 
 Query translation changes a user's wording before search so that retrieval sees language closer to the corpus. Someone asks, "Can partners burst above limits now?" The relevant document is titled "Q3 Quota Policy Update — Partner Tier Burst Allowance." Both describe the same policy, but a single query embedding may place them in different neighborhoods. Translation searches more of that space without changing the corpus or the [[Embeddings|embedding model]].
 
-An LLM produces one or more variants. Depending on the technique, those variants may be paraphrases, narrower sub-questions, a broader question, or a hypothetical answer. Each one runs through [[Retrieval]]. The candidate lists are then deduplicated and fused before [[Re-ranking|reranking]] or generation.
+An LLM produces one or more variants. Depending on the technique, those variants may be paraphrases, narrower sub-questions, a broader question, or a hypothetical answer. Each one runs through [[Retrieval]]. Lists from alternative phrasings are deduplicated and fused before [[Re-ranking|reranking]] or generation, while decomposition can answer each sub-question from its own evidence and then synthesize the partial answers.
 
 ```mermaid
 flowchart LR
@@ -34,7 +35,7 @@ flowchart LR
 
 A query such as "rate limit behavior for partner tier accounts" can become "partner tier throttling policy" and "API quota enforcement for partner customers." Each wording reaches a slightly different document neighborhood. Fusion keeps the strongest candidates from both searches.
 
-This only fixes recall lost to vocabulary mismatch. It cannot repair bad [[Chunking]], a weak embedding model, a broken index, or a missing source document.
+Translation can recover recall lost to vocabulary mismatch, split a multi-part request into separate searches, or add a broader background search. It cannot repair bad [[Chunking]], a weak embedding model, a broken index, or a missing source document.
 
 # How Each Rewrite Changes Search
 
@@ -109,7 +110,7 @@ The original query remains one of the retrieval variants. Translation prompts pr
 
 ## Latency Multiplication
 
-Translation adds a serial model call before retrieval. Even with concurrent searches, end-to-end latency is the translator plus the slowest search. That is the number the p95 budget must absorb.
+Translation adds a serial model call before retrieval. Even with concurrent searches, the translation-and-retrieval portion of latency is the translator plus the slowest search. That is the number the p95 budget must absorb.
 
 A hard budget of two to four variants bounds the cost. Searches run concurrently, and stable rewrites can be reused through [[Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching|caching]]. Production-like concurrency exposes queueing and tail latency that a single-query benchmark hides.
 
@@ -127,26 +128,73 @@ Every sub-question includes the original request or its material constraints. Th
 
 # Choosing a Technique
 
-| Technique | Recall improvement | Precision risk | Latency cost | Best for |
+The recall column describes how each technique can find more evidence, not a workload-independent gain; any gain depends on the corpus and query class. Latency cost counts the model and retrieval calls in each pipeline, excluding the final answer-generation call that every row shares.
+
+| Technique | How recall can improve | Precision risk | Latency cost | Best for |
 | --- | --- | --- | --- | --- |
-| No translation | Baseline -- single query only | Lowest -- no drift risk | None | Simple corpora with predictable query vocabulary |
-| Multi-Query | Moderate -- covers vocabulary variants | Low-moderate -- drift from paraphrases | N retrieval calls -- parallelizable | Natural-language queries with varied user phrasing |
-| RAG-Fusion | Moderate-high -- consensus can lift repeated evidence | Moderate -- RRF rewards agreement but does not remove drift | N retrieval calls + fusion computation | Broad questions where faithful variants surface the same evidence |
-| Decomposition | High for multi-hop -- distinct evidence per sub-question | Moderate -- constraint loss across sub-questions | N retrieval calls + synthesis LLM call | Multi-entity or multi-constraint questions requiring separate evidence |
-| Step-Back | Moderate -- adds principled background context | Low-moderate -- overly abstract retrieval possible | 2 retrieval calls -- original + step-back | Questions requiring first-principles context before specifics |
-| HyDE | High for vague queries -- denser search vector | High -- hallucination can bias retrieval | 1 retrieval call + LLM generation | Short or exploratory queries where direct embedding is too sparse |
+| No translation | Baseline -- single query only | Lowest -- no drift risk | 1 retrieval call | Simple corpora with predictable query vocabulary |
+| Multi-Query | Paraphrases can reach documents that use other words for the same intent | Low-moderate -- drift from paraphrases | 1 translation call + N retrieval calls -- retrievals parallelizable | Natural-language queries with varied user phrasing |
+| RAG-Fusion | As multi-query; RRF can also lift evidence that several variants retrieve | Moderate -- RRF rewards agreement but does not remove drift | 1 translation call + N retrieval calls + fusion computation | Broad questions where faithful variants surface the same evidence |
+| Decomposition | Each sub-question can retrieve evidence that one combined query would miss | Moderate -- constraint loss across sub-questions | 1 decomposition call + N retrieval calls + N sub-answer calls when each sub-question is answered before synthesis | Multi-entity or multi-constraint questions requiring separate evidence |
+| Step-Back | The broader question can add background context alongside the original search | Low-moderate -- overly abstract retrieval possible | 1 step-back generation call + 2 retrieval calls -- original + step-back | Questions requiring first-principles context before specifics |
+| HyDE | A hypothetical answer can give a short or vague query a richer search vector | High -- hallucination can bias retrieval | 1 hypothetical-answer generation call + 1 retrieval call | Short or exploratory queries where direct embedding is too sparse |
 
 Direct retrieval provides the control. Multi-query or RAG-Fusion earns its cost when evaluation isolates vocabulary mismatch. Decomposition fits requests with independently retrievable sub-problems, while HyDE fits vague semantic queries. A technique stays only when it beats direct retrieval for its target query class within the latency budget.
 
 # Questions
 
-> [!qard]- Why does query translation often improve recall but sometimes hurt precision, and how can the tradeoff be detected?
-> Query translation raises recall by searching more phrasings, but it lowers precision when a rewrite adds concepts or changes constraints.
-> Measure Recall@k and Precision@k before and after translation, split by query type. If Recall@20 rises while Precision@5 falls, coverage improved but the generator receives worse evidence. Keep the original query in the candidate set and reject variants that change material constraints.
+<!-- qard-id: 53a89faf-27cb-4f67-94fe-18e9373b2852 -->
+> [!qard]- What does query translation change in a RAG retrieval pipeline, and what can it not fix?
+> Query translation changes only the queries sent to retrieval. A model turns the user's request into one or more retrieval inputs, such as paraphrases, a broader step-back question, sub-questions or a hypothetical answer. Each input is then searched against the existing index. Translation cannot fix problems in the corpus or in the index itself.
+> 
+> - **What it can help:** vocabulary mismatch, where the user and the corpus describe the same idea in different words; requests whose parts need separate searches; and questions that also need broader background. For example, “Can partners burst above limits now?” and a document titled “Partner Tier Burst Allowance” describe the same policy, and a rewrite closer to the document's wording can reach it.
+> - **What it cannot fix:** evidence missing from the corpus, chunks that split the needed text, a weak embedding model or a broken index. Every variant still searches the same chunks and vectors.
+> 
+> The work after search depends on the technique. Lists retrieved for several phrasings of one question are usually deduplicated and fused before reranking or generation. Decomposition can instead answer each sub-question from its own evidence and then synthesize the partial answers into one response. In every case, the benefit is measured against direct retrieval on the same queries.
+> 
+> Sources:
+> - [Query Rewriting for Retrieval-Augmented Large Language Models (Ma et al., EMNLP 2023)](https://arxiv.org/html/2305.14283)
+> - [RAG-Fusion: a New Take on Retrieval-Augmented Generation (Rackauckas, 2024)](https://arxiv.org/html/2402.03367)
+> - [Sub Question Query Engine (LlamaIndex)](https://developers.llamaindex.ai/python/examples/query_engine/sub_question_query_engine/)
+> - [[Query Translation#How Each Rewrite Changes Search|Query Translation: How Each Rewrite Changes Search]]
 
-> [!qard]- When is decomposition a better choice than multi-query, and when does it hurt?
-> Decomposition fits distinct sub-problems that need different evidence, such as a comparison or a timeline assembled from several sources. Multi-query fits one intent expressed with uncertain vocabulary.
-> Decomposition hurts when the split removes the constraints connecting the pieces. It fits only when each sub-question can be answered independently and those answers can support the original request. It also adds a synthesis call, while multi-query adds only retrieval work.
+<!-- qard-id: 63c5e250-74a4-4dec-8e14-ffd1ae425738 -->
+> [!qard]- How can query translation change retrieval quality, and how should that change be evaluated?
+> Translation can raise recall by searching wordings closer to the corpus's vocabulary. It can lower precision when a rewrite drifts from the request's entities or constraints. Its effect is measured by comparing translated retrieval with direct retrieval on the same labeled queries.
+> 
+> - **Gain:** a rewrite such as “partner tier throttling policy” can match documents that use words the user did not, so relevant evidence missed by the original wording enters the results.
+> - **Loss:** a rewrite can stay on topic yet change the request. When “`HttpClient` connection timeout” becomes “network timeout troubleshooting”, operating-system material can crowd out .NET-specific evidence. Fusing the result lists does not remove drift, because a document ranked highly by one bad variant can still pass the cutoff.
+> 
+> How the change is evaluated:
+> 
+> 1. Direct retrieval is the control, run on the same labeled queries.
+> 2. Results are split by query class, such as vague questions and identifier-heavy ones, because a technique can help one class and hurt another.
+> 3. Recall@k and Precision@k are measured at the cutoffs the pipeline actually uses. A rise in Recall@20 with a fall in Precision@5 means more relevant candidates appear within 20 results while the top five carry more noise. By itself, that result does not show what survives reranking or reaches the generator.
+> 
+> Two common controls limit drift: the original query stays among the searched variants, and rewrites that alter entities, identifiers, versions or other material constraints are rejected.
+> 
+> Sources:
+> - [Query Rewriting for Retrieval-Augmented Large Language Models (Ma et al., EMNLP 2023)](https://arxiv.org/html/2305.14283)
+> - [RAG-Fusion: a New Take on Retrieval-Augmented Generation (Rackauckas, 2024)](https://arxiv.org/html/2402.03367)
+> - [RAG solution design and evaluation guide (Azure Architecture Center)](https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/rag/rag-solution-design-and-evaluation-guide)
+
+<!-- qard-id: b6525d64-1361-4305-987b-a389e784975d -->
+> [!qard]- When should a RAG system decompose a question instead of generating multiple query phrasings?
+> Decomposition fits a request whose parts need different evidence. Multiple phrasings fit a single, clear information need whose wording may not match the corpus.
+> 
+> | Aspect | Decomposition | Multi-query |
+> |---|---|---|
+> | Fits when | Parts of the request need separate evidence, as in comparing two systems or assembling a timeline | One intent is clear, but the corpus may describe it in other words |
+> | What is generated | Different sub-questions, each retrieving its own evidence | Several phrasings of the same question |
+> | Main failure | Sub-questions drop constraints from the original request, so retrieval returns generic evidence that synthesis cannot make specific again | Paraphrases drift from the intent and pull in related but wrong material |
+> | Execution | Independent sub-questions can run concurrently. Multi-hop sub-questions depend on earlier answers and run in sequence. | Variants can run concurrently, and their result lists are merged and deduplicated |
+> | Added work | Generating sub-questions, one retrieval per sub-question and a synthesis step that combines the partial answers | Generating variants and one retrieval per variant |
+> 
+> Example: “How does `Task` compare to `ValueTask` for high-throughput API endpoints?” needs evidence on `Task` allocation, `ValueTask` constraints and throughput behavior, which a single passage is unlikely to contain. Decomposition fits, provided each sub-question keeps the high-throughput constraint and the synthesis step receives the original request.
+> 
+> Sources:
+> - [Sub Question Query Engine (LlamaIndex)](https://developers.llamaindex.ai/python/examples/query_engine/sub_question_query_engine/)
+> - [Retrieval-augmented generation in Azure AI Search](https://learn.microsoft.com/en-us/azure/search/retrieval-augmented-generation-overview)
 
 # References
 
