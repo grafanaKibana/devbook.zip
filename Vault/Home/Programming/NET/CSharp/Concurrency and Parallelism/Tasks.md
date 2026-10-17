@@ -132,7 +132,7 @@ var r1 = await vt; // OK
 var r2 = await vt; // WRONG — may read from a recycled object
 ```
 
-Call `AsTask()` once when the result must be cached, shared, or awaited more than once.
+A single `AsTask()` call converts the `ValueTask` to a `Task` when the result must be cached, shared, or awaited more than once.
 
 **`Task.Run` for asynchronous I/O.** Wrapping an already asynchronous API adds a ThreadPool scheduling hop. The worker normally returns after the I/O has been initiated, so it is inaccurate to say that it stays occupied for the whole wait, but the wrapper still adds no useful asynchrony.
 
@@ -141,7 +141,7 @@ Call `AsTask()` once when the result must be cached, shared, or awaited more tha
 var result = await Task.Run(() => _http.GetStringAsync(url));
 ```
 
-Fix: `await` the async method directly.
+Awaiting the async method directly gives the same asynchrony without the scheduling hop.
 
 **Unbounded fan-out.** Creating thousands of operations can exhaust connection limits, rate limits, memory, or downstream capacity. Pure asynchronous waiting does not consume one ThreadPool worker per task, but every completion and CPU segment still needs processing.
 
@@ -150,25 +150,86 @@ Fix: `await` the async method directly.
 var results = await Task.WhenAll(items.Select(i => ProcessAsync(i)));
 ```
 
-Bound concurrency according to the scarce resource. `Parallel.ForEachAsync`, a channel-backed worker set, or `SemaphoreSlim` can limit work before it reaches the dependency or [[ThreadPool]].
+Concurrency is bounded according to the scarce resource. `Parallel.ForEachAsync`, a channel-backed worker set, or `SemaphoreSlim` can limit work before it reaches the dependency or [[ThreadPool]].
 
 # Questions
 
 <!-- qard-id: f3889ce8-c8c4-492a-b4a0-d4b3be95ed90 -->
 > [!qard]- Why is `Task` not equivalent to a thread?
-> A `Task` represents an operation and its eventual result, cancellation, or failure; a thread is an execution resource. Asynchronous I/O can remain pending without occupying a managed thread, though code needs a thread when it initiates or resumes processing. [Microsoft: TAP I/O-bound tasks](https://learn.microsoft.com/en-us/dotnet/standard/asynchronous-programming-patterns/implementing-the-task-based-asynchronous-pattern#io-bound-tasks) · [Microsoft: Task-based asynchronous programming](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/task-based-asynchronous-programming)
+> A `Task` is an object that represents an operation and its eventual outcome: a result, a failure or cancellation. A thread is an execution resource that runs code. A task uses a thread only while code belonging to it is actually running.
+> 
+> - **CPU-bound tasks:** with the default scheduler, which `Task.Run` uses, their delegates are queued to the ThreadPool, where a limited set of reusable threads runs many tasks over time instead of one thread per task. A custom `TaskScheduler` decides for itself where its tasks run, and the `LongRunning` hint typically leads the default scheduler to use a separate non-pool thread.
+> - **I/O-bound tasks:** while the operating system performs the I/O, the pending task holds no managed thread. A thread is needed only to start the operation and to run the code that processes its completion.
+> 
+> Creating many tasks therefore does not mean one thread per task, and the number of pending tasks does not show how many threads are busy.
+> 
+> [Microsoft: Task-based asynchronous programming](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/task-based-asynchronous-programming) · [Microsoft: TaskScheduler](https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.taskscheduler?view=net-10.0) · [Microsoft: TAP I/O-bound tasks](https://learn.microsoft.com/en-us/dotnet/standard/asynchronous-programming-patterns/implementing-the-task-based-asynchronous-pattern#io-bound-tasks)
 
 <!-- qard-id: db5bfc4e-e700-4619-8af4-682ca20127c6 -->
-> [!qard]- When is `Task.Run` appropriate in ASP.NET Core?
-> For an ASP.NET Core request, `Task.Run` usually adds a ThreadPool queue hop without adding CPU capacity; it does not turn synchronous I/O into asynchronous I/O. Await an API that is already asynchronous directly. Sustained CPU work needs a separately designed execution path rather than a request wrapper. [Microsoft: ASP.NET Core best practices](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/best-practices?view=aspnetcore-10.0) [Microsoft: task-based asynchronous programming](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/task-based-asynchronous-programming)
+> [!qard]- Why does awaiting `Task.Run` inside an ASP.NET Core request usually not help?
+> ASP.NET Core already runs request code on ThreadPool threads. When the request awaits `Task.Run`, its own thread returns to the pool while another pool thread runs the work. The request therefore gains no CPU capacity and frees no net thread. It only adds a scheduling hop.
+> 
+> - **Blocking work:** inside `Task.Run` it still blocks a pool thread, just a different one. Synchronous I/O does not become asynchronous I/O.
+> - **Already asynchronous APIs:** awaiting them directly gives the same non-blocking wait without the extra hop.
+> - **Long-running or CPU-heavy work:** it competes with other requests for the same pool threads. It belongs outside the request path, for example in a background service or an out-of-process worker fed by a queue, with the result reported to the client asynchronously.
+> 
+> [Microsoft: ASP.NET Core best practices](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/best-practices?view=aspnetcore-10.0) · [Microsoft: Task-based asynchronous programming](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/task-based-asynchronous-programming)
 
 <!-- qard-id: 55bddd1a-2bfc-482a-a86b-0be86ea885a5 -->
 > [!qard]- Why can `Task.WhenAll` reduce elapsed time for independent asynchronous calls?
-> When independent calls are started before the wait, their I/O waiting can overlap. `Task.WhenAll` completes after every supplied task completes; it coordinates those operations but does not start dormant work or make synchronous work parallel. [Microsoft: Task.WhenAll](https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.task.whenall?view=net-10.0) · [Microsoft: task-based asynchronous programming](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/task-based-asynchronous-programming)
+> The time saving comes from starting the calls before waiting, so their waits overlap. Awaiting each call in turn makes the total roughly the sum of the call times. Starting all of them first and then awaiting `Task.WhenAll` makes the total approach the slowest call.
+> 
+> ```csharp
+> // Sequential: the second call starts only after the first finishes
+> var user = await GetUserAsync(id);
+> var orders = await GetOrdersAsync(id);
+> 
+> // Overlapped: both calls are in flight before the wait
+> var userTask = GetUserAsync(id);
+> var ordersTask = GetOrdersAsync(id);
+> await Task.WhenAll(userTask, ordersTask);
+> ```
+> 
+> `Task.WhenAll` itself only returns a task that completes when every supplied task has completed. It does not start tasks that were never started, and it does not make synchronous work run in parallel. Awaiting the already-started tasks one by one would also overlap them. `WhenAll` adds one wait for all of them that also records every failure.
+> 
+> The gain also requires the calls to be independent and the downstream service to handle them concurrently. If it queues or throttles them, the total moves back toward the sum.
+> 
+> [Microsoft: Task.WhenAll](https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.task.whenall?view=net-10.0) · [Microsoft: Task-based asynchronous programming](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/task-based-asynchronous-programming)
+
+> [!qard]- How does `Task.WhenAll` report failures when several of its tasks fail?
+> The task returned by `Task.WhenAll` completes only after every supplied task has finished. If any of them faulted, it ends faulted, and its `Exception` holds an `AggregateException` with the failures from all faulted tasks. Awaiting it, however, rethrows only one of those exceptions.
+> 
+> - **The other failures:** after `await` throws, the full set is still available on the combined task's `Exception.InnerExceptions` and on each input task's own `Exception`.
+> - **No early exit:** one failure does not stop or cancel the remaining tasks, and `WhenAll` still waits for all of them.
+> - **Cancellation:** when no task faulted but at least one was canceled, the combined task ends canceled.
+> 
+> ```csharp
+> Task all = Task.WhenAll(a, b, c);
+> try
+> {
+>     await all;
+> }
+> catch (Exception)
+> {
+>     // await rethrew one failure; the combined task keeps all of them
+>     var failures = all.Exception?.InnerExceptions;
+>     Log(failures);
+>     throw;
+> }
+> ```
+> 
+> [Microsoft: Task.WhenAll](https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.task.whenall?view=net-10.0)
 
 <!-- qard-id: cc606580-b441-46d2-82a6-9d4928c9c59e -->
 > [!qard]- When is `ValueTask` worth using instead of `Task`?
-> `ValueTask` is useful when measured allocation savings justify its stricter consumption rules. Frequent synchronous completion is one common case, but pooled sources can also complete asynchronously. A `ValueTask` may be consumed only once, depending on its backing source; convert it to `Task` when the result must be stored or shared. [Microsoft: ValueTask](https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.valuetask?view=net-10.0)
+> `ValueTask` is worth it only when profiling shows that `Task` allocations on a hot path matter. The typical case is a method called very often that usually completes synchronously, such as a read served from an internal buffer. `Task` remains the default.
+> 
+> - **What it saves:** when the result is already available, `ValueTask<T>` carries it directly instead of allocating a `Task<T>`. It can also wrap a reusable `IValueTaskSource`, so some asynchronous completions avoid an allocation too.
+> - **What it costs:** the struct holds more fields than a single `Task` reference, so returning and copying it costs more. It also has stricter consumption rules: it is awaited only once, never awaited concurrently, and its `Result` is not read before it completes. A pooled source can be reused for another operation after the first consumption, so breaking these rules gives undefined behavior, such as reading another operation's result.
+> 
+> A caller that must store, share or await the result more than once calls `AsTask()` once and uses the resulting `Task`.
+> 
+> [Microsoft: ValueTask](https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.valuetask?view=net-10.0)
 
 # References
 

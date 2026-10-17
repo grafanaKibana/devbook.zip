@@ -19,7 +19,7 @@ In managed code, a memory leak is usually a lifetime bug: an object has stopped 
 
 A leak often appears as retained memory that rises across comparable workload cycles, but process RSS alone is not proof. Heap expansion, allocator high-water marks, caches, JIT data, and native libraries can keep committed memory high without an ever-growing set of useless objects. A container kill or `OutOfMemoryException` is a possible end state, not part of the definition.
 
-Diagnosis starts by separating managed retention from native or handle growth. For managed memory, compare heap snapshots under similar load, identify types whose retained count or size grows, and inspect a representative instance with `gcroot <address>`. The useful result is not merely the largest type. It is the reference path that explains why an unwanted instance remains reachable.
+Diagnosis starts by separating managed retention from native or handle growth. For managed memory, the next step compares heap snapshots under similar load, identifies types whose retained count or size grows, and inspects a representative instance with `gcroot <address>`. The useful result is not merely the largest type. It is the reference path that explains why an unwanted instance remains reachable.
 
 # Event Handlers
 
@@ -133,8 +133,8 @@ public class ProfilePicExtractor
 
 	public byte[] GetProfilePicByID(int id)
 	{
-		// Ideally, you should use a synchronization mechanism here,
-		// but we omit it to keep the example simple
+		// Ideally, a synchronization mechanism is used here,
+		// but it is omitted to keep the example simple
 		if (!PictureCache.ContainsKey(id))
 		{
 			var picture = GetPictureFromDatabase(id);
@@ -346,8 +346,8 @@ A finalizer cannot repair a managed retention bug. If a root still reaches the o
 
 Current .NET applications add several lifetime traps that may present as memory growth or adjacent resource exhaustion:
 
-- **`HttpClient` connection exhaustion** — creating and disposing a client for every request can churn connection pools and exhaust ephemeral ports because underlying TCP connections are not released immediately. This is resource exhaustion rather than a managed-memory leak. Use a correctly configured `IHttpClientFactory` client or a long-lived client with an appropriate handler lifetime.
-- **DI captive dependencies** — a singleton that captures a scoped service extends that service to singleton lifetime. The built-in container can reject this when scope validation is enabled. Disposable transient or scoped services resolved from the root container are also retained for later disposal. Create an explicit scope with `IServiceScopeFactory` when a singleton must perform scoped work. See [[Home/Programming/NET/ASP NET Web API/Dependency Injection|Dependency Injection]].
+- **`HttpClient` connection exhaustion** — creating and disposing a client for every request can churn connection pools and exhaust ephemeral ports because underlying TCP connections are not released immediately. This is resource exhaustion rather than a managed-memory leak. The remedy is either a correctly configured `IHttpClientFactory` client or a long-lived client with an appropriate handler lifetime.
+- **DI captive dependencies** — a singleton that captures a scoped service extends that service to singleton lifetime. The built-in container can reject this when scope validation is enabled. Disposable transient or scoped services resolved from the root container are also retained for later disposal. A singleton that must perform scoped work uses an explicit scope created with `IServiceScopeFactory`. Related note: [[Home/Programming/NET/ASP NET Web API/Dependency Injection|Dependency Injection]].
 - **Pooled-buffer ownership errors** — a rented `ArrayPool<T>` or `MemoryPool<T>` buffer must be returned or disposed according to its pool contract. Failing to return it defeats reuse and increases allocation pressure. Continuing to use it after return violates ownership and can corrupt another operation's data.
 - **Ambient-state retention** — `AsyncLocal<T>` values flow with `ExecutionContext`, so a captured context can retain a value beyond one logical operation. `ThreadLocal<T>` values are tied to participating threads and should be disposed with their owner. Large graphs should not be stored in either without a clear lifetime boundary.
 - **Incomplete asynchronous operations** — an incomplete `TaskCompletionSource` does not root itself, but any long-lived owner that retains its task, continuations, or captured state can keep the entire operation graph alive. Cancellation and timeout paths must complete the ownership protocol.
@@ -355,8 +355,8 @@ Current .NET applications add several lifetime traps that may present as memory 
 
 # Diagnosing in Production
 
-- **`dotnet-gcdump collect`** induces a generation 2 collection and reconstructs a managed heap graph from GC events. It is lighter than a full process dump but still adds target-process work and may need substantial buffers. Compare snapshots taken at equivalent workload points. Growth is a lead, not proof, until a root path explains it.
-- **`dotnet-counters monitor System.Runtime`** provides a low-overhead trend view of selected runtime memory, GC, and handle counters. Counter names vary across tool/runtime generations, so select them from the installed runtime's published list and alert on workload-adjusted trends rather than one universal threshold.
+- **`dotnet-gcdump collect`** induces a generation 2 collection and reconstructs a managed heap graph from GC events. It is lighter than a full process dump but still adds target-process work and may need substantial buffers. Meaningful comparisons use snapshots taken at equivalent workload points. Growth is a lead, not proof, until a root path explains it.
+- **`dotnet-counters monitor System.Runtime`** provides a low-overhead trend view of selected runtime memory and GC counters. Counter names vary across tool/runtime generations, so the counter set comes from the installed runtime's published list, and alerting relies on workload-adjusted trends rather than one universal threshold.
 - **`dotnet-trace`** records allocation and runtime events when the question is where pressure originates. `gcroot <address>` in `dotnet-dump analyze` answers the different question of why a particular managed instance is still reachable.
 
 # Tradeoffs
@@ -374,19 +374,101 @@ The governing rule is ownership, not syntax. Each subscription, cache entry, tim
 
 <!-- qard-id: fd0bb1da-7714-4709-b6a3-752467733b71 -->
 > [!qard]- Can a .NET application leak memory even though it has garbage collection?
-> Yes. The GC reclaims managed objects only after they become unreachable, so a root path such as an unbounded cache or lingering event subscription can retain an object that is no longer useful. Native memory and OS handles have separate ownership and release rules that the GC does not manage. Growth is a signal to investigate, not proof of a leak; the retained reference path or unreleased native allocation establishes the cause. [Microsoft: GC fundamentals](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/fundamentals) · [Microsoft: diagnose memory leaks](https://learn.microsoft.com/en-us/dotnet/core/diagnostics/debug-memory-leak)
+> Yes. The garbage collector reclaims a managed object only when the object is no longer reachable, and it cannot tell that a reachable object is no longer needed. Resources outside the managed heap can also leak.
+> 
+> - **Managed retention:** an object stays alive while a chain of references from a GC root, such as a static field or a local variable on a thread's stack, still reaches it. An unbounded cache held in a static field keeps its entries reachable. So does a long-lived publisher whose event still holds a subscriber's handler. The GC is working correctly here: it never reclaims data the program can still reach.
+> - **Unmanaged resources:** native memory and operating-system resources, such as files or network connections, must be released explicitly, and the GC does not know how to release them. If neither the owner's `Dispose` call nor a finalizable wrapper such as `SafeHandle` releases them, they stay allocated even after the managed wrapper object is collected.
+> 
+> Rising memory alone does not prove a leak, because heap growth, caches and allocators can keep memory high for legitimate reasons. A leak is established by the reference path that keeps unwanted objects alive, or by a native allocation that is never released.
+> 
+> [Microsoft: Fundamentals of garbage collection](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/fundamentals) · [Microsoft: Implement a Dispose method](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose) · [Microsoft: Debug a memory leak in .NET](https://learn.microsoft.com/en-us/dotnet/core/diagnostics/debug-memory-leak)
+
+> [!qard]- How can a suspected memory leak in a running .NET application be diagnosed?
+> Diagnosis first confirms a sustained growth trend, then follows the kind of memory that is growing until evidence explains why it is retained. For managed memory, that evidence is the reference path from a GC root to objects that are no longer needed.
+> 
+> 1. **Confirm a trend:** runtime counters, for example from `dotnet-counters`, are compared across comparable workload cycles and at comparable points relative to collections. A single high reading or growth during warm-up is not yet evidence of a leak.
+> 2. **Locate the growth:** counters indicate where to look, not the cause. Heap-size readings depend on the measurement. On .NET 9 and later, the runtime's GC heap-size metric, `dotnet.gc.last_collection.heap.size`, includes fragmentation. For apps on .NET 8 and earlier, `dotnet-counters` falls back to legacy EventCounters, whose `gc-heap-size` counter is based on `GC.GetTotalMemory` and excludes fragmentation. GC committed memory also includes capacity ready for future allocations. Whichever measurement is used, a rising heap metric is a lead toward managed retention rather than proof of it. Process memory that rises without matching growth in GC committed memory is a lead toward memory outside the managed heap, such as native allocations or handles.
+> 3. **Managed growth, compare heap contents:** dumps taken at equivalent workload points, for example with `dotnet-dump collect`, show which types grow in count or total size. In `dotnet-dump analyze`, `dumpheap -stat` summarizes the heap by type.
+> 4. **Managed growth, find the retaining path:** for a representative instance of a growing type, `gcroot <address>` lists the chain of references from a GC root, such as a static field, to that object. The path names the holder, such as a cache without eviction or an event subscription that is never removed. The fix bounds or ends that ownership.
+> 5. **Native or handle growth:** this branch needs evidence from its own layer, such as a native allocation or an operating-system handle that is never released. `gcroot` explains only managed reachability, so it cannot establish this cause.
+> 
+> The type that uses the most memory is only a lead until a retaining path explains it. A retaining path proves that an object is reachable. The retention is a leak only when the object is no longer useful.
+> 
+> [Microsoft: Debug a memory leak in .NET](https://learn.microsoft.com/en-us/dotnet/core/diagnostics/debug-memory-leak) · [Microsoft: .NET runtime metrics](https://learn.microsoft.com/en-us/dotnet/core/diagnostics/built-in-metrics-runtime) · [Microsoft: Well-known EventCounters in .NET](https://learn.microsoft.com/en-us/dotnet/core/diagnostics/available-counters) · [Microsoft: GC.GetTotalMemory](https://learn.microsoft.com/en-us/dotnet/api/system.gc.gettotalmemory) · [Microsoft: dotnet-counters](https://learn.microsoft.com/en-us/dotnet/core/diagnostics/dotnet-counters) · [Microsoft: Fundamentals of garbage collection](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/fundamentals)
 
 <!-- qard-id: 1bdc896e-a0a2-42f6-94be-29c7f63cf28b -->
 > [!qard]- Why is `using` needed when .NET already has garbage collection?
-> The GC controls managed-memory reclamation, but it does not release every resource at the time its owner is finished. `using` gives an `IDisposable` resource a lexical lifetime and lowers to cleanup that calls `Dispose` when control leaves the scope, including on exceptions. [Microsoft: using statement](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/using) · [Microsoft: dispose pattern](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose)
+> The garbage collector frees managed memory when allocations or low system memory trigger a collection, not when code has finished with an object. Many objects also hold resources other than managed memory, such as files, network connections or database connections. Those resources are limited, and the GC does not know how to release them. At best, a finalizer releases them at an unpredictable time later, so a resource can stay open long after its last use or be exhausted.
+> 
+> `using` makes the release deterministic. The compiler wraps the scope in `try`/`finally` and calls `Dispose` on the `IDisposable` object in the `finally` block. The resource is therefore released as soon as control leaves the scope, whether normally or through an exception. `await using` does the same for `IAsyncDisposable` by awaiting `DisposeAsync`.
+> 
+> ```csharp
+> using (var stream = File.OpenRead(path))
+> {
+>     // reads from stream
+> }
+> // stream.Dispose() has run here, even if reading threw
+> ```
+> 
+> Disposal releases the resource, not the object's managed memory. The GC still reclaims that memory later, once the object is unreachable.
+> 
+> [Microsoft: using statement](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/using) · [Microsoft: Fundamentals of garbage collection](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/fundamentals) · [Microsoft: Implement a Dispose method](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose)
 
 <!-- qard-id: 5e311685-41d1-44ae-baf9-516faaecaf4d -->
 > [!qard]- How do `IDisposable` and a finalizer differ?
-> `Dispose` is explicit cleanup that an owner can call at a known point. A finalizer is a delayed fallback after an object becomes unreachable; its timing is nondeterministic and it is not a shutdown guarantee. Prefer `SafeHandle` for native handles, and add a finalizer only when the type directly owns an unmanaged resource that cannot be delegated to a safe wrapper. [Microsoft: dispose pattern](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose) · [Microsoft: finalizers](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/finalizers) · [Microsoft: SafeHandle](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.safehandle)
+> `Dispose` is deterministic cleanup that the owning code calls when it has finished with a resource. A finalizer is an optional fallback that the garbage collector runs at an unpredictable time after it finds the object unreachable, so that cleanup can still happen if `Dispose` was never called. `IDisposable` itself requires only the `Dispose` method, not a finalizer.
+> 
+> | Aspect | `IDisposable.Dispose` | Finalizer |
+> |---|---|---|
+> | Trigger | Owning code calls it, directly or through `using`. | The GC queues it to run after finding the object unreachable. |
+> | Timing | Runs at a known point, so scarce resources are released promptly. | Runs at an unpredictable time after the object becomes unreachable. .NET 5 and later do not run finalizers when the application exits, so it may never run. |
+> | What it can safely clean up | Managed `IDisposable` objects the type owns, plus its unmanaged resources. | Only unmanaged resources the object owns directly. Other managed objects may already have been finalized, because finalization order is undefined. |
+> | Cost | An ordinary method call. | Each finalizable object adds an entry that the GC must process in its finalization queue. |
+> 
+> When a type defines its own finalizer, the two work together. `Dispose` performs the cleanup and calls `GC.SuppressFinalize`, so the finalizer runs only when disposal was missed. Most types can avoid an own-type finalizer altogether. A type whose native handle is wrapped in a `SafeHandle` needs no finalizer of its own, because `SafeHandle` already provides finalization for that handle. A custom finalizer is justified only for an unmanaged resource that the type owns directly and that no safe wrapper can hold.
+> 
+> [Microsoft: Implement a Dispose method](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose) · [Microsoft: Finalizers](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/finalizers) · [Microsoft: SafeHandle](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.safehandle)
 
 <!-- qard-id: 56cd4094-8fef-44ac-9e9c-50873f2193f8 -->
 > [!qard]- How does the .NET dispose pattern work?
-> The public `Dispose()` method releases owned resources and, for an inheritable type, normally calls `Dispose(true)` and then `GC.SuppressFinalize`. `Dispose(bool)` is idempotent: explicit disposal may release managed and unmanaged resources, while a finalizer path calls `Dispose(false)` and releases only directly owned unmanaged state. Add a finalizer only when ownership cannot be handled by `SafeHandle`. [Microsoft: dispose pattern](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose) · [Microsoft: finalizers](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/finalizers)
+> The pattern routes both cleanup paths through one method, `Dispose(bool disposing)`. Its argument tells it whether owning code called `Dispose` or a finalizer is running.
+> 
+> - **Explicit path:** owning code calls the public, non-virtual `Dispose()`, which calls `Dispose(true)` and then `GC.SuppressFinalize(this)`. With `disposing` set to `true`, the method releases both the managed `IDisposable` objects the type owns and its unmanaged resources. Suppressing finalization tells the GC that cleanup is already done, so it does not run the finalizer.
+> - **Finalizer path:** if `Dispose` was never called and the type has a finalizer, the finalizer calls `Dispose(false)`. That call releases only unmanaged resources the object owns directly. It does not touch other managed objects, because finalization order is undefined and they may already have been finalized.
+> - **Repeated calls:** `Dispose(bool)` records that disposal has happened and returns early on later calls. Calling `Dispose` more than once is therefore harmless and never releases the same resource twice.
+> - **Inheritance:** in an unsealed type, `Dispose(bool)` is `protected virtual`. A derived class overrides it to release its own resources and then calls `base.Dispose(disposing)`.
+> 
+> ```csharp
+> public class NativeBuffer : IDisposable
+> {
+>     private IntPtr _buffer = Marshal.AllocHGlobal(1024);
+>     private bool _disposed;
+> 
+>     public void Dispose()
+>     {
+>         Dispose(true);
+>         GC.SuppressFinalize(this);
+>     }
+> 
+>     protected virtual void Dispose(bool disposing)
+>     {
+>         if (_disposed) return;
+>         if (disposing)
+>         {
+>             // Owned managed IDisposable fields are disposed here.
+>         }
+>         Marshal.FreeHGlobal(_buffer);
+>         _buffer = IntPtr.Zero;
+>         _disposed = true;
+>     }
+> 
+>     ~NativeBuffer() => Dispose(false);
+> }
+> ```
+> 
+> This type needs a finalizer only because it holds a raw native pointer directly. When a `SafeHandle` owns the native resource, the type implements `Dispose()` and `Dispose(bool)` without a finalizer, and the `SafeHandle` supplies the finalization fallback.
+> 
+> [Microsoft: Implement a Dispose method](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose) · [Microsoft: Finalizers](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/finalizers)
 
 # References
 

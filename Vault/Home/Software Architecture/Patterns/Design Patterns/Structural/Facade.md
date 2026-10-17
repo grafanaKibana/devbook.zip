@@ -152,7 +152,7 @@ public class CheckoutController(OrderFacade orderFacade) : ControllerBase
 builder.Services.AddScoped<OrderFacade>();
 ```
 
-The sample awaits request-scoped side effects so their failures and lifetimes remain owned by the Facade. When completion should not delay the response or must survive process failure, write durable work to an outbox or an owned background queue instead of discarding a task. That delivery concern is separate from the Facade structure.
+The sample awaits request-scoped side effects so their failures and lifetimes remain owned by the Facade. When completion should not delay the response or must survive process failure, durable work is written to an outbox or an owned background queue rather than started as a discarded task. That delivery concern is separate from the Facade structure.
 
 Fraud detection can now be inserted once in `OrderFacade.PlaceOrderAsync`, and every caller follows the same workflow.
 
@@ -170,7 +170,7 @@ Fraud detection can now be inserted once in `OrderFacade.PlaceOrderAsync`, and e
 
 **Use it when:** several clients repeat the same subsystem workflow or need protection from changes inside that subsystem. One high-level operation should express a meaningful use case.
 
-**Skip it when:** one class merely forwards to another, or the proposed interface hides no meaningful sequence. A facade should coordinate domain services, not absorb their rules and state into a god object.
+**Skip it when:** one class merely forwards to another, or the proposed interface neither simplifies the subsystem nor reduces clients' dependence on its internals. A facade should coordinate domain services, not absorb their rules and state into a god object.
 
 **Related patterns:** [[Home/Software Architecture/Patterns/Design Patterns/Structural/Adapter]] translates an incompatible interface. [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Mediator]] coordinates peers, while a Facade gives clients a one-way front door. At a network boundary, [[Home/Software Architecture/Distributed Systems/API Gateway]] can play a facade-like role over several services.
 

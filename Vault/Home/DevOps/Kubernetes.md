@@ -92,8 +92,21 @@ Kubernetes earns its complexity when several workloads need multi-node schedulin
 
 # Questions
 
+<!-- qard-id: bc9a5b5d-d49f-480f-a7de-7fe709538cac -->
 > [!qard]- What is the difference between a Pod, Deployment, and Service?
-> A Pod is Kubernetes’ scheduled execution unit for one or more containers. A Deployment declares and reconciles a desired set of replaceable Pod replicas through ReplicaSets. A Service provides a stable network identity and selects backend endpoints for a group of Pods. They cover execution, workload reconciliation, and service discovery/routing. [Kubernetes: Pods](https://kubernetes.io/docs/concepts/workloads/pods/) · [Kubernetes: Deployments](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/) · [Kubernetes: Service API](https://kubernetes.io/docs/reference/kubernetes-api/service-resources/service-v1/)
+> They separate three concerns. A Pod runs containers. A Deployment declares the desired set of Pods, drives the cluster toward it and rolls out changes to it. A Service gives clients a stable way to reach the Pods behind it while those Pods change.
+> 
+> | Object | Responsibility | Identity and lifetime |
+> |---|---|---|
+> | Pod | The smallest unit Kubernetes schedules onto a node: one or more containers that share networking and can share storage. | Replaceable. A replacement is a new Pod, usually with a different IP, so Pod addresses are not durable identity. |
+> | Deployment | Declares how many Pods should run from a Pod template and reconciles actual state toward that count through a ReplicaSet. A template change rolls out through a new ReplicaSet. | A long-lived declaration; the individual Pods it manages come and go. |
+> | Service (typical selector-based ClusterIP) | Selects Pods by label, puts a stable name and virtual IP in front of them and distributes traffic among them. | Stays the same while its set of backend Pods changes. |
+> 
+> **How they work together:** a Deployment with `replicas: 3` and the Pod label `app: myapi` declares three desired replicas. If one Pod is deleted or its node fails, the ReplicaSet creates a replacement Pod, usually with a new IP, to converge back toward three. The count is a target, not a guarantee: unschedulable Pods, insufficient quota, image pull errors or failing readiness checks can leave fewer Pods ready to serve. A Service that selects `app: myapi` keeps its name and address throughout. Normally only Pods that pass their readiness check receive Service traffic, so the replacement starts receiving requests once it becomes ready. Clients never have to track Pod IPs.
+> 
+> A Deployment never routes traffic, and a Service never creates Pods. In this selector-based setup, they are connected only through the labels on the Pods. A Service without a selector relies on separately managed endpoints, and a headless Service has no virtual IP.
+> 
+> [Kubernetes: Pods](https://kubernetes.io/docs/concepts/workloads/pods/) · [Kubernetes: Deployments](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/) · [Kubernetes: Service API](https://kubernetes.io/docs/reference/kubernetes-api/service-resources/service-v1/)
 
 # References
 

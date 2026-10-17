@@ -52,7 +52,7 @@ public class DiscountService
 
         // ⚠️ "Buy 2 get 1 free on Electronics" — hardcoded
         var electronicsItems = order.Items.Where(i => i.Product.Category == "Electronics").ToList();
-        if (electronicsItems.Count >= 2)
+        if (electronicsItems.Count >= 3)
         {
             var cheapest = electronicsItems.MinBy(i => i.UnitPrice);
             if (cheapest is not null) discount += cheapest.UnitPrice;
@@ -180,9 +180,9 @@ As written, developers compose these expression objects in startup code, so chan
 
 # Pitfalls
 
-**Repeated tree walking.** Interpreting the same deep expression for every request adds per-call overhead. When profiling shows it matters, compile the tree to a delegate and cache that delegate. Compilation moves cost to setup and uses more memory.
+**Repeated tree walking.** Interpreting the same deep expression for every request adds per-call overhead. When profiling shows it matters, the tree can be compiled to a delegate and that delegate cached. Compilation moves cost to setup and uses more memory.
 
-**Grammar growth.** A few boolean and comparison rules stay manageable. Once precedence, diagnostics, and richer syntax appear, use a parser that produces an AST. A hand-written chain of string splits will collapse under edge cases.
+**Grammar growth.** A few boolean and comparison rules stay manageable. Once precedence, diagnostics, and richer syntax appear, the grammar needs a parser that produces an AST. A hand-written chain of string splits will collapse under edge cases.
 
 **Untrusted expressions.** General-purpose scripting turns configuration into code execution. User-authored rules should use a restricted grammar with an allowlist of operations and fields. Input sanitization alone is not a security boundary.
 
@@ -201,12 +201,32 @@ Interpreter fits a small language represented as data. Stable rules are clearer 
 # Questions
 
 <!-- qard-id: 6cc8dca5-c8e6-48fc-b88a-d16195df8f1d -->
-> [!qard]- How does EF Core use LINQ Expression Trees as an Interpreter?
-> The `Queryable.Where` overload receives an expression tree, which represents the predicate as data rather than only an executable delegate. EF Core inspects supported nodes and translates them for the provider; a method the provider cannot translate fails in a server-required part of the query, though top-level projection may be evaluated on the client. Captured values can be parameterized. [C# expression trees](https://learn.microsoft.com/en-us/dotnet/csharp/advanced-topics/expression-trees/) · [EF Core: client vs. server evaluation](https://learn.microsoft.com/en-us/ef/core/querying/client-eval)
+> [!qard]- How does EF Core use LINQ expression trees as an Interpreter?
+> EF Core treats a query's lambda as a sentence in a small language. The lambda arrives as an expression tree, and EF Core walks its nodes and translates them into a query that its database provider can run, instead of running the lambda as compiled code. With a relational provider, that query is SQL.
+> 
+> 1. `Queryable.Where` accepts an `Expression<Func<T, bool>>`, so the compiler builds a tree that describes the predicate. `Enumerable.Where` accepts a `Func<T, bool>`, which can only be executed.
+> 2. When the query runs, EF Core visits the supported nodes, such as member access, comparisons and `&&`, and the provider produces an equivalent query in its own language, which is SQL for a relational database.
+> 3. Captured variables, such as `minTotal` in `o => o.Total > minTotal`, can become query parameters instead of literals, which are SQL parameters with a relational provider.
+> 4. A node with no translation, such as a call to an ordinary C# method that the provider does not map, makes EF Core 3.0 and later throw when it appears in a filter or another server-evaluated part of the query. Only the top-level projection can be partly evaluated on the client.
+> 
+> The tree plays the role of the Interpreter pattern's abstract syntax tree. In the classic pattern each node evaluates itself; EF Core instead translates the tree into the provider's query language, such as SQL, which the database then executes.
+> 
+> [C# expression trees](https://learn.microsoft.com/en-us/dotnet/csharp/advanced-topics/expression-trees/) · [EF Core: client vs. server evaluation](https://learn.microsoft.com/en-us/ef/core/querying/client-eval) · [EF Core: how queries work](https://learn.microsoft.com/en-us/ef/core/querying/how-query-works)
 
 <!-- qard-id: 11ee9711-6130-40ef-9fe2-d513d49ba91a -->
-> [!qard]- How does Interpreter differ from Strategy when rules are selected at runtime?
-> Strategy selects among behavior implementations already expressed as code, as shown by the [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Strategy#Solution|Strategy implementations]]. Interpreter evaluates a rule represented by a language or expression tree, as shown by the [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Interpreter#Solution|Interpreter expression model]]. Strategy varies which implementation runs; Interpreter defines data the evaluator understands.
+> [!qard]- How does the Interpreter pattern differ from the Strategy pattern when rules are chosen at runtime?
+> Both let behavior vary at runtime, but they vary different things. Strategy chooses which already-written implementation runs. Interpreter represents the rule itself as data, such as an expression tree, and an evaluator walks that data to produce the result. Choosing an implementation at runtime is therefore not enough to make a design an Interpreter.
+> 
+> | Aspect | Strategy | Interpreter |
+> |---|---|---|
+> | What varies | The implementation selected, such as a flat-rate or a weight-based shipping calculator. | The rule's structure, built from expression nodes such as `And(TierEquals(Silver), TotalGreaterThan(200))`. |
+> | New behavior | Selecting or configuring an existing implementation needs no new code; behavior that none of them provides needs a new implementation. | Can often be composed from existing expression types without new classes, within what the grammar can express. |
+> | Where the logic lives | In each strategy's code, which the caller simply invokes. | Split across node types that an evaluator applies to a context, such as an order and its customer. |
+> | Main costs | Variation is limited to the implementations that exist, so uncovered behavior means new code to write, test and ship. Running a strategy is ordinary compiled code. | A grammar to design and maintain, slower tree evaluation and harder debugging. Rules from untrusted users also need a restricted grammar with allowlisted fields and operations. |
+> 
+> Composing rules from data avoids new code only when the rule representation can be stored and loaded safely. Rule objects built in startup code still change only with a deployment.
+> 
+> [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Interpreter#Solution|Interpreter: solution]] · [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Interpreter#Pitfalls|Interpreter: pitfalls]] · [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Interpreter#Tradeoffs|Interpreter: tradeoffs]]
 
 # References
 

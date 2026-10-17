@@ -81,21 +81,37 @@ Routing and transformation are integration concerns. Pricing rules, eligibility 
 
 ## Shared Data Without Ownership
 
-A shared database can be unavoidable during legacy integration. The dangerous part is shared write authority. Give each service explicit ownership of its tables or stored procedures, then expose cross-boundary behavior through contracts. Direct writes from several services turn a schema change into a coordinated release.
+A shared database can be unavoidable during legacy integration. The dangerous part is shared write authority. Each service has explicit ownership of its tables or stored procedures, and cross-boundary behavior is exposed through contracts. Direct writes from several services turn a schema change into a coordinated release.
 
 ## Contract Version Sprawl
 
-Rigid consumers can make a harmless additive field behave like a breaking change. Prefer tolerant readers and additive evolution, record deprecation dates, and measure remaining consumers before retiring a version. A permanent collection of `/v1` through `/v6` endpoints is not a versioning strategy.
+Rigid consumers can make a harmless additive field behave like a breaking change. Sustainable versioning relies on tolerant readers and additive evolution, recorded deprecation dates, and measurement of remaining consumers before a version is retired. A permanent collection of `/v1` through `/v6` endpoints is not a versioning strategy.
 
 ## Central Governance as a Queue
 
-A central contract review can protect interoperability, but it can also serialize every team behind one group. Standardize the parts that must interoperate and leave service implementation decisions with the owning team.
+A central contract review can protect interoperability, but it can also serialize every team behind one group. Effective governance standardizes the parts that must interoperate and leaves service implementation decisions with the owning team.
 
 # Coexisting with Microservices
 
 Many estates use both styles. Existing systems meet through governed integration services, while newer product capabilities use smaller independently deployed services. The dividing line is whether stable cross-system contracts or independent product-team delivery is the stronger constraint.
 
 # Questions
+
+> [!qard]- How does service-oriented architecture (SOA) differ from microservices?
+> Both organize a system as services behind explicit contracts. They differ mainly in where change is controlled. Typical enterprise SOA centralizes integration and governance to connect existing systems that cannot change together. Microservices push ownership, data and deployment decisions into independently owned services.
+> 
+> | Aspect | Typical enterprise SOA | Typical microservices |
+> |---|---|---|
+> | Main pressure | Make heterogeneous systems, such as SAP, mainframes and custom applications, interoperate through stable contracts | Let teams own, change and deploy bounded business capabilities independently |
+> | Service size | Often coarse business services shared by several business units | Usually smaller services, each aligned to one bounded capability |
+> | Integration logic | Often placed in a central ESB or orchestration layer that routes, transforms and mediates protocols | Kept near service endpoints or in a workflow engine, with comparatively simple transport |
+> | Data | Shared enterprise stores are common | Each service owns its data |
+> | Governance | Central contract and schema review gives controlled interoperability at the cost of slower local change | Teams own their contracts within platform guardrails |
+> | Deployment | Services may share infrastructure and coordinate releases | Independent deployment is a core goal |
+> 
+> These are tendencies rather than strict definitions. Many organizations use both styles: governed integration services around existing systems, and microservices for newer product capabilities.
+> 
+> [Fowler and Lewis: Microservices and SOA](https://martinfowler.com/articles/microservices.html#MicroservicesAndSOA) · [SOA Manifesto](https://soa-manifesto.org/default.html)
 
 <!-- qard-id: e94992f0-b946-4aac-9616-e0916d028264 -->
 > [!qard]- Which part of SOA remains useful without SOAP, WSDL, or an ESB?

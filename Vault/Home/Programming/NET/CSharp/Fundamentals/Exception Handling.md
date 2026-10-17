@@ -77,7 +77,7 @@ public static string NormalizeName(string? value)
 
 # Custom Exceptions
 
-Create a custom type when callers need to distinguish the failure from other exceptions. Derive from `Exception`, keep useful state immutable, and preserve an inner exception when the custom type translates a lower-level failure.
+A custom type fits when callers need to distinguish the failure from other exceptions. Such a type derives from `Exception`, keeps useful state immutable, and preserves an inner exception when the custom type translates a lower-level failure.
 
 ```csharp
 public sealed class OrderNotFoundException(int orderId)
@@ -91,7 +91,7 @@ A built-in type is better when it already communicates the contract (`ArgumentEx
 
 # Aggregated and Cross-Boundary Exceptions
 
-- **`AggregateException`** represents multiple failures from parallel or task-based work. Awaiting a faulted `Task.WhenAll` propagates one exception, while the completed task's `Exception` property retains the aggregate. `Flatten()` removes nested aggregates, and `Handle(predicate)` marks selected inner exceptions as handled. See [[Tasks]].
+- **`AggregateException`** represents multiple failures from parallel or task-based work. Awaiting a faulted `Task.WhenAll` propagates one exception, while the completed task's `Exception` property retains the aggregate. `Flatten()` removes nested aggregates, and `Handle(predicate)` marks selected inner exceptions as handled. [[Tasks]] describes how task-based work aggregates these failures.
 - **`ExceptionDispatchInfo`** captures an exception so it can be thrown later without replacing its original throw-site information:
 
   ```csharp
@@ -115,17 +115,31 @@ Unhandled exceptions need an application boundary that records the failure and c
 # Pitfalls
 
 - **Exceptions as routine branching.** A cache miss or validation rejection may be an expected result. A `Try*` method, nullable result, or explicit domain result makes that path visible and avoids paying for stack capture on normal traffic.
-- **`throw ex;` in `catch`**: this restarts the stack trace at the rethrow point and loses the original call path. Use `throw;` inside the same `catch` to preserve debugging context.
-- **Throwing in `finally`**: a new exception from `finally` can mask the original failure from `try`/`catch`. Keep `finally` focused on cleanup and avoid new throws there.
-- **Overly generic exception types**: throwing `Exception` makes handling and telemetry less actionable. Prefer specific built-in types (`ArgumentException`, `InvalidOperationException`, and related types) that communicate intent.
+- **`throw ex;` in `catch`**: this restarts the stack trace at the rethrow point and loses the original call path. `throw;` inside the same `catch` preserves debugging context.
+- **Throwing in `finally`**: a new exception from `finally` can mask the original failure from `try`/`catch`. Keeping `finally` focused on cleanup that raises no new exceptions prevents that masking.
+- **Overly generic exception types**: throwing `Exception` makes handling and telemetry less actionable. Specific built-in types (`ArgumentException`, `InvalidOperationException`, and related types) communicate intent.
 
 # Tradeoffs
 
 - **Exceptions versus result values.** Exceptions carry unexpected failures naturally through .NET infrastructure. Result values make expected rejection paths explicit in signatures. The useful dividing line is whether the caller is expected to branch on the outcome.
-- **Catch width.** A broad catch is appropriate at a host boundary that logs and translates failures. Deeper in the application, catch only what can be handled, enriched, or rolled back meaningfully.
-- **Exception filters.** A `when` filter runs before stack unwinding and can select a handler without catching and rethrowing. Keep filters predictable. A filter that returns `false` leaves handler search to continue.
+- **Catch width.** A broad catch is appropriate at a host boundary that logs and translates failures. Deeper in the application, a catch belongs only where the failure can be handled, enriched, or rolled back meaningfully.
+- **Exception filters.** A `when` filter runs before stack unwinding and can select a handler without catching and rethrowing. Filter logic needs to stay predictable. A filter that returns `false` leaves handler search to continue.
 
 # Questions
+
+> [!qard]- When should a .NET method throw an exception instead of returning a failure result?
+> A method throws when it cannot deliver what it promises and callers are not expected to branch on that outcome in normal flow. It returns a failure result when the outcome is common and expected, so callers routinely check it.
+> 
+> | Aspect | Throwing an exception | Returning a failure result |
+> |---|---|---|
+> | Fits when | The failure is unexpected for this call, such as an invalid argument, an invalid object state or an unavailable dependency. | The outcome is part of normal flow, such as a cache miss, unparsable user input or a rejected validation. |
+> | If the caller ignores it | A synchronous throw propagates up the call stack until a handler catches it, so the caller cannot skip it by not checking. A `Task`-returning async method stores the exception on that `Task`; it surfaces only when the code that owns the task awaits or otherwise observes it, so an ignored faulted task can go unnoticed. | The failure can be silently ignored if the caller never checks the result. |
+> | Cost when it happens | Throwing and unwinding are expensive, which matters when the outcome occurs on every request. | Reporting the outcome costs about the same as success. |
+> | Typical .NET shape | A specific exception type such as `ArgumentException` or `InvalidOperationException`. | A `Try` method such as `int.TryParse` returning `bool`, `null` or default for a common miss, or an explicit result type. |
+> 
+> Many APIs offer both forms: `int.Parse` throws on bad input, while `int.TryParse` returns `false`. The caller then picks the form that matches how often failure is expected.
+> 
+> [Microsoft: Best practices for exceptions](https://learn.microsoft.com/en-us/dotnet/standard/exceptions/best-practices-for-exceptions) · [Microsoft: TaskScheduler.UnobservedTaskException](https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.taskscheduler.unobservedtaskexception?view=net-10.0)
 
 <!-- qard-id: 47c1a77e-18c3-47f2-beec-be36bdb47219 -->
 > [!qard]- What is the difference between `throw;` and `throw ex;` inside a `catch` block?
@@ -133,15 +147,35 @@ Unhandled exceptions need an application boundary that records the failure and c
 
 <!-- qard-id: 0d4bb361-db0d-4d8f-b57e-1ec0c12ca36e -->
 > [!qard]- When should an exception be wrapped instead of rethrown directly?
-> Wrap an exception when crossing a boundary requires meaningful context or translation to a stable failure contract. Preserve the original as the inner exception so its cause remains available. If the wrapper adds no useful meaning, use `throw;` in the catch block. [Microsoft: exception best practices](https://learn.microsoft.com/en-us/dotnet/standard/exceptions/best-practices-for-exceptions)
+> An exception should be wrapped when a boundary must add meaning that the original lacks: context about the operation that failed, or translation into a stable failure type that callers of that layer are expected to handle. The original goes into the new exception's `InnerException`, so its type, message and stack trace stay available.
+> 
+> For example, a data-access layer can translate a database provider's exception into a domain-level `OrderStoreUnavailableException`. Callers then handle one stable type and do not depend on the provider.
+> 
+> When the catch block only logs, cleans up or decides it cannot handle the failure, `throw;` rethrows the original with its stack trace intact. Wrapping without adding meaning only lengthens the exception chain. It can also change which outer handlers match. A `catch` matches its declared type and types derived from it, so a handler that caught the original stops matching when the wrapper's type is neither that type nor derived from it.
+> 
+> [Microsoft: Best practices for exceptions](https://learn.microsoft.com/en-us/dotnet/standard/exceptions/best-practices-for-exceptions) · [Microsoft: Exception-handling statements](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/exception-handling-statements)
 
 <!-- qard-id: d8eb2954-a6b6-4720-b753-13e6f473ae67 -->
 > [!qard]- Why is throwing from `finally` dangerous?
-> If the protected operation throws and cleanup in `finally` also throws, the cleanup exception can replace the exception already in flight. The caller may then lose the original failure as the one that surfaces. Keep cleanup from masking the primary failure. [Microsoft: exception handling statements](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/exception-handling-statements)
+> An exception that escapes `finally` while another exception is already propagating replaces that exception. The original stops propagating, so callers, outer handlers and any later logging see only the cleanup error, which usually says little about the real cause.
+> 
+> For example, a `try` block fails with a timeout, and closing a connection in `finally` then throws an exception that escapes the block. The caller receives the close failure, and the timeout no longer appears in the propagated exception.
+> 
+> Cleanup in `finally` is therefore kept simple, and any failure it can raise is caught and logged inside the `finally` block so the original exception keeps propagating.
+> 
+> [Microsoft: Exception-handling statements](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/exception-handling-statements) · [Microsoft: Best practices for exceptions](https://learn.microsoft.com/en-us/dotnet/standard/exceptions/best-practices-for-exceptions)
 
 <!-- qard-id: 9ffe22a9-8db4-43a7-acea-929d5baa0d53 -->
 > [!qard]- When might `finally` not execute?
-> `finally` runs during normal control transfer and exception unwinding while the process is executing. It cannot guarantee cleanup after abrupt termination such as `Environment.FailFast`, because the process stops without normal unwinding. Treat it as in-process cleanup, not crash recovery. [Microsoft: exception handling statements](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/exception-handling-statements) · [Microsoft: Environment.FailFast](https://learn.microsoft.com/en-us/dotnet/api/system.environment.failfast?view=net-10.0)
+> `finally` runs when control leaves its `try` block while the process keeps executing: normal completion, a jump such as `return` or `break`, or an exception unwinding through it. It does not run when the process ends without unwinding or when control never leaves the `try` block.
+> 
+> - **Immediate process termination:** `Environment.FailFast` ends the process without running pending `finally` blocks or finalizers. A stack overflow, or the process being killed by the operating system or an orchestrator, ends it just as abruptly.
+> - **Unhandled exceptions:** cleanup is reliable when a handler exists and the stack unwinds to it. If no handler is found, whether `finally` blocks run depends on how the runtime and operating system end the process.
+> - **Control never leaves the `try` block:** an infinite loop or a deadlock inside it means `finally` is never reached.
+> 
+> `finally` is therefore in-process cleanup, not crash recovery. State that must survive a crash relies on durable mechanisms such as transactions or recovery logic that runs on restart.
+> 
+> [Microsoft: Exception-handling statements](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/exception-handling-statements) · [Microsoft: Environment.FailFast](https://learn.microsoft.com/en-us/dotnet/api/system.environment.failfast?view=net-10.0)
 
 # References
 

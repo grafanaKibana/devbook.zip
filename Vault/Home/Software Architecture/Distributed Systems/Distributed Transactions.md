@@ -86,13 +86,13 @@ The usual controls are **semantic locks**, such as a `PENDING` status that other
 
 A compensation can fail, and some side effects cannot be undone. An email cannot be unsent, and a payment provider without a refund operation cannot reverse a charge.
 
-Define compensation before the forward step. Irreversible effects need a corrective action, such as sending a cancellation notice, rather than a fictional inverse. Some outcomes require manual recovery.
+Each compensation should be defined before its forward step. Irreversible effects need a corrective action, such as sending a cancellation notice, rather than a fictional inverse. Some outcomes require manual recovery.
 
 ## Saga State Must Survive a Crash
 
 If saga state exists only in process memory, a restarted orchestrator cannot tell which steps completed.
 
-Persist the workflow state and each outcome. A saga framework such as MassTransit or NServiceBus can supply durable state and retry behavior, but the application still defines idempotency and compensation semantics.
+The workflow state and each step outcome must be persisted. A saga framework such as MassTransit or NServiceBus can supply durable state and retry behavior, but the application still defines idempotency and compensation semantics.
 
 # Tradeoffs
 
@@ -102,17 +102,45 @@ Persist the workflow state and each outcome. A saga framework such as MassTransi
 | Saga ([[Home/Software Architecture/Distributed Systems/Choreography|choreography]]) | Eventual | Distributed subscription and recovery logic | Low call-path latency | Simple flows and independent reactions |
 | Saga ([[Home/Software Architecture/Distributed Systems/Orchestration|orchestration]]) | Eventual | Durable orchestrator state | Medium | Ordered multi-step flows with explicit visibility |
 
-Use 2PC only when every participant supports it and blocking during recovery fits the availability and throughput budget. A saga with [[Home/Software Architecture/Distributed Systems/Choreography|choreography]] fits simple flows or independent reactions. A saga with [[Home/Software Architecture/Distributed Systems/Orchestration|orchestration]] is easier to operate when the flow needs explicit state, retries, deadlines, or long-running visibility. Event publication still needs an outbox.
+2PC is appropriate only when every participant supports it and blocking during recovery fits the availability and throughput budget. A saga with [[Home/Software Architecture/Distributed Systems/Choreography|choreography]] fits simple flows or independent reactions. A saga with [[Home/Software Architecture/Distributed Systems/Orchestration|orchestration]] is easier to operate when the flow needs explicit state, retries, deadlines, or long-running visibility. Event publication still needs an outbox.
 
 # Questions
 
 <!-- qard-id: 1f55b33c-29a0-4777-8e34-e43c6b00b881 -->
-> [!qard]- Why is 2PC problematic in microservices?
-> Two-phase commit needs a coordinator and participants that can durably prepare and later obey one global decision. A prepared participant may keep its locks until commit or rollback; if the decision is delayed, those resources stay tied up and can reduce availability or throughput. A service boundary that cannot join the same transaction protocol cannot share that atomic commit. [PostgreSQL: PREPARE TRANSACTION](https://www.postgresql.org/docs/current/sql-prepare-transaction.html)
+> [!qard]- Why is two-phase commit (2PC) problematic in microservices?
+> Two-phase commit is a blocking protocol. Every participant that has prepared must wait for one coordinator's decision while still holding its locks, so a slow or failed coordinator or a network delay can stall other services. It also works only when every participant supports the same transaction protocol, which couples independently failing services to one shared coordinator.
+> 
+> How the blocking arises:
+> 
+> 1. **Prepare:** the coordinator asks each participant to make its tentative work durable and vote. A participant that votes yes keeps the locks that work needs and promises to follow the final decision.
+> 2. **Decide:** the coordinator records commit only if every participant voted yes. Any no vote produces abort.
+> 3. **Complete:** each participant commits or rolls back when the decision reaches it, and only then releases its locks.
+> 
+> Consequences for microservices:
+> 
+> - **Locks held across network delays:** between steps 1 and 3, a coordinator crash or network delay leaves prepared data locked. Requests that need those rows wait or time out, so one component's failure reduces the availability and throughput of others.
+> - **Shared protocol requirement:** each database, broker or service in the transaction must take part in the same prepare-and-commit protocol under one coordinator. A participant that cannot join that protocol cannot share the atomic commit.
+> 
+> This is why microservice workflows more often commit locally in each service and coordinate the remaining steps through messages, as in a saga.
+> 
+> [PostgreSQL: PREPARE TRANSACTION](https://www.postgresql.org/docs/current/sql-prepare-transaction.html)
 
 <!-- qard-id: 308353ee-bfa4-462c-8cf5-0bcd625b572b -->
 > [!qard]- How does the Outbox pattern support at-least-once event delivery?
-> The service writes the domain change and its event into the same local transaction, then a relay publishes the committed event and retries after failures. A crash after publication but before recording progress can send it again, so consumers need idempotent handling or deduplication. This is a local atomicity boundary, not one transaction across the service and broker. [Microsoft: transactional outbox with Azure Cosmos DB](https://learn.microsoft.com/en-us/azure/architecture/databases/guide/transactional-out-box-cosmos)
+> The Outbox pattern makes an event as durable as the state change it describes, then publishes it with retries. After the change commits, the event can be delayed or published more than once, but it is not lost while the relay keeps retrying.
+> 
+> 1. **Write atomically:** the service saves the domain change and an outbox record for the event in one local database transaction. Either both commit or neither does.
+> 2. **Relay:** a separate process reads committed outbox records and publishes them to the broker.
+> 3. **Retry:** if publishing fails, the record stays pending and the relay tries again.
+> 4. **Record progress:** after the broker accepts the event, the relay marks the record as published.
+> 
+> Without an outbox, the service writes to the database and to the broker as two separate operations. A failure between them can leave one done and the other missing, for example a committed order whose event was never published.
+> 
+> **Duplicates:** if the relay crashes after the broker accepts the event but before step 4, it publishes the event again. Consumers therefore need idempotent handling or deduplication, for example by recording the IDs of events they have already processed.
+> 
+> The atomicity covers only the local store, whose transaction must include both records. No single transaction spans the database and the broker. In Azure Cosmos DB, for example, the two writes go into one transactional batch, which must target a single logical partition.
+> 
+> [Microsoft: Transactional Outbox pattern with Azure Cosmos DB](https://learn.microsoft.com/en-us/azure/architecture/databases/guide/transactional-out-box-cosmos)
 
 # References
 

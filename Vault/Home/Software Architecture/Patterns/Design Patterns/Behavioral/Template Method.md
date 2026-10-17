@@ -196,7 +196,18 @@ It fits poorly when behavior must change at runtime or when inheritance exists o
 
 <!-- qard-id: 1cb407d0-9794-4cf3-8019-5f9e34d0c19d -->
 > [!qard]- What should determine whether algorithm variation uses Template Method or Strategy?
-> Use Template Method when a base type owns a stable sequence and subclasses vary selected steps. Use Strategy when the varying algorithm is a separate collaborator that can be replaced or selected independently. Template Method couples variation to inheritance; Strategy adds composition and selection. [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Template Method#Solution|Template Method implementation]] · [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Strategy#Solution|Strategy implementation]]
+> The decision depends on who owns the algorithm and when the variation must be chosen. Template Method fits when a base class owns a stable sequence and subclasses vary a few steps. Strategy fits when the varying behavior is a separate collaborator that must be selected or replaced independently, including at runtime.
+> 
+> | Aspect | Template Method | Strategy |
+> |---|---|---|
+> | Who owns the algorithm | The base class runs the sequence and calls hooks that subclasses override. | The context calls a composed object or delegate that supplies the varying behavior. |
+> | When a variant is chosen | When a subclass is instantiated, so the choice is fixed for that object. | When a strategy is passed in or selected, so it can change at runtime. |
+> | Coupling | Subclasses depend on the base class's hook order and shared state, so a base-class change can affect every subtype. Inheritance also uses the class's single base-class slot. | Variation stays outside the class hierarchy, so the base-class slot remains free. |
+> | Cost | Smallest design when the base genuinely owns most of the workflow. | Adds a separate abstraction and, with several strategies, logic to select among them. |
+> 
+> Template Method fits poorly when behavior must change at runtime or when inheritance exists only to reuse a few lines.
+> 
+> [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Template Method#Tradeoffs|Template Method tradeoffs]]
 
 <!-- qard-id: 6f925cbd-8e7f-4f10-a0f2-f6cc3294b014 -->
 > [!qard]- What is the "Hollywood Principle," and how does Template Method apply it?

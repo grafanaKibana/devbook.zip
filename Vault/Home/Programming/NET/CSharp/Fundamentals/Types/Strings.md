@@ -62,8 +62,8 @@ var result = sb.ToString();
 
 The usual decision is small:
 
-- Use interpolation or concatenation for small, one-off composition.
-- Use `StringBuilder` for repeated incremental construction after the allocation cost matters.
+- Interpolation or concatenation fits small, one-off composition.
+- `StringBuilder` fits repeated incremental construction after the allocation cost matters.
 
 # Encoding and Unicode
 
@@ -82,7 +82,7 @@ Hot paths sometimes need construction without intermediate strings:
 
 # Pitfalls
 
-- Repeated `+=` in a loop creates intermediate strings. In a measured hot path, use `StringBuilder` or a pre-sized buffer to cut that churn.
+- Repeated `+=` in a loop creates intermediate strings. In a measured hot path, `StringBuilder` or a pre-sized buffer cuts that churn.
 - `ReferenceEquals` checks identity, and interning makes identity depend on how the string was created. Semantic comparison should use APIs that accept `StringComparison`, including `string.Equals`, `StartsWith`, `EndsWith`, and `IndexOf`.
 - Culture-implicit comparison can change with the current culture. Identifiers and protocol values normally need `Ordinal` or `OrdinalIgnoreCase`. Natural-language UI text may need a culture-aware comparison instead.
 
@@ -96,11 +96,31 @@ Hot paths sometimes need construction without intermediate strings:
 
 <!-- qard-id: e73d1e16-6636-4fa5-966c-6c12bab1222c -->
 > [!qard]- When is `StringBuilder` a better choice than string concatenation?
-> `StringBuilder` is useful when text grows through repeated appends, especially in a loop, because it avoids creating a new intermediate string for each step. Interpolation or concatenation is clearer for a small one-off expression. Choose a builder when repeated construction makes allocation cost matter; capacity is useful when the final size is reasonably known. [Microsoft: StringBuilder](https://learn.microsoft.com/en-us/dotnet/standard/base-types/stringbuilder)
+> `StringBuilder` is the better choice when text is built through many appends, especially in a loop or another frequently executed path where allocations matter. For a small, fixed expression, interpolation or concatenation is clearer.
+> 
+> The difference comes from string immutability:
+> 
+> - **Repeated concatenation:** a `string` cannot change, so each `result += part` allocates a new string holding the accumulated text plus the new part. Each loop step leaves behind an intermediate string, and the growing text is copied again every time.
+> - **`StringBuilder`:** each append writes into a mutable buffer, and `ToString()` creates the final string once. The buffer reallocates only when it runs out of capacity, so an initial capacity close to the expected final size avoids that growth.
+> 
+> No fixed number of appends marks the switch point. The signal for a builder is repeated construction in code where measured allocation cost matters.
+> 
+> Sources: [Microsoft Learn: Using the StringBuilder class](https://learn.microsoft.com/en-us/dotnet/standard/base-types/stringbuilder)
 
 <!-- qard-id: cbfb80da-9ddd-4625-8352-7a13aa6b2474 -->
 > [!qard]- Why can `ReferenceEquals(a, b)` be false when `a == b` is true for strings?
-> String `==` compares string values, while `ReferenceEquals` checks whether both variables identify the same object. Two separate string instances can therefore contain equal text without sharing identity. Use the comparison rule the data needs, such as ordinal for protocol keys or culture-aware comparison for natural language. [Microsoft: string equality](https://learn.microsoft.com/en-us/dotnet/api/system.string.op_equality?view=net-10.0) · [Microsoft: string comparison best practices](https://learn.microsoft.com/en-us/dotnet/standard/base-types/best-practices-strings)
+> They test different things. For strings, `==` compares contents: it returns true when both strings hold the same characters in the same order, using an ordinal, case-sensitive comparison. `ReferenceEquals` returns true only when both references point to the same object.
+> 
+> Equal text can therefore live in two separate objects. Strings built at run time are not interned automatically, so two strings built from the same pieces are normally distinct instances: `==` returns true while `ReferenceEquals` returns false.
+> 
+> Interning can make identity coincide through two different mechanisms:
+> 
+> - **Explicit `String.Intern`:** it returns the intern pool's reference for a string with that value, adding the argument to the pool if no equal string is there yet. Equal strings passed through `String.Intern` therefore always come back as the same reference.
+> - **Automatic literal interning:** identical string literals typically share one pooled instance, so `ReferenceEquals` often returns true for them. A compilation can request `NoStringInterning`, and runtime behavior may vary, so literal identity is not a dependable contract.
+> 
+> Because identity depends on how each string was produced, `ReferenceEquals` is not a test of content. Content comparisons belong to `==` or `string.Equals`, with an explicit `StringComparison` stating the rule the data needs: ordinal comparison (`Ordinal` or `OrdinalIgnoreCase`) for protocol keys and identifiers, and culture-aware comparison for natural-language text shown to users.
+> 
+> Sources: [Microsoft Learn: Object.ReferenceEquals](https://learn.microsoft.com/en-us/dotnet/api/system.object.referenceequals?view=net-10.0) · [Microsoft Learn: String equality operator](https://learn.microsoft.com/en-us/dotnet/api/system.string.op_equality?view=net-10.0) · [Microsoft Learn: String.Intern](https://learn.microsoft.com/en-us/dotnet/api/system.string.intern?view=net-10.0) · [Microsoft Learn: Best practices for comparing strings](https://learn.microsoft.com/en-us/dotnet/standard/base-types/best-practices-strings)
 
 # References
 
