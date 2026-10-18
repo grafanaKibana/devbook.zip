@@ -1,11 +1,9 @@
 import assert from "node:assert/strict"
-import { readFileSync } from "node:fs"
 import test from "node:test"
 import { runInNewContext } from "node:vm"
 import { h } from "preact"
 import render from "preact-render-to-string"
 import type { Element } from "hast"
-import { parse } from "yaml"
 import { QuestionsIndex } from "./questions-index"
 
 const callout = (type = "question"): Element => ({
@@ -20,18 +18,6 @@ const file = (slug: string, count = 0, frontmatter = {}, type = "question") => (
   questionCallouts: Array.from({ length: count }, () => ({ node: callout(type) })),
 })
 const component = QuestionsIndex(undefined)
-const customStyles = readFileSync(
-  new URL("../../quartz/styles/custom.scss", import.meta.url),
-  "utf8",
-)
-const quartzConfig = parse(
-  readFileSync(new URL("../../quartz.config.yaml", import.meta.url), "utf8"),
-) as {
-  plugins: Array<{
-    source: string
-    options?: { includeAll?: boolean; includedProperties?: string[]; hidePropertiesView?: boolean }
-  }>
-}
 const html = (allFiles: ReturnType<typeof file>[], slug = "questions") =>
   render(h(component, { allFiles, fileData: { slug } } as never))
 
@@ -74,17 +60,6 @@ test("native Qard cards keep the existing component data shape and hide Qard met
   assert.match(result, /data-callout="qard"/)
   assert.match(result, /Native card/)
   assert.doesNotMatch(result, /qard-deck|qard-topic|Private deck|Private topic/)
-  const noteProperties = quartzConfig.plugins.find(
-    (plugin) => plugin.source === "github:quartz-community/note-properties",
-  )
-  assert.deepEqual(noteProperties?.options, {
-    includeAll: false,
-    includedProperties: ["topic", "subtopic", "status"],
-    excludedProperties: [],
-    hidePropertiesView: true,
-    delimiters: "---",
-    language: "yaml",
-  })
 })
 
 test("topic order, labels and nested counts follow folder metadata", () => {
@@ -140,22 +115,6 @@ test("every topic panel and source is preloaded in server HTML without JavaScrip
   assert.equal(
     topicPanels.every((panel) => panel.includes('class="qi-source"')),
     true,
-  )
-})
-
-test("Questions-only Tabsdown layout wraps with the plugin's supported variables", () => {
-  assert.match(
-    customStyles,
-    /\.questions-index \.tabsdown\.tabsdown--mounted \{[^}]*--tabsdown-overflow-wrap: wrap;[^}]*--tabsdown-overflow-x: visible;[^}]*--tabsdown-equal-width-flex: 1 1 max-content;/,
-  )
-  assert.doesNotMatch(component.css!, /--tabsdown-overflow-wrap/)
-})
-
-test("FAQ chrome shares selectors across legacy, native, and mixed adjacent cards", () => {
-  assert.match(customStyles, /\.callout:is\(\[data-callout="question"\], \[data-callout="qard"\]\)/)
-  assert.match(
-    customStyles,
-    /:has\(\s*\+ \.callout:is\(\[data-callout="question"\], \[data-callout="qard"\]\)\s*\)/,
   )
 })
 

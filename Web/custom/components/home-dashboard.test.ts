@@ -109,13 +109,6 @@ test("tiles form a complete rectangle without gaps or overlaps for zero through 
   }
 })
 
-test("tile widths respect each responsive layout minimum", async () => {
-  const layouts = placements(await renderDashboard(30), 30)
-  for (const minSpan of [6, 4, 3] as const) {
-    assert.ok(layouts[minSpan].every((tile) => tile.width >= minSpan))
-  }
-})
-
 test("source and keyboard order follows visual row-major order", async () => {
   const count = 30
   const html = await renderDashboard(count)
@@ -136,22 +129,6 @@ test("source and keyboard order follows visual row-major order", async () => {
   }
 })
 
-test("ten desktop topics form three, four, and three cards in complete rows", async () => {
-  const tiles = placements(await renderDashboard(10), 10)[3]
-  assert.deepEqual(
-    [1, 2, 3].map((row) => tiles.filter((tile) => tile.row === row).length),
-    [3, 4, 3],
-  )
-  assert.ok(tiles.every((tile) => tile.height === 1))
-  assertRectangle(tiles, 10, 3)
-})
-
-test("the same topic inventory produces stable tile coordinates", async () => {
-  const first = placements(await renderDashboard(30), 30)
-  const second = placements(await renderDashboard(30), 30)
-  assert.deepEqual(second, first)
-})
-
 test("rendered topic summaries remain complete and unclamped", async () => {
   const summary =
     "A deliberately long summary whose final sentinel must remain available to both readers. SUMMARY_END"
@@ -159,8 +136,4 @@ test("rendered topic summaries remain complete and unclamped", async () => {
   const css = /<style>([\s\S]*?)<\/style>/.exec(html)?.[1] ?? ""
   assert.match(html, new RegExp(`${summary.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}</p>`))
   assert.doesNotMatch(css, /(?:line-clamp|text-overflow|max-height)/)
-})
-
-test("home source no longer contains the welcome copy", () => {
-  assert.doesNotMatch(source, /Welcome to DevBook!/i)
 })

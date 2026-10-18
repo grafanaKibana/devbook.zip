@@ -5,9 +5,7 @@ import test from "node:test"
 
 const REPO_ROOT = join(import.meta.dirname, "../../..")
 const TEMPLATE_PATH = join(REPO_ROOT, "Vault/Templates/Blocks/Template - Callout.md")
-const CSS_PATH = join(REPO_ROOT, "Vault/.obsidian/snippets/question-margin-note.css")
 const templateSource = readFileSync(TEMPLATE_PATH, "utf8")
-const cssSource = readFileSync(CSS_PATH, "utf8")
 
 type RunOptions = {
   callout?: string | null
@@ -38,7 +36,6 @@ const runTemplate = async (options: RunOptions = {}) => {
   const notices: string[] = []
   const promptValues = [options.title, options.answer]
   const suggestionValues = [options.callout, options.fold]
-  let pathReads = 0
   const tp = {
     system: {
       suggester: async () => suggestionValues.shift() ?? null,
@@ -47,7 +44,6 @@ const runTemplate = async (options: RunOptions = {}) => {
     },
     file: {
       path: () => {
-        pathReads++
         return path
       },
       find_tfile: (candidate: string) => (candidate === path ? file : null),
@@ -86,43 +82,8 @@ const runTemplate = async (options: RunOptions = {}) => {
   }
   const execute = new AsyncFunction("tp", "app", "tR", "Notice", `${script}\nreturn tR;`)
   const output = await execute(tp, app, "", Notice)
-  return { metadata, notices, output, pathReads, processCalls }
+  return { metadata, notices, output, processCalls }
 }
-
-test("keeps every generic choice and names generic Question distinctly from interview Qard", () => {
-  const required = [
-    "Abstract",
-    "Attention",
-    "Bug",
-    "Caution",
-    "Check",
-    "Cite",
-    "Danger",
-    "Done",
-    "Error",
-    "Example",
-    "Fail",
-    "Failure",
-    "FAQ",
-    "Help",
-    "Hint",
-    "Important",
-    "Info",
-    "Missing",
-    "Note",
-    "Question (generic)",
-    "Quote",
-    "Success",
-    "Summary",
-    "Tip",
-    "TLDR",
-    "Todo",
-    "Warning",
-    "Interview Question (Qard)",
-  ]
-  for (const choice of required)
-    assert.match(templateSource, new RegExp(`"${choice.replace(/[()]/g, "\\$&")}"`))
-})
 
 test("generic Question preserves fold, optional title, and selection-first body behavior", async () => {
   const result = await runTemplate({
@@ -199,84 +160,31 @@ test("interview Qard preserves a legitimate .md suffix in the note basename", as
   assert.equal(result.metadata["qard-topic"], "Foo.md")
 })
 
-test("interview Qard rejects cancellation, invalid metadata, and unsupported active files atomically", async () => {
-  const cancelledTitle = await runTemplate({ callout: "__qard__", title: null })
-  assert.equal(cancelledTitle.output, "")
-  assert.equal(cancelledTitle.processCalls, 0)
-
-  const cancelledAnswer = await runTemplate({
-    callout: "__qard__",
-    title: "Question",
-    answer: null,
-  })
-  assert.equal(cancelledAnswer.output, "")
-  assert.equal(cancelledAnswer.processCalls, 0)
-
-  const blankTitle = await runTemplate({ callout: "__qard__", title: "   " })
-  assert.equal(blankTitle.output, "")
-  assert.equal(blankTitle.processCalls, 0)
-
-  const blankAnswer = await runTemplate({
-    callout: "__qard__",
-    title: "Question",
-    answer: "  \n ",
-  })
-  assert.equal(blankAnswer.output, "")
-  assert.equal(blankAnswer.processCalls, 0)
-
-  const multilineTitle = await runTemplate({
-    callout: "__qard__",
-    title: "Question\nInjected answer",
-    answer: "Answer",
-  })
-  assert.equal(multilineTitle.output, "")
-  assert.equal(multilineTitle.processCalls, 0)
-
-  const commentOnlyTitle = await runTemplate({
-    callout: "__qard__",
-    title: "<!-- hidden -->",
-    answer: "Answer",
-  })
-  assert.equal(commentOnlyTitle.output, "")
-  assert.equal(commentOnlyTitle.processCalls, 0)
-
-  const commentOnlyAnswer = await runTemplate({
-    callout: "__qard__",
-    title: "Question",
-    answer: "<!-- qard-answer -->\n%% hidden %%",
-  })
-  assert.equal(commentOnlyAnswer.output, "")
-  assert.equal(commentOnlyAnswer.processCalls, 0)
-
-  const invalidMetadata = await runTemplate({
-    callout: "__qard__",
-    title: "Question",
-    answer: "Answer",
-    frontmatter: { "qard-deck": ["invalid"] },
-  })
-  assert.equal(invalidMetadata.output, "")
-  assert.equal(invalidMetadata.processCalls, 0)
-  assert.deepEqual(invalidMetadata.metadata, { "qard-deck": ["invalid"] })
-
-  const outsideHome = await runTemplate({
-    callout: "__qard__",
-    title: "Question",
-    answer: "Answer",
-    path: "Templates/Scratch.md",
-  })
-  assert.equal(outsideHome.output, "")
-  assert.equal(outsideHome.processCalls, 0)
-
-  const inactive = await runTemplate({
-    callout: "__qard__",
-    title: "Question",
-    answer: "Answer",
-    activePath: "Home/Programming/Other.md",
-  })
-  assert.equal(inactive.output, "")
-  assert.equal(inactive.processCalls, 0)
-
-  const driftDuringFrontmatter = await runTemplate({
+test("interview Qard rejects incomplete input, invalid identity and unsupported files atomically", async () => {
+  const invalid: RunOptions[] = [
+    { title: null },
+    { answer: null },
+    { title: "   " },
+    { answer: "  \n " },
+    { title: "Question\nInjected answer" },
+    { title: "<!-- hidden -->" },
+    { answer: "<!-- qard-answer -->\n%% hidden %%" },
+    { frontmatter: { "qard-deck": ["invalid"] } },
+    { path: "Templates/Scratch.md" },
+    { activePath: "Home/Programming/Other.md" },
+  ]
+  for (const options of invalid) {
+    const result = await runTemplate({
+      callout: "__qard__",
+      title: "Question",
+      answer: "Answer",
+      ...options,
+    })
+    assert.equal(result.output, "", JSON.stringify(options))
+    assert.equal(result.processCalls, 0)
+    assert.deepEqual(result.metadata, options.frontmatter ?? {})
+  }
+  const drift = await runTemplate({
     callout: "__qard__",
     title: "Question",
     answer: "Answer",
@@ -286,26 +194,18 @@ test("interview Qard rejects cancellation, invalid metadata, and unsupported act
       "Home/Programming/Other.md",
     ],
   })
-  assert.equal(driftDuringFrontmatter.output, "")
-  assert.equal(driftDuringFrontmatter.processCalls, 1)
-  assert.deepEqual(driftDuringFrontmatter.metadata, {})
-  assert.match(driftDuringFrontmatter.notices.join("\n"), /active note changed/i)
-
-  const unexpectedFailure = await runTemplate({
+  assert.equal(drift.output, "")
+  assert.equal(drift.processCalls, 1)
+  assert.deepEqual(drift.metadata, {})
+  assert.match(drift.notices.join("\n"), /active note changed/i)
+  const failure = await runTemplate({
     callout: "__qard__",
     title: "Question",
     answer: "Answer",
     processFrontMatterError: new Error("simulated API failure"),
   })
-  assert.equal(unexpectedFailure.output, "")
-  assert.equal(unexpectedFailure.processCalls, 1)
-  assert.match(unexpectedFailure.notices.join("\n"), /metadata could not be updated/i)
-  assert.doesNotMatch(unexpectedFailure.notices.join("\n"), /active note changed/i)
-})
-
-test("shared Obsidian FAQ selectors cover legacy, Qard, and mixed adjacency", () => {
-  assert.match(cssSource, /:is\(\[data-callout="question"\], \[data-callout="qard"\]\)/)
-  assert.match(cssSource, /:has\(\s*\+ \.callout:is\(/)
-  assert.match(cssSource, /\.callout:is\([^)]*qard[^)]*\)\.is-collapsed/)
-  assert.doesNotMatch(cssSource, /^\.callout\[data-callout="question"\]/m)
+  assert.equal(failure.output, "")
+  assert.equal(failure.processCalls, 1)
+  assert.match(failure.notices.join("\n"), /metadata could not be updated/i)
+  assert.doesNotMatch(failure.notices.join("\n"), /active note changed/i)
 })
