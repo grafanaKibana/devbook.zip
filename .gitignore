@@ -25,6 +25,7 @@ _site/
 
 # Obsidian
 **/.obsidian/workspace.json
+Vault/.obsidian/plugins/qard/study-backups/
 Vault/Assets/Docs/
 
 # Python bytecode caches (never track compiled artifacts)
