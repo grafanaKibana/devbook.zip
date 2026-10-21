@@ -29,7 +29,7 @@ if (calloutType === "__qard__") {
   };
   const validLogicalValue = (value) =>
     typeof value === "string" && value.trim().length > 0 && !/[\r\n]/.test(value);
-  const hasAnswerDivider = (value) => {
+  const hasReservedAnswerBoundary = (value) => {
     let fence = "";
     for (const line of value.split(/\r?\n/)) {
       if (fence) {
@@ -38,7 +38,10 @@ if (calloutType === "__qard__") {
       } else {
         const opening = line.match(/^ {0,3}(`{3,}|~{3,})/)?.[1];
         if (opening) fence = opening;
-        else if (line.trim() === "<!-- qard-answer -->") return true;
+        else if (
+          line.trim() === "<!-- qard-answer -->" ||
+          /^[ \t]{0,3}>[ \t]*\[!(?:qard|question)\][+-]?(?:[ \t]+(.*))?$/i.test(`> ${line}`)
+        ) return true;
       }
     }
     return false;
@@ -64,8 +67,8 @@ if (calloutType === "__qard__") {
       const answer = answerInput?.trim();
       if (!answer || !semanticText(answer)) {
         if (answerInput !== null) new Notice("Interview questions require an answer.");
-      } else if (hasAnswerDivider(answer)) {
-        new Notice("The reserved <!-- qard-answer --> divider cannot appear in an interview answer outside a code fence.");
+      } else if (hasReservedAnswerBoundary(answer)) {
+        new Notice("Reserved Qard/Question card headers and the <!-- qard-answer --> divider cannot appear in an interview answer outside a code fence.");
       } else if (!isStable()) {
         new Notice("The active note changed; the interview question was not added.");
       } else {

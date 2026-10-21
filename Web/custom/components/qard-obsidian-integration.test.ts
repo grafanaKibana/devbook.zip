@@ -268,3 +268,50 @@ test("interview Qard preserves literal answer dividers inside native Qard fences
     assert.equal(result.processCalls, 1)
   }
 })
+
+test("interview Qard rejects answer content that would create a sibling interview callout atomically", async () => {
+  for (const source of ["answer", "selection", "clipboard"] as const) {
+    for (const newline of ["\n", "\r\n"]) {
+      for (const header of [
+        "[!qard]- Another question",
+        "[!QaRd]+ Another question",
+        "[!QARD]",
+        "[!qard]-",
+        "[!question]- Another question",
+        "[!QuEsTiOn]+ Another question",
+        " [!question]- Another question",
+        "\t[!question]",
+        "  [!qard]- Another question",
+        "\t[!qard]+ Another question",
+      ]) {
+        const answer = ["First answer.", header, "Second answer."].join(newline)
+        const result = await runTemplate({
+          callout: "__qard__",
+          title: "Question",
+          [source]: answer,
+        })
+        assert.equal(result.output, "", `${source}: ${answer}`)
+        assert.equal(result.processCalls, 0)
+        assert.deepEqual(result.metadata, {})
+        assert.match(result.notices.join("\n"), /reserved.*qard/i)
+      }
+    }
+  }
+})
+
+test("interview Qard preserves fenced and nested quoted card-header examples", async () => {
+  for (const answer of [
+    "First answer.\n```markdown\n[!qard]- Example\n```",
+    "First answer.\n~~~markdown\n[!QaRd]+ Example\n~~~",
+    "First answer.\n````markdown\n```\n[!qard]- Example\n````",
+    "First answer.\n> [!qard]- Nested example\n> Nested answer.",
+    "First answer.\n> [!question]- Nested example\n> Nested answer.",
+    "First answer.\n```markdown\n[!question]- Example\n```",
+    "First answer.\n[!qard]-Not a native header",
+    "First answer.\n`[!qard]- Example`",
+  ]) {
+    const result = await runTemplate({ callout: "__qard__", title: "Question", answer })
+    assert.equal(result.output, `> [!qard]- Question\n> ${answer.replaceAll("\n", "\n> ")}`)
+    assert.equal(result.processCalls, 1)
+  }
+})
