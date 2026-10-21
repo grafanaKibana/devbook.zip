@@ -1,5 +1,6 @@
 """Vault contracts and reversible migration, exercised on disposable vaults."""
 import importlib.util
+import re
 import sys
 import tempfile
 import unittest
@@ -172,6 +173,38 @@ class VaultToolingTests(unittest.TestCase):
         self.write("Card.md", hidden_card + example)
         self.assertIn("card.hidden", [issue["code"] for issue in migration.create_manifest(self.root)["issues"]])
 
+        inline_hidden = "Prose <!--\n> [!qard]- Hidden from Markdown?\n> Answer.\n-->\n"
+        self.assertEqual(["qard.hidden-card"], [issue.code for issue in validator.validate_qard_interviews(self.note(inline_hidden))])
+        self.assertEqual(["card.hidden"], [issue["code"] for issue in migration.create_manifest(self.root)["issues"]])
+
+    def test_qard_native_related_metadata_and_title_fences(self):
+        related_blocks = [
+            "<!-- qard-reverse:  reverse -->\n",
+            "<!-- qard-reverse: first -->\n<!-- qard-reverse: second -->\n",
+            "<!-- qard-siblings: first -->\n<!-- qard-siblings: second -->\n",
+        ]
+        for related in related_blocks:
+            body = '<!-- qard-id: stable -->\n' + related + '> [!qard]- Prompt?\n> Answer.\n'
+            self.assertIn("qard.identity-metadata", [issue.code for issue in validator.validate_qard_interviews(self.note(body))])
+            self.assertIn("card.identity-metadata", [issue["code"] for issue in migration.create_manifest(self.root)["issues"]])
+        tab_literal = '> [!qard]- Q?\n> Before.\n> \t```js\n> Code.\n'
+        self.assertEqual([], validator.validate_qard_interviews(self.note(tab_literal)))
+        self.assertEqual([], migration.create_manifest(self.root)["issues"])
+        title_fence = '> [!qard]- ```text\n> question line\n> ```\n> <!-- qard-answer -->\n> Answer.\n'
+        self.assertEqual([], validator.validate_qard_interviews(self.note(title_fence)))
+        self.assertEqual([], migration.create_manifest(self.root)["issues"])
+        path = self.write("Card.md", '# Questions\n' + title_fence.replace('[!qard]', '[!QUESTION]') + '\n' + tab_literal.replace('[!qard]', '[!QUESTION]'))
+        original = path.read_bytes()
+        manifest = migration.create_manifest(self.root)
+        self.assertEqual([], manifest["issues"])
+        migration.apply_manifest(self.root, manifest)
+        self.assertIn(title_fence, path.read_text())
+        self.assertIn(tab_literal, path.read_text())
+        self.assertEqual([], migration.verify_manifest(self.root, manifest))
+        self.assertEqual([], validator.validate_qard_interviews(validator.load_note(path, self.root)))
+        migration.rollback_manifest(self.root, manifest)
+        self.assertEqual(original, path.read_bytes())
+
     def test_qard_identity_adjacency_and_collapsed_migration(self):
         metadata = '<!-- qard-id: stable -->\n<!-- qard-reverse: reverse -->\n<!-- qard-siblings: siblings -->\n<!-- qard-location: {"deck":"D","topic":"T"} -->\n\n'
         body = metadata + '> [!qard]- Prompt?\n> Answer.\n'
@@ -196,6 +229,39 @@ class VaultToolingTests(unittest.TestCase):
         self.assertEqual([], migration.verify_manifest(self.root, manifest))
         migration.rollback_manifest(self.root, manifest)
         self.assertEqual(original, path.read_bytes())
+
+    def test_migration_canonicalizes_headers_to_native_qard_grammar(self):
+        body = ('# Questions\n<!-- qard-id: existing -->\n'
+                '>  [!QUESTION]- What does "quoted" mean?\n> Answer one.\n\n'
+                '>\t[!QUESTION]+ Second?\n>\tAnswer two.\n\n'
+                '>\u00a0[!QUESTION]- Third?\n> Answer three.\n')
+        path = self.write("Card.md", body)
+        original = path.read_bytes()
+        manifest = migration.create_manifest(self.root)
+        self.assertEqual([], manifest["issues"])
+        self.assertEqual(3, manifest["summary"]["legacy_interview_cards"])
+        self.assertEqual(manifest["files"], migration.create_manifest(self.root)["files"])
+        migration.apply_manifest(self.root, manifest)
+        applied = path.read_text()
+        # Stock Qard 0.6.2's header expression, tested against actual output.
+        native = re.compile(r"^ {0,3}> ?\[!qard\][+-]?(?:[ \t]+(.*))?$", re.I)
+        headers = [line for line in applied.splitlines() if '[!qard]' in line]
+        self.assertEqual(3, len(headers))
+        self.assertTrue(all(native.fullmatch(line) for line in headers))
+        self.assertIn('> [!qard]- What does "quoted" mean?', applied)
+        self.assertIn('<!-- qard-id: existing -->', applied)
+        self.assertIn('>\tAnswer two.', applied)
+        self.assertEqual([], migration.verify_manifest(self.root, manifest))
+        self.assertEqual([], migration.apply_manifest(self.root, manifest))
+        self.assertEqual([], validator.validate_qard_interviews(validator.load_note(path, self.root)))
+        migration.rollback_manifest(self.root, manifest)
+        self.assertEqual(original, path.read_bytes())
+        for prefix in ['>  ', '>\t', '>\u00a0', '\t> ']:
+            invalid = prefix + '[!qard]- Prompt?\n> Answer.\n'
+            self.assertIn('qard.header', [issue.code for issue in validator.validate_qard_interviews(self.note(invalid))])
+            self.assertIn('card.header', [issue['code'] for issue in migration.create_manifest(self.root)['issues']])
+        valid = '>[!qard]- No separating space?\n> Answer.\n\n   > [!qard]- Indented?\n> Answer.\n'
+        self.assertEqual([], validator.validate_qard_interviews(self.note(valid)))
 
     def test_migration_preserves_overrides_ids_and_round_trip(self):
         metadata = 'qard-deck: "Logical Deck"\nqard-topic: "Logical Topic"\n'

@@ -25,17 +25,19 @@ from typing import Iterable
 VERSION = 1
 DEFAULT_REPO_ROOT = Path(__file__).resolve().parent.parent
 HEADER_RE = re.compile(
-    r"^(?P<prefix>[ \t]{0,3}>[ \t]*\[!)(?P<kind>question|qard)"
-    r"(?P<suffix>\](?P<fold>[+-]?)(?:[ \t]+(?P<title>.*))?)(?P<eol>\r\n|\n|\r|)$",
+    r"^(?P<prefix>[^\S\r\n]{0,3}>[^\S\r\n]*\[!)(?P<kind>question|qard)"
+    r"(?P<suffix>\](?P<fold>[+-]?)(?:[^\S\r\n]+(?P<title>.*))?)(?P<eol>\r\n|\n|\r|)$",
     re.IGNORECASE,
 )
-QUOTE_RE = re.compile(r"^[ \t]{0,3}>[ \t]?(?P<text>.*?)(?:\r\n|\n|\r)?$")
-FENCE_RE = re.compile(r"^[ \t]{0,3}(?P<fence>`{3,}|~{3,})")
+NATIVE_QARD_HEADER_RE = re.compile(r"^ {0,3}> ?\[!qard\][+-]?(?:[ \t]+.*)?$", re.IGNORECASE)
+QUOTE_RE = re.compile(r"^ {0,3}> ?(?P<text>.*?)(?:\r\n|\n|\r)?$")
+FENCE_RE = re.compile(r"^ {0,3}(?P<fence>`{3,}|~{3,})")
 QUESTION_HEADING_RE = re.compile(r"^# Questions[ \t]*(?:\r\n|\n|\r)?$")
 H1_RE = re.compile(r"^# [^#].*?(?:\r\n|\n|\r)?$")
 ID_RE = re.compile(r"^[ \t]*<!--[ \t]*qard-id:[ \t]*([A-Za-z0-9_-]+)[ \t]*-->[ \t]*$")
 ID_LOOSE_RE = re.compile(r"^[ \t]*<!--[ \t]*qard-id:[ \t]*(.*?)[ \t]*-->[ \t]*$")
-RELATED_RE = re.compile(r"^[ \t]*<!--[ \t]*qard-(?:siblings|reverse):[ \t]*[A-Za-z0-9_-]+[ \t]*-->[ \t]*$")
+RELATED_RE = re.compile(r"^\s*<!-- qard-(siblings|reverse): ([A-Za-z0-9_-]+) -->\s*$")
+RELATED_LOOSE_RE = re.compile(r"^[ \t]*<!--[ \t]*qard-(siblings|reverse):.*?-->[ \t]*$")
 LOCATION_RE = re.compile(r"^[ \t]*<!--[ \t]*qard-location:[ \t]*(.+?)[ \t]*-->[ \t]*$")
 ANSWER_MARKER = "<!-- qard-answer -->"
 METADATA_FIELDS = ("qard-deck", "qard-topic")
@@ -93,16 +95,17 @@ def scan_active_lines(lines: list[str], *, obsidian_comments: bool = True) -> li
             fence = ""
             in_card = False
         code_line = quoted.group("text") if in_card and quoted else raw
-        if not fence and HEADER_RE.match(raw):
+        card_header = HEADER_RE.match(raw) if not fence else None
+        if card_header:
             in_card = True
         # Literal delimiters inside code never change Markdown comment state.
         if fence:
             active.append(False)
-            closing = re.match(r"^[ \t]{0,3}(`+|~+)[ \t]*$", code_line)
+            closing = re.match(r"^ {0,3}(`+|~+)\s*$", code_line)
             if closing and closing.group(1)[0] == fence[0] and len(closing.group(1)) >= len(fence):
                 fence = ""
             continue
-        opening = re.match(r"^[ \t]{0,3}(`{3,}|~{3,})", code_line) if comment_end is None else None
+        opening = re.match(r"^ {0,3}(`{3,}|~{3,})", code_line) if comment_end is None else None
         if opening:
             active.append(False)
             fence = opening.group(1)
@@ -121,12 +124,19 @@ def scan_active_lines(lines: list[str], *, obsidian_comments: bool = True) -> li
             opener = re.search(r"<!--|%%" if obsidian_comments else r"<!--", remaining)
             if opener is None:
                 break
+            # Native Qard starts HTML comments only at the beginning of a line.
+            if not obsidian_comments and opener.start() and not remaining[:opener.start()].isspace():
+                break
             # A complete HTML metadata comment is active for adjacency checks.
             if opener.group() == "%%":
                 hidden = True
             comment_end = "-->" if opener.group() == "<!--" else "%%"
             remaining = remaining[opener.end():]
         active.append(not hidden)
+        if card_header and not hidden:
+            title_fence = re.match(r"^ {0,3}(`{3,}|~{3,})", card_header.group("title") or "")
+            if title_fence:
+                fence = title_fence.group(1)
     return active
 
 
@@ -251,6 +261,7 @@ def parse_qard_string_scalar(raw: str) -> str | None:
 def preceding_card_metadata(lines: list[str], header_index: int) -> tuple[str | None, str | None]:
     card_id: str | None = None
     location: str | None = None
+    related_fields: set[str] = set()
     index = header_index - 1
     if index >= 0 and not visible_line(lines[index]).strip():
         index -= 1
@@ -265,8 +276,8 @@ def preceding_card_metadata(lines: list[str], header_index: int) -> tuple[str | 
             card_id = id_match.group(1)
         elif location_match and location is None:
             location = location_match.group(1)
-        elif RELATED_RE.match(raw):
-            pass
+        elif (related := RELATED_RE.match(raw)) and related.group(1) not in related_fields:
+            related_fields.add(related.group(1))
         else:
             break
         index -= 1
@@ -292,8 +303,8 @@ def validate_location(raw: str | None) -> bool:
 
 
 def semantic_parts(title: str, body: list[str]) -> tuple[str, str, bool]:
-    active = scan_active_lines(body)
-    marker_indexes = [index for index, value in enumerate(body) if active[index] and value.strip() == ANSWER_MARKER]
+    active = scan_active_lines([title, *body])
+    marker_indexes = [index for index, value in enumerate(body) if active[index + 1] and value.strip() == ANSWER_MARKER]
     if len(marker_indexes) > 1:
         return "", "", False
     if marker_indexes:
@@ -320,7 +331,7 @@ def strip_hidden_comments(content: str) -> str:
     for raw_line in content.splitlines(keepends=True):
         line = raw_line.rstrip("\r\n")
         ending = raw_line[len(line) :]
-        fence_match = re.match(r"^[ \t]{0,3}(`{3,}|~{3,})", line)
+        fence_match = re.match(r"^ {0,3}(`{3,}|~{3,})", line)
         if fence:
             visible.append(raw_line)
             if (
@@ -384,16 +395,24 @@ def scan_note(path: Path, repo_root: Path) -> dict[str, object]:
             continue
         kind = header.group("kind").casefold()
         if kind == "qard" and native_active[position] and not active[position]:
-            issues.append({"code": "card.hidden", "line": position + 1, "message": "Qard indexes cards hidden by Obsidian %% comments"})
+            issues.append({"code": "card.hidden", "line": position + 1, "message": "Qard indexes this card despite Markdown/Obsidian comment hiding"})
         if not active[position] or (kind == "question" and not scope[position]):
             continue
         previous = position - 1
         if previous >= 0 and not visible_line(lines[previous]).strip():
             previous -= 1
+        related_fields: set[str] = set()
         while previous >= 0 and active[previous] and (
             ID_LOOSE_RE.match(visible_line(lines[previous])) or LOCATION_RE.match(visible_line(lines[previous]))
-            or RELATED_RE.match(visible_line(lines[previous]))
+            or RELATED_LOOSE_RE.match(visible_line(lines[previous]))
         ):
+            raw_metadata = visible_line(lines[previous])
+            related = RELATED_LOOSE_RE.match(raw_metadata)
+            if related:
+                if not RELATED_RE.match(raw_metadata) or related.group(1) in related_fields:
+                    issues.append({"code": "card.identity-metadata", "line": previous + 1, "message": "Malformed or repeated related metadata interrupts native Qard identity attachment"})
+                    break
+                related_fields.add(related.group(1))
             if ID_LOOSE_RE.match(visible_line(lines[previous])):
                 attached_ids.add(previous)
             previous -= 1
@@ -417,7 +436,7 @@ def scan_note(path: Path, repo_root: Path) -> dict[str, object]:
             index += 1
             continue
         body: list[str] = []
-        title_fence = re.match(r"^[ \t]{0,3}(`{3,}|~{3,})", match.group("title") or "")
+        title_fence = re.match(r"^ {0,3}(`{3,}|~{3,})", match.group("title") or "")
         card_fence = title_fence.group(1) if title_fence else ""
         end = index + 1
         while end < len(lines):
@@ -425,7 +444,7 @@ def scan_note(path: Path, repo_root: Path) -> dict[str, object]:
             if quoted is None or (active[end] and HEADER_RE.match(lines[end])):
                 break
             text = quoted.group("text")
-            fence_match = re.match(r"^[ \t]{0,3}(`{3,}|~{3,})(.*)$", text)
+            fence_match = re.match(r"^ {0,3}(`{3,}|~{3,})(.*)$", text)
             if card_fence:
                 if fence_match and fence_match.group(1)[0] == card_fence[0] and len(fence_match.group(1)) >= len(card_fence) and not fence_match.group(2).strip():
                     card_fence = ""
@@ -440,7 +459,7 @@ def scan_note(path: Path, repo_root: Path) -> dict[str, object]:
         # Fence delimiters alone are not an answer; literal code contents are.
         def has_content(value: str) -> bool:
             visible = strip_hidden_comments(value)
-            return bool(re.sub(r"(?m)^[ \t]{0,3}(?:`{3,}|~{3,})[^\n]*$", "", visible).strip())
+            return bool(re.sub(r"(?m)^ {0,3}(?:`{3,}|~{3,})[^\n]*$", "", visible).strip())
 
         front_nonempty = has_content(front)
         back_nonempty = has_content(back)
@@ -460,6 +479,8 @@ def scan_note(path: Path, repo_root: Path) -> dict[str, object]:
             "header": lines[index],
         }
         cards.append(card)
+        if kind == "qard" and not NATIVE_QARD_HEADER_RE.fullmatch(visible_line(lines[index])):
+            issues.append({"code": "card.header", "line": index + 1, "message": "Qard header does not match native callout whitespace syntax"})
         if kind == "qard" and match.group("fold") != "-":
             issues.append({"code": "card.collapsed", "line": index + 1, "message": "Qard cards must use collapsed callouts"})
         if not marker_valid:
@@ -580,9 +601,8 @@ def qard_header(original: str) -> str:
     match = HEADER_RE.match(original)
     if match is None or match.group("kind").casefold() != "question":
         raise MigrationError("manifest header no longer describes a legacy interview card")
-    start, end = match.span("kind")
-    fold_end = match.end("fold")
-    return original[:start] + "qard" + original[end:match.start("fold")] + "-" + original[fold_end:]
+    title = match.group("title")
+    return "> [!qard]-" + (" " + title if title is not None else "") + match.group("eol")
 
 
 def render_applied_bytes(repo_root: Path, entry: dict[str, object], source: bytes | None = None) -> bytes:

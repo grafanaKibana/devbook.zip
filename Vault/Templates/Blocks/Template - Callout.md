@@ -29,8 +29,8 @@ if (calloutType === "__qard__") {
   };
   const validLogicalValue = (value) =>
     typeof value === "string" && value.trim().length > 0 && !/[\r\n]/.test(value);
-  const hasReservedAnswerBoundary = (value) => {
-    let fence = "";
+  const hasInvalidAnswerStructure = (value, title) => {
+    let fence = title.match(/^ {0,3}(`{3,}|~{3,})/)?.[1] || "";
     for (const line of value.split(/\r?\n/)) {
       if (fence) {
         const closing = line.match(/^ {0,3}(`+|~+)\s*$/)?.[1];
@@ -44,7 +44,7 @@ if (calloutType === "__qard__") {
         ) return true;
       }
     }
-    return false;
+    return fence.length > 0;
   };
   const semanticText = (value) =>
     value
@@ -64,11 +64,11 @@ if (calloutType === "__qard__") {
       const answerInput = selection.trim()
         ? selection
         : (await tp.system.clipboard()).trim() || await tp.system.prompt("Answer (Shift+Enter for new line)", "", false, true);
-      const answer = answerInput?.trim();
+      const answer = answerInput?.replace(/\r\n?/g, "\n").trim();
       if (!answer || !semanticText(answer)) {
         if (answerInput !== null) new Notice("Interview questions require an answer.");
-      } else if (hasReservedAnswerBoundary(answer)) {
-        new Notice("Reserved Qard/Question card headers and the <!-- qard-answer --> divider cannot appear in an interview answer outside a code fence.");
+      } else if (hasInvalidAnswerStructure(answer, title)) {
+        new Notice("Interview answers must close all code fences and cannot contain reserved Qard/Question headers or <!-- qard-answer --> dividers outside code fences.");
       } else if (!isStable()) {
         new Notice("The active note changed; the interview question was not added.");
       } else {

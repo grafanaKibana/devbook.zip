@@ -2,10 +2,44 @@ import assert from "node:assert/strict"
 import { readFileSync } from "node:fs"
 import { join } from "node:path"
 import test from "node:test"
+import { parseDocument } from "yaml"
 
 const REPO_ROOT = join(import.meta.dirname, "../../..")
 const TEMPLATE_PATH = join(REPO_ROOT, "Vault/Templates/Blocks/Template - Callout.md")
 const templateSource = readFileSync(TEMPLATE_PATH, "utf8")
+
+// Evaluate only Qard 0.6.2's pure Markdown parser and its pure dependencies,
+// never the plugin bootstrap, Obsidian APIs, or saved study state.
+const nativeVersion = JSON.parse(
+  readFileSync(join(REPO_ROOT, "Vault/.obsidian/plugins/qard/manifest.json"), "utf8"),
+).version
+assert.equal(
+  nativeVersion,
+  "0.6.2",
+  "Review the pure-parser extraction when upgrading bundled Qard",
+)
+const nativeSource = readFileSync(join(REPO_ROOT, "Vault/.obsidian/plugins/qard/main.js"), "utf8")
+const nativeSection = (start: string, end: string) => {
+  const first = nativeSource.indexOf(start)
+  const last = nativeSource.indexOf(end, first + start.length)
+  assert.ok(first >= 0 && last > first, `Bundled Qard parser section unavailable: ${start}`)
+  return nativeSource.slice(first, last)
+}
+const parseNativeQard = new Function(
+  "zd",
+  nativeSection("function zn(", "function ") +
+    nativeSection("function Sd(", "function ") +
+    "var " +
+    nativeSection("Ti=/", "function Fo(") +
+    nativeSection("function DB(", "function Dk(") +
+    "; return Xe;",
+)(parseDocument) as (
+  markdown: string,
+  path: string,
+) => {
+  cards: Array<{ frontMarkdown: string; backMarkdown: string }>
+  issues: Array<{ message: string }>
+}
 
 type RunOptions = {
   callout?: string | null
@@ -313,5 +347,90 @@ test("interview Qard preserves fenced and nested quoted card-header examples", a
     const result = await runTemplate({ callout: "__qard__", title: "Question", answer })
     assert.equal(result.output, `> [!qard]- Question\n> ${answer.replaceAll("\n", "\n> ")}`)
     assert.equal(result.processCalls, 1)
+  }
+})
+
+test("interview Qard rejects unclosed answer fences atomically using the native parser contract", async () => {
+  for (const source of ["answer", "selection", "clipboard"] as const) {
+    for (const newline of ["\n", "\r\n"]) {
+      for (const lines of [
+        ["First answer.", "```text", "Unclosed example"],
+        ["First answer.", "~~~text", "Unclosed example"],
+        ["First answer.", "````text", "Short closer", "```"],
+        ["First answer.", "~~~text", "Mismatched closer", "```"],
+        ["First answer.", "```text", "Not a closing fence", "``` suffix"],
+      ]) {
+        const answer = lines.join(newline)
+        const native = parseNativeQard(
+          `> [!qard]- Question\n> ${answer.replaceAll("\n", "\n> ")}`,
+          "Home/Test.md",
+        )
+        assert.equal(native.cards.length, 0)
+        assert.match(native.issues[0]?.message ?? "", /unclosed code fence/i)
+        const result = await runTemplate({
+          callout: "__qard__",
+          title: "Question",
+          [source]: answer,
+        })
+        assert.equal(result.output, "", `${source}: ${answer}`)
+        assert.equal(result.processCalls, 0)
+        assert.deepEqual(result.metadata, {})
+        assert.match(result.notices.join("\n"), /fence/i)
+      }
+    }
+  }
+})
+
+test("accepted template cards retain their question and complete answer in the bundled native parser", async () => {
+  for (const answer of [
+    "Plain answer.",
+    "An example.\n```html\n<!-- qard-answer -->\n[!qard]- Literal header\n```",
+    "An example.\n~~~text\nLiteral answer\n~~~~",
+    "An example.\n````markdown\n```\n<!-- qard-answer -->\n`````",
+    "A nested quote.\n> [!qard]- Nested example\n> Nested answer.",
+  ]) {
+    const result = await runTemplate({ callout: "__qard__", title: "Question", answer })
+    const native = parseNativeQard(result.output, "Home/Test.md")
+    assert.deepEqual(native.issues, [])
+    assert.equal(native.cards.length, 1)
+    assert.equal(native.cards[0].frontMarkdown, "Question")
+    assert.equal(native.cards[0].backMarkdown, answer)
+  }
+})
+
+test("interview Qard rejects unfinished fences opened in the title before metadata writes", async () => {
+  for (const title of ["```text", "~~~text"]) {
+    const native = parseNativeQard(`> [!qard]- ${title}\n> Answer`, "Home/Test.md")
+    assert.equal(native.cards.length, 0)
+    assert.match(native.issues[0]?.message ?? "", /unclosed code fence/i)
+    const result = await runTemplate({ callout: "__qard__", title, answer: "Answer" })
+    assert.equal(result.output, "")
+    assert.equal(result.processCalls, 0)
+    assert.deepEqual(result.metadata, {})
+  }
+})
+
+test("interview Qard preserves complete answers with every native newline style", async () => {
+  for (const source of ["answer", "selection", "clipboard"] as const) {
+    for (const newline of ["\n", "\r\n", "\r"]) {
+      const result = await runTemplate({
+        callout: "__qard__",
+        title: "Question",
+        [source]: ["First line.", "Second line."].join(newline),
+      })
+      const native = parseNativeQard(result.output, "Home/Test.md")
+      assert.deepEqual(native.issues, [])
+      assert.equal(native.cards.length, 1)
+      assert.equal(native.cards[0].backMarkdown, "First line.\nSecond line.")
+    }
+  }
+  for (const title of ["```text", "~~~text"]) {
+    const answer = `Code example.\n${title.slice(0, 3)}`
+    const result = await runTemplate({ callout: "__qard__", title, answer })
+    const native = parseNativeQard(result.output, "Home/Test.md")
+    assert.deepEqual(native.issues, [])
+    assert.equal(native.cards.length, 1)
+    assert.equal(native.cards[0].frontMarkdown, title)
+    assert.equal(native.cards[0].backMarkdown, answer)
   }
 })
