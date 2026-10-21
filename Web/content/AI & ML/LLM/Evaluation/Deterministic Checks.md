@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-10-12T09:19:58.225Z
-modified: 2026-10-12T09:19:58.225Z
-published: 2026-10-12T09:19:58.225Z
+created: 2026-10-21T13:29:32.425Z
+modified: 2026-10-21T13:29:32.425Z
+published: 2026-10-21T13:29:32.425Z
 topic:
   - AI & ML
 subtopic:
@@ -14,11 +14,12 @@ priority: Medium
 status: Done
 qard-deck: AI & ML
 qard-topic: LLM/Evaluation/Deterministic Checks
+flashcard_uid: 29dd80f1
 ---
 
-Deterministic checks turn explicit requirements into executable pass/fail rules. They validate structure, required fields, tool permissions, and other contracts without asking another model for an opinion. Run them before semantic scorers. There is no reason to pay for a judge when the output is malformed or an agent called a forbidden tool.
+Deterministic checks turn explicit requirements into executable pass/fail rules. They validate structure, required fields, tool permissions, and other contracts without asking another model for an opinion. They run before semantic scorers, so no judge call is paid for when the output is malformed or an agent called a forbidden tool.
 
-The boundary is simple: deterministic checks enforce properties that can be stated exactly. They cannot decide whether a valid action was the right action, whether an explanation is persuasive, or whether an answer captured the user's intent.
+The boundary is simple: deterministic checks enforce properties that can be stated exactly. They can judge correctness only where an explicit rule encodes it. Without such a rule, they cannot decide whether a valid action was the right action, whether an explanation is persuasive, or whether an answer captured the user's intent.
 
 # Types of Deterministic Checks
 
@@ -66,7 +67,7 @@ LLM Output
 [3] Human review          ← for high-stakes or ambiguous cases
 ```
 
-Run deterministic checks first. Malformed JSON and disallowed actions are hard failures.
+Deterministic checks run first because malformed JSON and disallowed actions are hard failures.
 
 # Deterministic Checks Vs LLM-as-Judge
 
@@ -87,7 +88,7 @@ The two layers solve different problems. Hard contracts belong in code. Semantic
 
 Schema validation can pass an output that is semantically wrong. The `action` field may contain `"search"` even when the case required `"escalate"`. Both values are valid under the contract.
 
-Add deterministic business rules only where the expected behavior is explicit. Cases that require judgment should continue to a rubric scorer rather than hiding a semantic decision inside brittle string matching.
+Deterministic business rules fit only where the expected behavior is explicit. Cases that require judgment belong with a rubric scorer, since brittle string matching would hide a semantic decision.
 
 ## Treating Deterministic Failures as Soft Warnings
 
@@ -99,12 +100,21 @@ Some scanners are heuristic, so their operational response may be quarantine or 
 
 Validating only the final response misses the actions that produced it. An agent can call `delete_record`, receive a successful result, and then return perfectly valid JSON.
 
-Apply permission and argument checks at the tool boundary, before execution. Output validation comes later.
+Permission and argument checks belong at the tool boundary, before execution. Output validation comes later.
 
 # Questions
 
-> [!qard]- What is the minimum useful set of deterministic checks for a tool-using agent?
-> Start with the contracts that can prevent irreversible harm: tool permission, argument validation, and output schema. Add data-loss prevention, citation, rendering, or length rules only when the product contract requires them. Each rule needs an explicit failure policy.
+<!-- qard-id: a37f0da1-2f80-49e2-90ed-6c7ef87f195f -->
+
+> [!qard]- Which deterministic checks should run before and after a tool-using agent calls a tool?
+> Before a tool runs, deterministic checks confirm that the caller is allowed to perform the requested action and validate the arguments against the tool's contract. After the call, they validate any returned data against the schema the next step expects.
+>
+> - **Before execution:** a permission or allowlist rule rejects an action the caller may not take. Argument validation rejects missing, malformed or out-of-range inputs. These checks must come first because later validation cannot undo a side effect: an agent can call `delete_record`, receive a success result and still return perfectly valid JSON.
+> - **After execution:** result validation stops malformed or unexpected data from reaching the next step.
+>
+> A strict function schema constrains the shape of arguments. Schema validity neither authorizes the action nor shows that it was the right action. A schema-valid request can still choose the wrong permitted action, such as `search` when the case required `escalate`. The product's risks determine which further checks are needed and whether a failure is rejected outright or routed to review.
+>
+> Sources: [OpenAI: Function calling](https://developers.openai.com/api/docs/guides/function-calling) · [OWASP: LLM06 Excessive Agency](https://genai.owasp.org/llmrisk/llm062025-excessive-agency/) · [JSON Schema Core](https://json-schema.org/draft/2020-12/json-schema-core)
 
 # References
 

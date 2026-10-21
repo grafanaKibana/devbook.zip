@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-10-12T09:19:58.308Z
-modified: 2026-10-12T09:19:58.308Z
-published: 2026-10-12T09:19:58.308Z
+created: 2026-10-14T11:59:33.505Z
+modified: 2026-10-14T11:59:33.505Z
+published: 2026-10-14T11:59:33.505Z
 tags:
   - FolderNote
 topic:
@@ -37,9 +37,6 @@ These patterns can share nearly identical class diagrams while serving different
 | [[Software Architecture/Patterns/Design Patterns/Structural/Proxy]] | Control access through a same-interface surrogate. | Access must be deferred, cached, authorized, or made remote without changing clients. |
 
 # Questions
-
-> [!qard]- Decorator and Proxy can have the same class structure. What determines which pattern is present?
-> Intent. A Decorator adds composable behavior to an object. A Proxy controls access to another object, perhaps by deferring creation or enforcing authorization. The wrapper's responsibility and the reason it exists matter more than the diagram.
 
 # References
 

@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-10-12T09:19:58.244Z
-modified: 2026-10-12T11:08:57.038Z
-published: 2026-10-12T11:08:57.038Z
+created: 2026-10-21T13:29:32.434Z
+modified: 2026-10-21T13:29:32.434Z
+published: 2026-10-21T13:29:32.434Z
 topic:
   - Data Persistence
 subtopic:
@@ -14,6 +14,7 @@ priority: High
 status: Ready to Repeat
 qard-deck: Data Persistence
 qard-topic: ORMs/Entity Framework
+flashcard_uid: 920a0510
 ---
 
 Entity Framework Core (EF Core) is a cross-platform .NET ORM. A database provider maps its model and query pipeline to a specific engine. Microsoft ships providers for SQL Server, SQLite, and Azure Cosmos DB. PostgreSQL and MySQL support comes from external provider packages with their own compatibility schedules.
@@ -183,11 +184,11 @@ The filter is part of the security and correctness boundary when it carries tena
 
 ## Lazy Loading in Production
 
-**What goes wrong**: lazy loading is enabled and navigation properties are accessed in loops, causing N+1 queries. A page that loads 100 orders and accesses `order.Customer` for each fires 101 queries.
+**What goes wrong**: lazy loading is enabled and navigation properties are accessed in loops, causing N+1 queries. A page that loads 100 orders and accesses `order.Customer` for each can fire up to 101 queries. The full count occurs when the orders reference 100 distinct customers that the context has not already loaded; shared or already tracked customers can need fewer queries.
 
 **Why it happens**: lazy loading is convenient in development but hides query patterns.
 
-**Mitigation**: lazy loading is off unless it is configured. Prefer a projection when the response has a fixed shape, or load the required navigation explicitly. Inspect command counts in tests and telemetry instead of assuming an object traversal stays in memory.
+**Mitigation**: lazy loading is off unless it is configured. A projection suits a response with a fixed shape, and explicit loading of the required navigation is the alternative. Command counts in tests and telemetry confirm the actual query behavior, because an object traversal cannot be assumed to stay in memory.
 
 ## Cartesian Explosion from Multiple Includes
 
@@ -198,26 +199,91 @@ Two sibling collection includes can produce a relational cross product. An order
 - **Model and migrations**: the EF model owns intended schema evolution, and reviewed migrations carry it forward.
 - **Reverse engineering**: `dotnet ef dbcontext scaffold` generates a model from an existing schema. Re-scaffolding and custom code need an ownership policy because generated files can change.
 
-Choose the owner first. Application-owned schemas fit model-driven migrations. An externally governed or existing schema fits reverse engineering, often with partial classes or separate configuration to keep custom behavior out of regenerated code.
+The schema owner is decided first. Application-owned schemas fit model-driven migrations. An externally governed or existing schema fits reverse engineering, often with partial classes or separate configuration to keep custom behavior out of regenerated code.
 
 ## Zero-Downtime Migrations
 
 Schema changes take provider-specific locks and may scan or rewrite a large table. Adding a required column, changing a type, building an index, or validating a constraint can exceed the deployment window even when the migration looks small. A generated migration does not establish that an operation is online.
 
-**Mitigation**: use an expand-contract rollout when old and new application versions must overlap:
+**Mitigation**: an expand-contract rollout applies when old and new application versions must overlap:
 
-1. Add a backward-compatible schema shape using the target engine's online-safe procedure where one exists.
-2. Deploy code that can read the old and new shapes and writes the new value.
-3. Backfill in bounded batches while monitoring locks, log growth, and replica lag.
-4. Validate the new invariant, make the column required when the engine can do so within the window, then remove obsolete compatibility code in a later release.
+1. A backward-compatible schema shape is added first, using the target engine's online-safe procedure where one exists.
+2. Next, a deployment ships code that can read the old and new shapes and writes the new value.
+3. The backfill runs in bounded batches while locks, log growth, and replica lag are monitored.
+4. The new invariant is validated, the column is made required when the engine can do so within the window, and obsolete compatibility code is then removed in a later release.
 
 # Questions
 
+> [!qard]- What lifetime should an EF Core `DbContext` have, and why?
+> An EF Core `DbContext` should live for one unit of work and serve one operation at a time. It is a session that tracks entities and coordinates `SaveChanges` for that unit of work. It is also not thread-safe, and EF Core does not support parallel operations on one instance.
+>
+> - **Web requests:** in ASP.NET Core, `AddDbContext` registers the context as scoped by default, so each request usually gets its own instance. One request can still contain several separate units of work.
+> - **Background or parallel work:** each task needs its own fresh context, typically created through `IDbContextFactory<TContext>`, rather than a shared request instance.
+> - **Singletons:** a singleton that captures a scoped context keeps one instance alive across requests, so concurrent requests can end up sharing it. This is the captive-dependency failure.
+> - **Context pooling:** `AddDbContextPool` reuses reset context instances to lower setup cost. Per-request state, such as a tenant identifier, must therefore be re-established safely on each use.
+>
+> [EF Core DbContext lifetime, configuration, and initialization](https://learn.microsoft.com/en-us/ef/core/dbcontext-configuration/) · [EF Core advanced performance topics and context pooling](https://learn.microsoft.com/en-us/ef/core/performance/advanced-performance-topics)
+
+<!-- qard-id: dd44ad40-d794-44fa-bdc0-f28f8e0e801a -->
+
 > [!qard]- How does EF Core change tracking work, and when is a no-tracking query appropriate?
-> A tracking query attaches its entity instances to the context and reuses the same instance when the same entity key appears again. With the default snapshot strategy, EF Core compares current values with the tracked original values when change detection runs, normally before `SaveChanges()`. `.AsNoTracking()` fits a read-only result that will not be updated through that context. If a disconnected entity is attached later, the application must state which properties changed and how concurrency will be checked.
+> EF Core change tracking records the entities that a `DbContext` loads, adds or attaches. It then compares their current values with remembered original values to decide what `SaveChanges` must write. A no-tracking query fits results that are only read and will not be updated through that context.
+>
+> With the default snapshot strategy, tracking works in four steps:
+>
+> 1. **Track:** a tracking query, the default for entity queries, attaches each returned entity to the context and keeps a snapshot of its original values. If an entity with the same key is already tracked, EF Core returns that existing instance instead of a new object. This is identity resolution.
+> 2. **Modify:** application code changes ordinary properties. Under this strategy, assigning a property does not notify EF Core.
+> 3. **Detect:** before `SaveChanges` writes, automatic change detection compares current values with the snapshot and marks changed entities and properties as modified.
+> 4. **Save:** `SaveChanges` sends the inserts, updates and deletes that the tracked entity states require.
+>
+> `.AsNoTracking()` skips setting up this tracking information, which usually makes read-only queries cheaper. In exchange, `SaveChanges` neither detects nor saves changes to the returned objects. A plain no-tracking query also skips identity resolution, so one row returned twice becomes two separate objects. Later use of such a detached object for an update requires attaching it, stating which entity or properties are modified and handling concurrency. The context never recorded the object's original values.
+>
+> [EF Core: Tracking vs. no-tracking queries](https://learn.microsoft.com/en-us/ef/core/querying/tracking) · [EF Core: Change detection](https://learn.microsoft.com/en-us/ef/core/change-tracking/change-detection)
+
+<!-- qard-id: bbf994dd-c7ce-441b-b48c-a8c58cc163ee -->
+
+> [!qard]- How does EF Core detect that another writer changed a row between reading it and saving an update?
+> EF Core detects the conflict through optimistic concurrency. The original value of a configured concurrency token is added to the `WHERE` clause of the `UPDATE` or `DELETE`. A command that then affects zero rows raises `DbUpdateConcurrencyException`. This detection does not require a database lock to span the read, the application's work and the save. Whether any lock is held during that interval depends separately on the enclosing transaction and its isolation level.
+>
+> 1. **Read:** EF Core loads the row and remembers the token's original value. In SQL Server, a `rowversion` column is a common token because the database changes it on every update.
+> 2. **Save:** the generated command changes the row only if its key and token still equal the values that were read.
+> 3. **Conflict:** if another writer updated the row in between, the token differs and the predicate matches nothing. EF Core treats the zero-row result as a conflict and throws `DbUpdateConcurrencyException`.
+>
+> ```sql
+> -- Simplified shape of the generated command
+> UPDATE Orders
+> SET Status = @newStatus
+> WHERE Id = @id AND Version = @originalVersion;
+> ```
+>
+> The application then resolves the conflict. It reloads and merges values, retries the operation from fresh state, or reports the conflict.
+>
+> **Limit:** the check covers only the rows that the command updates or deletes. It does not detect a concurrent change to other rows that a decision relied on, such as a newly inserted overlapping booking. Protecting such a predicate needs a stronger mechanism, such as Serializable isolation.
+>
+> [EF Core: Handling concurrency conflicts](https://learn.microsoft.com/en-us/ef/core/saving/concurrency)
+
+<!-- qard-id: 5e9681ff-5093-4fb4-b6ff-b76f1501d587 -->
 
 > [!qard]- What is the N+1 query problem, and how can it be detected?
-> N+1 means one query loads parent rows and later navigation access issues another query for each parent. Detect it by counting database commands per operation and inspecting generated SQL in logs or tracing. Fix the query shape with a projection, an explicit include, or a deliberate second query. The choice depends on result size and consistency needs. There is no universal collection-size threshold for split queries.
+> The N+1 query problem occurs when one query loads N parent rows and code then triggers a separate query for each parent's related data. The result is N + 1 round trips instead of one or two. In EF Core it commonly comes from lazy loading: accessing a navigation inside a loop can issue a query per item.
+>
+> ```csharp
+> var orders = await db.Orders.ToListAsync();   // 1 query
+> foreach (var order in orders)
+>     Console.WriteLine(order.Customer.Name);   // with lazy loading: can query once per order
+> ```
+>
+> Each extra query adds a round trip, so the cost grows with the number of parents. A page that seems fast with little test data can degrade as production data grows.
+>
+> **Detection:**
+>
+> - **Command count per operation:** counting the database commands that one request or test issues reveals N+1 when the count grows with the number of parent rows.
+> - **Logged SQL:** the log shows the same statement repeated many times, with only the key parameter changing.
+> - **Traces:** one request contains many short, sequential database spans.
+>
+> **Fixes** reduce the round trips. Options include a projection that selects only the related columns the result needs, an `Include` that eager-loads the navigation, or a deliberate second query that loads the related rows for all parents at once. The right choice depends on the result shape and consistency needs. No single collection-size threshold decides it.
+>
+> [EF Core: Efficient querying](https://learn.microsoft.com/en-us/ef/core/performance/efficient-querying)
 
 # References
 

@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-10-12T09:19:58.272Z
-modified: 2026-10-12T09:19:58.272Z
-published: 2026-10-12T09:19:58.272Z
+created: 2026-10-21T13:29:32.447Z
+modified: 2026-10-21T13:29:32.447Z
+published: 2026-10-21T13:29:32.447Z
 topic:
   - Security
 subtopic:
@@ -14,6 +14,7 @@ priority: High
 status: Ready to Repeat
 qard-deck: Security
 qard-topic: Authentication/Basic Auth
+flashcard_uid: ebb77730
 ---
 
 HTTP Basic authentication sends a reusable user identifier and password in the `Authorization` header. Base64 makes the bytes safe for the header syntax. It provides no confidentiality. RFC 7617 defines the scheme and its protection-space behavior.
@@ -82,13 +83,13 @@ Basic is a poor default for interactive login and broad external APIs because ev
 
 The same password appears on every request in the protection space. A misconfigured TLS hop, proxy, trace, or header log can disclose it.
 
-Use TLS across every hop, redact the `Authorization` header, restrict credential scope, and rotate through a secret manager. Short rotation intervals reduce exposure but do not prevent replay between rotations.
+Mitigation requires TLS across every hop, redaction of the `Authorization` header, restricted credential scope, and rotation through a secret manager. Short rotation intervals reduce exposure but do not prevent replay between rotations.
 
 ## Coarse Revocation
 
 Basic defines no access-token lifetime or refresh protocol. Revocation means disabling the account or replacing its password, which can interrupt every client sharing that credential.
 
-Give each client a distinct credential so one can be disabled without rotating an entire fleet. Where supported, workload identity, mutual TLS, or OAuth client authentication provides stronger client identity and rotation boundaries.
+A distinct credential for each client allows one client to be disabled without rotating an entire fleet. Where supported, workload identity, mutual TLS, or OAuth client authentication provides stronger client identity and rotation boundaries.
 
 # Tradeoffs
 
@@ -104,11 +105,27 @@ Basic earns its place when interoperability requires it and its coarse credentia
 
 # Questions
 
+<!-- qard-id: 5c001546-86f0-41e0-9eea-867440f7a0f6 -->
+
 > [!qard]- Why is Basic Auth unsafe over HTTP?
-> Base64 is reversible encoding. Without TLS, every observer on the path can recover the reusable password. TLS protects it only to the termination point. The credential remains exposed to the client, verifier, trusted proxies, and any system that records the header.
+> Basic Auth sends a reusable username/password value encoded with Base64; Base64 is reversible and provides no confidentiality. Without TLS, an observer on the path can recover credentials and replay them. TLS protects only up to its termination point, so logs and trusted intermediaries remain separate exposure boundaries. [RFC 7617: Basic authentication](https://www.rfc-editor.org/rfc/rfc7617)
+
+<!-- qard-id: 343f05cb-bfd5-4906-bf26-e72f11083c42 -->
 
 > [!qard]- When is Basic Auth acceptable in production?
-> It can be acceptable for a constrained integration that requires Basic and supports TLS across every hop, a unique vaulted credential, narrow authorization, rotation, rate limiting, and header redaction. A shared password across many clients or an interactive user's primary password creates an unnecessarily large compromise boundary.
+> Basic Auth is acceptable in production only for a narrow, controlled integration that needs it. A typical case is a legacy or machine-to-machine interface whose protocol requires Basic. Its coarse credential lifecycle must be acceptable, and the credential must be protected on every hop.
+>
+> Basic itself provides none of this protection, so the deployment must supply it:
+>
+> - **TLS on every hop:** without it, anyone on the path can read the Base64 credential.
+> - **A distinct credential per client:** one client can be disabled without rotating every other client.
+> - **Narrow authorization:** the credential can perform only the operations its integration needs.
+> - **Rotation and revocation:** the password is long-lived and reusable. It is therefore kept in a secret store and replaced on a schedule and after any suspected exposure.
+> - **Redaction and abuse controls:** the `Authorization` header stays out of logs and traces, and repeated failed attempts are rate-limited.
+>
+> Basic is a poor default for interactive login and broad external APIs. Every request presents the primary secret, and revocation means disabling the account or changing its password. Workload identity, mutual TLS or OAuth client authentication usually give a better credential lifecycle. Being on an internal network does not make Basic safe either.
+>
+> Sources: [RFC 7617: The 'Basic' HTTP Authentication Scheme](https://www.rfc-editor.org/rfc/rfc7617.html)
 
 # References
 

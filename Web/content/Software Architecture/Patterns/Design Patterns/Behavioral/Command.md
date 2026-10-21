@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-10-12T09:19:58.288Z
-modified: 2026-10-12T09:19:58.288Z
-published: 2026-10-12T09:19:58.288Z
+created: 2026-10-21T13:29:32.453Z
+modified: 2026-10-21T13:29:32.453Z
+published: 2026-10-21T13:29:32.453Z
 topic:
   - Software Architecture
 subtopic:
@@ -14,6 +14,7 @@ priority: High
 status: Done
 qard-deck: Software Architecture
 qard-topic: Patterns/Design Patterns/Behavioral/Command
+flashcard_uid: dd0e4ff8
 ---
 
 A restaurant ticket is a command in paper form. It records the requested meal, waits in the kitchen queue, and tells the chef what to prepare. The waiter does not cook and the chef does not take the order. The ticket keeps the request separate from its execution.
@@ -194,8 +195,33 @@ This in-memory history fits a local UI action whose execution and undo each comp
 
 # Questions
 
+> [!qard]- What is the Command pattern?
+> The Command pattern turns a request into an object that holds the action to perform and the input it needs. An invoker triggers the command, typically through an `Execute` method, without knowing which object does the work or how.
+>
+> - **Command:** an object such as `PlaceOrderCommand` that carries the request data and knows which receiver to call.
+> - **Receiver:** the object that actually performs the work, such as an `OrderService`.
+> - **Invoker:** the code that calls `Execute`, such as a button, a queue or a scheduler.
+> - **Client:** creates the command and passes it to the invoker.
+>
+> A restaurant ticket works the same way: it records the order, waits in the kitchen queue and tells the chef what to cook, so the waiter never cooks and the chef never takes orders.
+>
+> Because the request becomes an object, it can be queued, logged, retried or delayed, and a command that records enough state can also undo or compensate for its effect. Wrapping a request in an object does not make its side effects atomic or durable. An in-memory undo history disappears with the process, and steps with external effects still need durable state, idempotency keys and compensation. A plain delegate such as `Action` is enough when naming, serialization and undo are not needed.
+>
+> [GoF: Design Patterns](https://www.oreilly.com/library/view/design-patterns-elements/0201633612/) · [[Software Architecture/Patterns/Design Patterns/Behavioral/Command#Solution|Command: solution and limits]] · [[Software Architecture/Patterns/Design Patterns/Behavioral/Command#Commands in UI, Messaging, and Data Access|Command: delegates and .NET examples]]
+
+<!-- qard-id: 559a25cf-a9b0-4267-850e-0575572aa65b -->
+
 > [!qard]- How does MediatR implement the Command pattern, and what does it add?
-> `PlaceOrderCommand` carries the request, while `PlaceOrderCommandHandler` owns execution. MediatR routes between them and can wrap handlers with pipeline behaviors. That indirection is useful when dispatch and shared policies matter across many requests. A direct service call remains clearer for a small, fixed interaction.
+> MediatR represents a command as a request object that carries the operation's data, and `Send` dispatches it to the one handler registered for that request type. It splits classic Command into parts: the request holds the data, the handler holds the execution logic that a classic command would put in `Execute`, and the mediator acts as the invoker that finds the right handler.
+>
+> What it adds:
+>
+> - **Decoupled callers:** a controller or other sender depends only on the mediator and the request type, not on the handler or the services the handler uses.
+> - **Pipeline behaviors:** shared policies such as validation or logging wrap every handler call without being repeated in each handler.
+>
+> The cost is indirection: following a call from sender to handler requires knowing the registrations. A direct service call stays clearer for one small, fixed interaction. MediatR is one way to realize a command-style design, not a requirement of the Command pattern.
+>
+> [MediatR: behaviors](https://github.com/LuckyPennySoftware/MediatR/wiki/Behaviors) · [[Software Architecture/Patterns/Design Patterns/Behavioral/Command#Commands in UI, Messaging, and Data Access|Command: MediatR request and handler]]
 
 # References
 

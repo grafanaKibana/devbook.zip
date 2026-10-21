@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-10-12T09:19:58.264Z
-modified: 2026-10-12T09:19:58.264Z
-published: 2026-10-12T09:19:58.264Z
+created: 2026-10-14T11:59:33.493Z
+modified: 2026-10-14T11:59:33.493Z
+published: 2026-10-14T11:59:33.493Z
 topic:
   - Programming
 subtopic:
@@ -14,6 +14,7 @@ priority: Medium
 status: Ready to Repeat
 qard-deck: Programming
 qard-topic: NET/CSharp/Fundamentals/Namespaces
+flashcard_uid: 1f7aec15
 ---
 
 A namespace gives a type a qualified name. `Billing.User` and `Identity.User` can coexist because the namespace is part of each type's identity. It also gives IDEs and readers a map of the API.
@@ -76,8 +77,10 @@ Keeping namespaces aligned with folders is still useful when it reflects real ow
 
 # Questions
 
-> [!qard]- When is `extern alias` necessary instead of an ordinary `using` alias?
-> Use an ordinary alias when two types have different fully qualified names. `extern alias` is for conflicting types whose assembly-qualified identities differ but whose fully qualified type names are identical.
+<!-- qard-id: 1e220da6-d51b-4556-baa7-0f6c2d8f6488 -->
+
+> [!qard]- What do a C# namespace, an assembly, and an access modifier control?
+> A namespace organizes qualified names, an assembly is a compiled unit used for deployment and loading, and access modifiers control which code can see a type or member. These are separate boundaries: sharing a namespace does not place types in one assembly or grant access. [Microsoft: namespaces](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/program-structure/namespaces) · [Microsoft: assemblies](https://learn.microsoft.com/en-us/dotnet/standard/assembly/) · [Microsoft: access modifiers](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/access-modifiers)
 
 # References
 

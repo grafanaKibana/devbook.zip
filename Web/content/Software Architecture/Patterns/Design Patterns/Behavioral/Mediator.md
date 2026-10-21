@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-10-12T09:19:58.291Z
-modified: 2026-10-12T09:19:58.291Z
-published: 2026-10-12T09:19:58.291Z
+created: 2026-10-21T13:29:32.453Z
+modified: 2026-10-21T13:29:32.453Z
+published: 2026-10-21T13:29:32.453Z
 topic:
   - Software Architecture
 subtopic:
@@ -14,6 +14,7 @@ priority: High
 status: Ready to Repeat
 qard-deck: Software Architecture
 qard-topic: Patterns/Design Patterns/Behavioral/Mediator
+flashcard_uid: f5019297
 ---
 
 Air traffic control is a useful Mediator analogy. Pilots coordinate through the tower instead of maintaining direct conversations with every aircraft nearby. A new plane joins one coordination system rather than a web of peer relationships.
@@ -138,19 +139,57 @@ Cross-cutting fraud screening can sit in a pipeline behavior shared by every rel
 
 # Tradeoffs
 
-**Use classic Mediator when** peer dependencies have become tangled and their interaction rules need one owner. MediatR fits a separate command/handler problem when several transports need the same dispatch boundary or shared pipeline behaviors justify the indirection.
+**Classic Mediator fits when** peer dependencies have become tangled and their interaction rules need one owner. MediatR fits a separate command/handler problem when several transports need the same dispatch boundary or shared pipeline behaviors justify the indirection.
 
-**Avoid it when** a direct call already expresses the relationship. Routing every two-class interaction through MediatR makes the execution path harder to find. The mediator also fails when it becomes a god object instead of dispatching to focused handlers.
+**It is a poor fit when** a direct call already expresses the relationship. Routing every two-class interaction through MediatR makes the execution path harder to find. The mediator also fails when it becomes a god object instead of dispatching to focused handlers.
 
-**Related patterns.** Mediator usually routes one request to one handler through `Send`. An **[[Software Architecture/Patterns/Event Bus]]** or **[[Software Architecture/Patterns/Design Patterns/Behavioral/Observer]]** fans one event out to many subscribers. A **[[Software Architecture/Patterns/Design Patterns/Structural/Facade]]** exposes a simpler subsystem API without coordinating peers.
+**Related patterns.** MediatR's `Send` routes one request to one handler. An **[[Software Architecture/Patterns/Event Bus]]** or **[[Software Architecture/Patterns/Design Patterns/Behavioral/Observer]]** fans one event out to many subscribers. A **[[Software Architecture/Patterns/Design Patterns/Structural/Facade]]** exposes a simpler subsystem API without coordinating peers.
 
 # Questions
 
+> [!qard]- What is the Mediator pattern, and how does MediatR's request dispatch differ from it?
+> The Mediator pattern moves the rules for how a group of objects interact into one mediator object. The participants, called colleagues, notify the mediator instead of calling each other, and the mediator decides which other colleagues react. A many-to-many web of dependencies becomes hub-and-spoke coordination, so a colleague can be changed or added without the others knowing about it. Air traffic control is the usual analogy: pilots coordinate through the tower rather than with every nearby aircraft.
+>
+> MediatR follows the same decoupling direction but solves a narrower problem:
+>
+> | Aspect | Classic Mediator | MediatR `Send` |
+> |---|---|---|
+> | What it connects | A set of peer colleagues that react to one another. | One sender and the single handler registered for a request type. |
+> | Where interaction rules live | In the mediator, which knows the colleagues and coordinates them. | In the handler. MediatR only locates and invokes it, with pipeline behaviors around the call. |
+> | What stops depending on what | Colleagues stop referring to each other. | The sender stops referring to the handler and the services it uses. |
+>
+> A MediatR handler that calls several services coordinates them itself; MediatR does not coordinate peers on its behalf.
+>
+> [GoF: Design Patterns](https://www.oreilly.com/library/view/design-patterns-elements/0201633612/) · [[Software Architecture/Patterns/Design Patterns/Behavioral/Mediator#In-Process Dispatch and Message Routing|Mediator: MediatR dispatch]]
+
+<!-- qard-id: 9213f8d0-8fbd-499c-910e-e820fc7509f7 -->
+
 > [!qard]- What are the signs that a mediator is adding indirection without reducing coupling?
-> A mediator should route work, not become the place where business rules accumulate. Moving a 300-line workflow from a controller into one handler changes its location without reducing its complexity or dependencies. For a simple, stable interaction, a direct dependency is usually clearer.
+> A mediator adds only indirection when it routes calls without providing a useful shared boundary: no common dispatch for several callers, no cross-cutting policy and no real coordination between participants. Typical signs:
+>
+> - **Callers still know the participants:** senders still reference concrete handlers or the services behind them, so the mediator removed no dependency.
+> - **Coordination is still duplicated:** several callers repeat the same sequence around their mediator calls instead of one place owning it.
+> - **Fixed two-party calls go through it:** a request has one caller, one handler and no shared behavior, so the route only makes the execution path harder to find.
+> - **The mediator becomes a god object:** one central mediator or handler accumulates unrelated rules instead of dispatching to focused handlers.
+>
+> Moving a workflow into a handler can decouple the caller from the services it uses, but the workflow itself is no simpler. Direct calls fit simple, stable interactions. The indirection pays off when several transports share an operation or when pipeline behaviors apply shared policies.
+>
+> [[Software Architecture/Patterns/Design Patterns/Behavioral/Mediator#Tradeoffs|Mediator: tradeoffs]] · [[Software Architecture/Patterns/Design Patterns/Behavioral/Mediator#Problem|Mediator: duplicated coordination]]
+
+<!-- qard-id: 6810a433-655b-49d5-b427-e57a278149ba -->
 
 > [!qard]- How do MediatR pipeline behaviors implement the Chain of Responsibility pattern?
-> Each `IPipelineBehavior<TRequest, TResponse>` wraps the next delegate. It calls `next()` to continue or returns its own response to stop. DI registration supplies the order, so the chain is less visible than explicit `SetNext()` calls but centralized in application composition.
+> Pipeline behaviors form a chain of wrappers that ends at the request handler. Each `IPipelineBehavior<TRequest, TResponse>` receives the request and a `next` delegate for the rest of the chain, and decides whether to pass the request on.
+>
+> 1. `Send` nests the behaviors registered for the request type around the handler.
+> 2. The outermost behavior runs its code before `next`, such as logging or validating the request.
+> 3. Calling `next` invokes the following behavior, and the innermost `next` invokes the handler.
+> 4. As calls return, each behavior can run code after `next`, such as recording elapsed time or adjusting the response.
+> 5. A behavior can short-circuit by returning a response or throwing without calling `next`, as a caching behavior does when it returns a stored result. Later behaviors and the handler then never run.
+>
+> Registration order determines the nesting, so it changes what happens. A logging behavior outside a validation behavior records rejected requests; inside it, rejected requests never reach the logger. Order that matters for correctness should be explicit and covered by tests rather than left to incidental registration order.
+>
+> [MediatR: behaviors](https://github.com/LuckyPennySoftware/MediatR/wiki/Behaviors)
 
 # References
 

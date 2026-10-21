@@ -231,6 +231,10 @@ return function QuestionsIndex() {
       let block = line;
       let next = index + 1;
       while (next < lines.length && /^>/.test(lines[next])) {
+        if (
+          !state.fence && !state.obsidianComment && !state.htmlComment &&
+          isQuestionCalloutHeader(lines[next])
+        ) break;
         block += "\n" + lines[next];
         visibleLine(lines[next], state);
         next++;

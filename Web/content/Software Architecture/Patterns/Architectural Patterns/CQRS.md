@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-10-12T09:19:58.285Z
-modified: 2026-10-12T09:19:58.286Z
-published: 2026-10-12T09:19:58.286Z
+created: 2026-10-21T13:29:32.451Z
+modified: 2026-10-21T13:29:32.451Z
+published: 2026-10-21T13:29:32.451Z
 topic:
   - Software Architecture
 subtopic:
@@ -14,6 +14,7 @@ priority: High
 status: Done
 qard-deck: Software Architecture
 qard-topic: Patterns/Architectural Patterns/CQRS
+flashcard_uid: "45394597"
 ---
 
 CQRS (Command Query Responsibility Segregation) gives state changes and reads different models. The write side protects business rules. The read side returns data in the shape each use case needs. This separation pays off when one shared model has become a compromise, not merely because reads outnumber writes.
@@ -200,7 +201,7 @@ CQRS often appears with [[Software Architecture/Patterns/Architectural Patterns/
 - CQRS without Event Sourcing: write model persists current state (for example, relational tables), and emits events only as integration/projection signals.
 - Event Sourcing without full CQRS: possible. Event streams can be queried directly, and specialized read projections are added when query needs grow.
 
-Use both only when authoritative history and replay are requirements of the write model. CQRS by itself needs neither.
+Combining both is justified only when authoritative history and replay are requirements of the write model. CQRS by itself needs neither.
 
 # Pitfalls
 
@@ -223,10 +224,25 @@ CQRS is worth considering when write invariants and query shapes pull the shared
 
 # Questions
 
-> [!qard]- When is CQRS useful, and when does it add unnecessary complexity?
-> CQRS is useful when the write side and the read side have clearly different needs. For example, writes may enforce order and payment rules, while reads need data prepared for fast searches and reports.
+> [!qard]- What is CQRS?
+> CQRS (Command Query Responsibility Segregation) handles state changes and reads through separate models. Commands go through a write model that enforces business rules and changes state. Queries go through a read model that returns data shaped for a screen or API and changes nothing.
 >
-> It is not useful when the same model already handles both sides without difficulty. In that case, maintaining a separate read model and keeping it synchronized adds complexity without enough benefit.
+> - **Commands** express a business intent, such as `PlaceOrder`. The write model validates each command against its invariants before changing state.
+> - **Queries**, such as `GetOrderSummary`, only return data. Their model can be shaped for the request, for example one flat row per order summary, so the query avoids joins.
+>
+> The separation lies in the models and code paths, not necessarily in storage:
+>
+> - **Shared data:** both models can work against the same database through separate logic. No copy has to be kept in sync.
+> - **Separate read store:** a denormalized copy must be updated from write-side changes. Updating it within the same request reduces staleness, but it ties the read side's latency and failures to the write. A failure between the two updates can still leave the copy out of date unless both commit atomically. Updating it asynchronously from events removes that coupling, but reads can be stale until the projection catches up. Events then need reliable publication, such as an outbox, and an idempotent projector.
+>
+> Message brokers, separate databases and Event Sourcing are optional choices, not part of the definition.
+>
+> [Microsoft: CQRS pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/cqrs)
+
+<!-- qard-id: 0db1b8e5-f1a2-4cea-8c69-5d0fc56ca7d2 -->
+
+> [!qard]- When is CQRS useful, and when does it add unnecessary complexity?
+> CQRS separates command-side changes from query-side reads so each model can match different rules, shapes, or scaling needs. It is useful when a shared model has become a poor fit for both sides. If simple CRUD already handles both, separate handlers or projections add synchronization and operational cost without enough benefit. Separate databases, messaging, and event sourcing are optional; asynchronous projections can be stale. [Microsoft: CQRS pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/cqrs)
 
 # References
 

@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-10-12T09:19:58.238Z
-modified: 2026-10-12T09:19:58.238Z
-published: 2026-10-12T09:19:58.238Z
+created: 2026-10-14T11:59:33.483Z
+modified: 2026-10-14T11:59:33.483Z
+published: 2026-10-14T11:59:33.483Z
 topic:
   - Computer Science
 subtopic:
@@ -14,6 +14,7 @@ priority: Medium
 status: Ready to Repeat
 qard-deck: Computer Science
 qard-topic: Algorithms/Paradigms/Backtracking
+flashcard_uid: bbcb105b
 ---
 
 The eight-queens problem has 4,426,165,368 ways to place eight pieces on 64 squares, but only 92 valid arrangements. Generating every board before testing it wastes almost all the work on positions whose first few queens already conflict.
@@ -38,7 +39,7 @@ A candidate is a sequence of choices, one per level of a search tree. At each no
 - a prefix that violates a constraint is rejected, and the next sibling is tried;
 - a feasible candidate that reaches a leaf is a complete solution by construction.
 
-Rejecting a partial candidate at depth `k` eliminates every completion sharing that prefix without generating any of them. This is the whole difference from brute force: the same tree of complete candidates exists, but the feasibility test keeps the search from descending into doomed regions. An earlier rejection cuts away a larger unfinished subtree.
+Rejecting a partial candidate at depth `k` eliminates every completion sharing that prefix without generating any of them. This is the whole difference from naive complete-candidate enumeration: the same tree of complete candidates exists, but the feasibility test keeps the search from descending into doomed regions. An earlier rejection cuts away a larger unfinished subtree.
 
 When a node's children are all exhausted, the algorithm undoes its own choice, restoring the shared partial candidate to the state its parent expects, and returns to the next sibling. That undo is what prevents state from one failed branch leaking into the next sibling.
 
@@ -153,8 +154,51 @@ Appending the live buffer as a solution stores a reference that later choices ov
 
 # Questions
 
-> [!qard]- What turns brute-force enumeration into backtracking?
-> A feasibility test on the partial candidate. Brute force waits until a configuration is complete. Backtracking checks after each choice and discards every completion that shares a rejected prefix.
+<!-- qard-id: 919b1d09-824b-4832-afeb-7606885b2743 -->
+
+> [!qard]- How does backtracking work, and how does it relate to brute-force search?
+> Backtracking is a form of brute-force search that builds candidates one choice at a time. It abandons a partial candidate as soon as that candidate is known to be unsuitable.
+>
+> The search process:
+>
+> 1. Start with an empty partial candidate.
+> 2. Choose one available option and add it to the partial candidate.
+> 3. Recursively explore the remaining choices from that partial candidate.
+> 4. If the candidate is complete and valid, record it. If a sound check proves the partial candidate cannot lead to a valid solution, it is a dead end and its exploration stops.
+> 5. Return to the previous decision point, undo the choice and try the next option. When no options remain, return to the level above.
+>
+> For example, when placing queens row by row, a placement that already attacks another queen is abandoned without filling the remaining rows.
+>
+> | Approach | How it searches | Consequence |
+> |---|---|---|
+> | Naive complete-candidate enumeration | It generates every complete candidate and then checks each one. | Invalid candidates are fully built before they are rejected. |
+> | Backtracking | It extends a partial candidate one choice at a time and can check it along the way. | Rejecting a partial candidate skips all of its continuations. |
+>
+> Pruning depends on having a check that can reject partial candidates. Without such a check, backtracking still visits every complete candidate. Even with pruning, the number of branches can grow exponentially in the worst case, so backtracking does not guarantee a fast search.
+>
+> [CS106B: Exhaustive Search and Recursive Backtracking (Stanford)](https://web.stanford.edu/class/archive/cs/cs106b/cs106b.1162/preview-backtracking.shtml)
+
+<!-- qard-id: f504e1ef-08f1-4d76-8962-1123f3e2cee5 -->
+
+> [!qard]- In backtracking with shared mutable state, why undo each choice before trying the next?
+> Undoing restores the parent state, so each sibling choice starts from the same prefix instead of inheriting the previous branch's changes.
+>
+> **Pattern:** choose → explore (recurse) → un-choose.
+>
+> **Example:** permutations of A, B, C built in one shared list.
+>
+> 1. At the root the list is `[ ]`. Choose A, giving `[A]`.
+> 2. Explore below A. The inner levels add and remove B and C, record `[A, B, C]` and `[A, C, B]`, and return with the list at `[A]`.
+> 3. **With undo:** remove A, giving `[ ]`. Choose B, giving `[B]`. The B branch now explores permutations that start with B.
+> 4. **Without undo:** A stays in the list. Choosing B gives `[A, B]`.
+>
+> The B branch should start from the root's empty prefix, but it starts from the A branch's leftover state. It therefore explores the wrong part of the search space. If A's 'used' flag also stays set, the search can record `[A, B, C]` again and never produce `[B, A, C]`. If only the list is wrong, it can record an invalid result such as `[A, B, A]`. Later sibling branches can inherit even more leftover state.
+>
+> Related changes, such as 'used' flags, must also be undone. A retained solution must be copied before later undo steps.
+>
+> **Alternative:** each branch can instead receive its own copied or immutable state. Then no explicit undo is needed. Copying state adds a per-branch cost; immutable representations may share structure.
+>
+> [CS106B: Exhaustive Search and Recursive Backtracking (Stanford)](https://web.stanford.edu/class/archive/cs/cs106b/cs106b.1162/preview-backtracking.shtml) · [.NET ImmutableStack implementation](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Collections.Immutable/src/System/Collections/Immutable/ImmutableStack_1.cs)
 
 # References
 

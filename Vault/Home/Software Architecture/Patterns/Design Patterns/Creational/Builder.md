@@ -265,10 +265,8 @@ A constructor or object initializer is the default. Builder earns a separate typ
 > 1. `WebApplication.CreateBuilder(args)` creates the builder with preconfigured defaults, such as the standard configuration sources.
 > 2. Setup code adds to the builder's properties:
 >    - configuration through `builder.Configuration`
->    - service registrations through `builder.Services`
+>    - service registrations through `builder.Services`, including registrations contributed by library extension methods
 >    - host and web-server settings through `builder.Host` and `builder.WebHost`
-> 
->    Extension methods from libraries add their own registrations to the same `builder.Services` collection.
 > 3. `builder.Build()` creates the `WebApplication` from the accumulated configuration and registrations.
 > 
 > A constructor with parameters would require callers to assemble the complete set of services and settings before a single call. That set is open-ended, because the application and its libraries both contribute to it. The builder therefore gives every contributor a shared place to add its part before anything is assembled. Staging also lets later setup steps read earlier results, such as configuration values that decide which services to register. A constructor is still used at the end: in ASP.NET Core 10, `Build()` builds the underlying host and passes it to the `WebApplication` constructor.

@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-10-12T09:19:58.225Z
-modified: 2026-10-12T09:19:58.225Z
-published: 2026-10-12T09:19:58.225Z
+created: 2026-10-21T13:29:32.424Z
+modified: 2026-10-21T13:29:32.424Z
+published: 2026-10-21T13:29:32.424Z
 topic:
   - AI & ML
 subtopic:
@@ -14,6 +14,7 @@ priority: High
 status: Done
 qard-deck: AI & ML
 qard-topic: LLM/Evaluation/Building an Evaluation Set
+flashcard_uid: e5bc3ffc
 ---
 
 An evaluation set is the common input to [[LLM-as-a-Judge]], [[Deterministic Checks]], and regression gates. If its cases do not represent the workload, a precise scorer still produces a misleading result. The set defines what is measured before any metric assigns a number.
@@ -28,7 +29,7 @@ The label determines which scorer is valid. Exact or structured expectations sup
 
 # Synthetic Generation
 
-Synthetic generation is a practical bootstrap. Start from source material with known provenance, ask a model for plausible requests that the material can answer, and keep the source identifier with each generated case. This reverses the expensive part of labeling: the evidence is known before the input is written.
+Synthetic generation is a practical bootstrap. It starts from source material with known provenance. A model writes plausible requests that the material can answer, and each generated case keeps its source identifier. This reverses the expensive part of labeling: the evidence is known before the input is written.
 
 ```text
 for item in sample(source_material, n=2000):
@@ -48,7 +49,7 @@ The weakness appears across the set rather than in one obvious bad case. Generat
 
 An evaluation result is an estimate over sampled cases. Its uncertainty depends on the metric, case distribution, correlation between observations, and the effect the gate is meant to detect. A small set may expose large failures while remaining unable to separate two close configurations.
 
-Choose the minimum detectable effect before sizing the set, then report an interval around the observed difference. Paired evaluation, where baseline and candidate answer the same cases, often reduces variance because each case acts as its own control. End-to-end outcomes may still need many observations when user behavior or task difficulty varies widely.
+The minimum detectable effect is chosen before the set is sized, and each result reports an interval around the observed difference. Paired evaluation, where baseline and candidate answer the same cases, often reduces variance because each case acts as its own control. End-to-end outcomes may still need many observations when user behavior or task difficulty varies widely.
 
 # Pitfalls
 
@@ -56,18 +57,28 @@ Choose the minimum detectable effect before sizing the set, then report an inter
 
 The corpus or product changes while the evaluation set stays frozen. Cases begin to reference deleted material or obsolete behavior, yet the dashboard remains stable.
 
-Version the set with the data and policy it describes. Validate that referenced sources still exist, and review cases when the product contract changes. Otherwise a score change cannot be attributed cleanly to the system, the data, or the labels.
+The set is versioned with the data and policy it describes. Referenced sources are checked to confirm they still exist, and cases are reviewed when the product contract changes. Otherwise a score change cannot be attributed cleanly to the system, the data, or the labels.
 
 ## Threshold Cargo-Culting
 
 A threshold copied from another workload has no local meaning. The same score can represent different risks when the rubric, traffic, or cost of failure changes.
 
-Calibrate thresholds against human labels and product outcomes from the workload being shipped. Relative regression limits are useful when the measurement scale is stable, but they cannot make an unsafe baseline acceptable.
+Thresholds are calibrated against human labels and product outcomes from the workload being shipped. Relative regression limits are useful when the measurement scale is stable, but they cannot make an unsafe baseline acceptable.
 
 # Questions
 
-> [!qard]- When should a team invest in a human-annotated golden set versus relying on synthetic generation?
-> Synthetic cases are enough to bootstrap breadth and test the harness. Human annotation becomes necessary when labels require domain judgment, the failure cost is high, or synthetic phrasing no longer matches production traffic. A practical set combines generated coverage with reviewed incidents and a curated regression subset in [[Golden Test Set and Regression Runs]].
+<!-- qard-id: 7517de71-7dad-4890-bec0-b62b49a788f0 -->
+
+> [!qard]- When should a team add human-labeled evaluation cases instead of relying only on synthetic generation?
+> Human-labeled cases become necessary when synthetic cases can no longer be trusted to represent the workload or to label it correctly. That happens when correctness depends on expert judgment, when failures are costly, or when production inputs differ from the generated ones.
+>
+> - **What synthetic generation does well:** a model writes plausible requests from source material with known provenance. Coverage and a working evaluation harness therefore arrive quickly and cheaply.
+> - **Where it falls short:** generated cases share the generator's phrasing and preferred difficulty, so ambiguous, messy or adversarial real inputs are under-represented. Generated labels can also miss subtle domain distinctions.
+> - **What human labels add:** reviewed cases ground the evaluation in real inputs and expert judgment. They also show whether synthetic labels and automated judges agree with people. ARES, for example, pairs synthetic training data with a small human-annotated set that corrects its automated estimates.
+>
+> A practical evaluation set often combines synthetic breadth, human-reviewed cases and regression cases taken from real failures. The balance depends on the task's risk and on how closely synthetic cases match production traffic.
+>
+> [ARES: An Automated Evaluation Framework for Retrieval-Augmented Generation Systems (arXiv)](https://arxiv.org/abs/2311.09476) · [Evaluation best practices (OpenAI)](https://developers.openai.com/api/docs/guides/evaluation-best-practices)
 
 # References
 

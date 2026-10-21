@@ -92,6 +92,111 @@ class VaultToolingTests(unittest.TestCase):
         legacy = self.note(generic + CARD)
         self.assertEqual(["qard.legacy-interview"], [i.code for i in validator.validate_qard_interviews(legacy)])
 
+    def test_qard_metadata_mentions_are_not_keys(self):
+        frontmatter = FRONTMATTER.replace("publish: false\n", "publish: false\ndescription: qard-deck and qard-topic are optional\nsummary: |\n  qard-deck: documented example\n")
+        self.assertEqual([], validator.validate_qard_interviews(self.note("", frontmatter)))
+        path = self.write("Card.md", CARD, frontmatter)
+        manifest = migration.create_manifest(self.root)
+        self.assertEqual([], manifest["issues"])
+        self.assertEqual({"qard-deck", "qard-topic"}, set(manifest["files"][0]["seed_values"]))
+        original = path.read_bytes()
+        migration.apply_manifest(self.root, manifest)
+        self.assertIn(b"description: qard-deck and qard-topic are optional", path.read_bytes())
+        migration.rollback_manifest(self.root, manifest)
+        self.assertEqual(original, path.read_bytes())
+        unsupported = FRONTMATTER.replace("publish: false\n", "publish: false\n? qard-deck\n: Deck\n")
+        self.assertIn("qard.metadata", [issue.code for issue in validator.validate_qard_interviews(self.note("", unsupported))])
+        self.write("Card.md", CARD, unsupported)
+        self.assertIn("metadata.unsupported", [issue["code"] for issue in migration.create_manifest(self.root)["issues"]])
+
+    def test_qard_indented_root_overrides_fail_closed_without_reseeding(self):
+        indented = "---\n" + "".join("  " + line + "\n" for line in FRONTMATTER.splitlines()[1:-1]) + "  qard-deck: Personal Deck\n  qard-topic: Personal Topic\n---\n"
+        path = self.write("Card.md", CARD, indented)
+        original = path.read_bytes()
+        manifest = migration.create_manifest(self.root)
+        self.assertEqual({}, manifest["files"][0]["seed_values"])
+        self.assertEqual(2, sum(issue["code"] == "metadata.unsupported" for issue in manifest["issues"]))
+        with self.assertRaises(migration.MigrationError):
+            migration.apply_manifest(self.root, manifest)
+        migration.rollback_manifest(self.root, manifest)
+        self.assertEqual(original, path.read_bytes())
+        self.assertEqual(2, sum(issue.code == "qard.metadata" for issue in validator.validate_qard_interviews(self.note("", indented))))
+
+        without_overrides = indented.replace("  qard-deck: Personal Deck\n  qard-topic: Personal Topic\n", "")
+        path = self.write("Card.md", CARD, without_overrides)
+        original = path.read_bytes()
+        manifest = migration.create_manifest(self.root)
+        self.assertEqual({}, manifest["files"][0]["seed_values"])
+        self.assertEqual(["metadata.unsupported"], [issue["code"] for issue in manifest["issues"]])
+        with self.assertRaises(migration.MigrationError):
+            migration.apply_manifest(self.root, manifest)
+        migration.rollback_manifest(self.root, manifest)
+        self.assertEqual(original, path.read_bytes())
+        self.assertEqual([], validator.validate_qard_interviews(self.note("Ordinary note.\n", without_overrides)))
+
+    def test_qard_unclosed_card_fence_does_not_hide_following_cards(self):
+        example = "```md\n> [!qard]- Fenced example?\n> Example answer.\n```\n"
+        broken = "# Questions\n> [!QUESTION]- First?\n> ```sql\n> SELECT 1\n\n> [!QUESTION]- Second?\n> Answer.\n"
+        path = self.write("Card.md", example + broken)
+        original = path.read_bytes()
+        manifest = migration.create_manifest(self.root)
+        self.assertEqual(2, manifest["summary"]["legacy_interview_cards"])
+        self.assertEqual(["card.unclosed-fence"], [issue["code"] for issue in manifest["issues"]])
+        with self.assertRaises(migration.MigrationError):
+            migration.apply_manifest(self.root, manifest)
+        self.assertEqual(original, path.read_bytes())
+        native = broken.replace("[!QUESTION]-", "[!qard]-")
+        self.assertEqual(["qard.unclosed-fence"], [issue.code for issue in validator.validate_qard_interviews(self.note(example + native))])
+        legacy_codes = [issue.code for issue in validator.validate_qard_interviews(self.note(example + broken))]
+        self.assertEqual(2, legacy_codes.count("qard.legacy-interview"))
+
+    def test_qard_comment_and_code_visibility_matches_readers(self):
+        example = "```md\n%%\n> [!qard]- Example only?\n> Answer.\n```\n"
+        legacy = example + CARD
+        path = self.write("Card.md", legacy)
+        self.assertEqual(["qard.legacy-interview"], [issue.code for issue in validator.validate_qard_interviews(self.note(legacy))])
+        manifest = migration.create_manifest(self.root)
+        self.assertEqual(1, manifest["summary"]["legacy_interview_cards"])
+        migration.apply_manifest(self.root, manifest)
+        self.assertIn(example, path.read_text())
+        code_answer = '> [!qard]- What is the SQL statement?\n> ```sql\n> SELECT 1; -- %% is literal\n> ```\n\n> [!qard]- Next prompt?\n> Answer.\n'
+        self.assertEqual([], validator.validate_qard_interviews(self.note(code_answer)))
+        self.write("Card.md", code_answer)
+        self.assertEqual([], migration.create_manifest(self.root)["issues"])
+        for hidden in ["<!-- hidden -->", "%% hidden %%", "```text\n```"]:
+            body = '> [!qard]- Prompt?\n' + "".join('> ' + line + '\n' for line in hidden.splitlines())
+            self.assertIn("qard.empty-back", [issue.code for issue in validator.validate_qard_interviews(self.note(body))])
+            self.assertIn("card.empty-back", [issue["code"] for issue in migration.create_manifest(self.root)["issues"]])
+        hidden_card = "%%\n> [!qard]- Hidden?\n> Answer.\n%%\n"
+        self.assertEqual(["qard.hidden-card"], [issue.code for issue in validator.validate_qard_interviews(self.note(hidden_card + example))])
+        self.write("Card.md", hidden_card + example)
+        self.assertIn("card.hidden", [issue["code"] for issue in migration.create_manifest(self.root)["issues"]])
+
+    def test_qard_identity_adjacency_and_collapsed_migration(self):
+        metadata = '<!-- qard-id: stable -->\n<!-- qard-reverse: reverse -->\n<!-- qard-siblings: siblings -->\n<!-- qard-location: {"deck":"D","topic":"T"} -->\n\n'
+        body = metadata + '> [!qard]- Prompt?\n> Answer.\n'
+        self.assertEqual([], validator.validate_qard_interviews(self.note(body)))
+        self.write("Card.md", body)
+        self.assertEqual([], migration.create_manifest(self.root)["issues"])
+        orphan = '<!-- qard-id: detached -->\nIntervening prose.\n' + body
+        self.assertIn("qard.orphan-id", [issue.code for issue in validator.validate_qard_interviews(self.note(orphan))])
+        self.write("Card.md", orphan)
+        self.assertIn("card.orphan-id", [issue["code"] for issue in migration.create_manifest(self.root)["issues"]])
+        protected = '```md\n<!-- qard-id: example -->\n```\n<!--\n<!-- qard-id: hidden -->\n-->\n' + body
+        self.assertEqual([], validator.validate_qard_interviews(self.note(protected)))
+        self.write("Card.md", protected)
+        self.assertEqual([], migration.create_manifest(self.root)["issues"])
+        expanded = body.replace('[!qard]-', '[!qard]+')
+        self.assertIn("qard.collapsed", [issue.code for issue in validator.validate_qard_interviews(self.note(expanded))])
+        path = self.write("Card.md", '# Questions\n> [!QUESTION]+ Prompt?\n> Answer.\n')
+        original = path.read_bytes()
+        manifest = migration.create_manifest(self.root)
+        migration.apply_manifest(self.root, manifest)
+        self.assertIn(b'[!qard]- Prompt?', path.read_bytes())
+        self.assertEqual([], migration.verify_manifest(self.root, manifest))
+        migration.rollback_manifest(self.root, manifest)
+        self.assertEqual(original, path.read_bytes())
+
     def test_migration_preserves_overrides_ids_and_round_trip(self):
         metadata = 'qard-deck: "Logical Deck"\nqard-topic: "Logical Topic"\n'
         frontmatter = FRONTMATTER.replace("publish: false\n", "publish: false\n" + metadata)

@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-10-12T09:19:58.233Z
-modified: 2026-10-12T09:19:58.233Z
-published: 2026-10-12T09:19:58.233Z
+created: 2026-10-21T13:29:32.430Z
+modified: 2026-10-21T13:29:32.430Z
+published: 2026-10-21T13:29:32.430Z
 topic:
   - AI & ML
 subtopic:
@@ -14,6 +14,7 @@ priority: Medium
 status: Done
 qard-deck: AI & ML
 qard-topic: LLM/Prompt Engineering/Prompt Composition
+flashcard_uid: a52de874
 ---
 
 A single prompt is often the right design. It becomes the wrong one when a task contains intermediate decisions that must be checked before later work can trust them. Prompt composition splits those decisions across calls, adds context before an answer, or uses a model to revise the prompt itself.
@@ -82,9 +83,9 @@ Meta prompting uses a model to draft or critique prompts. It is cheap search ove
 
 Three uses recur:
 
-1. Prompt generation: describe the task and ask the model to draft a first prompt.
-2. Prompt refinement: provide the current prompt plus failure cases and ask for an improved version.
-3. Prompt evaluation: ask the model to identify weaknesses and likely failure modes.
+1. Prompt generation: a model drafts a first prompt from a task description.
+2. Prompt refinement: a model receives the current prompt plus failure cases and proposes an improved version.
+3. Prompt evaluation: a model identifies weaknesses and likely failure modes in a prompt.
 
 A refinement pass might start from this evidence:
 
@@ -97,11 +98,11 @@ Meta prompting keeps a person in the revision loop. [[Automated Prompt Optimizat
 
 # Pitfalls
 
-**Error propagation.** A bad extraction can corrupt every later step. If ERR-42 becomes `error_code: null`, the classifier may route the request as a general inquiry. Reject missing required fields and stop the chain when an intermediate contract fails. A confidence score is useful only when it has been calibrated against observed errors.
+**Error propagation.** A bad extraction can corrupt every later step. If ERR-42 becomes `error_code: null`, the classifier may route the request as a general inquiry. A required-field check rejects the missing value and stops the chain when an intermediate contract fails. A confidence score is useful only when it has been calibrated against observed errors.
 
-**Cross-step instruction smuggling.** A chain can copy hostile text into a later call where it is mistaken for an instruction. Delimiters help the model distinguish data from control text, but they are not a security boundary. Keep system rules outside untrusted content, pass the smallest structured fields possible, and constrain downstream actions with ordinary authorization and validation.
+**Cross-step instruction smuggling.** A chain can copy hostile text into a later call where it is mistaken for an instruction. Delimiters help the model distinguish data from control text, but they are not a security boundary. System rules stay outside untrusted content, later calls receive the smallest structured fields possible, and downstream actions are constrained by ordinary authorization and validation.
 
-**Meta-prompt overfitting.** A revision that fixes five remembered failures can break ordinary inputs. Evaluate every candidate on held-out examples, version the prompt with its evaluator, and keep a rollback threshold.
+**Meta-prompt overfitting.** A revision that fixes five remembered failures can break ordinary inputs. Evaluating every candidate on held-out examples can reveal that regression before release. The prompt is versioned with its evaluator, and a rollback threshold limits the impact of regressions the evaluation misses.
 
 # Tradeoffs
 
@@ -113,11 +114,37 @@ Meta prompting keeps a person in the revision loop. [[Automated Prompt Optimizat
 
 # Questions
 
-> [!qard]- When is prompt chaining a better fit than one large prompt?
-> Chaining fits when a task has real stages and an intermediate result changes what should happen next. Each stage should have a clear output contract, so invalid data can be stopped before it reaches the following call and failures can be traced to one step. That control has to justify the extra latency, token cost, and risk of errors passing between calls. If the task is simple and no intermediate result needs separate validation, one prompt is usually easier to operate.
+<!-- qard-id: 891d3fd3-1b89-4b8c-a92d-679c7e978ad5 -->
 
-> [!qard]- What is a practical meta prompting workflow for improving a weak prompt?
-> A useful workflow starts with real failures rather than a general request to make the prompt better. Group the failures by cause, then ask for a revision that addresses those causes and states a clear output contract. Compare the candidate with the current prompt on held-out cases, not only on the examples used to create it. Version the prompt and evaluator together, and keep a rollback threshold in case the revision fixes known failures but hurts normal inputs.
+> [!qard]- When is prompt chaining a better fit than one large prompt?
+> Prompt chaining fits better when a task has real stages and an intermediate result must be checked before later work can trust it, or when that result determines what happens next. One prompt fits better when no intermediate result needs separate treatment. Each extra call adds latency, token cost and another boundary where errors can propagate.
+>
+> A chain earns its cost only when its boundaries are real:
+>
+> - Each stage has one narrow job and an explicit output contract, such as entities as JSON or an intent label from a closed set.
+> - A deterministic check runs before the next stage uses that output. A missing required field or an unknown label stops the chain instead of corrupting later steps.
+> - Failures can be localized, because each stage's input and output can be inspected separately.
+>
+> For example, a support assistant extracts entities, validates them against a schema, classifies intent into an allowed set and only then writes the reply. If the error code `ERR-42` comes back as `error_code: null`, a required-field check stops the chain. Without that check, the classifier may route the request as a general inquiry.
+>
+> Splitting one vague prompt into several vague prompts adds failure points without adding control. For that reason, the complete chain is evaluated end to end against a simpler single-prompt baseline.
+>
+> Sources: [Anthropic, Building effective agents](https://www.anthropic.com/engineering/building-effective-agents) · [OpenAI evals](https://developers.openai.com/api/docs/guides/evals)
+
+<!-- qard-id: 637042dc-8641-4fbe-9f1a-25620b16a717 -->
+
+> [!qard]- What is a practical meta-prompting workflow for improving a weak prompt?
+> A practical workflow treats a model-drafted prompt revision as a candidate that must beat the current prompt on held-out cases before it ships.
+>
+> 1. **Collect failures:** the starting evidence is observed failures from real outputs, such as incident summaries that omit the timeline and root cause.
+> 2. **Group by cause:** failures are grouped by likely cause, such as a missing output requirement or an ambiguous instruction. One revision then targets a cause instead of patching single cases.
+> 3. **Draft a candidate:** a model receives the current prompt, the grouped failures and the required output contract, and proposes a revision. In the incident example, the revision can require `timeline`, `root_cause` and `actions` as mandatory JSON keys.
+> 4. **Compare on held-out cases:** the candidate and the current prompt are both scored on the known failures and on representative cases that were not used to write the revision.
+> 5. **Version and gate:** the prompt is versioned together with its evaluator, and a rollback threshold is set before deployment.
+>
+> The held-out comparison is the check for meta-prompt overfitting, where a revision fixes the remembered failures but silently breaks ordinary inputs. It can reveal that regression before release, which reduces the risk without ruling it out. Inputs that the evaluation set does not represent can still regress, so the rollback threshold limits the damage after deployment. A model-drafted revision is a hypothesis to test, not a reliability guarantee.
+>
+> Sources: [OpenAI model optimization](https://developers.openai.com/api/docs/guides/model-optimization) · [OpenAI evals](https://developers.openai.com/api/docs/guides/evals)
 
 # References
 

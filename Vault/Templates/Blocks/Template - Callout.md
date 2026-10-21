@@ -29,6 +29,20 @@ if (calloutType === "__qard__") {
   };
   const validLogicalValue = (value) =>
     typeof value === "string" && value.trim().length > 0 && !/[\r\n]/.test(value);
+  const hasAnswerDivider = (value) => {
+    let fence = "";
+    for (const line of value.split(/\r?\n/)) {
+      if (fence) {
+        const closing = line.match(/^ {0,3}(`+|~+)\s*$/)?.[1];
+        if (closing?.[0] === fence[0] && closing.length >= fence.length) fence = "";
+      } else {
+        const opening = line.match(/^ {0,3}(`{3,}|~{3,})/)?.[1];
+        if (opening) fence = opening;
+        else if (line.trim() === "<!-- qard-answer -->") return true;
+      }
+    }
+    return false;
+  };
   const semanticText = (value) =>
     value
       .replace(/<!--[\s\S]*?(?:-->|$)/g, "")
@@ -44,13 +58,14 @@ if (calloutType === "__qard__") {
       if (titleInput !== null) new Notice("Interview questions require a title.");
     } else {
       const selection = tp.file.selection();
-      const clipboard = (await tp.system.clipboard()).trim();
       const answerInput = selection.trim()
         ? selection
-        : clipboard || await tp.system.prompt("Answer (Shift+Enter for new line)", "", false, true);
+        : (await tp.system.clipboard()).trim() || await tp.system.prompt("Answer (Shift+Enter for new line)", "", false, true);
       const answer = answerInput?.trim();
       if (!answer || !semanticText(answer)) {
         if (answerInput !== null) new Notice("Interview questions require an answer.");
+      } else if (hasAnswerDivider(answer)) {
+        new Notice("The reserved <!-- qard-answer --> divider cannot appear in an interview answer outside a code fence.");
       } else if (!isStable()) {
         new Notice("The active note changed; the interview question was not added.");
       } else {
@@ -118,10 +133,9 @@ if (calloutType === "__qard__") {
   );
   const title = await tp.system.prompt("Optional Title", "");
   const selection = tp.file.selection();
-  const clipboard = (await tp.system.clipboard()).trim();
   const body = selection
     ? selection
-    : clipboard || await tp.system.prompt("Content (Shift+Enter for new line)", "", false, true);
+    : (await tp.system.clipboard()).trim() || await tp.system.prompt("Content (Shift+Enter for new line)", "", false, true);
   if (foldState != null && body != null) {
     tR += `> [!${calloutType}]${foldState} ${title ?? ""}\n> ${body.replaceAll("\n", "\n> ")}`;
   }

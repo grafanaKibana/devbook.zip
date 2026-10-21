@@ -1,9 +1,9 @@
 ---
 publish: true
 title: Machine Learning Types
-created: 2026-10-12T09:19:58.237Z
-modified: 2026-10-12T09:19:58.237Z
-published: 2026-10-12T09:19:58.237Z
+created: 2026-10-21T13:29:32.432Z
+modified: 2026-10-21T13:29:32.432Z
+published: 2026-10-21T13:29:32.432Z
 tags:
   - FolderNote
 topic:
@@ -17,6 +17,7 @@ level:
   - "1"
 qard-deck: AI & ML
 qard-topic: Machine Learning/Types/Types
+flashcard_uid: d3a3edaf
 ---
 
 The useful way to classify machine learning is by its learning signal. Labels, proxy targets, rewards, or the absence of a target determine what the training loop can optimize and how its result can be evaluated. Model architecture comes later.
@@ -79,7 +80,7 @@ Reward design sets the real objective. An incomplete proxy invites specification
 
 ```mermaid
 flowchart TD
-    A{Do actions change later state and is a reward signal available?} -->|Yes| D[Reinforcement learning]
+    A{Is the learning signal a reward for chosen actions?} -->|Yes| D["Reinforcement learning: sequential if actions change later state, bandit if not"]
     A -->|No| B{Do you have reliable target labels?}
     B -->|Yes| E[Supervised learning]
     B -->|Some| C[Semi-supervised learning]
@@ -91,12 +92,39 @@ flowchart TD
 
 Reliable labels and a clear target point to supervised learning. With no labels, the choice depends on the desired output: unsupervised methods look for task-relevant structure, while self-supervised methods learn reusable representations from proxy targets. A small labeled set can anchor a semi-supervised approach.
 
-Reinforcement learning is the narrow branch. It needs an environment or simulator, actions that change later state, and a reward signal for their consequences; per-example target labels are not its defining input. If the problem can be reduced to independent labeled examples, a supervised formulation is easier to test and operate.
+Reinforcement learning is the narrow branch. It needs an environment or simulator that returns a reward for chosen actions; per-example target labels are not its defining input. When actions also change later state, the problem is sequential and rewards must be credited across steps. Bandit problems, in which each action affects only its immediate reward, are the simplest reinforcement-learning setting. If the problem can be reduced to independent labeled examples, a supervised formulation is easier to test and operate.
 
 # Questions
 
-> [!qard]- What learning signal distinguishes supervised, self-supervised, and reinforcement learning even when all three use a neural network?
-> Supervised learning receives an external target for each example. Self-supervised learning derives a proxy target from the input itself, such as a hidden or next token. Reinforcement learning receives rewards from actions in an environment and optimizes return across a trajectory. The architecture does not determine which learning problem is being solved.
+> [!qard]- What is the difference between supervised and unsupervised learning?
+> Supervised learning trains on inputs paired with known targets and learns to predict those targets. Unsupervised learning trains on inputs without targets. It finds structure defined by a chosen objective, such as groups of similar examples.
+>
+> | Aspect | Supervised learning | Unsupervised learning |
+> |---|---|---|
+> | Training data | Examples with labels, such as tickets paired with their owning team or houses paired with their sale price. | Examples without labels, such as merchant transaction histories. |
+> | What training optimizes | Error between predictions and the known targets. | An objective that defines structure, for example how close examples are to their cluster centers in k-means, or how much variance PCA keeps. |
+> | Typical tasks | Classification, regression and ranking. | Clustering, dimensionality reduction and anomaly detection. |
+> | How results are evaluated | Directly, by comparing predictions with held-out labels the model did not see during training. | Training gives no answers to compare against, and a good objective score is only a proxy. Usefulness needs external evidence, such as whether the structure explains different behavior or improves a real decision. That evidence can be label-free or use labels collected only for evaluation. |
+> | Common failure | Label errors, held-out data that does not represent production, or distribution shift. | Structure that is mathematically tidy but useless. Feature choice, scaling and random initialization can change the result substantially. |
+>
+> A cluster is therefore not a discovered truth. It is the output of a chosen objective and feature space.
+>
+> [Google Machine Learning Glossary](https://developers.google.com/machine-learning/glossary)
+
+<!-- qard-id: eae4d15f-44e2-4fe2-bb4d-495806ec28d1 -->
+
+> [!qard]- How do supervised, self-supervised, and reinforcement learning differ in their learning signal, even when all three use neural networks?
+> The three paradigms differ in where the training signal comes from. Supervised learning uses a target supplied for each example. Self-supervised learning derives targets automatically from the input data. Reinforcement learning uses rewards that an environment returns in response to actions, and it optimizes expected cumulative reward.
+>
+> | Paradigm | Learning signal | Example | What training optimizes |
+> |---|---|---|---|
+> | Supervised | A label for each example, provided by people or by another system. | Support tickets paired with the team that owns them. | Agreement between predictions and the given labels. |
+> | Self-supervised | A proxy target derived from the data itself, with no human annotation. | Predicting the next token, or a hidden one, in text. | Performance on the proxy task, usually to learn representations that are reused for other tasks. |
+> | Reinforcement | A reward from the environment after an action. The reward may arrive immediately or only after later actions. | A routing policy rewarded when tickets get resolved. | A policy with high expected cumulative reward (return) over time. |
+>
+> The architecture does not determine the paradigm: similar neural-network components can be trained with any of these signals. The signal determines what training can optimize and how the result is evaluated. Taxonomies differ on where self-supervised learning belongs. It is sometimes described as turning an unsupervised problem into a supervised one by creating surrogate labels from unlabeled data.
+>
+> [Google Machine Learning Glossary](https://developers.google.com/machine-learning/glossary) · [OpenAI Spinning Up: Key Concepts in RL](https://spinningup.openai.com/en/latest/spinningup/rl_intro.html)
 
 # References
 

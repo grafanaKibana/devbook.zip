@@ -14,6 +14,7 @@ type RunOptions = {
   answer?: string | null
   selection?: string
   clipboard?: string
+  clipboardState?: "rejects" | "unavailable"
   path?: string
   frontmatter?: Record<string, unknown>
   activePath?: string | null
@@ -33,6 +34,7 @@ const runTemplate = async (options: RunOptions = {}) => {
   const file = { path }
   const metadata = { ...(options.frontmatter ?? {}) }
   let processCalls = 0
+  let clipboardCalls = 0
   const notices: string[] = []
   const promptValues = [options.title, options.answer]
   const suggestionValues = [options.callout, options.fold]
@@ -40,7 +42,15 @@ const runTemplate = async (options: RunOptions = {}) => {
     system: {
       suggester: async () => suggestionValues.shift() ?? null,
       prompt: async () => promptValues.shift() ?? null,
-      clipboard: async () => options.clipboard ?? "",
+      clipboard:
+        options.clipboardState === "unavailable"
+          ? undefined
+          : async () => {
+              clipboardCalls++
+              if (options.clipboardState === "rejects")
+                throw new Error("Clipboard permission denied")
+              return options.clipboard ?? ""
+            },
     },
     file: {
       path: () => {
@@ -82,7 +92,7 @@ const runTemplate = async (options: RunOptions = {}) => {
   }
   const execute = new AsyncFunction("tp", "app", "tR", "Notice", `${script}\nreturn tR;`)
   const output = await execute(tp, app, "", Notice)
-  return { metadata, notices, output, processCalls }
+  return { metadata, notices, output, processCalls, clipboardCalls }
 }
 
 test("generic Question preserves fold, optional title, and selection-first body behavior", async () => {
@@ -208,4 +218,53 @@ test("interview Qard rejects incomplete input, invalid identity and unsupported 
   assert.equal(failure.processCalls, 1)
   assert.match(failure.notices.join("\n"), /metadata could not be updated/i)
   assert.doesNotMatch(failure.notices.join("\n"), /active note changed/i)
+})
+
+test("selected content never accesses a rejected or unavailable clipboard", async () => {
+  for (const callout of ["question", "__qard__"]) {
+    for (const clipboardState of ["rejects", "unavailable"] as const) {
+      const result = await runTemplate({
+        callout,
+        fold: "-",
+        title: "Question",
+        selection: "Selected answer",
+        clipboardState,
+      })
+      assert.match(result.output, /\n> Selected answer$/)
+      assert.equal(result.clipboardCalls, 0)
+      assert.equal(result.processCalls, callout === "__qard__" ? 1 : 0)
+    }
+  }
+})
+
+test("interview Qard rejects a reserved answer divider before any metadata write", async () => {
+  for (const source of ["answer", "selection", "clipboard"] as const) {
+    for (const answer of [
+      "Visible answer\n<!-- qard-answer -->\nRemainder",
+      "Visible answer\r\n  <!-- qard-answer -->  \r\nRemainder",
+      "```text\nExample\n```\n<!-- qard-answer -->\nRemainder",
+      "~~~~text\nExample\n~~~~~\n<!-- qard-answer -->\nRemainder",
+    ]) {
+      const result = await runTemplate({ callout: "__qard__", title: "Question", [source]: answer })
+      assert.equal(result.output, "", `${source}: ${answer}`)
+      assert.equal(result.processCalls, 0)
+      assert.deepEqual(result.metadata, {})
+      assert.match(result.notices.join("\n"), /reserved.*qard-answer/i)
+    }
+  }
+})
+
+test("interview Qard preserves literal answer dividers inside native Qard fences", async () => {
+  for (const answer of [
+    "Visible answer\n```html\n<!-- qard-answer -->\n```",
+    "Visible answer\n~~~~html\n<!-- qard-answer -->\n~~~~",
+    "Visible answer\n````markdown\n```\n<!-- qard-answer -->\n`````",
+    "Visible answer\n~~~markdown\n```\n<!-- qard-answer -->\n~~~",
+    "Visible answer\n<!-- qard-answer --> inline example",
+    "Visible answer\n`<!-- qard-answer -->`",
+  ]) {
+    const result = await runTemplate({ callout: "__qard__", title: "Question", answer })
+    assert.equal(result.output, `> [!qard]- Question\n> ${answer.replaceAll("\n", "\n> ")}`)
+    assert.equal(result.processCalls, 1)
+  }
 })

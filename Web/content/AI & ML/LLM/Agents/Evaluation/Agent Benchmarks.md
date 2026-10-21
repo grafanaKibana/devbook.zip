@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-10-12T09:19:58.211Z
-modified: 2026-10-12T09:19:58.211Z
-published: 2026-10-12T09:19:58.211Z
+created: 2026-10-21T13:29:32.417Z
+modified: 2026-10-21T13:29:32.417Z
+published: 2026-10-21T13:29:32.417Z
 topic:
   - AI & ML
 subtopic:
@@ -14,6 +14,7 @@ priority: Medium
 status: Done
 qard-deck: AI & ML
 qard-topic: LLM/Agents/Evaluation/Agent Benchmarks
+flashcard_uid: f16dc5d5
 ---
 
 Agent benchmarks run a model and its scaffold against a fixed public task suite. The tasks usually require several actions: edit a repository until hidden tests pass, operate a website, or combine browsing with calculation. These suites are useful for narrowing a model shortlist and checking whether an evaluation harness produces plausible results.
@@ -35,10 +36,10 @@ The useful comparison starts with task shape. BFCL isolates the unit measured by
 
 # How to Read an Agent Leaderboard
 
-- **Hold the scaffold constant.** Planning, retries, tool descriptions, and context management can move the score as much as the base model. Cross-system results are comparable only when those parts are controlled.
-- **Read the reliability metric.** `pass@1` reports average success across attempts. `pass^k` requires the task to succeed on every one of `k` attempts, so it exposes intermittent failures that an average hides.
-- **Check the age and curation of the set.** Scores on an old public suite may rise because examples or solutions entered training data. Human verification improves issue and test quality; it does not isolate public tasks from training. Treat public suites such as SWE-bench Verified as potentially contaminated for frontier comparisons, and use fresh private or rolling held-out tasks to control that risk.
-- **Account for the missing operating metrics.** Leaderboards often omit token cost, wall-clock latency, and tool-call count. A winning system that spends several dollars and forty calls per task may be the wrong production choice. Those measurements belong in [[AI & ML/LLM/Agents/Evaluation/Evaluation|Agent Evaluation]].
+- **A fixed scaffold isolates the base model.** Planning, retries, tool descriptions, and context management can move the score as much as the base model. A score difference can be attributed to the model only when those parts are held constant. Complete systems with different scaffolds can still be compared as systems when they run the same tasks under the same attempt and cost budgets and report their run conditions, but that comparison does not isolate the model.
+- **Reliability needs its own metric.** `pass@1` reports average success across attempts. `pass^k` requires the task to succeed on every one of `k` attempts, so it exposes intermittent failures that an average hides.
+- **The age and curation of the set affect scores.** Scores on an old public suite may rise because examples or solutions entered training data. Human verification improves issue and test quality; it does not isolate public tasks from training. Public suites such as SWE-bench Verified are therefore potentially contaminated for frontier comparisons, and fresh private or rolling held-out tasks reduce that risk.
+- **Operating metrics may be absent.** Leaderboards often omit token cost, wall-clock latency, and tool-call count. A winning system that spends several dollars and forty calls per task may be the wrong production choice. Those measurements belong in [[AI & ML/LLM/Agents/Evaluation/Evaluation|Agent Evaluation]].
 
 # Why Public Scores Miss Internal Workloads
 
@@ -56,16 +57,25 @@ System B: 45% resolved, but pass^3 = 41% and $0.30/task, scaffold Y
 
 Naive read: A wins (48 > 45).
 Engineering read: reliability is not comparable. B reports pass^3 and cost;
-A reports neither, and the systems use different scaffolds. Run both on the
-same repos, scaffold, and budget with repeated trials before choosing.
+A reports neither, and the systems use different scaffolds. A system choice
+requires running each with its own scaffold on the same repos, attempt count,
+and budget, with repeated trials.
 ```
 
-The example exposes missing evidence rather than a winner. System B reports repeated-run reliability and cost. System A does not. Its `48%` cannot be called lucky or unreliable from one aggregate alone. A reliability comparison requires repeated trials for both systems under the same scaffold.
+The example exposes missing evidence rather than a winner. System B reports repeated-run reliability and cost. System A does not. Its `48%` cannot be called lucky or unreliable from one aggregate alone. Comparing the two complete systems requires repeated trials for both on the same tasks, attempt count, and budget, with each keeping its own scaffold. A shared scaffold is required only to isolate the base model, which is a separate question from choosing between the systems.
 
 # Questions
 
-> [!qard]- Why can one base model produce very different results on the same benchmark?
-> The benchmark runs a model-plus-scaffold system. Planning logic, retry limits, prompts, tool descriptions, and context handling all affect the outcome. Scores from different scaffolds cannot isolate model quality. A fair model comparison keeps the scaffold fixed, then reruns the candidates on the same tasks.
+<!-- qard-id: 0d0c25bd-07f5-4f8d-a204-f23e5016b1ad -->
+
+> [!qard]- Why can one base model produce very different results on the same agent benchmark?
+> Because an agent benchmark scores a whole system, not the model alone. The result reflects the model together with its scaffold: prompts and policies, tool descriptions, planning and retry logic, context management, and the loop that runs it. Changing the scaffold can move the score even when the base model stays the same.
+>
+> Run conditions also matter. An agent can solve a task on one attempt and fail it on the next. τ-bench reports `pass^k`, the chance that all `k` trials of a task succeed, which exposes inconsistency that a single-attempt score hides.
+>
+> A fair model comparison therefore holds the task set, scaffold and run conditions constant and varies only the model. Comparing scaffolds is a separate experiment with the model held fixed. A leaderboard score describes one benchmark setup, not intrinsic model quality.
+>
+> [τ-bench: A Benchmark for Tool-Agent-User Interaction in Real-World Domains](https://arxiv.org/html/2406.12045)
 
 # References
 

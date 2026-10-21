@@ -363,16 +363,20 @@ for (const type of ["QUESTION", "qard"]) {
   }
 }
 
-test("production extraction keeps nested answer lookalikes inside their original card", async () => {
+test("production extraction separates adjacent cards while preserving nested and fenced examples", async () => {
   const hub = "---\ntags: [FolderNote]\norder: 10\n---"
   const fixture = [
     "> [!qard]- Outer card",
     "> > [!QUESTION]- Nested answer example",
     "> > Nested content",
+    "> ```md",
+    "> [!qard]- Fenced answer example",
+    "> ```",
     "> Outer answer",
-    "",
     "> [!QUESTION]- Sibling card",
     "> Sibling answer",
+    "> [!qard]- Third card",
+    "> Third answer",
   ].join("\n")
   const path = "Home/Programming/Nested-Lookalike.md"
   const harness = new DatacoreHarness(
@@ -385,9 +389,13 @@ test("production extraction keeps nested answer lookalikes inside their original
   await harness.settle()
 
   const questions = questionSnapshot(harness)
-  assert.equal(questions.length, 2)
+  assert.equal(questions.length, 3)
   assert.match(questions[0].question, /> > \[!QUESTION\]- Nested answer example/)
+  assert.match(questions[0].question, /Fenced answer example/)
+  assert.doesNotMatch(questions[0].question, /Sibling card|Third card/)
   assert.match(questions[1].question, /Sibling card/)
+  assert.doesNotMatch(questions[1].question, /Third card/)
+  assert.match(questions[2].question, /Third card/)
 })
 
 test("shows a loading message before the first read batch completes", () => {
