@@ -18,5 +18,6 @@
   "obsidian-linter",
   "tabsdown",
   "quartz-syncer",
-  "qard"
+  "qard",
+  "advanced-rename-and-delete-handler"
 ]
