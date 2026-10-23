@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.695Z
-modified: 2026-08-20T20:41:15.696Z
-published: 2026-08-20T20:41:15.696Z
+created: 2026-10-21T13:29:32.457Z
+modified: 2026-10-21T13:29:32.457Z
+published: 2026-10-21T13:29:32.457Z
 topic:
   - Software Architecture
 subtopic:
@@ -12,6 +12,9 @@ level:
   - "2"
 priority: High
 status: Done
+qard-deck: Software Architecture
+qard-topic: Patterns/Design Patterns/Structural/Adapter
+flashcard_uid: dc9183f6
 ---
 
 A travel plug adapter lets a US charger connect to a European outlet. It changes neither device. The small piece between them translates one physical interface into the other.
@@ -183,12 +186,25 @@ Replacing the legacy system now requires a new adapter. `OrderService` stays unc
 
 # Questions
 
-> [!QUESTION]- How can an Adapter be distinguished from a Facade when both wrap another system?
-> An Adapter translates an incompatible interface into the contract a client expects. A Facade gives clients a smaller, workflow-oriented API and may coordinate several subsystem calls. For example, a wrapper that exposes three business operations over twenty legacy calls is acting as a Facade, even if some translation also happens inside it.
+<!-- qard-id: a7781445-d0b1-4c3a-94df-94013fbec7fb -->
+
+> [!qard]- How can an Adapter be distinguished from a Facade when both wrap another system?
+> An Adapter makes an existing component usable through a contract that a client already expects. Its defining job is compatibility. A Facade gives clients a new, simpler interface to a complex subsystem. Its defining job is simplification, which can include coordinating several subsystem calls behind one operation.
+>
+> | Aspect | Adapter | Facade |
+> |---|---|---|
+> | Problem it solves | The client depends on one interface, but the existing component exposes an incompatible one. | Using the subsystem directly is complex, for example because clients must know many of its components or repeat the same sequence of calls. |
+> | Interface it exposes | The target contract the client already uses, such as `IInventoryService`. | A new, higher-level interface shaped around what clients need, such as a checkout operation `PlaceOrderAsync`. |
+> | Work inside | Maps method names, reshapes data, and converts results and error codes between the two contracts. | Hides subsystem details behind that interface. When a use case needs several steps, it calls the components in the required order and owns that workflow. |
+> | Without it | The two sides cannot work together unless equivalent translation is written somewhere else, such as in the client. | Clients can still use the subsystem directly, but each one has to handle its complexity. Where a workflow is involved, each client duplicates it, and the copies can drift in sequencing or error handling. |
+>
+> A Facade may also contain some translation. The defining responsibility separates the two: compatibility for an Adapter, simplification for a Facade.
+>
+> [Design Patterns: Adapter/Facade (Microsoft Learn)](https://learn.microsoft.com/en-us/shows/visual-studio-toolbox/design-patterns-adapterfaade) · [[Software Architecture/Patterns/Design Patterns/Structural/Adapter#Solution|Adapter: Solution]] · [[Software Architecture/Patterns/Design Patterns/Structural/Facade#Problem|Facade: Problem]] · [[Software Architecture/Patterns/Design Patterns/Structural/Facade#Tradeoffs|Facade: Tradeoffs]]
 
 # References
 
 - [Adapter pattern](https://refactoring.guru/design-patterns/adapter)
 - [Adapter Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=2PKQtcJjYvc\&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc\&index=8)
 - [StreamReader — .NET's built-in Adapter for byte-to-text stream translation](https://learn.microsoft.com/en-us/dotnet/api/system.io.streamreader)
-- [DelegatingHandler — HTTP pipeline adapter pattern in .NET](https://learn.microsoft.com/en-us/dotnet/api/system.net.http.delegatinghandler)
+- [DelegatingHandler — delegating HTTP handler chains](https://learn.microsoft.com/en-us/dotnet/api/system.net.http.delegatinghandler)

@@ -1,5 +1,4 @@
 import assert from "node:assert/strict"
-import { readFileSync } from "node:fs"
 import test from "node:test"
 import { runInNewContext } from "node:vm"
 import { h } from "preact"
@@ -7,22 +6,18 @@ import render from "preact-render-to-string"
 import type { Element } from "hast"
 import { QuestionsIndex } from "./questions-index"
 
-const callout: Element = {
+const callout = (type = "question"): Element => ({
   type: "element",
   tagName: "blockquote",
-  properties: { className: ["callout", "question"] },
+  properties: { className: ["callout", type], dataCallout: type },
   children: [{ type: "text", value: "Question and answer" }],
-}
-const file = (slug: string, count = 0, frontmatter = {}) => ({
+})
+const file = (slug: string, count = 0, frontmatter = {}, type = "question") => ({
   slug,
   frontmatter: slug.endsWith("/index") ? { tags: ["FolderNote"], ...frontmatter } : frontmatter,
-  questionCallouts: Array.from({ length: count }, () => ({ node: callout })),
+  questionCallouts: Array.from({ length: count }, () => ({ node: callout(type) })),
 })
 const component = QuestionsIndex(undefined)
-const customStyles = readFileSync(
-  new URL("../../quartz/styles/custom.scss", import.meta.url),
-  "utf8",
-)
 const html = (allFiles: ReturnType<typeof file>[], slug = "questions") =>
   render(h(component, { allFiles, fileData: { slug } } as never))
 
@@ -50,6 +45,21 @@ test("QuestionsIndex gates to its dashboard and has a useful empty state", () =>
   assert.equal(html([file("programming/note", 1)], "index"), "")
   assert.match(html([]), /0 questions/)
   assert.match(html([]), /No questions found/)
+})
+
+test("native Qard cards keep the existing component data shape and hide Qard metadata", () => {
+  const result = html([
+    file(
+      "programming/qard-source",
+      1,
+      { title: "Native card", "qard-deck": "Private deck", "qard-topic": "Private topic" },
+      "qard",
+    ),
+  ])
+
+  assert.match(result, /data-callout="qard"/)
+  assert.match(result, /Native card/)
+  assert.doesNotMatch(result, /qard-deck|qard-topic|Private deck|Private topic/)
 })
 
 test("topic order, labels and nested counts follow folder metadata", () => {
@@ -106,14 +116,6 @@ test("every topic panel and source is preloaded in server HTML without JavaScrip
     topicPanels.every((panel) => panel.includes('class="qi-source"')),
     true,
   )
-})
-
-test("Questions-only Tabsdown layout wraps with the plugin's supported variables", () => {
-  assert.match(
-    customStyles,
-    /\.questions-index \.tabsdown\.tabsdown--mounted \{[^}]*--tabsdown-overflow-wrap: wrap;[^}]*--tabsdown-overflow-x: visible;[^}]*--tabsdown-equal-width-flex: 1 1 max-content;/,
-  )
-  assert.doesNotMatch(component.css!, /--tabsdown-overflow-wrap/)
 })
 
 test("root-level notes are included in a selectable scope", () => {

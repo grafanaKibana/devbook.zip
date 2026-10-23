@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.492Z
-modified: 2026-08-20T20:41:15.492Z
-published: 2026-08-20T20:41:15.492Z
+created: 2026-10-21T13:29:32.426Z
+modified: 2026-10-21T13:29:32.426Z
+published: 2026-10-21T13:29:32.426Z
 topic:
   - AI & ML
 subtopic:
@@ -12,11 +12,14 @@ level:
   - "2"
 priority: High
 status: Ready to Repeat
+qard-deck: AI & ML
+qard-topic: LLM/Fine-tuning
+flashcard_uid: b36582e5
 ---
 
 Fine-tuning continues a pretrained model's training on task-specific examples. The resulting behavior lives in the weights, so the same instructions do not need to travel with every request. It works well for stable output conventions, classification boundaries, tool-call reliability, and narrow-task distillation. It makes a poor knowledge store. Facts learned during training have no citation boundary and start aging immediately.
 
-Start with prompting, add [[AI & ML/LLM/Context Engineering/RAG/RAG|RAG]] when the gap is current or private knowledge, and fine-tune only when a measured behavior gap remains. [[#Preference alignment]] covers preference-pair methods after supervised fine-tuning, and [[#GRPO]] covers group-relative online reinforcement learning.
+Prompting is the usual starting point. [[AI & ML/LLM/Context Engineering/RAG/RAG|RAG]] addresses gaps in current or private knowledge, and fine-tuning is justified only when a measured behavior gap remains. [[#Preference alignment]] covers preference-pair methods after supervised fine-tuning, and [[#GRPO]] covers group-relative online reinforcement learning.
 
 # GRPO
 
@@ -40,12 +43,12 @@ The absence of a critic reduces model-state memory and one source of estimation 
 
 GRPO works best with rewards that are cheap to verify and hard to game, such as exact math answers, executable tests, schema checks, or constrained simulators. A vague style judge can reward verbosity or shortcuts that fail outside the training setup.
 
-Check that the reward still predicts useful behavior:
+Validation checks that the reward still predicts useful behavior:
 
-- Keep held-out prompts and run target, general-capability, and safety evaluations.
-- Inspect examples with high reward but poor human judgment.
-- Measure reward distribution and group variance alongside average training reward.
-- Test the final policy outside the environment and formatting assumptions used by the verifier.
+- Held-out prompts are kept and run through target, general-capability, and safety evaluations.
+- Examples with high reward but poor human judgment are inspected.
+- Reward distribution and group variance are measured alongside average training reward.
+- The final policy is tested outside the environment and formatting assumptions used by the verifier.
 
 ## Where GRPO Came From
 
@@ -64,7 +67,7 @@ rejected: invents an exception and promises a refund
 rubric: correctness, actionability, tone
 ```
 
-Hold out complete prompts as well as response pairs so evaluation tests generalization to new situations.
+Evaluation holds out complete prompts as well as response pairs, so it tests generalization to new situations.
 
 ## RLHF
 
@@ -78,7 +81,7 @@ Direct Preference Optimization derives a classification-style objective from pre
 
 DPO fits a fixed preference set that is already available and stable. Online methods such as [[#GRPO]] fit when a verifier can score newly sampled candidates and remains reliable as outputs change.
 
-Measure pairwise win rate with blinded raters alongside task correctness, refusal behavior, calibration, and safety slices. Keep another set for general-capability regressions. Response length needs explicit control or reporting because raters and judges can favor longer answers that are no more correct.
+Evaluation measures pairwise win rate with blinded raters alongside task correctness, refusal behavior, calibration, and safety slices. A separate set catches general-capability regressions. Response length needs explicit control or reporting because raters and judges can favor longer answers that are no more correct.
 
 # When Fine-tuning Earns Its Cost
 
@@ -93,7 +96,7 @@ A held-out evaluation set and a baseline from the exact base model must exist be
 
 Full fine-tuning updates every model weight. Its memory footprint is not a fixed multiple of the published model size. A run may hold weights, gradients, optimizer states, activations, temporary buffers, and communication shards at different precisions. Adam-style optimizers keep several state tensors. Activation memory moves with batch size, sequence length, layer shape, and checkpointing policy. Quantization, mixed precision, ZeRO/FSDP sharding, CPU offload, and optimizer choice change the total again.
 
-Plan capacity from a component-level estimate for the exact model and training stack, then measure a short run. Reserve full tuning for cases where broader weight updates beat PEFT on held-out quality enough to justify distributed compute and a full derived checkpoint.
+Capacity planning starts from a component-level estimate for the exact model and training stack, followed by a measured short run. Full tuning is justified only when broader weight updates beat PEFT on held-out quality by enough to pay for distributed compute and a full derived checkpoint.
 
 # Parameter-efficient Fine-tuning
 
@@ -113,17 +116,17 @@ Feasibility still depends on the model architecture and the actual training conf
 
 Data quality and coverage matter more than raw count.
 
-- Match the production chat template, system role, tool schema, and output format exactly.
-- Remove contradictory labels and near-duplicate examples that over-weight one phrasing.
-- Cover ordinary cases, boundary cases, refusals, and negative examples in the proportions expected at inference.
-- Keep a held-out split that is never used for training or prompt iteration.
-- Record the base checkpoint, tokenizer, data version, hyperparameters, and adapter targets so the run is reproducible.
+- Training examples match the production chat template, system role, tool schema, and output format exactly.
+- Contradictory labels and near-duplicate examples that over-weight one phrasing are removed.
+- Ordinary cases, boundary cases, refusals, and negative examples appear in the proportions expected at inference.
+- A held-out split is never used for training or prompt iteration.
+- The base checkpoint, tokenizer, data version, hyperparameters, and adapter targets are recorded so the run is reproducible.
 
 # Evaluation
 
-Compare the base and fine-tuned candidates on the same target set, broad capability holdouts, and safety checks. Report effect sizes by slice instead of hiding them inside one average. A format gain that causes a reasoning or refusal regression is a trade, not a free improvement.
+The base and fine-tuned candidates are compared on the same target set, broad capability holdouts, and safety checks. Effect sizes are reported by slice instead of hidden inside one average. A format gain that causes a reasoning or refusal regression is a trade, not a free improvement.
 
-During training, validation loss and early stopping detect memorization, but shipping still depends on task metrics and production confirmation through [[AI & ML/LLM/Evaluation/Online Evaluation and AB Tests|online evaluation and A/B tests]]. Keep the base checkpoint deployable so rollback is an operational action, not a retraining project.
+During training, validation loss and early stopping detect memorization, but shipping still depends on task metrics and production confirmation through [[AI & ML/LLM/Evaluation/Online Evaluation and AB Tests|online evaluation and A/B tests]]. A deployable base checkpoint keeps rollback an operational action, not a retraining project.
 
 # Pitfalls
 
@@ -133,7 +136,7 @@ During training, validation loss and early stopping detect memorization, but shi
 
 **Narrow-only evaluation:** target gains can hide losses in general reasoning, multilingual behavior, or safety. The active adapter belongs in every deployment candidate being evaluated.
 
-**Capacity estimates from one multiplier:** model-file size is not training memory. Estimate weights, gradients, optimizer states, activations, and sharding for the actual configuration.
+**Capacity estimates from one multiplier:** model-file size is not training memory. A usable estimate accounts for weights, gradients, optimizer states, activations, and sharding in the actual configuration.
 
 # Tradeoffs
 
@@ -147,8 +150,28 @@ During training, validation loss and early stopping detect memorization, but shi
 
 # Questions
 
-> [!QUESTION]- Why can LoRA still cause forgetting if the base weights are frozen?
-> The deployed output comes from the base plus the adapter’s updates. Narrow adapter training can steer that effective model away from capabilities outside the training distribution. The frozen base makes rollback easy. It does not guarantee unchanged behavior while the adapter is enabled.
+> [!qard]- What is LoRA, and why is it cheaper than full fine-tuning?
+> LoRA (Low-Rank Adaptation) fine-tunes a pretrained model by freezing its weights and training only a small low-rank update for selected layers. Because the trainable part is a tiny fraction of the model, training needs gradients and optimizer state only for that update, and the result is a small adapter instead of a full model copy.
+>
+> 1. A chosen weight matrix `W0` stays frozen.
+> 2. Its change is represented as the product of two small matrices, `B·A`. Their shared inner dimension, the rank `r`, is much smaller than the layer's dimensions.
+> 3. Only `A` and `B` are trained.
+> 4. The adapted layer computes `W0·x + B·A·x`.
+>
+> The small trainable set lowers training memory compared with updating every weight. Adapters for different tasks can share one base model and be swapped. An adapter can also be merged into `W0`, so serving needs no extra computation. Whether a LoRA adapter matches full fine-tuning on a particular task depends on its configuration, such as rank and target layers, and held-out evaluation establishes it.
+>
+> Sources: [Hu et al.: LoRA](https://arxiv.org/abs/2106.09685) · [Hugging Face PEFT: LoRA](https://huggingface.co/docs/peft/en/developer_guides/lora)
+
+<!-- qard-id: d65b682a-c207-4ffc-87d5-1839b2d5ba54 -->
+
+> [!qard]- Why can LoRA still cause capability regressions if the base weights are frozen?
+> Freezing the base weights fixes what is stored and updated during training, not what the deployed model computes. LoRA adds a trainable low-rank update to selected layers. While the adapter is active, each adapted layer computes the frozen weight's output plus the adapter's contribution: `W0·x + B·A·x`.
+>
+> That added term applies to every input passing through those layers, not only to inputs that resemble the training data. Training optimizes it for the target examples alone, so it can also shift behavior the data never covered, such as instruction following, safety behavior or general reasoning. Frozen base weights therefore do not guarantee unchanged outputs. The full base-plus-adapter model needs evaluation on both the target task and broad held-out sets.
+>
+> Freezing does make rollback easier. A separate adapter can be disabled, which returns the model to the base behavior. Merging folds the update into the weights, so rollback after a merge depends on a supported unmerge or an unmodified copy of the base checkpoint.
+>
+> Sources: [Hu et al.: LoRA](https://arxiv.org/abs/2106.09685) · [Hugging Face PEFT: LoRA](https://huggingface.co/docs/peft/en/developer_guides/lora) · [More Than Catastrophic Forgetting](https://arxiv.org/abs/2405.17830)
 
 # References
 

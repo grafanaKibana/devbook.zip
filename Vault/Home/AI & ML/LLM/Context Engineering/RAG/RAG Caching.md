@@ -9,6 +9,9 @@ level:
 priority: High
 status: Done
 publish: true
+qard-deck: "AI & ML"
+qard-topic: "LLM/Context Engineering/RAG/RAG Caching"
+flashcard_uid: "e2208d57"
 ---
 
 A RAG request can repeat the same expensive work: embed the query, search the index, and generate an answer. Caches remove that work only when their keys capture every input that affects the result.
@@ -128,10 +131,43 @@ Fast-changing evidence may justify caching embeddings and retrieval results with
 
 # Questions
 
-> [!QUESTION]- Why should retrieval cache keys be based on processed query text instead of raw embeddings?
-> Processed query text and its transformation version are readable, deterministic inputs. Raw embedding bytes change with the model and hide why two entries differ. A translation-version change should produce a new key, and the embedding model version still belongs in the retrieval key because it affects ranking.
+> [!qard]- What must a RAG retrieval-cache key include to keep cache hits correct?
+> The key must include every input that can change the ranked candidate list, so that changing any of them produces a different key. A retrieval cache stores document IDs and scores. If a result-affecting input is missing from the key, a hit returns a list computed under different conditions.
+> 
+> | Key field | Failure if it is missing |
+> |---|---|
+> | Processed query, plus the version of the canonicalization or translation that produced it | After query processing changes, hits can return lists produced by the old processing. |
+> | Embedding model and its configuration | After an upgrade, lists ranked in the old embedding space are reused. |
+> | Index or corpus version | Added, changed or deleted documents stay invisible to cached queries. |
+> | Tenant and authorization-context hash | One caller receives candidates computed for another caller's permissions, which is a data leak, not just staleness. |
+> | Filters, top-k and retriever or reranker configuration | A request with different settings receives a list built for other settings. |
+> 
+> The query part of the key can be processed text or embedding bytes. Text is inspectable and stays stable while its canonicalization is versioned. Embedding bytes are deterministic only while the encoder, model and configuration are pinned. Either works when every other result-changing input is also in the key.
+> 
+> For protected content, a complete key is necessary but not sufficient. A read still checks the caller's current access, because permissions can change after an entry is stored.
+> 
+> Sources:
+> - [Cache-Aside pattern (Azure Architecture Center)](https://learn.microsoft.com/en-us/azure/architecture/patterns/cache-aside)
+> - [Cache-aside with Azure Managed Redis and PostgreSQL (Azure Architecture Center)](https://learn.microsoft.com/en-us/azure/architecture/databases/architecture/cache-aside-azure-managed-redis-postgresql)
+> - [[RAG Caching#Retrieval Cache|RAG Caching: Retrieval Cache]]
+
+<!-- qard-id: 5cb490e8-881c-4bf7-832b-d7d2d8ceeb1d -->
+> [!qard]- How do caches help a RAG pipeline, and what makes a cache hit safe?
+> Each cache layer skips a different expensive step: an embedding cache skips the embedding call, a retrieval cache skips search and reranking, and a response cache skips generation. A hit is safe only when three conditions hold: the key or a validation check covers every input that could change that stage's result, the caller is currently allowed to see the value, and the entry is fresh enough for its sources.
+> 
+> | Layer | Stores | Work skipped on a hit | Key must cover | Main risk |
+> |---|---|---|---|---|
+> | Embedding | The vector for a processed text | The embedding call, at ingestion or query time | Text hash, embedding model, dimensions and preprocessing version | Vectors from an old model mixed with new ones, which makes similarity scores meaningless |
+> | Retrieval | Ranked document IDs and scores | Vector search and reranking | Processed query, index version, filters, top-k, retriever settings, tenant and authorization context | Stale lists after an index update, or results computed for another tenant |
+> | Response | The final answer | Generation | The retrieval inputs plus prompt template, selected evidence, generation model and settings, and any conversation state that changes meaning | Answers grounded in outdated evidence, or served to a caller who may not see that evidence |
+> 
+> Freshness follows the sources. A time-to-live bounds staleness, and known source or permission changes invalidate entries before it expires. Fast-changing evidence can justify caching embeddings and retrieval results while not caching final answers.
+> 
+> Sources:
+> - [Cache-Aside pattern (Azure Architecture Center)](https://learn.microsoft.com/en-us/azure/architecture/patterns/cache-aside)
+> - [[RAG Caching#Flow|RAG Caching: Flow]]
 
 # References
 
-- [Caching embeddings (LangChain integrations)](https://docs.langchain.com/oss/python/integrations/embeddings)
-- [RAGOps: Operating and Managing RAG Pipelines](https://arxiv.org/abs/2506.03401)
+- [Cache-Aside pattern (Azure Architecture Center)](https://learn.microsoft.com/en-us/azure/architecture/patterns/cache-aside)
+- [Cache-aside with Azure Managed Redis and PostgreSQL (Azure Architecture Center)](https://learn.microsoft.com/en-us/azure/architecture/databases/architecture/cache-aside-azure-managed-redis-postgresql)

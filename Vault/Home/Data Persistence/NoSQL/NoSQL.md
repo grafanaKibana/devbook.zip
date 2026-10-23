@@ -11,6 +11,9 @@ tags: [FolderNote]
 
 publish: true
 priority: High
+qard-deck: "Data Persistence"
+qard-topic: "NoSQL/NoSQL"
+flashcard_uid: "96ca4645"
 ---
 
 NoSQL names a loose group of data stores rather than one database model. It covers key-value, document, wide-column, and graph stores, while search and time-series engines are often grouped beside them. Product boundaries overlap. A document store may enforce schemas, a key-value service may expose secondary indexes, and either may support transactions within a documented scope.
@@ -54,8 +57,15 @@ Data is often shaped around known reads because keeping related values in one pa
 
 # Questions
 
-> [!QUESTION]- When is NoSQL a bad idea?
-> It is a poor trade when the core model depends on relational constraints, multi-entity transactions, or queries that change faster than the storage model can be redesigned. If the selected engine cannot enforce those guarantees, application code inherits them. Keeping SQL and adding a cache, replica, or purpose-built read model is often cheaper.
+<!-- qard-id: 510a2738-ff3d-447d-a2eb-c48661cd012d -->
+> [!qard]- When is a non-relational store a poor fit for a service?
+> A non-relational store is a poor fit when the service's correctness depends on guarantees that the chosen engine cannot provide within the required scope. Those guarantees are constraints, transactions across related records, or support for a changing set of queries.
+> 
+> - **Invariants move into application code.** If the database cannot enforce a rule across records, the application must enforce it, coordinate concurrent writes and repair copies that drift apart. For example, a transfer between two account records needs both balance changes to commit or fail together. An engine whose transactions are limited to one document or partition provides that atomicity only when both accounts lie inside one such scope. Under a partition-scoped transaction, two separate account documents in the same partition can still commit together. When the accounts fall outside every atomic scope the engine supports, such as in different partitions, the application must coordinate the transfer itself.
+> - **New queries can require remodeling.** Data in such stores is often shaped around known reads. A query the model was not designed for may need another index, a duplicated record or a different layout.
+> - **The label decides little.** “NoSQL” names no single consistency or transaction model. Some engines provide strong reads or transactions within a bounded scope, while others offer eventual or tunable consistency. The fit therefore depends on the concrete engine and the scope of each operation.
+> 
+> [Microsoft: Understand data store models](https://learn.microsoft.com/en-us/azure/architecture/data-guide/technology-choices/understand-data-store-models) · [Azure Cosmos DB: Database transactions and optimistic concurrency](https://learn.microsoft.com/en-us/azure/cosmos-db/database-transactions-optimistic-concurrency)
 
 # References
 

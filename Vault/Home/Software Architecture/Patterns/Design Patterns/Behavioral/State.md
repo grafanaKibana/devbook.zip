@@ -9,6 +9,9 @@ level:
 priority: High
 status: Done
 publish: true
+qard-deck: "Software Architecture"
+qard-topic: "Patterns/Design Patterns/Behavioral/State"
+flashcard_uid: "79f8c824"
 ---
 
 A vending machine responds to the same button differently while idle, holding credit, or out of stock. The input stays the same. Its current state decides what the input means.
@@ -189,7 +192,7 @@ public class Order
 
 **Incomplete transition effects.** Changing `Paid` to `Cancelled` without arranging the refund creates a valid-looking state with broken business meaning. The transition boundary must define whether effects complete atomically, run through an outbox, or leave the machine in an intermediate state.
 
-**Persistence coupling.** Persist a stable state identifier and reconstruct behavior after loading. Serializing concrete state objects ties stored data to the class hierarchy and makes refactoring much harder.
+**Persistence coupling.** A stable state identifier is persisted, and behavior is reconstructed from it after loading. Serializing concrete state objects ties stored data to the class hierarchy and makes refactoring much harder.
 
 # Tradeoffs
 
@@ -205,8 +208,35 @@ State earns its classes when state-dependent rules are scattered across several 
 
 # Questions
 
-> [!QUESTION]- How does a compiler-generated async state machine relate to the State pattern?
-> The compiler emits an `IAsyncStateMachine` implementation with a numeric state field. `MoveNext()` branches on that field, saves a continuation when an awaiter is incomplete, and later resumes from the saved point. Locals that must survive suspension become fields. This is a compiler state machine, but it does not use the pattern's usual family of state objects.
+> [!qard]- What is the State pattern?
+> The State pattern moves state-dependent behavior into separate state objects that share one interface. A context object holds its current state and delegates each operation to it, so replacing the state object changes how the same operation behaves.
+> 
+> For example, `Order.Ship()` delegates to the order's current state:
+> 
+> - `PendingState` rejects the call because the order is unpaid.
+> - `PaidState` transitions the order to `ShippedState`.
+> - `ShippedState` rejects the call because the order has already shipped.
+> 
+> In this example, each state decides which transitions it allows. That ownership is a design choice: either the context or a concrete state may decide which state comes next and when. In both forms, callers request domain operations such as `Pay()` or `Ship()` instead of setting a status directly.
+> 
+> The pattern replaces the same `switch` on a status repeated across many operations. A new state becomes one new class, plus edits wherever transitions to or from it are defined. The cost is many small classes, and a new operation must be implemented in every state. A small machine with few state-dependent rules is often clearer as an enum with one transition function.
+> 
+> [Gamma et al.: Design Patterns, State chapter](https://cs.gonzaga.edu/faculty/crandall/misc/GoF.pdf) · [MSDN Magazine: Solidify your C# application architecture with design patterns](https://learn.microsoft.com/en-us/archive/msdn-magazine/2001/july/design-patterns-solidify-your-csharp-application-architecture-with-design-patterns) · [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/State#Solution|State pattern implementation]] · [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/State#Tradeoffs|State tradeoffs]]
+
+<!-- qard-id: 1c479114-9836-446c-88c8-e0ea73be8a6e -->
+> [!qard]- How does a compiler-generated async state machine relate to the State pattern?
+> Both let stored state decide what happens next, but the async state machine is a compiler implementation technique, not the GoF State pattern.
+> 
+> | Aspect | Compiler-generated async state machine | GoF State pattern |
+> |---|---|---|
+> | What the state means | Where the method paused, meaning which incomplete `await` it is waiting on. | The object's current mode in the domain, such as `Pending` or `Paid`. |
+> | How state is stored | A generated state field, plus fields for the locals that must survive the `await`. | The context holds a reference to a state object that implements a shared interface. |
+> | How behavior changes | When the awaited operation completes, its continuation calls `MoveNext()`, which branches on the state field and resumes after that `await`. | The context delegates each operation to its current state object; replacing that object changes behavior. |
+> | Who designs it | The compiler generates it from an `async` method. | Developers design the state classes and the transitions between them. |
+> 
+> The async machine therefore shows state-driven control flow built from generated fields and branching, not from interchangeable state objects.
+> 
+> [C#: async scenarios](https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/async-scenarios) · [Stephen Toub: How Async/Await Really Works in C#](https://devblogs.microsoft.com/dotnet/how-async-await-really-works/) · [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/State#Familiar state machines|Familiar state machines]] · [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/State#Solution|State pattern implementation]]
 
 # References
 

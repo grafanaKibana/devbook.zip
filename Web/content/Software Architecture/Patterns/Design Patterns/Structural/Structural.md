@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.699Z
-modified: 2026-08-20T20:41:15.699Z
-published: 2026-08-20T20:41:15.699Z
+created: 2026-10-14T11:59:33.505Z
+modified: 2026-10-14T11:59:33.505Z
+published: 2026-10-14T11:59:33.505Z
 tags:
   - FolderNote
 topic:
@@ -14,6 +14,8 @@ level:
   - "3"
 priority: High
 status: Done
+qard-deck: Software Architecture
+qard-topic: Patterns/Design Patterns/Structural/Structural
 ---
 
 Structural patterns organize relationships between objects. They solve different boundary problems: incompatible interfaces, recursive part-whole trees, independently changing dimensions, layered behavior, simplified subsystem access, shared intrinsic state, and controlled access. The right pattern follows from the relationship that must remain stable.
@@ -35,9 +37,6 @@ These patterns can share nearly identical class diagrams while serving different
 | [[Software Architecture/Patterns/Design Patterns/Structural/Proxy]] | Control access through a same-interface surrogate. | Access must be deferred, cached, authorized, or made remote without changing clients. |
 
 # Questions
-
-> [!QUESTION]- Decorator and Proxy can have the same class structure. What determines which pattern is present?
-> Intent. A Decorator adds composable behavior to an object. A Proxy controls access to another object, perhaps by deferring creation or enforcing authorization. The wrapper's responsibility and the reason it exists matter more than the diagram.
 
 # References
 

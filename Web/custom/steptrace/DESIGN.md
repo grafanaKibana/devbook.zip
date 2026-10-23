@@ -354,19 +354,11 @@ For a changed visual family, capture:
 - Initial, representative active, and final state.
 - Reduced motion when motion behavior changed.
 
-### Capture, review, promote
+### Automated verification and visual review
 
-Visual proof is a two-phase immutable-candidate protocol. Candidate capture writes a sealed tree once, records product failures separately from pending visual approvals, and never reads approvals. Independent review may then append ledger entries without changing or recapturing the candidate. Promotion uses `--mode=verify-candidate --run-id=<id>` to revalidate the sealed artifacts, exact capture inputs and environment, product status, and current approval ledger; its closure receipt lives outside the candidate directory.
+`npm run steptrace:test` checks every registered frame algorithm against authored inputs plus registry, player, milestones and invalid-input boundaries. `npm run steptrace:lifecycle` runs a self-contained Chromium smoke of the real generated engine and Quartz hydrator: compact and wide layout, reduced motion, keyboard seeking, SPA remount/cleanup and representative structure operations.
 
-Every visual mode runs through `steptrace.visual.launcher.mjs`; direct harness execution is rejected. The launcher hashes itself, the visual harness, and every imported local executable module before import, then passes a manifest that the harness verifies immediately. Candidate capture requires `--run-id` and `--producer-agent-id`. Promotion requires the same run id plus `--quartz-receipt` and `--obsidian-receipt`. The launch-manifest hash and exact executable bytes remain part of both pre/post capture snapshots, the candidate seal, and the external capture anchor.
-
-The exclusive capture anchor is `quality-gate/g008-promotion-protocol/capture-anchors/<run-id>.json`. Each screenshot has one canonical contained candidate path; promotion retains its validated bytes and hashes through classification and approval matching, then rechecks the complete anchored candidate tree immediately before the exclusive closure receipt write.
-
-Every current v2 approval requires an exclusive external anchor at `quality-gate/g008-promotion-protocol/review-anchors/<run-id>/<reviewer-agent-id>.json`. It binds the external capture-anchor path and hash, producer agent and harness identity, a distinct reviewer agent and evidence-owned tool identity, an allowed reviewer role, exact review artifacts and hashes, and the complete approval identity set. Path-only reviews and legacy approvals are not trusted.
-
-Current-run real-host receipts are written by the evidence-owned G008 adapters under `quality-gate/g008-promotion-protocol/runners/` to `real-host/g008/<run-id>/<host>/receipt.json`. Quartz uses runner `steptrace-g008-quartz-v1` with `playwright-cli`; Obsidian uses `steptrace-g008-obsidian-v1` with `obsidian-cli`. Promotion accepts only canonical schema-v2 PASS receipts with current runner-file hashes, exact capture/input/source/generated bindings, concrete check and artifact manifests, zero errors, and successful cleanup. Product failures are independently rederived before host or review evidence is consulted.
-
-**Architect WATCH:** review consolidation and real-host execution remain separate evidence lanes. They may exclusively create their anchors and receipts later, but they must not rewrite candidate, baseline, ledger, generated, or promotion artifacts. Raster equivalence retains the strict existing tolerance and never uses recapture consensus.
+The former historical baseline/candidate receipt protocol is retired. Automated smoke does not replace the changed-family captures listed above. Capture and review current Obsidian and Quartz states when changing visuals, and retain the resulting evidence with the change.
 
 Automated tests prove contracts; screenshots prove composition. Neither replaces keyboard and interaction checks.
 

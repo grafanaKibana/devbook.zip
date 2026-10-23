@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.483Z
-modified: 2026-08-20T20:41:15.484Z
-published: 2026-08-20T20:41:15.484Z
+created: 2026-10-21T13:29:32.423Z
+modified: 2026-10-21T13:29:32.423Z
+published: 2026-10-21T13:29:32.423Z
 topic:
   - AI & ML
 subtopic:
@@ -12,6 +12,9 @@ level:
   - "2"
 priority: High
 status: Done
+qard-deck: AI & ML
+qard-topic: LLM/Context Engineering/RAG/RAG Patterns
+flashcard_uid: fb2f007d
 ---
 
 RAG patterns are repairs for observed retrieval failures. The order below is an adoption guide rather than a popularity ranking. The first working pipeline remains in place until [[AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation|evaluation]] identifies a failure that the cheaper design cannot fix. Each pattern buys something and creates a new way to fail. The surrounding pipeline is described in [[AI & ML/LLM/Context Engineering/RAG/RAG|RAG]].
@@ -266,8 +269,17 @@ This family fits high-risk systems that can calibrate evidence evaluators or tra
 
 # Questions
 
-> [!QUESTION]- When is GraphRAG a better fit than plain vector retrieval?
-> GraphRAG earns its cost when answers depend on explicit entity relations or paths across many documents. Compliance tracing and architecture impact analysis are examples. Plain vector retrieval remains better for independent fact lookup because it avoids a graph extraction pipeline.
+<!-- qard-id: a2e5357e-483e-41e0-80be-f563d42cf86b -->
+
+> [!qard]- What kind of RAG question can justify adding a knowledge graph to vector retrieval?
+> A knowledge graph can be justified when the answer depends on explicit relationships between entities, or on synthesis across much of a corpus, rather than on a few passages that resemble the question. A question such as _What are the main themes across these documents?_ is an example: no small set of similar chunks contains its answer.
+>
+> - **Vector retrieval** returns the top-k chunks closest to the query. That suits direct fact lookup, where one or a few passages hold the answer.
+> - **GraphRAG** uses a language model to extract entities and relationships into a graph, groups closely related entities into communities and pre-generates a summary of each community. Corpus-wide questions can then be answered from those summaries instead of from isolated chunks. Questions about dependencies or impact can follow explicit edges between entities.
+>
+> The graph adds model-driven extraction, indexing and maintenance cost, and extraction or linking errors become wrong edges. Microsoft Research evaluated GraphRAG on corpus-wide, query-focused summarization, so its benefit for other question types has to be measured. The decision therefore rests on a comparison with a vector-retrieval baseline on representative questions.
+>
+> [From Local to Global: A Graph RAG Approach to Query-Focused Summarization (Microsoft Research)](https://www.microsoft.com/en-us/research/publication/from-local-to-global-a-graph-rag-approach-to-query-focused-summarization/)
 
 # References
 

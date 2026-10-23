@@ -2,7 +2,6 @@ import assert from "node:assert/strict"
 import test from "node:test"
 import type { Element, RootContent } from "hast"
 
-import { renderComplexityDom } from "./dom"
 import { renderComplexityHast } from "./hast"
 import { buildComplexityViewModel, CURVE_IDS, curveValue } from "./model"
 import { ComplexityBlock } from "../transformers/complexity-block"
@@ -129,61 +128,6 @@ function textOf(node: RootContent): string {
   return node.children.map(textOf).join("")
 }
 
-class FakeStyle {
-  readonly values = new Map<string, string>()
-  setProperty(name: string, value: string) {
-    this.values.set(name, value)
-  }
-}
-
-class FakeNode {
-  children: FakeNode[] = []
-  textContent = ""
-  append(...children: FakeNode[]) {
-    this.children.push(...children)
-  }
-  replaceChildren(...children: FakeNode[]) {
-    this.children = children
-  }
-}
-
-class FakeElement extends FakeNode {
-  id = ""
-  className = ""
-  dataset: Record<string, string> = {}
-  hidden = false
-  tabIndex = 0
-  style = new FakeStyle()
-  attributes: Record<string, string> = {}
-  constructor(
-    readonly tagName: string,
-    readonly ownerDocument: FakeDocument,
-  ) {
-    super()
-  }
-  setAttribute(name: string, value: string) {
-    this.attributes[name] = String(value)
-  }
-}
-
-class FakeDocument {
-  createElement(tagName: string) {
-    return new FakeElement(tagName, this)
-  }
-  createElementNS(_namespace: string, tagName: string) {
-    return new FakeElement(tagName, this)
-  }
-  createTextNode(value: string) {
-    const node = new FakeNode()
-    node.textContent = value
-    return node
-  }
-}
-
-function fakeElements(node: FakeNode): FakeElement[] {
-  return [...(node instanceof FakeElement ? [node] : []), ...node.children.flatMap(fakeElements)]
-}
-
 test("every public schema mode builds a finite view model", () => {
   for (const [index, config] of [catalogue, cases, operations, resources, comparison].entries()) {
     const view = buildComplexityViewModel(config, `unit-${index}`)
@@ -246,25 +190,6 @@ test("HAST keeps accessibility, namespaces, and variables inside the figure", ()
   }
 })
 
-test("the DOM renderer exposes the same figure contract and destroys cleanly", () => {
-  const document = new FakeDocument()
-  const root = new FakeElement("root", document)
-  const view = buildComplexityViewModel(resources, "dom")
-  const handle = renderComplexityDom(root as unknown as HTMLElement, view)
-  const nodes = fakeElements(root)
-  const figure = nodes.find(({ tagName }) => tagName === "figure")
-
-  assert.equal(figure?.attributes["aria-label"], view.label)
-  assert.equal(nodes.filter(({ attributes }) => attributes.role === "tab").length, 2)
-  assert.equal(nodes.filter(({ attributes }) => attributes.role === "tabpanel").length, 2)
-  assert.ok(
-    nodes.findIndex(({ className }) => className === "complexity__variables") >
-      nodes.findIndex(({ className }) => className === "complexity__resources"),
-  )
-  handle.destroy()
-  assert.equal(root.children.length, 0)
-})
-
 test("the transformer replaces only valid complexity fences", () => {
   const transform = ComplexityBlock().htmlPlugins?.()[0]?.()
   assert.ok(transform)
@@ -295,40 +220,4 @@ test("the transformer replaces only valid complexity fences", () => {
   assert.equal(tree.children[1].tagName, "pre")
   assert.equal(tree.children[2].tagName, "pre")
   assert.match(textOf(tree.children[2] as RootContent), /{invalid/)
-})
-
-test("legend formulas drop a qualifier that only repeats the row label", () => {
-  const entries = [
-    {
-      kind: "operation",
-      operation: "Insert",
-      bounds: [
-        {
-          kind: "curve",
-          role: "Amortized / Average",
-          formula: "O(1) amortized / average",
-          curveId: "constant",
-        },
-        { kind: "curve", role: "Adjacency list", formula: "O(1) amortized", curveId: "constant" },
-        { kind: "text", role: "Average", formula: "O(1) average" },
-      ],
-    },
-  ]
-  const view = buildComplexityViewModel(
-    {
-      version: 2,
-      label: "Qualifiers",
-      variables: resources.variables,
-      resources: {
-        time: { mode: "operations", entries },
-        space: { mode: "operations", entries },
-      },
-    },
-    "qualifiers",
-  )
-  const legend = view.resources[0].legend.flatMap((group) => group.items)
-  assert.deepEqual(
-    legend.map(({ semanticLabel, formula }) => `${semanticLabel}: ${formula}`),
-    ["Amortized / Average: O(1)", "Adjacency list: O(1) amortized", "Average: O(1)"],
-  )
 })

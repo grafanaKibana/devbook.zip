@@ -9,13 +9,16 @@ priority: High
 status: Ready to Repeat
 
 publish: true
+qard-deck: "DevOps"
+qard-topic: "CI CD tools"
+flashcard_uid: "26290128"
 ---
 
 CI/CD turns a source change into a traceable release decision. Continuous integration (CI) combines small changes frequently and verifies them while the context is fresh. Continuous delivery keeps a verified artifact releasable. Continuous deployment releases qualifying changes without a routine human approval.
 
 # One Artifact Through the Pipeline
 
-A commit should produce one immutable package or image. Every later stage promotes that exact artifact rather than rebuilding it. If CI verifies `checkout-api@sha256:8f31…`, production should run that digest. Rebuilding after approval creates different bytes and breaks the evidence chain.
+A commit should produce one immutable package or image. Every later stage promotes that exact artifact rather than rebuilding it. If CI verifies `checkout-api@sha256:8f31…`, production should run that digest. Rebuilding after approval can produce different bytes, so the evidence chain holds only if the rebuilt artifact is verified to match the approved digest.
 
 ```text
 commit -> build artifact -> verify artifact -> deploy artifact -> expose artifact
@@ -67,8 +70,21 @@ Repository workflow files are not the whole control plane. GitHub Actions can at
 
 # Questions
 
-> [!QUESTION]- What separates continuous delivery from continuous deployment?
-> Both approaches keep a tested artifact ready for production. With continuous delivery, releasing that artifact is still a separate decision, often an approval or a business-controlled step. With continuous deployment, every change that passes the required automated checks is released automatically.
+<!-- qard-id: 3ea361b7-f5fa-47ca-8da8-ea9adb1a360d -->
+> [!qard]- What separates continuous delivery from continuous deployment?
+> They differ only in the final step to production. Continuous delivery keeps every change that passes the pipeline releasable, but a separate authorized decision releases it. Continuous deployment has no routine approval step: each change that passes all required gates is released to production automatically.
+> 
+> Both build on continuous integration, in which small changes are merged frequently and each one is built and verified automatically.
+> 
+> | Aspect | Continuous delivery | Continuous deployment |
+> |---|---|---|
+> | Production release decision | A person or business process approves the release of an already verified artifact. | The pipeline releases the artifact as soon as the required gates pass. |
+> | Release timing | Verified changes can wait, so a release can follow business timing such as a planned launch. | Each qualifying change reaches production shortly after it is verified, without waiting for an approver. |
+> | Role of automated gates | They show that an artifact is ready to release; the approval adds the decision to release it. | They make the whole release decision, so their evidence must be trustworthy enough to stand in for an approver. |
+> 
+> The gates are broader than tests. They can include security and policy checks, environment checks, and health checks during a progressive rollout.
+> 
+> [AWS: Continuous integration and continuous delivery/deployment](https://docs.aws.amazon.com/whitepapers/latest/practicing-continuous-integration-continuous-delivery/what-is-continuous-integration-and-continuous-deliverydeployment.html)
 
 # References
 

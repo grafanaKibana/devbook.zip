@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.692Z
-modified: 2026-08-20T20:41:15.692Z
-published: 2026-08-20T20:41:15.692Z
+created: 2026-10-21T13:29:32.455Z
+modified: 2026-10-21T13:29:32.455Z
+published: 2026-10-21T13:29:32.455Z
 topic:
   - Software Architecture
 subtopic:
@@ -12,6 +12,9 @@ level:
   - "3"
 priority: High
 status: Ready to Repeat
+qard-deck: Software Architecture
+qard-topic: Patterns/Design Patterns/Behavioral/Visitor
+flashcard_uid: ff80b76c
 ---
 
 A museum can keep the same exhibits while offering a new audio tour. Each tour performs a different operation over the fixed exhibit set. Adding a tour is cheap. Adding an exhibit forces every tour to decide what to do with it.
@@ -53,7 +56,7 @@ Modern C# pattern matching handles small type-dispatch problems with less machin
 
 # Problem
 
-`CartService` has switch/if on item type for every calculation — adding a new calculation means editing every method:
+`CartService` has switch/if on item type for every calculation — adding a new item type means editing every calculation:
 
 ```csharp
 public class CartService
@@ -222,14 +225,50 @@ Visitor fits a stable element set that receives new cross-cutting operations. Pa
 
 # Questions
 
-> [!QUESTION]- What is double dispatch and why does Visitor need it?
-> Normal virtual dispatch selects a method from the runtime type of the receiver. Overload resolution still uses the argument's compile-time type. `Accept` first dispatches to the concrete element, where `this` has that concrete type. `visitor.Visit(this)` can then select the corresponding overload and dispatch to the concrete visitor implementation. The two calls encode both dimensions.
+<!-- qard-id: 2203e8b7-3c85-4898-a81c-24b8a34892c5 -->
 
-> [!QUESTION]- When does EF Core use ExpressionVisitor, and what does it do?
-> EF Core receives a LINQ expression tree and passes it through multiple visitor-based phases that normalize, expand, translate, and shape the query. A method or member fails translation when the provider has no supported server-side mapping for that expression in its current context. The failure is broader than a missing `Visit` overload because providers often visit the node successfully but cannot translate its semantics.
+> [!qard]- What is double dispatch, and why does the Visitor pattern need it?
+> Double dispatch chooses the code to run from the runtime types of two objects, here the element and the visitor. Visitor needs it because an ordinary virtual call dispatches on only one runtime type, and ordinary C# overload resolution picks a `Visit` overload at compile time from the argument's static type. Through an `ICartItem` reference, the concrete element type is not available for that choice.
+>
+> Visitor recovers it in two dispatches:
+>
+> 1. The caller invokes `item.Accept(visitor)`. Virtual dispatch on `item` runs the concrete element's `Accept`, such as `PhysicalProduct.Accept`.
+> 2. Inside that method, `this` has the static type `PhysicalProduct`, so `visitor.Visit(this)` binds to the `Visit(PhysicalProduct)` overload at compile time.
+> 3. That call is virtual on the visitor, so it runs the concrete visitor's implementation, such as `TaxCalculatorVisitor.Visit(PhysicalProduct)`.
+>
+> The first dispatch fixes the element type and the second fixes the operation. New operations can therefore be added as new visitor classes without changing the element classes.
+>
+> [[Software Architecture/Patterns/Design Patterns/Behavioral/Visitor#Solution|Visitor implementation]] · [[Software Architecture/Patterns/Design Patterns/Behavioral/Visitor#Pitfalls|Visitor pitfalls]]
 
-> [!QUESTION]- When is pattern matching a better fit than Visitor?
-> Pattern matching is usually clearer for a small hierarchy or a short operation because it needs no `Accept` method or visitor interface. Its exhaustiveness depends on the type shape: an interface hierarchy with a discard arm does not warn when a new implementation appears. Visitor earns its ceremony when the element hierarchy is stable and compile-time pressure to update every operation is an important part of the design.
+<!-- qard-id: 60362454-c9c3-4efc-aef1-35553bd028bb -->
+
+> [!qard]- When does EF Core use `ExpressionVisitor`, and what does it do?
+> EF Core uses expression visitors when it translates a LINQ query for execution. A series of visitor passes walks the query's expression tree, reshapes it into a form the provider can handle, and translates the supported parts into the provider's query, such as SQL.
+>
+> - **Traversal:** `ExpressionVisitor` provides node-specific visit methods, so a pass can handle method calls, member access or constants differently.
+> - **Rewriting:** a visit method can return a replacement node, so each pass hands a reshaped tree to the next. No single visitor simply emits SQL node by node.
+> - **Phases:** preprocessing passes reshape the query, and translation passes then convert it into the provider's representation.
+>
+> Each pass is a separate operation over the same tree structure, which is the kind of variation Visitor is designed for.
+>
+> A translation error does not by itself show that a visit method or overload is missing. It can occur when the active provider lacks a server-side translation for that expression in that query context, but the error alone does not establish a single cause.
+>
+> [[Software Architecture/Patterns/Design Patterns/Behavioral/Visitor#Framework examples|Visitor framework examples]] · [EF Core: client vs. server evaluation](https://learn.microsoft.com/en-us/ef/core/querying/client-eval) · [EF Core source: QueryTranslationPreprocessor](https://github.com/dotnet/efcore/blob/main/src/EFCore/Query/QueryTranslationPreprocessor.cs)
+
+<!-- qard-id: 66e5c82b-2a1f-4c67-b188-2c409f153b90 -->
+
+> [!qard]- When is pattern matching a better fit than Visitor?
+> Pattern matching is a better fit when the type set is small or when there are only a few short operations. A `switch` expression keeps the type dispatch visible in one function, without `Accept` methods or a visitor interface. A closed type set does not decide the choice by itself, because Visitor also depends on a stable element set. Visitor earns its ceremony when element types are stable, new operations are added often, and those operations benefit from carrying state across elements.
+>
+> | Aspect | Pattern matching | Visitor |
+> |---|---|---|
+> | Adding an operation | Another function with a `switch` over the types. | Another visitor class; element classes do not change. |
+> | Adding an element type | A new case in each relevant `switch`. | A new `Visit` method on the visitor interface, implemented in every visitor. |
+> | Detecting a missed case | Over an open hierarchy with a discard `_` arm, the compiler cannot report a forgotten type; the value reaches the discard, which may throw at run time. | Adding the method to the visitor interface makes every visitor that lacks it fail to compile. |
+> | State across elements | Awkward; a `switch` holds no state between elements, so an accumulator lives in surrounding code that the arms or the caller update. | Natural; a visitor accumulates results in its own fields during traversal. |
+> | Readability | Dispatch is explicit in one place. | Double dispatch through `Accept` is harder to follow. |
+>
+> [C#: pattern matching](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/patterns/pattern-matching) · [[Software Architecture/Patterns/Design Patterns/Behavioral/Visitor#Tradeoffs|Visitor tradeoffs]] · [[Software Architecture/Patterns/Design Patterns/Behavioral/Visitor#Problem|Visitor problem]]
 
 # References
 

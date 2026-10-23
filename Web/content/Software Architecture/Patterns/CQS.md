@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.686Z
-modified: 2026-08-20T20:41:15.686Z
-published: 2026-08-20T20:41:15.686Z
+created: 2026-10-21T13:29:32.452Z
+modified: 2026-10-21T13:29:32.452Z
+published: 2026-10-21T13:29:32.452Z
 topic:
   - Software Architecture
 subtopic:
@@ -12,6 +12,9 @@ level:
   - "4"
 priority: High
 status: Ready to Repeat
+qard-deck: Software Architecture
+qard-topic: Patterns/CQS
+flashcard_uid: 1bbc667f
 ---
 
 Command-Query Separation (CQS) divides operations by contract. A command changes state and traditionally returns no result. A query returns data without observable side effects. Bertrand Meyer introduced the rule so a call's shape reveals whether it can mutate the system.
@@ -52,7 +55,7 @@ Strict CQS sometimes produces a worse contract:
 - A create operation may return a database-generated identifier because a second round trip adds no clarity.
 - Many .NET APIs use `Task<T>` for an operation that performs I/O and reports its outcome. The return type alone no longer proves purity.
 
-Keep queries safe to observe and make command mutation and retry behavior explicit. Do not split an atomic operation merely to satisfy the surface rule.
+Queries should remain safe to observe, and command mutation and retry behavior should be explicit. An atomic operation should not be split merely to satisfy the surface rule.
 
 # CQS Vs CQRS
 
@@ -83,7 +86,7 @@ public interface IOrderRepository
 }
 
 // The generated ID exception: returning the ID from Add is a pragmatic CQS violation.
-// Document it explicitly:
+// This exception needs explicit documentation:
 // Task<OrderId> AddAsync(Order order);  // returns generated ID only, not the full entity
 ```
 
@@ -95,15 +98,49 @@ The interface makes mutation paths visible. Query implementations must still avo
 
 When `repository.Add(entity)` returns the saved entity, mutation and observation share one contract. That exception may be reasonable, but the returned object does not prove that retrying the command is safe.
 
-Return only the outcome the caller needs, often an identifier or version, and state retry behavior separately. Fetch the full current representation through a query.
+The command should return only the outcome the caller needs, often an identifier or version, and its retry behavior should be stated separately. The full current representation should be fetched through a query.
 
 # Questions
 
-> [!QUESTION]- Why does CQS make code easier to reason about?
-> The contract separates observation from mutation. Queries can be repeated or cached only when their no-side-effect promise holds. Commands expose the paths that need authorization, transaction boundaries, and retry analysis. The distinction reduces the amount of implementation detail required to judge a call site.
+<!-- qard-id: ee1d4f87-1ac1-440e-aa72-b31354d7308a -->
 
-> [!QUESTION]- When is it pragmatic to violate CQS?
-> A combined operation is justified when separation breaks a coherent transition or adds a wasteful round trip. `Stack.Pop()` is the classic single-threaded shape; `ConcurrentStack<T>.TryPop()` supplies the atomic concurrent form. A create command returning its generated identifier is another. The exception should keep mutation, retry safety, and returned data explicit.
+> [!qard]- Why does Command-Query Separation (CQS) make code easier to reason about?
+> CQS makes each operation's contract show whether it can change state. A query returns information without observable side effects; a command changes state and traditionally returns no result. Finding where the code changes state therefore only requires following command calls.
+>
+> - **Queries:** calling one causes no state change, so a query call can be added, repeated or moved, for example while debugging, without introducing a mutation.
+> - **Commands:** every intended mutation goes through a command, so the paths that change state are easy to find, and retry and transaction decisions attach to those calls.
+>
+> CQS rules out state changes caused by queries, not changes in what queries observe. A side-effect-free query can return a different result when it reads the current time or data that a command or another process has changed. Its position relative to commands therefore still matters, and caching its result still needs a freshness decision.
+>
+> Repeating or caching a query avoids unintended state changes only when the query actually honors the contract. A query that secretly writes, such as one that updates a last-accessed timestamp, changes state on every call, and a method name alone cannot guarantee the contract.
+>
+> [Martin Fowler: Command Query Separation](https://martinfowler.com/bliki/CommandQuerySeparation.html)
+
+<!-- qard-id: 6343f47f-4ceb-4b9e-a1ba-7af48b818bba -->
+
+> [!qard]- When is it pragmatic to violate Command-Query Separation (CQS)?
+> Violating CQS is pragmatic when reading and changing state form one coherent or atomic operation, or when a separate query would only add a round trip without adding clarity.
+>
+> - **Atomic read-and-remove:** `Stack<T>.Pop()` removes the top item and returns it in one call, a long-accepted exception to strict CQS. In concurrent code, separate check and remove calls would let another thread take the item in between, so `ConcurrentStack<T>.TryPop(out item)` does both as one atomic operation.
+> - **Create that returns its identifier:** an insert can return the database-generated ID, because the caller needs it and a follow-up query would only cost another round trip.
+>
+> The combined operation should still make its state change obvious and return only what the caller needs, such as an identifier or version rather than the full entity. A returned result does not show whether retrying the command is safe, so retry behavior needs its own explicit contract.
+>
+> [.NET: ConcurrentStack<T>.TryPop](https://learn.microsoft.com/en-us/dotnet/api/system.collections.concurrent.concurrentstack-1.trypop?view=net-10.0) · [Martin Fowler: Command Query Separation](https://martinfowler.com/bliki/CommandQuerySeparation.html)
+
+> [!qard]- What is the difference between Command-Query Separation (CQS) and CQRS?
+> CQS is a rule for individual operations: each method either changes state (a command) or returns data without side effects (a query). CQRS, Command Query Responsibility Segregation, applies the same distinction at the architecture level by giving the write path and the read path separate models and handlers.
+>
+> | Aspect | CQS | CQRS |
+> |---|---|---|
+> | Scope | One method or operation at a time, usually within a single class. | A subsystem's whole write path and read path. |
+> | What is separated | Command and query signatures; both kinds of method can work on one shared model. | The models themselves: a write model for changes and a read model shaped for queries. |
+> | Data storage | Not addressed; a single shared store is normal. | One store can serve both sides; separate read and write stores are common but optional. |
+> | Cost | Low; mainly a discipline for method contracts. | High; two models and their handlers must be built and kept consistent. |
+>
+> The two are independent: a CQRS system does not guarantee that every method follows strict CQS, and following CQS does not require CQRS.
+>
+> [Martin Fowler: Command Query Separation](https://martinfowler.com/bliki/CommandQuerySeparation.html) · [[Software Architecture/Patterns/CQS#CQS Vs CQRS|CQS vs CQRS]]
 
 # References
 

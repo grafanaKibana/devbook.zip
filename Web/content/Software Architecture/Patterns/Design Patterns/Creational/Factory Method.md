@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.693Z
-modified: 2026-08-20T20:41:15.694Z
-published: 2026-08-20T20:41:15.694Z
+created: 2026-10-21T13:29:32.456Z
+modified: 2026-10-21T13:29:32.456Z
+published: 2026-10-21T13:29:32.456Z
 topic:
   - Software Architecture
 subtopic:
@@ -12,11 +12,14 @@ level:
   - "1"
 priority: High
 status: Done
+qard-deck: Software Architecture
+qard-topic: Patterns/Design Patterns/Creational/Factory Method
+flashcard_uid: "33124e08"
 ---
 
 Sometimes a base workflow knows when it needs a collaborator but cannot choose the concrete implementation. A notification workflow can save an order and send a confirmation while a subtype decides whether the sender uses email or SMS.
 
-Factory Method puts that creation decision in an overridable method. The creator owns the surrounding algorithm and works with the returned product interface. Concrete creators override the factory method to supply one product implementation. This is the pattern's defining boundary: product selection varies through creator inheritance, while the rest of the creator workflow stays shared.
+Factory Method puts that creation decision in an overridable method. Concrete creators override the factory method to supply one product implementation, so product selection varies through creator inheritance. That overridable creation hook is the pattern's defining boundary. A creator often also owns a surrounding algorithm that works with the returned product interface, as the notification workflow does, which keeps the rest of that workflow shared. That collaboration is a common and useful arrangement, but the pattern does not require it.
 
 ```mermaid
 flowchart LR
@@ -76,7 +79,7 @@ Supporting Slack changes the order workflow even though one creator could be sel
 
 # Solution
 
-Extract notification construction into a creator hierarchy, then register one concrete creator for the deployment:
+Notification construction moves into a creator hierarchy, and the composition root registers one concrete creator for the deployment:
 
 ```csharp
 // Product interface
@@ -108,7 +111,7 @@ public class SmsNotificationSender : INotificationSender
             $"Order #{order.Id} confirmed. Total: {order.Total:C}");
 }
 
-public class SlackNotificationSender : INotificationSender // ✅ new channel = new class, zero edits elsewhere
+public class SlackNotificationSender : INotificationSender // ✅ new channel = new sender and creator; creator workflow unchanged, composition-root registration updated
 {
     private readonly SlackClient _slack;
     public SlackNotificationSender(SlackClient slack) => _slack = slack;
@@ -167,11 +170,35 @@ Slack can be added as another creator subtype without changing the order workflo
 
 # Questions
 
-> [!QUESTION]- When does Factory Method become the wrong choice?
-> It is the wrong fit when no creator algorithm needs an overridable construction hook. A static factory or DI registration is smaller for simple selection. When several product types must vary together, an Abstract Factory makes that family boundary explicit.
+<!-- qard-id: 387e21f5-e2c0-481e-bb89-cf3370a20ffb -->
 
-> [!QUESTION]- How does Factory Method support the Open/Closed Principle?
-> The shared creator algorithm can remain unchanged while a new subtype supplies another product. This protects only the creation variation anticipated by the abstraction. A change to the workflow or product contract still modifies existing code. If subtypes exist solely to return different constructors, a registry or DI registration may express the variation with fewer classes.
+> [!qard]- When does Factory Method become the wrong choice?
+> Factory Method is the wrong choice when no creator needs an overridable creation hook through which subclasses decide the product. That hook defines the pattern. A shared base workflow that uses the product is a common reason the hook pays off, but it is not required. When nothing needs a subclass creation decision, the creator hierarchy is ceremony.
+>
+> Simpler or better-fitting options:
+>
+> - **Implementation chosen once at startup:** a DI registration of the product interface, such as `INotificationSender` mapped to `EmailNotificationSender`, selects the implementation without a creator subclass per variant.
+> - **Plain construction:** a static factory method or a constructor is smaller when creating the object needs no subclass decision. Many APIs called factory methods, such as `Task.FromResult<T>()`, are static functions rather than the GoF pattern.
+> - **Several related products must vary together:** Abstract Factory keeps the compatible family behind one factory object instead of separate creation hooks.
+>
+> When each variant gets its own creator subclass, as in the notification example, the cost being avoided is a parallel hierarchy: each new variant adds both a product class and a matching creator class, even when the creator contributes nothing beyond picking the product.
+>
+> [[Software Architecture/Patterns/Design Patterns/Creational/Factory Method#Related .NET factory APIs|Related .NET factory APIs]] · [[Software Architecture/Patterns/Design Patterns/Creational/Factory Method#Solution|Factory Method solution]] · [Microsoft: .NET dependency injection](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection/overview) · [GoF: Factory Method pattern](https://people.csail.mit.edu/addy/pattern/pat3c.htm)
+
+<!-- qard-id: 6ba2a5be-041f-4ac2-ad2a-c3f3cd810ee2 -->
+
+> [!qard]- How does Factory Method support the Open/Closed Principle?
+> Factory Method lets a new product variant arrive as new code, in the form of a creator subclass, while the creator's existing workflow stays unchanged. That is the Open/Closed Principle at one variation point: the workflow is open to new products but closed to modification.
+>
+> How a new variant is added:
+>
+> 1. The base creator runs its workflow and gets the product only through the overridable factory method. In the notification example this is `CreateSender()`, which returns the product interface `INotificationSender`.
+> 2. A new channel, such as Slack, adds a `SlackNotificationSender` and a creator subclass whose override returns it.
+> 3. The composition root registers the new creator. The shared workflow, the existing creators and the code that calls the workflow are not edited.
+>
+> The protection covers only the anticipated variation point. A variant that needs a different product contract, or a change to the shared workflow, still requires editing existing code. The composition root that selects the creator also changes when the new creator is put into use.
+>
+> [Robert C. Martin: Design Principles and Design Patterns](https://objectmentor.com/resources/articles/Principles_and_Patterns.pdf) · [Robert C. Martin: SOLID course notes](https://cleancoder.com/files/solid.md) · [[Software Architecture/Patterns/Design Patterns/Creational/Factory Method#Solution|Factory Method solution]]
 
 # References
 

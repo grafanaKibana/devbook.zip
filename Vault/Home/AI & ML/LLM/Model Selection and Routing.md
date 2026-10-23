@@ -9,6 +9,9 @@ level:
 priority: Medium
 status: Ready to Repeat
 publish: true
+qard-deck: "AI & ML"
+qard-topic: "LLM/Model Selection and Routing"
+flashcard_uid: "776eda2e"
 ---
 
 Model selection decides which models are allowed to serve a workload. Routing makes the per-request choice among them. Frontier models often handle difficult tasks well. Smaller models are usually cheaper and faster. Neither tendency is a contract. A specialized model can win on a narrow task, while a frontier model can miss a latency SLA or regress after a provider update. Production selection is empirical: the least expensive candidate that clears the workload's quality, safety, reliability, and latency gates wins.
@@ -57,7 +60,7 @@ A cascade saves money only when the first attempt plus its escalations cost less
 
 A labeled routing set starts with real traffic. Each request records which candidates pass the task rubric along with latency and full cost. That supports comparison against an oracle that always selects the cheapest passing model.
 
-Track:
+Router evaluation tracks these signals:
 
 - End-to-end task success together with classifier accuracy.
 - Hard-query miss rate and safety-sensitive miss rate.
@@ -97,14 +100,38 @@ Versions should be pinned where the provider allows it. A model change behind an
 
 # Questions
 
-> [!QUESTION]- What matters when choosing an LLM?
-> Model size and labels such as "frontier" are only starting points. A frontier model may produce better answers but miss the latency or cost target. A smaller model may look cheap until retries and human escalation are included.
-> Candidates should be tested on the same representative workload for task quality, safety, reliability, latency, and total cost per successful task. The best choice is the least expensive model that meets all required targets.
+<!-- qard-id: ff4e82a3-bf2c-40e8-b0b3-e27753258ec9 -->
+> [!qard]- How should candidate LLMs be compared for a production workload?
+> Candidate LLMs are compared empirically. Every candidate runs on the same representative, versioned workload and is judged against the same gates for task quality, safety, latency and cost. A common decision rule then selects the least expensive candidate that clears every required gate.
+> 
+> What the comparison measures:
+> 
+> - **Task quality:** correctness, groundedness, tool-call success and failure slices, measured on a labeled set drawn from the product's own traffic and rubric.
+> - **Safety and policy:** refusal behavior, data handling and provider terms.
+> - **Latency:** p50 and p95 at the expected prompt size, output length and concurrency.
+> - **Cost per successful task:** input, output and tool usage, plus retries and escalations. A model with a low price per token can still cost more per completed task if it often needs a retry or a human.
+> - **Capabilities and operations:** required context length, structured outputs, tools, rate limits and version pinning.
+> 
+> Public leaderboards help build a shortlist, but they measure a different distribution and rubric. The evidence also expires. A change in traffic, prompts or prices invalidates earlier results, as does a new model version behind a provider alias, so the comparison is rerun when any of these occur.
+> 
+> Sources: [OpenAI evals](https://developers.openai.com/api/docs/guides/evals) · [OpenAI model optimization](https://developers.openai.com/api/docs/guides/model-optimization)
 
-> [!QUESTION]- How do classifier routing and cascading differ, and when is each useful?
-> A classifier chooses a model before generation based on the predicted task type or difficulty. It is useful when those signals are reliable and generating a second answer would cost too much or take too long. Its main risk is sending a hard request to a model that cannot handle it.
-> A cascade starts with one model and decides whether to escalate after checking its answer. It works well when failures can be detected with a cheap, reliable signal, such as schema validation or a groundedness check. Failed first attempts pay for a second generation and add latency.
-> The patterns can also work together: a classifier can choose the initial route, while a cascade handles answers that fail a quality gate. The complete route should be evaluated for end-to-end quality, cost, and tail latency.
+<!-- qard-id: d37397ec-330a-4742-a8ef-22a28b395047 -->
+> [!qard]- How do classifier routing and cascading differ when choosing an LLM for each request, and how can they be combined?
+> A classifier router predicts which model should handle a request before anything is generated. A cascade generates with a lower-cost model first and escalates to a stronger model only when an observable check on that output fails.
+> 
+> | Aspect | Classifier routing | Cascade |
+> |---|---|---|
+> | When the decision is made | Before generation, from request features such as task type or predicted difficulty. | After a first generation, from a gate on the output such as schema validation, a groundedness check, calibrated confidence or an explicit unsupported result. |
+> | Generations per request | One, so no request pays for a discarded attempt. | One when the gate passes; at least two when the request escalates. |
+> | Typical failure | A false “easy” prediction sends a hard request to a weaker model. Quality drops silently unless something downstream checks the answer. | Escalated requests pay for duplicate generation and extra latency, which can dominate p95. If many requests escalate, the cascade can cost more than always using the stronger model. |
+> | What it depends on | Predictable difficulty signals, and a classifier evaluated on per-route recall for hard and safety-sensitive requests. | A cheap, reliable gate. A weak gate escalates too often or lets bad answers through. |
+> 
+> **Combining them:** the classifier chooses the starting model, and a cascade gate checks that model's output. Requests predicted to be hard go straight to the stronger model. Requests predicted to be easy start on the cheaper model with the gate behind it. The gate then catches some misroutes that classifier routing alone would serve unnoticed.
+> 
+> The combined policy is judged on end-to-end task success, cost per successful task and tail latency, not on classifier accuracy alone. Managed routers such as Microsoft Foundry Model Router package per-request model selection as a product feature, and they still need the same evaluation on the target workload.
+> 
+> Sources: [FrugalGPT (Chen et al.)](https://arxiv.org/abs/2305.05176) · [Microsoft Foundry Model Router](https://learn.microsoft.com/en-us/azure/ai-foundry/openai/concepts/model-router?view=foundry) · [OpenAI evals](https://developers.openai.com/api/docs/guides/evals)
 
 # References
 

@@ -9,6 +9,9 @@ level:
 priority: High
 status: Done
 publish: true
+qard-deck: "Software Architecture"
+qard-topic: "Patterns/Design Patterns/Behavioral/Strategy"
+flashcard_uid: "1335da26"
 ---
 
 A route planner can optimize the same trip for time, distance, or toll cost. The navigation workflow stays put while the routing algorithm changes.
@@ -71,7 +74,7 @@ public class ShippingService
         {
             return 0m;
         }
-        // ⚠️ String comparison — typos cause silent failures
+        // ⚠️ String comparison — typos compile and fail only at runtime
         throw new ArgumentException($"Unknown strategy: {strategy}");
     }
 }
@@ -192,11 +195,45 @@ The algorithm now lives in its own class. The selection policy still needs a det
 
 # Questions
 
-> [!QUESTION]- What determines whether a strategy should use an interface or a `Func<T, TResult>` delegate?
-> A delegate is enough when the variation is one operation and its inputs contain everything it needs. An interface becomes useful when the algorithm has several related operations, owns a lifecycle, or has dependencies that should be visible in dependency injection. State alone does not require an interface because a delegate can close over state, although doing that may hide who owns the state and how long it lives.
+<!-- qard-id: f3cf0276-c3d0-4869-9dad-bf432e5629a0 -->
+> [!qard]- What is the Strategy pattern?
+> Strategy puts interchangeable algorithms for one step of a workflow behind a common contract. The code that runs the workflow calls the contract without knowing which algorithm it is using, so algorithms can be added or replaced independently of that workflow.
+> 
+> - **Context:** owns the workflow and delegates the variable step. For example, a shipping service calls `IShippingCostStrategy.Calculate(order)` without containing any pricing rules.
+> - **Strategy contract:** the interface, or a delegate for a single operation, that every algorithm implements.
+> - **Concrete strategies:** the algorithms themselves, such as flat-rate, weight-based or zone-based pricing.
+> - **Selection:** a client, configuration or selection policy decides which strategy the context uses.
+> 
+> **Problem it solves:** without Strategy, one conditional chain holds every variant. Adding same-day delivery then means editing the method that already carries all the other pricing rules, with a risk of disturbing them. With Strategy, a new variant is a new implementation plus its registration, and existing strategies stay unchanged.
+> 
+> Separating the algorithms does not choose between them. When several could apply, the selection rule remains its own design decision.
+> 
+> In .NET, `IComparer<T>` is a familiar example: it supplies the ordering that sorting methods use.
+> 
+> [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Strategy#Problem|Strategy: Problem]] · [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Strategy#Solution|Strategy: Solution]] · [Microsoft: `IComparer<T>`](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.icomparer-1)
 
-> [!QUESTION]- How should strategy selection work when several strategies can handle the same request?
-> Precedence has to be part of the contract. A first-match registry needs stable ordering, explicit selection needs a validated key, and a composite needs a rule for combining results. If two strategies apply with the same priority and the contract does not say what happens, that is a domain bug. Dependency-injection registration order should not decide it by accident.
+<!-- qard-id: 1a2ec437-ae29-4464-8e69-1600cc732671 -->
+> [!qard]- What determines whether a strategy should use an interface or a `Func<T, TResult>` delegate?
+> The shape of the collaboration decides, not whether the strategy holds state. A `Func<T, TResult>` fits when the strategy is a single operation whose parameters and captured variables supply everything it needs. An interface is clearer when the strategy has several related members, its own dependencies, or a lifetime that must be managed.
+> 
+> - **Delegate:** any lambda or method group with a matching signature can be passed without declaring a type. LINQ predicates and key selectors are strategies of this kind.
+> - **Interface:** a named contract keeps related members together. Each implementation can declare constructor dependencies, which a DI container supplies with a chosen lifetime. For example, a shipping-cost strategy that exposes `Priority`, `AppliesTo` and `Calculate` and needs an `IZoneCalculator` is clearer as an interface than as three separate delegates.
+> 
+> State alone does not decide the choice. A lambda can capture outer variables, and a captured variable is not collected while the delegate that references it is still reachable. A delegate can therefore carry state too.
+> 
+> [Microsoft: Lambda capture of outer variables](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/operators/lambda-expressions#capture-of-outer-variables-and-variable-scope-in-lambda-expressions) · [Microsoft: .NET dependency injection](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection/overview)
+
+<!-- qard-id: 687474e2-5f50-417a-9c13-360e0261a9f1 -->
+> [!qard]- How should strategy selection work when several strategies can handle the same request?
+> Overlaps need an explicit rule owned by the domain: a unique key, a documented precedence, or deliberate composition. The order in which a DI container returns registrations is not such a rule.
+> 
+> - **Explicit key:** the request carries an identifier, such as the chosen shipping method, that maps to exactly one strategy. Overlaps cannot occur, and an unknown key fails visibly.
+> - **Documented precedence:** each strategy reports whether it applies and declares a priority. The highest-priority applicable strategy wins. A tie at the top priority is a configuration error, and it is detected rather than resolved arbitrarily.
+> - **Composition:** when combining is the intended behavior, such as applying several eligible discounts, every matching strategy runs under a defined combination rule.
+> 
+> In .NET's built-in container, resolving a single service returns the last registration, and resolving `IEnumerable<T>` returns all registrations in registration order. That order is deterministic, but it reflects how the application was wired, not a business decision. Reordering registrations would silently change which strategy wins, so any intended order belongs in explicit data such as a priority.
+> 
+> [Microsoft: Service registration](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection/service-registration)
 
 # References
 

@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.674Z
-modified: 2026-08-20T20:41:15.674Z
-published: 2026-08-20T20:41:15.674Z
+created: 2026-10-21T13:29:32.449Z
+modified: 2026-10-21T13:29:32.449Z
+published: 2026-10-21T13:29:32.449Z
 topic:
   - Software Architecture
 subtopic:
@@ -12,6 +12,9 @@ level:
   - "3"
 priority: High
 status: Ready to Repeat
+qard-deck: Software Architecture
+qard-topic: Application Architecture/Clean Architecture
+flashcard_uid: 1f408830
 ---
 
 Clean Architecture, popularized by Robert C. Martin, keeps business policy independent of delivery technology. Its Dependency Rule is strict: source dependencies point inward, so inner policy code cannot name a web framework, database adapter, or UI type. That separation keeps domain behavior testable while outer details change. It earns its cost in systems with substantial business rules and a longer life than the current infrastructure stack.
@@ -221,7 +224,7 @@ The existence read is advisory fast feedback, not the uniqueness guarantee. Infr
 
 ## Over Engineering Simple CRUD
 
-A thin endpoint that copies fields into one table does not become safer because it gained a command, use case, and pair of ports. Those boundaries charge maintenance cost before there is policy to protect. Start with a thinner design and introduce a use-case boundary when behavior or invariants give it a real job.
+A thin endpoint that copies fields into one table does not become safer because it gained a command, use case, and pair of ports. Those boundaries charge maintenance cost before there is policy to protect. A thinner design fits until behavior or invariants give a use-case boundary a real job.
 
 ## Framework Leakage into Domain and Use Cases
 
@@ -229,7 +232,7 @@ EF mapping attributes on entities and ASP.NET request models passed into use cas
 
 ## Treating Clean Architecture as Folder Naming
 
-Names such as Domain, Application, and Infrastructure prove nothing when use cases still depend on EF Core or concrete HTTP clients. Validate project references in CI. Architecture tests with **NetArchTest** or **ArchUnitNET** can fail the build when inner layers reference outer packages, turning the Dependency Rule into an executable constraint.
+Names such as Domain, Application, and Infrastructure prove nothing when use cases still depend on EF Core or concrete HTTP clients. CI can validate project references. Architecture tests with **NetArchTest** or **ArchUnitNET** can fail the build when inner layers reference outer packages, turning the Dependency Rule into an executable constraint.
 
 ## Premature Abstraction Everywhere
 
@@ -246,12 +249,27 @@ Dependency inversion does not require an interface for every class. Interfaces b
 | Cognitive load | Higher at first due to ports adapters and composition root | Lower initial mental model | Medium with many slices and duplicated patterns |
 | Best fit | Long-lived systems with complex policy | Small-to-medium apps with simple behavior | Product teams optimizing for independent feature flow |
 
-Start with a simpler layered or vertical-slice structure when the domain is shallow. Tighten the dependency boundaries when stable policy, expected infrastructure churn, or fast isolated tests make the added indirection cheaper than continued coupling.
+A simpler layered or vertical-slice structure fits a shallow domain. Tighter dependency boundaries become worthwhile when stable policy, expected infrastructure churn, or fast isolated tests make the added indirection cheaper than continued coupling.
 
 # Questions
 
-> [!QUESTION]- How does Clean Architecture differ from traditional N Layer, and when does the extra indirection pay off?
-> Traditional N Layer commonly points dependencies from UI through business logic to data access. Clean Architecture points source dependencies toward policy instead, so inner layers own the contracts that outer adapters implement. The extra boundary pays off when business rules are valuable, isolated tests matter, or infrastructure is likely to change. A short-lived service with shallow rules usually pays the wiring cost without receiving much protection.
+<!-- qard-id: 81caa6e2-7b0d-463a-af9a-b48b849ac077 -->
+
+> [!qard]- What is Clean Architecture?
+> Clean Architecture structures an application so its business rules sit at the center, independent of frameworks, UI and databases. Its purpose is core logic that can be understood, tested and changed independently of those details.
+>
+> - **Entities:** general business rules, such as an `Order` that rejects zero quantities.
+> - **Use cases:** application-specific rules that coordinate entities, such as `PlaceOrder`.
+> - **Adapters:** translate between use cases and the outside world. Examples are controllers, presenters and repository implementations.
+> - **Frameworks and drivers (infrastructure):** outer details such as ASP.NET Core, EF Core and the database.
+>
+> **Dependency rule:** _inward_ means toward the business rules. Any source-code dependency that crosses one of these boundaries must point inward, so inner code never names an outer detail. Code at the same level may still refer to its peers.
+>
+> **Example:** `PlaceOrder` declares and calls `IOrderRepository`. `SqlOrderRepository`, a database adapter, implements that interface, and dependency injection supplies it at runtime. Control flows outward to the database, but the source dependency points inward. A fake repository therefore allows `PlaceOrder` to be tested without a database.
+>
+> The circles describe dependency direction. They do not require a particular number of projects or folders.
+>
+> [Robert C. Martin: The Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html) · [Microsoft: Common web application architectures](https://learn.microsoft.com/en-us/dotnet/architecture/modern-web-apps-azure/common-web-application-architectures)
 
 # References
 

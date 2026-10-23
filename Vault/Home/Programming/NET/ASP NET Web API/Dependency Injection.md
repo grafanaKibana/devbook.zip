@@ -10,6 +10,9 @@ level:
 priority: Medium
 status: Ready to Repeat
 publish: true
+qard-deck: "Programming"
+qard-topic: "NET/ASP NET Web API/Dependency Injection"
+flashcard_uid: "117ac578"
 ---
 
 ASP.NET Core's built-in container maps service types to creation rules. Registrations in `Program.cs` define the implementation and lifetime. Framework activation then supplies those services to controllers, middleware, filters, and hosted services.
@@ -106,7 +109,7 @@ A singleton cannot safely capture a scoped dependency from the root provider. Th
 
 Scope validation catches the direct mismatch when enabled. Some indirect lifetime mistakes still require design review because the container only sees the registrations it resolves.
 
-Do not inject scoped services into singletons. A transient captured by a singleton also lives with that singleton, which may be intended only when the transient is stateless and safe for concurrent use. Background services that need request-like scoped work should create an explicit scope per operation.
+Scoped services are unsafe dependencies for singletons. A transient captured by a singleton also lives with that singleton, which may be intended only when the transient is stateless and safe for concurrent use. Background services that need request-like scoped work should create an explicit scope per operation.
 
 ```csharp
 public sealed class BackgroundWorker(IServiceScopeFactory scopeFactory) : BackgroundService
@@ -126,7 +129,7 @@ public sealed class BackgroundWorker(IServiceScopeFactory scopeFactory) : Backgr
 
 `AddDbContext<T>()` already registers a scoped context. Overriding that lifetime discards the safe default.
 
-Keep the scoped default for request work. A singleton or parallel worker should use `IDbContextFactory<T>` to create and dispose an independent context for each operation.
+The scoped default is the safe lifetime for request work. A singleton or parallel worker should use `IDbContextFactory<T>` to create and dispose an independent context for each operation.
 
 ## Disposal and the Transient `IDisposable` Trap
 
@@ -143,14 +146,13 @@ The container owns disposal for instances it creates. Scoped disposables are rel
 
 # Questions
 
-> [!QUESTION]- What is a captive dependency and why is it dangerous?
-> A captive dependency appears when a long-lived service holds a dependency that was meant to live for less time. For example, a singleton that captures a scoped `DbContext` keeps it beyond one request and may share that non-thread-safe object across concurrent operations. A transient captured by a singleton also lives as long as the singleton, which is safe only if it can handle that lifetime and concurrency.
 
-> [!QUESTION]- How can a scoped service be used safely from a singleton?
-> The singleton should not keep the scoped service. Inject `IServiceScopeFactory`, create a new scope for each operation, resolve and use the service inside that scope, then dispose the scope. A background worker normally repeats this for every iteration instead of keeping one scope for the worker's lifetime.
 
-> [!QUESTION]- What is the difference between `GetService<T>` and `GetRequiredService<T>`?
-> `GetService<T>` returns `null` when no registration exists. `GetRequiredService<T>` throws `InvalidOperationException` at the point of resolution. Startup validation can move some failures earlier, but calling `GetRequiredService` alone does not guarantee startup-time failure.
+
+
+<!-- qard-id: 21fca1dc-8fda-4a2b-b5af-a582c10b4e8e -->
+> [!qard]- What is the difference between `GetService<T>` and `GetRequiredService<T>`?
+> `GetService<T>` returns `null` when the requested registration is absent. `GetRequiredService<T>` throws `InvalidOperationException` at resolution. [Microsoft: GetRequiredService](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.dependencyinjection.serviceproviderserviceextensions.getrequiredservice?view=net-10.0) · [Microsoft: service lifetimes](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection/service-lifetimes) · [Microsoft: DI guidelines](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection/guidelines)
 
 # References
 

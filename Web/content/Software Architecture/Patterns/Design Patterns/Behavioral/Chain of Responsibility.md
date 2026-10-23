@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.687Z
-modified: 2026-08-20T20:41:15.688Z
-published: 2026-08-20T20:41:15.688Z
+created: 2026-10-21T13:29:32.452Z
+modified: 2026-10-21T13:29:32.452Z
+published: 2026-10-21T13:29:32.452Z
 topic:
   - Software Architecture
 subtopic:
@@ -12,11 +12,14 @@ level:
   - "3"
 priority: High
 status: Ready to Repeat
+qard-deck: Software Architecture
+qard-topic: Patterns/Design Patterns/Behavioral/Chain of Responsibility
+flashcard_uid: "78366059"
 ---
 
 Airport security behaves like a Chain of Responsibility. A bag moves through a fixed sequence of checkpoints. Each one clears it, rejects it, or passes it forward. A new check can be inserted without rewriting the existing stations, and the passenger has no reason to know which checkpoint will stop the process.
 
-The pattern sends a request through ordered handlers. A handler can finish the request, reject it, or call the next handler. The sender sees one entry point and stays independent of the handler count. ASP.NET Core middleware follows this shape: `app.UseAuthentication()` → `app.UseAuthorization()` → `app.UseRateLimiting()` → endpoint.
+The pattern sends a request through ordered handlers. A handler can finish the request, reject it, or call the next handler. The sender sees one entry point and stays independent of the handler count. ASP.NET Core middleware follows this shape: `app.UseAuthentication()` → `app.UseAuthorization()` → `app.UseRateLimiter()` → endpoint.
 
 ```mermaid
 sequenceDiagram
@@ -218,7 +221,7 @@ The sanctions check is added as one handler and one composition change. Existing
 
 # Pitfalls
 
-**Chain ordering bugs.** Handler order is a business rule. A credit lookup before fraud screening performs needless work on a request that may be rejected. Keep the order visible in one composition root.
+**Chain ordering bugs.** Handler order is a business rule. A credit lookup before fraud screening performs needless work on a request that may be rejected. The order should stay visible in one composition root.
 
 **Requests reaching no handler.** A request may fall off the end and disappear. A terminal handler should define that outcome. Validation pipelines often treat the absence of a rejection as success, which must be an explicit contract.
 
@@ -238,8 +241,19 @@ Chain of Responsibility pays off when several ordered handlers can accept or rej
 
 # Questions
 
-> [!QUESTION]- How does ASP.NET Core Middleware differ from a classical Chain of Responsibility?
-> Classical CoR usually links handler objects directly. ASP.NET Core composes middleware delegates into one request pipeline at startup. That pipeline is fixed after the application is built, while a conventional object chain may be rearranged at runtime. The practical boundary is startup composition versus runtime mutation.
+<!-- qard-id: 6a5f0253-1b54-409b-a65e-b85fb300596f -->
+
+> [!qard]- How does ASP.NET Core middleware differ from a classical Chain of Responsibility?
+> Both send a request through ordered handlers that can stop it early. In the classical pattern, linked handler objects pass the request along until one of them takes responsibility for it. ASP.NET Core middleware is a pipeline of delegates composed once at startup, in which each component normally does its part and calls the next, wrapping everything after it.
+>
+> | Aspect | Classical Chain of Responsibility | ASP.NET Core middleware |
+> |---|---|---|
+> | Handlers and links | Handler objects that each keep a reference to their successor. | Request delegates; each middleware receives the rest of the pipeline as a `next` delegate. |
+> | Building the chain | Links are set between objects, and an implementation may allow them to change later. | `Use`, `Map` and `Run` registrations are composed into one request delegate when the app starts. The order is then fixed, although branches can still choose a path for each request. |
+> | Role of each handler | Usually either handles the request or forwards it, so typically one handler does the work. | Usually every component does some work and calls `next`. Not calling `next` short-circuits the rest, and a `Run` component always ends the pipeline. |
+> | Work after the next step | Not a focus of the pattern's intent. | Code after `await next(context)` runs as the response returns, so components see the response in reverse registration order. |
+>
+> [ASP.NET Core middleware](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/middleware/?view=aspnetcore-10.0) · [GoF: Design Patterns](https://www.oreilly.com/library/view/design-patterns-elements/0201633612/)
 
 # References
 

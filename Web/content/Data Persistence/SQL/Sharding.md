@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-09-12T17:17:13.838Z
-modified: 2026-09-12T17:17:13.839Z
-published: 2026-09-12T17:17:13.839Z
+created: 2026-10-21T13:29:32.436Z
+modified: 2026-10-21T13:29:32.436Z
+published: 2026-10-21T13:29:32.436Z
 topic:
   - Data Persistence
 subtopic:
@@ -12,6 +12,9 @@ level:
   - "4"
 priority: High
 status: Ready to Repeat
+qard-deck: Data Persistence
+qard-topic: SQL/Sharding
+flashcard_uid: 7f93ffe2
 ---
 
 Sharding is horizontal partitioning across distinct storage and ownership domains, commonly separate database instances or clusters. Each shard owns a non-overlapping subset of rows. Unlike table partitioning inside one server, sharding can distribute storage, writes, backups, and failure domains across machines.
@@ -62,7 +65,7 @@ The picture is an escalation map, not proof that partitioning alone creates 100Ã
 
 # Routing and Ownership Maps
 
-Shard routing turns a key into the one current owner allowed to serve the operation. Assume 4,096 logical buckets:
+Shard routing turns a key into the one current owner allowed to serve the operation. This example uses 4,096 logical buckets:
 
 ```text
 bucket = hash(tenant_id) % 4096
@@ -134,8 +137,60 @@ Shard requests are retry-safe only when the operation is idempotent or deduplica
 
 # Questions
 
-> [!QUESTION]- What evidence justifies sharding a database?
-> Scale-driven sharding is justified after evidence shows that write throughput or storage exceeds one ownership domain and simpler measures cannot remove the ceiling. Hard tenant isolation, locality, or data-placement constraints can justify it earlier. Read replicas help reads, caches remove repeated reads, and in-engine partitioning improves manageability without creating cross-database transactions.
+<!-- qard-id: c63ffce5-ccfa-41d5-a62c-fb60c7bbb4db -->
+
+> [!qard]- What evidence justifies sharding a database?
+> Sharding is justified by measured evidence that one database primary cannot handle the workload's write throughput or storage, after cheaper options have failed to remove that limit. A hard requirement, such as isolating tenants or keeping data in particular locations, can justify it earlier.
+>
+> For scale-driven sharding, the relevant ceiling is write throughput or storage, because each cheaper option addresses a different limit:
+>
+> - **Query and index repair:** removes wasted work, which may be the actual bottleneck.
+> - **Vertical scaling:** adds CPU, memory or I/O to the same server.
+> - **Read replicas:** add read capacity, but in a single-primary setup every write still goes to one server.
+> - **Caching:** serves repeated reads without reaching the database.
+> - **Partitioning inside one database:** splits a table into partitions that stay within one database and one transaction domain, so it does not spread work across independent servers.
+>
+> The bar is high because sharding adds lasting costs:
+>
+> - Queries that need data from several shards must fan out and merge results.
+> - Transactions and constraints that span shards need extra coordination.
+> - Data must be moved when shards are rebalanced.
+>
+> [Microsoft: Sharding pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/sharding)
+
+<!-- qard-id: 3c8d484d-3a0c-4e2e-9e4f-29a7d608fe68 -->
+
+> [!qard]- What makes a shard key viable for a workload?
+> A shard key is viable when four conditions hold:
+>
+> - The workload's common operations include it.
+> - It spreads both data and traffic evenly.
+> - Data that must change atomically shares the same key value.
+> - Its values rarely change.
+>
+> | Property | Why it matters | Failure when it is missing |
+> |---|---|---|
+> | Present in common operations | The router can send each operation to the one shard that owns the key. | Common queries without the key must fan out to every shard and merge the results. |
+> | Even spread of data and load | Each shard gets a similar share of storage and requests. | Hot shards: skewed values, sequential ranges or one very large tenant overload a single shard even when total cluster capacity is sufficient. |
+> | Keeps atomic changes together | Rows that must change in one transaction live on one shard, so a local transaction is enough. | Those changes need cross-shard coordination or a multi-step workflow. |
+> | Stable values | Rows avoid moves caused by a change to their own key value. Ownership can still move when the key-to-shard mapping or shard topology changes, such as during rebalancing. | A changed key value can map to a different shard. When it does, the row must migrate across shards instead of being updated in place. |
+>
+> For example, `tenant_id` can fit a multi-tenant service well: most requests carry it, a tenant's data usually changes together, and it does not change. It still fails if one tenant outgrows a single shard.
+>
+> [Microsoft: Sharding pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/sharding)
+
+> [!qard]- How do lookup, range and hash sharding strategies differ?
+> All three strategies map a shard key to the shard that owns the data. They differ in what decides that mapping, which in turn decides load balance, range-query efficiency and how hard rebalancing is.
+>
+> | Aspect | Lookup (directory) | Range | Hash |
+> |---|---|---|---|
+> | How a key is mapped | A stored map records which shard owns each key, tenant or virtual shard. | Contiguous key ranges belong to shards, such as customer IDs `1â€“9999` on one shard. | A hash of the key determines the shard, so no map has to be stored. |
+> | Load balance | Placement is explicit, so large tenants can be placed deliberately. | Can be uneven. Sequential keys, such as timestamps or increasing IDs, send new writes to the newest range and create a hotspot. | Usually spreads data and load evenly, although one very hot key still lands on a single shard. |
+> | Range queries | No inherent locality; it depends on how the map groups keys. | Efficient, because neighboring keys sit on the same shard. | Neighboring keys scatter, so a range query fans out to many shards. |
+> | Rebalancing | Data is moved and its map entries are updated. With keys mapped to virtual shards, a virtual shard can move between physical servers without changing application code. | Moving or splitting a range moves its data. Rebalancing may not fix load that concentrates on adjacent keys. | Difficult. With a simple `hash(key) % N`, changing the number of shards changes the owner of most keys. |
+> | Routing overhead | A map lookup on every routed request. | A comparison of the key against stored range boundaries. | Computing the hash. |
+>
+> [Microsoft: Sharding pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/sharding)
 
 # References
 

@@ -9,6 +9,9 @@ level:
 priority: High
 status: Ready to Repeat
 publish: true
+qard-deck: "Software Architecture"
+qard-topic: "Application Architecture/Layered Architecture"
+flashcard_uid: "90fb828a"
 ---
 
 Layered architecture groups code by responsibility and defines which groups may depend on which. Traditional layering points dependencies downward, usually from presentation through business logic to data access. Onion and Clean variants reverse selected edges so infrastructure depends on inner policy. The useful part is the boundary: business rules stop drifting into controllers and persistence code.
@@ -136,14 +139,28 @@ This sketch only stages the entity in EF Core. A complete transaction or Unit of
 
 **Anemic domain model.** Service classes accumulate the rules while Domain objects become data bags. The project references may be correct, yet there is little policy at the center for the architecture to protect.
 
-**Layer bypass.** A controller that calls repositories directly now coordinates application behavior at the HTTP boundary. Either route the operation through an application use case or remove the unused layer. A ceremonial boundary is worse than an honest, smaller structure.
+**Layer bypass.** A controller that calls repositories directly now coordinates application behavior at the HTTP boundary. Routing that operation through an application use case restores the separation; removing the unused layer instead makes the smaller structure explicit. A ceremonial boundary is worse than an honest, smaller structure.
 
 **Over-engineering small apps.** Four projects and an interface for every class add ceremony to a three-endpoint CRUD API. A thin structure is enough until behavior becomes complex enough to need isolation.
 
 # Questions
 
-> [!QUESTION]- What is the difference between traditional layered and Onion/Clean Architecture?
-> Traditional layering points from UI to Business Logic to Data Access, so the business layer consumes the lower data API. Onion and Clean move the persistence contract inward and make Infrastructure implement it. Both separate responsibilities. Only the inward form prevents source dependencies from pulling infrastructure types into policy.
+<!-- qard-id: 6f3ec2a2-8880-4ee1-b5a3-03f00f167401 -->
+> [!qard]- What is the difference between traditional layered and Onion/Clean Architecture?
+> In traditional layering, source dependencies usually follow the call chain downward, so business logic depends on data access. In Onion and Clean Architecture, dependencies point toward the business rules. The business and application code defines the interfaces it needs, and infrastructure implements them.
+>
+> In the table, A → B means that code in A refers to types in B.
+>
+> | Aspect | Traditional layered | Onion/Clean |
+> |---|---|---|
+> | Typical source dependencies | UI → business logic → data access. Business logic compiles against the data layer. | UI → core, and infrastructure → core. The business and application core refers to nothing outside itself. |
+> | How business rules reach storage | Business logic calls classes or interfaces that the data-access layer owns. | The core declares the interface it needs, such as IOrderRepository. Infrastructure implements it, and dependency injection supplies it at runtime. |
+> | Testing business rules | Isolating the rules is harder because they refer to data-access types. | The rules can be tested with simple fakes of core-owned interfaces, without a database. |
+> | Changing infrastructure | Changes to data-access types can ripple into business code. | Changes stay behind the core's interfaces unless the core's needs change. |
+>
+> Layered designs can also use dependency inversion. For example, business logic can own a repository interface that the data layer implements. Onion and Clean make that inward direction a defining rule rather than an optional technique. Onion and Clean share this rule but name their layers differently, and neither requires a particular number of projects.
+>
+> [Common web application architectures (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/architecture/modern-web-apps-azure/common-web-application-architectures) · [The Clean Architecture (Robert C. Martin)](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
 
 # References
 

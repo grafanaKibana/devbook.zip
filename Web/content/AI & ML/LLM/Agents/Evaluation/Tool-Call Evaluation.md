@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.469Z
-modified: 2026-08-20T20:41:15.472Z
-published: 2026-08-20T20:41:15.472Z
+created: 2026-10-21T13:29:32.418Z
+modified: 2026-10-21T13:29:32.418Z
+published: 2026-10-21T13:29:32.418Z
 topic:
   - AI & ML
 subtopic:
@@ -12,11 +12,14 @@ level:
   - "3"
 priority: High
 status: Done
+qard-deck: AI & ML
+qard-topic: LLM/Agents/Evaluation/Tool-Call Evaluation
+flashcard_uid: 1d83d54c
 ---
 
 A tool call is where an agent stops describing an action and asks a system to perform it. Failures at this boundary are concrete: the agent can name the wrong tool, send the wrong value in valid JSON, invent a function, or repeat a call that changed nothing.
 
-Score four properties separately: validity, selection, arguments, and necessity. A combined "tool accuracy" number hides the repair. Selection failures usually point to routing or tool descriptions. Argument failures more often expose weak grounding or an unsafe schema.
+Four properties are scored separately: validity, selection, arguments, and necessity. A combined "tool accuracy" number hides which decision failed. Separate scores suggest where to investigate: selection failures point toward routing or tool descriptions, and argument failures toward weak grounding or an unsafe schema. These are leads, not proven root causes.
 
 This is the detailed version of tool-call correctness in [[AI & ML/LLM/Agents/Evaluation/Evaluation|Agent Evaluation]]. A [[Deterministic Checks|deterministic check]] handles structure. An [[LLM-as-a-Judge|LLM judge]] or labeled reference handles decisions whose meaning depends on conversation state.
 
@@ -37,7 +40,7 @@ flowchart TD
 
 - **Validity** asks whether the tool exists and whether its arguments parse against the schema. This check is deterministic and can run before execution.
 - **Selection** asks whether the current state calls for this tool. It covers both needless calls and the opposite failure: answering from memory when fresh state was required.
-- **Arguments** checks meaning after structure has passed. `order_id=4851` is valid JSON even when the conversation identifies order `4815`. Time zones and dropped search constraints fail the same way.
+- **Arguments** checks meaning after structure has passed. `{"order_id": "4851"}` is valid JSON even when the conversation identifies order `4815`. Time zones and dropped search constraints fail the same way.
 - **Necessity** checks whether the call advances the task. Repeating the same read against unchanged state raises cost and often marks the start of a loop.
 
 # Metrics
@@ -50,7 +53,7 @@ flowchart TD
 | Redundant-call rate | Duplicate or no-progress calls per task | Deterministic (hash of tool+args) + judge |
 | Calls-per-task | Total calls vs the minimum a clean solve needs | Counter |
 
-Keep selection and argument accuracy separate. If selection is 95% and argument accuracy is 70%, the immediate problem is value grounding. Averaging them to 82.5% destroys that diagnosis.
+Selection and argument accuracy are scored separately. If selection is 95% and argument accuracy is 70%, argument handling is the first area to investigate. Averaging them to 82.5% destroys that diagnosis.
 
 # Ground Truth
 
@@ -69,7 +72,7 @@ Agent call: issue_refund(order_id="4851", amount="full")
 - Valid:      yes (schema-valid, real tool)            [deterministic: PASS]
 - Selection:  issue_refund is correct here             [reference: PASS]
 - Arguments:  order_id 4851 != expected 4815           [reference: FAIL]
-- Necessary:  yes, advances the task                   [PASS]
+- Necessary:  refund operation needed, not a repeat    [PASS]
 
 Verdict: schema-valid call, wrong target order — the failure deterministic
 checks cannot see. Caught only because the reference pinned order_id=4815.
@@ -79,11 +82,11 @@ checks cannot see. Caught only because the reference pinned order_id=4815.
 
 | Scorer | Catches | Cost | Blind to |
 | --- | --- | --- | --- |
-| Deterministic schema check | Malformed calls, unknown tools, exact duplicates | Lowest — runs pre-execution | Semantically wrong arguments, wrong tool choice |
+| Deterministic checks | Malformed calls and unknown tools via schema validation; exact duplicates via comparison with earlier calls | Lowest — runs pre-execution | Semantically wrong arguments, wrong tool choice |
 | Reference match | Wrong tool, wrong argument values | Medium — needs labeled traces | Valid alternate tools/paths the reference didn't list |
 | LLM judge | Tool-choice reasonableness, necessity, semantic args | Highest — a judge call per step, plus judge bias | Subtle value errors a reference would pin exactly |
 
-Run deterministic validity checks on every call. They are cheap and can block malformed requests before execution. Add reference matching to tools where a wrong value is expensive, such as payments or deletion. A judge fits open-ended selection and necessity decisions, provided its scores are calibrated against human labels. Otherwise it may reward a longer trace simply because the trace looks more thorough.
+Deterministic validity checks fit every call: they are cheap and can block malformed requests before execution. Reference matching fits tools where a wrong value is expensive, such as payments or deletion. A judge fits open-ended selection and necessity decisions, provided its scores are calibrated against human labels. Otherwise it may reward a longer trace simply because the trace looks more thorough.
 
 # Pitfalls
 
@@ -93,7 +96,7 @@ String equality marks `"refund the full amount"` wrong against `"full refund"`, 
 
 ## Order-sensitive Scoring Punishes Valid Reorderings
 
-An exact reference sequence penalizes harmless reordering of independent reads. Compare those calls as a set. Order becomes part of correctness only when one call establishes a precondition for the next, such as looking up an order before issuing its refund.
+An exact reference sequence penalizes harmless reordering of independent reads. Comparing those calls as a set avoids that penalty. Order becomes part of correctness only when one call establishes a precondition for the next, such as looking up an order before issuing its refund.
 
 ## Schema-valid Hides Semantically Wrong
 
@@ -101,8 +104,21 @@ The riskiest call may be perfectly valid: real tool, valid schema, wrong account
 
 # Questions
 
-> [!QUESTION]- Why should tool selection and argument accuracy be measured separately?
-> They fail for different reasons. Choosing the wrong tool usually points to routing or unclear tool descriptions. Choosing the right tool but passing the wrong order ID, filter, or date points to grounding or schema problems. Separate metrics make a result such as 95% selection accuracy and 70% argument accuracy actionable instead of hiding it inside one average. Identifiers and enums can usually be checked against exact references, while free-text arguments often need a semantic check.
+<!-- qard-id: 23f9e773-456c-4f3f-b85a-96dcd927918e -->
+
+> [!qard]- Why should tool selection and argument accuracy be measured separately?
+> Because they score different decisions that fail for different reasons. Tool selection asks whether the agent called the right tool for the current step, including recognizing when no call is needed. Argument accuracy asks whether a correctly chosen tool received the right values.
+>
+> A combined score hides which decision failed. For example, 95% selection accuracy and 70% argument accuracy average to 82.5%, and that single number no longer shows that arguments are the weak point. Separate scores point an investigation in a direction:
+>
+> - **Selection failures** often suggest unclear tool descriptions or a routing problem.
+> - **Argument failures** often suggest weak grounding in the conversation or a loosely constrained schema. A call can name the right tool in schema-valid form and still send order `4851` when the conversation identifies order `4815`.
+>
+> These patterns are leads to investigate, not proof of the root cause.
+>
+> How argument accuracy is scored also depends on the field. Exact matching fits identifiers, enums and booleans with one defined value. Free-text fields need normalization or a semantic check, which is valid only where the tool contract accepts equivalent wording.
+>
+> [Berkeley Function Calling Leaderboard](https://gorilla.cs.berkeley.edu/blogs/8_berkeley_function_calling_leaderboard.html)
 
 # References
 

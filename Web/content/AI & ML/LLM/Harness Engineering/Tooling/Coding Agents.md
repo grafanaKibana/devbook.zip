@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.495Z
-modified: 2026-08-20T20:41:15.495Z
-published: 2026-08-20T20:41:15.495Z
+created: 2026-10-21T13:29:32.427Z
+modified: 2026-10-21T13:29:32.427Z
+published: 2026-10-21T13:29:32.427Z
 topic:
   - AI & ML
 subtopic:
@@ -12,6 +12,9 @@ status: Done
 level:
   - "2"
 priority: Medium
+qard-deck: AI & ML
+qard-topic: LLM/Harness Engineering/Tooling/Coding Agents
+flashcard_uid: 4e540b65
 ---
 
 Coding agents put a language model inside a tool loop. The model reads repository state, chooses an action, observes the result, and decides what to do next. That turns code generation into an execution process rather than a one-shot answer.
@@ -67,14 +70,14 @@ OpenCode is an open-source agent for terminal and application workflows. It supp
 
 ## Amazon Q Developer
 
-Amazon Q Developer provides IDE and CLI assistance with AWS-oriented development and transformation workflows. Its fit is strongest when repository work is coupled to AWS services or modernization tasks.
+Amazon Q Developer provides IDE assistance with AWS-oriented development and transformation workflows. Its fit is strongest when repository work is coupled to AWS services or modernization tasks. Its command-line assistant has been rebranded as Kiro, where AWS places future updates; the original open-source Amazon Q Developer CLI receives only critical security fixes.
 
 # Pitfalls
 
-- **Plausible diffs:** a change can pass tests and still violate an architectural boundary the suite does not encode. Keep tasks narrow enough to review and make hidden boundaries explicit in repository instructions.
-- **Stale context:** long sessions make old reads dangerous. Re-read a file before editing it when another tool, hook, or agent may have changed it.
-- **Cost drift:** autonomous retry loops can trigger 50+ model calls during a debugging spiral. Cost grows with cumulative input, output, tool calls, and retries rather than wall-clock time alone. Bound steps and stop when the same failure repeats without new evidence.
-- **Invented APIs:** weak context produces convincing methods and configuration keys that do not exist. Search the installed SDK or official docs first, then let the compiler and targeted tests settle the claim.
+- **Plausible diffs:** a change can pass tests and still violate an architectural boundary the suite does not encode. Narrow tasks keep diffs reviewable, and repository instructions can make hidden boundaries explicit.
+- **Stale context:** long sessions make old reads dangerous. A file needs a fresh read before editing when another tool, hook, or agent may have changed it.
+- **Cost drift:** autonomous retry loops can trigger 50+ model calls during a debugging spiral. Cost grows with cumulative input, output, tool calls, and retries rather than wall-clock time alone. A step bound and a rule to stop when the same failure repeats without new evidence keep that cost contained.
+- **Invented APIs:** weak context produces convincing methods and configuration keys that do not exist. The installed SDK or official docs are the first check, and the compiler and targeted tests settle the claim.
 
 # Tradeoffs
 
@@ -86,8 +89,21 @@ Amazon Q Developer provides IDE and CLI assistance with AWS-oriented development
 
 # Questions
 
-> [!QUESTION]- What controls reduce production risk when adopting coding agents?
-> Start by limiting the task, the tools the agent can call, and the number of iterations it can run. Destructive or external actions need code-enforced approval before execution, while hooks and CI should run deterministic checks. Repository instructions capture architectural rules that tests cannot enforce. Before merge, the diff still needs review and the claimed behavior needs fresh test or build evidence, regardless of which model produced the change.
+<!-- qard-id: 83f1e938-9d0a-4efd-90e5-34f6a6534159 -->
+
+> [!qard]- What controls reduce risk when a coding agent can change a repository?
+> The main controls are a bounded task and budget, restricted permissions, runtime-enforced approval or denial of consequential actions, and CI plus review of the resulting change. They work because the runtime and delivery process enforce them; instructions alone depend on the model complying.
+>
+> | Control | What it does | Risk it reduces |
+> |---|---|---|
+> | Narrow task, limited tools, step or iteration budget | Restricts what the agent attempts and how long it can keep retrying | Broad diffs that are hard to review, and costly retry loops that repeat the same failure |
+> | Sandbox and permissions | Limits filesystem, network and command access, where the platform provides these controls | Actions outside the intended workspace or network reach |
+> | Runtime approval or denial | Requires approval for consequential actions or blocks them before execution; in GitHub Copilot, a hook that runs before a tool call can deny that call | Dangerous actions that the model was only told to avoid |
+> | CI and code review | Check the resulting change before it merges | Defects and boundary violations in the produced code |
+>
+> Each control covers specific paths and failure modes. Passing tests and review reduce risk but do not prove that every tool call or behavior was safe. A change can pass the suite and still violate an architectural boundary that the tests do not encode.
+>
+> Source: [GitHub Copilot hooks reference](https://docs.github.com/en/copilot/reference/hooks-reference)
 
 # References
 

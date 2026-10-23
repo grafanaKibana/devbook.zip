@@ -10,6 +10,9 @@ priority: High
 level:
   - "4"
 status: Creation
+qard-deck: "Software Architecture"
+qard-topic: "Application Architecture/Application Architecture"
+flashcard_uid: "3f90569b"
 ---
 
 Application architecture divides code into presentation, application, domain, and infrastructure modules, then controls which modules may call or implement which interfaces. Onion and Clean Architecture invert dependencies so the domain remains independent of the database and web framework.
@@ -34,7 +37,7 @@ These four notes answer different questions. Traditional [[Home/Software Archite
 
 # Production Web Application Request Path
 
-Trace `POST /orders` through boundaries rather than listing infrastructure as peers:
+`POST /orders` crosses the following request and messaging boundaries:
 
 1. DNS resolves the public name. An edge or load balancer terminates TLS and routes a healthy instance.
 2. The web adapter authenticates, validates transport input, and invokes one application use case.
@@ -63,8 +66,18 @@ This is not an API gateway. A gateway governs inbound traffic to APIs the organi
 
 # Questions
 
-> [!QUESTION]- How should a small CRUD service with simple domain rules be structured if growth is expected?
-> Expected growth alone is not enough reason to start with the full ceremony of Clean Architecture. A layered structure is usually sufficient, provided domain logic does not leak into controllers or infrastructure code. Stricter inward dependency rules become useful when valuable business policy is repeatedly coupled to a framework, database, or external service. Ports and adapters should earn their cost through faster tests or clearer change isolation, not through the possibility that the service may become complex later.
+<!-- qard-id: 1adaf9e4-e593-4d9c-b141-37486173bcce -->
+> [!qard]- When is simple layering enough for a small CRUD service, and when is Clean Architecture worth it?
+> Simple layering is usually enough when the service mainly validates input and reads or writes records, because there are few business rules to protect. Clean Architecture is worth its extra cost when substantial business rules must stay independent of the database and other infrastructure, and must be testable without them.
+>
+> The decision is about responsibilities and dependency direction:
+>
+> - **Simple layering:** the API calls business logic, and business logic calls data access directly. Business code refers to persistence code, so it is coupled to that code. When the logic is thin, this coupling costs little and the design stays direct.
+> - **Clean Architecture:** business rules and use cases declare the interfaces they need, such as an order repository. Infrastructure implements those interfaces, and dependency injection connects them at runtime. Business code never refers to database code, but each boundary adds abstractions and configuration.
+>
+> A layered design can also invert selected dependencies where a rule needs isolation. Expected future growth does not justify either choice by itself. The question is whether real business rules make isolation and independent testing worth the extra abstraction.
+>
+> [Common web application architectures (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/architecture/modern-web-apps-azure/common-web-application-architectures) · [The Clean Architecture (Robert C. Martin)](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
 
 # References
 

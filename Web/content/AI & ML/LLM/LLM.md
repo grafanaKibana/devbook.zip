@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-09-12T17:17:13.825Z
-modified: 2026-09-12T17:17:13.825Z
-published: 2026-09-12T17:17:13.825Z
+created: 2026-10-21T13:29:32.428Z
+modified: 2026-10-21T13:29:32.428Z
+published: 2026-10-21T13:29:32.428Z
 tags:
   - FolderNote
 topic:
@@ -14,6 +14,9 @@ level:
   - "3"
 priority: High
 status: Creation
+qard-deck: AI & ML
+qard-topic: LLM/LLM
+flashcard_uid: 1eb55a0b
 ---
 
 A large language model (LLM) is a neural language model trained at enough scale to handle a broad range of language tasks. The name says little about the exact architecture. Decoder-only models continue text causally, encoder-decoder models generate from an encoded source, and encoder-only models produce contextual representations instead of open-ended text.
@@ -121,7 +124,7 @@ When too many tokens choose one expert, its device becomes a bottleneck while ot
 
 Sparse activation saves feed-forward arithmetic compared with evaluating every expert. The rest of the transformer still runs, and the full parameter set still affects deployment.
 
-Distinguish three measurements:
+Three measurements describe different costs:
 
 - **Total parameters** affect checkpoint storage and expert placement across device memory.
 - **Active parameters per token** approximate part of the arithmetic executed for a token.
@@ -148,8 +151,58 @@ The DeepSeek-V3 report describes routed experts, shared experts, and an auxiliar
 
 # Questions
 
-> [!QUESTION]- How should prompting, RAG, and fine-tuning be chosen for an LLM system?
-> The choice starts with the type of gap shown by evaluation. Prompting is the simplest option when clearer instructions or examples can stabilize the task. RAG fits gaps in current or private knowledge and cases where answers need source evidence. Fine-tuning fits a stable behavior gap, such as format, policy, style, or a narrow task, after prompting has been tested and is still inconsistent. The techniques can be combined: fine-tuning can shape behavior while RAG supplies facts that change.
+> [!qard]- How do encoder-only, encoder-decoder, and decoder-only transformers differ?
+> The three families differ in which transformer stacks they use, and therefore in how attention sees the input and what the model produces. Encoder-only models build contextual representations of an input. Decoder-only models generate a continuation one token at a time. Encoder-decoder models read a source sequence and generate a separate target sequence.
+>
+> | Aspect | Encoder-only (BERT) | Encoder-decoder (T5) | Decoder-only (GPT-style) |
+> |---|---|---|---|
+> | Attention | Bidirectional: every token can attend to the whole input | The encoder reads the source bidirectionally; the decoder attends causally to its own earlier tokens and to the encoder's output | Causal: each position attends only to earlier positions |
+> | Pretraining objective | Predict masked tokens from the context on both sides | The encoder reads input with spans removed, and the decoder generates the missing spans | Predict the next token |
+> | Output | One contextual vector per token, or a pooled vector, passed to a task head | A generated target sequence | A generated continuation of the prompt |
+> | Typical use | Classification, extraction, reranking, embeddings | Translation, summarization and other text-to-text tasks | Chat, code, completion, tool-call generation |
+>
+> An encoder-only model has no autoregressive decoder, so it is not used for open-ended generation. The causal mask is what lets one decoder-only stack train on next-token prediction and then continue a prompt token by token. The typical uses describe common fits, not hard limits.
+>
+> Sources: [Attention Is All You Need](https://arxiv.org/abs/1706.03762) · [BERT](https://arxiv.org/abs/1810.04805) · [T5: Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer](https://arxiv.org/abs/1910.10683) · [Language Models are Few-Shot Learners](https://arxiv.org/abs/2005.14165)
+
+<!-- qard-id: 25714b3e-c167-44ee-b9ad-aa5e3144b4dd -->
+
+> [!qard]- How should prompting, RAG, and fine-tuning be chosen for an LLM system?
+> The choice follows the gap that evaluation reveals. A behavior gap is first addressed with clearer instructions and examples. A knowledge gap is closed by putting the facts into context. Small, stable facts can be written directly into the prompt. Large, private or changing facts are retrieved per request with RAG. Fine-tuning addresses behavior that stays inconsistent after prompt work. The techniques solve different problems and can be combined.
+>
+> | Technique | What it changes | Fits when | Main limit |
+> |---|---|---|---|
+> | Prompting | The instructions, examples and any fixed reference text sent with each request | The model can do the task but needs a clearer specification, output format or examples, or the facts it needs are few and stable enough to write into the prompt | Instructions alone add no knowledge. Facts written into the prompt are fixed in advance and add tokens to every call, so this approach does not scale to large or changing knowledge |
+> | RAG | The evidence selected and placed in the context at request time | Answers depend on current, private or citable information that is too large or changeable to include in every prompt | Answer quality is limited by retrieval quality, and retrieved text does not reliably teach a new format or style |
+> | Fine-tuning | The model's weights, through training on examples | Format, style or task behavior remains inconsistent after prompt work | It needs training data and evaluation, and facts stored in weights are harder to update than retrieved documents |
+>
+> Prompting is the usual starting point because it is the cheapest to iterate, but this is a diagnostic default, not a mandatory sequence. A fine-tuned model can still use RAG: training shapes behavior while retrieval supplies changing facts. Each change is compared on the same representative evaluation set, so an improvement can be attributed to that change.
+>
+> Source: [OpenAI: Optimizing LLM accuracy](https://developers.openai.com/api/docs/guides/optimizing-llm-accuracy)
+
+> [!qard]- How does a sparse mixture-of-experts model work, and what does sparse activation actually save?
+> A sparse mixture-of-experts (MoE) model replaces some dense feed-forward layers with several expert networks and a learned router. Each token is processed by only a few selected experts. Compared with evaluating every expert on every token, this saves feed-forward arithmetic, so total parameter capacity can grow while per-token computation stays roughly constant. It does not shrink the parameter footprint: every expert still has to be stored and placed in device memory, and the rest of the transformer still runs for every token.
+>
+> Routing a token through an MoE layer:
+>
+> 1. The router scores every expert for the token's hidden state.
+> 2. The top-k experts are selected.
+> 3. The token is dispatched to those experts, possibly on other devices.
+> 4. Their outputs are combined using the router's weights.
+>
+> | Measure | What it reflects |
+> |---|---|
+> | Total parameters | Checkpoint size and the device memory needed to hold every expert |
+> | Active parameters per token | Part of the arithmetic performed for each token |
+> | Measured latency and throughput | Arithmetic plus router work, cross-device dispatch, load imbalance, batching and kernels |
+>
+> If many tokens choose the same expert, its device becomes a bottleneck while others sit idle. Capacity limits and load-balancing objectives counter this. Depending on the implementation, tokens beyond an expert's capacity are dropped or rerouted.
+>
+> The saving is relative to evaluating all experts. It is not a guaranteed advantage over every alternative. A dense model with a similar number of active parameters can be faster than an MoE when expert traffic is communication-bound, because the MoE also pays for routing, dispatch and imbalance. Parameter counts alone cannot predict either outcome. Only measurement on the intended serving workload shows the real cost.
+>
+> MoE routing happens inside one model and is separate from application-level routing between different models.
+>
+> Source: [Switch Transformers](https://jmlr.org/papers/v23/21-0998.html)
 
 # References
 

@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.665Z
-modified: 2026-08-20T20:41:15.665Z
-published: 2026-08-20T20:41:15.665Z
+created: 2026-10-21T13:29:32.447Z
+modified: 2026-10-21T13:29:32.447Z
+published: 2026-10-21T13:29:32.447Z
 topic:
   - Security
 subtopic:
@@ -12,6 +12,9 @@ level:
   - "3"
 priority: High
 status: Ready to Repeat
+qard-deck: Security
+qard-topic: Authentication/Resource-based Auth
+flashcard_uid: 55d97186
 ---
 
 Resource-based authorization decides whether a principal may perform an operation on one concrete resource. A role can grant document-editing capability in general. The resource check decides whether this document falls within that principal's authority.
@@ -131,18 +134,31 @@ The controller loads a resource and returns or mutates it without an instance-le
 
 Role checks often create false confidence because they establish broad capability while saying nothing about this object's owner or tenant.
 
-Call `IAuthorizationService.AuthorizeAsync(User, resource, policy)` after loading the resource and before releasing data or applying a change. The data-access boundary should enforce the same ownership or tenant constraint when concurrent changes are possible.
+The remedy is a call to `IAuthorizationService.AuthorizeAsync(User, resource, policy)` after the resource is loaded and before any data is released or any change is applied. The data-access boundary should enforce the same ownership or tenant constraint when concurrent changes are possible.
 
 ## Returning 404 Vs 403
 
 `403 Forbidden` reveals that the resource exists. `404 Not Found` can conceal existence, but it also makes a missing object indistinguishable from a hidden one.
 
-Use `403` when authenticated callers may know that the resource exists. Use `404` when existence itself is sensitive, and apply that policy consistently so response timing or list endpoints do not undo the concealment.
+`403` fits when authenticated callers may know that the resource exists. `404` fits when existence itself is sensitive, and that policy must be applied consistently so response timing or list endpoints do not undo the concealment.
 
 # Questions
 
-> [!QUESTION]- What is the difference between role-based and resource-based authorization?
-> Role-based authorization evaluates assigned roles without needing the target instance. Resource-based authorization includes the loaded object's attributes or relationships in the decision. Roles work well as coarse gates. Resource checks enforce ownership, tenancy, or object state.
+<!-- qard-id: 235fa0a0-b160-4ef3-b4b1-0d6040e5be7d -->
+
+> [!qard]- What is the difference between role-based and resource-based authorization?
+> Role-based authorization decides whether a principal holds a broad capability, such as being an editor. Resource-based authorization decides whether the principal may perform an operation on one specific resource, using facts from that resource such as its owner, tenant or current state.
+>
+> | Aspect | Role-based | Resource-based |
+> |---|---|---|
+> | Question answered | Whether the principal may perform this kind of operation at all. | Whether the principal may perform the operation on this particular instance. |
+> | Facts evaluated | The principal's assigned roles. A conventional role check does not need the target object. | Data from the loaded resource, such as owner, tenant, project or classification, compared with the principal's identity and claims. |
+> | When the check can run | Before the action executes, for example declaratively with `[Authorize(Roles = "Editor")]`. | Only after the resource is loaded. The code passes the resource to `IAuthorizationService.AuthorizeAsync(User, document, "DocumentOwner")` before returning data or applying a change. |
+> | Limit | A global role cannot express ownership or tenancy of one object. An `Editor` role alone lets every editor edit every document. | The resource must be loaded before the decision, and every code path that reads or changes the instance needs the check. |
+>
+> The two work together. A role check can act as a coarse early gate, and the resource check makes the final decision for the instance. Resource-based authorization is an evaluation shape rather than a separate model: the handler that receives the resource can apply role, attribute or relationship rules to it. When permission depends on the instance but only a role check runs, an authenticated user can change an identifier and reach another owner's or tenant's object. This flaw is called an insecure direct object reference.
+>
+> Sources: [Microsoft Learn: Resource-based authorization in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/security/authorization/resourcebased?view=aspnetcore-10.0) · [Microsoft Learn: Role-based authorization in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/security/authorization/roles?view=aspnetcore-10.0)
 
 # References
 

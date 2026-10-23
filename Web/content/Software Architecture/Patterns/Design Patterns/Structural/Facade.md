@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.698Z
-modified: 2026-08-20T20:41:15.698Z
-published: 2026-08-20T20:41:15.698Z
+created: 2026-10-21T13:29:32.458Z
+modified: 2026-10-21T13:29:32.458Z
+published: 2026-10-21T13:29:32.458Z
 topic:
   - Software Architecture
 subtopic:
@@ -12,6 +12,9 @@ level:
   - "2"
 priority: High
 status: Ready to Repeat
+qard-deck: Software Architecture
+qard-topic: Patterns/Design Patterns/Structural/Facade
+flashcard_uid: 514952cf
 ---
 
 A hotel concierge gives guests one contact for services that still run independently behind the desk. The concierge adds no new capability. The value is a simpler entry point and knowledge of the required sequence.
@@ -152,7 +155,7 @@ public class CheckoutController(OrderFacade orderFacade) : ControllerBase
 builder.Services.AddScoped<OrderFacade>();
 ```
 
-The sample awaits request-scoped side effects so their failures and lifetimes remain owned by the Facade. When completion should not delay the response or must survive process failure, write durable work to an outbox or an owned background queue instead of discarding a task. That delivery concern is separate from the Facade structure.
+The sample awaits request-scoped side effects so their failures and lifetimes remain owned by the Facade. When completion should not delay the response or must survive process failure, durable work is written to an outbox or an owned background queue rather than started as a discarded task. That delivery concern is separate from the Facade structure.
 
 Fraud detection can now be inserted once in `OrderFacade.PlaceOrderAsync`, and every caller follows the same workflow.
 
@@ -170,14 +173,16 @@ Fraud detection can now be inserted once in `OrderFacade.PlaceOrderAsync`, and e
 
 **Use it when:** several clients repeat the same subsystem workflow or need protection from changes inside that subsystem. One high-level operation should express a meaningful use case.
 
-**Skip it when:** one class merely forwards to another, or the proposed interface hides no meaningful sequence. A facade should coordinate domain services, not absorb their rules and state into a god object.
+**Skip it when:** one class merely forwards to another, or the proposed interface neither simplifies the subsystem nor reduces clients' dependence on its internals. A facade should coordinate domain services, not absorb their rules and state into a god object.
 
 **Related patterns:** [[Software Architecture/Patterns/Design Patterns/Structural/Adapter]] translates an incompatible interface. [[Software Architecture/Patterns/Design Patterns/Behavioral/Mediator]] coordinates peers, while a Facade gives clients a one-way front door. At a network boundary, [[Software Architecture/Distributed Systems/API Gateway]] can play a facade-like role over several services.
 
 # Questions
 
-> [!QUESTION]- When does a Facade become a "god class" anti-pattern?
-> The shift happens when orchestration becomes ownership of business rules or mutable domain state. `OrderFacade` may call pricing and validation services in sequence. It should not become the place where those rules are implemented. Difficulty testing the facade without reproducing the whole domain is a stronger signal than a line-count threshold.
+<!-- qard-id: 4598344b-d894-4709-afce-89182604fa5b -->
+
+> [!qard]- When does a Facade become a "god class" anti-pattern?
+> A Facade simplifies access to a subsystem by coordinating its collaborators. It becomes a god class when it absorbs business rules or mutable domain state instead of delegating those responsibilities to domain services/objects. Difficulty testing it without recreating the domain is a stronger signal than line count. [[Software Architecture/Patterns/Design Patterns/Structural/Facade#Tradeoffs|Facade tradeoffs]]
 
 # References
 

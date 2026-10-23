@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.466Z
-modified: 2026-08-20T20:41:15.467Z
-published: 2026-08-20T20:41:15.467Z
+created: 2026-10-21T13:29:32.416Z
+modified: 2026-10-21T13:29:32.416Z
+published: 2026-10-21T13:29:32.416Z
 tags:
   - FolderNote
 icon: astroid
@@ -16,6 +16,9 @@ level:
   - "3"
 priority: High
 status: Creation
+qard-deck: AI & ML
+qard-topic: AI & ML
+flashcard_uid: 792c6bf3
 ---
 
 AI & ML covers the engineering around systems that learn from data or use trained models. The section moves from classic machine learning to LLM applications and the tooling used to build them. Model choice matters, but production results usually turn on the data and on how the system is evaluated and operated. A gradient-boosted tree and an LLM can fail for the same reason: an impressive model cannot rescue weak evidence or missing monitoring.
@@ -24,8 +27,18 @@ AI & ML covers the engineering around systems that learn from data or use traine
 
 # Questions
 
-> [!QUESTION]- When is classic machine learning a better fit than an LLM?
-> Classic ML fits a well-defined prediction problem with representative labeled data, such as classification, regression, or ranking. It usually has lower latency and unit cost, and its behavior is easier to measure at scale. An LLM fits open-ended language work or early product discovery, where a prompt can describe the task before a training set exists. That choice can change as traffic grows or output variability becomes a problem. At that point, a rule-based system or a smaller trained model may be the better option.
+<!-- qard-id: c28d8736-4f09-48e3-9a55-a635b6e08875 -->
+
+> [!qard]- When is classic machine learning a better fit than an LLM?
+> Classic machine learning is the better fit when two conditions hold. First, the task is a defined prediction with representative labeled examples and a measurable objective. Second, measurement on the actual workload shows that classic ML meets that objective with a better balance of quality, latency, cost and maintenance than an LLM. The first condition makes classic ML a strong candidate. Only the second decides.
+>
+> - **Task and data fit:** the task has a fixed output to predict, such as a class, a number or a ranking. Labeled examples represent the inputs seen in production, and a metric measures success directly. A model trained on those examples learns that mapping, and the metric checks its quality.
+> - **Why fit alone does not decide:** generative models can also perform classification and regression, and an LLM can be the stronger option for some text-classification tasks. A labeled prediction task can therefore have more than one viable approach.
+> - **Measurement:** both options are evaluated against the same simple, observable objective on the same data. Neither approach is inherently more accurate, faster, cheaper or easier to maintain.
+>
+> Prompting can also try an LLM on a task while its requirements are still changing. Those results need the same measurement before either approach is chosen.
+>
+> [Google: ML problem framing](https://developers.google.com/machine-learning/problem-framing/ml-framing) · [Google: Rules of Machine Learning](https://developers.google.com/machine-learning/guides/rules-of-ml/)
 
 # References
 

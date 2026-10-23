@@ -9,6 +9,9 @@ level:
 priority: Low
 status: Done
 publish: true
+qard-deck: "AI & ML"
+qard-topic: "LLM/Loop Engineering/Multi-Agentic Systems"
+flashcard_uid: "743a064f"
 ---
 
 A multi-agent system gives separate LLM agents their own context and tools, then coordinates their work. [[Home/AI & ML/LLM/Agents/Agents|An individual agent]] already has its own tool loop, while [[Home/AI & ML/LLM/Agents/Workflow Patterns|workflow patterns]] arrange bounded calls under one control flow. Adding other agents creates a different problem: handoffs, shared state, and failures that cross several traces.
@@ -101,7 +104,7 @@ Potential pairwise relationships scale as n(n−1)/2. A task costing $0.10 for a
 
 Free-form conversations can also produce politeness loops in which agents acknowledge one another without changing shared state. Nothing in natural language guarantees termination.
 
-Bound every conversation with `max_turns`, a token budget, and a completion signal the runtime can check. Structured results are preferable to open-ended messages when the receiver needs data rather than discussion.
+Every conversation needs a bound: `max_turns`, a token budget, and a completion signal the runtime can check. Structured results are preferable to open-ended messages when the receiver needs data rather than discussion.
 
 ## Deadlocks and Infinite Loops
 
@@ -117,14 +120,14 @@ One agent's unsupported claim can become the next agent's premise. Once written 
 
 Schemas can validate shape, not truth. Parallel execution increases the blast radius when many workers consume the same faulty plan.
 
-Validate at the boundary where an output becomes an input. High-stakes conclusions need independent evidence, and permissions should be enforced by the runtime so a propagated mistake cannot exceed its assigned scope.
+Validation belongs at the boundary where an output becomes an input. High-stakes conclusions need independent evidence, and permissions should be enforced by the runtime so a propagated mistake cannot exceed its assigned scope.
 
 # Tradeoffs
 
 | Factor | Single Agent | Multi-Agent |
 |---|---|---|
 | Token cost | 1× baseline | Workload-dependent, usually much higher |
-| Latency | Sequential tool calls | Parallelizable, but coordination adds overhead |
+| Latency | One reasoning thread; independent tool calls can still be requested together and run in parallel where the runtime supports it | Separate agents can work on subtasks in parallel, but coordination adds overhead |
 | Debuggability | Single linear trace | Multiple interleaving traces |
 | Context window | Limited by one window | Each agent gets a fresh window |
 | Tool management | Selection depends on model, schema quality, and eval results | Specialized toolsets per agent |
@@ -134,14 +137,45 @@ Multi-agent architecture should solve a measured limit in the current system. If
 
 # Questions
 
-> [!QUESTION]- When is multi-agent coordination worth the added complexity?
-> Multi-agent coordination makes sense when separate contexts keep unrelated work apart, independent tasks can run in parallel, or specialists need tools or instructions that would conflict inside one agent. The extra agents also mean more tokens, handoffs, and traces to debug, so the design should show a clear improvement in quality or latency over a single agent.
+<!-- qard-id: 49fa9838-bbc8-4135-8c54-9ed2145a0b61 -->
+> [!qard]- When is multi-agent coordination worth its added complexity?
+> Multi-agent coordination is worth its cost when at least one of these pressures exists and evaluation shows an improvement in a required outcome over a single agent:
+> 
+> - **Context isolation:** a large subtask would fill the main context with material the coordinator does not need. A separate agent explores it and returns a condensed result.
+> - **Parallel work:** independent paths can run at the same time, and latency matters.
+> - **Specialization:** part of the task needs a different tool set, or instructions that conflict with the rest of the task.
+> 
+> The cost is real. Each split adds handoffs, duplicated context, more traces and new coordination failures. Agents can also pass work back and forth, so the whole run needs turn and token limits, not just each agent. Anthropic reported that its multi-agent research system used about 15 times as many tokens as ordinary chat interactions. That multiplier describes one workload, but the direction of the cost is general.
+> 
+> A useful split gives each agent a bounded body of context that it can summarize back as an artifact or decision. Closely related work, such as implementing a feature and testing it, stays with one agent, which can reuse its evidence and decisions instead of rebuilding them after a lossy handoff. Without one of the pressures above, a single agent with well-designed tools is usually cheaper and easier to debug.
+> 
+> Source: [Anthropic: How we built our multi-agent research system](https://www.anthropic.com/engineering/multi-agent-research-system)
 
-> [!QUESTION]- What is the benefit of keeping related context with one agent?
-> Keeping related evidence and decisions in one working context lets the agent complete connected work without rebuilding the same background after each handoff. Splitting that work between agents creates more transfers and more chances to lose details. The tradeoff is that each agent owns a broader part of the work.
+> [!qard]- When one agent hands work to another, how much prior context should the receiving agent get?
+> The receiving agent should get the context its assignment needs, not automatically everything that came before. More history preserves detail but dilutes focus and exposes more data. Less history keeps focus but can drop an edge case the next agent needed.
+> 
+> | Handoff content | Benefit | Risk |
+> |---|---|---|
+> | Full conversation history | Nothing is lost, and it is the simplest option to wire up | Irrelevant turns compete with the assignment, and all prior data is exposed to the receiver |
+> | Scoped assignment or summary | The receiver sees only its task, which keeps it focused and limits data exposure | A summary can omit or distort a detail; in a chain of handoffs each summary summarizes the previous one, so loss compounds |
+> | Small assignment plus references to durable artifacts | Focus is kept while exact source material stays retrievable, and structured outputs can be validated before use | Requires shared storage and an agreed artifact format |
+> 
+> In the OpenAI Agents SDK, a handoff gives the receiving agent the previous conversation history by default. An `input_filter` can change what is passed, for example by removing earlier tool calls. Reducing that history is a deliberate decision about focus and data exposure.
+> 
+> Source: [OpenAI Agents SDK: Handoffs](https://openai.github.io/openai-agents-python/handoffs/)
 
-> [!QUESTION]- What makes multi-agent failures difficult to trace?
-> A bad output can pass through several agents before the failure becomes visible. A handoff may contain a false claim that looks valid, and parallel agents may repeat that claim in several places. Debugging therefore needs the full handoff history, the source of each artifact, and limits such as token or turn budgets for the whole run, not just separate agent logs.
+<!-- qard-id: a4b03a79-f586-4c5b-baa0-6e8807e6e1a9 -->
+> [!qard]- What evidence makes failures across multi-agent handoffs traceable?
+> Failures become traceable when a run records who produced each piece of work, what crossed each handoff, and why routing and tool decisions were made, all linked to the same run.
+> 
+> - **Run-level correlation:** every agent's activity in one workflow belongs to a single trace, so a failure in a later agent can be followed back to earlier steps.
+> - **Artifact provenance:** each artifact records the agent that produced it and the evidence behind its key claims, so an unsupported premise can be found where it entered.
+> - **Handoff contents:** the assignment, summary or references passed to the receiving agent show whether a detail was lost or distorted at the transfer.
+> - **Decisions:** routing choices and tool calls are recorded with their arguments and results.
+> 
+> Forwarding every raw message to every agent is not required. Structured artifacts with provenance preserve the chain of evidence with less context and less data exposure. The retained trace is kept under the system's access and retention policy. The OpenAI Agents SDK, for example, records agent runs, model generations, tool calls and handoffs as spans within a trace.
+> 
+> Source: [OpenAI Agents SDK: Tracing](https://openai.github.io/openai-agents-python/tracing/)
 
 # References
 

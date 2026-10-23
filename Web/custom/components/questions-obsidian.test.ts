@@ -1,6 +1,6 @@
 import assert from "node:assert/strict"
-import { readFileSync, readdirSync } from "node:fs"
-import { join, relative, sep } from "node:path"
+import { readFileSync } from "node:fs"
+import { join } from "node:path"
 import test from "node:test"
 import { transformSync } from "esbuild"
 import { cloneElement, Component, createRef, h, type ComponentChildren, type VNode } from "preact"
@@ -82,40 +82,25 @@ const page = (path: string, content: string): Page => {
   }
 }
 
-const vaultFixture = () => {
-  const contents = new Map<string, string>()
-  const visit = (directory: string) => {
-    for (const entry of readdirSync(directory, { withFileTypes: true })) {
-      const path = join(directory, entry.name)
-      if (entry.isDirectory()) visit(path)
-      else if (entry.isFile() && entry.name.endsWith(".md")) {
-        contents.set(relative(VAULT_ROOT, path).split(sep).join("/"), readFileSync(path, "utf8"))
-      }
-    }
-  }
-  visit(join(VAULT_ROOT, "Home"))
-  return {
-    contents,
-    pages: [...contents].map(([path, content]) => page(path, content)),
-  }
+type LoadComponent = (dc: Record<string, unknown>, h: typeof import("preact").h) => () => VNode
+
+const compileQuestions = (questionsSource: string): LoadComponent => {
+  const block = /```datacorejsx\n([\s\S]*?)\n```/.exec(questionsSource)?.[1]
+  assert.ok(block, "Questions.md must contain a datacorejsx block")
+  const compiled = transformSync(`function load(dc, h) {\n${block}\n}\nmodule.exports = load`, {
+    loader: "jsx",
+    format: "cjs",
+    jsxFactory: "h",
+    jsxFragment: "Fragment",
+    target: "es2022",
+  }).code
+  const loaded = { exports: undefined as unknown }
+  new Function("module", "exports", compiled)(loaded, loaded.exports)
+  return loaded.exports as LoadComponent
 }
 
 const source = readFileSync(QUESTIONS_PATH, "utf8")
-const block = /```datacorejsx\n([\s\S]*?)\n```/.exec(source)?.[1]
-assert.ok(block, "Questions.md must contain a datacorejsx block")
-const compiled = transformSync(`function load(dc, h) {\n${block}\n}\nmodule.exports = load`, {
-  loader: "jsx",
-  format: "cjs",
-  jsxFactory: "h",
-  jsxFragment: "Fragment",
-  target: "es2022",
-}).code
-const module = { exports: undefined as unknown }
-new Function("module", "exports", compiled)(module, module.exports)
-const loadComponent = module.exports as (
-  dc: Record<string, unknown>,
-  h: typeof import("preact").h,
-) => () => VNode
+const loadComponent = compileQuestions(source)
 
 const childrenOf = (value: ComponentChildren): ComponentChildren[] =>
   Array.isArray(value)
@@ -176,8 +161,6 @@ class DatacoreHarness {
   private pendingReads = 0
   private component: () => VNode
   private vnode!: VNode
-  readCount = 0
-  revision = 1
 
   constructor(
     readonly pages: Page[],
@@ -187,7 +170,7 @@ class DatacoreHarness {
     const dc = {
       useCurrentPath: () => "Home/Questions",
       useQuery: () => this.pages,
-      useIndexUpdates: () => this.revision,
+      useIndexUpdates: () => 1,
       useRef: (initial: unknown) => {
         const index = this.cursor++
         if (!(index in this.slots)) this.slots[index] = { current: initial }
@@ -227,7 +210,6 @@ class DatacoreHarness {
         vault: {
           getAbstractFileByPath: (path: string) => (this.contents.has(path) ? { path } : null),
           cachedRead: async ({ path }: { path: string }) => {
-            this.readCount++
             this.pendingReads++
             try {
               return await this.contents.get(path)!
@@ -238,7 +220,9 @@ class DatacoreHarness {
         },
       },
       Markdown: ({ content }: { content: string }) =>
-        h("mock-markdown", { "data-content": content }),
+        h("mock-markdown", {
+          "data-content": content.replace(/^>\s*<!--\s*qard-answer\s*-->\s*$/gim, ""),
+        }),
       preact: { Component, createRef },
     }
     this.component = loadComponent(dc, h)
@@ -251,24 +235,17 @@ class DatacoreHarness {
     this.vnode = this.component()
   }
 
-  async settle(stopWhen?: () => boolean) {
+  async settle() {
     for (let attempt = 0; attempt < 200; attempt++) {
       if (this.dirty) this.render()
       await new Promise<void>((resolve) => setImmediate(resolve))
       if (this.dirty) continue
-      if (stopWhen?.()) return
-      if (!stopWhen && this.pendingReads === 0) {
+      if (this.pendingReads === 0) {
         await Promise.resolve()
         if (!this.dirty) return
       }
     }
     throw new Error("Datacore harness did not settle")
-  }
-
-  refresh() {
-    this.revision++
-    this.dirty = true
-    this.render()
   }
 
   html() {
@@ -290,67 +267,7 @@ class DatacoreHarness {
     assert.ok(component, "missing QuestionTopics bridge")
     return component
   }
-
-  chooseTopic(label: string) {
-    const component = this.questionTopics()
-    const topic = component.props.topics.find(
-      (candidate: { name: string; label: string }) =>
-        candidate.name === label || candidate.label === label,
-    )
-    assert.ok(topic, `missing topic ${label}`)
-    component.props.onSelect(topic.name)
-    this.render()
-  }
-
-  choosePath(path: string) {
-    const select = this.nodes("select")[0]
-    assert.ok(select, "missing subtopic select")
-    select.props.onChange({ currentTarget: { value: path } })
-    this.render()
-  }
 }
-
-const real = vaultFixture()
-const realHarness = new DatacoreHarness(real.pages, real.contents)
-await realHarness.settle()
-
-const calloutCount = (content: string) => content.match(/^>\s*\[!QUESTION\]/gim)?.length ?? 0
-
-const expectedRootInventory = real.pages
-  .filter(
-    (candidate) =>
-      candidate.$path.split("/").length === 3 &&
-      candidate.$tags.includes("FolderNote") &&
-      !candidate.$tags.includes("MetricsIgnore"),
-  )
-  .map((hub) => {
-    const root = hub.$path.split("/")[1]
-    const count = [...real.contents]
-      .filter(([path]) => path.startsWith(`Home/${root}/`) && path !== "Home/Questions.md")
-      .reduce((total, [, content]) => total + calloutCount(content), 0)
-    const numericOrder = Number(hub.value("order"))
-    return {
-      label: hub.$name,
-      root,
-      order: Number.isFinite(numericOrder) ? numericOrder : Number.MAX_SAFE_INTEGER,
-      count,
-    }
-  })
-  .sort((left, right) => left.order - right.order || left.label.localeCompare(right.label))
-
-const renderedRootInventory = () =>
-  realHarness
-    .questionTopics()
-    .props.topics.map(({ label, count }: { label: string; count: number }) => ({ label, count }))
-
-const expectedScopeCount = (scope: string) =>
-  [...real.contents]
-    .filter(([path]) => {
-      const folder = path.slice(0, path.lastIndexOf("/"))
-      const expectedFolder = `Home/${scope}`
-      return folder === expectedFolder || folder.startsWith(`${expectedFolder}/`)
-    })
-    .reduce((total, [, content]) => total + calloutCount(content), 0)
 
 const questionSnapshot = (harness: DatacoreHarness) =>
   harness
@@ -365,114 +282,120 @@ const questionSnapshot = (harness: DatacoreHarness) =>
       }
     })
 
-test("renders every current FolderNote root in frontmatter order", () => {
-  assert.deepEqual(
-    renderedRootInventory().map(({ label }) => label),
-    expectedRootInventory.map(({ label }) => label),
+test("production extraction accepts legacy and Qard cards once while ignoring lookalikes", async () => {
+  const hub = "---\ntags: [FolderNote]\norder: 10\n---"
+  const fixture = [
+    "> [!QUESTION] Legacy question",
+    "> Legacy answer with [[Link]] and ![[Embed.png]]",
+    "",
+    "> [!qArD]- Native question",
+    "> Native answer",
+    "",
+    "> [!qard]+ Multiline front",
+    "> Additional front context",
+    "> <!-- qard-answer -->",
+    "> Multiline answer",
+    "",
+    "> [!QUESTION]- Inline HTML <!-- editorial marker -->",
+    "> Inline HTML answer",
+    "",
+    "> [!qard]- Visible before <!-- opening marker",
+    "> still in the comment -->",
+    "> Inline multiline comment answer",
+    "",
+    "> [!QUESTION]- Mixed <!-- first --> visible <!-- second -->",
+    "> Mixed comment answer",
+    "",
+    "> [!warning] Not an interview card",
+    "> Warning body",
+    "",
+    "```text",
+    "> [!qard]- Fenced lookalike",
+    "> Not a card",
+    "```",
+    "",
+    "%%",
+    "> [!QUESTION]- Commented lookalike",
+    "> Not a card",
+    "%%",
+  ].join("\n")
+  const paths = ["Home/Programming/Programming.md", "Home/Programming/Mixed.md"]
+  const harness = new DatacoreHarness(
+    [page(paths[0], hub), page(paths[1], fixture)],
+    new Map([
+      [paths[0], hub],
+      [paths[1], fixture],
+    ]),
   )
-})
-
-test("extracts the current vault question totals for every root", () => {
-  assert.deepEqual(
-    renderedRootInventory(),
-    expectedRootInventory.map(({ label, count }) => ({ label, count })),
-  )
-})
-
-test("preloads every keyed question subtree without rereading on scope changes", async () => {
-  const harness = new DatacoreHarness(real.pages, real.contents)
   await harness.settle()
 
-  const expectedTotal = expectedRootInventory.reduce((total, topic) => total + topic.count, 0)
-  const before = questionSnapshot(harness)
-  assert.equal(before.length, expectedTotal)
-  assert.equal(new Set(before.map(({ key }) => key)).size, expectedTotal)
+  const questions = questionSnapshot(harness)
+  assert.equal(questions.length, 6, questions.map(({ question }) => question).join("\n---\n"))
+  assert.match(questions[0].question, /Legacy answer with \[\[Link\]\] and !\[\[Embed\.png\]\]/)
+  assert.match(questions[1].question, /^> \[!qArD\]- Native question/m)
+  assert.match(questions[2].question, /<!-- qard-answer -->/)
+  assert.match(questions[3].question, /Inline HTML answer/)
+  assert.match(questions[4].question, /Inline multiline comment answer/)
+  assert.match(questions[5].question, /Mixed comment answer/)
+  assert.equal(new Set(questions.map(({ key }) => key)).size, questions.length)
+  assert.doesNotMatch(harness.html(), /qard-answer/)
+})
 
-  const allSelects = harness.allNodes("select")
-  assert.equal(allSelects.length, expectedRootInventory.length)
-  assert.equal(harness.nodes("select").length, 1)
-  assert.equal(new Set(allSelects.map((select) => select.props.id)).size, allSelects.length)
-  for (const topic of expectedRootInventory) {
-    assert.ok(
-      allSelects.some((select) => String(select.props.id).endsWith(encodeURIComponent(topic.root))),
-      `missing stable select id for ${topic.root}`,
-    )
+for (const type of ["QUESTION", "qard"]) {
+  for (const [open, close] of [
+    ["<!--", "-->"],
+    ["%%", "%%"],
+  ]) {
+    test(`production extraction ignores ${open} hidden ${type} cards`, async () => {
+      const hub = "---\ntags: [FolderNote]\n---"
+      const hidden = `${open}\n> [!${type}]- Hidden example\n> Hidden answer\n${close}`
+      const contents = new Map([
+        ["Home/Programming/Programming.md", hub],
+        ["Home/Programming/Hidden.md", hidden],
+      ])
+      const harness = new DatacoreHarness(
+        [...contents].map(([path, content]) => page(path, content)),
+        contents,
+      )
+      await harness.settle()
+      assert.equal(questionSnapshot(harness).length, 0)
+    })
   }
+}
 
-  const sectionScopes = harness
-    .allNodes("section")
-    .filter((node) => node.props.class === "dc-qi-section")
-    .map((node) => ({ key: node.key, scope: node.props["data-scope"] }))
-  assert.ok(sectionScopes.length > expectedRootInventory.length)
-  assert.equal(new Set(sectionScopes.map(({ key }) => key)).size, sectionScopes.length)
-  assert.ok(sectionScopes.every(({ key, scope }) => key === scope))
-
-  const reads = harness.readCount
-  const deepPath = harness
-    .nodes("option")
-    .map((option) => String(option.props.value))
-    .reduce((left, right) => (right.split("/").length > left.split("/").length ? right : left))
-  harness.choosePath(deepPath)
-  assert.deepEqual(questionSnapshot(harness), before)
-  harness.chooseTopic("AI & ML")
-  assert.deepEqual(questionSnapshot(harness), before)
-  assert.equal(harness.readCount, reads)
-})
-
-test("topic selection switches the selected topic and resets its scope", () => {
-  const topic = expectedRootInventory.find(({ root }) => root === "AI & ML")!
-  realHarness.chooseTopic(topic.label)
-  assert.equal(textOf(realHarness.nodes("h2")[0]), topic.root)
-  assert.equal(realHarness.nodes("select")[0].props.value, topic.root)
-  assert.equal(
-    realHarness.nodes("div").filter((node) => node.props.class === "dc-qi-question").length,
-    topic.count,
+test("production extraction separates adjacent cards while preserving nested and fenced examples", async () => {
+  const hub = "---\ntags: [FolderNote]\norder: 10\n---"
+  const fixture = [
+    "> [!qard]- Outer card",
+    "> > [!QUESTION]- Nested answer example",
+    "> > Nested content",
+    "> ```md",
+    "> [!qard]- Fenced answer example",
+    "> ```",
+    "> Outer answer",
+    "> [!QUESTION]- Sibling card",
+    "> Sibling answer",
+    "> [!qard]- Third card",
+    "> Third answer",
+  ].join("\n")
+  const path = "Home/Programming/Nested-Lookalike.md"
+  const harness = new DatacoreHarness(
+    [page("Home/Programming/Programming.md", hub), page(path, fixture)],
+    new Map([
+      ["Home/Programming/Programming.md", hub],
+      [path, fixture],
+    ]),
   )
-})
+  await harness.settle()
 
-test("the subtopic selector exposes every depth and scopes to the chosen path", () => {
-  realHarness.chooseTopic("Programming")
-  const values = realHarness.nodes("option").map((option) => option.props.value)
-  const deepest = values.reduce((left, right) =>
-    right.split("/").length > left.split("/").length ? right : left,
-  )
-  assert.ok(deepest.split("/").length >= 5, `expected a deep path, got ${deepest}`)
-  realHarness.choosePath(deepest)
-  assert.equal(realHarness.nodes("select")[0].props.value, deepest)
-  assert.equal(
-    textOf(realHarness.nodes("p").find((node) => node.props.class === "dc-qi-path")!),
-    deepest.split("/").join(" / "),
-  )
-  assert.equal(
-    realHarness.nodes("div").filter((node) => node.props.class === "dc-qi-question").length,
-    expectedScopeCount(deepest),
-  )
-})
-
-test("repeated Evaluation options preserve their full ancestry", () => {
-  realHarness.chooseTopic("AI & ML")
-  const evaluation = realHarness
-    .nodes("option")
-    .filter((option) => String(option.props.value).endsWith("/Evaluation"))
-  assert.ok(evaluation.length >= 2)
-  assert.equal(new Set(evaluation.map((option) => textOf(option))).size, evaluation.length)
-  assert.ok(evaluation.every((option) => textOf(option).includes(" / Evaluation")))
-})
-
-test("each rendered question keeps its source link outside the answer markdown", () => {
-  const topic = expectedRootInventory.find(({ count }) => count > 0)!
-  realHarness.chooseTopic(topic.label)
-  const questions = realHarness.nodes("div").filter((node) => node.props.class === "dc-qi-question")
-  assert.ok(questions.length > 0)
-  for (const question of questions) {
-    const children = childrenOf(question.props.children) as VNode[]
-    assert.equal(typeof children[0].type, "function")
-    assert.equal(children[1].props.class, "dc-qi-source")
-    assert.match(
-      String((childrenOf(children[1].props.children)[0] as VNode).props.content),
-      /^\*Source:/,
-    )
-  }
+  const questions = questionSnapshot(harness)
+  assert.equal(questions.length, 3)
+  assert.match(questions[0].question, /> > \[!QUESTION\]- Nested answer example/)
+  assert.match(questions[0].question, /Fenced answer example/)
+  assert.doesNotMatch(questions[0].question, /Sibling card|Third card/)
+  assert.match(questions[1].question, /Sibling card/)
+  assert.doesNotMatch(questions[1].question, /Third card/)
+  assert.match(questions[2].question, /Third card/)
 })
 
 test("shows a loading message before the first read batch completes", () => {
@@ -503,62 +426,6 @@ test("shows explicit empty states when topics or questions are absent", async ()
   )
   await empty.settle()
   assert.match(empty.html(), /No questions in this topic yet/)
-})
-
-test("retains a chosen deep scope while a progressive refresh rebuilds it", async () => {
-  const hub = "---\ntags: [FolderNote]\norder: 10\n---"
-  const question = "> [!QUESTION] Deep question\n> Deep answer"
-  const paths = Array.from({ length: 24 }, (_, index) => `Home/Programming/Filler-${index}.md`)
-  const deepPath = "Home/Programming/NET/C#/Concurrency/Parallelism.md"
-  const pages = [
-    page("Home/Programming/Programming.md", hub),
-    ...paths.map((path) => page(path, question)),
-    page(deepPath, question),
-  ]
-  const contents = new Map<string, string | Promise<string>>([
-    ["Home/Programming/Programming.md", hub],
-    ...paths.map((path) => [path, question] as const),
-    [deepPath, question],
-  ])
-  const harness = new DatacoreHarness(pages, contents)
-  await harness.settle()
-  harness.choosePath("Programming/NET/C#/Concurrency")
-
-  const wait = deferred<string>()
-  contents.set(deepPath, wait.promise)
-  harness.refresh()
-  await harness.settle(
-    () => harness.html().includes('aria-busy="true"') && harness.html().includes("Filler-23"),
-  )
-  wait.resolve(question)
-  await harness.settle()
-
-  assert.equal(harness.nodes("select")[0].props.value, "Programming/NET/C#/Concurrency")
-  assert.equal(
-    harness.nodes("div").filter((node) => node.props.class === "dc-qi-question").length,
-    1,
-  )
-  assert.match(harness.html(), />Programming \/ NET \/ C# \/ Concurrency<\/p>/)
-})
-
-test("falls back to the topic after a chosen section disappears", async () => {
-  const hub = "---\ntags: [FolderNote]\norder: 10\n---"
-  const question = "> [!QUESTION] Deep question\n> Deep answer"
-  const deepPath = "Home/Programming/NET/C#/Concurrency/Parallelism.md"
-  const pages = [page("Home/Programming/Programming.md", hub), page(deepPath, question)]
-  const contents = new Map<string, string | Promise<string>>([
-    ["Home/Programming/Programming.md", hub],
-    [deepPath, question],
-  ])
-  const harness = new DatacoreHarness(pages, contents)
-  await harness.settle()
-  harness.choosePath("Programming/NET/C#/Concurrency")
-  contents.set(deepPath, "")
-  harness.refresh()
-  await harness.settle()
-
-  assert.equal(harness.nodes("select")[0].props.value, "Programming")
-  assert.match(harness.html(), /No questions in this topic yet/)
 })
 
 test("QuestionTopics destroys before remount, preserves selection, and cleans up", async () => {

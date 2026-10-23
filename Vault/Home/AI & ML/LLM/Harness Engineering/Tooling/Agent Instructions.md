@@ -9,6 +9,9 @@ status: Done
 level:
   - "2"
 priority: Medium
+qard-deck: "AI & ML"
+qard-topic: "LLM/Harness Engineering/Tooling/Agent Instructions"
+flashcard_uid: "fef75b53"
 ---
 
 Agent instruction files describe how work gets done in one repository. They capture facts the code cannot reliably explain on its own: which commands are safe, where boundaries sit, what conventions matter, and how a change is proved complete.
@@ -56,14 +59,14 @@ Minimal but effective `AGENTS.md` for a .NET API project:
 
 The file gives the agent a tested command, a data boundary, and a clear definition of done. Each rule can be checked against a diff or command result.
 
-A long architecture essay is a poor substitute. It consumes context, hides the few rules that can break the build, and usually drifts into describing the repository a team hopes to have. Keep always-loaded guidance tight. Move task procedures into on-demand skills and keep deeper explanations in ordinary documentation.
+A long architecture essay is a poor substitute. It consumes context, hides the few rules that can break the build, and usually drifts into describing the repository a team hopes to have. Effective always-loaded guidance is tight: task procedures belong in on-demand skills, and deeper explanations belong in ordinary documentation.
 
 # Pitfalls
 
-- **Bloat:** always-loaded prose competes with the code and the task for context. Keep the root contract small. Load specialized procedures only when needed.
+- **Bloat:** always-loaded prose competes with the code and the task for context. A small root contract limits that competition, and specialized procedures load only when a task needs them.
 - **Conflicting scopes:** two files that name different test commands leave the runtime to guess. Local rules should refine the root, not quietly reverse it.
-- **Aspirational guidance:** an agent follows the documented architecture even when the code has not reached it. Describe the current boundary and track the migration elsewhere.
-- **Drift:** renamed scripts and retired paths turn good instructions into a failure generator. Update the rule in the same change that makes it false.
+- **Aspirational guidance:** an agent follows the documented architecture even when the code has not reached it. Instruction files describe the current boundary, and the planned migration is tracked elsewhere.
+- **Drift:** renamed scripts and retired paths turn good instructions into a failure generator. A rule stays accurate when it is updated in the same change that makes it false.
 
 # Tradeoffs
 
@@ -74,8 +77,15 @@ A long architecture essay is a poor substitute. It consumes context, hides the f
 
 # Questions
 
-> [!QUESTION]- Why do hierarchical instruction files often outperform a single giant root file?
-> The root file can hold rules that apply to the whole repository, while a local file adds the build command or dependency rule for one subtree when the runtime supports path-based loading. This keeps unrelated guidance out of the model's context and makes the active instructions more specific to the files being changed. The hierarchy works only when precedence is clear and local rules refine the root instead of silently contradicting it.
+<!-- qard-id: 3b175756-d560-4eee-93e8-03057eb3c3c2 -->
+> [!qard]- Why use path-specific instruction files for coding agents, and what must be checked before relying on them?
+> Path-specific instruction files apply guidance only to files whose path matches a pattern. An agent working on those files receives the local constraints it needs, while guidance for unrelated parts of the repository stays out of its context. Before relying on them, the selected agent's documented rules for loading, precedence and conflict handling must be checked, because those rules are tool-specific.
+> 
+> - **Example:** in GitHub Copilot CLI, a path-specific file declares an `applyTo` pattern. When the agent works on a matching file, those instructions are combined with the repository-wide instructions.
+> - **Precedence:** GitHub's documentation describes this combination but does not define a general precedence order for conflicting instructions. If two files name different test commands, the outcome depends on runtime behavior rather than on a documented rule.
+> - **Maintainability rule:** local files written as refinements of the root guidance, rather than reversals, do not depend on how a runtime resolves conflicts. This is a maintenance discipline, not a portable precedence guarantee.
+> 
+> Source: [GitHub Copilot CLI custom instructions](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-custom-instructions)
 
 # References
 

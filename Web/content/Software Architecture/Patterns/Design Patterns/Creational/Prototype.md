@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.694Z
-modified: 2026-08-20T20:41:15.694Z
-published: 2026-08-20T20:41:15.694Z
+created: 2026-10-21T13:29:32.456Z
+modified: 2026-10-21T13:29:32.456Z
+published: 2026-10-21T13:29:32.456Z
 topic:
   - Software Architecture
 subtopic:
@@ -12,6 +12,9 @@ level:
   - "2"
 priority: High
 status: Done
+qard-deck: Software Architecture
+qard-topic: Patterns/Design Patterns/Creational/Prototype
+flashcard_uid: e5ac3c19
 ---
 
 Prototype creates an object from an existing instance. It fits when construction starts from a configured template or when the concrete runtime type must decide how to copy itself.
@@ -61,7 +64,7 @@ Adding `ShippingConstraints` now requires finding every manual copy site. A miss
 
 # Solution
 
-Use `with` for a shallow record copy and override every member that needs fresh identity or independent mutable state. Use an explicit copy constructor when those rules should be visible in one place.
+A `with` expression makes a shallow record copy and sets only the members its initializer names, so the initializer must explicitly override every member that needs fresh identity or independent mutable state. An explicit copy constructor fits when those rules should be visible in one place.
 
 ```csharp
 // Modern approach: record with {} — the idiomatic C# Prototype
@@ -135,7 +138,7 @@ New record fields participate in the compiler-generated copy automatically. Refe
 
 # Pitfalls
 
-**Shared mutable references.** `with` does not recursively copy a list, array, or child entity. `IReadOnlyList<T>` restricts the exposed API but does not prove that the underlying collection is immutable. Replace mutable members or use an immutable collection.
+**Shared mutable references.** `with` does not recursively copy a list, array, or child entity. `IReadOnlyList<T>` restricts the exposed API but does not prove that the underlying collection is immutable. A safe copy replaces such mutable members or holds them in an immutable collection.
 
 **Ambiguous identity.** A cloned entity usually needs a new identifier, while shared value objects may keep their values. Copying persistence identifiers, event subscriptions, locks, or caches can create two objects that claim to be the same entity or share runtime-only state.
 
@@ -143,11 +146,49 @@ New record fields participate in the compiler-generated copy automatically. Refe
 
 # Questions
 
-> [!QUESTION]- When is Prototype useful instead of constructing an object directly?
-> Prototype fits when the new object starts as a variant of an existing configured instance. It also fits when code knows only an abstraction and the runtime object must copy its own concrete type. Direct construction is clearer when there is no useful template and the runtime type is already known.
+<!-- qard-id: 39dce427-e0c5-4393-9c82-0bdbd4a467c2 -->
 
-> [!QUESTION]- Where is the boundary between a shallow and a deep copy?
-> A shallow copy duplicates the outer object's fields and preserves references to nested objects. A deep-copy policy replaces the mutable nested state that must evolve independently. Copying every reachable object is rarely the real requirement. Ownership and identity decide where copying stops.
+> [!qard]- When is Prototype useful instead of constructing an object directly?
+> Prototype is useful when a new object should start as a copy of an existing instance rather than be built from scratch. Two situations justify it:
+>
+> - **A configured template exists:** many objects differ from a base in only a few values. Product variants, for example, share the base product's name, description, category and shipping rules. Copying the template and overriding the differences avoids manual copy code that lists every member, which silently produces incomplete objects when a newly added member is missed.
+> - **The caller does not know the concrete runtime type:** code that holds an object through a base type cannot call the right constructor, but the object knows its own type and can copy itself through its own copy method.
+>
+> Direct construction is clearer when the type and the values are already known and no template carries useful state.
+>
+> A prototype still needs a defined copy contract:
+>
+> - which members stay shared
+> - which are duplicated
+> - which get fresh values, such as a new identifier
+>
+> In C#, `record with { }` makes a shallow copy with selected members replaced, and an explicit copy constructor states deeper copy rules.
+>
+> [[Software Architecture/Patterns/Design Patterns/Creational/Prototype#Solution|Prototype solution]] · [[Software Architecture/Patterns/Design Patterns/Creational/Prototype#Pitfalls|Prototype pitfalls]] · [Microsoft: Records (C# reference)](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record)
+
+<!-- qard-id: ceccd6bd-3ed8-4f4d-80fa-9b805e5ee7a9 -->
+
+> [!qard]- What separates a shallow copy from a deep copy, and which nested objects must a deep copy duplicate?
+> A shallow copy creates a new outer object, but its reference-type fields still point to the same nested objects as the original. A deep copy also duplicates nested objects, so changing them through the copy does not affect the original. A practical deep copy duplicates the mutable nested state that must evolve independently, not everything reachable.
+>
+> | Aspect | Shallow copy | Deep copy |
+> |---|---|---|
+> | Outer object | A new instance. | A new instance. |
+> | Value-type fields | Copied bit by bit. | Copied. |
+> | Reference-type fields | Only the reference is copied, so both objects share the same nested instance. | Members covered by the copy policy get new instances. |
+> | Adding an item to a nested `List<T>` | The change is visible through both objects. | Only the object that was changed sees it. |
+> | .NET mechanisms | `Object.MemberwiseClone()` and `record with { }`. | A copy constructor or copy method that duplicates chosen members. |
+>
+> Where the boundary goes:
+>
+> - **Duplicated:** mutable state that the copy owns and changes independently, such as an order's line items and its shipping address.
+> - **Shared:** immutable objects, such as immutable collections, because neither copy can change them.
+> - **Shared deliberately:** objects that are meant to be common, such as the `Customer` an order refers to.
+> - **Left out or reset:** runtime-only state such as event subscriptions, locks and caches. A cloned entity usually also needs a new identifier.
+>
+> A member typed as `IReadOnlyList<T>` only limits the exposed API. The underlying list may still be mutable and shared.
+>
+> [Microsoft: Object.MemberwiseClone](https://learn.microsoft.com/en-us/dotnet/api/system.object.memberwiseclone?view=net-10.0) · [Microsoft: Records (C# reference)](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record) · [[Software Architecture/Patterns/Design Patterns/Creational/Prototype#Pitfalls|Prototype pitfalls]]
 
 # References
 

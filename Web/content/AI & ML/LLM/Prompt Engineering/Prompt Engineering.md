@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.501Z
-modified: 2026-08-20T20:41:15.501Z
-published: 2026-08-20T20:41:15.501Z
+created: 2026-10-21T13:29:32.430Z
+modified: 2026-10-21T13:29:32.430Z
+published: 2026-10-21T13:29:32.430Z
 tags:
   - FolderNote
 topic:
@@ -14,6 +14,9 @@ level:
   - "3"
 status: Done
 priority: Medium
+qard-deck: AI & ML
+qard-topic: LLM/Prompt Engineering/Prompt Engineering
+flashcard_uid: 008ceb7e
 ---
 
 Prompt engineering turns an intention into a task the model can execute and the system can test. Small changes in wording or generation settings can shift output quality because an LLM samples from a probability distribution rather than following a fixed program.
@@ -134,20 +137,38 @@ Strict output shape needs structured output or schema validation. Examples can c
 
 # Pitfalls
 
-- **Indirect prompt injection from retrieved content.** A document, web page, or tool result may contain malicious instructions that the model mistakes for trusted guidance. Keep trusted instructions separate from untrusted data, restrict tools by policy, and validate outputs.
-- **Correct shape, wrong content.** JSON can pass schema validation while carrying invented values. Add semantic checks for ranges, required relationships, and source-grounded claims.
-- **Token budget collapse.** Long context and verbose generations can crowd out critical instructions or examples. Control the input and output budgets together, then monitor truncation rather than assuming the model saw everything.
+- **Indirect prompt injection from retrieved content.** A document, web page, or tool result may contain malicious instructions that the model mistakes for trusted guidance. Mitigations keep trusted instructions separate from untrusted data, restrict tools by policy, and validate outputs.
+- **Correct shape, wrong content.** JSON can pass schema validation while carrying invented values. Semantic checks for ranges, required relationships, and source-grounded claims catch what the schema cannot.
+- **Token budget collapse.** Long context and verbose generations can crowd out critical instructions or examples. Input and output budgets are controlled together, and truncation is monitored instead of assuming the model saw everything.
 
 # Questions
 
-> [!QUESTION]- Why must prompt structure and model settings be designed together?
-> The prompt defines the task, context, constraints, and expected output, while model settings control sampling and output limits. Clear instructions can still produce unstable results when sampling is too random for the task. Conservative settings cannot repair an ambiguous instruction or a missing output contract. Both parts should be tested together on the same task-specific evaluation set because changing either one can change quality, consistency, latency, and cost.
+<!-- qard-id: 15c3b707-bc20-4a2a-8db8-5a3198d20844 -->
 
-> [!QUESTION]- When is few-shot prompting a better fit than pure instruction prompting?
-> Few-shot prompting is useful when the expected meaning, label boundary, or output convention is easier to demonstrate than to describe. A small set of representative examples can show how close cases should be handled and make repeated outputs more consistent. Examples do not replace a schema when the shape must be strict. Start with the smallest set that improves held-out results, then add edge cases only when evaluation shows a real gap because every example consumes context.
+> [!qard]- Why must prompt instructions and generation settings be evaluated together?
+> The prompt and the generation settings control different parts of the result, and neither can compensate for a defect in the other. The prompt defines the task, context, constraints and requested output. Where the selected model and endpoint support them, generation settings control sampling and output limits.
+>
+> - A low-randomness setting, such as a low temperature, makes output more repeatable but cannot resolve an ambiguous instruction. It can just produce the same misreading more consistently.
+> - A clear prompt cannot make an unsupported setting take effect. Parameter support differs across models and endpoints, so values tuned on one model may not carry over to another.
+>
+> Because the result depends on the combination, prompt and settings are evaluated together on a task-specific set for the selected model and endpoint. A change to either one, or a switch to another model, calls for reevaluation.
+>
+> Sources: [OpenAI prompt engineering](https://developers.openai.com/api/docs/guides/prompt-engineering) · [OpenAI reasoning best practices](https://developers.openai.com/api/docs/guides/reasoning-best-practices)
 
-> [!QUESTION]- How can an accurate but verbose and expensive prompt be tightened?
-> First identify whether the cost comes from repeated instructions, unnecessary examples, oversized context, or a verbose output contract. Remove duplicated input and state the required length and shape directly. `max_tokens` is a safety cap rather than the main way to request a concise answer because a low cap can truncate a valid response; stop sequences help only when the output has a reliable delimiter. Compare token usage, task quality, and truncation or failure rates after each change so a cheaper prompt does not quietly become less accurate.
+<!-- qard-id: b6902cab-7ab7-4955-ac30-1916ef9fbccc -->
+
+> [!qard]- How can an output-token cap limit cost without truncating valid answers?
+> An output-token cap limits cost as a hard ceiling against runaway generation, not as a way to shorten normal answers. Normal length and cost are reduced through the prompt. The cap is sized from the measured total of generated tokens plus headroom, within the room the context window leaves after the input.
+>
+> - **Prompt first:** repeated instructions, irrelevant context and redundant examples are removed, and the desired answer shape is stated directly, such as a label, a fixed set of fields or a length limit. This lowers cost without risking a cut-off answer.
+> - **Cap as a ceiling:** generation stops when the cap is reached, whether or not the answer is complete. A cap is not a reliable request for concise wording, so a cap set near typical length truncates longer valid answers. A truncated JSON object, for example, no longer parses.
+> - **Total generated tokens:** the cap is sized from the generated-token counts of valid responses on the evaluation set, plus headroom. Where a model's reasoning or other non-visible tokens count toward the output limit, they belong in that total. Hidden reasoning can then use up the cap before a short visible answer is finished, or before any visible output appears.
+> - **Context capacity:** input and generated tokens share the model's context window. A long input leaves less room for output, so generation can stop at the context limit before it reaches the cap.
+> - **Detecting truncation:** a response that stopped at a limit is identified from the stop or incomplete reason that the API returns. It is handled as truncated rather than complete.
+>
+> Parameter names and limit reporting are endpoint- and model-specific. In OpenAI's APIs, Responses uses `max_output_tokens` and Chat Completions uses `max_completion_tokens`. On OpenAI reasoning models, reasoning tokens count toward that limit and are billed as output tokens. A Responses call that hits the limit returns an `incomplete` status with the reason `max_output_tokens`.
+>
+> Sources: [OpenAI token counting](https://developers.openai.com/api/docs/guides/token-counting) · [OpenAI reasoning models](https://developers.openai.com/api/docs/guides/reasoning)
 
 # References
 

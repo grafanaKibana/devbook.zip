@@ -9,6 +9,9 @@ level:
 priority: High
 status: Ready to Repeat
 publish: true
+qard-deck: "Software Architecture"
+qard-topic: "Application Architecture/Plug-in Architecture (MicroKernel)"
+flashcard_uid: "9959d912"
 ---
 
 Plug-in (Microkernel) architecture puts stable product behavior in a small **core** and exposes contracts that **plug-ins** implement. The core can run without knowing any concrete extension. Features are selected at deployment or discovered at runtime, which fits products that vary by customer or accept third-party extensions.
@@ -89,11 +92,11 @@ public sealed class PdfPlugin : IPlugin
 
 ## Plug-in Version Conflicts
 
-Two plug-ins may require incompatible versions of the same library. Loading every dependency into the default context can produce type-identity conflicts or failures such as `MissingMethodException`. Give each plug-in a custom `AssemblyLoadContext` and resolve its private dependencies there. The shared extension-contract assembly must still come from the host context so both sides agree on the identity of `IPlugin`.
+Two plug-ins may require incompatible versions of the same library. Loading every dependency into the default context can produce type-identity conflicts or failures such as `MissingMethodException`. Each plug-in's custom `AssemblyLoadContext` resolves its private dependencies. The shared extension-contract assembly must still come from the host context so both sides agree on the identity of `IPlugin`.
 
 ## Unstable Extension Point Contracts
 
-Changing `IPlugin` can break every extension at once. Treat the contract as a public library API: keep compatible changes compatible, introduce a new contract for breaking behavior, and adapt an older version only while its migration window remains open. Supporting two versions has a real maintenance cost, so deprecation needs an end date.
+Changing `IPlugin` can break every extension at once. As a public library API, the contract preserves compatibility for existing consumers; breaking behavior uses a new contract, and an older version is adapted only during its migration window. Supporting two versions has a real maintenance cost, so deprecation needs an end date.
 
 # Tradeoffs
 
@@ -103,15 +106,45 @@ Changing `IPlugin` can break every extension at once. Treat the contract as a pu
 | Monolith with feature flags | Simpler, no loading complexity | All features in one codebase, harder to isolate | Internal applications, small teams |
 | Microservices | Process and deployment isolation with explicit network boundaries | Network overhead, distributed system complexity | High-scale, independent team ownership |
 
-Use plug-in architecture when extensions must ship independently of the core or when customers need different modules from one product. If one team owns every known feature and deploys them together, ordinary modules with feature flags are simpler.
+Plug-in architecture fits when extensions must ship independently of the core or when customers need different modules from one product. If one team owns every known feature and deploys them together, ordinary modules with feature flags are simpler.
 
 # Questions
 
-> [!QUESTION]- How can plug-ins use different versions of the same dependency without breaking the host contract?
-> Each plug-in can load its private dependencies through its own `AssemblyLoadContext`. Plug-in A may then resolve `Newtonsoft.Json` 12.x while plug-in B resolves 13.x. The extension contract must still come from the host's default context. If a plug-in loads another copy of that contract assembly, its types have a different identity even when the name and source code match. Values should cross the boundary through the shared contract types and plain data.
+<!-- qard-id: 1027d3cf-cce1-4c6c-b591-a16aada18738 -->
+> [!qard]- What is plug-in architecture?
+> Plug-in architecture lets a host application gain behavior from separately built extensions through a shared contract.
+>
+> It has three parts:
+>
+> - **Host:** the main application. It decides where extensions can fit, then finds, loads, creates and calls them.
+> - **Shared contract:** an interface or abstract type that both sides reference, such as `ICommand` with a `Name` and an `Execute` method.
+> - **Extensions (plug-ins):** separately built implementations of the contract.
+>
+> For example, an image editor can expose a filter contract and load sharpening or blur filters as extensions. The host understands how to apply a filter; each extension supplies the actual transformation.
+>
+> This makes supported behavior extensible, but introduces contract-compatibility and loading costs. Extensions remain limited by the host's extension points, and loading them in-process does not provide a security sandbox.
+>
+> [Microsoft: Create a .NET application with plugins](https://learn.microsoft.com/en-us/dotnet/core/tutorials/creating-app-with-plugin-support)
 
-> [!QUESTION]- When is plug-in architecture the wrong choice?
-> It is the wrong choice when one team owns all features and releases them with the host. Dynamic loading and contract compatibility add failure modes without creating independent delivery. A modular monolith with feature flags handles that case with fewer moving parts. Plug-ins earn their cost when an extension must evolve without changing or rebuilding the core.
+<!-- qard-id: eb5e11a7-7fb2-461d-9885-68641296b08d -->
+> [!qard]- How does a plug-in add behavior through an existing host extension point?
+> A plug-in adds behavior by implementing a contract that the host already defines. The host finds that implementation, creates it and calls it through the contract, without knowing the plug-in's concrete type.
+>
+> Example: the host's shared contract is `IExporter { string Format { get; } void Export(Document doc, Stream output); }`.
+>
+> 1. **Implement the contract:** `PdfExporter : IExporter` reports `pdf` as its format and writes PDF bytes.
+> 2. **Build and provide it:** the extension's author compiles it separately and places it where the host looks, such as a plugins folder.
+> 3. **Discover:** the host loads the plug-in and finds types that implement `IExporter`.
+> 4. **Create:** the host instantiates `PdfExporter`, either directly or through DI.
+> 5. **Invoke:** when the user chooses PDF, the host calls `Export(doc, stream)` the same way it calls any other exporter.
+>
+> **Limit:** a plug-in can only do what its extension point expresses. `IExporter` cannot add collaborative editing. That works only if the host already offers a suitable extension point for it. Otherwise, a suitable extension point must be added or changed first.
+>
+> [Microsoft: Create a .NET application with plugins](https://learn.microsoft.com/en-us/dotnet/core/tutorials/creating-app-with-plugin-support)
+
+<!-- qard-id: 9cbbcde2-1003-4c4e-ace9-c6304bbb1fa0 -->
+> [!qard]- When is plug-in architecture the wrong choice?
+> It is usually a poor fit when one team owns the features and ships them with the host: dynamic discovery, loading, and extension-contract compatibility add work without enabling independent delivery. [Microsoft: common web application architectures](https://learn.microsoft.com/en-us/dotnet/architecture/modern-web-apps-azure/common-web-application-architectures)
 
 # References
 

@@ -1,6 +1,6 @@
 /* Questions are FAQ disclosures, not callout cards. Keep Obsidian's native
  * folding behavior while borrowing its divider and text tokens. */
-.callout[data-callout="question"] {
+.callout:is([data-callout="question"], [data-callout="qard"]) {
   --callout-color: var(--interactive-accent-rgb);
   margin: 0;
   border: 0;
@@ -10,27 +10,29 @@
   box-shadow: none;
 }
 
-.callout[data-callout="question"]:has(+ .callout[data-callout="question"]),
-.el-div:has(.callout[data-callout="question"]):has(
-    + .el-div .callout[data-callout="question"]
+.callout:is([data-callout="question"], [data-callout="qard"]):has(
+    + .callout:is([data-callout="question"], [data-callout="qard"])
+  ),
+.el-div:has(.callout:is([data-callout="question"], [data-callout="qard"])):has(
+    + .el-div .callout:is([data-callout="question"], [data-callout="qard"])
   )
-  .callout[data-callout="question"],
-.el-blockquote:has(.callout[data-callout="question"]):has(
-    + .el-blockquote .callout[data-callout="question"]
+  .callout:is([data-callout="question"], [data-callout="qard"]),
+.el-blockquote:has(.callout:is([data-callout="question"], [data-callout="qard"])):has(
+    + .el-blockquote .callout:is([data-callout="question"], [data-callout="qard"])
   )
-  .callout[data-callout="question"],
+  .callout:is([data-callout="question"], [data-callout="qard"]),
 .markdown-source-view.is-live-preview
-  .cm-callout:has(.callout[data-callout="question"]):has(
-    + .cm-callout .callout[data-callout="question"]
+  .cm-callout:has(.callout:is([data-callout="question"], [data-callout="qard"])):has(
+    + .cm-callout .callout:is([data-callout="question"], [data-callout="qard"])
   )
-  .callout[data-callout="question"],
+  .callout:is([data-callout="question"], [data-callout="qard"]),
 .dc-questions-index
-  > span:has(+ span > .callout[data-callout="question"])
-  > .callout[data-callout="question"] {
+  > span:has(+ span > .callout:is([data-callout="question"], [data-callout="qard"]))
+  > .callout:is([data-callout="question"], [data-callout="qard"]) {
   border-block-end: 1px solid var(--background-modifier-border) !important;
 }
 
-.callout[data-callout="question"] > .callout-title {
+.callout:is([data-callout="question"], [data-callout="qard"]) > .callout-title {
   min-block-size: 3rem;
   display: grid;
   grid-template-columns: minmax(0, 1fr) 2.75rem;
@@ -40,7 +42,7 @@
   color: var(--text-normal);
 }
 
-.callout[data-callout="question"] > .callout-title::after {
+.callout:is([data-callout="question"], [data-callout="qard"]) > .callout-title::after {
   grid-column: 2;
   min-inline-size: 2.75rem;
   min-block-size: 2.75rem;
@@ -53,28 +55,34 @@
   content: "\2212";
 }
 
-.callout[data-callout="question"].is-collapsed > .callout-title::after {
+.callout:is([data-callout="question"], [data-callout="qard"]).is-collapsed
+  > .callout-title::after {
   content: "+";
 }
 
-.callout[data-callout="question"] > .callout-title > .callout-icon,
-.callout[data-callout="question"] > .callout-title > .callout-fold {
+.callout:is([data-callout="question"], [data-callout="qard"])
+  > .callout-title
+  > .callout-icon,
+.callout:is([data-callout="question"], [data-callout="qard"])
+  > .callout-title
+  > .callout-fold {
   display: none;
 }
 
-.callout[data-callout="question"] .callout-title-inner {
+.callout:is([data-callout="question"], [data-callout="qard"]) .callout-title-inner {
   grid-column: 1;
   color: var(--text-normal);
   font-weight: var(--font-semibold);
 }
 
-.callout[data-callout="question"] > .callout-content {
+.callout:is([data-callout="question"], [data-callout="qard"]) > .callout-content {
   margin: 0;
   padding: 0 1.25rem 1.25rem;
   color: var(--text-normal);
 }
 
-.callout[data-callout="question"].is-collapsed > .callout-content {
+.callout:is([data-callout="question"], [data-callout="qard"]).is-collapsed
+  > .callout-content {
   padding-block: 0;
 }
 

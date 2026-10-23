@@ -9,6 +9,9 @@ level:
 priority: High
 status: Ready to Repeat
 publish: true
+qard-deck: "Programming"
+qard-topic: "NET/CSharp/Concurrency and Parallelism/Async Await"
+flashcard_uid: "4a42db52"
 ---
 
 `async` and `await` let .NET code wait for I/O without holding a thread idle. While a network or database operation is in flight, the worker can return to the pool and run something else. UI applications stay responsive, and servers can keep many requests in progress without assigning a thread to every wait.
@@ -125,7 +128,7 @@ Calling `.Result` or `.Wait()` under a single-threaded `SynchronizationContext` 
 var result = GetDataAsync().Result;
 ```
 
-Fix the boundary that blocks and keep the call chain asynchronous. Library code that does not need the caller's context can also use `ConfigureAwait(false)`, but relying on every transitive await to do so is brittle.
+The fix belongs at the boundary that blocks: awaiting there instead of blocking keeps the call chain asynchronous. Library code that does not need the caller's context can also use `ConfigureAwait(false)`, but relying on every transitive await to do so is brittle.
 
 **Fire-and-forget swallows exceptions**
 Calling an async method without awaiting it drops the caller's handle to completion. A later fault sits on the returned `Task` with no local code to observe or report it.
@@ -135,7 +138,7 @@ Calling an async method without awaiting it drops the caller's handle to complet
 _ = SendEmailAsync(user);
 ```
 
-Await work that belongs to the current operation. Work that must outlive it belongs in an owned background queue where failures and shutdown are observed.
+Work that belongs to the current operation is awaited by that operation. Work that must outlive it belongs in an owned background queue where failures and shutdown are observed.
 
 **Async void**
 `async void` methods cannot be awaited and their exceptions cannot be caught by callers. They exist only for event handlers.
@@ -145,7 +148,7 @@ Await work that belongs to the current operation. Work that must outlive it belo
 public async void OnButtonClick(object sender, EventArgs e) { ... }
 ```
 
-Fix: use `async Task` everywhere except event handlers.
+Fix: `async Task` replaces `async void` everywhere except event handlers.
 
 **Unnecessary `Task.Run` wrapping**
 Wrapping already-async I/O in `Task.Run` wastes a thread pool thread for no benefit.
@@ -155,30 +158,90 @@ Wrapping already-async I/O in `Task.Run` wastes a thread pool thread for no bene
 var result = await Task.Run(() => _http.GetAsync(url));
 ```
 
-Fix: `await` the async method directly.
+Fix: the async method is awaited directly, without the `Task.Run` wrapper.
 
 **Awaiting `Task.WhenAll` throws one contained exception**
-A faulted `WhenAll` task records every failure in its `Exception` property, but `await` propagates one contained exception rather than throwing the surrounding `AggregateException`. Keep the combined task and inspect `task.Exception` when every failure matters.
+A faulted `WhenAll` task records every failure in its `Exception` property, but `await` propagates one contained exception rather than throwing the surrounding `AggregateException`. When every failure matters, code keeps the combined task and inspects `task.Exception`.
 
 # Questions
 
-> [!QUESTION]- What is the difference between asynchrony and multithreading?
-> Asynchrony is about not blocking while work is waiting. During asynchronous I/O, the method can pause without keeping a worker thread idle, then continue later, possibly on the same thread.
-> Multithreading is about executing work on multiple threads at the same time, usually for CPU-bound work. An application can be asynchronous while using only one thread, but CPU-bound work still needs a thread to execute it.
+<!-- qard-id: 1cd27d60-d7eb-47c8-9be5-3d6e78be5028 -->
+> [!qard]- How do asynchronous waiting and multithreading differ?
+> Asynchronous waiting is about not occupying a thread while an operation is pending; multithreading is about running work on more than one thread. An `async` method does not create a thread by itself.
+> 
+> | Aspect | Asynchronous waiting | Multithreading |
+> |---|---|---|
+> | What it addresses | Time spent waiting for I/O or another pending operation. | Executing several pieces of work on separate threads. |
+> | Thread use | While true asynchronous I/O is pending, the method is suspended and no thread runs it. A thread is needed again only when completion makes the continuation runnable. | Each piece of work occupies its thread while it runs. The threads run in parallel only when enough processors are available; otherwise the scheduler interleaves them. |
+> | CPU-bound work | No gain by itself, because computation still needs a thread to execute. | Several pieces of CPU-bound work can make progress at the same time when processors allow. |
+> 
+> The two ideas are independent: asynchronous code can wait without extra threads, and multithreaded code can still block its threads while waiting.
+> 
+> [Microsoft: `await` operator](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/operators/await) · [Microsoft: ASP.NET Core best practices](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/best-practices?view=aspnetcore-10.0) · [Microsoft: Task-based asynchronous programming](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/task-based-asynchronous-programming)
 
-> [!QUESTION]- What is the difference between `await` and using `Task.Result`?
-> Both return the task's result, but they wait differently. If the task is not complete, `await` pauses the method without blocking the current thread. The method continues when the task finishes, using the captured `SynchronizationContext` when one exists.
-> `Task.Result` blocks the current thread until the task completes. This can cause a deadlock when the continuation needs to return to that same thread. It also wraps errors in `AggregateException`, while `await` throws the original exception.
+<!-- qard-id: d15b1902-c519-4853-98ac-4cc2da428172 -->
+> [!qard]- What changes when an incomplete task is consumed with `await` instead of `Task.Result`?
+> `await` suspends the method and frees the current thread until the task completes, while `Task.Result` blocks the calling thread for the entire wait. That difference also changes deadlock risk and how failures surface.
+> 
+> | Aspect | `await` | `Task.Result` |
+> |---|---|---|
+> | Calling thread | Returns to its caller while the task is pending, so the thread can run other work. | Stays blocked and idle until the task completes. |
+> | Resumption | Runs the rest of the method later as a continuation, through the captured `SynchronizationContext` or non-default `TaskScheduler` when one applies. | Continues on the same thread once it is released; no continuation is involved. |
+> | Deadlock risk | Avoids the context deadlock, because the waiting code does not hold the context's thread. | Can deadlock when the task's continuation needs a single-threaded context, such as a UI thread, that the blocked caller occupies. Each side then waits for the other. |
+> | Failures | Rethrows the task's exception itself; when a task holds several exceptions, `await` rethrows one of them. | Throws an `AggregateException` that wraps the task's exception or exceptions. |
+> 
+> [Microsoft: Task-based asynchronous programming](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/task-based-asynchronous-programming) · [Microsoft: Synchronous wrappers for asynchronous methods](https://learn.microsoft.com/en-us/dotnet/standard/asynchronous-programming-patterns/synchronous-wrappers-for-asynchronous-methods) · [Microsoft: `Task<TResult>.Result`](https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.task-1.result)
 
-> [!QUESTION]- When is `ConfigureAwait(false)` appropriate?
-> It is mainly useful in reusable library code when the continuation does not need the caller's scheduling context. The continuation no longer has to return through a captured `SynchronizationContext` or non-default `TaskScheduler`.
-> UI code usually keeps context capture when it needs to update controls. ASP.NET Core normally has no custom `SynchronizationContext`, so using `ConfigureAwait(false)` there usually changes little, and `HttpContext` does not depend on that context.
+<!-- qard-id: 52ff6f00-16ec-4741-9be4-2551798fc8ee -->
+> [!qard]- What does `ConfigureAwait(false)` change, and when is it useful?
+> `ConfigureAwait(false)` tells an `await` that its continuation does not need to resume through the captured `SynchronizationContext` or non-default `TaskScheduler`. It is mainly useful in general-purpose library code that never needs its caller's context.
+> 
+> **What changes:**
+> 
+> - By default, awaiting an incomplete task captures the current `SynchronizationContext`, or a non-default current `TaskScheduler`, and resumes through it. In a UI app, that returns the continuation to the UI thread.
+> - With `ConfigureAwait(false)`, that scheduling context is not captured. The continuation can run on a ThreadPool thread or directly on the thread that completed the operation.
+> 
+> **What it does not do:**
+> 
+> - It does not force a thread switch. If the awaited task has already completed, the method continues synchronously on the current thread, still inside the original context.
+> - It does not stop `ExecutionContext` flow. Ambient state such as `AsyncLocal<T>` values still reaches the continuation by default.
+> - It is not a reliable fix for code that blocks on asynchronous work. Every `await` along the path would need it; keeping the call chain asynchronous is the durable fix.
+> 
+> **Where it fits:**
+> 
+> - **Reusable libraries:** library code stays independent of whatever context its caller has and avoids the cost of queuing back to it.
+> - **UI code:** usually keeps the default, because code after the `await` often updates controls that belong to the UI thread.
+> - **ASP.NET Core:** normally has no custom `SynchronizationContext`, so the setting usually changes little. `HttpContext` lifetime and thread safety remain separate concerns: `HttpContext` is not thread-safe and is unsafe to use outside the processing of its request, whichever thread resumes the method.
+> 
+> [Microsoft: Task.ConfigureAwait](https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.task.configureawait?view=net-10.0) · [.NET Blog: ConfigureAwait FAQ](https://devblogs.microsoft.com/dotnet/configureawait-faq/) · [Microsoft: HttpContext in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/use-http-context?view=aspnetcore-10.0)
 
-> [!QUESTION]- Why can asynchronous I/O improve server scalability without using extra threads?
-> While I/O is pending, the asynchronous operation pauses and returns its worker thread to the pool. That thread can process another request instead of sitting idle. A server with 100 threads can therefore keep thousands of I/O-bound requests in progress, as long as those threads are released during each wait. This improves concurrency for I/O-bound work; it does not make CPU-bound work require fewer threads.
+<!-- qard-id: 36a34049-8f3f-493f-b608-a516bf6a28a4 -->
+> [!qard]- Why can true asynchronous I/O improve server concurrency without keeping a thread for every wait?
+> Asynchronous I/O improves concurrency because a pending operation needs no thread. At the `await`, the request code gives its worker thread back to the ThreadPool, and a thread is needed again only to run the continuation after the I/O completes.
+> 
+> 1. Request code starts an I/O operation, such as a database query, and awaits the incomplete task.
+> 2. The method suspends and returns, and the worker thread goes back to the pool.
+> 3. While the I/O is pending, that thread can serve other requests.
+> 4. When the I/O completes, the continuation becomes runnable and a thread resumes the method. Whether the continuation is queued or runs directly on the completing thread depends on completion timing and the scheduling context.
+> 
+> A synchronous blocking call instead keeps its thread idle for the entire wait. Under load, blocked threads pile up, the ThreadPool runs short of free threads, and response times degrade.
+> 
+> Async I/O removes threads as the limit on how many waits can be in flight. It does not guarantee a particular capacity or throughput: CPU work, remaining blocking calls, connection pools, downstream services and other resource limits still constrain the system.
+> 
+> [Microsoft: `await` operator](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/operators/await) · [Microsoft: ASP.NET Core best practices](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/best-practices?view=aspnetcore-10.0) · [.NET Blog: ConfigureAwait FAQ](https://devblogs.microsoft.com/dotnet/configureawait-faq/)
 
-> [!QUESTION]- When is `Task.Run` useful in async code?
-> `Task.Run` is useful for CPU-bound work that should run on a thread-pool thread, for example to keep a UI thread responsive. It should not wrap an I/O API that is already asynchronous. That adds another scheduling step without making the I/O finish sooner.
+<!-- qard-id: 21176d6e-4394-438b-b511-e3f91affc308 -->
+> [!qard]- When is `Task.Run` useful, and why is it usually wrong around asynchronous I/O?
+> `Task.Run` is useful for moving CPU-bound work off a thread that must stay responsive, typically a UI thread. Around an API that is already asynchronous it gains nothing: the I/O does not finish sooner, and the wrapper only adds a ThreadPool scheduling hop.
+> 
+> - **What it does:** queues a delegate to the ThreadPool and returns a task that represents that work.
+> - **Useful case:** a UI event handler awaits `Task.Run(() => BuildReport(data))`, so the UI thread keeps handling input during a long calculation. The calculation still consumes CPU and occupies a pool thread while it runs.
+> - **Already-asynchronous I/O:** `await Task.Run(() => client.GetStringAsync(url))` only starts the same request from a pool thread. The wait was already threadless, so awaiting `client.GetStringAsync(url)` directly gives the same result with less overhead.
+> - **Synchronous blocking I/O:** wrapping a blocking call does not make it asynchronous. The block moves to a pool thread, which stays occupied for the whole wait.
+> 
+> On a server, request code already runs on ThreadPool threads, so wrapping work in `Task.Run` and immediately awaiting it frees nothing and adds scheduling and pool pressure.
+> 
+> [Microsoft: Task-based asynchronous programming](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/task-based-asynchronous-programming) · [Microsoft: ASP.NET Core best practices](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/best-practices?view=aspnetcore-10.0)
 
 # References
 

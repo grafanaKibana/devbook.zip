@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-09-12T17:17:13.853Z
-modified: 2026-09-12T17:17:13.853Z
-published: 2026-09-12T17:17:13.853Z
+created: 2026-10-21T13:29:32.449Z
+modified: 2026-10-21T13:29:32.449Z
+published: 2026-10-21T13:29:32.449Z
 tags:
   - FolderNote
 icon: lock
@@ -16,6 +16,9 @@ priority: High
 level:
   - "4"
 status: Done
+qard-deck: Security
+qard-topic: Security
+flashcard_uid: e838d602
 ---
 
 Security keeps a system's promised behavior intact when people, software, and infrastructure fail or act maliciously. It is an engineering property of the whole service: identities, authorization, data handling, dependencies, deployment, detection, and recovery all contribute to the result.
@@ -35,16 +38,16 @@ Small omissions often open the path: one missing ownership check, one reusable c
 
 # Secure System Design Checklist
 
-Start with one abuse case, not a catalog of controls. For a payroll export, identify the employee records as assets, payroll staff and the export worker as actors, and the browser, API, job queue, object store, and third-party delivery service as separate trust boundaries. Then make each control answer a concrete path through those boundaries.
+The checklist starts from one abuse case, not a catalog of controls. For a payroll export, the employee records are the assets, payroll staff and the export worker are the actors, and the browser, API, job queue, object store, and third-party delivery service are separate trust boundaries. Each control then answers a concrete path through those boundaries.
 
-1. **Assets and actors:** classify the data and operations, name legitimate actors, and describe what an attacker gains. See [[Security/Sensitive Data|Sensitive Data]].
-2. **Trust boundaries:** draw where identities, data, and administrative control cross processes, networks, tenants, and vendors.
-3. **Identity and access:** authenticate each actor, authorize the exact resource and action, deny by default, and keep privileges narrow. See [[Security/Authentication/Authentication|Authentication]] and [[Security/Authorization Models|Authorization Models]].
-4. **Secure defaults:** expose only required endpoints and methods, close unused ports, reject unknown input, and make a missing policy fail closed. See [[Security/Firewall|Firewall]], [[Security/OWASP|OWASP]], and [[Security/Web Vulnerabilities|Web Vulnerabilities]].
-5. **Secrets and keys:** keep credentials out of code and telemetry, use managed key storage, separate key and data administration, and test rotation. See [[Security/Secrets Management|Secrets Management]] and [[Security/Encryption|Encryption]].
-6. **Dependencies and delivery:** pin and verify build inputs, scan deployed artifacts, protect CI identities, and keep a current inventory of components and public APIs.
-7. **Detection:** record authentication, authorization, administrative, and sensitive-data events with safe metadata. Alert on an attack pattern rather than one expected denial.
-8. **Response and recovery:** assign incident owners, preserve evidence, revoke compromised access, communicate under the applicable obligations, and restore from a tested recovery path.
+1. **Assets and actors:** the data and operations are classified, legitimate actors are named, and what an attacker gains is described. See [[Security/Sensitive Data|Sensitive Data]].
+2. **Trust boundaries:** the model shows where identities, data, and administrative control cross processes, networks, tenants, and vendors.
+3. **Identity and access:** each actor is authenticated, authorization covers the exact resource and action, access is denied by default, and privileges stay narrow. See [[Security/Authentication/Authentication|Authentication]] and [[Security/Authorization Models|Authorization Models]].
+4. **Secure defaults:** only required endpoints and methods are exposed, unused ports are closed, unknown input is rejected, and a missing policy fails closed. See [[Security/Firewall|Firewall]], [[Security/OWASP|OWASP]], and [[Security/Web Vulnerabilities|Web Vulnerabilities]].
+5. **Secrets and keys:** credentials stay out of code and telemetry, keys live in managed key storage, key administration is separated from data administration, and rotation is tested. See [[Security/Secrets Management|Secrets Management]] and [[Security/Encryption|Encryption]].
+6. **Dependencies and delivery:** build inputs are pinned and verified, deployed artifacts are scanned, CI identities are protected, and a current inventory of components and public APIs is maintained.
+7. **Detection:** authentication, authorization, administrative, and sensitive-data events are recorded with safe metadata. Alerts fire on an attack pattern rather than one expected denial.
+8. **Response and recovery:** incidents have assigned owners, evidence is preserved, compromised access is revoked, communication follows the applicable obligations, and restoration uses a tested recovery path.
 
 ![[Assets/Security/Security-Security-18120000.png|theme-aware]]
 
@@ -52,8 +55,22 @@ A checklist becomes evidence only when its failure paths are exercised. The payr
 
 # Questions
 
-> [!QUESTION]- How do authentication and authorization work together when handling a request?
-> Authentication establishes who or what is making the request and produces a principal. Authorization then checks whether that principal may perform the requested action on the specific resource in the current context. A valid identity does not grant access to every resource, so both checks are required.
+<!-- qard-id: 020bc3d2-4f0b-4156-94ef-d2ebc35ffa9f -->
+
+> [!qard]- How do authentication and authorization work together when handling a request?
+> Authentication runs first and establishes who is calling. It validates a credential, such as a cookie or bearer token, and produces a principal with claims. Authorization then uses that principal to decide whether this caller may perform this action on this resource in the current context. A valid identity is an input to the authorization decision, not permission for every operation.
+>
+> In ASP.NET Core, one request flows as follows:
+>
+> 1. **Authenticate:** the handler for the configured scheme validates the credential and sets `HttpContext.User` to the resulting principal. This step does not reject a request that lacks a valid credential. Such a request continues without an authenticated identity.
+> 2. **Authorize the endpoint:** policies on the endpoint are evaluated against the principal before the action runs. Examples are requiring an authenticated user, a role or a claim.
+> 3. **Authorize the resource:** an endpoint policy cannot see a record that the action has not loaded yet. When the decision depends on the record, such as whether the caller owns invoice 42, the action loads it and calls `IAuthorizationService.AuthorizeAsync(User, invoice, "CanReadInvoice")`.
+> 4. **Handle a denial:** an unauthenticated caller receives a _challenge_, which asks for credentials. An authenticated caller without permission receives a _forbid_. The scheme decides the actual response:
+>    - JWT bearer authentication returns 401 for a challenge and 403 for a forbid.
+>    - Cookie authentication returns 401 or 403 to XHR requests and, from ASP.NET Core 10, to recognized API endpoints by default.
+>    - Other cookie-authenticated requests are redirected to a sign-in page or an access-denied page.
+>
+> [Microsoft: ASP.NET Core authentication](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/?view=aspnetcore-10.0) · [Microsoft: Resource-based authorization](https://learn.microsoft.com/en-us/aspnet/core/security/authorization/resource-based?view=aspnetcore-10.0) · [Microsoft: .NET 10 cookie authentication change for API endpoints](https://learn.microsoft.com/en-us/aspnet/core/breaking-changes/10/cookie-authentication-api-endpoints?view=aspnetcore-10.0)
 
 # References
 

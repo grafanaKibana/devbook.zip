@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.685Z
-modified: 2026-08-20T20:41:15.685Z
-published: 2026-08-20T20:41:15.685Z
+created: 2026-10-21T13:29:32.451Z
+modified: 2026-10-21T13:29:32.451Z
+published: 2026-10-21T13:29:32.451Z
 topic:
   - Software Architecture
 subtopic:
@@ -12,6 +12,9 @@ level:
   - "2"
 priority: High
 status: Ready to Repeat
+qard-deck: Software Architecture
+qard-topic: Patterns/Architectural Patterns/Domain-Driven Design
+flashcard_uid: 9a093ee2
 ---
 
 Domain-Driven Design (DDD) organizes software around business language and rules. Its strategic patterns separate models that assign different meanings to the same words. Tactical patterns express one model's invariants in code.
@@ -118,12 +121,46 @@ When query needs diverge from the aggregate's command model, [[Software Architec
 | Transaction Script | Simple, fast to write | Logic scattered in services, hard to maintain as complexity grows | Simple CRUD, scripts, prototypes |
 | Anemic model + services | Familiar to most developers | Invariants are procedural and dispersed across services, so they are easier to bypass or duplicate | Short-lived projects, simple domains |
 
-Use tactical patterns where invariants need a clear consistency boundary. Use Bounded Contexts when one shared model has become ambiguous or a coordination bottleneck. Simple CRUD can stay simple.
+Tactical patterns fit where invariants need a clear consistency boundary. Bounded Contexts fit when one shared model has become ambiguous or a coordination bottleneck. Simple CRUD can stay simple.
 
 # Questions
 
-> [!QUESTION]- When is full DDD the wrong choice?
-> A system with straightforward CRUD and little business behavior gains little from aggregates, repositories, and context mapping. Strategic boundaries may still help a large organization, but tactical machinery should follow real invariants rather than project size alone.
+> [!qard]- What is a bounded context in Domain-Driven Design?
+> A bounded context is the explicit boundary within which one domain model and its language apply. Inside it, each term has one consistent meaning. Another context can use the same word for a different concept with its own model.
+>
+> For example, "Customer" in Sales means a prospect with contact details and deal history, while "Customer" in Billing means an account with payment terms and a credit limit. A single shared `Customer` type would collect optional fields and rules that belong to neither context.
+>
+> - **Ownership:** each context owns its model. Team organization, code bases and database schemas often mark the boundary. Contexts can still share a deployment or a physical database if table ownership keeps one model from leaking into the other.
+> - **Integration:** contexts communicate through an explicit contract or translation, such as Sales publishing `OrderPlaced` and Billing creating an invoice from it, instead of using each other's internal types.
+>
+> A bounded context is a model boundary, not necessarily a separate deployment.
+>
+> [Eric Evans: Domain-Driven Design Reference (Bounded Context)](https://www.domainlanguage.com/wp-content/uploads/2016/05/DDD_Reference_2015-03.pdf)
+
+> [!qard]- What is an aggregate in Domain-Driven Design?
+> An aggregate is a cluster of related domain objects treated as one consistency boundary. Outside code holds references only to its root entity and changes the cluster only through that root. The root enforces the invariants that must hold across the whole cluster.
+>
+> For example, an `Order` root owns its order lines. Adding a line goes through `Order.AddLine`, which rejects a non-positive quantity before any state changes, and other code cannot edit the line collection directly.
+>
+> - **Transaction scope:** the aggregate boundary also scopes transactions. A transaction usually changes one aggregate, so consistency and locking stay local. Changing several in one transaction can still be correct when an immediate invariant spans them and the storage commits them atomically. If that happens often, the boundary is probably wrong.
+> - **Sizing:** the boundary belongs around facts that must agree at commit time. An oversized aggregate loads and locks unrelated state. An undersized one turns an immediate invariant into coordination between transactions.
+> - **Later consequences:** effects that can follow after the commit, such as updating another aggregate, are handled asynchronously, often through domain events.
+> - **Persistence:** repositories load and save whole aggregates through their roots.
+>
+> [Eric Evans: Domain-Driven Design Reference (Aggregates)](https://www.domainlanguage.com/wp-content/uploads/2016/05/DDD_Reference_2015-03.pdf) · [Microsoft: Domain events: design and implementation](https://learn.microsoft.com/en-us/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/domain-events-design-implementation)
+
+<!-- qard-id: 725eb1e1-0775-4997-ba90-2f5d0772d85c -->
+
+> [!qard]- When is full DDD the wrong choice?
+> Full DDD is the wrong choice when a domain has few business rules, such as a CRUD service that mainly validates and stores records. Its modeling and coordination cost then protects little, and a simple transaction script or data-centric model is easier to build and maintain.
+>
+> - **Tactical patterns** such as aggregates, value objects and repositories earn their cost where invariants must hold inside a clear consistency boundary. Without such rules, they add types and indirection without protecting anything.
+> - **Strategic patterns** such as a ubiquitous language and bounded contexts can still help on their own when the same term means different things in different parts of the business, even if the code inside each context stays simple.
+> - **Effort can differ by subdomain:** the core domain that differentiates the business may justify rich modeling, while supporting or generic subdomains stay simple or are bought or adopted.
+>
+> The deciding factor is the amount of real domain behavior, not project size.
+>
+> [Microsoft: Design a DDD-oriented microservice](https://learn.microsoft.com/en-us/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/ddd-oriented-microservice)
 
 # References
 

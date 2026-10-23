@@ -9,6 +9,9 @@ level:
 priority: High
 status: Done
 publish: true
+qard-deck: "Software Architecture"
+qard-topic: "Patterns/Design Patterns/Behavioral/Observer"
+flashcard_uid: "a91c4462"
 ---
 
 A newspaper subscription has the shape of Observer. The publisher keeps a subscriber list and sends each new issue to that list. Subscribers can leave independently, and the publisher does not know how any recipient uses the issue.
@@ -82,8 +85,7 @@ public class Order
     }
 }
 
-public record OrderStatusChangedEventArgs(Guid OrderId, OrderStatus Previous, OrderStatus New)
-    : EventArgs;
+public record OrderStatusChangedEventArgs(Guid OrderId, OrderStatus Previous, OrderStatus New);
 
 // Synchronous UI subscriber
 public class StatusBadge
@@ -152,11 +154,11 @@ A push subscriber is registered alongside the others. The publisher contract doe
 
 # Pitfalls
 
-**Unsubscribed event handlers.** A long-lived publisher retains its delegate targets. A closed view can stay alive because its handler is still attached to a surviving ViewModel. Unsubscribe with the owning lifetime or use a weak-event mechanism where that ownership cannot be aligned.
+**Unsubscribed event handlers.** A long-lived publisher retains its delegate targets. A closed view can stay alive because its handler is still attached to a surviving ViewModel. The handler is removed when its owning lifetime ends; a weak-event mechanism is the fallback where that ownership cannot be aligned.
 
 **One observer breaks the notification loop.** A synchronous event invocation stops when a handler throws. Explicit async observers can isolate failures or aggregate them with `Task.WhenAll`, but the policy must say whether one subscriber may fail the whole operation.
 
-**Hidden ordering dependencies.** `Task.WhenAll` starts independent observers together and gives no completion order. When `WarehouseNotifier` must finish before `ShippingNotifier`, await observers sequentially in an explicit workflow or chain.
+**Hidden ordering dependencies.** `Task.WhenAll` starts independent observers together and gives no completion order. When `WarehouseNotifier` must finish before `ShippingNotifier`, an explicit workflow or chain awaits the observers sequentially.
 
 # Tradeoffs
 
@@ -165,15 +167,37 @@ A push subscriber is registered alongside the others. The publisher contract doe
 | Async support | Awkward (`async void` or fire-and-forget) | Natural (`Task`-returning interface) |
 | Error handling | Exceptions propagate to publisher | Can wrap each observer independently |
 | Subscriber discovery | Manual registration | DI container can inject all implementations |
-| Completion order | Invocation-list order for synchronous handlers | None with `Task.WhenAll`. Use a sequential awaited loop when order matters |
+| Completion order | Invocation-list order for synchronous handlers | None with `Task.WhenAll`. A sequential awaited loop preserves order when it matters |
 | Lifetime and removal | Must hold the handler delegate and unsubscribe | Governed by DI registration and the containing scope |
 
 C# events fit synchronous UI notifications. Server-side async subscribers need a `Task`-returning interface so completion and failure remain observable. `IObservable<T>` with Rx becomes worthwhile when the event stream itself needs composition over time.
 
 # Questions
 
-> [!QUESTION]- How should event subscriptions be managed to avoid retaining subscribers after their lifetime ends?
-> A subscription should be removed when its owner is disposed or otherwise reaches the end of its lifetime. Weak events help when the publisher must live longer than its subscribers and there is no clear owner that can unsubscribe. Matching DI scopes helps only if the publisher stays in the same scope and the subscription does not escape into a singleton, static event, or another longer-lived object.
+> [!qard]- What is the Observer pattern?
+> The Observer pattern defines a one-to-many relationship: a publisher keeps a list of independently registered subscribers and notifies all of them when its state changes. The publisher depends only on a notification contract, not on the subscribers' concrete types, so a subscriber can be added or removed without changing the publisher.
+> 
+> - **Publisher (subject):** owns the changing state, keeps the subscription list and sends the notifications.
+> - **Subscribers (observers):** register through the contract and decide how to react.
+> - **Notification contract:** a callback signature or interface, such as an order's `StatusChanged` event or an `IOrderStatusObserver` interface.
+> 
+> C# events provide this directly: `+=` subscribes a handler, `-=` removes it, and raising the event invokes the handlers currently subscribed. Event handlers are invoked synchronously, so asynchronous server-side subscribers fit better behind a `Task`-returning interface that keeps their completion and failures observable.
+> 
+> [.NET events](https://learn.microsoft.com/en-us/dotnet/standard/events/) · [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Observer#Solution|Observer implementation]] · [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Observer#Events and Observable APIs in .NET|Events and observable APIs in .NET]]
+
+<!-- qard-id: 83b4f765-ae00-4359-8df6-6cc015fa3cd6 -->
+> [!qard]- How should event subscriptions be managed to avoid retaining subscribers after their lifetime ends?
+> Each subscription needs an owner that removes it when the subscriber's lifetime ends, usually the component that added it. Weak events are a fallback when a longer-lived publisher has no clear owner to unsubscribe.
+> 
+> **Why retention happens:** subscribing stores a delegate in the publisher, and that delegate usually references the subscriber. While the publisher stays reachable, so does the subscriber. This becomes a leak when the publisher outlives the subscriber, such as a closed view whose handler is still attached to a surviving view model.
+> 
+> - **Explicit ownership:** the component that subscribes with `+=` unsubscribes with `-=` when its lifetime ends, such as when a view closes or the subscriber is disposed.
+> - **Keeping the handler:** unsubscribing needs the same delegate that was added, so a lambda handler has to be stored if it will be removed later.
+> - **Weak events:** the publisher's reference no longer keeps the subscriber alive, so no unsubscribe owner is required. The extra machinery is worthwhile only when ownership cannot be aligned with the subscriber's lifetime.
+> 
+> When an owner exists, explicit unsubscription is simpler and more predictable.
+> 
+> [.NET events](https://learn.microsoft.com/en-us/dotnet/standard/events/) · [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Observer#Pitfalls|Observer pitfalls]] · [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Observer#Tradeoffs|Observer tradeoffs]]
 
 # References
 

@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.476Z
-modified: 2026-08-20T20:41:15.477Z
-published: 2026-08-20T20:41:15.477Z
+created: 2026-10-21T13:29:32.419Z
+modified: 2026-10-21T13:29:32.419Z
+published: 2026-10-21T13:29:32.419Z
 topic:
   - AI & ML
 subtopic:
@@ -12,6 +12,9 @@ level:
   - "3"
 priority: Medium
 status: Creation
+qard-deck: AI & ML
+qard-topic: LLM/Agents/Workflow Patterns
+flashcard_uid: 27b2b0a4
 ---
 
 Five workflow patterns cover the space between one [[AI & ML/LLM/Agents/Agents|augmented LLM]] call and an autonomous loop. Application code still owns the outer control flow. The model handles bounded decisions inside it. This middle of the [[AI & ML/LLM/Agents/Agents|agentic]] spectrum is usually easier to test and operate because the allowed paths remain visible.
@@ -91,11 +94,39 @@ This pattern fits work where feedback improves the output and the evaluator can 
 
 # Questions
 
-> [!QUESTION]- How do the five workflow patterns differ in who controls the next step?
-> The difference is how much of the control flow is fixed by the application. Prompt chaining fixes the sequence, routing chooses among predefined branches, and parallelization runs predefined work at the same time. With orchestrator-workers, the model decides the tasks and worker count at runtime. Evaluator-optimizer adds a loop that continues until an acceptance test passes or a limit is reached. The simplest pattern that matches the task is usually easier to test because every extra model-owned decision adds variable cost and makes failures harder to reproduce.
+<!-- qard-id: 6d82467a-87cc-4efd-b831-9eeab32bdbc5 -->
 
-> [!QUESTION]- Why are orchestrator-workers harder to operate than ordinary parallelization even when their diagrams look similar?
-> Parallelization starts a known set of calls, so coverage, cost, and aggregation can be tested ahead of time. An orchestrator chooses the decomposition and worker count from the input. That flexibility creates variable cost and new failure modes: missing work, overlapping assignments, or a synthesis that cannot reconcile the results. It also makes the pattern a bridge into [[Multi-Agentic Systems]], because the model controls the shape of the work.
+> [!qard]- How do prompt chaining, routing, parallelization, orchestrator-workers, and evaluator-optimizer differ in who controls the next step?
+> They differ in how much of the control flow code fixes in advance. In prompt chaining, routing and parallelization, application code defines every possible path, and a model at most picks one predefined branch. In orchestrator-workers, a model decides the subtasks at runtime. In evaluator-optimizer, a model's evaluation decides whether the loop repeats, within a cap set in code.
+>
+> | Pattern | Who decides the next step | What code fixes in advance |
+> |---|---|---|
+> | Prompt chaining | Code. Each step always follows the previous one, and programmatic gates can stop a bad intermediate result. | The whole sequence of steps. |
+> | Routing | A classifier, often an LLM, reads the input and picks one branch. | The set of branches and how each one is handled. |
+> | Parallelization | Code. It starts the calls together and aggregates them, either splitting independent sections or voting over repeated runs. | The subtasks and how their results are combined. |
+> | Orchestrator-workers | The orchestrator model decides how to split the task, what to delegate and how to synthesize the results. | Only the outer frame; worker count and assignments appear at runtime. |
+> | Evaluator-optimizer | An evaluator model decides whether a draft passes explicit criteria or returns to the generator with feedback. | The acceptance criteria and an iteration cap that ends the loop. |
+>
+> Each additional model-owned decision tends to make cost less predictable and failures harder to reproduce, so the simplest pattern that fits is usually the easiest to test.
+>
+> [Building Effective AI Agents](https://www.anthropic.com/engineering/building-effective-agents)
+
+<!-- qard-id: c1c8ac97-e367-45a7-9727-9a1da6e9a126 -->
+
+> [!qard]- Why is the orchestrator-workers pattern harder to operate than ordinary parallelization, even though both fan out work to several calls?
+> Orchestrator-workers is harder to operate because a model, not code, decides the structure of the fan-out. In ordinary parallelization, code defines the subtasks and the aggregation in advance. In orchestrator-workers, a model chooses the subtasks for each input at runtime and also synthesizes the results, so the set of calls is not known before the run.
+>
+> - **Ordinary parallelization:** application code starts a predefined set of independent calls, such as one per code-review concern, and aggregates their outputs programmatically. The split and aggregation rules can be read, reviewed and tested before any run.
+> - **Orchestrator-workers:** an orchestrator model reads the input, decides how to split it and what to delegate, then synthesizes the workers' results. The worker count and assignments exist only at runtime.
+>
+> Fixed rules make the structure inspectable, but they do not make outcomes repeatable. In both patterns, the workers are model calls whose outputs can differ between runs, and how well a split suits the task depends on the input. Orchestrator-workers adds model-chosen structure on top of that variability:
+>
+> - **Work and cost vary:** the number of workers, and therefore the calls and tokens spent, can change between inputs and even between runs on the same input.
+> - **The split itself can fail per run:** any fan-out can miss part of the task, duplicate work or combine results poorly. With a fixed fan-out, the split and aggregation rules can be checked before deployment. With orchestrator-workers, a flawed decomposition or synthesis exists only in a particular run's decisions. It cannot be reviewed in advance and can appear for some inputs or runs but not others. It is therefore harder to reproduce and to catch with a few fixed test cases.
+>
+> These are risks, not guaranteed outcomes. A trace of each run's decomposition and synthesis shows where a particular run went wrong.
+>
+> [Building Effective AI Agents](https://www.anthropic.com/engineering/building-effective-agents)
 
 # References
 
