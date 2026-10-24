@@ -198,7 +198,7 @@ INDEX_STATE = """JSON.stringify((()=>{
  }));
  return {inventory:all.map(f=>f.path),observedStats,metadataStats,
   nativePublishPaths:native,extendedReady:extended?.isReady===true,
-  extendedPublishPaths:extended?.isReady?Array.from(extended.getFilesWithFrontmatterValue(key,true)).filter(p=>p.startsWith('Home/')):[]};
+  extendedPublishPaths:extended?.isReady?Array.from(extended.getFilesWithFrontmatterValue(key,true)).filter(p=>p.startsWith('Home/')&&p.toLowerCase().endsWith('.md')):[]};
 })())"""
 
 

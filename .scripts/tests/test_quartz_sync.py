@@ -56,6 +56,7 @@ if "eval" in sys.argv and "nativePublishPaths" in args:
     native = [] if scenario == "native-incomplete" else ["Home/example.md"]
     extended = [] if scenario == "extended-incomplete" else ["Home/example.md"]
     if scenario == "same-count-wrong-path": native = ["Home/other.md"]
+    if scenario == "extended-stale-markdown": extended.append("Home/stale.md")
     if scenario == "missing-new-file": inventory = []
     if scenario == "startup-wait" and (root / "calls").read_text().count("nativePublishPaths") == 1: native = []
     observed = {name:{"mtime":(root / "Vault" / name).stat().st_mtime_ns / 1000000,"size":(root / "Vault" / name).stat().st_size} for name in inventory}
@@ -284,7 +285,7 @@ print(("=> " if full_publish else "") + json.dumps({"success":True,"data":data})
                 os.fstat(descriptor)
 
     def test_incomplete_indexes_block_before_publication(self):
-        for scenario in ["native-incomplete", "extended-incomplete", "missing-new-file", "same-count-wrong-path", "index-unready", "stale-stat", "stale-size", "stale-metadata"]:
+        for scenario in ["native-incomplete", "extended-incomplete", "missing-new-file", "same-count-wrong-path", "extended-stale-markdown", "index-unready", "stale-stat", "stale-size", "stale-metadata"]:
             with self.subTest(scenario=scenario):
                 (self.repo / "calls").unlink(missing_ok=True)
                 result = self.run_sync(scenario, "2")
@@ -486,6 +487,22 @@ const run = async () => JSON.parse(await vm.runInNewContext(process.argv[1], {ap
         result = subprocess.run(["node", "-e", setup + assertions + "\n})().catch(error=>{console.error(error);process.exitCode=1;});",
                                  getattr(module, name)], capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_index_readiness_compares_markdown_paths_without_dropping_canvas_inventory(self):
+        self.run_bridge("INDEX_STATE", r"""
+const note = {path:'Home/example.md',stat:{mtime:1,size:2}};
+const canvas = {path:'Home/Roadmap.canvas',stat:{mtime:1,size:3}};
+app.vault = {getMarkdownFiles(){return [note];},getFiles(){return [note,canvas];}};
+app.metadataCache = {getFileCache(){return {frontmatter:{publish:true}};},fileCache:{'Home/example.md':{mtime:1,size:2}}};
+const plugin = app.plugins.plugins['quartz-syncer'];
+plugin.settings = {publishFrontmatterKey:'publish'};
+plugin.cacheHandle = {api:{isReady:true,getFilesWithFrontmatterValue(){return new Set([note.path,canvas.path,'Home/stale.md']);}}};
+const result = await run();
+assert.deepEqual(result.nativePublishPaths,['Home/example.md']);
+assert.deepEqual(result.extendedPublishPaths,['Home/example.md','Home/stale.md']);
+assert.deepEqual(result.inventory,['Home/example.md','Home/Roadmap.canvas']);
+assert.deepEqual(result.observedStats['Home/Roadmap.canvas'],{mtime:1,size:3});
+""")
 
     def test_full_publication_awaits_all_status_groups_and_closes_dynamic_session(self):
         self.run_bridge("FULL_PUBLISH", r"""
