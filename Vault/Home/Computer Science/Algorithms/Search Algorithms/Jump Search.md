@@ -19,8 +19,9 @@ Ordering proves that a block ending below the target contains no match. A direct
 
 The first block end at or above the target narrows the search to one block. That overshoot is the defining move.
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 
 
@@ -38,7 +39,7 @@ Each jump is a proof, not a guess. Block `k` spans indices `[(k−1)m, k·m − 
 
 The stride size balances the checkpoint phase against the final scan. Larger strides use fewer checkpoints but leave a longer candidate block; smaller strides do the reverse. The chart captures the chosen square-root balance.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -118,7 +119,8 @@ tab: Complexity
 ```
 
 The chart assumes the block size is chosen near the square root of the input length, balancing the jump phase against the final scan.
-~~~~~
+
+%% endtabs %%
 
 # Diagram and C# Implementation
 

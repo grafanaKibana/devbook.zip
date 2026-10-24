@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.608Z
-modified: 2026-08-20T20:41:15.609Z
-published: 2026-08-20T20:41:15.609Z
+modified: 2026-10-23T19:06:27.550Z
+published: 2026-10-23T19:06:27.550Z
 topic:
   - Computer Science
 subtopic:
@@ -20,8 +20,9 @@ The structure is a [[Computer Science/Data Structures/Trees/Binary Search Tree|b
 
 Inserting the prefilled `0` creates a red-red violation. The highlighted recolor and rotation participants restore equal black-height.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"red-black-tree","values":[10,5,15,1],"value":0}
@@ -34,7 +35,7 @@ Each node stores its key, left/right/parent pointers, and a single color bit. `n
 1. Every node is red or black.
 2. The root is black.
 3. A red node has two black children — no two reds appear consecutively on any path.
-4. Every root-to-`nil` path crosses the same number of black nodes — the tree's *black-height*.
+4. Every root-to-`nil` path crosses the same number of black nodes — the tree's _black-height_.
 
 Define `bh(x)` as the number of black nodes on any path from, but excluding, `x` down to and including a descendant `nil` sentinel. Let `size(x)` count internal nodes in the subtree rooted at `x`. For `x = nil`, `bh(x) = 0` and `size(x) = 0 = 2^0 - 1`. For an internal node, each child has black-height at least `bh(x) - 1`, so induction gives `size(x) ≥ 1 + 2(2^(bh(x)-1) - 1) = 2^bh(x) - 1`. A root-to-`nil` path of height `h` contains `bh(root)` black nodes below the black root and, because invariant 3 forbids consecutive reds, at most `bh(root)` red nodes.
 
@@ -45,7 +46,7 @@ An insert colors the new node red and attaches it as a normal BST leaf. Red can 
 
 The unbounded part of insert repair — recoloring up the tree — touches only color fields. Rotation, the pointer surgery that actually reshapes the tree, is capped at two for insertion. Delete is harder: removing a black node drops one black from a path and may propagate a "double-black" state toward the root. A red sibling triggers a preparatory rotation that converts the configuration into a black-sibling case. With a black sibling and two black children, recolor the sibling red: a black parent inherits the deficit, while a red parent becomes black and terminates the fixup; reaching the root also absorbs the deficit. A black sibling with a red child uses one or two terminal rotations plus recoloring and ends the fixup. Exact case layout and rotation counts depend on whether the implementation repairs bottom-up or transforms 2-3-4 nodes while descending.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -141,7 +142,8 @@ tab: Complexity
   }
 }
 ```
-````
+
+%% endtabs %%
 
 # Where the Looser Balance Shows
 

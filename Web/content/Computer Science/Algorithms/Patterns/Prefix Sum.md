@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.531Z
-modified: 2026-08-20T20:41:15.532Z
-published: 2026-08-20T20:41:15.532Z
+modified: 2026-10-23T19:06:27.542Z
+published: 2026-10-23T19:06:27.542Z
 topic:
   - Computer Science
 subtopic:
@@ -16,24 +16,19 @@ status: Creation
 
 Repeated range-sum queries should not rescan the same values. A prefix array stores `prefix[i]`, the sum of the first `i` elements, with `prefix[0] = 0` for the empty prefix. An inclusive range `[l, r]` then costs one subtraction: `prefix[r + 1] - prefix[l]`. The shared prefix before `l` cancels, leaving exactly the requested range.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
 
-
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"prefix-sum","array":[4,7,2,9,5,3,8],"range":[2,5]}
 ```
 
-
-
 The trace uses seven days of sales, `[4, 7, 2, 9, 5, 3, 8]`. It writes every running total into the prefix array, then answers `[2, 5]`: `prefix[6] - prefix[2] = 30 - 11 = 19`.
-
-
 
 `prefix[k]` accumulates every element strictly before index `k`, so `prefix[r + 1]` covers `a[0..r]` and `prefix[l]` covers `a[0..l-1]`. Subtracting them removes the common head `a[0..l-1]` exactly, leaving `a[l] + ... + a[r]`. The `prefix[0] = 0` sentinel and the length-`(n + 1)` array are what let `l = 0` use the same formula as any other left bound: `prefix[0]` supplies the empty sum with no special case.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -85,7 +80,8 @@ tab: Complexity
 ```
 
 Both curves are per-query. The prefix array costs `O(n)` to build once, so the pattern only pays off when the number of queries outgrows that single pass.
-````
+
+%% endtabs %%
 
 # When the Precompute Stops Holding
 

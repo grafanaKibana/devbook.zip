@@ -19,8 +19,9 @@ The trade is explicit. Capacity never grows, and a full ring must either overwri
 
 **Core shape:** fixed array + `head`/`tail`/`count` → indices wrap `mod capacity` → a full write overwrites the oldest element or is rejected, according to policy.
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 
 ```steptrace
@@ -47,7 +48,7 @@ The invariant that needs a deliberate design decision is the **`head == tail` am
 
 A monotonic-counter variant uses increasing 64-bit `head` and `tail` counters that are not reduced modulo capacity and are masked only for array access. Their difference is the true count while arithmetic remains within the supported counter range; an implementation must either tolerate unsigned wraparound correctly or prevent overflow. Power-of-two capacities then replace `% capacity` with `& (capacity - 1)`. Under reject-on-full or wait-on-full, enqueue changes `tail` and `count`, while dequeue changes `head` and `count`. Under overwrite-oldest, a full enqueue also advances `head`, logically evicting the oldest slot before replacing it.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -169,7 +170,8 @@ tab: Complexity
   }
 }
 ```
-~~~~~
+
+%% endtabs %%
 
 # When the Capacity is Reached
 

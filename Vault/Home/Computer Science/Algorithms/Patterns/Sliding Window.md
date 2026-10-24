@@ -17,8 +17,9 @@ Sorting would destroy the ranges being measured. Sliding windows preserve the in
 
 
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 
 
@@ -36,7 +37,7 @@ Every index enters the window once and leaves at most once. A last-seen index id
 
 This accounting holds when entry and exit update validity incrementally. A running sum, element count, or frequency map qualifies because one value changes at a boundary. A window maximum needs an additional structure because removing the maximum does not reveal the next-largest retained value.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -96,7 +97,7 @@ tab: Complexity
 }
 ```
 
-~~~~~
+%% endtabs %%
 
 # Where the Pattern Breaks
 

@@ -269,7 +269,8 @@ class FakeApi:
         self.calls.append(("GRAPHQL", query))
         return {"data": {"id": variables.get("id")}}
 
-    def add_owner_comment(self, number: int, body: str, *, item_id: int = 700, updated_at: str) -> None:
+    def add_owner_comment(self, number: int, body: str, *, item_id: int = 700, updated_at: str,
+                          paths: list[str] | None = None) -> None:
         rows = self.comments.setdefault(number, [])
         rows[:] = [row for row in rows if row.get("id") != item_id]
         rows.append(
@@ -277,6 +278,7 @@ class FakeApi:
                 "id": item_id,
                 "body": body,
                 "html_url": f"https://example.test/pull/{number}#issuecomment-{item_id}",
+                "paths": paths,
                 "user": {"id": OWNER_ID, "login": OWNER_LOGIN},
                 "updated_at": updated_at,
             }
@@ -451,12 +453,12 @@ def demonstrate(root: Path, config: Mapping[str, Any]) -> dict[str, Any]:
     steps.append({"name": "same_pr_second_note", **second})
     pr_number = api.prs[0]["number"]
 
-    api.add_owner_comment(pr_number, "Make the Task boundary explicit.", updated_at="2026-10-13T12:10:00Z")
+    api.add_owner_comment(pr_number, "Make the Task boundary explicit.", updated_at="2026-10-13T12:10:00Z", paths=[path_a])
     feedback = engine().run(apply=True, with_model=True)
     steps.append({"name": "owner_feedback", **feedback})
     duplicate = engine().run(apply=True, with_model=True)
     steps.append({"name": "duplicate_feedback_skip", **duplicate})
-    api.add_owner_comment(pr_number, "Make the Task boundary explicit and mention completion semantics.", updated_at="2026-10-13T12:20:00Z")
+    api.add_owner_comment(pr_number, "Make the Task boundary explicit and mention completion semantics.", updated_at="2026-10-13T12:20:00Z", paths=[path_a])
     edited = engine().run(apply=True, with_model=True)
     steps.append({"name": "edited_feedback", **edited})
 

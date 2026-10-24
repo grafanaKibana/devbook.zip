@@ -41,8 +41,9 @@ tp.hooks.on_all_templates_executed(async () => {
 
 <!-- Open with one paragraph: name the concrete problem and input shape, the repeated cost, the move that reduces it, and the condition that makes that move valid. -->
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 <!-- The StepTrace fence must be the first rendered child. Replace this required draft configuration with a supported trace that exposes the decisive transition and auxiliary state; do not add a heading or lead-in before it. -->
 
@@ -52,11 +53,11 @@ tab: Visualization
 
 <!-- Optional: add at most one `####` support section after the trace when the visible transition needs an invariant or mechanism explanation. Keep unheaded prose when a heading adds no navigation value, and delete copy that only restates controls or the pictured scenario. -->
 
-tab: Complexity
+%% tab: Complexity %%
 
 <!-- Insert exactly one validated version 2 `complexity` fence here after note-specific Time and Space evidence exists. Follow it only with concise unheaded prose that supplies a chart-missing assumption, model/resource distinction, or decision-changing failure boundary. Do not add headings, Markdown tables, or placeholders inside or outside this panel. -->
 
-~~~~~
+%% endtabs %%
 
 # Fit and Limits
 

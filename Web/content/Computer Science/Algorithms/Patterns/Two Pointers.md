@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.533Z
-modified: 2026-08-20T20:41:15.533Z
-published: 2026-08-20T20:41:15.533Z
+modified: 2026-10-23T19:06:27.543Z
+published: 2026-10-23T19:06:27.543Z
 topic:
   - Computer Science
 subtopic:
@@ -18,22 +18,17 @@ On a sorted array, two indices replace nested pair enumeration with a converging
 
 Order is the proof. Raising `left` can only increase the sum. Lowering `right` can only decrease it. One comparison can therefore settle a whole set of pairs. Without that monotonic relationship, moving either pointer is only a guess.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
 
-
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"two-pointers","array":[1,4,5,7,9,12,15],"target":14}
 ```
 
-
-
 The trace runs the converging pair-sum over the sorted array `[1, 4, 5, 7, 9, 12, 15]`, searching for two elements that add to `14`.
 
 The first comparison is `arr[0] + arr[6] = 1 + 15 = 16 > 14`, so `right` moves left. The next comparison is `arr[0] + arr[5] = 1 + 12 = 13 < 14`, so `left` moves right. Each decision retains the compared indices before the chosen pointer moves, and the scan finishes at `arr[2] + arr[4] = 5 + 9 = 14 ✓`.
-
-
 
 Sorted order is the invariant that turns each move into a proof instead of a guess. Consider the full grid of candidate pairs `(i, j)` with `i < j`: a brute-force loop inspects each cell. The converging pointers instead sit at one cell `(left, right)` and let a single comparison eliminate an entire line of that grid.
 
@@ -42,7 +37,7 @@ Sorted order is the invariant that turns each move into a proof instead of a gue
 
 Each move retires one index permanently. Neither pointer reverses direction or revisits a discarded pair.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -94,7 +89,8 @@ tab: Complexity
 ```
 
 The chart describes the converging pass over already-sorted input. If sorting is required first, account for that preprocessing separately.
-````
+
+%% endtabs %%
 
 # When the Proof Stops Working
 

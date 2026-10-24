@@ -15,8 +15,9 @@ Fibonacci Search locates a value in a sorted, random-access array without repeat
 
 Every possible target index stays greater than `offset` and inside the current Fibonacci window. A value below the target advances the offset. A value above it keeps the offset and contracts the window to its left component. Like [[Home/Computer Science/Algorithms/Search Algorithms/Binary Search|Binary Search]], the algorithm repeatedly discards part of the candidate range. Its distinction is the Fibonacci offset arithmetic.
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 { "algorithm": "fibonacci-search", "array": [2, 5, 8, 13, 21, 34, 55, 89, 144], "target": 55 }
@@ -24,7 +25,7 @@ tab: Visualization
 
 The trace grows a Fibonacci window that covers the nine values, then probes from an offset initially set before index `0`. Each comparison either advances the offset past a proven-small prefix or contracts the live range to the smaller Fibonacci component. A final one-element check handles the remaining candidate after the main window reaches size one.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -86,7 +87,8 @@ tab: Complexity
   }
 }
 ```
-~~~~~
+
+%% endtabs %%
 
 # Boundaries
 

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.530Z
-modified: 2026-08-20T20:41:15.530Z
-published: 2026-08-20T20:41:15.530Z
+modified: 2026-10-23T19:06:27.542Z
+published: 2026-10-23T19:06:27.542Z
 topic:
   - Computer Science
 subtopic:
@@ -16,17 +16,15 @@ status: Creation
 
 An arbitrary set of calendar ranges may contain overlaps and nested intervals. Sorting by start time makes those relationships local. A left-to-right sweep then carries one current block: extend it when the next interval overlaps, or emit it when a gap appears.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
 
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"merge-intervals"}
 ```
 
 The contained interval `[3,5]` leaves `[1,6]` unchanged, which makes the `max(current.end, next.end)` rule visible. The gaps before `[8,10]` and `[13,16]` finalize the earlier blocks, while the closed intervals `[13,16]` and `[16,20]` merge at their shared endpoint.
-
-
 
 The sweep carries one piece of state: `current`, the interval being accumulated, initialised to the first interval after sorting. For each following `next`:
 
@@ -35,14 +33,12 @@ The sweep carries one piece of state: `current`, the interval being accumulated,
 
 The reason one comparison suffices is the sort. After ascending starts, every interval later in the list starts at or after `next.start`. If `next` does not reach `current.end`, no interval after it can reach back either, so `current` is final the moment a gap appears. The invariant that survives each step is that `current.end` holds the furthest right edge of every interval merged into the current block, which is exactly the value the next overlap test needs.
 
-
-
 The same sort-then-sweep skeleton answers the rest of the interval family, each specialising the emit/extend step:
 
 - **Insert one interval into a sorted, pairwise-disjoint list** — the sweep copies intervals ending before the new one, then expands the pending interval to `[min(starts), max(ends)]` for every overlap under the chosen closed or half-open endpoint convention. It copies the remaining intervals after that run. No re-sort is needed. If the existing list overlaps itself, normalize it first.
 - **Intersect two sorted, pairwise-disjoint lists** — a [[Computer Science/Algorithms/Patterns/Two Pointers|Two Pointers]] sweep advances the pointer whose interval ends first and emits `[max(starts), min(ends)]` whenever the current pair overlaps. Ordering and internal non-overlap on both sides keep the scan to one pass; otherwise each list needs normalization first.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -93,7 +89,7 @@ tab: Complexity
 }
 ```
 
-````
+%% endtabs %%
 
 # When the Convention or Order Breaks
 

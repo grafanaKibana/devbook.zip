@@ -17,8 +17,9 @@ The lack of a precondition is its main advantage. [[Home/Computer Science/Algori
 
 
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 
 
@@ -32,7 +33,7 @@ The trace searches for `83` in a 16-element array.
 
 The scan starts at index 0 and compares each value with `83` in order until it reaches the match at index 14. No comparison rules out an element it has not read, because unsorted input offers no proof about the values ahead. Unlike [[Home/Computer Science/Algorithms/Search Algorithms/Binary Search|Binary Search]], the scan never discards a range: every unchecked element stays a candidate until it is inspected, and the search ends only on the first match or when the sequence is exhausted.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -94,7 +95,8 @@ tab: Complexity
   }
 }
 ```
-~~~~~
+
+%% endtabs %%
 
 # Why No Precondition is Needed
 

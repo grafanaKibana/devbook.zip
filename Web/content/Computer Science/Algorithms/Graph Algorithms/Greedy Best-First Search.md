@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-09-12T17:17:13.830Z
-modified: 2026-09-12T17:17:13.830Z
-published: 2026-09-12T17:17:13.830Z
+modified: 2026-10-23T19:06:27.539Z
+published: 2026-10-23T19:06:27.539Z
 topic:
   - Computer Science
 subtopic:
@@ -18,8 +18,9 @@ A grid pathfinder may value a quick route over the shortest route. A cost-aware 
 
 That ranking rule is also the weakness. The search cannot distinguish a short route from a long one that happens to end near the goal because `g(n)`, the cost already paid, never enters the comparison. A returned path may be far longer than necessary. On an infinite graph, an improving estimate can also pull the search down a branch that never terminates.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"greedy-best-first-search"}
@@ -27,14 +28,13 @@ tab: Visualization
 
 Greedy first moves downward because those cells have smaller `h`, then follows the lower corridor until a vertical barrier forces it back up and around. It reaches the goal with cost `12`. [[Computer Science/Algorithms/Graph Algorithms/A-Star Search|A*]] uses the same grid but ranks by `g + h`, returning the optimal upper route with cost `8`. The comparison isolates the missing term: Greedy knows both routes point toward the same goal but never charges itself for the four extra steps already taken.
 
-
 The frontier is a priority queue keyed by `h(n)`. Each iteration pops the node with the smallest estimate, and if it is not the goal, pushes every unvisited neighbor keyed by that neighbor's own `h`. The trace accumulates edge weights only to report the returned path cost; they never affect priority. A visited set stops a node from entering the queue twice.
 
 The only property this maintains is that the next node expanded is the one the heuristic currently rates closest to the goal. Nothing ties the order of expansion to the length of the path built so far, which is the guarantee a cost-aware search provides and this one drops. When `h` is accurate and the map is open, the estimate shrinks along an almost straight line and the goal is reached after expanding on the order of `m` nodes. When `h` points into an obstacle, the same rule keeps re-selecting cells that hug the barrier because they still score lowest, and the accumulated `g` that would expose the detour is never consulted.
 
 One framing makes the family relationship exact: [[Computer Science/Algorithms/Graph Algorithms/A-Star Search|A*]] expands by `f = g + h`. Setting `g` to zero collapses `f` to `h`, which is precisely Greedy Best-First — the case where a node's history counts for nothing.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -138,7 +138,8 @@ tab: Complexity
   }
 }
 ```
-````
+
+%% endtabs %%
 
 # When the Estimate Misleads
 

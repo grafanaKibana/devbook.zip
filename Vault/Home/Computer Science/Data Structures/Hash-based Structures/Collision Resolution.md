@@ -25,11 +25,13 @@ Hashing names the storage boundary. Chaining can grow beyond the bucket array, s
 
 **Core split:** collisions land two keys in one home bucket → chain them outside the array or probe to another in-array slot. A bucket/group layout changes how many candidates one access examines, then delegates overflow to chaining or probing. The third StepTrace tab demonstrates bucketed probing.
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
 
-~~~~tabsdown
-tab: Closed Addressing
+%% tab: Visualization %%
+
+%% tabs %%
+
+%% tab: Closed Addressing %%
 
 ```steptrace
 {"algorithm":"hash-map","variant":"closed-addressing"}
@@ -37,7 +39,7 @@ tab: Closed Addressing
 
 Separate chaining (open hashing): each bucket points to its own external key/value chain.
 
-tab: Open Addressing
+%% tab: Open Addressing %%
 
 ```steptrace
 {"algorithm":"hash-map","variant":"open-addressing"}
@@ -45,7 +47,7 @@ tab: Open Addressing
 
 Linear probing scans the fixed table and preserves tombstones after removal.
 
-tab: Bucket Hashing
+%% tab: Bucket Hashing %%
 
 ```steptrace
 {"algorithm":"hash-map","variant":"buckets"}
@@ -53,7 +55,7 @@ tab: Bucket Hashing
 
 Four three-cell buckets use bucket-by-bucket linear overflow with wraparound.
 
-~~~~
+%% endtabs %%
 
 Each array slot holds a pointer to a secondary container — classically a linked list — of every entry that hashed there. A collision appends to that bucket's list; a lookup hashes to the bucket and scans its list with an equality check. The array slot is a fixed *address* for the key (hence "closed addressing"), but the storage behind it is open-ended (hence "open hashing").
 
@@ -84,7 +86,7 @@ The array can group `B` adjacent slots into a fixed-size **bucket**. The home re
 
 Use bucket/group layout when memory or disk locality dominates; its tail behaviour remains the behaviour of the chosen chain or probe scheme.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -204,7 +206,8 @@ tab: Complexity
   }
 }
 ```
-~~~~~
+
+%% endtabs %%
 
 # Chaining and Open-Addressing Layouts
 

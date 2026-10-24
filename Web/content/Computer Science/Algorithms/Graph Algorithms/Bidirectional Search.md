@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-09-12T17:17:13.829Z
-modified: 2026-09-12T17:17:13.829Z
-published: 2026-09-12T17:17:13.829Z
+modified: 2026-10-23T19:06:27.537Z
+published: 2026-10-23T19:06:27.537Z
 topic:
   - Computer Science
 subtopic:
@@ -20,13 +20,13 @@ Bidirectional search launches a second BFS backward from `t` over reversed edges
 
 The saving has conditions. The goal must provide one or more enumerable states that can seed the backward search. The graph must also expose predecessors through a reverse adjacency list or an invertible move operator. A goal predicate alone is useless when its matching states cannot be listed.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"bidirectional-search"}
 ```
-
 
 Two frontiers advance in parallel. `F` holds the vertices reached from `s` along forward edges; `B` holds the vertices reached from `t` along reversed edges. Each side records the distance at which it first reached every vertex.
 
@@ -36,7 +36,7 @@ For an unweighted graph the stopping rule is exact. Expansion proceeds one full 
 
 Alternating complete levels keeps the search depths within one level in the trace. Expanding the smaller frontier is a useful heuristic on irregular graphs, but queue size alone does not guarantee balanced depth; a lopsided schedule can lose the idealized exponent-halving behavior.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -144,7 +144,8 @@ tab: Complexity
   }
 }
 ```
-````
+
+%% endtabs %%
 
 # Where the Clean Case Ends
 

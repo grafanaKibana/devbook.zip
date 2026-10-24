@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.518Z
-modified: 2026-08-20T20:41:15.518Z
-published: 2026-08-20T20:41:15.518Z
+modified: 2026-10-23T19:06:27.540Z
+published: 2026-10-23T19:06:27.540Z
 topic:
   - Computer Science
 subtopic:
@@ -22,24 +22,23 @@ The **residual graph** makes that choice reversible. An edge carrying flow `f` o
 
 The transition worth animating is a backward arc in the residual graph retracting an earlier, suboptimal augmenting path.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"maximum-flow"}
 ```
 
-
 Take the unit-capacity network `s→a, s→b, a→b, a→t, b→t`; its maximum flow is 2, since only `s→a` and `s→b` leave the source. A greedy first augmentation along `s → a → b → t` saturates all three of its edges and reports flow 1. Every remaining forward path is now blocked — `s→a` and `b→t` are full — so a forward-only algorithm stops one unit short.
 
 The residual graph reopens the choice. Sending one unit `a → b` created a backward arc `b → a` with residual 1. The path `s → b → a → t` uses that backward arc: `b → a` retracts the earlier `a → b` unit and reroutes it, so `a → b` returns to zero while `s→a→t` and `s→b→t` each carry one unit. Flow reaches 2. The backward arc is the entire reason a locally-committed, wrong routing decision can be undone; forward-only residuals leave no legal move to reach that state, which is exactly why greedy-without-residuals returns a value below the maximum.
 
-
 An `s`-`t` **cut** splits the vertices into `S` (containing `s`) and `T` (containing `t`); its capacity is the total capacity of the original edges crossing `S → T`. Any flow value is bounded by any cut capacity, because everything reaching `t` must cross the partition. The **max-flow min-cut theorem** sharpens that to equality: the maximum flow equals the minimum cut capacity.
 
-The theorem also names the cut. When no augmenting path remains, let `S` be the vertices still reachable from `s` in the final residual graph; `t ∉ S`, or a path would exist. Every original edge from `S` to `T` is saturated — an unsaturated one would keep a forward residual arc and extend reachability — and no flow crosses back from `T` to `S`, so the cut capacity equals the flow value. Reachability in the residual graph is therefore a checkable optimality certificate: it both proves the flow is maximal and reads off the bottleneck edges. The cut side `S` comes from the *residual* reachable set, but the reported edges are the *original* forward edges out of `S`.
+The theorem also names the cut. When no augmenting path remains, let `S` be the vertices still reachable from `s` in the final residual graph; `t ∉ S`, or a path would exist. Every original edge from `S` to `T` is saturated — an unsaturated one would keep a forward residual arc and extend reachability — and no flow crosses back from `T` to `S`, so the cut capacity equals the flow value. Reachability in the residual graph is therefore a checkable optimality certificate: it both proves the flow is maximal and reads off the bottleneck edges. The cut side `S` comes from the _residual_ reachable set, but the reported edges are the _original_ forward edges out of `S`.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -144,7 +143,8 @@ tab: Complexity
 ```
 
 The chart describes adjacency-list implementations. The drawer's capacity-matrix Edmonds–Karp scans `V²` cells per BFS and stores a `V × V` residual matrix, changing its bounds to `O(V³E)` time and `O(V²)` auxiliary space. It returns the maximum-flow value only; opposite-direction capacity and reverse cancellation share residual cells, so it does not reconstruct flow per original antiparallel edge.
-````
+
+%% endtabs %%
 
 # Where the Guarantees Break
 

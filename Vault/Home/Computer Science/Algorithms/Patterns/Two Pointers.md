@@ -17,8 +17,9 @@ Order is the proof. Raising `left` can only increase the sum. Lowering `right` c
 
 
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 
 
@@ -41,7 +42,7 @@ Sorted order is the invariant that turns each move into a proof instead of a gue
 
 Each move retires one index permanently. Neither pointer reverses direction or revisits a discarded pair.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -93,7 +94,8 @@ tab: Complexity
 ```
 
 The chart describes the converging pass over already-sorted input. If sorting is required first, account for that preprocessing separately.
-~~~~~
+
+%% endtabs %%
 
 # When the Proof Stops Working
 

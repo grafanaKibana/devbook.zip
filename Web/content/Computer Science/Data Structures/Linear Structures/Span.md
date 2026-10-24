@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.601Z
-modified: 2026-08-20T20:41:15.602Z
-published: 2026-08-20T20:41:15.602Z
+modified: 2026-10-23T19:06:27.549Z
+published: 2026-10-23T19:06:27.549Z
 topic:
   - Computer Science
 subtopic:
@@ -22,8 +22,9 @@ A span owns nothing. It is a small value containing a managed reference to the f
 
 The interactive view keeps the backing array and active window visible together. Slice narrows the `(start, length)` window without copying. A write through it mutates the same backing slot.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"span"}
@@ -41,7 +42,7 @@ Three properties follow from the design:
 - **Stack-only value.** `Span<T>` is a `ref struct`, so it cannot be boxed, captured, or stored in an ordinary heap field. Escape analysis additionally prevents a span over `stackalloc` memory from leaving the allocating frame; it does not track the lifetime of unmanaged allocations.
 - **Read-only variant.** `ReadOnlySpan<T>` is the same window with writes removed, so it can wrap immutable data such as a `string` (as `ReadOnlySpan<char>`). `Span<T>` converts implicitly to it; the reverse is disallowed.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -154,7 +155,8 @@ tab: Complexity
   }
 }
 ```
-````
+
+%% endtabs %%
 
 # Where the Stack-only Window Breaks down
 

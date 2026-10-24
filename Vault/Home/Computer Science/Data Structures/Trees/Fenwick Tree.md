@@ -17,8 +17,9 @@ Each slot owns one precisely sized block. In a 1-indexed array, slot `i` aggrega
 
 **Core shape:** 1-indexed array → slot `i` sums the `i & -i` elements ending at `i` → a prefix query clears low bits downward, a point update adds the low bit upward → arbitrary range reconstruction requires an invertible aggregate
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"fenwick-tree","array":[3,1,4,1,5,9,2,6]}
@@ -47,7 +48,7 @@ Three facts define a valid state:
 
 Only the slots on an update path change; the rest of the array is untouched. The structure records aggregates, not the original values, so recovering `a[i]` alone means `Prefix(i) − Prefix(i − 1)` rather than a direct read.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -169,7 +170,8 @@ tab: Complexity
   }
 }
 ```
-~~~~~
+
+%% endtabs %%
 
 # When the Structure Stops Fitting
 

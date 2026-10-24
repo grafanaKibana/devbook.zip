@@ -366,9 +366,12 @@ def select_batch(
     if not candidates:
         return None
     ranked_topics = sorted(candidates, key=lambda topic: (0 if feedback_by_topic.get(topic) else 1, min(row[0] for row in candidates[topic]), topic.casefold()))
+    scope_batch = None
     for topic in ranked_topics:
         pr = _open_pr_for_topic(current, topic)
         feedback = feedback_by_topic.get(topic, [])
+        if scope_batch and not feedback:
+            return scope_batch
         if pr is None and open_pr_count >= int(cfg["max_open_prs"]) and not feedback:
             continue
         rows = sorted(candidates[topic])
@@ -377,9 +380,28 @@ def select_batch(
                 continue
             allowed_paths = {path for item in feedback for path in item.get("paths", [])}
             rows = [row for row in rows if row[2]["path"] in allowed_paths]
-        selected = rows[: int(cfg["max_notes_per_run"])]
-        if not selected and feedback:
-            selected = []
+        limit = int(cfg["max_notes_per_run"])
+        available = {row[2]["path"] for row in rows}
+        requested_paths: set[str] = set()
+        # Pack complete requests first: a disposition must never claim that a
+        # cross-note request was handled after reviewing only one of its notes.
+        for item in feedback:
+            paths = set(item.get("paths") or [])
+            if paths <= available and len(requested_paths | paths) <= limit:
+                requested_paths.update(paths)
+        rows.sort(key=lambda row: (row[2]["path"] not in requested_paths, row[0], row[1]))
+        selected = rows[:limit]
+        selected_paths = {row[2]["path"] for row in selected}
+        scoped_feedback = [item for item in feedback if set(item.get("paths") or []) <= selected_paths]
+        if feedback and not scoped_feedback:
+            # Keep indivisible oversized/missing-path requests visible without
+            # sending a partial request to the author or silently starving it.
+            scope_batch = scope_batch or {
+                "topic": topic, "topic_id": topic_id(topic), "notes": [],
+                "feedback": feedback, "rules_hash": rules_hash, "pr": copy.deepcopy(pr),
+            }
+            continue
+        feedback = scoped_feedback
         if selected or feedback:
             return {
                 "topic": topic,
@@ -389,7 +411,7 @@ def select_batch(
                 "rules_hash": rules_hash,
                 "pr": copy.deepcopy(pr),
             }
-    return None
+    return scope_batch
 
 
 def _validate_path(path: str, sources: Mapping[str, str]) -> None:
@@ -688,7 +710,7 @@ def apply_proposal(
                     ]
                     if any(metadata != before_non_id for metadata in child_metadata):
                         raise ProposalError("every split child must preserve the parent's non-identity Qard metadata exactly")
-                elif edit["kind"] != "add" and before_non_id != after_non_id:
+                elif edit["kind"] not in {"add", "remove"} and before_non_id != after_non_id:
                     raise ProposalError("sensitive non-identity Qard metadata must be preserved exactly")
                 if target == "new" and edit["kind"] not in {"add", "replace", "split"}:
                     raise ProposalError("new learning targets require add, replace, or split")

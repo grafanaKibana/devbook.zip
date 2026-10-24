@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.609Z
-modified: 2026-08-20T20:41:15.609Z
-published: 2026-08-20T20:41:15.609Z
+modified: 2026-10-23T19:06:27.551Z
+published: 2026-10-23T19:06:27.551Z
 topic:
   - Computer Science
 subtopic:
@@ -20,8 +20,9 @@ A segment tree keeps the array's index order but overlays a binary hierarchy of 
 
 **Core shape:** array indices → binary interval tree → each node holds `merge` over its `[l, r]`
 
-````tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"segment-tree","array":[3,4,1,7,2,6,5,8]}
@@ -42,7 +43,7 @@ Each node covers a fixed range decided at build time. The root covers `[0, n-1]`
 
 Lazy propagation adds a pending tag only when the update can transform a node's aggregate in constant time and tags compose correctly. For a sum tree with range-add, applying `delta` to a node of length `len` changes its aggregate by `delta * len`; multiple add tags compose by addition. Other pairs need different laws: range-add does not automatically work with every aggregate.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -164,7 +165,8 @@ tab: Complexity
   }
 }
 ```
-````
+
+%% endtabs %%
 
 # When the Structure Stops Fitting
 

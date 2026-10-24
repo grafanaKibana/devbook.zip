@@ -12,14 +12,20 @@ for bin_dir in /opt/homebrew/bin /opt/homebrew/opt/node@22/bin /usr/local/bin; d
     [[ -d "$bin_dir" ]] && PATH="$bin_dir:$PATH"
 done
 
-# Collect staged Vault files, plus Markdown separately for note-only automations.
+# Hold the export lock across maintenance and the awaited local publication.
+if [[ "${DEVBOOK_QUARTZ_MAINTENANCE:-}" != 1 ]]; then
+    exec python3 "$REPO_ROOT/.scripts/sync-quartz.py" --hook "$REPO_ROOT/.githooks/pre-commit"
+fi
+
+# Collect staged Vault files, including deletions, without splitting path names.
 STAGED_VAULT=()
 STAGED_MD=()
-while IFS= read -r file; do
+while IFS= read -r -d '' file; do
     [[ "$file" == Vault/* ]] || continue
+    [[ "$file" == Vault/.obsidian/* ]] && continue
     STAGED_VAULT+=("$file")
     [[ "$file" =~ \.(md|MD)$ ]] && STAGED_MD+=("$file")
-done < <(git diff --cached --name-only --diff-filter=ACMR)
+done < <(git diff --cached --name-only -z --no-renames)
 
 # If no staged Vault files, skip vault automations.
 if [[ ${#STAGED_VAULT[@]} -eq 0 ]]; then

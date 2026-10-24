@@ -70,7 +70,7 @@
       "run",
       "test",
       "--",
-      "custom/transformers/question-collector.test.ts"
+      "custom/transformers/publishing.test.ts"
     ]
   ],
   "content_quality": {

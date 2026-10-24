@@ -17,8 +17,9 @@ This block is the storage underneath `List<T>`, `Stack<T>`, and `Queue<T>`. `Dic
 
 **Core shape:** equal-size elements → one contiguous fixed block → address `base + i·elementSize` → no cheap growth or middle insert.
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"arrays"}
@@ -46,7 +47,7 @@ Out-of-bounds access has no natural floor or ceiling in the arithmetic itself. M
 
 The cache-locality advantage is not a rounding error. For small `n`, a contiguous scan routinely beats an asymptotically better structure — a tree or hash table whose nodes are scattered — because the constant factor is memory latency, not operation count. The crossover where the better big-O wins can sit well past the sizes a given workload ever reaches.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -191,7 +192,8 @@ tab: Complexity
   }
 }
 ```
-~~~~~
+
+%% endtabs %%
 
 # Diagram and C# Implementation
 

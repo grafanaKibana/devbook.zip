@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.610Z
-modified: 2026-08-20T20:41:15.611Z
-published: 2026-08-20T20:41:15.611Z
+modified: 2026-10-23T19:06:27.551Z
+published: 2026-10-23T19:06:27.551Z
 topic:
   - Computer Science
 subtopic:
@@ -22,8 +22,9 @@ What the structure gives up is compactness. Every distinct prefix becomes a node
 
 **Core shape:** strings → character-labelled edges from one root → a path spells a prefix → an end-of-word flag marks a complete key
 
-````tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"trie","operations":[["insert","car"],["insert","card"],["insert","care"],["insert","cat"],["insert","dog"],["prefix","ca"],["search","car"]]}
@@ -36,7 +37,7 @@ A node holds two pieces of state and nothing else:
 - A mapping from the next character to a child node — a `Dictionary<char, Node>` when the alphabet is open or sparse, or a fixed `Node[σ]` array indexed by symbol when the alphabet is small and known (`children[c - 'a']`).
 - A boolean `IsEnd` flag that is true exactly when the path from the root to this node is a stored key.
 
-The key itself is never stored. `card` exists in the trie when the edges `c`, `a`, `r`, `d` can all be followed from the root *and* the node reached at `d` has `IsEnd` set. The same walk without the final flag check answers a prefix query: reaching the node is enough, because it certifies that at least one stored key starts with the fragment.
+The key itself is never stored. `card` exists in the trie when the edges `c`, `a`, `r`, `d` can all be followed from the root _and_ the node reached at `d` has `IsEnd` set. The same walk without the final flag check answers a prefix query: reaching the node is enough, because it certifies that at least one stored key starts with the fragment.
 
 Three invariants hold in a valid trie:
 
@@ -44,9 +45,9 @@ Three invariants hold in a valid trie:
 2. `IsEnd` on a node is independent of whether that node has children. `car` and `card` coexist: the `r` node is both an end-of-word and an interior node on the way to `d`.
 3. Insertion only ever adds nodes or sets a flag; it never relabels an existing edge, so previously inserted keys stay reachable.
 
-The distinction between reaching a node and reaching a *flagged* node is the whole contract: exact search checks the flag, prefix search does not.
+The distinction between reaching a node and reaching a _flagged_ node is the whole contract: exact search checks the flag, prefix search does not.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -198,7 +199,8 @@ tab: Complexity
   }
 }
 ```
-````
+
+%% endtabs %%
 
 # When Fixed Child Arrays Hurt
 

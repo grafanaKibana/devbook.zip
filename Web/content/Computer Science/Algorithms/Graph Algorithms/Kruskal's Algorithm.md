@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.517Z
-modified: 2026-08-20T20:41:15.517Z
-published: 2026-08-20T20:41:15.517Z
+modified: 2026-10-23T19:06:27.540Z
+published: 2026-10-23T19:06:27.540Z
 topic:
   - Computer Science
 subtopic:
@@ -18,13 +18,13 @@ A connected, undirected, weighted graph can contain many spanning trees. The [[C
 
 The cycle test does the real work. A [[Computer Science/Data Structures/Graph Structures/Disjoint Set|disjoint set]] tracks the current forest components. If `find(u) == find(v)`, edge `(u, v)` would close a cycle and is rejected. Otherwise `union(u, v)` merges the components and the edge enters the result. The cut property makes the greedy choice safe: a lightest edge crossing a cut belongs to some MST.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"kruskal"}
 ```
-
 
 For edges `AB=1`, `BC=2`, `AC=3`, `CD=4`, the initial components are `{A}`, `{B}`, `{C}`, `{D}`.
 
@@ -37,7 +37,7 @@ For edges `AB=1`, `BC=2`, `AC=3`, `CD=4`, the initial components are `{A}`, `{B}
 
 The accepted edges have total weight `7` and stop at `V - 1 = 3` edges. At every acceptance, the endpoints lie on opposite sides of a current component cut, and no lighter unprocessed edge crosses that cut.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -96,7 +96,8 @@ tab: Complexity
   }
 }
 ```
-````
+
+%% endtabs %%
 
 # Boundary Cases
 

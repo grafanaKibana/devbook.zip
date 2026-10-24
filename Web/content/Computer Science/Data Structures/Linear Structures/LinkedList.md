@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-09-12T17:17:13.832Z
-modified: 2026-09-12T17:17:13.833Z
-published: 2026-09-12T17:17:13.833Z
+modified: 2026-10-23T19:06:27.548Z
+published: 2026-10-23T19:06:27.548Z
 topic:
   - Computer Science
 subtopic:
@@ -22,11 +22,13 @@ Each value lives in a separately allocated node rather than a contiguous block. 
 
 Appending below rewires the old tail's `next` field from `null` to the new node. The doubly linked form also points the new node's `prev` field back to the old tail. The existing values stay where they are.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
 
-~~~~tabsdown
-tab: Singly linked
+%% tab: Visualization %%
+
+%% tabs %%
+
+%% tab: Singly linked %%
 
 ```steptrace
 {"algorithm":"linked-list","variant":"singly","array":[12,27,39,54]}
@@ -34,7 +36,7 @@ tab: Singly linked
 
 Each cell stores a value over one next-pointer field.
 
-tab: Doubly linked
+%% tab: Doubly linked %%
 
 ```steptrace
 {"algorithm":"linked-list","variant":"doubly","array":[12,27,39,54]}
@@ -42,7 +44,7 @@ tab: Doubly linked
 
 Each cell stores a value over separate prev- and next-pointer fields.
 
-tab: Reverse in place
+%% tab: Reverse in place %%
 
 ```steptrace
 {"algorithm":"linked-list","variant":"reverse","array":[12,27,39,54]}
@@ -50,7 +52,7 @@ tab: Reverse in place
 
 `Reverse` rewires the `next` chain while every node keeps its address and value. `Reset` restores the original pointer order.
 
-~~~~
+%% endtabs %%
 
 The list itself stores almost nothing: a `First` reference, usually a `Last` reference, and a count. All content lives in independently allocated nodes connected through neighbour pointers; `First`, `Last`, or caller-held node references may also reach them directly.
 
@@ -66,7 +68,7 @@ Three invariants define a valid state:
 
 Inserting around a held node in a doubly linked list mutates only a constant number of adjacent pointers plus the count. No index is recomputed and no element is copied. Nothing about ordering is derived from position — position exists only as the path of pointers, so there is no random access to recover.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -242,7 +244,8 @@ tab: Complexity
   }
 }
 ```
-````
+
+%% endtabs %%
 
 # Reverse in place
 

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.524Z
-modified: 2026-08-20T20:41:15.524Z
-published: 2026-08-20T20:41:15.524Z
+modified: 2026-10-23T19:06:27.541Z
+published: 2026-10-23T19:06:27.541Z
 topic:
   - Computer Science
 subtopic:
@@ -20,20 +20,19 @@ Greedy algorithms build the answer through a sequence of commitments. Each step 
 
 **Exactness condition:** a fixed local rule + the greedy-choice property + optimal substructure → the committed choices form a global optimum.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
 
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"activity-selection"}
 ```
 
-
 Sorting by finish time moves the earliest release opportunity first; the sweep then accepts a compatible meeting permanently or rejects it as soon as it overlaps the last accepted finish.
 
 The first commitment, `[1, 4]`, rejects `[3, 5]` and `[0, 6]`. Meetings `[5, 7]` and `[8, 9]` remain compatible, producing a maximum schedule of three meetings. The accepted lane illustrates the exchange intuition: each commitment leaves at least as much room as any alternative first choice.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -84,7 +83,8 @@ tab: Complexity
   }
 }
 ```
-````
+
+%% endtabs %%
 
 # When Local Choices Reach the Global Optimum
 

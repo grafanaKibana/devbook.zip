@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.533Z
-modified: 2026-08-20T20:41:15.533Z
-published: 2026-08-20T20:41:15.533Z
+modified: 2026-10-23T19:06:27.543Z
+published: 2026-10-23T19:06:27.543Z
 topic:
   - Computer Science
 subtopic:
@@ -18,20 +18,15 @@ A sorted, indexable sequence may not expose its length. [[Computer Science/Algor
 
 The window is sound because its lower edge comes from the last probe below the target. Its upper edge is the first probe at or beyond the target, or the end of the sequence.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
 
-
+%% tab: Visualization %%
 
 ```steptrace
 { "algorithm": "exponential-search", "array": [2, 4, 7, 11, 18, 29, 41, 56, 72], "target": 41 }
 ```
 
-
-
 The trace searches for `41` in `[2, 4, 7, 11, 18, 29, 41, 56, 72]`. During the gallop, hatched bars are already too small, muted bars are not reached yet, and the blue probe jumps through indices `0, 1, 2, 4, 8`. Once index `8` passes the target, the live bracket becomes `[4, 8]` and the same card switches to binary search. Its midpoint is index `6`, where the target is found.
-
-
 
 The gallop maintains one fact through every iteration: as long as the loop continues, `a[bound] < target`, so the target's position lies strictly to the right of `bound`. Doubling may jump past the answer, but it doubles only after proving the current bound is too small; the skipped interval is retained between the previous and new bounds. The loop stops for exactly one of two reasons:
 
@@ -42,7 +37,7 @@ Either way the window is `[bound/2, min(bound, n − 1)]`. Index `0` is checked 
 
 The unbounded, indexable variant never references `n`. It generates the indices it probes (`1, 2, 4, …`) and asks only "is `a[bound]` still below the target?" An unknown-length finite source must also report that a probe is past the end so the high bound can be clamped to the last valid index. Index `0` is handled before the loop, since `bound` starts at `1`: if `a[0] == target`, the answer is `0`.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -146,7 +141,8 @@ tab: Complexity
 ```
 
 The position-sensitive bound applies only when the target exists. A miss in a bounded input is measured against the full input because there is no target position to substitute.
-````
+
+%% endtabs %%
 
 # When the Assumptions Stop Holding
 

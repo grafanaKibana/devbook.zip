@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.604Z
-modified: 2026-08-20T20:41:15.604Z
-published: 2026-08-20T20:41:15.604Z
+modified: 2026-10-23T19:06:27.549Z
+published: 2026-10-23T19:06:27.549Z
 topic:
   - Computer Science
 subtopic:
@@ -22,8 +22,9 @@ The **ordering invariant** applies at every node: all keys in the left subtree a
 
 Inserting the prefilled `80` adds a deeper right branch to the balanced seven-key start. Further increasing keys stretch the same branch: order remains valid, but nothing repairs the height.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"binary-search-tree","values":[40,20,60,10,30,50,70],"value":80}
@@ -33,7 +34,7 @@ tab: Visualization
 
 Each node holds a `key`, a `Left` child, a `Right` child, and optionally a `Parent` back-pointer. There are no arrays or indices — the structure is a graph of node objects reachable from a single `root`. An empty tree is `root == null`; a leaf is a node whose `Left` and `Right` are both null.
 
-The ordering invariant is global, not local. It is not enough that a node's immediate left child is smaller: *every* key anywhere in the left subtree must be smaller than the node, and every key in the right subtree larger. This is what each operation relies on:
+The ordering invariant is global, not local. It is not enough that a node's immediate left child is smaller: _every_ key anywhere in the left subtree must be smaller than the node, and every key in the right subtree larger. This is what each operation relies on:
 
 - **Search** starts at the root and compares. Equal ends it; smaller descends left; larger descends right; a null child means the key is absent. Every comparison eliminates the entire opposite subtree, because the invariant guarantees the target cannot be there.
 - **Insert** repeats the search walk. The null child where the walk falls off is exactly the one position where the new key preserves the invariant, so the new leaf is linked there.
@@ -41,7 +42,7 @@ The ordering invariant is global, not local. It is not enough that a node's imme
 
 Insert and delete change parent/child links; search and traversal read them without mutation. The resulting shape — which key ends up at the root, how deep a subtree runs — is an artifact of insertion order, not of the key set. Two trees holding `{1,2,3}` can be a balanced triangle or a three-node chain depending on the order the keys arrived.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -198,7 +199,8 @@ tab: Complexity
   }
 }
 ```
-````
+
+%% endtabs %%
 
 # When the Shape Stops Cooperating
 

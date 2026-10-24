@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.537Z
-modified: 2026-08-20T20:41:15.537Z
-published: 2026-08-20T20:41:15.537Z
+modified: 2026-10-23T19:06:27.544Z
+published: 2026-10-23T19:06:27.544Z
 topic:
   - Computer Science
 subtopic:
@@ -20,17 +20,13 @@ The **bad-character rule** uses the mismatching character's rightmost pattern po
 
 The trace keeps the pattern aligned under the text while the comparison cursor moves right to left and each rule proposes a shift.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
 
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"boyer-moore","text":"ACCCDBACBA","pattern":"ACBA"}
 ```
-
-
-
-
 
 Each alignment fixes the pattern's last character over some text index and compares leftward until a character disagrees (or the whole pattern matches). Two independent rules each propose a shift; the algorithm advances by the larger.
 
@@ -41,8 +37,6 @@ Each alignment fixes the pattern's last character over some text index and compa
 The shift is `max(bad_char_shift, good_suffix_shift)`, which is always at least one, so the search never stalls. Correctness rests on a negative argument: any smaller shift would either drop a known-mismatching character back over the text or misalign a suffix already proven to match, so every alignment skipped over provably cannot produce a match — even though its characters were never compared. That clause is the whole mechanism. A left-to-right comparison at the current alignment does not expose the trailing mismatch needed for this bad-character/block-skipping argument; KMP instead advances by reusing pattern-overlap information.
 
 Preprocessing builds both tables ahead of the scan. A last-occurrence table stores the raw rightmost index for each character, making the mismatch calculation `max(1, j - lastOccurrence(c))` explicit. An equivalent delta table used by Horspool-style code stores `m - 1 - i`, excludes the pattern's final position, and must adjust that end-relative delta back to the current mismatch position `j`; applying its values as unconditional shifts is a different algorithm. The good-suffix table maps each mismatch position to a safe suffix-preserving shift, but its index arithmetic is delicate.
-
-
 
 Searching for `ACBA` in `ACCCDBACBA` produces all three decisions exposed in the trace:
 
@@ -69,7 +63,7 @@ All four characters match right-to-left; report index 6.
 
 The alignment starts are `0 → 2 → 3 → 6`; the corresponding shift distances are `2`, `1`, and `3`. No alignment between those starts can be a match.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -199,7 +193,8 @@ tab: Complexity
 ```
 
 The favorable chart row describes inputs where large shifts repeatedly skip untouched text. The plain algorithm can repeat comparisons on adversarial text; the Galil rule remembers a region already known to match and avoids those repeated comparisons.
-````
+
+%% endtabs %%
 
 # Where the Skip Disappears
 

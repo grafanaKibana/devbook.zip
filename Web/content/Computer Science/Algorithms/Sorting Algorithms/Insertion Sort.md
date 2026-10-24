@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.542Z
-modified: 2026-08-20T20:41:15.542Z
-published: 2026-08-20T20:41:15.542Z
+modified: 2026-10-23T19:06:27.545Z
+published: 2026-10-23T19:06:27.545Z
 topic:
   - Computer Science
 subtopic:
@@ -20,16 +20,13 @@ The incoming element is the key. Starting at the right edge of the prefix, every
 
 **Core condition:** a sorted prefix and one incoming key → shift larger prefix elements right until the key lands → repeat until the prefix covers the array.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
 
-
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"insertion-sort","array":[8,3,5,1,9,2,7,4]}
 ```
-
-
 
 The prefix left of the active index is sorted before each step and stays sorted after it. When a key is smaller than its left neighbour, every larger prefix element copies one position right until a smaller element—or the start of the array—halts the walk, and the key fills the vacated slot. A key that already fits, like `9` following `1, 3, 5, 8`, triggers no shift and the prefix simply grows by one. The number of shifts a key performs equals the count of larger elements standing to its left, so the further a key is out of place, the more work it does.
 
@@ -43,7 +40,7 @@ One property falls directly out of the shift-and-drop move:
 
 The shift count follows the disorder already present: an ordered prefix needs no moves, while a misplaced key crosses every larger prefix element. Larger hybrids use insertion sort only on deliberately short runs or partitions—[[Computer Science/Algorithms/Sorting Algorithms/Merge Sort|Merge Sort]]-based [[Computer Science/Algorithms/Sorting Algorithms/Tim Sort|Timsort]] builds short runs with it, and [[Computer Science/Algorithms/Sorting Algorithms/Introsort|Introsort]] uses it below a small-partition threshold. Those ranges are bounded in size, not guaranteed to be nearly sorted.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -107,7 +104,8 @@ tab: Complexity
 ```
 
 Cutting comparisons does not fix this. Since the prefix is sorted, [[Computer Science/Algorithms/Search Algorithms/Binary Search|Binary Search]] can locate the key's slot in `O(log j)` comparisons instead of a linear scan—binary insertion sort. But locating the slot is not the bottleneck: the elements between the slot and the key still shift right one at a time, so the array movement stays `O(n²)`. Binary insertion only pays off when a comparison costs far more than a move, such as ordering long strings through an expensive comparator.
-````
+
+%% endtabs %%
 
 # Diagram and C# Implementation
 

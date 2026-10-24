@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.519Z
-modified: 2026-08-20T20:41:15.519Z
-published: 2026-08-20T20:41:15.519Z
+modified: 2026-10-23T19:06:27.540Z
+published: 2026-10-23T19:06:27.540Z
 topic:
   - Computer Science
 subtopic:
@@ -22,9 +22,9 @@ Collapsing each SCC into one node produces the **condensation**, which is always
 
 Direction defines the problem. In an undirected graph, mutual reachability is ordinary reachability, so the task reduces to connected components found by [[Computer Science/Data Structures/Graph Structures/Union-Find|union-find]] or a flood fill.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
 
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"strongly-connected-components"}
@@ -32,11 +32,9 @@ tab: Visualization
 
 The trace uses Tarjan's single-pass algorithm as the concrete way to expose this partition; the overview below also compares Kosaraju and Gabow.
 
-
 On `A→B, B→C, C→A, C→D, D→E, E→D`, the visualization emits `{D, E}` and `{A, B, C}`. Inside each set every vertex reaches every other. Across the sets `{A, B, C}` reaches `{D, E}`, but not vice versa, so they cannot merge.
 
 Contracting the two sets gives one edge, `A-B-C → D-E`. More generally, the condensation cannot contain a cycle: a cycle between two component nodes would make their original vertices mutually reachable, contradicting maximality. The result is therefore a DAG that can feed [[Computer Science/Algorithms/Graph Algorithms/Topological Sort|topological sorting]] and DAG dynamic programming.
-
 
 [[Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm|Tarjan's algorithm]] runs one DFS with discovery indices, low links, and an active-vertex stack. When `low[v] == disc[v]`, it pops one complete SCC. The stack is essential: an edge into an already-emitted component must not lower the active low link.
 
@@ -48,7 +46,7 @@ Kosaraju uses two ordinary traversals:
 
 Individual vertex finish times are not a topological order inside an SCC. The useful property is at component level: decreasing maximum finish time orders the SCCs of `G`'s condensation DAG from sources onward. The selected source SCC becomes a sink in `Gᵀ`, so the second DFS cannot escape it.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -150,7 +148,8 @@ tab: Complexity
   }
 }
 ```
-````
+
+%% endtabs %%
 
 # Components and the Condensation Graph
 

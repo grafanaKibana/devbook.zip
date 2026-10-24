@@ -17,8 +17,9 @@ This is deliberately less information than a graph. The structure remembers whic
 
 **Core shape:** elements → parent-index forest → one root per set → shared root means shared membership
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 
 
@@ -49,7 +50,7 @@ Four invariants define a valid state:
 
 Path compression rewrites parent indices but preserves set membership. Union by rank changes which root represents the merged set but preserves every previous connectivity result. The representative is therefore an internal identity, not a stable domain value.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -211,7 +212,8 @@ tab: Complexity
   }
 }
 ```
-~~~~~
+
+%% endtabs %%
 
 # When the Structure Stops Fitting
 

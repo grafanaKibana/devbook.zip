@@ -19,8 +19,9 @@ The cut property is what makes those local choices trustworthy: it certifies tha
 
 **Core condition:** connected, undirected, weighted graph → repeatedly accept a cut-certified safe edge without closing a cycle → `V − 1` edges of minimum total weight. Prim chooses the lightest edge crossing out of its growing tree. Kruskal chooses the lightest edge joining two current components.
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 
 ```steptrace
@@ -39,7 +40,7 @@ Both algorithms are this property applied to a different cut each step:
 - **Kruskal's** scans edges by weight and uses a [[Home/Computer Science/Data Structures/Graph Structures/Disjoint Set|disjoint set]]—the [[Home/Computer Science/Data Structures/Graph Structures/Union-Find|union-find]] structure—to reject edges that would close a cycle.
 
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -162,7 +163,8 @@ tab: Complexity
   }
 }
 ```
-~~~~~
+
+%% endtabs %%
 
 # When the Definition Bends
 

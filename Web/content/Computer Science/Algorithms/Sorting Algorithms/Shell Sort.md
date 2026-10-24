@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.547Z
-modified: 2026-08-20T20:41:15.548Z
-published: 2026-08-20T20:41:15.548Z
+modified: 2026-10-23T19:06:27.546Z
+published: 2026-10-23T19:06:27.546Z
 topic:
   - Computer Science
 subtopic:
@@ -20,22 +20,19 @@ Shell sort reduces that long-distance disorder first. It runs insertion sort ove
 
 **Core condition:** a decreasing gap sequence ending at `h = 1` → each pass `h`-sorts interleaved subsequences → the final adjacent pass completes the ordering.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
 
-
+%% tab: Visualization %%
 
 ```steptrace
 { "algorithm": "shell-sort", "array": [9, 8, 7, 6, 5, 4, 3, 2, 1], "gaps": [4, 1] }
 ```
 
-
-
 The shrinking gap is the transition worth animating: after the `h = 4` lanes move distant values close to their destinations, the `h = 1` pass only resolves the remaining local inversions.
 
 #### Why H-sorting Cuts the Shift Work
 
-An array is *`h`-sorted* when `a[i] ≤ a[i + h]` for every valid `i`. A gap-`h` pass treats the array as `h` interleaved subsequences — indices `{0, h, 2h, …}`, `{1, h+1, …}`, and so on — and insertion-sorts each one independently. Because the stride is `h`, a single shift moves an element `h` positions rather than one.
+An array is _`h`-sorted_ when `a[i] ≤ a[i + h]` for every valid `i`. A gap-`h` pass treats the array as `h` interleaved subsequences — indices `{0, h, 2h, …}`, `{1, h+1, …}`, and so on — and insertion-sorts each one independently. Because the stride is `h`, a single shift moves an element `h` positions rather than one.
 
 The pass ordering is valid because the sequence ends at gap 1, which directly compares adjacent positions and completes the ordering. Earlier gaps move distant elements toward their destinations; they do not guarantee that every element is already close to its final slot before that last pass.
 
@@ -43,7 +40,7 @@ On the reverse-sorted `[9, 8, 7, 6, 5, 4, 3, 2, 1]`, a gap-4 pass sorts the four
 
 The algorithm is **not stable**: a shift jumps `h` positions and can carry a key past an equal key sitting between them, and no later pass restores their original relative order.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -126,7 +123,7 @@ The bound belongs to the gap sequence, not to Shell sort alone. For power-of-two
 
 There is also no way to buy a proven bound and top speed at once. Pratt's 3-smooth gaps give a proven `Θ(n log² n)` worst case, but they use so many passes that constant factors make them slower in practice than Ciura's unproven-but-fast sequence. A workload that needs a contractual `O(n log n)` guarantee cannot get it from Shell sort — [[Computer Science/Algorithms/Sorting Algorithms/Heap Sort|heap sort]] or [[Computer Science/Algorithms/Sorting Algorithms/Introsort|introsort]] can.
 
-````
+%% endtabs %%
 
 The `h`-stride can lift one equal key over another. Shell sort is therefore a poor fit when a secondary sort must preserve the earlier ordering of equal keys.
 

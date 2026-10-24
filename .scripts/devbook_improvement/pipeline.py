@@ -259,6 +259,7 @@ class Engine:
         by_path = {note["path"]: note for note in notes}
         all_feedback: list[dict[str, Any]] = []
         managed, rows = {}, []
+        polled_prs: set[int] = set()
         allowlist = [(int(row["id"]), row["login"]) for row in self.config["owner_allowlist"]]
         for pr in prs:
             marker = runtime.parse_marker(pr.get("body", ""))
@@ -316,6 +317,7 @@ class Engine:
                     text = self.publisher.read_note(path, pr["head"]["ref"])
                     by_path[path].update(content=text, hash=core.digest(text))
                 feedback = runtime.poll_feedback(self.api, pr["number"], allowlist)
+                polled_prs.add(pr["number"])
                 for item in feedback:
                     all_feedback.append({**item, "author": item["user"], "topic": topic,
                                          "pr_number": pr["number"], "paths": item.get("paths") or paths})
@@ -328,13 +330,18 @@ class Engine:
             rows.append(row)
         state = core.sync_prs(state, rows)
         owner = {"ids": [pair[0] for pair in allowlist], "logins": [pair[1] for pair in allowlist]}
-        actionable = [item for item in all_feedback if item.get("kind") != "review" or item.get("body", "").strip()]
+        actionable = [item for item in all_feedback if item.get("body", "").strip()]
         for item in core.ingest_feedback(state, rows, actionable, owner):
             # An edited revision supersedes the pending version of that same comment.
             for old in state["feedback"].values():
                 if old["kind"] == item["kind"] and old["id"] == item["id"] and old["status"] == "pending":
                     old["status"] = "superseded"
             state["feedback"][item["key"]] = item
+        present_keys = {core._feedback_key(item)[0] for item in actionable}
+        for item in state["feedback"].values():
+            if (item.get("pr_number") in polled_prs and item.get("status") == "pending"
+                    and item["key"] not in present_keys):
+                item["status"] = "withdrawn"
         return state, managed, all_feedback
 
     def _cooldown(self, error: provider.ClaudeQuotaError, stage: str) -> dict[str, Any]:
@@ -391,6 +398,9 @@ class Engine:
         save(self.store, state, "reconcile maintenance queue")
         if batch is None:
             return {"status": "topics_paused" if paused else "no_changes", "paused_topics": sorted(paused), "model_calls": 0}
+        if not batch["notes"] and batch["feedback"]:
+            return {"status": "feedback_needs_scope", "batch": batch,
+                    "feedback": batch["feedback"], "model_calls": 0}
         if not with_model:
             return {"status": "selected", "batch": batch, "model_calls": 0, "mutated": False}
         if self.model is None:
@@ -399,8 +409,6 @@ class Engine:
         pr = batch.get("pr") or {}
         history = list(pr.pop("proposal_records", []))
         raw_pr = prs.get(pr.get("number"), {})
-        if not selected:
-            return {"status": "feedback_needs_scope", "feedback": batch["feedback"], "model_calls": 0}
         hashes = {path: core.digest(text) for path, text in selected.items()}
         feedback_keys = sorted(item["key"] for item in batch["feedback"])
         pending = state.get("pending_author_proposal") or {}

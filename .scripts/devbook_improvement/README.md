@@ -81,7 +81,9 @@ After the setup PR is manually merged, `gh workflow run devbook-improvement.yml 
 - Disable the workflow in Actions to stop even demo opportunities.
 - Keep the state branch and open PRs: they preserve progress, feedback revisions, rejection history, and cooldowns.
 - Main-topic content drift pauses that topic until its branch includes current `main`; other queues can continue.
-- Interrupted publications reconcile their journal against GitHub before retrying. Never force-push or clear state to bypass conflicts or failed checks.
+- `feedback_needs_scope` keeps an indivisible request pending when its notes exceed the batch limit or are unavailable. Narrow the request’s scope or deliberately raise the configured note limit before retrying.
+- Interrupted publications recheck owner feedback before writing an unapplied candidate. Changed feedback archives that candidate for reconciliation.
+- Terminal validation failures retain the failed head and proposal evidence, freeze that PR against unrelated additions, and release the queue for other topics or explicit owner corrections. Never force-push or clear state to bypass conflicts or failed checks.
 
 See [detailed failure recovery and limitations](../../docs/devbook-improvement.md#pause-disable-and-recover). The additional Codex content-review experiment remains disabled pending a decision about the existing integration.
 

@@ -35,7 +35,7 @@
   ],
   "shouldCollectAttachmentsAutomatically": false,
   "shouldDeduplicateIdenticalAttachments": false,
-  "shouldFollowObsidianAttachmentLocation": false,
+  "shouldFollowObsidianAttachmentLocation": true,
   "shouldKeepNamesOfPastedNonScreenshotFiles": false,
   "shouldPreserveImageMetadata": false,
   "shouldRenameCollectedAttachments": false,
@@ -44,5 +44,5 @@
   "specialCharacters": "#^[]|*\\<>:?/",
   "specialCharactersReplacement": "-",
   "timeoutInSeconds": 5,
-  "version": "15.1.1"
+  "version": "16.0.0"
 }

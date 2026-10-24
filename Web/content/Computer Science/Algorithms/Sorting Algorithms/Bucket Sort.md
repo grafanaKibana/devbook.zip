@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.540Z
-modified: 2026-08-20T20:41:15.540Z
-published: 2026-08-20T20:41:15.540Z
+modified: 2026-10-23T19:06:27.544Z
+published: 2026-10-23T19:06:27.544Z
 topic:
   - Computer Science
 subtopic:
@@ -18,10 +18,9 @@ For numeric keys in a known, bounded range, magnitude can identify a range slice
 
 The mapping works because the bounds are known. `bucketIndex = floor(m · (key − min) / (upperExclusive − min))` locates a bucket without inspecting another element. Performance depends on the buckets remaining small, which usually means the keys are spread roughly uniformly. When most keys land in a few buckets, the inner sort does nearly all the work.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
 
-
+%% tab: Visualization %%
 
 ```steptrace
 { "algorithm": "bucket-sort", "array": [0.78, 0.17, 0.39, 0.26, 0.72, 0.94], "bucketCount": 5 }
@@ -29,7 +28,7 @@ tab: Visualization
 
 The middle range `[0.4, 0.6)` stays empty, while `[0.6, 0.8)` receives `0.78` and `0.72` and sorts them as `0.72, 0.78`. Empty and occupied buckets gather the same way: range order already determines their order relative to every other bucket.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -134,7 +133,8 @@ tab: Complexity
 The average curve assumes a known, roughly uniform distribution and about as many buckets as elements. Skew can collapse distinct reverse-ordered values into one bucket and expose the inner sort's quadratic behavior; duplicate-heavy occupancy alone does not, because equal keys trigger no shifts. The chart's space curves include both bucket headers and stored elements, separate from the input array.
 
 Replacing the stable insertion sort inside each bucket with an `O(s log s)` inner sort such as introsort, where `s` is the bucket size, improves the skewed tail but may change stability. Bucket Sort still returns the right order under skew because range partitioning remains valid; only the work inside an overloaded bucket changes.
-````
+
+%% endtabs %%
 
 The value-to-index mapping restricts the input. Keys need a numeric or otherwise orderable half-open range with known bounds. Opaque identifiers and values ordered only by an external comparator have no meaningful bucket index. They need a comparison sort or a digit-wise scheme such as [[Computer Science/Algorithms/Sorting Algorithms/Radix Sort|Radix Sort]].
 

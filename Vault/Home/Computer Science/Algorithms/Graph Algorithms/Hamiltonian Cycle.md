@@ -15,8 +15,9 @@ A Hamiltonian cycle visits every **vertex** exactly once and returns to its star
 
 For a graph with `n` vertices, a candidate cycle is a permutation whose consecutive vertices are adjacent, including the last and first. Backtracking explores these permutations and abandons a partial path as soon as an edge is missing or a vertex repeats.
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"hamiltonian-cycle"}
@@ -27,7 +28,7 @@ For the graph with cycle edges `A-B-C-D-A` plus diagonal `A-C`, start with `A` a
 
 The maintained invariant is compact: the path contains distinct vertices, and every consecutive pair is an edge. A solution is accepted only at length `n` and only if the final vertex is adjacent to the start.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -100,7 +101,8 @@ tab: Complexity
   }
 }
 ```
-~~~~~
+
+%% endtabs %%
 
 # Necessary Checks and False Shortcuts
 

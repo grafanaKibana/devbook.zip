@@ -132,7 +132,20 @@ class GhApi:
         *,
         paginate: bool = False,
     ) -> Any:
-        if not path.startswith("/") or ".." in path:
+        parsed = urllib.parse.urlsplit(path)
+        if not path.startswith("/") or parsed.scheme or parsed.netloc or parsed.fragment:
+            raise UnsafeInput("invalid GitHub API path")
+        decoded_path = parsed.path
+        while True:
+            decoded = urllib.parse.unquote(decoded_path)
+            if decoded == decoded_path:
+                break
+            decoded_path = decoded
+        if (
+            "\\" in decoded_path
+            or any(ord(char) < 32 or ord(char) == 127 for char in decoded_path)
+            or any(part in {".", ".."} for part in decoded_path.split("/"))
+        ):
             raise UnsafeInput("invalid GitHub API path")
         if paginate:
             rows: list[Any] = []
@@ -827,6 +840,53 @@ class GitHubRuntime:
             raise Conflict("created PR lost its machine marker")
         return dict(created), True
 
+    def _feedback_unchanged(
+        self, pr_number: int, revision: Mapping[str, Any],
+        feedback: Iterable[Mapping[str, Any]] | None = None,
+    ) -> bool:
+        allowlist = [
+            (int(row.split(":", 1)[0]), row.split(":", 1)[1])
+            for row in revision.get("allowlist", [])
+        ]
+        if feedback is None:
+            feedback = poll_feedback(self.api, pr_number, allowlist) if allowlist else []
+        current = {f"{item['kind']}:{item['id']}": item["revision"] for item in feedback}
+        return current == dict(revision.get("processed", {}))
+
+    def _archive_pending(
+        self, op_id: str, collection: str, evidence: Mapping[str, Any], *, freeze: bool = False
+    ) -> None:
+        """Release the global WAL while retaining rejected/failed publication evidence."""
+        self._assert_lease()
+        snapshot = self.store.read()
+        op = dict(snapshot.state.get("pending_operation") or {})
+        if op.get("op_id") != op_id:
+            raise Conflict("journal operation changed before archival")
+        op["evidence"] = {**op.get("evidence", {}), **evidence}
+        op["updated_at"] = iso()
+        state = dict(snapshot.state)
+        state[collection] = {**state.get(collection, {}), op_id: op}
+        state["pending_operation"] = None
+        if freeze:
+            key = f"{op['topic']}:{op['generation']}"
+            receipt = op.get("receipts") or {}
+            prs = dict(state.get("prs", {}))
+            pr = dict(prs.get(key) or {})
+            pr.update(
+                topic_id=op["topic"], generation=op["generation"],
+                number=op.get("pr_number") or op["evidence"].get("pr_number"),
+                branch=op["branch"], status="open", frozen=True,
+                head_sha=op["evidence"].get("commit_sha"),
+                validation_failure=dict(op["evidence"]),
+            )
+            if "records" in receipt:
+                pr["proposal_records"] = receipt["records"]
+            if "base_note_hashes" in receipt:
+                pr["base_note_hashes"] = receipt["base_note_hashes"]
+            prs[key] = pr
+            state["prs"] = prs
+        self.store.write(state, snapshot, f"maintenance: archive {op_id} {collection}")
+
     def recover_pending(self) -> dict[str, Any] | None:
         """Reconcile one WAL entry from observable refs/PRs/checks, without a model call."""
         operation = self.store.read().state.get("pending_operation")
@@ -847,10 +907,17 @@ class GitHubRuntime:
             selected_pr = self._require_open_pr_identity(
                 int(expected_pr_number), str(op["topic"]), int(op["generation"]), branch
             )
-            if phase != "prepared":
-                ensure_draft_for_mutation(self.api, selected_pr)
         elif self._terminal_generation_exists(str(op["topic"]), int(op["generation"]), branch):
             raise Conflict("terminal generation branch cannot be reused")
+        if expected_pr_number and phase in {"prepared", "commit_created"}:
+            applied = bool(commit_sha and self.ref_sha(branch) == commit_sha)
+            if not applied and not self._feedback_unchanged(
+                int(expected_pr_number), op.get("feedback_revision") or {}
+            ):
+                self._archive_pending(
+                    op_id, "invalidated_operations", {"reason": "owner feedback changed before recovery"}
+                )
+                return {"op_id": op_id, "status": "feedback_changed"}
         if phase == "prepared":
             self._assert_lease()
             commit_sha = self._create_commit(
@@ -862,12 +929,19 @@ class GitHubRuntime:
         if phase == "commit_created":
             self._assert_lease()
             assert commit_sha
+            current = self.ref_sha(branch)
             if expected_pr_number:
                 selected_pr = self._require_open_pr_identity(
                     int(expected_pr_number), str(op["topic"]), int(op["generation"]), branch
                 )
+                if current != commit_sha and not self._feedback_unchanged(
+                    int(expected_pr_number), op.get("feedback_revision") or {}
+                ):
+                    self._archive_pending(
+                        op_id, "invalidated_operations", {"reason": "owner feedback changed before recovery"}
+                    )
+                    return {"op_id": op_id, "status": "feedback_changed"}
                 ensure_draft_for_mutation(self.api, selected_pr)
-            current = self.ref_sha(branch)
             if current != commit_sha:
                 self._update_branch_cas(branch, str(op["parent_head"]), str(commit_sha))
             self._assert_lease()
@@ -925,6 +999,12 @@ class GitHubRuntime:
                 self.api, branch, commit_sha, self.required_checks
             )
             if state == "failed":
+                self._archive_pending(
+                    op_id, "failed_operations",
+                    {"check_sha": commit_sha, "commit_sha": commit_sha, "checks": checks,
+                     "vault_validation": vault, "reason": "exact-head validation failed"},
+                    freeze=True,
+                )
                 raise RuntimeFailure("exact-head validation failed")
             if state == "success":
                 self._assert_lease()
@@ -985,8 +1065,7 @@ class GitHubRuntime:
                 (int(row.split(":", 1)[0]), row.split(":", 1)[1])
                 for row in feedback_revision.get("allowlist", [])
             ]) if feedback_revision.get("allowlist") else []
-            current_revisions = {f"{item['kind']}:{item['id']}": item["revision"] for item in current_feedback}
-            if current_revisions != dict(feedback_revision.get("processed", {})):
+            if not self._feedback_unchanged(int(current_pr["number"]), feedback_revision, current_feedback):
                 raise Conflict("owner feedback changed before publication")
             freeze = freeze or should_freeze(current_pr, current_feedback, notes=0, lines=0)
         if freeze:

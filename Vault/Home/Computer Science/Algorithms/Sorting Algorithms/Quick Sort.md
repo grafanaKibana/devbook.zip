@@ -17,8 +17,9 @@ The pivot position determines the recursion tree. A pivot near the median divide
 
 **Operating idea:** each partition fixes one pivot permanently, then recursion continues on the disjoint ranges beside it.
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 
 
@@ -38,7 +39,7 @@ That final swap is what makes recursion valid. The pivot is now at its sorted in
 
 Quick sort is **not stable**: a swap can lift an element past an equal one, discarding original order. Equal keys are compared, never tracked.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -104,7 +105,8 @@ tab: Complexity
 A deterministic first- or last-element pivot makes already sorted and reverse-sorted input a worst case. On already-sorted or reverse-sorted data every pivot is an extreme value: one partition holds `n − 1` elements, the other holds none, and the recursion becomes a linear chain of `n` frames. That is `O(n²)` comparisons and, because the given code recurses before returning, `O(n)` stack depth — a stack overflow on a large array rather than a slow-but-correct sort. With distinct keys, choosing each pivot uniformly at random gives expected `O(n log n)` for any fixed input. Median-of-three improves ordinary ordered inputs but remains deterministic: a constructed input can still force extreme partitions and `O(n²)`.
 
 Many equal keys break the two-way scheme for a different reason. Lomuto sends every element `≤ pivot` to the left partition, so an array that is mostly one repeated value piles almost everything on one side of each pivot — the same unbalanced split, now driven by duplicates instead of order. Three-way partitioning (the Dutch national flag) splits into `< pivot`, `= pivot`, and `> pivot`; the entire equal block is placed at once and dropped from both recursive calls, so an array of identical keys finishes in `O(n)`.
-~~~~~
+
+%% endtabs %%
 
 # Diagram and C# Implementation
 

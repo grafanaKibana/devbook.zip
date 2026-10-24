@@ -17,8 +17,9 @@ LRU (Least Recently Used) stores each entry in a map and a doubly-[[Home/Compute
 
 **Core shape:** key → map → list node → recency-ordered doubly-linked list → head is MRU, tail is the eviction victim
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"lru-cache"}
@@ -42,7 +43,7 @@ Three invariants define a valid state:
 
 `get(k)` reads the map, unlinks the node from between its current neighbours, and splices it after `head`. Its value and key are unchanged; the move uses a fixed six pointer assignments. `put(k, v)` updates the same node in place and moves it to the head when `k` is resident; otherwise, if the cache is full, it first unlinks the node before `tail` and removes that node's key from the map, then creates the new node in both structures. The recency order is an internal artifact: two caches that received the same accesses in the same order hold identical contents, but the pointer layout is not a domain value.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -252,7 +253,8 @@ tab: Complexity
   }
 }
 ```
-~~~~~
+
+%% endtabs %%
 
 # When the Composite Breaks
 
