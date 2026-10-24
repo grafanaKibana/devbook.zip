@@ -1,0 +1,138 @@
+name: DevBook Improvement
+
+on:
+  schedule:
+    - cron: "23 */6 * * *"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Run the credential-free demo or a protected live dry/apply run
+        required: true
+        default: demo
+        type: choice
+        options:
+          - demo
+          - dry-run
+          - apply
+      model:
+        description: Exact Claude model identifier; no fallback is configured
+        required: true
+        default: claude-sonnet-5-5
+        type: string
+      with_model:
+        description: Use protected subscription OAuth for a manual dry-run
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: devbook-improvement
+  cancel-in-progress: false
+
+jobs:
+  demo:
+    if: >-
+      (github.event_name == 'schedule' && (vars.DEVBOOK_IMPROVEMENT_ACTIVATED != 'true' || vars.DEVBOOK_IMPROVEMENT_SCHEDULE_ENABLED != 'true')) ||
+      (github.event_name == 'workflow_dispatch' && (inputs.mode == 'demo' || (inputs.mode == 'dry-run' && inputs.with_model == false)))
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Run credential-free tests and fixture flow
+        env:
+          PYTHONPATH: .scripts
+          MODEL: ${{ inputs.model || 'claude-sonnet-5-5' }}
+        run: |
+          mkdir -p artifacts/devbook-improvement
+          python3 -m unittest discover -s .scripts/tests -p 'test_devbook_improvement_*.py'
+          if [ "${{ github.event_name }}" = workflow_dispatch ] && [ "${{ inputs.mode }}" = dry-run ]; then
+            python3 -m devbook_improvement.pipeline --config .github/devbook-improvement.json --model "$MODEL" --dry-run --output-dir artifacts/devbook-improvement
+          else
+            python3 -m devbook_improvement.pipeline --config .github/devbook-improvement.json --model claude-sonnet-5-5 --demo --output-dir artifacts/devbook-improvement
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: devbook-improvement-${{ github.run_id }}
+          path: artifacts/devbook-improvement
+          if-no-files-found: warn
+
+  maintenance:
+    if: >-
+      (github.event_name == 'schedule' && vars.DEVBOOK_IMPROVEMENT_ACTIVATED == 'true' && vars.DEVBOOK_IMPROVEMENT_SCHEDULE_ENABLED == 'true') ||
+      (github.event_name == 'workflow_dispatch' && (inputs.mode == 'apply' || (inputs.mode == 'dry-run' && inputs.with_model)))
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    environment: devbook-improvement-production
+    steps:
+      - name: Check protected activation gates
+        env:
+          REQUESTED_MODE: ${{ github.event_name == 'schedule' && 'apply' || inputs.mode }}
+          EVENT_NAME: ${{ github.event_name }}
+          ACTIVATED: ${{ vars.DEVBOOK_IMPROVEMENT_ACTIVATED }}
+          SUBSCRIPTION_ONLY: ${{ vars.DEVBOOK_IMPROVEMENT_SUBSCRIPTION_ONLY_CONFIRMED }}
+          USAGE_CREDITS_DISABLED: ${{ vars.DEVBOOK_IMPROVEMENT_USAGE_CREDITS_DISABLED_CONFIRMED }}
+          PR_WORKFLOWS_CONFIRMED: ${{ vars.DEVBOOK_IMPROVEMENT_PR_WORKFLOWS_CONFIRMED }}
+        run: |
+          test "$ACTIVATED" = true
+          test "$SUBSCRIPTION_ONLY" = true
+          test "$USAGE_CREDITS_DISABLED" = true
+          case "$REQUESTED_MODE" in dry-run|apply) ;; *) exit 1 ;; esac
+          if [ "$REQUESTED_MODE" = apply ] && [ "$EVENT_NAME" = schedule ]; then
+            test "$PR_WORKFLOWS_CONFIRMED" = true
+          fi
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.DEVBOOK_GITHUB_TOKEN }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: Web/package-lock.json
+      - name: Install repository validation dependencies
+        run: npm ci --prefix Web
+      - name: Install locked Quartz plugins
+        working-directory: Web
+        run: |
+          npx quartz plugin install
+          git diff --exit-code -- quartz.lock.json
+      - name: Install pinned Claude Code
+        run: npm install --global @anthropic-ai/claude-code@2.1.285
+      - name: Run bounded maintenance opportunity
+        env:
+          PYTHONPATH: .scripts
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          DEVBOOK_GITHUB_TOKEN: ${{ secrets.DEVBOOK_GITHUB_TOKEN }}
+          DEVBOOK_IMPROVEMENT_MODE: ${{ github.event_name == 'schedule' && 'apply' || inputs.mode }}
+          DEVBOOK_IMPROVEMENT_ACTIVATED: ${{ vars.DEVBOOK_IMPROVEMENT_ACTIVATED }}
+          DEVBOOK_IMPROVEMENT_SUBSCRIPTION_ONLY_CONFIRMED: ${{ vars.DEVBOOK_IMPROVEMENT_SUBSCRIPTION_ONLY_CONFIRMED }}
+          DEVBOOK_IMPROVEMENT_USAGE_CREDITS_DISABLED_CONFIRMED: ${{ vars.DEVBOOK_IMPROVEMENT_USAGE_CREDITS_DISABLED_CONFIRMED }}
+          DEVBOOK_IMPROVEMENT_PR_WORKFLOWS_CONFIRMED: ${{ vars.DEVBOOK_IMPROVEMENT_PR_WORKFLOWS_CONFIRMED }}
+          MODEL: ${{ github.event_name == 'schedule' && (vars.DEVBOOK_IMPROVEMENT_MODEL || 'claude-sonnet-5-5') || inputs.model }}
+        run: >-
+          mkdir -p artifacts/devbook-improvement &&
+          python3 -m devbook_improvement.pipeline
+          --config .github/devbook-improvement.json
+          --model "$MODEL"
+          --${DEVBOOK_IMPROVEMENT_MODE}
+          --with-model
+          --output-dir artifacts/devbook-improvement
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: devbook-improvement-${{ github.run_id }}
+          path: artifacts/devbook-improvement
+          if-no-files-found: warn
