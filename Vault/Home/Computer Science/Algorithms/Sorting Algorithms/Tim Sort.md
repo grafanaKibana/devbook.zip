@@ -19,8 +19,9 @@ The visualization follows classic TimSort as retained by OpenJDK: strictly desce
 
 **Classic/OpenJDK shape:** partially ordered input → detect natural runs → pad short runs to `minrun` with binary insertion sort → merge under stack size invariants while preserving equal-key order.
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 
 
@@ -61,7 +62,7 @@ The algorithm combines run detection, extension, stack policy, and merging.
 
 **Merging and galloping.** A production merge uses [[Home/Computer Science/Algorithms/Sorting Algorithms/Merge Sort|merge sort]]'s two-way merge into a temporary copy of the smaller run, resolving ties toward the earlier run to stay stable. When one run wins `MIN_GALLOP = 7` comparisons in a row, the merge switches to **galloping**: exponential search followed by binary search finds the end of the winning block, which is then copied together. If galloping stops paying off it backs out to one-at-a-time merging.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -127,7 +128,8 @@ tab: Complexity
 **Galloping can be net-negative.** A short winning streak can reach `MIN_GALLOP` and enter galloping, only for the exponential/binary search to find a block too short to amortize the probe before the merge falls back to one-at-a-time comparisons. The adaptive penalty raises the entry threshold after that failed attempt, but the probe and mode switch are still wasted work.
 
 **`O(n)` memory, not in place.** The merge buffer of up to `n/2` is pure overhead when stability is unobservable — for example sorting a huge primitive array whose elements have no identity beyond their value. That cost is precisely why Java sorts *primitives* with a dual-pivot [[Home/Computer Science/Algorithms/Sorting Algorithms/Quick Sort|quick sort]] and .NET sorts with [[Home/Computer Science/Algorithms/Sorting Algorithms/Introsort|introsort]] rather than Tim sort.
-~~~~~
+
+%% endtabs %%
 
 # When the Merge Policy Breaks
 

@@ -17,8 +17,9 @@ Equal hashes only identify a candidate. Distinct strings can collide, so the alg
 
 
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 
 
@@ -48,7 +49,7 @@ Subtracting `T[i]·b^(m-1)` removes the outgoing character's weighted term; mult
 
 Hash equality is necessary but not sufficient for string equality. The map from `m`-character strings to residues mod `p` is many-to-one, so two different windows can share a hash — a collision. Rabin-Karp treats a hash match as a claim to be checked: on `h == patternHash` it compares the `m` characters directly and reports a match only when they agree. That verification is the invariant separating Rabin-Karp from a probabilistic filter — without it, a collision would be reported as a false match.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -133,7 +134,8 @@ tab: Complexity
 ```
 
 The expected row assumes a large modulus and suitable base make spurious hash matches rare. Adversarial collisions force full pattern verification at many windows and select the chart's adverse row.
-~~~~~
+
+%% endtabs %%
 
 # Collisions and the Multi-pattern Payoff
 

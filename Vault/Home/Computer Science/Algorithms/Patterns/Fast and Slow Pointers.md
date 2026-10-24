@@ -17,8 +17,9 @@ The technique needs one property from the input: every element has exactly one s
 
 
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 
 ```steptrace
@@ -27,7 +28,7 @@ tab: Visualization
 
 The trace uses `A → B → C → D → E → F → G → H → C`, with the six-node cycle `C → D → E → F → G → H → C`. Every hop is shown separately: slow moves once, fast moves twice, and they first collide at `G` after six slow iterations. Phase two resets the fast pointer to `A`; both then move one hop at a time and converge at the cycle entry `C` after two iterations.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -77,7 +78,8 @@ tab: Complexity
   }
 }
 ```
-~~~~~
+
+%% endtabs %%
 
 # Why the Pointers Meet, and where
 

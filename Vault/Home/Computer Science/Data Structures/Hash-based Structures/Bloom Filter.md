@@ -17,8 +17,9 @@ A Bloom filter retains an *m*-bit array and derives *k* positions for each eleme
 
 **Core shape:** elements → *k* hash bits set in an *m*-bit array → all-ones means probably present, any-zero means definitely absent
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"bloom-filter"}
@@ -39,7 +40,7 @@ Three properties follow directly from the fact that bits are only ever set, neve
 
 The representative state is therefore a compressed image of set membership, not the set. Identity, multiplicity, and order are gone the moment an element is folded into the bits.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -187,7 +188,8 @@ tab: Complexity
   }
 }
 ```
-~~~~~
+
+%% endtabs %%
 
 # When the Structure Stops Fitting
 

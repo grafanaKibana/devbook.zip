@@ -17,8 +17,9 @@ Heap sort keeps that information by treating the unsorted region as a [[Home/Com
 
 **Core shape:** array reinterpreted as a max-heap → repeated extract-max grows a sorted suffix from the back → sift-down restores the shrinking heap.
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 
 
@@ -43,7 +44,7 @@ Two phases use nothing but sift-down:
 
 Those swaps are why heap sort is **not stable**: an extraction can carry one of two equal keys across the array past the other, and no step restores their input order.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -109,7 +110,7 @@ tab: Complexity
 The best curve assumes all keys compare equal, so each sift-down stops after its first child comparisons. The space curves assume iterative sift-down; a recursive version adds call-stack storage.
 
 
-~~~~~
+%% endtabs %%
 
 # Stability
 

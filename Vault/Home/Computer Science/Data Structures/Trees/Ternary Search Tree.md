@@ -19,8 +19,9 @@ Compared with an array-backed trie, the TST reserves no slot for an absent symbo
 
 **Core shape:** trie positions linked by `eq`. At each position the alternatives form a BST split on the character via `lo`/`hi` → three pointers per node, not `σ`
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"ternary-search-tree","operations":[["insert","cat"],["insert","car"],["insert","cup"],["insert","bat"],["search","car"]]}
@@ -45,7 +46,7 @@ Three invariants hold:
 
 The whole contract lives in the difference between "matched the split and there is more key" (follow `eq`) and "the character is smaller or larger" (follow `lo`/`hi` without advancing).
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -183,7 +184,8 @@ tab: Complexity
   }
 }
 ```
-~~~~~
+
+%% endtabs %%
 
 # Where the Three-way Split Earns Its Place
 

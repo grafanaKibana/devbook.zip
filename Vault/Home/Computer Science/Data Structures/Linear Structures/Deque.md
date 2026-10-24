@@ -19,8 +19,9 @@ It generalizes two narrower structures. A [[Home/Computer Science/Data Structure
 
 The interactive view keeps the deque state between actions. Push or pop at either end to watch `head`, `count`, and wrapping slots change without shifting live elements.
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"deque"}
@@ -45,7 +46,7 @@ Invariants that define a valid state (ring-buffer form):
 
 The `head` index and `count` are internal identity, not domain values: a resize renumbers every physical slot while preserving the logical front-to-back order.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -227,7 +228,8 @@ tab: Complexity
   }
 }
 ```
-~~~~~
+
+%% endtabs %%
 
 # When the Structure Stops Fitting
 

@@ -22,8 +22,9 @@ Memoization only *pays* when calls repeat. If every call has distinct arguments,
 
 **Core shape:** pure function + a cache keyed on the full argument set → first call computes and stores, repeats read the store → time drops to `(distinct arguments) × (work per call)` when calls actually repeat.
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 
 ```steptrace
@@ -42,7 +43,7 @@ The cache is a map from *arguments* to *result*. A correct and useful cache depe
 
 For a recursive function, the recursion must call *through* the memoised entry point, not the raw function — otherwise the inner calls bypass the cache and the exponential tree returns. That is why the idiomatic form nests a local function that calls itself and shares one `memo` dictionary across the whole call graph.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -92,7 +93,8 @@ tab: Complexity
   }
 }
 ```
-~~~~~
+
+%% endtabs %%
 
 # Where Memoization Breaks or Costs
 

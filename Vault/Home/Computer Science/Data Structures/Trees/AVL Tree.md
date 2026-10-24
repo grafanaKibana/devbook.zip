@@ -19,8 +19,9 @@ That guarantee adds work to every mutation. Each node carries a height field, an
 
 The visualization starts with a balanced tree. Inserting the prefilled `5` makes node `20` left-heavy, then an LL rotation restores the bound.
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"avl-tree","values":[30,20,40,10],"value":5}
@@ -49,7 +50,7 @@ The double cases (LR, RL) exist because a single rotation on a zig-zag shape onl
 
 Insert and delete diverge in how far the repair travels. After an insert, a single rebalancing operation (one single or one double rotation) restores the invariant for the *entire* tree — the rebalanced subtree regains its pre-insert height, so nothing above it changed. After a delete, the rotated subtree can end up one level *shorter* than before, which can itself unbalance a node further up, so rebalancing may cascade all the way to the root.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -168,7 +169,8 @@ tab: Complexity
   }
 }
 ```
-~~~~~
+
+%% endtabs %%
 
 # Where Strict Balance Costs
 

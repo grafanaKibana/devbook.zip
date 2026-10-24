@@ -19,8 +19,9 @@ The structure retains key order, but it promises no fixed height bound. Recent a
 
 Press **Search** with the prefilled `60`: the path `100 → 50 → 75 → 60` performs zig-zag then zig and leaves `60` at the root.
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"splay-tree","values":[100,50,150,25,75,60],"value":60}
@@ -44,7 +45,7 @@ The three cases are determined by the accessed node `x`, its parent `p`, and gra
 
 Insert places a key as in a plain BST and splays the new node. Delete splays the target to the root, removes it, then joins the remaining left and right trees by splaying the maximum key of the left tree and attaching the right tree.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -238,7 +239,8 @@ tab: Complexity
   }
 }
 ```
-~~~~~
+
+%% endtabs %%
 
 # Where Adaptation Costs
 

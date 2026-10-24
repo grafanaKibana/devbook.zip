@@ -17,8 +17,9 @@ Shell sort reduces that long-distance disorder first. It runs insertion sort ove
 
 **Core condition:** a decreasing gap sequence ending at `h = 1` → each pass `h`-sorts interleaved subsequences → the final adjacent pass completes the ordering.
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 
 
@@ -40,7 +41,7 @@ On the reverse-sorted `[9, 8, 7, 6, 5, 4, 3, 2, 1]`, a gap-4 pass sorts the four
 
 The algorithm is **not stable**: a shift jumps `h` positions and can carry a key past an equal key sitting between them, and no later pass restores their original relative order.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -123,7 +124,7 @@ The bound belongs to the gap sequence, not to Shell sort alone. For power-of-two
 
 There is also no way to buy a proven bound and top speed at once. Pratt's 3-smooth gaps give a proven `Θ(n log² n)` worst case, but they use so many passes that constant factors make them slower in practice than Ciura's unproven-but-fast sequence. A workload that needs a contractual `O(n log n)` guarantee cannot get it from Shell sort — [[Home/Computer Science/Algorithms/Sorting Algorithms/Heap Sort|heap sort]] or [[Home/Computer Science/Algorithms/Sorting Algorithms/Introsort|introsort]] can.
 
-~~~~~
+%% endtabs %%
 
 The `h`-stride can lift one equal key over another. Shell sort is therefore a poor fit when a secondary sort must preserve the earlier ordering of equal keys.
 

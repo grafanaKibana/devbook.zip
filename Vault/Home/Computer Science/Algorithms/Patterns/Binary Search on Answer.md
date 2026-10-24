@@ -17,8 +17,9 @@ Feasibility is **monotone**: increasing capacity can never require more days. Ac
 
 
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 
 
@@ -30,7 +31,7 @@ tab: Visualization
 
 Six packages with weights `[3, 2, 2, 4, 1, 4]` must ship within three days. The answer strip classifies capacities `4 … 16` as known infeasible, still unknown, or known feasible. Each probe expands into the greedy day-by-day packing that supplies the predicate result, making the work inside `feasible(capacity)` visible instead of presenting the candidates as a stored array. The boundary settles at capacity `6`.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -86,7 +87,8 @@ tab: Complexity
   }
 }
 ```
-~~~~~
+
+%% endtabs %%
 
 # Why Halving the Answer Works
 

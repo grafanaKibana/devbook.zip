@@ -15,8 +15,9 @@ Pancake sort works under an unusual constraint: the only legal move reverses a p
 
 The settled suffix is the invariant. After boundary `end` has been processed, every position to its right holds its final value and later flips cannot reach it. The price of the restricted move is repeated scanning: every new boundary requires another search for the maximum of the live prefix.
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 { "algorithm": "pancake-sort", "array": [6, 1, 8, 3, 7, 2, 5, 4] }
@@ -24,7 +25,7 @@ tab: Visualization
 
 Each move reverses `[0..k]`. When the live maximum is not already at the boundary, one flip brings it to the front and a second carries it to the boundary. At most two prefix reversals settle each position.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -56,7 +57,8 @@ tab: Complexity
   }
 }
 ```
-~~~~~
+
+%% endtabs %%
 
 # Prefix reversals, stability, and scan cost
 

@@ -15,8 +15,9 @@ An arbitrary set of calendar ranges may contain overlaps and nested intervals. S
 
 
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 
 ```steptrace
@@ -41,7 +42,7 @@ The same sort-then-sweep skeleton answers the rest of the interval family, each 
 - **Insert one interval into a sorted, pairwise-disjoint list** — the sweep copies intervals ending before the new one, then expands the pending interval to `[min(starts), max(ends)]` for every overlap under the chosen closed or half-open endpoint convention. It copies the remaining intervals after that run. No re-sort is needed. If the existing list overlaps itself, normalize it first.
 - **Intersect two sorted, pairwise-disjoint lists** — a [[Home/Computer Science/Algorithms/Patterns/Two Pointers|Two Pointers]] sweep advances the pointer whose interval ends first and emits `[max(starts), min(ends)]` whenever the current pair overlaps. Ordering and internal non-overlap on both sides keep the scan to one pass; otherwise each list needs normalization first.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -92,7 +93,7 @@ tab: Complexity
 }
 ```
 
-~~~~~
+%% endtabs %%
 
 # When the Convention or Order Breaks
 

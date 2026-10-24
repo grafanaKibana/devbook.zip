@@ -17,8 +17,9 @@ The bound must be *optimistic*. In a maximisation problem it cannot fall below t
 
 **Core condition:** an optimisation objective + a cheap optimistic bound from a relaxation → prune any subtree whose bound cannot beat the best complete solution so far (the incumbent) → exact search that can touch only a fraction of an exponential tree.
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 
 ```steptrace
@@ -47,7 +48,7 @@ Best-first keeps live nodes in a priority queue ordered by bound. Depth-first fo
 
 A good early incumbent raises the bar every later bound must clear, so more subtrees fall on a single comparison. Solvers exploit this by seeding the incumbent with a fast heuristic — often a [[Home/Computer Science/Algorithms/Paradigms/Greedy Algorithms|greedy]] solution — before the exact search starts.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -108,7 +109,8 @@ tab: Complexity
 Best-first can retain every live node and exhaust memory on a hard instance. Depth-first retains only the current search path, trading that smaller frontier for less global control over which bound is explored next.
 
 The general `b`-ary model expands `1 + b + ... + b^n = Θ(b^n)` nodes when pruning fails. Binary 0/1 knapsack specializes that model to two take-or-skip branches per item, giving `O(2^n · c)` time. TSP does not have a constant branching factor: the number of remaining-city choices shrinks by one per level, so exhaustive search can remain factorial. `c` isolates the per-node cost of evaluating the relaxation from the branching factor `b`.
-~~~~~
+
+%% endtabs %%
 
 # When the Bound Stops Helping
 

@@ -19,8 +19,9 @@ A stack fixes every mutation at one end, the top. `push` adds an item, `pop` rem
 
 The visualization shows push and pop operations growing the stack upward while access remains fixed to the top cell.
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"stack","capacity":6,"values":["A","B","C"]}
@@ -40,7 +41,7 @@ Two invariants define a valid state regardless of backing:
 
 The stack API deliberately withholds random access and direct interior removal even when an array backing could provide them. That restriction enforces LIFO; the operation costs come from the backing implementation — a tail index for the array or a head pointer for the linked list. A workload that repeatedly needs buried elements belongs on a different structure.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -128,7 +129,8 @@ tab: Complexity
 ```
 
 Array-backed push is `O(1)` amortized but `O(n)` on the resizing push that doubles a full backing array.
-~~~~~
+
+%% endtabs %%
 
 # Where the Discipline Bites
 

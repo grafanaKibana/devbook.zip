@@ -17,8 +17,9 @@ The structure records nothing beyond that order. It cannot address the middle by
 
 The interactive view isolates circular wraparound and fixed-capacity full behavior. The growable resize remains explained in the prose below.
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"queue"}
@@ -40,7 +41,7 @@ Three facts hold across every operation:
 
 A growable circular buffer adds one more rule: when the live region fills the whole array, the next enqueue allocates a larger array, copies the elements in front-to-back order, and resets `head` to `0`.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -156,7 +157,8 @@ tab: Complexity
   }
 }
 ```
-~~~~~
+
+%% endtabs %%
 
 # When the FIFO Shape Stops Fitting
 

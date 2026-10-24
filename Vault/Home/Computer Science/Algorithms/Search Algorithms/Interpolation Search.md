@@ -23,8 +23,9 @@ To find `950` in `[0 … 1000]` it probes near index `95%`, not `50%` — the sa
 
 The distinguishing step is where the first probe lands.
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 
 
@@ -44,7 +45,7 @@ The comparison that follows is identical to Binary Search. `a[pos] < target` pro
 
 On exactly evenly spaced values, a present target's value fraction equals its index fraction, so the first estimate lands exactly in the idealized arithmetic model. An individual search can shrink by more or less than the uniform model predicts.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -108,7 +109,8 @@ tab: Complexity
 ```
 
 The expected row assumes uniformly distributed keys. Skewed values can repeatedly place the estimated probe near one boundary, which is why binary search has a stronger unconditional guarantee.
-~~~~~
+
+%% endtabs %%
 
 # When the Distribution Stops Cooperating
 

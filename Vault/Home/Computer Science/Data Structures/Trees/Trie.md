@@ -19,8 +19,9 @@ What the structure gives up is compactness. Every distinct prefix becomes a node
 
 **Core shape:** strings → character-labelled edges from one root → a path spells a prefix → an end-of-word flag marks a complete key
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"trie","operations":[["insert","car"],["insert","card"],["insert","care"],["insert","cat"],["insert","dog"],["prefix","ca"],["search","car"]]}
@@ -43,7 +44,7 @@ Three invariants hold in a valid trie:
 
 The distinction between reaching a node and reaching a *flagged* node is the whole contract: exact search checks the flag, prefix search does not.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -195,7 +196,8 @@ tab: Complexity
   }
 }
 ```
-~~~~~
+
+%% endtabs %%
 
 # When Fixed Child Arrays Hurt
 

@@ -19,8 +19,9 @@ The **ordering invariant** applies at every node: all keys in the left subtree a
 
 Inserting the prefilled `80` adds a deeper right branch to the balanced seven-key start. Further increasing keys stretch the same branch: order remains valid, but nothing repairs the height.
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"binary-search-tree","values":[40,20,60,10,30,50,70],"value":80}
@@ -38,7 +39,7 @@ The ordering invariant is global, not local. It is not enough that a node's imme
 
 Insert and delete change parent/child links; search and traversal read them without mutation. The resulting shape — which key ends up at the root, how deep a subtree runs — is an artifact of insertion order, not of the key set. Two trees holding `{1,2,3}` can be a balanced triangle or a three-node chain depending on the order the keys arrived.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -195,7 +196,8 @@ tab: Complexity
   }
 }
 ```
-~~~~~
+
+%% endtabs %%
 
 # When the Shape Stops Cooperating
 

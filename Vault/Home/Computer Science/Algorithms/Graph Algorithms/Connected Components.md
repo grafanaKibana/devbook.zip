@@ -17,8 +17,9 @@ The implementation depends on how the graph changes. For a static graph, [[Home/
 
 The outer loop does the work that is easy to miss. One DFS finds only its source component. Finding the full partition requires another flood from every vertex left unlabelled by earlier traversals.
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"connected-components"}
@@ -47,7 +48,7 @@ DFS and BFS produce identical labels — the partition does not depend on visit 
 
 When edges arrive over time, [[Home/Computer Science/Data Structures/Graph Structures/Union-Find|union-find]] maintains the partition incrementally: initialize `V` singleton roots, then union each edge's endpoints. This is the same [[Home/Computer Science/Data Structures/Graph Structures/Disjoint Set|disjoint-set]] forest used by [[Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree|Kruskal's MST]]; union by rank keeps trees shallow, and path compression flattens the route each `find` traverses.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -130,7 +131,8 @@ tab: Complexity
 ```
 
 With adjacency lists, traversal visits each vertex once and scans each stored adjacency entry once. An undirected edge appears in two adjacency lists, which changes the constant count of scans but not the charted bound.
-~~~~~
+
+%% endtabs %%
 
 # Diagram and C# Implementation
 

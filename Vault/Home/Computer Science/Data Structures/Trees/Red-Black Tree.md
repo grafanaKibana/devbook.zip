@@ -17,8 +17,9 @@ The structure is a [[Home/Computer Science/Data Structures/Trees/Binary Search T
 
 Inserting the prefilled `0` creates a red-red violation. The highlighted recolor and rotation participants restore equal black-height.
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"red-black-tree","values":[10,5,15,1],"value":0}
@@ -42,7 +43,7 @@ An insert colors the new node red and attaches it as a normal BST leaf. Red can 
 
 The unbounded part of insert repair — recoloring up the tree — touches only color fields. Rotation, the pointer surgery that actually reshapes the tree, is capped at two for insertion. Delete is harder: removing a black node drops one black from a path and may propagate a "double-black" state toward the root. A red sibling triggers a preparatory rotation that converts the configuration into a black-sibling case. With a black sibling and two black children, recolor the sibling red: a black parent inherits the deficit, while a red parent becomes black and terminates the fixup; reaching the root also absorbs the deficit. A black sibling with a red child uses one or two terminal rotations plus recoloring and ends the fixup. Exact case layout and rotation counts depend on whether the implementation repairs bottom-up or transforms 2-3-4 nodes while descending.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -138,7 +139,8 @@ tab: Complexity
   }
 }
 ```
-~~~~~
+
+%% endtabs %%
 
 # Where the Looser Balance Shows
 

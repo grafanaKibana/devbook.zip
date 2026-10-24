@@ -15,8 +15,9 @@ When adjacent swaps are the only permitted move, every value travels one positio
 
 That movement is uneven. A large value can cross the array in one pass, while a small value moves left only when the scan reaches its immediate neighbor. After each pass, one more tail position is settled. A pass with no swaps proves that the array is already ordered and ends the sort early.
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 
 
@@ -36,7 +37,7 @@ The `swapped` flag turns "no work happened" into a stopping condition. On alread
 
 The sort is **stable** because a swap happens only on a strict `a[i] > a[i+1]`; equal keys never cross, so their input order survives.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -100,7 +101,8 @@ tab: Complexity
 ```
 
 The best case assumes the `swapped` early-exit flag. Without it, even ordered input follows the quadratic comparison curve because the fixed double loop still schedules every pass.
-~~~~~
+
+%% endtabs %%
 
 # Where Adjacency Hurts
 

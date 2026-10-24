@@ -16,23 +16,25 @@ A weighted graph assigns each edge a non-negative cost — travel time, latency,
 The commit order makes settle-once correct. Each vertex becomes settled when its smallest queued entry is removed. A lazy-deletion heap may later pop older entries for that same vertex and skip them. A settled distance can no longer change. Relaxing outgoing edges can only lower still-unsettled neighbours, never a node already behind the frontier. Non-negative weights are the precondition: they guarantee that leaving a settled node and returning through a longer detour cannot arrive cheaper.
 
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
 
-~~~~tabsdown
-tab: Midtown map
+%% tab: Visualization %%
+
+%% tabs %%
+
+%% tab: Midtown map %%
 
 ```steptrace
 {"algorithm":"dijkstra","variant":"midtown-map"}
 ```
 
-tab: Cities
+%% tab: Cities %%
 
 ```steptrace
 {"algorithm":"dijkstra","variant":"ukraine-cities","start":"Lviv","target":"Kharkiv"}
 ```
 
-~~~~
+%% endtabs %%
 
 
 Midtown makes direction and cost visible: Dijkstra expands from Seventh Avenue and West 47th Street in increasing accumulated street cost, respects one-way roads and the West 44th Street closure, and finishes by highlighting the cheapest route to Sixth Avenue and West 42nd Street. The Cities view runs the same distance-first search over a larger weighted network. In both views, Watch shows the current node, the edge being relaxed, the resulting distance change or settled distance, the nearest frontier entries, and how many nodes are settled; hovering or focusing the distances row lists every tentative distance. The map marks the current node, the active edge, the settled region, and the final path. No heuristic steers either search.
@@ -44,7 +46,7 @@ Suppose node `u` is popped with tentative distance `d[u]`, and assume for contra
 
 The single step that makes the argument valid is that the tail from `y` to `u` cannot be negative. With a negative edge that tail could subtract from the cost, `d[y]` would no longer bound the full path, and a node could settle at a distance a later path beats.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -143,7 +145,8 @@ tab: Complexity
   }
 }
 ```
-~~~~~
+
+%% endtabs %%
 
 # Where the Invariant Breaks
 

@@ -17,8 +17,9 @@ The window is sound because its lower edge comes from the last probe below the t
 
 
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 
 
@@ -41,7 +42,7 @@ Either way the window is `[bound/2, min(bound, n − 1)]`. Index `0` is checked 
 
 The unbounded, indexable variant never references `n`. It generates the indices it probes (`1, 2, 4, …`) and asks only "is `a[bound]` still below the target?" An unknown-length finite source must also report that a probe is past the end so the high bound can be clamped to the last valid index. Index `0` is handled before the loop, since `bound` starts at `1`: if `a[0] == target`, the answer is `0`.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -145,7 +146,8 @@ tab: Complexity
 ```
 
 The position-sensitive bound applies only when the target exists. A miss in a bounded input is measured against the full input because there is no target position to substitute.
-~~~~~
+
+%% endtabs %%
 
 # When the Assumptions Stop Holding
 
