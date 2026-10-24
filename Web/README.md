@@ -67,7 +67,7 @@ npm run build                # update community plugins and build → Web/public
 npx quartz build --serve     # dev server + live reload → http://localhost:8080
 ```
 
-`npm run build` regenerates and checks StepTrace, installs missing configured plugins with `plugin install --from-config`, updates installed plugins with `plugin install --latest`, then builds the site. The two install commands are separate so cached plugin directories also receive updates. Latest follows each plugin's upstream default branch, including commits newer than its last tagged release.
+`npm run build` regenerates and checks StepTrace, clears the disposable `.quartz/plugins` installation cache, installs configured plugins with `plugin install --from-config`, updates them with `plugin install --latest`, then builds the site. Reinstalling protects builds from Vercel caches that omit plugins’ Git metadata. It preserves the committed lockfile baseline and authored plugin sources. Latest follows each plugin's upstream default branch, including commits newer than its last tagged release.
 
 ## Customization surfaces
 
