@@ -48,7 +48,7 @@
   "arbitraryPublishPaths": [],
   "autoPublishInterval": 0,
   "remoteFetchInterval": 60,
-  "quartzRepoPath": "/Users/nikitareshetnik/Engineering/Repositories/DevBook/Web",
+  "quartzRepoPath": "Web/",
   "enableSystemCommands": true,
   "ENABLE_DEVELOPER_TOOLS": false,
   "obsidianCommentMode": "preserve"

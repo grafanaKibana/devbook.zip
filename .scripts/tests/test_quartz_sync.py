@@ -42,6 +42,10 @@ if scenario == "stdin-eof":
 if scenario == "timeout": time.sleep(2)
 if scenario == "malformed": print("not json"); sys.exit(0)
 if scenario == "false": print(json.dumps({"success":False})); sys.exit(0)
+if "eval" in sys.argv and "devbook.quartz-syncer.relative-path" in args:
+    configured = "Web/" if scenario == "relative" else str(root / "Web")
+    result = {"configuredPath":configured,"resolvedPath":str(root / ("Other" if scenario == "binding-failure" else "Web")),"vaultPath":str(root / "Vault")}
+    print("=> " + json.dumps(result)); sys.exit(0)
 if "eval" in sys.argv and "nativePublishPaths" in args:
     inventory = [str(p.relative_to(root / "Vault")) for p in (root / "Vault").rglob("*") if p.is_file() and not any(part.startswith(".") for part in p.relative_to(root / "Vault").parts)]
     disk = ["Home/example.md"]
@@ -64,7 +68,7 @@ if "eval" in sys.argv:
     result = {"vaultPath":str(root / ("Other" if scenario == "vault" else "Vault")), "datacoreReady":scenario != "datacore", "preserveSupported":scenario != "unsupported"}
     print("=> " + json.dumps(result)); sys.exit(0)
 if "quartz-syncer:config" in args:
-    data = {"publishTarget":"remote" if scenario == "remote" else "local", "quartzRepoPath":str(root / ("Other" if scenario == "destination" else "Web")), "contentFolder":"content", "vaultPath":"Other/" if scenario == "vault-mapping" else "Home/", "obsidianCommentMode":"remove" if scenario == "remove" else "preserve", "autoPublishInterval":0, "autoCleanOrphanedMedia":False, "useDatacore":True, "publishFrontmatterKey":"other" if scenario == "publish-key" else "publish", "allNotesPublishableByDefault":scenario == "all-notes"}
+    data = {"publishTarget":"remote" if scenario == "remote" else "local", "quartzRepoPath":("Web/" if scenario == "relative" else "Other/" if scenario == "wrong-relative" else str(root / ("Other" if scenario == "destination" else "Web"))), "contentFolder":"content", "vaultPath":"Other/" if scenario == "vault-mapping" else "Home/", "obsidianCommentMode":"remove" if scenario == "remove" else "preserve", "autoPublishInterval":0, "autoCleanOrphanedMedia":False, "useDatacore":True, "publishFrontmatterKey":"other" if scenario == "publish-key" else "publish", "allNotesPublishableByDefault":scenario == "all-notes"}
 elif "quartz-syncer:publish" in args:
     if scenario == "edit": (root / "Vault/note.md").write_text("concurrent")
     time.sleep(0.05)
@@ -113,7 +117,7 @@ print(json.dumps({"success":True,"data":data}))
         self.assertLess(refreshes[1], status)
 
     def test_export_failures_block_without_staging_output(self):
-        for scenario in ["false", "malformed", "partial", "vault", "destination", "remote", "remove", "edit", "cleanup-failure", "mass-cleanup", "datacore", "unsupported", "query", "refresh-failure", "final-refresh-failure", "vault-mapping", "publish-key", "all-notes"]:
+        for scenario in ["false", "malformed", "partial", "vault", "destination", "remote", "remove", "edit", "cleanup-failure", "mass-cleanup", "datacore", "unsupported", "query", "refresh-failure", "final-refresh-failure", "vault-mapping", "publish-key", "all-notes", "wrong-relative", "binding-failure"]:
             with self.subTest(scenario=scenario):
                 (self.repo / "calls").unlink(missing_ok=True)
                 result = self.run_sync(scenario)
@@ -253,10 +257,92 @@ print(json.dumps({"success":True,"data":data}))
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertGreaterEqual((self.repo / "calls").read_text().count("nativePublishPaths"), 3)
 
+    def test_relative_quartz_path_is_bound_before_publication(self):
+        result = self.run_sync("relative")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        calls = (self.repo / "calls").read_text()
+        self.assertLess(calls.index("devbook.quartz-syncer.relative-path"), calls.index("quartz-syncer:publish"))
+
     def test_nonvault_change_skips_cli(self):
         self.git("restore", "--staged", "Vault/note.md")
         self.assertEqual(self.run_sync().returncode, 0)
         self.assertFalse((self.repo / "calls").exists())
 
+
+
+class QuartzRelativePathTests(unittest.TestCase):
+    def node(self, assertions):
+        setup = r"""
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const vm = require('node:vm');
+const source = fs.readFileSync(process.argv[1], 'utf8');
+let vaultPath = '/checkout/Vault';
+const calls = { publisher:0, destination:0, hub:0, compatibility:0, status:0 };
+const settings = { quartzRepoPath:'Web/', another:{enabled:true} };
+const plugin = { settings,
+ invalidateCachedInstances(){ calls.publisher++; },
+ syncStatusCacheDestination(){ calls.destination++; },
+ hubDetectionCache:{clear(){calls.hub++;}},
+ quartzCompatibility:{invalidate(){calls.compatibility++;}},
+ statusCache:{invalidate(){calls.status++;}} };
+const app = { plugins:{plugins:{'quartz-syncer':plugin}},
+ vault:{adapter:{getBasePath(){return vaultPath;}}} };
+const bind = () => JSON.parse(vm.runInNewContext(source, {app, require, Symbol}));
+"""
+        result = subprocess.run(["node", "-e", setup + assertions,
+                                 str(SCRIPT.with_name("quartz-relative-path.js"))],
+                                capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_relative_resolution_and_json_preserve_original_settings(self):
+        self.node(r"""
+process.chdir(require('node:os').tmpdir());
+const identity = plugin.settings;
+assert.deepEqual(bind(), {configuredPath:'Web/',resolvedPath:'/checkout/Web',vaultPath:'/checkout/Vault'});
+assert.equal(plugin.settings, identity);
+assert.equal(settings.quartzRepoPath, '/checkout/Web');
+settings.another.enabled = false;
+settings.newField = 'retained';
+const saved = JSON.parse(JSON.stringify(settings));
+assert.equal(saved.quartzRepoPath, 'Web/');
+assert.equal(saved.another.enabled, false);
+assert.equal(saved.newField, 'retained');
+assert.equal(JSON.parse(JSON.stringify({success:true,data:settings})).data.quartzRepoPath, 'Web/');
+assert.equal(Object.getOwnPropertyDescriptor(settings, 'toJSON').enumerable, false);
+assert.equal(Object.getOwnPropertySymbols(settings).length, 1);
+assert.equal(Object.getOwnPropertyDescriptor(settings, Object.getOwnPropertySymbols(settings)[0]).enumerable, false);
+""")
+
+    def test_idempotence_setter_and_relocation_invalidate_only_when_needed(self):
+        self.node(r"""
+bind();
+assert.deepEqual(Object.values(calls), [1,1,1,1,1]);
+bind();
+settings.quartzRepoPath = 'Web/';
+assert.deepEqual(Object.values(calls), [1,1,1,1,1]);
+settings.quartzRepoPath = 'Other/';
+assert.equal(settings.quartzRepoPath, '/checkout/Other');
+assert.equal(JSON.parse(JSON.stringify(settings)).quartzRepoPath, 'Other/');
+assert.deepEqual(Object.values(calls), [2,2,2,2,2]);
+vaultPath = '/moved/Vault';
+bind();
+assert.equal(settings.quartzRepoPath, '/moved/Other');
+assert.deepEqual(Object.values(calls), [3,3,3,3,3]);
+bind();
+assert.deepEqual(Object.values(calls), [3,3,3,3,3]);
+""")
+
+    def test_empty_and_absolute_paths_remain_unchanged(self):
+        self.node(r"""
+settings.quartzRepoPath = '';
+assert.equal(bind().resolvedPath, '');
+assert.equal(JSON.parse(JSON.stringify(settings)).quartzRepoPath, '');
+settings.quartzRepoPath = '/absolute/Web/';
+assert.equal(settings.quartzRepoPath, '/absolute/Web/');
+assert.equal(JSON.parse(JSON.stringify(settings)).quartzRepoPath, '/absolute/Web/');
+settings.quartzRepoPath = '';
+assert.equal(settings.quartzRepoPath, '');
+""")
 
 if __name__ == "__main__": unittest.main()

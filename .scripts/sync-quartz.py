@@ -190,8 +190,10 @@ def export(root):
     if identity.get("preserveSupported") is not True:
         raise SyncError("The running Quartz Syncer does not support Preserve. Reload the installed PR build before committing.")
     settings = cli(root, binary, "quartz-syncer:config", "action=list", "format=json")
+    configured_path = settings.get("quartzRepoPath")
     if (settings.get("publishTarget") != "local"
-            or Path(settings.get("quartzRepoPath", "")).resolve() != (root / "Web").resolve()
+            or not isinstance(configured_path, str) or not configured_path
+            or (root / configured_path).resolve() != (root / "Web").resolve()
             or settings.get("contentFolder") != "content"
             or settings.get("vaultPath") != "Home/"
             or settings.get("publishFrontmatterKey") != "publish"
@@ -202,6 +204,12 @@ def export(root):
         raise SyncError("Syncer must export explicitly publish-marked Home/ notes to local Web/content with Preserve, disabled automatic publishing and disabled orphan-media cleanup.")
     if settings.get("useDatacore") and identity.get("datacoreReady") is not True:
         raise SyncError("Datacore is not initialized. Wait for indexing to finish before committing.")
+    adapter = Path(__file__).with_name("quartz-relative-path.js").read_text()
+    binding = cli(root, binary, "eval", "code=" + adapter, structured=False)
+    if (binding.get("configuredPath") != configured_path
+            or Path(binding.get("resolvedPath", "")).resolve() != (root / "Web").resolve()
+            or Path(binding.get("vaultPath", "")).resolve() != (root / "Vault").resolve()):
+        raise SyncError("Relative Quartz destination binding failed; commit blocked.")
     log(root, "Verified local export destination and settings; starting publication.")
     before = snapshot(root)
     wait_for_indexes(root, binary, before)
