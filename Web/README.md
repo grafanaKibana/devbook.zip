@@ -24,7 +24,25 @@ Web/public/  →  devbook.zip
 
 ## Local development
 
-Enable repository hooks once with `git config core.hooksPath .githooks`. Keep this checkout's `Vault` open in Obsidian, enable its CLI, and wait for Datacore indexing before committing vault changes. The hook also runs when committing through Obsidian Git.
+After cloning, run one setup command from the repository root:
+
+```bash
+bash .scripts/setup.sh
+```
+
+It installs the locked npm dependencies in `Web/`, enables this checkout’s Git hooks, and configures Syncer for this checkout through the existing supported CLI flow. It does not export notes, stage files, commit, or deploy the site. Running it again is safe; `npm ci` reinstalls the locked dependencies.
+
+**Manual prerequisites before running setup:**
+
+1. Install Git, Bash, Python 3.9 or later, Node 22 with npm, and Obsidian desktop. Activate Node 22 in the shell; `Web/.node-version` records the project version. No pip packages are needed.
+2. Open this checkout’s `Vault/` folder in Obsidian and allow community plugins. Enable the bundled Quartz Syncer, Datacore and Dataview plugins, and Git for commits inside Obsidian. Keep the bundled Syncer build described below.
+3. Enable **Settings → General → Command line interface** and follow Obsidian’s registration prompt. Keep the vault open while setup runs. See the [Obsidian CLI setup guide](https://obsidian.md/help/cli).
+
+**Manual steps before the first commit/push:** configure Git’s name/email if missing, authenticate Git for GitHub access when pulling or pushing, and let Datacore finish indexing. Setup leaves identity and credentials under your control. Local export needs no Syncer GitHub token. Once ready, commits from desktop Obsidian Git run the same blocking pre-commit export as terminal commits.
+
+If setup fails, its output identifies the failed stage. Dependencies and hooks already installed remain in place; fix the reported prerequisite and run the same command again. Setup only reports success after Syncer configuration succeeds.
+
+This workflow is tested on macOS. Linux has not been verified; native Windows and mobile are unsupported because the exporter uses Bash and Unix file locking. Quartz community plugins are installed and updated by `npm run build`, described below; setup installs the npm dependencies needed for the authoring workflow.
 
 The installed Syncer is a temporary build of [PR #153](https://github.com/saberzero1/quartz-syncer/pull/153), recorded in `Vault/.obsidian/plugins/quartz-syncer/build-info.json`. Shared export defaults live in `.scripts/quartz-syncer.defaults.json`: **Preserve** keeps existing `%%` Tabsdown/Colsdown markers, the vault root is `Home/`, and the content folder is `content`. Automatic publishing and automatic orphan-media cleanup are disabled; the hook performs checked publication and cleanup itself. It never pushes remotely. When replacing the temporary build, first verify the installed release supports Preserve; released builds without that setting cannot export marker layouts correctly.
 
