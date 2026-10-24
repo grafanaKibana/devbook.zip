@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.536Z
-modified: 2026-08-20T20:41:15.536Z
-published: 2026-08-20T20:41:15.536Z
+modified: 2026-10-23T19:06:27.543Z
+published: 2026-10-23T19:06:27.543Z
 topic:
   - Computer Science
 subtopic:
@@ -18,17 +18,13 @@ A signature engine may scan one byte stream against thousands of fixed, non-empt
 
 Aho-Corasick compiles the dictionary into one trie augmented with **failure links** and **output links**. Each text character advances a single automaton state. Shared trie paths reuse common prefixes, failure links recover the longest viable suffix after a miss, and output links enumerate every pattern ending at the current position. The scan never rewinds the text.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
 
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"aho-corasick","patterns":["he","she","his","hers"],"text":"ushers"}
 ```
-
-
-
-
 
 The automaton is a trie of the pattern set plus two kinds of back-edge.
 
@@ -40,15 +36,13 @@ The automaton is a trie of the pattern set plus two kinds of back-edge.
 
 **Construction.** Failure and output links are filled by one breadth-first pass from the root. A node's failure target always sits at strictly smaller depth, so it is finalized before the node needs it; a depth-first order would read unfinished links. The root's direct children fail to the root.
 
-
-
 The dictionary `{ he, she, his, hers }` compiles to a trie with a handful of failure and output links. Two are decisive: the state for `she` fails to the state for `he` — its longest proper suffix that is also a prefix in the trie — and because `he` ends a pattern, `she`'s output link points there.
 
 Reading `ushers` left to right, the automaton stays at the root through `u`, then walks `s → sh → she` on the next three characters. Arriving at `she` after the `e`, the state itself ends a pattern, so `she` is reported at `[1..3]`. Its output link then leads to `he`, which also ends here, reported at `[2..3]` — a nested match that shares the same end position and is invisible without the output walk. On the next character `r`, the state `she` has no child, so the automaton follows the failure link to `he` and takes `he → her` on `r`; the final `s` reaches `hers`, reported at `[2..5]`.
 
 The invariant makes each of those steps legal: after reading `i` characters the automaton is always at the state whose string is the longest suffix of the first `i` characters that is still a prefix of some pattern. Every pattern occurrence ending at position `i` is a suffix of that state's string, and the output chain lists exactly those. That is why a single left-to-right pass, with no rewinding of the text, sees every match.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -138,7 +132,8 @@ tab: Complexity
 ```
 
 The build rows distinguish a sparse transition map from a dense alphabet-wide table. The automaton is reusable structure space; a search adds only the current state and output cursor beyond it.
-````
+
+%% endtabs %%
 
 # Where it Stops Fitting
 

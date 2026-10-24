@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.544Z
-modified: 2026-08-20T20:41:15.544Z
-published: 2026-08-20T20:41:15.544Z
+modified: 2026-10-23T19:06:27.546Z
+published: 2026-10-23T19:06:27.546Z
 topic:
   - Computer Science
 subtopic:
@@ -18,8 +18,9 @@ Odd-even sort, also called odd-even transposition sort, alternates between two a
 
 Together, one odd phase and one even phase cover every adjacent boundary. If neither phase swaps, no adjacent inversion remains and the array is sorted. The algorithm is mainly useful as a simple sorting network for parallel processors.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 { "algorithm": "odd-even-sort", "array": [6, 3, 8, 1, 7, 2, 5, 4] }
@@ -27,7 +28,7 @@ tab: Visualization
 
 The trace alternates odd-start and even-start pairs. Values move at most one position per phase, so a value far from its destination needs multiple phases even though comparisons inside a phase are independent.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -61,7 +62,8 @@ tab: Complexity
 ```
 
 With enough processors, one phase performs about `n/2` comparisons concurrently and sorting takes `O(n)` parallel phases, while total work remains `O(n²)`. The plotted table describes sequential execution.
-````
+
+%% endtabs %%
 
 # Phase barriers and stability
 

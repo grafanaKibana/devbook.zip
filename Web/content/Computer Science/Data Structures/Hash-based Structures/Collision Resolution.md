@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.595Z
-modified: 2026-08-20T20:41:15.595Z
-published: 2026-08-20T20:41:15.595Z
+modified: 2026-10-23T19:06:27.547Z
+published: 2026-10-23T19:06:27.547Z
 topic:
   - Computer Science
 subtopic:
@@ -28,11 +28,13 @@ Hashing names the storage boundary. Chaining can grow beyond the bucket array, s
 
 **Core split:** collisions land two keys in one home bucket → chain them outside the array or probe to another in-array slot. A bucket/group layout changes how many candidates one access examines, then delegates overflow to chaining or probing. The third StepTrace tab demonstrates bucketed probing.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
 
-~~~~tabsdown
-tab: Closed Addressing
+%% tab: Visualization %%
+
+%% tabs %%
+
+%% tab: Closed Addressing %%
 
 ```steptrace
 {"algorithm":"hash-map","variant":"closed-addressing"}
@@ -40,7 +42,7 @@ tab: Closed Addressing
 
 Separate chaining (open hashing): each bucket points to its own external key/value chain.
 
-tab: Open Addressing
+%% tab: Open Addressing %%
 
 ```steptrace
 {"algorithm":"hash-map","variant":"open-addressing"}
@@ -48,7 +50,7 @@ tab: Open Addressing
 
 Linear probing scans the fixed table and preserves tombstones after removal.
 
-tab: Bucket Hashing
+%% tab: Bucket Hashing %%
 
 ```steptrace
 {"algorithm":"hash-map","variant":"buckets"}
@@ -56,9 +58,9 @@ tab: Bucket Hashing
 
 Four three-cell buckets use bucket-by-bucket linear overflow with wraparound.
 
-~~~~
+%% endtabs %%
 
-Each array slot holds a pointer to a secondary container — classically a linked list — of every entry that hashed there. A collision appends to that bucket's list; a lookup hashes to the bucket and scans its list with an equality check. The array slot is a fixed *address* for the key (hence "closed addressing"), but the storage behind it is open-ended (hence "open hashing").
+Each array slot holds a pointer to a secondary container — classically a linked list — of every entry that hashed there. A collision appends to that bucket's list; a lookup hashes to the bucket and scans its list with an equality check. The array slot is a fixed _address_ for the key (hence "closed addressing"), but the storage behind it is open-ended (hence "open hashing").
 
 - **Load factor** can exceed 1 because each bucket may hold a chain of entries. As a chain grows, lookup examines more candidates rather than hitting a full-table cliff. Java's `HashMap` may treeify when an insertion grows a bin past its threshold of 8 entries, but only when the table capacity is at least 64; below that it resizes instead. Equal-hash keys without a usable `Comparable` order may still require examining both tree branches.
 - **Delete is direct** — unlink the node and update normal table metadata. No tombstone or probe-chain repair is required.
@@ -66,15 +68,18 @@ Each array slot holds a pointer to a secondary container — classically a linke
 
 The price is a pointer or index per entry and, in the naive form, poor cache behaviour.
 
-Every entry lives directly in the bucket array; there are no external lists. On a collision the table follows a deterministic **probe sequence** to the next candidate slot until it finds an empty one (for insert) or the key (for lookup). The storage is closed (a fixed array), but a key's final *address* is open — it may sit far from its home slot.
+Every entry lives directly in the bucket array; there are no external lists. On a collision the table follows a deterministic **probe sequence** to the next candidate slot until it finds an empty one (for insert) or the key (for lookup). The storage is closed (a fixed array), but a key's final _address_ is open — it may sit far from its home slot.
 
 The probe sequence is the whole design:
 
 - **Linear probing** — try `h, h+1, h+2, …`. It usually has the strongest spatial locality of these probe sequences, but collisions pile into contiguous runs (**primary clustering**) that lengthen every probe touching the run.
-- **Quadratic probing** — try `h+1², h+2², h+3², …`. Breaks up primary clustering; keys with the *same* home slot still share a sequence (**secondary clustering**), and it can fail to find a free slot unless capacity and load are constrained.
+
+- **Quadratic probing** — try `h+1², h+2², h+3², …`. Breaks up primary clustering; keys with the _same_ home slot still share a sequence (**secondary clustering**), and it can fail to find a free slot unless capacity and load are constrained.
+
 - **Double hashing** — step by a second hash `h₂(key)`. The stride must be non-zero and coprime to the table capacity so the sequence can visit every slot. Key-specific strides mitigate primary and secondary clustering; they do not eliminate clustering caused by correlated or poor hashes. The cost is a second hash computation and worse locality than linear probing.
 
-- **Load factor must stay below 1** — the array *is* the storage, so a terminating empty slot must remain reachable. As occupancy rises, probe clusters grow and a miss may inspect many occupied cells before finding that terminator. Real costs depend on hash quality, deletion history, and resize policy.
+- **Load factor must stay below 1** — the array _is_ the storage, so a terminating empty slot must remain reachable. As occupancy rises, probe clusters grow and a miss may inspect many occupied cells before finding that terminator. Real costs depend on hash quality, deletion history, and resize policy.
+
 - **Deletion must preserve probe reachability.** Blindly clearing a slot can create a terminating empty before keys displaced past it. A tombstone is one strategy: lookups continue through it and inserts may reuse it, with periodic cleanup or rehashing to control accumulation. Linear probing can instead backward-shift entries or rebuild the affected local cluster; other probe schemes need a repair rule that preserves their sequence.
 
 Open addressing often lowers pointer and cache overhead when the hash is good and the load factor is controlled. It is not overhead-free: the table reserves empty slack and needs control metadata or sentinel states to distinguish empty, occupied, and sometimes deleted slots.
@@ -87,7 +92,7 @@ The array can group `B` adjacent slots into a fixed-size **bucket**. The home re
 
 Use bucket/group layout when memory or disk locality dominates; its tail behaviour remains the behaviour of the chosen chain or probe scheme.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -207,7 +212,8 @@ tab: Complexity
   }
 }
 ```
-````
+
+%% endtabs %%
 
 # Chaining and Open-Addressing Layouts
 

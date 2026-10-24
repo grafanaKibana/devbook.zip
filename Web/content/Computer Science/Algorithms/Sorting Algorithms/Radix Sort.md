@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.546Z
-modified: 2026-08-20T20:41:15.547Z
-published: 2026-08-20T20:41:15.547Z
+modified: 2026-10-23T19:06:27.546Z
+published: 2026-10-23T19:06:27.546Z
 topic:
   - Computer Science
 subtopic:
@@ -20,16 +20,13 @@ This works only when every key can be decomposed into a bounded number of digits
 
 **Operating condition:** the keys expose bounded-width digits, and every pass preserves the order established by earlier passes.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
 
-
+%% tab: Visualization %%
 
 ```steptrace
 { "algorithm": "radix-sort", "array": [170, 45, 75, 90, 802, 24, 2, 66], "radix": 10, "mode": "LSD" }
 ```
-
-
 
 The trace runs LSD radix sort on `[170, 45, 75, 90, 802, 24, 2, 66]`, making three base-10 passes from the ones digit upward. Each pass selects one digit position, distributes the keys into digit buckets without disturbing ties, then gathers the buckets into the input order for the next position.
 
@@ -50,7 +47,7 @@ hundreds →     2  24  45  66  75   90  170  802    fully ordered
 
 `170` and `75` both carry `7` in the tens place. The tens pass reads only that digit, so it leaves them in the order the ones pass produced — `170` before `75`. The hundreds pass then places them by hundreds digits `1` and `0`, moving `75` ahead of `170` without re-examining the lower digits. Every tie survives to the next pass because every pass is stable.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -158,7 +155,7 @@ tab: Complexity
 
 **Choosing `b`.** The radix sets both the pass count — `d = 1` when `maxKey = 0`, otherwise `d = ⌊log_b(maxKey)⌋ + 1` — and the per-pass count-array size `Θ(b)`. A large `b` cuts passes but grows a count array that can fall out of cache; a small `b` keeps the array tiny but multiplies passes over the data. `b = 256` (one byte per pass, four passes for 32-bit keys) is the usual balance for integer keys; `b = 2^16` sorts 32-bit keys in two passes but needs a 65,536-entry count array each pass.
 
-````
+%% endtabs %%
 
 Variable-length lexicographic strings cannot simply be aligned from the right. They need a common width with an explicit missing-character sentinel, or an MSD radix sort that works left to right. Keys exposed only through a comparator have no positional digit structure, so radix sorting does not apply.
 

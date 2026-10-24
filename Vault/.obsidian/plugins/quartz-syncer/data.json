@@ -1,6 +1,6 @@
 {
   "settingsSchemaVersion": 5,
-  "publishTarget": "remote",
+  "publishTarget": "local",
   "gitRemoteUrl": "https://github.com/grafanaKibana/devbook.zip.git",
   "gitBranch": "notes/sync",
   "gitCorsProxyUrl": "",
@@ -8,7 +8,7 @@
   "gitAuthUsername": "grafanaKibana",
   "gitProviderHint": "github",
   "vaultPath": "Home/",
-  "contentFolder": "Web/content",
+  "contentFolder": "content",
   "publishFrontmatterKey": "publish",
   "allNotesPublishableByDefault": false,
   "showCreatedTimestamp": true,
@@ -22,7 +22,7 @@
   "publishedTimestampKey": "published, publishDate, date",
   "timestampFormat": "MMM dd, yyyy h:mm a",
   "useCache": true,
-  "autoCleanOrphanedMedia": true,
+  "autoCleanOrphanedMedia": false,
   "autoPublishDynamicNotes": true,
   "syncCache": true,
   "persistCache": false,
@@ -48,7 +48,8 @@
   "arbitraryPublishPaths": [],
   "autoPublishInterval": 0,
   "remoteFetchInterval": 60,
-  "quartzRepoPath": "Web/",
+  "quartzRepoPath": "/Users/nikitareshetnik/Engineering/Repositories/DevBook/Web",
   "enableSystemCommands": true,
-  "ENABLE_DEVELOPER_TOOLS": false
+  "ENABLE_DEVELOPER_TOOLS": false,
+  "obsidianCommentMode": "preserve"
 }

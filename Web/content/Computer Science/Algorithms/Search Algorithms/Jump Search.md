@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.534Z
-modified: 2026-08-20T20:41:15.535Z
-published: 2026-08-20T20:41:15.535Z
+modified: 2026-10-23T19:06:27.543Z
+published: 2026-10-23T19:06:27.543Z
 topic:
   - Computer Science
 subtopic:
@@ -20,26 +20,21 @@ Ordering proves that a block ending below the target contains no match. A direct
 
 The first block end at or above the target narrows the search to one block. That overshoot is the defining move.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
 
-
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"jump-search","array":[1,3,5,7,9,11,13,15,17],"target":13,"blockSize":3}
 ```
 
-
-
 With block size `3`, the trace probes block ends at indices `2`, `5`, and `8`. The first two values remain below target `13`; the third overshoots it, reducing the candidate range to indices `6 … 8`. A forward scan of that block finds `13` at index `6`.
-
-
 
 Each jump is a proof, not a guess. Block `k` spans indices `[(k−1)m, k·m − 1]`, so its end value is `a[k·m − 1]`. Because the records are sorted, `a[k·m − 1] < target` guarantees every record in the first `k` blocks is below the target — none can match, and the checkpoint link skips their individual probes. The search stops at the first block whose end satisfies `a[k·m − 1] >= target`; the previous block ended below the target, so monotonic order forces the target, if present, into this single block. The retained previous checkpoint is then traversed forward through at most `m` records.
 
 The stride size balances the checkpoint phase against the final scan. Larger strides use fewer checkpoints but leave a longer candidate block; smaller strides do the reverse. The chart captures the chosen square-root balance.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -119,7 +114,8 @@ tab: Complexity
 ```
 
 The chart assumes the block size is chosen near the square root of the input length, balancing the jump phase against the final scan.
-````
+
+%% endtabs %%
 
 # Diagram and C# Implementation
 

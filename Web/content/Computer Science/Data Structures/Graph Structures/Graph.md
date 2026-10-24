@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.593Z
-modified: 2026-08-20T20:41:15.593Z
-published: 2026-08-20T20:41:15.593Z
+modified: 2026-10-23T19:06:27.547Z
+published: 2026-10-23T19:06:27.547Z
 topic:
   - Computer Science
 subtopic:
@@ -20,9 +20,9 @@ A graph has no single canonical layout. The same vertices and edges can live in 
 
 **Core shape:** vertices + edges → one of {neighbor lists, `V × V` table, flat edge tuples} → each keeps topology, direction, and weight but trades space against edge-test and neighbor-scan cost.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
 
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"graph"}
@@ -46,7 +46,7 @@ These representation invariants define valid stored graphs:
 2. In adjacency lists and matrices, undirected symmetry is a stored property: the mirrored list entries or symmetric matrix cells must be maintained together, or the graph silently becomes directed. An edge list instead treats one `(u, v)` tuple as an unordered endpoint pair and needs no mirrored tuple.
 3. The vertex identifier is an internal index. The array and matrix forms assume dense integer IDs `0 … V − 1`; strings, GUIDs, or sparse numeric IDs need a `Dictionary<T, int>` mapping first, which adds memory and makes ID management part of the API boundary — the same constraint the [[Computer Science/Data Structures/Graph Structures/Disjoint Set|Disjoint Set]] array representation carries.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -212,7 +212,8 @@ tab: Complexity
   }
 }
 ```
-````
+
+%% endtabs %%
 
 # When One Representation Stops Fitting
 

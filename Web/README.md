@@ -9,7 +9,8 @@ This directory turns the notes in [`../Vault/`](../Vault) into a fast static web
 ```text
 Obsidian  (Vault/Home, publish: true notes)
    │  Quartz Syncer plugin: renders in-note Dataview/Datacore/Bases → static HTML,
-   │  strips the "Home" vault-root folder, commits the result into Web/content/
+   │  preserves %% markers, strips the "Home" vault-root folder
+   │  pre-commit waits for export and stages Web/content/ and Syncer styles
    ▼
 Web/content/     # generated, git-tracked, deployed as-is
    │  npx quartz build   (Vercel, on every push)
@@ -18,10 +19,16 @@ Web/public/  →  devbook.zip
 ```
 
 - **Author** notes in Obsidian under `Vault/Home/`. Only `publish: true` notes ever leave the vault.
-- **Publish** with the Quartz Syncer plugin — it renders in-note Dataview/Datacore/Bases to static HTML and commits into `Web/content/`. Treat that folder as generated output; edit notes in `Vault/` and regenerate the projection through Syncer.
+- **Commit** staged vault changes — the pre-commit hook waits for Quartz Syncer to render in-note Dataview/Datacore/Bases to static HTML, verifies publication and cleanup, and stages generated output into that same commit. Treat `Web/content/` as generated output; edit notes in `Vault/`.
 - **Build & deploy** — Vercel runs the Quartz build from `Web/` on each push; production deploys from `main`.
 
 ## Local development
+
+Enable repository hooks once with `git config core.hooksPath .githooks`. Keep this checkout's `Vault` open in Obsidian, enable its CLI, and wait for Datacore indexing before committing vault changes. The hook also runs when committing through Obsidian Git.
+
+The installed Syncer is a temporary build of [PR #153](https://github.com/saberzero1/quartz-syncer/pull/153), recorded in `Vault/.obsidian/plugins/quartz-syncer/build-info.json`. Its **Obsidian comments** setting is **Preserve**, retaining existing `%%` markers for Tabsdown and Colsdown. Export targets **Local**, with repository path `/Users/nikitareshetnik/Engineering/Repositories/DevBook/Web`, content folder `content`, and vault root `Home/`. Update the absolute repository path if moving the checkout. Automatic publishing and automatic orphan-media cleanup are disabled; the hook performs checked publication and cleanup itself. It never pushes remotely. When replacing the temporary build, first verify the installed release supports Preserve and enable it again; released builds without that setting cannot export marker layouts correctly.
+
+Stage all intended vault source changes before committing. Partially staged, unstaged, or untracked source blocks export, as do pre-existing generated-output changes. The hook waits for Obsidian and Syncer indexes to match the files on disk before publishing or deleting pages. A failed or skipped note, an unrendered query, incomplete cleanup, wrong vault/settings, concurrent source edits, or a timeout blocks the commit. Inspect `git status` and the Git metadata log (`git rev-parse --git-path quartz-syncer-publish.log`), fix the cause, then review any partial generated output before committing or restoring it separately and retrying. Do not discard vault source to clear an export failure. The default timeout is 600 seconds per CLI command and index-readiness wait (`QUARTZ_SYNC_TIMEOUT` overrides it); a timeout does not cancel work already running inside Obsidian. Source-free commits skip export.
 
 Quartz requires **Node 22** (`.node-version`).
 

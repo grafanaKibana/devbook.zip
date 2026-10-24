@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.543Z
-modified: 2026-08-20T20:41:15.544Z
-published: 2026-08-20T20:41:15.544Z
+modified: 2026-10-23T19:06:27.545Z
+published: 2026-10-23T19:06:27.545Z
 topic:
   - Computer Science
 subtopic:
@@ -20,16 +20,13 @@ Ordering happens only during the merge. When both runs are sorted, the smaller f
 
 **Core condition:** two sorted runs → emit the smaller front element → merge pairwise until one ordered run remains.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
 
-
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"merge-sort-tree","array":[8,3,5,1,9,2,7,4]}
 ```
-
-
 
 The decisive step is the final merge. By then the left half has become `[1, 3, 5, 8]` and the right half `[2, 4, 7, 9]`; one pass compares the two fronts, emits the smaller, and advances that read head, producing `[1, 2, 3, 4, 5, 7, 8, 9]` after at most seven comparisons for eight elements. That same merge runs at every level below it — length-1 runs merge into length-2, then length-4 — so the number of comparisons is bounded by the number of levels, `⌈log₂ 8⌉ = 3`, times the n elements each level touches. No comparison depends on how disordered the input was; it depends only on how the two current fronts relate.
 
@@ -41,7 +38,7 @@ Nothing sorts on the way down. The split only partitions indices, and the leaves
 
 Stability rides on one comparison. The left run holds the elements that appeared earlier in the original array, so on a tie the merge must emit the left element first to keep equal keys in their original order. The implementation does this with `a[i] <= a[j]`: equal keys take the left branch. Switching to `a[i] < a[j]` pulls the right element ahead on ties and quietly makes the sort unstable — the whole distinction between a stable and an unstable merge is that one operator.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -106,7 +103,7 @@ tab: Complexity
 
 The auxiliary figure is the merge buffer. A top-down array merge sort copies each merge's output into an `O(n)` scratch array and adds `O(log n)` call-stack space for the recursion; a bottom-up variant merges adjacent runs of width 1, 2, 4… in loops and keeps the `O(n)` buffer while dropping the stack entirely. A linked-list merge is the outlier: splicing existing nodes needs `O(1)` merge workspace. Top-down list merge sort still uses `O(log n)` total auxiliary space for recursion, while a bottom-up list implementation can keep total auxiliary space at `O(1)`.
 
-````
+%% endtabs %%
 
 # Diagram and C# Implementation
 

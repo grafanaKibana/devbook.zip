@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.532Z
-modified: 2026-08-20T20:41:15.532Z
-published: 2026-08-20T20:41:15.532Z
+modified: 2026-10-23T19:06:27.542Z
+published: 2026-10-23T19:06:27.542Z
 topic:
   - Computer Science
 subtopic:
@@ -18,26 +18,21 @@ A report needs the largest total among all 30-day spans in a series of 100,000 r
 
 Sorting would destroy the ranges being measured. Sliding windows preserve the input order because every candidate must remain contiguous.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
 
-
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"sliding-window","text":"abcabcbb"}
 ```
 
-
-
 The trace finds the longest substring without repeating characters in `abcabcbb`. The right boundary admits `a`, `b`, and `c`, so the current window and best substring both become `abc`. When the next `a` enters at index `3`, the trace names the duplicate and marks it red before the left boundary advances past the previous `a`; the accepted window becomes `bca`, while the best remains `abc` with length `3`.
-
-
 
 Every index enters the window once and leaves at most once. A last-seen index identifies whether the entering character already exists inside the current window and moves the left boundary to one position past that duplicate; neither boundary moves backward.
 
 This accounting holds when entry and exit update validity incrementally. A running sum, element count, or frequency map qualifies because one value changes at a boundary. A window maximum needs an additional structure because removing the maximum does not reveal the next-largest retained value.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -97,7 +92,7 @@ tab: Complexity
 }
 ```
 
-````
+%% endtabs %%
 
 # Where the Pattern Breaks
 

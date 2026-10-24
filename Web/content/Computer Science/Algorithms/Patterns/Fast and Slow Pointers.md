@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.529Z
-modified: 2026-08-20T20:41:15.530Z
-published: 2026-08-20T20:41:15.530Z
+modified: 2026-10-23T19:06:27.542Z
+published: 2026-10-23T19:06:27.542Z
 topic:
   - Computer Science
 subtopic:
@@ -18,9 +18,9 @@ A linked list may have no known length and no terminating node. If a tail points
 
 The technique needs one property from the input: every element has exactly one successor. That successor may be `node.next` in a list or `i → nums[i]` when an integer array is read as a functional graph.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
 
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"fast-and-slow-pointers"}
@@ -28,7 +28,7 @@ tab: Visualization
 
 The trace uses `A → B → C → D → E → F → G → H → C`, with the six-node cycle `C → D → E → F → G → H → C`. Every hop is shown separately: slow moves once, fast moves twice, and they first collide at `G` after six slow iterations. Phase two resets the fast pointer to `A`; both then move one hop at a time and converge at the cycle entry `C` after two iterations.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -78,7 +78,8 @@ tab: Complexity
   }
 }
 ```
-````
+
+%% endtabs %%
 
 # Why the Pointers Meet, and where
 

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.594Z
-modified: 2026-08-20T20:41:15.594Z
-published: 2026-08-20T20:41:15.594Z
+modified: 2026-10-23T19:06:27.547Z
+published: 2026-10-23T19:06:27.547Z
 topic:
   - Computer Science
 subtopic:
@@ -20,8 +20,9 @@ A Bloom filter retains an _m_-bit array and derives _k_ positions for each eleme
 
 **Core shape:** elements → _k_ hash bits set in an _m_-bit array → all-ones means probably present, any-zero means definitely absent
 
-````tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"bloom-filter"}
@@ -29,20 +30,20 @@ tab: Visualization
 
 #### Representation and Invariants
 
-The stored state is a single bit array of length *m* and a family of *k* hash functions, each mapping an element to an index in `[0, m)`. Nothing else persists — no keys, no counts, no insertion order.
+The stored state is a single bit array of length _m_ and a family of _k_ hash functions, each mapping an element to an index in `[0, m)`. Nothing else persists — no keys, no counts, no insertion order.
 
-- `Add(x)` computes `h₁(x)..hₖ(x)` and sets each of those *k* bits to 1. Bits already at 1 stay at 1; the operation only ever turns bits on.
-- `Query(x)` computes the same *k* positions and returns "possibly present" when every one of them is 1. If any position holds 0, `x` was never added, and the answer "definitely absent" is exact.
+- `Add(x)` computes `h₁(x)..hₖ(x)` and sets each of those _k_ bits to 1. Bits already at 1 stay at 1; the operation only ever turns bits on.
+- `Query(x)` computes the same _k_ positions and returns "possibly present" when every one of them is 1. If any position holds 0, `x` was never added, and the answer "definitely absent" is exact.
 
 Three properties follow directly from the fact that bits are only ever set, never cleared, and are shared across elements:
 
 1. Every bit that a present element touched is 1, so a present element always passes its query. False negatives cannot occur.
-2. A bit reaching 1 records that *some* element hashed to it, not *which* element. Once several elements have been added, a queried element can find all *k* of its bits already set by unrelated elements. That is the false positive, and it is intrinsic to storing overlapping fingerprints rather than the elements.
+2. A bit reaching 1 records that _some_ element hashed to it, not _which_ element. Once several elements have been added, a queried element can find all _k_ of its bits already set by unrelated elements. That is the false positive, and it is intrinsic to storing overlapping fingerprints rather than the elements.
 3. Because no bit belongs to a single element, no operation can safely undo an insertion — clearing a bit for one element could clear a bit another present element depends on, which would manufacture a false negative.
 
 The representative state is therefore a compressed image of set membership, not the set. Identity, multiplicity, and order are gone the moment an element is folded into the bits.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -190,7 +191,8 @@ tab: Complexity
   }
 }
 ```
-````
+
+%% endtabs %%
 
 # When the Structure Stops Fitting
 
