@@ -15,8 +15,9 @@ Stooge sort compares the endpoints of a range and swaps them when they are inver
 
 All three recursive calls still run when the range is already ordered. Non-adjacent endpoint swaps make the algorithm unstable. Its practical value is as a recurrence-analysis exercise.
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 { "algorithm": "stooge-sort", "array": [5, 2, 6, 1, 4, 3] }
@@ -24,7 +25,7 @@ tab: Visualization
 
 The trace marks the active recursive range before comparing its endpoints. The visualization accepts at most seven items and stops at a 900-frame ceiling, preventing the three-way recursion from overwhelming either host.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -64,7 +65,8 @@ tab: Complexity
 ```
 
 The recurrence is `T(n) = 3T(2n/3) + O(1)`, giving `Θ(n^log₁.₅3) ≈ Θ(n².7095)`. The recursion stack follows one branch at a time.
-~~~~~
+
+%% endtabs %%
 
 # Recursive work and the demonstration ceiling
 

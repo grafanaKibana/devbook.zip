@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.610Z
-modified: 2026-08-20T20:41:15.610Z
-published: 2026-08-20T20:41:15.610Z
+modified: 2026-10-23T19:06:27.551Z
+published: 2026-10-23T19:06:27.551Z
 topic:
   - Computer Science
 subtopic:
@@ -22,8 +22,9 @@ Compared with an array-backed trie, the TST reserves no slot for an absent symbo
 
 **Core shape:** trie positions linked by `eq`. At each position the alternatives form a BST split on the character via `lo`/`hi` → three pointers per node, not `σ`
 
-````tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"ternary-search-tree","operations":[["insert","cat"],["insert","car"],["insert","cup"],["insert","bat"],["search","car"]]}
@@ -34,8 +35,8 @@ tab: Visualization
 A node holds a split character, an end-of-key flag, and three child links:
 
 - `Split` — the character this node discriminates on.
-- `Lo` / `Hi` — subtrees for keys whose character at *this same position* sorts before / after `Split`. Following them does **not** consume a character.
-- `Eq` — the subtree for the *next* position, taken only after the current character equals `Split`. Following it consumes one character.
+- `Lo` / `Hi` — subtrees for keys whose character at _this same position_ sorts before / after `Split`. Following them does **not** consume a character.
+- `Eq` — the subtree for the _next_ position, taken only after the current character equals `Split`. Following it consumes one character.
 - `IsEnd` — true when the `eq`-chain from the root to this node spells a complete stored key.
 
 The key is never stored. `cat` is present when, starting at the root, three matched-then-`eq` steps land on a node whose `Split` is `t` and whose `IsEnd` is set. A single trie level — "which character comes next here?" — is exactly one BST reachable through `lo`/`hi` links, and the answer to that question is the `eq` link out of the matching node.
@@ -48,7 +49,7 @@ Three invariants hold:
 
 The whole contract lives in the difference between "matched the split and there is more key" (follow `eq`) and "the character is smaller or larger" (follow `lo`/`hi` without advancing).
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -186,7 +187,8 @@ tab: Complexity
   }
 }
 ```
-````
+
+%% endtabs %%
 
 # Where the Three-way Split Earns Its Place
 

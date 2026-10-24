@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-10-21T13:29:32.432Z
-modified: 2026-10-21T13:29:32.432Z
-published: 2026-10-21T13:29:32.432Z
+created: 2026-10-17T18:11:50.073Z
+modified: 2026-10-23T19:06:27.541Z
+published: 2026-10-23T19:06:27.541Z
 topic:
   - Computer Science
 subtopic:
@@ -25,27 +25,25 @@ Memoization only _pays_ when calls repeat. If every call has distinct arguments,
 
 **Core shape:** pure function + a cache keyed on the full argument set → first call computes and stores, repeats read the store → time drops to `(distinct arguments) × (work per call)` when calls actually repeat.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
 
+%% tab: Visualization %%
 
 ```steptrace
 { "algorithm": "memoization" }
 ```
 
-
 The trace uses abstract states rather than tying the mechanism to one recurrence. The left branch computes and stores states `D` and `E`. The right branch requests both keys again: cached `D` skips its two child calls, while cached base state `E` returns immediately.
 
-
-The cache is a map from *arguments* to *result*. A correct and useful cache depends on three things; failures either return a stale answer or destroy the expected hit rate:
+The cache is a map from _arguments_ to _result_. A correct and useful cache depends on three things; failures either return a stale answer or destroy the expected hit rate:
 
 - **Valid cached results.** Purity is a simple sufficient condition: the same arguments produce the same result, and skipping execution loses no required observable effect. If mutable external data affects the result, its version must be represented in the key or cached entries must be invalidated when it changes.
-- **A complete, stable key.** The key must capture *every* input that affects the result and must not change while stored. Omit one — memoise a two-argument recurrence on only the first argument — and two genuinely different calls collide on one cache slot, so the second read can be stale. Mutate a stored key and the entry can become unreachable. This is exactly DP's [[Computer Science/Algorithms/Paradigms/Dynamic Programming|state-design]] problem: the key *is* the state.
+- **A complete, stable key.** The key must capture _every_ input that affects the result and must not change while stored. Omit one — memoise a two-argument recurrence on only the first argument — and two genuinely different calls collide on one cache slot, so the second read can be stale. Mutate a stored key and the entry can become unreachable. This is exactly DP's [[Computer Science/Algorithms/Paradigms/Dynamic Programming|state-design]] problem: the key _is_ the state.
 - **Lookup semantics that match value identity.** A cache needs equality appropriate to its store. For a `Dictionary`, equality and hashing must use the meaningful fields; a record key usually supplies both. Reference identity for logically equal arguments normally causes avoidable misses rather than wrong values, while inconsistent `Equals` and `GetHashCode` breaks dictionary lookup.
 
-For a recursive function, the recursion must call *through* the memoised entry point, not the raw function — otherwise the inner calls bypass the cache and the exponential tree returns. That is why the idiomatic form nests a local function that calls itself and shares one `memo` dictionary across the whole call graph.
+For a recursive function, the recursion must call _through_ the memoised entry point, not the raw function — otherwise the inner calls bypass the cache and the exponential tree returns. That is why the idiomatic form nests a local function that calls itself and shares one `memo` dictionary across the whole call graph.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -95,7 +93,8 @@ tab: Complexity
   }
 }
 ```
-````
+
+%% endtabs %%
 
 # Where Memoization Breaks or Costs
 

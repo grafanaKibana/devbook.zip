@@ -13,8 +13,9 @@ publish: true
 
 Ten million exam scores still use only 101 possible keys. That small domain turns each score into an array index, so a score of 73 is also an address. Counting Sort tallies the keys in `[0, k]`, converts those counts into end positions with a running sum, and writes each element into the block reserved for its value. The constraint is strict: the keys must be integers, or map to integers, over a range small enough to allocate `k + 1` counters.
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 
 
@@ -38,7 +39,7 @@ Stability falls out of the placement direction. Equal keys share one block, and 
 
 Input order does not alter the sequence: tally every key, scan the counters, then place every key. Failure is therefore a property of the key range, not whether the input arrives sorted, reversed, or random.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -142,7 +143,8 @@ tab: Complexity
 ```
 
 **`k ≫ n` inverts the economics.** Eight unsigned 64-bit keys spanning from `0` to `2^64 - 1` require a `2^64`-cell count array. Even with offset indexing, value-as-address needs one counter for every integer in the observed span `[min, max]`, not one per element present. The range term becomes the entire cost, and the allocation fails long before the eight elements are placed. [[Home/Computer Science/Algorithms/Sorting Algorithms/Radix Sort|Radix Sort]] exists for exactly this case: it sorts wide keys through several Counting Sort passes over a fixed small digit base, holding each pass's range down.
-~~~~~
+
+%% endtabs %%
 
 Non-integer or unbounded keys cannot name a finite cell in `count`. They need a comparison sort, or [[Home/Computer Science/Algorithms/Sorting Algorithms/Bucket Sort|Bucket Sort]] when numeric values follow a suitable distribution. Negative keys only need an offset: allocate `max - min + 1` counters and index with `key - min`.
 

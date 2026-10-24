@@ -19,8 +19,9 @@ The name also appears in sorted-array lookup, where a three-way split buys nothi
 
 
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 
 
@@ -42,7 +43,7 @@ The interval `[lo, hi]` holds the peak `p` at the start of every step, and the d
 
 Golden-section search changes the probe placement so the next interval can reuse one value already evaluated. That matters when `f` is a simulation or physical measurement rather than an array read.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -141,7 +142,8 @@ tab: Complexity
 ```
 
 The chart counts interval reductions. If evaluating the objective is not fixed-cost, multiply the probe count by the cost of one evaluation; cache repeated evaluations when that function is expensive. Golden-section search retains about 0.618 of the interval per step and reuses one probe, while ternary search retains about 0.667 and evaluates two new probes; prefer golden-section search when objective evaluation is expensive.
-~~~~~
+
+%% endtabs %%
 
 # When Unimodality Fails
 

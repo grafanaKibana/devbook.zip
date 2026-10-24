@@ -15,8 +15,9 @@ A grid pathfinder may value a quick route over the shortest route. A cost-aware 
 
 That ranking rule is also the weakness. The search cannot distinguish a short route from a long one that happens to end near the goal because `g(n)`, the cost already paid, never enters the comparison. A returned path may be far longer than necessary. On an infinite graph, an improving estimate can also pull the search down a branch that never terminates.
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"greedy-best-first-search"}
@@ -31,7 +32,7 @@ The only property this maintains is that the next node expanded is the one the h
 
 One framing makes the family relationship exact: [[Home/Computer Science/Algorithms/Graph Algorithms/A-Star Search|A*]] expands by `f = g + h`. Setting `g` to zero collapses `f` to `h`, which is precisely Greedy Best-First — the case where a node's history counts for nothing.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -135,7 +136,8 @@ tab: Complexity
   }
 }
 ```
-~~~~~
+
+%% endtabs %%
 
 # When the Estimate Misleads
 

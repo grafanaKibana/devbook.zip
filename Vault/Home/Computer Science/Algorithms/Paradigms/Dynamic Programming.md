@@ -20,12 +20,14 @@ The formulation starts with a state definition, base cases, and a recurrence ove
 
 **Core shape for finite one-pass DP:** state + base cases + recurrence + acyclic dependency order → each reached state solved once → `(number of distinct states) × (transition work per state)` time.
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 
-~~~~tabsdown
-tab: Greedy
+%% tabs %%
+
+%% tab: Greedy %%
 
 
 ```steptrace
@@ -34,7 +36,7 @@ tab: Greedy
 
 Largest usable coin first: exact change, but 6 coins instead of 3.
 
-tab: Naive Recursion
+%% tab: Naive Recursion %%
 
 
 ```steptrace
@@ -43,7 +45,7 @@ tab: Naive Recursion
 
 Try every first coin. Repeated remainders rebuild the same work.
 
-tab: Memoization
+%% tab: Memoization %%
 
 
 ```steptrace
@@ -52,7 +54,7 @@ tab: Memoization
 
 Keep recursion, but save each answered remainder beside the counter.
 
-tab: Tabulation
+%% tab: Tabulation %%
 
 
 ```steptrace
@@ -61,7 +63,7 @@ tab: Tabulation
 
 Build exact change from 0¢ upward on a visual amount board.
 
-tab: Memoization (Raw)
+%% tab: Memoization (Raw) %%
 
 
 ```steptrace
@@ -70,7 +72,7 @@ tab: Memoization (Raw)
 
 The raw view shows the canonical recursion tree, cache hits, and stored returns.
 
-~~~~
+%% endtabs %%
 
 
 Both examples become DP only after the state discards irrelevant history. Coin change keeps the remaining amount because every denomination remains reusable; finite coin stock would also require the remaining counts. Grid path keeps the current coordinate. Two calls with the same state have the same future choices and therefore the same answer, regardless of how they arrived there.
@@ -166,8 +168,9 @@ The simplified Memoization and Tabulation tabs keep the cashier model visible. M
 
 A warehouse robot may move only right or down from the loading bay to the dispatch door. Choosing the cheaper immediate tile and breaking ties to the right walks into an expensive corridor and costs `21`; the best complete route costs `10`. Naive recursion eventually finds it, but different route prefixes repeatedly reach the same coordinate.
 
-~~~~tabsdown
-tab: Greedy
+%% tabs %%
+
+%% tab: Greedy %%
 
 
 ```steptrace
@@ -176,7 +179,7 @@ tab: Greedy
 
 Choose the cheaper next tile, breaking ties right. Later costs trap the route.
 
-tab: Naive Recursion
+%% tab: Naive Recursion %%
 
 
 ```steptrace
@@ -185,7 +188,7 @@ tab: Naive Recursion
 
 Explore every right/down route and revisit the same coordinates.
 
-tab: Memoization
+%% tab: Memoization %%
 
 
 ```steptrace
@@ -194,7 +197,7 @@ tab: Memoization
 
 Write solved remaining costs into the warehouse map and reuse repeated tiles.
 
-tab: Tabulation
+%% tab: Tabulation %%
 
 
 ```steptrace
@@ -203,7 +206,7 @@ tab: Tabulation
 
 Fill the warehouse map backward from the dispatch door and reveal the route.
 
-tab: Memoization (Raw)
+%% tab: Memoization (Raw) %%
 
 
 ```steptrace
@@ -212,7 +215,7 @@ tab: Memoization (Raw)
 
 The raw view shows the canonical coordinate recursion tree and cache hits.
 
-~~~~
+%% endtabs %%
 
 Here the state is a coordinate rather than an amount. `best(R2C2)` means “the minimum remaining cost from this tile,” independent of how the robot arrived. The four simplified tabs use one warehouse matrix with integrated context, while Memoization (Raw) exposes the canonical recursion tree. Memoization stops repeated calls to a saved coordinate; tabulation makes the dependency order spatial by reading the already-solved tiles to the right and below.
 
@@ -292,7 +295,7 @@ Here the state is a coordinate rather than an amount. `best(R2C2)` means “the 
 > ```
 > Both versions require a nonempty grid and return the same checked `long` route cost. Explicit edge transitions prevent an out-of-grid sentinel from winning against a large valid suffix. The visualization keeps the full table so it can also highlight the chosen route.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -348,7 +351,8 @@ tab: Complexity
   }
 }
 ```
-~~~~~
+
+%% endtabs %%
 
 # Boundaries
 

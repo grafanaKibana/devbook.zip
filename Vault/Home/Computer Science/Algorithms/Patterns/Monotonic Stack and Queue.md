@@ -19,8 +19,9 @@ A monotonic deque adds window expiry. New candidates enter at the back, dominate
 
 
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"monotonic-stack-and-queue","array":[73,74,75,71,69,72,76,73]}
@@ -36,7 +37,7 @@ The deque keeps the same monotone contents but adds a second exit. Values decrea
 
 Each index is pushed once and removed at most once. Charge a removal to that index's earlier push and no index can be charged twice, even though one arriving value may trigger several pops.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -87,7 +88,7 @@ tab: Complexity
 }
 ```
 
-~~~~~
+%% endtabs %%
 
 # When the Invariant is Set Wrong
 

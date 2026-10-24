@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.518Z
-modified: 2026-08-20T20:41:15.519Z
-published: 2026-08-20T20:41:15.519Z
+modified: 2026-10-23T19:06:27.540Z
+published: 2026-10-23T19:06:27.540Z
 topic:
   - Computer Science
 subtopic:
@@ -22,27 +22,24 @@ The cut property is what makes those local choices trustworthy: it certifies tha
 
 **Core condition:** connected, undirected, weighted graph → repeatedly accept a cut-certified safe edge without closing a cycle → `V − 1` edges of minimum total weight. Prim chooses the lightest edge crossing out of its growing tree. Kruskal chooses the lightest edge joining two current components.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
 
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"prim","start":"A","nodes":[{"id":"A"},{"id":"B"},{"id":"C"},{"id":"D"},{"id":"E"},{"id":"F"}],"edges":[{"from":"A","to":"B","weight":4},{"from":"A","to":"C","weight":2},{"from":"B","to":"C","weight":1},{"from":"B","to":"D","weight":5},{"from":"C","to":"D","weight":8},{"from":"C","to":"E","weight":10},{"from":"D","to":"E","weight":2},{"from":"D","to":"F","weight":6},{"from":"E","to":"F","weight":3}]}
 ```
 
-
 Every step splits the vertices into two groups — those already in the green tree and those still outside — and adds the single minimum-weight edge crossing that boundary. From `{A}` the crossing edges are `A–C` (2) and `A–B` (4), so `C` joins first. From `{A, C}` the frontier now includes `B–C` (1), lighter than the still-available `A–B` (4); the algorithm takes `B–C` and pulls in `B`. That is the whole idea: the cheapest edge leaving the current tree, wherever it sits, is the one added, and the cut property proves it belongs to some MST, so the pick never has to be undone. Once `A`, `B`, and `C` are all inside, the edge `A–B` (4) lies entirely within the tree, crosses no boundary, and is skipped — adding it would close a cycle. The run ends with five edges totaling 13.
 
-
-A *cut* partitions the vertices into two non-empty groups; an edge *crosses* the cut when its endpoints fall on opposite sides. The cut property states: for any cut, the minimum-weight edge crossing it belongs to some MST. The reason is an exchange argument — suppose a minimum tree `T` omits the lightest crossing edge `e`. Adding `e` to `T` closes exactly one cycle, and that cycle must leave and re-enter the cut, so it contains another crossing edge `f` with `weight(f) ≥ weight(e)`. Replacing `f` with `e` yields a spanning tree no heavier than `T`, so a minimum one can always include `e`.
+A _cut_ partitions the vertices into two non-empty groups; an edge _crosses_ the cut when its endpoints fall on opposite sides. The cut property states: for any cut, the minimum-weight edge crossing it belongs to some MST. The reason is an exchange argument — suppose a minimum tree `T` omits the lightest crossing edge `e`. Adding `e` to `T` closes exactly one cycle, and that cycle must leave and re-enter the cut, so it contains another crossing edge `f` with `weight(f) ≥ weight(e)`. Replacing `f` with `e` yields a spanning tree no heavier than `T`, so a minimum one can always include `e`.
 
 Both algorithms are this property applied to a different cut each step:
 
 - **Prim's** keeps one growing tree and uses the cut between in-tree and out-of-tree vertices. A [[Computer Science/Data Structures/Trees/Heap-like/Heap|min-priority queue]] returns the next crossing edge.
 - **Kruskal's** scans edges by weight and uses a [[Computer Science/Data Structures/Graph Structures/Disjoint Set|disjoint set]]—the [[Computer Science/Data Structures/Graph Structures/Union-Find|union-find]] structure—to reject edges that would close a cycle.
 
-
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -165,7 +162,8 @@ tab: Complexity
   }
 }
 ```
-````
+
+%% endtabs %%
 
 # When the Definition Bends
 

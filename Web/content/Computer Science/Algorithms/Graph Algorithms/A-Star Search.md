@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-09-12T17:17:13.828Z
-modified: 2026-09-12T17:17:13.828Z
-published: 2026-09-12T17:17:13.828Z
+modified: 2026-10-23T19:06:27.537Z
+published: 2026-10-23T19:06:27.537Z
 topic:
   - Computer Science
 subtopic:
@@ -24,51 +24,49 @@ With nonnegative edge costs, the optimality guarantee holds when `0 ≤ h(n) ≤
 
 The decisive step is which node leaves the frontier next, and how `h` skews that choice toward the goal.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
 
-~~~~tabsdown
-tab: Coordinate grid
+%% tab: Visualization %%
 
+%% tabs %%
+
+%% tab: Coordinate grid %%
 
 ```steptrace
 {"algorithm":"a-star","variant":"coordinate-grid"}
 ```
 
-tab: Cities
-
+%% tab: Cities %%
 
 ```steptrace
 {"algorithm":"a-star","variant":"ukraine-cities","start":"Lviv","target":"Kharkiv"}
 ```
 
-tab: Building floor
-
+%% tab: Building floor %%
 
 ```steptrace
 {"algorithm":"a-star","variant":"building-floor"}
 ```
 
-tab: Midtown map
-
+%% tab: Midtown map %%
 
 ```steptrace
 {"algorithm":"a-star","variant":"midtown-map"}
 ```
 
-~~~~
+%% endtabs %%
 
 #### Why `f = g + h` Stays Optimal
 
 With nonnegative edge costs, each iteration pops the frontier node with the smallest `f`, relaxes its outgoing edges, and pushes any neighbor whose `g` improves; `g[source] = 0` and `f[source] = h(source)` seed the search. Two properties of `h` decide whether the result is correct.
 
-**Admissibility** — `0 ≤ h(n) ≤ h*(n)`, so `h(goal) = 0`. With reopening, this is enough for A* to return an optimal path. Before a suboptimal goal could be popped, take the first state `n` on an optimal path that has not yet been settled with its optimal cost. Its predecessor has been settled optimally, so relaxation has placed an OPEN record for `n` with `g(n) = g*(n)`; if `n` was previously expanded through a worse path, reopening restores that record to OPEN. Therefore `f(n) = g*(n) + h(n) ≤ g*(n) + h*(n)`, which equals the optimal solution cost. Because A* pops the smallest `f` and `f(goal) = g(goal)`, it cannot pop a more expensive goal first. Underestimating is safe — it only makes A* inspect a node sooner than strictly necessary.
+**Admissibility** — `0 ≤ h(n) ≤ h*(n)`, so `h(goal) = 0`. With reopening, this is enough for A\* to return an optimal path. Before a suboptimal goal could be popped, take the first state `n` on an optimal path that has not yet been settled with its optimal cost. Its predecessor has been settled optimally, so relaxation has placed an OPEN record for `n` with `g(n) = g*(n)`; if `n` was previously expanded through a worse path, reopening restores that record to OPEN. Therefore `f(n) = g*(n) + h(n) ≤ g*(n) + h*(n)`, which equals the optimal solution cost. Because A\* pops the smallest `f` and `f(goal) = g(goal)`, it cannot pop a more expensive goal first. Underestimating is safe — it only makes A\* inspect a node sooner than strictly necessary.
 
-**Consistency (monotonicity)** — `h(n) ≤ cost(n, n') + h(n')` for every edge `(n, n')`, with `h(goal) = 0`. Consistency implies admissibility and adds a stronger guarantee: `f` never decreases along a path, so the first time a node is popped its `g` is already optimal. Graph-search A* can then move that node to a closed set and never reconsider it — each node is expanded at most once.
+**Consistency (monotonicity)** — `h(n) ≤ cost(n, n') + h(n')` for every edge `(n, n')`, with `h(goal) = 0`. Consistency implies admissibility and adds a stronger guarantee: `f` never decreases along a path, so the first time a node is popped its `g` is already optimal. Graph-search A\* can then move that node to a closed set and never reconsider it — each node is expanded at most once.
 
-The pull is concrete: on a 4-connected grid with Manhattan `h`, a node reached in `g = 3` that sits toward the goal (`h = 2`, `f = 5`) is popped before an equal-cost node reached in `g = 3` that faces away (`h = 5`, `f = 8`). Dijkstra ranks both by `g` alone and expands the second as readily as the first. That `h` term is the whole difference between a corridor and a disc, and setting `h ≡ 0` erases it — which is exactly what turns A* back into [[Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]].
+The pull is concrete: on a 4-connected grid with Manhattan `h`, a node reached in `g = 3` that sits toward the goal (`h = 2`, `f = 5`) is popped before an equal-cost node reached in `g = 3` that faces away (`h = 5`, `f = 8`). Dijkstra ranks both by `g` alone and expands the second as readily as the first. That `h` term is the whole difference between a corridor and a disc, and setting `h ≡ 0` erases it — which is exactly what turns A\* back into [[Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]].
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -173,7 +171,7 @@ tab: Complexity
 
 The exponential bounds describe implicit state spaces with unit or uniform positive edge costs. On an explicit finite graph with a consistent, `O(1)` heuristic, an indexed heap with decrease-key gives `O((V + E) log V)` time and `O(V)` auxiliary space. The C# implementation below instead enqueues lazy duplicates: up to `O(E)` queue records, `O((V + E) log E)` time, and `O(V + E)` auxiliary space. Heuristic quality and tie-breaking still matter: even exact `h*` can expand many states tied at the optimal solution cost, while an uninformative heuristic approaches Dijkstra's search.
 
-````
+%% endtabs %%
 
 # When the Heuristic Breaks the Guarantee
 

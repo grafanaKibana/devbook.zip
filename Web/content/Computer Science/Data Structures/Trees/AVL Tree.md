@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.602Z
-modified: 2026-08-20T20:41:15.602Z
-published: 2026-08-20T20:41:15.602Z
+modified: 2026-10-23T19:06:27.549Z
+published: 2026-10-23T19:06:27.549Z
 topic:
   - Computer Science
 subtopic:
@@ -22,8 +22,9 @@ That guarantee adds work to every mutation. Each node carries a height field, an
 
 The visualization starts with a balanced tree. Inserting the prefilled `5` makes node `20` left-heavy, then an LL rotation restores the bound.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"avl-tree","values":[30,20,40,10],"value":5}
@@ -39,7 +40,7 @@ balanceFactor(node) = height(node.Left) − height(node.Right)   ∈ {−1, 0, +
 
 Insert and delete run exactly as in a plain BST first — descend by key comparison, splice the node in or out at a leaf-adjacent position. The AVL work happens on the way back up: the path from the touched node to the root is retraced, each node's stored height recomputed, and the first node whose balance factor reaches ±2 is rebalanced by rotation.
 
-A rotation is a local pointer reassignment that lifts the middle-valued of three keys up one level while preserving in-order sequence. Which rotation applies depends on the *shape* of the imbalance, and there are exactly four:
+A rotation is a local pointer reassignment that lifts the middle-valued of three keys up one level while preserving in-order sequence. Which rotation applies depends on the _shape_ of the imbalance, and there are exactly four:
 
 | Shape | Detected as | Repair |
 | --- | --- | --- |
@@ -50,9 +51,9 @@ A rotation is a local pointer reassignment that lifts the middle-valued of three
 
 The double cases (LR, RL) exist because a single rotation on a zig-zag shape only mirrors the imbalance to the other side; the inner node has to be rotated outward into a straight chain first. Whatever the shape, the node that ends up on top is always the median of the three keys involved.
 
-Insert and delete diverge in how far the repair travels. After an insert, a single rebalancing operation (one single or one double rotation) restores the invariant for the *entire* tree — the rebalanced subtree regains its pre-insert height, so nothing above it changed. After a delete, the rotated subtree can end up one level *shorter* than before, which can itself unbalance a node further up, so rebalancing may cascade all the way to the root.
+Insert and delete diverge in how far the repair travels. After an insert, a single rebalancing operation (one single or one double rotation) restores the invariant for the _entire_ tree — the rebalanced subtree regains its pre-insert height, so nothing above it changed. After a delete, the rotated subtree can end up one level _shorter_ than before, which can itself unbalance a node further up, so rebalancing may cascade all the way to the root.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -171,7 +172,8 @@ tab: Complexity
   }
 }
 ```
-````
+
+%% endtabs %%
 
 # Where Strict Balance Costs
 

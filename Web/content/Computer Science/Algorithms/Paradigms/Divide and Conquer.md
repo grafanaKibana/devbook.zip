@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.523Z
-modified: 2026-08-20T20:41:15.523Z
-published: 2026-08-20T20:41:15.523Z
+modified: 2026-10-23T19:06:27.541Z
+published: 2026-10-23T19:06:27.541Z
 topic:
   - Computer Science
 subtopic:
@@ -20,17 +20,15 @@ Subproblems are **independent** when each can be solved without another subprobl
 
 **Core shape:** divide into independent subproblems → recurse to a base case → combine their results.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
 
+%% tab: Visualization %%
 
 ```steptrace
 { "algorithm": "divide-and-conquer" }
 ```
 
-
 Each recursive node divides one problem into independent subproblems, reaches direct base cases, then carries partial answers upward for combination. [[Computer Science/Algorithms/Sorting Algorithms/Merge Sort|Merge sort]] is one concrete use of that recursion-tree shape.
-
 
 The paradigm is three steps and a stopping rule:
 
@@ -42,7 +40,7 @@ Which step carries the work varies. [[Computer Science/Algorithms/Search Algorit
 
 Logical independence permits parallel execution but does not make it automatic. Calls that share mutable data still need ownership rules or synchronization, the combine step must wait for every result it consumes, and task-scheduling overhead can exceed the work saved on small inputs. Whether a divide-and-conquer implementation is race-free or faster in parallel depends on its data access, synchronization, grain size, and runtime.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -96,7 +94,8 @@ tab: Complexity
 A common balanced special case creates a fixed number `a` of equal-size subproblems `n/b`, giving `T(n) = a·T(n/b) + f(n)`. The Master Theorem applies to that recurrence, not to divide-and-conquer universally. Unequal or input-dependent splits need a recursion-tree or substitution argument; fixed unequal fractions fit Akra–Bazzi, while randomized partitions need an expected recurrence.
 
 The live stack follows the longest branch. Balanced shrinkage keeps it shallow; a chain of bad [[Computer Science/Algorithms/Sorting Algorithms/Quick Sort|quicksort]] pivots can overflow the call stack. Merge-style combining may also require a separate output buffer.
-````
+
+%% endtabs %%
 
 # Boundaries and Implementation Costs
 

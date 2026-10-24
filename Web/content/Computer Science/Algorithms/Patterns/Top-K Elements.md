@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.532Z
-modified: 2026-08-20T20:41:15.532Z
-published: 2026-08-20T20:41:15.532Z
+modified: 2026-10-23T19:06:27.542Z
+published: 2026-10-23T19:06:27.542Z
 topic:
   - Computer Science
 subtopic:
@@ -18,8 +18,9 @@ A latency feed produces millions of samples. The dashboard needs only the ten sl
 
 A size-`k` heap avoids sorting or retaining the whole feed. Finding the `k` **largest** values requires a **min**-heap. Once full, its root is the smallest retained winner. A new value replaces that root only when it is larger, and the heap never grows beyond `k`. After one pass it holds the largest `min(k, n)` values, even if the input arrived as a stream. Finding the `k` smallest reverses the polarity and uses a max-heap.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"top-k-elements","array":[12,3,17,8,25,5,19,14],"k":3}
@@ -29,18 +30,16 @@ The trace keeps the internal heap-array order visible rather than sorting the an
 
 The StepTrace uses a binary tree because that shape makes parent-child repairs easy to see. .NET's `PriorityQueue<TElement, TPriority>` uses an array-backed quaternary min-heap; both arities enforce the same invariant that every parent is no larger than its children.
 
-
-
 The invariant carried across the scan is that the heap contains every value seen until it reaches `k`; once full, it contains the `k` largest values seen so far, with the `k`-th largest at the root. Each later element `x` faces one comparison against the root:
 
 - `x > root` proves `x` belongs to the top `k` — it beats the current weakest survivor. The root leaves, `x` enters, and the heap again holds the `k` largest seen so far.
 - `x ≤ root` need not be retained. If `x < root`, it cannot qualify because it is smaller than every retained winner. If `x = root`, replacing the root would leave the retained value multiset unchanged. Discarding `x` therefore preserves the invariant.
 
-The polarity is the load-bearing choice. Exposing the *minimum* of the retained set at the root makes the "does this element deserve to be kept" test direct and ensures eviction removes the weakest survivor. A max-heap of size `k` would expose the *largest* retained element, which is never the one to drop, so it cannot support this scan.
+The polarity is the load-bearing choice. Exposing the _minimum_ of the retained set at the root makes the "does this element deserve to be kept" test direct and ensures eviction removes the weakest survivor. A max-heap of size `k` would expose the _largest_ retained element, which is never the one to drop, so it cannot support this scan.
 
 Because the heap never exceeds `k` entries, it retains only the current candidates rather than materializing the full input. That fixed capacity is what lets the input arrive as a stream.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -96,7 +95,8 @@ tab: Complexity
   }
 }
 ```
-````
+
+%% endtabs %%
 
 # When the Assumptions Stop Holding
 

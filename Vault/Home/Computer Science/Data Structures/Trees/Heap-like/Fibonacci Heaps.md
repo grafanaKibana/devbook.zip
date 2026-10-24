@@ -21,8 +21,9 @@ The forest can hold many trees and many equal degrees between extract-mins, and 
 
 The initial forest is replayed through public **Insert** operations. Add roots lazily, use **Extract min** to consolidate equal degrees, then decrease an existing key to see the cut rule move it to the root list. **Reset** repeats those public inserts rather than loading a hidden prebuilt forest.
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"fibonacci-heap","array":[3,7,18,24,26,39,41,52,63]}
@@ -46,7 +47,7 @@ Which fields each operation may change:
 - **Decrease-key** — rewrites one node's key; if that breaks heap order with its parent, cuts the node to the root list (clearing its mark, since roots are unmarked), then cascades: while the parent was already marked, cut it too, upward. Degrees of cut parents drop by one.
 - **Extract-min** — removes the min root, promotes its children to roots, then consolidates by repeatedly linking two roots of equal degree (the larger key becomes a child of the smaller) until every root degree is distinct, and finally rescans the root list to reset the min pointer.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -234,7 +235,8 @@ tab: Complexity
   }
 }
 ```
-~~~~~
+
+%% endtabs %%
 
 # Where Laziness and Amortization Stop Paying
 

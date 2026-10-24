@@ -19,8 +19,9 @@ The eight-queens problem has 4,426,165,368 ways to place eight pieces on 64 squa
 Backtracking avoids that waste by building one candidate a choice at a time and checking constraints as it goes. A queen is placed in one row. If it shares a column or diagonal with a queen above, no completion of the remaining rows can work, so the search drops the entire partial board. This depends on being able to test a prefix instead of waiting for a finished candidate. One queen in each of eight rows leaves `8^8` column choices when columns may repeat. Rejecting shared columns narrows the search to `8! = 40,320` permutations, and diagonal checks cut it further.
 
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 
 ```steptrace
@@ -41,7 +42,7 @@ Rejecting a partial candidate at depth `k` eliminates every completion sharing t
 
 When a node's children are all exhausted, the algorithm undoes its own choice, restoring the shared partial candidate to the state its parent expects, and returns to the next sibling. That undo is what prevents state from one failed branch leaking into the next sibling.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -92,7 +93,8 @@ tab: Complexity
   }
 }
 ```
-~~~~~
+
+%% endtabs %%
 
 # When Pruning Stops Helping
 

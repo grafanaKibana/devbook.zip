@@ -19,8 +19,9 @@ The representation is a backing array plus `count` and `capacity`. Compared with
 
 The interactive view keeps the dynamic-array state between operations. Fill its spare slots, then append once more to expose the allocate-copy-grow step.
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"dynamic-array"}
@@ -47,7 +48,7 @@ The growth `FACTOR` is a direct memory-versus-copy trade. A factor of `2` wastes
 
 `Insert(0, x)` shifts every existing element one slot right; `RemoveAt(0)` shifts every element left. A resize separately invalidates references, spans, and pointers into the old backing array because growth replaces that array. A versioned enumerator such as `List<T>.Enumerator` is invalidated whenever a mutation changes the collection version, even when no resize occurs, and detects the mismatch on `MoveNext` or `Reset`.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -181,7 +182,8 @@ tab: Complexity
   }
 }
 ```
-~~~~~
+
+%% endtabs %%
 
 # Diagram and C# Implementation
 

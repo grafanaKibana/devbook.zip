@@ -21,8 +21,9 @@ The whole tree need not be balanced. It may grow deep and strongly left-heavy. O
 
 Use **Merge** on the heaps `[2, 7, 10]` and `[3, 5, 8]`. The active path follows the right spines. Amber marks the nodes whose children must swap after the null-path-length comparison.
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"leftist-heap"}
@@ -41,7 +42,7 @@ Step 4 is the load-bearing move. After the recursive merge, the right child may 
 
 **insert** merges the heap with a one-node heap. **extract-min** returns the root and merges the root's left and right subtrees back together. **find-min** just reads the root.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -211,7 +212,8 @@ tab: Complexity
   }
 }
 ```
-~~~~~
+
+%% endtabs %%
 
 # Where the Invariant is Load-bearing
 

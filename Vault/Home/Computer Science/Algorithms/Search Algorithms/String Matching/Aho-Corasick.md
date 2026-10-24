@@ -17,8 +17,9 @@ Aho-Corasick compiles the dictionary into one trie augmented with **failure link
 
 
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 
 ```steptrace
@@ -47,7 +48,7 @@ Reading `ushers` left to right, the automaton stays at the root through `u`, the
 
 The invariant makes each of those steps legal: after reading `i` characters the automaton is always at the state whose string is the longest suffix of the first `i` characters that is still a prefix of some pattern. Every pattern occurrence ending at position `i` is a suffix of that state's string, and the output chain lists exactly those. That is why a single left-to-right pass, with no rewinding of the text, sees every match.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -137,7 +138,8 @@ tab: Complexity
 ```
 
 The build rows distinguish a sparse transition map from a dense alphabet-wide table. The automaton is reusable structure space; a search adds only the current state and output cursor beyond it.
-~~~~~
+
+%% endtabs %%
 
 # Where it Stops Fitting
 

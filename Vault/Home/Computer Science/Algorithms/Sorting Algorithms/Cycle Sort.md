@@ -15,8 +15,9 @@ Cycle sort reads the mapping from current positions to sorted positions as a set
 
 With distinct values, each displaced element goes to its final position in one write and never moves again. This is the minimum number of writes for a comparison sort that reuses the input array. The tradeoff is repeated scanning: every carried value needs another count over the remaining suffix. Duplicate values also require skipping equal destinations, or the cycle may keep exchanging indistinguishable entries.
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 { "algorithm": "cycle-sort", "array": [5, 2, 8, 2, 1, 7, 4, 3] }
@@ -24,7 +25,7 @@ tab: Visualization
 
 The trace separates comparisons from writes. A scan computes the rank of the carried value, then one overwrite places it and picks up the displaced value. Equal values are skipped when selecting the destination.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -56,7 +57,8 @@ tab: Complexity
   }
 }
 ```
-~~~~~
+
+%% endtabs %%
 
 # Write minimization and duplicate keys
 

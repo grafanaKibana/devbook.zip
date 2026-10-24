@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.521Z
-modified: 2026-08-20T20:41:15.523Z
-published: 2026-08-20T20:41:15.523Z
+modified: 2026-10-23T19:06:27.541Z
+published: 2026-10-23T19:06:27.541Z
 topic:
   - Computer Science
 subtopic:
@@ -20,9 +20,9 @@ The bound must be _optimistic_. In a maximisation problem it cannot fall below t
 
 **Core condition:** an optimisation objective + a cheap optimistic bound from a relaxation → prune any subtree whose bound cannot beat the best complete solution so far (the incumbent) → exact search that can touch only a fraction of an exponential tree.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
 
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"branch-and-bound"}
@@ -30,27 +30,24 @@ tab: Visualization
 
 The step that carries the whole idea is a single bound comparison that erases a subtree before it is expanded.
 
-
 Branch-and-bound turns on four moving parts:
 
-- **Branch** — split the problem at a decision point into disjoint subproblems (item *i* is in the knapsack vs out), so the partial configurations form a search tree.
-- **Bound** — at each node, compute an optimistic estimate of the best objective any completion below it could reach. For maximisation this is an *upper* bound; for minimisation a *lower* one.
+- **Branch** — split the problem at a decision point into disjoint subproblems (item _i_ is in the knapsack vs out), so the partial configurations form a search tree.
+- **Bound** — at each node, compute an optimistic estimate of the best objective any completion below it could reach. For maximisation this is an _upper_ bound; for minimisation a _lower_ one.
 - **Incumbent** — the best complete solution seen so far, and the yardstick every bound is measured against.
 - **Prune / select** — if a node's bound is no better than the incumbent, discard its whole subtree; otherwise expand it and pick the next live node to visit.
 
-The correctness of the discard rests on the optimism of the bound. For maximisation, "optimistic" means the bound is `≥` the true best of every completion in the subtree. So if `bound ≤ incumbent`, then *every* completion is `≤ incumbent`, and none of them can improve the answer — the subtree can be removed unexplored without risking the optimum. Minimisation reverses the inequality.
+The correctness of the discard rests on the optimism of the bound. For maximisation, "optimistic" means the bound is `≥` the true best of every completion in the subtree. So if `bound ≤ incumbent`, then _every_ completion is `≤ incumbent`, and none of them can improve the answer — the subtree can be removed unexplored without risking the optimum. Minimisation reverses the inequality.
 
 This is the same optimism requirement as [[Computer Science/Algorithms/Graph Algorithms/A-Star Search|A* Search]]'s admissibility condition: a guided tree search stays correct only while its estimate errs in the optimistic direction and never lies pessimistically. Branch-and-bound is that same idea applied to the decision tree of an optimisation problem, with the bounding function playing the role of the heuristic. For maximisation 0/1 knapsack, an LP relaxation is a safe upper bound: its optimal fractional solution can only meet or exceed the integer optimum, so ignoring integrality never under-shoots.
-
 
 Every live (unpruned, unexpanded) node is a candidate to visit next, and the order changes how fast a strong incumbent appears — which in turn changes how much gets pruned.
 
 Best-first keeps live nodes in a priority queue ordered by bound. Depth-first follows one branch to a complete candidate before returning to siblings, using the same choose-and-undo discipline as [[Computer Science/Algorithms/Paradigms/Backtracking|backtracking]], which often produces an incumbent earlier.
 
-
 A good early incumbent raises the bar every later bound must clear, so more subtrees fall on a single comparison. Solvers exploit this by seeding the incumbent with a fast heuristic — often a [[Computer Science/Algorithms/Paradigms/Greedy Algorithms|greedy]] solution — before the exact search starts.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -111,7 +108,8 @@ tab: Complexity
 Best-first can retain every live node and exhaust memory on a hard instance. Depth-first retains only the current search path, trading that smaller frontier for less global control over which bound is explored next.
 
 The general `b`-ary model expands `1 + b + ... + b^n = Θ(b^n)` nodes when pruning fails. Binary 0/1 knapsack specializes that model to two take-or-skip branches per item, giving `O(2^n · c)` time. TSP does not have a constant branching factor: the number of remaining-city choices shrinks by one per level, so exhaustive search can remain factorial. `c` isolates the per-node cost of evaluating the relaxation from the branching factor `b`.
-````
+
+%% endtabs %%
 
 # When the Bound Stops Helping
 

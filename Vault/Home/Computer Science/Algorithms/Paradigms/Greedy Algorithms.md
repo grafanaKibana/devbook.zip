@@ -17,8 +17,9 @@ Greedy algorithms build the answer through a sequence of commitments. Each step 
 
 **Exactness condition:** a fixed local rule + the greedy-choice property + optimal substructure → the committed choices form a global optimum.
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 
 ```steptrace
@@ -30,7 +31,7 @@ Sorting by finish time moves the earliest release opportunity first; the sweep t
 
 The first commitment, `[1, 4]`, rejects `[3, 5]` and `[0, 6]`. Meetings `[5, 7]` and `[8, 9]` remain compatible, producing a maximum schedule of three meetings. The accepted lane illustrates the exchange intuition: each commitment leaves at least as much room as any alternative first choice.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -81,7 +82,8 @@ tab: Complexity
   }
 }
 ```
-~~~~~
+
+%% endtabs %%
 
 # When Local Choices Reach the Global Optimum
 

@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-10-14T11:59:33.483Z
-modified: 2026-10-14T11:59:33.483Z
-published: 2026-10-14T11:59:33.483Z
+created: 2026-10-17T18:11:50.072Z
+modified: 2026-10-23T19:06:27.540Z
+published: 2026-10-23T19:06:27.540Z
 topic:
   - Computer Science
 subtopic:
@@ -21,17 +21,15 @@ The eight-queens problem has 4,426,165,368 ways to place eight pieces on 64 squa
 
 Backtracking avoids that waste by building one candidate a choice at a time and checking constraints as it goes. A queen is placed in one row. If it shares a column or diagonal with a queen above, no completion of the remaining rows can work, so the search drops the entire partial board. This depends on being able to test a prefix instead of waiting for a finished candidate. One queen in each of eight rows leaves `8^8` column choices when columns may repeat. Rejecting shared columns narrows the search to `8! = 40,320` permutations, and diagonal checks cut it further.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
 
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"n-queens","n":4}
 ```
 
-
 The decisive event is a rejection. When the queen in the current row has no safe column, the partial board cannot be extended, so the search abandons it and returns to the previous row to advance that queen to its next column — every board that would have grown beneath the failed placement is pruned unexamined. Starting the first queen in column 0 leads to exactly this dead end: each of its completions collides, the whole subtree under column 0 is exhausted, and the search retreats to row 0, lifts that queen, and only the column-1 start extends to the arrangement `(1, 3, 0, 2)`. Depth in the tree is the row index, so a rejection at row `k` discards every placement of rows `k+1…n` beneath it at once.
-
 
 A candidate is a sequence of choices, one per level of a search tree. At each node the algorithm extends the partial candidate by one choice and tests the constraints its prefix can already decide:
 
@@ -43,7 +41,7 @@ Rejecting a partial candidate at depth `k` eliminates every completion sharing t
 
 When a node's children are all exhausted, the algorithm undoes its own choice, restoring the shared partial candidate to the state its parent expects, and returns to the next sibling. That undo is what prevents state from one failed branch leaking into the next sibling.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -94,7 +92,8 @@ tab: Complexity
   }
 }
 ```
-````
+
+%% endtabs %%
 
 # When Pruning Stops Helping
 

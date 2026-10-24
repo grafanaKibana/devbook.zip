@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-09-12T17:17:13.828Z
-modified: 2026-09-12T17:17:13.829Z
-published: 2026-09-12T17:17:13.829Z
+modified: 2026-10-23T19:06:27.537Z
+published: 2026-10-23T19:06:27.537Z
 topic:
   - Computer Science
 subtopic:
@@ -20,13 +20,13 @@ Correctness rests on a fact about shortest paths. With no negative cycle present
 
 The trace uses the adverse scan order `2→3, 1→2, 0→2, 0→1`, so each round exposes one more edge of the shortest path.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"bellman-ford"}
 ```
-
 
 A round relaxes every edge once: for edge `(u, v, w)`, if `dist[u] + w < dist[v]`, then `dist[v]` drops to `dist[u] + w` and `pred[v]` becomes `u`. The order of edges within a round changes the intermediate values but never the round's guarantee.
 
@@ -50,7 +50,7 @@ Round 4   (V-th) no edge relaxes -> no negative cycle; distances final
 
 Round 2 is the decisive transition: the negative edge `1→2` pulls `dist[2]` below the direct `0→2` estimate of `5`, and round 3 propagates that gain to `dist[3]`. A shortest-path-ordered sweep would have converged in a single round; the adverse order is what exposes the per-round frontier and the `V−1` bound. The `V`-th round changes nothing, which is exactly the negative-cycle check coming up empty.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -138,7 +138,8 @@ tab: Complexity
   }
 }
 ```
-````
+
+%% endtabs %%
 
 # When Distances Stop Being Defined
 

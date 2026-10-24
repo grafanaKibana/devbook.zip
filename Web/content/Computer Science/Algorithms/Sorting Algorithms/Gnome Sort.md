@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.541Z
-modified: 2026-08-20T20:41:15.542Z
-published: 2026-08-20T20:41:15.542Z
+modified: 2026-10-23T19:06:27.545Z
+published: 2026-10-23T19:06:27.545Z
 topic:
   - Computer Science
 subtopic:
@@ -18,8 +18,9 @@ Gnome sort maintains a sorted prefix with a single index. An ordered pair, `a[i-
 
 The mechanism is [[Computer Science/Algorithms/Sorting Algorithms/Insertion Sort|Insertion Sort]] expressed as adjacent swaps instead of shifting a saved value. Every swap removes one inversion, which guarantees termination. Equal values never cross because the comparison is strict, so the sort is stable.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 { "algorithm": "gnome-sort", "array": [7, 3, 5, 2, 8, 1, 6, 4] }
@@ -27,7 +28,7 @@ tab: Visualization
 
 Forward steps confirm the current prefix remains ordered. A swap steps back by one position; repeated swaps walk the smaller value left until its predecessor is no greater, after which the scan moves forward again.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -59,7 +60,8 @@ tab: Complexity
   }
 }
 ```
-````
+
+%% endtabs %%
 
 # Inversion cost and adjacent swaps
 

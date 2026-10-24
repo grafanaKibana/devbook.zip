@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-10-21T13:29:32.432Z
-modified: 2026-10-21T13:29:32.432Z
-published: 2026-10-21T13:29:32.432Z
+created: 2026-10-17T18:11:50.072Z
+modified: 2026-10-23T19:06:27.541Z
+published: 2026-10-23T19:06:27.541Z
 topic:
   - Computer Science
 subtopic:
@@ -23,13 +23,13 @@ The formulation starts with a state definition, base cases, and a recurrence ove
 
 **Core shape for finite one-pass DP:** state + base cases + recurrence + acyclic dependency order → each reached state solved once → `(number of distinct states) × (transition work per state)` time.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
 
+%% tab: Visualization %%
 
-~~~~tabsdown
-tab: Greedy
+%% tabs %%
 
+%% tab: Greedy %%
 
 ```steptrace
 {"algorithm":"coin-change-greedy"}
@@ -37,8 +37,7 @@ tab: Greedy
 
 Largest usable coin first: exact change, but 6 coins instead of 3.
 
-tab: Naive Recursion
-
+%% tab: Naive Recursion %%
 
 ```steptrace
 {"algorithm":"coin-change-naive"}
@@ -46,8 +45,7 @@ tab: Naive Recursion
 
 Try every first coin. Repeated remainders rebuild the same work.
 
-tab: Memoization
-
+%% tab: Memoization %%
 
 ```steptrace
 {"algorithm":"coin-change-memoization"}
@@ -55,8 +53,7 @@ tab: Memoization
 
 Keep recursion, but save each answered remainder beside the counter.
 
-tab: Tabulation
-
+%% tab: Tabulation %%
 
 ```steptrace
 {"algorithm":"coin-change-tabulation"}
@@ -64,8 +61,7 @@ tab: Tabulation
 
 Build exact change from 0¢ upward on a visual amount board.
 
-tab: Memoization (Raw)
-
+%% tab: Memoization (Raw) %%
 
 ```steptrace
 {"algorithm":"coin-change-top-down"}
@@ -73,8 +69,7 @@ tab: Memoization (Raw)
 
 The raw view shows the canonical recursion tree, cache hits, and stored returns.
 
-~~~~
-
+%% endtabs %%
 
 Both examples become DP only after the state discards irrelevant history. Coin change keeps the remaining amount because every denomination remains reusable; finite coin stock would also require the remaining counts. Grid path keeps the current coordinate. Two calls with the same state have the same future choices and therefore the same answer, regardless of how they arrived there.
 
@@ -82,7 +77,6 @@ Both examples become DP only after the state discards irrelevant history. Coin c
 - **Bottom-up (tabulation)** starts from known answers and fills every state its target may depend on. Coin change advances from `0¢` to `30¢`; grid path moves backward from the dispatch door. The loops make dependency order explicit and avoid recursion.
 
 The recurrence then names the dependencies. Coin change reads `best[amount - coin]` for every usable denomination and keeps the minimum plus one. Grid path reads the right and down suffix costs and adds the current tile. The animations differ because those state spaces differ—a one-dimensional amount board versus a two-dimensional matrix—but the storage rule is the same.
-
 
 A cashier must return exactly `30¢` using real `1¢`, `10¢`, `25¢`, and `50¢` denominations. The example assumes enough of each coin that stock is not a constraint. Taking the largest usable coin first returns `25 + 1 + 1 + 1 + 1 + 1`, while `10 + 10 + 10` uses half as many coins. The five tabs keep that counterexample fixed while changing the solving strategy and level of abstraction.
 
@@ -164,14 +158,14 @@ The simplified Memoization and Tabulation tabs keep the cashier model visible. M
 >     return dp[amount] > amount ? -1 : dp[amount];
 > }
 > ```
+>
 > `FewestCoinsTopDown(30, [1, 10, 25, 50])` and the bottom-up version both return `3`. The contract requires `0 <= amount < int.MaxValue` and strictly positive denominations; those constraints keep dependencies acyclic and the sentinel arithmetic valid.
-
 
 A warehouse robot may move only right or down from the loading bay to the dispatch door. Choosing the cheaper immediate tile and breaking ties to the right walks into an expensive corridor and costs `21`; the best complete route costs `10`. Naive recursion eventually finds it, but different route prefixes repeatedly reach the same coordinate.
 
-~~~~tabsdown
-tab: Greedy
+%% tabs %%
 
+%% tab: Greedy %%
 
 ```steptrace
 {"algorithm":"grid-path-greedy"}
@@ -179,8 +173,7 @@ tab: Greedy
 
 Choose the cheaper next tile, breaking ties right. Later costs trap the route.
 
-tab: Naive Recursion
-
+%% tab: Naive Recursion %%
 
 ```steptrace
 {"algorithm":"grid-path-naive"}
@@ -188,8 +181,7 @@ tab: Naive Recursion
 
 Explore every right/down route and revisit the same coordinates.
 
-tab: Memoization
-
+%% tab: Memoization %%
 
 ```steptrace
 {"algorithm":"grid-path-memoization"}
@@ -197,8 +189,7 @@ tab: Memoization
 
 Write solved remaining costs into the warehouse map and reuse repeated tiles.
 
-tab: Tabulation
-
+%% tab: Tabulation %%
 
 ```steptrace
 {"algorithm":"grid-path-tabulation"}
@@ -206,8 +197,7 @@ tab: Tabulation
 
 Fill the warehouse map backward from the dispatch door and reveal the route.
 
-tab: Memoization (Raw)
-
+%% tab: Memoization (Raw) %%
 
 ```steptrace
 {"algorithm":"grid-path-top-down"}
@@ -215,7 +205,7 @@ tab: Memoization (Raw)
 
 The raw view shows the canonical coordinate recursion tree and cache hits.
 
-~~~~
+%% endtabs %%
 
 Here the state is a coordinate rather than an amount. `best(R2C2)` means “the minimum remaining cost from this tile,” independent of how the robot arrived. The four simplified tabs use one warehouse matrix with integrated context, while Memoization (Raw) exposes the canonical recursion tree. Memoization stops repeated calls to a saved coordinate; tabulation makes the dependency order spatial by reading the already-solved tiles to the right and below.
 
@@ -230,6 +220,7 @@ Here the state is a coordinate rather than an amount. `best(R2C2)` means “the 
 >   D --> E["minimum of right and down"]
 >   E --> F["dispatch door"]
 > ```
+>
 > `R2C2` is one state even though two route prefixes reach it. Memoization computes its suffix once; tabulation fills it once before either predecessor reads it.
 
 > [!EXAMPLE]- Grid path, top-down and bottom-up (C#)
@@ -293,9 +284,10 @@ Here the state is a coordinate rather than an amount. `best(R2C2)` means “the 
 >     return dp[0, 0];
 > }
 > ```
+>
 > Both versions require a nonempty grid and return the same checked `long` route cost. Explicit edge transitions prevent an out-of-grid sentinel from winning against a large valid suffix. The visualization keeps the full table so it can also highlight the chosen route.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -351,7 +343,8 @@ tab: Complexity
   }
 }
 ```
-````
+
+%% endtabs %%
 
 # Boundaries
 

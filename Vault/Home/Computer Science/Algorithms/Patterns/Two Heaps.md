@@ -20,8 +20,9 @@ Two invariants make the result correct:
 
 A value no greater than `lower.Peek()` enters `lower`. Anything larger enters `upper`. If the size rule breaks, moving one boundary root restores it. An odd number of values leaves the median at `lower.Peek()`. With an even count, the two roots are averaged.
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 { "algorithm": "two-heaps", "array": [5, 2, 10, 4, 7, 3, 8, 9] }
@@ -29,7 +30,7 @@ tab: Visualization
 
 The stream rail shows insertion order. After each value arrives, the lower max-heap exposes the largest value from the lower half and the upper min-heap exposes the smallest value from the upper half. Rebalancing moves only a root, preserving both the partition and the size difference of at most one.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -103,7 +104,8 @@ tab: Complexity
   }
 }
 ```
-~~~~~
+
+%% endtabs %%
 
 # Where the Pattern Applies
 

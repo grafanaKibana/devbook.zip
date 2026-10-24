@@ -19,8 +19,9 @@ Collapsing each SCC into one node produces the **condensation**, which is always
 
 Direction defines the problem. In an undirected graph, mutual reachability is ordinary reachability, so the task reduces to connected components found by [[Home/Computer Science/Data Structures/Graph Structures/Union-Find|union-find]] or a flood fill.
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 
 ```steptrace
@@ -45,7 +46,7 @@ Kosaraju uses two ordinary traversals:
 
 Individual vertex finish times are not a topological order inside an SCC. The useful property is at component level: decreasing maximum finish time orders the SCCs of `G`'s condensation DAG from sources onward. The selected source SCC becomes a sink in `Gᵀ`, so the second DFS cannot escape it.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -147,7 +148,8 @@ tab: Complexity
   }
 }
 ```
-~~~~~
+
+%% endtabs %%
 
 # Components and the Condensation Graph
 

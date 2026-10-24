@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.592Z
-modified: 2026-08-20T20:41:15.592Z
-published: 2026-08-20T20:41:15.592Z
+modified: 2026-10-23T19:06:27.547Z
+published: 2026-10-23T19:06:27.547Z
 topic:
   - Computer Science
 subtopic:
@@ -20,15 +20,13 @@ This is deliberately less information than a graph. The structure remembers whic
 
 **Core shape:** elements → parent-index forest → one root per set → shared root means shared membership
 
-````tabsdown
-tab: Visualization
+%% tabs %%
 
-
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"union-find","n":7}
 ```
-
 
 The view starts with seven singleton sets. Choose two elements and run `Union` to merge their roots, `Find A` to resolve and compress one parent path, or `Connected?` to resolve both roots and compare representatives. Because that check performs two finds, it may flatten both parent paths. The forest and its parent array update together: an arrow points from a child to its parent, and a root stores its own index.
 
@@ -52,7 +50,7 @@ Four invariants define a valid state:
 
 Path compression rewrites parent indices but preserves set membership. Union by rank changes which root represents the merged set but preserves every previous connectivity result. The representative is therefore an internal identity, not a stable domain value.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -214,7 +212,8 @@ tab: Complexity
   }
 }
 ```
-````
+
+%% endtabs %%
 
 # When the Structure Stops Fitting
 

@@ -17,14 +17,15 @@ A quadtree is a **spatial-partitioning tree, not a balanced search tree**. It ha
 
 **Family shape:** recursively partition a 2D domain into four child regions → route or aggregate spatial data within those regions → prune regions that cannot intersect a query. PR and region quadtrees split rectangular bounds into equal NW/NE/SW/SE quadrants when a bucket overflows or a raster block is mixed. A point quadtree instead splits at each stored point into generally unequal quadrants.
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ![[Assets/Computer Science/Computer Science-Quadtree-Adaptive-Split.svg|900|theme-aware]]
 
 Only the overfull northeast leaf subdivides; the other three root quadrants retain their bounds and contents. The inserted points are then routed into the four new child regions, so resolution increases locally where the data is dense.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -165,7 +166,8 @@ tab: Complexity
 Point operations follow actual depth `h`; no relationship between `h` and `n` is structural. For a PR quadtree, `h` is capped only when the implementation defines a finite root region and a minimum cell size, finite coordinate precision, or another terminal overflow rule. A region quadtree over a `2^r × 2^r` raster instead has `h ≤ r`. Persistent space follows allocated nodes `s`, which depends on depth and whether empty children are materialized. A range query depends on both visited nodes `v` and returned points `k`.
 
 The point-quadtree worst case comes from insertion order and spatial placement, just as an ordinary binary search tree can become a chain. The PR-quadtree worst case comes from repeated subdivision of one region; coincident points cannot be separated by geometry, so the implementation must keep an overflow bucket or stop at a declared depth. Coordinate resolution bounds depth only when coordinates are quantized and the split arithmetic respects that finite domain.
-~~~~~
+
+%% endtabs %%
 
 # Variants
 

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.599Z
-modified: 2026-08-20T20:41:15.600Z
-published: 2026-08-20T20:41:15.600Z
+modified: 2026-10-23T19:06:27.548Z
+published: 2026-10-23T19:06:27.548Z
 topic:
   - Computer Science
 subtopic:
@@ -22,8 +22,9 @@ It generalizes two narrower structures. A [[Computer Science/Data Structures/Lin
 
 The interactive view keeps the deque state between actions. Push or pop at either end to watch `head`, `count`, and wrapping slots change without shifting live elements.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"deque"}
@@ -48,7 +49,7 @@ Invariants that define a valid state (ring-buffer form):
 
 The `head` index and `count` are internal identity, not domain values: a resize renumbers every physical slot while preserving the logical front-to-back order.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -230,7 +231,8 @@ tab: Complexity
   }
 }
 ```
-````
+
+%% endtabs %%
 
 # When the Structure Stops Fitting
 

@@ -17,8 +17,9 @@ At each position, the algorithm swaps the resident value into that home and repe
 
 
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 
 
@@ -30,7 +31,7 @@ tab: Visualization
 
 The cursor stays put after a swap because the displaced value still needs inspection; it advances only when the resident value is home.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -80,7 +81,8 @@ tab: Complexity
   }
 }
 ```
-~~~~~
+
+%% endtabs %%
 
 # Why Each Swap Finalises an Element
 

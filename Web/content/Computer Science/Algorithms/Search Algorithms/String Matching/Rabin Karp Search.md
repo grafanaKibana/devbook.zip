@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.537Z
-modified: 2026-08-20T20:41:15.538Z
-published: 2026-08-20T20:41:15.538Z
+modified: 2026-10-23T19:06:27.544Z
+published: 2026-10-23T19:06:27.544Z
 topic:
   - Computer Science
 subtopic:
@@ -18,22 +18,17 @@ Searching a text `T` of length `n` for a pattern `P` of length `m` creates `n �
 
 Equal hashes only identify a candidate. Distinct strings can collide, so the algorithm still compares the `m` characters before reporting a match. The rolling hash saves work. The direct comparison preserves correctness.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
 
-
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"rabin-karp","text":"GEEKSFORGEEKS","pattern":"GEEK"}
 ```
 
-
-
 The trace searches for `GEEK` in `GEEKSFORGEEKS`, sliding a four-character window and comparing its rolling hash against the pattern hash.
 
 The window at index 0 hashes equal to the pattern, so that position triggers a character check and confirms the first match. Every following slide reuses the previous hash: the algorithm subtracts the weight of the character leaving on the left, shifts, and adds the character entering on the right. Positions whose hash differs from the pattern's are rejected on an integer comparison and never reach character verification. A matching hash triggers a direct pattern comparison, which confirms the second occurrence at index 8 just as it confirmed the first.
-
-
 
 Rabin-Karp reads each length-`m` string as a number in base `b`, reduced modulo a large prime `p`. With characters mapped to integers, the window `T[i..i+m-1]` hashes to:
 
@@ -49,7 +44,7 @@ Subtracting `T[i]·b^(m-1)` removes the outgoing character's weighted term; mult
 
 Hash equality is necessary but not sufficient for string equality. The map from `m`-character strings to residues mod `p` is many-to-one, so two different windows can share a hash — a collision. Rabin-Karp treats a hash match as a claim to be checked: on `h == patternHash` it compares the `m` characters directly and reports a match only when they agree. That verification is the invariant separating Rabin-Karp from a probabilistic filter — without it, a collision would be reported as a false match.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -134,7 +129,8 @@ tab: Complexity
 ```
 
 The expected row assumes a large modulus and suitable base make spurious hash matches rare. Adversarial collisions force full pattern verification at many windows and select the chart's adverse row.
-````
+
+%% endtabs %%
 
 # Collisions and the Multi-pattern Payoff
 

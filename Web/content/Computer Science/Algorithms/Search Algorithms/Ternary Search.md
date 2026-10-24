@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.539Z
-modified: 2026-08-20T20:41:15.539Z
-published: 2026-08-20T20:41:15.539Z
+modified: 2026-10-23T19:06:27.544Z
+published: 2026-10-23T19:06:27.544Z
 topic:
   - Computer Science
 subtopic:
@@ -20,20 +20,15 @@ Ternary search works on a **unimodal** function: one that strictly increases to 
 
 The name also appears in sorted-array lookup, where a three-way split buys nothing: binary search chooses the correct half with fewer comparisons. Ternary search is useful for unimodal objectives, including one-parameter optimization and geometric extrema. [[Computer Science/Algorithms/Patterns/Binary Search on Answer|Binary Search on Answer]] solves a different shape: a monotone feasibility predicate rather than a non-monotone objective that rises and falls.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
 
-
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"ternary-search","array":[1,4,9,12,11,7,2],"goal":"maximum"}
 ```
 
-
-
 The values rise to `12` and then fall, giving one strict peak. Each ternary step shows both third-point probes at once; the lower side is discarded, and a final scan of at most three positions confirms the maximum at index `3`.
-
-
 
 The interval `[lo, hi]` holds the peak `p` at the start of every step, and the discard rule preserves that. Let `m1 < m2` be the third-point probes. Strict unimodality means `f` increases on `[lo, p]` and decreases on `[p, hi]`.
 
@@ -43,7 +38,7 @@ The interval `[lo, hi]` holds the peak `p` at the start of every step, and the d
 
 Golden-section search changes the probe placement so the next interval can reuse one value already evaluated. That matters when `f` is a simulation or physical measurement rather than an array read.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -142,7 +137,8 @@ tab: Complexity
 ```
 
 The chart counts interval reductions. If evaluating the objective is not fixed-cost, multiply the probe count by the cost of one evaluation; cache repeated evaluations when that function is expensive. Golden-section search retains about 0.618 of the interval per step and reuses one probe, while ternary search retains about 0.667 and evaluates two new probes; prefer golden-section search when objective evaluation is expensive.
-````
+
+%% endtabs %%
 
 # When Unimodality Fails
 

@@ -19,32 +19,34 @@ The structure retains key-to-value associations. Order is outside its contract, 
 
 The three tabs keep the same 12-cell table while changing only collision policy. **Closed Addressing** uses separate chaining (also called open hashing): each bucket points to its own external key/value chain. **Open Addressing** uses linear probing (also called closed hashing) and leaves tombstones after removal. **Bucket Hashing** groups the array into four contiguous 3-cell buckets, then advances bucket by bucket with wraparound when the home group is full. This prototype fixes capacity at 12 to compare collision policies. Production maps usually resize or rebuild after crossing a load threshold.
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
 
-~~~~tabsdown
-tab: Closed Addressing
+%% tab: Visualization %%
+
+%% tabs %%
+
+%% tab: Closed Addressing %%
 
 
 ```steptrace
 {"algorithm":"hash-map","variant":"closed-addressing"}
 ```
 
-tab: Open Addressing
+%% tab: Open Addressing %%
 
 
 ```steptrace
 {"algorithm":"hash-map","variant":"open-addressing"}
 ```
 
-tab: Bucket Hashing
+%% tab: Bucket Hashing %%
 
 
 ```steptrace
 {"algorithm":"hash-map","variant":"buckets"}
 ```
 
-~~~~
+%% endtabs %%
 
 #### Representation and invariants
 
@@ -63,7 +65,7 @@ Three invariants define a valid state:
 2. Keys that compare equal must hash equal — the `GetHashCode`/`Equals` contract. If it breaks, equal keys can land in different buckets and both survive as separate entries.
 3. A lookup recomputes the bucket, then resolves the collision by equality within it. Correctness depends on both the hash (which bucket) and equality (which entry).
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -241,7 +243,8 @@ tab: Complexity
 ```
 
 Bounds are relative to the entry count and assume constant-cost hashing and equality, a hash function that distributes keys close to uniformly, and a load factor kept bounded by resizing. If hashing or equality scans a key of length `k`, each operation also pays that `O(k)` work; if distribution or load-factor control fails, collisions concentrate work in long buckets. Insert's typical bound is amortized because one threshold-crossing insert may rehash the entire map, while geometric growth spreads those occasional rebuilds across the inserts that filled each table. The space entries distinguish normal per-operation storage from the temporary allocation during a resize.
-~~~~~
+
+%% endtabs %%
 
 # Where the representation breaks
 

@@ -21,8 +21,9 @@ What the forest gives up is compactness and locality. Nodes are separate allocat
 
 Use **Meld** to combine the canonical 3-value forest with a singleton. The forest slots expose the two equal-order links and the carry into `B₂`. **Reset** restores both source forests.
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"binomial-queue"}
@@ -59,7 +60,7 @@ Four invariants define a valid state:
 
 Linking is the only operation that changes parentage, and it only ever attaches one root beneath another root. No interior node is ever re-parented in isolation, so heap order and binomial shape are preserved by construction rather than repaired afterward.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -259,7 +260,8 @@ tab: Complexity
   }
 }
 ```
-~~~~~
+
+%% endtabs %%
 
 # When the Structure Stops Fitting
 

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.534Z
-modified: 2026-08-20T20:41:15.534Z
-published: 2026-08-20T20:41:15.534Z
+modified: 2026-10-23T19:06:27.543Z
+published: 2026-10-23T19:06:27.543Z
 topic:
   - Computer Science
 subtopic:
@@ -24,28 +24,23 @@ To find `950` in `[0 … 1000]` it probes near index `95%`, not `50%` — the sa
 
 The distinguishing step is where the first probe lands.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
 
-
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"interpolation-search","array":[0,1,4,9,16,25,36,49,64,81,100,121],"target":81}
 ```
 
-
-
 The trace searches for `81` in the quadratic sequence `a[i] = i²`. The target sits about 67% across the initial value span but at index `9` of `11`, so the first estimate undershoots at index `7`. Each miss remaps the target against the new endpoints until the probe reaches index `9`.
 
-
-
-At the start of every loop the target, if present, lies in `[a[lo], a[hi]]` — the same invariant Binary Search maintains. Interpolation Search adds an assumption about *where* inside that range it lies. The formula treats the values between `a[lo]` and `a[hi]` as points on a straight line against their indices: the fraction `(target - a[lo]) / (a[hi] - a[lo])` of the value span maps to that same fraction of the index span. When the data actually follows that line, the probe lands on or beside the target's true index, and even a miss leaves a sub-range far smaller than half.
+At the start of every loop the target, if present, lies in `[a[lo], a[hi]]` — the same invariant Binary Search maintains. Interpolation Search adds an assumption about _where_ inside that range it lies. The formula treats the values between `a[lo]` and `a[hi]` as points on a straight line against their indices: the fraction `(target - a[lo]) / (a[hi] - a[lo])` of the value span maps to that same fraction of the index span. When the data actually follows that line, the probe lands on or beside the target's true index, and even a miss leaves a sub-range far smaller than half.
 
 The comparison that follows is identical to Binary Search. `a[pos] < target` proves indices `lo … pos` are too small, so `lo` moves to `pos + 1`; `a[pos] > target` moves `hi` to `pos - 1`. The loop also guards `a[lo] <= target <= a[hi]`, so a target that falls outside the current value window exits immediately rather than interpolating into an empty region.
 
 On exactly evenly spaced values, a present target's value fraction equals its index fraction, so the first estimate lands exactly in the idealized arithmetic model. An individual search can shrink by more or less than the uniform model predicts.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -109,7 +104,8 @@ tab: Complexity
 ```
 
 The expected row assumes uniformly distributed keys. Skewed values can repeatedly place the estimated probe near one boundary, which is why binary search has a stronger unconditional guarantee.
-````
+
+%% endtabs %%
 
 # When the Distribution Stops Cooperating
 

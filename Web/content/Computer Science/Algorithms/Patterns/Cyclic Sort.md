@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.528Z
-modified: 2026-08-20T20:41:15.529Z
-published: 2026-08-20T20:41:15.529Z
+modified: 2026-10-23T19:06:27.542Z
+published: 2026-10-23T19:06:27.542Z
 topic:
   - Computer Science
 subtopic:
@@ -18,20 +18,17 @@ Cyclic Sort exploits a narrow input contract: an array of `n` integers is a perm
 
 At each position, the algorithm swaps the resident value into that home and repeats until the correct value arrives. Missing-value and duplicate-value problems use a guarded variant. Values still map to `1..n`, but collisions or absent homes are allowed. A final mismatch scan exposes them. This range-mapped interview pattern is distinct from the comparison-based Cycle Sort that minimizes writes on arbitrary comparable values.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
 
-
+%% tab: Visualization %%
 
 ```steptrace
 { "algorithm": "cyclic-sort", "array": [3, 1, 5, 4, 2] }
 ```
 
-
-
 The cursor stays put after a swap because the displaced value still needs inspection; it advances only when the resident value is home.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -81,7 +78,8 @@ tab: Complexity
   }
 }
 ```
-````
+
+%% endtabs %%
 
 # Why Each Swap Finalises an Element
 

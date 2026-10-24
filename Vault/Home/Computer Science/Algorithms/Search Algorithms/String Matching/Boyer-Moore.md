@@ -19,8 +19,9 @@ The **bad-character rule** uses the mismatching character's rightmost pattern po
 
 The trace keeps the pattern aligned under the text while the comparison cursor moves right to left and each rule proposes a shift.
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 
 ```steptrace
@@ -68,7 +69,7 @@ All four characters match right-to-left; report index 6.
 
 The alignment starts are `0 → 2 → 3 → 6`; the corresponding shift distances are `2`, `1`, and `3`. No alignment between those starts can be a match.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -198,7 +199,8 @@ tab: Complexity
 ```
 
 The favorable chart row describes inputs where large shifts repeatedly skip untouched text. The plain algorithm can repeat comparisons on adversarial text; the Galil rule remembers a region already known to match and avoids those repeated comparisons.
-~~~~~
+
+%% endtabs %%
 
 # Where the Skip Disappears
 

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.542Z
-modified: 2026-08-20T20:41:15.542Z
-published: 2026-08-20T20:41:15.542Z
+modified: 2026-10-23T19:06:27.545Z
+published: 2026-10-23T19:06:27.545Z
 topic:
   - Computer Science
 subtopic:
@@ -20,24 +20,21 @@ Heap sort keeps that information by treating the unsorted region as a [[Computer
 
 **Core shape:** array reinterpreted as a max-heap → repeated extract-max grows a sorted suffix from the back → sift-down restores the shrinking heap.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
 
-
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"heap-sort","array":[8,3,5,1,9,2,7,4]}
 ```
 
-
-
 The first phase sifts each internal node down until every parent dominates its children, rearranging the array into a max-heap with nothing yet in its final sorted position. From there every step is identical: the root — the largest remaining key — is swapped with the last cell still inside the heap, the heap boundary retreats by one, and the new root sifts down until heap order holds again. The swapped-out maximum now sits at its final index, so a sorted suffix grows leftward from the end of the array while the heap shrinks toward the front. When the heap holds one element the array is ordered.
 
 #### Array as an Implicit Heap
 
-Heap sort never materialises a tree of node objects. The array *is* the tree: the element at index `i` is the parent of the elements at `2i + 1` and `2i + 2`, and the last node with any child is at `n/2 - 1`. The structure and its full operation set live in [[Computer Science/Data Structures/Trees/Heap-like/Heap|heap]]; heap sort borrows only the max-heap variant and a single primitive, sift-down.
+Heap sort never materialises a tree of node objects. The array _is_ the tree: the element at index `i` is the parent of the elements at `2i + 1` and `2i + 2`, and the last node with any child is at `n/2 - 1`. The structure and its full operation set live in [[Computer Science/Data Structures/Trees/Heap-like/Heap|heap]]; heap sort borrows only the max-heap variant and a single primitive, sift-down.
 
-Sift-down repairs one broken position. A value that may be smaller than a child is swapped with the *larger* of its two children, and the check repeats one level lower, stopping when the value dominates both children or reaches a leaf. The invariant it preserves is heap order — every parent is at least as large as each child. The subtrees beside and above the repaired path already satisfied that order and are left untouched, which is what keeps a single repair to the height of one subtree.
+Sift-down repairs one broken position. A value that may be smaller than a child is swapped with the _larger_ of its two children, and the check repeats one level lower, stopping when the value dominates both children or reaches a leaf. The invariant it preserves is heap order — every parent is at least as large as each child. The subtrees beside and above the repaired path already satisfied that order and are left untouched, which is what keeps a single repair to the height of one subtree.
 
 Two phases use nothing but sift-down:
 
@@ -46,7 +43,7 @@ Two phases use nothing but sift-down:
 
 Those swaps are why heap sort is **not stable**: an extraction can carry one of two equal keys across the array past the other, and no step restores their input order.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -111,8 +108,7 @@ tab: Complexity
 
 The best curve assumes all keys compare equal, so each sift-down stops after its first child comparisons. The space curves assume iterative sift-down; a recursive version adds call-stack storage.
 
-
-````
+%% endtabs %%
 
 # Stability
 

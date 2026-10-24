@@ -17,8 +17,9 @@ The minimum scan is unconditional. It examines every remaining element whether t
 
 **Operating condition:** each full suffix scan finalizes one prefix position with at most one swap.
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 
 
@@ -36,7 +37,7 @@ After pass `i` completes, `a[0..i]` holds the `i + 1` smallest values in sorted 
 
 The scan is unconditional: there is no shortcut that ends a pass early and no outer flag that notices an already-sorted array. Each pass still ends with at most one swap. The prefix position becomes final; the suffix position does not and can be written again.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -103,7 +104,8 @@ Comparisons dominate the running time and are identical across all three rows �
 
 
 A stable variant exists but abandons the write budget that motivates the algorithm. Rather than swapping the minimum into place, it removes the minimum and shifts the intervening elements up by one — the same move [[Home/Computer Science/Algorithms/Sorting Algorithms/Insertion Sort|Insertion Sort]] makes. Preserving equal-key order costs `Θ(n)` writes per pass, restoring the `Θ(n²)` write total that the swap-based form was chosen to avoid.
-~~~~~
+
+%% endtabs %%
 
 Selection sort is unstable because a long-distance swap can carry one equal key past another. Sorting `[5a, 3, 5b, 1]` by value produces `[1, 3, 5b, 5a]`. The two fives have changed order.
 

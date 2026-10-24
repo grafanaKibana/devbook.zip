@@ -21,8 +21,9 @@ A window `[l, r]`, called the **Z-box**, tracks the prefix match that reaches fu
 
 The trace keeps the prefix, current Z-box, mirror source, and committed Z values aligned while each entry is copied or extended.
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 
 ```steptrace
@@ -67,7 +68,7 @@ Indices 5, 6, and 7 copy their values from mirrors inside `[4, 8]` without reche
 
 Single-pattern search reduces to one Z-array. Build `S = P + sep + T`, where `sep` is a character occurring in neither `P` nor `T`, and compute `z` over `S`. Any index `i` in the `T` region with `z[i] >= |P|` marks an occurrence: the substring at `i` reproduces the whole pattern prefix in `|P|` characters that lie entirely inside `T`. A proper separator caps every text-region Z-value at `|P|` — no match can run across the boundary — so here `>=` and `==` coincide.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -147,7 +148,8 @@ tab: Complexity
 ```
 
 The search space row counts both the temporary concatenated string and its Z-array. Computing only the Z-array for an existing string needs no second copy of that string.
-~~~~~
+
+%% endtabs %%
 
 # When the Assumptions Stop Holding
 
