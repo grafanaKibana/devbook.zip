@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.530Z
-modified: 2026-08-20T20:41:15.531Z
-published: 2026-08-20T20:41:15.531Z
+modified: 2026-10-23T19:06:27.542Z
+published: 2026-10-23T19:06:27.542Z
 topic:
   - Computer Science
 subtopic:
@@ -20,8 +20,9 @@ A monotonic stack stores indices while their values remain ordered. For a next-g
 
 A monotonic deque adds window expiry. New candidates enter at the back, dominated candidates leave from the back, and expired indices leave from the front. Storing indices makes both expiry and duplicate identity explicit.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"monotonic-stack-and-queue","array":[73,74,75,71,69,72,76,73]}
@@ -29,15 +30,13 @@ tab: Visualization
 
 The trace uses daily temperatures `[73, 74, 75, 71, 69, 72, 76, 73]`. At `72`, the stack pops `69` and `71`, then becomes `[75, 72]` from bottom to top. At `76`, it pops `72` and `75`; `74` was already popped when `75` arrived. The six popped temperatures are `73`, `74`, `69`, `71`, `72`, and `75`, each in its own frame. Converting each resolved next index to `nextIndex - currentIndex` gives the Daily Temperatures waits `[1, 1, 4, 2, 1, 1, 0, 0]`. The charge counter shows the global bound: eight pushes and six pops over the whole scan.
 
-
-
 The stack holds unanswered indices whose values are non-increasing from bottom to top. When `a[i]` pops index `j`, no position between `j` and `i` held a greater value — such a value would already have popped `j`. Therefore `i` is the nearest qualifying index to the right. Entries left after the scan have no greater value to their right.
 
 The deque keeps the same monotone contents but adds a second exit. Values decrease from front to back; the front is always the current window maximum. Each new index `i` drops the front if it has slid out of the window, then pops from the back while `a[back] <= a[i]`: the incoming value is at least as large, and an equal newer index dominates because it expires later. Indices are the standard representation because the expiry check is direct; a value-only variant needs the departing value and may preserve equal entries separately or compress them into counts.
 
 Each index is pushed once and removed at most once. Charge a removal to that index's earlier push and no index can be charged twice, even though one arriving value may trigger several pops.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -88,7 +87,7 @@ tab: Complexity
 }
 ```
 
-````
+%% endtabs %%
 
 # When the Invariant is Set Wrong
 

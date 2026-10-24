@@ -19,8 +19,9 @@ The structure is a self-adjusting relative of the [[Home/Computer Science/Data S
 
 Use **Merge** on the heaps `[2, 7, 10]` and `[3, 5, 8]`. Every touched node swaps its children, regardless of shape. **Reset** restores both inputs.
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"skew-heap"}
@@ -34,7 +35,7 @@ The unconditional swap breaks that: every node on the traversed spine has its fr
 
 The invariant that survives every operation is heap order alone: a parent key never exceeds a child key. There is no structural invariant on shape — a skew heap can momentarily be a long right chain. Insert merges a singleton node into the heap. Extract-min removes the root and merges its two children. Both inherit merge's cost profile exactly.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -222,7 +223,8 @@ tab: Complexity
   }
 }
 ```
-~~~~~
+
+%% endtabs %%
 
 Persistence widens the difference. A leftist heap's worst-case bound applies to each operation, even when versions share subtrees. A skew heap spreads cost across an update sequence. Branching repeatedly from older versions needs a separate sequence analysis.
 

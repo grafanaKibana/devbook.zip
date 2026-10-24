@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.595Z
-modified: 2026-08-20T20:41:15.596Z
-published: 2026-08-20T20:41:15.596Z
+modified: 2026-10-23T19:06:27.548Z
+published: 2026-10-23T19:06:27.548Z
 topic:
   - Computer Science
 subtopic:
@@ -20,8 +20,9 @@ Elements are unique according to the set's comparer. The structure is effectivel
 
 **Core shape:** element → `comparer.GetHashCode` → home bucket/cell → bucket chain or probe sequence → `comparer.Equals` candidate already there? reject : store
 
-````tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"hash-set"}
@@ -37,7 +38,7 @@ The membership contract is **exact while the comparer contract holds and compare
 
 Two properties are deliberately not retained. Iteration order reflects bucket layout and rehash history, not insertion sequence, and can change after any `Add`/`Remove` or across runtime versions. And because the set stores presence rather than occurrence, it cannot answer "how many times" — an element is either in or out.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -225,7 +226,8 @@ tab: Complexity
   }
 }
 ```
-````
+
+%% endtabs %%
 
 # When the Structure Stops Fitting
 

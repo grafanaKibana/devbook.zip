@@ -15,8 +15,9 @@ publish: true
 
 Comb sort keeps compare-and-swap but widens the distance between the elements. It starts with a gap near `n / 1.3`, compares `a[i]` with `a[i + gap]`, and divides the gap by roughly `1.3` after each pass until it reaches `1`. Early wide gaps move turtles several positions at once. The final gap-1 phase runs over a much less disordered array. Comb sort applies to [[Home/Computer Science/Algorithms/Sorting Algorithms/Bubble Sort|Bubble Sort]] the same gapped-pass idea that [[Home/Computer Science/Algorithms/Sorting Algorithms/Shell Sort|Shell Sort]] applies to [[Home/Computer Science/Algorithms/Sorting Algorithms/Insertion Sort|Insertion Sort]].
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 
 
@@ -36,7 +37,7 @@ Correctness does not come from the wide passes; they only rearrange. The loop te
 
 The shrink factor governs how fast the gap collapses. Lacey and Box selected `1.3` because it minimized comparisons in their experiments on random input. A smaller factor contracts slowly and spends more full sweeps at wide gaps; a larger one reaches `gap == 1` quickly and can leave more turtles for the bubble phase.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -117,7 +118,8 @@ tab: Complexity
 ```
 
 The performance rests on an empirical constant. `1.3` is not derived from a convergence proof; it is the factor that minimized comparisons in the original experiments. Some gap values also interact badly with real inputs: when the shrink sequence passes through a gap of `9` or `10`, a residual pattern survives that the next pass fails to clear, so the "combsort11" variant forces those gaps to `11`. A hand-tuned special case is a symptom that the sub-quadratic behavior is measured rather than guaranteed — an adversary can still drive the algorithm to `Θ(n²)`.
-~~~~~
+
+%% endtabs %%
 
 A wide-gap swap can carry one equal key past another, and later passes do not restore their original order. Bubble Sort avoids this because it swaps only strictly inverted adjacent pairs. Comb sort is therefore unstable.
 

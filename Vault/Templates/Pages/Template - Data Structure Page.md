@@ -41,8 +41,9 @@ tp.hooks.on_all_templates_executed(async () => {
 
 <!-- State the workload, persistent state, repeated cost the representation reduces, and information it deliberately does not retain. -->
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 <!-- The StepTrace fence must be the first rendered child. Replace this required draft configuration with a supported trace that shows several operations over one structure and exposes meaningful persistent state; do not add a heading or lead-in before it. -->
 
@@ -52,11 +53,11 @@ tab: Visualization
 
 <!-- Optional: add at most one `####` support section after the trace when the visible operations need a representation or invariant explanation. Keep unheaded prose when a heading adds no navigation value, and delete copy that only restates controls or the pictured scenario. -->
 
-tab: Complexity
+%% tab: Complexity %%
 
 <!-- Insert exactly one validated version 2 `complexity` fence here after note-specific Time and Space evidence exists. Follow it only with concise unheaded prose that supplies a chart-missing assumption, model/resource distinction, or decision-changing failure boundary. Do not add headings, Markdown tables, or placeholders inside or outside this panel. -->
 
-~~~~~
+%% endtabs %%
 
 # Fit and Limits
 

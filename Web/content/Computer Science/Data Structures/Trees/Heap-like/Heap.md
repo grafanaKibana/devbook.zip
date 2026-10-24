@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.606Z
-modified: 2026-08-20T20:41:15.607Z
-published: 2026-08-20T20:41:15.607Z
+modified: 2026-10-23T19:06:27.550Z
+published: 2026-10-23T19:06:27.550Z
 topic:
   - Computer Science
 subtopic:
@@ -20,8 +20,9 @@ A heap gets that speed by maintaining less order than a sorted list. It guarante
 
 **Core shape:** complete binary tree → heap-order property (min-heap: parent ≤ both children) → packed implicitly into an array → only the root is the extreme
 
-````tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"heap","array":[3,5,8,9]}
@@ -45,9 +46,9 @@ No per-node object, no child pointers, no allocation per element — just one ar
 - `extract-min` reads index `0`, moves the last element into the root, shrinks the count, then **sifts down**: repeatedly swap with the smaller of its two children until neither child is smaller.
 - `peek` returns index `0` without touching the array.
 
-The heap-order invariant is local: every parent is `≤` both of its children (min-heap; a max-heap reverses the comparison). Sift-up restores it along a single root-ward path after an append; sift-down restores it along a single leaf-ward path after the root is replaced. The invariant says nothing about order *across* subtrees, so arbitrary ranks cannot be read directly from array positions.
+The heap-order invariant is local: every parent is `≤` both of its children (min-heap; a max-heap reverses the comparison). Sift-up restores it along a single root-ward path after an append; sift-down restores it along a single leaf-ward path after the root is replaced. The invariant says nothing about order _across_ subtrees, so arbitrary ranks cannot be read directly from array positions.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -204,7 +205,8 @@ tab: Complexity
   }
 }
 ```
-````
+
+%% endtabs %%
 
 # Boundaries
 

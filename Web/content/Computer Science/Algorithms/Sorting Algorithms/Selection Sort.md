@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.547Z
-modified: 2026-08-20T20:41:15.547Z
-published: 2026-08-20T20:41:15.547Z
+modified: 2026-10-23T19:06:27.546Z
+published: 2026-10-23T19:06:27.546Z
 topic:
   - Computer Science
 subtopic:
@@ -20,16 +20,13 @@ The minimum scan is unconditional. It examines every remaining element whether t
 
 **Operating condition:** each full suffix scan finalizes one prefix position with at most one swap.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
 
-
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"selection-sort","array":[8,3,5,1,9,2,7,4]}
 ```
-
-
 
 The first pass scans all eight elements, finds the minimum `1` at index 3, and swaps it with `a[0]`. That swap writes both indices 0 and 3, and it fixes index 0 permanently: no smaller value remains in the suffix, so index 0 is never revisited. Index 3 remains in the unsorted suffix and may be written again. The second pass repeats the scan over `a[1..7]`, now seven elements, and places `2`. Each pass performs at most one swap and shortens the unsorted suffix by one, so the sorted prefix on the left grows by one element per pass while the comparison work on the right falls by one — the sorted region and the scanning cost move in opposite directions.
 
@@ -39,7 +36,7 @@ After pass `i` completes, `a[0..i]` holds the `i + 1` smallest values in sorted 
 
 The scan is unconditional: there is no shortcut that ends a pass early and no outer flag that notices an already-sorted array. Each pass still ends with at most one swap. The prefix position becomes final; the suffix position does not and can be written again.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -104,9 +101,9 @@ tab: Complexity
 
 Comparisons dominate the running time and are identical across all three rows — the direct consequence of an unconditional scan. Swaps are the axis that varies, yet even the worst case stays linear at no more than one swap per pass. Auxiliary space is `O(1)`: the sort runs in place over the original array using a handful of index variables.
 
-
 A stable variant exists but abandons the write budget that motivates the algorithm. Rather than swapping the minimum into place, it removes the minimum and shifts the intervening elements up by one — the same move [[Computer Science/Algorithms/Sorting Algorithms/Insertion Sort|Insertion Sort]] makes. Preserving equal-key order costs `Θ(n)` writes per pass, restoring the `Θ(n²)` write total that the swap-based form was chosen to avoid.
-````
+
+%% endtabs %%
 
 Selection sort is unstable because a long-distance swap can carry one equal key past another. Sorting `[5a, 3, 5b, 1]` by value produces `[1, 3, 5b, 5a]`. The two fives have changed order.
 

@@ -24,6 +24,8 @@ _site/
 .impeccable/
 
 # Obsidian
+# Quartz Syncer settings contain machine-local paths and personal state.
+Vault/.obsidian/plugins/quartz-syncer/data.json
 **/.obsidian/workspace.json
 Vault/.obsidian/plugins/qard/study-backups/
 Vault/Assets/Docs/

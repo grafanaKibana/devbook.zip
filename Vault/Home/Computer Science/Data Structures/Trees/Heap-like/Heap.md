@@ -17,8 +17,9 @@ A heap gets that speed by maintaining less order than a sorted list. It guarante
 
 **Core shape:** complete binary tree → heap-order property (min-heap: parent ≤ both children) → packed implicitly into an array → only the root is the extreme
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"heap","array":[3,5,8,9]}
@@ -44,7 +45,7 @@ No per-node object, no child pointers, no allocation per element — just one ar
 
 The heap-order invariant is local: every parent is `≤` both of its children (min-heap; a max-heap reverses the comparison). Sift-up restores it along a single root-ward path after an append; sift-down restores it along a single leaf-ward path after the root is replaced. The invariant says nothing about order *across* subtrees, so arbitrary ranks cannot be read directly from array positions.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -201,7 +202,8 @@ tab: Complexity
   }
 }
 ```
-~~~~~
+
+%% endtabs %%
 
 # Boundaries
 

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.539Z
-modified: 2026-08-20T20:41:15.539Z
-published: 2026-08-20T20:41:15.539Z
+modified: 2026-10-23T19:06:27.544Z
+published: 2026-10-23T19:06:27.544Z
 topic:
   - Computer Science
 subtopic:
@@ -18,8 +18,9 @@ Bogo sort takes generate-and-test literally. It checks whether the array is sort
 
 Bogo Sort is useful as a counterexample. Practical sorting algorithms preserve progress by shrinking the unsorted region or removing disorder. Bogo Sort discards all previous work after every shuffle.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 { "algorithm": "bogo-sort", "array": [3, 1, 4, 2] }
@@ -27,7 +28,7 @@ tab: Visualization
 
 The teaching trace enumerates a deterministic bounded sequence of permutations instead of depending on random luck. It accepts at most five items and stops after at most 120 attempts. Those limits keep the card reproducible and finite; the classical algorithm remains random and has no finite worst-case bound.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -65,7 +66,8 @@ tab: Complexity
   }
 }
 ```
-````
+
+%% endtabs %%
 
 # Attempt cap and termination
 

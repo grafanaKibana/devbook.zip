@@ -16,8 +16,9 @@ A build system needs an order that respects every dependency. Model each prerequ
 The order exists only when the dependency graph is acyclic. A cycle `a → b → … → a` eventually requires `a` to precede itself. Both standard constructions detect that contradiction while attempting to build the order: a directed graph is topologically sortable exactly when it is a DAG.
 
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 
 ```steptrace
@@ -36,7 +37,7 @@ Both standard algorithms enforce the same invariant: no edge ends up pointing ba
 
 The two are valid because they realize the invariant from opposite ends. Kahn's cannot emit `v` until every `u` with `u → v` has already left the queue, so `u` precedes `v`. DFS finishes `v` before `u` whenever `u → v`, so `u`'s larger finish time places it earlier in reverse-finish order. Neither can produce a backward-pointing edge.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -114,7 +115,8 @@ tab: Complexity
   }
 }
 ```
-~~~~~
+
+%% endtabs %%
 
 # Where the Order Fails or Splits
 

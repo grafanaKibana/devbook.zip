@@ -17,8 +17,9 @@ That reduction has two requirements. The values must be ordered, and the middle 
 
 
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 
 
@@ -46,7 +47,7 @@ The range strictly shrinks after every miss. The iterative form carries the two 
 
 Compute the midpoint as `left + (right - left) / 2`. It is algebraically equivalent to `(left + right) / 2`, but it never forms the potentially overflowing sum.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -108,7 +109,8 @@ tab: Complexity
   }
 }
 ```
-~~~~~
+
+%% endtabs %%
 
 # When the Assumptions Stop Holding
 

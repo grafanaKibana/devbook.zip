@@ -17,8 +17,9 @@ During the search, a mismatch lowers only the matched pattern length. The text i
 
 
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 
 
@@ -40,7 +41,7 @@ The search keeps a text index `i` and a match length `j` (equivalently, the curr
 
 The text index `i` never moves backward. On a mismatch, only `j` retreats through previously computed prefix lengths, preserving the text already consumed.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -142,7 +143,8 @@ tab: Complexity
   }
 }
 ```
-~~~~~
+
+%% endtabs %%
 
 # Where the Guarantee Earns Its Keep
 

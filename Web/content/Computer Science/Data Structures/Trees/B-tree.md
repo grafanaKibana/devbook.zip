@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.603Z
-modified: 2026-08-20T20:41:15.604Z
-published: 2026-08-20T20:41:15.604Z
+modified: 2026-10-23T19:06:27.549Z
+published: 2026-10-23T19:06:27.549Z
 topic:
   - Computer Science
 subtopic:
@@ -22,8 +22,9 @@ A B-tree packs many sorted keys into each page-sized node. With fan-out `m` in t
 
 Inserting the prefilled `6` temporarily gives the leaf four keys. The median `10` moves into a new root, leaving the remaining keys in two leaves.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"b-tree","values":[10,20,5],"value":6}
@@ -50,7 +51,7 @@ The trace uses that **bottom-up** algorithm: descend first, permit a temporary `
 
 A delete can leave a node below the `⌈m/2⌉−1` minimum. The repair mirrors the split. If an adjacent sibling has a spare key, the node **borrows** — the parent's separator rotates down and the sibling's key rotates up. If both siblings are minimal, the node **merges** with a sibling and the separating parent key into one node; merges cascade upward, and when the root empties the tree loses a level. Deleting from an internal node is first reduced to the leaf case by swapping the key with its in-order predecessor.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -182,7 +183,8 @@ tab: Complexity
   }
 }
 ```
-````
+
+%% endtabs %%
 
 # When Block Orientation Stops Paying off
 

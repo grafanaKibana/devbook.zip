@@ -15,8 +15,9 @@ A [[Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree|mini
 
 The cut property certifies each selection. A component defines a cut between its vertices and the rest of the graph, so its cheapest outgoing edge belongs to some MST. Two components may select the same edge, while several equal-weight selections may form a cycle. Deduplication and the union-find check keep a compatible forest.
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"boruvka"}
@@ -27,7 +28,7 @@ For vertices `A, B, C, D` with edges `AB=1`, `AC=4`, `BC=2`, `BD=5`, `CD=3`, the
 
 Within each original connected component, every current piece that is not yet complete chooses an edge to another piece. Once distinct choices are unioned, the number of active pieces there falls by at least half because each merged piece contains at least two previous ones. Isolated or already-complete components remain unchanged. Applying the contraction independently inside each connected component still gives at most `⌈log₂ V⌉` merging rounds.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -106,7 +107,8 @@ tab: Complexity
   }
 }
 ```
-~~~~~
+
+%% endtabs %%
 
 # Boundary Cases
 

@@ -17,8 +17,9 @@ A size-`k` heap avoids sorting or retaining the whole feed. Finding the `k` **la
 
 
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"top-k-elements","array":[12,3,17,8,25,5,19,14],"k":3}
@@ -39,7 +40,7 @@ The polarity is the load-bearing choice. Exposing the *minimum* of the retained 
 
 Because the heap never exceeds `k` entries, it retains only the current candidates rather than materializing the full input. That fixed capacity is what lets the input arrive as a stream.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -95,7 +96,8 @@ tab: Complexity
   }
 }
 ```
-~~~~~
+
+%% endtabs %%
 
 # When the Assumptions Stop Holding
 

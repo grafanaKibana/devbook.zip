@@ -15,8 +15,9 @@ An integer is a fixed-width array of bits — 32 for `int`, 64 for `long`. Any q
 
 
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 
 
@@ -47,7 +48,7 @@ Three identities carry most of the weight beyond masking:
 
 A machine word doubles as a set over a universe of at most 64 elements: bit `i` records membership of element `i`, union is `|`, intersection is `&`, and difference is `a & ~b`. The signed-`int` subset loop below deliberately supports only `0 <= n <= 30`; within that bound, `1 << n` counts the subsets of an `n`-element set. That representation is the state in bitmask [[Home/Computer Science/Algorithms/Paradigms/Dynamic Programming|Dynamic Programming]], where "which of these `n` items are already used" is a single integer.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -98,7 +99,7 @@ tab: Complexity
 }
 ```
 
-~~~~~
+%% endtabs %%
 
 # Where the Representation Bites
 

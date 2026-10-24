@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.549Z
-modified: 2026-08-20T20:41:15.550Z
-published: 2026-08-20T20:41:15.550Z
+modified: 2026-10-23T19:06:27.547Z
+published: 2026-10-23T19:06:27.547Z
 topic:
   - Computer Science
 subtopic:
@@ -22,16 +22,13 @@ The visualization follows classic TimSort as retained by OpenJDK: strictly desce
 
 **Classic/OpenJDK shape:** partially ordered input → detect natural runs → pad short runs to `minrun` with binary insertion sort → merge under stack size invariants while preserving equal-key order.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
 
-
+%% tab: Visualization %%
 
 ```steptrace
 { "algorithm": "tim-sort", "array": [5, 6, 7, 8, 9, 4, 3, 1, 2, 8], "minrun": 4 }
 ```
-
-
 
 Classic/OpenJDK TimSort's turning point is the moment the run stack collapses two adjacent runs because their sizes have just violated the merge invariant. The animation shows that over a small partially-ordered array.
 
@@ -54,7 +51,7 @@ The three-run condition `Z > Y + X` fails when `[8]` lands (`5 > 4 + 1` is false
 
 The algorithm combines run detection, extension, stack policy, and merging.
 
-**Classic/OpenJDK run detection.** From the current position the scan extends a run as long as elements stay ascending (`a[i] <= a[i+1]`) or *strictly* descending (`a[i] > a[i+1]`). A descending run is reversed. The asymmetry is load-bearing: because descent is strict, a stretch of equal keys can never form a descending run, so reversal never disturbs equal keys. Current CPython instead accepts non-increasing runs: it reverses each equal-key block while scanning, then reverses the whole run, so the double reversal restores equal keys to their original order.
+**Classic/OpenJDK run detection.** From the current position the scan extends a run as long as elements stay ascending (`a[i] <= a[i+1]`) or _strictly_ descending (`a[i] > a[i+1]`). A descending run is reversed. The asymmetry is load-bearing: because descent is strict, a stretch of equal keys can never form a descending run, so reversal never disturbs equal keys. Current CPython instead accepts non-increasing runs: it reverses each equal-key block while scanning, then reverses the whole run, so the double reversal restores equal keys to their original order.
 
 **`minrun`.** A natural run shorter than its target is extended by binary [[Computer Science/Algorithms/Sorting Algorithms/Insertion Sort|insertion sort]]: following elements are pulled in and placed with a binary search for the insertion point. OpenJDK computes one fixed `minrun` for the array from the high-order bits of `n`; `MIN_MERGE = 32` gives `minrun ∈ [16, 32]` (`minrun = n` for `n < 32`). Current CPython uses `MAX_MINRUN = 64`, but since 2025 it carries the fractional remainder of `n / 2^e` forward, so successive targets can differ by one: for `n = 315`, they are a mix of 39 and 40 instead of one fixed 40. The variable targets keep each level of the merge tree as balanced as possible.
 
@@ -64,7 +61,7 @@ The algorithm combines run detection, extension, stack policy, and merging.
 
 **Merging and galloping.** A production merge uses [[Computer Science/Algorithms/Sorting Algorithms/Merge Sort|merge sort]]'s two-way merge into a temporary copy of the smaller run, resolving ties toward the earlier run to stay stable. When one run wins `MIN_GALLOP = 7` comparisons in a row, the merge switches to **galloping**: exponential search followed by binary search finds the end of the winning block, which is then copied together. If galloping stops paying off it backs out to one-at-a-time merging.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -129,8 +126,9 @@ tab: Complexity
 
 **Galloping can be net-negative.** A short winning streak can reach `MIN_GALLOP` and enter galloping, only for the exponential/binary search to find a block too short to amortize the probe before the merge falls back to one-at-a-time comparisons. The adaptive penalty raises the entry threshold after that failed attempt, but the probe and mode switch are still wasted work.
 
-**`O(n)` memory, not in place.** The merge buffer of up to `n/2` is pure overhead when stability is unobservable — for example sorting a huge primitive array whose elements have no identity beyond their value. That cost is precisely why Java sorts *primitives* with a dual-pivot [[Computer Science/Algorithms/Sorting Algorithms/Quick Sort|quick sort]] and .NET sorts with [[Computer Science/Algorithms/Sorting Algorithms/Introsort|introsort]] rather than Tim sort.
-````
+**`O(n)` memory, not in place.** The merge buffer of up to `n/2` is pure overhead when stability is unobservable — for example sorting a huge primitive array whose elements have no identity beyond their value. That cost is precisely why Java sorts _primitives_ with a dual-pivot [[Computer Science/Algorithms/Sorting Algorithms/Quick Sort|quick sort]] and .NET sorts with [[Computer Science/Algorithms/Sorting Algorithms/Introsort|introsort]] rather than Tim sort.
+
+%% endtabs %%
 
 # When the Merge Policy Breaks
 

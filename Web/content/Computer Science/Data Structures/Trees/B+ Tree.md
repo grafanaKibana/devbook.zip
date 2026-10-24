@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.603Z
-modified: 2026-08-20T20:41:15.603Z
-published: 2026-08-20T20:41:15.603Z
+modified: 2026-10-23T19:06:27.549Z
+published: 2026-10-23T19:06:27.549Z
 topic:
   - Computer Science
 subtopic:
@@ -26,8 +26,9 @@ Internal nodes carry no values, so each routing page packs more separators than 
 
 Inserting the prefilled `25` splits a leaf. The first key in the new right leaf is copied into the parent and remains in the leaf. A **Range scan** for `[15, 40]` then descends to the first match and follows the green links across the remaining leaves.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"b-plus-tree","values":[5,9,12,17,33,40,21],"value":25,"range":[15,40]}
@@ -51,7 +52,7 @@ Splits treat the two node kinds differently. Splitting a leaf **copies up** the 
 
 A point lookup compares against separators to pick a child at each level and always continues to a leaf, because that is the only place a value exists. A range scan `[A, B]` descends to the leaf where `A` would be inserted, starts at `lower_bound(A)`, then follows `next` pointers until a key exceeds `B`. `A` need not exist. The descent cost is the tree height; the leaf-page walk depends on how many result pages are touched.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -222,7 +223,8 @@ tab: Complexity
   }
 }
 ```
-````
+
+%% endtabs %%
 
 # Boundaries
 

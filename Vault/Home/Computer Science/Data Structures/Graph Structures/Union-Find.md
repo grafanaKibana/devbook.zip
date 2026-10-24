@@ -17,8 +17,9 @@ Union by rank controls how trees combine. Path compression rewrites the chain tr
 
 **Core condition:** merges only accumulate → each `find` walks toward a root
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"union-find","n":7}
@@ -38,7 +39,7 @@ Each heuristic attacks tree height from a different direction.
 
 Neither heuristic alone reaches near-constant time: rank bounds how tall a tree can grow, while compression guarantees each tall path is walked only a few times before it flattens.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -200,7 +201,8 @@ tab: Complexity
   }
 }
 ```
-~~~~~
+
+%% endtabs %%
 
 # Where the Bound and the Interface Stop
 

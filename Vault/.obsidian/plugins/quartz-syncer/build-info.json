@@ -1,0 +1,11 @@
+{
+  "source": "https://github.com/saberzero1/quartz-syncer/pull/153",
+  "commit": "d93e86b8f42e33321663c834335dbc9e98fa3d08",
+  "temporaryBuild": true,
+  "buildCommand": "npm ci --ignore-scripts && npm run build",
+  "sha256": {
+    "main.js": "1242b6f40d26872f1aa5a02ab2ecc1b838ee383157af099ac2a0eef24fb16ee2",
+    "manifest.json": "59b5c233ce0cddee72ce07de9deea6c69d2c98c203311a9c2f3f04cada142402",
+    "styles.css": "38eec3c560b4c9a56195bf69193510a07f2fcc139a98638ded3e16c79f4cda4e"
+  }
+}

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.540Z
-modified: 2026-08-20T20:41:15.540Z
-published: 2026-08-20T20:41:15.540Z
+modified: 2026-10-23T19:06:27.544Z
+published: 2026-10-23T19:06:27.544Z
 topic:
   - Computer Science
 subtopic:
@@ -18,10 +18,9 @@ When adjacent swaps are the only permitted move, every value travels one positio
 
 That movement is uneven. A large value can cross the array in one pass, while a small value moves left only when the scan reaches its immediate neighbor. After each pass, one more tail position is settled. A pass with no swaps proves that the array is already ordered and ends the sort early.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
 
-
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"bubble-sort","array":[8,3,5,1,9,2,7,4]}
@@ -39,7 +38,7 @@ The `swapped` flag turns "no work happened" into a stopping condition. On alread
 
 The sort is **stable** because a swap happens only on a strict `a[i] > a[i+1]`; equal keys never cross, so their input order survives.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -103,7 +102,8 @@ tab: Complexity
 ```
 
 The best case assumes the `swapped` early-exit flag. Without it, even ordered input follows the quadratic comparison curve because the fixed double loop still schedules every pass.
-````
+
+%% endtabs %%
 
 # Where Adjacency Hurts
 

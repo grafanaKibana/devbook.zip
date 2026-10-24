@@ -21,39 +21,41 @@ With nonnegative edge costs, the optimality guarantee holds when `0 ≤ h(n) ≤
 
 The decisive step is which node leaves the frontier next, and how `h` skews that choice toward the goal.
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
 
-~~~~tabsdown
-tab: Coordinate grid
+%% tab: Visualization %%
+
+%% tabs %%
+
+%% tab: Coordinate grid %%
 
 
 ```steptrace
 {"algorithm":"a-star","variant":"coordinate-grid"}
 ```
 
-tab: Cities
+%% tab: Cities %%
 
 
 ```steptrace
 {"algorithm":"a-star","variant":"ukraine-cities","start":"Lviv","target":"Kharkiv"}
 ```
 
-tab: Building floor
+%% tab: Building floor %%
 
 
 ```steptrace
 {"algorithm":"a-star","variant":"building-floor"}
 ```
 
-tab: Midtown map
+%% tab: Midtown map %%
 
 
 ```steptrace
 {"algorithm":"a-star","variant":"midtown-map"}
 ```
 
-~~~~
+%% endtabs %%
 
 #### Why `f = g + h` Stays Optimal
 
@@ -65,7 +67,7 @@ With nonnegative edge costs, each iteration pops the frontier node with the smal
 
 The pull is concrete: on a 4-connected grid with Manhattan `h`, a node reached in `g = 3` that sits toward the goal (`h = 2`, `f = 5`) is popped before an equal-cost node reached in `g = 3` that faces away (`h = 5`, `f = 8`). Dijkstra ranks both by `g` alone and expands the second as readily as the first. That `h` term is the whole difference between a corridor and a disc, and setting `h ≡ 0` erases it — which is exactly what turns A* back into [[Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]].
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -170,7 +172,7 @@ tab: Complexity
 
 The exponential bounds describe implicit state spaces with unit or uniform positive edge costs. On an explicit finite graph with a consistent, `O(1)` heuristic, an indexed heap with decrease-key gives `O((V + E) log V)` time and `O(V)` auxiliary space. The C# implementation below instead enqueues lazy duplicates: up to `O(E)` queue records, `O((V + E) log E)` time, and `O(V + E)` auxiliary space. Heuristic quality and tie-breaking still matter: even exact `h*` can expand many states tied at the optimal solution cost, while an uninformative heuristic approaches Dijkstra's search.
 
-~~~~~
+%% endtabs %%
 
 # When the Heuristic Breaks the Guarantee
 

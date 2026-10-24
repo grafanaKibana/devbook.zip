@@ -88,11 +88,43 @@ function tableStarts(lines, start, end) {
   return starts;
 }
 
+function markerLayoutAt(lines, start, limit = lines.length) {
+  let depth = 1;
+  for (let index = start + 1; index < limit; index += 1) {
+    const fence = isFenceOpener(lines[index]);
+    if (fence) {
+      const closer = new RegExp(`^${fence[1][0]}{${fence[1].length},}\\s*$`);
+      index += 1;
+      while (index < limit && !closer.test(lines[index])) index += 1;
+      continue;
+    }
+    if (/^%% tabs %%\s*$/.test(lines[index])) depth += 1;
+    if (/^%% endtabs %%\s*$/.test(lines[index]) && --depth === 0) {
+      return { start, end: index, markers: true, unclosed: false };
+    }
+  }
+  return { start, end: limit, markers: true, unclosed: true };
+}
+
 function findOuter(lines) {
   const groups = [];
   for (let start = 0; start < lines.length; start += 1) {
+    if (/^%% tabs %%\s*$/.test(lines[start])) {
+      const group = markerLayoutAt(lines, start);
+      groups.push(group);
+      start = group.end;
+      continue;
+    }
     const opener = /^((?:~{5,}|`{4,}))tabsdown\s*$/.exec(lines[start]);
-    if (!opener) continue;
+    if (!opener) {
+      const fence = isFenceOpener(lines[start]);
+      if (fence) {
+        const closer = new RegExp(`^${fence[1][0]}{${fence[1].length},}\\s*$`);
+        start += 1;
+        while (start < lines.length && !closer.test(lines[start])) start += 1;
+      }
+      continue;
+    }
     const delimiter = opener[1];
     const end = lines.findIndex(
       (line, index) => index > start && line.trim() === delimiter,
@@ -110,6 +142,19 @@ function findOuter(lines) {
 function findOuterLabels(lines, outer) {
   const labels = [];
   for (let index = outer.start + 1; index < outer.end; index += 1) {
+    if (outer.markers && /^%% tabs %%\s*$/.test(lines[index])) {
+      index = markerLayoutAt(lines, index, outer.end).end;
+      continue;
+    }
+    if (outer.markers) {
+      const fence = isFenceOpener(lines[index]);
+      if (fence) {
+        const closer = new RegExp(`^${fence[1][0]}{${fence[1].length},}\\s*$`);
+        index += 1;
+        while (index < outer.end && !closer.test(lines[index])) index += 1;
+        continue;
+      }
+    }
     const nested = /^((?:~{3,4}|`{4,}))tabsdown\s*$/.exec(lines[index]);
     if (nested) {
       const nestedEnd = lines.findIndex(
@@ -120,7 +165,7 @@ function findOuterLabels(lines, outer) {
       index = nestedEnd;
       continue;
     }
-    const label = /^tab:\s+(.+?)\s*$/.exec(lines[index]);
+    const label = (outer.markers ? /^%% tab:\s+(.+?)\s+%%\s*$/ : /^tab:\s+(.+?)\s*$/).exec(lines[index]);
     if (label) labels.push({ index, name: label[1] });
   }
   return labels;
@@ -173,20 +218,18 @@ function validateUnit(lines, start, end, path, errors, allowStaticImage) {
 function parseInner(lines, start, end, path, errors) {
   const first = firstRenderable(lines, start, end);
   if (first < 0) return null;
+  const markers = /^%% tabs %%\s*$/.test(lines[first]);
   const opener = /^((?:~{3,4}|`{4,}))tabsdown\s*$/.exec(lines[first]);
-  if (!opener) return null;
-  const innerEnd = lines.findIndex(
+  if (!opener && !markers) return null;
+  const markerGroup = markers ? markerLayoutAt(lines, first, end) : null;
+  const innerEnd = markers ? (markerGroup.unclosed ? -1 : markerGroup.end) : lines.findIndex(
     (line, index) => index > first && index < end && line.trim() === opener[1],
   );
   if (innerEnd < 0) {
     addError(errors, path, first, "Nested Tabsdown block is not closed");
     return { start: first, end, variants: [], sharedStart: end };
   }
-  const labels = [];
-  for (let index = first + 1; index < innerEnd; index += 1) {
-    const label = /^tab:\s+(.+?)\s*$/.exec(lines[index]);
-    if (label) labels.push({ index, name: label[1] });
-  }
+  const labels = findOuterLabels(lines, { start: first, end: innerEnd, markers });
   if (labels.length === 0) {
     addError(errors, path, first, "Nested Tabsdown block has no variants");
   }
@@ -198,10 +241,13 @@ function parseInner(lines, start, end, path, errors) {
   return { start: first, end: innerEnd, variants, sharedStart: innerEnd + 1 };
 }
 
-function scanOutsideComplexity(lines, excludedStart, excludedEnd, path, errors) {
+function scanOutsideComplexity(lines, excludedStart, excludedEnd, path, errors, outer = null) {
   const included = (index) => index < excludedStart || index >= excludedEnd;
   const ranges = fenceRanges(lines, 0, lines.length);
+  // Legacy outer fences hid their complete contents from this line-based scan.
+  // Keep the same boundary for marker layouts; table checks below remain unchanged.
   const inFence = (index) =>
+    (outer?.markers && index >= outer.start && index <= outer.end) ||
     ranges.some((range) => index >= range.start && index < range.end);
   let inQuestions = false;
 
@@ -328,7 +374,7 @@ function validateText(text, path, { requireTabs = true } = {}) {
     addError(errors, path, table, "Complexity tab may not contain Markdown tables");
   }
 
-  scanOutsideComplexity(lines, complexity.index, outer.end + 1, path, errors);
+  scanOutsideComplexity(lines, complexity.index, outer.end + 1, path, errors, outer);
   return [...new Set(errors)];
 }
 
@@ -353,7 +399,9 @@ function fullInventory() {
   if (concepts.length !== 100) errors.push(`inventory: expected 100 concept notes, found ${concepts.length}`);
   if (folderNotes.length !== 14) errors.push(`inventory: expected 14 FolderNotes, found ${folderNotes.length}`);
 
-  const tabsdownPaths = concepts.filter((path) => readFileSync(path, "utf8").includes("tabsdown"));
+  const tabsdownPaths = concepts.filter((path) =>
+    findOuter(normalize(readFileSync(path, "utf8")).split("\n")).length > 0,
+  );
   const algorithmCount = tabsdownPaths.filter((path) => path.includes("/Algorithms/")).length;
   const dataStructureCount = tabsdownPaths.filter((path) => path.includes("/Data Structures/")).length;
   if (tabsdownPaths.length !== 97) {
@@ -374,6 +422,7 @@ function runSelfTests() {
   const multi = (variantSupport = "", sharedSupport = "") => `~~~~~tabsdown\ntab: Visualization\n\n~~~~tabsdown\ntab: One\n\n\`\`\`steptrace\n{}\n\`\`\`\n${variantSupport}\ntab: Two\n\n\`\`\`steptrace\n{}\n\`\`\`\n~~~~\n${sharedSupport}\ntab: Complexity\n\n${complexity}\n~~~~~\n`;
   const pass = [
     ["ordinary-no-heading.md", ordinary()],
+    ["visualization-complexity-prose.md", ordinary("The scan costs O(n). Average runtime is linear.\n")],
     ["backtick-outer.md", backtick()],
     ["ordinary-one-heading.md", ordinary("#### Invariant\n\nSupport.\n")],
     ["multi-shared.md", multi("", "#### Shared invariant\n\nSupport.\n")],
@@ -381,6 +430,11 @@ function runSelfTests() {
     ["Quadtree.md", ordinary().replace("```steptrace\n{}\n```", "![[quadtree.png]]")],
     ["questions-recall.md", `${ordinary()}\n# Questions\n\nWhy is the operation O(log n) amortized?\n\n# References\n`],
   ];
+  const markerVersion = (text) => !text.includes("tabsdown") ? text : text
+    .replace(/^(?:~{4,5}|`{4})tabsdown\s*$/gm, "%% tabs %%")
+    .replace(/^(?:~{4,5}|`{4})\s*$/gm, "%% endtabs %%")
+    .replace(/^tab:\s*(.*?)\s*$/gm, "%% tab: $1 %%");
+  pass.push(...pass.map(([path, text]) => [`markers/${path}`, markerVersion(text)]));
   for (const [path, text] of pass) {
     const errors = validateText(text, path);
     if (errors.length) throw new Error(`${path} should pass:\n${errors.join("\n")}`);
@@ -393,6 +447,7 @@ function runSelfTests() {
     ["two-headings.md", ordinary("#### One\n\n#### Two\n"), "at most one heading"],
     ["mixed-headings.md", multi("#### Variant\n", "#### Shared\n"), "may not coexist"],
     ["complexity-table.md", ordinary().replace(complexity, `${complexity}\n\n| A | B |\n| --- | --- |\n| 1 | 2 |`), "may not contain Markdown tables"],
+    ["visualization-complexity-table.md", ordinary("| Case | Time |\n| --- | --- |\n| Worst | O(n) |\n"), "Complexity table exists outside"],
     ["outside-heading.md", `${ordinary()}\n# Complexity analysis\n`, "heading exists outside"],
     ["outside-table.md", `${ordinary()}\n| Case | Time |\n| --- | --- |\n| Worst | O(n) |\n`, "Complexity table exists outside"],
     ["outside-bound.md", `${ordinary()}\nThe scan costs O(n).\n`, "Asymptotic complexity claim exists outside"],
@@ -406,13 +461,31 @@ function runSelfTests() {
     ],
     ["not-quadtree.md", ordinary().replace("```steptrace\n{}\n```", "![[image.png]]"), "must begin with a StepTrace"],
   ];
+  fail.push(...fail.map(([path, text, expected]) => [`markers/${path}`, markerVersion(text), expected]));
   for (const [path, text, expected] of fail) {
     const errors = validateText(text, path);
     if (!errors.some((error) => error.includes(expected))) {
       throw new Error(`${path} should report ${expected}:\n${errors.join("\n")}`);
     }
   }
-  console.log(`PASS self-test (${pass.length} positive, ${fail.length} negative fixtures)`);
+  const literalMarkers = "```markdown\n%% tabs %%\n%% tab: Example %%\n%% endtabs %%\n```\n";
+  if (findOuter(literalMarkers.split("\n")).length !== 0) {
+    throw new Error("Marker examples inside ordinary code must not count as layouts");
+  }
+  const literalLabel = markerVersion(ordinary()).replace(
+    "{}\n```", "{}\n%% tab: Unexpected %%\n%% endtabs %%\n```",
+  );
+  const literalErrors = validateText(literalLabel, "literal-code-markers.md");
+  if (literalErrors.length) throw new Error(literalErrors.join("\n"));
+  const unclosedOuter = markerVersion(ordinary()).replace(/%% endtabs %%\s*$/, "");
+  if (!validateText(unclosedOuter, "unclosed-marker.md").some((error) => error.includes("not closed"))) {
+    throw new Error("An unclosed marker layout must fail validation");
+  }
+  const unclosedNested = markerVersion(multi()).replace("%% endtabs %%", "");
+  if (!validateText(unclosedNested, "unclosed-nested-marker.md").some((error) => error.includes("not closed"))) {
+    throw new Error("An unclosed nested marker layout must fail validation");
+  }
+  console.log(`PASS self-test (${pass.length} positive, ${fail.length} negative fixtures, 4 marker-boundary checks)`);
 }
 
 const args = process.argv.slice(2);

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.542Z
-modified: 2026-08-20T20:41:15.543Z
-published: 2026-08-20T20:41:15.543Z
+modified: 2026-10-23T19:06:27.545Z
+published: 2026-10-23T19:06:27.545Z
 topic:
   - Computer Science
 subtopic:
@@ -20,20 +20,17 @@ Introsort, introduced by David Musser in 1997, keeps quicksort's partitioning an
 
 **Core condition:** quicksort partitioning + a depth counter that hands off to [[Computer Science/Algorithms/Sorting Algorithms/Heap Sort|Heap Sort]] past `2⌊log₂ n⌋` → insertion sort finishes tiny partitions.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
 
-
+%% tab: Visualization %%
 
 ```steptrace
 { "algorithm": "introsort", "array": [2, 1, 9, 8, 7, 6, 5, 4, 3], "depthLimit": 1, "smallPartitionThreshold": 3 }
 ```
 
-
-
 This compact trace deliberately lowers the depth limit to `1` and the insertion cutoff to `3`. Those are illustrative values, not runtime defaults: they keep quicksort, the heap fallback, and a visible insertion cleanup inside nine bars.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -102,7 +99,7 @@ The small-partition cutoff is a separate optimization. Ranges below ~16 elements
 
 The depth multiplier (`2`) and the small-partition threshold (~16) are tunable and implementation-specific. Raising the multiplier tolerates deeper imbalance before heap sort intervenes; lowering the cutoff recurses further on small ranges before the final pass. Both shift constant factors and the point where the switch fires; neither changes the `O(n log n)` asymptotic guarantee, because that guarantee rests on the switch existing, not on its exact threshold.
 
-````
+%% endtabs %%
 
 Introsort does not preserve equal-key order once quicksort partitioning or heap sort runs. A small input may happen to use only the insertion-sort finish, but that does not make the algorithm stable.
 

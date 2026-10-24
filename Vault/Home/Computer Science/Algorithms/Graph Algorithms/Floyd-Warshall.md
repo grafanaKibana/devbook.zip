@@ -18,8 +18,9 @@ Floyd-Warshall fills the whole table with one triple loop by recasting the probl
 
 The decisive step is a single relaxation sweeping the whole distance matrix for one admitted intermediate vertex.
 
-~~~~~tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 
 ```steptrace
@@ -60,7 +61,7 @@ dist after init:            final all-pairs distances:
 
 `dist[0][3]` holds the direct edge `7` until vertex `2` becomes admissible at stage `k = 2`, where `0→2→3` costs `5 + 1 = 6` and wins. `dist[1][3]` first drops to `15` through vertex `0` at `k = 0`, then to `3` at `k = 2` via `1→2→3`. No diagonal entry ends negative, so the graph carries no negative cycle.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -109,7 +110,8 @@ tab: Complexity
   }
 }
 ```
-~~~~~
+
+%% endtabs %%
 
 # Diagram and C# Implementation
 

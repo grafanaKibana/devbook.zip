@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.600Z
-modified: 2026-08-20T20:41:15.600Z
-published: 2026-08-20T20:41:15.600Z
+modified: 2026-10-23T19:06:27.548Z
+published: 2026-10-23T19:06:27.548Z
 topic:
   - Computer Science
 subtopic:
@@ -22,8 +22,9 @@ The representation is a backing array plus `count` and `capacity`. Compared with
 
 The interactive view keeps the dynamic-array state between operations. Fill its spare slots, then append once more to expose the allocate-copy-grow step.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"dynamic-array"}
@@ -38,7 +39,7 @@ Three fields define the state. The backing array holds the elements in index ord
 
 Geometric growth is the whole reason append stays cheap on average. Doubling makes resizes exponentially rarer as the array grows. Consider the copy work across `n` appends that trigger resizes at sizes `1, 2, 4, …, n`: the total elements copied is `1 + 2 + 4 + … + n < 2n`.
 
-In .NET this structure is `List<T>`; other ecosystems call it a *vector* or *array list*. `List<T>` doubles the capacity on overflow and exposes `Count` and `Capacity` directly, so `new List<T>(capacity)` pre-reserves the buffer and skips the intermediate resizes when the final size is known.
+In .NET this structure is `List<T>`; other ecosystems call it a _vector_ or _array list_. `List<T>` doubles the capacity on overflow and exposes `Count` and `Capacity` directly, so `new List<T>(capacity)` pre-reserves the buffer and skips the intermediate resizes when the final size is known.
 
 #### Boundaries Tied to the Backing Array
 
@@ -50,7 +51,7 @@ The growth `FACTOR` is a direct memory-versus-copy trade. A factor of `2` wastes
 
 `Insert(0, x)` shifts every existing element one slot right; `RemoveAt(0)` shifts every element left. A resize separately invalidates references, spans, and pointers into the old backing array because growth replaces that array. A versioned enumerator such as `List<T>.Enumerator` is invalidated whenever a mutation changes the collection version, even when no resize occurs, and detects the mismatch on `MoveNext` or `Reset`.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -184,7 +185,8 @@ tab: Complexity
   }
 }
 ```
-````
+
+%% endtabs %%
 
 # Diagram and C# Implementation
 

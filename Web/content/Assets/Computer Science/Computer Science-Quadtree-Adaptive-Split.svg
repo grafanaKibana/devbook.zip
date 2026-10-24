@@ -1,0 +1,55 @@
+  <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="680" viewBox="0 0 1200 680" role="img" aria-labelledby="title desc">
+  <title id="title">Adaptive point-region quadtree split</title>
+  <desc id="desc">An overfull northeast quadrant splits into four child regions while the other root quadrants remain unchanged.</desc>
+  <rect width="1200" height="680" rx="32" fill="#101827"/>
+  <text x="70" y="70" fill="#f8fafc" font-family="system-ui, sans-serif" font-size="30" font-weight="700">Before insertion</text>
+  <text x="730" y="70" fill="#f8fafc" font-family="system-ui, sans-serif" font-size="30" font-weight="700">After local split</text>
+
+  <g stroke="#94a3b8" stroke-width="4" fill="#172033">
+    <rect x="70" y="110" width="400" height="400" rx="8"/>
+    <line x1="270" y1="110" x2="270" y2="510"/>
+    <line x1="70" y1="310" x2="470" y2="310"/>
+  </g>
+  <rect x="270" y="110" width="200" height="200" fill="#5b2131" opacity="0.9"/>
+  <g fill="#fbbf24" stroke="#fff7d6" stroke-width="3">
+    <circle cx="326" cy="166" r="11"/>
+    <circle cx="399" cy="149" r="11"/>
+    <circle cx="367" cy="227" r="11"/>
+    <circle cx="431" cy="258" r="11"/>
+    <circle cx="302" cy="274" r="11"/>
+  </g>
+  <g fill="#cbd5e1" font-family="system-ui, sans-serif" font-size="18" font-weight="600">
+    <text x="90" y="142">NW</text><text x="288" y="142">NE · overfull</text>
+    <text x="90" y="342">SW</text><text x="288" y="342">SE</text>
+  </g>
+
+  <path d="M510 300 H655" stroke="#38bdf8" stroke-width="7" stroke-linecap="round"/>
+  <path d="M640 282 L662 300 L640 318" fill="none" stroke="#38bdf8" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="514" y="264" fill="#bae6fd" font-family="system-ui, sans-serif" font-size="19" font-weight="650">bucket capacity exceeded</text>
+
+  <g stroke="#94a3b8" stroke-width="4" fill="#172033">
+    <rect x="730" y="110" width="400" height="400" rx="8"/>
+    <line x1="930" y1="110" x2="930" y2="510"/>
+    <line x1="730" y1="310" x2="1130" y2="310"/>
+  </g>
+  <rect x="930" y="110" width="200" height="200" fill="#12354a" opacity="0.95"/>
+  <g stroke="#38bdf8" stroke-width="3">
+    <line x1="1030" y1="110" x2="1030" y2="310"/>
+    <line x1="930" y1="210" x2="1130" y2="210"/>
+  </g>
+  <g fill="#fbbf24" stroke="#fff7d6" stroke-width="3">
+    <circle cx="986" cy="166" r="11"/>
+    <circle cx="1059" cy="149" r="11"/>
+    <circle cx="1027" cy="227" r="11"/>
+    <circle cx="1091" cy="258" r="11"/>
+    <circle cx="962" cy="274" r="11"/>
+  </g>
+  <g fill="#cbd5e1" font-family="system-ui, sans-serif" font-size="18" font-weight="600">
+    <text x="750" y="142">NW</text><text x="948" y="142">NE</text>
+    <text x="750" y="342">SW</text><text x="948" y="342">SE</text>
+  </g>
+
+  <rect x="215" y="560" width="770" height="70" rx="18" fill="#172033" stroke="#334155" stroke-width="2"/>
+  <text x="600" y="590" text-anchor="middle" fill="#f8fafc" font-family="system-ui, sans-serif" font-size="22" font-weight="700">Only the overfull region subdivides</text>
+  <text x="600" y="617" text-anchor="middle" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="18">The root's NW, SW, and SE leaves keep their original bounds and state.</text>
+</svg>

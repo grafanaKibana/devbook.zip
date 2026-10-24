@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.605Z
-modified: 2026-08-20T20:41:15.606Z
-published: 2026-08-20T20:41:15.606Z
+modified: 2026-10-23T19:06:27.550Z
+published: 2026-10-23T19:06:27.550Z
 topic:
   - Computer Science
 subtopic:
@@ -24,8 +24,9 @@ The forest can hold many trees and many equal degrees between extract-mins, and 
 
 The initial forest is replayed through public **Insert** operations. Add roots lazily, use **Extract min** to consolidate equal degrees, then decrease an existing key to see the cut rule move it to the root list. **Reset** repeats those public inserts rather than loading a hidden prebuilt forest.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"fibonacci-heap","array":[3,7,18,24,26,39,41,52,63]}
@@ -39,7 +40,7 @@ Three invariants hold between operations:
 
 1. **Heap order.** Every node's key is `<=` each child's key.
 2. **Distinct root degrees only after consolidation.** Between extract-mins the root list may contain many roots of the same degree; consolidation restores distinctness, and that is the only place it is enforced.
-3. **The mark records one prior loss.** A root is always unmarked. A non-root becomes marked when it loses its *first* child to a cut; losing a *second* child triggers a cut of the node itself.
+3. **The mark records one prior loss.** A root is always unmarked. A non-root becomes marked when it loses its _first_ child to a cut; losing a _second_ child triggers a cut of the node itself.
 
 The mark bit is what bounds tree shape. Insert and merge never touch existing trees, so nothing bounds tree shape on its own — repeated decrease-keys could otherwise strip a high-degree node down to almost nothing and leave consolidation linking wide, shallow trees forever. The cascading cut caps the damage: a node is allowed to lose at most one child before it is itself cut up to the root list.
 
@@ -49,7 +50,7 @@ Which fields each operation may change:
 - **Decrease-key** — rewrites one node's key; if that breaks heap order with its parent, cuts the node to the root list (clearing its mark, since roots are unmarked), then cascades: while the parent was already marked, cut it too, upward. Degrees of cut parents drop by one.
 - **Extract-min** — removes the min root, promotes its children to roots, then consolidates by repeatedly linking two roots of equal degree (the larger key becomes a child of the smaller) until every root degree is distinct, and finally rescans the root list to reset the min pointer.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -237,7 +238,8 @@ tab: Complexity
   }
 }
 ```
-````
+
+%% endtabs %%
 
 # Where Laziness and Amortization Stop Paying
 

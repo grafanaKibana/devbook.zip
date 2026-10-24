@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.537Z
-modified: 2026-08-20T20:41:15.537Z
-published: 2026-08-20T20:41:15.537Z
+modified: 2026-10-23T19:06:27.544Z
+published: 2026-10-23T19:06:27.544Z
 topic:
   - Computer Science
 subtopic:
@@ -18,22 +18,17 @@ Naive string search restarts the pattern one position later after a mismatch, ev
 
 During the search, a mismatch lowers only the matched pattern length. The text index never retreats. The table identifies the longest prefix that already matches the consumed text's suffix. That invariant gives KMP a linear scan and lets it operate on a stream that cannot be rewound.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
 
-
+%% tab: Visualization %%
 
 ```steptrace
 {"algorithm":"kmp","text":"ABABCABAB","pattern":"ABAB"}
 ```
 
-
-
 The trace searches for the pattern `ABAB` in the text `ABABCABAB`.
 
 The first four characters match, so `j` reaches `4 = m` and a match is reported at index 0. Instead of restarting, `j` resets to `π[3] = 2`: the trailing `AB` of the region just matched is itself a prefix of the pattern, so those two characters already count as matched and the pattern strip slides right by two while the text pointer holds at index 4. There `C` fails against `pattern[2] = A`; `j` falls to `π[1] = 0`, so the same `C` may be compared again at index 4 against the shorter-prefix position before the text pointer advances. The pointer never retreats, and the scan re-enters the pattern at `A` to find the second match at index 5.
-
-
 
 The failure table `π` (also called the LPS array — longest proper prefix that is also a suffix) has one entry per pattern position. `π[j]` is the length of the longest proper prefix of `pattern[0..j]` that also occurs as a suffix of that same span. For `ABABC` the table is `[0, 0, 1, 2, 0]`: `ABAB` ends in `AB`, which is also its prefix, so `π[3] = 2`.
 
@@ -41,7 +36,7 @@ The search keeps a text index `i` and a match length `j` (equivalently, the curr
 
 The text index `i` never moves backward. On a mismatch, only `j` retreats through previously computed prefix lengths, preserving the text already consumed.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -143,7 +138,8 @@ tab: Complexity
   }
 }
 ```
-````
+
+%% endtabs %%
 
 # Where the Guarantee Earns Its Keep
 

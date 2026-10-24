@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-08-20T20:41:15.540Z
-modified: 2026-08-20T20:41:15.540Z
-published: 2026-08-20T20:41:15.540Z
+modified: 2026-10-23T19:06:27.545Z
+published: 2026-10-23T19:06:27.545Z
 topic:
   - Computer Science
 subtopic:
@@ -18,8 +18,9 @@ Cocktail shaker sort runs [[Computer Science/Algorithms/Sorting Algorithms/Bubbl
 
 The backward pass addresses Bubble Sort's main weakness. A small value near the tail can move several positions toward the front in one round instead of one position per forward pass. Strict comparison keeps equal values from crossing, so the sort remains stable. It is still mainly useful for explaining adjacent-swap behavior.
 
-````tabsdown
-tab: Visualization
+%% tabs %%
+
+%% tab: Visualization %%
 
 ```steptrace
 { "algorithm": "cocktail-shaker-sort", "array": [8, 3, 5, 1, 9, 2, 7, 4] }
@@ -27,7 +28,7 @@ tab: Visualization
 
 The forward sweep carries the largest live value to the right edge. The backward sweep carries the smallest live value to the left edge. A complete sweep with no swap proves that no adjacent inversion remains, so the array is sorted.
 
-tab: Complexity
+%% tab: Complexity %%
 
 ```complexity
 {
@@ -59,7 +60,8 @@ tab: Complexity
   }
 }
 ```
-````
+
+%% endtabs %%
 
 # Early exit and stability
 
