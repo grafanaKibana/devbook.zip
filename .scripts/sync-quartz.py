@@ -84,7 +84,7 @@ def executable():
     raise SyncError("Obsidian CLI not found. Open DevBook in Obsidian with CLI enabled, or set OBSIDIAN_BIN.")
 
 
-def cli(root, binary, *args, structured=True, timeout=None):
+def cli(root, binary, *args, structured=True, timeout=None, json_output=True):
     # Native Obsidian CLI can exit before asynchronous handlers finish when its
     # inherited stdin is already at EOF (as in Git hooks). Keep a private pipe
     # open until the response completes; never read the user's terminal input.
@@ -101,6 +101,8 @@ def cli(root, binary, *args, structured=True, timeout=None):
         os.close(write_fd)
     if result.returncode:
         raise SyncError("Obsidian command failed. Ensure the correct vault is open and CLI is enabled.")
+    if not json_output:
+        return result.stdout
     try:
         response = result.stdout.strip()
         if not structured and response.startswith("=> "):
@@ -182,34 +184,73 @@ def wait_for_indexes(root, binary, source):
         time.sleep(min(0.25, max(0, deadline - time.monotonic())))
 
 
-def export(root):
-    binary = executable()
-    identity = cli(root, binary, "eval", "code=JSON.stringify({vaultPath:app.vault.adapter.getBasePath(),datacoreReady:!!window.datacore&&app.plugins.plugins.datacore?.core?.initialized===true,preserveSupported:JSON.stringify(app.setting.pluginTabs.find(t=>t.id==='quartz-syncer')?.getSettingDefinitions?.()??[]).includes('obsidianCommentMode')})", structured=False)
+def loaded_vault(root, binary):
+    identity = cli(root, binary, "eval", "code=JSON.stringify({vaultPath:app.vault.adapter.getBasePath(),datacoreReady:!!window.datacore&&app.plugins.plugins.datacore?.core?.initialized===true,preserveSupported:JSON.stringify(app.setting.pluginTabs.find(t=>t.id==='quartz-syncer')?.getSettingDefinitions?.()??[]).includes('obsidianCommentMode'),syncerLoaded:!!app.plugins.plugins['quartz-syncer'],autoPublishActive:app.plugins.plugins['quartz-syncer']?.getEngineStatus?.()?.autoPublish})", structured=False)
     if Path(identity.get("vaultPath", "")).resolve() != (root / "Vault").resolve():
         raise SyncError("Connected Obsidian vault does not match this checkout's Vault directory.")
-    if identity.get("preserveSupported") is not True:
+    if identity.get("syncerLoaded") is not True or identity.get("preserveSupported") is not True:
         raise SyncError("The running Quartz Syncer does not support Preserve. Reload the installed PR build before committing.")
+    if type(identity.get("autoPublishActive")) is not bool:
+        raise SyncError("Quartz Syncer's background publishing state cannot be verified.")
+    return identity
+
+
+def reload_syncer(root, binary):
+    cli(root, binary, "plugin:reload", "id=quartz-syncer", json_output=False)
+    identity = loaded_vault(root, binary)
+    if identity["autoPublishActive"]:
+        raise SyncError("Quartz Syncer's background publisher is still active after reload; commit blocked.")
+    return identity
+
+
+def configure(root):
+    """Apply shared export policy through Syncer's public CLI; retain local data."""
+    binary = executable()
+    identity = loaded_vault(root, binary)
+    defaults = json.loads(Path(__file__).with_name("quartz-syncer.defaults.json").read_text())
+    settings = cli(root, binary, "quartz-syncer:config", "action=list", "format=json")
+    if identity["autoPublishActive"]:
+        # Stop the existing timer before changing any destination or compilation
+        # policy. Saving the interval alone does not stop the running engine.
+        if settings.get("autoPublishInterval") != 0:
+            cli(root, binary, "quartz-syncer:config", "action=set", "key=autoPublishInterval", "value=0", "format=json")
+        identity = reload_syncer(root, binary)
+        settings = cli(root, binary, "quartz-syncer:config", "action=list", "format=json")
+    changed = [key for key, value in defaults.items()
+               if key not in settings or type(settings[key]) is not type(value) or settings[key] != value]
+    configured_path = settings.get("quartzRepoPath")
+    target = str((root / "Web").resolve())
+    destination_changed = (settings.get("publishTarget") != "local"
+                           or not isinstance(configured_path, str)
+                           or not Path(configured_path).is_absolute()
+                           or Path(configured_path).resolve() != Path(target))
+    if changed or destination_changed:
+        # Clear before saving settings so a failed clear cannot leave a retry
+        # seeing updated settings but reusing compiled notes from the old policy.
+        cleared = cli(root, binary, "quartz-syncer:cache", "action=clear", "format=json")
+        if cleared.get("cleared") is not True:
+            raise SyncError("Compiled-note cache was not cleared; local configuration blocked.")
+        for key in changed:
+            cli(root, binary, "quartz-syncer:config", "action=set", "key=" + key,
+                "value=" + (defaults[key] if isinstance(defaults[key], str) else json.dumps(defaults[key], separators=(",", ":"))), "format=json")
+        if destination_changed:
+            cli(root, binary, "quartz-syncer:repo", "action=set-local", "path=" + target, "format=json")
+        identity = reload_syncer(root, binary)
     settings = cli(root, binary, "quartz-syncer:config", "action=list", "format=json")
     configured_path = settings.get("quartzRepoPath")
     if (settings.get("publishTarget") != "local"
-            or not isinstance(configured_path, str) or not configured_path
-            or (root / configured_path).resolve() != (root / "Web").resolve()
-            or settings.get("contentFolder") != "content"
-            or settings.get("vaultPath") != "Home/"
-            or settings.get("publishFrontmatterKey") != "publish"
-            or settings.get("allNotesPublishableByDefault") is not False
-            or settings.get("obsidianCommentMode") != "preserve"
-            or settings.get("autoPublishInterval") != 0
-            or settings.get("autoCleanOrphanedMedia") is not False):
-        raise SyncError("Syncer must export explicitly publish-marked Home/ notes to local Web/content with Preserve, disabled automatic publishing and disabled orphan-media cleanup.")
+            or not isinstance(configured_path, str) or not Path(configured_path).is_absolute()
+            or Path(configured_path).resolve() != Path(target)
+            or any(key not in settings or type(settings[key]) is not type(value) or settings[key] != value
+                   for key, value in defaults.items())):
+        raise SyncError("Quartz Syncer's local configuration does not match this checkout; commit blocked.")
+    return binary, settings, identity
+
+
+def export(root):
+    binary, settings, identity = configure(root)
     if settings.get("useDatacore") and identity.get("datacoreReady") is not True:
         raise SyncError("Datacore is not initialized. Wait for indexing to finish before committing.")
-    adapter = Path(__file__).with_name("quartz-relative-path.js").read_text()
-    binding = cli(root, binary, "eval", "code=" + adapter, structured=False)
-    if (binding.get("configuredPath") != configured_path
-            or Path(binding.get("resolvedPath", "")).resolve() != (root / "Web").resolve()
-            or Path(binding.get("vaultPath", "")).resolve() != (root / "Vault").resolve()):
-        raise SyncError("Relative Quartz destination binding failed; commit blocked.")
     log(root, "Verified local export destination and settings; starting publication.")
     before = snapshot(root)
     wait_for_indexes(root, binary, before)
@@ -255,9 +296,10 @@ def export(root):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--hook", help="Run this hook's maintenance inside the export lock")
+    parser.add_argument("--configure-only", action="store_true", help="Configure the open vault for this checkout without exporting or staging")
     args = parser.parse_args()
     root = Path(subprocess.check_output(["git", "rev-parse", "--show-toplevel"], text=True).strip()).resolve()
-    if not staged_source(root):
+    if not args.configure_only and not staged_source(root):
         return 0
     lock_path = Path(os.fsdecode(git(root, "rev-parse", "--git-path", "quartz-sync.lock")).strip())
     if not lock_path.is_absolute():
@@ -267,6 +309,11 @@ def main():
             fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         except BlockingIOError as error:
             raise SyncError("Another Quartz pre-commit sync is running; retry when it finishes.") from error
+        if args.configure_only:
+            configure(root)
+            log(root, "Local Quartz Syncer configuration verified.")
+            print("Quartz Syncer configured for this checkout; no export or staging performed.")
+            return 0
         guard_source(root)
         guard_output(root)
         if args.hook:

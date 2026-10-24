@@ -30,27 +30,21 @@ class QuartzSyncTests(unittest.TestCase):
         (self.repo / "Vault/note.md").write_text("after\n")
         self.git("add", "Vault/note.md")
         self.fake = self.repo / "fake-obsidian"
-        self.fake.write_text('''#!/usr/bin/env python3
-import json, os, pathlib, select, sys, time
+        self.fake.write_text(r'''#!/usr/bin/env python3
+import json, os, pathlib, re, select, sys, time
 root = pathlib.Path.cwd()
 scenario = os.environ.get("SCENARIO", "")
 args = " ".join(sys.argv[1:])
-with (root / "calls").open("a") as f: f.write(args + "\\n")
+with (root / "calls").open("a") as f: f.write(args + "\n")
 if scenario == "stdin-eof":
-    # Reproduce native CLI behavior: exit before the async response if stdin closes.
     if select.select([sys.stdin], [], [], 0.05)[0] and os.read(0, 1) == b"": sys.exit(0)
 if scenario == "timeout": time.sleep(2)
 if scenario == "malformed": print("not json"); sys.exit(0)
 if scenario == "false": print(json.dumps({"success":False})); sys.exit(0)
-if "eval" in sys.argv and "devbook.quartz-syncer.relative-path" in args:
-    configured = "Web/" if scenario == "relative" else str(root / "Web")
-    result = {"configuredPath":configured,"resolvedPath":str(root / ("Other" if scenario == "binding-failure" else "Web")),"vaultPath":str(root / "Vault")}
-    print("=> " + json.dumps(result)); sys.exit(0)
 if "eval" in sys.argv and "nativePublishPaths" in args:
     inventory = [str(p.relative_to(root / "Vault")) for p in (root / "Vault").rglob("*") if p.is_file() and not any(part.startswith(".") for part in p.relative_to(root / "Vault").parts)]
-    disk = ["Home/example.md"]
-    native = [] if scenario == "native-incomplete" else disk
-    extended = [] if scenario == "extended-incomplete" else disk
+    native = [] if scenario == "native-incomplete" else ["Home/example.md"]
+    extended = [] if scenario == "extended-incomplete" else ["Home/example.md"]
     if scenario == "same-count-wrong-path": native = ["Home/other.md"]
     if scenario == "missing-new-file": inventory = []
     if scenario == "startup-wait" and (root / "calls").read_text().count("nativePublishPaths") == 1: native = []
@@ -64,23 +58,64 @@ if "eval" in sys.argv and "nativePublishPaths" in args:
         for value in metadata.values(): value["mtime"] = 0
     result = {"inventory":inventory, "observedStats":observed, "metadataStats":metadata, "nativePublishPaths":native,"extendedPublishPaths":extended,"extendedReady":scenario != "index-unready"}
     print("=> " + json.dumps(result)); sys.exit(0)
+engine_path = root / ".git/fake-syncer-engine.json"
+if not engine_path.exists(): engine_path.write_text(json.dumps({"active":scenario in ["active-timer", "reload-failure", "reload-noop"]}))
+engine = json.loads(engine_path.read_text())
+if "plugin:reload" in sys.argv:
+    if scenario == "reload-failure": sys.exit(1)
+    if scenario != "reload-noop": engine_path.write_text(json.dumps({"active":False}))
+    print("Reloaded plugin: quartz-syncer"); sys.exit(0)
 if "eval" in sys.argv:
-    result = {"vaultPath":str(root / ("Other" if scenario == "vault" else "Vault")), "datacoreReady":scenario != "datacore", "preserveSupported":scenario != "unsupported"}
+    result = {"vaultPath":str(root / ("Other" if scenario == "vault" else "Vault")), "datacoreReady":scenario != "datacore", "preserveSupported":scenario != "unsupported", "syncerLoaded":True,"autoPublishActive":engine["active"]}
     print("=> " + json.dumps(result)); sys.exit(0)
+state_path = root / ".git/fake-syncer-settings.json"
+if state_path.exists(): settings = json.loads(state_path.read_text())
+else:
+    defaults_path = pathlib.Path(__DEFAULTS_PATH__)
+    settings = json.loads(defaults_path.read_text()) if defaults_path.exists() else {}
+    settings.update({"publishTarget":"local", "quartzRepoPath":str(root / "Web"), "contentFolder":"content", "vaultPath":"Home/", "publishFrontmatterKey":"publish", "allNotesPublishableByDefault":False, "obsidianCommentMode":"preserve", "autoPublishInterval":0, "autoCleanOrphanedMedia":False,"useDatacore":True,"localOnly":{"keep":True}})
+    if scenario == "absent-defaults": settings = {"localOnly":{"keep":True}}
+    if scenario in ["relocated", "repo-failure", "repo-noop"]: settings["quartzRepoPath"] = str(root / "previous/Web")
+    if scenario == "relative": settings["quartzRepoPath"] = "Web/"
+    if scenario in ["active-timer", "reload-failure", "reload-noop"]:
+        settings.update({"autoPublishInterval":60,"obsidianCommentMode":"remove","quartzRepoPath":str(root / "previous/Web")})
+    if scenario in ["remove", "config-failure", "config-noop", "cache-clear-failure"]: settings["obsidianCommentMode"] = "remove"
+    state_path.write_text(json.dumps(settings))
 if "quartz-syncer:config" in args:
-    data = {"publishTarget":"remote" if scenario == "remote" else "local", "quartzRepoPath":("Web/" if scenario == "relative" else "Other/" if scenario == "wrong-relative" else str(root / ("Other" if scenario == "destination" else "Web"))), "contentFolder":"content", "vaultPath":"Other/" if scenario == "vault-mapping" else "Home/", "obsidianCommentMode":"remove" if scenario == "remove" else "preserve", "autoPublishInterval":0, "autoCleanOrphanedMedia":False, "useDatacore":True, "publishFrontmatterKey":"other" if scenario == "publish-key" else "publish", "allNotesPublishableByDefault":scenario == "all-notes"}
+    if "action=set" in sys.argv:
+        if scenario == "config-failure": print(json.dumps({"success":False})); sys.exit(0)
+        key = next(a[4:] for a in sys.argv if a.startswith("key="))
+        raw = next(a[6:] for a in sys.argv if a.startswith("value="))
+        if key == "obsidianCommentMode" and raw not in ["remove", "preserve"]:
+            print(json.dumps({"success":False})); sys.exit(0)
+        trimmed = raw.strip()
+        if trimmed.startswith(("{", "[")) or trimmed in ["true", "false", "null"] or re.fullmatch(r"-?\d+(\.\d+)?", trimmed):
+            try: value = json.loads(trimmed)
+            except ValueError: value = raw
+        else: value = raw
+        if scenario != "config-noop": settings[key] = value
+        state_path.write_text(json.dumps(settings))
+        data = {"key":key,"value":value}
+    else: data = settings
+elif "quartz-syncer:repo" in args:
+    if scenario == "repo-failure": print(json.dumps({"success":False})); sys.exit(0)
+    target = next(a[5:] for a in sys.argv if a.startswith("path="))
+    if scenario != "repo-noop": settings.update({"publishTarget":"local","quartzRepoPath":target})
+    state_path.write_text(json.dumps(settings))
+    data = {"mode":"local","localPath":target}
 elif "quartz-syncer:publish" in args:
     if scenario == "edit": (root / "Vault/note.md").write_text("concurrent")
     time.sleep(0.05)
     content = "exported"
-    if scenario == "query": content = "```datacoretsx\\nreturn [];\\n```"
-    if scenario == "comment-query": content = "%%\\n```datacoretsx\\nreturn [];\\n```\\n%%"
+    if scenario == "query": content = "```datacoretsx\nreturn [];\n```"
+    if scenario == "comment-query": content = "%%\n```datacoretsx\nreturn [];\n```\n%%"
     (root / "Web/content/note.md").write_text(content)
     data = {"failures":[{"error":"compile"}] if scenario == "partial" else [], "skipped":0}
 elif "quartz-syncer:delete" in args: data = {"filesDeleted":0}
 elif "quartz-syncer:cache" in args:
+    if "action=clear" in sys.argv and scenario == "cache-clear-failure": print(json.dumps({"success":False})); sys.exit(0)
     if scenario == "refresh-failure" or (scenario == "final-refresh-failure" and (root / "calls").read_text().count("action=tree-refresh") == 2): print(json.dumps({"success":False})); sys.exit(0)
-    data = {"refreshed":True}
+    data = {"refreshed":True,"cleared":True}
 elif "quartz-syncer:media" in args:
     if "action=clean" in args:
         if scenario == "cleanup-failure": print(json.dumps({"success":False})); sys.exit(0)
@@ -89,14 +124,14 @@ elif "quartz-syncer:media" in args:
         data = {"files":[{"linked":False}] * (6 if scenario == "mass-cleanup" else 1) if scenario in ["cleanup-failure", "mass-cleanup", "cleanup"] else []}
 else: data = {"unpublished":0,"deleted":0,"changed":12}
 print(json.dumps({"success":True,"data":data}))
-''')
+'''.replace("__DEFAULTS_PATH__", repr(str(SCRIPT.with_name("quartz-syncer.defaults.json")))))
         self.fake.chmod(0o755)
 
     def git(self, *args):
         return subprocess.check_output(["git", *args], cwd=self.repo).decode()
 
-    def run_sync(self, scenario="", timeout="5"):
-        return subprocess.run([sys.executable, str(SCRIPT)], cwd=self.repo,
+    def run_sync(self, scenario="", timeout="5", configure_only=False):
+        return subprocess.run([sys.executable, str(SCRIPT), *(["--configure-only"] if configure_only else [])], cwd=self.repo,
                               env={**os.environ, "OBSIDIAN_BIN":str(self.fake), "SCENARIO":scenario,
                                    "QUARTZ_SYNC_TIMEOUT":timeout}, capture_output=True, text=True)
 
@@ -117,9 +152,10 @@ print(json.dumps({"success":True,"data":data}))
         self.assertLess(refreshes[1], status)
 
     def test_export_failures_block_without_staging_output(self):
-        for scenario in ["false", "malformed", "partial", "vault", "destination", "remote", "remove", "edit", "cleanup-failure", "mass-cleanup", "datacore", "unsupported", "query", "refresh-failure", "final-refresh-failure", "vault-mapping", "publish-key", "all-notes", "wrong-relative", "binding-failure"]:
+        for scenario in ["false", "malformed", "partial", "vault", "edit", "cleanup-failure", "mass-cleanup", "datacore", "unsupported", "query", "refresh-failure", "final-refresh-failure", "config-failure", "repo-failure", "config-noop", "repo-noop", "cache-clear-failure"]:
             with self.subTest(scenario=scenario):
                 (self.repo / "calls").unlink(missing_ok=True)
+                (self.repo / ".git/fake-syncer-settings.json").unlink(missing_ok=True)
                 result = self.run_sync(scenario)
                 self.assertNotEqual(result.returncode, 0)
                 self.assertEqual(self.git("show", ":Web/content/note.md"), "before\n")
@@ -232,7 +268,7 @@ print(json.dumps({"success":True,"data":data}))
         for scenario in ["native-incomplete", "extended-incomplete", "missing-new-file", "same-count-wrong-path", "index-unready", "stale-stat", "stale-size", "stale-metadata"]:
             with self.subTest(scenario=scenario):
                 (self.repo / "calls").unlink(missing_ok=True)
-                result = self.run_sync(scenario, "0.5")
+                result = self.run_sync(scenario, "2")
                 self.assertNotEqual(result.returncode, 0)
                 self.assertNotIn("quartz-syncer:publish", (self.repo / "calls").read_text())
                 self.assertEqual(self.git("show", ":Web/content/note.md"), "before\n")
@@ -257,92 +293,99 @@ print(json.dumps({"success":True,"data":data}))
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertGreaterEqual((self.repo / "calls").read_text().count("nativePublishPaths"), 3)
 
-    def test_relative_quartz_path_is_bound_before_publication(self):
-        result = self.run_sync("relative")
+    def test_absent_shared_defaults_are_configured_without_replacing_local_preferences(self):
+        result = self.run_sync("absent-defaults")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        settings = json.loads((self.repo / ".git/fake-syncer-settings.json").read_text())
+        self.assertEqual(settings["obsidianCommentMode"], "preserve")
+        self.assertEqual(Path(settings["quartzRepoPath"]), (self.repo / "Web").resolve())
+        self.assertEqual(settings["localOnly"], {"keep":True})
+        calls = (self.repo / "calls").read_text()
+        self.assertIn("action=set-local", calls)
+        self.assertLess(calls.index("action=clear"), calls.index("quartz-syncer:config action=set"))
+        self.assertLess(calls.index("action=clear"), calls.index("quartz-syncer:publish"))
+
+    def test_relocated_and_relative_destinations_are_repaired_locally(self):
+        for scenario in ["relocated", "relative"]:
+            with self.subTest(scenario=scenario):
+                (self.repo / ".git/fake-syncer-settings.json").unlink(missing_ok=True)
+                result = self.run_sync(scenario, configure_only=True)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                settings = json.loads((self.repo / ".git/fake-syncer-settings.json").read_text())
+                self.assertEqual(Path(settings["quartzRepoPath"]), (self.repo / "Web").resolve())
+
+    def test_wrong_vault_is_checked_before_configuration_writes(self):
+        result = self.run_sync("vault", configure_only=True)
+        self.assertNotEqual(result.returncode, 0)
+        calls = (self.repo / "calls").read_text()
+        self.assertNotIn("quartz-syncer:config", calls)
+        self.assertNotIn("quartz-syncer:repo", calls)
+
+    def test_configure_only_skips_source_and_generated_output_guards(self):
+        (self.repo / "Vault/new.md").write_text("untracked")
+        (self.repo / "Web/content/note.md").write_text("local output")
+        result = self.run_sync("remove", configure_only=True)
         self.assertEqual(result.returncode, 0, result.stderr)
         calls = (self.repo / "calls").read_text()
-        self.assertLess(calls.index("devbook.quartz-syncer.relative-path"), calls.index("quartz-syncer:publish"))
+        self.assertIn("action=set", calls)
+        self.assertNotIn("quartz-syncer:publish", calls)
+        self.assertNotIn("quartz-syncer:delete", calls)
+        self.assertEqual(self.git("show", ":Web/content/note.md"), "before\n")
+
+    def test_matching_local_configuration_is_not_written_again(self):
+        result = self.run_sync(configure_only=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        calls = (self.repo / "calls").read_text()
+        self.assertNotIn("action=set", calls)
+        self.assertNotIn("action=clear", calls)
+        self.assertNotIn("plugin:reload", calls)
+
+    def test_failed_cache_clear_leaves_old_settings_and_retry_reconfigures(self):
+        failed = self.run_sync("cache-clear-failure")
+        self.assertNotEqual(failed.returncode, 0)
+        settings_path = self.repo / ".git/fake-syncer-settings.json"
+        self.assertEqual(json.loads(settings_path.read_text())["obsidianCommentMode"], "remove")
+        self.assertNotIn("action=set", (self.repo / "calls").read_text())
+        retried = self.run_sync()
+        self.assertEqual(retried.returncode, 0, retried.stderr)
+        self.assertEqual(json.loads(settings_path.read_text())["obsidianCommentMode"], "preserve")
+
+    def test_shared_defaults_exclude_machine_personal_and_cache_state(self):
+        defaults = json.loads(SCRIPT.with_name("quartz-syncer.defaults.json").read_text())
+        excluded = {"quartzRepoPath", "settingsSchemaVersion", "pluginVersion", "gitRemoteUrl", "gitBranch",
+                    "gitAuthType", "gitAuthUsername", "lastUsedSettingsTab", "cache", "cacheTimestamp",
+                    "useCache", "syncCache", "persistCache", "enableSystemCommands", "timestampFormat"}
+        self.assertFalse(set(defaults) & excluded)
+        self.assertEqual(defaults["obsidianCommentMode"], "preserve")
+        self.assertEqual(defaults["autoPublishInterval"], 0)
+
+    def test_active_timer_is_stopped_before_destination_and_policy_changes(self):
+        result = self.run_sync("active-timer", configure_only=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        calls = (self.repo / "calls").read_text()
+        self.assertEqual(calls.count("plugin:reload id=quartz-syncer"), 2)
+        self.assertLess(calls.index("plugin:reload"), calls.index("action=set-local"))
+        self.assertLess(calls.index("plugin:reload"), calls.index("key=obsidianCommentMode"))
+        self.assertFalse(json.loads((self.repo / ".git/fake-syncer-engine.json").read_text())["active"])
+
+    def test_failed_or_noop_reload_blocks_and_retry_stops_existing_timer(self):
+        for scenario in ["reload-failure", "reload-noop"]:
+            with self.subTest(scenario=scenario):
+                for name in ["fake-syncer-settings.json", "fake-syncer-engine.json"]:
+                    (self.repo / ".git" / name).unlink(missing_ok=True)
+                result = self.run_sync(scenario)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertNotIn("quartz-syncer:publish", (self.repo / "calls").read_text())
+                self.assertTrue(json.loads((self.repo / ".git/fake-syncer-engine.json").read_text())["active"])
+                self.assertEqual(json.loads((self.repo / ".git/fake-syncer-settings.json").read_text())["autoPublishInterval"], 0)
+                retried = self.run_sync(configure_only=True)
+                self.assertEqual(retried.returncode, 0, retried.stderr)
+                self.assertFalse(json.loads((self.repo / ".git/fake-syncer-engine.json").read_text())["active"])
 
     def test_nonvault_change_skips_cli(self):
         self.git("restore", "--staged", "Vault/note.md")
         self.assertEqual(self.run_sync().returncode, 0)
         self.assertFalse((self.repo / "calls").exists())
 
-
-
-class QuartzRelativePathTests(unittest.TestCase):
-    def node(self, assertions):
-        setup = r"""
-const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const vm = require('node:vm');
-const source = fs.readFileSync(process.argv[1], 'utf8');
-let vaultPath = '/checkout/Vault';
-const calls = { publisher:0, destination:0, hub:0, compatibility:0, status:0 };
-const settings = { quartzRepoPath:'Web/', another:{enabled:true} };
-const plugin = { settings,
- invalidateCachedInstances(){ calls.publisher++; },
- syncStatusCacheDestination(){ calls.destination++; },
- hubDetectionCache:{clear(){calls.hub++;}},
- quartzCompatibility:{invalidate(){calls.compatibility++;}},
- statusCache:{invalidate(){calls.status++;}} };
-const app = { plugins:{plugins:{'quartz-syncer':plugin}},
- vault:{adapter:{getBasePath(){return vaultPath;}}} };
-const bind = () => JSON.parse(vm.runInNewContext(source, {app, require, Symbol}));
-"""
-        result = subprocess.run(["node", "-e", setup + assertions,
-                                 str(SCRIPT.with_name("quartz-relative-path.js"))],
-                                capture_output=True, text=True)
-        self.assertEqual(result.returncode, 0, result.stderr)
-
-    def test_relative_resolution_and_json_preserve_original_settings(self):
-        self.node(r"""
-process.chdir(require('node:os').tmpdir());
-const identity = plugin.settings;
-assert.deepEqual(bind(), {configuredPath:'Web/',resolvedPath:'/checkout/Web',vaultPath:'/checkout/Vault'});
-assert.equal(plugin.settings, identity);
-assert.equal(settings.quartzRepoPath, '/checkout/Web');
-settings.another.enabled = false;
-settings.newField = 'retained';
-const saved = JSON.parse(JSON.stringify(settings));
-assert.equal(saved.quartzRepoPath, 'Web/');
-assert.equal(saved.another.enabled, false);
-assert.equal(saved.newField, 'retained');
-assert.equal(JSON.parse(JSON.stringify({success:true,data:settings})).data.quartzRepoPath, 'Web/');
-assert.equal(Object.getOwnPropertyDescriptor(settings, 'toJSON').enumerable, false);
-assert.equal(Object.getOwnPropertySymbols(settings).length, 1);
-assert.equal(Object.getOwnPropertyDescriptor(settings, Object.getOwnPropertySymbols(settings)[0]).enumerable, false);
-""")
-
-    def test_idempotence_setter_and_relocation_invalidate_only_when_needed(self):
-        self.node(r"""
-bind();
-assert.deepEqual(Object.values(calls), [1,1,1,1,1]);
-bind();
-settings.quartzRepoPath = 'Web/';
-assert.deepEqual(Object.values(calls), [1,1,1,1,1]);
-settings.quartzRepoPath = 'Other/';
-assert.equal(settings.quartzRepoPath, '/checkout/Other');
-assert.equal(JSON.parse(JSON.stringify(settings)).quartzRepoPath, 'Other/');
-assert.deepEqual(Object.values(calls), [2,2,2,2,2]);
-vaultPath = '/moved/Vault';
-bind();
-assert.equal(settings.quartzRepoPath, '/moved/Other');
-assert.deepEqual(Object.values(calls), [3,3,3,3,3]);
-bind();
-assert.deepEqual(Object.values(calls), [3,3,3,3,3]);
-""")
-
-    def test_empty_and_absolute_paths_remain_unchanged(self):
-        self.node(r"""
-settings.quartzRepoPath = '';
-assert.equal(bind().resolvedPath, '');
-assert.equal(JSON.parse(JSON.stringify(settings)).quartzRepoPath, '');
-settings.quartzRepoPath = '/absolute/Web/';
-assert.equal(settings.quartzRepoPath, '/absolute/Web/');
-assert.equal(JSON.parse(JSON.stringify(settings)).quartzRepoPath, '/absolute/Web/');
-settings.quartzRepoPath = '';
-assert.equal(settings.quartzRepoPath, '');
-""")
 
 if __name__ == "__main__": unittest.main()
