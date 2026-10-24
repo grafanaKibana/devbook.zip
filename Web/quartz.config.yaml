@@ -51,7 +51,7 @@ plugins:
         - git
         - filesystem
     order: 10
-  - source: github:grafanaKibana/quartz-tabsdown#0.6.0
+  - source: github:grafanaKibana/quartz-tabsdown
     enabled: true
     options:
       # Mirrors every Tabsdown control set in the vault's Style Settings
