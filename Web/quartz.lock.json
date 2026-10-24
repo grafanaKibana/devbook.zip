@@ -170,10 +170,11 @@
       "installedAt": "2026-07-16T16:56:35.272Z"
     },
     "quartz-tabsdown": {
-      "source": "github:grafanaKibana/quartz-tabsdown",
+      "source": "github:grafanaKibana/quartz-tabsdown#0.6.0",
       "resolved": "https://github.com/grafanaKibana/quartz-tabsdown.git",
-      "commit": "5ad8ba881c6e45af4ffd94d8ccb71ec3941d802c",
-      "installedAt": "2026-08-03T10:45:35.770Z"
+      "commit": "0117edddac200bf100274461b7b6194ec1d841bd",
+      "ref": "0.6.0",
+      "installedAt": "2026-10-24T13:10:03.190Z"
     },
     "reader-mode": {
       "source": "github:quartz-community/reader-mode",
