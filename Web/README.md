@@ -27,13 +27,12 @@ Quartz requires **Node 22** (`.node-version`).
 
 ```bash
 cd Web
-npm ci                                     # install dependencies
-npx quartz plugin install --from-config    # install community plugins (pinned in quartz.lock.json)
-npx quartz build --serve                   # dev server + live reload → http://localhost:8080
-npx quartz build                           # production build → Web/public/
+npm ci                       # install dependencies
+npm run build                # update community plugins and build → Web/public/
+npx quartz build --serve     # dev server + live reload → http://localhost:8080
 ```
 
-On a fresh clone / CI, `plugin install --from-config` must run before the first build.
+`npm run build` regenerates and checks StepTrace, installs missing configured plugins with `plugin install --from-config`, updates installed plugins with `plugin install --latest`, then builds the site. The two install commands are separate so cached plugin directories also receive updates. Latest follows each plugin's upstream default branch, including commits newer than its last tagged release.
 
 ## Customization surfaces
 
@@ -78,8 +77,8 @@ Vercel builds from the repo-root `vercel.json`:
 
 ```text
 installCommand:  cd Web && npm ci
-buildCommand:    cd Web && npm run steptrace:build && npm run steptrace:check && npm run quartz -- plugin install --from-config && npm run quartz -- build
+buildCommand:    cd Web && npm run build
 outputDirectory: Web/public
 ```
 
-`quartz.lock.json` pins plugin commits — commit it, and CI must run the plugin-install step before the build. Vercel regenerates StepTrace before checking artifact freshness, so a stale committed Obsidian bundle cannot block the web build.
+Commit `quartz.lock.json` as the baseline for ordinary lockfile installs. The deployment build intentionally updates plugins beyond that baseline; its lockfile changes stay in the build workspace and are not committed back. Updates happen on each build; publishing a plugin update alone does not trigger a deployment. Vercel regenerates StepTrace before checking artifact freshness, so a stale committed Obsidian bundle cannot block the web build.

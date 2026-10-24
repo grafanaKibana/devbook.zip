@@ -13,6 +13,7 @@
   },
   "scripts": {
     "quartz": "node ./quartz/bootstrap-cli.mjs",
+    "build": "npm run steptrace:build && npm run steptrace:check && npm run quartz -- plugin install --from-config && npm run quartz -- plugin install --latest && npm run quartz -- build",
     "serve": "node ./quartz/bootstrap-cli.mjs build --serve --port 8085 --wsPort 3002",
     "readme:image": "playwright install chromium && node ./scripts/generate-readme-image.mjs",
     "docs": "node ./quartz/bootstrap-cli.mjs build --serve -d docs",
