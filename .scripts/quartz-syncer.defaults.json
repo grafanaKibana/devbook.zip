@@ -24,5 +24,6 @@
   "useBases": true,
   "useCanvas": true,
   "manageSyncerStyles": true,
-  "allowArbitraryFilePublishing": false
+  "allowArbitraryFilePublishing": false,
+  "useCache": true
 }

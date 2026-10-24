@@ -35,12 +35,22 @@ import json, os, pathlib, re, select, sys, time
 root = pathlib.Path.cwd()
 scenario = os.environ.get("SCENARIO", "")
 args = " ".join(sys.argv[1:])
+full_publish = "eval" in sys.argv and "publishBatch" in args
 with (root / "calls").open("a") as f: f.write(args + "\n")
 if scenario == "stdin-eof":
     if select.select([sys.stdin], [], [], 0.05)[0] and os.read(0, 1) == b"": sys.exit(0)
 if scenario == "timeout": time.sleep(2)
 if scenario == "malformed": print("not json"); sys.exit(0)
 if scenario == "false": print(json.dumps({"success":False})); sys.exit(0)
+if scenario == "nonzero-error" and "quartz-syncer:publish" in args:
+    print(json.dumps({"success":False,"error":"EACCES: permission denied password=DO_NOT_LOG_PASSWORD","data":{"config":"DO_NOT_LOG_CONFIG"}}))
+    print("write failed Authorization: Bearer DO_NOT_LOG_BEARER",file=sys.stderr); sys.exit(13)
+if "eval" in sys.argv and "cleanOrphanedMedia" in args:
+    if scenario == "cleanup-failure": result = {"success":False,"error":"EACCES: cannot remove Assets/orphan.svg"}
+    elif scenario == "cleanup-malformed": result = {}
+    elif scenario in ["cleanup", "dynamic-media"]: result = {"success":True,"data":{"outcome":"cleaned","filesDeleted":1}}
+    else: result = {"success":True,"data":{"outcome":"unchanged-or-withheld"}}
+    print("=> " + json.dumps(result)); sys.exit(0)
 if "eval" in sys.argv and "nativePublishPaths" in args:
     inventory = [str(p.relative_to(root / "Vault")) for p in (root / "Vault").rglob("*") if p.is_file() and not any(part.startswith(".") for part in p.relative_to(root / "Vault").parts)]
     native = [] if scenario == "native-incomplete" else ["Home/example.md"]
@@ -65,7 +75,7 @@ if "plugin:reload" in sys.argv:
     if scenario == "reload-failure": sys.exit(1)
     if scenario != "reload-noop": engine_path.write_text(json.dumps({"active":False}))
     print("Reloaded plugin: quartz-syncer"); sys.exit(0)
-if "eval" in sys.argv:
+if "eval" in sys.argv and not full_publish:
     result = {"vaultPath":str(root / ("Other" if scenario == "vault" else "Vault")), "datacoreReady":scenario != "datacore", "preserveSupported":scenario != "unsupported", "syncerLoaded":True,"autoPublishActive":engine["active"]}
     print("=> " + json.dumps(result)); sys.exit(0)
 state_path = root / ".git/fake-syncer-settings.json"
@@ -103,14 +113,21 @@ elif "quartz-syncer:repo" in args:
     if scenario != "repo-noop": settings.update({"publishTarget":"local","quartzRepoPath":target})
     state_path.write_text(json.dumps(settings))
     data = {"mode":"local","localPath":target}
-elif "quartz-syncer:publish" in args:
+elif "quartz-syncer:publish" in args or full_publish:
     if scenario == "edit": (root / "Vault/note.md").write_text("concurrent")
     time.sleep(0.05)
     content = "exported"
     if scenario == "query": content = "```datacoretsx\nreturn [];\n```"
     if scenario == "comment-query": content = "%%\n```datacoretsx\nreturn [];\n```\n%%"
     (root / "Web/content/note.md").write_text(content)
-    data = {"failures":[{"error":"compile"}] if scenario == "partial" else [], "skipped":0}
+    if full_publish:
+        for source in (root / "Vault/Assets").rglob("*"):
+            if source.is_file():
+                target = root / "Web/content/Assets" / source.relative_to(root / "Vault/Assets")
+                target.parent.mkdir(parents=True,exist_ok=True); target.write_bytes(source.read_bytes())
+    data = {"failures":[{"vaultPath":"Home/broken note.md","error":"EACCES: permission denied token=DO_NOT_LOG_TOKEN"}] if scenario == "partial" else [], "skipped":0}
+    if scenario == "structured-error":
+        print(json.dumps({"success":False,"error":"EACCES: cannot write output","data":{"failures":[{"vaultPath":"Home/broken note.md","error":"permission denied token=DO_NOT_LOG_TOKEN"}],"config":"DO_NOT_LOG_CONFIG"}})); sys.exit(0)
 elif "quartz-syncer:delete" in args: data = {"filesDeleted":0}
 elif "quartz-syncer:cache" in args:
     if "action=clear" in sys.argv and scenario == "cache-clear-failure": print(json.dumps({"success":False})); sys.exit(0)
@@ -119,11 +136,12 @@ elif "quartz-syncer:cache" in args:
 elif "quartz-syncer:media" in args:
     if "action=clean" in args:
         if scenario == "cleanup-failure": print(json.dumps({"success":False})); sys.exit(0)
+        if scenario == "dynamic-media": (root / "Web/content/Assets/query-only.svg").unlink()
         data = {"cleaned":1}
     else:
-        data = {"files":[{"linked":False}] * (6 if scenario == "mass-cleanup" else 1) if scenario in ["cleanup-failure", "mass-cleanup", "cleanup"] else []}
+        data = {"files":[{"linked":False}] * (6 if scenario == "mass-cleanup" else 1) if scenario in ["cleanup-failure", "mass-cleanup", "cleanup", "dynamic-media"] else []}
 else: data = {"unpublished":0,"deleted":0,"changed":12}
-print(json.dumps({"success":True,"data":data}))
+print(("=> " if full_publish else "") + json.dumps({"success":True,"data":data}))
 '''.replace("__DEFAULTS_PATH__", repr(str(SCRIPT.with_name("quartz-syncer.defaults.json")))))
         self.fake.chmod(0o755)
 
@@ -152,7 +170,7 @@ print(json.dumps({"success":True,"data":data}))
         self.assertLess(refreshes[1], status)
 
     def test_export_failures_block_without_staging_output(self):
-        for scenario in ["false", "malformed", "partial", "vault", "edit", "cleanup-failure", "mass-cleanup", "datacore", "unsupported", "query", "refresh-failure", "final-refresh-failure", "config-failure", "repo-failure", "config-noop", "repo-noop", "cache-clear-failure"]:
+        for scenario in ["false", "malformed", "partial", "vault", "edit", "cleanup-failure", "cleanup-malformed", "datacore", "unsupported", "query", "refresh-failure", "final-refresh-failure", "config-failure", "repo-failure", "config-noop", "repo-noop", "cache-clear-failure"]:
             with self.subTest(scenario=scenario):
                 (self.repo / "calls").unlink(missing_ok=True)
                 (self.repo / ".git/fake-syncer-settings.json").unlink(missing_ok=True)
@@ -193,7 +211,8 @@ print(json.dumps({"success":True,"data":data}))
 
     def test_media_cleanup_is_awaited(self):
         self.assertEqual(self.run_sync("cleanup").returncode, 0)
-        self.assertIn("action=clean force", (self.repo / "calls").read_text())
+        self.assertIn("cleanOrphanedMedia", (self.repo / "calls").read_text())
+        self.assertNotIn("quartz-syncer:media", (self.repo / "calls").read_text())
 
     def test_concurrent_run_is_blocked(self):
         with (self.repo / ".git/quartz-sync.lock").open("a") as lock:
@@ -354,8 +373,9 @@ print(json.dumps({"success":True,"data":data}))
         defaults = json.loads(SCRIPT.with_name("quartz-syncer.defaults.json").read_text())
         excluded = {"quartzRepoPath", "settingsSchemaVersion", "pluginVersion", "gitRemoteUrl", "gitBranch",
                     "gitAuthType", "gitAuthUsername", "lastUsedSettingsTab", "cache", "cacheTimestamp",
-                    "useCache", "syncCache", "persistCache", "enableSystemCommands", "timestampFormat"}
+                    "syncCache", "persistCache", "enableSystemCommands", "timestampFormat"}
         self.assertFalse(set(defaults) & excluded)
+        self.assertTrue(defaults["useCache"])
         self.assertEqual(defaults["obsidianCommentMode"], "preserve")
         self.assertEqual(defaults["autoPublishInterval"], 0)
 
@@ -382,10 +402,144 @@ print(json.dumps({"success":True,"data":data}))
                 self.assertEqual(retried.returncode, 0, retried.stderr)
                 self.assertFalse(json.loads((self.repo / ".git/fake-syncer-engine.json").read_text())["active"])
 
+    def test_asset_only_and_markdown_asset_updates_publish_unchanged_notes(self):
+        self.git("restore", "--staged", "Vault/note.md")
+        self.git("restore", "Vault/note.md")
+        for name in ["picture.svg", "asset.md", "drawing.excalidraw.md"]:
+            with self.subTest(name=name):
+                source = self.repo / "Vault/Assets" / name
+                target = self.repo / "Web/content/Assets" / name
+                source.parent.mkdir(parents=True,exist_ok=True)
+                target.parent.mkdir(parents=True,exist_ok=True)
+                source.write_bytes(b"old asset")
+                target.write_bytes(b"old asset")
+                self.git("add", "Vault", "Web/content")
+                self.git("-c", "user.name=Test", "-c", "user.email=test@example.com", "commit", "-qm", "asset baseline")
+                source.write_bytes(b"updated asset")
+                self.git("add", str(source))
+                result = self.run_sync("asset-update")
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual(self.git("show", ":Web/content/Assets/" + name), "updated asset")
+                self.assertIn("publishBatch", (self.repo / "calls").read_text())
+                self.git("reset", "--hard", "HEAD")
+
+    def test_query_rendered_media_survives_native_cleanup(self):
+        image = self.repo / "Web/content/Assets/query-only.svg"
+        image.parent.mkdir(parents=True)
+        image.write_text("query-generated link target")
+        self.git("add", "Vault", "Web/content")
+        self.git("-c", "user.name=Test", "-c", "user.email=test@example.com", "commit", "-qm", "query asset baseline")
+        (self.repo / "Vault/note.md").write_text("query refresh")
+        self.git("add", "Vault/note.md")
+        result = self.run_sync("dynamic-media")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertTrue(image.exists())
+        self.assertNotIn("quartz-syncer:media", (self.repo / "calls").read_text())
+
+    def test_native_cleanup_guard_is_an_honest_conservative_noop(self):
+        result = self.run_sync("mass-cleanup")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        log = (self.repo / ".git/quartz-syncer-publish.log").read_text()
+        self.assertIn("no changes or cleanup withheld by native safeguard", log)
+        self.assertNotIn("cleaned 0", log)
+
+    def test_failures_report_the_command_and_note_without_credentials(self):
+        for scenario in ["structured-error", "partial", "nonzero-error", "malformed"]:
+            with self.subTest(scenario=scenario):
+                result = self.run_sync(scenario)
+                self.assertNotEqual(result.returncode, 0)
+                if scenario != "malformed":
+                    self.assertIn("quartz-syncer:publish", result.stderr)
+                    self.assertIn("EACCES", result.stderr)
+                if scenario in ["structured-error", "partial"]:
+                    self.assertIn("Home/broken note.md", result.stderr)
+                if scenario == "nonzero-error":
+                    self.assertIn("13", result.stderr)
+                self.assertNotIn("DO_NOT_LOG", result.stderr)
+                self.assertNotIn("code=", result.stderr)
+                self.git("restore", "Web/content/note.md")
+
     def test_nonvault_change_skips_cli(self):
         self.git("restore", "--staged", "Vault/note.md")
         self.assertEqual(self.run_sync().returncode, 0)
         self.assertFalse((self.repo / "calls").exists())
+
+
+class PublisherBridgeTests(unittest.TestCase):
+    def run_bridge(self, name, assertions):
+        spec = importlib.util.spec_from_file_location("quartz_sync_bridge", SCRIPT)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        setup = r"""
+const assert = require('node:assert/strict');
+const vm = require('node:vm');
+const events = [];
+const publisher = {
+ beginDynamicSession(){events.push('begin');},
+ endDynamicSession(){events.push('end');},
+ async getPublishStatus(){events.push('status');return {unpublished:[{path:'new'}],changed:[{path:'changed'}],published:[{path:'unchanged'}]};}
+};
+const app = {plugins:{plugins:{'quartz-syncer':{getPublisher(){return publisher;}}}}};
+const run = async () => JSON.parse(await vm.runInNewContext(process.argv[1], {app}));
+(async()=>{
+"""
+        result = subprocess.run(["node", "-e", setup + assertions + "\n})().catch(error=>{console.error(error);process.exitCode=1;});",
+                                 getattr(module, name)], capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_full_publication_awaits_all_status_groups_and_closes_dynamic_session(self):
+        self.run_bridge("FULL_PUBLISH", r"""
+publisher.publishBatch = async files => {
+ assert.deepEqual(Array.from(files, file=>file.path), ['new','changed','unchanged']);
+ await new Promise(resolve=>setTimeout(resolve,5));
+ events.push('published');
+ return {success:true,filesPublished:3,filesDeleted:0};
+};
+const result = await run();
+assert.equal(result.success,true);
+assert.equal(result.data.filesPublished,3);
+assert.deepEqual(events,['begin','status','published','end']);
+""")
+
+    def test_full_publication_failures_and_throws_preserve_details_and_close_session(self):
+        self.run_bridge("FULL_PUBLISH", r"""
+publisher.publishBatch = async ()=>{throw new Error('EACCES: cannot write');};
+let result = await run();
+assert.equal(result.success,false);
+assert.match(result.error,/EACCES/);
+publisher.publishBatch = async ()=>({success:false,error:'compile failed',failures:[{vaultPath:'Home/broken.md',error:'denied'}]});
+result = await run();
+assert.equal(result.success,false);
+assert.equal(result.data.failures[0].vaultPath,'Home/broken.md');
+publisher.publishBatch = async ()=>null;
+assert.equal((await run()).success,false);
+publisher.publishBatch = async ()=>({success:true});
+assert.equal((await run()).success,false);
+assert.equal(events.filter(event=>event==='end').length,4);
+""")
+
+    def test_compiled_cleanup_awaits_native_method_and_distinguishes_guarded_noop(self):
+        self.run_bridge("COMPILED_MEDIA_CLEANUP", r"""
+publisher.cleanOrphanedMedia = async ()=>{await new Promise(resolve=>setTimeout(resolve,5));events.push('cleanup');return null;};
+let result = await run();
+assert.equal(result.success,true);
+assert.equal(result.data.outcome,'unchanged-or-withheld');
+assert.equal('filesDeleted' in result.data,false);
+assert.deepEqual(events,['begin','cleanup','end']);
+publisher.cleanOrphanedMedia = async ()=>({success:true,filesDeleted:1});
+result = await run();
+assert.equal(result.data.outcome,'cleaned');
+assert.equal(result.data.filesDeleted,1);
+publisher.cleanOrphanedMedia = async ()=>{throw new Error('EACCES: cannot delete');};
+result = await run();
+assert.equal(result.success,false);
+assert.match(result.error,/EACCES/);
+publisher.cleanOrphanedMedia = async ()=>'malformed';
+assert.equal((await run()).success,false);
+publisher.cleanOrphanedMedia = async ()=>({success:false,error:'unsafe cache'});
+assert.equal((await run()).success,false);
+assert.equal(events.filter(event=>event==='end').length,5);
+""")
 
 
 if __name__ == "__main__": unittest.main()

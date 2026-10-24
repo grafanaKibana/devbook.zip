@@ -84,7 +84,36 @@ def executable():
     raise SyncError("Obsidian CLI not found. Open DevBook in Obsidian with CLI enabled, or set OBSIDIAN_BIN.")
 
 
-def cli(root, binary, *args, structured=True, timeout=None, json_output=True):
+def safe_text(value, limit=500):
+    """Keep useful errors without echoing credentials or large response bodies."""
+    if not isinstance(value, str):
+        return ""
+    value = re.sub(r"(?i)\bBearer\s+[^\s,;]+", "Bearer [redacted]", value)
+    value = re.sub(r"(?i)(\b(?:[\w-]*(?:token|password|secret)|authorization|api[_-]?key)[\"']?\s*[:=]\s*)(?:\"[^\"]*\"|'[^']*'|[^\s,;]+)", r"\1[redacted]", value)
+    value = re.sub(r"(?<=://)[^/@\s]+:[^/@\s]+@", "[redacted]@", value)
+    value = re.sub(r"\b(?:gh[pousr]_[A-Za-z0-9_]+|github_pat_[A-Za-z0-9_]+)\b", "[redacted]", value)
+    return " ".join(value.split())[:limit]
+
+
+def failure_details(value):
+    if not isinstance(value, dict):
+        return ""
+    details = [safe_text(value.get("error"))]
+    data = value.get("data") if isinstance(value.get("data"), dict) else value
+    failures = data.get("failures")
+    if isinstance(failures, list):
+        for failure in failures[:3]:
+            if isinstance(failure, dict):
+                path = safe_text(failure.get("vaultPath"), 240)
+                error = safe_text(failure.get("error"))
+                details.append(": ".join(part for part in [path, error] if part))
+    return "; ".join(part for part in details if part)
+
+
+def cli(root, binary, *args, structured=True, timeout=None, json_output=True, operation=None):
+    label = args[0] if args else "Obsidian"
+    action = next((arg for arg in args[1:] if re.fullmatch(r"action=[a-z-]+", arg)), "")
+    label = f"{label} ({operation})" if operation else " ".join(part for part in [label, action] if part)
     # Native Obsidian CLI can exit before asynchronous handlers finish when its
     # inherited stdin is already at EOF (as in Git hooks). Keep a private pipe
     # open until the response completes; never read the user's terminal input.
@@ -95,28 +124,63 @@ def cli(root, binary, *args, structured=True, timeout=None, json_output=True):
                                     stdin=read_fd, capture_output=True, text=True,
                                     timeout=timeout if timeout is not None else float(os.environ.get("QUARTZ_SYNC_TIMEOUT", "600")))
         except subprocess.TimeoutExpired as error:
-            raise SyncError("Export command timed out; Obsidian may still be working. Wait for it to finish and inspect output before retrying.") from error
+            raise SyncError(f"{label}: command timed out; Obsidian may still be working. Wait for it to finish and inspect output before retrying.") from error
+        except OSError as error:
+            raise SyncError(f"{label}: {safe_text(str(error))}") from error
     finally:
         os.close(read_fd)
         os.close(write_fd)
     if result.returncode:
-        raise SyncError("Obsidian command failed. Ensure the correct vault is open and CLI is enabled.")
+        try:
+            failed = json.loads(result.stdout.strip().removeprefix("=> "))
+        except ValueError:
+            failed = None
+        details = "; ".join(part for part in [failure_details(failed), safe_text(result.stderr, 600)] if part)
+        raise SyncError(f"{label}: exit {result.returncode}" + (f"; {details}" if details else "; ensure the correct vault is open and CLI is enabled."))
     if not json_output:
         return result.stdout
     try:
         response = result.stdout.strip()
-        if not structured and response.startswith("=> "):
+        if args and args[0] == "eval" and response.startswith("=> "):
             response = response[3:]
         value = json.loads(response)
     except (ValueError, TypeError) as error:
-        raise SyncError("Obsidian returned malformed JSON; export completion cannot be verified.") from error
+        raise SyncError(f"{label}: malformed JSON; export completion cannot be verified.") from error
+    if (isinstance(value, dict) and value.get("success") is False) or (structured and (not isinstance(value, dict) or value.get("success") is not True)):
+        details = failure_details(value)
+        raise SyncError(f"{label}: Syncer reported failure" + (f"; {details}" if details else "; commit blocked."))
     if structured:
-        if not isinstance(value, dict) or value.get("success") is not True:
-            raise SyncError("Quartz Syncer reported failure; the commit is blocked.")
         value = value.get("data")
     if not isinstance(value, dict):
-        raise SyncError("Unexpected Obsidian response; export completion cannot be verified.")
+        raise SyncError(f"{label}: unexpected response; export completion cannot be verified.")
     return value
+
+
+FULL_PUBLISH = """(async()=>{
+ const publisher=app.plugins.plugins['quartz-syncer'].getPublisher();
+ if(!publisher)return JSON.stringify({success:false,error:'Publisher is not configured'});
+ publisher.beginDynamicSession();
+ try{
+  const status=await publisher.getPublishStatus();
+  const result=await publisher.publishBatch([...status.unpublished,...status.changed,...status.published],'Refresh notes and referenced assets before commit');
+  if(!result||typeof result.success!=='boolean'||(result.success&&(!Number.isInteger(result.filesPublished)||!Number.isInteger(result.filesDeleted))))throw new Error('Malformed publication result');
+  return JSON.stringify({success:result.success,data:result,error:result.error});
+ }catch(error){return JSON.stringify({success:false,error:error instanceof Error?error.message:String(error)});}
+ finally{publisher.endDynamicSession();}
+})()"""
+
+COMPILED_MEDIA_CLEANUP = """(async()=>{
+ const publisher=app.plugins.plugins['quartz-syncer'].getPublisher();
+ if(!publisher)return JSON.stringify({success:false,error:'Publisher is not configured'});
+ publisher.beginDynamicSession();
+ try{
+  const result=await publisher.cleanOrphanedMedia();
+  if(result===null)return JSON.stringify({success:true,data:{outcome:'unchanged-or-withheld'}});
+  if(!result||typeof result.success!=='boolean')throw new Error('Malformed cleanup result');
+  return JSON.stringify({success:result.success,data:{...result,outcome:'cleaned'},error:result.error});
+ }catch(error){return JSON.stringify({success:false,error:error instanceof Error?error.message:String(error)});}
+ finally{publisher.endDynamicSession();}
+})()"""
 
 
 INDEX_STATE = """JSON.stringify((()=>{
@@ -255,25 +319,31 @@ def export(root):
     before = snapshot(root)
     wait_for_indexes(root, binary, before)
     cli(root, binary, "quartz-syncer:cache", "action=tree-refresh", "format=json")
-    published = cli(root, binary, "quartz-syncer:publish", "format=json")
+    refresh_assets = any(path.startswith("Vault/Assets/") or Path(path).suffix.lower() != ".md"
+                         for path in staged_source(root))
+    if refresh_assets:
+        published = cli(root, binary, "eval", "code=" + FULL_PUBLISH, operation="force-publish")
+    else:
+        published = cli(root, binary, "quartz-syncer:publish", "format=json")
     if published.get("failures", []) != [] or published.get("skipped", 0) != 0:
-        raise SyncError("Syncer skipped or failed to compile notes; commit blocked.")
+        details = failure_details(published)
+        command = "force-publish" if refresh_assets else "quartz-syncer:publish"
+        raise SyncError(f"{command}: skipped or failed notes" + (f"; {details}" if details else "; commit blocked."))
     log(root, "Publication completed without skipped or failed notes.")
     if snapshot(root) != before:
         raise SyncError("Vault source changed during export; refusing deletion. Stage the changes and retry.")
     wait_for_indexes(root, binary, before)
     cli(root, binary, "quartz-syncer:delete", "force", "format=json")
-    media = cli(root, binary, "quartz-syncer:media", "action=list", "format=json")
-    files = media.get("files")
-    if not isinstance(files, list) or any(not isinstance(item, dict) or not isinstance(item.get("linked"), bool) for item in files):
-        raise SyncError("Unexpected media inventory; refusing cleanup.")
-    orphaned = [item for item in files if item["linked"] is False]
-    if len(files) > 5 and len(orphaned) > len(files) * 0.8:
-        raise SyncError("More than 80% of exported media appears orphaned; inspect the export before cleanup.")
-    if orphaned:
-        cleaned = cli(root, binary, "quartz-syncer:media", "action=clean", "force", "format=json")
-        if cleaned.get("cleaned") != len(orphaned):
-            raise SyncError("Media cleanup did not finish; commit blocked.")
+    cleanup = cli(root, binary, "eval", "code=" + COMPILED_MEDIA_CLEANUP, operation="compiled-media-cleanup")
+    if cleanup.get("outcome") == "unchanged-or-withheld":
+        log(root, "Native media cleanup: no changes or cleanup withheld by native safeguard.")
+    elif (cleanup.get("outcome") == "cleaned"
+          and type(cleanup.get("filesDeleted")) is int and cleanup["filesDeleted"] >= 0
+          and cleanup.get("failures", []) == []):
+        log(root, f"Native media cleanup completed: {cleanup['filesDeleted']} file deletions.")
+    else:
+        details = failure_details(cleanup)
+        raise SyncError("compiled-media-cleanup: malformed or incomplete native cleanup result" + (f"; {details}" if details else "; commit blocked."))
     cli(root, binary, "quartz-syncer:cache", "action=tree-refresh", "format=json")
     status = cli(root, binary, "quartz-syncer:status", "format=json")
     if status.get("unpublished") != 0 or status.get("deleted") != 0:
