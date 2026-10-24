@@ -53,6 +53,134 @@ def pending_runtime(phase='prepared'):
 
 
 class ReviewRuntimeTests(unittest.TestCase):
+    def test_terminal_pr_recovery_archives_all_pending_phases_without_remote_writes(self):
+        for phase in runtime.JOURNAL_PHASES[:-1]:
+            for status in ['closed', 'merged']:
+                for saved_number in [True, False]:
+                    with self.subTest(phase=phase, status=status, saved_number=saved_number):
+                        api, store, engine = pending_runtime(phase)
+                        api.prs[0]['state'] = 'closed'
+                        if status == 'merged':
+                            api.prs[0]['merged_at'] = '2026-10-24T03:00:00Z'
+                        if not saved_number:
+                            store.state['pending_operation']['pr_number'] = None
+                            store.state['pending_operation']['evidence'].pop('pr_number', None)
+                        records = copy.deepcopy(store.state['pending_operation']['receipts']['records'])
+                        result = engine.recover_pending()
+                        self.assertEqual(result['status'], 'pr_terminal')
+                        self.assertEqual(result['terminal_status'], status)
+                        self.assertIsNone(store.state['pending_operation'])
+                        self.assertEqual(store.state['terminal_operations']['op']['receipts']['records'], records)
+                        self.assertEqual(store.state['prs']['topic:1']['proposal_records'], records)
+                        self.assertEqual(store.state['prs']['topic:1']['status'], 'open')
+                        self.assertTrue(all(call[0] == 'GET' for call in api.calls))
+                        self.assertIsNone(engine.recover_pending())
+                        runtime.OperationJournal(store).prepare({'op_id': 'next-topic'})
+
+    def test_terminal_archive_preserves_rejection_reconciliation_and_next_topic(self):
+        for status in ['closed', 'merged']:
+            with self.subTest(status=status):
+                api, store, publisher = pending_runtime('pr_updated')
+                path = 'Vault/Home/Topic/Note.md'
+                source = api.files[(BRANCH, path)]
+                topic = core.topic_for(path)
+                topic_key = core.topic_id(topic)
+                branch = runtime.expected_managed_branch(topic_key, 1)
+                api.refs[branch] = api.refs.pop(BRANCH)
+                api.prs[0]['head'].update(ref=branch, sha='candidate-commit')
+                api.prs[0].update(body=runtime.marker(topic_key, 1), state='closed')
+                if status == 'merged':
+                    api.prs[0]['merged_at'] = '2026-10-24T03:00:00Z'
+                op = store.state['pending_operation']
+                op.update(topic=topic_key, branch=branch, pr_number=None)
+                edit = {'path': path, 'kind': 'rewrite', 'learning_target': 'same',
+                        'before': 'Old?', 'after': 'Improved question?'}
+                op['receipts']['records'] = [{
+                    'batch': {'notes': [{'path': path, 'content': source}], 'rules_hash': 'rules'},
+                    'proposal': {'edits': [edit], 'dispositions': [{'path': path, 'outcome': 'changed'}]},
+                    'result': {'sources': {path: 'candidate'}},
+                }]
+                self.assertEqual(publisher.recover_pending()['status'], 'pr_terminal')
+                root = pipeline_root(self, Path(__file__).resolve().parents[2])
+                other_path = 'Vault/Home/Other/Note.md'
+                notes = [{'path': name, 'content': source, 'hash': core.digest(source),
+                          'topic': core.topic_for(name), 'violations': []} for name in [path, other_path]]
+                config = {**core.DEFAULT_CONFIG, 'repo': api.repo, 'base_branch': 'main',
+                          'owner_allowlist': [{'id': 1, 'login': 'owner'}]}
+                result = pipeline.Engine(root, config, store, api=api, publisher=publisher,
+                    notes_loader=lambda _: copy.deepcopy(notes), snapshot_sha_loader=lambda: 'base').run(apply=True)
+                self.assertEqual(result['status'], 'selected')
+                self.assertEqual(result['batch']['topic'], 'Other')
+                self.assertEqual(store.state['prs'][f'{topic_key}:1']['status'], status)
+                self.assertEqual(bool(store.state['rejections']), status == 'closed')
+                self.assertIn('terminal_audit', store.state['prs'][f'{topic_key}:1'])
+                self.assertFalse(store.state.get('completed_operations'))
+                self.assertTrue(all(call[0] == 'GET' for call in api.calls))
+
+    def test_latest_unmanaged_description_is_preserved_during_update_and_recovery(self):
+        for recovery in [False, True]:
+            with self.subTest(recovery=recovery):
+                api, store, engine = pending_runtime('branch_updated')
+                begin = '<!-- devbook-improvement:start topic=topic -->'
+                end = '<!-- devbook-improvement:end -->'
+                original = f'Original user text\n\n{runtime.marker("topic", 1)}\n\n{begin}\nOld summary\n{end}\n'
+                proposed = original.replace('Old summary', 'New cumulative summary')
+                api.prs[0]['body'] = original
+                snapshot = copy.deepcopy(engine.open_prs())
+                api.prs[0]['body'] = original.replace('Original user text', 'Concurrent human edit') + '\nHuman footer\n'
+                if recovery:
+                    api.refs[BRANCH] = 'candidate-commit'
+                    api.check_sha = 'candidate-commit'
+                    store.state['pending_operation']['body'] = proposed
+                    result = engine.recover_pending()
+                    self.assertEqual(result['status'], 'recovered')
+                else:
+                    engine._ensure_pr(snapshot, topic='topic', generation=1, branch=BRANCH,
+                                      title='notes: improve topic', body=proposed)
+                updated = api.prs[0]['body']
+                self.assertIn('Concurrent human edit', updated)
+                self.assertTrue(updated.endswith('\nHuman footer\n'))
+                self.assertIn('New cumulative summary', updated)
+                self.assertNotIn('Old summary', updated)
+                self.assertEqual(updated.count(begin), 1)
+
+    def test_export_handoff_releases_global_journal_without_verifying_or_finalizing(self):
+        for recovery in [False, True]:
+            with self.subTest(recovery=recovery):
+                api, store, engine = pending_runtime('pr_updated' if recovery else 'prepared')
+                op = copy.deepcopy(store.state['pending_operation'])
+                if recovery:
+                    store.state['pending_operation']['export_required'] = True
+                    result = engine.recover_pending()
+                else:
+                    store.state['pending_operation'] = None
+                    path = 'Vault/Home/Topic/Note.md'
+                    with mock.patch.object(runtime, 'require_apply_activation'):
+                        result = engine.publish(topic='topic', generation=1, branch=BRANCH,
+                            expected_sources={path: api.files[(BRANCH, path)]}, candidate={path: 'candidate'},
+                            title='notes: improve topic', body=runtime.marker('topic', 1),
+                            feedback_revision=op['feedback_revision'], expected_base_sha='base',
+                            expected_branch_sha='base', expected_pr_number=1,
+                            operation_receipts=op['receipts'], export_required=True)
+                self.assertEqual(result['status'], 'awaiting_export')
+                self.assertIsNone(store.state['pending_operation'])
+                archived = store.state['export_operations'][result['op_id']]
+                self.assertTrue(archived['export_required'])
+                self.assertEqual(archived['receipts'], op['receipts'])
+                pr = store.state['prs']['topic:1']
+                self.assertTrue(pr['frozen'])
+                self.assertTrue(pr['export_required'])
+                self.assertEqual(pr['export_operation_id'], result['op_id'])
+                self.assertEqual(pr['head_sha'], result['commit_sha'])
+                self.assertEqual(pr['proposal_records'], op['receipts']['records'])
+                self.assertEqual(pr['base_note_hashes'], op['receipts']['base_note_hashes'])
+                self.assertNotIn('validation_failure', pr)
+                self.assertFalse(store.state.get('completed_operations'))
+                self.assertFalse(store.state.get('finalized_operations'))
+                self.assertFalse(any('/actions/' in call[1] or '/check-runs' in call[1] for call in api.calls))
+                runtime.OperationJournal(store).prepare({'op_id': 'unrelated-topic'})
+                self.assertEqual(store.state['pending_operation']['op_id'], 'unrelated-topic')
+
     def test_transport_allows_compare_ranges_but_rejects_decoded_traversal(self):
         runner = mock.Mock(return_value=subprocess.CompletedProcess([], 0, stdout='{}', stderr=''))
         api = runtime.GhApi('owner/repo', runner=runner)

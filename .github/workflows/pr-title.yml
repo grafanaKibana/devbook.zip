@@ -23,3 +23,22 @@ jobs:
             echo "::error::PR title must start with 'feature:', 'notes:', 'docs:', 'bug:', 'fix:' or 'maintenance:' (append '!' for a breaking/major change, e.g. 'feature!:'). Got: ${TITLE:-<empty>}"
             exit 1
           fi
+
+      # Keep export freshness inside an already-required check; a draft flag
+      # alone does not prevent marking a stale public-note PR ready manually.
+      - uses: actions/checkout@v4
+        if: startsWith(github.head_ref, 'notes/automated-')
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        if: startsWith(github.head_ref, 'notes/automated-')
+        with:
+          python-version: "3.13"
+
+      - name: Verify managed-note Quartz export handoff
+        if: startsWith(github.head_ref, 'notes/automated-')
+        env:
+          DEVBOOK_EXPORT_HEAD_REF: ${{ github.head_ref }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: python .scripts/devbook_improvement/sync_export.py verify --base-ref "$BASE_SHA"

@@ -15,7 +15,7 @@ import time
 from typing import Any, Callable, Mapping
 from urllib.parse import quote
 
-from . import core, provider, runtime
+from . import core, provider, runtime, sync_export
 
 
 def save(store: Any, state: dict[str, Any], reason: str) -> None:
@@ -251,7 +251,29 @@ class Engine:
                 raise runtime.RuntimeFailure("validation commands missing")
             return runtime.run_validations(repo.path, commands)
 
-    def remote_view(self, state: dict[str, Any], notes: list[dict[str, Any]], base_sha: str | None = None) -> tuple[dict[str, Any], dict[int, dict[str, Any]], list[dict[str, Any]]]:
+    def finalize_export_receipts(self, state: dict[str, Any], pr: Mapping[str, Any],
+                                 head_sha: str, *, post_feedback: bool) -> dict[str, Any]:
+        # Each publication appends one cumulative proposal record. Use that
+        # durable order before timestamps, which can tie within one second.
+        operations = sorted(state.get("export_operations", {}).items(), key=lambda item: (
+            len(item[1].get("receipts", {}).get("records", [])),
+            item[1].get("updated_at", ""), item[0]))
+        for op_id, operation in operations:
+            if operation.get("topic") != pr.get("topic_id") or operation.get("generation") != pr.get("generation"):
+                continue
+            receipt = operation.get("receipts", {})
+            if not receipt:
+                raise runtime.Conflict("export handoff lacks reviewed proposal receipts")
+            if op_id not in state.setdefault("finalized_exports", {}):
+                state = core.record_outcome(state, receipt["batch"], receipt["proposal"], receipt["result"])
+                persist_decisions(state, receipt.get("decisions", []))
+                state.setdefault("finalized_exports", {})[op_id] = {"head_sha": head_sha}
+            if post_feedback and not state.setdefault("export_feedback_receipts", {}).get(op_id):
+                self.feedback_receipt(receipt["proposal"], receipt["batch"], head_sha, True)
+                state["export_feedback_receipts"][op_id] = True
+        return state
+
+    def remote_view(self, state: dict[str, Any], notes: list[dict[str, Any]], base_sha: str | None = None, *, post_export_receipts: bool = False) -> tuple[dict[str, Any], dict[int, dict[str, Any]], list[dict[str, Any]]]:
         if not self.api:
             return state, {}, []
         prs = self.api.request("GET", "/pulls?state=all&per_page=100", paginate=True)
@@ -282,6 +304,11 @@ class Engine:
                         # The unchanged base was considered and rejected; don't regenerate it merely because the PR closed.
                         state["notes"][path]["content_hash"] = by_path[path]["hash"]
                         state["notes"][path]["outcome"] = "keep"
+            if status == "merged" and prior.get("export_operation_id"):
+                # A merge may happen before the next scheduled open-PR poll.
+                # Preserve every handoff's review/decision history without
+                # processing feedback on a now-terminal PR.
+                state = self.finalize_export_receipts(state, prior, pr["head"]["sha"], post_feedback=False)
             if status != "open":
                 for item in state["feedback"].values():
                     if item.get("pr_number") == pr["number"] and item["status"] == "pending":
@@ -290,7 +317,9 @@ class Engine:
                    "branch": pr["head"]["ref"], "head_sha": pr["head"]["sha"], "frozen": prior.get("frozen", False)}
             if status == "open":
                 files = self.api.request("GET", f"/pulls/{pr['number']}/files?per_page=100", paginate=True)
-                paths = [file["filename"] for file in files]
+                all_paths = [file["filename"] for file in files]
+                export_paths = [path for path in all_paths if sync_export.is_export_path(path)]
+                paths = [path for path in all_paths if path not in export_paths]
                 main_hashes = {note["path"]: note["hash"] for note in notes if note["topic"] == topic}
                 baseline = prior.get("base_note_hashes")
                 if baseline != main_hashes:
@@ -310,6 +339,25 @@ class Engine:
                     row["base_conflict"] = False
                     row["base_note_hashes"] = main_hashes
                 row["pause_reason"] = None
+                if export_paths:
+                    try:
+                        _, fresh = sync_export.remote_receipt(self.api, pr["head"]["sha"])
+                    except runtime.Conflict as error:
+                        row.update(base_conflict=True, frozen=True, pause_reason=str(error))
+                        rows.append(row)
+                        continue
+                    row.update(export_required=not fresh, frozen=True)
+                    if fresh and prior.get("export_operation_id"):
+                        required = tuple(dict.fromkeys((*self.config.get("required_check_contexts", runtime.DEFAULT_REQUIRED_CHECKS), "validate")))
+                        try:
+                            checks = runtime.required_checks_for_sha(self.api, pr["head"]["sha"], required)
+                        except runtime.Conflict:
+                            checks = {}
+                        if checks and all(value == "success" for value in checks.values()):
+                            state = self.finalize_export_receipts(
+                                state, row, pr["head"]["sha"], post_feedback=post_export_receipts)
+                elif prior.get("export_required"):
+                    row["export_required"] = True
                 for path in paths:
                     runtime.validate_note_path(self.root, path)
                     if path not in by_path or core.topic_for(path) != topic:
@@ -319,8 +367,10 @@ class Engine:
                 feedback = runtime.poll_feedback(self.api, pr["number"], allowlist)
                 polled_prs.add(pr["number"])
                 for item in feedback:
+                    scoped_paths = [path for path in item.get("paths", paths)
+                                    if path in by_path and core.topic_for(path) == topic]
                     all_feedback.append({**item, "author": item["user"], "topic": topic,
-                                         "pr_number": pr["number"], "paths": item.get("paths") or paths})
+                                         "pr_number": pr["number"], "paths": scoped_paths})
                 row["frozen"] = bool(row["frozen"] or feedback or not pr.get("draft", True)
                                       or len(paths) >= self.config.get("max_pr_notes", 16)
                                       or sum(file.get("additions", 0) + file.get("deletions", 0) for file in files) >= self.config.get("max_pr_lines", 1200))
@@ -379,7 +429,7 @@ class Engine:
             raise runtime.Conflict("checkout snapshot and remote base differ; retry from current main before model work")
         # Keep the current base independently from topic-branch overlays.
         base = {note["path"]: note["content"] for note in notes}
-        state, prs, feedback = self.remote_view(state, notes, base_sha)
+        state, prs, feedback = self.remote_view(state, notes, base_sha, post_export_receipts=apply)
         all_notes = list(notes)
         rules = core.rules_version(self.root)
         paused = {row["topic_id"] for row in state["prs"].values() if row.get("status") == "open" and row.get("base_conflict")}
@@ -500,6 +550,14 @@ class Engine:
             summary += "\nIndependent review adapter: CLEAN fixture result. No Claude request was made; live semantic quality remains unverified.\n"
         else:
             summary += "\nIndependent Claude note review: CLEAN; full candidate notes and fetched source text inspected.\n"
+        export_required = sync_export.needs_export(selected, result["sources"])
+        if export_required:
+            summary += ("\nQuartz export: awaiting the verified local Syncer handoff. PR remains draft and "
+                        "the required validation gate blocks merge until the generated output and current "
+                        "source-bound receipt are committed. In a clean dedicated managed-branch checkout "
+                        "with its Vault open in Obsidian, run `PYTHONPATH=.scripts python3 -m "
+                        "devbook_improvement.sync_export export --expected-head <current-PR-head>`, "
+                        "then review, commit and push the staged output and receipt.\n")
         if pr.get("review_started_head_sha"):
             summary += "\nChanges after review require renewed review of this head. PR remains draft.\n"
         response = {"status": "proposed", "topic": batch["topic"], "proposal": proposal, "review": review,
@@ -522,9 +580,10 @@ class Engine:
                                "processed": {f"{item['kind']}:{item['id']}": item["revision"] for item in feedback if item["pr_number"] == pr.get("number")}},
             expected_base_sha=base_sha,
             expected_branch_sha=pr.get("head_sha"), expected_pr_number=pr.get("number"),
-            freeze=pr.get("frozen", False), pending_feedback=batch["feedback"], edits=proposal["edits"], operation_receipts=receipts)
+            freeze=pr.get("frozen", False), pending_feedback=batch["feedback"], edits=proposal["edits"],
+            operation_receipts=receipts, export_required=export_required)
         response.update(status=publication.get("status", "published"), publication=publication)
-        if response["status"] != "awaiting_checks":
+        if response["status"] not in {"awaiting_checks", "awaiting_export"}:
             self.finalize_completed()
         return response
 

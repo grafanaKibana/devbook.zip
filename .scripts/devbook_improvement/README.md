@@ -74,6 +74,20 @@ The demo uses the real engine with fixture providers and GitHub transport. It ex
 
 After the setup PR is manually merged, `gh workflow run devbook-improvement.yml -f mode=demo` starts a safe test. [The activation runbook](../../docs/devbook-improvement.md#safe-activation) covers subscription OAuth, minimal GitHub permissions, protected secrets, live web/model checks, first manual apply, and schedule activation. Credentials go through official local flows and GitHub secret prompts, never chat or committed files.
 
+## Publish the reviewed notes to Quartz
+
+GitHub runners cannot run the vault's local Obsidian Syncer. After a note batch, the runtime returns `awaiting_export`, keeps that topic PR draft/frozen, and releases the queue for other topics or explicit owner corrections. It does not report successful export checks. This gate applies conservatively to all changed managed notes, including unpublished notes.
+
+Use a **clean dedicated checkout of the managed PR branch**, with that checkout's `Vault` open in Obsidian and its current PR head checked locally:
+
+```sh
+PYTHONPATH=.scripts python3 -m devbook_improvement.sync_export export --expected-head <current-PR-head-sha>
+```
+
+The command reuses the existing verified local Syncer flow, verifies the exact checkout/vault identity, and stages only generated Quartz output and `.devbook-improvement/syncer-export.json`. It does not commit or push. Review those files, obtain normal commit approval, then commit and push them to the same PR. Do not run it in a dirty working checkout or edit `Web/content` manually.
+
+The receipt binds source, generated-output, and Syncer-policy Git blob hashes. The existing required `pr-title` check verifies freshness on managed PRs targeting `main`; no branch protection settings are changed by this setup. Any subsequent source or output change requires another verified export. Existing export files remain readable to the queue, but never become model-writable paths. A hash receipt detects staleness; trusted local execution and manual review establish export provenance.
+
 ## Pause and recovery
 
 - Set repository variable `DEVBOOK_IMPROVEMENT_SCHEDULE_ENABLED=false` to pause unattended processing.

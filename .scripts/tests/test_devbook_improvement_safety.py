@@ -298,10 +298,15 @@ class RuntimeSafetyTests(unittest.TestCase):
                         "body": runtime.marker("topic", 1),
                         "pr_number": None if scenario == "closed-generation" else 1})
                     api.calls.clear()
-                    with self.assertRaises(runtime.Conflict):
-                        engine.recover_pending()
+                    if scenario.startswith("closed"):
+                        self.assertEqual(engine.recover_pending()["status"], "pr_terminal")
+                        self.assertIsNone(store.state["pending_operation"])
+                        self.assertTrue(store.state["terminal_operations"])
+                    else:
+                        with self.assertRaises(runtime.Conflict):
+                            engine.recover_pending()
+                        self.assertEqual("prepared", store.state["pending_operation"]["phase"])
                     self.assertTrue(all(method == "GET" for method, *_ in api.calls), api.calls)
-                    self.assertEqual("prepared", store.state["pending_operation"]["phase"])
 
     def test_only_verified_owner_feedback_enters_queue(self):
         api = FakeGitHub()

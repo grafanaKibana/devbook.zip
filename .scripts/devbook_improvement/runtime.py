@@ -28,6 +28,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Iterable, Iterator, Mapping, Protocol, Sequence
 
+from . import core
+
 
 UTC = dt.timezone.utc
 STATE_BRANCH = "maintenance/devbook-improvement-state"
@@ -829,7 +831,24 @@ class GitHubRuntime:
             prs, topic, generation, branch, repo=self.repo, base_branch=self.base_branch,
         )
         if found:
-            updated = self.api.request("PATCH", f"/pulls/{found['number']}", {"title": title, "body": body})
+            latest = self._require_open_pr_identity(int(found["number"]), topic, generation, branch)
+            current_body = str(latest.get("body") or "")
+            try:
+                proposed_sections = core._managed_sections(body)
+                current_sections = core._managed_sections(current_body)
+                if any(section.group("topic") != topic for section in proposed_sections + current_sections):
+                    raise ValueError("managed summary belongs to another topic")
+            except ValueError as exc:
+                raise Conflict("managed PR description needs reconciliation") from exc
+            if proposed_sections:
+                section = proposed_sections[0].group(0)
+                if current_sections:
+                    current = current_sections[0]
+                    current_body = current_body[:current.start()] + section + current_body[current.end():]
+                else:
+                    separator = "" if not current_body or current_body.endswith("\n\n") else "\n" if current_body.endswith("\n") else "\n\n"
+                    current_body += separator + section + "\n"
+            updated = self.api.request("PATCH", f"/pulls/{found['number']}", {"title": title, "body": current_body})
             return dict(updated), False
         created = self.api.request(
             "POST",
@@ -854,7 +873,8 @@ class GitHubRuntime:
         return current == dict(revision.get("processed", {}))
 
     def _archive_pending(
-        self, op_id: str, collection: str, evidence: Mapping[str, Any], *, freeze: bool = False
+        self, op_id: str, collection: str, evidence: Mapping[str, Any], *, freeze: bool = False,
+        terminal_pr: Mapping[str, Any] | None = None,
     ) -> None:
         """Release the global WAL while retaining rejected/failed publication evidence."""
         self._assert_lease()
@@ -867,7 +887,7 @@ class GitHubRuntime:
         state = dict(snapshot.state)
         state[collection] = {**state.get(collection, {}), op_id: op}
         state["pending_operation"] = None
-        if freeze:
+        if freeze or terminal_pr is not None:
             key = f"{op['topic']}:{op['generation']}"
             receipt = op.get("receipts") or {}
             prs = dict(state.get("prs", {}))
@@ -877,8 +897,17 @@ class GitHubRuntime:
                 number=op.get("pr_number") or op["evidence"].get("pr_number"),
                 branch=op["branch"], status="open", frozen=True,
                 head_sha=op["evidence"].get("commit_sha"),
-                validation_failure=dict(op["evidence"]),
             )
+            if terminal_pr is not None:
+                # Keep the prior open state until Engine.remote_view consumes receipts
+                # and applies its ordinary closure/merge and rejection policies.
+                pr["number"] = terminal_pr["number"]
+                pr["head_sha"] = terminal_pr.get("head", {}).get("sha") or pr["head_sha"]
+                pr["observed_terminal_status"] = lifecycle(terminal_pr)
+            if freeze and collection == "failed_operations":
+                pr["validation_failure"] = dict(op["evidence"])
+            if collection == "export_operations":
+                pr.update(export_required=True, export_operation_id=op_id)
             if "records" in receipt:
                 pr["proposal_records"] = receipt["records"]
             if "base_note_hashes" in receipt:
@@ -904,11 +933,21 @@ class GitHubRuntime:
         expected_pr_number = op.get("pr_number") or evidence.get("pr_number")
         selected_pr: dict[str, Any] | None = None
         if expected_pr_number:
-            selected_pr = self._require_open_pr_identity(
-                int(expected_pr_number), str(op["topic"]), int(op["generation"]), branch
+            selected_pr = dict(self.api.request("GET", f"/pulls/{int(expected_pr_number)}"))
+            if not valid_pr_identity(selected_pr, self.repo, self.base_branch, str(op["topic"]), int(op["generation"])):
+                raise Conflict("selected managed PR changed identity")
+        else:
+            prs = self.api.request("GET", "/pulls?state=all&per_page=100", paginate=True)
+            selected_pr = next((dict(pr) for pr in prs if lifecycle(pr) != "open" and valid_pr_identity(
+                pr, self.repo, self.base_branch, str(op["topic"]), int(op["generation"])
+            )), None)
+        if selected_pr and lifecycle(selected_pr) != "open":
+            status = lifecycle(selected_pr)
+            self._archive_pending(
+                op_id, "terminal_operations", {"terminal_status": status, "pr_number": selected_pr["number"]},
+                terminal_pr=selected_pr,
             )
-        elif self._terminal_generation_exists(str(op["topic"]), int(op["generation"]), branch):
-            raise Conflict("terminal generation branch cannot be reused")
+            return {"op_id": op_id, "commit_sha": commit_sha, "status": "pr_terminal", "terminal_status": status}
         if expected_pr_number and phase in {"prepared", "commit_created"}:
             applied = bool(commit_sha and self.ref_sha(branch) == commit_sha)
             if not applied and not self._feedback_unchanged(
@@ -971,6 +1010,12 @@ class GitHubRuntime:
             phase = "pr_updated"
         if phase == "pr_updated":
             self._assert_lease()
+            if op.get("export_required"):
+                self._archive_pending(
+                    op_id, "export_operations", {"commit_sha": commit_sha, "reason": "verified Syncer export required"},
+                    freeze=True,
+                )
+                return {"op_id": op_id, "commit_sha": commit_sha, "status": "awaiting_export"}
             verified = self._await_checks(op_id, branch, str(commit_sha))
             if verified is None:
                 return {"op_id": op_id, "commit_sha": commit_sha, "status": "awaiting_checks"}
@@ -1034,6 +1079,7 @@ class GitHubRuntime:
         edits: Iterable[Mapping[str, Any]] = (),
         expected_pr_number: int | None = None,
         operation_receipts: Mapping[str, Any] | None = None,
+        export_required: bool = False,
     ) -> dict[str, Any]:
         """Publish one guarded batch and persist every ambiguous side effect.
 
@@ -1092,6 +1138,7 @@ class GitHubRuntime:
                 "body": body if marker(topic, generation) in body else body.rstrip() + "\n\n" + marker(topic, generation) + "\n",
                 "commit_message": f"notes: improve {topic} [{prepared_op_id}]",
                 "receipts": dict(operation_receipts or {}),
+                "export_required": export_required,
             }
         )
         op_id = op["op_id"]
@@ -1120,6 +1167,12 @@ class GitHubRuntime:
         )
         self.journal.advance(op_id, "pr_updated", {"pr_number": pr["number"], "created": created})
         self._assert_lease()
+        if export_required:
+            self._archive_pending(
+                op_id, "export_operations", {"commit_sha": commit_sha, "reason": "verified Syncer export required"},
+                freeze=True,
+            )
+            return {"op_id": op_id, "commit_sha": commit_sha, "pr": pr, "status": "awaiting_export"}
         verified = self._await_checks(op_id, branch, commit_sha)
         if verified is None:
             return {
