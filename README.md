@@ -78,4 +78,3 @@ This installs the locked Web npm dependencies, enables local Git hooks and confi
 ## License
 
 [MIT License](LICENSE)
-
