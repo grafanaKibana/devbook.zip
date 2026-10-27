@@ -2,7 +2,10 @@
 
 > A personal Senior .NET / AI software-engineering knowledge base — authored in [Obsidian](https://obsidian.md), published as a static website, and paired with a .NET RAG backend that searches and answers over the same notes.
 
-**🔗 Live site: [devbook.zip](https://devbook.zip)**
+<p>
+<a href="https://devbook.zip"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/Read_online.svg?variant=default&amp;size=sm&amp;font=geist&amp;mode=dark&amp;logo=ri%3ALuBookOpen&amp;color=84cc16&amp;logoColor=0e100f&amp;valueColor=0e100f&amp;labelTextColor=0e100f"><img alt="Read online" src="https://shieldcn.dev/badge/Read_online.svg?variant=default&amp;size=sm&amp;font=geist&amp;mode=light&amp;logo=ri%3ALuBookOpen&amp;color=437100&amp;logoColor=ffffff&amp;valueColor=ffffff&amp;labelTextColor=ffffff"></picture></a>
+<a href="https://github.com/grafanaKibana/devbook.zip/actions/workflows/vault-validation.yml"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/ci/grafanaKibana/devbook.zip.svg?variant=outline&amp;size=xs&amp;font=geist&amp;mode=dark&amp;logo=githubactions&amp;color=84cc16&amp;logoColor=84cc16&amp;valueColor=fafafa&amp;labelTextColor=fafafa&amp;label=Vault+Validation&amp;workflow=vault-validation.yml&amp;branch=main&amp;statusDot=true"><img alt="Vault Validation" src="https://shieldcn.dev/github/ci/grafanaKibana/devbook.zip.svg?variant=outline&amp;size=xs&amp;font=geist&amp;mode=light&amp;logo=githubactions&amp;color=437100&amp;logoColor=437100&amp;valueColor=18181b&amp;labelTextColor=18181b&amp;label=Vault+Validation&amp;workflow=vault-validation.yml&amp;branch=main&amp;statusDot=true"></picture></a>
+</p>
 
 [![DevBook homepage in light and dark theme](docs/assets/site-home.png)](https://devbook.zip)
 
@@ -75,3 +78,4 @@ This installs the locked Web npm dependencies, enables local Git hooks and confi
 ## License
 
 [MIT License](LICENSE)
+
