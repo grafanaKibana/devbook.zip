@@ -9,7 +9,7 @@
     "backgroundStyle": "solid",
     "artDirection": "porcelain",
     "layout": "site-top",
-    "imageZoom": 1.0,
+    "imageZoom": 1,
     "ink": "#252527",
     "siteBackdrop": true,
     "siteTint": "#7e9578",
@@ -173,7 +173,7 @@
     "timeoutMs": 600000
   },
   "server": {
-    "command": "node .github/actions/product-captures/serve.mjs --dir Web/public --port 4180",
+    "command": "node \"$PRODUCT_CAPTURE_TOOL_ROOT/serve.mjs\" --dir Web/public --port 4180",
     "url": "http://127.0.0.1:4180",
     "timeoutMs": 60000
   }
