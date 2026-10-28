@@ -1,180 +1,25 @@
 {
-  "version": 1,
-  "project": {
-    "id": "devbook",
-    "title": "DevBook",
-    "subtitle": "",
+  "name": "DevBook",
+  "appearance": {
     "background": "#c5d0bd",
-    "accent": "#7ca534",
-    "backgroundStyle": "solid",
-    "artDirection": "porcelain",
-    "layout": "site-top",
-    "imageZoom": 1,
-    "ink": "#252527",
-    "siteBackdrop": true,
-    "siteTint": "#7e9578",
-    "edgeBleed": 0.06,
-    "darkBackground": "#38493d"
+    "darkBackground": "#38493d",
+    "tint": "#7e9578"
   },
-  "outputDir": "docs/assets/product-captures",
-  "captures": [
-    {
-      "id": "overview-light",
-      "provider": "web",
-      "url": "/",
-      "viewport": {
-        "width": 1440,
-        "height": 1000
-      },
-      "colorScheme": "light",
-      "fallback": "docs/assets/product-captures/captures/overview-light.png",
-      "ready": {
-        "selector": ".dc-topic-grid"
-      },
-      "localStorage": {
-        "theme": "light"
-      }
+  "capture": {
+    "viewport": {
+      "width": 1440,
+      "height": 1000
     },
-    {
-      "id": "overview-dark",
-      "provider": "web",
-      "url": "/",
-      "viewport": {
-        "width": 1440,
-        "height": 1000
-      },
-      "colorScheme": "dark",
-      "fallback": "docs/assets/product-captures/captures/overview-dark.png",
-      "ready": {
-        "selector": ".dc-topic-grid"
-      },
-      "localStorage": {
-        "theme": "dark"
-      }
+    "ready": ".dc-topic-grid",
+    "storage": {
+      "theme": "$theme"
     }
-  ],
-  "outputs": [
-    {
-      "id": "hero",
-      "template": "showcase",
-      "captures": [
-        "overview-light"
-      ],
-      "width": 1600,
-      "height": 1100,
-      "layout": "site-top",
-      "theme": "light",
-      "capturesByTheme": {
-        "light": [
-          "overview-light"
-        ],
-        "dark": [
-          "overview-dark"
-        ]
-      }
-    },
-    {
-      "id": "hero-dark",
-      "template": "showcase",
-      "captures": [
-        "overview-dark"
-      ],
-      "width": 1600,
-      "height": 1100,
-      "layout": "site-top",
-      "theme": "dark",
-      "capturesByTheme": {
-        "light": [
-          "overview-light"
-        ],
-        "dark": [
-          "overview-dark"
-        ]
-      }
-    },
-    {
-      "id": "themes",
-      "template": "showcase",
-      "captures": [
-        "overview-light"
-      ],
-      "width": 1600,
-      "height": 1000,
-      "theme": "light",
-      "capturesByTheme": {
-        "light": [
-          "overview-light"
-        ],
-        "dark": [
-          "overview-dark"
-        ]
-      }
-    },
-    {
-      "id": "themes-dark",
-      "template": "showcase",
-      "captures": [
-        "overview-dark"
-      ],
-      "width": 1600,
-      "height": 1000,
-      "theme": "dark",
-      "capturesByTheme": {
-        "light": [
-          "overview-light"
-        ],
-        "dark": [
-          "overview-dark"
-        ]
-      }
-    },
-    {
-      "id": "social",
-      "template": "showcase",
-      "captures": [
-        "overview-light"
-      ],
-      "width": 1200,
-      "height": 800,
-      "layout": "site-top",
-      "theme": "light",
-      "capturesByTheme": {
-        "light": [
-          "overview-light"
-        ],
-        "dark": [
-          "overview-dark"
-        ]
-      }
-    },
-    {
-      "id": "social-dark",
-      "template": "showcase",
-      "captures": [
-        "overview-dark"
-      ],
-      "width": 1200,
-      "height": 800,
-      "layout": "site-top",
-      "theme": "dark",
-      "capturesByTheme": {
-        "light": [
-          "overview-light"
-        ],
-        "dark": [
-          "overview-dark"
-        ]
-      }
-    }
-  ],
-  "prepare": {
+  },
+  "build": {
     "cwd": "Web",
-    "command": "npm ci --cache ../.product-captures-cache/npm && npm run steptrace:check && npm run quartz -- plugin install --from-config && npm run quartz -- build",
-    "timeoutMs": 600000
+    "command": "npm ci --cache ../.product-captures-cache/npm && npm run steptrace:check && npm run quartz -- plugin install --from-config && npm run quartz -- build"
   },
   "server": {
-    "command": "node \"$PRODUCT_CAPTURE_TOOL_ROOT/serve.mjs\" --dir Web/public --port 4180",
-    "url": "http://127.0.0.1:4180",
-    "timeoutMs": 60000
+    "directory": "Web/public"
   }
 }

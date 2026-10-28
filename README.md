@@ -84,4 +84,4 @@ This installs the locked Web npm dependencies, enables local Git hooks and confi
 
 [MIT License](LICENSE)
 
-[Regenerate product images](docs/product-captures.md)
+[Regenerate product images](https://github.com/grafanaKibana/product-captures#configuration)
