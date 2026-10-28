@@ -170,6 +170,24 @@ print(("=> " if full_publish else "") + json.dumps({"success":True,"data":data})
         self.assertLess(deletion, refreshes[1])
         self.assertLess(refreshes[1], status)
 
+    def test_note_dates_are_stored_before_export_without_owning_published(self):
+        result = self.run_sync()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        note = self.git("show", ":Vault/Home/example.md")
+        self.assertIn("created:", note)
+        self.assertIn("modified:", note)
+        self.assertNotIn("published:", note)
+        self.assertEqual(note, (self.repo / "Vault/Home/example.md").read_text())
+        self.assertEqual((self.repo / "calls").read_text().count("quartz-syncer:publish"), 1)
+
+    def test_worktree_vault_id_is_forwarded_to_obsidian(self):
+        with mock.patch.dict(os.environ, {"OBSIDIAN_VAULT": "isolated-worktree-id"}):
+            result = self.run_sync(configure_only=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        commands = (self.repo / "calls").read_text().splitlines()
+        self.assertTrue(commands)
+        self.assertTrue(all(command.startswith("vault=isolated-worktree-id ") for command in commands))
+
     def test_export_failures_block_without_staging_output(self):
         for scenario in ["false", "malformed", "partial", "vault", "edit", "cleanup-failure", "cleanup-malformed", "datacore", "unsupported", "query", "refresh-failure", "final-refresh-failure", "config-failure", "repo-failure", "config-noop", "repo-noop", "cache-clear-failure"]:
             with self.subTest(scenario=scenario):

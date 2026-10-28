@@ -120,7 +120,7 @@ def cli(root, binary, *args, structured=True, timeout=None, json_output=True, op
     read_fd, write_fd = os.pipe()
     try:
         try:
-            result = subprocess.run([binary, "vault=Vault", *args], cwd=root,
+            result = subprocess.run([binary, "vault=" + (os.environ.get("OBSIDIAN_VAULT") or "Vault"), *args], cwd=root,
                                     stdin=read_fd, capture_output=True, text=True,
                                     timeout=timeout if timeout is not None else float(os.environ.get("QUARTZ_SYNC_TIMEOUT", "600")))
         except subprocess.TimeoutExpired as error:
@@ -315,8 +315,16 @@ def export(root):
     binary, settings, identity = configure(root)
     if settings.get("useDatacore") and identity.get("datacoreReady") is not True:
         raise SyncError("Datacore is not initialized. Wait for indexing to finish before committing.")
+    dates = runpy.run_path(str(Path(__file__).with_name("note_dates.py")))
+    source_before_dates = snapshot(root)
+    updated_dates = dates["prepare"](root, expected=source_before_dates)
+    before = {**source_before_dates, **updated_dates}
+    if snapshot(root) != before:
+        raise SyncError("Vault source changed while preparing note dates; commit blocked.")
+    guard_source(root)
+    if updated_dates:
+        print(f"[pre-commit] Stored source dates for {len(updated_dates)} notes.")
     log(root, "Verified local export destination and settings; starting publication.")
-    before = snapshot(root)
     wait_for_indexes(root, binary, before)
     cli(root, binary, "quartz-syncer:cache", "action=tree-refresh", "format=json")
     refresh_assets = any(path.startswith("Vault/Assets/") or Path(path).suffix.lower() != ".md"
