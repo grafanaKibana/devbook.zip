@@ -1,11 +1,8 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - Machine Learning
+topic: [AI & ML]
+subtopic: [Machine Learning]
 summary: "Five levels of AI involvement, from fully human-driven to fully autonomous."
-level:
-  - "1"
+level: ["1"]
 priority: Low
 status: Done
 publish: true

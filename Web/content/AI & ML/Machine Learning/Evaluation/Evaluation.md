@@ -1,9 +1,9 @@
 ---
 publish: true
 title: Machine Learning Evaluation
-created: 2026-09-12T17:17:13.826Z
-modified: 2026-09-12T17:17:13.827Z
-published: 2026-09-12T17:17:13.827Z
+created: 2026-10-28T12:27:02.667Z
+modified: 2026-10-28T12:33:02.630Z
+published: 2026-10-28T12:33:02.630Z
 tags:
   - FolderNote
 topic:

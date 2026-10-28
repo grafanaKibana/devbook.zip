@@ -1,14 +1,11 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - Patterns
+topic: [Software Architecture]
+subtopic: [Patterns]
 summary: "Patterns that keep distributed systems stable when dependencies degrade by controlling how failure propagates."
 tags: [FolderNote]
 publish: true
 priority: High
-level:
-  - "3"
+level: ["3"]
 status: Done
 ---
 

@@ -1,11 +1,8 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Data Structures
+topic: [Computer Science]
+subtopic: [Data Structures]
 summary: "A self-balancing BST using node colors for good-enough balance with cheap repairs, the default ordered map."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Ready to Repeat
 publish: true

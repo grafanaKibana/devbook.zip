@@ -1,11 +1,8 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Finds all occurrences of many patterns in one text pass using a trie with failure links."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Creation
 publish: true
@@ -15,20 +12,13 @@ A signature engine may scan one byte stream against thousands of fixed, non-empt
 
 Aho-Corasick compiles the dictionary into one trie augmented with **failure links** and **output links**. Each text character advances a single automaton state. Shared trie paths reuse common prefixes, failure links recover the longest viable suffix after a miss, and output links enumerate every pattern ending at the current position. The scan never rewinds the text.
 
-
-
 %% tabs %%
 
 %% tab: Visualization %%
 
-
 ```steptrace
 {"algorithm":"aho-corasick","patterns":["he","she","his","hers"],"text":"ushers"}
 ```
-
-
-
-
 
 The automaton is a trie of the pattern set plus two kinds of back-edge.
 
@@ -39,8 +29,6 @@ The automaton is a trie of the pattern set plus two kinds of back-edge.
 **Output links.** A single state can complete several patterns at once, because a shorter pattern may be a suffix of a longer one — `he` is a suffix of the state reached by `she`. Each state's output link points to the nearest failure-reachable state that ends a pattern; walking that chain at every visited state emits all patterns ending there. The link is set by the same suffix rule as the failure link: a state's output is its failure target if that target ends a pattern, otherwise the failure target's own output.
 
 **Construction.** Failure and output links are filled by one breadth-first pass from the root. A node's failure target always sits at strictly smaller depth, so it is finalized before the node needs it; a depth-first order would read unfinished links. The root's direct children fail to the root.
-
-
 
 The dictionary `{ he, she, his, hers }` compiles to a trie with a handful of failure and output links. Two are decisive: the state for `she` fails to the state for `he` — its longest proper suffix that is also a prefix in the trie — and because `he` ends a pattern, `she`'s output link points there.
 
@@ -142,8 +130,6 @@ The build rows distinguish a sparse transition map from a dense alphabet-wide ta
 %% endtabs %%
 
 # Where it Stops Fitting
-
-
 
 **Overlapping and nested matches.** The automaton reports every occurrence, including `aa` at offsets 0 and 1 in `aaa`, and `he` ending inside `she`. Nested matches surface through the output chain. Emitting only the pattern attached to the current trie node leaves the scan correctly positioned but loses suffix matches: `{ he, she, hers }` over `ushers` would report `she` and `hers`, but not `he`. Dictionaries without suffix-related patterns hide this defect.
 

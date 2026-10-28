@@ -1,11 +1,8 @@
 ---
-topic:
-  - Networks
-subtopic:
-  - Protocols
+topic: [Networks]
+subtopic: [Protocols]
 summary: "A stateless request-response protocol carrying web and API messages across reusable connections."
-level:
-  - "3"
+level: ["3"]
 priority: High
 status: Ready to Repeat
 
@@ -266,17 +263,17 @@ Connections return to the pool after content consumption when `HttpResponseMessa
 <!-- qard-id: 4c4c1b1f-db4e-4e7a-98e9-c9a49ac03838 -->
 > [!qard]- What does HTTP idempotency guarantee about retrying a request?
 > An idempotent HTTP method guarantees that sending the same request several times has the same intended effect on the server as sending it once. A client can therefore resend such a request after a communication failure, for example when the connection closes before the response arrives, even though the first attempt may already have succeeded.
-> 
+>
 > `PUT`, `DELETE` and the safe methods, such as `GET` and `HEAD`, are idempotent. `POST` is not.
-> 
+>
 > The guarantee is narrower than identical behavior:
-> 
+>
 > - **Responses can differ.** A retried `DELETE` leaves the resource deleted, but the second response can report that the resource no longer exists.
 > - **Only the requested effect is covered.** The server can still log, audit or record history separately for each copy of the request.
 > - **Method semantics do not make a particular retry harmless.** The request body must be replayable, the retry must fit within the caller's deadline and credentials must still be valid. A request that carries a single-use value, such as a one-time token, cannot simply be replayed.
 > 
 > For a non-idempotent method such as `POST`, an automatic retry is appropriate only when the client knows the operation is idempotent for that resource or can detect that the first attempt was never applied.
-> 
+>
 > [RFC 9110: Idempotent methods](https://www.rfc-editor.org/rfc/rfc9110.html#section-9.2.2)
 
 # References

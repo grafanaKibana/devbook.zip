@@ -1,11 +1,8 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
+topic: [AI & ML]
+subtopic: [LLM]
 summary: "Repeatable loops that generate, evaluate, and select prompt candidates against a validation set."
-level:
-  - "3"
+level: ["3"]
 priority: Low
 status: Done
 publish: true

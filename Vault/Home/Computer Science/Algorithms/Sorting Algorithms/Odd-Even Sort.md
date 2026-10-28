@@ -1,11 +1,8 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Alternates disjoint odd and even adjacent compare-swap phases until neither changes the array."
-level:
-  - "4"
+level: ["4"]
 priority: Low
 status: Not-Started
 publish: true

@@ -1,12 +1,9 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Data Structures
+topic: [Computer Science]
+subtopic: [Data Structures]
 summary: "Sequence structures like arrays, lists, stacks, queues, and buffers, defined by access order."
 tags: [FolderNote]
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 publish: true
 status: Done

@@ -1,10 +1,8 @@
 ---
-topic:
-  - Data Persistence
+topic: [Data Persistence]
 subtopic: []
 summary: "How object keys, metadata, HTTP APIs, multipart writes, and lifecycle tiers shape storage design."
-level:
-  - "3"
+level: ["3"]
 priority: High
 status: Ready to Repeat
 publish: true

@@ -1,12 +1,9 @@
 ---
 title: ASP.NET Core Dependency Injection
-topic:
-  - Programming
-subtopic:
-  - NET
+topic: [Programming]
+subtopic: [NET]
 summary: "ASP.NET Core's built-in IoC container managing service lifetimes and constructor injection."
-level:
-  - "1"
+level: ["1"]
 priority: Medium
 status: Ready to Repeat
 publish: true
@@ -145,10 +142,6 @@ The container owns disposal for instances it creates. Scoped disposables are rel
 - **Built-in or third-party container:** the default container covers lifetimes, constructor activation, keyed services, and open generics. A replacement earns its cost only when a missing registration feature is used broadly enough to simplify the application.
 
 # Questions
-
-
-
-
 
 <!-- qard-id: 21fca1dc-8fda-4a2b-b5af-a582c10b4e8e -->
 > [!qard]- What is the difference between `GetService<T>` and `GetRequiredService<T>`?

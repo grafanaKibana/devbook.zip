@@ -1,11 +1,8 @@
 ---
-topic:
-  - Data Persistence
-subtopic:
-  - NoSQL
+topic: [Data Persistence]
+subtopic: [NoSQL]
 summary: "How Elasticsearch maps and analyzes documents into Lucene segments, distributes shards, and serves search and aggregations."
-level:
-  - "3"
+level: ["3"]
 priority: High
 status: Ready to Repeat
 publish: true
@@ -112,7 +109,7 @@ PostgreSQL full-text search fits when one relational data set needs modest searc
 <!-- qard-id: fc591795-e2d6-468f-8923-de04b6ff8463 -->
 > [!qard]- Why might Elasticsearch map one logical value as both `text` and `keyword`?
 > Full-text search and exact-value operations need different index forms, and one field type serves only one of them well. A multi-field indexes the same source value both ways, so each query can use the form that matches its intent.
-> 
+>
 > - **`text`** passes the value through an analyzer that splits and normalizes it into terms. A standard analyzer may index `Running Shoes` as `running` and `shoes`, so a search for `shoes` matches. The index holds separate normalized terms instead of the whole original value, so `text` is a poor basis for exact filters, sorting and aggregations.
 > - **`keyword`** indexes the whole value unchanged. A term filter, a sort or an aggregation such as a facet count works on the exact value `Running Shoes`. A full-text search for `shoes` does not match it.
 > 
@@ -123,20 +120,20 @@ PostgreSQL full-text search fits when one relational data set needs modest searc
 >   }
 > }
 > ```
-> 
+>
 > With this mapping, full-text queries target `name`, while exact filters, sorting and aggregations target `name.raw`.
-> 
+>
 > [Elasticsearch: text fields](https://www.elastic.co/guide/en/elasticsearch/reference/current/text.html) · [Elasticsearch: keyword fields](https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/keyword)
 
 > [!qard]- Why can a newly indexed Elasticsearch document be missing from search results for a short time?
 > Elasticsearch search is near real-time. A document becomes searchable only after a refresh opens the segment that contains it, so an acknowledged write can be stored before it appears in search results.
-> 
+>
 > 1. **Index:** the document enters an in-memory indexing buffer and the transaction log on its shard. Acknowledgement depends on the primary and replica write settings, not on search visibility.
 > 2. **Refresh:** on a periodic interval, or when explicitly requested, buffered documents become a new immutable Lucene segment that is opened for search.
 > 3. **Merge:** background merges combine small segments and discard obsolete document versions.
 > 
 > A shorter refresh interval reduces the delay but creates more small segments and more merge work. That work consumes CPU, disk bandwidth and temporary disk space. Forcing a refresh after every write is therefore a costly default and fits only bounded workflows that truly need immediate visibility.
-> 
+>
 > [Elasticsearch near-real-time search](https://www.elastic.co/docs/manage-data/data-store/near-real-time-search) · [Elasticsearch refresh parameter](https://www.elastic.co/docs/reference/elasticsearch/rest-apis/refresh-parameter) · [Elasticsearch translog settings](https://www.elastic.co/docs/reference/elasticsearch/index-settings/translog)
 
 # References

@@ -1,13 +1,10 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Data Structures
+topic: [Computer Science]
+subtopic: [Data Structures]
 summary: "How to pick a data structure by matching operations to complexity, with the .NET type for each."
 tags: [FolderNote]
 publish: true
-level:
-  - "4"
+level: ["4"]
 priority: High
 status: Creation
 ---

@@ -1,11 +1,8 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - Patterns
+topic: [Software Architecture]
+subtopic: [Patterns]
 summary: "Event Sourcing stores each aggregate's state as an ordered stream of domain events instead of only the latest snapshot."
-level:
-  - "2"
+level: ["2"]
 priority: High
 status: Done
 

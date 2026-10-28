@@ -1,11 +1,8 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "A refined brute force that builds candidate solutions incrementally and prunes a partial candidate the moment it can't possibly succeed."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Ready to Repeat
 publish: true
@@ -18,19 +15,15 @@ The eight-queens problem has 4,426,165,368 ways to place eight pieces on 64 squa
 
 Backtracking avoids that waste by building one candidate a choice at a time and checking constraints as it goes. A queen is placed in one row. If it shares a column or diagonal with a queen above, no completion of the remaining rows can work, so the search drops the entire partial board. This depends on being able to test a prefix instead of waiting for a finished candidate. One queen in each of eight rows leaves `8^8` column choices when columns may repeat. Rejecting shared columns narrows the search to `8! = 40,320` permutations, and diagonal checks cut it further.
 
-
 %% tabs %%
 
 %% tab: Visualization %%
-
 
 ```steptrace
 {"algorithm":"n-queens","n":4}
 ```
 
-
 The decisive event is a rejection. When the queen in the current row has no safe column, the partial board cannot be extended, so the search abandons it and returns to the previous row to advance that queen to its next column — every board that would have grown beneath the failed placement is pruned unexamined. Starting the first queen in column 0 leads to exactly this dead end: each of its completions collides, the whole subtree under column 0 is exhausted, and the search retreats to row 0, lifts that queen, and only the column-1 start extends to the arrangement `(1, 3, 0, 2)`. Depth in the tree is the row index, so a rejection at row `k` discards every placement of rows `k+1…n` beneath it at once.
-
 
 A candidate is a sequence of choices, one per level of a search tree. At each node the algorithm extends the partial candidate by one choice and tests the constraints its prefix can already decide:
 

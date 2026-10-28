@@ -1,15 +1,12 @@
 ---
 title: Machine Learning Evaluation
-topic:
-  - AI & ML
-subtopic:
-  - Machine Learning
+topic: [AI & ML]
+subtopic: [Machine Learning]
 summary: "Measuring whether a model solves its real problem in production by picking the right metric."
 tags: [FolderNote]
 publish: true
 priority: Medium
-level:
-  - "3"
+level: ["3"]
 status: Done
 ---
 

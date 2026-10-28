@@ -1,12 +1,9 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - Patterns
+topic: [Software Architecture]
+subtopic: [Patterns]
 summary: "Behavioral patterns assign responsibilities and coordinate communication between objects without tightly coupling them."
 tags: [FolderNote]
-level:
-  - "3"
+level: ["3"]
 priority: High
 publish: true
 status: Done

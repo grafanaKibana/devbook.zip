@@ -1,11 +1,8 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - Patterns
+topic: [Software Architecture]
+subtopic: [Patterns]
 summary: "Separates the write path from the read path so each can be scaled and optimized independently."
-level:
-  - "3"
+level: ["3"]
 priority: High
 status: Done
 
@@ -221,17 +218,17 @@ CQRS is worth considering when write invariants and query shapes pull the shared
 
 > [!qard]- What is CQRS?
 > CQRS (Command Query Responsibility Segregation) handles state changes and reads through separate models. Commands go through a write model that enforces business rules and changes state. Queries go through a read model that returns data shaped for a screen or API and changes nothing.
-> 
+>
 > - **Commands** express a business intent, such as `PlaceOrder`. The write model validates each command against its invariants before changing state.
 > - **Queries**, such as `GetOrderSummary`, only return data. Their model can be shaped for the request, for example one flat row per order summary, so the query avoids joins.
 > 
 > The separation lies in the models and code paths, not necessarily in storage:
-> 
+>
 > - **Shared data:** both models can work against the same database through separate logic. No copy has to be kept in sync.
 > - **Separate read store:** a denormalized copy must be updated from write-side changes. Updating it within the same request reduces staleness, but it ties the read side's latency and failures to the write. A failure between the two updates can still leave the copy out of date unless both commit atomically. Updating it asynchronously from events removes that coupling, but reads can be stale until the projection catches up. Events then need reliable publication, such as an outbox, and an idempotent projector.
 > 
 > Message brokers, separate databases and Event Sourcing are optional choices, not part of the definition.
-> 
+>
 > [Microsoft: CQRS pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/cqrs)
 
 <!-- qard-id: 0db1b8e5-f1a2-4cea-8c69-5d0fc56ca7d2 -->

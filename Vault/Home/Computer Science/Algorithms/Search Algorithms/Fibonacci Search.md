@@ -1,11 +1,8 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Searches a sorted array by shrinking a Fibonacci-sized window around an offset."
-level:
-  - "4"
+level: ["4"]
 priority: Low
 status: Not-Started
 publish: true

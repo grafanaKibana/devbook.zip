@@ -1,10 +1,8 @@
 ---
-topic:
-  - Cloud
+topic: [Cloud]
 subtopic: []
 summary: "Designing application behavior so cloud cost stays attributable, measurable, and proportional to useful work."
-level:
-  - "2"
+level: ["2"]
 priority: High
 status: Ready to Repeat
 publish: true

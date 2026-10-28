@@ -1,14 +1,11 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - Patterns
+topic: [Software Architecture]
+subtopic: [Patterns]
 summary: "Architectural patterns define how a system's components are organized, how data flows between them, and where responsibility boundaries lie."
 tags: [FolderNote]
 publish: true
 priority: High
-level:
-  - "3"
+level: ["3"]
 status: Done
 ---
 

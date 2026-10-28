@@ -1,11 +1,8 @@
 ---
-topic:
-  - Software Design
-subtopic:
-  - Principles
+topic: [Software Design]
+subtopic: [Principles]
 summary: "Five design principles governing how classes relate and where new behavior goes."
-level:
-  - "4"
+level: ["4"]
 priority: High
 status: Ready to Repeat
 publish: true

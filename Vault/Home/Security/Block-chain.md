@@ -1,11 +1,8 @@
 ---
-topic:
-  - Security
-subtopic:
-  - Security
+topic: [Security]
+subtopic: [Security]
 summary: "An append-only ledger of blocks linked by cryptographic hashes, making tampering detectable."
-level:
-  - "1"
+level: ["1"]
 priority: Low
 status: Ready to Repeat
 

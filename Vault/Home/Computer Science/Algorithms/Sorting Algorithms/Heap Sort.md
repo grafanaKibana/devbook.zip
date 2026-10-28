@@ -1,11 +1,8 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Heapifies the array, then repeatedly extracts the maximum into a growing sorted suffix."
-level:
-  - "4"
+level: ["4"]
 status: Creation
 publish: true
 priority: Medium
@@ -21,13 +18,9 @@ Heap sort keeps that information by treating the unsorted region as a [[Home/Com
 
 %% tab: Visualization %%
 
-
-
 ```steptrace
 {"algorithm":"heap-sort","array":[8,3,5,1,9,2,7,4]}
 ```
-
-
 
 The first phase sifts each internal node down until every parent dominates its children, rearranging the array into a max-heap with nothing yet in its final sorted position. From there every step is identical: the root — the largest remaining key — is swapped with the last cell still inside the heap, the heap boundary retreats by one, and the new root sifts down until heap order holds again. The swapped-out maximum now sits at its final index, so a sorted suffix grows leftward from the end of the array while the heap shrinks toward the front. When the heap holds one element the array is ordered.
 
@@ -108,7 +101,6 @@ Those swaps are why heap sort is **not stable**: an extraction can carry one of 
 ```
 
 The best curve assumes all keys compare equal, so each sift-down stops after its first child comparisons. The space curves assume iterative sift-down; a recursive version adds call-stack storage.
-
 
 %% endtabs %%
 

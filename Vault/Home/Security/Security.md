@@ -2,15 +2,13 @@
 icon: lock
 order: 80
 color: "#0ea5e9"
-topic:
-  - Security
+topic: [Security]
 subtopic: []
 summary: "Protecting users, data, and systems: authentication, authorization, and cryptography."
 tags: [FolderNote]
 publish: true
 priority: High
-level:
-  - "4"
+level: ["4"]
 status: Done
 qard-deck: "Security"
 qard-topic: "Security"
@@ -57,9 +55,9 @@ A checklist becomes evidence only when its failure paths are exercised. The payr
 <!-- qard-id: 020bc3d2-4f0b-4156-94ef-d2ebc35ffa9f -->
 > [!qard]- How do authentication and authorization work together when handling a request?
 > Authentication runs first and establishes who is calling. It validates a credential, such as a cookie or bearer token, and produces a principal with claims. Authorization then uses that principal to decide whether this caller may perform this action on this resource in the current context. A valid identity is an input to the authorization decision, not permission for every operation.
-> 
+>
 > In ASP.NET Core, one request flows as follows:
-> 
+>
 > 1. **Authenticate:** the handler for the configured scheme validates the credential and sets `HttpContext.User` to the resulting principal. This step does not reject a request that lacks a valid credential. Such a request continues without an authenticated identity.
 > 2. **Authorize the endpoint:** policies on the endpoint are evaluated against the principal before the action runs. Examples are requiring an authenticated user, a role or a claim.
 > 3. **Authorize the resource:** an endpoint policy cannot see a record that the action has not loaded yet. When the decision depends on the record, such as whether the caller owns invoice 42, the action loads it and calls `IAuthorizationService.AuthorizeAsync(User, invoice, "CanReadInvoice")`.

@@ -1,11 +1,8 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
+topic: [AI & ML]
+subtopic: [LLM]
 summary: "Designing callable operations that models can select, execute, and recover from reliably."
-level:
-  - "3"
+level: ["3"]
 priority: Low
 status: Done
 
@@ -172,35 +169,35 @@ Several mechanisms contribute:
 <!-- qard-id: 1ae0756c-dd19-4930-bc8c-5588680c4326 -->
 > [!qard]- When should repeated agent failures be fixed in a tool contract instead of the prompt?
 > A failure belongs in the tool contract when it recurs across different requests that use the same tool: the wrong tool is selected, arguments are malformed, or errors are not recovered from. A pattern that repeats across requests points to the interface, not to one request's wording. The contract is part of every call to that tool, so a change there reaches all later calls. A prompt workaround works only when the model remembers and follows the exception.
-> 
+>
 > Reaching every call does not guarantee that the failure stops. Rerunning representative tool tasks and comparing selection, argument and recovery failures before and after the change shows whether it actually helps.
-> 
+>
 > Contract-level fixes include:
-> 
+>
 > - **Names and descriptions** that state what the tool does, what it returns and when a different tool fits.
 > - **Parameters** with explicit formats, enums and required fields, leaving fewer ways to produce a call that parses but means nothing.
 > - **Errors** that say what failed and how to correct the call, so the next attempt has a concrete repair.
 > - **Results** that contain the fields the next step needs, including identifiers a later call may use.
 > 
 > For example, Anthropic reported that its SWE-bench agent made mistakes with relative file paths after moving out of the root directory. It also reported that those mistakes stopped once the tool was changed to always require absolute paths.
-> 
+>
 > The prompt remains the place for task intent and for instructions specific to one request.
-> 
+>
 > Sources: [Writing effective tools for AI agents (Anthropic)](https://www.anthropic.com/engineering/writing-tools-for-agents) · [Building effective agents (Anthropic)](https://www.anthropic.com/engineering/building-effective-agents)
 
 <!-- qard-id: d192b24b-4e3d-4bd7-afe9-363b687b7d2f -->
 > [!qard]- What determines whether related operations should use one broad tool or several narrower tools?
 > The deciding factor is whether the operations share one contract. Operations that need different permissions, input schemas or descriptions belong in separate tools. Closely related actions that share context, permissions and arguments can stay in one tool.
-> 
+>
 > | Signal | Points toward | Reason |
 > |---|---|---|
 > | Different permission checks | Separate tools | Each tool can be authorized and exposed on its own. |
 > | One schema collecting unrelated optional fields | Separate tools | Fewer argument combinations remain that are valid JSON but meaningless as a request. |
 > | Actions sharing context, permissions and arguments | One tool | A single description and schema cover them without unrelated options. |
 > | Many similar or overlapping tools already exposed | Fewer, clearer tools | Each additional tool is another option the model must tell apart, so selection errors can rise. |
-> 
+>
 > Narrower tools usually simplify each call's arguments but enlarge the set the model chooses from. The net effect depends on the real task mix and the whole exposed catalog, so it is measured rather than assumed. Tracking tool-selection accuracy and argument correctness separately on representative tasks shows which failure a change actually reduces.
-> 
+>
 > Source: [Writing effective tools for AI agents (Anthropic)](https://www.anthropic.com/engineering/writing-tools-for-agents)
 
 # References

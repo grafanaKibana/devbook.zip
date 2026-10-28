@@ -1,11 +1,8 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Data Structures
+topic: [Computer Science]
+subtopic: [Data Structures]
 summary: "A rigidly self-balancing BST with tighter worst-case height than red-black trees for lookup-heavy workloads."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Ready to Repeat
 publish: true

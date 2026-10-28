@@ -1,11 +1,8 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Finds the greatest s-to-t throughput in a capacitated network by repeatedly augmenting paths in a residual graph."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Ready to Repeat
 publish: true
@@ -27,11 +24,9 @@ The transition worth animating is a backward arc in the residual graph retractin
 {"algorithm":"maximum-flow"}
 ```
 
-
 Take the unit-capacity network `s→a, s→b, a→b, a→t, b→t`; its maximum flow is 2, since only `s→a` and `s→b` leave the source. A greedy first augmentation along `s → a → b → t` saturates all three of its edges and reports flow 1. Every remaining forward path is now blocked — `s→a` and `b→t` are full — so a forward-only algorithm stops one unit short.
 
 The residual graph reopens the choice. Sending one unit `a → b` created a backward arc `b → a` with residual 1. The path `s → b → a → t` uses that backward arc: `b → a` retracts the earlier `a → b` unit and reroutes it, so `a → b` returns to zero while `s→a→t` and `s→b→t` each carry one unit. Flow reaches 2. The backward arc is the entire reason a locally-committed, wrong routing decision can be undone; forward-only residuals leave no legal move to reach that state, which is exactly why greedy-without-residuals returns a value below the maximum.
-
 
 An `s`-`t` **cut** splits the vertices into `S` (containing `s`) and `T` (containing `t`); its capacity is the total capacity of the original edges crossing `S → T`. Any flow value is bounded by any cut capacity, because everything reaching `t` must cross the partition. The **max-flow min-cut theorem** sharpens that to equality: the maximum flow equals the minimum cut capacity.
 
@@ -228,9 +223,7 @@ The residual mechanism exposes two sharp boundaries.
 > ```
 > This compact matrix variant accepts `capacity[u, v]` and returns only the maximum-flow value. One opposite-direction residual entry combines cancellation capacity with any original antiparallel capacity. Reconstructing flow for each original edge therefore requires paired edge objects.
 
-
 # Comparison
-
 
 Edmonds–Karp is the simplest fixed path-selection baseline. It chooses augmenting paths with [[Home/Computer Science/Algorithms/Graph Algorithms/DFS BFS|BFS]], while plain Ford–Fulkerson may use [[Home/Computer Science/Algorithms/Graph Algorithms/DFS BFS|DFS]] or another rule. Dinic keeps the residual-path model and batches augmentations. Its extra machinery pays off on larger networks and matching workloads. Ford–Fulkerson is the model to reason from, not the default implementation, because arbitrary path selection can fail to terminate on irrational capacities.
 

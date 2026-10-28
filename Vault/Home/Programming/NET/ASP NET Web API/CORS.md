@@ -1,11 +1,8 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
+topic: [Programming]
+subtopic: [NET]
 summary: "Browser protocol controlling whether cross-origin JavaScript may access an API response."
-level:
-  - "1"
+level: ["1"]
 priority: Medium
 status: Ready to Repeat
 publish: true

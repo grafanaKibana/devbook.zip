@@ -1,11 +1,8 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - System Architecture
+topic: [Software Architecture]
+subtopic: [System Architecture]
 summary: "Uses provider-managed functions, containers, messaging, storage, or databases with service-defined scaling and billing."
-level:
-  - "3"
+level: ["3"]
 priority: Medium
 status: Ready to Repeat
 publish: true

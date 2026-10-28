@@ -2,15 +2,13 @@
 icon: skull
 order: 100
 color: "#6366f1"
-topic:
-  - DevOps
+topic: [DevOps]
 subtopic: []
 summary: "Automation, observability, and delivery practices that move changes to production safely."
 tags: [FolderNote]
 publish: true
 priority: High
-level:
-  - "4"
+level: ["4"]
 status: Done
 ---
 

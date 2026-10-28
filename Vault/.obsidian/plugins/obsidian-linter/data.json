@@ -54,7 +54,7 @@
       "sort-order": "Ascending Alphabetical"
     },
     "yaml-key-sort": {
-      "enabled": true,
+      "enabled": false,
       "yaml-key-priority-sort-order": [
         "order",
         "icon",
@@ -97,7 +97,7 @@
       "remove-alias-if-empty": true
     },
     "capitalize-headings": {
-      "enabled": true,
+      "enabled": false,
       "style": "First letter",
       "ignore-case-words": true,
       "ignore-words": [
@@ -435,14 +435,14 @@
       "extra-auto-correct-files": []
     },
     "blockquote-style": {
-      "enabled": true,
+      "enabled": false,
       "style": "space"
     },
     "convert-bullet-list-markers": {
       "enabled": false
     },
     "default-language-for-code-fences": {
-      "enabled": true,
+      "enabled": false,
       "default-language": "text"
     },
     "emphasis-style": {
@@ -560,16 +560,16 @@
     },
     "trailing-spaces": {
       "enabled": true,
-      "two-space-line-break": false
+      "two-space-line-break": true
     },
     "add-blockquote-indentation-on-paste": {
-      "enabled": false
+      "enabled": true
     },
     "prevent-double-checklist-indicator-on-paste": {
-      "enabled": false
+      "enabled": true
     },
     "prevent-double-list-item-indicator-on-paste": {
-      "enabled": false
+      "enabled": true
     },
     "proper-ellipsis-on-paste": {
       "enabled": false
@@ -597,21 +597,30 @@
       "enabled": false
     }
   },
-  "lintOnSave": false,
+  "lintOnSave": true,
   "recordLintOnSaveLogs": false,
   "displayChanged": true,
   "suppressMessageWhenNoChange": false,
   "enableDiffPreviewView": true,
   "suppressLintAllFilesConfirmationModal": false,
   "suppressLintAllFilesInFolderConfirmationModal": false,
-  "lintOnFileChange": false,
+  "lintOnFileChange": true,
   "displayLintOnFileChangeNotice": true,
   "settingsConvertedToConfigKeyValues": true,
   "textAreaSettingsConvertedToListItemSettings": true,
   "defaultArrayStyleMovedToCommonStyles": true,
   "additionalFileExtensions": [],
-  "foldersToIgnore": [],
-  "filesToIgnore": [],
+  "foldersToIgnore": [
+    "Assets",
+    "Templates"
+  ],
+  "filesToIgnore": [
+    {
+      "match": "^Home/Changelog\\.md$",
+      "flags": "",
+      "label": "Generated changelog"
+    }
+  ],
   "linterLocale": "system-default",
   "logLevel": "ERROR",
   "lintCommands": [],
@@ -622,6 +631,6 @@
     "minimumNumberOfDollarSignsToBeAMathBlock": 2,
     "escapeCharacter": "\"",
     "removeUnnecessaryEscapeCharsForMultiLineArrays": true,
-    "defaultArrayStyle": "multi-line"
+    "defaultArrayStyle": "single-line"
   }
 }

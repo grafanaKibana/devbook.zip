@@ -1,11 +1,8 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Data Structures
+topic: [Computer Science]
+subtopic: [Data Structures]
 summary: "A LIFO collection where the most recently pushed element is popped first, used for backtracking, undo, and DFS."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Done
 publish: true

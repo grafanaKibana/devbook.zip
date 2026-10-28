@@ -1,12 +1,9 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Data Structures
+topic: [Computer Science]
+subtopic: [Data Structures]
 summary: "Hierarchical parent-child structures whose operation bounds depend on the tree family and its height or routing invariant."
 tags: [FolderNote]
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 publish: true
 status: Creation

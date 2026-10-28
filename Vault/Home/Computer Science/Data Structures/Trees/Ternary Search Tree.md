@@ -1,11 +1,8 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Data Structures
+topic: [Computer Science]
+subtopic: [Data Structures]
 summary: "Stores strings with trie-style depth and a character BST at each position, using three links per node."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Ready to Repeat
 publish: true

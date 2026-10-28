@@ -1,11 +1,8 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - System Architecture
+topic: [Software Architecture]
+subtopic: [System Architecture]
 summary: "A style where services communicate by publishing and consuming events instead of calling each other directly."
-level:
-  - "2"
+level: ["2"]
 priority: High
 status: Done
 
@@ -167,39 +164,39 @@ Trace context is propagated across hops, event identity is recorded at operation
 
 > [!qard]- What is event-driven architecture?
 > Event-driven architecture (EDA) is a style in which components coordinate by publishing and consuming events. An event records a fact that has already happened, such as `OrderPlaced`. A producer publishes the fact without naming the consumers, and each consumer decides what that fact means for its own state. When event communication is asynchronous, the producer also does not wait for the consumers.
-> 
+>
 > | Aspect | Synchronous direct call | Event-driven |
 > |---|---|---|
 > | Knowledge of the receiver | The caller names the service it calls. | The producer does not know which consumers exist, so new consumers can subscribe without changing it. |
 > | Timing | The caller waits for the response, so both sides must be available at the same time. | With asynchronous delivery, consumers can react later, which removes that temporal coupling when an immediate answer is not needed. |
 > | Outcome | The caller learns the result before continuing. | With asynchronous delivery, the producer continues without learning the consumers' results. Other services update their state after processing the event, so cross-service consistency is usually eventual. |
-> 
+>
 > Not naming consumers does not by itself mean not waiting. In-process domain events can be dispatched synchronously, so the producing code waits for its handlers even though it does not name them.
-> 
+>
 > EDA is a communication model, not a synonym for using a queue. A message broker or retained log is a common transport for durable cross-process events. In-process dispatch, database change streams and HTTP webhooks can also carry events, each with different durability and coupling. Synchronous APIs remain the better fit for queries and decisions that need an immediate answer.
-> 
+>
 > [Event-driven architecture style (Azure Architecture Center)](https://learn.microsoft.com/en-us/azure/architecture/guide/architecture-styles/event-driven) · [Microsoft: Domain events: design and implementation](https://learn.microsoft.com/en-us/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/domain-events-design-implementation)
 
 <!-- qard-id: f0a2c8b0-c242-478a-aa17-246db688b537 -->
 > [!qard]- What determines whether an event-driven workflow uses orchestration or choreography?
 > The choice depends on whether one component must own the workflow's order, state and recovery. Choreography fits when services can react to published events independently and no component needs to own the whole workflow. Orchestration fits when ordered steps, current progress and failure recovery must be tracked and controlled in one place. Asynchronous messaging supports both styles, so using events does not force choreography.
-> 
+>
 > | Aspect | Choreography | Orchestration |
 > |---|---|---|
 > | Who decides the next step | Each service decides how to react to the events it receives; no component directs the others. | A coordinator decides which step runs next and tells the participant to perform it. |
 > | Workflow state | Spread across the participants, so no single component knows the overall progress. | Held by the coordinator, which knows which steps have completed. |
 > | Failure and recovery | Each participant reacts to failure events itself, so recovery logic is distributed. | The coordinator detects a failed step and triggers retries or compensating actions. |
 > | Adding a reaction | A new subscriber can start consuming an event without any change to the producer. | A new step usually means changing the coordinator's workflow. |
-> 
+>
 > **Example:** after `OrderPlaced`, sending a confirmation email and updating analytics are independent reactions, so choreography fits. A checkout reserves stock, then takes payment, and releases the stock if payment fails. Ordered steps and compensation alone do not require an orchestrator, because a choreographed saga can also chain local transactions and compensations through events. Orchestration fits this checkout when one component must explicitly own its order, progress and recovery. Both styles can exist in one system.
-> 
+>
 > The number of events or services does not decide the style by itself; ownership of order, state and recovery does.
-> 
+>
 > [Event-driven architecture style (Azure Architecture Center)](https://learn.microsoft.com/en-us/azure/architecture/guide/architecture-styles/event-driven) · [Saga distributed transactions pattern (Azure Architecture Center)](https://learn.microsoft.com/en-us/azure/architecture/patterns/saga)
 
 > [!qard]- How do domain events, integration events, and event notifications differ?
 > Domain and integration events differ by boundary and contract. A domain event records a business fact inside one bounded context, while an integration event publishes a stable contract that other services depend on. Event notification is a different axis: it describes a payload and retrieval style in which the event only signals that something changed and consumers fetch the details themselves. An integration event can therefore be notification-style.
-> 
+>
 > | Aspect | Domain event | Integration event |
 > |---|---|---|
 > | Purpose | Records a business fact inside one bounded context, such as `InvoiceIssued`. | Shares a fact with other services as a published contract, such as `OrderPlacedIntegrationEvent`. |
@@ -207,16 +204,16 @@ Trace context is propagated across hops, event identity is recorded at operation
 > | When it is raised or published | Raised by domain logic when local business state changes. It can be dispatched synchronously in process. | Published only after the local transaction succeeds, usually through an outbox and publisher. |
 > | Payload | Can follow the internal model. It typically carries rich domain data, but that richness is not what makes it a domain event. | A stable DTO, so consumers do not depend on the internal model. |
 > | Main constraint | Normally stays inside the service; leaving it requires an explicit mapping to an integration event. | Versioning and backward compatibility become part of the contract, because consumers deploy independently. |
-> 
+>
 > **Event notification** describes what an event carries, not where it travels:
-> 
+>
 > - It carries minimal identifiers and metadata, such as `CatalogItemChanged { ItemId, ChangedAt }`.
 > - Consumers fetch current state from the source when they need more detail.
 > - It suits cache invalidation and broad fan-out, but couples consumers to the source's availability and read API.
 > - An integration event can use this style when other services only need to know that something changed.
 > 
 > The domain fact is modeled first. Only the part that another service can safely depend on is mapped into an integration event.
-> 
+>
 > [Microsoft: Domain events: design and implementation](https://learn.microsoft.com/en-us/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/domain-events-design-implementation) · [Martin Fowler: What do you mean by "Event-Driven"?](https://martinfowler.com/articles/201701-event-driven.html)
 
 # References

@@ -1,11 +1,8 @@
 ---
-topic:
-  - Data Persistence
-subtopic:
-  - NoSQL
+topic: [Data Persistence]
+subtopic: [NoSQL]
 summary: "A write-optimized storage engine that buffers writes in memory and flushes immutable sorted files, trading read amplification for sequential-write throughput — the B-tree's counterpart."
-level:
-  - "4"
+level: ["4"]
 priority: High
 status: Creation
 publish: true

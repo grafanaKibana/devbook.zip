@@ -1,11 +1,8 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
+topic: [Programming]
+subtopic: [NET]
 summary: "Finishing CPU-bound work faster by using multiple cores at once."
-level:
-  - "4"
+level: ["4"]
 priority: High
 status: Ready to Repeat
 publish: true
@@ -127,39 +124,39 @@ Parallelism is not limited to running more threads:
 <!-- qard-id: d918b18d-d000-4609-b2ca-0a7266c4944b -->
 > [!qard]- Why can adding more parallel workers reduce performance?
 > Extra workers help only while there is independent work for them and spare capacity to run it. Past that point, each added worker contributes more overhead and contention than useful work, so throughput can fall and latency can rise.
-> 
+>
 > - **More CPU-bound workers than cores:** the extra workers cannot run at the same time. The operating system time-slices them, which adds switching overhead without adding compute.
 > - **Contention on shared resources:** locks, shared writes and thread-safe collections make workers wait for one another. Memory bandwidth and caches are shared as well, so memory-heavy workers slow each other down.
 > - **Coordination overhead:** partitioning the input, scheduling the pieces and merging the results cost more as work is spread across more workers.
 > - **Downstream limits:** when each worker calls a database or remote service, extra workers queue on that dependency's connections or rate limits, adding waiting and possibly timeouts.
 > 
 > Worker count is therefore a value to measure against the real workload, not a direct measure of speed.
-> 
+>
 > [Microsoft: Potential pitfalls with PLINQ](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/potential-pitfalls-with-plinq) · [Microsoft: Understanding speedup in PLINQ](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/understanding-speedup-in-plinq)
 
 <!-- qard-id: 6f1732ae-c419-4c5a-9c6e-cd54e91be456 -->
 > [!qard]- How should `MaxDegreeOfParallelism` be chosen?
 > The limit should come from the resource that actually constrains the work and be confirmed by measurement under representative load. `Environment.ProcessorCount` is a reasonable starting point for CPU-bound work, not a universal default.
-> 
+>
 > - **CPU-bound work:** values near the core count are a starting point. Higher values add time-slicing overhead without adding compute.
 > - **Memory- or cache-heavy work:** memory bandwidth can saturate before every core is busy, so the best value can be lower than the core count.
 > - **Work that waits on I/O or a dependency:** the limit follows what the database or remote service can handle, such as its connection pool or rate limits. It can be higher or lower than the core count.
 > 
 > The chosen value is the one that meets throughput and tail-latency goals without exhausting those resources. `MaxDegreeOfParallelism` is only an upper bound on concurrent operations. It does not force that many to run.
-> 
+>
 > [Microsoft: ParallelOptions.MaxDegreeOfParallelism](https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.paralleloptions.maxdegreeofparallelism?view=net-10.0) · [Microsoft: Introduction to PLINQ](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/introduction-to-plinq) · [Microsoft: Understanding speedup in PLINQ](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/understanding-speedup-in-plinq)
 
 <!-- qard-id: 6b77dfe2-1eb1-4e64-a158-8563bde1f363 -->
 > [!qard]- When is PLINQ a poor fit?
 > PLINQ is a poor fit when the query's work is not independent and large enough per element, or when running its delegates concurrently would break correctness.
-> 
+>
 > - **Shared mutable state:** delegates that write to shared variables or call non-thread-safe code can corrupt data. Locks or thread-safe calls that prevent this make workers wait on each other and can erase the speedup.
 > - **Order-dependent side effects:** elements are processed on several threads, so side effects happen in no predictable order. `AsOrdered()` only preserves the order of the query's results, at extra merge cost.
 > - **Thread-affine code:** work that must run on a specific thread, such as Windows Forms or WPF UI access or single-threaded-apartment COM objects, cannot safely run inside PLINQ delegates.
 > - **Too little work per element:** partitioning and merging overhead can outweigh the parallel gain.
 > 
 > PLINQ fits pure, CPU-bound transforms over in-memory data, where each element does enough work and measurement shows a speedup.
-> 
+>
 > [Microsoft: Potential pitfalls with PLINQ](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/potential-pitfalls-with-plinq) · [Microsoft: Introduction to PLINQ](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/introduction-to-plinq) · [Microsoft: Understanding speedup in PLINQ](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/understanding-speedup-in-plinq)
 
 <!-- qard-id: 7121b006-f909-4325-8fd7-53f0c9b69861 -->

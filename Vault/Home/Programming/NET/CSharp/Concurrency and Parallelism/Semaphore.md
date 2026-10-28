@@ -1,11 +1,8 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
+topic: [Programming]
+subtopic: [NET]
 summary: "A primitive allowing up to N concurrent holders, for bounded parallelism."
-level:
-  - "4"
+level: ["4"]
 priority: High
 status: Ready to Repeat
 publish: true
@@ -82,16 +79,16 @@ finally
 <!-- qard-id: 6d43729c-6478-465f-afd9-5b432d9ad3ae -->
 > [!qard]- When is `SemaphoreSlim` a better fit than `lock`?
 > `SemaphoreSlim` is the better fit when waiting must be asynchronous, such as protected work that contains `await`, or when up to N callers may proceed at once. `lock` remains the simpler fit for a short synchronous section that one thread at a time may enter.
-> 
+>
 > | Aspect | `lock` | `SemaphoreSlim` |
 > |---|---|---|
 > | Callers inside at once | One thread, so it only provides mutual exclusion. | Up to the configured count. A count of 1 gives mutual exclusion, and a higher count throttles concurrency. |
 > | How a caller waits | The waiting thread blocks until the lock is free. | `WaitAsync` returns a task, so the caller waits without holding a thread. `Wait` blocks like a lock. |
 > | `await` inside the section | Not allowed by the compiler, because the lock belongs to the thread that entered it. | Allowed, because a permit is not tied to any thread. |
 > | Release | Automatic when the block exits, including after an exception. | Only through an explicit `Release` call, which any code can make. |
-> 
+>
 > Because a semaphore tracks no owner, each successful wait is paired with exactly one `Release`, normally in a `finally` block. A missed release permanently removes a permit. An extra release adds a permit beyond the intended limit. A `maxCount` does not reliably prevent this: `Release` throws `SemaphoreFullException` only when it would raise the count above that maximum, so an extra release made while permits are still held succeeds silently.
-> 
+>
 > [Microsoft: SemaphoreSlim](https://learn.microsoft.com/en-us/dotnet/api/system.threading.semaphoreslim?view=net-10.0) · [Microsoft: SemaphoreSlim.Release](https://learn.microsoft.com/en-us/dotnet/api/system.threading.semaphoreslim.release?view=net-10.0) · [Microsoft: C# lock statement](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/lock)
 
 # References

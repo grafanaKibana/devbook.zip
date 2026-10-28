@@ -1,11 +1,8 @@
 ---
-topic:
-  - Security
-subtopic:
-  - Authentication
+topic: [Security]
+subtopic: [Authentication]
 summary: "How time-based one-time passwords are provisioned, generated, validated, and recovered."
-level:
-  - "3"
+level: ["3"]
 priority: High
 status: Ready to Repeat
 publish: true

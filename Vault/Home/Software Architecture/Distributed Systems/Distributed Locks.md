@@ -1,11 +1,8 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - Distributed Systems
+topic: [Software Architecture]
+subtopic: [Distributed Systems]
 summary: "Distributed locks are expiring leases whose users need ownership and fencing tokens to survive pauses, expiry, and partitions."
-level:
-  - "4"
+level: ["4"]
 priority: High
 status: Ready to Repeat
 publish: true

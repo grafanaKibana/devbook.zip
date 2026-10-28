@@ -1,11 +1,8 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - Patterns
+topic: [Software Architecture]
+subtopic: [Patterns]
 summary: "Creates new objects by copying an existing instance rather than constructing from scratch, with the prototype knowing how to clone itself."
-level:
-  - "2"
+level: ["2"]
 priority: High
 status: Done
 publish: true
@@ -146,26 +143,26 @@ New record fields participate in the compiler-generated copy automatically. Refe
 <!-- qard-id: 39dce427-e0c5-4393-9c82-0bdbd4a467c2 -->
 > [!qard]- When is Prototype useful instead of constructing an object directly?
 > Prototype is useful when a new object should start as a copy of an existing instance rather than be built from scratch. Two situations justify it:
-> 
+>
 > - **A configured template exists:** many objects differ from a base in only a few values. Product variants, for example, share the base product's name, description, category and shipping rules. Copying the template and overriding the differences avoids manual copy code that lists every member, which silently produces incomplete objects when a newly added member is missed.
 > - **The caller does not know the concrete runtime type:** code that holds an object through a base type cannot call the right constructor, but the object knows its own type and can copy itself through its own copy method.
 > 
 > Direct construction is clearer when the type and the values are already known and no template carries useful state.
-> 
+>
 > A prototype still needs a defined copy contract:
-> 
+>
 > - which members stay shared
 > - which are duplicated
 > - which get fresh values, such as a new identifier
 > 
 > In C#, `record with { }` makes a shallow copy with selected members replaced, and an explicit copy constructor states deeper copy rules.
-> 
+>
 > [[Home/Software Architecture/Patterns/Design Patterns/Creational/Prototype#Solution|Prototype solution]] · [[Home/Software Architecture/Patterns/Design Patterns/Creational/Prototype#Pitfalls|Prototype pitfalls]] · [Microsoft: Records (C# reference)](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record)
 
 <!-- qard-id: ceccd6bd-3ed8-4f4d-80fa-9b805e5ee7a9 -->
 > [!qard]- What separates a shallow copy from a deep copy, and which nested objects must a deep copy duplicate?
 > A shallow copy creates a new outer object, but its reference-type fields still point to the same nested objects as the original. A deep copy also duplicates nested objects, so changing them through the copy does not affect the original. A practical deep copy duplicates the mutable nested state that must evolve independently, not everything reachable.
-> 
+>
 > | Aspect | Shallow copy | Deep copy |
 > |---|---|---|
 > | Outer object | A new instance. | A new instance. |
@@ -173,16 +170,16 @@ New record fields participate in the compiler-generated copy automatically. Refe
 > | Reference-type fields | Only the reference is copied, so both objects share the same nested instance. | Members covered by the copy policy get new instances. |
 > | Adding an item to a nested `List<T>` | The change is visible through both objects. | Only the object that was changed sees it. |
 > | .NET mechanisms | `Object.MemberwiseClone()` and `record with { }`. | A copy constructor or copy method that duplicates chosen members. |
-> 
+>
 > Where the boundary goes:
-> 
+>
 > - **Duplicated:** mutable state that the copy owns and changes independently, such as an order's line items and its shipping address.
 > - **Shared:** immutable objects, such as immutable collections, because neither copy can change them.
 > - **Shared deliberately:** objects that are meant to be common, such as the `Customer` an order refers to.
 > - **Left out or reset:** runtime-only state such as event subscriptions, locks and caches. A cloned entity usually also needs a new identifier.
 > 
 > A member typed as `IReadOnlyList<T>` only limits the exposed API. The underlying list may still be mutable and shared.
-> 
+>
 > [Microsoft: Object.MemberwiseClone](https://learn.microsoft.com/en-us/dotnet/api/system.object.memberwiseclone?view=net-10.0) · [Microsoft: Records (C# reference)](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record) · [[Home/Software Architecture/Patterns/Design Patterns/Creational/Prototype#Pitfalls|Prototype pitfalls]]
 
 # References

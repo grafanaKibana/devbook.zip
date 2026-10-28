@@ -1,13 +1,10 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Step-by-step problem-solving procedures compared by runtime, memory, and complexity using Big O."
 tags: [FolderNote]
 publish: true
-level:
-  - "4"
+level: ["4"]
 status: Creation
 priority: High
 ---

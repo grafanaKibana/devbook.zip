@@ -1,11 +1,8 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
+topic: [AI & ML]
+subtopic: [LLM]
 summary: "Adapting model behavior with supervised training, parameter-efficient updates, and held-out evaluation."
-level:
-  - "2"
+level: ["2"]
 priority: High
 status: Ready to Repeat
 publish: true
@@ -149,24 +146,24 @@ During training, validation loss and early stopping detect memorization, but shi
 
 > [!qard]- What is LoRA, and why is it cheaper than full fine-tuning?
 > LoRA (Low-Rank Adaptation) fine-tunes a pretrained model by freezing its weights and training only a small low-rank update for selected layers. Because the trainable part is a tiny fraction of the model, training needs gradients and optimizer state only for that update, and the result is a small adapter instead of a full model copy.
-> 
+>
 > 1. A chosen weight matrix `W0` stays frozen.
 > 2. Its change is represented as the product of two small matrices, `B·A`. Their shared inner dimension, the rank `r`, is much smaller than the layer's dimensions.
 > 3. Only `A` and `B` are trained.
 > 4. The adapted layer computes `W0·x + B·A·x`.
 > 
 > The small trainable set lowers training memory compared with updating every weight. Adapters for different tasks can share one base model and be swapped. An adapter can also be merged into `W0`, so serving needs no extra computation. Whether a LoRA adapter matches full fine-tuning on a particular task depends on its configuration, such as rank and target layers, and held-out evaluation establishes it.
-> 
+>
 > Sources: [Hu et al.: LoRA](https://arxiv.org/abs/2106.09685) · [Hugging Face PEFT: LoRA](https://huggingface.co/docs/peft/en/developer_guides/lora)
 
 <!-- qard-id: d65b682a-c207-4ffc-87d5-1839b2d5ba54 -->
 > [!qard]- Why can LoRA still cause capability regressions if the base weights are frozen?
 > Freezing the base weights fixes what is stored and updated during training, not what the deployed model computes. LoRA adds a trainable low-rank update to selected layers. While the adapter is active, each adapted layer computes the frozen weight's output plus the adapter's contribution: `W0·x + B·A·x`.
-> 
+>
 > That added term applies to every input passing through those layers, not only to inputs that resemble the training data. Training optimizes it for the target examples alone, so it can also shift behavior the data never covered, such as instruction following, safety behavior or general reasoning. Frozen base weights therefore do not guarantee unchanged outputs. The full base-plus-adapter model needs evaluation on both the target task and broad held-out sets.
-> 
+>
 > Freezing does make rollback easier. A separate adapter can be disabled, which returns the model to the base behavior. Merging folds the update into the weights, so rollback after a merge depends on a supported unmerge or an unmodified copy of the base checkpoint.
-> 
+>
 > Sources: [Hu et al.: LoRA](https://arxiv.org/abs/2106.09685) · [Hugging Face PEFT: LoRA](https://huggingface.co/docs/peft/en/developer_guides/lora) · [More Than Catastrophic Forgetting](https://arxiv.org/abs/2405.17830)
 
 # References

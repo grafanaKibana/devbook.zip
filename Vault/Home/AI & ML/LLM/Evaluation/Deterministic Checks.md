@@ -1,11 +1,8 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
+topic: [AI & ML]
+subtopic: [LLM]
 summary: "Executable checks that reject malformed or policy-violating output before semantic evaluation."
-level:
-  - "3"
+level: ["3"]
 priority: Medium
 status: Done
 publish: true
@@ -104,12 +101,12 @@ Permission and argument checks belong at the tool boundary, before execution. Ou
 <!-- qard-id: a37f0da1-2f80-49e2-90ed-6c7ef87f195f -->
 > [!qard]- Which deterministic checks should run before and after a tool-using agent calls a tool?
 > Before a tool runs, deterministic checks confirm that the caller is allowed to perform the requested action and validate the arguments against the tool's contract. After the call, they validate any returned data against the schema the next step expects.
-> 
+>
 > - **Before execution:** a permission or allowlist rule rejects an action the caller may not take. Argument validation rejects missing, malformed or out-of-range inputs. These checks must come first because later validation cannot undo a side effect: an agent can call `delete_record`, receive a success result and still return perfectly valid JSON.
 > - **After execution:** result validation stops malformed or unexpected data from reaching the next step.
 > 
 > A strict function schema constrains the shape of arguments. Schema validity neither authorizes the action nor shows that it was the right action. A schema-valid request can still choose the wrong permitted action, such as `search` when the case required `escalate`. The product's risks determine which further checks are needed and whether a failure is rejected outright or routed to review.
-> 
+>
 > Sources: [OpenAI: Function calling](https://developers.openai.com/api/docs/guides/function-calling) · [OWASP: LLM06 Excessive Agency](https://genai.owasp.org/llmrisk/llm062025-excessive-agency/) · [JSON Schema Core](https://json-schema.org/draft/2020-12/json-schema-core)
 
 # References

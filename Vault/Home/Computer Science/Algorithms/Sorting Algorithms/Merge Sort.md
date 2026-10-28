@@ -1,11 +1,8 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Stable divide-and-conquer sort that repeatedly merges ordered runs."
-level:
-  - "4"
+level: ["4"]
 priority: Low
 status: Ready to Repeat
 publish: true
@@ -21,13 +18,9 @@ Ordering happens only during the merge. When both runs are sorted, the smaller f
 
 %% tab: Visualization %%
 
-
-
 ```steptrace
 {"algorithm":"merge-sort-tree","array":[8,3,5,1,9,2,7,4]}
 ```
-
-
 
 The decisive step is the final merge. By then the left half has become `[1, 3, 5, 8]` and the right half `[2, 4, 7, 9]`; one pass compares the two fronts, emits the smaller, and advances that read head, producing `[1, 2, 3, 4, 5, 7, 8, 9]` after at most seven comparisons for eight elements. That same merge runs at every level below it — length-1 runs merge into length-2, then length-4 — so the number of comparisons is bounded by the number of levels, `⌈log₂ 8⌉ = 3`, times the n elements each level touches. No comparison depends on how disordered the input was; it depends only on how the two current fronts relate.
 

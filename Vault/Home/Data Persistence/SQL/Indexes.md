@@ -1,12 +1,9 @@
 ---
-topic:
-  - Data Persistence
-subtopic:
-  - SQL
+topic: [Data Persistence]
+subtopic: [SQL]
 summary: "Index structures across database engines and the operators, storage layouts, and mutation costs each structure serves."
 publish: true
-level:
-  - "4"
+level: ["4"]
 priority: High
 status: Ready to Repeat
 ---

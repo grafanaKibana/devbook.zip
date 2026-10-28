@@ -1,11 +1,8 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - Patterns
+topic: [Software Architecture]
+subtopic: [Patterns]
 summary: "A centralized publish/subscribe dispatcher where publishers emit events and subscribers register handlers, with neither side knowing the other exists."
-level:
-  - "2"
+level: ["2"]
 priority: Medium
 status: Ready to Repeat
 publish: true

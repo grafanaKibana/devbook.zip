@@ -1,11 +1,8 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - Distributed Systems
+topic: [Software Architecture]
+subtopic: [Distributed Systems]
 summary: "Assigns traffic across eligible backends; pool capacity and health policy determine whether the system tolerates load and failures."
-level:
-  - "2"
+level: ["2"]
 priority: High
 status: Done
 publish: true

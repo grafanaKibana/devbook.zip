@@ -1,14 +1,11 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - Application Architecture
+topic: [Software Architecture]
+subtopic: [Application Architecture]
 summary: "How a codebase is shaped into layers and modules, and where responsibilities live."
 tags: [FolderNote]
 publish: true
 priority: High
-level:
-  - "4"
+level: ["4"]
 status: Creation
 qard-deck: "Software Architecture"
 qard-topic: "Application Architecture/Application Architecture"

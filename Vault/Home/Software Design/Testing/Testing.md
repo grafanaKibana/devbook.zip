@@ -1,14 +1,11 @@
 ---
-topic:
-  - Software Design
-subtopic:
-  - Testing
+topic: [Software Design]
+subtopic: [Testing]
 summary: Testing as a design and verification discipline — unit vs integration, the test pyramid as a cost model, and TDD.
 tags: [FolderNote]
 publish: true
 priority: High
-level:
-  - "4"
+level: ["4"]
 status: Not-Started
 ---
 

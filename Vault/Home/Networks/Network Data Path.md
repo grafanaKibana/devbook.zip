@@ -1,10 +1,8 @@
 ---
-topic:
-  - Networks
+topic: [Networks]
 subtopic: []
 summary: "The packet path from an application socket through the kernel, NIC, network, and receiving process."
-level:
-  - "3"
+level: ["3"]
 priority: Medium
 status: Ready to Repeat
 publish: true

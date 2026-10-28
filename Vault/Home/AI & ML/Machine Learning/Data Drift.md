@@ -1,11 +1,8 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - Machine Learning
+topic: [AI & ML]
+subtopic: [Machine Learning]
 summary: "When production inputs shift away from training data, potentially weakening model predictions without an obvious error."
-level:
-  - "1"
+level: ["1"]
 priority: Low
 status: Done
 publish: true
@@ -135,13 +132,13 @@ Scheduled retraining is predictable when labels arrive on a regular cadence and 
 <!-- qard-id: 88c67018-a43a-46a1-b62c-5f7c06b2fad7 -->
 > [!qard]- What is the difference between data drift and concept drift?
 > Data drift, in its narrow sense, is a change in the input distribution P(X). Concept drift is a change in the relationship between inputs and outcomes, P(Y|X). After concept drift, the same input tends to have a different correct answer.
-> 
+>
 > - **What changes:** with input (covariate) drift, the mix of feature values shifts, for example when a new user segment with different demographics arrives. With concept drift, the mapping from inputs to outcomes changes, for example when spam patterns change as spammers adapt.
 > - **Effect on the model:** input drift may or may not reduce quality. It matters when the shift reaches features the model relies on or regions where the model generalizes poorly. Concept drift means the learned mapping is out of date, so predictions can be wrong even for inputs that look familiar.
 > - **Evidence needed:** input drift can be measured from unlabeled production inputs by comparing feature distributions with a baseline. Confirming concept drift needs outcome labels, because unlabeled inputs cannot show whether the relationship between inputs and outcomes has changed.
 > 
 > The term "data drift" is used inconsistently, sometimes for any change in distribution. Stating which distribution is monitored, such as P(X) or P(Y|X), avoids that ambiguity. An input-distribution alert neither proves that model quality fell nor rules out concept drift. Recent labeled outcomes, which often arrive late, are the stronger check.
-> 
+>
 > [Gama et al., A Survey on Concept Drift Adaptation](https://doi.org/10.1145/2523813)
 
 # References

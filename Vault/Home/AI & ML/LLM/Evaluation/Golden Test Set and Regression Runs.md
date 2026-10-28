@@ -1,11 +1,8 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
+topic: [AI & ML]
+subtopic: [LLM]
 summary: "Golden sets detect broad regressions. Targeted suites isolate specific high-risk failures."
-level:
-  - "3"
+level: ["3"]
 priority: Medium
 status: Done
 publish: true

@@ -1,11 +1,8 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
+topic: [Programming]
+subtopic: [NET]
 summary: "Logic running around controller action stages for cross-cutting MVC concerns."
-level:
-  - "2"
+level: ["2"]
 priority: Medium
 status: Ready to Repeat
 publish: true
@@ -119,46 +116,46 @@ Attributes cannot receive runtime services through their own constructors, so at
 <!-- qard-id: b5d3f2ba-51a2-4fd2-9508-aa0de30ad608 -->
 > [!qard]- What is the normal execution order of ASP.NET Core MVC filter types?
 > After routing selects an MVC action, the filter stages run in this order: authorization, resource, action, then result. Exception filters are not a sequential stage; they run only when an unhandled exception occurs.
-> 
+>
 > 1. **Authorization filters** run first and can short-circuit an unauthorized request.
 > 2. **Resource filters** run their before logic next, ahead of model binding, and their after logic last, once the rest of the pipeline has completed.
 > 3. **Action filters** run immediately before and after the action method.
 > 4. **Result filters** run immediately before and after the action result executes.
 > 
 > Full flow: authorization → resource (before) → action (before) → action method → action (after) → result (before) → result execution → result (after) → resource (after).
-> 
+>
 > Action filters finish before result filters start, so an action filter's after logic can still replace the result. Only resource filters wrap both the action and the result stages.
-> 
+>
 > [Microsoft: Filters in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/mvc/controllers/filters?view=aspnetcore-10.0)
 <!-- qard-id: ec8874e5-0ca6-4d53-a3dd-6594e0a512e3 -->
 > [!qard]- Which exceptions can ASP.NET Core MVC exception filters handle, and what happens after they run?
 > MVC exception filters handle only unhandled exceptions raised while MVC creates the controller, binds the model, runs action filters or runs the action method. They are not a before-and-after stage; they run only when such an exception occurs.
-> 
+>
 > **Not covered:**
-> 
+>
 > - Exceptions from authorization filters and resource filters, which run outside that part of the pipeline.
 > - Exceptions from result filters or from executing the action result.
 > - Exceptions from middleware, routing or non-MVC endpoints, which run outside MVC.
 > 
 > **After an exception filter runs:**
-> 
+>
 > - **Handled:** the filter sets `ExceptionHandled` to `true` or assigns a `Result`, and the exception stops propagating. A supplied `Result` is executed as the response. Ordinary result filters do not run around it; only always-run result filters, such as `IAlwaysRunResultFilter` implementations, do.
 > - **Not handled:** the exception leaves the MVC pipeline and continues to outer middleware, such as exception-handling middleware.
 > 
 > Because of these gaps, exception-handling middleware is the broader boundary for a uniform API error response.
-> 
+>
 > [Microsoft: Filters in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/mvc/controllers/filters?view=aspnetcore-10.0)
 <!-- qard-id: b115f4c1-4ffb-413c-917b-d5fcdb62cb05 -->
 > [!qard]- Within one ASP.NET Core MVC filter type, how do scope and the `Order` property determine execution order?
 > By default, scope decides the order among filters of one type: global filters wrap controller filters, which wrap action filters. An explicit `Order` value, exposed through `IOrderedFilter`, takes precedence over scope.
-> 
+>
 > - **Equal `Order` values:** before logic runs global → controller → action, and after logic runs action → controller → global.
 > - **Different `Order` values:** filters are sorted by `Order` first and by scope second. A lower value runs its before logic earlier and its after logic later, so it wraps filters with higher values regardless of their scope.
 > 
 > For example, an action-level action filter with `Order` 0 runs its before logic ahead of a global action filter with `Order` 1.
-> 
+>
 > This ordering only arranges filters of the same type. It cannot move an action filter ahead of an authorization filter, because each filter type runs at its own stage of the MVC pipeline.
-> 
+>
 > [Microsoft: Filters in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/mvc/controllers/filters?view=aspnetcore-10.0)
 
 # References

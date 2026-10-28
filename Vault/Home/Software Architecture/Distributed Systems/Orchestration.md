@@ -1,11 +1,8 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - Distributed Systems
+topic: [Software Architecture]
+subtopic: [Distributed Systems]
 summary: "Coordinates a multi-service workflow through one component that owns its state, ordering, retries, and compensation decisions."
-level:
-  - "3"
+level: ["3"]
 priority: High
 status: Not-Started
 publish: true

@@ -1,11 +1,8 @@
 ---
-topic:
-  - Networks
-subtopic:
-  - Protocols
+topic: [Networks]
+subtopic: [Protocols]
 summary: "The ingest, transcoding, packaging, CDN, and playback path for live adaptive video."
-level:
-  - "3"
+level: ["3"]
 priority: Medium
 status: Ready to Repeat
 publish: true

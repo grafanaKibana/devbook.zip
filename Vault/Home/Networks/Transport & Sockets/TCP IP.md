@@ -1,11 +1,8 @@
 ---
-topic:
-  - Networks
-subtopic:
-  - Transport & Sockets
+topic: [Networks]
+subtopic: [Transport & Sockets]
 summary: "The internet's core protocol suite: IP handles addressing, TCP adds reliable delivery."
-level:
-  - "3"
+level: ["3"]
 priority: Medium
 status: Ready to Repeat
 publish: true

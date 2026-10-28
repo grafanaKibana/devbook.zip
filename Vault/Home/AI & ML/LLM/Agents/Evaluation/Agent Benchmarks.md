@@ -1,11 +1,8 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
+topic: [AI & ML]
+subtopic: [LLM]
 summary: "Public task suites scoring multi-step tool use. Useful to shortlist models, not to decide."
-level:
-  - "3"
+level: ["3"]
 priority: Medium
 status: Done
 publish: true
@@ -66,11 +63,11 @@ The example exposes missing evidence rather than a winner. System B reports repe
 <!-- qard-id: 0d0c25bd-07f5-4f8d-a204-f23e5016b1ad -->
 > [!qard]- Why can one base model produce very different results on the same agent benchmark?
 > Because an agent benchmark scores a whole system, not the model alone. The result reflects the model together with its scaffold: prompts and policies, tool descriptions, planning and retry logic, context management, and the loop that runs it. Changing the scaffold can move the score even when the base model stays the same.
-> 
+>
 > Run conditions also matter. An agent can solve a task on one attempt and fail it on the next. τ-bench reports `pass^k`, the chance that all `k` trials of a task succeed, which exposes inconsistency that a single-attempt score hides.
-> 
+>
 > A fair model comparison therefore holds the task set, scaffold and run conditions constant and varies only the model. Comparing scaffolds is a separate experiment with the model held fixed. A leaderboard score describes one benchmark setup, not intrinsic model quality.
-> 
+>
 > [τ-bench: A Benchmark for Tool-Agent-User Interaction in Real-World Domains](https://arxiv.org/html/2406.12045)
 
 # References

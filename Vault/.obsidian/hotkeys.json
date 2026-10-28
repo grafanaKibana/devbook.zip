@@ -52,7 +52,7 @@
     }
   ],
   "workspace:new-tab": [],
-  "homepage:open-homepage": [
+  "notebook-navigator:open-homepage": [
     {
       "modifiers": [
         "Alt"

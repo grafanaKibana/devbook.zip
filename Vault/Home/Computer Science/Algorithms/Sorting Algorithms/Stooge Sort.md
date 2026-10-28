@@ -1,11 +1,8 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Recursively sorts overlapping two-thirds ranges in a first-last-first sequence."
-level:
-  - "4"
+level: ["4"]
 priority: Low
 status: Not-Started
 publish: true

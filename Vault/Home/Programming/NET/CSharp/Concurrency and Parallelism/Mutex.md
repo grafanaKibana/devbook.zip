@@ -1,11 +1,8 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
+topic: [Programming]
+subtopic: [NET]
 summary: "An OS-backed primitive enforcing single-owner access, useful across processes."
-level:
-  - "4"
+level: ["4"]
 priority: High
 status: Ready to Repeat
 publish: true
@@ -114,7 +111,7 @@ The decision follows the ownership boundary. A [[Locking|lock]] covers synchrono
 <!-- qard-id: 6529d8fe-c25a-46f7-94a1-c6241857a6a5 -->
 > [!qard]- When is a named `Mutex` appropriate in .NET?
 > A named `Mutex` fits when separate processes on the same machine must not run a critical section at the same time. Examples are a single-instance application guard and several processes writing one local file. Every process that opens the same name shares one operating-system mutex, and only one thread across those processes can own it at a time.
-> 
+>
 > - **Thread ownership:** the thread that acquires the mutex must release it with `ReleaseMutex`; a call from any other thread throws. Acquisition and release therefore stay in one synchronous scope, not around an `await`.
 > - **Inside one process:** `lock` for synchronous code, or `SemaphoreSlim` for asynchronous code, provides exclusion without an operating-system mutex.
 > - **Across machines:** a named mutex cannot coordinate them. Ownership across machines needs a lease or lock managed by a shared database or coordination service.

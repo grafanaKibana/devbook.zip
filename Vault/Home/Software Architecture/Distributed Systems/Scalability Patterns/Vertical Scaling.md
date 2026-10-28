@@ -1,11 +1,8 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - Distributed Systems
+topic: [Software Architecture]
+subtopic: [Distributed Systems]
 summary: "Vertical scaling gives a single node more CPU, RAM, or disk, the simplest first move for monoliths and managed databases."
-level:
-  - "2"
+level: ["2"]
 priority: High
 status: Creation
 publish: true

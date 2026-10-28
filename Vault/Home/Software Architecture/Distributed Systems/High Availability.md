@@ -1,11 +1,8 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - Distributed Systems
+topic: [Software Architecture]
+subtopic: [Distributed Systems]
 summary: "High availability starts with a measured SLO and removes shared failure domains through tested detection, failover, and degradation."
-level:
-  - "4"
+level: ["4"]
 priority: High
 status: Ready to Repeat
 publish: true

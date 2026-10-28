@@ -41,8 +41,8 @@
             "showSearch": false,
             "searchQuery": ""
           },
-          "icon": "lucide-folder-closed",
-          "title": "Files"
+          "icon": "lucide-ghost",
+          "title": "file-explorer"
         }
       },
       {
@@ -133,6 +133,8 @@
   },
   "left-ribbon": {
     "hiddenItems": {
+      "quartz-syncer:Quartz Syncer Publication Center": false,
+      "qard:Open study workspace": false,
       "switcher:Open quick switcher": false,
       "graph:Open graph view": false,
       "canvas:Create new canvas": false,
@@ -142,9 +144,7 @@
       "omnisearch:Omnisearch": false,
       "notebook-navigator:Notebook Navigator": false,
       "obsidian-git:Open Git source control": false,
-      "homepage:Open homepage": false,
-      "obsidian-excalidraw-plugin:New drawing": false,
-      "quartz-syncer:Quartz Syncer publication center": false
+      "obsidian-excalidraw-plugin:New drawing": false
     }
   },
   "active": "16055cb3cc2f2cde",

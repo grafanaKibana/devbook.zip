@@ -1,11 +1,8 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Runs forward and backward searches that meet."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Creation
 publish: true
@@ -17,7 +14,6 @@ Bidirectional search launches a second BFS backward from `t` over reversed edges
 
 The saving has conditions. The goal must provide one or more enumerable states that can seed the backward search. The graph must also expose predecessors through a reverse adjacency list or an invertible move operator. A goal predicate alone is useless when its matching states cannot be listed.
 
-
 %% tabs %%
 
 %% tab: Visualization %%
@@ -25,7 +21,6 @@ The saving has conditions. The goal must provide one or more enumerable states t
 ```steptrace
 {"algorithm":"bidirectional-search"}
 ```
-
 
 Two frontiers advance in parallel. `F` holds the vertices reached from `s` along forward edges; `B` holds the vertices reached from `t` along reversed edges. Each side records the distance at which it first reached every vertex.
 

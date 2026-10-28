@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-09-12T17:17:13.844Z
-modified: 2026-09-12T17:17:13.844Z
-published: 2026-09-12T17:17:13.844Z
+created: 2026-10-28T12:27:02.930Z
+modified: 2026-10-28T12:33:02.651Z
+published: 2026-10-28T12:33:02.651Z
 topic:
   - Networks
 subtopic:

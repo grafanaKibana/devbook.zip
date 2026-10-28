@@ -1,11 +1,8 @@
 ---
-topic:
-  - Software Design
-subtopic:
-  - UML
+topic: [Software Design]
+subtopic: [UML]
 summary: "Reading and drawing UML class diagrams without confusing type relationships with object ownership."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Ready to Repeat
 publish: true

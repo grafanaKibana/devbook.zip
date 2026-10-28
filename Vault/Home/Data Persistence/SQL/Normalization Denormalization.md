@@ -1,11 +1,8 @@
 ---
-topic:
-  - Data Persistence
-subtopic:
-  - SQL
+topic: [Data Persistence]
+subtopic: [SQL]
 summary: "Structuring a relational schema to remove redundancy, trading read performance for fewer anomalies."
-level:
-  - "4"
+level: ["4"]
 priority: High
 status: Done
 
@@ -270,51 +267,51 @@ An OLTP design starts by writing down candidate keys and functional dependencies
 <!-- qard-id: 490485e5-5ecc-4738-8ff1-c06c00b82234 -->
 > [!qard]- What problem does normalization solve in a relational schema?
 > Normalization prevents insertion, update and deletion anomalies. These arise when one fact is stored redundantly in rows that exist for other reasons. Normalization decomposes tables according to their dependencies, so each fact is stored once, with the key that actually determines it.
-> 
+>
 > For example, an `Orders` table that is the only place storing customer addresses repeats a customer's address on every order row. It has all three anomalies:
-> 
+>
 > - **Update anomaly:** changing the address means updating every order row for that customer. Missing one row leaves two contradictory addresses.
 > - **Insertion anomaly:** a new customer's address cannot be recorded until the customer places an order.
 > - **Deletion anomaly:** deleting a customer's last order also deletes the only record of the address.
 > 
 > Storing the address in a `Customers` table keyed by customer ID, with each order referring to that ID, removes all three. The goal is not to remove every repeated value: the customer ID repeated on each order is a reference, not a duplicated fact. The address an order was shipped to is a different, historical fact, and it belongs on the order.
-> 
+>
 > A valid decomposition is lossless: joining the smaller tables reproduces exactly the original rows, without losing any or inventing new ones. The constraints the business needs must also remain enforceable after the split.
-> 
+>
 > [Codd: Further Normalization of the Data Base Relational Model](https://apollo.inf.upol.cz/~urbanec/teaching/2021/data2/files/codd2.pdf)
 
 <!-- qard-id: 0655df3d-3076-45b4-b318-fe908c8ee76d -->
 > [!qard]- When does a relational schema need 4NF or 5NF rather than stopping at BCNF?
 > A schema needs 4NF or 5NF when redundancy remains that no functional dependency explains. 3NF and BCNF are built on functional dependencies, where one set of attributes determines a single value of another attribute. Fourth and fifth normal form handle two other kinds of dependency.
-> 
+>
 > | Aspect | 4NF | 5NF (project-join normal form) |
 > |---|---|---|
 > | Dependency removed | A multivalued dependency: one value determines a set of values that is independent of the table's other attributes. | A join dependency: the full fact is exactly the join of three or more smaller projections, and this is not implied by the candidate keys. |
 > | Example | A `{Restaurant, PizzaType, DeliveryArea}` table where `Restaurant ↠ PizzaType` and `Restaurant ↠ DeliveryArea` are independent. Every pizza type repeats for every area. Adding one type needs one row per area, and a missing row falsely says the pizza is unavailable there. | A `{Supplier, Product, Customer}` table under the rule that a supplier supplies a product to a customer exactly when the supplier offers the product, serves the customer, and the customer buys the product. |
 > | Decomposition | `{Restaurant, PizzaType}` and `{Restaurant, DeliveryArea}`. | `SupplierProduct`, `SupplierCustomer` and `ProductCustomer`. |
-> 
+>
 > Both decompositions are valid only when the dependency really holds in the domain. If pizza availability differs by delivery area, the two sets are not independent, and the three-column table is the correct fact. If a supplier offers a product only to some of its customers, joining the three pairwise tables produces combinations that never existed, so the decomposition loses information. The design follows from the dependencies that actually hold, not from a target normal-form number.
-> 
+>
 > [Codd: Further Normalization of the Data Base Relational Model](https://apollo.inf.upol.cz/~urbanec/teaching/2021/data2/files/codd2.pdf) · [Fagin: Multivalued Dependencies and a New Normal Form for Relational Databases](https://www.comp.nus.edu.sg/~lingtw/papers/fagin.pdf) · [Fagin: Project-Join Normal Form](https://citeseerx.ist.psu.edu/document?doi=4735fc168eb72ef96817384aa5d40d5b6016d713&repid=rep1&type=pdf)
 
 <!-- qard-id: 61f5acfa-1113-408f-9deb-acd3b5e6b958 -->
 > [!qard]- What conditions justify denormalizing a table, and what risks does it introduce?
 > Denormalization is justified when three conditions hold:
-> 
+>
 > - A specific read path has a measured latency or resource problem.
 > - Cheaper fixes, such as an index or a corrected query plan, do not meet its target.
 > - Keeping a stored copy up to date costs less than recomputing the result on every read.
 > 
 > High read volume alone does not justify it.
-> 
+>
 > The risk is that the same fact now lives in two places, and every change must reach both:
-> 
+>
 > - **Drift:** a write path that updates the source but misses the copy leaves them silently inconsistent.
 > - **Staleness:** a copy updated asynchronously or on a schedule serves old data between updates. A PostgreSQL materialized view, for example, changes only when `REFRESH MATERIALIZED VIEW` runs.
 > - **Write cost and contention:** each source change also updates the copy. A stored `TotalOrderAmount` on `Customers` adds an update to every order write, and concurrent orders for the same customer contend on that one row.
 > 
 > A safe design therefore names four things:
-> 
+>
 > - the authoritative source;
 > - the acceptable freshness;
 > - how the copy is updated, either in the same transaction or by an asynchronous projection;
@@ -325,9 +322,9 @@ An OLTP design starts by writing down candidate keys and functional dependencies
 <!-- qard-id: 5b6ce553-cc6a-41a8-a22d-da5fc5fb740c -->
 > [!qard]- How do 2NF and 3NF differ?
 > 2NF removes facts that depend on only part of a composite key. 3NF also removes facts that depend on another non-key attribute instead of on a key. Every relation in 3NF is also in 2NF.
-> 
+>
 > A *non-prime* attribute is one that is not part of any candidate key.
-> 
+>
 > | Aspect | 2NF | 3NF |
 > |---|---|---|
 > | Problem removed | Partial dependency: a non-prime attribute depends on only part of a composite candidate key. | Transitive dependency: a non-prime attribute depends on another non-key attribute, which in turn depends on the key. |
@@ -335,9 +332,9 @@ An OLTP design starts by writing down candidate keys and functional dependencies
 > | When it can be violated | For a table already in 1NF, only when a candidate key has several attributes; such a table whose candidate keys are all single attributes is automatically in 2NF. | Also when the key is a single attribute. |
 > | Example violation | Key `{Make, Model}`: `Discount` depends only on `Make`, so the same discount repeats on every model row for that make. | Key `Model`: `Model → Store` and `Store → Phone`, so each store's phone number repeats on every model row for that store. |
 > | Fix | A separate `{Make, Discount}` table holds each make's discount. | A separate `{Store, Phone}` table holds each store's phone number. |
-> 
+>
 > Each fix is a lossless decomposition: joining the new tables on the shared attribute reproduces the original rows exactly. Whether every original dependency can still be enforced within a single table is a separate design concern.
-> 
+>
 > [Codd: Further Normalization of the Data Base Relational Model](https://apollo.inf.upol.cz/~urbanec/teaching/2021/data2/files/codd2.pdf)
 
 # References

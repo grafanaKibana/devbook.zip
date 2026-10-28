@@ -1,11 +1,8 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Data Structures
+topic: [Computer Science]
+subtopic: [Data Structures]
 summary: "Vertices and edges modelling relationships that allow cycles, multiple paths, and no single root."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Ready to Repeat
 publish: true
@@ -20,7 +17,6 @@ A graph has no single canonical layout. The same vertices and edges can live in 
 %% tabs %%
 
 %% tab: Visualization %%
-
 
 ```steptrace
 {"algorithm":"graph"}

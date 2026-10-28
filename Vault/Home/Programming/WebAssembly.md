@@ -1,10 +1,8 @@
 ---
-topic:
-  - Programming
+topic: [Programming]
 subtopic: []
 summary: "A validated portable instruction format with explicit host imports, linear memory, and browser or WASI embeddings."
-level:
-  - "3"
+level: ["3"]
 priority: Medium
 status: Creation
 publish: true

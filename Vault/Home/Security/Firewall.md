@@ -1,11 +1,8 @@
 ---
-topic:
-  - Security
-subtopic:
-  - Security
+topic: [Security]
+subtopic: [Security]
 summary: "Filters traffic at host, network, and application boundaries to constrain reachable services and record denied paths."
-level:
-  - "3"
+level: ["3"]
 priority: High
 status: Ready to Repeat
 publish: true

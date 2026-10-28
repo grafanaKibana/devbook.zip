@@ -1,11 +1,8 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
+topic: [Programming]
+subtopic: [NET]
 summary: "The default in-process mutual-exclusion primitive: one thread in the critical section at a time."
-level:
-  - "4"
+level: ["4"]
 priority: High
 status: Creation
 publish: true
@@ -96,18 +93,18 @@ For short synchronous state changes inside one process, `lock` is the smallest c
 
 > [!qard]- What is a race condition, and how does `lock` prevent it?
 > A race condition occurs when the result depends on the timing of threads that access shared state concurrently. `lock` prevents it by letting only one thread at a time run code protected by the same lock object, so one protected update cannot interleave with another.
-> 
+>
 > For example, two threads run `_count++` on a shared field. The increment is three steps: read the value, add one and write the result back.
-> 
+>
 > 1. Thread A reads 5.
 > 2. Thread B reads 5 before A writes.
 > 3. A writes 6.
 > 4. B writes 6.
 > 
 > Two increments ran, but one was lost. With `lock (_gate) { _count++; }` in both threads, B cannot read until A has written and released the lock, so the result is 7.
-> 
+>
 > The protection covers only code that takes the same lock. Every read and write of the shared state must use that lock object; an unprotected access elsewhere can still interleave with a protected update.
-> 
+>
 > [Microsoft: Managed threading best practices](https://learn.microsoft.com/en-us/dotnet/standard/threading/managed-threading-best-practices) · [Microsoft: `lock` statement](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/lock)
 
 <!-- qard-id: e403b36e-6e7b-4f41-826c-e2e258743019 -->
@@ -117,11 +114,11 @@ For short synchronous state changes inside one process, `lock` is the smallest c
 <!-- qard-id: 2c0335e4-1efa-4aa3-b33b-605b74456ccc -->
 > [!qard]- Why can’t a `lock` block contain `await`?
 > `Monitor` ownership belongs to the thread that entered it, and only that thread can exit it. An awaited continuation may resume on a different thread, which would then try to release a monitor it does not own. The C# compiler therefore rejects `await` inside a `lock` block.
-> 
+>
 > Holding a lock across `await` would also make other threads wait for the whole asynchronous operation, turning I/O latency into lock contention.
-> 
+>
 > Two alternatives remain:
-> 
+>
 > - **Restructure:** the awaited work runs outside the lock, and only the resulting state change runs inside a short `lock`. This fits most cases.
 > - **Async-aware gate:** when an invariant must stay protected across an `await`, a `SemaphoreSlim` with one permit and `await WaitAsync()` provides the gate. It has no thread ownership, so a continuation on another thread can release it. `Release()` belongs in `finally`.
 > 
@@ -134,12 +131,12 @@ For short synchronous state changes inside one process, `lock` is the smallest c
 <!-- qard-id: 0fdc576b-ea0a-41ce-9613-4ec6f7fe0d57 -->
 > [!qard]- How does reentrancy differ between `lock`/`Monitor` and `SemaphoreSlim`?
 > `lock`/`Monitor` is reentrant for its owning thread. `SemaphoreSlim` is not reentrant, because it has no owner.
-> 
+>
 > - **`lock`/`Monitor`:** records which thread owns the monitor and how many times it has entered. The owner can enter again without blocking, and other threads can acquire the monitor only after the owner has exited the same number of times.
 > - **`SemaphoreSlim`:** records only how many permits remain, not which thread or asynchronous flow holds them. A second wait from the same code is just another request for a permit.
 > 
 > With a one-permit `SemaphoreSlim`, a method that holds the permit and then calls code that waits on the same semaphore ends up waiting for itself. Without a timeout or cancellation, `Wait()` blocks forever and `WaitAsync()` never completes. The permit therefore belongs at one boundary in the call chain, with `Release()` in `finally` so that each acquisition is released exactly once.
-> 
+>
 > [Microsoft: `lock` statement](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/lock) · [Monitor.Enter](https://learn.microsoft.com/en-us/dotnet/api/system.threading.monitor.enter?view=net-10.0) · [SemaphoreSlim API](https://learn.microsoft.com/en-us/dotnet/api/system.threading.semaphoreslim?view=net-10.0)
 
 # References

@@ -1,11 +1,8 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Estimates a target's position from value ratios in uniformly distributed sorted data."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Creation
 publish: true
@@ -19,25 +16,17 @@ Interpolation Search probes at that predicted position instead of the middle. Gi
 
 To find `950` in `[0 … 1000]` it probes near index `95%`, not `50%` — the same instinct that opens a phone book near the back to find "Smith". Without the uniform model, value ratios stop predicting index ratios.
 
-
-
 The distinguishing step is where the first probe lands.
 
 %% tabs %%
 
 %% tab: Visualization %%
 
-
-
 ```steptrace
 {"algorithm":"interpolation-search","array":[0,1,4,9,16,25,36,49,64,81,100,121],"target":81}
 ```
 
-
-
 The trace searches for `81` in the quadratic sequence `a[i] = i²`. The target sits about 67% across the initial value span but at index `9` of `11`, so the first estimate undershoots at index `7`. Each miss remaps the target against the new endpoints until the probe reaches index `9`.
-
-
 
 At the start of every loop the target, if present, lies in `[a[lo], a[hi]]` — the same invariant Binary Search maintains. Interpolation Search adds an assumption about *where* inside that range it lies. The formula treats the values between `a[lo]` and `a[hi]` as points on a straight line against their indices: the fraction `(target - a[lo]) / (a[hi] - a[lo])` of the value span maps to that same fraction of the index span. When the data actually follows that line, the probe lands on or beside the target's true index, and even a miss leaves a sub-range far smaller than half.
 

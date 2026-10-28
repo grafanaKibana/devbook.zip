@@ -1,11 +1,8 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Data Structures
+topic: [Computer Science]
+subtopic: [Data Structures]
 summary: "A union-find structure that partitions elements into disjoint sets and answers whether two share a set."
-level:
-  - "3"
+level: ["3"]
 priority: Medium
 status: Ready to Repeat
 publish: true
@@ -21,12 +18,9 @@ This is deliberately less information than a graph. The structure remembers whic
 
 %% tab: Visualization %%
 
-
-
 ```steptrace
 {"algorithm":"union-find","n":7}
 ```
-
 
 The view starts with seven singleton sets. Choose two elements and run `Union` to merge their roots, `Find A` to resolve and compress one parent path, or `Connected?` to resolve both roots and compare representatives. Because that check performs two finds, it may flatten both parent paths. The forest and its parent array update together: an arrow points from a child to its parent, and a root stores its own index.
 

@@ -1,11 +1,8 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Expands whichever node looks closest by heuristic h(n) alone. Fast but not optimal."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Ready to Repeat
 publish: true
@@ -24,7 +21,6 @@ That ranking rule is also the weakness. The search cannot distinguish a short ro
 ```
 
 Greedy first moves downward because those cells have smaller `h`, then follows the lower corridor until a vertical barrier forces it back up and around. It reaches the goal with cost `12`. [[Home/Computer Science/Algorithms/Graph Algorithms/A-Star Search|A*]] uses the same grid but ranks by `g + h`, returning the optimal upper route with cost `8`. The comparison isolates the missing term: Greedy knows both routes point toward the same goal but never charges itself for the four extra steps already taken.
-
 
 The frontier is a priority queue keyed by `h(n)`. Each iteration pops the node with the smallest estimate, and if it is not the goal, pushes every unvisited neighbor keyed by that neighbor's own `h`. The trace accumulates edge weights only to report the returned path cost; they never affect priority. A visited set stops a node from entering the queue twice.
 

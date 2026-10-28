@@ -1,11 +1,8 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
+topic: [AI & ML]
+subtopic: [LLM]
 summary: "Scoring the whole path an agent took via reference-trajectory match or an LLM judge over the trace."
-level:
-  - "3"
+level: ["3"]
 priority: High
 status: Done
 publish: true
@@ -95,22 +92,22 @@ Visible task success can make a judge rationalize a messy path. Reliable path sc
 <!-- qard-id: 520c7686-9751-4f5d-b51e-53db694c08ed -->
 > [!qard]- When is reference matching a better way to score an agent's trajectory than an LLM judge?
 > Reference matching is the better scorer when the acceptable tool-call paths are few enough to write down and the rule for comparing them is clear. It is then cheap, deterministic and repeatable. An LLM judge fits better when many different paths can be correct, because it scores the trace against a rubric instead of a list of paths. The cost is an extra model call and less deterministic scores.
-> 
+>
 > | Aspect | Reference matching | LLM judge over the trace |
 > |---|---|---|
 > | What it needs | One or more known-good tool-call paths and a comparison mode. | A rubric describing good behavior, such as plan quality, tool choice, wasted work and recovery. |
 > | Alternative valid paths | Accepted only if listed or tolerated by the mode; an unanticipated correct path fails. | Can be accepted without being listed, because the rubric describes qualities rather than one path. |
 > | Cost and repeatability | No model call; the same trace always gets the same score. | A model call per scored trajectory; scores for the same trace can vary between runs. |
-> 
+>
 > The comparison mode sets how much variation counts as acceptable:
-> 
+>
 > - **Strict:** same calls in the same order; fits a task with one valid procedure.
 > - **Unordered:** same calls in any order; fits independent reads.
 > - **Subset:** every agent call must appear in the reference, so unlisted tools fail. This can forbid writes in a read-only task.
 > - **Superset:** every reference call must appear in the trace, and extra calls are allowed. This enforces required steps, but a wasteful trace that contains them still passes.
 > 
 > Several valid paths do not automatically require a judge. A richer set of references, or a hybrid rule such as a subset gate plus a judge for path quality, may be enough.
-> 
+>
 > [Trajectory evaluation (LangSmith)](https://docs.langchain.com/langsmith/trajectory-evals)
 
 # References

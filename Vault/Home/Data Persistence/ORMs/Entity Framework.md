@@ -1,11 +1,8 @@
 ---
-topic:
-  - Data Persistence
-subtopic:
-  - ORMs
+topic: [Data Persistence]
+subtopic: [ORMs]
 summary: "Microsoft's .NET ORM: maps C# classes to tables, translates LINQ, and manages migrations."
-level:
-  - "4"
+level: ["4"]
 priority: High
 status: Ready to Repeat
 publish: true
@@ -212,7 +209,7 @@ Schema changes take provider-specific locks and may scan or rewrite a large tabl
 
 > [!qard]- What lifetime should an EF Core `DbContext` have, and why?
 > An EF Core `DbContext` should live for one unit of work and serve one operation at a time. It is a session that tracks entities and coordinates `SaveChanges` for that unit of work. It is also not thread-safe, and EF Core does not support parallel operations on one instance.
-> 
+>
 > - **Web requests:** in ASP.NET Core, `AddDbContext` registers the context as scoped by default, so each request usually gets its own instance. One request can still contain several separate units of work.
 > - **Background or parallel work:** each task needs its own fresh context, typically created through `IDbContextFactory<TContext>`, rather than a shared request instance.
 > - **Singletons:** a singleton that captures a scoped context keeps one instance alive across requests, so concurrent requests can end up sharing it. This is the captive-dependency failure.
@@ -223,22 +220,22 @@ Schema changes take provider-specific locks and may scan or rewrite a large tabl
 <!-- qard-id: dd44ad40-d794-44fa-bdc0-f28f8e0e801a -->
 > [!qard]- How does EF Core change tracking work, and when is a no-tracking query appropriate?
 > EF Core change tracking records the entities that a `DbContext` loads, adds or attaches. It then compares their current values with remembered original values to decide what `SaveChanges` must write. A no-tracking query fits results that are only read and will not be updated through that context.
-> 
+>
 > With the default snapshot strategy, tracking works in four steps:
-> 
+>
 > 1. **Track:** a tracking query, the default for entity queries, attaches each returned entity to the context and keeps a snapshot of its original values. If an entity with the same key is already tracked, EF Core returns that existing instance instead of a new object. This is identity resolution.
 > 2. **Modify:** application code changes ordinary properties. Under this strategy, assigning a property does not notify EF Core.
 > 3. **Detect:** before `SaveChanges` writes, automatic change detection compares current values with the snapshot and marks changed entities and properties as modified.
 > 4. **Save:** `SaveChanges` sends the inserts, updates and deletes that the tracked entity states require.
 > 
 > `.AsNoTracking()` skips setting up this tracking information, which usually makes read-only queries cheaper. In exchange, `SaveChanges` neither detects nor saves changes to the returned objects. A plain no-tracking query also skips identity resolution, so one row returned twice becomes two separate objects. Later use of such a detached object for an update requires attaching it, stating which entity or properties are modified and handling concurrency. The context never recorded the object's original values.
-> 
+>
 > [EF Core: Tracking vs. no-tracking queries](https://learn.microsoft.com/en-us/ef/core/querying/tracking) · [EF Core: Change detection](https://learn.microsoft.com/en-us/ef/core/change-tracking/change-detection)
 
 <!-- qard-id: bbf994dd-c7ce-441b-b48c-a8c58cc163ee -->
 > [!qard]- How does EF Core detect that another writer changed a row between reading it and saving an update?
 > EF Core detects the conflict through optimistic concurrency. The original value of a configured concurrency token is added to the `WHERE` clause of the `UPDATE` or `DELETE`. A command that then affects zero rows raises `DbUpdateConcurrencyException`. This detection does not require a database lock to span the read, the application's work and the save. Whether any lock is held during that interval depends separately on the enclosing transaction and its isolation level.
-> 
+>
 > 1. **Read:** EF Core loads the row and remembers the token's original value. In SQL Server, a `rowversion` column is a common token because the database changes it on every update.
 > 2. **Save:** the generated command changes the row only if its key and token still equal the values that were read.
 > 3. **Conflict:** if another writer updated the row in between, the token differs and the predicate matches nothing. EF Core treats the zero-row result as a conflict and throws `DbUpdateConcurrencyException`.
@@ -249,33 +246,33 @@ Schema changes take provider-specific locks and may scan or rewrite a large tabl
 > SET Status = @newStatus
 > WHERE Id = @id AND Version = @originalVersion;
 > ```
-> 
+>
 > The application then resolves the conflict. It reloads and merges values, retries the operation from fresh state, or reports the conflict.
-> 
+>
 > **Limit:** the check covers only the rows that the command updates or deletes. It does not detect a concurrent change to other rows that a decision relied on, such as a newly inserted overlapping booking. Protecting such a predicate needs a stronger mechanism, such as Serializable isolation.
-> 
+>
 > [EF Core: Handling concurrency conflicts](https://learn.microsoft.com/en-us/ef/core/saving/concurrency)
 
 <!-- qard-id: 5e9681ff-5093-4fb4-b6ff-b76f1501d587 -->
 > [!qard]- What is the N+1 query problem, and how can it be detected?
 > The N+1 query problem occurs when one query loads N parent rows and code then triggers a separate query for each parent's related data. The result is N + 1 round trips instead of one or two. In EF Core it commonly comes from lazy loading: accessing a navigation inside a loop can issue a query per item.
-> 
+>
 > ```csharp
 > var orders = await db.Orders.ToListAsync();   // 1 query
 > foreach (var order in orders)
 >     Console.WriteLine(order.Customer.Name);   // with lazy loading: can query once per order
 > ```
-> 
+>
 > Each extra query adds a round trip, so the cost grows with the number of parents. A page that seems fast with little test data can degrade as production data grows.
-> 
+>
 > **Detection:**
-> 
+>
 > - **Command count per operation:** counting the database commands that one request or test issues reveals N+1 when the count grows with the number of parent rows.
 > - **Logged SQL:** the log shows the same statement repeated many times, with only the key parameter changing.
 > - **Traces:** one request contains many short, sequential database spans.
 > 
 > **Fixes** reduce the round trips. Options include a projection that selects only the related columns the result needs, an `Include` that eager-loads the navigation, or a deliberate second query that loads the related rows for all parents at once. The right choice depends on the result shape and consistency needs. No single collection-size threshold decides it.
-> 
+>
 > [EF Core: Efficient querying](https://learn.microsoft.com/en-us/ef/core/performance/efficient-querying)
 
 # References

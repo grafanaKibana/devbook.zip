@@ -1,11 +1,8 @@
 ---
-topic:
-  - Networks
-subtopic:
-  - Architecture & Ops
+topic: [Networks]
+subtopic: [Architecture & Ops]
 summary: "Intermediaries that represent either a client reaching the internet or an origin accepting traffic."
-level:
-  - "3"
+level: ["3"]
 priority: Medium
 status: Ready to Repeat
 publish: true

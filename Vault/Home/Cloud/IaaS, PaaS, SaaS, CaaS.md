@@ -1,10 +1,8 @@
 ---
-topic:
-  - Cloud
+topic: [Cloud]
 subtopic: []
 summary: "Choosing how much runtime control the application needs and which responsibilities can move to a provider."
-level:
-  - "2"
+level: ["2"]
 priority: High
 status: Ready to Repeat
 publish: true

@@ -1,11 +1,8 @@
 ---
-topic:
-  - Security
-subtopic:
-  - Security
+topic: [Security]
+subtopic: [Security]
 summary: "A compact claims format whose signature, issuer, audience, lifetime, and intended use must be validated before authorization."
-level:
-  - "4"
+level: ["4"]
 priority: High
 status: Ready to Repeat
 

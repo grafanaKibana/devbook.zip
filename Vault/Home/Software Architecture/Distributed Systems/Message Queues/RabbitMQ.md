@@ -1,11 +1,8 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - Distributed Systems
+topic: [Software Architecture]
+subtopic: [Distributed Systems]
 summary: "Open-source AMQP 0-9-1 broker routing messages from exchanges to queues via bindings, decoupling producers from consumers."
-level:
-  - "2"
+level: ["2"]
 priority: High
 status: Done
 

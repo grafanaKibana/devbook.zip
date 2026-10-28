@@ -1,16 +1,9 @@
 ---
-topic:
-  - Software Design
-subtopic:
-  - Principles
+topic: [Software Design]
+subtopic: [Principles]
 summary: "Balances one source of knowledge, framework-owned control, and deferral of speculative features."
-aliases:
-  - DRY
-  - YAGNI
-  - IoC (Holywood Principle)
-  - IoC (Hollywood Principle)
-level:
-  - "4"
+aliases: [DRY, YAGNI, IoC (Holywood Principle), IoC (Hollywood Principle)]
+level: ["4"]
 priority: High
 status: Ready to Repeat
 publish: true

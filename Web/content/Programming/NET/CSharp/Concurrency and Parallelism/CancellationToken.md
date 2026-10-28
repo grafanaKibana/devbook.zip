@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.649Z
-modified: 2026-08-20T20:41:15.649Z
-published: 2026-08-20T20:41:15.649Z
+created: 2026-10-28T12:27:02.938Z
+modified: 2026-10-28T12:33:02.654Z
+published: 2026-10-28T12:33:02.654Z
 topic:
   - Programming
 subtopic:

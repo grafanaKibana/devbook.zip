@@ -1,11 +1,8 @@
 ---
-topic:
-  - Software Design
-subtopic:
-  - Paradigms
+topic: [Software Design]
+subtopic: [Paradigms]
 summary: "Models computation as the evaluation of pure functions over immutable data."
-level:
-  - "3"
+level: ["3"]
 priority: Medium
 status: Ready to Repeat
 publish: true
@@ -146,17 +143,17 @@ The practical C# pattern is a functional core with an effectful shell: read exte
 <!-- qard-id: 335bedbd-8894-48a7-9fe2-5318c9607cad -->
 > [!qard]- What makes a function "pure" and why does purity matter for testing?
 > A function is pure when its result depends only on its explicit arguments and evaluating it has no observable side effects. The same inputs always give the same output. The function does not read hidden state, such as the clock, a global variable or configuration. It also changes nothing outside its return value, such as shared state, a database or a log. A call can therefore be replaced by its result without changing program behavior. This property is called referential transparency.
-> 
+>
 > For example, `CalculateTax(amount, rate) => amount * rate` is pure. A version that reads `_config.TaxRate` and writes a log entry is impure. Its result depends on hidden state, and running it has an effect.
-> 
+>
 > Purity matters for testing because every dependency is an argument:
-> 
+>
 > - **Direct checks:** a test passes input values and asserts on the returned value. No database, clock or global has to be arranged, faked or reset first.
 > - **Repeatable results:** the same inputs give the same result on every run and in any test order, so hidden state cannot make the test flaky.
 > - **Effects at the edges:** code that reads the clock or database and writes results stays in a thin surrounding layer. The decision logic is tested with plain values, and that layer is tested separately against its real boundary.
 > 
 > Purity and totality are separate properties. Totality is judged against a stated input domain: a function is total on that domain when every input in it produces a result. Suppose the stated domain is every value of the parameter types. A function that deterministically fails for some of those values, for example by throwing, is then partial on that domain. The same function can still be total on a narrower stated domain that excludes those values. Haskell's semantics models such an evaluation error as bottom (⊥), like non-termination. That is a language-semantics model, not a general rule for C# exceptions. When invalid input is an expected case, it can be returned as a value, such as a `Result<T>`. The function then returns a result for those inputs too. The outcome stays explicit, and a test can assert it like any other result.
-> 
+>
 > [.NET: Functional vs. imperative programming](https://learn.microsoft.com/en-us/dotnet/standard/linq/functional-vs-imperative-programming) · [Haskell 2010 Report §3.1: Errors](https://www.haskell.org/onlinereport/haskell2010/haskellch3.html#sect3.1) · [Lean reference: Functions](https://lean-lang.org/doc/reference/latest/The-Type-System/Functions/)
 
 # References

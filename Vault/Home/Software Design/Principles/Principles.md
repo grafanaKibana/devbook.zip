@@ -1,14 +1,11 @@
 ---
-topic:
-  - Software Design
-subtopic:
-  - Principles
+topic: [Software Design]
+subtopic: [Principles]
 summary: "Design heuristics like SOLID, DRY, KISS, and YAGNI that keep systems understandable."
 tags: [FolderNote]
 publish: true
 priority: High
-level:
-  - "4"
+level: ["4"]
 status: Creation
 ---
 

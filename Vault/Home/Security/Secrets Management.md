@@ -1,11 +1,8 @@
 ---
-topic:
-  - Security
-subtopic:
-  - Security
+topic: [Security]
+subtopic: [Security]
 summary: "Keeping credentials out of source code, distributing them to workloads, and rotating safely."
-level:
-  - "3"
+level: ["3"]
 priority: High
 status: Ready to Repeat
 publish: true
@@ -99,7 +96,7 @@ Workload identity is preferred when the platform and target service can bind it 
 <!-- qard-id: 14923451-815f-46a2-b05a-41a2cb9dd319 -->
 > [!qard]- What should happen when a secret is accidentally committed and pushed?
 > A pushed secret is treated as compromised. The response replaces and revokes the credential at its issuer, confirms that the old value no longer works, and checks whether it was used. Cleaning the repository comes afterward and is not a fix by itself, because copies that already exist cannot be recalled.
-> 
+>
 > 1. **Assume exposure:** once pushed, the value may already exist in clones, forks, caches, CI logs and notifications. Deleting it from Git does not make it secret again.
 > 2. **Rotate and revoke:** a replacement credential is issued, every service that uses the secret moves to it, and the old value is revoked where it is accepted. Until revocation, anyone holding a copy can still use the old value. Revoking before consumers move stops misuse sooner but breaks those consumers, so the window is kept as short as the rollout allows.
 > 3. **Verify:** an attempt with the old value is rejected, and the dependent services work with the new one.
@@ -107,7 +104,7 @@ Workload identity is preferred when the platform and target service can bind it 
 > 5. **Clean up the repository:** removing the value from current files, and optionally rewriting history, reduces future discovery. Neither step revokes the credential or recalls copies already made.
 > 
 > The common failure is treating deletion as remediation. A later commit that deletes the line leaves the value in history, and the credential stays valid wherever it was copied.
-> 
+>
 > [GitHub: Remediating a leaked secret](https://docs.github.com/en/code-security/tutorials/remediate-leaked-secrets/remediating-a-leaked-secret)
 
 # References

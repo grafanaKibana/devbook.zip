@@ -1,11 +1,8 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Builds a minimum spanning tree in parallel rounds by adding each component's cheapest outgoing edge."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Ready to Repeat
 publish: true
@@ -22,7 +19,6 @@ The cut property certifies each selection. A component defines a cut between its
 ```steptrace
 {"algorithm":"boruvka"}
 ```
-
 
 For vertices `A, B, C, D` with edges `AB=1`, `AC=4`, `BC=2`, `BD=5`, `CD=3`, the first round selects `AB` for `A`, `AB` for `B`, `BC` for `C`, and `CD` for `D`. After duplicate removal, all three edges are safe and the graph becomes one component in a single round.
 

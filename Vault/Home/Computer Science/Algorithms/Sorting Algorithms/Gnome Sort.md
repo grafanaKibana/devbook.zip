@@ -1,11 +1,8 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Walks forward across ordered neighbors and steps backward after each adjacent swap."
-level:
-  - "4"
+level: ["4"]
 priority: Low
 status: Not-Started
 publish: true

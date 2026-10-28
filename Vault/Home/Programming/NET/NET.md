@@ -1,14 +1,11 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
+topic: [Programming]
+subtopic: [NET]
 summary: "Microsoft's cross-platform runtime and framework for building web, cloud, desktop, and mobile software."
 tags: [FolderNote]
 publish: true
 status: Creation
-level:
-  - "4"
+level: ["4"]
 priority: High
 qard-deck: "Programming"
 qard-topic: "NET/NET"
@@ -31,7 +28,7 @@ return FolderStructureMap;
 <!-- qard-id: 290f9386-ef5a-4148-8677-71811ce19253 -->
 > [!qard]- What are the main layers of .NET, and why does it help to separate them?
 > A practical model splits .NET into languages and compilers, SDK tooling, the runtime, the base libraries and application frameworks. Separating them helps because each owns different behavior, so naming the owning layer turns a vague symptom into a testable hypothesis.
-> 
+>
 > | Layer | What it owns | Example of a problem it owns |
 > |---|---|---|
 > | Languages and compilers | Translate C#, F# or Visual Basic source into IL stored in assemblies. | A compile error, or unexpected behavior of a language feature. |
@@ -39,11 +36,11 @@ return FolderStructureMap;
 > | Runtime (CLR) | Load assemblies and run managed code: JIT compilation, garbage collection, exception handling and threading. | GC pauses, or slow startup while methods are compiled. |
 > | Base libraries | Shared APIs such as collections, I/O, networking and threading primitives. | The behavior or cost of a specific API, such as a collection or stream. |
 > | Application frameworks | Application models such as ASP.NET Core, WPF or .NET MAUI, including pipelines like HTTP middleware. | A slow or misordered request pipeline. |
-> 
+>
 > A symptom often appears in a different layer from its cause. Rising memory shows up as garbage-collection activity in the runtime even when application code is keeping objects reachable. A slow HTTP request can come from the framework pipeline, synchronous I/O in application code or the generated machine code. “.NET is slow” is not a useful hypothesis until the owning part is named.
-> 
+>
 > This is a conceptual map rather than an official fixed taxonomy, and component and version boundaries change between releases.
-> 
+>
 > Sources: [Microsoft Learn: Introduction to .NET](https://learn.microsoft.com/en-us/dotnet/core/introduction) · [Microsoft Learn: Common Language Runtime overview](https://learn.microsoft.com/en-us/dotnet/standard/clr)
 
 # References

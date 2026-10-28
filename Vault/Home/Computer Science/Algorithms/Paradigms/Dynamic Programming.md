@@ -1,11 +1,8 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Defines finite acyclic states and recurrences, solves each state in dependency order, and reuses stored results."
-level:
-  - "4"
+level: ["4"]
 priority: High
 status: Ready to Repeat
 publish: true
@@ -24,11 +21,9 @@ The formulation starts with a state definition, base cases, and a recurrence ove
 
 %% tab: Visualization %%
 
-
 %% tabs %%
 
 %% tab: Greedy %%
-
 
 ```steptrace
 {"algorithm":"coin-change-greedy"}
@@ -38,7 +33,6 @@ Largest usable coin first: exact change, but 6 coins instead of 3.
 
 %% tab: Naive Recursion %%
 
-
 ```steptrace
 {"algorithm":"coin-change-naive"}
 ```
@@ -46,7 +40,6 @@ Largest usable coin first: exact change, but 6 coins instead of 3.
 Try every first coin. Repeated remainders rebuild the same work.
 
 %% tab: Memoization %%
-
 
 ```steptrace
 {"algorithm":"coin-change-memoization"}
@@ -56,7 +49,6 @@ Keep recursion, but save each answered remainder beside the counter.
 
 %% tab: Tabulation %%
 
-
 ```steptrace
 {"algorithm":"coin-change-tabulation"}
 ```
@@ -64,7 +56,6 @@ Keep recursion, but save each answered remainder beside the counter.
 Build exact change from 0¢ upward on a visual amount board.
 
 %% tab: Memoization (Raw) %%
-
 
 ```steptrace
 {"algorithm":"coin-change-top-down"}
@@ -74,14 +65,12 @@ The raw view shows the canonical recursion tree, cache hits, and stored returns.
 
 %% endtabs %%
 
-
 Both examples become DP only after the state discards irrelevant history. Coin change keeps the remaining amount because every denomination remains reusable; finite coin stock would also require the remaining counts. Grid path keeps the current coordinate. Two calls with the same state have the same future choices and therefore the same answer, regardless of how they arrived there.
 
 - **Top-down (memoisation)** follows the recurrence from the target. The first visit to an amount or coordinate computes it; later visits return the saved answer. It may skip unreachable states, but it pays call-stack cost. [[Home/Computer Science/Algorithms/Paradigms/Memoization|Memoization]] develops that reuse mechanism independently of DP.
 - **Bottom-up (tabulation)** starts from known answers and fills every state its target may depend on. Coin change advances from `0¢` to `30¢`; grid path moves backward from the dispatch door. The loops make dependency order explicit and avoid recursion.
 
 The recurrence then names the dependencies. Coin change reads `best[amount - coin]` for every usable denomination and keeps the minimum plus one. Grid path reads the right and down suffix costs and adds the current tile. The animations differ because those state spaces differ—a one-dimensional amount board versus a two-dimensional matrix—but the storage rule is the same.
-
 
 A cashier must return exactly `30¢` using real `1¢`, `10¢`, `25¢`, and `50¢` denominations. The example assumes enough of each coin that stock is not a constraint. Taking the largest usable coin first returns `25 + 1 + 1 + 1 + 1 + 1`, while `10 + 10 + 10` uses half as many coins. The five tabs keep that counterexample fixed while changing the solving strategy and level of abstraction.
 
@@ -165,13 +154,11 @@ The simplified Memoization and Tabulation tabs keep the cashier model visible. M
 > ```
 > `FewestCoinsTopDown(30, [1, 10, 25, 50])` and the bottom-up version both return `3`. The contract requires `0 <= amount < int.MaxValue` and strictly positive denominations; those constraints keep dependencies acyclic and the sentinel arithmetic valid.
 
-
 A warehouse robot may move only right or down from the loading bay to the dispatch door. Choosing the cheaper immediate tile and breaking ties to the right walks into an expensive corridor and costs `21`; the best complete route costs `10`. Naive recursion eventually finds it, but different route prefixes repeatedly reach the same coordinate.
 
 %% tabs %%
 
 %% tab: Greedy %%
-
 
 ```steptrace
 {"algorithm":"grid-path-greedy"}
@@ -181,7 +168,6 @@ Choose the cheaper next tile, breaking ties right. Later costs trap the route.
 
 %% tab: Naive Recursion %%
 
-
 ```steptrace
 {"algorithm":"grid-path-naive"}
 ```
@@ -189,7 +175,6 @@ Choose the cheaper next tile, breaking ties right. Later costs trap the route.
 Explore every right/down route and revisit the same coordinates.
 
 %% tab: Memoization %%
-
 
 ```steptrace
 {"algorithm":"grid-path-memoization"}
@@ -199,7 +184,6 @@ Write solved remaining costs into the warehouse map and reuse repeated tiles.
 
 %% tab: Tabulation %%
 
-
 ```steptrace
 {"algorithm":"grid-path-tabulation"}
 ```
@@ -207,7 +191,6 @@ Write solved remaining costs into the warehouse map and reuse repeated tiles.
 Fill the warehouse map backward from the dispatch door and reveal the route.
 
 %% tab: Memoization (Raw) %%
-
 
 ```steptrace
 {"algorithm":"grid-path-top-down"}
@@ -370,20 +353,20 @@ Optimization DP still needs a valid composition rule. For the same US-coin drawe
 <!-- qard-id: 96195e4d-ddca-4379-b065-484eedb7a520 -->
 > [!qard]- What changes between memoization and tabulation if the recurrence is the same?
 > Memoization and tabulation evaluate the same recurrence and store one result per state. They differ in how the evaluation order is determined and which states get computed.
-> 
+>
 > - **Memoization (top-down):** starts from the requested state, recursively follows its dependencies and caches each result the first time it is computed.
 > - **Tabulation (bottom-up):** loops fill the stored results in an order where every dependency is already available.
-> 
+>
 > | Aspect | Memoization (top-down) | Tabulation (bottom-up) |
 > |---|---|---|
 > | Evaluation order | Recursion from the target discovers dependencies as it goes, so no order has to be written down. The dependencies must still be acyclic. | The loops must visit states in an order that solves every dependency before any state that reads it. |
 > | States computed | Only states reachable from the target are computed, so unneeded states are skipped. | Every state in the planned table is computed, including states the target never reads. |
 > | Control cost | Each call costs a function call and a cache check. Recursion depth follows the longest dependency chain, so very deep chains can overflow the call stack. | Plain loops avoid recursive calls and their stack-depth limit. |
-> 
+>
 > When both compute the same set of states with equivalent work per state, their asymptotic time is identical: the number of states times the work per state.
-> 
+>
 > Coin change with a `30¢` target shows the two orders. Memoization starts at `best(30)` and recurses into the smaller remaining amounts it needs. Tabulation fills `best[0]` through `best[30]` in increasing order, which works because each amount reads only smaller amounts.
-> 
+>
 > [MIT 6.006: Dynamic Programming](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/28461a74f81101874a13d9679a40584d_MIT6_006S20_lec16.pdf) · [MIT 6.006: Memoization](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-fall-2011/ea1cb4a29625017bdbcaf2dfd61b179e_MIT6_006F11_lec19_orig.pdf)
 
 # References

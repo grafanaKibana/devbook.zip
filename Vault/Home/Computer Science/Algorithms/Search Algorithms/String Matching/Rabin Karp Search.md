@@ -1,11 +1,8 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Matches patterns by comparing rolling hashes of consecutive text windows."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Done
 publish: true
@@ -15,25 +12,17 @@ Searching a text `T` of length `n` for a pattern `P` of length `m` creates `n âˆ
 
 Equal hashes only identify a candidate. Distinct strings can collide, so the algorithm still compares the `m` characters before reporting a match. The rolling hash saves work. The direct comparison preserves correctness.
 
-
-
 %% tabs %%
 
 %% tab: Visualization %%
-
-
 
 ```steptrace
 {"algorithm":"rabin-karp","text":"GEEKSFORGEEKS","pattern":"GEEK"}
 ```
 
-
-
 The trace searches for `GEEK` in `GEEKSFORGEEKS`, sliding a four-character window and comparing its rolling hash against the pattern hash.
 
 The window at index 0 hashes equal to the pattern, so that position triggers a character check and confirms the first match. Every following slide reuses the previous hash: the algorithm subtracts the weight of the character leaving on the left, shifts, and adds the character entering on the right. Positions whose hash differs from the pattern's are rejected on an integer comparison and never reach character verification. A matching hash triggers a direct pattern comparison, which confirms the second occurrence at index 8 just as it confirmed the first.
-
-
 
 Rabin-Karp reads each length-`m` string as a number in base `b`, reduced modulo a large prime `p`. With characters mapped to integers, the window `T[i..i+m-1]` hashes to:
 

@@ -1,11 +1,8 @@
 ---
-topic:
-  - Networks
-subtopic:
-  - Architecture & Ops
+topic: [Networks]
+subtopic: [Architecture & Ops]
 summary: "An event-driven web server and reverse proxy for static delivery, TLS, routing, caching, and load balancing."
-level:
-  - "3"
+level: ["3"]
 priority: Medium
 status: Ready to Repeat
 publish: true

@@ -1,14 +1,11 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - Distributed Systems
+topic: [Software Architecture]
+subtopic: [Distributed Systems]
 summary: "Core distributed-systems concepts for production: consistency tradeoffs, messaging, coordination, and failure handling under an unreliable network."
 tags: [FolderNote]
 publish: true
 priority: High
-level:
-  - "4"
+level: ["4"]
 status: Creation
 ---
 

@@ -1,11 +1,8 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Data Structures
+topic: [Computer Science]
+subtopic: [Data Structures]
 summary: "A fixed-size array with wrapping read and write indices for streaming and bounded-history workloads."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Ready to Repeat
 publish: true
@@ -22,7 +19,6 @@ The trade is explicit. Capacity never grows, and a full ring must either overwri
 %% tabs %%
 
 %% tab: Visualization %%
-
 
 ```steptrace
 {"algorithm":"circular-buffer"}

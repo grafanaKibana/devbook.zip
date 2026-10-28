@@ -1,9 +1,9 @@
 ---
 publish: true
 title: Algorithm Patterns
-created: 2026-09-12T17:17:13.831Z
-modified: 2026-09-12T17:17:13.831Z
-published: 2026-09-12T17:17:13.831Z
+created: 2026-10-28T12:27:02.725Z
+modified: 2026-10-28T12:33:02.636Z
+published: 2026-10-28T12:33:02.636Z
 tags:
   - FolderNote
 topic:

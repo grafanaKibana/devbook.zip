@@ -1,11 +1,8 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - Application Architecture
+topic: [Software Architecture]
+subtopic: [Application Architecture]
 summary: "How MVC, MVVM, MVP, MVU, coordinators, and VIPER divide presentation state, rendering, interaction, and navigation."
-level:
-  - "3"
+level: ["3"]
 priority: Medium
 status: Ready to Repeat
 publish: true
@@ -164,16 +161,16 @@ A view-model becomes a second controller when it owns data access or domain rule
 <!-- qard-id: 0fe15750-bc1e-470f-bcae-0356e989b2da -->
 > [!qard]- What is the key difference between MVC and MVVM?
 > In MVC, a controller receives each user action, works with the model, and then selects a view and supplies the data it renders. In MVVM, the view binds to properties and commands exposed by a view-model. The view-model changes its own state and raises change notifications, and the bindings refresh the view. The view-model never references the view.
-> 
+>
 > | Aspect | MVC | MVVM |
 > |---|---|---|
 > | Handling input | The controller receives the request, calls application behavior and chooses the response. The path from input to output is explicit in the action code. | The view forwards user actions to view-model commands through bindings. The same view stays on screen and reflects the new state; navigation is handled separately. |
 > | Updating the view | The controller passes data to the selected view, which renders it for that response. | Bound controls refresh when the view-model raises a change notification, such as `PropertyChanged` from `INotifyPropertyChanged`. A missed notification leaves the screen showing stale data. |
 > | Testing | Controller logic can be unit-tested without rendering a view. | View-model state and commands can be unit-tested without creating any UI controls. |
 > | Typical fit | Request/response web applications, such as ASP.NET Core MVC. | Long-lived client screens on platforms with data binding, such as .NET MAUI. |
-> 
+>
 > The cost of MVVM is its binding infrastructure: observable properties, commands and change notifications must be implemented and kept correct.
-> 
+>
 > [Microsoft: Overview of ASP.NET Core MVC](https://learn.microsoft.com/en-us/aspnet/core/mvc/overview?view=aspnetcore-10.0) · [Microsoft: Model-View-ViewModel (.NET MAUI)](https://learn.microsoft.com/en-us/dotnet/architecture/maui/mvvm)
 
 # References

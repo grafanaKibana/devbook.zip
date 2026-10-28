@@ -1,13 +1,10 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
+topic: [Programming]
+subtopic: [NET]
 summary: "Core C# building blocks: types, methods, generics, exceptions, namespaces, iteration, and reflection."
 tags: [FolderNote]
 publish: true
-level:
-  - "4"
+level: ["4"]
 priority: High
 status: Creation
 ---

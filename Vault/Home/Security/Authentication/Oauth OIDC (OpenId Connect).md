@@ -1,11 +1,8 @@
 ---
-topic:
-  - Security
-subtopic:
-  - Authentication
+topic: [Security]
+subtopic: [Authentication]
 summary: "OAuth delegates API access. OpenID Connect adds an interoperable authentication result."
-level:
-  - "3"
+level: ["3"]
 priority: High
 status: Ready to Repeat
 publish: true

@@ -1,11 +1,8 @@
 ---
-topic:
-  - Data Persistence
-subtopic:
-  - SQL
+topic: [Data Persistence]
+subtopic: [SQL]
 summary: "Keeping copies of data on multiple nodes to spread reads and survive failures."
-level:
-  - "4"
+level: ["4"]
 priority: High
 status: Ready to Repeat
 publish: true

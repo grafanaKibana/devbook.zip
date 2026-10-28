@@ -1,10 +1,8 @@
 ---
-topic:
-  - Cloud
+topic: [Cloud]
 subtopic: []
 summary: "A developer-oriented introduction to AWS, Azure, and Google Cloud and the constraints that should choose between them."
-level:
-  - "2"
+level: ["2"]
 priority: Medium
 status: Creation
 publish: true

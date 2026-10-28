@@ -1,11 +1,8 @@
 ---
-topic:
-  - Security
-subtopic:
-  - Security
+topic: [Security]
+subtopic: [Security]
 summary: "Uses keys and authenticated cryptographic primitives to protect confidentiality and detect tampering."
-level:
-  - "4"
+level: ["4"]
 priority: High
 status: Ready to Repeat
 
@@ -89,25 +86,25 @@ In .NET, `HttpClient` negotiates TLS for HTTPS endpoints. An ASP.NET Core deploy
 <!-- qard-id: d712664a-cd28-4712-a5f7-ab627ffdbf62 -->
 > [!qard]- How are symmetric and asymmetric cryptography used together in a real system?
 > Public-key (asymmetric) cryptography handles the small jobs that establish trust: authenticating a party with a signature, and establishing or protecting a shared key. Symmetric authenticated encryption then protects the bulk data with that key, because it is efficient and detects tampering as well as hiding content. Real systems combine the two instead of choosing one family for everything.
-> 
+>
 > **TLS 1.3 with certificate authentication:**
-> 
+>
 > 1. Client and server run an ephemeral (EC)DHE key agreement. Both sides derive fresh shared secrets without ever sending the key itself.
 > 2. The server signs the handshake transcript with its certificate's private key. The client validates the certificate and checks the signature with the certificate's public key, which authenticates the exchange as coming from that server.
 > 3. Keys derived from the shared secrets drive a symmetric AEAD cipher, such as AES-GCM, that protects all application data.
 > 
 > In this handshake, the certificate key only signs. It never encrypts a session key.
-> 
+>
 > **Envelope encryption for stored data:**
-> 
+>
 > 1. A random data-encryption key (DEK) encrypts the payload with symmetric authenticated encryption.
 > 2. A key-encryption key held in a key service, or a recipient's public key, encrypts (wraps) the DEK.
 > 3. The wrapped DEK is stored with the ciphertext. Decryption first unwraps the DEK, then decrypts the payload.
 > 
 > Rotating the key-encryption key or adding a recipient then rewraps only the small DEK instead of re-encrypting the bulk data.
-> 
+>
 > Public-key encryption suits only small payloads such as keys, so it is not applied to bulk data directly. Combining the families also does not remove key management. Public keys still need authentication, for example through certificates, and private keys and key-encryption keys still need protection.
-> 
+>
 > Sources: [NIST SP 800-57 Part 1 Rev. 5: Recommendation for Key Management](https://csrc.nist.gov/pubs/sp/800/57/pt1/r5/final) · [RFC 8446: TLS 1.3](https://www.rfc-editor.org/rfc/rfc8446)
 
 # References

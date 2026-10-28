@@ -1,11 +1,8 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Finds the extremum of a unimodal function by splitting the range in thirds each step."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Creation
 publish: true
@@ -17,23 +14,15 @@ Ternary search works on a **unimodal** function: one that strictly increases to 
 
 The name also appears in sorted-array lookup, where a three-way split buys nothing: binary search chooses the correct half with fewer comparisons. Ternary search is useful for unimodal objectives, including one-parameter optimization and geometric extrema. [[Home/Computer Science/Algorithms/Patterns/Binary Search on Answer|Binary Search on Answer]] solves a different shape: a monotone feasibility predicate rather than a non-monotone objective that rises and falls.
 
-
-
 %% tabs %%
 
 %% tab: Visualization %%
-
-
 
 ```steptrace
 {"algorithm":"ternary-search","array":[1,4,9,12,11,7,2],"goal":"maximum"}
 ```
 
-
-
 The values rise to `12` and then fall, giving one strict peak. Each ternary step shows both third-point probes at once; the lower side is discarded, and a final scan of at most three positions confirms the maximum at index `3`.
-
-
 
 The interval `[lo, hi]` holds the peak `p` at the start of every step, and the discard rule preserves that. Let `m1 < m2` be the third-point probes. Strict unimodality means `f` increases on `[lo, p]` and decreases on `[p, hi]`.
 

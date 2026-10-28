@@ -1,11 +1,8 @@
 ---
-topic:
-  - Networks
-subtopic:
-  - Protocols
+topic: [Networks]
+subtopic: [Protocols]
 summary: "A browser-oriented address with a scheme, authority, path, query, and fragment."
-level:
-  - "3"
+level: ["3"]
 priority: Medium
 status: Ready to Repeat
 publish: true

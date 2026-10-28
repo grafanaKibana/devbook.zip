@@ -1,11 +1,8 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
+topic: [AI & ML]
+subtopic: [LLM]
 summary: "An open protocol standardizing how LLM apps connect to external tools and data."
-level:
-  - "3"
+level: ["3"]
 priority: Low
 status: Done
 
@@ -108,27 +105,27 @@ MCP earns its overhead when several clients need the same integration or when ca
 <!-- qard-id: 45986407-9c75-4603-8105-a328b9997416 -->
 > [!qard]- When should a tool remain an in-process function instead of being exposed through an MCP server?
 > A tool should stay an in-process function when only one application uses it, especially when it works directly on that application's private state or business logic. An MCP server is worth its extra moving parts when several compatible clients need the same capability, managed and secured separately from any one application.
-> 
+>
 > The choice concerns where the tool lives, not how the model calls it. With function calling, the model returns a structured request and the application executes it. MCP is a client/server protocol through which a server advertises tools and other capabilities to any compatible client. A host can discover an MCP tool and present it to its model as a function definition. That translation is done by the host or its SDK, not by function calling itself.
-> 
+>
 > | Aspect | In-process function tool | Tool behind an MCP server |
 > |---|---|---|
 > | Reuse | Belongs to one application; other applications reuse it only through shared code or services | Any compatible MCP client can discover and call it |
 > | Application state | Reads the application's in-memory state directly | Cannot see the host application's memory; needed context arrives in each request, for example as an explicit handle that the server must authorize |
 > | Runtime cost | A local method call | A separate process or network hop, plus deployment and lifecycle for the server |
 > | Trust | Runs inside the application's own security context | Runs as a separate server that each host must configure and trust |
-> 
+>
 > Sources: [OpenAI: Function calling](https://developers.openai.com/api/docs/guides/function-calling) · [MCP specification 2026-07-28: Tools](https://modelcontextprotocol.io/specification/2026-07-28/server/tools) · [MCP 2026-07-28 update](https://blog.modelcontextprotocol.io/posts/2026-07-28/)
 
 <!-- qard-id: 59308422-df66-4bad-b9ce-ca18c5608606 -->
 > [!qard]- Which security checks must an MCP server still perform after HTTP authorization admits a caller?
 > HTTP authorization admits a caller only as far as its access token allows: the token must be issued for this MCP server and carry the scopes the request requires. The server still decides, in its own code, whether that caller may perform the operation on the specific object and tenant involved. It also validates every tool input before using it.
-> 
+>
 > - **Covered by MCP authorization for HTTP-based transports:** the server accepts only an OAuth access token issued for itself as the intended audience, and it can require particular scopes, such as a write scope for a tool that changes data. Audience and scopes decide who may reach the server and which kinds of operation the token permits.
 > - **Left to application-defined authorization:** whether this caller may act on this particular object or tenant, such as deleting a specific record or reading another tenant's data. A write scope permits writing in general but does not say which records. The server also validates tool arguments, rate-limits tool calls and sanitizes tool output.
 > 
 > Tool names, descriptions and results are text placed in the model's context. They can influence what the model requests, but they enforce nothing, so permission checks belong in server code.
-> 
+>
 > Sources: [MCP specification 2026-07-28: Authorization](https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization) · [MCP specification 2026-07-28: Tools](https://modelcontextprotocol.io/specification/2026-07-28/server/tools)
 
 # References

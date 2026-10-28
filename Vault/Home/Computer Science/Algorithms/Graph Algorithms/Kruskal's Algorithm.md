@@ -1,11 +1,8 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Builds a minimum spanning tree by accepting the lightest edges that join separate components."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Ready to Repeat
 publish: true
@@ -22,7 +19,6 @@ The cycle test does the real work. A [[Home/Computer Science/Data Structures/Gra
 ```steptrace
 {"algorithm":"kruskal"}
 ```
-
 
 For edges `AB=1`, `BC=2`, `AC=3`, `CD=4`, the initial components are `{A}`, `{B}`, `{C}`, `{D}`.
 

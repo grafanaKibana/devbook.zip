@@ -1,10 +1,8 @@
 ---
-topic:
-  - Data Persistence
+topic: [Data Persistence]
 subtopic: []
 summary: "How k+m data and parity shards trade storage efficiency for reconstruction work."
-level:
-  - "3"
+level: ["3"]
 priority: Medium
 status: Ready to Repeat
 publish: true

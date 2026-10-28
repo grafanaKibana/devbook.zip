@@ -1,11 +1,8 @@
 ---
-topic:
-  - Security
-subtopic:
-  - Authentication
+topic: [Security]
+subtopic: [Authentication]
 summary: "How independent factors, TOTP, WebAuthn, and recovery change account-takeover risk."
-level:
-  - "3"
+level: ["3"]
 priority: High
 status: Ready to Repeat
 publish: true

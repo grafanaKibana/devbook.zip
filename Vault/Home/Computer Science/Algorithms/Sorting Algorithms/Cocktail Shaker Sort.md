@@ -1,11 +1,8 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Alternates forward and backward bubble passes so both ends settle during each round."
-level:
-  - "4"
+level: ["4"]
 priority: Low
 status: Not-Started
 publish: true

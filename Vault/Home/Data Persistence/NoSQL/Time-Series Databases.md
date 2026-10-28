@@ -1,11 +1,8 @@
 ---
-topic:
-  - Data Persistence
-subtopic:
-  - NoSQL
+topic: [Data Persistence]
+subtopic: [NoSQL]
 summary: "Storage engines for append-heavy series, time-range scans, retention, and rollups."
-level:
-  - "3"
+level: ["3"]
 priority: Medium
 status: Creation
 publish: true

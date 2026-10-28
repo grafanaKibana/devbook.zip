@@ -1,11 +1,8 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - Distributed Systems
+topic: [Software Architecture]
+subtopic: [Distributed Systems]
 summary: "Once a network partition happens, a distributed data system can guarantee at most one of strong consistency or availability."
-level:
-  - "2"
+level: ["2"]
 priority: High
 status: Done
 

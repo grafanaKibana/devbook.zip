@@ -1,11 +1,8 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - Patterns
+topic: [Software Architecture]
+subtopic: [Patterns]
 summary: "Defines a one-to-many dependency where a subject's state change automatically notifies all subscribers."
-level:
-  - "3"
+level: ["3"]
 priority: High
 status: Done
 publish: true
@@ -176,27 +173,27 @@ C# events fit synchronous UI notifications. Server-side async subscribers need a
 
 > [!qard]- What is the Observer pattern?
 > The Observer pattern defines a one-to-many relationship: a publisher keeps a list of independently registered subscribers and notifies all of them when its state changes. The publisher depends only on a notification contract, not on the subscribers' concrete types, so a subscriber can be added or removed without changing the publisher.
-> 
+>
 > - **Publisher (subject):** owns the changing state, keeps the subscription list and sends the notifications.
 > - **Subscribers (observers):** register through the contract and decide how to react.
 > - **Notification contract:** a callback signature or interface, such as an order's `StatusChanged` event or an `IOrderStatusObserver` interface.
 > 
 > C# events provide this directly: `+=` subscribes a handler, `-=` removes it, and raising the event invokes the handlers currently subscribed. Event handlers are invoked synchronously, so asynchronous server-side subscribers fit better behind a `Task`-returning interface that keeps their completion and failures observable.
-> 
+>
 > [.NET events](https://learn.microsoft.com/en-us/dotnet/standard/events/) · [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Observer#Solution|Observer implementation]] · [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Observer#Events and Observable APIs in .NET|Events and observable APIs in .NET]]
 
 <!-- qard-id: 83b4f765-ae00-4359-8df6-6cc015fa3cd6 -->
 > [!qard]- How should event subscriptions be managed to avoid retaining subscribers after their lifetime ends?
 > Each subscription needs an owner that removes it when the subscriber's lifetime ends, usually the component that added it. Weak events are a fallback when a longer-lived publisher has no clear owner to unsubscribe.
-> 
+>
 > **Why retention happens:** subscribing stores a delegate in the publisher, and that delegate usually references the subscriber. While the publisher stays reachable, so does the subscriber. This becomes a leak when the publisher outlives the subscriber, such as a closed view whose handler is still attached to a surviving view model.
-> 
+>
 > - **Explicit ownership:** the component that subscribes with `+=` unsubscribes with `-=` when its lifetime ends, such as when a view closes or the subscriber is disposed.
 > - **Keeping the handler:** unsubscribing needs the same delegate that was added, so a lambda handler has to be stored if it will be removed later.
 > - **Weak events:** the publisher's reference no longer keeps the subscriber alive, so no unsubscribe owner is required. The extra machinery is worthwhile only when ownership cannot be aligned with the subscriber's lifetime.
 > 
 > When an owner exists, explicit unsubscription is simpler and more predictable.
-> 
+>
 > [.NET events](https://learn.microsoft.com/en-us/dotnet/standard/events/) · [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Observer#Pitfalls|Observer pitfalls]] · [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Observer#Tradeoffs|Observer tradeoffs]]
 
 # References

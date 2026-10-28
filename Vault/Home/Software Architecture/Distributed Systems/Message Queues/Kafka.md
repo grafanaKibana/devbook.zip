@@ -1,11 +1,8 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - Distributed Systems
+topic: [Software Architecture]
+subtopic: [Distributed Systems]
 summary: "Distributed event streaming platform built on an append-only commit log, giving durability, high throughput, and replayable per-partition ordering."
-level:
-  - "2"
+level: ["2"]
 priority: High
 status: Done
 

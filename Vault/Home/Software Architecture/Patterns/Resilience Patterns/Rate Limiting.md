@@ -1,13 +1,10 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - Patterns
+topic: [Software Architecture]
+subtopic: [Patterns]
 summary: "Caps how many requests a client can make in a period so one caller cannot exhaust shared resources."
 priority: High
 publish: true
-level:
-  - "3"
+level: ["3"]
 status: Done
 ---
 

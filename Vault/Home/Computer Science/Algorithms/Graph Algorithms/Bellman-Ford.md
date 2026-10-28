@@ -1,11 +1,8 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Single-source shortest paths with negative edges, relaxing every edge V-1 times and detecting negative cycles."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Creation
 publish: true
@@ -24,7 +21,6 @@ The trace uses the adverse scan order `2→3, 1→2, 0→2, 0→1`, so each roun
 ```steptrace
 {"algorithm":"bellman-ford"}
 ```
-
 
 A round relaxes every edge once: for edge `(u, v, w)`, if `dist[u] + w < dist[v]`, then `dist[v]` drops to `dist[u] + w` and `pred[v]` becomes `u`. The order of edges within a round changes the intermediate values but never the round's guarantee.
 

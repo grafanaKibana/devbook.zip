@@ -1,12 +1,9 @@
 ---
 title: ASP.NET Core Authentication
-topic:
-  - Programming
-subtopic:
-  - NET
+topic: [Programming]
+subtopic: [NET]
 summary: "Verifying who a caller is and populating HttpContext.User with a ClaimsPrincipal."
-level:
-  - "1"
+level: ["1"]
 priority: Medium
 status: Ready to Repeat
 publish: true
@@ -154,16 +151,16 @@ Lifetime validation must stay enabled. Short access-token lifetimes bound exposu
 <!-- qard-id: 8de4ae9c-12bc-45dc-b06f-47f0585070c2 -->
 > [!qard]- What must an API establish before it trusts a bearer JWT?
 > Before trusting a bearer JWT, an API must confirm all of the following against its own configured trust settings:
-> 
+>
 > - **Signature:** the token was signed with a key the API accepts, so its contents were not changed after signing.
 > - **Issuer:** the authority the API expects issued it.
 > - **Audience:** it was issued for this API rather than for another service.
 > - **Lifetime:** it has not expired.
 > 
 > Each check answers a different question, so none can stand in for another. A valid signature proves only that an accepted key signed the token. It does not show that the expected authority issued the token, that this API was the intended recipient, or that the token is still valid. Any further claims the API requires depend on its own trust configuration.
-> 
+>
 > In ASP.NET Core, the JWT bearer handler performs these checks according to its `TokenValidationParameters`. Disabling issuer, audience or lifetime validation because the token is signed removes the protection that check provides.
-> 
+>
 > [Microsoft: Configure JWT bearer authentication in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/configure-jwt-bearer-authentication?view=aspnetcore-10.0)
 
 # References

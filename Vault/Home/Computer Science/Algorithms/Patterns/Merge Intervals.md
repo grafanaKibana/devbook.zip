@@ -1,11 +1,8 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Sorts ranges by start, then sweeps once to merge overlapping intervals."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Creation
 publish: true
@@ -13,12 +10,9 @@ publish: true
 
 An arbitrary set of calendar ranges may contain overlaps and nested intervals. Sorting by start time makes those relationships local. A left-to-right sweep then carries one current block: extend it when the next interval overlaps, or emit it when a gap appears.
 
-
-
 %% tabs %%
 
 %% tab: Visualization %%
-
 
 ```steptrace
 {"algorithm":"merge-intervals"}
@@ -26,16 +20,12 @@ An arbitrary set of calendar ranges may contain overlaps and nested intervals. S
 
 The contained interval `[3,5]` leaves `[1,6]` unchanged, which makes the `max(current.end, next.end)` rule visible. The gaps before `[8,10]` and `[13,16]` finalize the earlier blocks, while the closed intervals `[13,16]` and `[16,20]` merge at their shared endpoint.
 
-
-
 The sweep carries one piece of state: `current`, the interval being accumulated, initialised to the first interval after sorting. For each following `next`:
 
 - `next.start <= current.end` means the two overlap, so `current.end = max(current.end, next.end)`. The `max` matters because `next` can be fully contained inside `current` — merging `[1,10]` with `[2,3]` must stay `[1,10]`, not shrink to `[1,3]`.
 - Otherwise a gap separates them: `current` can never grow again, so it is emitted and `current` becomes `next`.
 
 The reason one comparison suffices is the sort. After ascending starts, every interval later in the list starts at or after `next.start`. If `next` does not reach `current.end`, no interval after it can reach back either, so `current` is final the moment a gap appears. The invariant that survives each step is that `current.end` holds the furthest right edge of every interval merged into the current block, which is exactly the value the next overlap test needs.
-
-
 
 The same sort-then-sweep skeleton answers the rest of the interval family, each specialising the emit/extend step:
 

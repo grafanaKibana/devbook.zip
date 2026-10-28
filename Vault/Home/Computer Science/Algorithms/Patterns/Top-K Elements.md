@@ -1,11 +1,8 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Finds the k largest or smallest values with a size-k heap over a stream."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Creation
 publish: true
@@ -14,8 +11,6 @@ publish: true
 A latency feed produces millions of samples. The dashboard needs only the ten slowest.
 
 A size-`k` heap avoids sorting or retaining the whole feed. Finding the `k` **largest** values requires a **min**-heap. Once full, its root is the smallest retained winner. A new value replaces that root only when it is larger, and the heap never grows beyond `k`. After one pass it holds the largest `min(k, n)` values, even if the input arrived as a stream. Finding the `k` smallest reverses the polarity and uses a max-heap.
-
-
 
 %% tabs %%
 
@@ -28,8 +23,6 @@ A size-`k` heap avoids sorting or retaining the whole feed. Finding the `k` **la
 The trace keeps the internal heap-array order visible rather than sorting the answer after the scan. Its final `[17, 25, 19]` is a valid min-heap containing the three largest values: `17` is the weakest winner at the root, while `25` and `19` need no ordering relative to each other.
 
 The StepTrace uses a binary tree because that shape makes parent-child repairs easy to see. .NET's `PriorityQueue<TElement, TPriority>` uses an array-backed quaternary min-heap; both arities enforce the same invariant that every parent is no larger than its children.
-
-
 
 The invariant carried across the scan is that the heap contains every value seen until it reaches `k`; once full, it contains the `k` largest values seen so far, with the `k`-th largest at the root. Each later element `x` faces one comparison against the root:
 

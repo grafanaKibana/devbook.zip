@@ -1,11 +1,8 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
+topic: [AI & ML]
+subtopic: [LLM]
 summary: "The execution cycle, ReAct's think-act-observe, that turns an LLM into an autonomous tool-using problem solver."
-level:
-  - "3"
+level: ["3"]
 priority: Medium
 status: Done
 publish: true
@@ -150,22 +147,22 @@ The runtime validates the function name and arguments before execution and retur
 <!-- qard-id: 379b8dd4-2827-420f-95eb-fd5e010aa7ad -->
 > [!qard]- What does ReAct add to language-model reasoning when a task needs external information or computation?
 > ReAct adds acting to reasoning. The model interleaves reasoning steps with actions such as a search, an API call or a calculation, and each action's result returns as an observation that informs the next reasoning step.
-> 
+>
 > 1. **Reason:** the model determines what is missing and which action could supply it.
 > 2. **Act:** the model requests a tool call, and the runtime executes it.
 > 3. **Observe:** the result is added to the model's context.
 > 4. **Continue or answer:** the model reasons over the new evidence, then requests another action or gives a final answer.
 > 
 > Reasoning alone draws only on the model's internal knowledge and the initial prompt, so an invented fact early in a reasoning chain can carry through to the answer. Observations ground each next step in external evidence, while reasoning decides which action is worth taking and how to interpret its result.
-> 
+>
 > ReAct does not guarantee a correct answer: a tool can return poor evidence, and the model can misread it. Each sequential cycle also adds a model call and more context, although a runtime can batch or parallelize independent actions.
-> 
+>
 > Sources: [ReAct: Synergizing Reasoning and Acting in Language Models](https://arxiv.org/abs/2210.03629) · [Claude: How tool use works](https://platform.claude.com/docs/en/agents-and-tools/tool-use/how-tool-use-works)
 
 <!-- qard-id: 22e7675e-b513-44c7-babb-19e1e8c8e818 -->
 > [!qard]- In a tool-using agent loop, which safeguards must be enforced outside the model, and what failure does each contain?
 > Hard limits on iterations, time and spending, plus validation of every tool call before it executes, must be enforced by the runtime. The model cannot be relied on to stop itself or to request only valid actions, so these checks live in code the model cannot override.
-> 
+>
 > | Safeguard | Failure it contains |
 > |---|---|
 > | Iteration cap per request | A loop that keeps calling tools and never reaches a final answer |
@@ -173,9 +170,9 @@ The runtime validates the function name and arguments before execution and retur
 > | Token and cost budget | Context growth that overflows the window, or spending that exceeds its limit |
 > | Repetition detection | The same call repeated, or two states alternating, without progress |
 > | Tool-call validation | Unknown tools, schema-invalid arguments or unauthorized requests reaching a side-effecting operation; a precise error lets the next iteration correct the call |
-> 
+>
 > Frameworks expose some of these limits directly; the OpenAI Agents SDK, for example, bounds a run with `max_turns`. Prompt instructions can reinforce the limits but cannot replace them, because none may depend on the model obeying.
-> 
+>
 > Sources: [OpenAI Agents SDK: Running agents](https://openai.github.io/openai-agents-python/running_agents/) · [Claude: How tool use works](https://platform.claude.com/docs/en/agents-and-tools/tool-use/how-tool-use-works)
 
 # References

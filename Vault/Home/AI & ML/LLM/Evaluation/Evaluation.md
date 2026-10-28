@@ -1,14 +1,11 @@
 ---
 title: LLM Evaluation
-topic:
-  - AI & ML
-subtopic:
-  - LLM
+topic: [AI & ML]
+subtopic: [LLM]
 summary: "Measuring LLM behavior with versioned cases, exact checks, semantic scoring, and production outcomes."
 tags: [FolderNote]
 publish: true
-level:
-  - "3"
+level: ["3"]
 status: Done
 priority: High
 ---

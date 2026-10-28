@@ -1,11 +1,8 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Rotates permutation cycles so displaced elements are written directly to final positions."
-level:
-  - "4"
+level: ["4"]
 priority: Low
 status: Not-Started
 publish: true

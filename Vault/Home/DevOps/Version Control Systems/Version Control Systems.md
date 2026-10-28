@@ -1,11 +1,8 @@
 ---
-topic:
-  - DevOps
-subtopic:
-  - Version Control Systems
+topic: [DevOps]
+subtopic: [Version Control Systems]
 summary: "Tracks file changes over time, enabling collaboration, branching, merging, and reverting."
-level:
-  - "4"
+level: ["4"]
 priority: High
 tags: [FolderNote]
 

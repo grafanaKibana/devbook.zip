@@ -1,9 +1,9 @@
 ---
 publish: true
 title: Programming Paradigms
-created: 2026-09-12T17:17:13.862Z
-modified: 2026-09-12T17:17:13.863Z
-published: 2026-09-12T17:17:13.863Z
+created: 2026-10-28T12:27:03.165Z
+modified: 2026-10-28T12:27:33.678Z
+published: 2026-10-28T12:27:33.678Z
 tags:
   - FolderNote
 topic:

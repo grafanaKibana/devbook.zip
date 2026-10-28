@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-10-17T18:11:50.055Z
-modified: 2026-10-17T18:11:50.055Z
-published: 2026-10-17T18:11:50.055Z
+created: 2026-10-28T12:27:02.624Z
+modified: 2026-10-28T12:27:14.866Z
+published: 2026-10-28T12:27:14.866Z
 tags:
   - FolderNote
 icon: astroid

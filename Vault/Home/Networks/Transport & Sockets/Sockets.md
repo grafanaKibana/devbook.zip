@@ -1,11 +1,8 @@
 ---
-topic:
-  - Networks
-subtopic:
-  - Transport & Sockets
+topic: [Networks]
+subtopic: [Transport & Sockets]
 summary: "A file-like endpoint for bidirectional communication between two processes over a network."
-level:
-  - "3"
+level: ["3"]
 priority: Medium
 status: Ready to Repeat
 
