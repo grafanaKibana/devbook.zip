@@ -1,12 +1,9 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
+topic: [AI & ML]
+subtopic: [LLM]
 summary: "Deliberately deciding what fills the finite context window, and in what order, to maximize useful signal."
 tags: [FolderNote]
-level:
-  - "2"
+level: ["2"]
 priority: High
 status: Done
 publish: true
@@ -122,28 +119,28 @@ The smallest context that answers the task is the starting point. Retrieval and 
 <!-- qard-id: ddd8a30b-97ea-4f04-8025-704d1c3481ab -->
 > [!qard]- Why can adding more context make answers worse instead of better?
 > Because a model does not use every part of a long input equally well, so extra material can bury or dilute the evidence that the answer depends on.
-> 
+>
 > - **Position effects:** in the long-context tasks evaluated in *Lost in the Middle*, some models used relevant information near the beginning or end of the input more reliably than the same information placed in the middle. The size of the effect depends on the model and task.
 > - **Dilution:** irrelevant or redundant text competes with the useful evidence, so adding it can lower answer quality instead of adding information.
 > - **Cost:** extra input tokens also add cost and can add latency, even when they do not improve the answer.
 > 
 > Added context is not always harmful. The aim is complete, relevant material placed deliberately, with answer quality and input cost measured on the actual workload as the context grows.
-> 
+>
 > [Lost in the Middle](https://arxiv.org/abs/2307.03172) · [Latency optimization](https://developers.openai.com/api/docs/guides/latency-optimization)
 
 <!-- qard-id: ed47de12-495f-495b-8cbb-662c952b3224 -->
 > [!qard]- How can a long-running agent keep useful context within a finite window?
 > By treating the context window as a working set. Each call contains the instructions, evidence and state needed for the next decision. Everything else stays outside the prompt but remains retrievable.
-> 
+>
 > The prompt, conversation history, tool results and space reserved for the response all draw from one finite token budget, so they are managed together:
-> 
+>
 > - **Selection and ordering:** only material relevant to the current step enters the window, and it is placed deliberately rather than replayed in full.
 > - **Trimmed tool results:** tool output keeps the fields the next decision uses, and stale results that no longer matter are cleared.
 > - **Compaction:** older turns are replaced by a short record of decisions, constraints and open work before history crowds out the task.
 > - **Offloading:** bulky state, such as notes, files or full documents, lives outside the prompt and is reloaded by reference when needed.
 > 
 > Compaction trades space for possible detail loss: a summary can drop a subtle fact that later matters. Where exact recovery matters, the source material is kept outside the window instead of being trusted to the summary.
-> 
+>
 > [Effective context engineering for AI agents](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents)
 # References
 

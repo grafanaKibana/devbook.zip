@@ -2,15 +2,13 @@
 icon: terminal
 order: 10
 color: "#f43f5e"
-topic:
-  - Programming
+topic: [Programming]
 subtopic: []
 summary: "Software craft focused on the .NET stack: C#, runtime, web APIs, and concurrency."
 tags: [FolderNote]
 publish: true
 status: Creation
-level:
-  - "4"
+level: ["4"]
 priority: High
 ---
 

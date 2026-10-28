@@ -1,11 +1,8 @@
 ---
-topic:
-  - Networks
-subtopic:
-  - Protocols
+topic: [Networks]
+subtopic: [Protocols]
 summary: "Registered service ports, their usual transports, and the caveats behind the defaults."
-level:
-  - "2"
+level: ["2"]
 priority: Low
 status: Ready to Repeat
 publish: true

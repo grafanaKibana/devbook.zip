@@ -1,11 +1,8 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "A search paradigm for optimisation that prunes any branch whose optimistic bound cannot beat the best solution so far."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Creation
 publish: true
@@ -21,13 +18,11 @@ The bound must be *optimistic*. In a maximisation problem it cannot fall below t
 
 %% tab: Visualization %%
 
-
 ```steptrace
 {"algorithm":"branch-and-bound"}
 ```
 
 The step that carries the whole idea is a single bound comparison that erases a subtree before it is expanded.
-
 
 Branch-and-bound turns on four moving parts:
 
@@ -40,11 +35,9 @@ The correctness of the discard rests on the optimism of the bound. For maximisat
 
 This is the same optimism requirement as [[Home/Computer Science/Algorithms/Graph Algorithms/A-Star Search|A* Search]]'s admissibility condition: a guided tree search stays correct only while its estimate errs in the optimistic direction and never lies pessimistically. Branch-and-bound is that same idea applied to the decision tree of an optimisation problem, with the bounding function playing the role of the heuristic. For maximisation 0/1 knapsack, an LP relaxation is a safe upper bound: its optimal fractional solution can only meet or exceed the integer optimum, so ignoring integrality never under-shoots.
 
-
 Every live (unpruned, unexpanded) node is a candidate to visit next, and the order changes how fast a strong incumbent appears — which in turn changes how much gets pruned.
 
 Best-first keeps live nodes in a priority queue ordered by bound. Depth-first follows one branch to a complete candidate before returning to siblings, using the same choose-and-undo discipline as [[Home/Computer Science/Algorithms/Paradigms/Backtracking|backtracking]], which often produces an incumbent earlier.
-
 
 A good early incumbent raises the bar every later bound must clear, so more subtrees fall on a single comparison. Solvers exploit this by seeding the incumbent with a fast heuristic — often a [[Home/Computer Science/Algorithms/Paradigms/Greedy Algorithms|greedy]] solution — before the exact search starts.
 
@@ -117,7 +110,6 @@ The general `b`-ary model expands `1 + b + ... + b^n = Θ(b^n)` nodes when pruni
 A **non-optimistic bound can return the wrong answer without warning.** Suppose a maximisation subtree contains a solution worth 90, its bound reports 78, and the incumbent is 80. The search prunes the subtree and returns 80 as *proven optimal*. The certificate is false. Bounds therefore come from relaxations that provably upper-bound maximisation or lower-bound minimisation, even when a safe bound is looser.
 
 A **bound too loose to discriminate degenerates to brute force.** Assuming every remaining item can be taken at full value with no weight limit is optimistic and valid. It also beats the incumbent at nearly every node, so almost nothing is pruned from the `2ⁿ` tree. Validity protects the answer. Tightness controls practical runtime and must be weighed against the cost of computing the bound.
-
 
 # Diagram and C# Implementation
 

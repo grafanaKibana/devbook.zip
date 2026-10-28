@@ -1,10 +1,8 @@
 ---
-topic:
-  - Data Persistence
+topic: [Data Persistence]
 subtopic: []
 summary: "Four properties (Atomicity, Consistency, Isolation, Durability) guaranteeing reliable database transactions."
-level:
-  - "3"
+level: ["3"]
 priority: High
 status: Ready to Repeat
 publish: true
@@ -167,14 +165,14 @@ await db.SaveChangesAsync();
 <!-- qard-id: 46fa4cf2-efe3-4a7c-a44a-eeb444d9ca02 -->
 > [!qard]- What does ACID mean for a database transaction, and where do its guarantees stop?
 > ACID names four guarantees a database gives a transaction, a group of reads and writes that ends in one commit decision. They hold only inside that database and only as strongly as its configured isolation and durability settings allow.
-> 
+>
 > - **Atomicity:** the transaction has one outcome. Either all of its writes commit or none do, so a crash or error cannot leave a partial commit.
 > - **Consistency:** a correct transaction moves the data from one valid state to another. Database constraints such as foreign keys, uniqueness and `CHECK` enforce the rules the database can express. Application logic must enforce the rest.
 > - **Isolation:** concurrent transactions are limited in what they can observe of each other and in which combined results can commit. The configured isolation level sets how strict this is.
 > - **Durability:** once the database acknowledges a commit, the changes survive the failures its durability configuration covers, such as a crash.
 > 
 > The guarantees stop at these boundaries:
-> 
+>
 > - **Configuration:** weaker settings narrow the guarantees. For example, PostgreSQL asynchronous commit can acknowledge a commit before it is durably logged, so a crash can lose the most recently committed transactions.
 > - **Retries:** atomicity does not make an operation safe to repeat. If a client times out after the server has committed and then retries, the work is applied twice. Making the operation idempotent prevents this, for example with a unique request ID.
 > - **Other databases and services:** a local commit cannot include writes elsewhere. Work that spans services needs a separate protocol, such as two-phase commit or a saga of local transactions.
@@ -184,37 +182,37 @@ await db.SaveChangesAsync();
 <!-- qard-id: 07f11423-b88a-4819-a0e8-eed6f352394e -->
 > [!qard]- What is write skew, and why can snapshot isolation allow it?
 > Write skew is a concurrency anomaly in which two transactions read the same data, each makes a decision that is valid for what it read, and each writes a different row. Both commit, but the combined result breaks an invariant that neither transaction broke alone.
-> 
+>
 > Example: a rule requires at least one doctor on call, and Alice and Bob are both on call.
-> 
+>
 > | Step | Transaction A | Transaction B |
 > |---|---|---|
 > | Read | Sees Alice and Bob on call | Sees the same state |
 > | Decide | Bob remains, so Alice may leave | Alice remains, so Bob may leave |
 > | Write | Sets Alice off call | Sets Bob off call |
 > | Commit | Succeeds | Succeeds |
-> 
+>
 > No doctor is left on call.
-> 
+>
 > Snapshot isolation gives each transaction a stable snapshot. Each transaction checks the rule against a snapshot that does not contain the other's change. Because they update different rows, there is no concurrent update of the same row to reject, so both commit. The problem is a read-write dependency: each transaction writes data that the other read when deciding.
-> 
+>
 > Preventing write skew requires protecting the whole invariant: a constraint where it can be expressed, locks covering every row or the predicate the decision read, or Serializable isolation. PostgreSQL's Serializable level detects this kind of dependency and aborts one transaction with a serialization failure. The application then retries the whole transaction.
-> 
+>
 > [PostgreSQL 18: Transaction isolation](https://www.postgresql.org/docs/18/transaction-iso.html)
 
 <!-- qard-id: d8395b28-d1ab-42ae-941b-0c2fd187ae9f -->
 > [!qard]- How should concurrency protection be chosen for a read-modify-write transaction?
 > Concurrency protection is chosen from the invariant the decision depends on, not from the row being written. The mechanism must protect every input that informed the decision: the rows read, any predicate such as 'at least one doctor on call', and rows whose absence mattered.
-> 
+>
 > Mechanisms that can cover the whole decision:
-> 
+>
 > - **Database constraint:** when the invariant can be expressed as a constraint, the database rejects any commit that would violate it, whatever the interleaving.
 > - **Serializable isolation:** the database commits only results that some one-at-a-time order of the transactions could have produced. It may abort a transaction to enforce this. The whole transaction, including its reads and decisions, must then be retried. Retrying only the final write would reuse stale reasoning.
 > - **Locks:** explicit locks protect the decision only when they cover every relevant row or the whole predicate.
 > - **Application-specific optimistic check:** valid only when it detects a change to any decision input, not just to the updated row.
 > 
 > Two choices that look sufficient but are not:
-> 
+>
 > - **Repeatable Read** keeps repeated reads or the transaction snapshot stable, depending on the engine. It can still allow write skew: two transactions read the same rows, each updates a different row, and together they break the invariant.
 > - **A row-version token** on the updated entity detects a concurrent change to that row only. It misses rows inserted or deleted under the predicate and changes to other rows that were read.
 > 

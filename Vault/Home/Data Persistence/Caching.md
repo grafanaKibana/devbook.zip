@@ -1,10 +1,8 @@
 ---
-topic:
-  - Data Persistence
+topic: [Data Persistence]
 subtopic: []
 summary: "Storing data closer to consumers so repeated reads skip the slower origin."
-level:
-  - "4"
+level: ["4"]
 priority: High
 status: Ready to Repeat
 

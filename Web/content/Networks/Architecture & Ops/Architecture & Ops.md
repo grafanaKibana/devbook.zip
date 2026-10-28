@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.626Z
-modified: 2026-08-20T20:41:15.627Z
-published: 2026-08-20T20:41:15.627Z
+created: 2026-10-28T12:27:02.915Z
+modified: 2026-10-28T12:33:02.649Z
+published: 2026-10-28T12:33:02.649Z
 tags:
   - FolderNote
 topic:

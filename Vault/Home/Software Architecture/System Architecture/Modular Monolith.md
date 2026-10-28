@@ -1,11 +1,8 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - System Architecture
+topic: [Software Architecture]
+subtopic: [System Architecture]
 summary: "A single deployable application intentionally split into strict modules with explicit boundaries, gaining microservices benefits without the distributed systems tax."
-level:
-  - "3"
+level: ["3"]
 priority: High
 status: Ready to Repeat
 publish: true
@@ -252,19 +249,19 @@ A modular monolith is the default for a product that needs durable boundaries bu
 
 > [!qard]- What is a modular monolith?
 > A modular monolith is a single deployable application whose code and data are divided into modules, each owning one business capability behind an explicit contract. It keeps a monolith's single deployment and in-process calls while giving each module clear ownership.
-> 
+>
 > - **Code boundary:** each module exposes a small public contract, such as commands, events, DTOs and interfaces. Other modules use that contract and do not reference the module's internal domain or infrastructure types.
 > - **Data boundary:** each table has one owning module, often made visible with a separate schema and `DbContext`. Other modules do not read or write those tables directly.
 > - **Runtime:** modules are released together and normally run in the same process, so calls between them are in-process. With EF Core on a relational database, modules can also commit together in one local transaction when their `DbContext` instances share the same `DbConnection` and `DbTransaction`; using the same database alone is not enough.
 > 
 > The boundaries hold only when they are enforced. Project references, architecture tests that fail the build, and database permissions make crossing a boundary harder than using the contract. Without that enforcement, direct table reads and internal references erode the modules into ordinary folders.
-> 
+>
 > [Kamil Grzybek: Modular Monolith: A Primer](https://www.kamilgrzybek.com/blog/posts/modular-monolith-primer) · [EF Core: Using transactions](https://learn.microsoft.com/en-us/ef/core/saving/transactions)
 
 <!-- qard-id: 77e3a78b-e6d8-4560-9399-33f66b9fc20b -->
 > [!qard]- When is a modular monolith a better fit than microservices, and what signals justify extracting a module?
 > A modular monolith fits better when strong module boundaries are valuable but one deployment, in-process calls and local transactions still serve the system well. Extracting a module is justified when it repeatedly needs independent release, scaling or isolation, and that need outweighs the cost of a new network boundary.
-> 
+>
 > | Aspect | Module inside a modular monolith | Module extracted as a service |
 > |---|---|---|
 > | Release | Ships and rolls back with every other module, so unrelated changes can delay it | Ships and rolls back on its own schedule |
@@ -272,16 +269,16 @@ A modular monolith is the default for a product that needs durable boundaries bu
 > | Calls | In-process, with no network between caller and module. A call can still hang, or throw after producing effects | Over the network, adding latency and transient failures. After a timeout or lost connection, the caller may not know whether the operation completed |
 > | Transactions | Can share one local transaction with another module when both `DbContext` instances use the same `DbConnection` and `DbTransaction`; using the same database alone is not enough | Commits only to its own store and cannot join the caller's transaction. When a local commit must also announce a change, an outbox records the message in that commit for later publication. Workflows spanning several services' commits may also need idempotent consumers and sometimes a saga |
 > | Operations | Shares one pipeline and runtime with the rest of the application | Needs its own pipeline, telemetry and on-call ownership |
-> 
+>
 > The extraction signals are recurring costs of the shared unit. The module's changes keep waiting behind unrelated releases, its load forces the whole application to scale, or its failures and resource use must be contained away from other features. Keeping the same contract interface does not make a remote call local. Deadlines, safe retries, cross-boundary observability and transaction boundaries must therefore be designed explicitly, with an outbox wherever a local commit must durably publish a message.
-> 
+>
 > [Azure: Microservices architecture style](https://learn.microsoft.com/en-us/azure/architecture/guide/architecture-styles/microservices) · [Azure: Saga pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/saga) · [EF Core: Using transactions](https://learn.microsoft.com/en-us/ef/core/saving/transactions) · [Azure: Transactional outbox with Azure Cosmos DB](https://learn.microsoft.com/en-us/azure/architecture/databases/guide/transactional-out-box-cosmos) · [Azure: Retry pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/retry)
 
 > [!qard]- When a modular-monolith module is extracted into a service, what must be redesigned even if its contract interface stays the same?
 > The interface can keep the same methods, but each call now crosses a network, which changes its latency, failure and transaction behavior. Local calls can already hang, or throw after producing an effect. The network adds another kind of uncertainty: after a timeout or lost connection, the caller may not know whether the service completed the operation. The remote call also can no longer join the caller's local transaction.
-> 
+>
 > What has to be redesigned:
-> 
+>
 > 1. **Deadlines and cancellation:** remote requests get time limits, and callers need a defined response when the service is slow or unavailable, such as rejecting, queuing or degrading.
 > 2. **Retries:** a request is retried only when repeating it is safe. Either the operation is naturally idempotent, or it carries an idempotency key that stays the same across retries of one logical request, so the service recognizes a repeat after an attempt that may already have succeeded. Retries are capped so a partial outage does not become a retry storm.
 > 3. **Observability:** trace context crosses the boundary, and dependency latency, errors, saturation and retries are measured before traffic moves.
@@ -289,7 +286,7 @@ A modular monolith is the default for a product that needs durable boundaries bu
 > 5. **Data:** the module's data moves to its own store through an explicit migration with backfill, reconciliation and rollback.
 > 
 > Good module boundaries reduce how much code changes during extraction, but they cannot make a remote operation behave like a local method call.
-> 
+>
 > [Azure: Retry pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/retry) · [Azure: Transactional outbox with Azure Cosmos DB](https://learn.microsoft.com/en-us/azure/architecture/databases/guide/transactional-out-box-cosmos) · [Azure: Saga pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/saga)
 
 # References

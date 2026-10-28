@@ -1,11 +1,8 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - Patterns
+topic: [Software Architecture]
+subtopic: [Patterns]
 summary: "Encapsulates a request as an object bundling action, parameters, and receiver, so it can be queued, logged, undone, and replayed."
-level:
-  - "2"
+level: ["2"]
 priority: High
 status: Done
 publish: true
@@ -194,29 +191,29 @@ This in-memory history fits a local UI action whose execution and undo each comp
 
 > [!qard]- What is the Command pattern?
 > The Command pattern turns a request into an object that holds the action to perform and the input it needs. An invoker triggers the command, typically through an `Execute` method, without knowing which object does the work or how.
-> 
+>
 > - **Command:** an object such as `PlaceOrderCommand` that carries the request data and knows which receiver to call.
 > - **Receiver:** the object that actually performs the work, such as an `OrderService`.
 > - **Invoker:** the code that calls `Execute`, such as a button, a queue or a scheduler.
 > - **Client:** creates the command and passes it to the invoker.
 > 
 > A restaurant ticket works the same way: it records the order, waits in the kitchen queue and tells the chef what to cook, so the waiter never cooks and the chef never takes orders.
-> 
+>
 > Because the request becomes an object, it can be queued, logged, retried or delayed, and a command that records enough state can also undo or compensate for its effect. Wrapping a request in an object does not make its side effects atomic or durable. An in-memory undo history disappears with the process, and steps with external effects still need durable state, idempotency keys and compensation. A plain delegate such as `Action` is enough when naming, serialization and undo are not needed.
-> 
+>
 > [GoF: Design Patterns](https://www.oreilly.com/library/view/design-patterns-elements/0201633612/) · [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Command#Solution|Command: solution and limits]] · [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Command#Commands in UI, Messaging, and Data Access|Command: delegates and .NET examples]]
 
 <!-- qard-id: 559a25cf-a9b0-4267-850e-0575572aa65b -->
 > [!qard]- How does MediatR implement the Command pattern, and what does it add?
 > MediatR represents a command as a request object that carries the operation's data, and `Send` dispatches it to the one handler registered for that request type. It splits classic Command into parts: the request holds the data, the handler holds the execution logic that a classic command would put in `Execute`, and the mediator acts as the invoker that finds the right handler.
-> 
+>
 > What it adds:
-> 
+>
 > - **Decoupled callers:** a controller or other sender depends only on the mediator and the request type, not on the handler or the services the handler uses.
 > - **Pipeline behaviors:** shared policies such as validation or logging wrap every handler call without being repeated in each handler.
 > 
 > The cost is indirection: following a call from sender to handler requires knowing the registrations. A direct service call stays clearer for one small, fixed interaction. MediatR is one way to realize a command-style design, not a requirement of the Command pattern.
-> 
+>
 > [MediatR: behaviors](https://github.com/LuckyPennySoftware/MediatR/wiki/Behaviors) · [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Command#Commands in UI, Messaging, and Data Access|Command: MediatR request and handler]]
 
 # References

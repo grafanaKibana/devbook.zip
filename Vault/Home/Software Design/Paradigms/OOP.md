@@ -1,11 +1,8 @@
 ---
-topic:
-  - Software Design
-subtopic:
-  - Paradigms
+topic: [Software Design]
+subtopic: [Paradigms]
 summary: "Models state and behavior as objects whose methods protect invariants and satisfy explicit contracts."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Ready to Repeat
 publish: true

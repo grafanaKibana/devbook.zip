@@ -1,11 +1,8 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
+topic: [Programming]
+subtopic: [NET]
 summary: "The CLR's automatic memory manager reclaiming unreachable objects generationally."
-level:
-  - "4"
+level: ["4"]
 priority: High
 status: Ready to Repeat
 
@@ -197,33 +194,33 @@ The runtime defaults are the starting point. A mode change is justified only whe
 <!-- qard-id: 43db5943-c33e-4a19-9cb1-dbbdacc1e6ec -->
 > [!qard]- How does the .NET garbage collector decide what managed memory it can reclaim?
 > The GC can reclaim any managed object that is no longer reachable from a root. Reachability alone decides: an object that is still reachable stays, even if the program will never use it again.
-> 
+>
 > 1. **Start from roots.** Roots are references the runtime knows about directly. They include static fields, local variables and CPU registers of running methods while the JIT reports them as live, and GC handles.
 > 2. **Mark reachable objects.** The GC follows reference fields from the roots, then from every object it reaches. Each object found this way is live.
 > 3. **Treat everything else as reclaimable.** An object that was not reached is eligible for reclamation. Cycles do not keep objects alive: two objects that refer only to each other are collectible once nothing reachable points to either.
 > 
 > Qualifications:
-> 
+>
 > - **Generations:** a collection reclaims objects only in the generations it collects. A young-generation collection also inspects the older-heap ranges that CoreCLR's write barriers recorded in a card table as possibly pointing to young objects. It does not scan the whole older generation, and it does not reclaim older objects. An unreachable generation 2 object is therefore reclaimed only by a collection that includes generation 2.
 > - **Finalization:** an unreachable object whose finalizer is still registered survives until its finalizer has run. A later collection normally reclaims it.
 > - **Timing:** eligibility does not mean immediate reclamation or memory returned to the operating system.
 > 
 > The reachability decision covers managed memory only. Native handles and buffers need explicit cleanup, typically through `IDisposable` and `using`.
-> 
+>
 > [Microsoft: Fundamentals of garbage collection](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/fundamentals) · [dotnet/runtime: CoreCLR GC write barriers](https://github.com/dotnet/runtime/blob/1bde9a53cb55127c1e154a2e98a7332477280abf/docs/design/coreclr/jit/GC-write-barriers.md#L25-L62)
 
 <!-- qard-id: 2ba4053d-0180-4c76-895f-5d1c1d3b988a -->
 > [!qard]- How do generations make .NET garbage collection more efficient?
 > Generations let the GC collect the small, recently allocated part of the heap often and the large, long-lived part rarely. This pays off because most objects become unreachable soon after allocation. A collection limited to new objects reclaims much of the garbage while examining little of the heap.
-> 
+>
 > - **Generation 0:** most new objects start here. It is collected most often, and a collection typically finds many of its objects already unreachable.
 > - **Generation 1:** objects that survived a generation 0 collection. It buffers between short-lived and long-lived objects. A generation 1 collection also collects generation 0.
 > - **Generation 2:** long-lived objects, such as application-lifetime services and caches. A generation 2 collection is a full collection. It includes every generation and must consider every reachable object, so its work grows with the whole live heap. Its actual cost depends on the workload, heap size and GC mode.
 > 
 > Survivors of a generation 0 or 1 collection usually move up one generation, although pinning and collector heuristics can keep an object in its current generation. Objects that survive a generation 2 collection stay in generation 2. Large objects, normally 85,000 bytes or more, go to the Large Object Heap, which is collected together with generation 2.
-> 
+>
 > The design has two consequences:
-> 
+>
 > - A young collection does not walk the whole older generation, so references from old objects to young ones must be recorded separately. The runtime records them with write barriers and a card table, and the young collection inspects only the recorded older-heap ranges.
 > - An object that lives just long enough to be promoted is then reclaimed only by a less frequent collection that includes its new generation.
 > 
@@ -232,30 +229,30 @@ The runtime defaults are the starting point. A mode change is justified only whe
 <!-- qard-id: 4712e926-745d-4522-ae9e-bf0116b7f914 -->
 > [!qard]- How does the .NET GC find old-to-young references during a young-generation collection?
 > The GC relies on write barriers that maintain a card table. When code stores a reference into a heap object, the write barrier can mark the area of the older heap that now points to young objects. A young-generation collection scans those marked areas, in addition to the roots, instead of walking the entire older generation.
-> 
+>
 > This is needed because a young object can be reachable only through a field of an older object. Roots alone would miss that reference, and the collector would reclaim a live object. Scanning every older object on each young collection would make it nearly as expensive as a full collection.
-> 
+>
 > In CoreCLR the process is:
-> 
+>
 > 1. The JIT inserts a write barrier around managed reference stores into heap objects.
 > 2. When a store may create a reference from an older generation to a younger one, the barrier marks the matching card-table entry. Each entry covers a small range of heap memory.
 > 3. A generation 0 or 1 collection scans the objects in dirty card ranges, follows the young references found there, and keeps those young objects alive.
 > 
 > The cost is a little extra work on reference writes, in exchange for young collections that do not walk the whole older heap. Which stores the barrier marks, how much memory each card covers and the exact scanning work are CoreCLR implementation details. They depend on runtime version and collection type and are not a .NET API contract.
-> 
+>
 > [dotnet/runtime: CoreCLR GC write barriers](https://github.com/dotnet/runtime/blob/1bde9a53cb55127c1e154a2e98a7332477280abf/docs/design/coreclr/jit/GC-write-barriers.md#L25-L62) · [Microsoft: Fundamentals of garbage collection](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/fundamentals)
 
 <!-- qard-id: d0ed692f-3776-4bd9-9f1a-c5d28faaf4d7 -->
 > [!qard]- Why can process memory stay high after a generation 2 collection?
 > A generation 2 collection frees space only from unreachable managed objects, and freed space is not necessarily returned to the operating system. Memory can stay high for several independent reasons:
-> 
+>
 > - **Live retention:** objects still reachable from roots, such as caches or static fields, survive every collection. The memory stays until the reference keeping the graph alive is removed.
 > - **Fragmentation:** pinned objects, and areas that are swept rather than compacted, can leave free gaps between survivors. The Large Object Heap in ordinary collections is one such area. The heap keeps that space, but new allocations may not fit into it.
 > - **Retained capacity:** the GC can keep memory committed after a collection so later allocations can reuse it. Committed heap size can therefore exceed the size of live objects.
 > - **Memory outside the GC heap:** native allocations and other non-GC memory in the process are not reclaimed by a managed collection.
 > 
 > Live object bytes, committed GC memory and process working set are different measurements, so a drop in one need not appear in another. Runtime counters and memory traces separate these causes before code or GC settings are changed. A large live heap points to retention. Much free or committed space relative to live objects points to fragmentation or retained capacity.
-> 
+>
 > [Microsoft: Garbage collection and performance](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/performance)
 
 # References

@@ -1,11 +1,8 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Scans elements one by one until a match and works without ordering or indexing."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Done
 publish: true
@@ -15,19 +12,13 @@ An unsorted log buffer has no order or index that can rule out an unread line. L
 
 The lack of a precondition is its main advantage. [[Home/Computer Science/Algorithms/Search Algorithms/Binary Search|Binary Search]] needs sorted, indexable input, while a hash lookup needs a prebuilt index. Linear Search works unchanged over an unsorted array, a singly linked list, or a stream that can be read only once.
 
-
-
 %% tabs %%
 
 %% tab: Visualization %%
 
-
-
 ```steptrace
 {"algorithm":"linear-search","array":[4,9,13,18,22,27,31,38,45,52,58,64,70,77,83,91],"target":83}
 ```
-
-
 
 The trace searches for `83` in a 16-element array.
 

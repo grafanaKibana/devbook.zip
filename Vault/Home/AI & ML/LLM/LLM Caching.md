@@ -1,11 +1,8 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
+topic: [AI & ML]
+subtopic: [LLM]
 summary: "Reuses prompt computation or completed answers; matching rules, freshness, permissions, and measured savings determine which cache is useful."
-level:
-  - "2"
+level: ["2"]
 priority: High
 status: Creation
 publish: true

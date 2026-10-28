@@ -1,11 +1,8 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
+topic: [Programming]
+subtopic: [NET]
 summary: "Data-centric C# types with generated value equality, ToString, and with-expressions."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Ready to Repeat
 publish: true
@@ -245,43 +242,43 @@ public record Wrapper(List<int> Items);
 
 > [!qard]- What is a C# record, and what does the compiler generate for it?
 > A record is a class or struct declared with `record`, whose equality is based on its data rather than its identity. The compiler generates the members that make it behave as a data value:
-> 
+>
 > - **Value equality:** `Equals`, `GetHashCode`, `==` and `!=` treat two records as equal when they have the same runtime type and equal field values, each field compared with its own type's equality. Two separately created `record class` instances with equal data compare equal, unlike two ordinary class instances.
 > - **Nondestructive mutation:** `p with { Age = 31 }` copies the record and changes the listed members. The copy is shallow, so referenced objects are shared.
 > - **Readable `ToString`:** prints the type name and public members, such as `Person { Name = Alice, Age = 30 }`.
 > - **Positional members:** `record Person(string Name, int Age)` also generates a primary constructor, a public property for each parameter and `Deconstruct`. These properties are init-only for `record class` and `readonly record struct`, but settable for a plain `record struct`.
 > 
 > `record` alone means `record class`, a reference type that can inherit from another record class, while `record struct` is a value type. Records fit DTOs, messages and value objects. Types whose identity matters more than their current data, such as Entity Framework Core entities, fit ordinary classes better.
-> 
+>
 > [Microsoft: records](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record)
 
 <!-- qard-id: 40d90777-69d9-4746-901b-68d334cae949 -->
 > [!qard]- In `record Wrapper(List<int> Items)`, if `var b = a with { };` and an item is added to `b.Items`, does `a` observe the change, and why?
 > Yes. A `with` expression makes a shallow copy: it copies each field of `a` into the new record, and for a reference-type field that copies the reference, not the object it points to. `a.Items` and `b.Items` therefore refer to the same `List<int>`, so an item added through `b.Items` is visible through `a.Items`.
-> 
+>
 > ```csharp
 > var a = new Wrapper(new List<int> { 1, 2 });
 > var b = a with { };
 > b.Items.Add(3);
 > Console.WriteLine(a.Items.Count); // 3
 > ```
-> 
+>
 > An independent copy needs its own list, for example `a with { Items = new List<int>(a.Items) }`.
-> 
+>
 > [Microsoft: records](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record)
 <!-- qard-id: 003b8f0c-ee5e-4a60-ac02-067b2fcef925 -->
 > [!qard]- Given `record Wrapper(List<int> Items)` and `var b = a with { };`, are `a` and `b` equal before and after an item is added to `b.Items`? Why?
 > They are equal both before and after the item is added. Generated record equality compares the runtime type and each field using that field's own equality, and `List<int>` compares by reference. Because `with` copied the reference, `a.Items` and `b.Items` refer to the same list. Adding an item changes that list in place without replacing it. The comparison therefore sees the same reference both times and never looks at the list's contents.
-> 
+>
 > The converse follows from the same rule: two `Wrapper` instances holding separate lists with identical items compare unequal.
-> 
+>
 > [Microsoft: records](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record)
 <!-- qard-id: 13eb1fca-847d-4f86-8bf6-c4720c859178 -->
 > [!qard]- How can a record compare a collection member by its elements instead of by reference?
 > There are two ways: override the record's equality so it compares the collection's elements, or store the elements in a type whose own `Equals` compares elements. Generated record equality compares each field with that field type's equality, and `List<T>` compares references, so the default never looks at the elements.
-> 
+>
 > Overriding equality in the record replaces the generated `Equals(T?)` and keeps `GetHashCode` consistent with it:
-> 
+>
 > ```csharp
 > public sealed record Basket(string Owner, List<string> Items)
 > {
@@ -299,11 +296,11 @@ public record Wrapper(List<int> Items);
 >     }
 > }
 > ```
-> 
+>
 > The generated `==` and `!=` call this `Equals`, so they also compare elements. `GetHashCode` hashes the same components that `Equals` compares, so records that compare equal produce equal hash codes, as hash-based collections require.
-> 
+>
 > Trade-offs:
-> 
+>
 > - **Cost:** `SequenceEqual` compares elements pairwise in order and stops at the first mismatch, so a comparison examines up to all n items, O(n), instead of comparing one reference. The `GetHashCode` shown always visits every item, so it is O(n).
 > - **Mutation:** this equality and hash read the list's current contents. If the list changes while the record is stored in a `HashSet<T>` or used as a dictionary key, the record's current hash can stop matching the hash the collection recorded, and its equality can change, so lookups become unreliable. A different hash and a failed lookup are both possible but not guaranteed, because different contents can produce the same hash code. This equality therefore fits collections that are not changed while the record serves as a key.
 > - **Immutability alone is not enough:** an immutable collection prevents such changes, but its type's own `Equals` still decides whether elements are compared.
@@ -313,36 +310,36 @@ public record Wrapper(List<int> Items);
 <!-- qard-id: 6ceafb8f-9a7c-4ebf-8ae5-7739e4e828aa -->
 > [!qard]- When is `record class` a better choice than `readonly record struct`?
 > A `record class` is the better choice when the value is large, needs inheritance, uses `null` as an ordinary 'no value' state, or is frequently handled as `object` or an interface. A `readonly record struct` fits small immutable values where avoiding a separate heap object matters more than those features. Both generate value equality and support `with`, so equality alone does not decide.
-> 
+>
 > | Aspect | `record class` | `readonly record struct` |
 > |---|---|---|
 > | Assignment and passing | Copies a reference, so the cost is the same however many fields the record has. | Copies every field, which is cheap for a few small fields and grows with the size of the value. |
 > | Storage | Each instance is a separate heap object that the garbage collector must track. | Stored inline in its variable, field or array element. Converting it to `object` or an interface boxes it into a heap copy. |
 > | Absence | A variable of the type can be `null`. | Needs `Nullable<T>` (`T?`) to represent a missing value. |
 > | Inheritance | Can derive from another record class, and equality accounts for the runtime type. | Cannot take part in inheritance: it neither derives from a record nor can be derived from. |
-> 
+>
 > When inheritance or `null` as absence decides the choice, no measurement is needed. When the justification rests on performance, the size at which copying outweighs allocation depends on the workload, so allocation and copy costs drive the decision only when measurement shows they matter.
-> 
+>
 > [Microsoft: records](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record) · [Microsoft: value types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/value-types) · [Microsoft: boxing](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/types/boxing-and-unboxing)
 
 <!-- qard-id: 3a52f8c2-f1a4-4c9e-960f-6461e184a661 -->
 > [!qard]- If record equality is customized, why must `GetHashCode` stay consistent with it?
 > Hash-based collections such as `Dictionary<TKey,TValue>` and `HashSet<T>` use `GetHashCode` to decide where to look, and then call `Equals` only on entries with a matching hash code. Objects that are equal must therefore return the same hash code. Otherwise a lookup never reaches `Equals` for the matching entry.
-> 
+>
 > For example, suppose a custom `Equals` ignores an `UpdatedAt` property, but the generated `GetHashCode` still includes every field:
-> 
+>
 > 1. Record `a` is added to a `HashSet` under a hash code that includes `a.UpdatedAt`.
 > 2. Record `b` differs only in `UpdatedAt`, so `a.Equals(b)` is `true`, but `b`'s hash code is computed from a different `UpdatedAt`.
 > 3. A lookup for `b` searches by `b`'s hash code and never compares it with `a`. `Contains(b)` returns `false`, and `Add(b)` stores a second entry equal to the first, unless the two hash codes happen to collide.
 > 
 > `GetHashCode` therefore must not depend on anything that can differ between two equal records, such as a property that `Equals` ignores. Hashing exactly the components that `Equals` compares is the usual choice. A coarser hash over a subset of them is also valid, because equal records agree on that subset; it only causes more collisions. The reverse is not required: unequal objects may share a hash code, which only costs extra `Equals` calls. For records, the compiler reports CS8851 when a record defines its own `Equals` but not `GetHashCode`.
-> 
+>
 > [Microsoft: Object.GetHashCode](https://learn.microsoft.com/en-us/dotnet/api/system.object.gethashcode?view=net-10.0) · [Microsoft: record declaration errors](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-messages/record-declaration-errors) · [Microsoft: define value equality](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/statements-expressions-operators/how-to-define-value-equality-for-a-type)
 
 <!-- qard-id: 7c90c152-1919-4c74-84a3-c9cb621d3255 -->
 > [!qard]- Can a record struct be used safely as a `Dictionary` key, and what can make it unsafe?
 > Yes, as long as the equality and hash code the dictionary actually uses cannot change while the key is stored. That is either the key type's own equality or the `IEqualityComparer<TKey>` supplied to the dictionary. A dictionary stores its own copy of a struct key, so later assignments to the original variable do not affect the stored key. The risk comes from referenced objects: copying a struct copies references, not the objects they point to. Suppose the effective equality or a supplied comparer observes a referenced object's mutable state. Changing that object can make the key's current hash differ from the hash the dictionary recorded and can change its equality. The dictionary does not notice, so lookups for the entry can fail.
-> 
+>
 > ```csharp
 > var tag = new Tag { Name = "a" };
 > var map = new Dictionary<Key, string> { [new Key(1, tag)] = "x" };
@@ -354,9 +351,9 @@ public record Wrapper(List<int> Items);
 > public record Tag { public string Name { get; set; } = ""; }
 > public readonly record struct Key(int Id, Tag Label);
 > ```
-> 
+>
 > `readonly` prevents reassigning the struct's own fields but does not freeze the objects they reference. A reference member compared by reference, such as a `List<T>` under the default comparer, stays stable when its contents change, because its identity does not. That holds only while the effective comparer also compares it by reference. A supplied comparer that compares the list's elements makes the key depend on mutable state again. A record struct key is therefore safe when every component that the effective equality and hash observe is immutable or compared by reference.
-> 
+>
 > [Microsoft: records](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record) · [Microsoft: value types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/value-types) · [Microsoft: Dictionary<TKey,TValue>](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.dictionary-2?view=net-10.0) · [Microsoft: Object.GetHashCode](https://learn.microsoft.com/en-us/dotnet/api/system.object.gethashcode?view=net-10.0)
 
 # References

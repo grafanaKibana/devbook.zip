@@ -1,12 +1,9 @@
 ---
 title: Agent Evaluation
-topic:
-  - AI & ML
-subtopic:
-  - LLM
+topic: [AI & ML]
+subtopic: [LLM]
 summary: "Measures outcome and process separately over a trajectory, since a task can fail by many paths."
-level:
-  - "3"
+level: ["3"]
 priority: High
 status: Done
 tags: [FolderNote]

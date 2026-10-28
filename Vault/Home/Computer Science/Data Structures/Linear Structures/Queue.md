@@ -1,11 +1,8 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Data Structures
+topic: [Computer Science]
+subtopic: [Data Structures]
 summary: "A FIFO collection where the earliest enqueued item is processed first, used for buffering, BFS, and pipelines."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Done
 publish: true

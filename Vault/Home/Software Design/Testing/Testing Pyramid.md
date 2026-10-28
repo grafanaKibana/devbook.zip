@@ -1,11 +1,8 @@
 ---
-topic:
-  - Software Design
-subtopic:
-  - Testing
+topic: [Software Design]
+subtopic: [Testing]
 summary: "A cost and feedback heuristic that favors many fast unit tests, fewer integration tests, and a thin end-to-end layer."
-level:
-  - "2"
+level: ["2"]
 priority: High
 status: Not-Started
 publish: true

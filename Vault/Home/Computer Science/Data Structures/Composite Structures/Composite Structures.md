@@ -1,12 +1,9 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Data Structures
+topic: [Computer Science]
+subtopic: [Data Structures]
 summary: "Structures that combine two primitives to get a guarantee neither gives alone."
 tags: [FolderNote]
-level:
-  - "4"
+level: ["4"]
 status: Creation
 publish: true
 priority: High

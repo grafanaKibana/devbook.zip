@@ -1,15 +1,11 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
+topic: [AI & ML]
+subtopic: [LLM]
 summary: The developer-facing tools and extension points that make an agent useful inside a repository.
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 status: Done
-level:
-  - "3"
+level: ["3"]
 priority: Medium
 ---
 

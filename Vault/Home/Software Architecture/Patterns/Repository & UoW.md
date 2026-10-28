@@ -1,11 +1,8 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - Patterns
+topic: [Software Architecture]
+subtopic: [Patterns]
 summary: "Repository gives a collection-like interface over domain objects. Unit of Work tracks changes and commits them as one atomic transaction."
-level:
-  - "4"
+level: ["4"]
 priority: High
 status: Ready to Repeat
 publish: true
@@ -142,29 +139,29 @@ The domain-facing contract consists of aggregate-specific interfaces with domain
 
 > [!qard]- How do the Repository and Unit of Work patterns differ?
 > Repository shapes how domain code reaches persisted aggregates, and Unit of Work controls when the changes from one business operation are committed. They solve different problems and usually work together.
-> 
+>
 > | Aspect | Repository | Unit of Work |
 > |---|---|---|
 > | Responsibility | Presents stored aggregates as a domain-oriented, collection-like interface, such as `IOrderRepository` with `FindAsync`, `Add` and `Remove`. | Tracks the changes made during one business operation and commits them through one transaction boundary. |
 > | What it keeps out of domain code | Query details such as SQL, EF includes and open-ended `IQueryable<T>` stay in infrastructure. | Individual inserts, updates and deletes are gathered and written together instead of one by one. |
 > | Effect of a call | `Add` or `Remove` only changes the set of pending objects; nothing is written yet. | One save writes the pending changes from every repository that shares the unit of work. |
 > | EF Core counterpart | `DbSet<T>` already provides collection-like access. | `DbContext` already tracks changes until `SaveChangesAsync` commits them. |
-> 
+>
 > **Flow:** a handler creates an `Order`, adds it through `IOrderRepository`, and then calls `SaveChangesAsync` on the unit of work. Several repository operations in the same handler therefore commit through one save, inside one transaction when the provider supports it.
-> 
+>
 > [EF Core: DbContext lifetime, configuration, and initialization](https://learn.microsoft.com/en-us/ef/core/dbcontext-configuration/) · [EF Core: Using transactions](https://learn.microsoft.com/en-us/ef/core/saving/transactions)
 
 <!-- qard-id: 156ee647-9c4f-46f1-8876-d290f7b63914 -->
 > [!qard]- Why does EF Core's `DbContext` already implement the Unit of Work pattern?
 > `DbContext` already performs the two jobs that define a Unit of Work. It records the changes made during one business operation, and it commits them together.
-> 
+>
 > - **Tracking:** the context's change tracker records entities returned by tracking queries and entities added, modified or removed through the context. Results of no-tracking queries do not enter the tracker. Tracked changes stay pending in memory until a save.
 > - **Commit:** `SaveChanges` or `SaveChangesAsync` writes all pending changes. When the database provider supports transactions, EF Core applies them in one transaction by default. If any change fails, the whole save is rolled back.
 > 
 > Repositories that receive the same context instance therefore share one unit of work. Each repository can call `Add` or `Remove`, and one save commits all of their changes. An `IUnitOfWork` interface implemented by the context only exposes that save; the mechanism is still EF Core's.
-> 
+>
 > **Boundaries:**
-> 
+>
 > - Each context instance has its own change tracker. Separate contexts are separate units of work by default, and each one's save commits on its own.
 > - With relational providers, separate contexts can join one explicit transaction by sharing the same `DbConnection` and `DbTransaction`. Their tracking stays separate, but their saves commit or roll back together with that transaction.
 > - A `DbContext` is designed for one short-lived unit of work and is not thread-safe. A singleton registration would share one long-lived tracker across concurrent requests, which is unsafe. `AddDbContext` registers the context as scoped by default, which gives one instance per request in ASP.NET Core.
@@ -174,27 +171,27 @@ The domain-facing contract consists of aggregate-specific interfaces with domain
 <!-- qard-id: b056c1a5-0827-47b6-a0ce-30fe7c7ef432 -->
 > [!qard]- When is a generic `IRepository<T>` an anti-pattern?
 > A generic `IRepository<T>` is an anti-pattern when it serves as the domain-facing contract and its operation surface does either of two things: it lets callers bypass aggregate invariants, or it exposes operations that do not fit the aggregate. Generic typing alone is not the defect. The defect is what the contract lets callers do.
-> 
+>
 > The harmful case shows up in two ways:
-> 
+>
 > - **Bypassed invariants:** the contract lets callers add, update or delete objects directly instead of going through the aggregate root, whose methods enforce the rules. For example, suppose `Order` forbids changing line items after confirmation. An `IRepository<OrderLine>` lets code delete a line from a confirmed order without that check.
 > - **Unsuitable operations:** the contract gives an aggregate methods such as unrestricted update or delete even when the domain has no such operation.
 > 
 > When every exposed operation fits and changes still go through the aggregate root, an interface is not harmful merely for being generic. A generic interface constrained to aggregate roots, for example, can be acceptable if each operation it offers is valid for those roots. An aggregate-specific interface such as `IOrderRepository` exposes only operations that make sense for `Order`. Its infrastructure implementation can still reuse a generic base class internally, as long as the generic methods do not widen the domain-facing contract.
-> 
+>
 > [Microsoft: Design a DDD-oriented microservice](https://learn.microsoft.com/en-us/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/ddd-oriented-microservice) · [Microsoft: Design the infrastructure persistence layer](https://learn.microsoft.com/en-us/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/infrastructure-persistence-layer-design)
 
 > [!qard]- When is a repository layer over EF Core worth adding instead of injecting `DbContext` directly?
 > A repository and unit-of-work layer over EF Core is worth adding when it protects a real domain boundary. Otherwise injecting `DbContext` directly is usually clearer. EF Core already provides collection-like access through `DbSet<T>`, and `DbContext` change tracking with `SaveChangesAsync` already acts as a unit of work.
-> 
+>
 > Reasons that justify the extra interfaces:
-> 
+>
 > - **Domain isolation:** application and domain code express aggregate operations, such as loading an order with the state its rules need, instead of EF queries.
 > - **Controlled access:** aggregates are loaded only through known shapes that preserve their invariants and ownership rules.
 > - **Multiple implementations:** the same domain contract genuinely has more than one persistence implementation.
 > 
 > Reasons that do not justify it on their own:
-> 
+>
 > - **Mirroring EF Core:** interfaces that wrap every `DbSet<T>` with matching CRUD methods only rename EF Core and add indirection.
 > - **Testability alone:** a fake repository cannot reproduce database behavior such as query translation and constraints. That behavior is better checked against the real provider.
 > 

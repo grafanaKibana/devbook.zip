@@ -1,13 +1,10 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
+topic: [AI & ML]
+subtopic: [LLM]
 summary: "Lifecycle callbacks that run custom logic at defined agent execution points."
 publish: true
 status: Done
-level:
-  - "2"
+level: ["2"]
 priority: Medium
 ---
 

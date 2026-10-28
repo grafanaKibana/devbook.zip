@@ -1,11 +1,8 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Data Structures
+topic: [Computer Science]
+subtopic: [Data Structures]
 summary: "Key-value pairs located by hashing into buckets, with collisions resolved by chaining or probing."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Ready to Repeat
 publish: true
@@ -27,20 +24,17 @@ The three tabs keep the same 12-cell table while changing only collision policy.
 
 %% tab: Closed Addressing %%
 
-
 ```steptrace
 {"algorithm":"hash-map","variant":"closed-addressing"}
 ```
 
 %% tab: Open Addressing %%
 
-
 ```steptrace
 {"algorithm":"hash-map","variant":"open-addressing"}
 ```
 
 %% tab: Bucket Hashing %%
-
 
 ```steptrace
 {"algorithm":"hash-map","variant":"buckets"}

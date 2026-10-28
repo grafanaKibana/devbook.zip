@@ -1,19 +1,18 @@
 {
   "accentColor": "",
-  "cssTheme": "Baseline",
+  "cssTheme": "Cupertino",
   "nativeMenus": true,
   "translucency": true,
   "showRibbon": true,
   "showViewHeader": true,
-  "interfaceFontFamily": "Geist,Figtree",
-  "textFontFamily": "Figtree,Geist",
+  "interfaceFontFamily": "system-ui",
+  "textFontFamily": "system-ui",
   "theme": "system",
   "baseFontSize": 16,
   "enabledCssSnippets": [
-    "hide-components",
     "paper-page",
-    "question-margin-note",
-    "markdown-max-width"
+    "markdown-max-width",
+    "question-margin-note"
   ],
-  "monospaceFontFamily": "JetBrains Mono"
+  "monospaceFontFamily": "ui-monospace,JetBrains Mono"
 }

@@ -1,11 +1,8 @@
 ---
-topic:
-  - Networks
-subtopic:
-  - Protocols
+topic: [Networks]
+subtopic: [Protocols]
 summary: "The standard TCP protocol for sending email between servers and from clients."
-level:
-  - "3"
+level: ["3"]
 priority: Low
 status: Ready to Repeat
 publish: true

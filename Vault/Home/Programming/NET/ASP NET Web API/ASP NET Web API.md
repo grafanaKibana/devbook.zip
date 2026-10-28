@@ -1,11 +1,8 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
+topic: [Programming]
+subtopic: [NET]
 summary: "How ASP.NET Core routes each HTTP request through middleware to handlers or controllers."
-level:
-  - "4"
+level: ["4"]
 priority: High
 tags: [FolderNote]
 

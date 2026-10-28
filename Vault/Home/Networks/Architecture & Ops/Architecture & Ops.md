@@ -1,14 +1,11 @@
 ---
-topic:
-  - Networks
-subtopic:
-  - Architecture & Ops
+topic: [Networks]
+subtopic: [Architecture & Ops]
 summary: "How networks are designed, observed, and kept healthy in production."
 tags: [FolderNote]
 publish: true
 priority: Medium
-level:
-  - "3"
+level: ["3"]
 status: Creation
 ---
 

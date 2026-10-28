@@ -1,10 +1,8 @@
 ---
-topic:
-  - Cloud
+topic: [Cloud]
 subtopic: []
 summary: "Turning RPO and RTO targets into recoverable data, compatible application state, and tested user flows."
-level:
-  - "2"
+level: ["2"]
 priority: High
 status: Ready to Repeat
 publish: true

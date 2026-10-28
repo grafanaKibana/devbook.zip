@@ -1,14 +1,11 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Techniques to find target values in arrays, graphs, or text, chosen by data ordering and shape."
 tags: [FolderNote]
 publish: true
 priority: Medium
-level:
-  - "4"
+level: ["4"]
 status: Creation
 ---
 

@@ -1,15 +1,12 @@
 ---
 title: Algorithm Design Paradigms
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "The broad strategies for constructing a solution, the lens you choose before writing code."
 tags: [FolderNote]
 publish: true
 priority: High
-level:
-  - "4"
+level: ["4"]
 status: Creation
 ---
 

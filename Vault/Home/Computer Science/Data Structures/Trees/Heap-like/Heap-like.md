@@ -1,12 +1,9 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Data Structures
+topic: [Computer Science]
+subtopic: [Data Structures]
 summary: "Priority-queue structures with an O(1) root peek, differing on meld and decreaseKey."
 tags: [FolderNote]
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Done
 publish: true

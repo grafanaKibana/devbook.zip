@@ -1,11 +1,8 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - Distributed Systems
+topic: [Software Architecture]
+subtopic: [Distributed Systems]
 summary: "Coordinates distributed behavior through services reacting to events without a central component directing the whole workflow."
-level:
-  - "3"
+level: ["3"]
 priority: High
 status: Not-Started
 publish: true

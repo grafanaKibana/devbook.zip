@@ -1,11 +1,8 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - Patterns
+topic: [Software Architecture]
+subtopic: [Patterns]
 summary: "Flyweight cuts memory by sharing immutable intrinsic state across many fine-grained objects while callers pass unique extrinsic state."
-level:
-  - "1"
+level: ["1"]
 priority: High
 status: Ready to Repeat
 publish: true
@@ -148,23 +145,23 @@ With immutable flyweights, a tax-rate change is applied by replacing the shared 
 
 > [!qard]- How does the Flyweight pattern reduce memory use?
 > Flyweight reduces memory by storing state that many objects have in common once and sharing it, instead of copying it into each object.
-> 
+>
 > - **Intrinsic state:** the shared, context-independent part, such as a product category's name, tax rate and shipping rules. It lives in the flyweight and should be immutable, because many owners see the same instance and a write to it would change what all of them observe.
 > - **Extrinsic state:** the part unique to each use, such as a product's ID, SKU, price and stock. It stays with each owner or is passed in by the caller.
 > - **Factory or interning table:** returns the existing flyweight for equal intrinsic state and creates one only on the first request.
 > 
 > Example: when 100,000 products each reference one of 50 shared category objects, the category data is stored 50 times instead of 100,000 times. `string.Intern()` applies the same idea to strings: the runtime returns one canonical instance for equal values.
-> 
+>
 > Flyweight is not object pooling. `ArrayPool<T>` lends a mutable buffer to one caller at a time and takes it back. A flyweight is shared by many owners at once.
-> 
+>
 > [[Home/Software Architecture/Patterns/Design Patterns/Structural/Flyweight#Solution|Flyweight: Solution]] · [[Home/Software Architecture/Patterns/Design Patterns/Structural/Flyweight#Common .NET Examples|Flyweight: Common .NET Examples]]
 
 <!-- qard-id: 3cc1bde5-1fdb-4c9b-9278-1a820242e881 -->
 > [!qard]- When is Flyweight not worth the complexity?
 > Flyweight is not worth its complexity when duplicated state is not a measured memory problem: the object population is modest, the shared part is small, or the state cannot be split cleanly into a shared part and a per-use part. In those cases it adds a factory, a lookup path and an extra level of indirection without relieving a real constraint. It is also a poor fit when the shared part must change per owner, because mutating a shared instance silently changes what every owner sees.
-> 
+>
 > It earns its cost when many objects repeat substantial immutable state and a memory profile shows that the duplication materially contributes to retained memory. The saving grows with the ratio of objects to distinct shared values. For example, 100,000 products can reference 50 shared category objects instead of each holding its own copy of the category data.
-> 
+>
 > [Debug a memory leak in .NET](https://learn.microsoft.com/en-us/dotnet/core/diagnostics/debug-memory-leak) · [[Home/Software Architecture/Patterns/Design Patterns/Structural/Flyweight#Tradeoffs|Flyweight: Tradeoffs]]
 
 # References

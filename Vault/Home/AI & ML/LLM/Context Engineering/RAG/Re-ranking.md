@@ -1,11 +1,8 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
+topic: [AI & ML]
+subtopic: [LLM]
 summary: "A second-stage pass that rescores, fuses, or diversifies retrieval candidates before context assembly."
-level:
-  - "2"
+level: ["2"]
 priority: High
 status: Done
 publish: true
@@ -158,35 +155,35 @@ A pipeline without a reranker is the baseline, and its measured failures show wh
 
 > [!qard]- Why does a RAG pipeline retrieve candidates first and then rerank them with a cross-encoder?
 > The two stages split the work between a fast scorer that can cover the whole corpus and a slower, finer-grained scorer that can only afford a short list. First-stage retrieval cheaply finds candidates across the corpus. A cross-encoder then rescores only those candidates; running it over every document would be far too slow.
-> 
+>
 > | Aspect | Bi-encoder (first-stage retrieval) | Cross-encoder (reranker) |
 > |---|---|---|
 > | How it scores | Embeds the query and each document separately. Document vectors are computed once at indexing time and compared with one query vector | Reads the query and one candidate together in a single model pass and outputs a relevance score |
 > | Relevance judgment | Coarser, because query and document are encoded without seeing each other | Can be finer, because attention spans both texts, so a qualifier or negation in the query can change the score. This often ranks better, but the gain depends on the model and the domain |
 > | Cost per query | One query encoding plus a fast index search | One model inference per candidate |
 > | Role | Recall: getting the relevant evidence into a candidate list, often tens of items | Precision: putting the best candidates into the small top-k that reaches the prompt |
-> 
+>
 > Keyword search such as BM25 can also fill the first-stage role. Whatever the first stage is, the reranker only reorders what it returned: if the relevant document is not among the candidates, no reranker can recover it. Because the ranking gain is not guaranteed, it is confirmed on domain queries against the first-stage order before the reranker is adopted.
-> 
+>
 > [Retrieve & Re-Rank (Sentence Transformers)](https://sbert.net/examples/sentence_transformer/applications/retrieve_rerank/README.html)
 
 <!-- qard-id: 466ddf4f-9bc8-46dc-82f6-34b0e669789f -->
 > [!qard]- Why can a reranker improve retrieval metrics without improving the generated answer?
 > A retrieval metric can improve in ranking positions that never reach the generator. Even when better evidence does reach the generator, the model still has to use it correctly.
-> 
+>
 > - **Outside the final cutoff:** a ranking metric is often computed over more results than the pipeline puts into the prompt. In this example, only the top 5 reranked chunks are assembled. Moving a relevant chunk from position 15 to position 8 raises a rank-sensitive metric such as nDCG@20, but the model input stays identical.
 > - **Generation-side limits:** retrieval and generation fail independently. If the needed evidence was already in the prompt, reordering it may not change the answer. If the model ignores, misreads or contradicts the evidence, better retrieval does not fix that.
 > 
 > Finding where the gain lands therefore requires following the same queries through each stage. The stages are candidate Recall@N before reranking, the ranking after reranking at the cutoff actually used, and the assembled context. Answer quality is then evaluated on representative queries. A retrieval metric gain alone does not establish a user-visible benefit.
-> 
+>
 > [Retrieve & Re-Rank (Sentence Transformers)](https://sbert.net/examples/sentence_transformer/applications/retrieve_rerank/README.html) · [Optimizing LLM accuracy (OpenAI)](https://developers.openai.com/api/docs/guides/optimizing-llm-accuracy)
 
 <!-- qard-id: 2525edd1-368e-4d10-a58a-4bc82c562674 -->
 > [!qard]- When can reranking worsen retrieval quality, and when can it fail to improve it?
 > A reranker trained on short web passages may misjudge long technical documents or unfamiliar terminology. It can then worsen results by pushing relevant evidence from inside the first-stage top-k to below that cutoff. A small candidate set or low first-stage recall causes a different failure. A reranker only reorders the candidates it receives, so it cannot add relevant evidence that is missing from them.
-> 
+>
 > Domain queries tell these cases apart when [[Monitoring#Retrieval Quality Metrics|recall and precision]] are measured at matched points:
-> 
+>
 > - **Missing candidates:** low candidate Recall@N before reranking means the evidence was absent before reranking began. That is a first-stage limit.
 > - **Demotion:** the comparison cuts the first-stage order and the reranked order at the same final k. Demotion means relevant evidence was inside the first-stage top-k but falls outside the reranked top-k. A net drop in Recall@k between the two orders signals it in aggregate. A low absolute Precision@k does not show demotion. With one relevant document ranked first in both orders, Recall@N and Recall@10 are both 1.0, yet Precision@10 is only 0.1, and nothing was demoted.
 > - **No promotion into top-k:** when relevant candidates fall outside top-k in both orders, their ranks in the two orders show whether reranking helped. A move from rank 50 to rank 11 at k = 10 is a partial improvement that still misses the final cutoff. An unchanged or worse rank means the reranker did not help that evidence. Exclusion in both orders does not by itself show that k is too small. Cutoff capacity matters only when the query needs more distinct relevant pieces than k can hold.

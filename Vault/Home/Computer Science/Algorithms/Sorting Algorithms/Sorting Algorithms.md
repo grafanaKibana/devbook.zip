@@ -1,14 +1,11 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Comparing sorting algorithms by stability, memory tradeoffs, and typical runtime behavior to guide production choices."
 tags: [FolderNote]
 publish: true
 priority: Medium
-level:
-  - "4"
+level: ["4"]
 status: Creation
 ---
 

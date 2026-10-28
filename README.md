@@ -4,7 +4,13 @@
 
 **🔗 Live site: [devbook.zip](https://devbook.zip)**
 
-[![DevBook homepage in light and dark theme](docs/assets/site-home.png)](https://devbook.zip)
+<a href="https://devbook.zip">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/product-captures/hero-dark.png">
+  <source media="(prefers-color-scheme: light)" srcset="docs/assets/product-captures/hero.png">
+  <img src="docs/assets/product-captures/hero.png" alt="DevBook product overview">
+</picture>
+</a>
 
 ## What It Is
 
@@ -60,18 +66,12 @@ git clone https://github.com/grafanaKibana/devbook.zip.git
 cd devbook.zip
 ```
 
-For automatic Quartz export when committing notes, first install Git, Bash, Python 3.9 or later, Node 22/npm and Obsidian desktop. Open `Vault/` in Obsidian, allow its bundled community plugins, and enable/register **Settings → General → Command line interface**. Then run:
-
-```bash
-bash .scripts/setup.sh
-```
-
-This installs the locked Web npm dependencies, enables local Git hooks and configures Syncer’s local destination with Preserve enabled. Git identity and GitHub authentication remain manual; let Datacore finish indexing before committing. Setup does not export, commit or deploy. See [new-machine prerequisites and recovery](Web/README.md#local-development), including the macOS-tested platform boundary.
-
-- **Edit notes** — open `Vault/` as an Obsidian vault; vault commits wait for automatic Quartz export.
-- **Run the website** — see [Web/README.md](Web/README.md#local-development) (after setup, `cd Web && npm run build && npx quartz build --serve`).
+- **Edit notes** — open `Vault/` as an Obsidian vault.
+- **Run the website** — see [Web/README.md](Web/README.md#local-development) (`cd Web && npm ci && npx quartz build --serve`).
 - **Run the backend** — see [Platform/DevBook/README.md](Platform/DevBook/README.md#run) (`dotnet run --project Platform/DevBook/DevBook.API/DevBook.API.csproj`).
 
 ## License
 
 [MIT License](LICENSE)
+
+[Regenerate product images](docs/product-captures.md)

@@ -1,15 +1,12 @@
 ---
 title: Programming Paradigms
-topic:
-  - Software Design
-subtopic:
-  - Paradigms
+topic: [Software Design]
+subtopic: [Paradigms]
 summary: "Mental models adopted before writing code — the programming paradigms that shape how you structure it (OOP, functional, event-driven)."
 tags: [FolderNote]
 publish: true
 status: Creation
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 ---
 

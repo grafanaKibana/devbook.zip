@@ -1,14 +1,11 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
+topic: [Programming]
+subtopic: [NET]
 summary: "Statically typed, multi-paradigm .NET language pairing OOP, functional features, and first-class async."
 tags: [FolderNote]
 publish: true
 status: Creation
-level:
-  - "4"
+level: ["4"]
 priority: High
 ---
 

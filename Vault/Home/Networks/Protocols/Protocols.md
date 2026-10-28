@@ -1,14 +1,11 @@
 ---
-topic:
-  - Networks
-subtopic:
-  - Protocols
+topic: [Networks]
+subtopic: [Protocols]
 summary: "The agreed rules that let machines communicate, with each layer's protocols and debugging."
 tags: [FolderNote]
 publish: true
 priority: High
-level:
-  - "3"
+level: ["3"]
 status: Done
 ---
 

@@ -1,12 +1,9 @@
 ---
-topic:
-  - DevOps
-subtopic:
-  - Version Control Systems
+topic: [DevOps]
+subtopic: [Version Control Systems]
 title: Branching Strategies
 summary: "How a team uses Git branches for parallel development, releases, and hotfixes."
-level:
-  - "4"
+level: ["4"]
 priority: High
 status: Ready to Repeat
 

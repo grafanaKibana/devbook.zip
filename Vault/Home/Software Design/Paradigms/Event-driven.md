@@ -1,11 +1,8 @@
 ---
-topic:
-  - Software Design
-subtopic:
-  - Paradigms
+topic: [Software Design]
+subtopic: [Paradigms]
 summary: "Systems built around immutable events and reactions, decoupling producers from consumers."
-level:
-  - "3"
+level: ["3"]
 priority: Medium
 status: Ready to Repeat
 publish: true

@@ -1,14 +1,11 @@
 ---
-topic:
-  - Security
-subtopic:
-  - Authentication
+topic: [Security]
+subtopic: [Authentication]
 summary: "How credentials, authentication ceremonies, sessions, and delegated authorization fit together."
 tags: [FolderNote]
 publish: true
 priority: High
-level:
-  - "4"
+level: ["4"]
 status: Ready to Repeat
 ---
 

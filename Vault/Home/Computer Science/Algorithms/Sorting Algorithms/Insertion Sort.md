@@ -1,11 +1,8 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Grows a sorted prefix by shifting larger elements right and inserting each new key."
-level:
-  - "4"
+level: ["4"]
 priority: Low
 status: Ready to Repeat
 publish: true
@@ -21,13 +18,9 @@ The incoming element is the key. Starting at the right edge of the prefix, every
 
 %% tab: Visualization %%
 
-
-
 ```steptrace
 {"algorithm":"insertion-sort","array":[8,3,5,1,9,2,7,4]}
 ```
-
-
 
 The prefix left of the active index is sorted before each step and stays sorted after it. When a key is smaller than its left neighbour, every larger prefix element copies one position right until a smaller element—or the start of the array—halts the walk, and the key fills the vacated slot. A key that already fits, like `9` following `1, 3, 5, 8`, triggers no shift and the prefix simply grows by one. The number of shifts a key performs equals the count of larger elements standing to its left, so the further a key is out of place, the more work it does.
 

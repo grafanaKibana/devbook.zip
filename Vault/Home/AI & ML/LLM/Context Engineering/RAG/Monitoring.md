@@ -1,11 +1,8 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
+topic: [AI & ML]
+subtopic: [LLM]
 summary: "Continuously observing a deployed RAG pipeline per stage to catch regressions before users do."
-level:
-  - "2"
+level: ["2"]
 priority: High
 status: Done
 publish: true
@@ -231,16 +228,16 @@ The practical default is deterministic metrics on all traffic, asynchronous judg
 <!-- qard-id: 9bc07aa9-b2ba-4ff6-93cc-63bff49c169b -->
 > [!qard]- How do offline evaluation and production monitoring work together for a RAG system?
 > Offline evaluation decides whether a candidate version is good enough to release. Production monitoring checks whether the released version keeps working on real traffic. Confirmed production failures are added to the offline dataset, so later releases are tested against them.
-> 
+>
 > | Aspect | Offline evaluation | Production monitoring |
 > |---|---|---|
 > | Data | A controlled, versioned dataset with relevance labels or reference answers | Live requests, whose query mix and source documents change over time |
 > | Timing | Before release, comparing a candidate with the current baseline | After release, continuously |
 > | Signals | Retrieval metrics against labels and answer correctness against references | Per-stage traces, latency, errors and cost, cheap checks on every request, and judge scores on a sample |
 > | Blind spot | Query patterns and data changes that the dataset does not contain | Usually no reference answer, so quality scores are only as valid as the sampling and the evaluator |
-> 
+>
 > The feedback loop:
-> 
+>
 > 1. A release passes offline gates against the baseline.
 > 2. Monitoring flags an anomaly, such as sampled faithfulness falling for one segment or empty results rising.
 > 3. Traces are triaged to confirm real failures and locate the failing stage.
@@ -248,7 +245,7 @@ The practical default is deterministic metrics on all traffic, asynchronous judg
 > 5. The fix is evaluated offline against the expanded dataset before the next release.
 > 
 > Sampled quality scores need representative or stratified sampling, and a judge whose agreement with human labels is checked. Without both, monitoring can look healthy while quality falls.
-> 
+>
 > Sources:
 > - [Evaluation types (LangSmith)](https://docs.langchain.com/langsmith/evaluation-types)
 > - [Semantic conventions for generative AI systems (OpenTelemetry)](https://opentelemetry.io/docs/specs/semconv/gen-ai/)

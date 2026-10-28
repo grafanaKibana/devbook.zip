@@ -1,3 +1,0 @@
-.nav-folder:has(> .nav-folder-title[data-path="Assets/components"]) {
-  display: none;
-}

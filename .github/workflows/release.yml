@@ -6,6 +6,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 concurrency:
   group: release
@@ -45,14 +46,32 @@ jobs:
           args: --tag ${{ steps.version.outputs.next }} --unreleased --strip header -o RELEASE_NOTES.md
 
       - name: Create tag + GitHub Release
+        id: publication
         if: steps.version.outputs.bump != 'none'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NEXT: ${{ steps.version.outputs.next }}
         run: |
           set -euo pipefail
+          printf 'created=false\n' >> "$GITHUB_OUTPUT"
           gh release create "$NEXT" \
             --target "$GITHUB_SHA" \
             --title "$NEXT" \
             --notes-file RELEASE_NOTES.md \
             --latest
+          printf 'created=true\n' >> "$GITHUB_OUTPUT"
+
+      # GITHUB_TOKEN-created releases do not trigger release.published workflows.
+      - name: Use Node.js for product captures
+        if: steps.publication.outputs.created == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Generate release product artwork
+        if: steps.publication.outputs.created == 'true'
+        uses: grafanaKibana/product-captures/actions/capture@v1
+        with:
+          dry-run: "false"
+          release-tag: ${{ steps.version.outputs.next }}
+          update-pr: "true"

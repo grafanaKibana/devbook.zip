@@ -1,11 +1,8 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - Machine Learning
+topic: [AI & ML]
+subtopic: [Machine Learning]
 summary: "Turning language into machine-usable representations for extraction, classification, search, and generation. Transformers are now common."
-level:
-  - "1"
+level: ["1"]
 priority: Low
 status: Done
 publish: true

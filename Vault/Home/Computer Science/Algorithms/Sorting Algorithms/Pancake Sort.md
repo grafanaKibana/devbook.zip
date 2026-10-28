@@ -1,11 +1,8 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Places each suffix maximum using only reversals of prefixes that begin at index zero."
-level:
-  - "4"
+level: ["4"]
 priority: Low
 status: Not-Started
 publish: true

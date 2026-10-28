@@ -1,11 +1,8 @@
 ---
-topic:
-  - Networks
-subtopic:
-  - Protocols
+topic: [Networks]
+subtopic: [Protocols]
 summary: "A resource-oriented architectural style built from stateless messages and a uniform interface."
-level:
-  - "3"
+level: ["3"]
 priority: High
 status: Done
 publish: true

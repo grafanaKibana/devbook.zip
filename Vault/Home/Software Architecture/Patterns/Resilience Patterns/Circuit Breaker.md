@@ -1,11 +1,8 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - Patterns
+topic: [Software Architecture]
+subtopic: [Patterns]
 summary: "Stops repeated calls to a failing dependency so the system fails fast instead of failing slowly."
-level:
-  - "3"
+level: ["3"]
 priority: High
 status: Done
 

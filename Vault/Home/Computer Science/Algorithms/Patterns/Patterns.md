@@ -1,15 +1,12 @@
 ---
 title: Algorithm Patterns
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Reusable coding idioms that turn brute-force approaches into efficient solutions. Recognising the pattern is the hard part."
 tags: [FolderNote]
 publish: true
 priority: Medium
-level:
-  - "4"
+level: ["4"]
 status: Creation
 ---
 

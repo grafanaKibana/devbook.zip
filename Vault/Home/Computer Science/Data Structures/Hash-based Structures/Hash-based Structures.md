@@ -1,12 +1,9 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Data Structures
+topic: [Computer Science]
+subtopic: [Data Structures]
 summary: "Dictionary, hash set, and Bloom filter, trading element ordering for near-O(1) key access."
 tags: [FolderNote]
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Done
 publish: true

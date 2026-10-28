@@ -1,11 +1,8 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - Patterns
+topic: [Software Architecture]
+subtopic: [Patterns]
 summary: "Defines an interface for creating an object but lets subclasses decide which concrete class to instantiate."
-level:
-  - "1"
+level: ["1"]
 priority: High
 status: Done
 publish: true
@@ -170,29 +167,29 @@ Slack can be added as another creator subtype without changing the order workflo
 <!-- qard-id: 387e21f5-e2c0-481e-bb89-cf3370a20ffb -->
 > [!qard]- When does Factory Method become the wrong choice?
 > Factory Method is the wrong choice when no creator needs an overridable creation hook through which subclasses decide the product. That hook defines the pattern. A shared base workflow that uses the product is a common reason the hook pays off, but it is not required. When nothing needs a subclass creation decision, the creator hierarchy is ceremony.
-> 
+>
 > Simpler or better-fitting options:
-> 
+>
 > - **Implementation chosen once at startup:** a DI registration of the product interface, such as `INotificationSender` mapped to `EmailNotificationSender`, selects the implementation without a creator subclass per variant.
 > - **Plain construction:** a static factory method or a constructor is smaller when creating the object needs no subclass decision. Many APIs called factory methods, such as `Task.FromResult<T>()`, are static functions rather than the GoF pattern.
 > - **Several related products must vary together:** Abstract Factory keeps the compatible family behind one factory object instead of separate creation hooks.
 > 
 > When each variant gets its own creator subclass, as in the notification example, the cost being avoided is a parallel hierarchy: each new variant adds both a product class and a matching creator class, even when the creator contributes nothing beyond picking the product.
-> 
+>
 > [[Home/Software Architecture/Patterns/Design Patterns/Creational/Factory Method#Related .NET factory APIs|Related .NET factory APIs]] · [[Home/Software Architecture/Patterns/Design Patterns/Creational/Factory Method#Solution|Factory Method solution]] · [Microsoft: .NET dependency injection](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection/overview) · [GoF: Factory Method pattern](https://people.csail.mit.edu/addy/pattern/pat3c.htm)
 
 <!-- qard-id: 6ba2a5be-041f-4ac2-ad2a-c3f3cd810ee2 -->
 > [!qard]- How does Factory Method support the Open/Closed Principle?
 > Factory Method lets a new product variant arrive as new code, in the form of a creator subclass, while the creator's existing workflow stays unchanged. That is the Open/Closed Principle at one variation point: the workflow is open to new products but closed to modification.
-> 
+>
 > How a new variant is added:
-> 
+>
 > 1. The base creator runs its workflow and gets the product only through the overridable factory method. In the notification example this is `CreateSender()`, which returns the product interface `INotificationSender`.
 > 2. A new channel, such as Slack, adds a `SlackNotificationSender` and a creator subclass whose override returns it.
 > 3. The composition root registers the new creator. The shared workflow, the existing creators and the code that calls the workflow are not edited.
 > 
 > The protection covers only the anticipated variation point. A variant that needs a different product contract, or a change to the shared workflow, still requires editing existing code. The composition root that selects the creator also changes when the new creator is put into use.
-> 
+>
 > [Robert C. Martin: Design Principles and Design Patterns](https://objectmentor.com/resources/articles/Principles_and_Patterns.pdf) · [Robert C. Martin: SOLID course notes](https://cleancoder.com/files/solid.md) · [[Home/Software Architecture/Patterns/Design Patterns/Creational/Factory Method#Solution|Factory Method solution]]
 
 # References

@@ -1,11 +1,8 @@
 ---
-topic:
-  - Software Design
-subtopic:
-  - Testing
+topic: [Software Design]
+subtopic: [Testing]
 summary: "Verifies that multiple components work together with real infrastructure like databases."
-level:
-  - "3"
+level: ["3"]
 priority: High
 status: Ready to Repeat
 publish: true

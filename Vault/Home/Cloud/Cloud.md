@@ -2,16 +2,14 @@
 icon: cloudy
 order: 90
 color: "#3b82f6"
-topic:
-  - Cloud
+topic: [Cloud]
 subtopic: []
 summary: "Using managed infrastructure without losing sight of the application responsibilities that remain."
 tags: [FolderNote]
 publish: true
 status: Creation
 priority: High
-level:
-  - "2"
+level: ["2"]
 ---
 
 Cloud computing turns compute, storage, networking, and higher-level platforms into services that can be provisioned on demand. It moves an application's operating boundary; it does not remove it. A managed database can eliminate host maintenance while leaving schema design, access control, consistency, recovery, service limits, and cost with the application team.

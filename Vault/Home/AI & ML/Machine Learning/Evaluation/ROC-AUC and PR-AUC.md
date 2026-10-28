@@ -1,11 +1,8 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - Machine Learning
+topic: [AI & ML]
+subtopic: [Machine Learning]
 summary: "Threshold-free ranking views: ROC-AUC for pairwise class ranking, PR-AUC for positive-alert quality when positives are rare."
-level:
-  - "2"
+level: ["2"]
 priority: Medium
 status: Done
 publish: true
@@ -139,13 +136,13 @@ Threshold selection needs a constraint rather than a visually appealing knee. A 
 <!-- qard-id: ee85524e-8de1-456c-8814-f0f6b88dc4bd -->
 > [!qard]- What does ROC-AUC show about a classifier?
 > ROC-AUC shows how well a binary classifier's scores rank positive cases above negative cases, summarized across all decision thresholds.
-> 
+>
 > The ROC curve comes from sweeping the threshold from strict to permissive. Each threshold gives one point on the curve. The point plots the true-positive rate (the share of positives flagged) against the false-positive rate (the share of negatives wrongly flagged).
-> 
+>
 > The area under this curve has a direct ranking meaning. An AUC of 0.8 means that a randomly chosen positive gets a higher score than a randomly chosen negative about 80% of the time, with ties counted as half. Random ranking gives about 0.5, and perfect ranking gives 1.0.
-> 
+>
 > Because it summarizes ranking over every threshold, ROC-AUC does not:
-> 
+>
 > - **choose an operating threshold:** that choice still depends on error costs, review capacity or a required precision or recall;
 > - **show calibration:** a model with a high AUC can give a case a score of 0.9 without that score meaning a 90% probability of the event.
 > 
@@ -154,12 +151,12 @@ Threshold selection needs a constraint rather than a visually appealing knee. A 
 <!-- qard-id: 4c2fb4ac-42d0-41fa-a56e-0c98344f7315 -->
 > [!qard]- When is PR-AUC especially useful alongside ROC-AUC?
 > PR-AUC is especially useful when positives are rare and the system acts on positive predictions, as with fraud alerts or review queues. ROC-AUC still describes overall ranking. PR-AUC adds whether the predicted positives are mostly correct, which ROC-AUC can hide.
-> 
+>
 > - **Why ROC-AUC can look strong:** the false-positive rate divides false positives by all negatives. With many negatives, even a large number of false alarms gives a small rate. For example, with 100 positives and 100,000 negatives, catching 80 positives while flagging 1,000 negatives gives a false-positive rate of 1%, yet only 80 of the 1,080 alerts, about 7%, are correct.
 > - **What PR shows:** precision is the share of alerts that are correct, and recall is the share of positives found. Both measures focus on the positive class, so false alarms that consume review capacity stay visible.
 > 
 > Two qualifications apply when reading a PR-AUC value:
-> 
+>
 > - **The baseline depends on prevalence:** a random ranker's expected precision equals the positive rate. A PR-AUC value is therefore meaningful only next to that rate. Comparing values across datasets with different positive rates mixes model quality with dataset composition. The evaluation set needs to match the production population and workload.
 > - **Implementations differ:** average precision, trapezoidal areas and interpolated areas under the PR curve can give different values. A reported PR-AUC is comparable only when the calculation method is known.
 > 

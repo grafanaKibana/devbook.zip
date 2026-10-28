@@ -1,11 +1,8 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Linear ordering of a DAG's vertices that places every edge's source before its target, sequencing dependencies first."
-level:
-  - "4"
+level: ["4"]
 priority: High
 status: Ready to Repeat
 publish: true
@@ -15,19 +12,15 @@ A build system needs an order that respects every dependency. Model each prerequ
 
 The order exists only when the dependency graph is acyclic. A cycle `a → b → … → a` eventually requires `a` to precede itself. Both standard constructions detect that contradiction while attempting to build the order: a directed graph is topologically sortable exactly when it is a DAG.
 
-
 %% tabs %%
 
 %% tab: Visualization %%
-
 
 ```steptrace
 {"algorithm":"topological-sort","directed":true,"nodes":[{"id":"A"},{"id":"B"},{"id":"C"},{"id":"D"},{"id":"E"},{"id":"F"},{"id":"G"}],"edges":[{"from":"A","to":"B"},{"from":"A","to":"C"},{"from":"B","to":"D"},{"from":"B","to":"E"},{"from":"C","to":"D"},{"from":"C","to":"E"},{"from":"D","to":"F"},{"from":"E","to":"F"},{"from":"F","to":"G"}]}
 ```
 
-
 A vertex with in-degree 0 has no unmet dependency — every edge into it would come from a vertex already emitted, and there are none left — so it is safe to place next. Emitting it removes its outgoing edges, which decrements the in-degree of each successor. A successor whose count reaches 0 has just had its last prerequisite satisfied and becomes eligible in turn. The frontier of ready vertices is therefore not fixed; it refills as earlier vertices leave. Here only `A` starts at in-degree 0; emitting it drops both `B` and `C` to 0, so the frontier now holds two vertices at once. Either may go next, and that fork is exactly where distinct valid orders diverge.
-
 
 Both standard algorithms enforce the same invariant: no edge ends up pointing backward. One realizes it by placing a vertex only after every predecessor is placed; the other by placing a vertex ahead of every vertex reachable from it, since it finishes only after all of them. Either direction produces the same guarantee, that for each `u → v` the vertex `u` precedes `v`.
 

@@ -1,12 +1,9 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - Patterns
+topic: [Software Architecture]
+subtopic: [Patterns]
 summary: "Structural patterns compose classes and objects into flexible larger structures via inheritance and composition."
 tags: [FolderNote]
-level:
-  - "3"
+level: ["3"]
 priority: High
 publish: true
 status: Done
@@ -36,8 +33,6 @@ These patterns can share nearly identical class diagrams while serving different
 | [[Home/Software Architecture/Patterns/Design Patterns/Structural/Proxy]] | Control access through a same-interface surrogate. | Access must be deferred, cached, authorized, or made remote without changing clients. |
 
 # Questions
-
-
 
 # References
 

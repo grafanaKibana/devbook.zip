@@ -1,10 +1,8 @@
 ---
-topic:
-  - Computer Science
+topic: [Computer Science]
 subtopic: []
 summary: "How multi-byte values map to byte addresses, and how to make byte order explicit at protocol and file boundaries."
-level:
-  - "3"
+level: ["3"]
 priority: Medium
 status: Creation
 publish: true

@@ -1,13 +1,10 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
+topic: [AI & ML]
+subtopic: [LLM]
 summary: "Reusable instruction packages that give a coding agent specialized domain expertise on demand."
 publish: true
 status: Done
-level:
-  - "2"
+level: ["2"]
 priority: Medium
 ---
 

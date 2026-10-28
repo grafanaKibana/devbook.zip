@@ -40,3 +40,9 @@ __pycache__/
 **/EvaluationReports/
 *.DotSettings.user
 **.sln.DotSettings.user
+
+# Reproducible product capture runtime (generated locally and in CI).
+/.product-captures-cache/
+
+/docs/assets/product-captures/gallery.html
+/docs/assets/product-captures/manifest.json

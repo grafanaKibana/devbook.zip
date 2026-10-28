@@ -1,11 +1,8 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Data Structures
+topic: [Computer Science]
+subtopic: [Data Structures]
 summary: "A stack-only value describing contiguous memory it does not own, enabling zero-copy slicing and parsing."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Done
 publish: true

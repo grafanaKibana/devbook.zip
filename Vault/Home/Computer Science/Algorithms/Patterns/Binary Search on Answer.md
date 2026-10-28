@@ -1,11 +1,8 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Binary-searches the space of possible answers using a monotonic feasibility test."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Creation
 publish: true
@@ -15,19 +12,13 @@ A fleet must clear a queue of packages within `D` days. The unknown is the small
 
 Feasibility is **monotone**: increasing capacity can never require more days. Across a range with a feasible upper bound, `feasible(x)` is a false prefix followed by a non-empty true suffix. The false prefix may be empty. Binary search finds the first true value. A probe does not compare `mid` with a stored array element. It runs `feasible(mid)` over the original input. This is [[Home/Computer Science/Algorithms/Search Algorithms/Binary Search|Binary Search]] applied to the boundary of a monotone predicate rather than to sorted data.
 
-
-
 %% tabs %%
 
 %% tab: Visualization %%
 
-
-
 ```steptrace
 {"algorithm":"binary-search-on-answer","weights":[3,2,2,4,1,4],"days":3}
 ```
-
-
 
 Six packages with weights `[3, 2, 2, 4, 1, 4]` must ship within three days. The answer strip classifies capacities `4 … 16` as known infeasible, still unknown, or known feasible. Each probe expands into the greedy day-by-day packing that supplies the predicate result, making the work inside `feasible(capacity)` visible instead of presenting the candidates as a stored array. The boundary settles at capacity `6`.
 

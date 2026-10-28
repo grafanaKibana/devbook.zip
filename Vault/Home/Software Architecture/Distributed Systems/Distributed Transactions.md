@@ -1,11 +1,8 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - Distributed Systems
+topic: [Software Architecture]
+subtopic: [Distributed Systems]
 summary: "Coordinates multi-participant change through atomic 2PC or independently committed saga steps with semantic compensation."
-level:
-  - "2"
+level: ["2"]
 priority: High
 status: Ready to Repeat
 publish: true
@@ -109,37 +106,37 @@ The workflow state and each step outcome must be persisted. A saga framework suc
 <!-- qard-id: 1f55b33c-29a0-4777-8e34-e43c6b00b881 -->
 > [!qard]- Why is two-phase commit (2PC) problematic in microservices?
 > Two-phase commit is a blocking protocol. Every participant that has prepared must wait for one coordinator's decision while still holding its locks, so a slow or failed coordinator or a network delay can stall other services. It also works only when every participant supports the same transaction protocol, which couples independently failing services to one shared coordinator.
-> 
+>
 > How the blocking arises:
-> 
+>
 > 1. **Prepare:** the coordinator asks each participant to make its tentative work durable and vote. A participant that votes yes keeps the locks that work needs and promises to follow the final decision.
 > 2. **Decide:** the coordinator records commit only if every participant voted yes. Any no vote produces abort.
 > 3. **Complete:** each participant commits or rolls back when the decision reaches it, and only then releases its locks.
 > 
 > Consequences for microservices:
-> 
+>
 > - **Locks held across network delays:** between steps 1 and 3, a coordinator crash or network delay leaves prepared data locked. Requests that need those rows wait or time out, so one component's failure reduces the availability and throughput of others.
 > - **Shared protocol requirement:** each database, broker or service in the transaction must take part in the same prepare-and-commit protocol under one coordinator. A participant that cannot join that protocol cannot share the atomic commit.
 > 
 > This is why microservice workflows more often commit locally in each service and coordinate the remaining steps through messages, as in a saga.
-> 
+>
 > [PostgreSQL: PREPARE TRANSACTION](https://www.postgresql.org/docs/current/sql-prepare-transaction.html)
 
 <!-- qard-id: 308353ee-bfa4-462c-8cf5-0bcd625b572b -->
 > [!qard]- How does the Outbox pattern support at-least-once event delivery?
 > The Outbox pattern makes an event as durable as the state change it describes, then publishes it with retries. After the change commits, the event can be delayed or published more than once, but it is not lost while the relay keeps retrying.
-> 
+>
 > 1. **Write atomically:** the service saves the domain change and an outbox record for the event in one local database transaction. Either both commit or neither does.
 > 2. **Relay:** a separate process reads committed outbox records and publishes them to the broker.
 > 3. **Retry:** if publishing fails, the record stays pending and the relay tries again.
 > 4. **Record progress:** after the broker accepts the event, the relay marks the record as published.
 > 
 > Without an outbox, the service writes to the database and to the broker as two separate operations. A failure between them can leave one done and the other missing, for example a committed order whose event was never published.
-> 
+>
 > **Duplicates:** if the relay crashes after the broker accepts the event but before step 4, it publishes the event again. Consumers therefore need idempotent handling or deduplication, for example by recording the IDs of events they have already processed.
-> 
+>
 > The atomicity covers only the local store, whose transaction must include both records. No single transaction spans the database and the broker. In Azure Cosmos DB, for example, the two writes go into one transactional batch, which must target a single logical partition.
-> 
+>
 > [Microsoft: Transactional Outbox pattern with Azure Cosmos DB](https://learn.microsoft.com/en-us/azure/architecture/databases/guide/transactional-out-box-cosmos)
 
 # References

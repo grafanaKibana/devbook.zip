@@ -1,11 +1,8 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
+topic: [AI & ML]
+subtopic: [LLM]
 summary: "Sets the unit of retrieval: too wide adds noise, too narrow splits meaning."
-level:
-  - "2"
+level: ["2"]
 priority: High
 status: Done
 publish: true
@@ -222,24 +219,24 @@ The ratings describe typical tendencies, not guaranteed results; a strategy's pr
 <!-- qard-id: 13f048ca-dbcc-49b1-8bbe-b502736ffee0 -->
 > [!qard]- How should chunking be chosen for a RAG corpus?
 > Chunking should be chosen from the corpus's structure, the queries it must answer and the failures that evaluation exposes. No splitter or chunk size is best for every corpus.
-> 
+>
 > Chunk size sets the basic trade-off:
-> 
+>
 > - **Larger chunks** keep related statements together, but they can dilute the match and spend context on irrelevant text.
 > - **Smaller chunks** can match a query more precisely, but they can also separate a rule from the condition or exception that changes it.
 > 
 > Each chunk must also fit the embedding model's input limit. Overlap between neighboring chunks lowers the chance that a boundary cuts a statement apart, at the cost of some duplicated text.
-> 
+>
 > A simple rule-based splitter, such as fixed-size or recursive splitting, provides a cheap baseline. A more specialized strategy earns its extra ingestion and maintenance cost only when evaluation traces failures to the problem it addresses:
-> 
+>
 > | Observed failure | Strategy that targets it | Why it helps |
 > |---|---|---|
 > | Tables, code blocks or clause–exception pairs are split apart | Structure-aware splitting | A format parser keeps those layout units intact. |
 > | The right passage is found, but nearby constraints are missing from the answer | Parent-child retrieval | Small chunks are searched, and their larger surrounding section is passed to generation. |
 > | Long prose without reliable headings mixes several topics in one chunk | Semantic splitting | Boundaries are placed where adjacent text stops being similar. |
-> 
+>
 > A change is kept only when it improves retrieval and end-to-end answers on that corpus.
-> 
+>
 > Sources:
 > - [Chunk large documents for vector search (Azure AI Search)](https://learn.microsoft.com/en-us/azure/search/vector-search-how-to-chunk-documents)
 > - [[Chunking#How to Choose a Strategy|Chunking: How to Choose a Strategy]]
@@ -247,18 +244,18 @@ The ratings describe typical tendencies, not guaranteed results; a strategy's pr
 <!-- qard-id: f1dcfdda-8d4e-4e58-bea0-32b47bf5fc89 -->
 > [!qard]- How does parent-child chunking change the context returned for a matching passage?
 > Parent-child chunking searches small child chunks but gives the generator the larger parent section that contains the match. Searching small children can keep matches precise, while generation receives surrounding text that the child alone may lack.
-> 
+>
 > The flow:
-> 
+>
 > 1. Ingestion splits each parent section into small child chunks and stores the parent's identifier with every child.
 > 2. A query is matched against the child chunks.
 > 3. The application maps each matched child to its parent through that identifier. This is a lookup, not another similarity search, and a parent shared by several matched children is included once.
 > 4. The parent text, rather than the child alone, is assembled into the generator's context.
 > 
 > The parent can restore a nearby prerequisite, condition or exception that the matching child omitted, such as an exception clause that follows a retention rule. It also adds tokens. A parent that is too broad brings back the irrelevant text that small children were meant to avoid. Expansion therefore helps only when evaluation on the corpus shows better retrieval and end-to-end answers.
-> 
+>
 > In Azure AI Search, index projections can index child chunks with a field that links each one to its parent document. Expanding results to parent text is logic the application implements.
-> 
+>
 > Sources:
 > - [Define index projections (Azure AI Search)](https://learn.microsoft.com/en-us/azure/search/search-how-to-define-index-projections)
 > - [Chunk large documents for vector search (Azure AI Search)](https://learn.microsoft.com/en-us/azure/search/vector-search-how-to-chunk-documents)
@@ -267,16 +264,16 @@ The ratings describe typical tendencies, not guaranteed results; a strategy's pr
 <!-- qard-id: 942a2714-803d-4e65-b5ee-7d973d370ecc -->
 > [!qard]- When should a team move from recursive to structure-aware chunking?
 > The move is justified when evaluation repeatedly traces retrieval or answer failures to document structure that the recursive splitter breaks, and the measured gain outweighs the cost of maintaining parsers.
-> 
+>
 > | Aspect | Recursive splitting | Structure-aware splitting |
 > |---|---|---|
 > | How boundaries are found | An ordered list of separator strings is tried, such as blank lines, then newlines, then spaces. Smaller separators are used only when a piece is still too large. | A parser for the source format identifies headings, tables, code blocks and list items. |
 > | What it keeps together | Paragraphs and sentences, as far as the separators match the format. | Logical units such as a whole table or a clause with its exception, plus metadata such as the heading path. |
 > | Typical failure | Boundaries fall wherever a separator occurs. Table rows can be separated from their header, and code blocks or clause–exception pairs can be divided. | A parser can misparse silently when a source changes format, and very large units still need a size limit. |
 > | Cost | Low: rule-based, with separators configurable per format. | Higher: one parser per source format, plus ongoing maintenance. |
-> 
+>
 > A generic recursive splitter, such as LangChain's `RecursiveCharacterTextSplitter`, works on separator strings and does not parse the document format. Some failures can be fixed within recursive splitting by adding format-specific separators, or by extracting tables and code blocks as whole units first. Structure-aware splitting earns its cost when those adjustments are not enough.
-> 
+>
 > Sources:
 > - [LangChain `RecursiveCharacterTextSplitter` implementation](https://github.com/langchain-ai/langchain/blob/master/libs/text-splitters/langchain_text_splitters/character.py)
 > - [Chunk large documents for vector search (Azure AI Search)](https://learn.microsoft.com/en-us/azure/search/vector-search-how-to-chunk-documents)
@@ -285,21 +282,21 @@ The ratings describe typical tendencies, not guaranteed results; a strategy's pr
 <!-- qard-id: 9cff4a1c-e06f-4a37-ad57-9a0e012b56fa -->
 > [!qard]- Why is semantic chunking not always superior to simpler rule-based approaches?
 > Semantic chunking places boundaries from embedding scores and a tuned breakpoint rule. That adds ingestion cost and a setting whose behavior can shift with the model and corpus. It adds little when the document's structure already marks the topic boundaries.
-> 
+>
 > How a semantic splitter places boundaries:
-> 
+>
 > 1. The text is split into sentences or small groups of sentences.
 > 2. Each group is embedded, and the distance between neighboring groups is computed.
 > 3. A boundary is placed where a distance exceeds a breakpoint, such as a percentile or a number of standard deviations computed over that text's distances.
 > 
 > Why that is not automatically better:
-> 
+>
 > - **Cost:** every span needs an embedding call during ingestion, which rule-based splitters avoid.
 > - **Instability:** the distribution of distances depends on the embedding model and the corpus. A breakpoint tuned in one setting can, in another, fragment text into tiny chunks or leave several topics in one chunk. It must therefore be re-evaluated after the model or corpus changes.
 > - **Redundancy:** when reliable headings or markup already separate topics, a structure-aware or recursive splitter finds the same boundaries more cheaply and predictably.
 > 
 > Semantic splitting earns its cost for long prose that changes topic without structural markers, such as transcripts or email threads, when evaluation shows better retrieval.
-> 
+>
 > Sources:
 > - [LangChain `SemanticChunker` implementation](https://github.com/langchain-ai/langchain-experimental/blob/main/libs/experimental/langchain_experimental/text_splitter.py)
 > - [Chunk large documents for vector search (Azure AI Search)](https://learn.microsoft.com/en-us/azure/search/vector-search-how-to-chunk-documents)

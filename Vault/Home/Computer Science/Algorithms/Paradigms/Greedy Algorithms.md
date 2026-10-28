@@ -1,11 +1,8 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Builds a solution by repeatedly making the locally best choice and never reconsidering. Exact only when a proof connects the rule to the optimum."
-level:
-  - "4"
+level: ["4"]
 priority: High
 status: Ready to Repeat
 publish: true
@@ -21,11 +18,9 @@ Greedy algorithms build the answer through a sequence of commitments. Each step 
 
 %% tab: Visualization %%
 
-
 ```steptrace
 {"algorithm":"activity-selection"}
 ```
-
 
 Sorting by finish time moves the earliest release opportunity first; the sweep then accepts a compatible meeting permanently or rejects it as soon as it overlaps the last accepted finish.
 

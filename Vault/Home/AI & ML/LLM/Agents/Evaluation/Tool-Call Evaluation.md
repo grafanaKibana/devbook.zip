@@ -1,11 +1,8 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
+topic: [AI & ML]
+subtopic: [LLM]
 summary: "Scoring each agent tool call on four axes: right tool, correct arguments, valid call, and necessity."
-level:
-  - "3"
+level: ["3"]
 priority: High
 status: Done
 publish: true
@@ -104,16 +101,16 @@ The riskiest call may be perfectly valid: real tool, valid schema, wrong account
 <!-- qard-id: 23f9e773-456c-4f3f-b85a-96dcd927918e -->
 > [!qard]- Why should tool selection and argument accuracy be measured separately?
 > Because they score different decisions that fail for different reasons. Tool selection asks whether the agent called the right tool for the current step, including recognizing when no call is needed. Argument accuracy asks whether a correctly chosen tool received the right values.
-> 
+>
 > A combined score hides which decision failed. For example, 95% selection accuracy and 70% argument accuracy average to 82.5%, and that single number no longer shows that arguments are the weak point. Separate scores point an investigation in a direction:
-> 
+>
 > - **Selection failures** often suggest unclear tool descriptions or a routing problem.
 > - **Argument failures** often suggest weak grounding in the conversation or a loosely constrained schema. A call can name the right tool in schema-valid form and still send order `4851` when the conversation identifies order `4815`.
 > 
 > These patterns are leads to investigate, not proof of the root cause.
-> 
+>
 > How argument accuracy is scored also depends on the field. Exact matching fits identifiers, enums and booleans with one defined value. Free-text fields need normalization or a semantic check, which is valid only where the tool contract accepts equivalent wording.
-> 
+>
 > [Berkeley Function Calling Leaderboard](https://gorilla.cs.berkeley.edu/blogs/8_berkeley_function_calling_leaderboard.html)
 
 # References

@@ -1,11 +1,8 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - Distributed Systems
+topic: [Software Architecture]
+subtopic: [Distributed Systems]
 summary: "A system's ability to keep serving requests as load grows by adding resources."
-level:
-  - "2"
+level: ["2"]
 priority: High
 publish: true
 tags: [FolderNote]

@@ -1,11 +1,8 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Tallies integer keys in a small range and places them directly without comparisons."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Creation
 publish: true
@@ -17,13 +14,9 @@ Ten million exam scores still use only 101 possible keys. That small domain turn
 
 %% tab: Visualization %%
 
-
-
 ```steptrace
 { "algorithm": "counting-sort", "array": [2, 5, 3, 0, 2, 3, 0, 3] }
 ```
-
-
 
 #### Why the Value is an Address
 

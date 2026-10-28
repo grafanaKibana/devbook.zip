@@ -1,11 +1,8 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Data Structures
+topic: [Computer Science]
+subtopic: [Data Structures]
 summary: "A doubly linked list that splices around held node references at the cost of locality."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Done
 publish: true

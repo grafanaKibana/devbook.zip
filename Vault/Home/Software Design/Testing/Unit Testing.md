@@ -1,11 +1,8 @@
 ---
-topic:
-  - Software Design
-subtopic:
-  - Testing
+topic: [Software Design]
+subtopic: [Testing]
 summary: "Verifies a small, isolated piece of behaviour quickly and deterministically."
-level:
-  - "4"
+level: ["4"]
 priority: High
 status: Ready to Repeat
 publish: true
@@ -158,45 +155,45 @@ The right layer is the lowest-cost one that can expose the failure faithfully. D
 
 > [!qard]- What is a unit test, and what counts as the unit?
 > A unit test verifies one small behavior quickly and deterministically, without crossing slow or nondeterministic process boundaries such as a database, remote HTTP, the filesystem or uncontrolled time. The unit is defined by the behavior under test, not by code size. It can be one method, one class or a small group of collaborating objects.
-> 
+>
 > - **Kept real:** ordinary in-memory collaborators can run as they are. They do not need to be mocked for the test to count as a unit test. Replacing them anyway is a design style, the mockist or London school, not part of the definition.
 > - **Replaced:** process boundaries the test does not own are represented by test doubles or plain values, such as a fixed clock instead of the system time.
 > - **Result:** fast, local evidence and a failure that points to a specific behavior.
 > 
 > A test that reaches a real database or filesystem has crossed a process boundary, whatever it is called. It becomes slower, and its failures include infrastructure state, so that behavior belongs in an integration test.
-> 
+>
 > [.NET unit-testing best practices](https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-best-practices)
 
 <!-- qard-id: 50fa1ae9-ab7b-4bb7-8b43-369f01298379 -->
 > [!qard]- What is the difference between a stub and a mock?
 > A stub supplies canned answers so the code under test can run, and the test then checks the result. A mock is set up with expected calls, and the test checks that those interactions actually happened.
-> 
+>
 > | Aspect | Stub | Mock |
 > |---|---|---|
 > | Role | Feeds inputs to the code under test, such as a repository that returns a fixed list of orders. | Observes outgoing calls, such as whether an email sender was asked to send a message exactly once. |
 > | What the test asserts | The outcome: a returned value or other observable state. | The interaction: which calls were made, with which arguments and how often. |
 > | Coupling to implementation | Lower. Internal refactoring does not break the test while the outcome and the stubbed contract stay the same. | Higher. Changing how collaborators are called can break the test even when the outcome is unchanged. |
 > | Typical fit | Dependencies whose answers drive the logic. | Commands whose observable result is the call itself, such as publishing an event. |
-> 
+>
 > The typical-fit row is a heuristic, not a type rule. The distinction lies in how the test uses the double, not in the tool that created it. In Moq, the same `Mock<T>` acts as a stub when it only configures `Setup(...).Returns(...)`, and as a mock when the test calls `Verify(...)`.
-> 
+>
 > Two related doubles complete the vocabulary. A spy records the calls it receives so the test can assert on them afterwards. A fake is a simplified working implementation, such as an in-memory repository backed by a `Dictionary`.
-> 
+>
 > [Martin Fowler: Mocks Aren’t Stubs](https://martinfowler.com/articles/mocksArentStubs.html)
 
 <!-- qard-id: dd734573-8233-47e9-bc3d-5fac7fc6e841 -->
 > [!qard]- When is a unit test the wrong testing layer?
 > A unit test is the wrong layer when the realistic failure comes from a boundary that the unit test replaces or never runs. A unit test substitutes doubles or plain values for databases, remote services and other process boundaries, so it cannot observe failures that only the real boundary produces. Using framework code does not by itself rule out a unit test. Deterministic in-memory framework behavior, such as `JsonSerializer.Serialize` turning an object into a JSON string, can run inside one. The limit applies when the test replaces that behavior or never runs the real configuration, host or wire exchange around it.
-> 
+>
 > Typical cases:
-> 
+>
 > - **Provider SQL and persistence:** a stubbed repository cannot show whether the database provider translates a query correctly or whether the query matches the real schema. An in-memory database provider is not a faithful substitute for relational behavior either.
 > - **Serialization and protocols:** field names, formats and wire compatibility are decided by the real serializer or HTTP stack.
 > - **Dependency registration and configuration binding:** a missing service registration or a misbound setting appears only when the real container and configuration are built and used.
 > - **Rendering:** markup and layout come from the UI framework, not from isolated logic.
 > 
 > These failures need a component or integration test that exercises the boundary with a real or appropriate implementation. The guiding rule is the lowest-cost layer that can still expose the realistic failure. Deterministic domain decisions belong in unit tests, while wiring and provider behavior need integration evidence.
-> 
+>
 > [.NET unit-testing best practices](https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-best-practices) · [.NET: Serialize objects to JSON with System.Text.Json](https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/how-to)
 
 # References

@@ -1,12 +1,9 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - Patterns
+topic: [Software Architecture]
+subtopic: [Patterns]
 summary: "Creational patterns abstract object instantiation so a system stays independent of how its objects are created, composed, and represented."
 tags: [FolderNote]
-level:
-  - "3"
+level: ["3"]
 priority: High
 publish: true
 status: Done
@@ -39,7 +36,7 @@ The patterns solve different construction problems. The condition in the last co
 <!-- qard-id: 2c7c6f9d-8162-43be-a7f0-4150803dcf65 -->
 > [!qard]- How do Factory Method and Abstract Factory differ?
 > Both hide which concrete class is created, but they vary different things. Factory Method lets a subclass decide one product by overriding a creation hook, which inherited creator code such as a shared workflow often calls. Abstract Factory is a separate object, given to its client, that creates a whole family of related products that must work together.
-> 
+>
 > | Aspect | Factory Method | Abstract Factory |
 > |---|---|---|
 > | What varies | One product returned by an overridable creation hook, often used inside a shared workflow, such as the sender a notification workflow uses. | A family of compatible products, such as a whole Stripe or PayPal provider family that is swapped together. |
@@ -47,9 +44,9 @@ The patterns solve different construction problems. The condition in the last co
 > | Where creation sits | In the creator's overridable hook. The same creator often also runs code that uses the product, but it need not. | In a dedicated factory, separate from the code that uses the products. |
 > | Adding a variant | A new creator subclass overrides the hook to return a new product, leaving any creator code that uses it unchanged. Creator and product hierarchies grow in parallel only when each concrete product gets its own creator subclass. | A new factory implementation supplies a whole new family. Adding a new kind of product to the family changes the factory interface and every family implementation. |
 > | What it protects | Creator code that uses the product, when it exists, stays unchanged while one creation decision varies. | Products obtained from one factory belong to the same family, as long as each factory creates only matching products. |
-> 
+>
 > When neither a subclass-overridable creation hook nor a product family is needed, a standalone factory function is usually smaller than both.
-> 
+>
 > [GoF: Design Patterns: Elements of Reusable Object-Oriented Software](https://cs.gonzaga.edu/faculty/crandall/misc/GoF.pdf) · [GoF: Abstract Factory (InformIT excerpt)](https://www.informit.com/articles/article.aspx?p=1398599) · [[Home/Software Architecture/Patterns/Design Patterns/Creational/Factory Method#Solution|Factory Method solution]] · [[Home/Software Architecture/Patterns/Design Patterns/Creational/Abstract Factory#Solution|Abstract Factory solution]] · [[Home/Software Architecture/Patterns/Design Patterns/Creational/Creational#Patterns at a Glance|Creational patterns at a glance]]
 
 # References

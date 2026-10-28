@@ -1,11 +1,8 @@
 ---
-topic:
-  - Software Design
-subtopic:
-  - Principles
+topic: [Software Design]
+subtopic: [Principles]
 summary: "Prefer the simplest solution that meets the actual requirements."
-level:
-  - "4"
+level: ["4"]
 priority: High
 status: Ready to Repeat
 publish: true

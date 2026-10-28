@@ -1,11 +1,8 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
+topic: [AI & ML]
+subtopic: [LLM]
 summary: "An LLM producing fluent, confident output unsupported by evidence, because it optimizes likelihood, not truth."
-level:
-  - "3"
+level: ["3"]
 priority: Medium
 status: Done
 publish: true
@@ -92,47 +89,47 @@ For evidence-backed answers, retrieval and claim-to-context checks are the usual
 
 > [!qard]- What is an LLM hallucination, and why does it happen?
 > An LLM hallucination is generated content that the available evidence does not support. It happens because a language model produces plausible continuations of text rather than checking each claim against reality, so fluent, confident output can carry unsupported claims.
-> 
+>
 > | Type | What happens | How it can be detected |
 > |---|---|---|
 > | Intrinsic | The answer contradicts the source, such as naming Dickens when the passage names Austen. | Comparing the answer with the supplied context can expose the contradiction. |
 > | Extrinsic | The answer adds a claim the source never states, such as a plausible date or citation. The claim may even be true, but nothing supports it. | The context alone cannot settle it. Another source or an abstention policy is needed. |
-> 
+>
 > Several causes can produce the same symptom:
-> 
+>
 > - **Weak evidence:** sparse or outdated training data gives the model little to draw on.
 > - **Preference tuning:** it can reward confident, agreeable answers over accurate ones.
 > - **Sampling:** generation can select an invented detail from several plausible continuations.
 > 
 > Polished prose does not reveal which cause applies. Claims are therefore checked against evidence rather than judged by how convincing they sound.
-> 
+>
 > Sources: [NIST AI 600-1, Generative AI Profile](https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.600-1.pdf) · [Ji et al., Survey of Hallucination in Natural Language Generation](https://arxiv.org/abs/2202.03629) · [Anthropic sycophancy research](https://www.anthropic.com/research/towards-understanding-sycophancy-in-language-models)
 
 <!-- qard-id: 23b87ee7-f681-4341-8622-6917a8ebc293 -->
 > [!qard]- Why can retrieval-augmented generation still produce a hallucinated answer?
 > Retrieval supplies evidence, but it does not guarantee that the evidence is sufficient or that the generated answer stays within it. The hallucination itself is an unsupported claim in the generated answer. A retrieval defect is a separate failure, although it can leave the gap that the model then fills.
-> 
+>
 > - **Retrieval defect:** the corpus may lack the fact, or retrieval may miss it or return weak or irrelevant passages. This is a retrieval failure, not yet a hallucination. It leads to one when the answer goes on to state claims the passages do not support instead of abstaining.
 > - **Unsupported generation:** even with good passages, the model can contradict them or add a plausible date, number or citation that they never mention.
 > 
 > Retrieval quality and answer faithfulness are measured separately so that a wrong answer can be traced to the stage that caused it. Separate measurement does not mean the failures are independent: a retrieval gap can be the reason for an unsupported claim, and both can affect the same answer. A faithfulness score checks only whether the answer's claims are supported by the supplied context. It does not show that the context is true, current or complete, and a faithful answer cannot recover evidence that retrieval never supplied. Automated faithfulness judges need calibration against reviewed examples.
-> 
+>
 > Sources: [RAGAS faithfulness metric](https://docs.ragas.io/en/v0.2.5/concepts/metrics/available_metrics/faithfulness/) · [RAGAS paper](https://arxiv.org/abs/2309.15217)
 
 <!-- qard-id: 2be4a1e2-afc3-44c7-a788-09b4d25dffeb -->
 > [!qard]- How can preference tuning make an answer more agreeable without making it more factual?
 > Preference tuning optimizes a model toward answers that human raters or preference models score highly. When those scores reward agreeing with the user or sounding convincing, optimization can make answers more agreeable without making them more correct. This includes accepting a false premise in the question.
-> 
+>
 > The mechanism:
-> 
+>
 > 1. Raters, human or model, compare candidate responses and mark the preferred one.
 > 2. The model is optimized to produce responses that earn higher preference scores.
 > 3. When raters sometimes prefer a convincingly written agreeable answer over a correct one, that preference is reinforced along with the useful ones.
 > 
 > Research on sycophancy found that in the studied RLHF settings, human and preference-model judgments sometimes favored sycophantic responses over correct ones. This is a risk, not an inevitable result of every preference-tuning setup.
-> 
+>
 > A higher preference score does not imply higher factual accuracy. Factual accuracy and calibration are therefore evaluated separately from preference scores, with test prompts that contain false premises so that agreement is not mistaken for quality.
-> 
+>
 > Sources: [Anthropic, Towards understanding sycophancy in language models](https://www.anthropic.com/research/towards-understanding-sycophancy-in-language-models)
 
 # References

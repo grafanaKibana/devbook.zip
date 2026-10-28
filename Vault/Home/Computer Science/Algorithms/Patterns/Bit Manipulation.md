@@ -1,11 +1,8 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Operates on integers' binary representation, using bitmasks to model sets, flags, and small finite sets."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Ready to Repeat
 publish: true
@@ -13,23 +10,15 @@ publish: true
 
 An integer is a fixed-width array of bits — 32 for `int`, 64 for `long`. Any question phrased over those bits (how many are set, which is the lowest, whether a value belongs to a universe of at most 64 items) can be answered by looping bit by bit, or by acting on the whole word at once. AND, OR, XOR, NOT, and the two shifts each transform every bit in a single CPU instruction, and a handful of algebraic identities collapse a per-bit loop into one expression.
 
-
-
 %% tabs %%
 
 %% tab: Visualization %%
-
-
 
 ```steptrace
 {"algorithm":"kernighan-popcount","value":44,"width":8}
 ```
 
-
-
 Each pass computes `n & (n - 1)`. Subtracting 1 from `n` flips its lowest set bit to 0 and turns every zero below it into a 1 — the borrow propagates up the trailing zeros until it consumes that lowest one. AND-ing `n` with the result keeps every bit above the lowest one untouched and clears the lowest one along with the zeros beneath it, so exactly one set bit disappears per iteration. The loop therefore runs once per set bit: three iterations for `44`, not the eight a bit-by-bit scan of the word would take. When `n` reaches 0 no set bits remain and the count is final.
-
-
 
 Five operators do the work: `&` (AND), `|` (OR), `^` (XOR), `~` (NOT), and the shifts `<<` / `>>`. A single bit is addressed through a one-hot mask `1 << k`, which has bit `k` set and every other bit clear:
 

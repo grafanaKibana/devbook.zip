@@ -1,11 +1,8 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Dynamic-programming all-pairs shortest paths."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Creation
 publish: true
@@ -15,13 +12,11 @@ Floyd-Warshall computes the shortest distance between every ordered pair in a we
 
 Floyd-Warshall fills the whole table with one triple loop by recasting the problem as [[Home/Computer Science/Algorithms/Paradigms/Dynamic Programming|dynamic programming]] over a growing set of permitted waypoints. The sub-problem is "the shortest path from `i` to `j` that may route only through intermediate vertices drawn from `{0..k}`." Beginning with direct edges alone and admitting one more permitted intermediate per stage, the last stage leaves every entry at its unrestricted shortest distance when no negative cycle is reachable on the route. Each stage `k` poses a single question at every pair: keep `dist[i][j]`, or improve it by going `i → k → j`. A negative cycle makes every pair that can reach it and then leave it have no finite shortest distance. The diagonal detects the condition, but the raw finite values left in the matrix are not valid answers for those pairs.
 
-
 The decisive step is a single relaxation sweeping the whole distance matrix for one admitted intermediate vertex.
 
 %% tabs %%
 
 %% tab: Visualization %%
-
 
 ```steptrace
 {
@@ -31,9 +26,7 @@ The decisive step is a single relaxation sweeping the whole distance matrix for 
 }
 ```
 
-
 The table starts with direct edges and `∞` for missing routes. At each stage `k`, the highlighted cell compares its current `dist[i][j]` with the route through `k`; green writes improve the matrix and gray cells keep the existing distance.
-
 
 Let `D^(k)[i][j]` mean the best `i`→`j` distance whose intermediate vertices are drawn from `{0..k}`; `D^(-1)` contains direct edges, zero-length self paths, and `∞` elsewhere. Each stage moves from `D^(k-1)` to `D^(k)` with:
 

@@ -1,11 +1,8 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Floyd's tortoise-and-hare detects cycles and functional-graph duplicates. Related fast/slow traversal finds linked-list midpoints."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Creation
 publish: true
@@ -15,12 +12,9 @@ A linked list may have no known length and no terminating node. If a tail points
 
 The technique needs one property from the input: every element has exactly one successor. That successor may be `node.next` in a list or `i → nums[i]` when an integer array is read as a functional graph.
 
-
-
 %% tabs %%
 
 %% tab: Visualization %%
-
 
 ```steptrace
 {"algorithm":"fast-and-slow-pointers"}

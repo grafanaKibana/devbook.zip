@@ -1,11 +1,8 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Maintains a running median by partitioning values across a max-heap and a min-heap."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Not-Started
 publish: true

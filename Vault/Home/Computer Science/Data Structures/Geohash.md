@@ -1,11 +1,8 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Data Structures
+topic: [Computer Science]
+subtopic: [Data Structures]
 summary: "A hierarchical spatial encoding that turns longitude and latitude into sortable cell prefixes for candidate lookup."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Creation
 publish: true

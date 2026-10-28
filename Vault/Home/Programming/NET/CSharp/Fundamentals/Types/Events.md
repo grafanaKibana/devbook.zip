@@ -1,11 +1,8 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
+topic: [Programming]
+subtopic: [NET]
 summary: "A restricted delegate member implementing publisher and subscriber communication."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Ready to Repeat
 publish: true
@@ -117,28 +114,28 @@ public sealed class Listener : IDisposable
 <!-- qard-id: 7cde4edd-5239-4b9f-99d2-4ae8423cf684 -->
 > [!qard]- What is the difference between an event and a public delegate field?
 > Outside code can only subscribe to and unsubscribe from an event, and the declaring type alone decides when it is raised. A public delegate field exposes the delegate value itself, so any outside code can also invoke it, overwrite it or clear it.
-> 
+>
 > | What outside code does | `public event EventHandler? Changed;` | `public EventHandler? Changed;` (field) |
 > |---|---|---|
 > | Add or remove a handler: `feed.Changed += OnChanged;` | Allowed, through the event's `add` and `remove` accessors. | Allowed, by storing a new combined delegate in the field. |
 > | Raise it: `feed.Changed?.Invoke(feed, EventArgs.Empty);` | Compile error, so only the publisher can announce the change. | Allowed, so any caller can send a notification for a change that never happened. |
 > | Overwrite it: `feed.Changed = OnChanged;` or `= null` | Compile error. | Allowed, so one careless `=` silently removes every other subscriber. |
-> 
+>
 > Inside the declaring type, a field-like event behaves like its backing delegate, so the publisher can still invoke it and check it for `null`. The `event` keyword therefore restricts access to the same delegate mechanism rather than introducing a different one.
-> 
+>
 > [Microsoft: events](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/events/) · [C# specification: classes (events)](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/classes)
 
 <!-- qard-id: 886d70ca-8fef-4ec6-8c16-3d1101f171f9 -->
 > [!qard]- Why can event subscriptions keep an otherwise unused object alive?
 > Subscribing stores a delegate in the publisher, and a delegate for an instance method keeps a reference to the subscriber as its target. The garbage collector reclaims only objects that are unreachable from roots. As long as the publisher is reachable, the subscriber is reachable through it, even when nothing else uses the subscriber.
-> 
+>
 > Reference path: GC root → publisher → event delegate → subscriber.
-> 
+>
 > - **Long-lived publisher:** a static event or an application-wide service stays reachable for the life of the process. Every subscriber that never unsubscribes stays in memory, and its handler keeps being called.
 > - **Short-lived publisher:** references point from the publisher to its subscribers, not the reverse. Once the publisher becomes unreachable, it no longer keeps its subscribers alive.
 > 
 > The fix is to unsubscribe with `-=` when the subscriber's lifetime ends, commonly in `Dispose`.
-> 
+>
 > [Microsoft: subscribe to and unsubscribe from events](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/events/how-to-subscribe-to-and-unsubscribe-from-events) · [Microsoft: events](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/events/) · [Microsoft: GC fundamentals](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/fundamentals)
 
 # References

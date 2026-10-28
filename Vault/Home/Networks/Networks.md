@@ -2,15 +2,13 @@
 icon: network
 order: 40
 color: "#f59e0b"
-topic:
-  - Networks
+topic: [Networks]
 subtopic: []
 summary: "Protocols, latency, and reliability of how machines communicate over a network."
 tags: [FolderNote]
 publish: true
 priority: High
-level:
-  - "3"
+level: ["3"]
 status: Done
 ---
 

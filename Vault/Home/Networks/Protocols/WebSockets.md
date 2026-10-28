@@ -1,11 +1,8 @@
 ---
-topic:
-  - Networks
-subtopic:
-  - Protocols
+topic: [Networks]
+subtopic: [Protocols]
 summary: "Full-duplex, message-oriented communication over a long-lived connection or HTTP stream for real-time apps."
-level:
-  - "3"
+level: ["3"]
 priority: High
 status: Ready to Repeat
 publish: true
@@ -115,23 +112,23 @@ Every long-lived option needs a queue policy. The policy bounds per-client memor
 
 > [!qard]- What is WebSocket, and how is a WebSocket connection opened?
 > WebSocket is a protocol for full-duplex, message-based communication over one long-lived connection: once the connection is open, either side can send a message at any time. It starts with an HTTP handshake, which lets it use the usual web ports and work with HTTP proxies and other intermediaries.
-> 
+>
 > The HTTP/1.1 opening handshake defined by RFC 6455 works as follows:
-> 
+>
 > 1. The client sends an HTTP `GET` request with `Upgrade: websocket`, `Connection: Upgrade` and a random `Sec-WebSocket-Key`.
 > 2. A server that accepts replies `101 Switching Protocols` with a `Sec-WebSocket-Accept` value computed from that key. The value shows that the server understood the request as a WebSocket handshake rather than ordinary HTTP.
 > 3. From then on, the same TCP connection carries WebSocket frames instead of HTTP messages. Data frames carry text or binary messages, and control frames carry ping, pong and the closing handshake.
 > 
 > `ws://` runs over plain TCP and `wss://` runs over TLS.
-> 
+>
 > The protocol provides framing and two-way delivery. It does not define request–response correlation, reconnection or resuming after a disconnect, so applications that need them build them on top.
-> 
+>
 > [RFC 6455: WebSocket](https://www.rfc-editor.org/rfc/rfc6455.html)
 
 <!-- qard-id: 69cd7260-69f8-4974-b65e-f3af8ae3feb5 -->
 > [!qard]- What conditions make Server-Sent Events a better fit than WebSockets?
 > Server-Sent Events (SSE) fit better when updates flow mainly from server to browser, client actions can travel as ordinary HTTP requests, and built-in reconnection with a resume cursor is useful. WebSockets fit better when both sides need to send messages over the same long-lived connection, or when messages are binary.
-> 
+>
 > | Aspect | Server-Sent Events | WebSockets |
 > |---|---|---|
 > | Direction | One-way: the server sends an ordered stream of events in one long-lived HTTP response. Client actions use separate HTTP requests. | Full duplex: either side can send messages at any time on one connection. |
@@ -139,9 +136,9 @@ Every long-lived option needs a queue policy. The policy bounds per-client memor
 > | Reconnection | The browser's `EventSource` reconnects automatically. If the stream has given it a nonempty event ID, the reconnection request sends that ID in a `Last-Event-ID` header. | Not part of the protocol. The application implements reconnection, usually with backoff. |
 > | Resuming after a disconnect | Works only if the server tags events with IDs, keeps recent events and replays those after `Last-Event-ID`. Clients still have to tolerate duplicates or gaps. | The application defines its own resume tokens, replay and acknowledgements. |
 > | Connection setup | An ordinary HTTP request and response. Intermediaries can drop a quiet stream, so servers often send periodic comment lines to keep it active. | Opens with an HTTP handshake, then exchanges WebSocket frames instead of HTTP messages. |
-> 
+>
 > Neither protocol guarantees a particular latency. Delivery time still depends on the server, the network and any intermediaries.
-> 
+>
 > [WHATWG: Server-sent events](https://html.spec.whatwg.org/multipage/server-sent-events.html) · [RFC 6455: WebSocket](https://www.rfc-editor.org/rfc/rfc6455.html)
 
 # References

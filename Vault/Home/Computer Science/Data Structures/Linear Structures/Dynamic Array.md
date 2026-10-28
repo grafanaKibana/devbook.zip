@@ -1,11 +1,8 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Data Structures
+topic: [Computer Science]
+subtopic: [Data Structures]
 summary: "A contiguous, index-addressable buffer that grows automatically by reserving spare capacity."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Done
 publish: true

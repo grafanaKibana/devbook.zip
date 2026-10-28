@@ -1,11 +1,8 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Breaks a problem into smaller independent instances, solves them recursively, and combines the answers."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Creation
 publish: true
@@ -21,14 +18,11 @@ Subproblems are **independent** when each can be solved without another subprobl
 
 %% tab: Visualization %%
 
-
 ```steptrace
 { "algorithm": "divide-and-conquer" }
 ```
 
-
 Each recursive node divides one problem into independent subproblems, reaches direct base cases, then carries partial answers upward for combination. [[Home/Computer Science/Algorithms/Sorting Algorithms/Merge Sort|Merge sort]] is one concrete use of that recursion-tree shape.
-
 
 The paradigm is three steps and a stopping rule:
 
@@ -100,7 +94,6 @@ The live stack follows the longest branch. Balanced shrinkage keeps it shallow; 
 # Boundaries and Implementation Costs
 
 Overlapping subproblems are repeated states reached from more than one branch. In naive Fibonacci, both `fib(n-1)` and `fib(n-2)` reach `fib(n-3)`, so plain recursion solves the same state again. Memoisation helps because the state repeats, not because calls share storage. Merge sort's range states are unique. Caching them adds overhead without removing work.
-
 
 A small-range cutoff addresses call overhead. Once a partition is tiny, another recursive split can cost more than a tight [[Home/Computer Science/Algorithms/Sorting Algorithms/Insertion Sort|insertion-sort]] loop. [[Home/Computer Science/Algorithms/Sorting Algorithms/Introsort|Introsort]] also tracks recursion depth and falls back to heapsort when quicksort exhausts that budget. These are separate controls: the cutoff speeds up small partitions, while the depth guard limits adversarial partition chains.
 

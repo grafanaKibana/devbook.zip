@@ -1,13 +1,10 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
+topic: [AI & ML]
+subtopic: [LLM]
 summary: "Designing the tools, protocol wiring, and execution boundary that a model acts through."
 tags: [FolderNote]
 publish: true
-level:
-  - "3"
+level: ["3"]
 priority: Medium
 status: Done
 qard-deck: "AI & ML"
@@ -56,18 +53,16 @@ The "tool quality" principle in the [[Home/AI & ML/LLM/Agents/Agents|Agents]] hu
 <!-- qard-id: d15112b8-f911-4f82-baa3-da3d67bbbf35 -->
 > [!qard]- How do context, harness, and loop engineering differ in what they control?
 > The three disciplines own different decisions about the same agent run. Context engineering decides what the model sees. Harness engineering decides what the model's proposed actions can reach and do. Loop engineering decides whether and how the work continues across turns.
-> 
+>
 > | Discipline | Decision it owns | Typical controls |
 > |---|---|---|
 > | Context engineering | Which information the model receives on each call | Selecting and compacting instructions, retrieved evidence, history and tool results |
 > | Harness engineering | What the runtime allows a proposed action to do once the model emits it | Which tools exist, their permissions and credentials, call validation, sandboxing and approval gates |
 > | Loop engineering | Whether another turn happens and when the run stops | Progress and verification checks, iteration and cost budgets, and termination |
-> 
+>
 > The boundaries touch. Tool schemas take up context and tool results feed later turns, so context engineering decides how much of them the model sees. Whether a tool such as `delete_branch` exists at all, and which policy approves its use, remains a harness decision.
-> 
+>
 > Sources: [Anthropic: Effective context engineering for AI agents](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents)
-
-
 
 # References
 
