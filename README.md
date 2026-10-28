@@ -1,16 +1,6 @@
 # DevBook
 
-> A personal Senior .NET / AI software-engineering knowledge base — authored in [Obsidian](https://obsidian.md), published as a static website, and paired with a .NET RAG backend that searches and answers over the same notes.
-
-**🔗 Live site: [devbook.zip](https://devbook.zip)**
-
-<a href="https://devbook.zip">
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/product-captures/hero-dark.png">
-  <source media="(prefers-color-scheme: light)" srcset="docs/assets/product-captures/hero.png">
-  <img src="docs/assets/product-captures/hero.png" alt="DevBook product overview">
-</picture>
-</a>
+[![DevBook homepage in light and dark theme](docs/assets/site-home.png)](https://devbook.zip)
 
 <p align="center">
 <a href="https://devbook.zip"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/Read_online.svg?variant=default&amp;size=sm&amp;font=geist&amp;mode=dark&amp;logo=ri%3ALuBookOpen&amp;color=84cc16&amp;logoColor=0e100f&amp;valueColor=0e100f&amp;labelTextColor=0e100f&amp;gradient=84cc16%2C95d133%2C110"><img alt="Read online" src="https://shieldcn.dev/badge/Read_online.svg?variant=default&amp;size=sm&amp;font=geist&amp;mode=light&amp;logo=ri%3ALuBookOpen&amp;color=437100&amp;logoColor=ffffff&amp;valueColor=ffffff&amp;labelTextColor=ffffff&amp;gradient=437100%2C4c7a10%2C110"></picture></a>
@@ -87,5 +77,3 @@ This installs the locked Web npm dependencies, enables local Git hooks and confi
 ## License
 
 [MIT License](LICENSE)
-
-[Regenerate product images](docs/product-captures.md)
