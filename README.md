@@ -12,6 +12,12 @@
 </picture>
 </a>
 
+<p align="center">
+<a href="https://devbook.zip"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/Read_online.svg?variant=default&amp;size=sm&amp;font=geist&amp;mode=dark&amp;logo=ri%3ALuBookOpen&amp;color=84cc16&amp;logoColor=0e100f&amp;valueColor=0e100f&amp;labelTextColor=0e100f&amp;gradient=84cc16%2C95d133%2C110"><img alt="Read online" src="https://shieldcn.dev/badge/Read_online.svg?variant=default&amp;size=sm&amp;font=geist&amp;mode=light&amp;logo=ri%3ALuBookOpen&amp;color=437100&amp;logoColor=ffffff&amp;valueColor=ffffff&amp;labelTextColor=ffffff&amp;gradient=437100%2C4c7a10%2C110"></picture></a>
+<a href="https://github.com/grafanaKibana/devbook.zip/releases/latest"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/release/grafanaKibana/devbook.zip/stable.svg?variant=outline&amp;size=sm&amp;font=geist&amp;mode=dark&amp;label=Version"><img alt="Latest version" src="https://shieldcn.dev/github/release/grafanaKibana/devbook.zip/stable.svg?variant=outline&amp;size=sm&amp;font=geist&amp;mode=light&amp;label=Version"></picture></a>
+<a href="https://github.com/grafanaKibana/devbook.zip/actions/workflows/vault-validation.yml"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/ci/grafanaKibana/devbook.zip.svg?variant=outline&amp;size=sm&amp;font=geist&amp;mode=dark&amp;label=CI&amp;workflow=vault-validation.yml&amp;branch=main&amp;statusDot=true"><img alt="CI status" src="https://shieldcn.dev/github/ci/grafanaKibana/devbook.zip.svg?variant=outline&amp;size=sm&amp;font=geist&amp;mode=light&amp;label=CI&amp;workflow=vault-validation.yml&amp;branch=main&amp;statusDot=true"></picture></a>
+</p>
+
 ## What It Is
 
 A structured collection of software engineering notes covering 11 topic areas, designed for learning and interview preparation at a Senior .NET / AI engineering level. Every note follows a strict quality bar: intro in your own words, concrete examples, pitfalls, tradeoffs, interview-style questions, and curated references.
@@ -66,8 +72,16 @@ git clone https://github.com/grafanaKibana/devbook.zip.git
 cd devbook.zip
 ```
 
-- **Edit notes** — open `Vault/` as an Obsidian vault.
-- **Run the website** — see [Web/README.md](Web/README.md#local-development) (`cd Web && npm ci && npx quartz build --serve`).
+For automatic Quartz export when committing notes, first install Git, Bash, Python 3.9 or later, Node 22/npm and Obsidian desktop. Open `Vault/` in Obsidian, allow its bundled community plugins, and enable/register **Settings → General → Command line interface**. Then run:
+
+```bash
+bash .scripts/setup.sh
+```
+
+This installs the locked Web npm dependencies, enables local Git hooks and configures Syncer’s local destination with Preserve enabled. Git identity and GitHub authentication remain manual; let Datacore finish indexing before committing. Setup does not export, commit or deploy. See [new-machine prerequisites and recovery](Web/README.md#local-development), including the macOS-tested platform boundary.
+
+- **Edit notes** — open `Vault/` as an Obsidian vault; vault commits wait for automatic Quartz export.
+- **Run the website** — see [Web/README.md](Web/README.md#local-development) (after setup, `cd Web && npm run build && npx quartz build --serve`).
 - **Run the backend** — see [Platform/DevBook/README.md](Platform/DevBook/README.md#run) (`dotnet run --project Platform/DevBook/DevBook.API/DevBook.API.csproj`).
 
 ## License
