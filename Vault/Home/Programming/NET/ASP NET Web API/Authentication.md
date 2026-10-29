@@ -10,6 +10,8 @@ publish: true
 qard-deck: "Programming"
 qard-topic: "NET/ASP NET Web API/Authentication"
 flashcard_uid: "9d950e14"
+created: "2026-02-19T23:08:30.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Authentication turns request credentials into an identity. In ASP.NET Core, a registered authentication handler validates the credential for its scheme and, on success, supplies the `ClaimsPrincipal` exposed through `HttpContext.User`. Authorization evaluates that principal later in the pipeline. [[Authorization]] covers that separate decision.

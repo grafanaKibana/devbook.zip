@@ -6,6 +6,8 @@ level: ["3"]
 priority: Medium
 status: Ready to Repeat
 publish: true
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 DNS (Domain Name System) maps names to typed records in a distributed hierarchy. Before opening a transport connection, an application usually resolves a name through local caches, static host mappings, and a recursive resolver.

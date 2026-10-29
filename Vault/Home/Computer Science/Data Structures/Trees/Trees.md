@@ -7,6 +7,8 @@ level: ["4"]
 priority: Medium
 publish: true
 status: Creation
+created: "2026-02-18T19:18:52.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A tree represents relationships through parent-child edges. It is a shape, not a complexity guarantee. A balanced search tree can keep lookup at O(log n), while an unbalanced tree may become a chain and cost O(n). A trie follows another rule entirely: lookup is O(k) in key length, while scanning a flat dictionary for a prefix is O(n).

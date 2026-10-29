@@ -10,6 +10,8 @@ publish: true
 qard-deck: "Programming"
 qard-topic: "NET/ASP NET Web API/Middlewares"
 flashcard_uid: "7fb97c90"
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 ASP.NET Core middleware forms an ordered chain around endpoint execution. Each component can inspect the inbound request, call the next delegate, and then observe the outbound response. This is the right boundary for behavior that spans many endpoint types, such as exception handling, request logging, CORS, or authentication.

@@ -9,6 +9,8 @@ publish: true
 qard-deck: "Programming"
 qard-topic: "NET/CSharp/Concurrency and Parallelism/Parallelism"
 flashcard_uid: "5a1bba92"
+created: "2026-02-18T20:04:43.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Parallelism uses several cores to finish CPU-bound work sooner. .NET provides loop-based APIs, PLINQ, and lower-level partitioning tools, but the useful speedup comes from the workload rather than the API name. Small items, shared writes, or a large serial phase can make parallel code slower than the original loop.

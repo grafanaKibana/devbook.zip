@@ -6,6 +6,8 @@ level: ["2"]
 priority: High
 status: Not-Started
 publish: true
+created: "2026-08-10T10:51:19.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 The testing pyramid arranges checks by feedback speed, fidelity, and maintenance cost. Narrow tests near the code are usually cheap and diagnostic. Broad tests across deployed boundaries prove more wiring but fail for more possible reasons. The shape is a heuristic rather than a fixed ratio, so the useful mix follows architecture and the cost of each missed defect.

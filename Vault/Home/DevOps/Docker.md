@@ -7,6 +7,8 @@ priority: High
 status: Ready to Repeat
 
 publish: true
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Docker builds an OCI-compatible image containing an application and its filesystem dependencies, then starts isolated processes from that image. The image is portable; the complete runtime is not. The host kernel and CPU architecture, networking, mounts, resource limits, injected configuration, security policy, and external services remain environmental inputs.

@@ -6,6 +6,8 @@ level: ["2"]
 priority: High
 status: Done
 publish: true
+created: "2026-02-28T16:25:46.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A client sends `GET /orders/42` to one public endpoint. The API gateway terminates TLS, authenticates the caller, checks the route quota, selects the Orders service, and forwards the request with its deadline and trace context. Clients no longer need internal service addresses or a separate authentication and throttling implementation for every backend.

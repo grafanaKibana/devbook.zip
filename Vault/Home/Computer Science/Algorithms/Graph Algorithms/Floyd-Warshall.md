@@ -6,6 +6,8 @@ level: ["4"]
 priority: Medium
 status: Creation
 publish: true
+created: "2026-07-10T06:24:36.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Floyd-Warshall computes the shortest distance between every ordered pair in a weighted directed graph, producing a full `V×V` table. Running a single-source algorithm from each vertex can produce the same table, but on a dense graph that repeats much of the work. Negative edge weights also rule out Dijkstra.

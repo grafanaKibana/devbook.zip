@@ -10,6 +10,8 @@ publish: true
 qard-deck: "Software Architecture"
 qard-topic: "System Architecture/Event-Driven Architecture"
 flashcard_uid: "784f3460"
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Event-driven architecture (EDA) moves coordination from direct calls to published facts. A producer emits `OrderPlaced`, `PaymentFailed`, or `InventoryReserved`. Consumers decide what those facts mean for their own state. The producer does not name them, and with asynchronous event communication it does not wait for them either. This removes temporal coupling when the reaction can happen later, while synchronous APIs still handle queries and decisions that need an immediate answer. In-process domain-event dispatch can be synchronous, in which case the producer waits for its handlers even though it does not name them.

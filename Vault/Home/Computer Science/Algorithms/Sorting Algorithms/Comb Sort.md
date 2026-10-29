@@ -6,6 +6,8 @@ level: ["4"]
 priority: Medium
 status: Creation
 publish: true
+created: "2026-07-10T06:24:36.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 [[Home/Computer Science/Algorithms/Sorting Algorithms/Bubble Sort|Bubble Sort]] swaps adjacent inversions until a pass makes no swap. A small value near the end, called a *turtle*, can move left by only one position per pass. Comb sort gives it a faster route.

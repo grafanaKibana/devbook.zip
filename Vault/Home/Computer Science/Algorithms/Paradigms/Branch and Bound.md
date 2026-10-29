@@ -6,6 +6,8 @@ level: ["4"]
 priority: Medium
 status: Creation
 publish: true
+created: "2026-07-10T06:24:36.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A 0/1 knapsack with 40 items has `2^40` candidate subsets. A symmetric travelling-salesman tour over 15 cities still has `14!/2` orderings after fixing the start and treating reversals as equivalent. Branch-and-bound explores these decision trees while attaching an optimistic bound to each partial candidate. Once a subtree cannot beat the best complete solution found so far, the search discards it.

@@ -7,6 +7,8 @@ publish: true
 level: ["4"]
 priority: High
 status: Creation
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A data structure decides which operations are cheap and which are expensive. .NET already supplies the common choices through types such as `List<T>`, `Dictionary<TKey, TValue>`, `HashSet<T>`, `Queue<T>`, and `PriorityQueue<TElement, TPriority>`. Collection choice usually changes performance more than tuning the loop around a poor choice.

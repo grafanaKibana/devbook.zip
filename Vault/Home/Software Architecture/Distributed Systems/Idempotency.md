@@ -6,6 +6,8 @@ level: ["2"]
 priority: High
 status: Ready to Repeat
 publish: true
+created: "2026-03-06T22:43:56.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 An operation is idempotent when repeating the same logical request has the same intended effect as applying it once. Distributed systems need this property because a timeout hides whether an operation failed or succeeded and its acknowledgement was lost. Safe retries require a stable operation identity, durable duplicate detection, and an atomic boundary around the protected effect.

@@ -9,6 +9,8 @@ publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Context Engineering/RAG/Vector Databases"
 flashcard_uid: "797606ed"
+created: "2026-06-11T07:39:53.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A vector database stores [[Embeddings]] with metadata and searches them by proximity. It sits under dense [[Retrieval]], where the indexed [[Chunking|chunks]] must be searched in milliseconds even when the collection contains millions of vectors.

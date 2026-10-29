@@ -4,6 +4,8 @@ summary: A .NET and AI engineering knowledge base with notes, examples, and ques
 tags: [FolderNote, MetricsIgnore]
 publish: true
 icon: home
+created: "2026-07-05T15:34:15.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 ```datacorejsx

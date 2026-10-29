@@ -6,6 +6,8 @@ level: ["3"]
 priority: Medium
 status: Done
 publish: true
+created: "2026-02-16T22:45:34.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Classification evaluation turns model errors into operating costs. The confusion matrix shows which mistakes occur. The threshold decides how many of each kind the system accepts. A release decision then compares models at the same constraint, such as maximizing precision while keeping recall above 0.95.

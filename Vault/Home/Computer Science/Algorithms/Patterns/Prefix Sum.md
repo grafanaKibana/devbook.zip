@@ -6,6 +6,8 @@ level: ["4"]
 priority: Medium
 status: Creation
 publish: true
+created: "2026-07-10T06:24:36.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Repeated range-sum queries should not rescan the same values. A prefix array stores `prefix[i]`, the sum of the first `i` elements, with `prefix[0] = 0` for the empty prefix. An inclusive range `[l, r]` then costs one subtraction: `prefix[r + 1] - prefix[l]`. The shared prefix before `l` cancels, leaving exactly the requested range.

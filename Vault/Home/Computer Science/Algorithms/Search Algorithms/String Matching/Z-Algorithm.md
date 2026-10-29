@@ -6,6 +6,8 @@ level: ["4"]
 priority: Medium
 status: Creation
 publish: true
+created: "2026-07-10T06:24:36.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 The Z-algorithm computes how much of a string's prefix reappears at every position. Its **Z-array** stores that result: `z[i]` is the length of the longest substring beginning at `i` that matches a prefix of `S`.

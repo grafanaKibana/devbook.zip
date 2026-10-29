@@ -9,6 +9,8 @@ publish: true
 qard-deck: "Computer Science"
 qard-topic: "Algorithms/Paradigms/Dynamic Programming"
 flashcard_uid: "fa8b80ea"
+created: "2026-06-20T05:33:50.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 In finite one-pass dynamic programming, a dependency graph becomes a set of stored answers. Each state is solved after the states it depends on, written once, and then reused by later transitions.

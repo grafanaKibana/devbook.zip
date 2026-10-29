@@ -6,6 +6,8 @@ level: ["4"]
 priority: Medium
 status: Creation
 publish: true
+created: "2026-07-15T08:20:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A quadtree divides a 2D domain into as many as four regions per node. In point-region (PR) and region quadtrees, a split produces **NW, NE, SW, SE** child regions. Empty quadrants may remain implicit rather than allocating child objects. An overfull point bucket or a mixed pixel block splits again until each leaf satisfies its stopping rule. Routing a point at `(x, y)` through those regions tends to place spatial neighbors in the same or adjacent leaves.

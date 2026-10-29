@@ -6,6 +6,8 @@ level: ["4"]
 priority: Medium
 status: Creation
 publish: true
+created: "2026-07-10T06:24:36.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A sorted sequential file may link every `m`-th record as a checkpoint while offering no arbitrary index lookup. Binary Search cannot jump to midpoints on that structure, and Linear Search follows every record. Jump Search follows block ends `a[m−1], a[2m−1], a[3m−1], …` until one reaches or passes the target. It then scans forward from the previous checkpoint through the single candidate block.

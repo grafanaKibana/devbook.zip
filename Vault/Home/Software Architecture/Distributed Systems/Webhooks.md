@@ -6,6 +6,8 @@ level: ["2"]
 priority: Medium
 status: Done
 publish: true
+created: "2026-02-28T20:52:28.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A webhook is a provider-initiated HTTP callback to a consumer-registered endpoint. It replaces repeated polling on the common path with near-real-time delivery and works across organizational boundaries where a shared broker is unavailable.

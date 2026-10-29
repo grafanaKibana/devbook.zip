@@ -6,6 +6,8 @@ level: ["4"]
 priority: Low
 status: Ready to Repeat
 publish: true
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 When adjacent swaps are the only permitted move, every value travels one position at a time. Bubble Sort repeatedly scans left to right, compares `a[i]` with `a[i+1]`, and swaps when `a[i] > a[i+1]`. The running maximum keeps moving right and reaches its final slot by the end of the pass.

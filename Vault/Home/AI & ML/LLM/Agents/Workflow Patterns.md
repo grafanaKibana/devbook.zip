@@ -9,6 +9,8 @@ publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Agents/Workflow Patterns"
 flashcard_uid: "27b2b0a4"
+created: "2026-07-13T19:23:03.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Five workflow patterns cover the space between one [[Home/AI & ML/LLM/Agents/Agents|augmented LLM]] call and an autonomous loop. Application code still owns the outer control flow. The model handles bounded decisions inside it. This middle of the [[Home/AI & ML/LLM/Agents/Agents|agentic]] spectrum is usually easier to test and operate because the allowed paths remain visible.

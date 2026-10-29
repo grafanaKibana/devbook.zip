@@ -10,6 +10,8 @@ status: Done
 qard-deck: "AI & ML"
 qard-topic: "LLM/Harness Engineering/Harness Engineering"
 flashcard_uid: "c0ec4e2e"
+created: "2026-07-13T18:58:50.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Harness engineering designs the boundary between a model's structured output and the systems that act on it. The boundary includes the callable operations in [[Tool Design]], the developer-facing extension surfaces in [[Home/AI & ML/LLM/Harness Engineering/Tooling/Tooling|Tooling]], the client wiring defined by [[Model Context Protocol]], and the execution environment that controls permissions and filesystem access. The model proposes a call. The harness decides what that call can reach and what happens when it runs.

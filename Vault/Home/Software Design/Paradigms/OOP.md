@@ -6,6 +6,8 @@ level: ["4"]
 priority: Medium
 status: Ready to Repeat
 publish: true
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Object-oriented programming places state beside the operations allowed to change it. The useful boundary is an object that owns an invariant, not a class that merely groups fields. Interfaces name capabilities, composition assembles behavior that can vary independently, and runtime dispatch lets a caller depend on a contract instead of a concrete implementation. Inheritance is optional. It earns its place only when a genuine subtype can preserve the base contract.

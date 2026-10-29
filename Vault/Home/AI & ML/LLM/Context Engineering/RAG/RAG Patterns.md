@@ -9,6 +9,8 @@ publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Context Engineering/RAG/RAG Patterns"
 flashcard_uid: "fb2f007d"
+created: "2026-02-27T01:19:52.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 RAG patterns are repairs for observed retrieval failures. The order below is an adoption guide rather than a popularity ranking. The first working pipeline remains in place until [[Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation|evaluation]] identifies a failure that the cheaper design cannot fix. Each pattern buys something and creates a new way to fail. The surrounding pipeline is described in [[Home/AI & ML/LLM/Context Engineering/RAG/RAG|RAG]].

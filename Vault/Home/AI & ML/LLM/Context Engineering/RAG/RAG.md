@@ -10,6 +10,8 @@ status: Done
 qard-deck: "AI & ML"
 qard-topic: "LLM/Context Engineering/RAG/RAG"
 flashcard_uid: "33e0a516"
+created: "2026-02-27T01:19:52.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Retrieval-Augmented Generation (RAG) retrieves evidence from a corpus and gives it to the model for generation. Knowledge can then change without retraining the model, and the answer can point back to the source that supported it.

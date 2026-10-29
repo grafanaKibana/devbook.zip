@@ -7,6 +7,8 @@ level: ["4"]
 priority: Medium
 status: Done
 publish: true
+created: "2026-07-09T18:37:04.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Hash-based structures use a key's hash to choose a small part of the collection to inspect. With a sound hash distribution and controlled load factor, lookup remains expected or amortized O(1) as the collection grows. That is a performance expectation, not a worst-case guarantee. A constant `GetHashCode` or deliberate hash flooding can force a map or set toward an O(n) scan. The `GetHashCode` contract governs that starting point. `Equals` then decides whether a candidate is the requested key.

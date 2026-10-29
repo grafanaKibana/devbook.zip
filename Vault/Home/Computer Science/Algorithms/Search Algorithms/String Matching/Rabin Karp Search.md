@@ -6,6 +6,8 @@ level: ["4"]
 priority: Medium
 status: Done
 publish: true
+created: "2026-02-20T23:50:18.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Searching a text `T` of length `n` for a pattern `P` of length `m` creates `n − m + 1` candidate windows. Rabin–Karp hashes `P` once and maintains the hash of the current window. A different hash rejects the window with one integer comparison.

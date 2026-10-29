@@ -6,6 +6,8 @@ level: ["3"]
 priority: Medium
 status: Ready to Repeat
 publish: true
+created: "2026-06-30T08:23:11.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A stream of updates asks for two operations. `union(a, b)` joins groups, while `find(x)` returns the representative of `x`'s group. Two elements are connected when their representatives match. The main cost is the walk `find` makes up a parent chain to the root.

@@ -10,6 +10,8 @@ publish: true
 qard-deck: "Networks"
 qard-topic: "Protocols/HTTP"
 flashcard_uid: "bf424dee"
+created: "2026-02-28T20:52:28.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 HTTP is the message contract behind browsers, APIs, webhooks, and service health checks. A request names a target and carries a method, fields, and optional content. The response reports an outcome and may carry a representation.

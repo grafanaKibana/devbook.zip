@@ -10,6 +10,8 @@ publish: true
 qard-deck: "Programming"
 qard-topic: "NET/Runtime/Common Language Runtime"
 flashcard_uid: "e98a40ab"
+created: "2026-02-10T16:03:55.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 The Common Language Runtime (CLR) is .NET's managed execution engine. It loads assemblies, establishes their types, executes managed methods, and supplies services such as garbage collection, exception handling, threading, and native interoperability.

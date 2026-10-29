@@ -6,6 +6,8 @@ publish: true
 status: Done
 level: ["2"]
 priority: Medium
+created: "2026-08-16T07:07:41.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 "Plugin" is an overloaded word in coding agents. It can mean an installable bundle for one product, an editor extension, or an external server connected through [[Model Context Protocol]]. The common idea is simple: the runtime gains a capability the model did not have in its original tool set.

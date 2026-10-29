@@ -10,6 +10,8 @@ status: Done
 qard-deck: "AI & ML"
 qard-topic: "LLM/Loop Engineering/Loop Engineering"
 flashcard_uid: "3d544ed9"
+created: "2026-07-13T18:58:50.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Loop engineering designs the runtime around repeated model calls. It controls the observe → decide → act cycle, defines when work is finished, checks progress between steps, and hands uncertain decisions to a person.

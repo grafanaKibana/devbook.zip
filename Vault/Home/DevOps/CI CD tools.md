@@ -10,6 +10,8 @@ publish: true
 qard-deck: "DevOps"
 qard-topic: "CI CD tools"
 flashcard_uid: "26290128"
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 CI/CD turns a source change into a traceable release decision. Continuous integration (CI) combines small changes frequently and verifies them while the context is fresh. Continuous delivery keeps a verified artifact releasable. Continuous deployment releases qualifying changes without a routine human approval.

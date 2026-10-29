@@ -10,6 +10,8 @@ publish: true
 qard-deck: "Security"
 qard-topic: "Authentication/Resource-based Auth"
 flashcard_uid: "55d97186"
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Resource-based authorization decides whether a principal may perform an operation on one concrete resource. A role can grant document-editing capability in general. The resource check decides whether this document falls within that principal's authority.

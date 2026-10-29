@@ -6,6 +6,8 @@ level: ["4"]
 priority: High
 status: Creation
 publish: true
+created: "2026-07-15T08:20:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A [[Home/Computer Science/Data Structures/Trees/B-tree|B-tree]] keeps keys ordered in pages and updates those pages in place. That gives point and range reads a short search path, but small updates can become scattered page writes alongside write-ahead-log records.

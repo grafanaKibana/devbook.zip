@@ -6,6 +6,8 @@ level: ["4"]
 priority: Medium
 status: Ready to Repeat
 publish: true
+created: "2026-07-12T19:33:38.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 In a friendship graph with 10M users, asking which users are connected to Ann and asking which cluster contains Ann are the same problem. A **connected component** is a maximal set of vertices where every pair is joined by some path. Reachability is symmetric in an undirected graph, so one traversal from any vertex covers its whole component. Directed graphs need a different definition: [[Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components|strongly connected components]] require paths in both directions and a two-pass or low-link algorithm.

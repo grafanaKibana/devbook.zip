@@ -9,6 +9,8 @@ publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/GRASP"
 flashcard_uid: "216293bb"
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 GRASP (General Responsibility Assignment Software Patterns) is a set of nine responsibility-assignment principles described by Craig Larman. They answer a concrete design question: which object should know, create, coordinate, or vary this behavior?

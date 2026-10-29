@@ -7,6 +7,8 @@ publish: true
 priority: High
 level: ["3"]
 status: Done
+created: "2026-02-28T21:14:18.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Architectural patterns set the large-scale shape of a system: where responsibilities sit, how components communicate, and how data moves. A poor choice is expensive because local refactoring cannot repair a boundary that cuts through the wrong business capability or gives failure recovery to the wrong component.

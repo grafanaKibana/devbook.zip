@@ -13,6 +13,8 @@ status: Creation
 qard-deck: "Software Architecture"
 qard-topic: "Software Architecture"
 flashcard_uid: "bffcd2eb"
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Software architecture decides which code changes together, which state has one authority, and which failures can be isolated. Those boundaries range from in-process modules to independently deployed services. A boundary is useful when it contains a real change, scaling, or failure cost. Splitting a system without that pressure only adds coordination.

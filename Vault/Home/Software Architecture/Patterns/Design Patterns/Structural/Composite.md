@@ -9,6 +9,8 @@ publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Structural/Composite"
 flashcard_uid: "dfa91e71"
+created: "2026-03-05T22:12:42.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A military command tree illustrates Composite. An order sent to a division flows through its child units until it reaches individual soldiers. The caller uses the same command operation at every level and leaves recursion to the hierarchy.

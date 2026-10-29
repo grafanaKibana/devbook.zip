@@ -6,6 +6,8 @@ level: ["4"]
 priority: Low
 status: Not-Started
 publish: true
+created: "2026-08-10T10:51:19.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Cocktail shaker sort runs [[Home/Computer Science/Algorithms/Sorting Algorithms/Bubble Sort|Bubble Sort]] in both directions. The forward pass fixes the largest remaining value at the right boundary. The backward pass fixes the smallest at the left. Both boundaries then move inward.

@@ -6,6 +6,8 @@ level: ["4"]
 priority: Medium
 status: Done
 publish: true
+created: "2026-02-20T23:50:18.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A sorted array may contain a million user IDs, yet Binary Search needs only about twenty comparisons to find one. Each comparison uses the ordering to discard half of the remaining range.

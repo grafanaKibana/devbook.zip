@@ -9,6 +9,8 @@ publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Creational/Factory Method"
 flashcard_uid: "33124e08"
+created: "2026-03-05T22:12:38.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Sometimes a base workflow knows when it needs a collaborator but cannot choose the concrete implementation. A notification workflow can save an order and send a confirmation while a subtype decides whether the sender uses email or SMS.

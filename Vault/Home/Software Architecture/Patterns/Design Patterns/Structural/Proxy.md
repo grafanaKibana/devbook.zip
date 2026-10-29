@@ -9,6 +9,8 @@ publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Structural/Proxy"
 flashcard_uid: "1783cee9"
+created: "2026-03-05T22:12:42.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A proxy stands between a client and another object while exposing the same contract. It can delay expensive work, return a cached result, or reject an unauthorized call before the real object runs. The client depends on the subject interface and does not need a separate calling path for those controls.

@@ -9,6 +9,8 @@ publish: true
 qard-deck: "Data Persistence"
 qard-topic: "Connection Pooling"
 flashcard_uid: "788e9b4c"
+created: "2026-06-20T08:45:59.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Opening a physical database connection can require a socket, a security handshake, authentication, and server-side session setup. Repeating that work for every query wastes latency and server capacity. A connection pool keeps physical connections open and lends them to callers. `SqlClient` and Npgsql enable pooling by default. The application still has to return connections promptly and keep the fleet-wide limit within what the database can serve.

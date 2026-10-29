@@ -6,6 +6,8 @@ level: ["3"]
 priority: High
 status: Ready to Repeat
 publish: true
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 OAuth 2.0 lets a client obtain bounded authority to call a resource server. It is an authorization framework, not a login protocol. OpenID Connect adds an interoperable authentication result through ID tokens and defines discovery, UserInfo, and validation behavior. An OIDC client consumes the ID token. An API consumes an access token issued for that resource.

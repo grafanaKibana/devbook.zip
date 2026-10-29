@@ -9,6 +9,8 @@ publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Graph Engineering"
 flashcard_uid: "ef968013"
+created: "2026-08-24T16:37:16.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Graph engineering is an emerging name for designing an agentic system as an executable graph: which units perform work, which transitions are legal, what state crosses each boundary, and where execution can stop, pause, or recover. The label is new; the mechanics come from established workflow engines, state machines, and graph-processing runtimes.

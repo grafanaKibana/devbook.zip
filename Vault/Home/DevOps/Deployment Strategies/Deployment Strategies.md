@@ -10,6 +10,8 @@ tags: [FolderNote]
 qard-deck: "DevOps"
 qard-topic: "Deployment Strategies/Deployment Strategies"
 flashcard_uid: "f7d6b407"
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A deployment strategy decides how a new artifact replaces the old one, how users are exposed to it, and how that exposure can be reversed. The choice trades spare capacity and rollout complexity against the size and duration of a failed release.

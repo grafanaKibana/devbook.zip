@@ -10,6 +10,8 @@ status: Done
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Creational/Creational"
 flashcard_uid: "0bc64c56"
+created: "2026-03-05T22:12:32.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Creational patterns move object-construction decisions away from the code that uses the result. The pressure is not the `new` keyword itself. It is construction knowledge that is repeated, varies by context, or must preserve an invariant across several objects. Factory Method and Abstract Factory choose implementations, Builder stages complex assembly, Prototype copies an existing configuration, and Singleton constrains lifetime and access.

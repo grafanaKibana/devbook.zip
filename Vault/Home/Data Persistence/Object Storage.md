@@ -6,6 +6,8 @@ level: ["3"]
 priority: High
 status: Ready to Repeat
 publish: true
+created: "2026-07-18T07:07:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Object storage keeps bytes and metadata under one key inside a bucket or container. Applications put, get, list, copy, or delete whole objects through an API. They do not manage disk blocks or depend on shared filesystem locking. The contract fits large values that are usually replaced as a unit, including media, backups, build artifacts, and data-lake files.

@@ -9,6 +9,8 @@ publish: true
 qard-deck: "Computer Science"
 qard-topic: "Big O Notation"
 flashcard_uid: "0c3fdd6d"
+created: "2026-07-12T19:33:38.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Big O notation describes how an algorithm's cost grows with its input, discarding machine-specific constants so competing approaches can be compared by growth rather than one benchmark on one machine.

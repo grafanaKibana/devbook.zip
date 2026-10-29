@@ -6,6 +6,8 @@ level: ["2"]
 priority: High
 status: Ready to Repeat
 publish: true
+created: "2026-07-18T07:07:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Disaster recovery (DR) is the tested ability to restore a business flow after severe failure, data corruption, or regional loss. The target comes before the topology. If checkout may lose at most 10 minutes of accepted orders and must return within 45 minutes, its recovery point objective is 10 minutes and its recovery time objective is 45 minutes.

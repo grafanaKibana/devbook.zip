@@ -9,6 +9,8 @@ publish: true
 qard-deck: "Programming"
 qard-topic: "NET/CSharp/Fundamentals/Reflection"
 flashcard_uid: "a67836fc"
+created: "2026-02-15T16:27:13.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Reflection reads .NET metadata at runtime and can use that metadata to construct objects or invoke members. It is useful when the target type is genuinely unknown until execution, as in plugin discovery or tooling. The cost is a weaker contract: a misspelled member name or incompatible signature becomes a runtime failure instead of a compiler error.

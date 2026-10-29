@@ -6,6 +6,8 @@ level: ["3"]
 priority: High
 status: Not-Started
 publish: true
+created: "2026-08-10T10:51:19.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Choreography coordinates distributed behavior through facts published by participants. Each service decides its own reaction. No central component sends every next-step command or owns the complete workflow state. Service ownership stays local, while the end-to-end process emerges from subscriptions and event contracts.

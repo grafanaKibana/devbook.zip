@@ -9,6 +9,8 @@ publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Structural/Flyweight"
 flashcard_uid: "b517d36a"
+created: "2026-03-05T22:12:42.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A printing press reuses one letter stamp at many positions on a page. The glyph shape stays the same. Position changes with each impression. Sharing the stable part avoids manufacturing a separate stamp for every character occurrence.

@@ -7,6 +7,8 @@ publish: true
 priority: High
 level: ["3"]
 status: Done
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Protocols define what machines exchange, how they sequence it, and how they react to failure. Each layer of the stack has its own contracts, from link framing through application messages. Production debugging often comes down to finding the first layer where the contract broke. An HTTP 502, for example, may point to a failed upstream application or to a TLS mismatch between proxy and origin that the application never sees.

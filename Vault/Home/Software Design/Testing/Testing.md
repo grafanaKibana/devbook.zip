@@ -7,6 +7,8 @@ publish: true
 priority: High
 level: ["4"]
 status: Not-Started
+created: "2026-07-15T12:08:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Testing gathers evidence about specific failure risks. [[Home/Software Design/Testing/Unit Testing|Unit tests]] give fast feedback on narrow behavior, [[Home/Software Design/Testing/Integration Testing|integration tests]] exercise real boundaries and wiring, and [[Home/Software Design/Testing/Testing Pyramid|the testing pyramid]] models the cost of moving an assertion through more of the system. [[Home/Software Design/Testing/Test-Driven Development|TDD]] adds a short test-first feedback loop when that loop helps shape an interface or behavior.

@@ -9,6 +9,8 @@ publish: true
 qard-deck: "Programming"
 qard-topic: "NET/CSharp/Concurrency and Parallelism/ThreadPool"
 flashcard_uid: "fd7a2ebc"
+created: "2026-02-18T20:04:43.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 The .NET ThreadPool reuses managed worker threads for short units of work. `Task.Run`, many task continuations, timers, and queued callbacks use it. Asynchronous I/O is registered with operating-system facilities. When completion needs managed code, that code must eventually get execution time too.

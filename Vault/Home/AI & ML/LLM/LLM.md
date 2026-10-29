@@ -10,6 +10,8 @@ status: Creation
 qard-deck: "AI & ML"
 qard-topic: "LLM/LLM"
 flashcard_uid: "1eb55a0b"
+created: "2026-02-10T16:03:55.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A large language model (LLM) is a neural language model trained at enough scale to handle a broad range of language tasks. The name says little about the exact architecture. Decoder-only models continue text causally, encoder-decoder models generate from an encoded source, and encoder-only models produce contextual representations instead of open-ended text.

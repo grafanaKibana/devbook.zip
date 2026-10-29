@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-10-28T12:27:03.180Z
-modified: 2026-10-28T12:27:59.270Z
-published: 2026-10-28T12:27:59.270Z
+created: 2026-07-15T12:08:47.000Z
+modified: 2026-10-28T12:33:42.000Z
+published: 2026-10-28T20:52:55.190Z
 tags:
   - FolderNote
 icon: ruler

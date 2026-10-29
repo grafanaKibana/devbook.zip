@@ -9,6 +9,8 @@ publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Embeddings"
 flashcard_uid: "485a25d5"
+created: "2026-02-27T12:56:16.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Embeddings turn text into vectors so that related meanings occupy nearby points. That geometry lets retrieval match "throttle partner API traffic" with a document about "rate limiting for partner plan" even when the wording does not overlap.

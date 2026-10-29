@@ -6,6 +6,8 @@ level: ["3"]
 priority: High
 status: Ready to Repeat
 publish: true
+created: "2026-07-18T11:06:07.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A health check is a signal with a declared consumer and action. Restarting a process needs different evidence from removing traffic or gating a deployment. One undifferentiated `/health` endpoint can turn a shared dependency outage into fleet-wide restart or eviction.

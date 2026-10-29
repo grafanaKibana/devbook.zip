@@ -6,6 +6,8 @@ level: ["4"]
 priority: High
 status: Ready to Repeat
 publish: true
+created: "2026-06-20T05:33:50.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 To schedule the most non-overlapping meetings into one room, sort the meetings by finish time, then walk the list once, accepting each meeting whose start is at or after the last accepted finish. The scan produces a maximum-size schedule without enumerating subsets or reconsidering an accepted meeting.
