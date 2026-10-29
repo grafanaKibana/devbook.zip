@@ -1,5 +1,10 @@
 """Persist created/modified source dates without filesystem timestamps.
 
+The commit hook preserves created, recovering missing dates from Git history.
+Modified advances only for body or ordinary-frontmatter changes; date fields
+are excluded. Published remains owned by Syncer. Direct UI exports bypass this
+commit-time preparation.
+
 The export lock and full-source staging guards belong to sync-quartz.py. These
 helpers additionally compare every affected worktree file with its Git index
 before writing and stage only their own changes.

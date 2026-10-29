@@ -69,27 +69,6 @@ npx quartz build --serve     # dev server + live reload → http://localhost:808
 
 `npm run build` regenerates and checks StepTrace, clears the disposable `.quartz/plugins` installation cache, installs configured plugins with `plugin install --from-config`, updates them with `plugin install --latest`, then builds the site. Reinstalling protects builds from Vercel caches that omit plugins’ Git metadata. It preserves the committed lockfile baseline and authored plugin sources. Latest follows each plugin's upstream default branch, including commits newer than its last tagged release.
 
-## Note dates
-
-The guarded pre-commit export flow stores `created` and `modified` in the source notes as ISO 8601 UTC values. Syncer reads those properties rather than the checkout's filesystem timestamps.
-
-- `created` is preserved once present. Missing historical values use the first available source-note Git history, following renames. New notes receive their initial date when prepared for commit.
-- `modified` advances when source text or ordinary frontmatter changes. Date fields are excluded from comparison; identical rewrites, date-only edits, renames, and checkouts do not automatically advance it. Missing historical values use the most recent available source-note Git date. Repeating preparation for the same pending edit preserves its date.
-- `published` remains controlled by Syncer. This workflow neither writes nor backfills it.
-
-Dates are prepared after vault maintenance, under the existing export lock, before index verification and publication. Fully staged source is required. Exact planned-byte checks protect against concurrent editor or index changes. A worktree-local Git metadata cache stabilizes dates across uncommitted retries; source frontmatter is the durable record. Direct publication through Obsidian's UI bypasses commit-time preparation.
-
-Creation dates can also be backfilled once without staging or exporting:
-
-```bash
-python3 .scripts/note_dates.py --backfill-created          # preview
-python3 .scripts/note_dates.py --backfill-created --write  # apply
-```
-
-For a worktree vault with the same display name as another open vault, set `OBSIDIAN_VAULT` to its Obsidian vault ID before invoking the export script or committing. The connected vault's path must still match this checkout; the ID only disambiguates targeting.
-
-Backfill preserves note bodies and existing valid creation dates. Historical dates represent available Git evidence, not events before tracking began; shallow history must be completed before missing dates can be recovered. Only Markdown pages under `Vault/Home/` receive these properties, including generated changelog metadata; templates, attachments, and Obsidian settings are excluded. The changelog's body remains owned by its generator.
-
 ## Customization surfaces
 
 Quartz is "clone and own" — the engine under `quartz/` is committed. **Ground changes in the [official docs](https://quartz.jzhao.xyz) and prefer config/plugins over custom code.** Only these surfaces are ours:
