@@ -18,9 +18,9 @@ Existing Qard IDs survive only when the learning target remains the same. New ta
 2. Select up to four notes from one directory-derived topic. Unchanged reviewed notes stay checked; keeping good content is successful.
 3. Let the author research public technical facts and return guarded block replacements. A separate Claude context reviews the complete candidate notes and factual sources.
 4. Validate source hashes, identity, protected metadata, paths, repository rules, and the complete current PR diff.
-5. Create or update the topic's draft PR. Preserve text outside the managed summary and require actual checks on the new head.
+5. Create or update the topic's draft PR, then automatically run genuine Obsidian and Syncer in an isolated hosted macOS job. A separate protected job adds verified Quartz output to that same PR and dispatches exact-head validation. The draft is ready for your review when the export and checks pass. Preserve text outside the managed summary.
 
-One stable generation branch and machine marker identify each topic PR. Later batches append until its size limit or owner review freezes it. Frozen PRs accept verified feedback fixes. Closed proposals remain rejected across rule changes; merged PRs allow a new generation.
+One stable generation branch and machine marker identify each topic PR. Later batches append until its size limit or owner review freezes it. Frozen PRs accept verified feedback fixes. Freeze controls only bot additions: it never locks your files or prevents your own commits. Posting a verified-owner comment/review or marking the draft ready starts the review freeze; opening the page does not. A successful automatic export does not freeze a PR. If all three PR slots are occupied and frozen, later opportunities keep the queue intact without further model calls. Closed proposals remain rejected across rule changes; merged PRs allow a new generation.
 
 ## Defaults
 
@@ -74,25 +74,34 @@ The demo uses the real engine with fixture providers and GitHub transport. It ex
 
 After the setup PR is manually merged, `gh workflow run devbook-improvement.yml -f mode=demo` starts a safe test. [The activation runbook](../../docs/devbook-improvement.md#safe-activation) covers subscription OAuth, minimal GitHub permissions, protected secrets, live web/model checks, first manual apply, and schedule activation. Credentials go through official local flows and GitHub secret prompts, never chat or committed files.
 
-## Publish the reviewed notes to Quartz
+## Automatic Quartz export
 
-GitHub runners cannot run the vault's local Obsidian Syncer. After a note batch, the runtime returns `awaiting_export`, keeps that topic PR draft/frozen, and releases the queue for other topics or explicit owner corrections. It does not report successful export checks. This gate applies conservatively to all changed managed notes, including unpublished notes.
+With `automatic_export: true` (the checked-in default), no local publishing step is required. The separate [verified export workflow](../../.github/workflows/devbook-improvement-export.yml) runs the existing `.scripts/sync-quartz.py` / Syncer implementation against a clean disposable checkout and its own Obsidian profile. It uses the repository's trusted rendering plugins and shared export settings; your working vault, Qard state and plugin settings are untouched. Published notes and referenced media become tracked `Web/content` files on the same PR. Actual website deployment still follows the repository's normal deployment flow after your manual merge.
 
-Use a **clean dedicated checkout of the managed PR branch**, with that checkout's `Vault` open in Obsidian and its current PR head checked locally:
+The renderer has no Claude token or repository write token. It uploads a bounded generated-file artifact. A separate protected publisher verifies the exact source head, managed PR identity, allowed output paths and source/output/policy receipt before a non-force update. Concurrent edits make the old export stale; it cannot overwrite them. Existing timestamps are restored before rendering to avoid turning a fresh clone into a full-vault date rewrite.
+
+The PR can briefly show source changes before the generated-output commit arrives. It remains a draft; the required receipt check blocks incomplete or stale output. Later batches can join the same unreviewed PR until review begins or a size limit is reached. New source changes require another automatic export. All changed lines, including generated output, count toward the PR limit.
+
+Exporter startup uses a real desktop app, not Obsidian Headless. Its isolated-profile bootstrap is an integration that must pass a genuine GitHub-hosted fixture pilot before production activation. The pinned installer is Obsidian `1.14.5` with a verified SHA-256. Fresh profiles disable app updates and use Electron’s test-only mock Keychain with no real credentials. Plugins start after native indexing, with Syncer last, to avoid a fresh-cache initialization race. Standard hosted macOS runners are free for public repositories under GitHub's current policy; this repository is public. No continuously running Mac or additional server is required.
+
+A failed export gets another opportunity after at least six hours, at most three attempts for the same source head; exhaustion leaves a recorded attention reason. A newer source head starts its own attempt count. Missing downstream validation can be redispatched with the same bounds. Failed or pending checks are preserved for inspection. Global quota cooldowns still pause queue opportunities. Genuine dispatch errors remain visible in workflow logs.
+
+Test without production credentials on a Mac with a compatible Obsidian bundle (tested with `1.14.5`; Syncer requires at least `1.13.0`). Replace the app path if the installed bundle is older:
 
 ```sh
-PYTHONPATH=.scripts python3 -m devbook_improvement.sync_export export --expected-head <current-PR-head-sha>
+PYTHONPATH=.scripts python3 -m devbook_improvement.export_worker fixture \
+  --app-bundle /Applications/Obsidian.app --output /tmp/devbook-export-fixture
 ```
 
-The command reuses the existing verified local Syncer flow, verifies the exact checkout/vault identity, and stages only generated Quartz output and `.devbook-improvement/syncer-export.json`. It does not commit or push. Review those files, obtain normal commit approval, then commit and push them to the same PR. Do not run it in a dirty working checkout or edit `Web/content` manually.
+The fixture verifies rendered Datacore, preserved card and layout markers, media bytes, unchanged source and a matching receipt. The export workflow also offers manual `mode=fixture`; it publishes only artifacts. `mode=managed` takes an existing PR number, its exact managed branch and expected head, and requires protected production activation for repository publication.
 
-The receipt binds source, generated-output, and Syncer-policy Git blob hashes. The existing required `pr-title` check verifies freshness on managed PRs targeting `main`; no branch protection settings are changed by this setup. Any subsequent source or output change requires another verified export. Existing export files remain readable to the queue, but never become model-writable paths. A hash receipt detects staleness; trusted local execution and manual review establish export provenance.
+Set `automatic_export: false` only to deliberately restore the manual handoff. The [runbook](../../docs/devbook-improvement.md#manual-export-recovery) retains the dedicated-checkout recovery command. Never hand-edit generated content.
 
 ## Pause and recovery
 
 - Set repository variable `DEVBOOK_IMPROVEMENT_SCHEDULE_ENABLED=false` to pause unattended processing.
 - Set `DEVBOOK_IMPROVEMENT_ACTIVATED=false` to stop all live model/publication runs.
-- Disable the workflow in Actions to stop even demo opportunities.
+- Disable both improvement and verified-export workflows in Actions to stop all opportunities. An already running export must also be cancelled explicitly if needed.
 - Keep the state branch and open PRs: they preserve progress, feedback revisions, rejection history, and cooldowns.
 - Main-topic content drift pauses that topic until its branch includes current `main`; other queues can continue.
 - `feedback_needs_scope` keeps an indivisible request pending when its notes exceed the batch limit or are unavailable. Narrow the request’s scope or deliberately raise the configured note limit before retrying.
@@ -108,3 +117,9 @@ See [detailed failure recovery and limitations](../../docs/devbook-improvement.m
 - [Subscription authentication](https://code.claude.com/docs/en/authentication)
 - [Web-search usage limits](https://support.claude.com/en/articles/10684626-enable-and-use-web-search)
 - [Context7 plans](https://context7.com/plans)
+
+- [Obsidian desktop CLI](https://obsidian.md/help/cli)
+- [Syncer CLI integration](https://saberzero1.github.io/quartz-syncer-docs/guides/cli)
+- [GitHub-hosted runners](https://docs.github.com/en/actions/reference/runners/github-hosted-runners)
+
+- [Electron macOS spawned-app mock-Keychain tests](https://github.com/electron/electron/pull/53790)

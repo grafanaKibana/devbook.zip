@@ -320,6 +320,15 @@ class Engine:
                 all_paths = [file["filename"] for file in files]
                 export_paths = [path for path in all_paths if sync_export.is_export_path(path)]
                 paths = [path for path in all_paths if path not in export_paths]
+                automatic_export = bool(self.config.get("automatic_export", False))
+                other_freeze = bool(prior.get("review_started_head_sha") or prior.get("validation_failure")
+                                    or prior.get("reviewDecision") or prior.get("review_activity")
+                                    or prior.get("has_reviews") or prior.get("review_count")
+                                    or prior.get("draft") is False
+                                    or len(prior.get("changed_paths", [])) >= self.config.get("max_pr_notes", 16)
+                                    or int(prior.get("additions", 0)) + int(prior.get("deletions", 0)) >= self.config.get("max_pr_lines", 1200))
+                if automatic_export and prior.get("export_operation_id") and not other_freeze:
+                    row.update(frozen=False, clear_export_freeze=True)
                 main_hashes = {note["path"]: note["hash"] for note in notes if note["topic"] == topic}
                 baseline = prior.get("base_note_hashes")
                 if baseline != main_hashes:
@@ -346,7 +355,9 @@ class Engine:
                         row.update(base_conflict=True, frozen=True, pause_reason=str(error))
                         rows.append(row)
                         continue
-                    row.update(export_required=not fresh, frozen=True)
+                    row.update(export_required=not fresh)
+                    if not automatic_export:
+                        row["frozen"] = True
                     if fresh and prior.get("export_operation_id"):
                         required = tuple(dict.fromkeys((*self.config.get("required_check_contexts", runtime.DEFAULT_REQUIRED_CHECKS), "validate")))
                         try:
@@ -394,6 +405,99 @@ class Engine:
                 item["status"] = "withdrawn"
         return state, managed, all_feedback
 
+    def retry_exports(self, state: dict[str, Any]) -> None:
+        """Retry one export per source head at scheduled intervals, without a model call."""
+        if not self.api or not self.config.get("automatic_export", False):
+            return
+        from .export_worker import dispatch_export
+        now = self.now()
+        for pr in state["prs"].values():
+            if pr.get("status") != "open" or not pr.get("export_required") or pr.get("base_conflict"):
+                continue
+            operation = state.get("export_operations", {}).get(pr.get("export_operation_id"))
+            if not operation:
+                continue
+            evidence = operation.setdefault("evidence", {})
+            head = pr["head_sha"]
+            same_head = evidence.get("export_head") == head
+            attempts = int(evidence.get("export_attempts", 0)) if same_head else 0
+            if attempts >= 3:
+                pr["export_attention"] = "automatic export needs inspection after three attempts for this source head"
+                continue
+            last = evidence.get("export_last_dispatch_at") if same_head else None
+            if last and (now - dt.datetime.fromisoformat(last.replace("Z", "+00:00"))).total_seconds() < 21600:
+                continue
+            # Persist the attempt before dispatch: an ambiguous network response
+            # must not turn the next opportunity into an immediate duplicate.
+            evidence.update(export_head=head, export_attempts=attempts + 1,
+                            export_last_dispatch_at=runtime.iso(now))
+            operation["automatic_export"] = True
+            pr.pop("export_attention", None)
+            save(self.store, state, "record automatic export attempt")
+            try:
+                dispatch_export(self.api, pr["number"], pr["branch"], head,
+                                ref=self.config.get("base_branch", "main"))
+            except runtime.RuntimeFailure as error:
+                evidence["export_error"] = str(error)
+                save(self.store, state, "record automatic export dispatch failure")
+                raise
+            evidence.pop("export_error", None)
+            evidence["export_dispatched"] = True
+            save(self.store, state, "queue automatic export")
+        self.retry_export_validation(state)
+
+    def retry_export_validation(self, state: dict[str, Any]) -> None:
+        """Apply-only recovery for an exported head whose validation never started."""
+        if (not self.api or not self.config.get("automatic_export", False)
+                or core.cooldown_active(state, self.now())):
+            return
+        from .export_worker import _pr
+        now = self.now()
+        for pr in state["prs"].values():
+            if (pr.get("status") != "open" or pr.get("export_required") is not False
+                    or pr.get("base_conflict")):
+                continue
+            operation = state.get("export_operations", {}).get(pr.get("export_operation_id"))
+            if not operation:
+                continue
+            head, branch = pr["head_sha"], pr["branch"]
+            if _pr(self.api, self.config, pr["number"], branch, head) is None:
+                continue
+            try:
+                runtime.required_checks_for_sha(self.api, head, ("validate",))
+            except runtime.Conflict:
+                pass
+            else:
+                continue  # Any existing result, including failed/pending, belongs to CI.
+            try:
+                runtime.vault_validation_for_sha(self.api, branch, head)
+            except runtime.Conflict:
+                pass
+            else:
+                continue  # A queued run may not have created its check context yet.
+            evidence = operation.setdefault("evidence", {})
+            same_head = evidence.get("validation_head") == head
+            attempts = int(evidence.get("validation_attempts", 0)) if same_head else 0
+            if attempts >= 3:
+                pr["export_attention"] = "export validation needs inspection after three dispatch attempts for this head"
+                continue
+            last = evidence.get("validation_last_dispatch_at") if same_head else None
+            if last and (now - dt.datetime.fromisoformat(last.replace("Z", "+00:00"))).total_seconds() < 21600:
+                continue
+            if _pr(self.api, self.config, pr["number"], branch, head) is None:
+                continue
+            evidence.update(validation_head=head, validation_attempts=attempts + 1,
+                            validation_last_dispatch_at=runtime.iso(now))
+            save(self.store, state, "record export validation dispatch intent")
+            try:
+                runtime.dispatch_vault_validation(self.api, branch)
+            except runtime.RuntimeFailure as error:
+                evidence["validation_dispatch_error"] = str(error)
+                save(self.store, state, "record export validation dispatch failure")
+                raise
+            evidence.pop("validation_dispatch_error", None)
+            save(self.store, state, "queue missing export validation")
+
     def _cooldown(self, error: provider.ClaudeQuotaError, stage: str) -> dict[str, Any]:
         state = initial_state(self.store)
         state = core.set_cooldown(state, error.kind, error.reset_at, self.now(),
@@ -430,6 +534,8 @@ class Engine:
         # Keep the current base independently from topic-branch overlays.
         base = {note["path"]: note["content"] for note in notes}
         state, prs, feedback = self.remote_view(state, notes, base_sha, post_export_receipts=apply)
+        if apply:
+            self.retry_exports(state)
         all_notes = list(notes)
         rules = core.rules_version(self.root)
         paused = {row["topic_id"] for row in state["prs"].values() if row.get("status") == "open" and row.get("base_conflict")}
@@ -441,6 +547,14 @@ class Engine:
             and sorted(item["key"] for item in state["feedback"].values() if item["status"] == "pending" and item["topic"] == note["topic"]) == hold.get("feedback_keys", [])
             for hold in held.values())]
         selection_state = copy.deepcopy(state)
+        if self.config.get("automatic_export", False):
+            # Already proposed and independently reviewed source versions must
+            # not be authored again while their automatic export is running.
+            for open_pr in state["prs"].values():
+                if open_pr.get("status") == "open":
+                    for record in open_pr.get("proposal_records", []):
+                        selection_state = core.record_outcome(
+                            selection_state, record["batch"], record["proposal"], record["result"])
         for item in selection_state["feedback"].values():
             if core.topic_id(item["topic"]) in paused and item["status"] == "pending":
                 item["status"] = "paused"
@@ -551,7 +665,12 @@ class Engine:
         else:
             summary += "\nIndependent Claude note review: CLEAN; full candidate notes and fetched source text inspected.\n"
         export_required = sync_export.needs_export(selected, result["sources"])
-        if export_required:
+        if export_required and self.config.get("automatic_export", False):
+            summary += ("\nQuartz export: an isolated hosted Obsidian/Syncer job will generate and verify the "
+                        "matching website files automatically. This PR remains draft until exact-head export "
+                        "receipt and repository checks pass. Export waiting does not freeze unrelated additions; "
+                        "owner review and configured size limits do.\n")
+        elif export_required:
             summary += ("\nQuartz export: awaiting the verified local Syncer handoff. PR remains draft and "
                         "the required validation gate blocks merge until the generated output and current "
                         "source-bound receipt are committed. In a clean dedicated managed-branch checkout "
@@ -581,7 +700,8 @@ class Engine:
             expected_base_sha=base_sha,
             expected_branch_sha=pr.get("head_sha"), expected_pr_number=pr.get("number"),
             freeze=pr.get("frozen", False), pending_feedback=batch["feedback"], edits=proposal["edits"],
-            operation_receipts=receipts, export_required=export_required)
+            operation_receipts=receipts, export_required=export_required,
+            automatic_export=bool(self.config.get("automatic_export", False)))
         response.update(status=publication.get("status", "published"), publication=publication)
         if response["status"] not in {"awaiting_checks", "awaiting_export"}:
             self.finalize_completed()

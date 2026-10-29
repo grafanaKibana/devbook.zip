@@ -887,7 +887,7 @@ class GitHubRuntime:
         state = dict(snapshot.state)
         state[collection] = {**state.get(collection, {}), op_id: op}
         state["pending_operation"] = None
-        if freeze or terminal_pr is not None:
+        if freeze or terminal_pr is not None or collection == "export_operations":
             key = f"{op['topic']}:{op['generation']}"
             receipt = op.get("receipts") or {}
             prs = dict(state.get("prs", {}))
@@ -895,7 +895,7 @@ class GitHubRuntime:
             pr.update(
                 topic_id=op["topic"], generation=op["generation"],
                 number=op.get("pr_number") or op["evidence"].get("pr_number"),
-                branch=op["branch"], status="open", frozen=True,
+                branch=op["branch"], status="open", frozen=bool(pr.get("frozen") or freeze or terminal_pr is not None),
                 head_sha=op["evidence"].get("commit_sha"),
             )
             if terminal_pr is not None:
@@ -907,7 +907,7 @@ class GitHubRuntime:
             if freeze and collection == "failed_operations":
                 pr["validation_failure"] = dict(op["evidence"])
             if collection == "export_operations":
-                pr.update(export_required=True, export_operation_id=op_id)
+                pr.update(export_required=True, export_operation_id=op_id, automatic_export=bool(op.get("automatic_export")))
             if "records" in receipt:
                 pr["proposal_records"] = receipt["records"]
             if "base_note_hashes" in receipt:
@@ -915,6 +915,32 @@ class GitHubRuntime:
             prs[key] = pr
             state["prs"] = prs
         self.store.write(state, snapshot, f"maintenance: archive {op_id} {collection}")
+
+    def _handoff_export(self, op_id: str, branch: str, commit_sha: str) -> dict[str, Any]:
+        self._assert_lease()
+        operation = self.store.read().state.get("pending_operation") or {}
+        if operation.get("op_id") != op_id:
+            raise Conflict("export publication journal changed")
+        automatic = bool(operation.get("automatic_export"))
+        evidence = operation.get("evidence", {})
+        if automatic and not evidence.get("export_dispatched"):
+            from .export_worker import dispatch_export
+            number = operation.get("pr_number") or evidence.get("pr_number")
+            if not isinstance(number, int):
+                raise Conflict("export handoff lacks its owning PR number")
+            if not evidence.get("export_last_dispatch_at"):
+                # Record intent before the request. An ambiguous timeout leaves
+                # a deferred handoff, not an immediately replayed dispatch.
+                self.journal.advance(op_id, "pr_updated", {"export_attempts": 1,
+                    "export_last_dispatch_at": iso(), "export_head": commit_sha})
+                dispatch_export(self.api, number, branch, commit_sha, ref=self.base_branch)
+                self.journal.advance(op_id, "pr_updated", {"export_dispatched": True})
+        self._archive_pending(
+            op_id, "export_operations", {"commit_sha": commit_sha,
+                "reason": "automatic Syncer export queued" if automatic else "verified local Syncer export required"},
+            freeze=not automatic,
+        )
+        return {"op_id": op_id, "commit_sha": commit_sha, "status": "awaiting_export", "automatic_export": automatic}
 
     def recover_pending(self) -> dict[str, Any] | None:
         """Reconcile one WAL entry from observable refs/PRs/checks, without a model call."""
@@ -1011,11 +1037,7 @@ class GitHubRuntime:
         if phase == "pr_updated":
             self._assert_lease()
             if op.get("export_required"):
-                self._archive_pending(
-                    op_id, "export_operations", {"commit_sha": commit_sha, "reason": "verified Syncer export required"},
-                    freeze=True,
-                )
-                return {"op_id": op_id, "commit_sha": commit_sha, "status": "awaiting_export"}
+                return self._handoff_export(op_id, branch, str(commit_sha))
             verified = self._await_checks(op_id, branch, str(commit_sha))
             if verified is None:
                 return {"op_id": op_id, "commit_sha": commit_sha, "status": "awaiting_checks"}
@@ -1080,6 +1102,7 @@ class GitHubRuntime:
         expected_pr_number: int | None = None,
         operation_receipts: Mapping[str, Any] | None = None,
         export_required: bool = False,
+        automatic_export: bool = False,
     ) -> dict[str, Any]:
         """Publish one guarded batch and persist every ambiguous side effect.
 
@@ -1139,6 +1162,7 @@ class GitHubRuntime:
                 "commit_message": f"notes: improve {topic} [{prepared_op_id}]",
                 "receipts": dict(operation_receipts or {}),
                 "export_required": export_required,
+                "automatic_export": automatic_export,
             }
         )
         op_id = op["op_id"]
@@ -1168,11 +1192,7 @@ class GitHubRuntime:
         self.journal.advance(op_id, "pr_updated", {"pr_number": pr["number"], "created": created})
         self._assert_lease()
         if export_required:
-            self._archive_pending(
-                op_id, "export_operations", {"commit_sha": commit_sha, "reason": "verified Syncer export required"},
-                freeze=True,
-            )
-            return {"op_id": op_id, "commit_sha": commit_sha, "pr": pr, "status": "awaiting_export"}
+            return {**self._handoff_export(op_id, branch, commit_sha), "pr": pr}
         verified = self._await_checks(op_id, branch, commit_sha)
         if verified is None:
             return {

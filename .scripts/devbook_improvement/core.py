@@ -246,8 +246,10 @@ def sync_prs(state: Mapping[str, Any], prs: Sequence[Mapping[str, Any]]) -> dict
         prior = result["prs"].get(key, {})
         size_frozen = int(raw.get("note_count", 0)) >= DEFAULT_CONFIG["max_pr_notes"] or int(raw.get("changed_lines", 0)) >= DEFAULT_CONFIG["max_pr_lines"]
         review_frozen = bool(raw.get("review_activity")) or bool(raw.get("has_reviews")) or int(raw.get("review_count", 0)) > 0
-        frozen = bool(prior.get("frozen")) or bool(raw.get("frozen")) or review_frozen or size_frozen or raw.get("draft") is False
+        inherited_frozen = bool(prior.get("frozen")) and not raw.get("clear_export_freeze", False)
+        frozen = inherited_frozen or bool(raw.get("frozen")) or review_frozen or size_frozen or raw.get("draft") is False
         entry = {**prior, **dict(raw), "topic_id": topic, "generation": generation, "number": number, "status": status, "frozen": frozen}
+        entry.pop("clear_export_freeze", None)
         if status == "open" and any(
             other_key != key and other.get("status") == "open" and other.get("topic_id") == topic
             for other_key, other in result["prs"].items()

@@ -84,5 +84,6 @@
       "Vault/Templates/Pages/Template - Index.md",
       "Vault/Templates/Blocks/Template - Callout.md"
     ]
-  }
+  },
+  "automatic_export": true
 }

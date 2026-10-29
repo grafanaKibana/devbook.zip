@@ -618,6 +618,7 @@ class PipelineSafetyTests(unittest.TestCase):
     def setUp(self):
         self.clock = dt.datetime(2026, 10, 13, 12, tzinfo=dt.timezone.utc)
         self.config = json.loads((ROOT / ".github/devbook-improvement.json").read_text())
+        self.config["automatic_export"] = False  # These fixtures exercise the legacy manual handoff.
         self.root = pipeline_root(self, ROOT)
         self.base = {PATH: demo._note("Demo Tasks", "existing_id", "Task")}
         self.store = runtime.MemoryStateStore(core.new_state())
