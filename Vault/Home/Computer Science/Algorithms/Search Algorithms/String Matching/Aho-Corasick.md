@@ -6,6 +6,8 @@ level: ["4"]
 priority: Medium
 status: Creation
 publish: true
+created: "2026-07-10T06:24:36.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A signature engine may scan one byte stream against thousands of fixed, non-empty patterns. Running a separate matcher for each pattern repeats the same prefix work.

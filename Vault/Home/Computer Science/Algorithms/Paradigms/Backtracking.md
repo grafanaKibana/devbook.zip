@@ -9,6 +9,8 @@ publish: true
 qard-deck: "Computer Science"
 qard-topic: "Algorithms/Paradigms/Backtracking"
 flashcard_uid: "bbcb105b"
+created: "2026-06-20T05:33:50.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 The eight-queens problem has 4,426,165,368 ways to place eight pieces on 64 squares, but only 92 valid arrangements. Generating every board before testing it wastes almost all the work on positions whose first few queens already conflict.

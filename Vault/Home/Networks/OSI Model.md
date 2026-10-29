@@ -9,6 +9,8 @@ publish: true
 qard-deck: "Networks"
 qard-topic: "OSI Model"
 flashcard_uid: "0dc6300d"
+created: "2026-06-20T08:45:59.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 The OSI model is a seven-layer reference model for separating communication responsibilities. It provides vocabulary for standards and diagnosis. It is not the implementation architecture of the Internet. Production stacks follow the [[TCP IP|TCP/IP]] suite and often cross or collapse OSI boundaries.

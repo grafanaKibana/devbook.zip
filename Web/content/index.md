@@ -1,9 +1,9 @@
 ---
 publish: true
 title: Home
-created: 2026-10-28T12:27:03.200Z
-modified: 2026-10-28T12:33:02.667Z
-published: 2026-10-28T12:33:02.667Z
+created: 2026-07-05T15:34:15.000Z
+modified: 2026-10-28T12:33:42.000Z
+published: 2026-10-28T20:52:55.191Z
 tags:
   - FolderNote
   - MetricsIgnore

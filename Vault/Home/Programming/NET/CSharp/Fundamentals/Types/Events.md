@@ -9,6 +9,8 @@ publish: true
 qard-deck: "Programming"
 qard-topic: "NET/CSharp/Fundamentals/Types/Events"
 flashcard_uid: "6b17a98d"
+created: "2026-02-18T19:18:52.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 An event is a delegate-backed member with restricted access. Code outside the declaring type may subscribe with `+=` or unsubscribe with `-=`, but it cannot raise the event or replace its invocation list. The publisher keeps control of notification, which is the reason public APIs expose events instead of delegate fields.

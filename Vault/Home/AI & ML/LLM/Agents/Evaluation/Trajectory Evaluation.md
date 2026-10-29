@@ -9,6 +9,8 @@ publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Agents/Evaluation/Trajectory Evaluation"
 flashcard_uid: "4a7a9900"
+created: "2026-06-12T18:50:14.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Trajectory evaluation scores the path from task to result: tool calls, observations, and intermediate decisions in order. Outcome scoring cannot distinguish a four-step solve from a lucky recovery after six wrong calls. [[Tool-Call Evaluation|tool-call scoring]] can flag individual mistakes, but it does not explain whether the sequence as a whole was sensible.

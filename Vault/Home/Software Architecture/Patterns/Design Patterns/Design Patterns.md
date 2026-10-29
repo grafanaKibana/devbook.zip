@@ -10,6 +10,8 @@ status: Done
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Design Patterns"
 flashcard_uid: "ddaa5e07"
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 The Gang of Four catalog names 23 recurring object-oriented design problems and the collaborations that address them. A pattern communicates intent and consequences. It is not a ready-made class diagram. Strategy says that an algorithm varies behind a stable contract, while Observer says that an unknown set of dependents receives notifications. The name is useful only when that pressure exists in the code.

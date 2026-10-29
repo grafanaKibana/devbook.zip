@@ -9,6 +9,8 @@ publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Prompt Engineering/In-Context Learning"
 flashcard_uid: "a871bbf2"
+created: "2026-02-28T13:40:02.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 In-context learning changes model behavior through examples in the prompt, without updating model weights. The model still predicts the next token at inference time. Demonstrations shift that prediction by establishing the task, label space, and expected output shape.

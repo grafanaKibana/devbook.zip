@@ -6,6 +6,8 @@ level: ["4"]
 priority: Medium
 status: Ready to Repeat
 publish: true
+created: "2026-07-26T20:18:51.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 [[Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components|Strongly connected components]] partition a digraph into maximal mutually reachable regions. Tarjan's algorithm finds that partition in one DFS by recording each vertex's discovery time, the earliest reachable vertex still on the active stack, and whether it still belongs to a component under construction.

@@ -9,6 +9,8 @@ publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Behavioral/Strategy"
 flashcard_uid: "1335da26"
+created: "2026-03-05T22:12:46.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A route planner can optimize the same trip for time, distance, or toll cost. The navigation workflow stays put while the routing algorithm changes.

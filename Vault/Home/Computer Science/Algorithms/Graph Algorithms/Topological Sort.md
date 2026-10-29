@@ -6,6 +6,8 @@ level: ["4"]
 priority: High
 status: Ready to Repeat
 publish: true
+created: "2026-06-20T05:33:50.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A build system needs an order that respects every dependency. Model each prerequisite as an edge `u → v`, meaning `u` must be built before `v`. A topological sort produces a linear vertex order in which every edge points forward, so `u` appears before `v` for each such edge.

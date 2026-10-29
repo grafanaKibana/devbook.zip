@@ -6,6 +6,8 @@ level: ["4"]
 priority: Medium
 status: Ready to Repeat
 publish: true
+created: "2026-07-09T18:37:04.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A priority queue sometimes has to absorb another queue and keep answering "smallest first". The contiguous layout that makes a binary heap fast to index is what makes it slow to union.

@@ -6,6 +6,8 @@ level: ["3"]
 priority: Medium
 status: Ready to Repeat
 publish: true
+created: "2026-07-18T07:07:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A network write crosses several ownership boundaries before another process can read it. The application gives bytes to a socket. The kernel applies transport and IP processing, queues packets, and prepares device descriptors. The NIC transfers packet data with DMA and emits frames. The receive path reverses those transformations and schedules the destination process.

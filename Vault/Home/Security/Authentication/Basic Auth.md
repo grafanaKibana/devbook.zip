@@ -10,6 +10,8 @@ publish: true
 qard-deck: "Security"
 qard-topic: "Authentication/Basic Auth"
 flashcard_uid: "ebb77730"
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 HTTP Basic authentication sends a reusable user identifier and password in the `Authorization` header. Base64 makes the bytes safe for the header syntax. It provides no confidentiality. RFC 7617 defines the scheme and its protection-space behavior.

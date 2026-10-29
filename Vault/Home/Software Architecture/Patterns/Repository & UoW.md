@@ -9,6 +9,8 @@ publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Repository & UoW"
 flashcard_uid: "54e299f5"
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A **Repository** presents aggregate persistence as a domain-oriented collection. A **Unit of Work** tracks changes made during one business operation and commits them through one transaction boundary. The patterns solve different problems: Repository shapes access, while Unit of Work coordinates the commit.

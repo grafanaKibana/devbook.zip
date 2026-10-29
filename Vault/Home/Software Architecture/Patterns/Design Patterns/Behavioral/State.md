@@ -9,6 +9,8 @@ publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Behavioral/State"
 flashcard_uid: "79f8c824"
+created: "2026-03-05T22:12:46.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A vending machine responds to the same button differently while idle, holding credit, or out of stock. The input stays the same. Its current state decides what the input means.

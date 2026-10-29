@@ -9,6 +9,8 @@ publish: true
 qard-deck: "Programming"
 qard-topic: "NET/CSharp/Fundamentals/Methods"
 flashcard_uid: "a3e803d0"
+created: "2026-02-15T16:27:13.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Methods define where behavior begins and what data may cross the boundary. The parameter list is part of that contract. By-value parameters isolate the caller's variable, `ref` and `out` expose it for reassignment, and `in` exposes storage as readonly. `params` changes how an expanded argument list is collected at the call site.

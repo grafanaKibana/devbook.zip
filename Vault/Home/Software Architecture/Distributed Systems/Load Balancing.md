@@ -6,6 +6,8 @@ level: ["2"]
 priority: High
 status: Done
 publish: true
+created: "2026-02-28T16:25:46.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Load balancing assigns each new connection or request to one eligible backend in a replica pool. It gives clients one stable endpoint while the service gains [[Home/Software Architecture/Distributed Systems/Scalability Patterns/Horizontal Scaling|horizontal scale]] and can remove failed replicas from rotation.

@@ -6,6 +6,8 @@ level: ["4"]
 priority: Medium
 status: Ready to Repeat
 publish: true
+created: "2026-06-20T05:33:50.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 An integer is a fixed-width array of bits — 32 for `int`, 64 for `long`. Any question phrased over those bits (how many are set, which is the lowest, whether a value belongs to a universe of at most 64 items) can be answered by looping bit by bit, or by acting on the whole word at once. AND, OR, XOR, NOT, and the two shifts each transform every bit in a single CPU instruction, and a handful of algebraic identities collapse a per-bit loop into one expression.

@@ -9,6 +9,8 @@ publish: true
 qard-deck: "Networks"
 qard-topic: "Protocols/WebSockets"
 flashcard_uid: "d66e2a8b"
+created: "2026-06-20T08:45:59.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 WebSocket (RFC 6455) is a full-duplex, message-oriented protocol for a long-lived browser/server channel. The common opening handshake upgrades an HTTP/1.1 connection. Extended CONNECT carries the same frame protocol on one HTTP/2 stream, and RFC 9220 adapts that mechanism to HTTP/3.

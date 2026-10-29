@@ -6,6 +6,8 @@ level: ["4"]
 priority: High
 status: Ready to Repeat
 publish: true
+created: "2026-07-18T07:07:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A distributed lock is usually a lease: exclusive ownership for a bounded time, not permanent mutual exclusion. A process can pause longer than its lease, resume, and still believe it owns the resource. Correct designs make stale owners harmless.

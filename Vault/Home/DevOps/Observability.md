@@ -9,6 +9,8 @@ publish: true
 qard-deck: "DevOps"
 qard-topic: "Observability"
 flashcard_uid: "75262be6"
+created: "2026-02-28T16:25:46.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Observability is the ability to infer a system's internal state from the signals it emits. Metrics reveal changes in scale and health, logs preserve discrete events, and traces reconstruct causal work across service boundaries. An alert may expose a symptom; correlation turns that symptom into a defensible explanation.

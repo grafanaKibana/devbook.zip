@@ -10,6 +10,8 @@ publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Context Engineering/Context Engineering"
 flashcard_uid: "0d1d06bc"
+created: "2026-06-11T07:39:53.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Context engineering decides what the model sees and where it appears in the context window. Instructions compete with examples, retrieved evidence, conversation history, and tool traffic for the same finite budget. Once a system gains retrieval or memory, [[Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering|Prompting]] is only one part of an assembled payload.

@@ -9,6 +9,8 @@ publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Evaluation/LLM-as-a-Judge"
 flashcard_uid: "446768f0"
+created: "2026-02-16T18:33:57.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 LLM-as-a-judge uses a model to grade a candidate output against an explicit rubric. It scales semantic evaluation beyond what exact-match checks can measure, but its verdict is another model output rather than ground truth. Reliability has to be measured against human labels.

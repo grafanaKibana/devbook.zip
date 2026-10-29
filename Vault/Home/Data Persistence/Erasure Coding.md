@@ -6,6 +6,8 @@ level: ["3"]
 priority: Medium
 status: Ready to Repeat
 publish: true
+created: "2026-07-18T07:07:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Erasure coding turns an object into `k` data shards and `m` coding shards. With a maximum-distance-separable code such as Reed-Solomon, any `k` surviving shards can reconstruct the object. A `(k, m)` layout can therefore lose as many as `m` shards when failures are independent and placement is correct. Other code families may recover from different shard combinations. The design saves capacity on large durable data sets and pays for it during encoding, degraded reads, and repair.

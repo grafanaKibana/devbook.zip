@@ -10,6 +10,8 @@ priority: High
 qard-deck: "AI & ML"
 qard-topic: "LLM/Agents/Agents"
 flashcard_uid: "ef9c99bb"
+created: "2026-02-10T16:03:55.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 An agentic system gives an LLM control over part of a workflow: calling tools, making decisions, or directing other LLMs. The term "agent" is used loosely, so system design starts with one practical boundary:

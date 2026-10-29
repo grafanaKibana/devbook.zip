@@ -10,6 +10,8 @@ publish: true
 qard-deck: "Programming"
 qard-topic: "NET/Runtime/Memory Leaks"
 flashcard_uid: "e5a2c1b5"
+created: "2026-02-10T16:03:55.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 In managed code, a memory leak is usually a lifetime bug: an object has stopped being useful, but a path from a GC root still reaches it. The collector is working correctly. It cannot infer that a reachable object is logically dead. Native allocations and operating-system handles form a second category because the GC does not release them directly.

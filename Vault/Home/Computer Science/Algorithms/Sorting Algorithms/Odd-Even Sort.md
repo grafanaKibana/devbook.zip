@@ -6,6 +6,8 @@ level: ["4"]
 priority: Low
 status: Not-Started
 publish: true
+created: "2026-08-10T10:51:19.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Odd-even sort, also called odd-even transposition sort, alternates between two adjacent compare-swap phases. The odd phase checks `(1,2), (3,4), …`. The even phase checks `(0,1), (2,3), …`. Pairs within one phase do not overlap, so they can run in parallel without writing the same element.

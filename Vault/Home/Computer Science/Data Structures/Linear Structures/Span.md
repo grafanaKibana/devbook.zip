@@ -6,6 +6,8 @@ level: ["4"]
 priority: Medium
 status: Done
 publish: true
+created: "2026-02-19T22:34:10.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Parsing a 4 KB network buffer often means passing a small middle section to another method. Treating `buffer[100..200]` as a new `byte[]` allocates an array and copies 100 bytes. Repeating that for every packet creates avoidable garbage. A `Span<T>` describes the same section as a reference and a length over the original buffer, so the view is created without copying its bytes.

@@ -1,9 +1,9 @@
 ---
 publish: true
 title: RAG Evaluation
-created: 2026-10-28T12:27:02.634Z
-modified: 2026-10-28T12:33:02.619Z
-published: 2026-10-28T12:33:02.619Z
+created: 2026-06-12T18:21:46.000Z
+modified: 2026-10-28T12:33:42.000Z
+published: 2026-10-28T20:52:55.134Z
 tags:
   - FolderNote
 topic:

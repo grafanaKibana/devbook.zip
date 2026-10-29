@@ -9,6 +9,8 @@ publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Architectural Patterns/Domain-Driven Design"
 flashcard_uid: "9a093ee2"
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Domain-Driven Design (DDD) organizes software around business language and rules. Its strategic patterns separate models that assign different meanings to the same words. Tactical patterns express one model's invariants in code.

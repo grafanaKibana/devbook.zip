@@ -7,6 +7,8 @@ level: ["4"]
 status: Creation
 publish: true
 priority: High
+created: "2026-07-09T18:37:04.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A composite structure keeps the same logical entries in two coordinated representations. Each representation makes a different operation cheap. Every mutation must update both. [[LRU Cache]] is the standard example. A `Dictionary<TKey, Node>` finds key `k` in expected O(1), while a doubly linked `LinkedList<T>` exposes the eviction order in O(1). The shared invariant is simple: every map entry points at a live list node. [[LRU Cache]] shows what fails when the two views disagree.

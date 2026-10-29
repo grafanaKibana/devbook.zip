@@ -6,6 +6,8 @@ level: ["4"]
 priority: Medium
 status: Creation
 publish: true
+created: "2026-07-10T06:24:36.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Boyer-Moore aligns the pattern under the text and compares from right to left. A mismatch exposes both the offending text character and the suffix that already matched. Two precomputed rules turn that information into a safe jump over alignments that cannot succeed.

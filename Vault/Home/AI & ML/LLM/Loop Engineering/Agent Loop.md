@@ -9,6 +9,8 @@ publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Loop Engineering/Agent Loop"
 flashcard_uid: "d747e381"
+created: "2026-02-27T19:33:38.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 An agent loop gives an LLM another move after each result. Within one run, the harness builds the context, asks the model what to do next, performs the chosen action, appends the result, and repeats until a termination check ends the run. That repeated decision is what separates a tool-using agent from a single model call.

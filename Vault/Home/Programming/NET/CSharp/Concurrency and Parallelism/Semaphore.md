@@ -9,6 +9,8 @@ publish: true
 qard-deck: "Programming"
 qard-topic: "NET/CSharp/Concurrency and Parallelism/Semaphore"
 flashcard_uid: "d136a9b7"
+created: "2026-02-19T22:34:10.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A semaphore represents a fixed number of permits. At most N callers may hold one at the same time, which makes the primitive useful for bounded concurrency rather than single-owner exclusion. `SemaphoreSlim` is the usual in-process choice in .NET because waiting can be asynchronous through `WaitAsync`. The operating-system-backed `Semaphore` exists for synchronous and named cross-process coordination.

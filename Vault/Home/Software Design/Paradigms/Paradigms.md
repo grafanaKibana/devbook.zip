@@ -8,6 +8,8 @@ publish: true
 status: Creation
 level: ["4"]
 priority: Medium
+created: "2026-07-05T15:34:15.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A programming paradigm is a model for organizing state and control flow. It determines which unit carries behavior, how larger operations compose, and where side effects appear. C# supports several of these models in the same program. An order can be an object with guarded invariants, its lines can pass through pure transformations, and the completed transaction can emit an event.

@@ -6,6 +6,8 @@ level: ["4"]
 priority: Medium
 status: Ready to Repeat
 publish: true
+created: "2026-06-20T05:33:50.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A circular buffer keeps a bounded slice of a stream, such as the last N log lines or one frame of audio samples. A growable [[Home/Computer Science/Data Structures/Linear Structures/Queue|Queue]] also uses circular indexing, but it occasionally allocates and copies when capacity runs out. A fixed ring chooses its capacity once and moves indices without resizing.

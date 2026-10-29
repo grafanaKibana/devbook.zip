@@ -9,6 +9,8 @@ publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Safety/Guardrails"
 flashcard_uid: "cf9e222c"
+created: "2026-02-16T21:15:26.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Guardrails are controls around an LLM that keep unsafe output from turning into unsafe behavior. They constrain input, accessible context, model output, and runtime actions. One filter cannot cover all four boundaries. A production system needs several independent checks so a missed attack is still contained and leaves evidence for recovery.

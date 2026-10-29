@@ -6,6 +6,8 @@ level: ["3"]
 priority: Medium
 status: Ready to Repeat
 publish: true
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Remote Procedure Call (RPC) exposes operations on another process through a client API. A generated stub or client library serializes the arguments, sends a request, waits for a response, and maps the result back into the caller's language.

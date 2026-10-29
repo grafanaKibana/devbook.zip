@@ -9,6 +9,8 @@ publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Creational/Prototype"
 flashcard_uid: "e5ac3c19"
+created: "2026-03-05T22:12:38.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Prototype creates an object from an existing instance. It fits when construction starts from a configured template or when the concrete runtime type must decide how to copy itself.

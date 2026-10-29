@@ -6,6 +6,8 @@ level: ["1"]
 priority: Medium
 status: Ready to Repeat
 publish: true
+created: "2026-02-19T23:08:30.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Authorization decides whether the current principal may perform an operation. Authentication supplies the identity. Authorization evaluates roles, claims, or policy requirements against that identity. When the decision depends on an object already loaded from storage, the object becomes an additional authorization resource.

@@ -6,6 +6,8 @@ level: ["4"]
 priority: High
 status: Ready to Repeat
 publish: true
+created: "2026-02-28T20:52:28.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Replication maintains copies of data on multiple nodes for availability, disaster recovery, and read distribution. Copying the initial state is the easy part. The lasting contract is how each later write is ordered, acknowledged, replayed, and exposed while nodes fail and networks partition. A weakly specified boundary produces stale reads, acknowledged-write loss, or two writable primaries.

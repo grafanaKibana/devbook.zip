@@ -8,6 +8,8 @@ publish: true
 level: ["3"]
 status: Done
 priority: High
+created: "2026-02-16T18:33:57.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Evaluation checks whether an LLM application behaves well enough to ship. Open-ended output may have several valid forms, so one assertion cannot represent the whole product contract. The practical system combines exact checks with rubric-based scoring, then compares both against a versioned set of cases and production outcomes.

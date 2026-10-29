@@ -11,6 +11,8 @@ level: ["1"]
 qard-deck: "AI & ML"
 qard-topic: "Machine Learning/Types/Types"
 flashcard_uid: "d3a3edaf"
+created: "2026-02-19T22:34:10.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 The useful way to classify machine learning is by its learning signal. Labels, proxy targets, rewards, or the absence of a target determine what the training loop can optimize and how its result can be evaluated. Model architecture comes later.

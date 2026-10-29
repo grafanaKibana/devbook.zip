@@ -10,6 +10,8 @@ publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Architectural Patterns/CQRS"
 flashcard_uid: "45394597"
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 CQRS (Command Query Responsibility Segregation) gives state changes and reads different models. The write side protects business rules. The read side returns data in the shape each use case needs. This separation pays off when one shared model has become a compromise, not merely because reads outnumber writes.

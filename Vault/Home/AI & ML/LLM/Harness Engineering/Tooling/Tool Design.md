@@ -10,6 +10,8 @@ publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Harness Engineering/Tooling/Tool Design"
 flashcard_uid: "4f5034d3"
+created: "2026-02-10T16:03:55.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Tool design turns model output into reliable operations. A tool lets an agent read current data, run a calculation, or request a side effect that text generation cannot perform on its own. A capable model still fails when its callable interfaces are ambiguous or brittle. Anthropic's SWE-bench agent work found a small interface detail with a large effect: switching one tool from relative to absolute file paths removed a recurring failure mode.

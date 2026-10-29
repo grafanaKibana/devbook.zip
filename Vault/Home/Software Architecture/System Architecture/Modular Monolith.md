@@ -9,6 +9,8 @@ publish: true
 qard-deck: "Software Architecture"
 qard-topic: "System Architecture/Modular Monolith"
 flashcard_uid: "63d5a8b8"
+created: "2026-03-06T22:43:56.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A modular monolith keeps one process and one deployment while dividing the codebase into modules that own distinct business capabilities. It captures much of what teams want from [[Home/Software Architecture/System Architecture/Microservices]]: clearer ownership and safer parallel change, without turning every boundary into a network call. For most growing products, that is the sensible default. Boundaries are strengthened inside the application first. A module is distributed only when delivery, scaling, or isolation pressure justifies the operating cost.

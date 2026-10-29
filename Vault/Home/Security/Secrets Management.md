@@ -9,6 +9,8 @@ publish: true
 qard-deck: "Security"
 qard-topic: "Secrets Management"
 flashcard_uid: "f1a26a0e"
+created: "2026-06-20T19:32:24.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A service needs a credential before it can open a database connection, call an API, or sign a token. Copying that credential into source or an image turns every clone and build artifact into another disclosure path. Replacing it without telling running consumers when to reload can instead cause an outage. Secrets management moves credentials from an issuer or store to an authorized workload, limits how long they remain useful, and removes them after expiry or compromise.

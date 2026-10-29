@@ -9,6 +9,8 @@ publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Behavioral/Mediator"
 flashcard_uid: "f5019297"
+created: "2026-03-05T22:12:46.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Air traffic control is a useful Mediator analogy. Pilots coordinate through the tower instead of maintaining direct conversations with every aircraft nearby. A new plane joins one coordination system rather than a web of peer relationships.

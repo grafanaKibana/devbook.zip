@@ -9,6 +9,8 @@ publish: true
 qard-deck: "Networks"
 qard-topic: "Protocols/HTTP 2"
 flashcard_uid: "6284b907"
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 HTTP/2 carries many independent HTTP streams over one TCP connection. Its binary framing removes HTTP/1.1's response-order dependency and HPACK compresses repeated fields. TCP still delivers one ordered byte stream, so a lost segment can delay every HTTP/2 stream on that connection.

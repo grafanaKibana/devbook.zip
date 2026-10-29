@@ -9,6 +9,8 @@ publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Evaluation/Deterministic Checks"
 flashcard_uid: "29dd80f1"
+created: "2026-02-16T21:15:26.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Deterministic checks turn explicit requirements into executable pass/fail rules. They validate structure, required fields, tool permissions, and other contracts without asking another model for an opinion. They run before semantic scorers, so no judge call is paid for when the output is malformed or an agent called a forbidden tool.

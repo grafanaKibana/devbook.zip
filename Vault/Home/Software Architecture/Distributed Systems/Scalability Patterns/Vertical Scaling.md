@@ -6,6 +6,8 @@ level: ["2"]
 priority: High
 status: Creation
 publish: true
+created: "2026-02-28T20:52:28.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Vertical scaling (scale-up) gives one node more CPU, memory, storage throughput, or network capacity. It raises the capacity of the same process or database instance without partitioning work across nodes. That makes it a practical first move when one resource is measured as the bottleneck and a larger instance stays inside the cost and availability budget. [[Home/Software Architecture/Distributed Systems/Scalability Patterns/Scalability Patterns|Scalability Patterns]] covers the wider measurement decision.

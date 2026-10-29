@@ -6,6 +6,8 @@ level: ["4"]
 priority: Low
 status: Not-Started
 publish: true
+created: "2026-08-10T10:51:19.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Stooge sort compares the endpoints of a range and swaps them when they are inverted. For a range longer than two elements, it sorts the first two-thirds, the last two-thirds, then the first two-thirds again. The final call repairs values displaced by the middle call.

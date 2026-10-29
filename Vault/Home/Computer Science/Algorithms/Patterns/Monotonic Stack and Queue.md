@@ -6,6 +6,8 @@ level: ["4"]
 priority: Medium
 status: Creation
 publish: true
+created: "2026-07-10T06:24:36.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 For each daily temperature, the next warmer day may be far ahead. Rescanning the suffix repeats the same comparisons. A monotonic stack keeps only unresolved days, and one warmer value can settle several of them at once.

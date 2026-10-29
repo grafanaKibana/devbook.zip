@@ -6,6 +6,8 @@ level: ["4"]
 priority: Medium
 status: Ready to Repeat
 publish: true
+created: "2026-07-09T18:37:04.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 An order book may hold 100K price levels while an exchange feed inserts and removes thousands of entries per second. Ordered iteration and min/max still need bounded search paths. An [[Home/Computer Science/Data Structures/Trees/AVL Tree|AVL tree]] keeps stricter ±1 height balance and often produces shorter paths, but may rebalance more often, especially during deletion. A red-black tree trades some read depth for cheaper updates.

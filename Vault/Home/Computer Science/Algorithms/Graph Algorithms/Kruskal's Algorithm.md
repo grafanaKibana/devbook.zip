@@ -6,6 +6,8 @@ level: ["4"]
 priority: Medium
 status: Ready to Repeat
 publish: true
+created: "2026-07-11T16:12:59.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A connected, undirected, weighted graph can contain many spanning trees. The [[Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree|Minimum spanning tree]] problem asks for the one with the least total edge weight. Kruskal's algorithm works from an edge list: sort the edges from lightest to heaviest, then accept an edge only when its endpoints still belong to separate components.

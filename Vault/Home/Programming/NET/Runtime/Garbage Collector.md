@@ -10,6 +10,8 @@ publish: true
 qard-deck: "Programming"
 qard-topic: "NET/Runtime/Garbage Collector"
 flashcard_uid: "4b72550a"
+created: "2026-02-10T16:03:55.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 The .NET garbage collector manages memory for objects on the managed heap. It traces references from roots known to the runtime, keeps reachable objects, and reuses space occupied by unreachable ones. Cycles need no special treatment: two objects that reference each other are still collectible when nothing reachable points to either of them.

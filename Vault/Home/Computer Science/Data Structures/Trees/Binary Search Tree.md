@@ -6,6 +6,8 @@ level: ["4"]
 priority: Medium
 status: Ready to Repeat
 publish: true
+created: "2026-07-09T18:37:04.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 An ordered collection needs efficient lookup and insertion without giving up min, max, successor, or range queries over `[10, 90)`. A binary search tree gets those operations from one rule: comparison with each ancestor determines whether a key belongs to the left or right.

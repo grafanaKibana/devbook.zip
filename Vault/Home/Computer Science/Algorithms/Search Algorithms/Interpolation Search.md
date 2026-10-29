@@ -6,6 +6,8 @@ level: ["4"]
 priority: Medium
 status: Creation
 publish: true
+created: "2026-07-10T06:24:36.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A sorted array holds ten million evenly spaced sensor readings, and one reading must be located by value. Binary Search ignores one fact the data offers: when values are exactly evenly spaced, the target's *value* determines its *index*. A reading whose value sits 95% of the way between the smallest and largest one sits 95% of the way through the array.

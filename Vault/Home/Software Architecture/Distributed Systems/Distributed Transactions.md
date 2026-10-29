@@ -9,6 +9,8 @@ publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Distributed Systems/Distributed Transactions"
 flashcard_uid: "c508afc9"
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A distributed transaction coordinates a change across independently failing services or databases. Local atomic commit stops at each participant. A crash or partition between commits can therefore expose a partial result unless the protocol defines recovery.

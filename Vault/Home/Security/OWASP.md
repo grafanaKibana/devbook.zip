@@ -10,6 +10,8 @@ publish: true
 qard-deck: "Security"
 qard-topic: "OWASP"
 flashcard_uid: "c892b874"
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 The Open Worldwide Application Security Project (OWASP) publishes community-maintained security guidance and tools. Its Web Application Security Top 10 is an awareness document: ten broad risk categories selected from contributed data and community analysis. The current released edition is 2025.

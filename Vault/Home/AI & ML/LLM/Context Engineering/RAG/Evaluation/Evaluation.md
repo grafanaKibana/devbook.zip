@@ -11,6 +11,8 @@ status: Done
 qard-deck: "AI & ML"
 qard-topic: "LLM/Context Engineering/RAG/Evaluation/Evaluation"
 flashcard_uid: "4c492fb9"
+created: "2026-06-12T18:21:46.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 RAG can fail before generation starts. It can also retrieve the right evidence and still produce a bad answer. Evaluation therefore separates retrieval from generation, then checks the finished system against the user's task. One blended quality score cannot show which part needs repair.

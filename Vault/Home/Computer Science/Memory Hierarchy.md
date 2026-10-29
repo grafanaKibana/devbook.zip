@@ -6,6 +6,8 @@ level: ["4"]
 priority: High
 status: Creation
 publish: true
+created: "2026-07-18T07:07:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A memory hierarchy keeps the fastest storage closest to the CPU and trades speed for capacity farther away. A load may be satisfied by a register, an L1/L2/L3 cache, or DRAM. A page fault can also bring file-backed or swapped data from local storage into DRAM. No single layer offers register latency, DRAM capacity, and durable storage at an acceptable cost.

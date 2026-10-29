@@ -6,6 +6,8 @@ level: ["4"]
 priority: Medium
 status: Ready to Repeat
 publish: true
+created: "2026-07-10T06:24:36.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A grid pathfinder may value a quick route over the shortest route. A cost-aware search such as [[Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]] counts the distance already travelled and can fan out in directions that lead away from the goal. Greedy Best-First Search ignores that accumulated cost. It orders the frontier only by `h(n)`, the estimated distance remaining, and expands whichever node currently looks closest to the target.

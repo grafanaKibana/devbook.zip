@@ -9,6 +9,8 @@ publish: true
 qard-deck: "Programming"
 qard-topic: "NET/ASP NET Web API/Filters"
 flashcard_uid: "ef27222b"
+created: "2026-02-19T23:08:30.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 MVC filters wrap defined stages of controller execution. They fit cross-cutting behavior that needs action arguments, model state, controller metadata, or the action result. A correlation-ID rule tied only to selected controllers is one example. An application-wide correlation ID usually belongs in middleware.

@@ -9,6 +9,8 @@ publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Agents/Evaluation/Tool-Call Evaluation"
 flashcard_uid: "1d83d54c"
+created: "2026-06-12T18:50:14.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A tool call is where an agent stops describing an action and asks a system to perform it. Failures at this boundary are concrete: the agent can name the wrong tool, send the wrong value in valid JSON, invent a function, or repeat a call that changed nothing.

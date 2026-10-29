@@ -10,6 +10,8 @@ publish: true
 qard-deck: "Data Persistence"
 qard-topic: "SQL/Normalization Denormalization"
 flashcard_uid: "ab5a8eb2"
+created: "2026-02-10T16:03:55.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Normalization uses functional, multivalued, and join dependencies to separate facts that have different keys. The goal is not to remove every repeated value. It is to prevent insertion, update, and deletion anomalies by giving each fact one authoritative dependency boundary. If a customer's current address is one fact, changing it should not require finding every order row that happened to repeat it.

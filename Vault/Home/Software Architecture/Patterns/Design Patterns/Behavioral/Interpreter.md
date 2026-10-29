@@ -9,6 +9,8 @@ publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Behavioral/Interpreter"
 flashcard_uid: "ea266703"
+created: "2026-03-05T22:12:46.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A calculator interprets `2 + 3 * 4` by parsing the expression into a tree and walking that tree according to precedence rules. Each node represents a grammar construct. LINQ providers use the same broad mechanism: a lambda supplied as an expression tree becomes data that a provider can inspect and translate.

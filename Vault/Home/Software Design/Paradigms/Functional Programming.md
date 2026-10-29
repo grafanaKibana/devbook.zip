@@ -9,6 +9,8 @@ publish: true
 qard-deck: "Software Design"
 qard-topic: "Paradigms/Functional Programming"
 flashcard_uid: "76f68e02"
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Functional programming makes data flow explicit. Calculations are expressed as functions whose results depend on their inputs, while database calls, clocks, logging, and other effects stay at the system's edges. That separation reduces the amount of code whose behavior depends on hidden state.

@@ -6,6 +6,8 @@ level: ["4"]
 priority: Medium
 status: Done
 publish: true
+created: "2026-02-19T22:34:10.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A queue preserves arrival order. When a service accepts work faster than one worker can drain it, the oldest waiting job remains at the front.

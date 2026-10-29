@@ -6,6 +6,8 @@ level: ["2"]
 priority: Medium
 status: Done
 publish: true
+created: "2026-06-11T07:39:53.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Calibration asks whether predicted probabilities keep their promises. Among cases scored near 0.7, roughly 70% should be positive. This is separate from discrimination, the ranking property measured by [[ROC-AUC and PR-AUC|ROC-AUC]]. A monotonic transformation can leave AUC unchanged while turning useful probabilities into nonsense. And a model that predicts the base rate for every case can be calibrated while ranking nothing well.

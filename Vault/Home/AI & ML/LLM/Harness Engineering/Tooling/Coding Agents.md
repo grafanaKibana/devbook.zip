@@ -9,6 +9,8 @@ priority: Medium
 qard-deck: "AI & ML"
 qard-topic: "LLM/Harness Engineering/Tooling/Coding Agents"
 flashcard_uid: "4e540b65"
+created: "2026-08-16T07:07:41.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Coding agents put a language model inside a tool loop. The model reads repository state, chooses an action, observes the result, and decides what to do next. That turns code generation into an execution process rather than a one-shot answer.

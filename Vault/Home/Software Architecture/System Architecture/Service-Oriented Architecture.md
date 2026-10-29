@@ -9,6 +9,8 @@ publish: true
 qard-deck: "Software Architecture"
 qard-topic: "System Architecture/Service-Oriented Architecture"
 flashcard_uid: "fad3bcad"
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Service-Oriented Architecture (SOA) exposes business capabilities through explicit network contracts. It became common in enterprise integration because SAP, mainframes, custom applications, and later SaaS products could cooperate without sharing an implementation stack.

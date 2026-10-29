@@ -10,6 +10,8 @@ level: ["4"]
 qard-deck: "Programming"
 qard-topic: "NET/Runtime/Runtime"
 flashcard_uid: "7ed037a5"
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 The .NET runtime executes managed code and supplies the machinery around it: code generation, type loading, garbage collection, exception dispatch, and shared threading services. These mechanisms shape startup, throughput, latency, and memory use, but a symptom attributed to “the runtime” often begins with an application lifetime or blocking decision.

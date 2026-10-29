@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-10-28T12:27:03.003Z
-modified: 2026-10-28T12:27:33.214Z
-published: 2026-10-28T12:27:33.214Z
+created: 2026-06-20T19:32:24.000Z
+modified: 2026-10-28T12:33:42.000Z
+published: 2026-10-28T20:52:55.177Z
 topic:
   - Security
 subtopic:

@@ -6,6 +6,8 @@ level: ["1"]
 priority: Low
 status: Done
 publish: true
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 The automation spectrum is a deployment model for deciding how much authority an AI system receives. It runs from human-only work through observation and assistance to autonomous action. Each step changes the blast radius of a bad prediction.

@@ -9,6 +9,8 @@ publish: true
 qard-deck: "Data Persistence"
 qard-topic: "SQL/Sharding"
 flashcard_uid: "7f93ffe2"
+created: "2026-02-28T20:52:28.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Sharding is horizontal partitioning across distinct storage and ownership domains, commonly separate database instances or clusters. Each shard owns a non-overlapping subset of rows. Unlike table partitioning inside one server, sharding can distribute storage, writes, backups, and failure domains across machines.

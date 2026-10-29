@@ -6,6 +6,8 @@ level: ["4"]
 priority: Medium
 status: Ready to Repeat
 publish: true
+created: "2026-07-09T18:37:04.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A database index serves point lookups and ordered ranges such as every key from `15` through `40`. Separator keys route a lookup down the tree. A range scan has another requirement: once it reaches the first matching leaf, it needs a cheap path to the next one.

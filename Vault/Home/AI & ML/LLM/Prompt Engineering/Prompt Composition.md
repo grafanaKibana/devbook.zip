@@ -9,6 +9,8 @@ publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Prompt Engineering/Prompt Composition"
 flashcard_uid: "a52de874"
+created: "2026-02-28T13:40:02.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A single prompt is often the right design. It becomes the wrong one when a task contains intermediate decisions that must be checked before later work can trust them. Prompt composition splits those decisions across calls, adds context before an answer, or uses a model to revise the prompt itself.

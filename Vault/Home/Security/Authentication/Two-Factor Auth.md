@@ -6,6 +6,8 @@ level: ["3"]
 priority: High
 status: Ready to Repeat
 publish: true
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Two-factor authentication (2FA) requires evidence from two distinct factor categories: knowledge, possession, or inherence. MFA covers two or more factors. Two passwords remain one factor category. A password plus a TOTP authenticator combines knowledge with possession.

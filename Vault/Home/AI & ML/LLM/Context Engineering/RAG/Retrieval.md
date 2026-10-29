@@ -9,6 +9,8 @@ publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Context Engineering/RAG/Retrieval"
 flashcard_uid: "6dc71082"
+created: "2026-02-27T12:56:16.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Retrieval decides which evidence reaches the prompt. Missing evidence caps what a grounded answer can claim, even though prompts and generation models can still improve how fixed evidence is used. The practical problem is to recover enough relevant material without filling the context window with noise or spending the entire latency budget on search.

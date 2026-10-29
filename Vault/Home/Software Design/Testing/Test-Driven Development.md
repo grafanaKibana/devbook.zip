@@ -9,6 +9,8 @@ publish: true
 qard-deck: "Software Design"
 qard-topic: "Testing/Test-Driven Development"
 flashcard_uid: "007a0cef"
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Test-Driven Development (TDD) grows behavior through a short test-first loop. Each cycle selects the next example from a test list, adds a test that fails for the expected reason, makes it pass with the simplest sufficient production change, then improves both code and tests while the suite remains green. The loop supplies regression evidence and makes the caller-facing interface visible before implementation choices harden.
