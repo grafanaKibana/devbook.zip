@@ -271,12 +271,18 @@ Original compiled output.
 
     def test_native_index_waits_for_boolean_readiness_and_rejects_cli_errors(self):
         session = desktop_export.DesktopSession(self.app, Path(self.temp.name), self.root / 'Vault', time.monotonic() + 60)
-        with mock.patch.object(session, 'command', side_effect=['=> false', '=> true']) as command, \
+        with mock.patch.object(session, 'command', side_effect=[desktop_export.EVAL_STARTUP_ERROR, '=> false', '=> true']) as command, \
                 mock.patch.object(desktop_export.time, 'sleep'):
             session.wait_native_index()
-        self.assertEqual(2, command.call_count)
+        self.assertEqual(3, command.call_count)
         with mock.patch.object(session, 'command', return_value='Error: eval is unavailable'):
             with self.assertRaisesRegex(ValueError, 'invalid response: Error: eval'):
+                session.wait_native_index()
+        session.deadline = 1
+        with mock.patch.object(session, 'command', return_value=desktop_export.EVAL_STARTUP_ERROR), \
+                mock.patch.object(desktop_export.time, 'monotonic', side_effect=[0, 2, 2]), \
+                mock.patch.object(desktop_export.time, 'sleep'):
+            with self.assertRaisesRegex(ValueError, 'last response: Error: Command "eval" not found'):
                 session.wait_native_index()
 
     def test_plugin_readiness_waits_for_full_capabilities_and_exact_plugin_set(self):

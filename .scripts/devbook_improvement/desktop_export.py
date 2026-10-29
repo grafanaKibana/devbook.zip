@@ -29,6 +29,7 @@ from . import sync_export
 
 PLUGINS = ('datacore', 'tabsdown', 'obsidian-excalidraw-plugin', 'quartz-syncer')
 BUNDLE_FILES = ('main.js', 'manifest.json', 'styles.css')
+EVAL_STARTUP_ERROR = 'Error: Command "eval" not found. It may require a plugin to be enabled.'
 APP_FLAGS = ('--use-mock-keychain', '--disable-background-networking', '--host-rules=MAP * 0.0.0.0, EXCLUDE localhost',
              '--disable-gpu', '--disable-background-timer-throttling',
              '--disable-renderer-backgrounding', '--disable-backgrounding-occluded-windows')
@@ -267,14 +268,13 @@ class DesktopSession:
         paths = [Path(row['path']).resolve() for row in registry.values()]
         if paths != [self.vault.resolve()]:
             raise ValueError('Obsidian registry includes a vault outside the disposable export')
-        startup_error = 'Error: Command "eval" not found. It may require a plugin to be enabled.'
         while time.monotonic() < self.deadline:
             response = self.command('eval', 'code=JSON.stringify({vaultPath:app.vault.adapter.getBasePath()})')
-            if response.strip() != startup_error:
+            if response.strip() != EVAL_STARTUP_ERROR:
                 break
             time.sleep(min(0.25, max(0, self.deadline - time.monotonic())))
         else:
-            raise ValueError('Obsidian CLI did not finish command registration: ' + startup_error)
+            raise ValueError('Obsidian CLI did not finish command registration: ' + EVAL_STARTUP_ERROR)
         try:
             value = json.loads(response.strip().removeprefix('=> '))
             path = value['vaultPath']
@@ -293,14 +293,15 @@ return files.length>0&&files.every(f=>{
  return entry?.size===f.stat.size&&entry?.mtime===f.stat.mtime&&
  Object.prototype.hasOwnProperty.call(app.metadataCache.resolvedLinks,f.path);
 });})())"""
+        response = 'not queried'
         while time.monotonic() < self.deadline:
             response = self.command('eval', f'code={probe}').strip().removeprefix('=> ')
             if response == 'true':
                 return
-            if response != 'false':
+            if response not in ('false', EVAL_STARTUP_ERROR):
                 raise ValueError('native metadata probe returned an invalid response: ' + response[:240])
-            time.sleep(min(0.25, self.remaining()))
-        raise ValueError('native metadata did not finish indexing before plugin startup')
+            time.sleep(min(0.25, max(0, self.deadline - time.monotonic())))
+        raise ValueError('native metadata did not finish indexing before plugin startup; last response: ' + response[:240])
 
     def wait_plugins(self) -> None:
         probe = """JSON.stringify({vaultPath:app.vault.adapter.getBasePath(),
