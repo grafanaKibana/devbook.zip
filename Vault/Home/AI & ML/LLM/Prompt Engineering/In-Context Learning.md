@@ -1,17 +1,16 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
+topic: [AI & ML]
+subtopic: [LLM]
 summary: "An LLM adapting to a task from prompt examples without weight updates."
-level:
-  - "3"
+level: ["3"]
 priority: Medium
 status: Done
 publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Prompt Engineering/In-Context Learning"
 flashcard_uid: "a871bbf2"
+created: "2026-02-28T13:40:02.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 In-context learning changes model behavior through examples in the prompt, without updating model weights. The model still predicts the next token at inference time. Demonstrations shift that prediction by establishing the task, label space, and expected output shape.
@@ -144,43 +143,43 @@ Zero-shot is the starting baseline. One example is added for a stubborn output c
 <!-- qard-id: c88469f4-babd-4f11-9181-de7a49f1a0f7 -->
 > [!qard]- When should a prompt move from zero-shot to one-shot or few-shot?
 > A prompt moves beyond zero-shot only when evaluation shows a gap that examples can close. Each added example stays only if it improves results on a representative evaluation set.
-> 
+>
 > 1. **Zero-shot:** instructions without examples. This is enough when the instruction and allowed labels already define the task, and it is the cheapest baseline that later prompts must beat.
 > 2. **One-shot:** one complete input-output pair. This fits when the task is understood but the output shape is not, such as JSON keys or field order.
 > 3. **Few-shot:** several diverse examples. These fit when they show decision boundaries better than prose can, such as classes that are easy to confuse. Near-duplicate easy examples add tokens without adding information.
 > 
 > The evaluation gate matters because examples are not free. Each one consumes context on every request. Example choice, order and formatting can also change behavior, so a model upgrade or a reordering can require reevaluation. When inconsistent output comes from an ambiguous instruction or conflicting example formats, more examples can amplify the problem, so fixing the instruction and format comes first.
-> 
+>
 > Examples make a format likely, not guaranteed. A strict output shape still needs structured outputs or schema validation.
-> 
+>
 > Sources: [Min et al., Rethinking the Role of Demonstrations](https://arxiv.org/abs/2202.12837) · [OpenAI Structured Outputs](https://developers.openai.com/api/docs/guides/structured-outputs)
 
 <!-- qard-id: 72a29801-08d8-4f28-a17b-c5049c397cfc -->
 > [!qard]- How does in-context learning work, and how does it differ from fine-tuning and retrieval?
 > In-context learning adapts a pretrained model to a task through instructions and examples placed in the prompt. The model still predicts the next token, and the examples shift that prediction by showing the task structure, the label space and the output format. No weights change, so the effect applies only to requests that include the examples.
-> 
+>
 > | Aspect | In-context learning | Fine-tuning | Retrieval |
 > |---|---|---|---|
 > | What changes | The prompt of one request. | The model's weights, through a training run. | The context, filled at request time with passages from an external store. |
 > | What it mainly supplies | How to perform the task: format, labels and boundary cases. | Stable learned behavior that no longer has to fit in every prompt. | Evidence the model lacks, such as current or private documents. |
 > | How long the effect lasts | Only while the examples are in the prompt. | Until the model is retrained or replaced. | It reflects whatever the index contains when the request runs. |
 > | Main cost | Context tokens on every request, plus sensitivity to example choice and order. | Training data, training runs and a model lifecycle to maintain. | Indexing and retrieval quality; poor retrieval caps answer quality. |
-> 
+>
 > The mechanisms combine: one prompt can contain retrieved passages and a few examples and be sent to a base or fine-tuned model. Examples are still not a reliable substitute for current or private source material, because they demonstrate behavior rather than serving as a dependable store of facts.
-> 
+>
 > Sources: [Brown et al., Language Models are Few-Shot Learners](https://arxiv.org/abs/2005.14165) · [Min et al., Rethinking the Role of Demonstrations](https://arxiv.org/abs/2202.12837) · [OpenAI prompt engineering](https://developers.openai.com/api/docs/guides/prompt-engineering)
 
 <!-- qard-id: 10d2fab2-81ed-4276-8775-ea307e40ec1b -->
 > [!qard]- What can few-shot examples clarify, and what problems do they not solve?
 > Few-shot examples clarify how a task should be performed. They show the output format, the allowed labels, conventions such as casing and field order, and the boundary between easily confused cases. They are not a dependable source of facts and cannot enforce permissions or runtime limits. Their own effect also depends on how they are chosen.
-> 
+>
 > What they do not solve:
-> 
+>
 > - **Missing or changing facts:** examples condition the response to the current prompt without updating model weights. They demonstrate behavior, so they are not a reliable store for facts absent from the model and the supplied context. Current or private evidence comes from trusted context supplied with the request, such as provided documents or retrieved passages.
 > - **Permissions and runtime limits:** prompt text cannot enforce authorization, budgets or loop termination in a multi-step workflow. Those controls run in the runtime, outside the model.
 > 
 > Their effect is also sensitive and costly. Example choice, format and order, as well as the model itself, can change the result, so a change to any of them needs reevaluation. A long example block also uses context needed for the request and its source material.
-> 
+>
 > Sources: [Min et al., Rethinking the Role of Demonstrations](https://arxiv.org/abs/2202.12837) · [OpenAI prompt engineering](https://developers.openai.com/api/docs/guides/prompt-engineering)
 
 # References

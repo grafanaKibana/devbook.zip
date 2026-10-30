@@ -1,17 +1,16 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
+topic: [AI & ML]
+subtopic: [LLM]
 summary: "Pairs queries with their relevant chunks. The hard part is labeling which chunks count."
-level:
-  - "2"
+level: ["2"]
 priority: High
 status: Done
 publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Context Engineering/RAG/Evaluation/Retrieval Evaluation Sets"
 flashcard_uid: "476f3199"
+created: "2026-06-12T18:21:46.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A retrieval evaluation set pairs queries with chunks judged relevant to them so [[Evaluation Metrics|retrieval metrics]] have ground truth. [[Building an Evaluation Set]] covers general dataset construction. This note focuses on the retrieval-specific part: deciding which chunks count, then avoiding distortions introduced by chunk-anchored synthetic questions.
@@ -66,17 +65,17 @@ The structure fits retrieval metrics directly: a query goes in, and the source c
 <!-- qard-id: 68b4fc0a-ef08-471b-92c9-7e9ef9055056 -->
 > [!qard]- How should retrieval metrics and cutoffs be chosen when a query has several relevant chunks?
 > The metric depends on how the relevant chunks contribute to the answer, and the cutoff must match what each pipeline stage actually passes on.
-> 
+>
 > | Relevance shape | Success means | Fitting metric | Misleading metric |
 > |---|---|---|---|
 > | Substitutable: any one chunk answers, as with duplicated policy text | At least one valid chunk appears, ideally early | HitRate@k, plus MRR when the first relevant rank matters | Strict Recall@k, which penalizes missing copies the generator never needed |
 > | Complementary: the answer needs the whole set, as in a comparison | Every required chunk appears | Recall@k or RAGAS Context Recall | HitRate@k, which passes after the first hit and hides the missing pieces |
 > | Graded: some chunks are more useful than others | The most useful chunks rank highest | nDCG@k with graded labels, such as `2` for direct evidence, `1` for support and `0` for irrelevant | Binary recall or precision, which discard the grades |
-> 
+>
 > Example: “How do plans A and B differ on refunds?” needs one policy chunk per plan. A result containing only plan A has `HitRate@5 = 1` but complementary recall of `1/2`.
-> 
+>
 > Cutoffs:
-> 
+>
 > - The final k equals the number of chunks the generator receives. A larger k credits evidence that never reaches the model.
 > - For complementary evidence, k must be at least the size of the required set. Otherwise recall cannot reach `1.0`.
 > - In a retrieve-then-rerank pipeline, first-stage Recall@N shows whether the evidence entered the candidate set, and the final top-k shows what reaches generation. Either measurement alone can hide a loss at the other stage.
@@ -90,12 +89,12 @@ The structure fits retrieval metrics directly: a query goes in, and the source c
 <!-- qard-id: 48f01445-3d19-4e2a-99b4-df08403ad5a5 -->
 > [!qard]- How can chunk-generated questions produce misleading retrieval evaluation labels?
 > A question generated from one chunk is labeled with only that chunk as relevant. That label can miss other valid answers, and the question can be easier to retrieve than real user queries.
-> 
+>
 > - **Missing positives (false negatives):** a duplicate, an overview section or another passage may answer the question equally well. If it is not labeled, a retriever that returns it is scored as wrong, and comparisons between retrievers can be distorted.
 > - **Lexical leakage:** the question may copy distinctive phrases from its source chunk. Exact-term overlap then makes keyword retrieval look stronger than it would on real queries.
 > 
 > Both are risks to check, not certainties. Common controls:
-> 
+>
 > - A second retrieval pass runs each generated question, and the top candidates are judged. Other valid chunks are added to the labels, or questions that stay ambiguous are dropped.
 > - Generation prompts ask for paraphrased, realistically incomplete wording, and the token overlap between each question and its source chunk is inspected.
 > 

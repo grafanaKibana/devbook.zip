@@ -1,13 +1,13 @@
 ---
-topic:
-  - Computer Science
+topic: [Computer Science]
 subtopic: []
 summary: "How multi-byte values map to byte addresses, and how to make byte order explicit at protocol and file boundaries."
-level:
-  - "3"
+level: ["3"]
 priority: Medium
 status: Creation
 publish: true
+created: "2026-07-18T07:07:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Endianness is the order in which a machine or format stores the bytes of a multi-byte value. It does not reverse the bits inside each byte. For the 32-bit value `0x12345678`, the bytes are `12`, `34`, `56`, and `78`. Only their address order changes.

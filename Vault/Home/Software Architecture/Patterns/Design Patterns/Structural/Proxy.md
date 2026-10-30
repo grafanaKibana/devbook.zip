@@ -1,17 +1,16 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - Patterns
+topic: [Software Architecture]
+subtopic: [Patterns]
 summary: "Provides a surrogate for another object to control access, deferring, caching, or authorizing calls transparently."
-level:
-  - "3"
+level: ["3"]
 priority: High
 status: Ready to Repeat
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Structural/Proxy"
 flashcard_uid: "1783cee9"
+created: "2026-03-05T22:12:42.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A proxy stands between a client and another object while exposing the same contract. It can delay expensive work, return a cached result, or reject an unauthorized call before the real object runs. The client depends on the subject interface and does not need a separate calling path for those controls.
@@ -233,15 +232,15 @@ A proxy earns its indirection when access must remain transparent and one policy
 <!-- qard-id: 44706abc-29f7-4553-8079-bdef2d5f0d0e -->
 > [!qard]- What's the difference between a Proxy and a Decorator in terms of intent?
 > Both wrap an object behind the same interface, so their structure can look identical. A Proxy exists to control access to the real subject. A Decorator exists to add a responsibility around the object it wraps.
-> 
+>
 > | Aspect | Proxy | Decorator |
 > |---|---|---|
 > | Intent | Decides whether, when or how the real subject is reached. | Extends what a call does by adding a responsibility around the wrapped object. |
 > | Effect on the real call | Can defer creating the subject, return a cached result or reject the call before the subject runs. | Normally runs added work before or after delegating to the wrapped object. It can also end a call before delegating as part of that responsibility, as validation does when it rejects invalid input. |
 > | Typical forms | Virtual (lazy creation), caching, protection (authorization) and remote proxies. | Logging, validation and metrics layers stacked in a chosen order. |
-> 
+>
 > Mixing both concerns in one wrapper makes ordering and failure behavior harder to reason about. Order matters even with separate wrappers: if a caching proxy wraps an authorization proxy, a cache hit can return data without the authorization check running.
-> 
+>
 > [[Home/Software Architecture/Patterns/Design Patterns/Structural/Proxy#Solution|Proxy: Solution]] · [[Home/Software Architecture/Patterns/Design Patterns/Structural/Proxy#Pitfalls|Proxy: Pitfalls]] · [[Home/Software Architecture/Patterns/Design Patterns/Structural/Decorator#Solution|Decorator: Solution]]
 
 # References

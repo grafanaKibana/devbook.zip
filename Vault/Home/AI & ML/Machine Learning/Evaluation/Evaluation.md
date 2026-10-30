@@ -1,16 +1,15 @@
 ---
 title: Machine Learning Evaluation
-topic:
-  - AI & ML
-subtopic:
-  - Machine Learning
+topic: [AI & ML]
+subtopic: [Machine Learning]
 summary: "Measuring whether a model solves its real problem in production by picking the right metric."
 tags: [FolderNote]
 publish: true
 priority: Medium
-level:
-  - "3"
+level: ["3"]
 status: Done
+created: "2026-02-17T23:29:46.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Evaluation asks a plain question: does the model solve the problem it was built for under production conditions? An offline score is only a proxy for that answer. The work is choosing a metric that matches the decision, knowing what the score hides, and setting a release gate that reflects the cost of mistakes. The dedicated pages on [[Classification Evaluation]], [[ROC-AUC and PR-AUC]], and [[Calibration]] cover the individual metric families in more depth.

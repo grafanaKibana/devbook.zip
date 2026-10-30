@@ -1,14 +1,13 @@
 ---
-topic:
-  - Data Persistence
-subtopic:
-  - SQL
+topic: [Data Persistence]
+subtopic: [SQL]
 summary: "How the database engine serializes conflicting access to enforce isolation — lock modes, granularity, and escalation — and how locking differs from MVCC and from in-process locks."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Creation
 publish: true
+created: "2026-07-15T09:25:25.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A database lock is one mechanism a storage engine uses to serialize conflicting access so concurrent transactions satisfy the selected [[Home/Data Persistence/ACID|ACID]] isolation level. The lock manager records an owner, a logical resource, and an access mode. A compatible request proceeds; an incompatible request waits until the holder releases its lock or the waiter is cancelled, times out, or becomes a deadlock victim.

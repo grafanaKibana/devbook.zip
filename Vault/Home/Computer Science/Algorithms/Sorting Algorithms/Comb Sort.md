@@ -1,14 +1,13 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Bubble sort with a shrinking gap that moves small tail values toward the front sooner."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Creation
 publish: true
+created: "2026-07-10T06:24:36.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 [[Home/Computer Science/Algorithms/Sorting Algorithms/Bubble Sort|Bubble Sort]] swaps adjacent inversions until a pass makes no swap. A small value near the end, called a *turtle*, can move left by only one position per pass. Comb sort gives it a faster route.
@@ -19,13 +18,9 @@ Comb sort keeps compare-and-swap but widens the distance between the elements. I
 
 %% tab: Visualization %%
 
-
-
 ```steptrace
 { "algorithm": "comb-sort", "array": [8, 4, 1, 6, 3, 2], "shrinkFactor": 1.3 }
 ```
-
-
 
 The shrinking gap is the state worth watching: wide pairs move turtles first, then the gap-1 passes remove the remaining adjacent inversions.
 

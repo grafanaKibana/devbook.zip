@@ -1,14 +1,13 @@
 ---
-topic:
-  - Security
-subtopic:
-  - Security
+topic: [Security]
+subtopic: [Security]
 summary: "Filters traffic at host, network, and application boundaries to constrain reachable services and record denied paths."
-level:
-  - "3"
+level: ["3"]
 priority: High
 status: Ready to Repeat
 publish: true
+created: "2026-07-18T07:07:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A firewall permits or denies traffic at a defined boundary. It constrains which services can communicate and supplies evidence about rejected paths. It does not authenticate an application user, repair a vulnerable service, or make an allowed connection trustworthy. The useful question is which source, destination, protocol, direction, and zone transition a named workload requires.

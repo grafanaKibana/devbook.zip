@@ -1,23 +1,20 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "The two fundamental graph traversals: BFS gives distance ordering by layers, DFS gives depth ordering."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Done
 publish: true
+created: "2026-02-20T23:50:18.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Reachability, fewest-hop paths, cycle detection, and component labelling all build on graph traversal. The central decision is which discovered vertex should be expanded next. A queue picks the oldest frontier entry, so breadth-first search widens one distance layer at a time. A stack picks the newest, so depth-first search follows one branch until it runs out and then backtracks. Both use a visited set and a frontier. Their ordering produces different guarantees.
 
-
 %% tabs %%
 
 %% tab: Visualization %%
-
 
 %% tabs %%
 
@@ -27,16 +24,13 @@ Reachability, fewest-hop paths, cycle detection, and component labelling all bui
 {"algorithm":"bfs","start":"A","target":"J","nodes":[{"id":"A"},{"id":"B"},{"id":"C"},{"id":"D"},{"id":"E"},{"id":"F"},{"id":"G"},{"id":"H"},{"id":"I"},{"id":"J"}],"edges":[{"from":"A","to":"B"},{"from":"A","to":"C"},{"from":"A","to":"D"},{"from":"B","to":"E"},{"from":"C","to":"F"},{"from":"C","to":"G"},{"from":"D","to":"I"},{"from":"E","to":"H"},{"from":"H","to":"J"},{"from":"I","to":"J"}]}
 ```
 
-
 Because the queue is FIFO, a node enters the frontier only from one that is a single edge closer to the source, and it leaves before anything discovered later. Every node at distance `k` is therefore dequeued before any node at distance `k+1`. That yields the property BFS is chosen for: the first time it reaches a node is along a path with the fewest edges. Here it dequeues nine nodes — `A, B, C, D, E, F, G, I, H` — before `J`, yet the route it recorded to `J` runs `A → D → I → J`, three edges, the shortest by hop count rather than the four-edge branch through `H`. The frontier holds an entire distance layer at once, so its size tracks the graph's width. Edge weights are invisible to this ordering. A fewest-edges path is a shortest path only when every edge costs the same, which is why weighted graphs fall to [[Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]] instead.
-
 
 %% tab: DFS (Depth-First Search) %%
 
 ```steptrace
 {"algorithm":"dfs","start":"A","target":"J","nodes":[{"id":"A"},{"id":"B"},{"id":"C"},{"id":"D"},{"id":"E"},{"id":"F"},{"id":"G"},{"id":"H"},{"id":"I"},{"id":"J"}],"edges":[{"from":"A","to":"B"},{"from":"A","to":"C"},{"from":"A","to":"D"},{"from":"B","to":"E"},{"from":"C","to":"F"},{"from":"C","to":"G"},{"from":"D","to":"I"},{"from":"E","to":"H"},{"from":"H","to":"J"},{"from":"I","to":"J"}]}
 ```
-
 
 A stack is LIFO, so the most recently discovered neighbour is expanded next and the search commits to one branch before touching its siblings. From `A` it takes the first edge to `B`, then descends `B → E → H → J`, reaching the target after five visits — half of BFS's count — because that branch happened to contain `J`. But it arrives along `A → B → E → H → J`, four edges, not the three-edge route: depth-first order finds *a* path quickly and guarantees nothing about its length. The order in which nodes finish — the moment a node has no unexplored neighbours and backtracks — is what powers [[Home/Computer Science/Algorithms/Graph Algorithms/Topological Sort|Topological Sort]], [[Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components|Strongly Connected Components]], and directed-edge classification.
 
@@ -213,7 +207,6 @@ Cycle detection in a *directed* graph needs more than a visited flag. A back edg
 > Both implementations mark on discovery, so each node enters its frontier once. DFS pushes neighbours in reverse to preserve the adjacency-list order on tree-shaped branches. Cross edges can still make an eager explicit-stack order differ from recursive DFS.
 
 # Comparison
-
 
 BFS fits distance and fewest-edge queries while a full layer still fits in memory. DFS fits problems driven by finish order or edge type, including topological sorting and cycle detection. Recursive or iterator-frame DFS keeps the active frontier to the current path. The eager explicit-stack form avoids call-stack overflow but may store more pending neighbours. Neither traversal solves weighted shortest paths. Once edge costs differ, [[Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]] supplies the required cost ordering for non-negative weights.
 

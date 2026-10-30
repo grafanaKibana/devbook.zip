@@ -1,15 +1,14 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - Distributed Systems
+topic: [Software Architecture]
+subtopic: [Distributed Systems]
 summary: "Once a network partition happens, a distributed data system can guarantee at most one of strong consistency or availability."
-level:
-  - "2"
+level: ["2"]
 priority: High
 status: Done
 
 publish: true
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 CAP describes the choice forced by a network partition. A replicated data system can preserve **strong consistency** or guarantee a non-error response in finite time to every request received by a non-failing node, but it cannot guarantee both while the replicas cannot communicate.

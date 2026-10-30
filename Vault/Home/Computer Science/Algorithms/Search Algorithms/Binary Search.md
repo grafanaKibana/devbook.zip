@@ -1,41 +1,32 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Finds a target in a sorted array by repeatedly halving the search range."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Done
 publish: true
+created: "2026-02-20T23:50:18.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A sorted array may contain a million user IDs, yet Binary Search needs only about twenty comparisons to find one. Each comparison uses the ordering to discard half of the remaining range.
 
 That reduction has two requirements. The values must be ordered, and the middle element must be cheap to reach by index. Without ordering, a comparison says nothing about the untouched half. Without random access, reaching each midpoint may cost as much as scanning the range.
 
-
-
 %% tabs %%
 
 %% tab: Visualization %%
 
-
-
 ```steptrace
 {"algorithm":"binary-search","array":[4,9,13,18,22,27,31,38,45,52,58,64,70,77,83,91],"target":83}
 ```
-
-
 
 The trace searches for `83` in a sorted 16-element array.
 
 The first probe inspects `38` at index 7. Because `38 < 83` and the array is sorted, indices 0 through 7 are no longer candidates; the next range begins at index 8. Repeating that elimination reaches `83`.
 
 Binary Search does not change the comparison itself; ordering makes each result eliminate an entire half-range that [[Home/Computer Science/Algorithms/Search Algorithms/Linear Search|Linear Search]] cannot discard.
-
-
 
 At the start of every loop, the target—if it exists—must lie inside the inclusive range `[left, right]`. The middle comparison preserves that invariant:
 

@@ -1,17 +1,16 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - Patterns
+topic: [Software Architecture]
+subtopic: [Patterns]
 summary: "Provides an interface for creating families of related objects without specifying their concrete classes, keeping every product in a family compatible."
-level:
-  - "3"
+level: ["3"]
 priority: High
 status: Done
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Creational/Abstract Factory"
 flashcard_uid: "de6b36c6"
+created: "2026-03-05T22:12:38.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 An application may need a matching set of provider-specific objects: a connection, command, and adapter for one database provider, or several payment components built for the same gateway. Selecting the family once is safer than repeating the provider choice at every construction site.
@@ -200,36 +199,36 @@ Abstract Factory fits several product types that must vary together across more 
 <!-- qard-id: 6f975d28-4f0a-4253-9a65-ae9d44e14b87 -->
 > [!qard]- What should happen when an Abstract Factory gains a new product type such as `IFraudDetector`?
 > It depends on whether every family must provide the new product. If so, the product is added to the abstract factory interface and implemented in every concrete factory. If the capability varies independently of the family, it belongs in a separate collaborator instead of the factory.
-> 
+>
 > - **Required in every family:** the factory interface gains a method such as `CreateFraudDetector()`, and each provider's factory returns its own implementation. A concrete factory without that method fails to compile, so no family is left incomplete. This is the pattern's known cost: each new product type changes the interface and every family.
 > - **Independent of the family:** when fraud detection does not have to match the payment provider, it is injected on its own rather than forced into every family's factory.
 > 
 > A default no-op implementation avoids the compile errors but hides a missing required behavior. For a safety check such as fraud detection, payments would then proceed unchecked without any error.
-> 
+>
 > Splitting the factory interface is justified only when consumers use genuinely separate families; arbitrary splitting hides the fact that the products must vary together.
-> 
+>
 > [[Home/Software Architecture/Patterns/Design Patterns/Creational/Abstract Factory#Pitfalls|Abstract Factory pitfalls]] · [[Home/Software Architecture/Patterns/Design Patterns/Creational/Abstract Factory#Solution|Abstract Factory implementation]]
 
 <!-- qard-id: 5afe8a29-5689-48d4-9785-7b2ee30124b1 -->
 > [!qard]- When is Abstract Factory overkill compared to a simpler approach?
 > Abstract Factory is overkill when only one product type varies, when a single provider is fixed, or when the products can be chosen independently. Injecting each product directly is simpler in those cases.
-> 
+>
 > The pattern adds a factory interface and one concrete factory per family. That layer pays off only when several product types must vary together. Choosing a payment provider, for example, must also choose its matching processor, receipt generator and refund handler, and the factory makes that choice once. Without such a coordinated compatibility requirement, the extra indirection buys nothing.
-> 
+>
 > The deciding pressure is coordinated variation, not a particular number of providers or classes.
-> 
+>
 > [[Home/Software Architecture/Patterns/Design Patterns/Creational/Abstract Factory#Tradeoffs|Abstract Factory tradeoffs]]
 
 <!-- qard-id: 3a40a979-9d08-465f-9aa9-dc46dd4aa503 -->
 > [!qard]- How does Abstract Factory relate to the DI container in modern .NET?
 > They solve different problems and are often combined. A DI container is a general object factory that builds object graphs from registrations. An Abstract Factory is a typed creation boundary: choosing one concrete factory chooses a whole family of related products.
-> 
+>
 > - **What the container provides:** each service is resolved from its own registration. Registrations can switch several services together, but `IServiceProvider` does not check that the resolved implementations belong to the same provider, so a Stripe processor can sit next to a PayPal receipt generator by mistake.
 > - **What the factory adds:** consumers depend on one interface, such as `IPaymentProviderFactory`, and each concrete factory creates all of its family's products. The compatibility decision lives in one place instead of being spread across registrations.
 > - **How they combine:** the container registers and injects the chosen concrete factory, for example with `AddSingleton<IPaymentProviderFactory>(...)`. One factory registered at startup fixes one family for the whole application; choosing a family per request needs a registry or strategy that selects among factories.
 > 
 > The factory centralizes compatibility but does not prove it. Its shared product interfaces cannot show that the returned implementations come from one provider; provider-specific types can move more of that check into the type system.
-> 
+>
 > [.NET dependency injection](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection/overview) · [[Home/Software Architecture/Patterns/Design Patterns/Creational/Abstract Factory#Framework examples|Abstract Factory framework examples]] · [[Home/Software Architecture/Patterns/Design Patterns/Creational/Abstract Factory#Pitfalls|Abstract Factory pitfalls]]
 
 # References

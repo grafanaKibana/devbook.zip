@@ -1,14 +1,13 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Runs forward and backward searches that meet."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Creation
 publish: true
+created: "2026-07-10T06:24:36.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Finding the shortest path between two specific vertices `s` and `t` with a single BFS means expanding vertices out to distance `d` from `s`. With branching factor `b` and shortest-path length `d`, that frontier grows as `b^d`. At `b = 10, d = 6`, the estimate is about a million vertices, most of them nowhere near `t`.
@@ -17,7 +16,6 @@ Bidirectional search launches a second BFS backward from `t` over reversed edges
 
 The saving has conditions. The goal must provide one or more enumerable states that can seed the backward search. The graph must also expose predecessors through a reverse adjacency list or an invertible move operator. A goal predicate alone is useless when its matching states cannot be listed.
 
-
 %% tabs %%
 
 %% tab: Visualization %%
@@ -25,7 +23,6 @@ The saving has conditions. The goal must provide one or more enumerable states t
 ```steptrace
 {"algorithm":"bidirectional-search"}
 ```
-
 
 Two frontiers advance in parallel. `F` holds the vertices reached from `s` along forward edges; `B` holds the vertices reached from `t` along reversed edges. Each side records the distance at which it first reached every vertex.
 

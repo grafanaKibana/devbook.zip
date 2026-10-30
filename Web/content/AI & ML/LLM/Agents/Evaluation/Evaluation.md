@@ -1,9 +1,9 @@
 ---
 publish: true
 title: Agent Evaluation
-created: 2026-09-12T17:17:13.820Z
-modified: 2026-09-12T17:17:13.820Z
-published: 2026-09-12T17:17:13.820Z
+created: 2026-06-12T18:21:46.000Z
+modified: 2026-10-28T12:33:42.000Z
+published: 2026-10-28T20:52:55.133Z
 tags:
   - FolderNote
 topic:

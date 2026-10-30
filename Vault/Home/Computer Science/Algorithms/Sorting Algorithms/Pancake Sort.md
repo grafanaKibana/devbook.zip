@@ -1,14 +1,13 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Places each suffix maximum using only reversals of prefixes that begin at index zero."
-level:
-  - "4"
+level: ["4"]
 priority: Low
 status: Not-Started
 publish: true
+created: "2026-08-10T10:51:19.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Pancake sort works under an unusual constraint: the only legal move reverses a prefix beginning at index `0`. To place the largest value in the unsorted region, one flip brings it to the front and another moves it to the region's right boundary. Then the boundary shrinks.

@@ -1,11 +1,8 @@
 ---
-topic:
-  - Security
-subtopic:
-  - Authentication
+topic: [Security]
+subtopic: [Authentication]
 summary: "The simplest HTTP scheme: Base64-encoded credentials in the Authorization header (RFC 7617)."
-level:
-  - "4"
+level: ["4"]
 priority: High
 status: Ready to Repeat
 
@@ -13,6 +10,8 @@ publish: true
 qard-deck: "Security"
 qard-topic: "Authentication/Basic Auth"
 flashcard_uid: "ebb77730"
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 HTTP Basic authentication sends a reusable user identifier and password in the `Authorization` header. Base64 makes the bytes safe for the header syntax. It provides no confidentiality. RFC 7617 defines the scheme and its protection-space behavior.
@@ -110,9 +109,9 @@ Basic earns its place when interoperability requires it and its coarse credentia
 <!-- qard-id: 343f05cb-bfd5-4906-bf26-e72f11083c42 -->
 > [!qard]- When is Basic Auth acceptable in production?
 > Basic Auth is acceptable in production only for a narrow, controlled integration that needs it. A typical case is a legacy or machine-to-machine interface whose protocol requires Basic. Its coarse credential lifecycle must be acceptable, and the credential must be protected on every hop.
-> 
+>
 > Basic itself provides none of this protection, so the deployment must supply it:
-> 
+>
 > - **TLS on every hop:** without it, anyone on the path can read the Base64 credential.
 > - **A distinct credential per client:** one client can be disabled without rotating every other client.
 > - **Narrow authorization:** the credential can perform only the operations its integration needs.
@@ -120,7 +119,7 @@ Basic earns its place when interoperability requires it and its coarse credentia
 > - **Redaction and abuse controls:** the `Authorization` header stays out of logs and traces, and repeated failed attempts are rate-limited.
 > 
 > Basic is a poor default for interactive login and broad external APIs. Every request presents the primary secret, and revocation means disabling the account or changing its password. Workload identity, mutual TLS or OAuth client authentication usually give a better credential lifecycle. Being on an internal network does not make Basic safe either.
-> 
+>
 > Sources: [RFC 7617: The 'Basic' HTTP Authentication Scheme](https://www.rfc-editor.org/rfc/rfc7617.html)
 
 # References

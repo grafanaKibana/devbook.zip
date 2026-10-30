@@ -1,14 +1,13 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - Distributed Systems
+topic: [Software Architecture]
+subtopic: [Distributed Systems]
 summary: "Five system designs compared through their ordering, state ownership, recovery, and scaling constraints."
-level:
-  - "4"
+level: ["4"]
 priority: High
 status: Ready to Repeat
 publish: true
+created: "2026-07-18T11:06:07.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Start a system design with the fact the system cannot afford to lose. Chat must preserve conversation order. Collaborative editing must converge. A notification service needs an honest record of each policy decision and delivery attempt. Search must identify the content and serving decisions behind a result while indexes keep changing. Trading must admit and match orders in one deterministic sequence.

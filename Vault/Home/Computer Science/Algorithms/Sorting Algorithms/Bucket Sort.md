@@ -1,14 +1,13 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Scatters elements into range buckets, sorts each, then concatenates. Works best when keys are uniformly distributed."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Creation
 publish: true
+created: "2026-07-10T06:24:36.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 For numeric keys in a known, bounded range, magnitude can identify a range slice directly. Bucket Sort divides that range into `m` equal-width buckets, maps each key with one arithmetic calculation, sorts within each bucket, then concatenates the buckets in range order.
@@ -18,8 +17,6 @@ The mapping works because the bounds are known. `bucketIndex = floor(m Â· (key â
 %% tabs %%
 
 %% tab: Visualization %%
-
-
 
 ```steptrace
 { "algorithm": "bucket-sort", "array": [0.78, 0.17, 0.39, 0.26, 0.72, 0.94], "bucketCount": 5 }

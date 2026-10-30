@@ -1,17 +1,16 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
+topic: [Programming]
+subtopic: [NET]
 summary: "C#'s common way to iterate a sequence, plus iterators and yield."
-level:
-  - "4"
+level: ["4"]
 priority: High
 status: Ready to Repeat
 publish: true
 qard-deck: "Programming"
 qard-topic: "NET/CSharp/Fundamentals/Foreach"
 flashcard_uid: "2e8ba405"
+created: "2026-02-15T16:27:13.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 `foreach` asks a source for one item at a time. Most sources implement `IEnumerable<T>`, but the compiler also accepts types that expose the required enumerator pattern without implementing the interface. This is why arrays, collections, spans, and custom stack-only enumerators can all use the same loop syntax.
@@ -94,20 +93,20 @@ Two boundaries are easy to miss:
 <!-- qard-id: 23508898-cc73-4289-ba2c-ab026d0258b2 -->
 > [!qard]- What must a type provide to work with `foreach`?
 > A type works with `foreach` in either of two ways. It implements `IEnumerable<T>` or `IEnumerable`, or it matches the enumerator pattern that the compiler looks for. The interface is the usual reusable contract, but it is not required.
-> 
+>
 > The pattern has two parts:
-> 
+>
 > - **The source** has a public parameterless `GetEnumerator()` method. That method can also be an extension method.
 > - **The returned enumerator** has a public `Current` property and a public parameterless `MoveNext()` method that returns `bool`.
 > 
 > The compiler binds to these members rather than to an interface, so a type can be iterated without implementing either interface. Arrays also receive specialized compiler handling.
-> 
+>
 > [Microsoft: iteration statements](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/iteration-statements)
 
 <!-- qard-id: cdfb0d9a-b75e-43e1-b6ed-ac7ea0da25c7 -->
 > [!qard]- How does `foreach` work under the hood?
 > The compiler rewrites `foreach` into lower-level code, and the result depends on the source type. For the general enumerator pattern, the rewrite is roughly:
-> 
+>
 > ```csharp
 > var enumerator = source.GetEnumerator();
 > try
@@ -123,17 +122,15 @@ Two boundaries are easy to miss:
 >     // Disposes the enumerator when it requires disposal.
 > }
 > ```
-> 
+>
 > 1. `GetEnumerator()` is called once, before the first element.
 > 2. Each `MoveNext()` call advances to the next element and returns `false` when the sequence is exhausted.
 > 3. `Current` supplies that element, which is assigned to the iteration variable before the body runs.
 > 4. When the enumerator requires disposal, the `finally` block disposes it, including after `break` or an exception. A handwritten `while (MoveNext())` loop has to provide that cleanup itself, or the enumerator's cleanup does not run.
 > 
 > No single generated shape fits every source. Arrays, for example, can be lowered to index-based code without an enumerator.
-> 
+>
 > [Microsoft: iteration statements](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/iteration-statements)
-
-
 
 <!-- qard-id: 0cfeffdf-d33d-4c50-a677-d2f470332fd4 -->
 > [!qard]- When is `yield return` useful compared with a materialized collection?

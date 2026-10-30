@@ -1,14 +1,13 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Data Structures
+topic: [Computer Science]
+subtopic: [Data Structures]
 summary: "An implicit complete binary tree with a parent-child priority rule, keeping the best item at the root."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Ready to Repeat
 publish: true
+created: "2026-02-20T23:50:18.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A scheduler holds thousands of pending tasks. New work keeps arriving, and the earliest deadline must remain cheap to retrieve.

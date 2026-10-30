@@ -1,11 +1,11 @@
 ---
 title: Home
 summary: A .NET and AI engineering knowledge base with notes, examples, and questions.
-tags:
-  - FolderNote
-  - MetricsIgnore
+tags: [FolderNote, MetricsIgnore]
 publish: true
 icon: home
+created: "2026-07-05T15:34:15.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 ```datacorejsx
@@ -277,7 +277,6 @@ p.dc-progress-note { margin: 0.6rem 0 0; color: var(--text-muted, var(--darkgray
                 </li>
               ))}
             </ul>
-            <p class="dc-progress-note">Progress weights each note by stage: {stagesFor(oByStatus).map((seg) => `${seg.label} ${seg.weight}%`).join(", ")}.</p>
           </div>
           <div class="dc-progress-visual" role="img" aria-label={`${oPct}% overall progress`}>
             <svg viewBox="0 0 120 120" aria-hidden="true">

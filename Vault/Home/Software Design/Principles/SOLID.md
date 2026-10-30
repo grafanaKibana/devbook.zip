@@ -1,14 +1,13 @@
 ---
-topic:
-  - Software Design
-subtopic:
-  - Principles
+topic: [Software Design]
+subtopic: [Principles]
 summary: "Five design principles governing how classes relate and where new behavior goes."
-level:
-  - "4"
+level: ["4"]
 priority: High
 status: Ready to Repeat
 publish: true
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 SOLID names five principles for managing change, dependencies, and behavioral contracts in object-oriented design. They are diagnostic tools, not a demand for an interface around every class. Each principle identifies a different failure mode:

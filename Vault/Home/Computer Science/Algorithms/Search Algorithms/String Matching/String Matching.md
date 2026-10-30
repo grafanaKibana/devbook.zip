@@ -1,15 +1,14 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Finding a pattern inside text, chosen by how many patterns you match and what you preprocess."
 tags: [FolderNote]
 publish: true
 priority: Medium
-level:
-  - "4"
+level: ["4"]
 status: Creation
+created: "2026-07-12T07:33:07.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 String matching finds occurrences of a pattern inside a text. A naive scan costs `O(n·m)` because it may restart the comparison after every mismatch. Faster methods keep the useful part of that failed comparison and avoid checking characters whose relationship is already known.

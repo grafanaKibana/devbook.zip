@@ -1,14 +1,13 @@
 ---
-topic:
-  - Security
-subtopic:
-  - Authentication
+topic: [Security]
+subtopic: [Authentication]
 summary: "How time-based one-time passwords are provisioned, generated, validated, and recovered."
-level:
-  - "3"
+level: ["3"]
 priority: High
 status: Ready to Repeat
 publish: true
+created: "2026-07-18T07:07:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 TOTP is a possession-factor protocol built on a secret shared by an authenticator and a verifier. Both derive the same time-step counter, compute HMAC, and truncate the result into a short decimal code. No network connection is needed to generate it. The code strengthens password-only login while remaining phishable and replayable inside the verifier's acceptance window.

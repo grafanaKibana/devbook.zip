@@ -1,14 +1,13 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Data Structures
+topic: [Computer Science]
+subtopic: [Data Structures]
 summary: "A self-adjusting BST that rotates each accessed node to the root, adapting the structure to access locality."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Creation
 publish: true
+created: "2026-07-11T16:12:59.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 An ordered dictionary may receive a strongly uneven access stream: a small working set is touched repeatedly while most keys stay cold.

@@ -1,14 +1,13 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
+topic: [AI & ML]
+subtopic: [LLM]
 summary: "Embedding and detecting a keyed statistical pattern in LLM token choices without adding visible markers."
-level:
-  - "3"
+level: ["3"]
 priority: Medium
 status: Ready to Repeat
 publish: true
+created: "2026-08-24T13:55:31.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 LLM text watermarking leaves a keyed statistical pattern in the token choices made during generation. Nothing visible is added to the response: there are no hidden characters, metadata fields, or extra tokens. The detector instead asks whether the sequence of choices is unusually consistent with the sampling decisions produced by a particular watermark key.

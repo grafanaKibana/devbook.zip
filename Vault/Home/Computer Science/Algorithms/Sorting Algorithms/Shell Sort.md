@@ -1,14 +1,13 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Runs insertion sort over decreasing gaps so elements jump toward their final positions."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Creation
 publish: true
+created: "2026-07-10T06:24:36.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A reverse-sorted array exposes insertion sort's movement cost. An element that belongs `k` positions away needs `k` one-slot shifts to get there. Across a fully inverted array, the total shift work equals the number of inversions.
@@ -21,13 +20,9 @@ Shell sort reduces that long-distance disorder first. It runs insertion sort ove
 
 %% tab: Visualization %%
 
-
-
 ```steptrace
 { "algorithm": "shell-sort", "array": [9, 8, 7, 6, 5, 4, 3, 2, 1], "gaps": [4, 1] }
 ```
-
-
 
 The shrinking gap is the transition worth animating: after the `h = 4` lanes move distant values close to their destinations, the `h = 1` pass only resolves the remaining local inversions.
 

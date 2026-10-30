@@ -1,15 +1,14 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Comparing sorting algorithms by stability, memory tradeoffs, and typical runtime behavior to guide production choices."
 tags: [FolderNote]
 publish: true
 priority: Medium
-level:
-  - "4"
+level: ["4"]
 status: Creation
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Choosing a sorting algorithm is mostly a choice among guarantees. Stability preserves the input order of equal keys. Extra memory may buy predictable merges, while in-place partitioning usually improves locality. Key structure can remove the comparison bound entirely.

@@ -1,14 +1,13 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Data Structures
+topic: [Computer Science]
+subtopic: [Data Structures]
 summary: "A bounded cache that evicts the least-recently-used item through a hash map plus doubly linked list."
-level:
-  - "4"
+level: ["4"]
 priority: High
 status: Ready to Repeat
 publish: true
+created: "2026-06-20T05:33:50.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A bounded cache must find key `k` and choose a victim when no free slot remains. Keeping entries only in recency order makes the victim obvious, but finding an arbitrary key still requires a scan.

@@ -1,17 +1,16 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
+topic: [AI & ML]
+subtopic: [LLM]
 summary: "Producing reliable, grounded, correctly formatted output by controlling sampling, evidence, and structure."
-level:
-  - "2"
+level: ["2"]
 priority: High
 status: Done
 publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Generation"
 flashcard_uid: "b145e45f"
+created: "2026-02-27T18:09:30.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Generation turns a prompt and its context into output. Producing text is easy. Producing text that is reliable, grounded, and usable by the next system is the engineering problem. Sampling controls affect token choice, evidence limits what the answer may claim, and structure determines whether another program can consume it.
@@ -135,23 +134,23 @@ Mitigation: semantic content is validated in addition to schema compliance. Crit
 <!-- qard-id: 62368673-03b1-4384-a272-2b350d505198 -->
 > [!qard]- Why is adjusting `temperature` and `top_p` at the same time discouraged?
 > Both settings control sampling randomness by reshaping the same next-token distribution. When both change at once, a change in output cannot be attributed to either setting. Tuning is therefore clearer when one setting moves while the other stays at its default.
-> 
+>
 > - `temperature` rescales the logits before sampling. Lower values concentrate probability on the most likely tokens; higher values flatten the distribution and admit more unlikely tokens.
 > - `top_p` (nucleus sampling) samples only from the smallest set of tokens whose cumulative probability reaches the threshold, cutting off the low-probability tail.
 > 
 > Both settings change how often low-probability tokens appear, so their effects overlap rather than controlling separate properties. OpenAI's API reference currently recommends altering one or the other, not both. This is tuning guidance, not a hard limit. Advice differs across providers, and some models fix or reject these parameters, so the deployed model's documentation and task evaluation decide the final settings.
-> 
+>
 > Sources: [OpenAI API reference: Create chat completion](https://developers.openai.com/api/reference/go/resources/chat/subresources/completions/methods/create) · [Hugging Face Transformers: Generation](https://huggingface.co/docs/transformers/main_classes/text_generation)
 
 <!-- qard-id: 353c5f64-fbcc-46f9-9fc3-3b72603bb9ee -->
 > [!qard]- Why can a response with valid citation markers still contain unsupported claims?
 > A citation marker only links a claim to a source location. It does not show that the cited passage supports the claim. Markers on some sentences also say nothing about sentences that have none.
-> 
+>
 > - **Wrong support:** the model generates the citation as well as the claim, so it can attach a real, on-topic passage to a statement that the passage does not entail. For example, a passage describing a refund policy may not contain the refund limit that the answer attributes to it.
 > - **Missing support:** a response can mix cited sentences with uncited claims drawn from the model's own memory.
 > 
 > Citation validity and claim support are therefore separate checks. Support is checked after generation by splitting the answer into claims and testing each claim against its cited passage, through human review or an automated verifier matched to the risk. Natural Language Inference classifiers and fact-checking models such as MiniCheck are automated options. They also make errors, so their decisions need validation against labeled examples.
-> 
+>
 > Sources: [Anthropic: Citations](https://platform.claude.com/docs/en/build-with-claude/citations) · [Tang et al.: MiniCheck](https://aclanthology.org/2024.emnlp-main.499/)
 
 # References

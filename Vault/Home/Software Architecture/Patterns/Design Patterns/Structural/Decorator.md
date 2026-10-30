@@ -1,17 +1,16 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - Patterns
+topic: [Software Architecture]
+subtopic: [Patterns]
 summary: "Decorator attaches responsibilities to an object dynamically by wrapping it in objects sharing the same interface, composable in any order."
-level:
-  - "3"
+level: ["3"]
 priority: High
 status: Done
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Structural/Decorator"
 flashcard_uid: "a1eefa19"
+created: "2026-03-05T22:12:42.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Pizza toppings work as layers over one base. Each layer changes the result without changing the dough underneath, and different combinations can be assembled from the same pieces.
@@ -241,9 +240,9 @@ Decorator fits optional behaviors that share a contract and need explicit compos
 
 > [!qard]- What is the Decorator pattern?
 > Decorator adds behavior to an object by wrapping it in another object that implements the same interface. The wrapper holds a reference to the wrapped component, normally delegates calls to it and runs its own work before or after delegating. A wrapper can also end a call without delegating, as a validation decorator does when it rejects invalid input. Because the wrapper still satisfies the original contract, clients use it exactly as they would use the component, and wrappers can be stacked.
-> 
+>
 > Example: a core `IOrderHandler` saves and processes an order, and separate decorators add validation, logging and metrics:
-> 
+>
 > ```csharp
 > IOrderHandler handler =
 >     new ValidationOrderHandler(
@@ -253,17 +252,17 @@ Decorator fits optional behaviors that share a contract and need explicit compos
 >                 metrics),
 >             logger));
 > ```
-> 
+>
 > A call enters the outermost wrapper first and moves inward unless a layer ends it, and results return outward through the layers it passed. Each concern lives in its own class, so adding one, such as idempotency, means adding another decorator rather than editing the core handler.
-> 
+>
 > Order is part of the behavior. With validation outside logging, invalid orders are rejected before they are logged. With the layers reversed, every attempt is logged. The costs are more small classes and deeper call stacks to trace.
-> 
+>
 > [[Home/Software Architecture/Patterns/Design Patterns/Structural/Decorator#Solution|Decorator: Solution]] · [[Home/Software Architecture/Patterns/Design Patterns/Structural/Decorator#Pitfalls|Decorator: Pitfalls]]
 
 <!-- qard-id: b1ec2977-973b-48db-bb3b-05f0458c246d -->
 > [!qard]- How does ASP.NET Core Middleware implement the Decorator pattern?
 > Middleware that delegates to the rest of the pipeline follows the Decorator shape: it wraps the remaining pipeline and adds behavior around it, while every step keeps the same request-handling contract.
-> 
+>
 > - **Shared contract:** each step is a request delegate that handles an `HttpContext`.
 > - **Wrapped component:** a wrapping middleware receives `next`, the delegate for the rest of the pipeline.
 > - **Added behavior:** code that runs before calling `next` acts on the request, and code that runs after it acts on the response.
@@ -271,30 +270,30 @@ Decorator fits optional behaviors that share a contract and need explicit compos
 > - **Boundary:** a terminal delegate, such as one added with `Run`, receives no `next` and ends the pipeline. In the Decorator lens it is the innermost component rather than a decorator.
 > 
 > As with stacked decorators, order is part of the behavior. A wrapping middleware can also end the request without calling `next`. This short-circuiting means later middleware never runs, so placement decides which middleware still sees the request.
-> 
+>
 > Decorator is one useful lens on this structure. The ASP.NET Core documentation describes it as a pipeline of request delegates.
-> 
+>
 > [ASP.NET Core middleware](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/middleware/?view=aspnetcore-10.0) · [[Home/Software Architecture/Patterns/Design Patterns/Structural/Decorator#Common .NET Examples|Decorator: Common .NET Examples]]
 
 <!-- qard-id: 3e762d01-9459-47e1-bc64-481597348c90 -->
 > [!qard]- When should Decorator replace inheritance for added behavior?
 > Decorator fits when the added behavior is optional, must be combined with other behaviors in a chosen order, or must wrap a type that cannot be subclassed. An example is a sealed or third-party implementation of an interface the client uses. Inheritance fits when the new type is a stable subtype of its base class rather than an add-on around it.
-> 
+>
 > | Aspect | Decorator | Inheritance |
 > |---|---|---|
 > | How behavior is attached | A wrapper implements the same interface, holds the wrapped object and runs work before or after delegating to it. | A subclass extends or overrides members of its base class. |
 > | Combining behaviors | Separate wrappers, such as validation, logging and metrics, are stacked when objects are composed, and the order is explicit there. | Combinations are fixed in the class hierarchy when the code is written. |
 > | Coupling | Depends only on the shared contract, not on a base-class implementation. | Ties the added behavior to the base-class implementation. |
 > | Cost | Adds an object, a delegation call and another layer to trace while debugging. | No wrapper object or extra delegation layer. |
-> 
+>
 > [[Home/Software Architecture/Patterns/Design Patterns/Structural/Decorator#Solution|Decorator: Solution]] · [[Home/Software Architecture/Patterns/Design Patterns/Structural/Decorator#Tradeoffs|Decorator: Tradeoffs]]
 
 <!-- qard-id: 9f76db55-9738-4abe-9446-a565d621dc2d -->
 > [!qard]- What's the performance cost of a deep decorator chain?
 > Each layer can add a cost to every call that passes through it: one more method call that delegates to the inner object. That cost is not fixed. It depends on the generated code, and runtime optimizations such as devirtualization and inlining can reduce it. A wrapper written as an `async` method that awaits the inner call can also carry the bookkeeping of an asynchronous method, which suspends and resumes it when the inner task has not yet completed. The potential overhead grows with the number of layers.
-> 
+>
 > Whether it matters depends on the path. On a CPU-bound hot path called very often, the extra calls can be measurable. When the wrapped operation performs I/O, such as a database or HTTP call, the I/O can dominate and make the wrapper overhead small by comparison. Profiling the specific path shows whether the layers are significant. Collapsing layers without that evidence gives up the separation of concerns the decorators provide.
-> 
+>
 > [Asynchronous programming scenarios (C#)](https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/async-scenarios) · [Performance Improvements in .NET 10](https://devblogs.microsoft.com/dotnet/performance-improvements-in-net-10/) · [[Home/Software Architecture/Patterns/Design Patterns/Structural/Decorator#Pitfalls|Decorator: Pitfalls]]
 
 # References

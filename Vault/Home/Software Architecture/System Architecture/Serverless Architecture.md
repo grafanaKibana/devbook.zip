@@ -1,14 +1,13 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - System Architecture
+topic: [Software Architecture]
+subtopic: [System Architecture]
 summary: "Uses provider-managed functions, containers, messaging, storage, or databases with service-defined scaling and billing."
-level:
-  - "3"
+level: ["3"]
 priority: Medium
 status: Ready to Repeat
 publish: true
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Serverless architecture moves capacity provisioning, patching, and much of the availability control plane to a provider. The category includes functions, managed containers, queues, object storage, and databases with service-defined scaling and billing.

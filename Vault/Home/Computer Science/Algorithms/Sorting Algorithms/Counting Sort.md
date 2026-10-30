@@ -1,14 +1,13 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Tallies integer keys in a small range and places them directly without comparisons."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Creation
 publish: true
+created: "2026-07-10T06:24:36.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Ten million exam scores still use only 101 possible keys. That small domain turns each score into an array index, so a score of 73 is also an address. Counting Sort tallies the keys in `[0, k]`, converts those counts into end positions with a running sum, and writes each element into the block reserved for its value. The constraint is strict: the keys must be integers, or map to integers, over a range small enough to allocate `k + 1` counters.
@@ -17,13 +16,9 @@ Ten million exam scores still use only 101 possible keys. That small domain turn
 
 %% tab: Visualization %%
 
-
-
 ```steptrace
 { "algorithm": "counting-sort", "array": [2, 5, 3, 0, 2, 3, 0, 3] }
 ```
-
-
 
 #### Why the Value is an Address
 

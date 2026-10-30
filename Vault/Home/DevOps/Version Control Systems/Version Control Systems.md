@@ -1,16 +1,15 @@
 ---
-topic:
-  - DevOps
-subtopic:
-  - Version Control Systems
+topic: [DevOps]
+subtopic: [Version Control Systems]
 summary: "Tracks file changes over time, enabling collaboration, branching, merging, and reverting."
-level:
-  - "4"
+level: ["4"]
 priority: High
 tags: [FolderNote]
 
 publish: true
 status: Ready to Repeat
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A version control system (VCS) records versions of tracked files so a team can compare, branch, merge, and restore repository history. Git is distributed: a normal clone contains a local object database and refs, so most history operations do not depend on the hosting service.

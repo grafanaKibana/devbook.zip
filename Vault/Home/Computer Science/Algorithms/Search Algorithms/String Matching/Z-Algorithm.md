@@ -1,14 +1,13 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Computes the longest prefix match starting at each index in one forward pass using a sliding Z-box."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Creation
 publish: true
+created: "2026-07-10T06:24:36.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 The Z-algorithm computes how much of a string's prefix reappears at every position. Its **Z-array** stores that result: `z[i]` is the length of the longest substring beginning at `i` that matches a prefix of `S`.
@@ -17,22 +16,15 @@ For `S = "aabaab"`, the array is `[·, 1, 0, 3, 1, 0]`. The substring at index 3
 
 A window `[l, r]`, called the **Z-box**, tracks the prefix match that reaches furthest right. Positions inside the box can reuse earlier work whenever their mirrored match ends before the box boundary.
 
-
-
 The trace keeps the prefix, current Z-box, mirror source, and committed Z values aligned while each entry is copied or extended.
 
 %% tabs %%
 
 %% tab: Visualization %%
 
-
 ```steptrace
 {"algorithm":"z-algorithm","text":"aabcaabxaaaz"}
 ```
-
-
-
-
 
 The pass carries one interval, the box `[l, r]`: the match with the largest right endpoint proven equal to a prefix, so `S[l..r] == S[0..r-l]`. Processing index `i` takes one of two paths.
 
@@ -63,8 +55,6 @@ Z = [10, 1, 0, 0, 5, 1, 0, 0, 1, 0]
 ```
 
 Indices 5, 6, and 7 copy their values from mirrors inside `[4, 8]` without rechecking the characters already covered by the box.
-
-
 
 Single-pattern search reduces to one Z-array. Build `S = P + sep + T`, where `sep` is a character occurring in neither `P` nor `T`, and compute `z` over `S`. Any index `i` in the `T` region with `z[i] >= |P|` marks an occurrence: the substring at `i` reproduces the whole pattern prefix in `|P|` characters that lie entirely inside `T`. A proper separator caps every text-region Z-value at `|P|` — no match can run across the boundary — so here `>=` and `==` coincide.
 
@@ -158,8 +148,6 @@ The search space row counts both the temporary concatenated string and its Z-arr
 That cap disappears when the separator occurs in the input. Searching for `P = "ab"` in `T = "aba"` with `sep = 'a'` builds `"abaaba"`, whose Z-array is `[6, 0, 1, 3, 0, 1]`. The occurrence at text position 0 maps to index 3 and has `z[3] = 3`, not `2`, because the match continues across the join. A strict `z[i] == m` test misses this valid occurrence. `FindAll` uses `z[i] >= m`. From a text-region index, those first `m` matching characters lie wholly inside `T`, so the result remains correct for any separator. A sentinel outside the alphabet, such as `\0` for ordinary text or `-1` for an integer sequence, simply restores the useful cap.
 
 **A mirror reaching the box edge.** Inside the box, `z[i-l]` is exact only when its match ends before `r`. If `z[i-l] >= r - i + 1`, copying it would claim equality for characters past `r` that have never been compared. In `S = "aaabaaa"`, index 2 mirrors index 1, where `z[1] = 2`. Copying that value would say `"ab"` matches the prefix `"aa"`. The actual value is `z[2] = 1`. At the edge, the mirror supplies a lower bound. The algorithm starts with the box remainder and resumes comparison at `r + 1`.
-
-
 
 # Diagram and C# Implementation
 

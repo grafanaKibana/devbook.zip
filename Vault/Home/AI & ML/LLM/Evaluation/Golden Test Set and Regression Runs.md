@@ -1,14 +1,13 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
+topic: [AI & ML]
+subtopic: [LLM]
 summary: "Golden sets detect broad regressions. Targeted suites isolate specific high-risk failures."
-level:
-  - "3"
+level: ["3"]
 priority: Medium
 status: Done
 publish: true
+created: "2026-02-16T21:15:26.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Every prompt, model, or retrieval change needs a repeatable comparison with the current baseline. A golden test set provides that stable sample. Targeted suites sit beside it and isolate failures such as prompt injection, unsupported claims, or unsafe tool use.

@@ -1,14 +1,13 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Data Structures
+topic: [Computer Science]
+subtopic: [Data Structures]
 summary: "A hierarchical spatial encoding that turns longitude and latitude into sortable cell prefixes for candidate lookup."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Creation
 publish: true
+created: "2026-07-18T07:07:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A geohash converts a longitude/latitude point into a base-32 string whose prefixes name progressively smaller rectangular cells. It is an encoding and query-partitioning technique, not a distance metric or a complete spatial index. The practical advantage is that a two-dimensional location can become a one-dimensional key for a sorted index, cache, partition key, or aggregation bucket.

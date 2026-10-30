@@ -1,14 +1,13 @@
 ---
-topic:
-  - Networks
-subtopic:
-  - Protocols
+topic: [Networks]
+subtopic: [Protocols]
 summary: "A typed API query language and execution model that lets clients select response fields."
-level:
-  - "3"
+level: ["3"]
 priority: High
 status: Ready to Repeat
 publish: true
+created: "2026-07-18T07:07:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 GraphQL defines a typed query language and an execution model for APIs. A client selects fields from a server-owned schema. The server validates the operation, executes resolvers, and returns a response shaped like that selection. It fits domains where several clients need different projections and governing one shared schema costs less than adding a REST representation for every screen.

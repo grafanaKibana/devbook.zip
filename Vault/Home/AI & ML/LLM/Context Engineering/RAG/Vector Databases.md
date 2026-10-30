@@ -1,17 +1,16 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
+topic: [AI & ML]
+subtopic: [LLM]
 summary: "Stores embeddings and serves fast approximate nearest-neighbor search, trading recall for speed."
-level:
-  - "2"
+level: ["2"]
 priority: High
 status: Done
 publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Context Engineering/RAG/Vector Databases"
 flashcard_uid: "797606ed"
+created: "2026-06-11T07:39:53.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A vector database stores [[Embeddings]] with metadata and searches them by proximity. It sits under dense [[Retrieval]], where the indexed [[Chunking|chunks]] must be searched in milliseconds even when the collection contains millions of vectors.
@@ -127,12 +126,12 @@ HNSW is a practical starting point for a typical text corpus. IVF or IVF-PQ beco
 <!-- qard-id: 81dd4838-6663-4a61-8bbb-b11ffb11d8d8 -->
 > [!qard]- Why do vector indexes use approximate nearest-neighbor search instead of exact search?
 > Exact search must compare the query with every stored vector, so its work grows with the size of the collection. An approximate nearest-neighbor (ANN) index examines only a promising subset of vectors. This often cuts query work sharply, at the cost of sometimes missing true nearest neighbors.
-> 
+>
 > - **Exact (flat) search:** one distance computation per stored vector, about N × d arithmetic for N vectors of dimension d. The results are exact, and the cost is acceptable for small collections.
 > - **ANN search:** the index structure limits which vectors are compared. An IVF index clusters the vectors and searches only the clusters nearest the query. An HNSW index walks a proximity graph toward closer neighbors. Parameters such as `nprobe` for IVF or `efSearch` for HNSW control how much is examined, trading latency for recall.
 > 
 > Missed neighbors raise no error. Recall is therefore measured against exact-search results as ground truth, on realistic queries and filters, and the index settings are chosen to meet both the recall and the latency targets. The N × d figure describes arithmetic work, not a guaranteed wall-clock time.
-> 
+>
 > [Faiss indexes (Faiss wiki)](https://github.com/facebookresearch/faiss/wiki/Faiss-indexes)
 
 # References

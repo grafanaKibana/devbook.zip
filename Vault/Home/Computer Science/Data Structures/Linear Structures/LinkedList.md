@@ -1,14 +1,13 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Data Structures
+topic: [Computer Science]
+subtopic: [Data Structures]
 summary: "A doubly linked list that splices around held node references at the cost of locality."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Done
 publish: true
+created: "2026-02-19T22:34:10.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Linked lists trade direct addressing for cheap local rewiring. When code already holds the node beside an edit, a doubly linked list inserts or removes by changing a fixed number of pointers. No neighboring value moves.

@@ -1,14 +1,13 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Builds a minimum spanning tree by accepting the lightest edges that join separate components."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Ready to Repeat
 publish: true
+created: "2026-07-11T16:12:59.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A connected, undirected, weighted graph can contain many spanning trees. The [[Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree|Minimum spanning tree]] problem asks for the one with the least total edge weight. Kruskal's algorithm works from an edge list: sort the edges from lightest to heaviest, then accept an edge only when its endpoints still belong to separate components.
@@ -22,7 +21,6 @@ The cycle test does the real work. A [[Home/Computer Science/Data Structures/Gra
 ```steptrace
 {"algorithm":"kruskal"}
 ```
-
 
 For edges `AB=1`, `BC=2`, `AC=3`, `CD=4`, the initial components are `{A}`, `{B}`, `{C}`, `{D}`.
 

@@ -1,17 +1,16 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
+topic: [Programming]
+subtopic: [NET]
 summary: "When execution paths wait forever on resources each other holds, halting progress."
-level:
-  - "4"
+level: ["4"]
 priority: High
 status: Ready to Repeat
 publish: true
 qard-deck: "Programming"
 qard-topic: "NET/CSharp/Concurrency and Parallelism/Deadlocks"
 flashcard_uid: "f9642578"
+created: "2026-02-18T20:04:43.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A deadlock is a closed waiting cycle: every participant holds something another participant needs, so none can move. In .NET this can happen with ordinary locks or when synchronous code blocks an async continuation. The process may stay healthy enough to answer a liveness probe while the affected work has stopped completely.
@@ -192,36 +191,36 @@ public async Task UpdateAsync()
 <!-- qard-id: fedf92a4-d6ae-45c5-a26f-25debb161739 -->
 > [!qard]- What are the four Coffman conditions for a resource deadlock?
 > The four conditions are mutual exclusion, hold and wait, no preemption and circular wait. A classical resource deadlock occurs only when all four hold at the same time.
-> 
+>
 > 1. **Mutual exclusion:** a resource can be held by only one participant at a time, as with a lock.
 > 2. **Hold and wait:** a participant keeps the resources it holds while waiting for another.
 > 3. **No preemption:** a resource cannot be taken from its holder; only the holder can release it.
 > 4. **Circular wait:** the waiting participants form a closed chain, each waiting for a resource held by the next.
 > 
 > For example, thread T1 holds lock A and waits for lock B, while T2 holds B and waits for A. Both locks are exclusive, each thread holds one while waiting, neither lock can be taken away, and the two waits close a cycle.
-> 
+>
 > Because all four conditions are required, breaking any one prevents this kind of deadlock. Which condition is practical to break depends on the resources and design. For locks, a single global acquisition order that every code path follows makes circular wait impossible.
-> 
+>
 > [Coffman, Elphick and Shoshani: System Deadlocks](https://doi.org/10.1145/356586.356588) · [Microsoft: Dynamic-link library best practices](https://learn.microsoft.com/en-us/windows/win32/Dlls/dynamic-link-library-best-practices)
 
 > [!qard]- How can lock-based deadlocks be prevented in .NET code?
 > Lock-based deadlocks are prevented by making a closed wait cycle impossible, or by ensuring that a thread does not wait forever while it holds locks.
-> 
+>
 > - **One global lock order:** every code path that needs several locks acquires them in the same order, such as A before B. No thread can then hold B while waiting for A, so circular wait cannot form.
 > - **Bounded acquisition:** a timed `Monitor.TryEnter` lets a thread give up instead of waiting forever. On failure, the thread releases any locks it already holds, then reports an error or retries after a randomized delay. The timeout does not take the lock from its owner, and identical retry timing could make two threads keep colliding (livelock).
 > - **Short critical sections:** I/O, blocking waits and calls into unknown library code stay outside the lock. Code called while a lock is held may take its own locks, which adds an ordering dependency that is hard to see.
 > - **Private lock objects:** a `private readonly` lock object keeps the lock under the component's control. Locking on `this`, a `Type` or a string lets unrelated code take the same lock and join the ordering.
 > 
 > For example, if `First` locks A then B while `Second` locks B then A, two threads can each hold one lock and wait for the other. Changing `Second` to lock A then B removes the cycle.
-> 
+>
 > [Microsoft: Dynamic-link library best practices](https://learn.microsoft.com/en-us/windows/win32/Dlls/dynamic-link-library-best-practices) · [Microsoft: `lock` statement](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/lock)
 
 <!-- qard-id: 17deb6e3-a3c1-4265-9148-1a96302dca83 -->
 > [!qard]- When does blocking on an incomplete task deadlock a UI thread?
 > Blocking deadlocks a UI thread when the task cannot complete without running code on that same UI thread. This happens when an `await` inside the task captured the UI `SynchronizationContext`, which runs continuations only on the UI thread.
-> 
+>
 > The cycle forms in five steps:
-> 
+>
 > 1. A UI event handler calls an async method, such as `LoadDataAsync()`.
 > 2. Inside it, `await` on incomplete I/O captures the UI context, and the method returns an incomplete task.
 > 3. The handler calls `.Result` or `.Wait()` on that task, blocking the UI thread.
@@ -229,22 +228,22 @@ public async Task UpdateAsync()
 > 5. The UI thread waits for the task, while the task waits for the UI thread. Neither can proceed.
 > 
 > Awaiting through the whole call chain breaks the cycle, because the handler yields the UI thread instead of blocking it. `ConfigureAwait(false)` in library code avoids capturing the context for those awaits, but it does not make blocking on asynchronous code a safe general bridge.
-> 
+>
 > Without a single-threaded context, as in ASP.NET Core, this particular cycle does not form. Blocking still holds a thread-pool thread for each waiting call and can starve the pool under load.
-> 
+>
 > [Microsoft: Common async bugs](https://learn.microsoft.com/en-us/dotnet/standard/asynchronous-programming-patterns/common-async-bugs) · [Microsoft: Synchronous wrappers for async methods](https://learn.microsoft.com/en-us/dotnet/standard/asynchronous-programming-patterns/synchronous-wrappers-for-asynchronous-methods)
 
 <!-- qard-id: 7c1fe64c-c539-4207-887a-8a8ad04d355b -->
 > [!qard]- How can a production .NET deadlock be diagnosed?
 > A production deadlock is diagnosed from a process dump by finding a closed wait-for cycle, in which each blocked thread or task waits for something that another member of the cycle holds or must run.
-> 
+>
 > 1. **Dump:** `dotnet-dump collect` saves the memory and thread state of the hung process.
 > 2. **Blocked threads:** in `dotnet-dump analyze`, `clrstack -all` shows every managed stack. Deadlocked threads sit in lock acquisitions such as `Monitor.Enter`, or in synchronous task waits such as `.Result` or `.Wait()`.
 > 3. **Monitor owners:** `syncblk` lists which thread owns each monitor. Matching each waiting thread to the lock it wants, and that lock to its owner, shows whether the waits close a cycle.
 > 4. **Async waits:** for a thread blocked on a task, the analysis also needs the task's pending continuation and the context or scheduler it must run on. For example, a continuation bound to the UI context cannot run while the UI thread itself is blocked on that task.
 > 
 > The cycle is the evidence. A high thread count, or many blocked threads without a cycle, points to a different problem such as thread-pool starvation.
-> 
+>
 > [Microsoft: Debug a .NET deadlock](https://learn.microsoft.com/en-us/dotnet/core/diagnostics/debug-deadlock) · [Microsoft: dotnet-dump](https://learn.microsoft.com/en-us/dotnet/core/diagnostics/dotnet-dump)
 
 # References

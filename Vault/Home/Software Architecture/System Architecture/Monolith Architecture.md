@@ -1,17 +1,16 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - System Architecture
+topic: [Software Architecture]
+subtopic: [System Architecture]
 summary: "An application whose modules are released and deployed together as one unit."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Ready to Repeat
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "System Architecture/Monolith Architecture"
 flashcard_uid: "4248833e"
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A monolith has one deployment boundary. Its modules are versioned, released, and rolled back together. One process and one database are common, but neither defines the style.
@@ -103,21 +102,21 @@ Moving a module out of process changes the failure model. A method call that onc
 <!-- qard-id: 221241e0-41e0-4964-8f8a-bdb66c1c129c -->
 > [!qard]- What evidence justifies extracting a service from a monolith?
 > Extraction is justified when a boundary is already able to stand alone and recurring, measured pressure requires it to. Without both conditions, extraction moves the coupling onto the network instead of removing it.
-> 
+>
 > **The boundary is ready:**
-> 
+>
 > - one team owns the capability and its changes;
 > - other code uses an explicit, stable contract instead of internal classes;
 > - the capability exclusively owns its data, and no other module reads or writes those tables directly.
 > 
 > **There is recurring pressure for independence:**
-> 
+>
 > - its changes repeatedly wait for unrelated releases;
 > - its load needs to scale separately from the rest of the application;
 > - its failures or resource use need runtime isolation from other features.
 > 
 > When the pressure is missing, the network hop buys no autonomy that matters. The coupling that was visible in code becomes operational coupling, with added latency, partial failure and another deployment to run. When the boundary is not ready, shared tables or paired releases make the extracted service part of a distributed monolith.
-> 
+>
 > [Azure: Microservices architecture style](https://learn.microsoft.com/en-us/azure/architecture/guide/architecture-styles/microservices)
 
 # References

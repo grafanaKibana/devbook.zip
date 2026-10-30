@@ -1,17 +1,16 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
+topic: [AI & ML]
+subtopic: [LLM]
 summary: "Project-level config files telling AI coding agents how a specific repository works."
 publish: true
 status: Done
-level:
-  - "2"
+level: ["2"]
 priority: Medium
 qard-deck: "AI & ML"
 qard-topic: "LLM/Harness Engineering/Tooling/Agent Instructions"
 flashcard_uid: "fef75b53"
+created: "2026-08-16T07:07:41.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Agent instruction files describe how work gets done in one repository. They capture facts the code cannot reliably explain on its own: which commands are safe, where boundaries sit, what conventions matter, and how a change is proved complete.
@@ -80,7 +79,7 @@ A long architecture essay is a poor substitute. It consumes context, hides the f
 <!-- qard-id: 3b175756-d560-4eee-93e8-03057eb3c3c2 -->
 > [!qard]- Why use path-specific instruction files for coding agents, and what must be checked before relying on them?
 > Path-specific instruction files apply guidance only to files whose path matches a pattern. An agent working on those files receives the local constraints it needs, while guidance for unrelated parts of the repository stays out of its context. Before relying on them, the selected agent's documented rules for loading, precedence and conflict handling must be checked, because those rules are tool-specific.
-> 
+>
 > - **Example:** in GitHub Copilot CLI, a path-specific file declares an `applyTo` pattern. When the agent works on a matching file, those instructions are combined with the repository-wide instructions.
 > - **Precedence:** GitHub's documentation describes this combination but does not define a general precedence order for conflicting instructions. If two files name different test commands, the outcome depends on runtime behavior rather than on a documented rule.
 > - **Maintainability rule:** local files written as refinements of the root guidance, rather than reversals, do not depend on how a runtime resolves conflicts. This is a maintenance discipline, not a portable precedence guarantee.

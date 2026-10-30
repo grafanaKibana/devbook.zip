@@ -1,14 +1,13 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Repeatedly swaps adjacent out-of-order elements. A slow teaching baseline for why better sorts exist."
-level:
-  - "4"
+level: ["4"]
 priority: Low
 status: Ready to Repeat
 publish: true
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 When adjacent swaps are the only permitted move, every value travels one position at a time. Bubble Sort repeatedly scans left to right, compares `a[i]` with `a[i+1]`, and swaps when `a[i] > a[i+1]`. The running maximum keeps moving right and reaches its final slot by the end of the pass.
@@ -18,8 +17,6 @@ That movement is uneven. A large value can cross the array in one pass, while a 
 %% tabs %%
 
 %% tab: Visualization %%
-
-
 
 ```steptrace
 {"algorithm":"bubble-sort","array":[8,3,5,1,9,2,7,4]}

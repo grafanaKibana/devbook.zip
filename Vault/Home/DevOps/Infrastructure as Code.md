@@ -1,13 +1,13 @@
 ---
-topic:
-  - DevOps
+topic: [DevOps]
 subtopic: []
 summary: "Provisioning infrastructure through version-controlled files, making environments repeatable and auditable."
-level:
-  - "3"
+level: ["3"]
 priority: High
 status: Ready to Repeat
 publish: true
+created: "2026-06-20T19:32:24.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Infrastructure as Code (IaC) records intended infrastructure in version-controlled definitions. A tool compares that desired state with observed resources, proposes create, update, replace, or delete operations, then applies the approved change. The definition makes intent reviewable; provider behavior, credentials, quotas, existing data, and regional capacity still affect the result.

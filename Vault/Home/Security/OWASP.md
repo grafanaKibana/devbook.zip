@@ -1,11 +1,8 @@
 ---
-topic:
-  - Security
-subtopic:
-  - Security
+topic: [Security]
+subtopic: [Security]
 summary: "The non-profit behind the OWASP Top 10 web security risk checklist."
-level:
-  - "4"
+level: ["4"]
 priority: High
 status: Ready to Repeat
 
@@ -13,6 +10,8 @@ publish: true
 qard-deck: "Security"
 qard-topic: "OWASP"
 flashcard_uid: "c892b874"
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 The Open Worldwide Application Security Project (OWASP) publishes community-maintained security guidance and tools. Its Web Application Security Top 10 is an awareness document: ten broad risk categories selected from contributed data and community analysis. The current released edition is 2025.
@@ -96,9 +95,9 @@ The Top 10 serves as a seed for threat models and verification. Architecture-spe
 <!-- qard-id: f7c6f0d2-4f4d-48d4-a0b1-0312f6c4437c -->
 > [!qard]- How should a .NET application prevent SQL injection?
 > A .NET application prevents SQL injection by keeping untrusted input out of the SQL text. Values are bound as parameters, and any dynamic part of the query structure is chosen from a fixed allowlist.
-> 
+>
 > **Why parameters work:** when input is concatenated into a query, the database parses it as SQL. An email value such as `x' OR '1'='1` then closes the string literal and adds a condition that is always true. A parameterized query contains only a placeholder, and the value is bound to it as data. Whatever characters the value contains, it cannot close a literal or add a clause.
-> 
+>
 > ```csharp
 > // Unsafe: the input becomes part of the SQL text
 > context.Users.FromSqlRaw("SELECT * FROM Users WHERE Email = '" + email + "'");
@@ -106,7 +105,7 @@ The Top 10 serves as a seed for threat models and verification. Architecture-spe
 > // Safe (EF Core 7.0+): the interpolated value becomes a DbParameter
 > context.Users.FromSql($"SELECT * FROM Users WHERE Email = {email}");
 > ```
-> 
+>
 > - **Library calls:** an ORM or data-access helper protects only when it actually creates parameters. The two calls above look similar, but only `FromSql` turns `email` into a parameter. `FromSqlRaw` sends the concatenated text as written.
 > - **Identifiers and structure:** parameters represent values, not table names, column names or sort direction. A dynamic sort column is therefore mapped from user input to known SQL through a closed allowlist, such as `"name"` → `Name`, and any other input is rejected.
 > - **Least privilege:** a database account with narrow permissions limits what injected SQL can do, but the injected SQL still runs. It reduces impact and does not replace parameterization.

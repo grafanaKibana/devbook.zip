@@ -1,15 +1,14 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Algorithms to traverse, rank, and optimize graph relationships: reachability, shortest paths, connectivity, and flow."
 tags: [FolderNote]
 publish: true
-level:
-  - "4"
+level: ["4"]
 status: Creation
 priority: High
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Graph algorithms turn edges into answers about reachability, dependency order, path cost, connectivity, or capacity. The required output comes first. Direction, weight semantics, and input density then narrow the valid choices. Breadth-first search finds a minimum-hop route, while Dijkstra minimizes total weight and becomes invalid as soon as an edge can be negative.

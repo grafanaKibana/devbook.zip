@@ -1,17 +1,16 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - Patterns
+topic: [Software Architecture]
+subtopic: [Patterns]
 summary: "Passes a request along a chain of handlers, each deciding to process it or forward it to the next."
-level:
-  - "3"
+level: ["3"]
 priority: High
 status: Ready to Repeat
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Behavioral/Chain of Responsibility"
 flashcard_uid: "78366059"
+created: "2026-03-05T22:12:46.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Airport security behaves like a Chain of Responsibility. A bag moves through a fixed sequence of checkpoints. Each one clears it, rejects it, or passes it forward. A new check can be inserted without rewriting the existing stations, and the passenger has no reason to know which checkpoint will stop the process.
@@ -241,14 +240,14 @@ Chain of Responsibility pays off when several ordered handlers can accept or rej
 <!-- qard-id: 6a5f0253-1b54-409b-a65e-b85fb300596f -->
 > [!qard]- How does ASP.NET Core middleware differ from a classical Chain of Responsibility?
 > Both send a request through ordered handlers that can stop it early. In the classical pattern, linked handler objects pass the request along until one of them takes responsibility for it. ASP.NET Core middleware is a pipeline of delegates composed once at startup, in which each component normally does its part and calls the next, wrapping everything after it.
-> 
+>
 > | Aspect | Classical Chain of Responsibility | ASP.NET Core middleware |
 > |---|---|---|
 > | Handlers and links | Handler objects that each keep a reference to their successor. | Request delegates; each middleware receives the rest of the pipeline as a `next` delegate. |
 > | Building the chain | Links are set between objects, and an implementation may allow them to change later. | `Use`, `Map` and `Run` registrations are composed into one request delegate when the app starts. The order is then fixed, although branches can still choose a path for each request. |
 > | Role of each handler | Usually either handles the request or forwards it, so typically one handler does the work. | Usually every component does some work and calls `next`. Not calling `next` short-circuits the rest, and a `Run` component always ends the pipeline. |
 > | Work after the next step | Not a focus of the pattern's intent. | Code after `await next(context)` runs as the response returns, so components see the response in reverse registration order. |
-> 
+>
 > [ASP.NET Core middleware](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/middleware/?view=aspnetcore-10.0) · [GoF: Design Patterns](https://www.oreilly.com/library/view/design-patterns-elements/0201633612/)
 
 # References

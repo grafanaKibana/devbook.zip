@@ -1,17 +1,16 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
+topic: [AI & ML]
+subtopic: [LLM]
 summary: "Layered controls around an LLM that make unsafe actions and data leaks detectable and recoverable."
-level:
-  - "3"
+level: ["3"]
 priority: Medium
 status: Done
 publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Safety/Guardrails"
 flashcard_uid: "cf9e222c"
+created: "2026-02-16T21:15:26.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Guardrails are controls around an LLM that keep unsafe output from turning into unsafe behavior. They constrain input, accessible context, model output, and runtime actions. One filter cannot cover all four boundaries. A production system needs several independent checks so a missed attack is still contained and leaves evidence for recovery.
@@ -155,14 +154,14 @@ The parser rejects anything outside this schema. The dispatcher must still map t
 <!-- qard-id: 50412e4a-ded5-437e-8c13-3f2838e734b4 -->
 > [!qard]- Which guardrails keep unsafe model output from becoming an unsafe action?
 > The controls that stop unsafe output from becoming an unsafe action sit between the model and the action. They are least-privilege access to tools and data, authorization enforced in application code, strict validation of structured output before dispatch, and bounds on requests and loops. They assume that a bad output or a successful injection can occur, and they limit what it can do.
-> 
+>
 > - **Least-privilege tools and data:** only the operations and data the current task needs are exposed. An injected instruction cannot call a tool the dispatcher never exposed. Data is contained only if no model-visible path can reach it, including the prompt, conversation history, retrieved context and every exposed tool. Leaving a document out of one retrieval result is not, by itself, a confidentiality guarantee.
 > - **Authorization in application code:** the executor checks whether this caller may perform the requested operation on this resource, regardless of what the model asked for.
 > - **Validation before dispatch:** output is parsed against a strict schema of allowed fields and values, then mapped to fixed operations. If the model emits the action `refund`, the schema only confirms that `refund` is an allowed action name. The permission check still decides whether this refund may happen.
 > - **Budgets and bounds:** rate limits, token budgets and loop-iteration caps limit runaway or abused loops.
 > 
 > Classifiers, monitoring and human approval for high-impact actions such as payments or account changes are added where the potential harm justifies their cost. Prompt-injection screening can flag familiar attack wording but can miss novel, obfuscated and indirect instructions, so it cannot replace least privilege. Together these controls form a defense-in-depth baseline, not a security or compliance guarantee.
-> 
+>
 > Sources: [OWASP LLM Prompt Injection Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/LLM_Prompt_Injection_Prevention_Cheat_Sheet.html) · [OpenAI safety best practices](https://developers.openai.com/api/docs/guides/safety-best-practices)
 
 # References

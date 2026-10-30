@@ -1,14 +1,13 @@
 ---
-topic:
-  - Networks
-subtopic:
-  - Protocols
+topic: [Networks]
+subtopic: [Protocols]
 summary: "The standard TCP protocol for sending email between servers and from clients."
-level:
-  - "3"
+level: ["3"]
 priority: Low
 status: Ready to Repeat
 publish: true
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 SMTP moves outbound mail into a submission service and relays it between mail servers. IMAP and POP3 solve a different problem: reading messages already stored in a mailbox.

@@ -1,37 +1,28 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Finds a range containing the target by doubling probe indices, then binary-searches that range."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Creation
 publish: true
+created: "2026-07-10T06:24:36.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A sorted, indexable sequence may not expose its length. [[Home/Computer Science/Algorithms/Search Algorithms/Binary Search|Binary Search]] cannot choose a first midpoint without a right endpoint, so Exponential Search discovers one. It probes indices `1, 2, 4, 8, 16, …` until a value reaches the target or the probe passes the end. Binary Search then works inside `[bound/2, min(bound, n − 1)]`.
 
 The window is sound because its lower edge comes from the last probe below the target. Its upper edge is the first probe at or beyond the target, or the end of the sequence.
 
-
-
 %% tabs %%
 
 %% tab: Visualization %%
-
-
 
 ```steptrace
 { "algorithm": "exponential-search", "array": [2, 4, 7, 11, 18, 29, 41, 56, 72], "target": 41 }
 ```
 
-
-
 The trace searches for `41` in `[2, 4, 7, 11, 18, 29, 41, 56, 72]`. During the gallop, hatched bars are already too small, muted bars are not reached yet, and the blue probe jumps through indices `0, 1, 2, 4, 8`. Once index `8` passes the target, the live bracket becomes `[4, 8]` and the same card switches to binary search. Its midpoint is index `6`, where the target is found.
-
-
 
 The gallop maintains one fact through every iteration: as long as the loop continues, `a[bound] < target`, so the target's position lies strictly to the right of `bound`. Doubling may jump past the answer, but it doubles only after proving the current bound is too small; the skipped interval is retained between the previous and new bounds. The loop stops for exactly one of two reasons:
 

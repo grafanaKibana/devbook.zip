@@ -1,14 +1,13 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Data Structures
+topic: [Computer Science]
+subtopic: [Data Structures]
 summary: "A fixed-size contiguous block of same-typed elements, the substrate for many indexed collections."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Ready to Repeat
 publish: true
+created: "2026-07-09T18:37:04.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A program often needs the i-th value in a sequence without walking through everything before it. An array makes that possible by packing equal-size slots into one contiguous block. The runtime computes `base + i * elementSize` and lands directly on the requested slot. Neighbors in the sequence are neighbors in memory too, which makes sequential scans friendly to CPU caches.

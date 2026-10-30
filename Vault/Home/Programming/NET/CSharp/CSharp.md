@@ -1,15 +1,14 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
+topic: [Programming]
+subtopic: [NET]
 summary: "Statically typed, multi-paradigm .NET language pairing OOP, functional features, and first-class async."
 tags: [FolderNote]
 publish: true
 status: Creation
-level:
-  - "4"
+level: ["4"]
 priority: High
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 C# is a statically typed language for .NET with object-oriented, functional, and low-level features in one type system. Its practical strength is not the number of paradigms. It is the ability to express a high-level domain model while keeping allocation, copying, asynchronous suspension, and interop costs visible when they matter.

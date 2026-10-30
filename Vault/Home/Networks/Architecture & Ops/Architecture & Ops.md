@@ -1,15 +1,14 @@
 ---
-topic:
-  - Networks
-subtopic:
-  - Architecture & Ops
+topic: [Networks]
+subtopic: [Architecture & Ops]
 summary: "How networks are designed, observed, and kept healthy in production."
 tags: [FolderNote]
 publish: true
 priority: Medium
-level:
-  - "3"
+level: ["3"]
 status: Creation
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Network architecture decides how traffic should flow. Network operations proves that it still flows under real load and failure. The work spans routing boundaries, segmentation, capacity, telemetry, and incident response.

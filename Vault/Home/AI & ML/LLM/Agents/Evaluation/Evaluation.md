@@ -1,16 +1,15 @@
 ---
 title: Agent Evaluation
-topic:
-  - AI & ML
-subtopic:
-  - LLM
+topic: [AI & ML]
+subtopic: [LLM]
 summary: "Measures outcome and process separately over a trajectory, since a task can fail by many paths."
-level:
-  - "3"
+level: ["3"]
 priority: High
 status: Done
 tags: [FolderNote]
 publish: true
+created: "2026-06-12T18:21:46.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Evaluating an [[Home/AI & ML/LLM/Agents/Agents|agent]] means evaluating a *trajectory*, not a single answer. The agent chooses a tool, reads the result, and decides what to do next. Two runs can reach the same result by very different routes. A third can look reasonable for several steps and then fail. A final-answer score hides that difference. Agent evaluation separates the **outcome** (was the task completed?) from the **process** (was the route sound and efficient?).

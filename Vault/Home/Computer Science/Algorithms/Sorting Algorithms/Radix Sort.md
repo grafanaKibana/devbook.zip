@@ -1,14 +1,13 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Sorts bounded-width keys one digit at a time with stable distribution-and-gather passes."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Creation
 publish: true
+created: "2026-07-10T06:24:36.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 [[Home/Computer Science/Algorithms/Sorting Algorithms/Quick Sort|Quick Sort]] and [[Home/Computer Science/Algorithms/Sorting Algorithms/Merge Sort|Merge Sort]] discover order by comparing keys. Radix Sort takes a different route. It treats each key as a sequence of digits in radix `b`, then distributes the keys by one digit at a time. Its cost follows key width rather than the number of comparisons needed to establish order.
@@ -21,13 +20,9 @@ This works only when every key can be decomposed into a bounded number of digits
 
 %% tab: Visualization %%
 
-
-
 ```steptrace
 { "algorithm": "radix-sort", "array": [170, 45, 75, 90, 802, 24, 2, 66], "radix": 10, "mode": "LSD" }
 ```
-
-
 
 The trace runs LSD radix sort on `[170, 45, 75, 90, 802, 24, 2, 66]`, making three base-10 passes from the ones digit upward. Each pass selects one digit position, distributes the keys into digit buckets without disturbing ties, then gathers the buckets into the input order for the next position.
 

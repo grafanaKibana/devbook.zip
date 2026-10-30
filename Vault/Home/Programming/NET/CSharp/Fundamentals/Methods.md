@@ -1,17 +1,16 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
+topic: [Programming]
+subtopic: [NET]
 summary: "C#'s unit of behavior, covering parameter modifiers and dispatch keywords."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Ready to Repeat
 publish: true
 qard-deck: "Programming"
 qard-topic: "NET/CSharp/Fundamentals/Methods"
 flashcard_uid: "a3e803d0"
+created: "2026-02-15T16:27:13.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Methods define where behavior begins and what data may cross the boundary. The parameter list is part of that contract. By-value parameters isolate the caller's variable, `ref` and `out` expose it for reassignment, and `in` exposes storage as readonly. `params` changes how an expanded argument list is collected at the call site.
@@ -226,15 +225,15 @@ By-value parameters and ordinary virtual dispatch are the default. By-reference 
 
 > [!qard]- How do `ref`, `out`, and `in` parameters differ?
 > All three pass the argument by reference instead of copying its value. For `ref` and `out`, the parameter always aliases the caller's variable. For `in`, it aliases the caller's variable when the argument is a variable of the parameter's type. An `in` argument that is not a variable, or that needs a conversion, can instead be copied into a temporary, and the parameter then refers to that temporary. The three modifiers differ in which direction data may flow through the reference.
-> 
+>
 > | Modifier | How data flows through the reference | Typical use |
 > |---|---|---|
 > | `ref` | Both ways. The caller must initialize the variable, and the method can read it and assign it. The caller sees any assignment | Updating or replacing the caller's variable |
 > | `out` | Outward. The caller can pass an unassigned variable. The method cannot read it before assigning it and must assign it before every normal return | Returning an extra result, as in `Try` methods such as `Dictionary.TryGetValue` |
 > | `in` | Inward and readonly. The caller must initialize the argument, and the method can read the parameter but cannot assign it | Avoiding copies of a large struct on a measured hot path |
-> 
+>
 > Without a modifier, the parameter is a copy, so assigning it never changes the caller's variable.
-> 
+>
 > [Microsoft: method parameters](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/method-parameters)
 
 <!-- qard-id: a16bf465-c1ae-4bca-909c-6f7462f37ca6 -->
@@ -248,40 +247,38 @@ By-value parameters and ordinary virtual dispatch are the default. By-reference 
 <!-- qard-id: 19ea3788-056c-4ed6-8bc6-2087ae866f65 -->
 > [!qard]- How does C# apply an optional parameter's default value, and why can already-compiled callers keep an old default?
 > The default is applied at the call site. When an ordinary compiled call omits an optional argument, the compiler inserts the declared default value into the caller's code, and the method receives it like any other argument.
-> 
+>
 > The declaration rules fit that mechanism:
-> 
+>
 > - **The default must be a compile-time value:** a constant expression, `default(S)`, or `new S()` where `S` is a value type. The compiler has to be able to write the value into each call.
 > - **Optional parameters come after all required parameters.** Named arguments let a call supply a later optional argument while omitting earlier ones.
 > 
 > **Versioning consequence:** the default lives in each caller's compiled code. If a library changes a default, callers compiled against the old version keep passing the old value until they are recompiled. A public default value is therefore part of the library's compatibility contract.
-> 
+>
 > [Microsoft: named and optional arguments](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/named-and-optional-arguments) · [C#: 12.6.2.3 Run-time evaluation of argument lists](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#12623-run-time-evaluation-of-argument-lists)
 
 <!-- qard-id: ffd19d60-4643-4ede-92ff-83ba55b3f613 -->
 > [!qard]- When `Animal a = new Dog();` calls `a.Category()`, what makes the call run `Dog`'s implementation, and what does that commit the `Animal` API to?
 > `Animal.Category()` must be declared `virtual`, and `Dog` must implement `Category()` with `override`. The call is then resolved by the runtime type of the object, `Dog`, rather than by the declared type of the variable, `Animal`.
-> 
+>
 > Methods are non-virtual by default. A non-virtual `a.Category()` binds to `Animal.Category()` because `a` is declared as `Animal`, even when `Dog` declares its own `Category()` with `new`.
-> 
+>
 > **Commitment for the base API:** a virtual member is an extension point. Derived classes can replace its behavior, unless an override along the hierarchy is marked `sealed`, which stops classes below it from overriding the member again. Ordinary calls to the member on such an object run the most-derived override, including calls made from code inside `Animal`. An explicit `base.Category()` call in a derived class is the exception: it runs the base class's implementation rather than the most-derived override. `Animal` can therefore no longer assume that its own implementation of that member is the one that runs.
-> 
+>
 > [Microsoft: virtual keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/virtual) · [Microsoft: new modifier](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/new-modifier) · [Microsoft: base keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/base) · [Microsoft: sealed modifier](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/sealed)
-
-
 
 <!-- qard-id: 13e7573c-4ba4-4f2b-a316-4f2dcb52ccd6 -->
 > [!qard]- A base method is not virtual, but a derived class needs different behavior. What are the options, and which ones work through a base-class reference?
 > Only virtual dispatch makes a call through a base-class reference run derived code. Making the base member `virtual` and overriding it is therefore the only option that works through such a reference. Hiding with `new` affects only derived-typed references, and composition moves the variation out of inheritance.
-> 
+>
 > | Option | Call through a base reference | Fits when |
 > |---|---|---|
 > | Base member made `virtual`, derived member marked `override` | Runs the derived implementation, chosen by the object's runtime type | The base type can be changed and derived objects are meant to substitute for base objects |
 > | Derived member declared with `new` (hiding) | Still runs the base implementation. Only references typed as the derived class reach the new member | Hiding itself is the intended behavior, such as a deliberate compatibility split, not polymorphism |
 > | Composition | No inheritance dispatch is involved. The class delegates the varying step to an object it holds | The base cannot be changed, or the variation is not a natural subtype relationship |
-> 
+>
 > Hiding is the common trap. The same object behaves differently depending on whether it is referenced as the derived type or as the base type.
-> 
+>
 > [Microsoft: virtual keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/virtual) · [Microsoft: new modifier](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/new-modifier)
 
 # References

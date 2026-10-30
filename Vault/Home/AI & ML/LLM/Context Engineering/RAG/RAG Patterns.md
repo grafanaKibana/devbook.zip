@@ -1,17 +1,16 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
+topic: [AI & ML]
+subtopic: [LLM]
 summary: "A catalog of production RAG patterns, each naming the failure it fixes and the risk it adds."
-level:
-  - "2"
+level: ["2"]
 priority: High
 status: Done
 publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Context Engineering/RAG/RAG Patterns"
 flashcard_uid: "fb2f007d"
+created: "2026-02-27T01:19:52.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 RAG patterns are repairs for observed retrieval failures. The order below is an adoption guide rather than a popularity ranking. The first working pipeline remains in place until [[Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation|evaluation]] identifies a failure that the cheaper design cannot fix. Each pattern buys something and creates a new way to fail. The surrounding pipeline is described in [[Home/AI & ML/LLM/Context Engineering/RAG/RAG|RAG]].
@@ -269,12 +268,12 @@ This family fits high-risk systems that can calibrate evidence evaluators or tra
 <!-- qard-id: a2e5357e-483e-41e0-80be-f563d42cf86b -->
 > [!qard]- What kind of RAG question can justify adding a knowledge graph to vector retrieval?
 > A knowledge graph can be justified when the answer depends on explicit relationships between entities, or on synthesis across much of a corpus, rather than on a few passages that resemble the question. A question such as *What are the main themes across these documents?* is an example: no small set of similar chunks contains its answer.
-> 
+>
 > - **Vector retrieval** returns the top-k chunks closest to the query. That suits direct fact lookup, where one or a few passages hold the answer.
 > - **GraphRAG** uses a language model to extract entities and relationships into a graph, groups closely related entities into communities and pre-generates a summary of each community. Corpus-wide questions can then be answered from those summaries instead of from isolated chunks. Questions about dependencies or impact can follow explicit edges between entities.
 > 
 > The graph adds model-driven extraction, indexing and maintenance cost, and extraction or linking errors become wrong edges. Microsoft Research evaluated GraphRAG on corpus-wide, query-focused summarization, so its benefit for other question types has to be measured. The decision therefore rests on a comparison with a vector-retrieval baseline on representative questions.
-> 
+>
 > [From Local to Global: A Graph RAG Approach to Query-Focused Summarization (Microsoft Research)](https://www.microsoft.com/en-us/research/publication/from-local-to-global-a-graph-rag-approach-to-query-focused-summarization/)
 
 # References

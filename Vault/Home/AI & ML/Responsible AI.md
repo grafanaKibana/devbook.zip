@@ -1,13 +1,13 @@
 ---
-topic:
-  - AI & ML
+topic: [AI & ML]
 subtopic: []
 summary: "Designing and operating AI so failures are bounded, decisions explainable, and impact fair."
-level:
-  - "3"
+level: ["3"]
 priority: Medium
 status: Done
 publish: true
+created: "2026-06-11T06:20:33.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Responsible AI turns broad duties toward people into engineering constraints. The work begins before model selection: identify who can be affected, decide which failures are unacceptable, then build controls and evidence around the full system. A strong model inside a weak decision process is still an unsafe product.

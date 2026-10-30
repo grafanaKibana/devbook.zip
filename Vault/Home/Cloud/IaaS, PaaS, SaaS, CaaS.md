@@ -1,13 +1,13 @@
 ---
-topic:
-  - Cloud
+topic: [Cloud]
 subtopic: []
 summary: "Choosing how much runtime control the application needs and which responsibilities can move to a provider."
-level:
-  - "2"
+level: ["2"]
 priority: High
 status: Ready to Repeat
 publish: true
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Cloud service models describe where provider responsibility ends and application responsibility begins. NIST defines IaaS, PaaS, and SaaS. CaaS and FaaS are useful industry labels for narrower managed-platform shapes, but their exact responsibility boundary varies by product.

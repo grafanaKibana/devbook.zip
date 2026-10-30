@@ -1,15 +1,14 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - Distributed Systems
+topic: [Software Architecture]
+subtopic: [Distributed Systems]
 summary: "Distributed event streaming platform built on an append-only commit log, giving durability, high throughput, and replayable per-partition ordering."
-level:
-  - "2"
+level: ["2"]
 priority: High
 status: Done
 
 publish: true
+created: "2026-02-15T15:01:57.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Apache Kafka is a distributed event-streaming platform built around an append-only log. Producers append records to topic partitions. Consumers move through those partitions at their own pace and store their position as an offset.

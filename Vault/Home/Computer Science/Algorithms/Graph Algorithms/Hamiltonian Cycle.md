@@ -1,14 +1,13 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Visits every graph vertex exactly once and returns to the start. Deciding existence is NP-complete."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Ready to Repeat
 publish: true
+created: "2026-07-11T16:12:59.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A Hamiltonian cycle visits every **vertex** exactly once and returns to its start. An Eulerian cycle asks a different question: it uses every edge exactly once and has a direct degree-based characterization. No polynomial-time test is known for Hamiltonian-cycle existence in general graphs. The decision problem is NP-complete.
@@ -22,7 +21,6 @@ For a graph with `n` vertices, a candidate cycle is a permutation whose consecut
 ```steptrace
 {"algorithm":"hamiltonian-cycle"}
 ```
-
 
 For the graph with cycle edges `A-B-C-D-A` plus diagonal `A-C`, start with `A` and mark it used. Choosing `C` first leaves candidates `B` and `D`; the branch `A-C-B` cannot continue to `D` because `B-D` is absent, so it backtracks to `C` and tries `D`. The branch `A-C-D` then cannot reach unused `B`. Returning to the root and choosing `B` produces `A-B-C-D`, and `D-A` closes the cycle.
 
@@ -111,7 +109,6 @@ Every vertex in a Hamiltonian graph has degree at least two. Such a graph also h
 Connectivity is too weak as well. It promises a path between each pair of vertices, not one cycle through every vertex. A graph may even have an Eulerian cycle and no Hamiltonian cycle because covering edges says nothing decisive about covering vertices once.
 
 # Comparison
-
 
 Hamiltonian cycle asks whether any cycle visits every vertex once. Traveling Salesman adds weights and asks which such cycle is cheapest. Eulerian cycle remains a separate, tractable edge-coverage problem.
 

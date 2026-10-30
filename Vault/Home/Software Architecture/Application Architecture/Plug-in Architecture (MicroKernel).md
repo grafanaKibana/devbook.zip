@@ -1,17 +1,16 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - Application Architecture
+topic: [Software Architecture]
+subtopic: [Application Architecture]
 summary: "Keeps a small, stable core defining extension points and extends behavior through plug-ins that implement those points without modifying the core."
-level:
-  - "3"
+level: ["3"]
 priority: High
 status: Ready to Repeat
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Application Architecture/Plug-in Architecture (MicroKernel)"
 flashcard_uid: "9959d912"
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Plug-in (Microkernel) architecture puts stable product behavior in a small **core** and exposes contracts that **plug-ins** implement. The core can run without knowing any concrete extension. Features are selected at deployment or discovered at runtime, which fits products that vary by customer or accept third-party extensions.

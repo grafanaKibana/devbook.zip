@@ -1,17 +1,16 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - System Architecture
+topic: [Software Architecture]
+subtopic: [System Architecture]
 summary: "Structures a system as loosely coupled services communicating over standardized protocols, historically integrated through an Enterprise Service Bus."
-level:
-  - "3"
+level: ["3"]
 priority: Medium
 status: Ready to Repeat
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "System Architecture/Service-Oriented Architecture"
 flashcard_uid: "fad3bcad"
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Service-Oriented Architecture (SOA) exposes business capabilities through explicit network contracts. It became common in enterprise integration because SAP, mainframes, custom applications, and later SaaS products could cooperate without sharing an implementation stack.
@@ -99,7 +98,7 @@ Many estates use both styles. Existing systems meet through governed integration
 
 > [!qard]- How does service-oriented architecture (SOA) differ from microservices?
 > Both organize a system as services behind explicit contracts. They differ mainly in where change is controlled. Typical enterprise SOA centralizes integration and governance to connect existing systems that cannot change together. Microservices push ownership, data and deployment decisions into independently owned services.
-> 
+>
 > | Aspect | Typical enterprise SOA | Typical microservices |
 > |---|---|---|
 > | Main pressure | Make heterogeneous systems, such as SAP, mainframes and custom applications, interoperate through stable contracts | Let teams own, change and deploy bounded business capabilities independently |
@@ -108,9 +107,9 @@ Many estates use both styles. Existing systems meet through governed integration
 > | Data | Shared enterprise stores are common | Each service owns its data |
 > | Governance | Central contract and schema review gives controlled interoperability at the cost of slower local change | Teams own their contracts within platform guardrails |
 > | Deployment | Services may share infrastructure and coordinate releases | Independent deployment is a core goal |
-> 
+>
 > These are tendencies rather than strict definitions. Many organizations use both styles: governed integration services around existing systems, and microservices for newer product capabilities.
-> 
+>
 > [Fowler and Lewis: Microservices and SOA](https://martinfowler.com/articles/microservices.html#MicroservicesAndSOA) · [SOA Manifesto](https://soa-manifesto.org/default.html)
 
 <!-- qard-id: e94992f0-b946-4aac-9616-e0916d028264 -->

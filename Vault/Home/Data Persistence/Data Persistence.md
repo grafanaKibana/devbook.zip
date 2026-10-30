@@ -2,19 +2,19 @@
 icon: database
 order: 30
 color: "#f97316"
-topic:
-  - Data Persistence
+topic: [Data Persistence]
 subtopic: []
 summary: "How software stores and protects state across restarts using SQL, NoSQL, and caching."
 tags: [FolderNote]
 publish: true
 priority: High
-level:
-  - "4"
+level: ["4"]
 status: Creation
 qard-deck: "Data Persistence"
 qard-topic: "Data Persistence"
 flashcard_uid: "d03cdcde"
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Data persistence is the part of a system that must survive process and machine restarts. A storage choice fixes more than where bytes live: it sets the available consistency guarantees, the shape of efficient queries, and much of the operating cost. A weak isolation choice can corrupt business state under concurrency. An unnecessary cache creates a stale-read path that the original system never had.
@@ -107,7 +107,7 @@ The categories overlap. CQRS may use materialized views, event sourcing may feed
 <!-- qard-id: dcef06ab-abdb-45d7-9cad-1d74f4b02856 -->
 > [!qard]- What determines whether a service should use relational or non-relational storage?
 > Three needs determine the choice: the invariants the data must keep, the scope of the transactions that protect them, and the queries the service must answer. These needs are judged against a concrete engine's consistency, query, recovery and operational limits.
-> 
+>
 > - **Relational storage** is the usual default when correctness depends on constraints, joins, transactions across several records, or query combinations that keep changing. The database enforces those rules close to the data, and a new query can usually be expressed without reshaping storage.
 > - **A specialized non-relational store** fits when one access pattern clearly dominates and the engine's consistency, query and recovery limits are acceptable for that workload. Typical patterns are lookup by key, reading and replacing a whole document, relationship traversal and full-text relevance.
 > - **A combination** keeps a relational source of truth and adds one specialized read path, such as a search index or cache, when that path solves a measured need. Each added store brings synchronization and recovery work that must have an owner.
@@ -116,7 +116,7 @@ The categories overlap. CQRS may use materialized views, event sourcing may feed
 
 > [!qard]- How should a slow database-backed request be diagnosed before scaling the database?
 > Diagnosis measures where the slow request spends its time and fixes the smallest demonstrated cause. It moves to read offloading or larger infrastructure only when a measured limit remains.
-> 
+>
 > 1. **Time breakdown:** the request's latency is split into pool wait, query execution, lock wait, network, serialization and downstream calls. The same interval is correlated with database CPU, memory, I/O, connection count, rows scanned and replication lag.
 > 2. **Actual query and plan:** the real SQL with representative parameters goes through the engine's plan tooling, such as PostgreSQL `EXPLAIN (ANALYZE, BUFFERS)`. Estimated and actual rows, scans, joins, spills and I/O show where the work goes.
 > 3. **Smallest demonstrated fix:** typical fixes return fewer rows or columns, remove an N+1 path, add or correct an index, shorten a transaction, or change the query or schema shape. The same trace and load are then rerun to confirm the effect.
@@ -125,7 +125,7 @@ The categories overlap. CQRS may use materialized views, event sourcing may feed
 > 6. **Capacity changes:** the node is scaled after the query path is sound. Partitioning or sharding is justified only when one node's measured capacity, data size or recovery boundary is still the limit.
 > 
 > Jumping straight to caches, replicas or shards can improve one graph while adding stale reads or duplicated writes that hide the original defect.
-> 
+>
 > [PostgreSQL: Using EXPLAIN](https://www.postgresql.org/docs/current/using-explain.html) · [SQL Server: Create indexed views](https://learn.microsoft.com/en-us/sql/relational-databases/views/create-indexed-views?view=sql-server-ver17)
 
 # References

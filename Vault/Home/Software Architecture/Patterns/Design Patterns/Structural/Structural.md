@@ -1,17 +1,16 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - Patterns
+topic: [Software Architecture]
+subtopic: [Patterns]
 summary: "Structural patterns compose classes and objects into flexible larger structures via inheritance and composition."
 tags: [FolderNote]
-level:
-  - "3"
+level: ["3"]
 priority: High
 publish: true
 status: Done
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Structural/Structural"
+created: "2026-03-05T22:12:32.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Structural patterns organize relationships between objects. They solve different boundary problems: incompatible interfaces, recursive part-whole trees, independently changing dimensions, layered behavior, simplified subsystem access, shared intrinsic state, and controlled access. The right pattern follows from the relationship that must remain stable.
@@ -36,8 +35,6 @@ These patterns can share nearly identical class diagrams while serving different
 | [[Home/Software Architecture/Patterns/Design Patterns/Structural/Proxy]] | Control access through a same-interface surrogate. | Access must be deferred, cached, authorized, or made remote without changing clients. |
 
 # Questions
-
-
 
 # References
 

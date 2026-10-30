@@ -1,14 +1,13 @@
 ---
-topic:
-  - Networks
-subtopic:
-  - Architecture & Ops
+topic: [Networks]
+subtopic: [Architecture & Ops]
 summary: "Edge caching servers that serve content from near users, cutting latency and origin load."
-level:
-  - "3"
+level: ["3"]
 priority: Medium
 status: Ready to Repeat
 publish: true
+created: "2026-06-20T08:45:59.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A content delivery network places shared delivery infrastructure between clients and an origin. Edge nodes cache reusable responses near access networks, reducing round trips to the origin and absorbing repeated requests. The same edge may terminate TLS, route dynamic traffic, filter attacks, or run constrained code, but those capabilities are separate from caching.

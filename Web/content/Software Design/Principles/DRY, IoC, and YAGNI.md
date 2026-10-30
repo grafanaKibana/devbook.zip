@@ -5,9 +5,9 @@ aliases:
   - YAGNI
   - IoC (Holywood Principle)
   - IoC (Hollywood Principle)
-created: 2026-08-20T20:41:15.707Z
-modified: 2026-08-20T20:41:15.707Z
-published: 2026-08-20T20:41:15.707Z
+created: 2026-08-10T10:51:19.000Z
+modified: 2026-10-28T12:33:42.000Z
+published: 2026-10-28T20:52:55.190Z
 topic:
   - Software Design
 subtopic:

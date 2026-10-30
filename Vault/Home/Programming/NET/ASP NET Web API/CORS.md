@@ -1,14 +1,13 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
+topic: [Programming]
+subtopic: [NET]
 summary: "Browser protocol controlling whether cross-origin JavaScript may access an API response."
-level:
-  - "1"
+level: ["1"]
 priority: Medium
 status: Ready to Repeat
 publish: true
+created: "2026-02-19T23:08:30.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Cross-Origin Resource Sharing (CORS) is the browser protocol for deciding whether JavaScript from one origin may read a response from another. An origin is the tuple of scheme, host, and port. The server publishes its decision through `Access-Control-*` response headers. The browser enforces it.

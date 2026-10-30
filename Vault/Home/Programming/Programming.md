@@ -2,16 +2,16 @@
 icon: terminal
 order: 10
 color: "#f43f5e"
-topic:
-  - Programming
+topic: [Programming]
 subtopic: []
 summary: "Software craft focused on the .NET stack: C#, runtime, web APIs, and concurrency."
 tags: [FolderNote]
 publish: true
 status: Creation
-level:
-  - "4"
+level: ["4"]
 priority: High
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Programming turns an operational problem into software whose behavior can be explained, tested, and changed. The code is only one part of that result. Contracts, failure handling, runtime cost, and the path from a source change to production all shape whether the system remains useful.

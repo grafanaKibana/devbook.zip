@@ -1,14 +1,13 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Hybrid that runs quicksort but falls back to heap sort when recursion becomes too deep."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Creation
 publish: true
+created: "2026-07-10T06:24:36.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Quicksort partitions an array around a pivot. A crafted input can force the worst split at every level: one element on one side and everything else on the other. When a standard library sorts untrusted data, this repeated degeneration creates a denial-of-service risk.
@@ -21,13 +20,9 @@ Introsort, introduced by David Musser in 1997, keeps quicksort's partitioning an
 
 %% tab: Visualization %%
 
-
-
 ```steptrace
 { "algorithm": "introsort", "array": [2, 1, 9, 8, 7, 6, 5, 4, 3], "depthLimit": 1, "smallPartitionThreshold": 3 }
 ```
-
-
 
 This compact trace deliberately lowers the depth limit to `1` and the insertion cutoff to `3`. Those are illustrative values, not runtime defaults: they keep quicksort, the heap fallback, and a visible insertion cleanup inside nine bars.
 

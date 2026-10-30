@@ -1,14 +1,13 @@
 ---
-topic:
-  - Security
-subtopic:
-  - Security
+topic: [Security]
+subtopic: [Security]
 summary: "Controls sensitive data from collection through deletion by attaching purpose, access, retention, and incident rules to each class."
-level:
-  - "3"
+level: ["3"]
 priority: High
 status: Ready to Repeat
 publish: true
+created: "2026-07-18T07:07:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Sensitive data is information whose disclosure, alteration, loss, or misuse could harm a person, the organization, or another affected party. Personal, health, financial, authentication, legal, and intellectual-property data commonly qualify. The label becomes actionable only when a data class has an owner, purpose, allowed consumers, retention rule, and deletion path.

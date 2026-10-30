@@ -1,14 +1,13 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Builds a minimum spanning tree in parallel rounds by adding each component's cheapest outgoing edge."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Ready to Repeat
 publish: true
+created: "2026-07-11T16:12:59.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A [[Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree|minimum spanning tree]] can grow from many fragments at once. Borůvka's algorithm starts with one component per vertex. During each round, every component selects its cheapest outgoing edge. A [[Home/Computer Science/Data Structures/Graph Structures/Disjoint Set|disjoint set]] accepts a selected edge only while its endpoints remain in different components. The merged components then become the input to the next round.
@@ -22,7 +21,6 @@ The cut property certifies each selection. A component defines a cut between its
 ```steptrace
 {"algorithm":"boruvka"}
 ```
-
 
 For vertices `A, B, C, D` with edges `AB=1`, `AC=4`, `BC=2`, `BD=5`, `CD=3`, the first round selects `AB` for `A`, `AB` for `B`, `BC` for `C`, and `CD` for `D`. After duplicate removal, all three edges are safe and the graph becomes one component in a single round.
 

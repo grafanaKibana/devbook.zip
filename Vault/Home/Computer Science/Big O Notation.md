@@ -1,16 +1,16 @@
 ---
-topic:
-  - Computer Science
+topic: [Computer Science]
 subtopic: []
 summary: "Describes how time or space grows with input size by retaining the dominant term and ignoring constants."
-level:
-  - "3"
+level: ["3"]
 priority: High
 status: Ready to Repeat
 publish: true
 qard-deck: "Computer Science"
 qard-topic: "Big O Notation"
 flashcard_uid: "0c3fdd6d"
+created: "2026-07-12T19:33:38.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Big O notation describes how an algorithm's cost grows with its input, discarding machine-specific constants so competing approaches can be compared by growth rather than one benchmark on one machine.
@@ -184,9 +184,9 @@ Big O states an upper bound. **Big Θ** (theta) states a *tight* bound where the
 <!-- qard-id: 8798b907-d969-43b3-aae7-3be04b553424 -->
 > [!qard]- What does Big O notation describe?
 > Big O notation describes an upper bound on how an algorithm's cost, usually running time or extra memory, grows as a function of input size `n`. It states how an approach scales, not how long it takes on a particular machine.
-> 
+>
 > Formally, `f(n) = O(g(n))` means positive constants `c` and `n₀` exist such that `f(n) ≤ c · g(n)` for every `n ≥ n₀`. Beyond some input size, the cost grows no faster than a fixed multiple of `g(n)`.
-> 
+>
 > - **Upper bound, not necessarily tight:** a loose bound is still true, so a linear-time algorithm is also `O(n²)`. A bound that holds from both above and below is tight and is written `Θ`.
 > - **Defined input size:** a bound is meaningful only once `n` is stated. For string processing, `n` can count strings or total characters, and the two can give different bounds.
 > 
@@ -195,28 +195,28 @@ Big O states an upper bound. **Big Θ** (theta) states a *tight* bound where the
 <!-- qard-id: 26038b92-83e0-4011-990c-a92c4ed51244 -->
 > [!qard]- Why does Big O notation drop constant factors and lower-order terms?
 > They cannot change an expression's growth class, so dropping them loses nothing that Big O expresses. Its definition only requires some fixed constant `c` and starting size `n₀` such that `f(n) ≤ c · g(n)` for every `n ≥ n₀`. A constant factor can be folded into `c`. A lower-order term grows more slowly than the dominant term. Beyond some size, it is therefore at most a fixed multiple of that term and can be folded into `c` as well.
-> 
+>
 > For example, when `n ≥ 1`, each term of `n² + 100n + 500` is at most a multiple of `n²`:
-> 
+>
 > `n² + 100n + 500 ≤ n² + 100n² + 500n² = 601n²`
-> 
+>
 > So `c = 601` and `n₀ = 1` satisfy the definition, and the expression is `O(n²)`, the same class as `n²` or `5n²`.
-> 
+>
 > The class describes eventual growth only. The discarded parts still affect actual cost: for every `n` up to 104, `100n + 500` is larger than `n²` itself.
-> 
+>
 > [MIT 6.006 Spring 2020: Recitation 1](https://live.ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/c6d8f06c6f11e3342633dec85498f551_MIT6_006S20_r01.pdf)
 
 <!-- qard-id: 595cb4a6-4ead-492c-8092-62027d94d384 -->
 > [!qard]- What is the difference between average-case and amortized complexity?
 > Average-case complexity is the expected cost when inputs or random choices follow a stated probability distribution. Amortized complexity is a guaranteed bound on the total cost of a sequence of operations, spread across those operations. Amortized analysis uses no probability, so it is not a kind of average-case analysis.
-> 
+>
 > | Aspect | Average case | Amortized |
 > |---|---|---|
 > | What is averaged | The cost of an operation over possible inputs or random choices, weighted by their probability. | The total cost of a sequence of operations, divided by the number of operations. |
 > | Assumption | A stated distribution. If real inputs do not follow it, the bound does not describe them. | No distribution. The bound holds for every sequence the analysis covers. |
 > | What can still be slow | A particular unlucky or adversarial input can cost much more than expected. | A single operation can be expensive, but expensive steps are rare enough that the sequence total stays within the bound. |
 > | Example | A hash lookup is constant time on average only under suitable hashing and collision assumptions. | Dynamic-array append is amortized `O(1)`. A resize copies every element in `O(n)`, but growing capacity by a constant factor, such as doubling, keeps the total for `n` appends at `O(n)`. |
-> 
+>
 > [NIST: Average-case complexity](https://xlinux.nist.gov/dads/HTML/averagecase.html) · [MIT 6.006 Spring 2020: Lecture 2](https://live.ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/79a07dc1cb47d76dae2ffedc701e3d2b_MIT6_006S20_lec2.pdf)
 
 # References

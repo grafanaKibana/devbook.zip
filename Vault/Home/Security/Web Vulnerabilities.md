@@ -1,14 +1,13 @@
 ---
-topic:
-  - Security
-subtopic:
-  - Security
+topic: [Security]
+subtopic: [Security]
 summary: "How SQL Injection, XSS, and CSRF work and the .NET defenses against each."
-level:
-  - "4"
+level: ["4"]
 priority: High
 status: Ready to Repeat
 publish: true
+created: "2026-06-20T19:32:24.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 SQL injection, cross-site scripting (XSS), and cross-site request forgery (CSRF) cross different trust boundaries. SQL injection changes a database command. XSS makes a browser execute attacker-controlled content in the application's origin. CSRF causes a browser to send an authenticated request that the user did not intend.

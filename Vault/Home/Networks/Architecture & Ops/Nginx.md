@@ -1,14 +1,13 @@
 ---
-topic:
-  - Networks
-subtopic:
-  - Architecture & Ops
+topic: [Networks]
+subtopic: [Architecture & Ops]
 summary: "An event-driven web server and reverse proxy for static delivery, TLS, routing, caching, and load balancing."
-level:
-  - "3"
+level: ["3"]
 priority: Medium
 status: Ready to Repeat
 publish: true
+created: "2026-07-18T07:07:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 NGINX is an event-driven HTTP server and reverse proxy. A master process owns configuration and worker lifecycle. Worker processes handle connections and requests.

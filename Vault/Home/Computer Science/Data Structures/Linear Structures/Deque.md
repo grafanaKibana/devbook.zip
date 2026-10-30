@@ -1,14 +1,13 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Data Structures
+topic: [Computer Science]
+subtopic: [Data Structures]
 summary: "A double-ended queue that pushes and pops at both ends, generalizing stacks and queues."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Ready to Repeat
 publish: true
+created: "2026-07-09T18:37:04.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A deque serves sequences that grow and shrink at *both* ends. A sliding window admits new elements at the back and expires old ones at the front. A work-stealing scheduler lets the owner take from one end while other threads steal from the other.

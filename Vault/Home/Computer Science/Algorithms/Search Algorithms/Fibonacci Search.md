@@ -1,14 +1,13 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Searches a sorted array by shrinking a Fibonacci-sized window around an offset."
-level:
-  - "4"
+level: ["4"]
 priority: Low
 status: Not-Started
 publish: true
+created: "2026-08-10T10:51:19.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Fibonacci Search locates a value in a sorted, random-access array without repeatedly dividing the search interval. It keeps three consecutive Fibonacci numbers large enough to cover the candidate range and probes at `offset + F(k-2)`.

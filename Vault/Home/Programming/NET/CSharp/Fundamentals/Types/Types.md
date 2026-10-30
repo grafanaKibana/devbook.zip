@@ -1,19 +1,18 @@
 ---
 title: C# Types
-topic:
-  - Programming
-subtopic:
-  - NET
+topic: [Programming]
+subtopic: [NET]
 summary: "How C# types define shape, behavior, and value versus reference assignment semantics."
 tags: [FolderNote]
 publish: true
 status: Creation
 priority: Medium
-level:
-  - "4"
+level: ["4"]
 qard-deck: "Programming"
 qard-topic: "NET/CSharp/Fundamentals/Types/Types"
 flashcard_uid: "a5c39ae2"
+created: "2026-02-10T16:03:55.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A C# type defines what values exist, which operations are valid, and what assignment copies. Value types copy their contained value. Reference types copy a reference to one object. That distinction controls aliasing and equality long before stack-versus-heap details matter.
@@ -78,45 +77,45 @@ The direct `h.Counter.Inc()` call compiles, but it mutates the temporary value r
 <!-- qard-id: d8eb59cf-ad2d-43be-954f-44db23f34d38 -->
 > [!qard]- Why might changing a struct inside `foreach` not update the collection, and how can it be fixed?
 > In an ordinary (non-`ref`) `foreach`, each struct element reaches the loop body as a copy held in a read-only iteration variable. Changes to the copy's own fields never reach the stored element.
-> 
+>
 > - Assigning the iteration variable, or one of its fields, is rejected by the compiler.
 > - Calling a mutating method on it compiles, but the method changes the copy's fields rather than the stored element's, so the update is silently lost.
 > 
 > The copy is shallow. When a field of the struct refers to an object, such as a `List<T>`, the copy and the stored element refer to the same object. A change made to that object through the copy, such as adding an item, therefore remains visible through the collection. Only changes to the struct's own field values are lost.
-> 
+>
 > The stored elements can be updated in two ways:
-> 
+>
 > - **Indexed write-back:** a loop by index reads `items[i]` into a local, changes the local and assigns it back to `items[i]`, replacing the whole element value.
 > - **`ref` iteration:** when the collection exposes its elements by reference, as `Span<T>` does, `foreach (ref var item in span)` makes `item` an alias for the stored element, so changes apply in place.
 > 
 > Mutable structs make this mistake easy. Immutable structs, updated by creating a new value and assigning it back, keep the copy boundary visible.
-> 
+>
 > Sources: [Microsoft Learn: Iteration statements](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/iteration-statements) · [Microsoft Learn: Structure types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/struct) · [Microsoft Learn: Value types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/value-types)
 
 <!-- qard-id: b89f32ef-f23d-488d-a26a-78ebe0051826 -->
 > [!qard]- Where does boxing commonly happen, and how can it be reduced?
 > Boxing happens wherever a value type is converted to `object` or to an interface it implements. The runtime allocates an object on the managed heap and copies the value into it. A nullable value type is boxed according to its contents: a populated `int?` boxes its underlying `int` value, and an empty one converts to a `null` reference without allocating.
-> 
+>
 > Common places:
-> 
+>
 > - **`object`-typed variables, collections and parameters:** `object o = 42;`, adding an `int` to a `List<object>` or an `ArrayList`, or passing a struct to a parameter of type `object`.
 > - **Interface-typed variables and parameters:** assigning a struct to an `IComparable` variable, or passing it where an interface type is declared.
 > 
 > Each box is a separate heap allocation that the garbage collector must later reclaim. The box also holds a copy, so later changes to the original value do not affect it.
-> 
+>
 > Ways to reduce boxing:
-> 
+>
 > - **Generic collections and APIs:** a generic collection such as `List<int>` is specialized for `int`, so adding an element stores the value without converting it to `object`.
 > - **Constrained generics instead of interface-typed parameters:** a method such as `Max<T>(T a, T b) where T : IComparable<T>` can call `CompareTo` on a struct argument without converting it to the interface type, provided the struct itself implements that member.
 > 
 > These changes matter mainly in frequently executed code. They justify extra API complexity where profiling shows boxing allocations are significant.
-> 
+>
 > Sources: [Microsoft Learn: Boxing and unboxing](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/types/boxing-and-unboxing) · [Microsoft Learn: Nullable value types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/nullable-value-types#boxing-and-unboxing) · [Microsoft Learn: Generic classes and methods](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/types/generics) · [Microsoft Learn: OpCodes.Constrained](https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.constrained?view=net-10.0)
 
 <!-- qard-id: d5bda60c-1799-4e4a-ab36-7624ae085e3a -->
 > [!qard]- When should a type be a `struct`, `class`, or `record class`?
 > The choice follows the semantics the type needs. A `struct` fits a small value that is copied field by field, a `class` fits an object with its own identity, and a `record class` fits a reference type whose contents define its equality. Copying, mutation and measured allocation costs then confirm or adjust that semantic choice.
-> 
+>
 > | Aspect | `struct` | `class` | `record class` |
 > |---|---|---|---|
 > | Assignment and passing | Copies every field, so each variable holds its own field values. The copy is shallow: a reference-type field copies only the reference, so both copies can still point to one object. | Copies a reference, so several variables can share and observe one object. | Copies a reference, as a class does. |
@@ -125,7 +124,7 @@ The direct `h.Counter.Inc()` call compiles, but it mutates the temporary value r
 > | Allocation and cost | Stored inline in the variable, field or array element that holds it, with no allocation of its own. Large values make every copy expensive, and boxing allocates. | One heap allocation per instance. | One heap allocation per instance, as with a class. |
 > | Inheritance | Cannot derive from another struct or class or serve as a base type, though it can implement interfaces. | Supports class inheritance. | Can inherit only from another record. |
 > | Typical fit | Small data-centric values with little behavior, such as a coordinate. | Entities with identity, a lifecycle or polymorphic behavior. | Data defined by its contents, such as messages or DTOs. |
-> 
+>
 > Sources: [Microsoft Learn: Structure types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/struct) · [Microsoft Learn: Value types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/value-types) · [Microsoft Learn: Classes (C# language specification)](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/classes) · [Microsoft Learn: Records](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record)
 
 # References

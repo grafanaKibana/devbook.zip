@@ -1,17 +1,16 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
+topic: [Programming]
+subtopic: [NET]
 summary: "A primitive allowing up to N concurrent holders, for bounded parallelism."
-level:
-  - "4"
+level: ["4"]
 priority: High
 status: Ready to Repeat
 publish: true
 qard-deck: "Programming"
 qard-topic: "NET/CSharp/Concurrency and Parallelism/Semaphore"
 flashcard_uid: "d136a9b7"
+created: "2026-02-19T22:34:10.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A semaphore represents a fixed number of permits. At most N callers may hold one at the same time, which makes the primitive useful for bounded concurrency rather than single-owner exclusion. `SemaphoreSlim` is the usual in-process choice in .NET because waiting can be asynchronous through `WaitAsync`. The operating-system-backed `Semaphore` exists for synchronous and named cross-process coordination.
@@ -82,16 +81,16 @@ finally
 <!-- qard-id: 6d43729c-6478-465f-afd9-5b432d9ad3ae -->
 > [!qard]- When is `SemaphoreSlim` a better fit than `lock`?
 > `SemaphoreSlim` is the better fit when waiting must be asynchronous, such as protected work that contains `await`, or when up to N callers may proceed at once. `lock` remains the simpler fit for a short synchronous section that one thread at a time may enter.
-> 
+>
 > | Aspect | `lock` | `SemaphoreSlim` |
 > |---|---|---|
 > | Callers inside at once | One thread, so it only provides mutual exclusion. | Up to the configured count. A count of 1 gives mutual exclusion, and a higher count throttles concurrency. |
 > | How a caller waits | The waiting thread blocks until the lock is free. | `WaitAsync` returns a task, so the caller waits without holding a thread. `Wait` blocks like a lock. |
 > | `await` inside the section | Not allowed by the compiler, because the lock belongs to the thread that entered it. | Allowed, because a permit is not tied to any thread. |
 > | Release | Automatic when the block exits, including after an exception. | Only through an explicit `Release` call, which any code can make. |
-> 
+>
 > Because a semaphore tracks no owner, each successful wait is paired with exactly one `Release`, normally in a `finally` block. A missed release permanently removes a permit. An extra release adds a permit beyond the intended limit. A `maxCount` does not reliably prevent this: `Release` throws `SemaphoreFullException` only when it would raise the count above that maximum, so an extra release made while permits are still held succeeds silently.
-> 
+>
 > [Microsoft: SemaphoreSlim](https://learn.microsoft.com/en-us/dotnet/api/system.threading.semaphoreslim?view=net-10.0) · [Microsoft: SemaphoreSlim.Release](https://learn.microsoft.com/en-us/dotnet/api/system.threading.semaphoreslim.release?view=net-10.0) · [Microsoft: C# lock statement](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/lock)
 
 # References

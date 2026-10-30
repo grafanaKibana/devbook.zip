@@ -1,14 +1,13 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Rotates permutation cycles so displaced elements are written directly to final positions."
-level:
-  - "4"
+level: ["4"]
 priority: Low
 status: Not-Started
 publish: true
+created: "2026-08-10T10:51:19.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Cycle sort reads the mapping from current positions to sorted positions as a set of cycles. At `cycleStart`, it counts smaller values to find where the current value belongs. It writes the value straight there, picks up the displaced value, and follows the cycle until it returns to `cycleStart`.

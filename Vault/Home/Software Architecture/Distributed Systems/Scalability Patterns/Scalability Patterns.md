@@ -1,15 +1,14 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - Distributed Systems
+topic: [Software Architecture]
+subtopic: [Distributed Systems]
 summary: "A system's ability to keep serving requests as load grows by adding resources."
-level:
-  - "2"
+level: ["2"]
 priority: High
 publish: true
 tags: [FolderNote]
 status: Creation
+created: "2026-02-28T16:25:46.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Scalability measures how capacity and unit cost change as load grows and resources are added. A system scales only while it preserves its latency, error, and reliability targets. The question becomes concrete once workload volume, traffic shape, data growth, and the first likely bottleneck are known.

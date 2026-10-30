@@ -1,17 +1,16 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
+topic: [AI & ML]
+subtopic: [LLM]
 summary: "An LLM running in an action loop to complete engineering tasks end to end."
 publish: true
 status: Done
-level:
-  - "2"
+level: ["2"]
 priority: Medium
 qard-deck: "AI & ML"
 qard-topic: "LLM/Harness Engineering/Tooling/Coding Agents"
 flashcard_uid: "4e540b65"
+created: "2026-08-16T07:07:41.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Coding agents put a language model inside a tool loop. The model reads repository state, chooses an action, observes the result, and decides what to do next. That turns code generation into an execution process rather than a one-shot answer.
@@ -89,16 +88,16 @@ Amazon Q Developer provides IDE assistance with AWS-oriented development and tra
 <!-- qard-id: 83f1e938-9d0a-4efd-90e5-34f6a6534159 -->
 > [!qard]- What controls reduce risk when a coding agent can change a repository?
 > The main controls are a bounded task and budget, restricted permissions, runtime-enforced approval or denial of consequential actions, and CI plus review of the resulting change. They work because the runtime and delivery process enforce them; instructions alone depend on the model complying.
-> 
+>
 > | Control | What it does | Risk it reduces |
 > |---|---|---|
 > | Narrow task, limited tools, step or iteration budget | Restricts what the agent attempts and how long it can keep retrying | Broad diffs that are hard to review, and costly retry loops that repeat the same failure |
 > | Sandbox and permissions | Limits filesystem, network and command access, where the platform provides these controls | Actions outside the intended workspace or network reach |
 > | Runtime approval or denial | Requires approval for consequential actions or blocks them before execution; in GitHub Copilot, a hook that runs before a tool call can deny that call | Dangerous actions that the model was only told to avoid |
 > | CI and code review | Check the resulting change before it merges | Defects and boundary violations in the produced code |
-> 
+>
 > Each control covers specific paths and failure modes. Passing tests and review reduce risk but do not prove that every tool call or behavior was safe. A change can pass the suite and still violate an architectural boundary that the tests do not encode.
-> 
+>
 > Source: [GitHub Copilot hooks reference](https://docs.github.com/en/copilot/reference/hooks-reference)
 
 # References

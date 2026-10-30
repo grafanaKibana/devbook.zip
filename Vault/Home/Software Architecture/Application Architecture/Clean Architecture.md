@@ -1,17 +1,16 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - Application Architecture
+topic: [Software Architecture]
+subtopic: [Application Architecture]
 summary: "Organizes software so business policy is protected from technical details via the Dependency Rule: source dependencies point inward toward business rules."
-level:
-  - "3"
+level: ["3"]
 priority: High
 status: Ready to Repeat
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Application Architecture/Clean Architecture"
 flashcard_uid: "1f408830"
+created: "2026-03-06T22:43:56.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Clean Architecture, popularized by Robert C. Martin, keeps business policy independent of delivery technology. Its Dependency Rule is strict: source dependencies point inward, so inner policy code cannot name a web framework, database adapter, or UI type. That separation keeps domain behavior testable while outer details change. It earns its cost in systems with substantial business rules and a longer life than the current infrastructure stack.

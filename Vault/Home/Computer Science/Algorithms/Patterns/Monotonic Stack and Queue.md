@@ -1,14 +1,13 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "A stack or deque kept monotone by popping dominated elements, answering next-greater and window-extremum queries in one traversal."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Creation
 publish: true
+created: "2026-07-10T06:24:36.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 For each daily temperature, the next warmer day may be far ahead. Rescanning the suffix repeats the same comparisons. A monotonic stack keeps only unresolved days, and one warmer value can settle several of them at once.
@@ -16,8 +15,6 @@ For each daily temperature, the next warmer day may be far ahead. Rescanning the
 A monotonic stack stores indices while their values remain ordered. For a next-greater query, values are non-increasing from bottom to top. An arriving value pops every smaller value above it and becomes the next greater value for each popped index. Every index is pushed once and removed at most once.
 
 A monotonic deque adds window expiry. New candidates enter at the back, dominated candidates leave from the back, and expired indices leave from the front. Storing indices makes both expiry and duplicate identity explicit.
-
-
 
 %% tabs %%
 
@@ -28,8 +25,6 @@ A monotonic deque adds window expiry. New candidates enter at the back, dominate
 ```
 
 The trace uses daily temperatures `[73, 74, 75, 71, 69, 72, 76, 73]`. At `72`, the stack pops `69` and `71`, then becomes `[75, 72]` from bottom to top. At `76`, it pops `72` and `75`; `74` was already popped when `75` arrived. The six popped temperatures are `73`, `74`, `69`, `71`, `72`, and `75`, each in its own frame. Converting each resolved next index to `nextIndex - currentIndex` gives the Daily Temperatures waits `[1, 1, 4, 2, 1, 1, 0, 0]`. The charge counter shows the global bound: eight pushes and six pops over the whole scan.
-
-
 
 The stack holds unanswered indices whose values are non-increasing from bottom to top. When `a[i]` pops index `j`, no position between `j` and `i` held a greater value — such a value would already have popped `j`. Therefore `i` is the nearest qualifying index to the right. Entries left after the scan have no greater value to their right.
 

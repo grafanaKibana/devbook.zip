@@ -1,17 +1,16 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
+topic: [Programming]
+subtopic: [NET]
 summary: "Bounded async producer-consumer handoff with explicit backpressure."
-level:
-  - "4"
+level: ["4"]
 priority: High
 status: Creation
 publish: true
 qard-deck: "Programming"
 qard-topic: "NET/CSharp/Concurrency and Parallelism/Channels"
 flashcard_uid: "a3dbcc37"
+created: "2026-07-14T20:57:52.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 `Channel<T>` is an in-memory handoff between producers and consumers. Both sides can wait asynchronously, and a bounded channel makes overload behavior explicit. One common shape is an HTTP endpoint that queues a thumbnail job while a `BackgroundService` drains the work.
@@ -119,38 +118,38 @@ A bounded `Channel<T>` fits asynchronous producer-consumer work that belongs to 
 <!-- qard-id: a09669e4-9708-4a01-a2a2-f26c9e01c72f -->
 > [!qard]- What is a `Channel<T>`, and what reliability does it provide?
 > `Channel<T>` is an in-process, in-memory queue that hands items from producers to consumers, with asynchronous waiting on both sides. Its reliability ends at the process boundary. Queued items are not persisted, so a crash loses them, and code on other hosts cannot read them.
-> 
+>
 > How it works:
-> 
+>
 > - **Writer and reader:** producers write through `channel.Writer`, for example with `WriteAsync`. Consumers read through `channel.Reader`, often with `await foreach` over `ReadAllAsync()`. A reader waiting on an empty channel, or a writer waiting on a full bounded channel, waits without blocking a thread.
 > - **Capacity:** `Channel.CreateBounded<T>(capacity)` has a fixed buffer and a full-mode policy that either makes producers wait or drops an item. `Channel.CreateUnbounded<T>()` keeps growing.
 > - **Completion:** `Writer.Complete()` signals that no more items will arrive, so readers drain the buffer and their read loop ends.
 > 
 > A typical use is an HTTP endpoint that queues a job while a `BackgroundService` in the same process handles it.
-> 
+>
 > Reliability limits:
-> 
+>
 > - **No persistence:** buffered items exist only in that process's memory and are lost if it crashes.
 > - **No cross-host delivery:** only code inside the same process can read the channel.
 > - **No durable retry:** reading an item removes it from the channel, and nothing redelivers it if processing then fails.
 > 
 > Work that must survive a crash or be retried durably needs a database, message broker or other persistent store.
-> 
+>
 > [Microsoft: Channels](https://learn.microsoft.com/en-us/dotnet/core/extensions/channels) · [Microsoft: Queued background tasks](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/host/hosted-services?view=aspnetcore-10.0)
 
 <!-- qard-id: ea5e2167-2696-4823-be5c-605359a6f69b -->
 > [!qard]- What does a bounded `Channel<T>` provide that `SemaphoreSlim` does not?
 > A bounded `Channel<T>` stores the work itself and hands it to separate consumers, using a fixed buffer and an overload policy. `SemaphoreSlim` stores no work. It only counts permits, which limits how many callers run an operation at the same time.
-> 
+>
 > | Aspect | Bounded `Channel<T>` | `SemaphoreSlim` |
 > |---|---|---|
 > | What it holds | Up to `capacity` queued items | Only a count of free permits |
 > | Who does the work | A producer writes an item and continues; a consumer reads and processes it later | The caller that gets a permit runs the operation itself, then releases the permit |
 > | At the limit | In `Wait` mode, `WriteAsync` waits for buffer space, which slows producers; drop modes discard an item instead | `WaitAsync` waits for a permit; nothing is stored or dropped |
 > | Order | Items are read in the order they were queued; with several consumers, they can finish in a different order | Waiting callers have no guaranteed order, such as FIFO, for receiving permits |
-> 
+>
 > A channel therefore fits producer-consumer handoff, such as a request queuing a job for a background worker. A semaphore fits admission control, such as capping concurrent calls to a dependency.
-> 
+>
 > [Microsoft: Channels](https://learn.microsoft.com/en-us/dotnet/core/extensions/channels) · [SemaphoreSlim API](https://learn.microsoft.com/en-us/dotnet/api/system.threading.semaphoreslim?view=net-10.0)
 
 <!-- qard-id: 5eab3f2c-b214-40c6-88e8-067ae43706e4 -->
@@ -160,11 +159,11 @@ A bounded `Channel<T>` fits asynchronous producer-consumer work that belongs to 
 <!-- qard-id: 2de35e05-694b-4701-b1f5-0edd419f02bd -->
 > [!qard]- When is `BoundedChannelFullMode.DropOldest` a reasonable policy?
 > `DropOldest` is reasonable when each newer item makes older buffered items obsolete, so only the latest values matter. Examples are progress snapshots, current status updates and sampled metrics.
-> 
+>
 > When the buffer is full, the channel removes the oldest buffered item and accepts the incoming one. The write still succeeds, so the producer is not slowed, and the write result does not report the discard; only an `itemDropped` callback, when configured for the channel, signals that an item was discarded. Losing a stale snapshot is harmless when a newer one is already queued, but counting or logging drops keeps unexpected loss visible.
-> 
+>
 > It is the wrong policy for independent jobs, commands or business events that must each be processed. Dropping one of those silently loses work. The default `Wait` mode instead makes producers wait for space and discards nothing.
-> 
+>
 > [Microsoft: Channels](https://learn.microsoft.com/en-us/dotnet/core/extensions/channels)
 
 # References

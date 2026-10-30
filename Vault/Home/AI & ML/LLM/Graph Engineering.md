@@ -1,17 +1,16 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
+topic: [AI & ML]
+subtopic: [LLM]
 summary: "Designing an agentic system's execution topology, state transitions, and recovery boundaries."
-level:
-  - "3"
+level: ["3"]
 priority: Medium
 status: Ready to Repeat
 publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Graph Engineering"
 flashcard_uid: "ef968013"
+created: "2026-08-24T16:37:16.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Graph engineering is an emerging name for designing an agentic system as an executable graph: which units perform work, which transitions are legal, what state crosses each boundary, and where execution can stop, pause, or recover. The label is new; the mechanics come from established workflow engines, state machines, and graph-processing runtimes.
@@ -95,40 +94,40 @@ Production traces need node identity, edge decisions, state and workflow version
 <!-- qard-id: bf90539b-c090-4d3b-b48e-5219ddb070e3 -->
 > [!qard]- What does an explicit execution graph define in an agent workflow?
 > An explicit execution graph defines an agent workflow's control flow: the units of work, the transitions allowed between them and the state carried from step to step.
-> 
+>
 > - **Nodes** do the work. A node can be ordinary code, a tool call, one model call, a complete agent loop or a nested graph.
 > - **Edges** route execution. A fixed edge always leads to the same successor, a conditional edge chooses the successor from an outcome or the current state, and a terminal edge ends the run.
 > - **State** records progress. Nodes read defined state and return updates, and the runtime's merge rules decide how concurrent updates combine.
 > 
 > A loop can run inside one node or appear as a cycle across nodes. The graph models control flow, not relationships in data as a knowledge graph does. The framework decides when nodes run, when their updates become visible and where checkpoints are taken.
-> 
+>
 > Sources: [Microsoft Agent Framework: Workflows](https://learn.microsoft.com/en-us/agent-framework/journey/workflows) · [Microsoft Agent Framework: Checkpoints](https://learn.microsoft.com/en-us/agent-framework/workflows/checkpoints)
 
 <!-- qard-id: ad089c51-706a-42b4-b12d-78e34c2f7e5e -->
 > [!qard]- Why does an explicit graph not make an agentic system deterministic?
 > An explicit graph fixes which paths are legal, not what happens along them. Fixed edges and deterministic guards make parts of the control flow repeatable, but other sources of variation remain:
-> 
+>
 > - **Model calls** inside nodes can return different outputs, and a model-driven routing decision can choose a different legal edge.
 > - **External services and mutable inputs** can return different data on different runs.
 > - **Concurrent work** can interleave differently from run to run.
 > 
 > The graph constrains the application's routing and makes it easier to inspect, but it does not guarantee repeatable results. Reproducing or debugging a run therefore depends on recording its inputs, state, node outputs and routing decisions.
-> 
+>
 > Sources: [Microsoft Agent Framework: Workflow edges](https://learn.microsoft.com/en-us/agent-framework/concepts/workflows/edges)
 
 <!-- qard-id: c08da6b5-68fd-4421-a99e-9c001e20e156 -->
 > [!qard]- Why does checkpointing require idempotent node design?
 > Resuming from a checkpoint can run a node's work again, so any external side effect in that node must be safe to repeat. In Microsoft Agent Framework, checkpoints are taken when a superstep completes. Work done after the last saved checkpoint is not part of any saved state, so resuming can repeat it.
-> 
+>
 > 1. The checkpoint after superstep N is saved.
 > 2. A node in superstep N+1 sends an email.
 > 3. The process stops before the checkpoint after superstep N+1 is saved.
 > 4. Resuming from the superstep N checkpoint runs the node again, and a second email is sent.
 > 
 > An idempotent operation prevents the duplicate. If the email service accepts an idempotency key, the node sends a key that identifies this one logical operation. The key stays the same on every retry or replay, so the service recognizes the repeat and does not send again. The key is built from checkpointed values, such as the run, the node and the loop iteration, rather than generated fresh inside the node, because a fresh value would differ on replay. A later send that is meant to happen, such as a reminder in a later iteration, gets a different key.
-> 
+>
 > When the side effect is itself a database write, atomic deduplication also works. A unique constraint on the operation's key makes a replayed insert fail instead of creating a second record. A separate check-then-write does not work, because the process can stop after the effect but before recording that it happened. Checkpointing provides resumable state, not exactly-once side effects.
-> 
+>
 > Sources: [Microsoft Agent Framework: Checkpoints](https://learn.microsoft.com/en-us/agent-framework/workflows/checkpoints) · [Amazon Builders' Library: Making retries safe with idempotent APIs](https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/)
 
 # References

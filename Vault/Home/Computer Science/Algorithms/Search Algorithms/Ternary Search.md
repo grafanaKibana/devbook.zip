@@ -1,14 +1,13 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Finds the extremum of a unimodal function by splitting the range in thirds each step."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Creation
 publish: true
+created: "2026-07-10T06:24:36.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A ball's range rises as its launch angle `θ` approaches the optimum, then falls after passing it. Once a model includes drag, the best angle may have no useful closed form. The search must sample the function and narrow the interval around its single peak. [[Home/Computer Science/Algorithms/Search Algorithms/Binary Search|Binary Search]] solves a different problem because there is no ordered target here, only values that rise and then fall.
@@ -17,23 +16,15 @@ Ternary search works on a **unimodal** function: one that strictly increases to 
 
 The name also appears in sorted-array lookup, where a three-way split buys nothing: binary search chooses the correct half with fewer comparisons. Ternary search is useful for unimodal objectives, including one-parameter optimization and geometric extrema. [[Home/Computer Science/Algorithms/Patterns/Binary Search on Answer|Binary Search on Answer]] solves a different shape: a monotone feasibility predicate rather than a non-monotone objective that rises and falls.
 
-
-
 %% tabs %%
 
 %% tab: Visualization %%
-
-
 
 ```steptrace
 {"algorithm":"ternary-search","array":[1,4,9,12,11,7,2],"goal":"maximum"}
 ```
 
-
-
 The values rise to `12` and then fall, giving one strict peak. Each ternary step shows both third-point probes at once; the lower side is discarded, and a final scan of at most three positions confirms the maximum at index `3`.
-
-
 
 The interval `[lo, hi]` holds the peak `p` at the start of every step, and the discard rule preserves that. Let `m1 < m2` be the third-point probes. Strict unimodality means `f` increases on `[lo, p]` and decreases on `[p, hi]`.
 

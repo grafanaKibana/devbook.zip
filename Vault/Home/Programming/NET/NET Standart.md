@@ -1,17 +1,16 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
+topic: [Programming]
+subtopic: [NET]
 summary: "A specification of .NET APIs that multiple runtimes agree to implement."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Ready to Repeat
 publish: true
 qard-deck: "Programming"
 qard-topic: "NET/NET Standart"
 flashcard_uid: "60a3e364"
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 .NET Standard is a versioned API specification implemented by several .NET runtimes. It was the compatibility bridge among .NET Framework, .NET Core, Mono, and Xamarin. Modern libraries normally target the current .NET TFM directly. `netstandard2.0` remains useful when a library must also serve .NET Framework or older consumers.
@@ -90,18 +89,18 @@ var buffer = new byte[256];
 <!-- qard-id: bec5a750-95b9-4d12-a09a-76e78858812c -->
 > [!qard]- When is targeting .NET Standard still justified?
 > Targeting .NET Standard is justified when one library build must be usable on more than one .NET implementation, which in practice usually means .NET Framework consumers remain. `netstandard2.0` is the highest version .NET Framework can consume, so it is the target that keeps that reach. When every consumer runs modern .NET, a modern `netX.0` target is the better default.
-> 
+>
 > .NET Standard is a versioned API contract, not a runtime, and meeting the contract does not by itself guarantee that a library runs on a given host. Targeting a version fixes the baseline reference API surface the library compiles against. Each .NET implementation supports particular .NET Standard versions starting from particular releases, so a consumer can use the library only on an implementation release that supports the targeted version. Compatible NuGet packages can add APIs beyond that baseline, and every package dependency must then also support the consumer's platform. After .NET 5 unified the target frameworks, no new .NET Standard versions are planned beyond 2.1.
-> 
+>
 > | Target | Consumers that can use it | Cost |
 > |---|---|---|
 > | `netstandard2.0` only | Releases of .NET Framework, .NET Core, Mono, Xamarin and modern .NET that implement 2.0 | Limited to the 2.0 baseline plus APIs from compatible packages, with no modern-target APIs or optimizations |
 > | `netstandard2.1` | Implementations and releases that support 2.1, including modern .NET, but not .NET Framework | Gives up .NET Framework reach without the full modern API set |
 > | Modern `netX.0` only | Apps on that .NET version or later | .NET Framework and older runtimes cannot load it |
 > | Multi-target, such as `net8.0;netstandard2.0` | Both groups, each receiving the assembly built for it | More builds, tests, conditional code and package metadata, justified only when distinct consumer groups need distinct assets |
-> 
+>
 > Modern .NET implements .NET Standard 2.1 and earlier, so an existing `netstandard2.0` library can keep serving modern consumers, provided its package dependencies also support those runtimes. Retargeting is worthwhile when the library needs APIs or features that only a newer target provides.
-> 
+>
 > Sources: [Microsoft Learn: .NET Standard](https://learn.microsoft.com/en-us/dotnet/standard/net-standard) · [.NET Blog: The future of .NET Standard](https://devblogs.microsoft.com/dotnet/the-future-of-net-standard/)
 
 # References

@@ -1,18 +1,17 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - Distributed Systems
+topic: [Software Architecture]
+subtopic: [Distributed Systems]
 summary: "Message queues decouple producers from consumers by buffering messages until consumers are ready, absorbing spikes and isolating failures."
 tags: [FolderNote]
 publish: true
 priority: High
-level:
-  - "2"
+level: ["2"]
 status: Done
 qard-deck: "Software Architecture"
 qard-topic: "Distributed Systems/Message Queues/Message Queues"
 flashcard_uid: "15a348c0"
+created: "2026-02-15T15:01:57.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Message queues decouple producers from consumers by buffering messages until consumers are ready. They absorb spikes, isolate failures, and keep systems working when downstream services slow. Queues suit webhook ingestion and background work.
@@ -203,21 +202,21 @@ Queue depth alone hides whether one old message is stuck or fresh traffic is arr
 
 > [!qard]- What is the difference between at-most-once, at-least-once and exactly-once message delivery?
 > The three guarantees describe what a failure can do to a message within a stated boundary, such as a consumer reading from a broker. At-most-once never redelivers, so a message can be lost but never repeated. At-least-once redelivers until progress is recorded, so no message is lost but one can be processed more than once. Exactly-once means each message's result is committed once, with neither loss nor duplication. It holds only inside a boundary that commits the result together with the consumer's progress. Delivery attempts can still repeat after a failure, but only one durable outcome survives.
-> 
+>
 > | Guarantee | Consumer sequence | After a crash |
 > |---|---|---|
 > | At-most-once | The consumer records its progress, by acknowledging or saving its position, and then processes the message. | A crash after recording progress loses the message, because it is not delivered again. |
 > | At-least-once | The consumer processes the message, then records its progress. | A crash before progress is recorded causes redelivery, so the work can happen twice. |
 > | Exactly-once | The result and the consumer's progress commit atomically. Examples are output topics and consumer offsets committed in one Kafka transaction and read with `read_committed` isolation, or a database write committed in the same transaction as the message's offset or ID. | Either both commit or neither does. An aborted attempt leaves no visible result and is retried. After a restart, the consumer resumes from the committed position or recognizes an already recorded ID, so the result is not applied twice. |
-> 
+>
 > The guarantee covers only what that atomic commit includes. Kafka transactions make consuming and producing between Kafka topics exactly-once only when the output and the consumer offsets commit in one transaction and downstream consumers are configured with `read_committed`. The default `read_uncommitted` setting can expose records from aborted transactions. A database write, email or HTTP call outside the transaction is not covered. Such a side effect needs the external system's cooperation, typically an idempotency key or the message position recorded atomically with the local state change. End-to-end exactly-once across arbitrary external systems is therefore generally not available. Retry limits that move a message to a dead-letter queue, and retention or TTL expiry, are separate limits outside these guarantees.
-> 
+>
 > [Apache Kafka: Message delivery semantics](https://kafka.apache.org/41/design/design/#message-delivery-semantics)
 
 <!-- qard-id: 01ecda04-9e78-4b1a-b6af-f99dc23aad40 -->
 > [!qard]- How do Kafka, RabbitMQ classic or quorum queues, and RabbitMQ Streams differ in workload fit, ordering and operational factors?
 > RabbitMQ classic or quorum queues fit work items that are processed and then removed. Kafka fits high-throughput event streams that are retained so many independent consumers can read and replay them, when its partitioned log and ecosystem are central to the design. RabbitMQ Streams provide similar log-style replay and fan-out for systems that already run RabbitMQ. None of the three orders messages globally: order holds only within one queue, partition or stream partition. Operating cost and the team's experience with each platform also shape the choice.
-> 
+>
 > | Aspect | RabbitMQ classic/quorum queues | Kafka | RabbitMQ Streams |
 > |---|---|---|---|
 > | After consumption | An acknowledged message leaves the queue, so the queue holds only pending work. Quorum queues replicate their contents across nodes for data safety. | Events stay in a partitioned log for the retention period. Each consumer group tracks its own position in that log. | Messages stay in a replicated append-only log. Consumers read them without removing them. |
@@ -225,12 +224,12 @@ Queue depth alone hides whether one old message is stuck or fresh traffic is arr
 > | Ordering boundary | One queue. Redelivery and competing consumers can still change processing order. | One partition, not the whole topic. | One stream. A super stream preserves order only within each partition. |
 > | Operations | Health is watched through queue depth, unacknowledged messages, redelivery and node health. | Partitions, replication, consumer rebalances, consumer lag and retention all need planning and monitoring. | Streams are a RabbitMQ feature, so a team that already operates RabbitMQ gains log-style consumption without running a second broker platform. |
 > | Typical workload | Latency-sensitive commands and background jobs such as `GenerateInvoice`, with acknowledgements, retries and flexible routing through exchanges. | High-throughput events such as `OrderPlaced`, consumed independently by billing, analytics and rebuildable projections. | Large fan-out, replay or large backlogs in a system that already operates RabbitMQ. |
-> 
+>
 > [Apache Kafka: Introduction](https://kafka.apache.org/documentation/#introduction) · [RabbitMQ: Quorum Queues](https://www.rabbitmq.com/docs/quorum-queues) · [RabbitMQ: Streams](https://www.rabbitmq.com/docs/streams) · [RabbitMQ: Super Streams](https://www.rabbitmq.com/docs/streams#super-streams)
 
 > [!qard]- How can a message-based system keep one entity's events in order?
 > Most brokers order messages only within one partition or queue, not across a whole topic. One entity's events therefore stay in order only under three conditions: they all travel through the same partition, they are processed one at a time for that entity, and the consumer applies them by a per-entity sequence rather than by arrival.
-> 
+>
 > 1. **Route by a stable key:** the producer sends every event for the entity with the same key, such as `OrderId`. In Kafka, events with the same key go to the same partition, and consumers read each partition in the order it was written.
 > 2. **Process each key sequentially:** concurrent handlers for one partition, or competing consumers sharing one RabbitMQ queue, can finish an entity's events in a different order than they arrived.
 > 3. **Apply by version or sequence number:** retries, redelivery and prefetch can still deliver an event twice or late. The consumer stores the last version it applied for the entity and compares each arriving event with it:
@@ -239,9 +238,9 @@ Queue depth alone hides whether one old message is stuck or fresh traffic is arr
 >    - **Further ahead:** an earlier change has not arrived yet. Applying this event now would build on missing state, and discarding the earlier one when it arrives would lose its change. The consumer holds or retries the later event, or recovers the gap from the source, until the missing event is applied.
 > 
 > The rule differs when each event carries the entity's complete state rather than a change. A newer snapshot then supersedes every older one, so it can be applied across a gap, and a late older snapshot can be discarded without losing anything.
-> 
+>
 > Adding partitions increases parallelism but creates no order between partitions. RabbitMQ super streams follow the same rule and preserve order only within each partition.
-> 
+>
 > [Apache Kafka: Introduction](https://kafka.apache.org/documentation/#introduction) · [RabbitMQ: Super Streams](https://www.rabbitmq.com/docs/streams#super-streams) · [Microsoft: Event Sourcing pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/event-sourcing)
 
 # References

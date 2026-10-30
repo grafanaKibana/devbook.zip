@@ -1,14 +1,13 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Partitions an undirected graph into maximal reachable vertex sets using DFS, BFS, or union-find."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Ready to Repeat
 publish: true
+created: "2026-07-12T19:33:38.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 In a friendship graph with 10M users, asking which users are connected to Ann and asking which cluster contains Ann are the same problem. A **connected component** is a maximal set of vertices where every pair is joined by some path. Reachability is symmetric in an undirected graph, so one traversal from any vertex covers its whole component. Directed graphs need a different definition: [[Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components|strongly connected components]] require paths in both directions and a two-pass or low-link algorithm.
@@ -24,7 +23,6 @@ The outer loop does the work that is easy to miss. One DFS finds only its source
 ```steptrace
 {"algorithm":"connected-components"}
 ```
-
 
 Keep a `component[]` array initialised to "unlabelled". Scan vertices in any order; when one is still unlabelled, it must start a new component, so flood the entire set reachable from it — via a stack (DFS) or queue (BFS) — stamping each vertex with the current id, then increment the id. Marking a vertex when it is discovered prevents a second stamp.
 
@@ -44,7 +42,6 @@ F unlabelled -> flood id 2: reach F       component = [0,0,0,1,1,2]  id -> 3
 ```
 
 DFS and BFS produce identical labels — the partition does not depend on visit order, only on which vertices are mutually reachable.
-
 
 When edges arrive over time, [[Home/Computer Science/Data Structures/Graph Structures/Union-Find|union-find]] maintains the partition incrementally: initialize `V` singleton roots, then union each edge's endpoints. This is the same [[Home/Computer Science/Data Structures/Graph Structures/Disjoint Set|disjoint-set]] forest used by [[Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree|Kruskal's MST]]; union by rank keeps trees shallow, and path compression flattens the route each `find` traverses.
 
@@ -193,7 +190,6 @@ With adjacency lists, traversal visits each vertex once and scans each stored ad
 > The outer loop is the part that turns a single traversal into a component decomposition: each unlabelled vertex it lands on is provably in a component nothing before it reached, so it earns a fresh id.
 
 # Comparison
-
 
 For a static undirected graph, DFS or BFS labelling is the direct answer. One sweep produces both per-vertex ids and the component count. An iterative traversal avoids recursion overflow on deep graphs. [[Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components|strongly connected components]] belong to directed graphs. Their extra machinery adds nothing on an undirected input.
 

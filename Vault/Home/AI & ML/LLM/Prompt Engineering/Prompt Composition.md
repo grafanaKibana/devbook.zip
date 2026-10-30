@@ -1,17 +1,16 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
+topic: [AI & ML]
+subtopic: [LLM]
 summary: "Decomposing complex tasks into multiple LLM calls for reliability and debuggability."
-level:
-  - "3"
+level: ["3"]
 priority: Medium
 status: Done
 publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Prompt Engineering/Prompt Composition"
 flashcard_uid: "a52de874"
+created: "2026-02-28T13:40:02.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A single prompt is often the right design. It becomes the wrong one when a task contains intermediate decisions that must be checked before later work can trust them. Prompt composition splits those decisions across calls, adds context before an answer, or uses a model to revise the prompt itself.
@@ -114,23 +113,23 @@ Meta prompting keeps a person in the revision loop. [[Automated Prompt Optimizat
 <!-- qard-id: 891d3fd3-1b89-4b8c-a92d-679c7e978ad5 -->
 > [!qard]- When is prompt chaining a better fit than one large prompt?
 > Prompt chaining fits better when a task has real stages and an intermediate result must be checked before later work can trust it, or when that result determines what happens next. One prompt fits better when no intermediate result needs separate treatment. Each extra call adds latency, token cost and another boundary where errors can propagate.
-> 
+>
 > A chain earns its cost only when its boundaries are real:
-> 
+>
 > - Each stage has one narrow job and an explicit output contract, such as entities as JSON or an intent label from a closed set.
 > - A deterministic check runs before the next stage uses that output. A missing required field or an unknown label stops the chain instead of corrupting later steps.
 > - Failures can be localized, because each stage's input and output can be inspected separately.
 > 
 > For example, a support assistant extracts entities, validates them against a schema, classifies intent into an allowed set and only then writes the reply. If the error code `ERR-42` comes back as `error_code: null`, a required-field check stops the chain. Without that check, the classifier may route the request as a general inquiry.
-> 
+>
 > Splitting one vague prompt into several vague prompts adds failure points without adding control. For that reason, the complete chain is evaluated end to end against a simpler single-prompt baseline.
-> 
+>
 > Sources: [Anthropic, Building effective agents](https://www.anthropic.com/engineering/building-effective-agents) · [OpenAI evals](https://developers.openai.com/api/docs/guides/evals)
 
 <!-- qard-id: 637042dc-8641-4fbe-9f1a-25620b16a717 -->
 > [!qard]- What is a practical meta-prompting workflow for improving a weak prompt?
 > A practical workflow treats a model-drafted prompt revision as a candidate that must beat the current prompt on held-out cases before it ships.
-> 
+>
 > 1. **Collect failures:** the starting evidence is observed failures from real outputs, such as incident summaries that omit the timeline and root cause.
 > 2. **Group by cause:** failures are grouped by likely cause, such as a missing output requirement or an ambiguous instruction. One revision then targets a cause instead of patching single cases.
 > 3. **Draft a candidate:** a model receives the current prompt, the grouped failures and the required output contract, and proposes a revision. In the incident example, the revision can require `timeline`, `root_cause` and `actions` as mandatory JSON keys.
@@ -138,7 +137,7 @@ Meta prompting keeps a person in the revision loop. [[Automated Prompt Optimizat
 > 5. **Version and gate:** the prompt is versioned together with its evaluator, and a rollback threshold is set before deployment.
 > 
 > The held-out comparison is the check for meta-prompt overfitting, where a revision fixes the remembered failures but silently breaks ordinary inputs. It can reveal that regression before release, which reduces the risk without ruling it out. Inputs that the evaluation set does not represent can still regress, so the rollback threshold limits the damage after deployment. A model-drafted revision is a hypothesis to test, not a reliability guarantee.
-> 
+>
 > Sources: [OpenAI model optimization](https://developers.openai.com/api/docs/guides/model-optimization) · [OpenAI evals](https://developers.openai.com/api/docs/guides/evals)
 
 # References

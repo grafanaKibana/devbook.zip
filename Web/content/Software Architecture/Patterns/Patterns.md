@@ -1,9 +1,9 @@
 ---
 publish: true
 title: Software Architecture Patterns
-created: 2026-10-17T18:11:50.101Z
-modified: 2026-10-17T18:11:50.101Z
-published: 2026-10-17T18:11:50.101Z
+created: 2026-02-10T01:40:47.000Z
+modified: 2026-10-28T12:33:42.000Z
+published: 2026-10-28T20:52:55.187Z
 tags:
   - FolderNote
 topic:

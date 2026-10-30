@@ -1,15 +1,14 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Data Structures
+topic: [Computer Science]
+subtopic: [Data Structures]
 summary: "Priority-queue structures with an O(1) root peek, differing on meld and decreaseKey."
 tags: [FolderNote]
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Done
 publish: true
+created: "2026-07-09T18:37:04.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Heap-like structures share one contract: a **partial order** in which each parent outranks its children. Sibling order is unspecified. Peek is O(1) with a single-root layout or a maintained global-min pointer. Otherwise a forest must scan its roots.

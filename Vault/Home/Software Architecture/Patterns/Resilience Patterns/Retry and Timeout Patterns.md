@@ -1,14 +1,13 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - Patterns
+topic: [Software Architecture]
+subtopic: [Patterns]
 summary: "Defensive strategies that re-attempt transient failures and bound how long a call may wait before failing."
-level:
-  - "3"
+level: ["3"]
 priority: High
 status: Ready to Repeat
 publish: true
+created: "2026-03-06T22:43:56.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Retries repeat operations after plausibly transient failures. Timeouts bound how long each attempt, or the whole operation, may occupy caller capacity. Distributed systems regularly encounter brief network loss, DNS failures, overload, and cold-start latency that clears within seconds. A missing retry turns those faults into unnecessary failures. A missing timeout lets one hung dependency hold connection slots until latency collapses upstream.

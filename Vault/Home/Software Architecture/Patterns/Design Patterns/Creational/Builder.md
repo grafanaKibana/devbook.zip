@@ -1,17 +1,16 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - Patterns
+topic: [Software Architecture]
+subtopic: [Patterns]
 summary: "Separates construction of a complex object from its representation, accumulating configuration through a fluent API validated on a final Build() call."
-level:
-  - "3"
+level: ["3"]
 priority: High
 status: Done
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Creational/Builder"
 flashcard_uid: "ad1872ad"
+created: "2026-03-05T22:12:38.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A complex object often cannot be created sensibly in one constructor call. Some inputs are optional, others interact, and derived values should never be supplied by callers.
@@ -245,23 +244,23 @@ A constructor or object initializer is the default. Builder earns a separate typ
 <!-- qard-id: 7ef0df00-358b-46be-9bed-4de8aff6ce01 -->
 > [!qard]- When is a Builder worth using instead of a constructor?
 > A Builder is worth its extra type when constructing the object is a process rather than one call. This holds when inputs arrive through several steps, often with many of them optional, or when the finished object needs validation or derived values that depend on the complete set of inputs. A constructor, or an object initializer with `required` members, stays clearer when the values fit in one readable call and the constructor or initializer can enforce the same invariants.
-> 
+>
 > What a Builder adds over a long constructor:
-> 
+>
 > - **Named steps instead of positional arguments:** calls such as `ShipTo(address)` and `WithGiftWrap(message)` replace a parameter list whose call site reads like `true, null, false`. A new option becomes another named method instead of another placeholder argument for every caller.
 > - **Cross-field validation in one place:** `Build()` sees the whole configuration. A rule such as requiring a shipping address and at least one item is therefore checked once, before the object exists.
 > - **Derived values and defaults:** `Build()` computes values such as the order total and applies defaults. One example is using the shipping address for billing when no billing address was given. Callers no longer have to do this themselves.
 > 
 > The costs are an extra type that mirrors the product's API and, for any required input that is checked only in `Build()`, runtime rather than compile-time enforcement of its presence, which `required` members provide. Mandatory inputs taken through the builder's own constructor, such as the customer in `new OrderBuilder(customer)`, must still be passed when the builder is created. A builder around independent property assignments only duplicates an object initializer.
-> 
+>
 > [[Home/Software Architecture/Patterns/Design Patterns/Creational/Builder#Tradeoffs|Builder tradeoffs]] · [[Home/Software Architecture/Patterns/Design Patterns/Creational/Builder#Solution|Builder implementation]] · [Microsoft: required modifier (C# reference)](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/required)
 
 <!-- qard-id: a219c123-c1e0-4eae-96fc-228367900e40 -->
 > [!qard]- Why does `WebApplicationBuilder` use a builder instead of a constructor with parameters?
 > An ASP.NET Core application is configured by many independent setup steps, not by one fixed set of arguments. `WebApplicationBuilder` collects that setup in stages, and `Build()` creates the `WebApplication` only after everything has been contributed.
-> 
+>
 > How the stages work:
-> 
+>
 > 1. `WebApplication.CreateBuilder(args)` creates the builder with preconfigured defaults, such as the standard configuration sources.
 > 2. Setup code adds to the builder's properties:
 >    - configuration through `builder.Configuration`
@@ -270,7 +269,7 @@ A constructor or object initializer is the default. Builder earns a separate typ
 > 3. `builder.Build()` creates the `WebApplication` from the accumulated configuration and registrations.
 > 
 > A constructor with parameters would require callers to assemble the complete set of services and settings before a single call. That set is open-ended, because the application and its libraries both contribute to it. The builder therefore gives every contributor a shared place to add its part before anything is assembled. Staging also lets later setup steps read earlier results, such as configuration values that decide which services to register. A constructor is still used at the end: in ASP.NET Core 10, `Build()` builds the underlying host and passes it to the `WebApplication` constructor.
-> 
+>
 > [Microsoft: WebApplicationBuilder class](https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.builder.webapplicationbuilder?view=aspnetcore-10.0) · [Microsoft: Configuration in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/configuration/?view=aspnetcore-10.0) · [Microsoft: .NET dependency injection](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection/overview) · [ASP.NET Core 10: WebApplicationBuilder source](https://github.com/dotnet/aspnetcore/blob/v10.0.0/src/DefaultBuilder/src/WebApplicationBuilder.cs)
 
 # References

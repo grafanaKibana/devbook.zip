@@ -1,17 +1,16 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - Patterns
+topic: [Software Architecture]
+subtopic: [Patterns]
 summary: "Uses a container-managed singleton lifetime when one shared, thread-safe instance should serve a provider boundary."
-level:
-  - "2"
+level: ["2"]
 priority: High
 status: Done
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Creational/Singleton"
 flashcard_uid: "12bb55c5"
+created: "2026-03-05T22:12:38.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Singleton combines two decisions: keep one instance within a defined boundary and provide access to it. The boundary is easy to miss. A classical static implementation owns a process-level access point, while `.AddSingleton<T>()` reuses one instance for subsequent resolutions from a particular root service provider and registration. A second provider or direct construction can still create another instance.
@@ -174,7 +173,7 @@ Singleton services may be stateless or hold shared state. Either way, their impl
 <!-- qard-id: 3ccef885-1fa9-4646-9ab0-8a9a97b1da4e -->
 > [!qard]- How does a DI singleton differ from the classical Singleton pattern?
 > A classical Singleton enforces a single instance inside the class itself and exposes it through a global static access point. A DI singleton is an ordinary class that the container creates once per root provider and injects into consumers, so its single instance is a container lifetime rule rather than a property of the type.
-> 
+>
 > | Aspect | Classical Singleton | DI singleton |
 > |---|---|---|
 > | Who enforces one instance | The type itself, through a private constructor and a static instance field, often initialized with `Lazy<T>`. | The container: after `AddSingleton<T>()`, the root provider creates the instance on first request and returns the same one for later resolutions. |
@@ -182,22 +181,22 @@ Singleton services may be stateless or hold shared state. Either way, their impl
 > | How far the single instance extends | Every caller of the static access point shares it. | One root provider and registration. A second provider, such as one created by calling `BuildServiceProvider` again, or direct construction with `new` produces another instance. |
 > | Testing and replacement | Consumers cannot be handed a substitute, and tests share the static state. | Tests pass a fake or substitute to the consumer's constructor. |
 > | Creation and disposal | Controlled by the type. | Controlled by the container, which disposes instances it created when the provider is disposed. |
-> 
+>
 > In both forms, one instance serves concurrent callers, so the instance's own state must be thread-safe.
-> 
+>
 > [Microsoft: Service lifetimes](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection/service-lifetimes) · [Microsoft: .NET dependency injection](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection/overview) · [[Home/Software Architecture/Patterns/Design Patterns/Creational/Singleton#Problem|Classical Singleton problem]] · [[Home/Software Architecture/Patterns/Design Patterns/Creational/Singleton#Singleton Lifetime in .NET|Singleton lifetime in .NET]]
 
 <!-- qard-id: 8f445829-cfc8-4081-9059-c663ca0a2d49 -->
 > [!qard]- What must be true before choosing singleton lifetime for mutable state?
 > Singleton lifetime suits mutable state only when four conditions hold: sharing is intended, concurrent access is safe, retained memory is bounded, and no scoped state is captured. One instance serves every caller of its provider until the provider is disposed, usually at application shutdown, so each condition guards against a specific failure.
-> 
+>
 > - **Sharing is intended:** every request and user resolved from that provider sees the same state. If the data really belongs to one request or one user, it leaks between callers.
 > - **Concurrent access is safe:** one instance serves concurrent requests. The container makes resolving the service thread-safe, but not the service's fields or dependencies, so unsynchronized mutation causes races and corrupted state.
 > - **Retained memory is bounded:** the singleton and its dependency graph live as long as the provider. An unbounded cache keeps growing, and failed or stale state survives far longer than intended.
 > - **No scoped state is captured:** a singleton that holds a scoped service keeps that instance beyond its intended scope. This is a captive dependency. When scope validation is enabled, it rejects constructor-injecting a scoped service into a singleton.
 > 
 > When any condition fails, a shorter lifetime such as scoped or transient fits better, or the state needs a different owner. Singleton work that genuinely needs scoped services can create and dispose an explicit scope for each operation.
-> 
+>
 > [Microsoft: Dependency injection guidelines](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection-guidelines) · [Microsoft: Service lifetimes](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection/service-lifetimes) · [[Home/Software Architecture/Patterns/Design Patterns/Creational/Singleton#Pitfalls|Singleton pitfalls]]
 
 # References

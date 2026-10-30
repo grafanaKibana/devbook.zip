@@ -1,8 +1,8 @@
 ---
 publish: true
-created: 2026-08-20T20:41:15.509Z
-modified: 2026-10-24T11:49:29.658Z
-published: 2026-10-24T11:49:29.658Z
+created: 2026-02-10T01:40:47.000Z
+modified: 2026-10-28T12:33:42.000Z
+published: 2026-10-28T20:52:55.143Z
 tags:
   - FolderNote
 icon: cloudy

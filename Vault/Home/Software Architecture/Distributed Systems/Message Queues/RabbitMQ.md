@@ -1,15 +1,14 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - Distributed Systems
+topic: [Software Architecture]
+subtopic: [Distributed Systems]
 summary: "Open-source AMQP 0-9-1 broker routing messages from exchanges to queues via bindings, decoupling producers from consumers."
-level:
-  - "2"
+level: ["2"]
 priority: High
 status: Done
 
 publish: true
+created: "2026-02-15T15:01:57.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 RabbitMQ is an open-source broker. This note focuses on its classic and quorum AMQP 0-9-1 queues: producers publish messages to exchanges, which route them into queues for consumers. This extra hop separates the rate of incoming work from the rate at which workers can finish it. In a `[[Home/Software Architecture/Distributed Systems/Webhooks|Webhook]] -> Queue -> Worker` flow, the queue turns a short traffic spike into backlog instead of forcing the webhook endpoint to wait for every job.

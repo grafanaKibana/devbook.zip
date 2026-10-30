@@ -1,16 +1,15 @@
 ---
-topic:
-  - DevOps
-subtopic:
-  - Version Control Systems
+topic: [DevOps]
+subtopic: [Version Control Systems]
 title: Branching Strategies
 summary: "How a team uses Git branches for parallel development, releases, and hotfixes."
-level:
-  - "4"
+level: ["4"]
 priority: High
 status: Ready to Repeat
 
 publish: true
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A branching strategy is a coordination contract: where integration happens, how long work may diverge, which checks gate a merge, and how releases are cut. The fit follows release topology, review latency, and the team's ability to keep the integration branch healthy.

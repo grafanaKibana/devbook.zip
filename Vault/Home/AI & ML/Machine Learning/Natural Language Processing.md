@@ -1,14 +1,13 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - Machine Learning
+topic: [AI & ML]
+subtopic: [Machine Learning]
 summary: "Turning language into machine-usable representations for extraction, classification, search, and generation. Transformers are now common."
-level:
-  - "1"
+level: ["1"]
 priority: Low
 status: Done
 publish: true
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Natural language processing (NLP) turns text or speech into representations a machine can use, then maps those representations to a task such as search, classification, extraction, translation, or generation. The machine does not "understand" language in the human sense. It learns statistical structure that can be useful enough to operate on language.

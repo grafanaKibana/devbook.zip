@@ -1,14 +1,13 @@
 ---
-topic:
-  - Data Persistence
-subtopic:
-  - NoSQL
+topic: [Data Persistence]
+subtopic: [NoSQL]
 summary: "Redis data structures, persistence, replication, clustering, and the failure contracts behind common use cases."
-level:
-  - "3"
+level: ["3"]
 priority: High
 status: Ready to Repeat
 publish: true
+created: "2026-07-18T07:07:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Redis keeps a working data set in memory and exposes atomic commands over typed values such as strings, hashes, sets, sorted sets, streams, and bitmaps. A `GET`, counter increment, or leaderboard update is cheap, but memory speed says nothing about durability or consistency. The design must still identify the authoritative system, the meaning of an acknowledged write, the failover loss window, and the application's behavior when Redis is unavailable.

@@ -1,14 +1,13 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Data Structures
+topic: [Computer Science]
+subtopic: [Data Structures]
 summary: "A contiguous, index-addressable buffer that grows automatically by reserving spare capacity."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Done
 publish: true
+created: "2026-02-18T19:18:52.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A dynamic array keeps array-style indexing while making append practical. It reserves more contiguous slots than it currently uses, so most appends write into spare capacity. Only the append that fills the buffer pays for growth.

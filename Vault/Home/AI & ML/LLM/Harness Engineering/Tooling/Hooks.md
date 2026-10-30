@@ -1,14 +1,13 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
+topic: [AI & ML]
+subtopic: [LLM]
 summary: "Lifecycle callbacks that run custom logic at defined agent execution points."
 publish: true
 status: Done
-level:
-  - "2"
+level: ["2"]
 priority: Medium
+created: "2026-08-16T07:07:41.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Hooks run configured logic at named points in an agent session. They turn a written policy into an event-bound check: inspect a tool call before it runs, format a file after an edit, or record which instructions were loaded.

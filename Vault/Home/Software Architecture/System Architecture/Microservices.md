@@ -1,11 +1,8 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - System Architecture
+topic: [Software Architecture]
+subtopic: [System Architecture]
 summary: "A style splitting a system into independently deployable services, each aligned to a business capability and owning its own data."
-level:
-  - "3"
+level: ["3"]
 priority: Medium
 status: Done
 
@@ -13,6 +10,8 @@ publish: true
 qard-deck: "Software Architecture"
 qard-topic: "System Architecture/Microservices"
 flashcard_uid: "538ccd0d"
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Microservices divide a system into services that can be changed and deployed independently. Each service owns a business capability and the data behind it. The useful boundary is deployment independence: separate processes alone do not make a microservice architecture.
@@ -176,64 +175,64 @@ A useful stop rule is simple. If extracting `Catalog` creates its own pipeline, 
 
 > [!qard]- What is a microservices architecture?
 > A microservices architecture splits a system into services that can be deployed independently. Each service is built around one business capability, owns that capability's data, and works with other services only through network contracts such as APIs and events.
-> 
+>
 > - **Independent deployment:** a service can be released, rolled back and scaled without a coordinated release of the whole system. This is the property the style exists for; running code in separate processes does not by itself make it a microservice architecture.
 > - **Business-capability boundaries:** services such as Orders, Inventory and Billing each contain their own rules and language, instead of the system being split by technical layer.
 > - **Exclusive data ownership:** only the owning service accesses its data directly, and other services go through its contract. Separate database servers are optional; exclusive ownership is not.
 > - **Contract-based integration:** versioned APIs and events carry data between services, so one service's internals can change without forcing another team to release.
 > 
 > The cost is that calls become network calls that can fail partially, workflows that span services lose single-database transactions, and every service needs its own pipeline, monitoring and on-call ownership.
-> 
+>
 > [Azure: Microservices architecture style](https://learn.microsoft.com/en-us/azure/architecture/guide/architecture-styles/microservices)
 
 <!-- qard-id: 2f039fe1-5942-48b0-8416-ab06d23915ef -->
 > [!qard]- Why do microservices create distributed data consistency problems, and what keeps a cross-service workflow reliable?
 > Each service commits only to its own datastore, so a business operation that spans several services has no single local ACID transaction by default. One service can commit while a later step fails, which leaves partial business state. While the workflow runs, other services can also observe intermediate state, so the overall result is eventually consistent rather than atomic.
-> 
+>
 > A reliable cross-service workflow combines separate mechanisms, each covering a different failure:
-> 
+>
 > | Mechanism | Failure it handles | How it handles it |
 > |---|---|---|
 > | Saga | A later step fails after earlier steps have committed | The workflow runs as a sequence of local transactions. When a step fails, compensating business actions counteract completed steps where possible, such as refunding a payment or releasing a stock reservation. |
 > | Transactional outbox | The service crashes between committing its data and publishing the related message | The state change and the outgoing message are written in the same local transaction, and a relay publishes the message afterward. A committed change therefore always has a stored message waiting to be published, and a rolled-back change is never announced. |
 > | Inbox or deduplication record | The same message arrives again, for example after a relay retry or an unconfirmed acknowledgement | The consumer records which messages it has already processed and skips repeats. |
 > | Idempotent effects | A command or handler is retried | Repeating the operation leaves the same result as performing it once. |
-> 
+>
 > Compensation is a new business action, not a database rollback, and it has two separate limits. Some committed steps have no compensating action at all. Such noncompensable (pivot) work cannot be undone once it commits, so compensation cannot restore the earlier state. Where a compensating action does exist, it can itself fail. The outbox does not make delivery exactly-once: a message can still arrive more than once, which is why consumers need deduplication or idempotent effects.
-> 
+>
 > [Azure: Saga pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/saga) · [Azure: Transactional outbox with Azure Cosmos DB](https://learn.microsoft.com/en-us/azure/architecture/databases/guide/transactional-out-box-cosmos) · [Azure: Event-driven architecture style](https://learn.microsoft.com/en-us/azure/architecture/guide/architecture-styles/event-driven)
 
 <!-- qard-id: b0b30416-18f1-43d0-be97-f7d92c1bd721 -->
 > [!qard]- What architecture usually fits a new product, and what evidence would justify moving to microservices?
 > A new product is usually best served by a monolith, ideally a modular monolith with explicit internal boundaries. Moving toward microservices is justified one capability at a time, when measured evidence shows that a stable capability repeatedly needs independent deployment, scaling, ownership or isolation, and the team can operate the resulting distributed system.
-> 
+>
 > **Why one deployment usually fits first:**
-> 
+>
 > - Domain boundaries in a new product are still moving. Inside one deployment, moving a boundary is an ordinary refactoring; between services, it means changing contracts, data ownership and deployments.
 > - Calls between collocated modules stay in-process, and transactions across those modules can stay local. These internal calls need no network failure handling or cross-service consistency work yet. Calls to external dependencies, such as a database or a third-party API, can still fail.
 > - One deployable unit is cheaper to operate than many services, each with its own pipeline, telemetry and on-call duty.
 > 
 > **What counts as evidence:** measured costs of the shared deployment, such as release wait time, change collisions between teams, one workload saturating while the rest of the application is idle, or incidents in one area spreading to unrelated features. A preference for microservices or an expected future scale is not evidence by itself.
-> 
+>
 > **Operational readiness:** every extracted service adds network failure modes for its callers. A workflow whose steps commit to independently owned state also becomes eventually consistent. An extraction that only serves reads need not create such a workflow. Without distributed tracing, on-call ownership and experience with asynchronous consistency, those costs outweigh the gain.
-> 
+>
 > This is a conditional judgment, not a universal monolith-first rule. A monolith alongside a few extracted services can be a stable end state.
-> 
+>
 > [Azure: Microservices architecture style](https://learn.microsoft.com/en-us/azure/architecture/guide/architecture-styles/microservices)
 
 <!-- qard-id: 4f8727f6-b1fa-40aa-8527-127b4090be74 -->
 > [!qard]- What evidence shows that an extracted service is independent rather than part of a distributed monolith?
 > An extracted service is independent when its owning team can change, deploy, roll back and operate it without a coordinated release elsewhere. A distributed monolith fails that test: its processes run separately, but its parts still change or fail together. Shared writable tables and paired deployments create that coupling directly. A mandatory synchronous call chain can create it too, when its contracts cannot evolve compatibly, its releases must be paired, or a dependency's failure is not contained. Synchronous communication alone does not force lockstep change.
-> 
+>
 > Evidence of independence:
-> 
+>
 > - **Unpaired release and operation:** the service ships and rolls back on its own, and its team runs it with its own alerts and on-call duty.
 > - **Exclusive data ownership:** only the service writes its data; other components use its contract instead of reading or writing its tables.
 > - **Versioned contract:** consumers depend on a published API or event schema that can evolve compatibly, not on shared internals.
 > - **Exercised failure behavior:** dependency failures have been tested, and callers reject, queue or degrade as designed instead of letting the failure spread.
 > 
 > Traces and reconciliation show that synchronous calls and later messages can be followed across the boundary, and that diverging state gets detected. That is useful evidence, but it does not prove independence on its own: a fully traced service can still require lockstep releases.
-> 
+>
 > [Azure: Microservices architecture style](https://learn.microsoft.com/en-us/azure/architecture/guide/architecture-styles/microservices) · [Azure: Event-driven architecture style](https://learn.microsoft.com/en-us/azure/architecture/guide/architecture-styles/event-driven)
 
 # References

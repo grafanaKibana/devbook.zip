@@ -1,17 +1,16 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
+topic: [AI & ML]
+subtopic: [LLM]
 summary: "A model grades candidate output with anchored scorecards or pairwise preference, then human labels calibrate the judge."
-level:
-  - "3"
+level: ["3"]
 priority: Medium
 status: Done
 publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Evaluation/LLM-as-a-Judge"
 flashcard_uid: "446768f0"
+created: "2026-02-16T18:33:57.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 LLM-as-a-judge uses a model to grade a candidate output against an explicit rubric. It scales semantic evaluation beyond what exact-match checks can measure, but its verdict is another model output rather than ground truth. Reliability has to be measured against human labels.
@@ -124,29 +123,29 @@ The aggregate is trusted only after calibration on labeled cases. Disagreements 
 <!-- qard-id: 935b5109-8c6e-4c87-80ad-38b3d509182f -->
 > [!qard]- When does an LLM judge fit better than a deterministic check?
 > An LLM judge fits when acceptance depends on meaning or quality that cannot be written as an exact rule, such as whether an answer is correct for the case, grounded in its sources, relevant or clear. A deterministic check fits any property that can be stated exactly, such as schema validity, an allowed action or a length limit. For those properties it remains the better tool even when a judge is available.
-> 
+>
 > | Aspect | Deterministic check | LLM judge |
 > |---|---|---|
 > | What it can decide | Exactly stated properties such as format, structure, allowed actions and hard policy rules | Open-ended qualities that a rubric can describe but code cannot fully specify |
 > | Repeatability | The same rule and input always give the same result | Verdicts can change with the judge model, prompt and sampling settings |
 > | Cost | Local parsing or scanning | A model call for every judgment |
 > | How it fails | Exact for schemas and allowlists; heuristic scanners such as PII detectors can misclassify | It can misread the rubric or the answer, or favor irrelevant features such as length |
-> 
+>
 > The two approaches combine. Deterministic checks run first, so a malformed output or a forbidden action fails immediately without the cost of a judge call. A good semantic score cannot rescue a failed hard rule. The judge then evaluates the remaining semantic criteria, and its verdicts are trusted only after calibration against human labels.
-> 
+>
 > Sources: [OpenAI: Evals guide](https://developers.openai.com/api/docs/guides/evals) · [Zheng et al.: Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena](https://arxiv.org/abs/2306.05685) · [JSON Schema Core](https://json-schema.org/draft/2020-12/json-schema-core)
 
 <!-- qard-id: a68a413d-a086-4bb3-8ba5-a71f1d99297c -->
 > [!qard]- What evidence supports trusting an LLM judge's verdicts?
 > An LLM judge earns trust through measured agreement with human judgment on representative cases. It also needs tests showing that its verdicts do not depend on irrelevant features such as answer order. This evidence supports the judge's reliability; it does not prove that the rubric measures the right thing.
-> 
+>
 > - **Agreement with human labels:** the judge scores a fixed set of cases that humans have already labeled, and its agreement with those labels is measured. Disagreements are inspected because they reveal whether the rubric is ambiguous, the reference is incomplete or the judge is biased.
 > - **Order-swap consistency:** in pairwise comparison, each pair is judged twice, once in each order. A consistent judge prefers the same underlying answer both times, so its A/B label switches along with the answers. A judge that keeps choosing the same position instead follows position rather than content, which is position bias. A pair whose preferred answer changes with the order is treated as a tie or sent to human review.
 > - **Bias probes:** calibration cases set concise correct answers beside padded or repetitive ones to expose verbosity bias. They also include outputs from the judge's own model family to expose self-preference.
 > - **Recalibration after changes:** the judge model, prompt, rubric and sampling settings together define the measurement. A change to any of them can make scores stricter or looser, so the calibration set is rerun before new scores are compared with old ones.
 > 
 > High agreement shows only that the judge matches the labelers on those cases. A judge that consistently applies a flawed rubric is stable but still measures the wrong thing.
-> 
+>
 > Sources: [Zheng et al.: Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena](https://arxiv.org/abs/2306.05685) · [OpenAI: Evals guide](https://developers.openai.com/api/docs/guides/evals)
 
 # References

@@ -1,14 +1,13 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Data Structures
+topic: [Computer Science]
+subtopic: [Data Structures]
 summary: "A prefix tree that stores strings as character paths for exact and prefix queries."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Ready to Repeat
 publish: true
+created: "2026-06-20T05:33:50.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 An autocomplete box must answer more than exact membership. Given the fragment `lap`, it needs every stored key that begins there. A [[Home/Computer Science/Data Structures/Hash-based Structures/HashMap|hash map]] hashes the whole key and has no location for a shared prefix, so this query scans all `n` keys. A trie keys the set by the *sequence* of characters. The prefix becomes a node in the structure rather than a filter over every entry.

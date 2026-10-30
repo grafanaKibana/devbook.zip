@@ -1,14 +1,13 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - Distributed Systems
+topic: [Software Architecture]
+subtopic: [Distributed Systems]
 summary: "Coordinates a multi-service workflow through one component that owns its state, ordering, retries, and compensation decisions."
-level:
-  - "3"
+level: ["3"]
 priority: High
 status: Not-Started
 publish: true
+created: "2026-08-10T10:51:19.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Orchestration coordinates a distributed workflow through an orchestrator that decides which participant acts next. The orchestrator owns the process state and sends commands. Services still own and commit their local business state. It is not a global database transaction, and durable orchestration does not remove eventual consistency.

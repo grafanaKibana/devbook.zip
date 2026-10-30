@@ -1,14 +1,13 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Repeatedly selects the minimum of the unsorted suffix and places it at the next prefix position."
-level:
-  - "4"
+level: ["4"]
 priority: Low
 status: Ready to Repeat
 publish: true
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Selection sort is useful when writes cost much more than comparisons, such as on flash or EEPROM with limited erase cycles. Pass `i` scans the unsorted suffix `a[i..n-1]`, finds its minimum, and swaps that value into position `i`. The guarded implementation performs at most one swap per pass. Position `i` is now final, while the other position touched by the swap remains in the unsorted suffix and may be written again.
@@ -21,13 +20,9 @@ The minimum scan is unconditional. It examines every remaining element whether t
 
 %% tab: Visualization %%
 
-
-
 ```steptrace
 {"algorithm":"selection-sort","array":[8,3,5,1,9,2,7,4]}
 ```
-
-
 
 The first pass scans all eight elements, finds the minimum `1` at index 3, and swaps it with `a[0]`. That swap writes both indices 0 and 3, and it fixes index 0 permanently: no smaller value remains in the suffix, so index 0 is never revisited. Index 3 remains in the unsorted suffix and may be written again. The second pass repeats the scan over `a[1..7]`, now seven elements, and places `2`. Each pass performs at most one swap and shortens the unsorted suffix by one, so the sorted prefix on the left grows by one element per pass while the comparison work on the right falls by one — the sorted region and the scanning cost move in opposite directions.
 
@@ -101,7 +96,6 @@ The scan is unconditional: there is no shortcut that ends a pass early and no ou
 ```
 
 Comparisons dominate the running time and are identical across all three rows — the direct consequence of an unconditional scan. Swaps are the axis that varies, yet even the worst case stays linear at no more than one swap per pass. Auxiliary space is `O(1)`: the sort runs in place over the original array using a handful of index variables.
-
 
 A stable variant exists but abandons the write budget that motivates the algorithm. Rather than swapping the minimum into place, it removes the minimum and shifts the intervening elements up by one — the same move [[Home/Computer Science/Algorithms/Sorting Algorithms/Insertion Sort|Insertion Sort]] makes. Preserving equal-key order costs `Θ(n)` writes per pass, restoring the `Θ(n²)` write total that the swap-based form was chosen to avoid.
 

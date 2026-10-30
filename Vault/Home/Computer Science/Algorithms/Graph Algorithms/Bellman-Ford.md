@@ -1,14 +1,13 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Single-source shortest paths with negative edges, relaxing every edge V-1 times and detecting negative cycles."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Creation
 publish: true
+created: "2026-07-10T06:24:36.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A weighted digraph can have one source and negative edge weights, as in a currency graph or a cost network where some transitions refund more than they charge. [[Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]] settles one vertex at a time and never revisits it, so a negative edge discovered later can lower a distance that was already treated as final. That breaks its greedy invariant. Bellman-Ford drops the settle-once rule: it relaxes every edge once per round and repeats the sweep, letting any distance keep falling for as many rounds as it takes.
@@ -24,7 +23,6 @@ The trace uses the adverse scan order `2→3, 1→2, 0→2, 0→1`, so each roun
 ```steptrace
 {"algorithm":"bellman-ford"}
 ```
-
 
 A round relaxes every edge once: for edge `(u, v, w)`, if `dist[u] + w < dist[v]`, then `dist[v]` drops to `dist[u] + w` and `pred[v]` becomes `u`. The order of edges within a round changes the intermediate values but never the round's guarantee.
 

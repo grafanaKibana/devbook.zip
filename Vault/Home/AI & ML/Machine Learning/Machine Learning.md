@@ -1,15 +1,14 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - Machine Learning
+topic: [AI & ML]
+subtopic: [Machine Learning]
 summary: "Training models to learn input-output mappings from data. The real work is the pipeline."
 tags: [FolderNote]
 publish: true
 status: Done
 priority: Medium
-level:
-  - "3"
+level: ["3"]
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Machine learning fits problems where useful behavior can be learned from examples more cheaply than it can be expressed as rules. The model is only one part of the system. Data collection, evaluation, serving, and monitoring usually carry more operational risk than the training algorithm itself.

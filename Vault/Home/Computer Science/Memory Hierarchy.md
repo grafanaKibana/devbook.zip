@@ -1,13 +1,13 @@
 ---
-topic:
-  - Computer Science
+topic: [Computer Science]
 subtopic: []
 summary: "The latency, capacity, and persistence layers between CPU registers and durable storage."
-level:
-  - "4"
+level: ["4"]
 priority: High
 status: Creation
 publish: true
+created: "2026-07-18T07:07:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A memory hierarchy keeps the fastest storage closest to the CPU and trades speed for capacity farther away. A load may be satisfied by a register, an L1/L2/L3 cache, or DRAM. A page fault can also bring file-backed or swapped data from local storage into DRAM. No single layer offers register latency, DRAM capacity, and durable storage at an acceptable cost.
@@ -28,7 +28,6 @@ The layers are connected, but they do not form one universal fallback chain. Har
 Temporal locality means recently accessed data is likely to be accessed again. Spatial locality means nearby addresses are likely to follow. Contiguous arrays exploit both. Pointer-rich structures trade that locality for cheaper structural updates.
 
 For example, summing a `int[]` walks adjacent values that share cache lines. Walking the same values through individually allocated linked nodes adds a pointer load per element and scatters accesses across the heap. Both algorithms are O(n), but the array gives the prefetcher and cache hierarchy a predictable stream.
-
 
 # References
 

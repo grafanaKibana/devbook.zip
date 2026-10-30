@@ -1,14 +1,13 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Natural merge sort that exploits existing runs. Stable, adaptive, and used for Python lists and Java object arrays."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Creation
 publish: true
+created: "2026-07-10T06:24:36.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Production data often arrives with some order already present. Logs are mostly time-ordered, appended lists are disturbed near the tail, and exported records may already be grouped. A plain [[Home/Computer Science/Algorithms/Sorting Algorithms/Merge Sort|merge sort]] ignores that structure and discovers the same order again.
@@ -23,13 +22,9 @@ The visualization follows classic TimSort as retained by OpenJDK: strictly desce
 
 %% tab: Visualization %%
 
-
-
 ```steptrace
 { "algorithm": "tim-sort", "array": [5, 6, 7, 8, 9, 4, 3, 1, 2, 8], "minrun": 4 }
 ```
-
-
 
 Classic/OpenJDK TimSort's turning point is the moment the run stack collapses two adjacent runs because their sizes have just violated the merge invariant. The animation shows that over a small partially-ordered array.
 

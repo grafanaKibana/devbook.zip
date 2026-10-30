@@ -1,14 +1,13 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Data Structures
+topic: [Computer Science]
+subtopic: [Data Structures]
 summary: "A rigidly self-balancing BST with tighter worst-case height than red-black trees for lookup-heavy workloads."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Ready to Repeat
 publish: true
+created: "2026-07-09T18:37:04.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 An ordered set still needs predictable lookups while keys are inserted and removed.

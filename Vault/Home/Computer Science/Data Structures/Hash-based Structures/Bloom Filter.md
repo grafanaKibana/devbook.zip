@@ -1,14 +1,13 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Data Structures
+topic: [Computer Science]
+subtopic: [Data Structures]
 summary: "A probabilistic membership filter using fixed bits, with tunable false positives but never false negatives."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Ready to Repeat
 publish: true
+created: "2026-06-20T05:33:50.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A service checks whether a key exists before an expensive disk, database, or network lookup. Most queried keys are absent, so the system spends much of its time confirming misses. A [[Home/Computer Science/Data Structures/Hash-based Structures/Hash Set|Hash Set]] answers membership exactly but must retain every key. That may cost more memory than the lookup guard can justify.

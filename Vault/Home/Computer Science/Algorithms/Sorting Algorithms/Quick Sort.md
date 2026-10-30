@@ -1,14 +1,13 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Partitions around a pivot, fixes it in place, then recursively sorts both sides."
-level:
-  - "4"
+level: ["4"]
 priority: Low
 status: Ready to Repeat
 publish: true
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Quick sort chooses a pivot and partitions the active range around it. Values not greater than the pivot move left. Greater values move right. The partition places the pivot at its final index, leaving two independent ranges that can be sorted by the same procedure.
@@ -21,13 +20,9 @@ The pivot position determines the recursion tree. A pivot near the median divide
 
 %% tab: Visualization %%
 
-
-
 ```steptrace
 {"algorithm":"quick-sort","array":[8,3,5,1,9,2,7,4]}
 ```
-
-
 
 Each partition ends with one bar fixed in place: the pivot has reached the index it occupies in the sorted array and never moves again. Everything to its left is not greater than it, everything to its right is greater, so no later comparison can cross the boundary the pivot draws. The two sides are now separate sorting problems over disjoint index ranges, and quick sort recurses into each without ever consulting the other. The array is ordered once every subrange has shrunk to a single fixed pivot.
 

@@ -1,15 +1,14 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - Distributed Systems
+topic: [Software Architecture]
+subtopic: [Distributed Systems]
 summary: "Core distributed-systems concepts for production: consistency tradeoffs, messaging, coordination, and failure handling under an unreliable network."
 tags: [FolderNote]
 publish: true
 priority: High
-level:
-  - "4"
+level: ["4"]
 status: Creation
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Distributed systems are hard because the network is unreliable and time is messy: partial failures, latency, and inconsistent views of the world. The recurring production problems are consistency tradeoffs, messaging, coordination, and failure handling. CAP, for example, is not a slogan. It explains why a partition forces a system to choose between availability and strong consistency.

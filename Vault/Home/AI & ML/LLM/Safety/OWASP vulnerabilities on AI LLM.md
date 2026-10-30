@@ -1,17 +1,16 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
+topic: [AI & ML]
+subtopic: [LLM]
 summary: "The OWASP Top 10 for LLM Applications, the highest-impact security failures in LLM systems."
-level:
-  - "3"
+level: ["3"]
 priority: Medium
 status: Done
 publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Safety/OWASP vulnerabilities on AI LLM"
 flashcard_uid: "c24fd7d3"
+created: "2026-02-15T15:01:57.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 The OWASP Top 10 for LLM Applications (2025 edition) is a risk catalog for systems that embed language models. Its central boundary is awkward: untrusted natural language influences a probabilistic model, and the result may drive deterministic code, retrieval, or tool calls. Prompts can mix data with instructions. Model output is therefore untrusted input to the next component.
@@ -147,40 +146,40 @@ Privilege separation is the baseline because it limits harm even when the model 
 
 > [!qard]- What is prompt injection, and how does indirect prompt injection differ from direct prompt injection?
 > Prompt injection is input that changes a language model's behavior or output in a way the application did not intend. Direct and indirect injection differ in where that input enters the model's context.
-> 
+>
 > | Aspect | Direct injection | Indirect injection |
 > |---|---|---|
 > | Entry point | The user's own message to the model. | External content that the model processes, such as web pages, files, retrieved documents or tool results. |
 > | Who can supply it | The person interacting with the system. | Anyone who can influence that content, without access to the conversation. |
 > | Example | A chat message telling the model to ignore its instructions and reveal hidden rules. | A web page with hidden instructions that make a summarizing assistant leak the conversation through a link. |
-> 
+>
 > The input can be deliberate or accidental, because ordinary content can also conflict with instructions. Injected text does not have to be visible to people as long as the model parses it, and multimodal systems can receive it through images or other media. Its impact depends largely on what the manipulated model can reach. Access to protected context, or to tools that act, is what turns a manipulated answer into a data leak or a damaging action.
-> 
+>
 > [OWASP LLM01:2025 Prompt Injection](https://genai.owasp.org/llmrisk/llm01-prompt-injection/)
 
 <!-- qard-id: e41e3af4-2925-4cbe-859c-d58567d74dfb -->
 > [!qard]- Why is prompt injection harder to prevent than SQL injection?
 > Prompt injection is harder to prevent because SQL has a code/data boundary that the database enforces, and language models have no established equivalent. A model receives its instructions and untrusted text through the same natural-language input, so untrusted text can still act as instructions.
-> 
+>
 > | Aspect | SQL injection | Prompt injection |
 > |---|---|---|
 > | How code and data reach the interpreter | A parameterized query defines the SQL code first and passes values separately. The database treats each bound value as data, whatever it contains. | System instructions, user messages, retrieved documents and tool results all enter the same model context. No mechanism forces the model to treat any part of that context only as data. |
 > | Effect of marking the data | Binding a value stops it from changing the query's structure. | Delimiters, labels on untrusted content and input filters lower the risk. The model may still follow instructions inside the marked content, and new phrasings can slip past filters. |
 > | Resulting defense | Prevention: a correctly bound value cannot become SQL code. | Containment: bypass is assumed possible, so controls outside the model limit what a manipulated model can do. These controls include least-privilege tools, validation of model output, authorization of each consequential action and human approval for high-risk actions. |
-> 
+>
 > OWASP's 2025 guidance states that it is unclear whether foolproof prevention methods for prompt injection exist. That statement describes current techniques. It does not prove that a stronger boundary can never be built.
-> 
+>
 > [OWASP SQL Injection Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html) · [OWASP LLM01:2025 Prompt Injection](https://genai.owasp.org/llmrisk/llm01-prompt-injection/)
 
 <!-- qard-id: 4c869882-dbf3-4b42-99ec-760b65df4849 -->
 > [!qard]- Why should a system prompt not be treated as a secret or authorization boundary?
 > A system prompt can be disclosed, and the model follows its instructions only probabilistically. It therefore cannot keep secrets or reliably decide what a caller is allowed to do.
-> 
+>
 > - **Not a secret:** adversarial queries can reveal the prompt. Any API keys, database credentials or other sensitive data placed in it can leak with it. Revealed internal rules, filtering criteria or role descriptions can also help an attacker plan further attacks.
 > - **Not an authorization boundary:** an instruction such as "only administrators may delete records" does not stop a manipulated or mistaken model from requesting a deletion. Enforcement belongs in deterministic code or the downstream service, which checks each requested action against the caller's actual permissions.
 > 
 > Secure designs keep credentials and authorization decisions outside the prompt and assume that the prompt may be exposed. That assumption does not make every prompt harmless to publish. It means that the system stays protected if the prompt leaks.
-> 
+>
 > [OWASP LLM07:2025 System Prompt Leakage](https://genai.owasp.org/llmrisk/llm072025-system-prompt-leakage/) · [OWASP LLM06:2025 Excessive Agency](https://genai.owasp.org/llmrisk/llm062025-excessive-agency/)
 
 # References

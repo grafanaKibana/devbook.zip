@@ -1,14 +1,13 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Data Structures
+topic: [Computer Science]
+subtopic: [Data Structures]
 summary: "Key-value pairs located by hashing into buckets, with collisions resolved by chaining or probing."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Ready to Repeat
 publish: true
+created: "2026-02-20T23:50:18.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A cache holds 50K active sessions and repeatedly looks up one session by ID. In a list, each lookup scans until it reaches the matching pair. A hash map derives a bucket index from the key and jumps directly to the small set of entries that could match.
@@ -27,20 +26,17 @@ The three tabs keep the same 12-cell table while changing only collision policy.
 
 %% tab: Closed Addressing %%
 
-
 ```steptrace
 {"algorithm":"hash-map","variant":"closed-addressing"}
 ```
 
 %% tab: Open Addressing %%
 
-
 ```steptrace
 {"algorithm":"hash-map","variant":"open-addressing"}
 ```
 
 %% tab: Bucket Hashing %%
-
 
 ```steptrace
 {"algorithm":"hash-map","variant":"buckets"}

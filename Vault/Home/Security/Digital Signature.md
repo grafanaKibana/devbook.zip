@@ -1,15 +1,14 @@
 ---
-topic:
-  - Security
-subtopic:
-  - Security
+topic: [Security]
+subtopic: [Security]
 summary: "Proves a message's authenticity and integrity without hiding its content."
-level:
-  - "2"
+level: ["2"]
 priority: Medium
 status: Ready to Repeat
 
 publish: true
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A digital signature binds a message to possession of a private signing key and detects changes made after signing. It does not hide the message or identify a person by itself. Identity comes from the trust system that binds the verification key to a signer.

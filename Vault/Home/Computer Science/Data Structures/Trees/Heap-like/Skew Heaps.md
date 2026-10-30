@@ -1,14 +1,13 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Data Structures
+topic: [Computer Science]
+subtopic: [Data Structures]
 summary: "A self-adjusting mergeable heap that swaps children after every recursive merge without storing rank metadata."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Ready to Repeat
 publish: true
+created: "2026-07-09T18:37:04.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Skew heaps are small mergeable priority queues. They store a heap-ordered binary tree and make merge the only structural operation. Insert merges a singleton, and extract-min merges the old root's children.

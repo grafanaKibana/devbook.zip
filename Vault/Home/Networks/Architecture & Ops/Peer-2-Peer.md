@@ -1,14 +1,13 @@
 ---
-topic:
-  - Networks
-subtopic:
-  - Architecture & Ops
+topic: [Networks]
+subtopic: [Architecture & Ops]
 summary: "An architecture where peers act as both client and server, avoiding a central bottleneck."
-level:
-  - "1"
+level: ["1"]
 priority: Medium
 status: Ready to Repeat
 publish: true
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Peer-to-peer architecture moves some resource discovery, storage, or transfer from dedicated servers to participating nodes. A peer can consume and provide the same resource. Central services may still handle bootstrap, identity, coordination, or relaying.

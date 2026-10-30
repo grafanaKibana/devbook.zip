@@ -1,14 +1,13 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Data Structures
+topic: [Computer Science]
+subtopic: [Data Structures]
 summary: "A self-balancing search tree with page-sized many-key nodes, keeping disk-resident indexes shallow."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Ready to Repeat
 publish: true
+created: "2026-07-09T18:37:04.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A relational index may hold millions of ordered keys on disk or SSD. Each random access fetches a whole block, typically a 4–16 KB page.

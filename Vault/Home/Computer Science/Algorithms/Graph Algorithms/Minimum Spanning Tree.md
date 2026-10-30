@@ -1,14 +1,13 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "The cheapest cycle-free edge set connecting every vertex of a weighted undirected graph, built greedily by Kruskal's or Prim's."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Ready to Repeat
 publish: true
+created: "2026-06-20T05:33:50.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Connecting a set of sites with the least total cable means reaching every site without paying for a redundant loop. A spanning tree does exactly that: it touches all `V` vertices, contains no cycle, and has `V − 1` edges. A *minimum* spanning tree (MST) is the spanning tree with the smallest total edge weight.
@@ -23,14 +22,11 @@ The cut property is what makes those local choices trustworthy: it certifies tha
 
 %% tab: Visualization %%
 
-
 ```steptrace
 {"algorithm":"prim","start":"A","nodes":[{"id":"A"},{"id":"B"},{"id":"C"},{"id":"D"},{"id":"E"},{"id":"F"}],"edges":[{"from":"A","to":"B","weight":4},{"from":"A","to":"C","weight":2},{"from":"B","to":"C","weight":1},{"from":"B","to":"D","weight":5},{"from":"C","to":"D","weight":8},{"from":"C","to":"E","weight":10},{"from":"D","to":"E","weight":2},{"from":"D","to":"F","weight":6},{"from":"E","to":"F","weight":3}]}
 ```
 
-
 Every step splits the vertices into two groups — those already in the green tree and those still outside — and adds the single minimum-weight edge crossing that boundary. From `{A}` the crossing edges are `A–C` (2) and `A–B` (4), so `C` joins first. From `{A, C}` the frontier now includes `B–C` (1), lighter than the still-available `A–B` (4); the algorithm takes `B–C` and pulls in `B`. That is the whole idea: the cheapest edge leaving the current tree, wherever it sits, is the one added, and the cut property proves it belongs to some MST, so the pick never has to be undone. Once `A`, `B`, and `C` are all inside, the edge `A–B` (4) lies entirely within the tree, crosses no boundary, and is skipped — adding it would close a cycle. The run ends with five edges totaling 13.
-
 
 A *cut* partitions the vertices into two non-empty groups; an edge *crosses* the cut when its endpoints fall on opposite sides. The cut property states: for any cut, the minimum-weight edge crossing it belongs to some MST. The reason is an exchange argument — suppose a minimum tree `T` omits the lightest crossing edge `e`. Adding `e` to `T` closes exactly one cycle, and that cycle must leave and re-enter the cut, so it contains another crossing edge `f` with `weight(f) ≥ weight(e)`. Replacing `f` with `e` yields a spanning tree no heavier than `T`, so a minimum one can always include `e`.
 
@@ -38,7 +34,6 @@ Both algorithms are this property applied to a different cut each step:
 
 - **Prim's** keeps one growing tree and uses the cut between in-tree and out-of-tree vertices. A [[Home/Computer Science/Data Structures/Trees/Heap-like/Heap|min-priority queue]] returns the next crossing edge.
 - **Kruskal's** scans edges by weight and uses a [[Home/Computer Science/Data Structures/Graph Structures/Disjoint Set|disjoint set]]—the [[Home/Computer Science/Data Structures/Graph Structures/Union-Find|union-find]] structure—to reject edges that would close a cycle.
-
 
 %% tab: Complexity %%
 
@@ -241,7 +236,6 @@ An MST minimizes the tree's total weight, not the distance between a particular 
 > `.NET`'s `PriorityQueue` has no decrease-key, so Prim pushes duplicate entries and discards already-in-tree vertices on dequeue — the same lazy-deletion pattern as [[Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]]. `DisjointSet` is the [[Home/Computer Science/Data Structures/Graph Structures/Union-Find|union-find]] forest with path compression and union by rank.
 
 # Comparison
-
 
 All three produce a minimum-weight tree. The useful distinction is how the graph is represented and where the work runs. Prim fits an adjacency structure, especially for a dense graph, because it grows a frontier without sorting every edge. [[Home/Computer Science/Algorithms/Graph Algorithms/Kruskal's Algorithm|Kruskal]] fits a sparse edge list: sort the edges once, then use union-find for cycle checks. [[Home/Computer Science/Algorithms/Graph Algorithms/Borůvka's Algorithm|Borůvka]] selects the cheapest outgoing edge from every component in the same round, which suits parallel or distributed execution. On one core, that contraction machinery rarely beats Prim or Kruskal.
 

@@ -1,11 +1,8 @@
 ---
-topic:
-  - Security
-subtopic:
-  - Authentication
+topic: [Security]
+subtopic: [Authentication]
 summary: "Checks whether a user may act on a specific resource instance, not just a type."
-level:
-  - "3"
+level: ["3"]
 priority: High
 status: Ready to Repeat
 
@@ -13,6 +10,8 @@ publish: true
 qard-deck: "Security"
 qard-topic: "Authentication/Resource-based Auth"
 flashcard_uid: "55d97186"
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Resource-based authorization decides whether a principal may perform an operation on one concrete resource. A role can grant document-editing capability in general. The resource check decides whether this document falls within that principal's authority.
@@ -145,16 +144,16 @@ The remedy is a call to `IAuthorizationService.AuthorizeAsync(User, resource, po
 <!-- qard-id: 235fa0a0-b160-4ef3-b4b1-0d6040e5be7d -->
 > [!qard]- What is the difference between role-based and resource-based authorization?
 > Role-based authorization decides whether a principal holds a broad capability, such as being an editor. Resource-based authorization decides whether the principal may perform an operation on one specific resource, using facts from that resource such as its owner, tenant or current state.
-> 
+>
 > | Aspect | Role-based | Resource-based |
 > |---|---|---|
 > | Question answered | Whether the principal may perform this kind of operation at all. | Whether the principal may perform the operation on this particular instance. |
 > | Facts evaluated | The principal's assigned roles. A conventional role check does not need the target object. | Data from the loaded resource, such as owner, tenant, project or classification, compared with the principal's identity and claims. |
 > | When the check can run | Before the action executes, for example declaratively with `[Authorize(Roles = "Editor")]`. | Only after the resource is loaded. The code passes the resource to `IAuthorizationService.AuthorizeAsync(User, document, "DocumentOwner")` before returning data or applying a change. |
 > | Limit | A global role cannot express ownership or tenancy of one object. An `Editor` role alone lets every editor edit every document. | The resource must be loaded before the decision, and every code path that reads or changes the instance needs the check. |
-> 
+>
 > The two work together. A role check can act as a coarse early gate, and the resource check makes the final decision for the instance. Resource-based authorization is an evaluation shape rather than a separate model: the handler that receives the resource can apply role, attribute or relationship rules to it. When permission depends on the instance but only a role check runs, an authenticated user can change an identifier and reach another owner's or tenant's object. This flaw is called an insecure direct object reference.
-> 
+>
 > Sources: [Microsoft Learn: Resource-based authorization in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/security/authorization/resourcebased?view=aspnetcore-10.0) · [Microsoft Learn: Role-based authorization in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/security/authorization/roles?view=aspnetcore-10.0)
 
 # References

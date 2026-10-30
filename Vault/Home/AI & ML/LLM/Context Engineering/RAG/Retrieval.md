@@ -1,17 +1,16 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
+topic: [AI & ML]
+subtopic: [LLM]
 summary: "Decides what evidence enters the prompt, balancing recall, precision, and latency across search methods."
-level:
-  - "2"
+level: ["2"]
 priority: High
 status: Done
 publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Context Engineering/RAG/Retrieval"
 flashcard_uid: "6dc71082"
+created: "2026-02-27T12:56:16.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Retrieval decides which evidence reaches the prompt. Missing evidence caps what a grounded answer can claim, even though prompts and generation models can still improve how fixed evidence is used. The practical problem is to recover enough relevant material without filling the context window with noise or spending the entire latency budget on search.
@@ -143,35 +142,35 @@ Hybrid retrieval with RRF and a conservative top-k, often 5–20, is a reasonabl
 
 > [!qard]- Why does hybrid retrieval combine keyword search and vector search?
 > Hybrid retrieval combines them because they fail in complementary ways. Keyword search matches the exact terms in a query, while vector search matches meaning even when the wording differs. Running both covers queries that either one alone would miss.
-> 
+>
 > | Aspect | Keyword search, such as BM25 | Vector search |
 > |---|---|---|
 > | What it matches | Documents that share the query's terms, with rarer terms counting more | Documents whose embeddings are close to the query's embedding, so related meanings match |
 > | Strong on | Exact identifiers such as error codes, product names and version numbers | Paraphrases and natural-language questions worded differently from the source |
 > | Weak on | Synonyms and rephrasing with no word overlap, such as *credential validation error* for *authentication failure* | Exact tokens, which can blur inside the embedding and surface topically similar but wrong chunks |
 > | What it needs | A lexical (inverted) index | An embedding model and a vector index |
-> 
+>
 > In a hybrid search, both queries run in parallel and their ranked lists are merged, commonly with Reciprocal Rank Fusion (RRF). RRF scores documents by their rank positions, so the two incompatible score scales never need to be normalized. For a query about *error 429 behavior for the partner tier*, keyword search can catch `429` while vector search finds rate-limiting passages phrased differently.
-> 
+>
 > Hybrid is a common starting point rather than a guaranteed improvement over either mode alone.
-> 
+>
 > [Hybrid search overview (Azure AI Search)](https://learn.microsoft.com/en-us/azure/search/hybrid-search-overview)
 
 <!-- qard-id: 3080dee6-c717-480c-b2ba-c0be9ba83120 -->
 > [!qard]- When can hybrid retrieval perform worse than single-mode retrieval?
 > Hybrid retrieval can perform worse when one retrieval path is much weaker on a particular corpus and query mix. Fusing its results pulls poor candidates into the top results. There they displace good results that the stronger path would have returned on its own.
-> 
+>
 > The mechanism:
-> 
+>
 > 1. Keyword search, such as BM25, and vector search run in parallel for the same query.
 > 2. Their ranked lists are merged, commonly with Reciprocal Rank Fusion (RRF), which scores each document from its rank positions rather than from raw scores.
 > 3. Standard RRF gives each list equal influence. For documents that appear in only one list, rank 1 in the weak list scores the same as rank 1 in the strong list, and higher than rank 3 in the strong list.
 > 4. With a small final cutoff, those weak candidates push relevant results out.
 > 
 > Whether this happens depends on the workload. In a homogeneous corpus where one mode clearly dominates, the other mode has little useful to add. A large top-k can also carry weak tail candidates into the context when no reranking or deduplication follows.
-> 
+>
 > Hybrid is therefore justified by measurement rather than assumed. Keyword-only, vector-only and hybrid retrieval are compared on representative queries, using the retrieval or end-to-end metric that matches the product goal. When hybrid loses, the fusion can be weighted toward the stronger path, or the extra path can be dropped.
-> 
+>
 > [Hybrid search overview (Azure AI Search)](https://learn.microsoft.com/en-us/azure/search/hybrid-search-overview)
 
 # References

@@ -1,15 +1,14 @@
 ---
-topic:
-  - Security
-subtopic:
-  - Authentication
+topic: [Security]
+subtopic: [Authentication]
 summary: "How credentials, authentication ceremonies, sessions, and delegated authorization fit together."
 tags: [FolderNote]
 publish: true
 priority: High
-level:
-  - "4"
+level: ["4"]
 status: Ready to Repeat
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Authentication establishes a principal from evidence supplied during a protocol exchange. Authorization decides what that principal may do. A complete design also defines credential enrollment, proof, session continuity, revocation, and recovery. Collapsing those responsibilities into one "authentication method" hides the boundary that failed.

@@ -1,15 +1,14 @@
 ---
-topic:
-  - Security
-subtopic:
-  - Security
+topic: [Security]
+subtopic: [Security]
 summary: "An append-only ledger of blocks linked by cryptographic hashes, making tampering detectable."
-level:
-  - "1"
+level: ["1"]
 priority: Low
 status: Ready to Repeat
 
 publish: true
+created: "2026-02-15T15:01:57.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A blockchain replicates an ordered ledger across several nodes. Blocks commit to earlier blocks through cryptographic hashes, while consensus rules decide which proposed history the nodes accept. That combination is useful when no participant should control the shared record alone. It is usually needless overhead when one trusted operator can own a database and audit log.

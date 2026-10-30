@@ -1,14 +1,13 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
+topic: [AI & ML]
+subtopic: [LLM]
 summary: "Repeatable loops that generate, evaluate, and select prompt candidates against a validation set."
-level:
-  - "3"
+level: ["3"]
 priority: Low
 status: Done
 publish: true
+created: "2026-02-28T13:40:02.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Manual prompt tuning works until prompts multiply. Model upgrades, new domains, and changing examples then turn each wording change into another experiment. Automated prompt optimization makes that experiment explicit: generate candidates, score them on a fixed evaluation set, and keep the variant that performs best.

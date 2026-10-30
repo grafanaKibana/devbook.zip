@@ -1,18 +1,17 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
+topic: [Programming]
+subtopic: [NET]
 summary: "Keeping work progressing without blocking, and using multiple cores for CPU-bound work."
 priority: High
 status: Creation
 tags: [FolderNote]
 publish: true
-level:
-  - "4"
+level: ["4"]
 qard-deck: "Programming"
 qard-topic: "NET/CSharp/Concurrency and Parallelism/Concurrency and Parallelism"
 flashcard_uid: "4b1835fe"
+created: "2026-02-18T20:04:43.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Concurrency describes program structure: several operations can be in progress during the same period. Parallelism describes execution: several operations run at the same instant. A single core can interleave concurrent work but cannot execute it in parallel.
@@ -134,31 +133,31 @@ A short synchronous critical section belongs behind a [[Home/Programming/NET/CSh
 <!-- qard-id: beccd0f9-7a5c-4599-a9b4-146afaadd095 -->
 > [!qard]- What is the difference between concurrency and parallelism in practice?
 > Concurrency means several operations are in progress during the same period, even if only one runs at any instant. Parallelism means several operations run at the same instant on different cores. Parallel execution is always concurrent, but concurrent work need not be parallel.
-> 
+>
 > | Aspect | Concurrency | Parallelism |
 > |---|---|---|
 > | What it describes | How work is structured: operations overlap in time, and their steps can interleave | How work executes: operations run simultaneously |
 > | Hardware required | Possible on a single thread or core | Requires multiple cores |
 > | Typical .NET use | Asynchronous I/O: a thread starts an operation, yields at `await` and runs other work while the operating system waits | CPU-bound work split across cores, such as `Parallel.For` over independent items |
 > | What it improves | Progress continues during waits, without a thread held for each wait | Elapsed time of computation that divides into independent parts |
-> 
+>
 > For example, one thread can start two HTTP requests, yield at each `await` and resume each request when its response arrives. Both requests are in flight together, yet the thread runs one continuation at a time. Extra threads would not make the remote service respond sooner. Parallelism pays off only when there is enough independent CPU work to repay the cost of partitioning and scheduling it.
-> 
+>
 > [Microsoft: Asynchronous programming](https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/) · [Microsoft: Parallel programming in .NET](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/) · [Microsoft: Task-based asynchronous programming](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/task-based-asynchronous-programming)
 
 <!-- qard-id: 5c09ef7b-cd74-4db0-949e-ea7e4e8605db -->
 > [!qard]- What should be checked before choosing `Task`, `lock`, `Parallel`, or `Channel`?
 > Three checks drive the choice: whether the work waits on I/O or uses CPU, whether threads share mutable state, and which code owns completion, cancellation and failure.
-> 
+>
 > | Check | Fits | Reason |
 > |---|---|---|
 > | The work mostly waits on I/O | `Task` with `await` | The thread is released while the operation waits; more threads would not make the I/O finish sooner |
 > | The work is independent CPU computation large enough to split | `Parallel` with a measured degree of parallelism | Several cores compute at once, but small or contended work may not repay partitioning and scheduling |
 > | Threads change shared mutable state in a short synchronous step | `lock` | Only one thread at a time performs the change; a `lock` cannot be held across `await` |
 > | Producers hand work to separate consumers | Bounded `Channel<T>` | It buffers items and fixes an overload policy: producers wait or items are dropped |
-> 
+>
 > Ownership applies to every option. Some code must await or otherwise observe each task so that its exceptions surface. That code also passes a cancellation token into the operation and, for a channel, calls `Complete` after the last write. Without such an owner, a task can fail unnoticed and a channel reader can wait forever for items that will never arrive.
-> 
+>
 > [Microsoft: Asynchronous programming](https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/) · [Microsoft: Task-based asynchronous programming](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/task-based-asynchronous-programming) · [Microsoft: Parallel programming in .NET](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/) · [Microsoft: `lock` statement](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/lock) · [Microsoft: Channels](https://learn.microsoft.com/en-us/dotnet/core/extensions/channels)
 
 # References

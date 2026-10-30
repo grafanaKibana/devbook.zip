@@ -1,15 +1,14 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Data Structures
+topic: [Computer Science]
+subtopic: [Data Structures]
 summary: "Graphs and disjoint sets for modelling relationships with cycles and multiple paths."
 tags: [FolderNote]
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Done
 publish: true
+created: "2026-07-09T18:37:04.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Graph structures model relationships that do not fit a tree. Service dependencies can form cycles, roads may offer several routes between two places, and neither system needs a root. .NET has no general `Graph<T>` type, so the representation is assembled from collection primitives around the query that must stay cheap. A `Dictionary<TNode, List<TNode>>` makes neighbor traversal cheap. A `bool[,]` matrix makes an edge test O(1). Two `int[]` arrays can answer whether two vertices share a component in near-O(1) time without storing the edges at all.

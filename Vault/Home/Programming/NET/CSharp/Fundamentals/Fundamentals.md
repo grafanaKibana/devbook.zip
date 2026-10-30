@@ -1,15 +1,14 @@
 ---
-topic:
-  - Programming
-subtopic:
-  - NET
+topic: [Programming]
+subtopic: [NET]
 summary: "Core C# building blocks: types, methods, generics, exceptions, namespaces, iteration, and reflection."
 tags: [FolderNote]
 publish: true
-level:
-  - "4"
+level: ["4"]
 priority: High
 status: Creation
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 C# fundamentals are the mechanics that keep showing up after the syntax has become familiar. Types determine what is copied or shared. Method signatures control how data crosses an API boundary. Generics move assumptions into compile-time constraints, while exceptions define how failures travel through a call stack.

@@ -1,14 +1,14 @@
 ---
-topic:
-  - Data Persistence
+topic: [Data Persistence]
 subtopic: []
 summary: "Storing data closer to consumers so repeated reads skip the slower origin."
-level:
-  - "4"
+level: ["4"]
 priority: High
 status: Ready to Repeat
 
 publish: true
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Caching keeps a copy of data closer to its consumer, in process memory, in a shared store such as Redis, or in both. A hit returns that copy without touching the slower origin. A miss loads the source, stores the result, and returns it.

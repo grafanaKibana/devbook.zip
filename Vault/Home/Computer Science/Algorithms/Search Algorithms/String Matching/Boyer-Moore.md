@@ -1,21 +1,18 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Matches a pattern by comparing right-to-left and skipping ahead via bad-character and good-suffix rules."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Creation
 publish: true
+created: "2026-07-10T06:24:36.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Boyer-Moore aligns the pattern under the text and compares from right to left. A mismatch exposes both the offending text character and the suffix that already matched. Two precomputed rules turn that information into a safe jump over alignments that cannot succeed.
 
 The **bad-character rule** uses the mismatching character's rightmost pattern position. The **good-suffix rule** repositions the suffix already known to match. Taking the larger safe shift can skip text positions that are never inspected, which is the algorithm's practical advantage over checking every alignment from the left.
-
-
 
 The trace keeps the pattern aligned under the text while the comparison cursor moves right to left and each rule proposes a shift.
 
@@ -23,14 +20,9 @@ The trace keeps the pattern aligned under the text while the comparison cursor m
 
 %% tab: Visualization %%
 
-
 ```steptrace
 {"algorithm":"boyer-moore","text":"ACCCDBACBA","pattern":"ACBA"}
 ```
-
-
-
-
 
 Each alignment fixes the pattern's last character over some text index and compares leftward until a character disagrees (or the whole pattern matches). Two independent rules each propose a shift; the algorithm advances by the larger.
 
@@ -41,8 +33,6 @@ Each alignment fixes the pattern's last character over some text index and compa
 The shift is `max(bad_char_shift, good_suffix_shift)`, which is always at least one, so the search never stalls. Correctness rests on a negative argument: any smaller shift would either drop a known-mismatching character back over the text or misalign a suffix already proven to match, so every alignment skipped over provably cannot produce a match — even though its characters were never compared. That clause is the whole mechanism. A left-to-right comparison at the current alignment does not expose the trailing mismatch needed for this bad-character/block-skipping argument; KMP instead advances by reusing pattern-overlap information.
 
 Preprocessing builds both tables ahead of the scan. A last-occurrence table stores the raw rightmost index for each character, making the mismatch calculation `max(1, j - lastOccurrence(c))` explicit. An equivalent delta table used by Horspool-style code stores `m - 1 - i`, excludes the pattern's final position, and must adjust that end-relative delta back to the current mismatch position `j`; applying its values as unconditional shifts is a different algorithm. The good-suffix table maps each mismatch position to a safe suffix-preserving shift, but its index arithmetic is delicate.
-
-
 
 Searching for `ACBA` in `ACCCDBACBA` produces all three decisions exposed in the trace:
 

@@ -1,15 +1,14 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Step-by-step problem-solving procedures compared by runtime, memory, and complexity using Big O."
 tags: [FolderNote]
 publish: true
-level:
-  - "4"
+level: ["4"]
 status: Creation
 priority: High
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 An algorithm is a finite procedure that turns an input into an output. Choosing one means deciding which costs matter for the workload: running time, memory, implementation risk, or behavior on hostile input.

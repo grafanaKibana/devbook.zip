@@ -1,14 +1,13 @@
 ---
-topic:
-  - Networks
-subtopic:
-  - Transport & Sockets
+topic: [Networks]
+subtopic: [Transport & Sockets]
 summary: "The internet's core protocol suite: IP handles addressing, TCP adds reliable delivery."
-level:
-  - "3"
+level: ["3"]
 priority: Medium
 status: Ready to Repeat
 publish: true
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 TCP/IP names a protocol suite, not one protocol. **IP** carries packets between addressed interfaces across networks. **TCP** runs above IP and turns that best-effort packet service into a reliable, ordered, connection-oriented byte stream. HTTP, gRPC, database protocols, and other application protocols then define meaning on top of that stream.

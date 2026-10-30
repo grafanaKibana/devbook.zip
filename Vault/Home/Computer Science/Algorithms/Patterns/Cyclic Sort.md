@@ -1,33 +1,26 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Sorts a permutation of 1..n by swapping each value directly to its home index."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Creation
 publish: true
+created: "2026-07-10T06:24:36.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Cyclic Sort exploits a narrow input contract: an array of `n` integers is a permutation of `1..n`, so every value names its final index.
 
 At each position, the algorithm swaps the resident value into that home and repeats until the correct value arrives. Missing-value and duplicate-value problems use a guarded variant. Values still map to `1..n`, but collisions or absent homes are allowed. A final mismatch scan exposes them. This range-mapped interview pattern is distinct from the comparison-based Cycle Sort that minimizes writes on arbitrary comparable values.
 
-
-
 %% tabs %%
 
 %% tab: Visualization %%
 
-
-
 ```steptrace
 { "algorithm": "cyclic-sort", "array": [3, 1, 5, 4, 2] }
 ```
-
-
 
 The cursor stays put after a swap because the displaced value still needs inspection; it advances only when the resident value is home.
 

@@ -1,14 +1,13 @@
 ---
-topic:
-  - Networks
-subtopic:
-  - Architecture & Ops
+topic: [Networks]
+subtopic: [Architecture & Ops]
 summary: "Intermediaries that represent either a client reaching the internet or an origin accepting traffic."
-level:
-  - "3"
+level: ["3"]
 priority: Medium
 status: Ready to Repeat
 publish: true
+created: "2026-07-18T07:07:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 A proxy receives traffic on one connection and sends it onward through another. A **forward proxy** sits on the client side of the trust boundary and controls egress. A **reverse proxy** sits in front of origins and controls ingress.

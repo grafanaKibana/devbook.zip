@@ -1,14 +1,13 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "A single DFS finds all cut vertices and cut edges, the points whose removal disconnects an undirected graph."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Creation
 publish: true
+created: "2026-07-10T06:24:36.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 In an undirected network, a router or cable is a single point of failure when removing it leaves some pair of nodes unable to reach each other.
@@ -26,7 +25,6 @@ The decisive transition is a DFS tree annotated with `disc`/`low`, where each ch
 ```steptrace
 {"algorithm":"articulation-points-and-bridges"}
 ```
-
 
 DFS runs from any unvisited vertex and repeats until every component is covered. Two integers are stored per vertex:
 

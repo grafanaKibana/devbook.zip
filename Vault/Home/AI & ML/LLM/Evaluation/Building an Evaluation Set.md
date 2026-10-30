@@ -1,17 +1,16 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
+topic: [AI & ML]
+subtopic: [LLM]
 summary: "How to structure, label, generate, and size the cases that every evaluation method relies on."
-level:
-  - "3"
+level: ["3"]
 priority: High
 status: Done
 publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Evaluation/Building an Evaluation Set"
 flashcard_uid: "e5bc3ffc"
+created: "2026-06-12T18:21:46.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 An evaluation set is the common input to [[LLM-as-a-Judge]], [[Deterministic Checks]], and regression gates. If its cases do not represent the workload, a precise scorer still produces a misleading result. The set defines what is measured before any metric assigns a number.
@@ -67,13 +66,13 @@ Thresholds are calibrated against human labels and product outcomes from the wor
 <!-- qard-id: 7517de71-7dad-4890-bec0-b62b49a788f0 -->
 > [!qard]- When should a team add human-labeled evaluation cases instead of relying only on synthetic generation?
 > Human-labeled cases become necessary when synthetic cases can no longer be trusted to represent the workload or to label it correctly. That happens when correctness depends on expert judgment, when failures are costly, or when production inputs differ from the generated ones.
-> 
+>
 > - **What synthetic generation does well:** a model writes plausible requests from source material with known provenance. Coverage and a working evaluation harness therefore arrive quickly and cheaply.
 > - **Where it falls short:** generated cases share the generator's phrasing and preferred difficulty, so ambiguous, messy or adversarial real inputs are under-represented. Generated labels can also miss subtle domain distinctions.
 > - **What human labels add:** reviewed cases ground the evaluation in real inputs and expert judgment. They also show whether synthetic labels and automated judges agree with people. ARES, for example, pairs synthetic training data with a small human-annotated set that corrects its automated estimates.
 > 
 > A practical evaluation set often combines synthetic breadth, human-reviewed cases and regression cases taken from real failures. The balance depends on the task's risk and on how closely synthetic cases match production traffic.
-> 
+>
 > [ARES: An Automated Evaluation Framework for Retrieval-Augmented Generation Systems (arXiv)](https://arxiv.org/abs/2311.09476) · [Evaluation best practices (OpenAI)](https://developers.openai.com/api/docs/guides/evaluation-best-practices)
 
 # References

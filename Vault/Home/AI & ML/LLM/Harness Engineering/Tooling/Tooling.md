@@ -1,16 +1,14 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
+topic: [AI & ML]
+subtopic: [LLM]
 summary: The developer-facing tools and extension points that make an agent useful inside a repository.
-tags:
-  - FolderNote
+tags: [FolderNote]
 publish: true
 status: Done
-level:
-  - "3"
+level: ["3"]
 priority: Medium
+created: "2026-08-16T07:07:41.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Tooling is the developer-facing part of an agent harness: coding agents, repository instructions, reusable skills, plugins, and lifecycle hooks. These surfaces connect a model to repository context, file edits, commands, and verification. [[Tool Design]] covers the lower-level API contract between the model and each callable operation.

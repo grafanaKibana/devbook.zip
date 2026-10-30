@@ -1,14 +1,13 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
+topic: [AI & ML]
+subtopic: [LLM]
 summary: "Reuses prompt computation or completed answers; matching rules, freshness, permissions, and measured savings determine which cache is useful."
-level:
-  - "2"
+level: ["2"]
 priority: High
 status: Creation
 publish: true
+created: "2026-09-29T12:13:16.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 LLM caching reuses either **prompt computation** or a **completed answer**. Prompt caching saves repeated input processing while still generating a fresh answer. Response caching returns a stored answer and skips generation entirely.

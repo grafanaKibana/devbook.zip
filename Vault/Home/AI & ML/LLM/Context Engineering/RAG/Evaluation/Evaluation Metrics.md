@@ -1,17 +1,16 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
+topic: [AI & ML]
+subtopic: [LLM]
 summary: "Retrieval, generation, and end-to-end metrics each answer a different question, making regressions diagnosable."
-level:
-  - "2"
+level: ["2"]
 priority: High
 status: Done
 publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics"
 flashcard_uid: "a6155222"
+created: "2026-06-12T18:21:46.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 RAG evaluation needs separate views of retrieval and generation. Retrieval metrics test whether the right evidence arrived. Generation metrics test whether the answer used that evidence correctly. End-to-end outcomes then show whether the task was solved. Mixing the layers turns every regression into guesswork: a faithful answer over irrelevant documents needs a retrieval fix, while ignored evidence points at generation.
@@ -112,7 +111,7 @@ Binary judgments often calibrate more reliably than broad numeric scales. Prompt
 
 > [!qard]- How do Recall@k, Precision@k, HitRate@k, MRR and nDCG@k differ as retrieval metrics?
 > All five compare a ranked result list with labeled relevant documents, but each rewards something different: coverage, low noise, any success, an early first hit or a well-ordered ranking.
-> 
+>
 > | Metric | What it measures | Effect of rank within the top k | What it misses |
 > |---|---|---|---|
 > | Recall@k | Share of a query's relevant documents that appear in the top k | None | How high the relevant documents rank and how much noise surrounds them |
@@ -120,16 +119,16 @@ Binary judgments often calibrate more reliably than broad numeric scales. Prompt
 > | HitRate@k | Share of queries with at least one relevant result in the top k | None | Every missing document after the first hit |
 > | MRR | Mean, across queries, of `1 / rank` for the first relevant result, counting `0` when none is found | Strong, but only for the first hit | Everything after the first relevant result |
 > | nDCG@k | Sum of the relevance grades in the top k, each discounted by its position, divided by that sum for the ideal ordering | Applies across the whole top k | Whether a low score comes from missing documents or from poor ordering |
-> 
+>
 > Example: a query has four known relevant documents, and its top five results are `[irrelevant, relevant, relevant, irrelevant, relevant]`.
-> 
+>
 > - Recall@5 is `3/4 = 0.75`, because three of the four relevant documents appear.
 > - Precision@5 is `3/5 = 0.6`, because three of the five results are relevant.
 > - The query counts as a hit for HitRate@5.
 > - Its reciprocal rank is `1/2 = 0.5`, because the first relevant result is at rank 2.
 > 
 > Recall sets a ceiling for generation, because the generator cannot use evidence it never receives. Precision matters when context space or token cost is tight. MRR fits a generator that reads only the top one or two chunks. nDCG@k fits a generator that uses all k chunks and benefits from seeing the strongest evidence first.
-> 
+>
 > Sources:
 > - [RAG evaluators and document retrieval metrics (Microsoft Foundry)](https://learn.microsoft.com/en-us/azure/foundry/concepts/evaluation-evaluators/rag-evaluators?view=foundry)
 > - [[Monitoring#Retrieval Quality Metrics|Monitoring: Retrieval Quality Metrics]]
@@ -137,19 +136,19 @@ Binary judgments often calibrate more reliably than broad numeric scales. Prompt
 <!-- qard-id: 93e287a9-2061-488e-ae8b-95393678099a -->
 > [!qard]- Why can aggregate retrieval metrics hide regressions, and when is a segment drop actionable?
 > An aggregate metric averages over all queries, so a gain on large, healthy segments can outweigh a serious loss on a small one. A segment drop is actionable when it matters to that segment's users and is too large to explain as sampling noise.
-> 
+>
 > Example: a change raises overall Recall@5 by 2%, while recall for one tenant's query cluster falls by 15%. A gate on the global average passes, yet that tenant now receives worse evidence.
-> 
+>
 > Slicing results by dimensions that change the retrieval problem, such as tenant, language, query class or document source, exposes such losses. Slicing has its own risk. A small segment has few labeled queries, so its score depends heavily on which queries happen to be in the set. A segment drop is credible and actionable when:
-> 
+>
 > - the segment has enough labeled queries, representative of its real traffic, for its score to be meaningful;
 > - the drop exceeds the uncertainty that comes from that limited query sample, for example by falling outside a confidence interval computed over the segment's queries;
 > - it crosses a threshold set in advance from the product's risk for that segment.
 > 
 > Rerunning the same evaluation on the same queries does not satisfy the second condition. Repeated runs show whether scores stay stable when retrieval or judging is nondeterministic. They add no queries, and they do not make the existing queries more representative.
-> 
+>
 > A material, credible segment regression remains a regression even when the global average improves.
-> 
+>
 > Sources:
 > - [Rules of Machine Learning (Google)](https://developers.google.com/machine-learning/guides/rules-of-ml)
 > - [[Evaluation Metrics#Aggregate Metrics Mask Segment Regressions|Evaluation Metrics: Aggregate Metrics Mask Segment Regressions]]
@@ -157,20 +156,20 @@ Binary judgments often calibrate more reliably than broad numeric scales. Prompt
 <!-- qard-id: f85d000b-ccfc-45ce-9b8a-b98babd40c07 -->
 > [!qard]- In a RAGAS evaluation, what does high Faithfulness with low Context Recall suggest, and what should be checked first?
 > It suggests that the answer stays consistent with the context it received, but that context lacks evidence the reference answer needs. The first check is the measurement itself: the reference answer, the captured context and the metric configuration. Retrieval is investigated once those are confirmed sound.
-> 
+>
 > - **Faithfulness:** the share of claims in the response that the supplied context supports. It does not show whether that context was complete.
 > - **Context Recall:** the share of claims in the reference answer that the retrieved context supports. It requires a reference and measures coverage of the evidence an answer needs.
 > 
 > Together, the scores fit a generator that stays within limited evidence, which can produce a grounded but incomplete answer.
-> 
+>
 > The order of investigation:
-> 
+>
 > 1. **Measurement:** the reference answer is correct, the scored context is what the generator actually received, and the metric variant, judge model and inputs are as intended. A flawed reference or a logging gap can produce the same pattern.
 > 2. **Retrieval path:** missing or unindexed documents, metadata filters, the candidate cutoff and context assembly.
 > 3. **Generation:** changed only after the retrieval path is ruled out, because a prompt cannot make use of evidence that never arrived.
 > 
 > Neither score alone proves the cause. The combination is a hypothesis to test on representative samples.
-> 
+>
 > Sources:
 > - [Context Recall (Ragas)](https://docs.ragas.io/en/stable/concepts/metrics/available_metrics/context_recall/)
 > - [Faithfulness (Ragas v0.2.5)](https://docs.ragas.io/en/v0.2.5/concepts/metrics/available_metrics/faithfulness/)

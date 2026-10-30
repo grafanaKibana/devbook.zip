@@ -1,15 +1,14 @@
 ---
-topic:
-  - Networks
-subtopic:
-  - Transport & Sockets
+topic: [Networks]
+subtopic: [Transport & Sockets]
 summary: "The practical network interface: ports, connections, streams, datagrams, and TCP vs UDP."
 tags: [FolderNote]
 publish: true
 status: Creation
 priority: Medium
-level:
-  - "3"
+level: ["3"]
+created: "2026-02-10T01:40:47.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Transport protocols decide how application data moves between endpoints. Sockets expose that machinery to programs. TCP presents a reliable, ordered byte stream while a connection remains viable. UDP sends independent datagrams and leaves loss recovery, ordering, and pacing to the application.

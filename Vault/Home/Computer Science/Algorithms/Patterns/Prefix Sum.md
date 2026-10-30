@@ -1,35 +1,26 @@
 ---
-topic:
-  - Computer Science
-subtopic:
-  - Algorithms
+topic: [Computer Science]
+subtopic: [Algorithms]
 summary: "Precomputes cumulative sums so each later range sum becomes one subtraction."
-level:
-  - "4"
+level: ["4"]
 priority: Medium
 status: Creation
 publish: true
+created: "2026-07-10T06:24:36.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Repeated range-sum queries should not rescan the same values. A prefix array stores `prefix[i]`, the sum of the first `i` elements, with `prefix[0] = 0` for the empty prefix. An inclusive range `[l, r]` then costs one subtraction: `prefix[r + 1] - prefix[l]`. The shared prefix before `l` cancels, leaving exactly the requested range.
-
-
 
 %% tabs %%
 
 %% tab: Visualization %%
 
-
-
 ```steptrace
 {"algorithm":"prefix-sum","array":[4,7,2,9,5,3,8],"range":[2,5]}
 ```
 
-
-
 The trace uses seven days of sales, `[4, 7, 2, 9, 5, 3, 8]`. It writes every running total into the prefix array, then answers `[2, 5]`: `prefix[6] - prefix[2] = 30 - 11 = 19`.
-
-
 
 `prefix[k]` accumulates every element strictly before index `k`, so `prefix[r + 1]` covers `a[0..r]` and `prefix[l]` covers `a[0..l-1]`. Subtracting them removes the common head `a[0..l-1]` exactly, leaving `a[l] + ... + a[r]`. The `prefix[0] = 0` sentinel and the length-`(n + 1)` array are what let `l = 0` use the same formula as any other left bound: `prefix[0]` supplies the empty sum with no special case.
 

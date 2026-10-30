@@ -1,14 +1,13 @@
 ---
-topic:
-  - Software Architecture
-subtopic:
-  - Patterns
+topic: [Software Architecture]
+subtopic: [Patterns]
 summary: "Caps how many requests a client can make in a period so one caller cannot exhaust shared resources."
 priority: High
 publish: true
-level:
-  - "3"
+level: ["3"]
 status: Done
+created: "2026-02-28T16:25:46.000Z"
+modified: "2026-10-28T12:33:42.000Z"
 ---
 
 Rate limiting caps how much work a caller may start during a defined interval. The limit protects shared capacity and keeps metered work predictable, especially LLM inference and embedding calls billed per request or token. In a system design discussion, it is best treated as admission control: well-behaved tenants keep usable latency when traffic spikes or one client misbehaves. Public APIs, multi-tenant services, and endpoints that fan out to costly dependencies are common boundaries.
