@@ -3,6 +3,7 @@ import base64
 import copy
 import datetime as dt
 import json
+import runpy
 import shutil
 from pathlib import Path
 import subprocess
@@ -362,6 +363,42 @@ class ExportValidationRecoveryTests(unittest.TestCase):
             now[0] += dt.timedelta(hours=6)
             engine.retry_export_validation(state)
             dispatch.assert_called_once_with(api, BRANCH)
+
+
+class FixtureToolingTests(unittest.TestCase):
+    def test_fixture_includes_tracked_tool_dependencies_and_canonical_dates(self):
+        with tempfile.TemporaryDirectory() as temp:
+            trusted = Path(temp)
+            scripts = trusted / '.scripts'
+            scripts.mkdir()
+            (scripts / 'sync-quartz.py').write_text('# fixture exporter')
+            (scripts / 'quartz-syncer.defaults.json').write_text('{}')
+            (scripts / 'validate-vault.py').write_text(
+                'import runpy\nfrom pathlib import Path\nVALUE = runpy.run_path(str(Path(__file__).with_name("note_dates.py")))["VALUE"]\n')
+            (scripts / 'note_dates.py').write_text('VALUE = "dependency present"')
+            (trusted / 'Web').mkdir()
+            (trusted / 'Web/quartz.config.yaml').write_text('version: 5')
+            for plugin in worker.PLUGINS:
+                folder = trusted / 'Vault/.obsidian/plugins' / plugin
+                folder.mkdir(parents=True)
+                (folder / 'main.js').write_text('// fixture')
+                (folder / 'manifest.json').write_text('{}')
+            subprocess.run(['git', 'init', '-q'], cwd=trusted, check=True)
+            subprocess.run(['git', 'add', '--', '.scripts', 'Vault', 'Web'], cwd=trusted, check=True)
+            (scripts / 'untracked_private.py').write_text('must not copy')
+            class FixtureInspected(Exception):
+                pass
+            def inspect_fixture(root, expected, app, **kwargs):
+                self.assertEqual('dependency present', runpy.run_path(str(root / '.scripts/validate-vault.py'))['VALUE'])
+                self.assertFalse((root / '.scripts/untracked_private.py').exists())
+                for name in ('Home/Topic/Example.md', 'Home/Questions.md'):
+                    text = (root / 'Vault' / name).read_text()
+                    self.assertIn('created: 2026-10-01T00:00:00.000Z', text)
+                    self.assertIn('modified: 2026-10-01T00:00:00.000Z', text)
+                raise FixtureInspected
+            with mock.patch('devbook_improvement.desktop_export.export_checkout', side_effect=inspect_fixture):
+                with self.assertRaises(FixtureInspected):
+                    worker.fixture_export(trusted, Path('/unused/Obsidian.app'))
 
 
 class OwnedCheckoutTests(unittest.TestCase):

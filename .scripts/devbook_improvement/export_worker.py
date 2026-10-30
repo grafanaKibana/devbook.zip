@@ -330,10 +330,14 @@ def fixture_export(trusted: Path, app_bundle: Path, *, timeout_seconds: int = 60
     with _owned_checkout('devbook-export-fixture-') as temp:
         root = Path(temp) / 'repo'
         root.mkdir()
-        for path in ('.scripts/sync-quartz.py', '.scripts/quartz-syncer.defaults.json', '.scripts/validate-vault.py'):
-            target = root / path
+        scripts = _git(trusted, 'ls-files', '-z', '--', ':(glob).scripts/*.py',
+                       '.scripts/quartz-syncer.defaults.json').decode().split('\0')
+        for path in filter(None, scripts):
+            source, target = trusted / path, root / path
+            if source.is_symlink() or not source.is_file():
+                raise runtime.UnsafeInput('fixture tooling must be regular tracked files')
             target.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copyfile(trusted / path, target)
+            shutil.copyfile(source, target)
         for plugin in PLUGINS:
             destination = root / 'Vault/.obsidian/plugins' / plugin
             destination.mkdir(parents=True, exist_ok=True)
@@ -343,9 +347,9 @@ def fixture_export(trusted: Path, app_bundle: Path, *, timeout_seconds: int = 60
                     shutil.copyfile(source, destination / name)
         note = root / 'Vault/Home/Topic/Example.md'
         note.parent.mkdir(parents=True)
-        note.write_text('''---\npublish: true\n---\n\n%% tabs %%\n%% tab: Example %%\nAn isolated fixture.\n%% endtabs %%\n\n> [!qard]- What does this fixture prove?\n> Genuine isolated export preserves the card.\n\n![[Assets/pixel.png]]\n''')
+        note.write_text('''---\npublish: true\ncreated: 2026-10-01T00:00:00.000Z\nmodified: 2026-10-01T00:00:00.000Z\n---\n\n%% tabs %%\n%% tab: Example %%\nAn isolated fixture.\n%% endtabs %%\n\n> [!qard]- What does this fixture prove?\n> Genuine isolated export preserves the card.\n\n![[Assets/pixel.png]]\n''')
         questions = root / 'Vault/Home/Questions.md'
-        questions.write_text('''---\npublish: true\n---\n\n```datacorejsx\nreturn <div className="dc-questions-index">FIXTURE_DATACORE_RENDERED</div>;\n```\n''')
+        questions.write_text('''---\npublish: true\ncreated: 2026-10-01T00:00:00.000Z\nmodified: 2026-10-01T00:00:00.000Z\n---\n\n```datacorejsx\nreturn <div className="dc-questions-index">FIXTURE_DATACORE_RENDERED</div>;\n```\n''')
         asset = root / 'Vault/Assets/pixel.png'
         asset.parent.mkdir()
         asset.write_bytes(base64.b64decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/l9sAAAAASUVORK5CYII='))
