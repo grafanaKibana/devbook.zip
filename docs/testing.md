@@ -12,16 +12,16 @@ Run native tooling inside `.scripts` so its exact SDK pin applies:
 (
   cd .scripts
   test "$(dotnet --version)" = 10.0.100
-  dotnet build DevBook.Tooling/DevBook.Tooling.csproj --configuration Release
-  dotnet test tests/DevBook.Tooling.Tests/DevBook.Tooling.Tests.csproj --configuration Release
-  dotnet run --no-cache --file validate-vault.cs -- --all --repo-root ..
-  dotnet run --no-cache --file devbook-improvement.cs -- --repo-root .. --demo --output-dir /tmp/devbook-demo
+  dotnet build DevBook.Tooling.slnx --configuration Release
+  dotnet test DevBook.Tooling.slnx --configuration Release
+  dotnet run --no-cache --file ValidateVault.cs -- --all --repo-root ..
+  dotnet run --project DevBook.Tooling -- improvement --repo-root .. --demo --output-dir /tmp/devbook-demo
 )
 node --test .codex/hooks/tests/note-review-hooks.test.mjs
 python3 -m unittest discover -s .scripts/tests -p 'test_changelog.py'
 ```
 
-The compact native suite uses xUnit and FluentAssertions for the improvement engine and shared vault/publishing tools. It protects core queue/lifecycle/feedback/quota behavior, durable identities, destructive-operation guards, dates and generated-output bindings. Avoid porting the old exhaustive edge-case matrix. The one retained Python test belongs to the unrelated changelog generator.
+The compact native suite lives in `.scripts/DevBook.Tooling.Tests`, beside the executable project in `DevBook.Tooling.slnx`. Tests use xUnit and FluentAssertions with explicit Arrange/Act/Assert groups. They protect core queue/lifecycle/feedback/quota behavior, durable identities, destructive-operation guards, dates and generated-output bindings. Avoid porting the old exhaustive edge-case matrix. The one retained Python test belongs to the unrelated changelog generator.
 
 Full-vault validation remains a separate deterministic check over the actual notes; passing fixture tests does not prove the vault is valid. The credential-free engine demo writes a proposed diff, separate question-change report and cumulative summary. Genuine desktop export is a separate fixture in the same improvement workflow (`mode=fixture`); native hosted success must be verified on the exact pushed revision before activation.
 

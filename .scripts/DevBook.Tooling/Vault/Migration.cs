@@ -562,7 +562,7 @@ public static class Migration
     {
         if (args.Contains("--help") || args.Contains("-h"))
         {
-            Console.WriteLine("migrate-question-callouts-to-qard.cs (inventory|dry-run|apply|verify|rollback) --manifest PATH [--repo-root PATH]");
+            Console.WriteLine("MigrateQuestionCalloutsToQard.cs (inventory|dry-run|apply|verify|rollback) --manifest PATH [--repo-root PATH]");
             return Task.FromResult(0);
         }
         try

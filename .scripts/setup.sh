@@ -37,7 +37,7 @@ printf '[setup] Enabling this checkout\047s Git hooks...\n'
 git config --local core.hooksPath .githooks || fail 'Could not enable local Git hooks. Check repository permissions and rerun setup.'
 
 printf '[setup] Configuring Quartz Syncer for this checkout...\n'
-if ! (cd "$REPO_ROOT/.scripts" && dotnet run --no-cache --file sync-quartz.cs -- --repo-root "$REPO_ROOT" --configure-only); then
+if ! (cd "$REPO_ROOT/.scripts" && dotnet run --no-cache --file SyncQuartz.cs -- --repo-root "$REPO_ROOT" --configure-only); then
     cat >&2 <<'EOF'
 [setup] Quartz Syncer configuration failed. Complete these steps, then rerun bash .scripts/setup.sh:
   - Open this checkout's Vault directory as a vault in Obsidian.

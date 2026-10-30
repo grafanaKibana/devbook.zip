@@ -43,10 +43,10 @@ jobs:
         working-directory: .scripts
         run: |
           test "$(dotnet --version)" = 10.0.100
-          dotnet test tests/DevBook.Tooling.Tests/DevBook.Tooling.Tests.csproj --configuration Release
+          dotnet test DevBook.Tooling.slnx --configuration Release
 
       - name: Validate full vault
         working-directory: .scripts
         run: |
           test "$(dotnet --version)" = 10.0.100
-          dotnet run --no-cache --file validate-vault.cs -- --all --repo-root ..
+          dotnet run --no-cache --file ValidateVault.cs -- --all --repo-root ..

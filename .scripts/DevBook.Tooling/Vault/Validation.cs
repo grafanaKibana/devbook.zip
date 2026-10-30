@@ -413,7 +413,7 @@ public static class Validation
             JsonNode expected = Roadmap.Generate(root).Canvas;
             if (!JsonNode.DeepEquals(Roadmap.NormalizeForComparison(actual!), Roadmap.NormalizeForComparison(expected)))
             {
-                return [new("generated.roadmap", "Vault/Home/Roadmap.canvas", 1, "Roadmap.canvas is stale; run `dotnet run --no-cache --file generate-roadmap.cs`")];
+                return [new("generated.roadmap", "Vault/Home/Roadmap.canvas", 1, "Roadmap.canvas is stale; run `dotnet run --no-cache --file GenerateRoadmap.cs`")];
             }
             return [];
         }
@@ -508,7 +508,7 @@ public static class Validation
     {
         if (args.Contains("--help") || args.Contains("-h"))
         {
-            Console.WriteLine("validate-vault.cs (--all | --staged) [--no-baseline] [--repo-root PATH]");
+            Console.WriteLine("ValidateVault.cs (--all | --staged) [--no-baseline] [--repo-root PATH]");
             return Task.FromResult(0);
         }
         try

@@ -13,11 +13,11 @@ public sealed class StaleExportPolicyException(string message) : IOException(mes
 public static class Receipt
 {
     public const string PathName = ".devbook-improvement/syncer-export.json";
-    public static readonly string[] NativeEntrypoints = ["devbook-improvement", "sync-export", "export-worker", "sync-quartz",
-        "validate-vault", "migrate-question-callouts-to-qard", "note-dates", "generate-roadmap", "sync-folder-rollup-frontmatter"];
+    public static readonly string[] NativeEntrypoints = ["SyncExport", "SyncQuartz", "ValidateVault",
+        "MigrateQuestionCalloutsToQard", "NoteDates", "GenerateRoadmap", "SyncFolderRollupFrontmatter"];
     public static readonly string[] Plugins = ["quartz-syncer", "datacore", "tabsdown", "obsidian-excalidraw-plugin"];
     private static readonly string[] RequiredPolicy = [".scripts/global.json", ".scripts/quartz-syncer.defaults.json",
-        ".scripts/DevBook.Tooling/DevBook.Tooling.csproj", ".scripts/DevBook.Tooling/Export/Receipt.cs",
+        ".scripts/DevBook.Tooling/DevBook.Tooling.csproj", ".scripts/DevBook.Tooling/Program.cs", ".scripts/DevBook.Tooling/Export/Receipt.cs",
         ".scripts/DevBook.Tooling/Export/Syncer.cs", ".scripts/DevBook.Tooling/Export/Desktop.cs",
         .. NativeEntrypoints.Select(name => $".scripts/{name}.cs"),
         .. Plugins.SelectMany(plugin => new[] { $"Vault/.obsidian/plugins/{plugin}/main.js", $"Vault/.obsidian/plugins/{plugin}/manifest.json" })];
@@ -209,7 +209,7 @@ public static class Receipt
         }
         catch (Exception error) when (error is IOException or InvalidOperationException or JsonException)
         {
-            throw new InvalidDataException("Official Quartz export required before merge. Resume the normal improvement workflow or run sync-export.cs export --expected-head "
+            throw new InvalidDataException("Official Quartz export required before merge. Resume the normal improvement workflow or run SyncExport.cs export --expected-head "
                 + context.GitText("rev-parse", "HEAD") + " in a clean dedicated checkout with its Vault open in Obsidian.", error);
         }
         return true;
@@ -260,7 +260,7 @@ public static class Receipt
     {
         if (args.Length == 0 || args.Contains("--help"))
         {
-            Console.WriteLine("sync-export.cs verify --base-ref <ref> [--head-ref <branch>] | export --expected-head <sha> [--repo-root <path>]");
+            Console.WriteLine("SyncExport.cs verify --base-ref <ref> [--head-ref <branch>] | export --expected-head <sha> [--repo-root <path>]");
             return args.Length == 0 ? 2 : 0;
         }
         try

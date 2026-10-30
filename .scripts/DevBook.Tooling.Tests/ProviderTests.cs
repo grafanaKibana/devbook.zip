@@ -12,6 +12,7 @@ public sealed class ProviderTests
     [Fact]
     public async Task AuthorAndReviewerUseSeparateRestrictedOAuthCalls()
     {
+        // Arrange
         var runner = new ProviderRunner();
         var config = new JsonObject
         {
@@ -26,8 +27,12 @@ public sealed class ProviderTests
             "PATH" => "/usr/bin:/bin",
             _ => null
         });
+
+        // Act
         JsonObject author = await provider.AuthorAsync(new JsonObject { ["topic"] = "fixture" });
         JsonObject review = await provider.ReviewAsync(new JsonObject { ["topic"] = "fixture" });
+
+        // Assert
         author.Int("version").Should().Be(1);
         review.Str("verdict").Should().Be("CHANGES REQUIRED");
         runner.Requests.Should().HaveCount(4);
@@ -51,15 +56,22 @@ public sealed class ProviderTests
     [Fact]
     public void QuotaPreservesReportedBoundariesAndDelaysUnknownReset()
     {
+        // Arrange
         DateTimeOffset now = DateTimeOffset.Parse("2026-10-30T12:00:00Z");
+
+        // Act
         ClaudeQuotaException weekly = ClaudeProvider.Quota("Weekly usage limit resets 2026-11-03T12:00:00Z", now)!;
+        ClaudeQuotaException fiveHour = ClaudeProvider.Quota("5-hour limit reset_at 1793448000", now)!;
+        ClaudeQuotaException unknown = ClaudeProvider.Quota("Usage limit reached", now)!;
+        ClaudeQuotaException? unrelatedFailure = ClaudeProvider.Quota("Transport failed", now);
+
+        // Assert
         weekly.Kind.Should().Be("weekly");
         weekly.ResetAt.Should().Be(DateTimeOffset.Parse("2026-11-03T12:00:00Z"));
-        ClaudeProvider.Quota("5-hour limit reset_at 1793448000", now)!.Kind.Should().Be("five_hour");
-        ClaudeQuotaException unknown = ClaudeProvider.Quota("Usage limit reached", now)!;
+        fiveHour.Kind.Should().Be("five_hour");
         unknown.ResetAt.Should().BeNull();
         unknown.NextCheckAt.Should().Be(now.AddHours(24));
-        ClaudeProvider.Quota("Transport failed", now).Should().BeNull();
+        unrelatedFailure.Should().BeNull();
     }
 
     private sealed class ProviderRunner : IProcessRunner

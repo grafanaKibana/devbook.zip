@@ -10,9 +10,14 @@ public sealed class DemoTests
     [Fact]
     public async Task NativeDemoReusesPrHandlesEditedFeedbackAndStopsQuietlyAtQuota()
     {
+        // Arrange
         string root = Repository.FindRoot();
         System.Text.Json.Nodes.JsonObject config = JsonData.ParseObject(await File.ReadAllTextAsync(Path.Combine(root, ".github/devbook-improvement.json")));
+
+        // Act
         System.Text.Json.Nodes.JsonObject result = await Demo.RunAsync(root, config);
+
+        // Assert
         result.Str("status").Should().Be("demo_complete");
         result.Bool("fixture").Should().BeTrue();
         result.Int("created_prs").Should().Be(1);

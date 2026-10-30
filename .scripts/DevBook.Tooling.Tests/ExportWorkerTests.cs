@@ -13,13 +13,22 @@ public sealed class ExportWorkerTests
     [Fact]
     public async Task GeneratedOnlyPublicationPreservesBinaryDeletionAndResumesChecksWithoutAnotherCommit()
     {
+        // Arrange
         var fixture = new WorkerFixture();
         var store = new MemoryStateStore(fixture.State);
         fixture.Api.FailBeforeRefOnce = true;
+
+        // Act: transport fails before updating the ref.
         Func<Task> interrupted = () => Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store);
+
+        // Assert
         await interrupted.Should().ThrowAsync<RuntimeFailure>().WithMessage("Simulated transport interruption*");
         fixture.Api.RefWrites.Should().Be(0);
+
+        // Act: finalize the saved commit.
         JsonObject first = await Worker.FinalizeAsync(fixture.Api, fixture.Config, store, fixture.Request);
+
+        // Assert
         first.Str("status").Should().Be("awaiting_checks");
         fixture.Api.RefWrites.Should().Be(1);
         fixture.Api.CommitWrites.Should().Be(1);
@@ -27,10 +36,16 @@ public sealed class ExportWorkerTests
         fixture.Api.DraftConversions.Should().Be(1);
         fixture.Api.CurrentTree.Should().NotContainKey("Web/content/Removed.md");
         fixture.Api.Blobs[fixture.Api.CurrentTree["Web/content/Assets/image.png"].Sha].Should().Equal(fixture.Binary);
+
+        // Act: select the pending checks opportunity.
         StateSnapshot pending = await store.ReadAsync();
         ExportOpportunity opportunity = Worker.SelectOpportunity(pending.State, DateTimeOffset.UtcNow);
+
+        // Assert
         opportunity.Mode.Should().Be("finalize");
         JsonNode.DeepEquals(opportunity.Request, fixture.Request).Should().BeTrue();
+
+        // Arrange: required checks finish within the bounded wait.
         fixture.Config["export_check_wait_seconds"] = 20;
         var clock = new CheckClock(DateTimeOffset.UtcNow);
         var delays = 0;
@@ -42,7 +57,11 @@ public sealed class ExportWorkerTests
             fixture.Api.ChecksReady = true;
             return Task.CompletedTask;
         });
+
+        // Act
         JsonObject resumed = await Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store, checkWait: waiting);
+
+        // Assert
         delays.Should().Be(1);
         resumed.Str("status").Should().Be("exported");
         resumed.Bool("resumed").Should().BeTrue();
@@ -58,7 +77,11 @@ public sealed class ExportWorkerTests
         final.Obj("feedback").Obj("inline:7:revision").Str("status").Should().Be("applied");
         final.Obj("cooldown").Str("kind").Should().Be("weekly");
         final["lease"].Should().BeNull();
+
+        // Act: retry an already finalized export.
         JsonObject again = await Worker.FinalizeAsync(fixture.Api, fixture.Config, store, fixture.Request);
+
+        // Assert
         again.Str("status").Should().Be("exported");
         fixture.Api.Comments.Count.Should().Be(1);
     }
@@ -66,56 +89,105 @@ public sealed class ExportWorkerTests
     [Fact]
     public async Task UnsafeArtifactsStaleHeadsAndLeaseConflictsStopWritesAndFixtureContainsNativeDependencies()
     {
+        // Arrange
         var fixture = new WorkerFixture();
         var store = new MemoryStateStore(fixture.State);
         JsonObject unsafeBundle = fixture.Bundle.Copy();
         unsafeBundle.Obj("files")["Vault/Home/Overwrite.md"] = Convert.ToBase64String("unsafe"u8.ToArray());
+
+        // Act: attempt publication outside generated paths.
         Func<Task> unsafePublish = () => Worker.PublishBundleAsync(fixture.Api, fixture.Config, unsafeBundle, fixture.Request, store);
+
+        // Assert
         await unsafePublish.Should().ThrowAsync<UnsafeInput>();
         fixture.Api.RefWrites.Should().Be(0);
+
+        // Arrange: another worker owns the lease.
         var lease = new DurableLease(store, "another-worker");
         await lease.AcquireAsync();
+
+        // Act
         Func<Task> competing = () => Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store);
+
+        // Assert
         await competing.Should().ThrowAsync<Conflict>();
+
+        // Arrange: the owner changes the branch after export.
         await lease.ReleaseAsync();
         fixture.Api.Head = FakeExportApi.OwnerChangedHead;
+
+        // Act
         JsonObject stale = await Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store);
+
+        // Assert
         stale.Str("status").Should().Be("stale");
         fixture.Api.RefWrites.Should().Be(0);
         fixture.Api.CommitWrites.Should().Be(0);
         JsonObject state = (await store.ReadAsync()).State;
         state.Obj("export_operations").Obj(fixture.Request.Str("op_id")).Obj("evidence").Bool("export_paused").Should().BeTrue();
+
+        // Arrange: export retries have reached their due time.
         JsonObject retryState = fixture.State.Copy();
         JsonObject retryEvidence = retryState.Obj("export_operations").Obj(fixture.Request.Str("op_id")).Obj("evidence");
         retryEvidence["export_last_dispatch_at"] = Runtime.Iso(DateTimeOffset.UtcNow.AddHours(-7));
         retryEvidence["export_attempts"] = 2;
+
+        // Act
         ExportOpportunity retry = Worker.SelectOpportunity(retryState, DateTimeOffset.UtcNow);
+
+        // Assert
         retry.Mode.Should().Be("render");
         retry.State.Obj("export_operations").Obj(fixture.Request.Str("op_id")).Obj("evidence").Int("export_attempts").Should().Be(3);
+
+        // Arrange: the last allowed retry also times out.
         retry.State.Obj("export_operations").Obj(fixture.Request.Str("op_id")).Obj("evidence")["export_last_dispatch_at"] = Runtime.Iso(DateTimeOffset.UtcNow.AddHours(-7));
+
+        // Act
         ExportOpportunity exhausted = Worker.SelectOpportunity(retry.State, DateTimeOffset.UtcNow);
+
+        // Assert
         exhausted.Request.Should().BeNull();
         exhausted.State.Obj("export_operations").Obj(fixture.Request.Str("op_id")).Obj("evidence").Bool("export_paused").Should().BeTrue();
 
 
+        // Arrange: hosted validation never starts.
         var missing = new WorkerFixture();
         missing.Api.ValidationMissing = true;
         var missingStore = new MemoryStateStore(missing.State);
+
+        // Act
         JsonObject notStarted = await Worker.PublishBundleAsync(missing.Api, missing.Config, missing.Bundle, missing.Request, missingStore);
+
+        // Assert
         notStarted.Str("status").Should().Be("awaiting_checks");
         missing.Api.Dispatches.Should().Be(1);
+
+        // Act: retry before the cooldown expires.
         JsonObject earlyRetry = await Worker.FinalizeAsync(missing.Api, missing.Config, missingStore, missing.Request);
+
+        // Assert
         earlyRetry.Str("status").Should().Be("awaiting_checks");
         missing.Api.Dispatches.Should().Be(1);
+
+        // Act: allow only the remaining recorded dispatch attempts.
         for (var attempt = 2; attempt <= 3; attempt++)
         {
             await MakeValidationDue(missingStore, missing.Request);
+            // Act
             JsonObject retried = await Worker.FinalizeAsync(missing.Api, missing.Config, missingStore, missing.Request);
+
+            // Assert
             retried.Str("status").Should().Be("awaiting_checks");
             missing.Api.Dispatches.Should().Be(attempt);
         }
+
+        // Arrange: the final retry boundary is due.
         await MakeValidationDue(missingStore, missing.Request);
+
+        // Act
         JsonObject paused = await Worker.FinalizeAsync(missing.Api, missing.Config, missingStore, missing.Request);
+
+        // Assert
         paused.Str("status").Should().Be("checks_failed");
         missing.Api.Dispatches.Should().Be(3);
         missing.Api.RefWrites.Should().Be(1);
@@ -126,6 +198,7 @@ public sealed class ExportWorkerTests
         missingEvidence.Str("validation_head").Should().Be(FakeExportApi.GeneratedHead);
         missingEvidence.Str("export_error").Should().Contain("three recorded dispatch attempts");
 
+        // Arrange: a credential-free checkout contains all native dependencies.
         string directory = Path.Combine(Path.GetTempPath(), "devbook-fixture-contract-" + Guid.NewGuid().ToString("N"));
         try
         {
@@ -137,7 +210,11 @@ public sealed class ExportWorkerTests
                 File.WriteAllText(path, "fixture dependency\n");
             }
             string root = Path.Combine(directory, "repo");
+
+            // Act
             string head = Fixture.PrepareCheckout(trusted, root);
+
+            // Assert
             head.Should().HaveLength(40);
             Receipt.Make(Receipt.TreeEntries(root)).Obj("policy").Count.Should().BeGreaterThanOrEqualTo(Receipt.RequiredPolicyPaths.Count);
             File.ReadAllText(Path.Combine(root, "Vault/Home/Topic/Undated.md")).Should().NotContain("created:").And.NotContain("modified:");

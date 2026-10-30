@@ -12,6 +12,7 @@ public sealed class EngineTests
     [Fact]
     public async Task ReviewerQuotaResumesExactDatedCandidateWithoutAnotherAuthorCall()
     {
+        // Arrange
         string root = Path.Combine(Path.GetTempPath(), "engine-core-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(Path.Combine(root, ".codex/agents"));
         await File.WriteAllTextAsync(Path.Combine(root, ".codex/agents/note-reviewer.toml"), "Fixture review contract");
@@ -27,18 +28,32 @@ public sealed class EngineTests
             var validations = 0;
             ImprovementEngine Engine() => new(root, config, store, model, notesLoader: Notes, clock: clock,
                 validator: (_, _, _) => { validations++; return Task.FromResult(new JsonArray(new JsonObject { ["check"] = "fixture", ["result"] = "passed" })); });
+
+            // Act: reach the reviewer quota.
             JsonObject limited = await Engine().RunAsync(withModel: true);
+
+            // Assert: preserve the dated proposal and notify once.
             limited.Str("status").Should().Be("cooldown");
             limited.Bool("notice").Should().BeTrue();
             JsonObject pending = (await store.ReadAsync()).State.RequiredObject("pending_author_proposal");
             string preparedAt = pending.Str("prepared_at");
+
+            // Act: retry during cooldown.
             JsonObject quiet = await Engine().RunAsync(withModel: true);
+
+            // Assert: skip quietly without another model call.
             quiet.Bool("notice").Should().BeFalse();
             model.Authors.Should().Be(1);
             model.Reviews.Should().Be(1);
             validations.Should().Be(0);
+
+            // Arrange: the quota has reset.
             clock.Advance(TimeSpan.FromHours(2));
+
+            // Act: resume the exact candidate.
             JsonObject resumed = await Engine().RunAsync(withModel: true);
+
+            // Assert: only the reviewer is called again.
             resumed.Str("status").Should().Be("proposed");
             resumed.Int("model_calls").Should().Be(1);
             model.Authors.Should().Be(1);
@@ -49,8 +64,15 @@ public sealed class EngineTests
             candidate.Should().Contain("The clarified mechanism.");
             JsonObject review = resumed.RequiredObject("review");
             Review.Clean(review, new Dictionary<string, string> { [path] = candidate }, resumed.RequiredObject("proposal"), new JsonArray(), new JsonArray()).Should().BeTrue();
+
+            // Arrange: stale reviewer evidence.
             review.RequiredArray("notes")[0]!.RequiredArray("current_text_evidence")[0]!["quote"] = "Stale source quote";
-            Review.Clean(review, new Dictionary<string, string> { [path] = candidate }, resumed.RequiredObject("proposal"), new JsonArray(), new JsonArray()).Should().BeFalse();
+
+            // Act: stale text cannot satisfy the review gate.
+            bool clean = Review.Clean(review, new Dictionary<string, string> { [path] = candidate }, resumed.RequiredObject("proposal"), new JsonArray(), new JsonArray());
+
+            // Assert
+            clean.Should().BeFalse();
         }
         finally
         {

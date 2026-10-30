@@ -12,7 +12,7 @@ public static class EngineCommand
     {
         if (args.Contains("--help"))
         {
-            Console.WriteLine("devbook-improvement.cs [--demo | --dry-run | --apply] [--with-model] [--config <root-relative-json>] [--model <id>] [--output-dir <root-relative-dir>] [--repo-root <path>]");
+            Console.WriteLine("DevBook.Tooling improvement [--demo | --dry-run | --apply] [--with-model] [--config <root-relative-json>] [--model <id>] [--output-dir <root-relative-dir>] [--repo-root <path>]");
             return 0;
         }
         try

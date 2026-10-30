@@ -582,7 +582,7 @@ public static class Syncer
     {
         if (args.Contains("--help"))
         {
-            Console.WriteLine("sync-quartz.cs [--configure-only] [--hook <path>] [--repo-root <path>]");
+            Console.WriteLine("SyncQuartz.cs [--configure-only] [--hook <path>] [--repo-root <path>]");
             return 0;
         }
         string? root = null;

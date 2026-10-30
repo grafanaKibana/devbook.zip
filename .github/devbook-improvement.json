@@ -50,7 +50,7 @@
       "run",
       "--no-cache",
       "--file",
-      "validate-vault.cs",
+      "ValidateVault.cs",
       "--",
       "--all",
       "--repo-root",
@@ -59,7 +59,7 @@
     [
       "dotnet",
       "test",
-      "tests/DevBook.Tooling.Tests/DevBook.Tooling.Tests.csproj",
+      "DevBook.Tooling.Tests/DevBook.Tooling.Tests.csproj",
       "--configuration",
       "Release"
     ],

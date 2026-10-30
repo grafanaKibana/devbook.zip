@@ -51,7 +51,7 @@ Before exporting, the hook applies the shared defaults through Syncer’s suppor
 The first vault commit configures Syncer automatically. To configure it before using manual Syncer commands, run this from the repository root after opening the vault:
 
 ```bash
-(cd .scripts && dotnet run --no-cache --file sync-quartz.cs -- --configure-only --repo-root ..)
+(cd .scripts && dotnet run --no-cache --file SyncQuartz.cs -- --configure-only --repo-root ..)
 ```
 
 This command only configures the connected checkout; it does not export, stage files, or require clean vault source. Setup updates an existing local `data.json` without replacing unrelated settings; new clones let Syncer create it.

@@ -12,57 +12,112 @@ public sealed class PublishingTests
     [Fact]
     public async Task ConfigureAndImmutableExportUseOfficialSequenceWithoutChangingUndatedSource()
     {
-        Syncer.ResolveTimeout(null, "1200").Should().Be(TimeSpan.FromSeconds(1200));
-        Syncer.ResolveTimeout(null, "7200").Should().Be(TimeSpan.FromHours(2));
-        Syncer.ResolveTimeout(TimeSpan.FromSeconds(30), "7200").Should().Be(TimeSpan.FromSeconds(30));
+        // Arrange
         Action invalidTimeout = () => Syncer.ResolveTimeout(null, "NaN");
+
+        // Act
+        TimeSpan configuredTimeout = Syncer.ResolveTimeout(null, "1200");
+        TimeSpan boundedTimeout = Syncer.ResolveTimeout(null, "7200");
+        TimeSpan explicitTimeout = Syncer.ResolveTimeout(TimeSpan.FromSeconds(30), "7200");
+
+        // Assert
+        configuredTimeout.Should().Be(TimeSpan.FromSeconds(1200));
+        boundedTimeout.Should().Be(TimeSpan.FromHours(2));
+        explicitTimeout.Should().Be(TimeSpan.FromSeconds(30));
         invalidTimeout.Should().Throw<SyncException>();
+
+        // Arrange: an isolated publishing checkout.
         using var fixture = new PublishingFixture();
         byte[] original = File.ReadAllBytes(Path.Combine(fixture.Root, "Vault/Home/Undated.md"));
         var context = new SyncerContext(fixture.Root, fixture.CommandAsync, timeout: TimeSpan.FromSeconds(10));
+
+        // Act: configure without exporting.
         await Syncer.ConfigureAsync(context);
+
+        // Assert
         fixture.Calls.Should().NotContain(call => call.StartsWith("quartz-syncer:publish", StringComparison.Ordinal));
         Git.Text(fixture.Root, "status", "--porcelain").Should().BeEmpty();
+
+        // Act: export through Syncer.
         await Syncer.ExportAsync(context);
+
+        // Assert
         File.ReadAllBytes(Path.Combine(fixture.Root, "Vault/Home/Undated.md")).Should().Equal(original);
         fixture.Calls.Should().ContainInOrder("quartz-syncer:cache action=tree-refresh", "quartz-syncer:publish", "quartz-syncer:delete force");
         fixture.Calls.Should().Contain(call => call.Contains("cleanOrphanedMedia", StringComparison.Ordinal));
         Git.Paths(fixture.Root, "diff", "--cached", "--name-only", "-z").Should().Equal("Web/content/Card.md");
+
+        // Arrange: Syncer reports skipped notes.
         fixture.Skipped = true;
+
+        // Act
         Func<Task> skipped = () => Syncer.ExportAsync(context);
+
+        // Assert
         await skipped.Should().ThrowAsync<SyncException>().WithMessage("*skipped or failed*");
     }
 
     [Fact]
     public async Task SourceOutputAndPersistentLockGuardsRejectUnsafeLocalPublication()
     {
+        // Arrange
         using var fixture = new PublishingFixture();
         var context = new SyncerContext(fixture.Root);
+
+        // Act: overlapping local export locks are rejected.
         using (FileStream first = Syncer.AcquireLock(context))
         {
             Action competing = () => Syncer.AcquireLock(context).Dispose();
+
+            // Assert
             competing.Should().Throw<SyncException>();
         }
+        // Act: release permits the next local export.
         using (FileStream released = Syncer.AcquireLock(context))
         {
+            // Assert
             released.CanWrite.Should().BeTrue();
         }
+
+        // Arrange: source changed outside the staged batch.
         File.AppendAllText(Path.Combine(fixture.Root, "Vault/Home/Undated.md"), "Concurrent edit\n");
+
+        // Act
         Action source = () => Syncer.GuardSource(context);
+
+        // Assert
         source.Should().Throw<SyncException>().WithMessage("*unstaged*");
+
+        // Arrange: generated output already has local changes.
         File.AppendAllText(Path.Combine(fixture.Root, "Web/content/Card.md"), "Existing output\n");
+
+        // Act
         Action outputGuard = () => Syncer.GuardOutput(context);
+
+        // Assert
         outputGuard.Should().Throw<SyncException>().WithMessage("*already has changes*");
         Syncer.SafeText("Bearer hidden github_pat_sensitive token=hidden").Should().NotContain("hidden").And.NotContain("sensitive");
+
+        // Arrange: maintenance hook output and diagnostics.
         using var output = new StringWriter();
         using var errors = new StringWriter();
+
+        // Act
         await Syncer.RunMaintenanceHookAsync(context, "fixture-hook", new HookRunner(new ProcessResult(0,
             Encoding.UTF8.GetBytes("Folder rollup: 2 notes checked.\n"), [])), output, errors);
+
+        // Assert
         output.ToString().Should().Contain("Folder rollup: 2 notes checked.");
+
+        // Arrange: a failing hook includes secrets in its diagnostics.
         var failed = new HookRunner(new ProcessResult(1,
             Encoding.UTF8.GetBytes("Roadmap generation completed.\nBearer hidden-value\n"),
             Encoding.UTF8.GetBytes("Vault/Home/Card.md:12: qard.empty-back Missing answer.\ntoken=another-secret\n")));
+
+        // Act
         Func<Task> hookFailure = () => Syncer.RunMaintenanceHookAsync(context, "fixture-hook", failed, output, errors);
+
+        // Assert
         await hookFailure.Should().ThrowAsync<SyncException>().WithMessage("*commit blocked*");
         output.ToString().Should().Contain("Roadmap generation completed.").And.NotContain("hidden-value");
         errors.ToString().Should().Contain("Vault/Home/Card.md:12: qard.empty-back Missing answer.").And.NotContain("another-secret");

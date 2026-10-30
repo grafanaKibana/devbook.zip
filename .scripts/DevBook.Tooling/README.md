@@ -4,7 +4,28 @@ A recurring queue for DevBook notes and Qard interview cards. Every six hours, t
 
 [Workflow](../../.github/workflows/devbook-improvement.yml) · [Configuration](../../.github/devbook-improvement.json) · [Activation and recovery runbook](../../docs/devbook-improvement.md)
 
-The native C# implementation is shared by thin .NET 10 `.cs` scripts. It needs no Python on the improvement, validation, migration, or publishing path. The unrelated release/changelog tool remains Python. Production activation and unattended operation require the separate runbook phase; tests passing do not activate them.
+Open [DevBook.Tooling.slnx](../DevBook.Tooling.slnx) for the tooling executable and its adjacent xUnit project. The executable owns the `improvement` and `export` commands. PascalCase `.cs` file-based scripts expose the shared vault tools used by hooks and manual publishing. The improvement, validation, migration and publishing paths need no Python; the unrelated release/changelog tool remains Python. Production activation and unattended operation require the separate runbook phase; tests passing do not activate them.
+
+## Project layout
+
+```text
+.scripts/
+  DevBook.Tooling.slnx
+  DevBook.Tooling/
+    DevBook.Tooling.csproj
+    Program.cs
+    Improvement/
+    Export/
+    Vault/
+    Infrastructure/
+  DevBook.Tooling.Tests/
+    DevBook.Tooling.Tests.csproj
+  ValidateVault.cs
+  SyncQuartz.cs
+  ...
+```
+
+The two projects share one solution and build together. Tests stay in their own assembly so test dependencies do not enter the application. Test methods group setup, the operation and its expected result into Arrange, Act and Assert sections. The separate RAG application under `Platform/DevBook` keeps its own solution.
 
 ## A regular opportunity
 
@@ -55,20 +76,21 @@ Install .NET SDK **10.0.100**. Enter `.scripts` so its `global.json` selects tha
 ```sh
 cd .scripts
 test "$(dotnet --version)" = 10.0.100
-dotnet test tests/DevBook.Tooling.Tests/DevBook.Tooling.Tests.csproj --configuration Release
-dotnet run --no-cache --file validate-vault.cs -- --all --repo-root ..
-dotnet run --no-cache --file devbook-improvement.cs -- --repo-root .. --demo --output-dir /tmp/devbook-demo
-dotnet run --no-cache --file devbook-improvement.cs -- --repo-root .. --dry-run --output-dir /tmp/devbook-selection
+dotnet build DevBook.Tooling.slnx --configuration Release
+dotnet test DevBook.Tooling.slnx --configuration Release
+dotnet run --no-cache --file ValidateVault.cs -- --all --repo-root ..
+dotnet run --project DevBook.Tooling -- improvement --repo-root .. --demo --output-dir /tmp/devbook-demo
+dotnet run --project DevBook.Tooling -- improvement --repo-root .. --dry-run --output-dir /tmp/devbook-selection
 ```
 
-Native commands use `--no-cache` so file-app builds pick up current shared-library changes instead of reusing an older cached copy.
+Project commands use normal incremental builds. The shared file-based scripts use `--no-cache` so they pick up current tooling changes instead of reusing an older cached copy.
 
 The compact suite uses xUnit and FluentAssertions for core queue, identity, state, feedback, lifecycle, quota, date and export contracts. It does not reproduce every old parser/regression permutation. Full-vault validation and genuine export remain separate checks.
 
 The demo produces `result.json`, `proposed.patch`, `pr-summary.md`, and separate `question-changes.json`, using fixture model/GitHub boundaries. It makes no live model request or PR. A Mac desktop fixture uses the same native export code:
 
 ```sh
-dotnet run --no-cache --file export-worker.cs -- fixture --repo-root .. \
+dotnet run --project DevBook.Tooling -- export fixture --repo-root .. \
   --app-bundle /Applications/Obsidian.app --output /tmp/devbook-export-fixture
 ```
 

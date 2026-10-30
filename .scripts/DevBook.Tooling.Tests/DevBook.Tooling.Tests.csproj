@@ -14,7 +14,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <ProjectReference Include="../../DevBook.Tooling/DevBook.Tooling.csproj" />
+    <ProjectReference Include="../DevBook.Tooling/DevBook.Tooling.csproj" />
     <None Update="fixtures/**" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

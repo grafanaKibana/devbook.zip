@@ -177,7 +177,7 @@ public static partial class Worker
     {
         if (args.Length == 0 || args.Contains("--help"))
         {
-            Console.WriteLine("export-worker.cs fixture --app-bundle <path> --output <dir> | render --request <json> --app-bundle <path> --output <dir> | publish --bundle <json> --request <json> | finalize --request <json> [--repo-root <path>]");
+            Console.WriteLine("DevBook.Tooling export fixture --app-bundle <path> --output <dir> | render --request <json> --app-bundle <path> --output <dir> | publish --bundle <json> --request <json> | finalize --request <json> [--repo-root <path>]");
             return args.Length == 0 ? 2 : 0;
         }
         try

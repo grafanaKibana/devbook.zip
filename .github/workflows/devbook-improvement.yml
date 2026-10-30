@@ -8,8 +8,9 @@ on:
       - .github/workflows/devbook-improvement.yml
       - .github/devbook-improvement.json
       - .scripts/DevBook.Tooling/**
-      - .scripts/tests/DevBook.Tooling.Tests/**
+      - .scripts/DevBook.Tooling.Tests/**
       - .scripts/*.cs
+      - .scripts/*.slnx
       - .scripts/global.json
   workflow_dispatch:
     inputs:
@@ -61,10 +62,10 @@ jobs:
         run: |
           set -euo pipefail
           test "$(dotnet --version)" = 10.0.100
-          dotnet test tests/DevBook.Tooling.Tests/DevBook.Tooling.Tests.csproj --configuration Release
+          dotnet test DevBook.Tooling.slnx --configuration Release
           mode=demo
           if [ "$SELECT_ONLY" = true ]; then mode=dry-run; fi
-          dotnet run --no-cache --file devbook-improvement.cs -- --repo-root .. \
+          dotnet run --project DevBook.Tooling -- improvement --repo-root .. \
             --config .github/devbook-improvement.json --model "$MODEL" --"$mode" \
             --output-dir artifacts/devbook-improvement
       - uses: actions/upload-artifact@v4
@@ -143,7 +144,7 @@ jobs:
         run: |
           set -euo pipefail
           test "$(dotnet --version)" = 10.0.100
-          dotnet run --no-cache --file devbook-improvement.cs -- --repo-root .. \
+          dotnet run --project DevBook.Tooling -- improvement --repo-root .. \
             --config .github/devbook-improvement.json --model "$MODEL" \
             --"$DEVBOOK_IMPROVEMENT_MODE" --with-model --output-dir artifacts/devbook-improvement
       - uses: actions/upload-artifact@v4
@@ -212,10 +213,10 @@ jobs:
           set -euo pipefail
           test "$(dotnet --version)" = 10.0.100
           if [ "$EXPORT_MODE" = fixture ]; then
-            dotnet run --no-cache --file export-worker.cs -- fixture --repo-root .. \
+            dotnet run --project DevBook.Tooling -- export fixture --repo-root .. \
               --app-bundle "$APP_BUNDLE" --output ../artifacts/export
           else
-            dotnet run --no-cache --file export-worker.cs -- render --repo-root .. \
+            dotnet run --project DevBook.Tooling -- export render --repo-root .. \
               --request ../artifacts/request/export-request.json --app-bundle "$APP_BUNDLE" --output ../artifacts/export
           fi
       - uses: actions/upload-artifact@v4
@@ -275,10 +276,10 @@ jobs:
           set -euo pipefail
           test "$(dotnet --version)" = 10.0.100
           if [ "$EXPORT_MODE" = finalize ]; then
-            dotnet run --no-cache --file export-worker.cs -- finalize --repo-root .. \
+            dotnet run --project DevBook.Tooling -- export finalize --repo-root .. \
               --request ../artifacts/request/export-request.json --output ../artifacts/publication
           else
-            dotnet run --no-cache --file export-worker.cs -- publish --repo-root .. \
+            dotnet run --project DevBook.Tooling -- export publish --repo-root .. \
               --request ../artifacts/request/export-request.json --bundle ../artifacts/export/bundle.json --output ../artifacts/publication
           fi
       - uses: actions/upload-artifact@v4
