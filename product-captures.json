@@ -1,0 +1,25 @@
+{
+  "name": "DevBook",
+  "appearance": {
+    "background": "#c5d0bd",
+    "darkBackground": "#38493d",
+    "tint": "#7e9578"
+  },
+  "capture": {
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "ready": ".dc-topic-grid",
+    "storage": {
+      "theme": "$theme"
+    }
+  },
+  "build": {
+    "cwd": "Web",
+    "command": "npm ci --cache ../.product-captures-cache/npm && npm run steptrace:check && npm run quartz -- plugin install --from-config && npm run quartz -- build"
+  },
+  "server": {
+    "directory": "Web/public"
+  }
+}
