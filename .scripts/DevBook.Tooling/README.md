@@ -18,14 +18,15 @@ Open [DevBook.Tooling.slnx](../DevBook.Tooling.slnx) for the tooling executable 
     Export/
     Vault/
     Infrastructure/
+    Scripts/
+      ValidateVault.cs
+      SyncQuartz.cs
+      ...
   DevBook.Tooling.Tests/
     DevBook.Tooling.Tests.csproj
-  ValidateVault.cs
-  SyncQuartz.cs
-  ...
 ```
 
-The two projects share one solution and build together. Tests stay in their own assembly so test dependencies do not enter the application. Test methods group setup, the operation and its expected result into Arrange, Act and Assert sections. The separate RAG application under `Platform/DevBook` keeps its own solution.
+The two projects share one solution and build together. `Scripts` contains file-based entry points, visible in the project but excluded from its compilation because each has its own entry point. Tests stay in their own assembly so test dependencies do not enter the application. Test methods group setup, the operation and its expected result into Arrange, Act and Assert sections. The separate RAG application under `Platform/DevBook` keeps its own solution.
 
 ## A regular opportunity
 
@@ -78,7 +79,7 @@ cd .scripts
 test "$(dotnet --version)" = 10.0.100
 dotnet build DevBook.Tooling.slnx --configuration Release
 dotnet test DevBook.Tooling.slnx --configuration Release
-dotnet run --no-cache --file ValidateVault.cs -- --all --repo-root ..
+dotnet run --no-cache --file DevBook.Tooling/Scripts/ValidateVault.cs -- --all --repo-root ..
 dotnet run --project DevBook.Tooling -- improvement --repo-root .. --demo --output-dir /tmp/devbook-demo
 dotnet run --project DevBook.Tooling -- improvement --repo-root .. --dry-run --output-dir /tmp/devbook-selection
 ```
@@ -94,7 +95,7 @@ dotnet run --project DevBook.Tooling -- export fixture --repo-root .. \
   --app-bundle /Applications/Obsidian.app --output /tmp/devbook-export-fixture
 ```
 
-Use the pinned compatible app from the workflow when the installed bundle differs. The hosted fixture pins Obsidian `1.14.5`, verifies the installer hash/signature, and proves Datacore rendering, card/layout markers, media bytes, unchanged source, and receipt bindings. The earlier Python hosted success is baseline evidence; the C# workflow needs its own exact-revision hosted proof before activation.
+Use the pinned compatible app from the workflow when the installed bundle differs. The hosted fixture pins Obsidian `1.14.5`, verifies the installer hash/signature, and proves Datacore rendering, card/layout markers, media bytes, unchanged source, and receipt bindings. Verify hosted success on the exact revision before activation.
 
 ## Web tools and quota
 

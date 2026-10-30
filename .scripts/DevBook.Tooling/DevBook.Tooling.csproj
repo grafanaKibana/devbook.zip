@@ -6,6 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="Scripts/**/*.cs" />
+    <None Include="Scripts/**/*.cs" />
     <EmbeddedResource Include="Infrastructure/LegacyCaseFold.json" />
     <EmbeddedResource Include="Improvement/ProviderProtocol.json" />
   </ItemGroup>

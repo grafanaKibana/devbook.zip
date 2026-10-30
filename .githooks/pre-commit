@@ -22,7 +22,7 @@ fi
 # Hold the export lock across maintenance and the awaited local publication.
 if [[ "${DEVBOOK_QUARTZ_MAINTENANCE:-}" != 1 ]]; then
     cd "$REPO_ROOT/.scripts"
-    exec dotnet run --no-cache --file SyncQuartz.cs -- --repo-root "$REPO_ROOT" --hook "$REPO_ROOT/.githooks/pre-commit"
+    exec dotnet run --no-cache --file DevBook.Tooling/Scripts/SyncQuartz.cs -- --repo-root "$REPO_ROOT" --hook "$REPO_ROOT/.githooks/pre-commit"
 fi
 
 # Collect staged Vault files, including deletions, without splitting path names.
@@ -46,7 +46,7 @@ echo "[pre-commit] Running vault automations..."
 # Note-derived artifacts only need refreshes when Markdown changed.
 if [[ ${#STAGED_MD[@]} -gt 0 ]]; then
     # 1. Sync folder frontmatter (derives status/priority/level from children)
-    ROLLUP_CHANGED=$(cd "$REPO_ROOT/.scripts" && dotnet run --no-cache --file SyncFolderRollupFrontmatter.cs -- --repo-root "$REPO_ROOT" --write --force --print-changed)
+    ROLLUP_CHANGED=$(cd "$REPO_ROOT/.scripts" && dotnet run --no-cache --file DevBook.Tooling/Scripts/SyncFolderRollupFrontmatter.cs -- --repo-root "$REPO_ROOT" --write --force --print-changed)
     if [[ -n "$ROLLUP_CHANGED" ]]; then
         while IFS= read -r file; do
             git add "$REPO_ROOT/$file"
@@ -55,7 +55,7 @@ if [[ ${#STAGED_MD[@]} -gt 0 ]]; then
     fi
 
     # 2. Generate roadmap canvas from folder structure
-    (cd "$REPO_ROOT/.scripts" && dotnet run --no-cache --file GenerateRoadmap.cs -- --repo-root "$REPO_ROOT")
+    (cd "$REPO_ROOT/.scripts" && dotnet run --no-cache --file DevBook.Tooling/Scripts/GenerateRoadmap.cs -- --repo-root "$REPO_ROOT")
     ROADMAP_FILE="Vault/Home/Roadmap.canvas"
     if ! git diff --quiet -- "$REPO_ROOT/$ROADMAP_FILE" 2>/dev/null; then
         git add "$REPO_ROOT/$ROADMAP_FILE"
@@ -65,7 +65,7 @@ fi
 
 # 3. Validate staged vault structure, metadata, links, and generated artifacts
 echo "[pre-commit] Validating staged vault changes..."
-if ! (cd "$REPO_ROOT/.scripts" && dotnet run --no-cache --file ValidateVault.cs -- --repo-root "$REPO_ROOT" --staged); then
+if ! (cd "$REPO_ROOT/.scripts" && dotnet run --no-cache --file DevBook.Tooling/Scripts/ValidateVault.cs -- --repo-root "$REPO_ROOT" --staged); then
     echo ""
     echo "[pre-commit] ✗ Vault validation failed. Fix the violations above, then re-stage."
     exit 1

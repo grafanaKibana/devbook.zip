@@ -9,7 +9,6 @@ on:
       - .github/devbook-improvement.json
       - .scripts/DevBook.Tooling/**
       - .scripts/DevBook.Tooling.Tests/**
-      - .scripts/*.cs
       - .scripts/*.slnx
       - .scripts/global.json
   workflow_dispatch:

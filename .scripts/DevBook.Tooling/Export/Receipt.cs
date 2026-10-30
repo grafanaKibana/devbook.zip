@@ -19,7 +19,7 @@ public static class Receipt
     private static readonly string[] RequiredPolicy = [".scripts/global.json", ".scripts/quartz-syncer.defaults.json",
         ".scripts/DevBook.Tooling/DevBook.Tooling.csproj", ".scripts/DevBook.Tooling/Program.cs", ".scripts/DevBook.Tooling/Export/Receipt.cs",
         ".scripts/DevBook.Tooling/Export/Syncer.cs", ".scripts/DevBook.Tooling/Export/Desktop.cs",
-        .. NativeEntrypoints.Select(name => $".scripts/{name}.cs"),
+        .. NativeEntrypoints.Select(name => $".scripts/DevBook.Tooling/Scripts/{name}.cs"),
         .. Plugins.SelectMany(plugin => new[] { $"Vault/.obsidian/plugins/{plugin}/main.js", $"Vault/.obsidian/plugins/{plugin}/manifest.json" })];
 
     public static IReadOnlyList<string> RequiredPolicyPaths => RequiredPolicy;

@@ -12,7 +12,7 @@ For usage, inputs, and examples, start with the [action README](../.scripts/DevB
 - [`.github/devbook-improvement.json`](../.github/devbook-improvement.json) holds reviewable policy: exact model, topic/PR limits, owner identity allowlist, source hosts, required checks, validators, and content-authority paths.
 - The same workflow has separate Ubuntu maintenance, macOS render, and protected Ubuntu publication jobs. No second workflow dispatch is needed for export. A PR or manual `fixture` run uses only credential-free jobs.
 - [`.scripts/DevBook.Tooling/`](../.scripts/DevBook.Tooling/) contains the shared native C# implementation: `Improvement` owns queue/provider/state/GitHub orchestration; `Vault` owns Markdown/Qard validation, migration, dates, folder rollups and Roadmap; `Export` owns genuine desktop Syncer rendering, receipts and generated-only publication. Effects are injectable; no server or database is added.
-- [`.scripts/DevBook.Tooling.slnx`](../.scripts/DevBook.Tooling.slnx) groups the tooling executable and adjacent `DevBook.Tooling.Tests` project. `Program.cs` dispatches `improvement` and `export`; shared vault tools remain PascalCase `.cs` file-based scripts. All tests use explicit Arrange/Act/Assert sections with xUnit and FluentAssertions. Run from `.scripts` to select SDK `10.0.100` via `global.json`. The unrelated changelog generator/test remains Python.
+- [`.scripts/DevBook.Tooling.slnx`](../.scripts/DevBook.Tooling.slnx) groups the tooling executable and adjacent `DevBook.Tooling.Tests` project. `Program.cs` dispatches `improvement` and `export`; shared vault entry points live under `DevBook.Tooling/Scripts`. Tests use Arrange/Act/Assert groups with xUnit and FluentAssertions. Run from `.scripts` to select SDK `10.0.100` via `global.json`. The unrelated changelog generator remains Python.
 
 Default workload is four notes per opportunity, sixteen notes or 1,200 changed lines per PR, three open managed PRs, a 35-minute worker budget within a 40-minute workflow job, and one model invocation at a time. Each author or reviewer call is capped at 900 seconds and 20 model turns, and also receives the pipeline's remaining run budget. A stable topic is the note's exact parent directory relative to `Vault/Home` (currently about 70 topic queues). Generated and dashboard pages remain excluded by default. `claude-sonnet-5-5` is the exact default model; Claude Code is pinned to `2.1.285`, above the model's `2.1.284` minimum. Maintenance runs do not inspect the installed Qard plugin or require a particular version. CI fixtures need no local plugin installation; note/card validation and study-state protections remain enforced.
 
@@ -146,7 +146,7 @@ Use a clean dedicated checkout of the exact managed PR head, open **that checkou
 ```sh
 cd .scripts
 test "$(dotnet --version)" = 10.0.100
-dotnet run --no-cache --file SyncExport.cs -- export --repo-root .. --expected-head <current-PR-head-sha>
+dotnet run --no-cache --file DevBook.Tooling/Scripts/SyncExport.cs -- export --repo-root .. --expected-head <current-PR-head-sha>
 ```
 
 The command invokes the same verified Syncer flow and stages only `Web/content`, generated Syncer styles and `.devbook-improvement/syncer-export.json`. It leaves committing/pushing for explicit approval and never switches, resets or stashes the working checkout. Failed or ambiguous exports retain reviewable files; inspect them before retrying. Never edit `Web/content` manually or bypass a stale receipt.

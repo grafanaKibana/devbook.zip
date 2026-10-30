@@ -413,7 +413,7 @@ public static class Validation
             JsonNode expected = Roadmap.Generate(root).Canvas;
             if (!JsonNode.DeepEquals(Roadmap.NormalizeForComparison(actual!), Roadmap.NormalizeForComparison(expected)))
             {
-                return [new("generated.roadmap", "Vault/Home/Roadmap.canvas", 1, "Roadmap.canvas is stale; run `dotnet run --no-cache --file GenerateRoadmap.cs`")];
+                return [new("generated.roadmap", "Vault/Home/Roadmap.canvas", 1, "Roadmap.canvas is stale; run `dotnet run --no-cache --file DevBook.Tooling/Scripts/GenerateRoadmap.cs`")];
             }
             return [];
         }

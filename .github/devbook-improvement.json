@@ -50,7 +50,7 @@
       "run",
       "--no-cache",
       "--file",
-      "ValidateVault.cs",
+      "DevBook.Tooling/Scripts/ValidateVault.cs",
       "--",
       "--all",
       "--repo-root",

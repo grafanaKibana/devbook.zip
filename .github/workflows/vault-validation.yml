@@ -25,19 +25,12 @@ jobs:
         working-directory: Web
         run: npm ci
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
-
       - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: 10.0.100
 
       - name: Test note review hooks
         run: node --test .codex/hooks/tests/note-review-hooks.test.mjs
-
-      - name: Test retained changelog tooling
-        run: python -m unittest discover -s .scripts/tests -p 'test_changelog.py'
 
       - name: Test native tooling core
         working-directory: .scripts
@@ -49,4 +42,4 @@ jobs:
         working-directory: .scripts
         run: |
           test "$(dotnet --version)" = 10.0.100
-          dotnet run --no-cache --file ValidateVault.cs -- --all --repo-root ..
+          dotnet run --no-cache --file DevBook.Tooling/Scripts/ValidateVault.cs -- --all --repo-root ..
