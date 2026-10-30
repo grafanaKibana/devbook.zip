@@ -59,7 +59,7 @@ Recurring improvement PRs additionally maintain one machine-marked cumulative se
 | [`major-approval.yml`](.github/workflows/major-approval.yml) | PR opened/edited, or `/approve-major` \| `/no-major` comment | Gates breaking (`!`) releases behind explicit approval |
 | [`release.yml`](.github/workflows/release.yml) | Push to `main` | Computes next version from commit prefixes + PR title, tags, publishes a GitHub Release with generated notes |
 | Dependabot ([`dependabot.yml`](.github/dependabot.yml)) | Weekly | Groups all npm updates into one `maintenance:` PR |
-| [`devbook-improvement.yml`](.github/workflows/devbook-improvement.yml) | Every six hours at minute 23, or manual | Runs a credential-free demo until separately activated; then proposes bounded topic note improvements in draft PRs, never merges them |
+| [`devbook-improvement.yml`](.github/workflows/devbook-improvement.yml) | Every six hours at minute 23, or manual | Native C# queue: credential-free demo/fixture until separately activated; then author/review → isolated genuine Syncer render → protected generated-output publication in one run; manual PR merge |
 
 ## 6. Releases
 

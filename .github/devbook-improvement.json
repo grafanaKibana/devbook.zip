@@ -46,17 +46,22 @@
   ],
   "validator_commands": [
     [
-      "python3",
-      ".scripts/validate-vault.py",
-      "--all"
+      "dotnet",
+      "run",
+      "--no-cache",
+      "--file",
+      "validate-vault.cs",
+      "--",
+      "--all",
+      "--repo-root",
+      ".."
     ],
     [
-      "python3",
-      "-m",
-      "unittest",
-      "discover",
-      "-s",
-      ".scripts/tests"
+      "dotnet",
+      "test",
+      "tests/DevBook.Tooling.Tests/DevBook.Tooling.Tests.csproj",
+      "--configuration",
+      "Release"
     ],
     [
       "node",

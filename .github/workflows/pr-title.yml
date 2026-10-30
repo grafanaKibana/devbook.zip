@@ -31,14 +31,18 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-dotnet@v5
         if: startsWith(github.head_ref, 'notes/automated-')
         with:
-          python-version: "3.13"
+          dotnet-version: 10.0.100
 
       - name: Verify managed-note Quartz export handoff
         if: startsWith(github.head_ref, 'notes/automated-')
         env:
           DEVBOOK_EXPORT_HEAD_REF: ${{ github.head_ref }}
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
-        run: python .scripts/devbook_improvement/sync_export.py verify --base-ref "$BASE_SHA"
+        working-directory: .scripts
+        run: |
+          set -euo pipefail
+          test "$(dotnet --version)" = 10.0.100
+          dotnet run --no-cache --file sync-export.cs -- verify --repo-root .. --base-ref "$BASE_SHA"

@@ -41,7 +41,7 @@ DevBook/
 ├── Vault/        # The Obsidian vault (open this in Obsidian)
 ├── Web/          # Quartz v5 site that publishes the vault       → Web/README.md
 ├── Platform/     # .NET RAG backend + evaluation                 → Platform/DevBook/README.md
-├── .scripts/     # Vault maintenance automation (Python)
+├── .scripts/     # Vault maintenance scripts (.NET 10 C#; Python release helper)
 ├── .githooks/    # Pre-commit hook that runs the automations
 └── AGENTS.md     # AI agent operating contract
 ```
@@ -60,7 +60,7 @@ git clone https://github.com/grafanaKibana/devbook.zip.git
 cd devbook.zip
 ```
 
-For automatic Quartz export when committing notes, first install Git, Bash, Python 3.9 or later, Node 22/npm and Obsidian desktop. Open `Vault/` in Obsidian, allow its bundled community plugins, and enable/register **Settings → General → Command line interface**. Then run:
+For automatic Quartz export when committing notes, first install Git, Bash, .NET SDK 10.0.100, Node 22/npm and Obsidian desktop. Open `Vault/` in Obsidian, allow its bundled community plugins, and enable/register **Settings → General → Command line interface**. Then run:
 
 ```bash
 bash .scripts/setup.sh
