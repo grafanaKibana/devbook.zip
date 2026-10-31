@@ -2,8 +2,8 @@
 publish: true
 title: Agent Evaluation
 created: 2026-06-12T18:21:46.000Z
-modified: 2026-10-28T12:33:42.000Z
-published: 2026-10-31T08:53:28.446Z
+modified: 2026-10-31T18:19:43.693Z
+published: 2026-10-31T18:21:12.000Z
 tags:
   - FolderNote
 topic:
@@ -77,6 +77,19 @@ Reliability: solved on 5/5 runs  (pass^5 = 1.0)
 | Efficiency / cost counters | Waste and looping | Very low: instrumentation only | Every task, paired with outcome checks |
 
 Gate releases on **verifiable task success plus efficiency limits**. Both are cheap and objective. Add trajectory judgment when many routes are valid and the outcome cannot separate a clean solve from a lucky one. Hand-built reference traces belong only on narrow, high-stakes tasks. Maintaining them across a broad suite becomes its own project.
+
+# Questions
+
+> [!qard]- An agent passes every final-state check on a single test run. Why is that not enough evidence that it is ready to ship?
+> A final-state check is the strongest single signal, because it checks the database row, test result or file instead of the agent's own claim. It still leaves two gaps.
+>
+> - **Process.** The check says nothing about how the agent got there. A run can succeed after wandering, repeating work, making unnecessary or risky tool calls, or recovering by luck from a bad branch. That costs tokens and latency, and the same path may fail on a slightly different input. Tool-call checks, trajectory review and step, cost and latency budgets cover this gap.
+> - **Reliability.** One run is one sample of a nondeterministic system. A task that passes 6 of 10 runs can look perfect in a demo. Running each task `k` times and reporting `pass^k`, the chance that all `k` trials succeed, exposes that inconsistency, which a mean pass rate hides. `pass^k` can only fall as `k` grows. In τ-bench's retail domain, an agent with roughly 61% average success fell below 25% at `pass^8`.
+>
+> A sound release gate therefore combines verifiable task success, efficiency limits and repeated-run reliability. Trajectory judgment is added where several routes are valid and the outcome cannot tell a clean solve from a lucky one.
+>
+> [τ-bench: A Benchmark for Tool-Agent-User Interaction in Real-World Domains](https://arxiv.org/html/2406.12045)
+> [Trajectory evaluations (LangSmith)](https://docs.langchain.com/langsmith/trajectory-evals)
 
 # References
 
