@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-02-10T16:03:55.000Z
-modified: 2026-10-28T12:33:42.000Z
-published: 2026-10-31T08:53:28.465Z
+modified: 2026-10-31T13:59:10.124Z
+published: 2026-10-31T14:04:23.000Z
 tags:
   - FolderNote
 topic:
@@ -59,13 +59,13 @@ An LLM checkpoint comes from one architecture, tokenizer, objective, and trainin
 | --- | --- | --- | --- |
 | Encoder-only | Bidirectional contextual encoding. BERT pretrains with masked-token prediction and sentence-level objectives | One contextual vector per input token or a pooled representation | Classification, extraction, reranking, embeddings |
 | Encoder-decoder | Encoder reads the source bidirectionally. Decoder generates target tokens autoregressively while attending to encoder output | Generated target sequence | Translation, summarization, text-to-text tasks |
-| Decoder-only | Causal attention exposes only earlier tokens during next-token prediction | Generated continuation | Chat, code, completion, tool-call generation |
+| Decoder-only | Causal self-attention: each input position attends to itself and earlier positions, never later ones. Training targets are shifted one position, so the output at position i predicts token i+1 | Generated continuation | Chat, code, completion, tool-call generation |
 
 **BERT** is encoder-only. It predicts masked tokens during pretraining and exposes contextual representations to a task head. It has no autoregressive decoder for open-ended generation.
 
 **T5** is a generative encoder-decoder. It pretrains with a span-corruption text-to-text objective: the encoder consumes corrupted input, and the decoder autoregressively generates missing target spans.
 
-**GPT-style models** are decoder-only. A causal mask makes each position predict from earlier positions, so the same stack can continue a prompt one token at a time.
+**GPT-style models** are decoder-only. A causal mask sets attention to later positions to negative infinity before the softmax, so each position attends only to itself and earlier positions. Because the target sequence is shifted one position, the output at position i is trained to predict token i+1 without seeing it. The same stack can therefore continue a prompt one token at a time ([Attention Is All You Need, v7, sections 3.1 and 3.2.3](https://arxiv.org/html/1706.03762v7)).
 
 ## Checkpoint is More than Weights
 
@@ -156,14 +156,14 @@ The DeepSeek-V3 report describes routed experts, shared experts, and an auxiliar
 >
 > | Aspect | Encoder-only (BERT) | Encoder-decoder (T5) | Decoder-only (GPT-style) |
 > |---|---|---|---|
-> | Attention | Bidirectional: every token can attend to the whole input | The encoder reads the source bidirectionally; the decoder attends causally to its own earlier tokens and to the encoder's output | Causal: each position attends only to earlier positions |
-> | Pretraining objective | Predict masked tokens from the context on both sides | The encoder reads input with spans removed, and the decoder generates the missing spans | Predict the next token |
+> | Attention | Bidirectional: every token can attend to the whole input | The encoder reads the source bidirectionally; the decoder attends causally to itself and its earlier tokens, and to the encoder's output | Causal: each input position attends to itself and earlier positions, never later ones |
+> | Pretraining objective | Predict masked tokens from the context on both sides | The encoder reads input with spans removed, and the decoder generates the missing spans | Predict the next token: targets are shifted one position, so the output at position i predicts token i+1 |
 > | Output | One contextual vector per token, or a pooled vector, passed to a task head | A generated target sequence | A generated continuation of the prompt |
 > | Typical use | Classification, extraction, reranking, embeddings | Translation, summarization and other text-to-text tasks | Chat, code, completion, tool-call generation |
 >
-> An encoder-only model has no autoregressive decoder, so it is not used for open-ended generation. The causal mask is what lets one decoder-only stack train on next-token prediction and then continue a prompt token by token. The typical uses describe common fits, not hard limits.
+> An encoder-only model has no autoregressive decoder, so it is not used for open-ended generation. The causal mask blocks attention to later input positions, while the one-position shift of the targets makes the output at each position a prediction of the next token. Together they let one decoder-only stack train on next-token prediction and then continue a prompt token by token. The typical uses describe common fits, not hard limits.
 >
-> Sources: [Attention Is All You Need](https://arxiv.org/abs/1706.03762) · [BERT](https://arxiv.org/abs/1810.04805) · [T5: Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer](https://arxiv.org/abs/1910.10683) · [Language Models are Few-Shot Learners](https://arxiv.org/abs/2005.14165)
+> Sources: [Attention Is All You Need (v7, sections 3.1 and 3.2.3)](https://arxiv.org/html/1706.03762v7) · [BERT](https://arxiv.org/abs/1810.04805) · [T5: Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer](https://arxiv.org/abs/1910.10683) · [Language Models are Few-Shot Learners](https://arxiv.org/abs/2005.14165)
 
 <!-- qard-id: 25714b3e-c167-44ee-b9ad-aa5e3144b4dd -->
 
