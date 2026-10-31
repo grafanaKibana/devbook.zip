@@ -115,9 +115,9 @@ public sealed partial class ImprovementEngine
     private async Task<string> FetchSourceAsync(string url, CancellationToken cancellationToken)
     {
         int maximumBytes = config.Int("max_source_bytes", 250_000);
-        if (maximumBytes is < 1 or > 1_000_000)
+        if (maximumBytes is < 1 or > 2_000_000)
         {
-            throw new RuntimeFailure("max_source_bytes must be between 1 and 1000000.");
+            throw new RuntimeFailure("max_source_bytes must be between 1 and 2000000.");
         }
         byte[] data = await Runtime.FetchPrimarySourceAsync(url, maximumBytes, cancellationToken);
         if (data.AsSpan().StartsWith("%PDF"u8))
