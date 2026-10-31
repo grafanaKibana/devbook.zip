@@ -256,7 +256,7 @@ public sealed class IsolatedRepository : IDisposable
 {
     private readonly string directory;
 
-    public IsolatedRepository(string source, string baseRef = "main")
+    public IsolatedRepository(string source, string snapshotSha)
     {
         directory = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "devbook-improvement-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(directory);
@@ -264,7 +264,7 @@ public sealed class IsolatedRepository : IDisposable
         try
         {
             Git.Run(source, "clone", "--no-hardlinks", "--quiet", System.IO.Path.GetFullPath(source), Path);
-            Git.Run(Path, "checkout", "--quiet", baseRef);
+            Git.Run(Path, "checkout", "--quiet", "--detach", snapshotSha);
             if (Git.Run(Path, "status", "--porcelain").Length != 0)
             {
                 throw new RuntimeFailure("Isolated repository is unexpectedly dirty.");

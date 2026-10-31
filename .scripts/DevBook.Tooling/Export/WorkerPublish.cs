@@ -53,6 +53,26 @@ public static partial class Worker
         _ = BoundOperation(state, request);
     }
 
+    private static async Task EnsureDraftForExportAsync(IGitHubApi api, IStateStore store, JsonObject request,
+        string owner, JsonObject pr, CancellationToken cancellationToken)
+    {
+        if (pr["draft"]?.GetValue<bool>() == false)
+        {
+            string reviewedHead = Bundle.ExactHead(pr.Obj("head").Str("sha"));
+            await RecordAsync(store, request, owner, "preserve owner review freeze before generated update", (state, _) =>
+            {
+                JsonObject row = state.RequiredObject("prs").RequiredObject($"{request.Str("topic_id")}:{request.Int("generation")}");
+                row["frozen"] = true;
+                if (row.Str("review_started_head_sha").Length == 0)
+                {
+                    row["review_started_head_sha"] = reviewedHead;
+                }
+            }, cancellationToken);
+            await AssertBoundLeaseAsync(store, request, owner, cancellationToken);
+            await Runtime.EnsureDraftForMutationAsync(api, pr, cancellationToken);
+        }
+    }
+
     public static async Task<JsonObject> PublishBundleAsync(IGitHubApi api, JsonObject config, JsonObject bundle,
         JsonObject request, IStateStore store, string? owner = null, CancellationToken cancellationToken = default, ExportCheckWait? checkWait = null)
     {
@@ -195,7 +215,7 @@ public static partial class Worker
             return await StaleAsync(store, request, owner, "Source head changed during generated commit creation.", cancellationToken);
         }
         await AssertBoundLeaseAsync(store, request, owner, cancellationToken);
-        await Runtime.EnsureDraftForMutationAsync(api, current, cancellationToken);
+        await EnsureDraftForExportAsync(api, store, request, owner, current, cancellationToken);
         if (await CurrentPrAsync(api, config, number, branch, expected, cancellationToken) is null)
         {
             return await StaleAsync(store, request, owner, "Managed head changed while renewing draft review.", cancellationToken);
@@ -319,7 +339,7 @@ public static partial class Worker
                 throw new Conflict("Journaled export recovery differs from the reviewed source, policy or generated-only tree.");
             }
             await AssertBoundLeaseAsync(store, request, owner, cancellationToken);
-            await Runtime.EnsureDraftForMutationAsync(api, sourcePr, cancellationToken);
+            await EnsureDraftForExportAsync(api, store, request, owner, sourcePr, cancellationToken);
             await RecordAsync(store, request, owner, "resume journaled generated ref update", (_, op) =>
             {
                 JsonObject evidence = op.Obj("evidence");

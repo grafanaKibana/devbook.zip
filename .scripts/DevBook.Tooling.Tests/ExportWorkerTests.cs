@@ -86,6 +86,62 @@ public sealed class ExportWorkerTests
         fixture.Api.Comments.Count.Should().Be(1);
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task OwnerReadyExportPersistsReviewFreezeBeforeDraftConversionIncludingRecovery(bool recoverGeneratedRef)
+    {
+        // Arrange: maintenance last observed a draft without owner feedback.
+        var fixture = new WorkerFixture();
+        fixture.Api.Pr["draft"] = true;
+        fixture.State.Obj("prs").Obj(fixture.Key)["draft"] = true;
+        var store = new MemoryStateStore(fixture.State);
+        if (recoverGeneratedRef)
+        {
+            fixture.Api.FailBeforeRefOnce = true;
+
+            // Act: a generated commit is saved before its ref update is interrupted.
+            Func<Task> interrupted = () => Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store);
+
+            // Assert
+            await interrupted.Should().ThrowAsync<RuntimeFailure>();
+            fixture.Api.DraftConversions.Should().Be(0);
+        }
+
+        // Arrange: the owner marks the PR ready while its export is outstanding.
+        fixture.Api.Pr["draft"] = false;
+        fixture.Api.BeforeDraftConversion = async () =>
+        {
+            JsonObject beforeConversion = (await store.ReadAsync()).State.Obj("prs").Obj(fixture.Key);
+            beforeConversion.Bool("frozen").Should().BeTrue();
+            beforeConversion.Str("review_started_head_sha").Should().Be(FakeExportApi.SourceHead);
+        };
+
+        // Act
+        JsonObject result = recoverGeneratedRef
+            ? await Worker.FinalizeAsync(fixture.Api, fixture.Config, store, fixture.Request)
+            : await Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store);
+        StateSnapshot saved = await store.ReadAsync();
+        JsonObject reconciled = Core.SyncPrs(saved.State, new JsonArray(new JsonObject
+        {
+            ["topic_id"] = fixture.Request.Str("topic_id"),
+            ["generation"] = 1,
+            ["number"] = 1,
+            ["status"] = "open",
+            ["draft"] = true,
+            ["head_sha"] = FakeExportApi.GeneratedHead
+        }));
+        JsonObject? nextBatch = DevBook.Tooling.Improvement.Queue.SelectBatch(reconciled,
+            new JsonArray(DomainFixtures.NoteRecord("Vault/Home/Programming/NET/Next.md")), "rules", fixture.Config);
+
+        // Assert
+        result.Str("status").Should().Be("awaiting_checks");
+        fixture.Api.DraftConversions.Should().Be(1);
+        fixture.Api.Pr.Bool("draft").Should().BeTrue();
+        saved.State.Obj("prs").Obj(fixture.Key).Str("review_started_head_sha").Should().Be(FakeExportApi.SourceHead);
+        nextBatch.Should().BeNull();
+    }
+
     [Fact]
     public async Task UnsafeArtifactsStaleHeadsAndLeaseConflictsStopWritesAndFixtureContainsNativeDependencies()
     {
@@ -363,6 +419,7 @@ public sealed class ExportWorkerTests
         public int CommitWrites { get; private set; }
         public int Dispatches { get; private set; }
         public int DraftConversions { get; private set; }
+        public Func<Task>? BeforeDraftConversion { get; set; }
         public JsonObject Pr { get; }
         public List<JsonObject> Comments { get; } = [];
         public Dictionary<string, byte[]> Blobs { get; } = new(StringComparer.Ordinal);
@@ -528,11 +585,15 @@ public sealed class ExportWorkerTests
             return Task.FromResult(response?.DeepClone());
         }
 
-        public Task<JsonNode?> GraphqlAsync(string query, JsonObject variables, CancellationToken cancellationToken = default)
+        public async Task<JsonNode?> GraphqlAsync(string query, JsonObject variables, CancellationToken cancellationToken = default)
         {
+            if (BeforeDraftConversion is not null)
+            {
+                await BeforeDraftConversion();
+            }
             DraftConversions++;
             Pr["draft"] = true;
-            return Task.FromResult<JsonNode?>(new JsonObject());
+            return new JsonObject();
         }
     }
 }

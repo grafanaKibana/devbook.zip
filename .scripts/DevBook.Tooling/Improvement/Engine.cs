@@ -18,6 +18,7 @@ public sealed partial class ImprovementEngine
     private readonly Func<Dictionary<string, string>, Dictionary<string, string>, CancellationToken, Task<JsonArray>> validator;
     private readonly Func<string, CancellationToken, Task<string>> sourceFetcher;
     private readonly Func<string> snapshotShaLoader;
+    private string? validationSnapshotSha;
     private readonly TimeProvider clock;
     private readonly long started;
     private StateSnapshot? expectedSnapshot;
@@ -124,7 +125,7 @@ public sealed partial class ImprovementEngine
 
     private async Task<JsonArray> ValidateAsync(Dictionary<string, string> expected, Dictionary<string, string> candidate, CancellationToken cancellationToken)
     {
-        using var isolated = new IsolatedRepository(root, config.Str("base_branch", "main"));
+        using var isolated = new IsolatedRepository(root, validationSnapshotSha ?? snapshotShaLoader());
         Dictionary<string, string> baseline = expected.Keys.ToDictionary(path => path, path => File.ReadAllText(Runtime.ValidateNotePath(isolated.Path, path)));
         Runtime.ApplyGuardedSources(isolated.Path, baseline, expected);
         Runtime.ApplyGuardedSources(isolated.Path, expected, candidate);
@@ -196,12 +197,15 @@ public sealed partial class ImprovementEngine
             throw new Conflict("Checkout snapshot and remote base differ; retry from current base before model work.");
         }
 
+        validationSnapshotSha = snapshot;
+
         Dictionary<string, string> baseline = notes.OfType<JsonObject>().ToDictionary(note => note.Str("path"), note => note.Str("content"));
         (state, Dictionary<int, JsonObject> prs, JsonArray feedback) = await RemoteViewAsync(state, notes, baseSha, apply, cancellationToken);
         string rules = Core.RulesVersion(root);
         HashSet<string> paused = state.Obj("prs").Select(item => item.Value).OfType<JsonObject>().Where(pr => pr.Str("status") == "open" && pr.Bool("base_conflict")).Select(pr => pr.Str("topic_id")).ToHashSet();
+        HashSet<string> heldPaths = notes.OfType<JsonObject>().Where(note => Held(state, note, rules)).Select(note => note.Str("path")).ToHashSet();
         JsonArray allNotes = notes.Copy();
-        notes = Copies(notes.OfType<JsonObject>().Where(note => !paused.Contains(Core.TopicId(note.Str("topic"))) && !Held(state, note, rules)));
+        notes = Copies(notes.OfType<JsonObject>().Where(note => !paused.Contains(Core.TopicId(note.Str("topic"))) && !heldPaths.Contains(note.Str("path"))));
         JsonObject selectionState = state.Copy();
         if (config.Bool("automatic_export"))
         {
@@ -216,7 +220,7 @@ public sealed partial class ImprovementEngine
 
         foreach (JsonObject item in selectionState.Obj("feedback").Select(item => item.Value).OfType<JsonObject>())
         {
-            if (paused.Contains(Core.TopicId(item.Str("topic"))) && item.Str("status") == "pending")
+            if (item.Str("status") == "pending" && (paused.Contains(Core.TopicId(item.Str("topic"))) || item.Arr("paths").Strings().Any(heldPaths.Contains)))
             {
                 item["status"] = "paused";
             }
@@ -314,10 +318,27 @@ public sealed partial class ImprovementEngine
             state["pending_author_proposal"] = pending;
             await SaveAsync(state, "save source-matched author proposal", cancellationToken);
         }
-        Proposal.Validate(proposal);
-        (JsonArray effectiveRejections, JsonArray decisions) = Proposal.BindDecisions(proposal, history, state.Arr("rejections"), batch.Arr("feedback"));
-        JsonObject result = Proposal.Apply(selected, proposal, effectiveRejections, feedbackKeys, prState.Bool("frozen") ? feedbackKeys : []);
-        Proposal.RestoreRejected(proposal, result, decisions, selected);
+        JsonArray decisions;
+        JsonObject result;
+        try
+        {
+            Proposal.Validate(proposal);
+            (JsonArray effectiveRejections, JsonArray boundDecisions) = Proposal.BindDecisions(proposal, history, state.Arr("rejections"), batch.Arr("feedback"));
+            decisions = boundDecisions;
+            result = Proposal.Apply(selected, proposal, effectiveRejections, feedbackKeys, prState.Bool("frozen") ? feedbackKeys : []);
+            Proposal.RestoreRejected(proposal, result, decisions, selected);
+        }
+        catch (ProposalException error)
+        {
+            JsonObject failed = CreateHold(state, pending);
+            failed["blocked_review"] = new JsonObject { ["stage"] = "deterministic_application", ["reason"] = error.Message };
+            failed["failed_at"] = Core.FormatTime(clock.GetUtcNow());
+            EnsureObject(state, "invalid_proposals")[LegacyIdentity.Digest(pending.ToJsonString())] = failed.Copy();
+            EnsureObject(state, "held_proposals")[batch.Str("topic_id")] = failed;
+            state.Remove("pending_author_proposal");
+            await SaveAsync(state, "quarantine invalid author proposal", cancellationToken);
+            return new JsonObject { ["status"] = "proposal_blocked", ["reason"] = error.Message, ["model_calls"] = modelCalls };
+        }
         if (proposal.Arr("edits").Count == 0 && decisions.Count == 0)
         {
             state = Core.RecordOutcome(state, batch, proposal, result);
@@ -392,7 +413,7 @@ public sealed partial class ImprovementEngine
         if (!Review.Clean(review, candidate, proposal, state.Arr("rejections"), batch.Arr("feedback")))
         {
             pending["blocked_review"] = review.Copy();
-            EnsureObject(state, "held_proposals")[batch.Str("topic_id")] = pending.Copy();
+            EnsureObject(state, "held_proposals")[batch.Str("topic_id")] = CreateHold(state, pending);
             state.Remove("pending_author_proposal");
             await SaveAsync(state, "preserve blocked semantic review", cancellationToken);
             return new JsonObject { ["status"] = "review_blocked", ["proposal"] = proposal, ["review"] = review, ["model_calls"] = modelCalls };
@@ -525,11 +546,26 @@ public sealed partial class ImprovementEngine
         return response;
     }
 
+    private static JsonObject CreateHold(JsonObject state, JsonObject pending)
+    {
+        JsonObject hold = pending.Copy();
+        hold["feedback_snapshot"] = Copies(state.Obj("feedback").Select(item => item.Value).OfType<JsonObject>()
+            .Where(item => item.Str("status") == "pending" && item.Str("topic") == pending.Obj("batch").Str("topic"))
+            .Select(item => new JsonObject { ["key"] = item.Str("key"), ["paths"] = item.Arr("paths").Copy() }));
+        return hold;
+    }
+
     private static bool Held(JsonObject state, JsonObject note, string rules)
     {
-        string[] keys = state.Obj("feedback").Select(item => item.Value).OfType<JsonObject>().Where(item => item.Str("status") == "pending" && item.Str("topic") == note.Str("topic")).Select(item => item.Str("key")).Order(StringComparer.Ordinal).ToArray();
-        return state.Obj("held_proposals").Select(item => item.Value).OfType<JsonObject>().Any(hold => hold.Obj("source_hashes").Str(note.Str("path")) == note.Str("hash")
-            && hold.Str("rules_hash") == rules && hold.Arr("feedback_keys").Strings().SequenceEqual(keys));
+        string path = note.Str("path");
+        string[] keys = state.Obj("feedback").Select(item => item.Value).OfType<JsonObject>()
+            .Where(item => item.Str("status") == "pending" && item.Str("topic") == note.Str("topic") && item.Arr("paths").Strings().Contains(path))
+            .Select(item => item.Str("key")).Order(StringComparer.Ordinal).ToArray();
+        return state.Obj("held_proposals").Concat(state.Obj("invalid_proposals")).Select(item => item.Value).OfType<JsonObject>()
+            .Any(hold => hold.Obj("source_hashes").Str(path) == note.Str("hash") && hold.Str("rules_hash") == rules
+                && (hold["feedback_snapshot"] as JsonArray ?? hold.Obj("batch").Arr("feedback")).OfType<JsonObject>()
+                    .Where(item => item.Arr("paths").Strings().Contains(path)).Select(item => item.Str("key"))
+                    .Order(StringComparer.Ordinal).SequenceEqual(keys));
     }
 
     private async Task PrepareDatesAsync(JsonObject result, Dictionary<string, string> selected, string parentRef, DateTimeOffset instant, CancellationToken cancellationToken)
