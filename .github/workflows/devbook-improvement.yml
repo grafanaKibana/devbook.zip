@@ -1,8 +1,6 @@
 name: DevBook Improvement
 
 on:
-  schedule:
-    - cron: "23 */6 * * *"
   pull_request:
     paths:
       - .github/workflows/devbook-improvement.yml
@@ -88,7 +86,11 @@ jobs:
 
   maintenance:
     if: >-
-      github.ref == 'refs/heads/main' &&
+      github.event_name == 'workflow_dispatch' && github.repository == 'grafanaKibana/devbook.zip' &&
+      github.actor_id == '45916288' && github.actor == 'grafanaKibana' &&
+      github.ref == 'refs/heads/feature/devbook-improvement-opus-test-20261031' &&
+      vars.DEVBOOK_IMPROVEMENT_DEBUG_SHA != '' && github.sha == vars.DEVBOOK_IMPROVEMENT_DEBUG_SHA &&
+      vars.DEVBOOK_IMPROVEMENT_ACTIVATED != 'true' && vars.DEVBOOK_IMPROVEMENT_SCHEDULE_ENABLED != 'true' &&
       ((github.event_name == 'schedule' && vars.DEVBOOK_IMPROVEMENT_ACTIVATED == 'true' && vars.DEVBOOK_IMPROVEMENT_SCHEDULE_ENABLED == 'true') ||
       (github.event_name == 'workflow_dispatch' && (inputs.mode == 'apply' || (inputs.mode == 'dry-run' && inputs.with_model))))
     runs-on: ubuntu-latest
@@ -102,13 +104,23 @@ jobs:
         env:
           REQUESTED_MODE: ${{ github.event_name == 'schedule' && 'apply' || inputs.mode }}
           EVENT_NAME: ${{ github.event_name }}
-          ACTIVATED: ${{ vars.DEVBOOK_IMPROVEMENT_ACTIVATED }}
-          SUBSCRIPTION_ONLY: ${{ vars.DEVBOOK_IMPROVEMENT_SUBSCRIPTION_ONLY_CONFIRMED }}
+          AUTHORIZED_SHA: ${{ vars.DEVBOOK_IMPROVEMENT_DEBUG_SHA }}
+          PRODUCTION_ACTIVATED: ${{ vars.DEVBOOK_IMPROVEMENT_ACTIVATED }}
+          SCHEDULE_ENABLED: ${{ vars.DEVBOOK_IMPROVEMENT_SCHEDULE_ENABLED }}
+          ACTIVATED: 'true'
+          SUBSCRIPTION_ONLY: 'true'
           USAGE_CREDITS_DISABLED: ${{ vars.DEVBOOK_IMPROVEMENT_USAGE_CREDITS_DISABLED_CONFIRMED }}
           PR_WORKFLOWS_CONFIRMED: ${{ vars.DEVBOOK_IMPROVEMENT_PR_WORKFLOWS_CONFIRMED }}
         run: |
           set -euo pipefail
-          test "$GITHUB_REF" = refs/heads/main
+          test "$GITHUB_EVENT_NAME" = workflow_dispatch
+          test "$GITHUB_REPOSITORY" = grafanaKibana/devbook.zip
+          test "$GITHUB_REF" = refs/heads/feature/devbook-improvement-opus-test-20261031
+          test "$GITHUB_SHA" = "$AUTHORIZED_SHA"
+          test "$GITHUB_ACTOR_ID" = 45916288
+          test "$GITHUB_ACTOR" = grafanaKibana
+          test "$PRODUCTION_ACTIVATED" = false
+          test "$SCHEDULE_ENABLED" = false
           test "$ACTIVATED" = true
           test "$SUBSCRIPTION_ONLY" = true
           test "$USAGE_CREDITS_DISABLED" = true
@@ -146,8 +158,8 @@ jobs:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           DEVBOOK_GITHUB_TOKEN: ${{ secrets.DEVBOOK_GITHUB_TOKEN }}
           DEVBOOK_IMPROVEMENT_MODE: ${{ github.event_name == 'schedule' && 'apply' || inputs.mode }}
-          DEVBOOK_IMPROVEMENT_ACTIVATED: ${{ vars.DEVBOOK_IMPROVEMENT_ACTIVATED }}
-          DEVBOOK_IMPROVEMENT_SUBSCRIPTION_ONLY_CONFIRMED: ${{ vars.DEVBOOK_IMPROVEMENT_SUBSCRIPTION_ONLY_CONFIRMED }}
+          DEVBOOK_IMPROVEMENT_ACTIVATED: 'true'
+          DEVBOOK_IMPROVEMENT_SUBSCRIPTION_ONLY_CONFIRMED: 'true'
           DEVBOOK_IMPROVEMENT_USAGE_CREDITS_DISABLED_CONFIRMED: ${{ vars.DEVBOOK_IMPROVEMENT_USAGE_CREDITS_DISABLED_CONFIRMED }}
           DEVBOOK_IMPROVEMENT_PR_WORKFLOWS_CONFIRMED: ${{ vars.DEVBOOK_IMPROVEMENT_PR_WORKFLOWS_CONFIRMED }}
           MODEL: ${{ github.event_name == 'schedule' && (vars.DEVBOOK_IMPROVEMENT_MODEL || 'claude-opus-5-5') || inputs.model }}
@@ -245,7 +257,11 @@ jobs:
     needs: [maintenance, render]
     if: >-
       always() && !cancelled() &&
-      github.ref == 'refs/heads/main' &&
+      github.event_name == 'workflow_dispatch' && github.repository == 'grafanaKibana/devbook.zip' &&
+      github.actor_id == '45916288' && github.actor == 'grafanaKibana' &&
+      github.ref == 'refs/heads/feature/devbook-improvement-opus-test-20261031' &&
+      vars.DEVBOOK_IMPROVEMENT_DEBUG_SHA != '' && github.sha == vars.DEVBOOK_IMPROVEMENT_DEBUG_SHA &&
+      vars.DEVBOOK_IMPROVEMENT_ACTIVATED != 'true' && vars.DEVBOOK_IMPROVEMENT_SCHEDULE_ENABLED != 'true' &&
       (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') &&
       needs.maintenance.result == 'success' && needs.maintenance.outputs.export_ready == 'true' &&
       (needs.maintenance.outputs.export_mode == 'finalize' || (needs.render.result == 'success' && needs.render.outputs.ready == 'true'))
@@ -255,10 +271,20 @@ jobs:
     steps:
       - name: Verify trusted workflow and activation
         env:
-          ACTIVATED: ${{ vars.DEVBOOK_IMPROVEMENT_ACTIVATED }}
+          ACTIVATED: 'true'
+          AUTHORIZED_SHA: ${{ vars.DEVBOOK_IMPROVEMENT_DEBUG_SHA }}
+          PRODUCTION_ACTIVATED: ${{ vars.DEVBOOK_IMPROVEMENT_ACTIVATED }}
+          SCHEDULE_ENABLED: ${{ vars.DEVBOOK_IMPROVEMENT_SCHEDULE_ENABLED }}
         run: |
           set -euo pipefail
-          test "$GITHUB_REF" = refs/heads/main
+          test "$GITHUB_EVENT_NAME" = workflow_dispatch
+          test "$GITHUB_REPOSITORY" = grafanaKibana/devbook.zip
+          test "$GITHUB_REF" = refs/heads/feature/devbook-improvement-opus-test-20261031
+          test "$GITHUB_SHA" = "$AUTHORIZED_SHA"
+          test "$GITHUB_ACTOR_ID" = 45916288
+          test "$GITHUB_ACTOR" = grafanaKibana
+          test "$PRODUCTION_ACTIVATED" = false
+          test "$SCHEDULE_ENABLED" = false
           test "$ACTIVATED" = true
       - uses: actions/checkout@v4
         with:
@@ -282,8 +308,8 @@ jobs:
           EXPORT_MODE: ${{ needs.maintenance.outputs.export_mode }}
           DEVBOOK_GITHUB_TOKEN: ${{ secrets.DEVBOOK_GITHUB_TOKEN }}
           DEVBOOK_IMPROVEMENT_MODE: apply
-          DEVBOOK_IMPROVEMENT_ACTIVATED: ${{ vars.DEVBOOK_IMPROVEMENT_ACTIVATED }}
-          DEVBOOK_IMPROVEMENT_SUBSCRIPTION_ONLY_CONFIRMED: ${{ vars.DEVBOOK_IMPROVEMENT_SUBSCRIPTION_ONLY_CONFIRMED }}
+          DEVBOOK_IMPROVEMENT_ACTIVATED: 'true'
+          DEVBOOK_IMPROVEMENT_SUBSCRIPTION_ONLY_CONFIRMED: 'true'
           DEVBOOK_IMPROVEMENT_USAGE_CREDITS_DISABLED_CONFIRMED: ${{ vars.DEVBOOK_IMPROVEMENT_USAGE_CREDITS_DISABLED_CONFIRMED }}
           DEVBOOK_IMPROVEMENT_PR_WORKFLOWS_CONFIRMED: ${{ vars.DEVBOOK_IMPROVEMENT_PR_WORKFLOWS_CONFIRMED }}
         run: |
