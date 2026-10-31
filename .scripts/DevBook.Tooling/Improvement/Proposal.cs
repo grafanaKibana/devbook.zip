@@ -50,6 +50,10 @@ public static class Proposal
 
     private static string[] Metadata(string block) => Markdown.Lines(block).Where(line => MetadataPattern.IsMatch(line)).ToArray();
 
+    private static bool CardEndMatches(string source, int cardEnd, int anchorEnd) =>
+        cardEnd == anchorEnd || cardEnd > anchorEnd && cardEnd - anchorEnd <= 2
+        && source[anchorEnd..cardEnd] is "\n" or "\r\n" or "\r";
+
     private static string Frontmatter(string text)
     {
         string[] lines = Markdown.Lines(text, true);
@@ -281,7 +285,7 @@ public static class Proposal
         string target = edit.Str("learning_target");
         string before = edit.Str("before");
         string after = edit.Str("after");
-        bool matchesCard = QardSpans(source).Any(span => span.Text == before);
+        bool matchesCard = QardSpans(source).Any(span => span.Start == start && CardEndMatches(source, span.End, end));
         if (kind != "add" && !matchesCard)
         {
             throw new ProposalException("card edit must replace one complete active Qard block including adjacent metadata");
@@ -531,7 +535,7 @@ public static class Proposal
             if (edit.Str("kind") != "note" && edit.Str("after").Length != 0)
             {
                 var spans = QardSpans(source).Where(span => span.Start < end && span.End > start).ToArray();
-                if (spans.Length == 0 || spans.Any(span => span.Start < start || span.End > end))
+                if (spans.Length == 0 || spans.Any(span => span.Start < start || span.End > end && !CardEndMatches(source, span.End, end)))
                 {
                     throw new ProposalException("rejection must restore complete current Qard blocks and adjacent metadata");
                 }
