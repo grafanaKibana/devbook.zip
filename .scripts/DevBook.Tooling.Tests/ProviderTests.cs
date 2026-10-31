@@ -161,6 +161,31 @@ public sealed class ProviderTests
         }
     }
     [Fact]
+    public void HtmlEvidenceRetainsMechanismAndMathWithoutPageScaffolding()
+    {
+        // Arrange
+        const string html = """
+            <!DOCTYPE html>
+            <html><head><title>hidden-head</title><script>hidden-head-script</script></head>
+            <body><style>.hidden-style { display: none; }</style><script>hidden-script</script>
+            <!-- hidden-comment -->
+            <article class="paper"><p>All k trials must succeed.</p>
+            <math><semantics><mrow><mi>p</mi><mi>k</mi></mrow>
+            <annotation encoding="application/x-tex">\operatorname{pass}^{k} = E[C(c,k)/C(n,k)]</annotation>
+            </semantics></math><p><code>x &lt; 5</code></p></article></body></html>
+            """;
+
+        // Act
+        string evidence = Runtime.SourceEvidenceText(Encoding.UTF8.GetBytes(html));
+
+        // Assert
+        evidence.Should().Contain("All k trials must succeed.").And.Contain(@"\operatorname{pass}^{k}")
+            .And.Contain("E[C(c,k)/C(n,k)]").And.Contain("x < 5");
+        evidence.Should().NotContain("hidden-head").And.NotContain("hidden-script").And.NotContain("hidden-style")
+            .And.NotContain("hidden-comment").And.NotContain("<article").And.NotContain("<math").And.NotContain("encoding=");
+    }
+
+    [Fact]
     public async Task PublicHttpsSourceNeedsNoDomainAllowlist()
     {
         // Arrange

@@ -125,7 +125,7 @@ public sealed partial class ImprovementEngine
             throw new UnsafeInput("PDF evidence needs a readable primary HTML/text source.");
         }
 
-        return Encoding.UTF8.GetString(data);
+        return Runtime.SourceEvidenceText(data);
     }
 
     private async Task<JsonArray> ValidateAsync(Dictionary<string, string> expected, Dictionary<string, string> candidate, CancellationToken cancellationToken)

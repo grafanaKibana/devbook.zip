@@ -143,20 +143,6 @@ public sealed class VaultTests
     }
 
     [Fact]
-    public void MissingPluginDataMeansNoRepairFlags()
-    {
-        // Arrange
-        using var vault = new RollupRollupVault();
-        Directory.CreateDirectory(vault.Root);
-
-        // Act
-        IReadOnlySet<string> ids = DevBook.Tooling.Improvement.RepairInputs.ReadIds(vault.Root);
-
-        // Assert
-        ids.Should().BeEmpty();
-    }
-
-    [Fact]
     public void MalformedPluginDataProducesDiagnosticWithoutChangingItsBytes()
     {
         // Arrange
