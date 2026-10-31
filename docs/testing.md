@@ -11,6 +11,7 @@ Run these from the repository root:
 ```sh
 python3 -m unittest discover -s .scripts/tests -p 'test_*.py'
 node --test .codex/hooks/tests/note-review-hooks.test.mjs
+node --test .scripts/tests/qard-learn-sync*.test.cjs
 python3 .scripts/validate-vault.py --all
 ```
 

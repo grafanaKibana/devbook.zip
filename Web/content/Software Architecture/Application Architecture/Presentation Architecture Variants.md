@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T07:07:47.000Z
-modified: 2026-10-28T12:33:42.000Z
-published: 2026-10-28T20:52:55.178Z
+modified: 2026-10-31T09:00:37.443Z
+published: 2026-10-31T09:00:46.357Z
 topic:
   - Software Architecture
 subtopic:
@@ -174,7 +174,7 @@ A view-model becomes a second controller when it owns data access or domain rule
 > | Handling input | The controller receives the request, calls application behavior and chooses the response. The path from input to output is explicit in the action code. | The view forwards user actions to view-model commands through bindings. The same view stays on screen and reflects the new state; navigation is handled separately. |
 > | Updating the view | The controller passes data to the selected view, which renders it for that response. | Bound controls refresh when the view-model raises a change notification, such as `PropertyChanged` from `INotifyPropertyChanged`. A missed notification leaves the screen showing stale data. |
 > | Testing | Controller logic can be unit-tested without rendering a view. | View-model state and commands can be unit-tested without creating any UI controls. |
-> | Typical fit | Request/response web applications, such as ASP.NET Core MVC. | Long-lived client screens on platforms with data binding, such as .NET MAUI. |
+> | Typical fit | Server-rendered request/response interfaces where a controller selects the view for each response. | Long-lived client screens on platforms with data binding, such as .NET MAUI. |
 >
 > The cost of MVVM is its binding infrastructure: observable properties, commands and change notifications must be implemented and kept correct.
 >
@@ -183,6 +183,6 @@ A view-model becomes a second controller when it owns data access or domain rule
 # References
 
 - [MVVM in .NET MAUI](https://learn.microsoft.com/en-us/dotnet/maui/xaml/fundamentals/mvvm)
-- [Model-View-Presenter](https://martinfowler.com/eaaDev/ModelViewPresenter.html)
+- [Passive View](https://martinfowler.com/eaaDev/PassiveScreen.html)
 - [The Elm Architecture](https://guide.elm-lang.org/architecture/)
 - [Redux fundamentals](https://redux.js.org/tutorials/fundamentals/part-2-concepts-data-flow)

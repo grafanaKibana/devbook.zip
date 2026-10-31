@@ -1,0 +1,48 @@
+---
+topic: [Networks]
+subtopic: []
+level: ["4"]
+priority: High
+status: Creation
+publish: false
+tags: [qard-internal, MetricsIgnore]
+qard-mastery: "Networks"
+---
+
+Trace bytes from an application through transport and naming, then choose application protocols and intermediaries by their failure, trust and latency contracts. Start with Layers and diagnosis; the later units reuse that model for APIs, edges and specialized communication.
+
+This is course 4 of the suggested vault route. Learn courses order capabilities; the existing first-pass plans track card exposure, and Today retains the material actually studied. Course switching is manual.
+
+All mapped topics are included in the learning flow, including source notes marked Creation or Not-Started. Previously planned objectives are new and follow the same prerequisite route as other unassessed objectives. Source-note lifecycle statuses remain unchanged; assessment evidence still comes from actual study.
+
+Start lessons and checks from this course's objectives. The record lives outside Home, so folder-based automatic association and Update objectives do not map the source tree. Maintain its explicit objective/source links directly. Prerequisites guide the frontier; Qard still permits manually teaching another objective.
+
+Setup assigns no due dates or evidence. Teaching and assessment write subsequent evidence; source-note lifecycle statuses remain owner-managed. Draft source status does not place an objective on hold.
+
+# Learning Objectives
+
+| Objective | Label | ID | Group | State | Due | Needs | Notes | Evidence | Source revision | Source updated |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Locate a communication failure by separating OSI reference-layer vocabulary from the implemented TCP/IP stack | Layers and diagnosis | layer-boundaries | 01 Transport and the host | new |  |  | [[Home/Networks/OSI Model]] |  | v1:4cb11d7457831e59cde9bd3b06b3e361ae45052dcdd6d7d7493ede263e2062e2/4 | |
+| Trace addressing, connection establishment, ordered delivery and flow control without treating a TCP write as a remote application acknowledgement | TCP and IP | tcp-contract | 01 Transport and the host | new |  | layer-boundaries | [[Home/Networks/Transport & Sockets/TCP IP]] |  | v1:7e6b5dd168a97c7495fac040608e842acbc0765c7ef594e4a83cccf7b9c49b3e/0 | |
+| Choose UDP when independent datagrams fit the workload and identify which loss, ordering and congestion behavior the application must supply | Datagram contract | udp-contract | 01 Transport and the host | new |  | tcp-contract | [[Home/Networks/Transport & Sockets/UDP]] |  | v1:d70d48d94e775b9a8f473c3ac0b8b7790755ba1de437e77422d6e1ce5b956af6/0 | |
+| Use a port and listener as endpoint evidence without assuming that a familiar port proves protocol identity or safety | Ports and listeners | endpoint-ports | 01 Transport and the host | new |  | tcp-contract | [[Home/Networks/Protocols/Ports]] |  | v1:43fb0d6121d40bd1205572b17b95078118b2316239122d9e245c4b490a864a1b/0 | |
+| Trace stream and datagram socket lifecycles and design message framing for partial TCP reads and writes | Sockets and framing | socket-framing | 01 Transport and the host | new |  | udp-contract, endpoint-ports | [[Home/Networks/Transport & Sockets/Sockets]] |  | v1:02e81272cc4f4fe00938c171726f09508338a495f187e9ab65462a108ca0f595/0 | |
+| Follow a network write through socket buffers, kernel queues and NIC transfer and locate backpressure or MTU failures | Host data path | host-data-path | 01 Transport and the host | new |  | socket-framing | [[Home/Networks/Network Data Path]] |  | v1:4bed0a813f5c7b8a88d337061e50243c478cc2b60d5f0c3e55b7a90ae36225a5/0 | |
+| Trace recursive resolution, authoritative referrals and cache windows and distinguish DNS data authentication from encrypted resolver transport | DNS resolution | dns-resolution | 02 Naming and HTTP | new |  | tcp-contract, udp-contract | [[Home/Networks/Protocols/DNS]] |  | v1:2488291d02180df3c0e50abee1333fc6f7f6010ac2c604336250365c0ac67b1a/0 | |
+| Parse a URL into authority, path, query and fragment and identify how encoding or normalization changes origin and resource identity | URL parsing | url-boundaries | 02 Naming and HTTP | new |  | layer-boundaries | [[Home/Networks/Protocols/URL]] |  | v1:267ea980a92ef4cb300dde5bb006e9cd6927dfa6f17489f25deb2a8e91ee04d0/0 | |
+| Choose HTTP methods, validators, cache policy and retry behavior while separating request semantics from transport and TLS guarantees | HTTP semantics | http-contract | 02 Naming and HTTP | new |  | dns-resolution, url-boundaries | [[Home/Networks/Protocols/HTTP]] |  | v1:69410f7be7bb91cff1d48ca99e57744f960314edb61cc8d9e8415ee1f16c1d78/1 | |
+| Explain how binary framing and multiplexing remove response-order blocking while TCP loss can still stall streams on one HTTP/2 connection | HTTP/2 streams | http2-multiplexing | 02 Naming and HTTP | new |  | http-contract | [[Home/Networks/Protocols/HTTP 2]] |  | v1:a15c076e88a30891af9164c19ff84b9c1027d0ead57483e6dd7aa417b9589afe/3 | |
+| Design resource and representation contracts with replay-safe operations, conditional updates and explicit pagination consistency limits | REST contracts | rest-boundaries | 03 API and realtime contracts | new |  | http-contract | [[Home/Networks/Protocols/REST]] |  | v1:fe0747d162fb8e9f73ddefa40d84aa8cd91be19a95700ed9cde4c539260b7652/0 | |
+| Distinguish a local call from an RPC by reasoning about deadlines, ambiguous outcomes and delivery guarantees | Remote call failure | rpc-failure | 03 API and realtime contracts | new |  | http-contract | [[Home/Networks/Protocols/RPC]] |  | v1:2924538853996ef588c2f188dedd6e6c3153fca90436a7c664de9009fd90736e/0 | |
+| Choose gRPC call shapes and propagate deadlines and flow control while preserving protobuf field identities and accounting for channel balancing | gRPC contracts | grpc-contract | 03 API and realtime contracts | new |  | rpc-failure, http2-multiplexing | [[Home/Networks/Protocols/gRPC]] |  | v1:5c143d413881957be3c084df9b454fce5d855241fe9d1baaaede894afa6dd2b4/0 | |
+| Trace schema validation and resolver execution and constrain query cost, authorization and partial-data failure | GraphQL execution | graphql-execution | 03 API and realtime contracts | new |  | rest-boundaries | [[Home/Networks/Protocols/GraphQL]] |  | v1:84dfac8ca4c60eab26229055306121dd9a426069c51628fac4646bf177bee35c/0 | |
+| Design a long-lived bidirectional session with bounded buffering, reconnect behavior and an explicit application message contract | WebSocket sessions | websocket-session | 03 API and realtime contracts | new |  | http-contract, socket-framing | [[Home/Networks/Protocols/WebSockets]] |  | v1:334107aeb6374db2783f4b79bd0f7cdb2ee7059a5d03d4934df63351b7b7c50d/2 | |
+| Distinguish forward and reverse proxy ownership and decide which forwarding metadata and TLS termination claims the next hop may trust | Proxy trust boundaries | proxy-trust | 04 Edges and private paths | new |  | http-contract | [[Home/Networks/Architecture & Ops/Forward and Reverse Proxies]] |  | v1:5d8afc5f1f4101eabef746e29121073623f141e67082e7628c6f6c05f8336c98/0 | |
+| Trace NGINX ingress routing and upstream connections and use failure codes and forwarding policy to locate the responsible boundary | NGINX upstream boundary | nginx-boundary | 04 Edges and private paths | new |  | proxy-trust | [[Home/Networks/Architecture & Ops/Nginx]] |  | v1:b7bb407c5b5305c9cc2dfec17d373d085049a7367c57bdc87e6b4ea53ec4cb27/0 | |
+| Design shared edge-cache keys, freshness and invalidation so origin savings do not expose another user or serve an invalid representation | CDN cache correctness | cdn-cache-key | 04 Edges and private paths | new |  | http-contract, dns-resolution | [[Home/Networks/Architecture & Ops/CDN]] |  | v1:6d7bc986f1dfc1d5475ba65e8e7381212729f279dfd584b79c599c23752949f4/0 | |
+| Trace encapsulated traffic through a VPN gateway and distinguish encrypted reachability from application access authorization | VPN routing and trust | vpn-routing | 04 Edges and private paths | new |  | tcp-contract, dns-resolution | [[Home/Networks/Architecture & Ops/VPN]] |  | v1:591059a936e9d98d6dd78868f56022be080b3fa11a1a513bc656b757a51b66c8/0 | |
+| Trace submission, DNS MX routing and relay acceptance while distinguishing queued mail, final delivery and sender authentication | Mail delivery boundaries | smtp-delivery | 05 Specialized communication | new |  | dns-resolution | [[Home/Networks/Protocols/SMTP]] |  | v1:1594ac5d864d67adf4ac59b7fc5e8cf15fb2acc813ac64b22cd14bce714b5c17/0 | |
+| Separate SSH server authentication, user authentication and multiplexed channels and diagnose host-key and forwarding failures | SSH host trust | ssh-host-trust | 05 Specialized communication | new |  | tcp-contract | [[Home/Networks/Protocols/SSH]] |  | v1:c3cc4437751650474c608812b2726d07e9260e7e41e515d7740d93a88a1e1b61/0 | |
+| Allocate latency across ingest, transcoding, packaging, delivery and playback and choose adaptive HTTP streaming or WebRTC by interaction requirements | Live-stream latency | streaming-latency | 05 Specialized communication | new |  | cdn-cache-key, http-contract | [[Home/Networks/Protocols/Live Streaming]] |  | v1:7a50279782102511df028702ebe0b1c09799278ed72bfc636ca3f22eea0b8f37/0 | |
+| Explain DHT-based peer discovery and reason about churn, availability, NAT traversal and remaining centralized dependencies | Peer discovery and churn | peer-discovery | 05 Specialized communication | new |  | dns-resolution, udp-contract | [[Home/Networks/Architecture & Ops/Peer-2-Peer]] |  | v1:7386d55eceab6975e6a92335b1b178c9757607514e5c3ffe0d2a7ab66ea3bb2e/0 | |
