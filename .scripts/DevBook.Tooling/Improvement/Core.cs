@@ -9,7 +9,7 @@ namespace DevBook.Tooling.Improvement;
 public static class Core
 {
     public const int StateVersion = 1;
-    public static readonly string[] ContentAuthorities = ["AGENTS.md", ".codex/agents/note-reviewer.toml", ".codex/agents/note-writer.toml", ".codex/skills/obsidian-markdown/SKILL.md", "Vault/Templates/Pages/Template - Concept Page.md", "Vault/Templates/Pages/Template - Index.md", "Vault/Templates/Blocks/Template - Callout.md"];
+    public static readonly string[] ContentAuthorities = ["AGENTS.md", ".claude/agents/note-reviewer.md", ".claude/agents/note-writer.md", ".codex/skills/obsidian-markdown/SKILL.md", "Vault/Templates/Pages/Template - Concept Page.md", "Vault/Templates/Pages/Template - Index.md", "Vault/Templates/Blocks/Template - Callout.md"];
     public static readonly HashSet<string> SpecialNotes = ["Vault/Home/index.md", "Vault/Home/Questions.md", "Vault/Home/About.md", "Vault/Home/Changelog.md"];
 
     public static string TopicFor(string path)
@@ -34,14 +34,33 @@ public static class Core
         return $"notes/automated-{TopicId(topic)}-g{generation}";
     }
 
-    public static string RulesVersion(string root)
+    public static JsonObject LoadContentAuthorities(string root)
+    {
+        var bundle = new JsonObject();
+        foreach (string relative in ContentAuthorities)
+        {
+            string path = System.IO.Path.Combine(root, relative);
+            if (!File.Exists(path))
+            {
+                throw new FileNotFoundException("Required content authority is missing: " + relative, path);
+            }
+            bundle[relative] = File.ReadAllText(path).Replace("\r\n", "\n", StringComparison.Ordinal).Replace('\r', '\n');
+        }
+        return bundle;
+    }
+
+    public static string RulesVersion(string root) => RulesVersion(LoadContentAuthorities(root));
+
+    public static string RulesVersion(JsonObject authorities)
     {
         var records = new JsonArray();
         foreach (string relative in ContentAuthorities)
         {
-            string path = System.IO.Path.Combine(root, relative);
-            string digest = File.Exists(path) ? LegacyIdentity.Digest(File.ReadAllText(path).Replace("\r\n", "\n").Replace('\r', '\n')) : "missing";
-            records.Add(new JsonArray(relative, digest));
+            if (authorities[relative] is not JsonValue value || !value.TryGetValue(out string? text))
+            {
+                throw new ArgumentException("Required content authority is missing: " + relative);
+            }
+            records.Add(new JsonArray(relative, LegacyIdentity.Digest(text)));
         }
         return LegacyIdentity.Fingerprint(records);
     }

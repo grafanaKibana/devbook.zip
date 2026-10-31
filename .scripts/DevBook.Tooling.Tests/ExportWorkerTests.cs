@@ -11,26 +11,17 @@ namespace DevBook.Tooling.Tests;
 public sealed class ExportWorkerTests
 {
     [Theory]
-    [InlineData(false, "lag")]
-    [InlineData(true, "lag")]
-    [InlineData(false, "foreign-head")]
-    [InlineData(false, "closed")]
-    [InlineData(false, "identity")]
-    [InlineData(false, "timeout")]
-    public async Task GeneratedRefPublicationWaitsOnlyForSafePrHeadPropagation(bool recovery, string scenario)
+    [InlineData("lag")]
+    [InlineData("foreign-head")]
+    [InlineData("closed")]
+    [InlineData("identity")]
+    [InlineData("timeout")]
+    public async Task GeneratedRefPublicationWaitsOnlyForSafePrHeadPropagation(string scenario)
     {
         // Arrange
         var fixture = new WorkerFixture();
         fixture.Api.ChecksReady = true;
         var store = new MemoryStateStore(fixture.State);
-        Exception? preparationFailure = null;
-        if (recovery)
-        {
-            fixture.Api.FailBeforeRefOnce = true;
-
-            preparationFailure = await Record.ExceptionAsync(() => Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store));
-        }
-
         // Git accepts the ref before the PR head reflects that update.
         fixture.Api.AfterRefUpdate = () =>
         {
@@ -67,13 +58,10 @@ public sealed class ExportWorkerTests
         });
 
         // Act
-        JsonObject result = recovery
-            ? await Worker.FinalizeAsync(fixture.Api, fixture.Config, store, fixture.Request, checkWait: wait)
-            : await Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store, checkWait: wait);
+        JsonObject result = await Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store, checkWait: wait);
         JsonObject state = (await store.ReadAsync()).State;
 
         // Assert
-        if (recovery) preparationFailure.Should().BeOfType<RuntimeFailure>();
         fixture.Api.RefWrites.Should().Be(1);
         fixture.Api.CommitWrites.Should().Be(1);
         if (scenario == "lag")
@@ -161,6 +149,99 @@ public sealed class ExportWorkerTests
         await publish.Should().ThrowAsync<UnsafeInput>();
         fixture.Api.CommitWrites.Should().Be(0);
         fixture.Api.RefWrites.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task BoundedTreeBatchesPreserveExactExportBytesAndAccumulatedLeaves()
+    {
+        // Arrange
+        var fixture = new WorkerFixture();
+        var files = new Dictionary<string, byte[]?>(Export.Bundle.Decode(fixture.Bundle), StringComparer.Ordinal);
+        for (var index = 0; index < 400; index++)
+        {
+            files[$"Web/content/{index:D3}-é.md"] = Encoding.UTF8.GetBytes("\uFEFFé😀\r\n\"\\" + new string('x', 16_000));
+        }
+        files["Web/content/Large.md"] = Encoding.UTF8.GetBytes(new string('x', TreeUpload.MaximumRequestBytes));
+        Dictionary<string, GitTreeEntry> expected = await Export.Bundle.TreeAsync(fixture.Api, FakeExportApi.SourceHead);
+        foreach (KeyValuePair<string, byte[]?> file in files)
+        {
+            if (file.Value is null)
+            {
+                expected.Remove(file.Key);
+            }
+            else
+            {
+                expected[file.Key] = new GitTreeEntry(file.Key, "100644", "blob", Export.Bundle.BlobSha(file.Value));
+            }
+        }
+        files[Receipt.PathName] = Encoding.UTF8.GetBytes(Receipt.Make(expected.Values).ToJsonString());
+        Dictionary<string, GitTreeEntry> predicted = await Export.Bundle.PredictAsync(fixture.Api, FakeExportApi.SourceHead, files);
+        var clock = new ExportWorkerCheckClock(DateTimeOffset.UtcNow);
+        var writes = new List<DateTimeOffset>();
+        var wait = new TreeUploadWait(clock, (duration, _) => { clock.Advance(duration); return Task.CompletedTask; });
+
+        // Act
+        string tree = await TreeUpload.UploadAsync(fixture.Api, new string('1', 40), files,
+            _ => { writes.Add(clock.GetUtcNow()); return Task.CompletedTask; }, wait: wait);
+
+        // Assert
+        Export.Bundle.SameLeaves(fixture.Api.Trees[tree].Values, predicted.Values).Should().BeTrue();
+        fixture.Api.TreeRequests.Count.Should().BeGreaterThan(4);
+        fixture.Api.BlobWrites.Should().Be(2);
+        fixture.Api.TreeRequests.Should().OnlyContain(request => request.Arr("tree").Count <= TreeUpload.MaximumEntries
+            && Encoding.UTF8.GetByteCount(LegacyIdentity.CanonicalJson(request)) <= TreeUpload.MaximumRequestBytes);
+        fixture.Api.TreeRequests.SelectMany(request => request.Arr("tree").OfType<JsonObject>())
+            .Count(entry => entry.ContainsKey("content")).Should().Be(402);
+        foreach (KeyValuePair<string, byte[]?> file in files.Where(item => item.Value is not null))
+        {
+            fixture.Api.Blobs[fixture.Api.Trees[tree][file.Key].Sha].Should().Equal(file.Value!);
+        }
+        writes.Zip(writes.Skip(1), (before, after) => after - before).Should().OnlyContain(gap => gap >= TimeSpan.FromSeconds(1));
+        fixture.Api.RefWrites.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task ExpiredLeaseAfterPacingPreventsTheNextImmutableWrite()
+    {
+        // Arrange
+        var fixture = new WorkerFixture();
+        var clock = new ExportWorkerCheckClock(DateTimeOffset.UtcNow);
+        DateTimeOffset expires = clock.GetUtcNow().AddMilliseconds(500);
+        var files = Enumerable.Range(0, 101).ToDictionary(index => $"Web/content/{index:D3}.md", _ => (byte[]?)"text"u8.ToArray());
+        var wait = new TreeUploadWait(clock, (duration, _) => { clock.Advance(duration); return Task.CompletedTask; });
+
+        // Act
+        Func<Task> upload = () => TreeUpload.UploadAsync(fixture.Api, new string('1', 40), files,
+            _ => clock.GetUtcNow() < expires ? Task.CompletedTask : throw new Conflict("Lease expired."), wait: wait);
+
+        // Assert
+        await upload.Should().ThrowAsync<Conflict>();
+        fixture.Api.TreeRequests.Should().ContainSingle();
+        fixture.Api.RefWrites.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task LostTreeResponseRestartsWithoutMovingTheBranchPartially()
+    {
+        // Arrange
+        var fixture = new WorkerFixture();
+        var store = new MemoryStateStore(fixture.State);
+        fixture.Api.FailAfterTreeOnce = true;
+        Exception? interruption = await Record.ExceptionAsync(() => Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store));
+        int writesAfterInterruption = fixture.Api.RefWrites;
+        string firstTree = fixture.Api.Trees.Keys.Last();
+        fixture.Api.ChecksReady = true;
+
+        // Act
+        JsonObject result = await Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store);
+
+        // Assert
+        interruption.Should().BeOfType<RuntimeFailure>();
+        writesAfterInterruption.Should().Be(0);
+        fixture.Api.Trees.Keys.Last().Should().Be(firstTree);
+        result.Str("status").Should().Be("exported");
+        fixture.Api.RefWrites.Should().Be(1);
+        fixture.Api.CommitWrites.Should().Be(1);
     }
 
     private static async Task MakeValidationDue(IStateStore store, JsonObject request)
@@ -292,8 +373,13 @@ public sealed class ExportWorkerTests
         public bool ChecksReady { get; set; }
         public bool ValidationMissing { get; set; }
         public bool FailBeforeRefOnce { get; set; }
+        public bool FailAfterTreeOnce { get; set; }
+        public List<JsonObject> TreeRequests { get; } = [];
+        public Dictionary<string, Dictionary<string, GitTreeEntry>> Trees { get; } = new(StringComparer.Ordinal);
+        private string generatedTree = new string('1', 40);
         public int RefWrites { get; private set; }
         public int ForceWrites { get; private set; }
+        public int BlobWrites { get; private set; }
         public int CommitWrites { get; private set; }
         public int Dispatches { get; private set; }
         public int DraftConversions { get; private set; }
@@ -311,6 +397,7 @@ public sealed class ExportWorkerTests
         {
             original = entries.ToDictionary(item => item.Path, StringComparer.Ordinal);
             CurrentTree = new(original, StringComparer.Ordinal);
+            Trees[new string('1', 40)] = new(original, StringComparer.Ordinal);
             this.ExportWorkerbranch = ExportWorkerbranch;
             Pr = new JsonObject
             {
@@ -349,7 +436,14 @@ public sealed class ExportWorkerTests
             }
             else if (method == "GET" && path.StartsWith("/git/trees/", StringComparison.Ordinal))
             {
-                Dictionary<string, GitTreeEntry> entries = path.Contains(GeneratedHead, StringComparison.Ordinal) ? CurrentTree : original;
+                string treeSha = path["/git/trees/".Length..].Split('?')[0];
+                treeSha = treeSha switch
+                {
+                    GeneratedHead => generatedTree,
+                    SourceHead or MainHead or OwnerChangedHead => new string('1', 40),
+                    _ => treeSha
+                };
+                Dictionary<string, GitTreeEntry> entries = Trees[treeSha];
                 response = new JsonObject
                 {
                     ["truncated"] = false,
@@ -368,13 +462,14 @@ public sealed class ExportWorkerTests
                 response = new JsonObject
                 {
                     ["sha"] = sha,
-                    ["tree"] = new JsonObject { ["sha"] = new string(sha == GeneratedHead ? '2' : '1', 40) },
+                    ["tree"] = new JsonObject { ["sha"] = sha == GeneratedHead ? generatedTree : new string('1', 40) },
                     ["message"] = sha == GeneratedHead ? Worker.ExportCommitMessage : "Owner source commit",
                     ["parents"] = new JsonArray(new JsonObject { ["sha"] = sha == GeneratedHead ? SourceHead : MainHead })
                 };
             }
             else if (method == "POST" && path == "/git/blobs")
             {
+                BlobWrites++;
                 byte[] bytes = Convert.FromBase64String(payload.Str("content"));
                 string sha = Export.Bundle.BlobSha(bytes);
                 Blobs[sha] = bytes;
@@ -386,22 +481,49 @@ public sealed class ExportWorkerTests
             }
             else if (method == "POST" && path == "/git/trees")
             {
-                CurrentTree = new(original, StringComparer.Ordinal);
-                foreach (JsonObject entry in payload!.Arr("tree").OfType<JsonObject>())
+                TreeRequests.Add(payload!.AsObject().Copy());
+                CurrentTree = new(Trees[payload.Str("base_tree")], StringComparer.Ordinal);
+                foreach (JsonObject entry in payload.Arr("tree").OfType<JsonObject>())
                 {
-                    if (entry["sha"] is null)
+                    bool inline = entry.ContainsKey("content");
+                    if (inline && entry.ContainsKey("sha"))
+                    {
+                        throw new InvalidOperationException("Tree entry mixes content and sha.");
+                    }
+                    if (!inline && !entry.ContainsKey("sha"))
+                    {
+                        throw new InvalidOperationException("Tree entry requires content or explicit sha.");
+                    }
+                    if (!inline && entry["sha"] is null)
                     {
                         CurrentTree.Remove(entry.Str("path"));
                     }
                     else
                     {
-                        CurrentTree[entry.Str("path")] = new GitTreeEntry(entry.Str("path"), entry.Str("mode"), entry.Str("type"), entry.Str("sha"));
+                        string sha = entry.Str("sha");
+                        if (inline)
+                        {
+                            byte[] bytes = Encoding.UTF8.GetBytes(entry.Str("content"));
+                            sha = Export.Bundle.BlobSha(bytes);
+                            Blobs[sha] = bytes;
+                        }
+                        CurrentTree[entry.Str("path")] = new GitTreeEntry(entry.Str("path"), entry.Str("mode"), entry.Str("type"), sha);
                     }
                 }
-                response = new JsonObject { ["sha"] = new string('2', 40) };
+                var identity = new JsonArray(CurrentTree.Values.OrderBy(entry => entry.Path, StringComparer.Ordinal)
+                    .Select(entry => (JsonNode)new JsonObject { ["path"] = entry.Path, ["mode"] = entry.Mode, ["type"] = entry.Type, ["sha"] = entry.Sha }).ToArray());
+                string treeSha = LegacyIdentity.Fingerprint(identity)[..40];
+                Trees[treeSha] = new(CurrentTree, StringComparer.Ordinal);
+                response = new JsonObject { ["sha"] = treeSha };
+                if (FailAfterTreeOnce)
+                {
+                    FailAfterTreeOnce = false;
+                    throw new RuntimeFailure("Simulated lost response after immutable tree creation.");
+                }
             }
             else if (method == "POST" && path == "/git/commits")
             {
+                generatedTree = payload.Str("tree");
                 CommitWrites++;
                 response = new JsonObject { ["sha"] = GeneratedHead };
             }

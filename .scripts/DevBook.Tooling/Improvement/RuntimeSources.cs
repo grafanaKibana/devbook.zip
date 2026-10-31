@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.Json.Nodes;
+using System.Text.RegularExpressions;
 using DevBook.Tooling.Infrastructure;
 
 namespace DevBook.Tooling.Improvement;
@@ -86,6 +87,38 @@ public static partial class Runtime
             stream.Write(content);
             stream.SetLength(content.Length);
             stream.Flush(flushToDisk: true);
+        }
+    }
+
+    public static string SourceEvidenceText(byte[] data)
+    {
+        string text = Encoding.UTF8.GetString(data);
+        TimeSpan timeout = TimeSpan.FromSeconds(2);
+        const RegexOptions options = RegexOptions.IgnoreCase | RegexOptions.Singleline;
+        try
+        {
+            if (!Regex.IsMatch(text, @"^\uFEFF?\s*(?:<!doctype\s+html\b|<html\b)", options, timeout))
+            {
+                return text;
+            }
+            text = Regex.Replace(text, @"<!--.*?(?:-->|$)", " ", options, timeout);
+            text = Regex.Replace(text, @"<(head|script|style)\b[^>]*>.*?</\1\s*>", " ", options, timeout);
+            text = Regex.Replace(text, @"</t[dh]\s*>", " | ", options, timeout);
+            text = Regex.Replace(text, @"</(?:p|div|section|article|h[1-6]|li|tr|table|blockquote|pre)\s*>|<(?:br|hr)\b[^>]*>", "\n", options, timeout);
+            text = Regex.Replace(text, "<(?:(?:\"[^\"]*\")|(?:'[^']*')|[^'\">])*>", " ", options, timeout);
+            text = WebUtility.HtmlDecode(text);
+            text = Regex.Replace(text, @"[^\S\r\n]+", " ", options, timeout);
+            text = Regex.Replace(text, @" *\r?\n *", "\n", options, timeout);
+            text = Regex.Replace(text, @"\n{3,}", "\n\n", options, timeout).Trim();
+            if (text.Length == 0)
+            {
+                throw new UnsafeInput("HTML source contains no readable evidence text.");
+            }
+            return text;
+        }
+        catch (RegexMatchTimeoutException)
+        {
+            throw new UnsafeInput("HTML source evidence exceeded its bounded extraction time.");
         }
     }
 

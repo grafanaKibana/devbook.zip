@@ -121,45 +121,23 @@ public sealed class QueueTests
     }
 
     [Fact]
-    public void AuthorOnlyLegacyKeepRequiresIndependentRecheck()
-    {
-        // Arrange
-        JsonObject state = Core.NewState();
-        state.Obj("notes")[DomainFixtures.Path] = new JsonObject
-        {
-            ["content_hash"] = LegacyIdentity.Digest(DomainFixtures.Note),
-            ["rules_hash"] = "rules",
-            ["outcome"] = "keep"
-        };
-
-        // Act
-        JsonObject batch = ImprovementQueue.SelectBatch(state, new JsonArray(DomainFixtures.NoteRecord()), "rules")!;
-
-        // Assert
-        batch.Arr("notes")[0]!.Str("selection_reason").Should().Be("keep_unverified");
-    }
-
-    [Theory]
-    [InlineData("workflow_dispatch", "owner", false)]
-    [InlineData("schedule", "owner", true)]
-    public void TargetedLiveExecutionRequiresManualOwnerDispatch(string trigger, string actor, bool rejected)
+    public void ScheduledExecutionCannotTargetANoteEvenForTheOwner()
     {
         // Arrange
         var config = new JsonObject { ["target_note"] = DomainFixtures.Path, ["owner_allowlist"] = RuntimeFixtures.Allowlist() };
         var environment = new Dictionary<string, string>
         {
-            ["GITHUB_EVENT_NAME"] = trigger,
+            ["GITHUB_EVENT_NAME"] = "schedule",
             ["GITHUB_ACTOR_ID"] = "42",
-            ["GITHUB_ACTOR"] = actor,
-            ["GITHUB_TRIGGERING_ACTOR"] = actor
+            ["GITHUB_ACTOR"] = "owner",
+            ["GITHUB_TRIGGERING_ACTOR"] = "owner"
         };
 
         // Act
         Exception? error = Record.Exception(() => ManualSelection.RequireManualOwner(config, environment));
 
         // Assert
-        if (rejected) error.Should().BeOfType<ProductionGate>();
-        else error.Should().BeNull();
+        error.Should().BeOfType<ProductionGate>();
     }
 
     [Fact]

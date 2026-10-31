@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json.Nodes;
 using DevBook.Tooling.Infrastructure;
+using DevBook.Tooling.Vault;
 
 namespace DevBook.Tooling.Improvement;
 
@@ -97,7 +98,9 @@ public static class Review
                 return false;
             }
 
-            if (new[] { "question_quality", "identity_safety" }.Any(key => quality.Str(key) is not ("PASS" or "NOT APPLICABLE")))
+            bool hasCards = QardScanner.Scan(candidates[path], includeGeneric: true).Count != 0
+                || proposal.Arr("edits").OfType<JsonObject>().Any(edit => edit.Str("path") == path && edit.Str("kind") != "note");
+            if (new[] { "question_quality", "identity_safety" }.Any(key => quality.Str(key) != "PASS" && (hasCards || quality.Str(key) != "NOT APPLICABLE")))
             {
                 return false;
             }

@@ -7,6 +7,7 @@ namespace DevBook.Tooling.Improvement;
 
 public sealed class StateBranchStore(IGitHubApi api, string branch = Runtime.StateBranch, string path = Runtime.StatePath) : IStateStore
 {
+    private StateSnapshot? cached;
     private const int MaximumEncodedStateLength = 32_000_000;
     private string RefPath => "/git/ref/heads/" + Uri.EscapeDataString(branch);
     private string UpdateRefPath => "/git/refs/heads/" + Uri.EscapeDataString(branch);
@@ -34,9 +35,16 @@ public sealed class StateBranchStore(IGitHubApi api, string branch = Runtime.Sta
         }
         catch (GitHubApiFailure error) when (error.Status == 404)
         {
+            cached = null;
             return new(new JsonObject(), null);
         }
         string head = reference.Obj("object").Str("sha");
+        StateSnapshot? cachedSnapshot = cached;
+        if (cachedSnapshot?.RefSha == head)
+        {
+            return Copy(cachedSnapshot);
+        }
+        cached = null;
         JsonObject commit = await Runtime.ObjectAsync(api, "GET", $"/git/commits/{head}", cancellationToken: cancellationToken);
         JsonObject tree = await Runtime.ObjectAsync(api, "GET", $"/git/trees/{commit.Obj("tree").Str("sha")}?recursive=1", cancellationToken: cancellationToken);
         if (tree["truncated"]?.GetValue<bool>() != false)
@@ -59,7 +67,9 @@ public sealed class StateBranchStore(IGitHubApi api, string branch = Runtime.Sta
             byte[] data = Convert.FromBase64String(blob.Str("content"));
             JsonObject state = JsonNode.Parse(new UTF8Encoding(false, true).GetString(data)) as JsonObject ?? throw new JsonException("Object required.");
             ValidateState(state);
-            return new(state, head, blobSha);
+            var snapshot = new StateSnapshot(state, head, blobSha);
+            cached = snapshot;
+            return Copy(snapshot);
         }
         catch (Exception error) when (error is FormatException or DecoderFallbackException or JsonException)
         {
@@ -69,7 +79,8 @@ public sealed class StateBranchStore(IGitHubApi api, string branch = Runtime.Sta
 
     public async Task<StateSnapshot> WriteAsync(JsonObject state, StateSnapshot expected, string message, CancellationToken cancellationToken = default)
     {
-        ValidateState(state);
+        JsonObject frozen = state.Copy();
+        ValidateState(frozen);
         if (expected.RefSha is null)
         {
             throw new Conflict("State branch must be provisioned during confirmed activation.");
@@ -80,10 +91,15 @@ public sealed class StateBranchStore(IGitHubApi api, string branch = Runtime.Sta
             throw new Conflict("State ref changed before write.");
         }
         JsonObject parent = await Runtime.ObjectAsync(api, "GET", $"/git/commits/{expected.RefSha}", cancellationToken: cancellationToken);
-        (string commit, string blob) = await CreateStateCommitAsync(state, expected.RefSha, parent.Obj("tree").Str("sha"), message, cancellationToken);
+        (string commit, string blob) = await CreateStateCommitAsync(frozen, expected.RefSha, parent.Obj("tree").Str("sha"), message, cancellationToken);
         await api.RequestAsync("PATCH", UpdateRefPath, new JsonObject { ["sha"] = commit, ["force"] = false }, cancellationToken: cancellationToken);
-        return new(state.Copy(), commit, blob);
+        var written = new StateSnapshot(frozen, commit, blob);
+        cached = written;
+        return Copy(written);
     }
+
+    private static StateSnapshot Copy(StateSnapshot snapshot) =>
+        new(snapshot.State.Copy(), snapshot.RefSha, snapshot.BlobSha);
 
     private async Task<(string Commit, string Blob)> CreateStateCommitAsync(JsonObject state, string parent, string parentTree, string message, CancellationToken cancellationToken)
     {
