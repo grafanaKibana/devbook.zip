@@ -280,16 +280,81 @@ public sealed class GitHubRuntime
             ["generation"] = operation["generation"]?.DeepClone(),
             ["prepared_source_version"] = operation["prepared_source_version"]?.DeepClone()
         };
+        bool automatic = operation.Bool("automatic_export");
         await ArchivePendingAsync(opId, "export_operations", new JsonObject
         {
             ["commit_sha"] = head,
             ["export_head"] = head,
             ["export_request"] = request.Copy(),
-            ["export_attempts"] = 1,
-            ["export_last_dispatch_at"] = Runtime.Iso(clock.GetUtcNow()),
-            ["reason"] = "Same-workflow Syncer export queued"
-        }, freeze: !operation.Bool("automatic_export"), cancellationToken: cancellationToken);
-        return new JsonObject { ["op_id"] = opId, ["commit_sha"] = head, ["status"] = "awaiting_export", ["automatic_export"] = operation.Bool("automatic_export"), ["export_request"] = request };
+            ["export_attempts"] = automatic ? 1 : 0,
+            ["export_last_dispatch_at"] = automatic ? Runtime.Iso(clock.GetUtcNow()) : null,
+            ["reason"] = automatic ? "Same-workflow Syncer export queued" : "Awaiting an explicitly approved local Syncer export"
+        }, freeze: !automatic, cancellationToken: cancellationToken);
+        var response = new JsonObject { ["op_id"] = opId, ["commit_sha"] = head, ["status"] = "awaiting_export", ["automatic_export"] = automatic };
+        if (automatic)
+        {
+            response["export_request"] = request;
+        }
+        return response;
+    }
+
+    private async Task<bool> EnsureDraftForSourceAsync(JsonObject pr, JsonObject operation, bool unapplied, CancellationToken cancellationToken)
+    {
+        await AssertLeaseAsync(cancellationToken);
+        StateSnapshot snapshot = await store.ReadAsync(cancellationToken);
+        string key = $"{operation.Str("topic")}:{operation.Int("generation")}";
+        JsonObject state = snapshot.State.Copy();
+        JsonObject prs = state.Obj("prs").Copy();
+        JsonObject row = prs.Obj(key).Copy();
+        bool reviewStarted = pr["draft"]?.GetValue<bool>() == false || pr.Str("reviewDecision").Length > 0;
+        if (reviewStarted)
+        {
+            if (state.Obj("pending_operation").Str("op_id") != operation.Str("op_id"))
+            {
+                throw new Conflict("Publication journal changed before preserving review freeze.");
+            }
+            row["topic_id"] = operation["topic"]?.DeepClone();
+            row["generation"] = operation["generation"]?.DeepClone();
+            row["number"] = pr["number"]?.DeepClone();
+            row["branch"] = operation["branch"]?.DeepClone();
+            row["status"] = "open";
+            row["frozen"] = true;
+            if (row.Str("review_started_head_sha").Length == 0)
+            {
+                row["review_started_head_sha"] = pr.Obj("head")["sha"]?.DeepClone();
+            }
+            prs[key] = row;
+            state["prs"] = prs;
+            await store.WriteAsync(state, snapshot, "maintenance: preserve owner review freeze before source update", cancellationToken);
+        }
+        if (unapplied && (reviewStarted || row.Str("review_started_head_sha").Length > 0))
+        {
+            try
+            {
+                if (operation["edits"] is not JsonArray edits || operation["pending_feedback"] is not JsonArray pending)
+                {
+                    throw new UnsafeInput("Pending candidate lacks saved owner-requested edit causality.");
+                }
+                HashSet<string> paths = edits.OfType<JsonObject>().Select(edit => edit.Str("path")).ToHashSet(StringComparer.Ordinal);
+                if (operation.Obj("candidate").Any(item => !paths.Contains(item.Key)))
+                {
+                    throw new UnsafeInput("Frozen PR candidates require explicit owner-requested edits for every changed path.");
+                }
+                Feedback.ValidateFrozenEdits(edits, pending);
+            }
+            catch (UnsafeInput error)
+            {
+                await ArchivePendingAsync(operation.Str("op_id"), "invalidated_operations", new JsonObject
+                {
+                    ["reason"] = "Owner review started before branch update",
+                    ["validation_error"] = error.Message
+                }, cancellationToken: cancellationToken);
+                return false;
+            }
+        }
+        await AssertLeaseAsync(cancellationToken);
+        await Runtime.EnsureDraftForMutationAsync(api, pr, cancellationToken);
+        return true;
     }
 
     public async Task<JsonObject> PublishAsync(JsonObject request, CancellationToken cancellationToken = default)
@@ -395,6 +460,16 @@ public sealed class GitHubRuntime
             ["candidate_hashes"] = candidateHashes,
             ["candidate"] = candidate.Copy(),
             ["feedback_revision"] = feedbackRevision.Copy(),
+            ["edits"] = new JsonArray(request.Arr("edits").OfType<JsonObject>().Select(edit => (JsonNode)new JsonObject
+            {
+                ["path"] = edit["path"]?.DeepClone(),
+                ["feedback_keys"] = edit["feedback_keys"]?.DeepClone()
+            }).ToArray()),
+            ["pending_feedback"] = new JsonArray(request.Arr("pending_feedback").OfType<JsonObject>().Select(item => (JsonNode)new JsonObject
+            {
+                ["key"] = item["key"]?.DeepClone(),
+                ["paths"] = item["paths"]?.DeepClone()
+            }).ToArray()),
             ["pr_number"] = currentPr?["number"]?.DeepClone(),
             ["prior_pr_draft"] = currentPr?["draft"]?.DeepClone(),
             ["prior_review_decision"] = currentPr?["reviewDecision"]?.DeepClone(),
@@ -414,7 +489,10 @@ public sealed class GitHubRuntime
         if (currentPr is not null)
         {
             currentPr = await RequireOpenPrAsync(currentPr.Int("number"), topic, generation, branch, cancellationToken);
-            await Runtime.EnsureDraftForMutationAsync(api, currentPr, cancellationToken);
+            if (!await EnsureDraftForSourceAsync(currentPr, op, true, cancellationToken))
+            {
+                return new JsonObject { ["op_id"] = opId, ["commit_sha"] = commitSha, ["status"] = "review_started" };
+            }
         }
         if (currentPr is not null && !await FeedbackUnchangedAsync(currentPr.Int("number"), feedbackRevision, null, cancellationToken))
         {
@@ -528,15 +606,19 @@ public sealed class GitHubRuntime
             if (number > 0)
             {
                 selected = await RequireOpenPrAsync(number, topic, generation, branch, cancellationToken);
+                if (!await EnsureDraftForSourceAsync(selected, op, current != commitSha, cancellationToken))
+                {
+                    return new JsonObject { ["op_id"] = opId, ["commit_sha"] = commitSha, ["status"] = "review_started" };
+                }
                 if (current != commitSha && !await FeedbackUnchangedAsync(number, op.Obj("feedback_revision"), null, cancellationToken))
                 {
                     await ArchivePendingAsync(opId, "invalidated_operations", new JsonObject { ["reason"] = "Owner feedback changed before recovery" }, cancellationToken: cancellationToken);
                     return new JsonObject { ["op_id"] = opId, ["status"] = "feedback_changed" };
                 }
-                await Runtime.EnsureDraftForMutationAsync(api, selected, cancellationToken);
             }
             if (current != commitSha)
             {
+                await AssertLeaseAsync(cancellationToken);
                 await UpdateBranchCasAsync(branch, op.Str("parent_head"), commitSha, cancellationToken);
             }
             await journal.AdvanceAsync(opId, "branch_updated", new JsonObject { ["branch_sha"] = commitSha }, cancellationToken);
@@ -552,7 +634,7 @@ public sealed class GitHubRuntime
             if (number > 0)
             {
                 selected = await RequireOpenPrAsync(number, topic, generation, branch, cancellationToken);
-                await Runtime.EnsureDraftForMutationAsync(api, selected, cancellationToken);
+                await EnsureDraftForSourceAsync(selected, op, false, cancellationToken);
             }
             (JsonObject pr, bool created) = await EnsurePrAsync(topic, generation, branch, op.Str("title"), op.Str("body"), cancellationToken);
             await journal.AdvanceAsync(opId, "pr_updated", new JsonObject { ["pr_number"] = pr["number"]?.DeepClone(), ["created"] = created }, cancellationToken);
