@@ -248,6 +248,8 @@ internal sealed class DemoModel(TimeProvider clock) : IModelProvider
             ["kind"] = kind,
             ["learning_target"] = "same",
             ["reason"] = "Make the operation and thread boundary recoverable.",
+            ["problem"] = "The original text does not explain the asynchronous operation or its thread boundary.",
+            ["reader_benefit"] = "Distinguishes operation completion from thread scheduling.",
             ["essential_meanings"] = kind == "note" ? new JsonArray() : new JsonArray("Represents asynchronous work", "Does not guarantee a dedicated thread"),
             ["sources"] = kind == "note" ? new JsonArray() : new JsonArray(new JsonObject { ["url"] = url, ["claim"] = "An asynchronous operation does not guarantee a dedicated thread.", ["version"] = "not version-specific" }),
             ["feedback_keys"] = feedbackKeys.Copy()
@@ -291,6 +293,14 @@ internal sealed class DemoModel(TimeProvider clock) : IModelProvider
                 ["quality"] = new JsonObject { ["accuracy"] = "PASS", ["clarity"] = "PASS", ["rules_compliance"] = "PASS", ["question_quality"] = "PASS", ["identity_safety"] = "PASS" }
             });
         }
-        return Task.FromResult(new JsonObject { ["verdict"] = "CLEAN", ["notes"] = reports, ["overall_reason"] = "Fixture review adapter checked complete final candidates.", ["decision_checks"] = new JsonArray() });
+        return Task.FromResult(new JsonObject
+        {
+            ["verdict"] = "CLEAN",
+            ["notes"] = reports,
+            ["change_checks"] = new JsonArray(Enumerable.Range(0, payload.RequiredObject("proposal").Arr("edits").Count).Select(index => (JsonNode)new JsonObject
+            { ["edit_index"] = index, ["verdict"] = "WORTHWHILE", ["reason"] = "Fixture comparison makes the operation and thread boundary recoverable." }).ToArray()),
+            ["overall_reason"] = "Fixture review adapter checked complete final candidates.",
+            ["decision_checks"] = new JsonArray()
+        });
     }
 }

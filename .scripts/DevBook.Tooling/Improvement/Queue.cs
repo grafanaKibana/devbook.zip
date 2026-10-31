@@ -5,7 +5,7 @@ namespace DevBook.Tooling.Improvement;
 
 public static class Queue
 {
-    private sealed record Candidate(int Priority, string PathKey, JsonObject Note, string Reason);
+    private sealed record Candidate(int Priority, bool NeedsFixing, string PathKey, JsonObject Note, string Reason);
 
     public static JsonObject? OpenPrForTopic(JsonObject state, string topic) => state.Obj("prs").Select(pair => pair.Value).OfType<JsonObject>()
         .FirstOrDefault(pr => pr.Str("status") == "open" && (pr.Str("topic_id", pr.Str("topic")) == topic || pr.Str("topic_id", pr.Str("topic")) == Core.TopicId(topic)));
@@ -30,14 +30,20 @@ public static class Queue
             string topic = note.Str("topic", Core.TopicFor(path));
             string hash = note.Str("hash", LegacyIdentity.Digest(note.Str("content")));
             JsonObject? prior = current.Obj("notes")[path] as JsonObject;
+            string repairHash = note.Str("repair_input_hash");
+            string evaluationHash = config.Str("evaluation_hash");
             (int priority, string reason) = feedbackByTopic.ContainsKey(topic) ? (0, "feedback")
                 : prior is null ? (1, "new")
                 : prior.Str("content_hash") != hash ? (2, "changed")
                 : prior.Str("outcome") is not ("keep" or "changed") ? (3, "unchecked")
                 : prior.Str("outcome") == "keep" && prior.Str("rules_hash") == rulesHash
-                    && !Review.VerifiedKeep(prior.Obj("keep_review"), path, note.Str("content"), rulesHash) ? (3, "keep_unverified")
+                    && (!Review.VerifiedKeep(prior.Obj("keep_review"), path, note.Str("content"), rulesHash)
+                        || evaluationHash.Length != 0 && prior.Str("evaluation_hash") == evaluationHash
+                            && prior.Obj("keep_review").Str("evaluation_hash") != evaluationHash) ? (3, "keep_unverified")
                 : note.Arr("violations").Count != 0 && prior.Str("violation_hash") != LegacyIdentity.ViolationHash(note.Arr("violations")) ? (4, "violations")
-                : prior.Str("rules_hash") != rulesHash ? (5, "rules_changed") : (99, "");
+                : prior.Str("rules_hash") != rulesHash ? (5, "rules_changed")
+                : evaluationHash.Length != 0 && prior.Str("evaluation_hash") != evaluationHash ? (6, "evaluation_changed")
+                : repairHash.Length != 0 && prior.Str("repair_input_hash") != repairHash ? (7, "needs_fixing") : (99, "");
             if (reason.Length == 0)
             {
                 continue;
@@ -47,9 +53,10 @@ public static class Queue
                 rows = [];
                 candidates[topic] = rows;
             }
-            rows.Add(new(priority, LegacyIdentity.CaseFold(path), note, reason));
+            rows.Add(new(priority, repairHash.Length != 0, LegacyIdentity.CaseFold(path), note, reason));
         }
         string[] topics = candidates.Keys.OrderBy(topic => feedbackByTopic.ContainsKey(topic) ? 0 : 1)
+            .ThenBy(topic => candidates[topic].Any(row => row.NeedsFixing) ? 0 : 1)
             .ThenBy(topic => candidates[topic].Min(row => row.Priority)).ThenBy(LegacyIdentity.CaseFold, StringComparer.Ordinal).ToArray();
         JsonObject? scopeBatch = null;
         foreach (string topic in topics)
@@ -64,7 +71,7 @@ public static class Queue
             {
                 continue;
             }
-            List<Candidate> rows = candidates[topic].OrderBy(row => row.Priority).ThenBy(row => row.PathKey, StringComparer.Ordinal).ToList();
+            List<Candidate> rows = candidates[topic].OrderBy(row => row.NeedsFixing ? 0 : 1).ThenBy(row => row.Priority).ThenBy(row => row.PathKey, StringComparer.Ordinal).ToList();
             if (pr?.Bool("frozen") == true)
             {
                 if (feedback.Length == 0)
@@ -84,23 +91,24 @@ public static class Queue
                     requested.UnionWith(paths);
                 }
             }
-            Candidate[] selected = rows.OrderBy(row => requested.Contains(row.Note.Str("path")) ? 0 : 1).ThenBy(row => row.Priority).ThenBy(row => row.PathKey, StringComparer.Ordinal).Take(limit).ToArray();
+            Candidate[] selected = rows.OrderBy(row => requested.Contains(row.Note.Str("path")) ? 0 : 1)
+                .ThenBy(row => row.NeedsFixing ? 0 : 1).ThenBy(row => row.Priority).ThenBy(row => row.PathKey, StringComparer.Ordinal).Take(limit).ToArray();
             HashSet<string> selectedPaths = selected.Select(row => row.Note.Str("path")).ToHashSet();
             JsonObject[] scopedFeedback = feedback.Where(item => item.Arr("paths").Strings().ToHashSet().IsSubsetOf(selectedPaths)).ToArray();
             if (feedback.Length != 0 && scopedFeedback.Length == 0)
             {
-                scopeBatch ??= MakeBatch(topic, [], feedback, rulesHash, pr);
+                scopeBatch ??= MakeBatch(topic, [], feedback, rulesHash, config.Str("evaluation_hash"), pr);
                 continue;
             }
             if (selected.Length != 0 || scopedFeedback.Length != 0)
             {
-                return MakeBatch(topic, selected, scopedFeedback, rulesHash, pr);
+                return MakeBatch(topic, selected, scopedFeedback, rulesHash, config.Str("evaluation_hash"), pr);
             }
         }
         return scopeBatch;
     }
 
-    private static JsonObject MakeBatch(string topic, IReadOnlyList<Candidate> selected, IEnumerable<JsonObject> feedback, string rulesHash, JsonObject? pr)
+    private static JsonObject MakeBatch(string topic, IReadOnlyList<Candidate> selected, IEnumerable<JsonObject> feedback, string rulesHash, string evaluationHash, JsonObject? pr)
     {
         var notes = new JsonArray();
         foreach (Candidate row in selected)
@@ -116,6 +124,7 @@ public static class Queue
             ["notes"] = notes,
             ["feedback"] = new JsonArray(feedback.Select(item => item.DeepClone()).ToArray()),
             ["rules_hash"] = rulesHash,
+            ["evaluation_hash"] = evaluationHash,
             ["pr"] = pr?.DeepClone()
         };
     }

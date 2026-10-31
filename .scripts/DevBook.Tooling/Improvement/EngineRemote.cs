@@ -202,6 +202,7 @@ public sealed partial class ImprovementEngine
         }
         if (loadedBranchNotes)
         {
+            IReadOnlySet<string> repairIds = RepairInputs.ReadIds(root);
             NoteDocument[] current = notes.OfType<JsonObject>()
                 .Select(note => NoteDocument.Parse(note.Str("content"), note.Str("path"), Path.Combine(root, note.Str("path"))))
                 .Concat(Core.SpecialNotes.Where(path => !byPath.ContainsKey(path) && File.Exists(Path.Combine(root, path)))
@@ -210,6 +211,7 @@ public sealed partial class ImprovementEngine
                 .Concat(Validation.ValidateGlobalQardIds(current)).ToArray();
             foreach (JsonObject note in notes.OfType<JsonObject>())
             {
+                RepairInputs.Apply(note, repairIds);
                 note["violations"] = new JsonArray(issues.Where(issue => issue.Path == note.Str("path"))
                     .Select(issue => (JsonNode)new JsonObject { ["code"] = issue.Code, ["line"] = issue.Line, ["message"] = issue.Message }).ToArray());
             }

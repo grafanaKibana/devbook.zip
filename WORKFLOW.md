@@ -16,6 +16,6 @@ Pushes to `main` trigger the [release workflow](.github/workflows/release.yml). 
 
 ## Recurring note improvements
 
-The [improvement workflow](.github/workflows/devbook-improvement.yml) provides six-hour opportunities and manual runs. It remains credential-free until separately activated. Its [runbook](docs/devbook-improvement.md) owns author/reviewer, export, quota and recovery details.
+The [improvement workflow](.github/workflows/devbook-improvement.yml) provides six-hour opportunities and manual runs. It remains credential-free until separately activated. Its [runbook](.scripts/DevBook.Tooling/README.md) owns author/reviewer, export, quota and recovery details.
 
 This queue is the exception to one issue per unit of work: topic PRs, durable state and verified-owner feedback provide its audit trail. Each topic has one draft PR; summaries cover the cumulative diff and preserve user-written text. The owner reviews and merges every batch manually.

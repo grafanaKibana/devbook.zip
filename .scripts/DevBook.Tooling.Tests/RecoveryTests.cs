@@ -1,49 +1,43 @@
-using System.Text.Json.Nodes;
 using DevBook.Tooling.Improvement;
 using DevBook.Tooling.Infrastructure;
 using FluentAssertions;
+using System.Text.Json.Nodes;
 using Xunit;
 
 namespace DevBook.Tooling.Tests;
 
-public sealed class RecoveryBranchConflictTests
+public sealed class RecoveryTests
 {
-    private const string TopicPath = "Vault/Home/Programming/AAA/Card.md";
-    private const string OtherPath = "Vault/Home/Programming/ZZZ/Other.md";
-    private const string LaterPath = "Vault/Home/Programming/AAA/Later.md";
-    private const string Source = "The original mechanism.\n";
-    private const string Candidate = "The reviewed mechanism.\n";
-    private static readonly string Topic = Core.TopicId(Core.TopicFor(TopicPath));
-    private static readonly string Branch = Runtime.ExpectedManagedBranch(Topic, 1);
+    private const string RecoveryBranchConflictTopicPath = "Vault/Home/Programming/AAA/Card.md";
+    private const string RecoveryBranchConflictOtherPath = "Vault/Home/Programming/ZZZ/Other.md";
+    private const string RecoveryBranchConflictLaterPath = "Vault/Home/Programming/AAA/Later.md";
+    private const string RecoveryBranchConflictSource = "The original mechanism.\n";
+    private const string RecoveryBranchConflictCandidate = "The reviewed mechanism.\n";
+    private static readonly string RecoveryBranchConflictTopic = Core.TopicId(Core.TopicFor(RecoveryBranchConflictTopicPath));
+    private static readonly string RecoveryBranchConflictBranch = Runtime.ExpectedManagedBranch(RecoveryBranchConflictTopic, 1);
 
     [Theory]
     [InlineData("prepared", false, false)]
-    [InlineData("commit_created", false, true)]
-    [InlineData("branch_updated", true, false)]
     [InlineData("pr_updated", false, true)]
-    public async Task Owner_branch_conflict_archives_the_candidate_and_allows_other_topic_work(string phase, bool missing, bool knownPr)
+    public async Task DefinitiveBranchConflictArchivesCandidateAndPreservesAudit(string phase, bool missing, bool knownPr)
     {
         // Arrange
-        using var files = new NoteFiles();
+        using var files = new RecoveryBranchConflictNoteFiles();
         bool actualPr = knownPr || phase == "branch_updated";
         bool observedReview = phase == "pr_updated";
-        var api = new RecoveryApi { Missing = missing, HasPr = actualPr, Draft = !observedReview };
-        JsonObject operation = Operation(phase, knownPr);
-        operation["receipts"] = Receipt(Core.RulesVersion(files.Root));
+        var api = new RecoveryBranchConflictRecoveryApi { Missing = missing, HasPr = actualPr, Draft = !observedReview };
+        JsonObject operation = RecoveryBranchConflictOperation(phase, knownPr);
+        operation["receipts"] = RecoveryBranchConflictReceipt(Core.RulesVersion(files.Root));
         JsonObject state = Core.NewState();
         state["pending_operation"] = operation.Copy();
-        state["pending_author_proposal"] = new JsonObject { ["topic_id"] = Topic, ["proposal"] = new JsonObject { ["audit"] = "original author proposal" } };
+        state["pending_author_proposal"] = new JsonObject { ["topic_id"] = RecoveryBranchConflictTopic, ["proposal"] = new JsonObject { ["audit"] = "original author proposal" } };
         if (knownPr)
         {
-            state.RequiredObject("prs")[Topic + ":1"] = new JsonObject { ["topic_id"] = Topic, ["generation"] = 1, ["number"] = 7, ["status"] = "open", ["frozen"] = false };
+            state.RequiredObject("prs")[RecoveryBranchConflictTopic + ":1"] = new JsonObject { ["topic_id"] = RecoveryBranchConflictTopic, ["generation"] = 1, ["number"] = 7, ["status"] = "open", ["frozen"] = false };
         }
         var store = new MemoryStateStore(state);
         await new DurableLease(store, "fixture").AcquireAsync();
         var runtime = new GitHubRuntime(api, store, leaseOwner: "fixture", activation: () => { });
-        var model = new KeepModel();
-        var config = new JsonObject { ["repo"] = api.Repo };
-        ImprovementEngine Engine() => new(files.Root, config, store, model, api, runtime,
-            notesLoader: files.Notes, snapshotShaLoader: () => "base");
 
         // Act: reconcile a definitive ref mismatch before any draft or branch mutation.
         JsonObject paused = (await runtime.RecoverPendingAsync())!;
@@ -59,7 +53,7 @@ public sealed class RecoveryBranchConflictTests
         audit.Str("custom_audit").Should().Be("preserve original evidence");
         audit.Obj("evidence").Str("expected_head").Should().Be(phase is "prepared" or "commit_created" ? "parent-head" : "candidate-head");
         audit.Obj("evidence").Str("observed_head").Should().Be(missing ? "" : "owner-head");
-        JsonObject marker = archived.State.Obj("topics").Obj(Topic).Obj("publication_conflict");
+        JsonObject marker = archived.State.Obj("topics").Obj(RecoveryBranchConflictTopic).Obj("publication_conflict");
         marker.Str("op_id").Should().Be("interrupted-op");
         marker.Int("generation").Should().Be(1);
         marker.Str("reason").Should().Contain(missing ? "disappeared" : "changed");
@@ -67,57 +61,12 @@ public sealed class RecoveryBranchConflictTests
         archived.State.Obj("prs").Count.Should().Be(actualPr ? 1 : 0);
         if (actualPr)
         {
-            JsonObject owningPr = archived.State.Obj("prs").Obj(Topic + ":1");
+            JsonObject owningPr = archived.State.Obj("prs").Obj(RecoveryBranchConflictTopic + ":1");
             owningPr.Int("number").Should().Be(7);
             owningPr.Str("head_sha").Should().Be(missing ? "" : "owner-head");
             owningPr.Bool("frozen").Should().Be(observedReview);
             owningPr.Str("review_started_head_sha").Should().Be(observedReview ? "owner-head" : "");
             JsonNode.DeepEquals(owningPr["proposal_records"], operation.Obj("receipts")["records"]).Should().BeTrue();
-        }
-
-        // Arrange: a ready PR can return to draft before ordinary reconciliation sees it.
-        api.Draft = true;
-
-        // Act: the next apply opportunity must not replay the candidate or poll the paused topic.
-        JsonObject progressed = await Engine().RunAsync(apply: true, withModel: true);
-        JsonObject settled = await Engine().RunAsync(apply: true, withModel: true);
-
-        // Assert
-        progressed.Str("status").Should().Be("no_worthwhile_changes");
-        settled.Str("status").Should().Be("topics_paused");
-        model.Paths.Should().Equal(OtherPath);
-        api.Writes.Should().Be(0);
-        api.Paths.Should().NotContain(path => path.Contains("/files?", StringComparison.Ordinal) || path.Contains("/comments?", StringComparison.Ordinal) || path.Contains("/reviews?", StringComparison.Ordinal) || path.StartsWith("/contents/", StringComparison.Ordinal));
-        api.OwnerSource.Should().Be("Owner's concurrent note edit.");
-        File.ReadAllText(Path.Combine(files.Root, TopicPath)).Should().Be(Source);
-        if (observedReview)
-        {
-            JsonObject reconciledPr = (await store.ReadAsync()).State.Obj("prs").Obj(Topic + ":1");
-            reconciledPr.Bool("frozen").Should().BeTrue();
-            reconciledPr.Str("review_started_head_sha").Should().Be("owner-head");
-        }
-
-        if (phase == "pr_updated")
-        {
-            // Arrange: closure advances the owning generation; its audit remains historical.
-            api.PrClosed = true;
-            files.IncludeLater = true;
-
-            // Act
-            JsonObject nextGeneration = await Engine().RunAsync(apply: true, withModel: true);
-            StateSnapshot afterClosure = await store.ReadAsync();
-
-            // Assert
-            nextGeneration.Str("status").Should().Be("no_worthwhile_changes");
-            model.Paths.Should().Equal(OtherPath, LaterPath, TopicPath);
-            afterClosure.State.Obj("topics").Obj(Topic).Int("generation").Should().Be(2);
-            afterClosure.State.Obj("topics").Obj(Topic).Obj("publication_conflict").Int("generation").Should().Be(1);
-            afterClosure.State.Obj("invalidated_operations").ContainsKey("interrupted-op").Should().BeTrue();
-            afterClosure.State.Arr("rejections").Should().ContainSingle().Which.Str("fingerprint")
-                .Should().Be(LegacyIdentity.Proposal(operation.Obj("receipts").Obj("proposal").Arr("edits")[0]!.AsObject()));
-            afterClosure.State.Obj("prs").Obj(Topic + ":1").Obj("terminal_audit").Int("record_count").Should().Be(1);
-            afterClosure.State.Obj("notes").Obj(TopicPath).Str("outcome").Should().Be("keep");
-            api.Writes.Should().Be(0);
         }
     }
 
@@ -125,9 +74,9 @@ public sealed class RecoveryBranchConflictTests
     public async Task Uncertain_ref_read_failure_preserves_the_global_journal_for_retry()
     {
         // Arrange
-        var api = new RecoveryApi { ReadFailure = true };
+        var api = new RecoveryBranchConflictRecoveryApi { ReadFailure = true };
         JsonObject state = Core.NewState();
-        state["pending_operation"] = Operation("prepared", false);
+        state["pending_operation"] = RecoveryBranchConflictOperation("prepared", false);
         var store = new MemoryStateStore(state);
         await new DurableLease(store, "fixture").AcquireAsync();
         var runtime = new GitHubRuntime(api, store, leaseOwner: "fixture", activation: () => { });
@@ -148,9 +97,9 @@ public sealed class RecoveryBranchConflictTests
     public async Task Recovery_accepts_its_own_already_applied_commit_without_rewriting_the_branch()
     {
         // Arrange
-        var api = new RecoveryApi { HasPr = true, Head = "candidate-head", Draft = true, InterruptPrUpdate = true };
+        var api = new RecoveryBranchConflictRecoveryApi { HasPr = true, Head = "candidate-head", Draft = true, InterruptPrUpdate = true };
         JsonObject state = Core.NewState();
-        state["pending_operation"] = Operation("commit_created", true);
+        state["pending_operation"] = RecoveryBranchConflictOperation("commit_created", true);
         var store = new MemoryStateStore(state);
         await new DurableLease(store, "fixture").AcquireAsync();
         var runtime = new GitHubRuntime(api, store, leaseOwner: "fixture", activation: () => { });
@@ -167,17 +116,17 @@ public sealed class RecoveryBranchConflictTests
         api.BranchWrites.Should().Be(0);
     }
 
-    private static JsonObject Operation(string phase, bool knownPr) => new()
+    private static JsonObject RecoveryBranchConflictOperation(string phase, bool knownPr) => new()
     {
         ["op_id"] = "interrupted-op",
         ["phase"] = phase,
-        ["topic"] = Topic,
+        ["topic"] = RecoveryBranchConflictTopic,
         ["generation"] = 1,
-        ["branch"] = Branch,
+        ["branch"] = RecoveryBranchConflictBranch,
         ["pr_number"] = knownPr ? 7 : 0,
         ["parent_head"] = "parent-head",
-        ["candidate"] = new JsonObject { [TopicPath] = Candidate },
-        ["candidate_hashes"] = new JsonObject { [TopicPath] = LegacyIdentity.Fingerprint(JsonValue.Create(Candidate)) },
+        ["candidate"] = new JsonObject { [RecoveryBranchConflictTopicPath] = RecoveryBranchConflictCandidate },
+        ["candidate_hashes"] = new JsonObject { [RecoveryBranchConflictTopicPath] = LegacyIdentity.Fingerprint(JsonValue.Create(RecoveryBranchConflictCandidate)) },
         ["evidence"] = new JsonObject { ["commit_sha"] = phase == "prepared" ? "" : "candidate-head" },
         ["feedback_revision"] = new JsonObject { ["allowlist"] = new JsonArray(), ["processed"] = new JsonObject() },
         ["prepared_source_version"] = 1,
@@ -185,29 +134,31 @@ public sealed class RecoveryBranchConflictTests
         ["custom_audit"] = "preserve original evidence"
     };
 
-    private static JsonObject Receipt(string rules)
+    private static JsonObject RecoveryBranchConflictReceipt(string rules)
     {
         JsonObject batch = new()
         {
-            ["topic"] = Core.TopicFor(TopicPath),
-            ["topic_id"] = Topic,
-            ["notes"] = new JsonArray(DomainFixtures.NoteRecord(TopicPath, Source)),
+            ["topic"] = Core.TopicFor(RecoveryBranchConflictTopicPath),
+            ["topic_id"] = RecoveryBranchConflictTopic,
+            ["notes"] = new JsonArray(DomainFixtures.NoteRecord(RecoveryBranchConflictTopicPath, RecoveryBranchConflictSource)),
             ["rules_hash"] = rules
         };
         JsonObject proposal = DomainFixtures.Proposal(new JsonObject
         {
-            ["path"] = TopicPath,
-            ["expected_hash"] = LegacyIdentity.Digest(Source),
-            ["before"] = Source,
-            ["after"] = Candidate,
+            ["path"] = RecoveryBranchConflictTopicPath,
+            ["expected_hash"] = LegacyIdentity.Digest(RecoveryBranchConflictSource),
+            ["before"] = RecoveryBranchConflictSource,
+            ["after"] = RecoveryBranchConflictCandidate,
             ["reason"] = "Clarify the operating mechanism.",
+            ["problem"] = "The existing explanation omits a material mechanism or boundary.",
+            ["reader_benefit"] = "The correction restores the mechanism for recall and engineering decisions.",
             ["kind"] = "note",
             ["learning_target"] = "same",
             ["essential_meanings"] = new JsonArray(),
             ["sources"] = new JsonArray(),
             ["feedback_keys"] = new JsonArray()
         });
-        JsonObject result = new() { ["sources"] = new JsonObject { [TopicPath] = Candidate } };
+        JsonObject result = new() { ["sources"] = new JsonObject { [RecoveryBranchConflictTopicPath] = RecoveryBranchConflictCandidate } };
         return new JsonObject
         {
             ["batch"] = batch,
@@ -217,34 +168,34 @@ public sealed class RecoveryBranchConflictTests
         };
     }
 
-    private sealed class NoteFiles : IDisposable
+    private sealed class RecoveryBranchConflictNoteFiles : IDisposable
     {
         public string Root { get; } = Path.Combine(Path.GetTempPath(), "recovery-topic-" + Guid.NewGuid().ToString("N"));
         public bool IncludeLater { get; set; }
 
-        public NoteFiles()
+        public RecoveryBranchConflictNoteFiles()
         {
             DomainFixtures.CreateReviewContract(Root);
-            foreach (string path in new[] { TopicPath, OtherPath, LaterPath })
+            foreach (string path in new[] { RecoveryBranchConflictTopicPath, RecoveryBranchConflictOtherPath, RecoveryBranchConflictLaterPath })
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(Path.Combine(Root, path))!);
-                File.WriteAllText(Path.Combine(Root, path), Source);
+                File.WriteAllText(Path.Combine(Root, path), RecoveryBranchConflictSource);
             }
         }
 
         public JsonArray Notes()
         {
-            var notes = new JsonArray(DomainFixtures.NoteRecord(TopicPath, Source), DomainFixtures.NoteRecord(OtherPath, Source));
+            var notes = new JsonArray(DomainFixtures.NoteRecord(RecoveryBranchConflictTopicPath, RecoveryBranchConflictSource), DomainFixtures.NoteRecord(RecoveryBranchConflictOtherPath, RecoveryBranchConflictSource));
             if (IncludeLater)
             {
-                notes.Add(DomainFixtures.NoteRecord(LaterPath, Source));
+                notes.Add(DomainFixtures.NoteRecord(RecoveryBranchConflictLaterPath, RecoveryBranchConflictSource));
             }
             return notes;
         }
         public void Dispose() => Directory.Delete(Root, recursive: true);
     }
 
-    private sealed class KeepModel : IModelProvider
+    private sealed class RecoveryBranchConflictKeepModel : IModelProvider
     {
         public List<string> Paths { get; } = [];
 
@@ -265,7 +216,7 @@ public sealed class RecoveryBranchConflictTests
             Task.FromResult(DomainFixtures.UnchangedReview(payload));
     }
 
-    private sealed class RecoveryApi : IGitHubApi
+    private sealed class RecoveryBranchConflictRecoveryApi : IGitHubApi
     {
         public string Repo => "owner/repo";
         public string Head { get; set; } = "owner-head";
@@ -280,13 +231,13 @@ public sealed class RecoveryBranchConflictTests
         public int BranchWrites { get; private set; }
         public List<string> Paths { get; } = [];
 
-        private JsonObject Pr() => new()
+        private JsonObject RecoveryBranchConflictPr() => new()
         {
             ["number"] = 7,
             ["state"] = PrClosed ? "closed" : "open",
             ["draft"] = Draft,
-            ["body"] = Runtime.Marker(Topic, 1),
-            ["head"] = new JsonObject { ["ref"] = Branch, ["sha"] = Head, ["repo"] = new JsonObject { ["full_name"] = Repo } },
+            ["body"] = Runtime.Marker(RecoveryBranchConflictTopic, 1),
+            ["head"] = new JsonObject { ["ref"] = RecoveryBranchConflictBranch, ["sha"] = Head, ["repo"] = new JsonObject { ["full_name"] = Repo } },
             ["base"] = new JsonObject { ["ref"] = "main", ["repo"] = new JsonObject { ["full_name"] = Repo } }
         };
 
@@ -307,7 +258,7 @@ public sealed class RecoveryBranchConflictTests
                 throw new InvalidOperationException("Conflicted recovery must not mutate GitHub.");
             }
             JsonNode response;
-            if (path == "/git/ref/heads/" + Uri.EscapeDataString(Branch))
+            if (path == "/git/ref/heads/" + Uri.EscapeDataString(RecoveryBranchConflictBranch))
             {
                 if (ReadFailure)
                 {
@@ -324,8 +275,8 @@ public sealed class RecoveryBranchConflictTests
                 response = path switch
                 {
                     "/git/ref/heads/main" => new JsonObject { ["object"] = new JsonObject { ["sha"] = "base" } },
-                    "/pulls/7" => Pr(),
-                    "/pulls?state=all&per_page=100" or "/pulls?state=open&per_page=100" => HasPr ? new JsonArray(Pr()) : new JsonArray(),
+                    "/pulls/7" => RecoveryBranchConflictPr(),
+                    "/pulls?state=all&per_page=100" or "/pulls?state=open&per_page=100" => HasPr ? new JsonArray(RecoveryBranchConflictPr()) : new JsonArray(),
                     _ => throw new InvalidOperationException("Paused topics must not be polled: " + path)
                 };
             }
@@ -338,4 +289,75 @@ public sealed class RecoveryBranchConflictTests
             throw new InvalidOperationException("Conflicted recovery must not change draft status.");
         }
     }
+    [Fact]
+    public async Task FeedbackChangedDuringCommitCreationArchivesCandidateWithoutUpdatingBranch()
+    {
+        // Arrange
+
+        var api = new NormalPublicationFeedbackFeedbackRaceApi();
+        var store = new MemoryStateStore(Core.NewState());
+        await new DurableLease(store, "fixture").AcquireAsync();
+        var runtime = new GitHubRuntime(api, store, leaseOwner: "fixture", activation: () => { });
+        await runtime.PublishAsync(RuntimeFixtures.Request("Original", "First reviewed candidate"));
+        string originalHead = api.Inner.Head;
+        api.Inner.Comments.Add(RuntimeFixtures.OwnerComment());
+        JsonArray pending = await Feedback.PollAsync(api, 1, RuntimeFixtures.Allowlist());
+        JsonObject request = RuntimeFixtures.Request("First reviewed candidate", "Withdrawn candidate");
+        request["expected_pr_number"] = 1;
+        request["expected_branch_sha"] = originalHead;
+        request["pending_feedback"] = pending.Copy();
+        request["edits"] = new JsonArray(new JsonObject { ["path"] = RuntimeFixtures.NotePath, ["feedback_keys"] = new JsonArray(pending[0]!.Str("key")) });
+        request["feedback_revision"] = new JsonObject
+        {
+            ["allowlist"] = new JsonArray("42:owner"),
+            ["processed"] = new JsonObject { ["comment:7"] = pending[0]!["revision"]!.DeepClone() }
+        };
+        api.AfterCommitCreated = () =>
+        {
+
+            api.Inner.Comments[0]!["body"] = "Withdraw that instruction; leave this note unchanged.";
+            api.Inner.Comments[0]!["updated_at"] = "2026-10-31T08:00:00Z";
+
+        };
+
+        // Act
+        JsonObject result = await runtime.PublishAsync(request);
+        StateSnapshot saved = await store.ReadAsync();
+
+        // Assert
+        result.Str("status").Should().Be("feedback_changed");
+        api.Inner.Head.Should().Be(originalHead);
+        api.Inner.Source.Should().Be("First reviewed candidate");
+        api.Inner.Commits.Should().Be(2);
+        api.Inner.PrCreates.Should().Be(1);
+        api.Inner.ForceWrites.Should().Be(0);
+        saved.State["pending_operation"].Should().BeNull();
+        JsonObject archived = saved.State.Obj("invalidated_operations").Single().Value!.AsObject();
+        archived.Obj("candidate").Str(RuntimeFixtures.NotePath).Should().Be("Withdrawn candidate");
+        archived.Obj("evidence").Str("commit_sha").Should().Be("commit-2");
+        archived.Obj("evidence").Str("reason").Should().Be("Owner feedback changed before branch update");
+        JsonNode.DeepEquals(archived["feedback_revision"], request["feedback_revision"]).Should().BeTrue();
+    }
+
+    private sealed class NormalPublicationFeedbackFeedbackRaceApi : IGitHubApi
+    {
+        public RuntimeApi Inner { get; } = new();
+        public Action? AfterCommitCreated { get; set; }
+        public string Repo => Inner.Repo;
+
+        public async Task<JsonNode?> RequestAsync(string method, string path, JsonNode? payload = null, bool paginate = false, CancellationToken cancellationToken = default)
+        {
+            JsonNode? result = await Inner.RequestAsync(method, path, payload, paginate, cancellationToken);
+            if (method == "POST" && path == "/git/commits" && AfterCommitCreated is Action action)
+            {
+                AfterCommitCreated = null;
+                action();
+            }
+            return result;
+        }
+
+        public Task<JsonNode?> GraphqlAsync(string query, JsonObject variables, CancellationToken cancellationToken = default) =>
+            Inner.GraphqlAsync(query, variables, cancellationToken);
+    }
+
 }

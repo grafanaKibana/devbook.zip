@@ -52,17 +52,20 @@ public static class Core
         string home = System.IO.Path.Combine(root, "Vault", "Home");
         NoteDocument[] notes = Directory.EnumerateFiles(home, "*.md", SearchOption.AllDirectories).Order(StringComparer.Ordinal).Select(path => NoteDocument.Load(path, root)).ToArray();
         Issue[] issues = notes.SelectMany(note => Validation.ValidateNote(note, home)).Concat(Validation.ValidateGlobalQardIds(notes)).ToArray();
+        IReadOnlySet<string> repairIds = RepairInputs.ReadIds(root);
         var result = new JsonArray();
         foreach (NoteDocument note in notes.Where(note => !SpecialNotes.Contains(note.Rel)))
         {
-            result.Add(new JsonObject
+            var record = new JsonObject
             {
                 ["path"] = note.Rel,
                 ["content"] = note.Content,
                 ["hash"] = LegacyIdentity.Digest(note.Content),
                 ["topic"] = TopicFor(note.Rel),
                 ["violations"] = new JsonArray(issues.Where(issue => issue.Path == note.Rel).Select(issue => (JsonNode)new JsonObject { ["code"] = issue.Code, ["line"] = issue.Line, ["message"] = issue.Message }).ToArray())
-            });
+            };
+            RepairInputs.Apply(record, repairIds);
+            result.Add(record);
         }
         return result;
     }
@@ -286,6 +289,11 @@ public static class Core
                 : note.Str("hash", LegacyIdentity.Digest(note.Str("content")));
             record["rules_hash"] = batch["rules_hash"]?.DeepClone();
             record["outcome"] = dispositions[path].Str("outcome");
+            if (record.Str("outcome") is "keep" or "changed")
+            {
+                record["repair_input_hash"] = note.Str("repair_input_hash");
+                record["evaluation_hash"] = batch["evaluation_hash"]?.DeepClone();
+            }
             record["violation_hash"] = LegacyIdentity.ViolationHash(note.Arr("violations"));
             JsonObject? noteReview = review?.Arr("notes").OfType<JsonObject>().FirstOrDefault(item => item.Str("path") == path);
             if (record.Str("outcome") == "keep" && review?.Str("verdict") == "CLEAN" && noteReview is not null)
@@ -295,6 +303,7 @@ public static class Core
                 {
                     ["content_hash"] = LegacyIdentity.Digest(currentText),
                     ["rules_hash"] = batch.Str("rules_hash"),
+                    ["evaluation_hash"] = batch["evaluation_hash"]?.DeepClone(),
                     ["review"] = noteReview.Copy()
                 };
                 if (Review.VerifiedKeep(evidence, path, currentText, batch.Str("rules_hash"))

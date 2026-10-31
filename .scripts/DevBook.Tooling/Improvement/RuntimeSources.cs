@@ -89,31 +89,20 @@ public static partial class Runtime
         }
     }
 
-    public static async Task<Uri> ValidateSourceUrlAsync(string url, IEnumerable<string> allowedHosts, CancellationToken cancellationToken = default)
+    public static async Task<Uri> ValidateSourceUrlAsync(string url, CancellationToken cancellationToken = default, Func<string, CancellationToken, Task<IPAddress[]>>? resolver = null)
     {
         if (!Uri.TryCreate(url, UriKind.Absolute, out Uri? uri) || uri.Scheme != "https" || uri.UserInfo.Length != 0
-            || uri.Port != 443 || uri.Host.Length == 0 || !allowedHosts.Contains(uri.IdnHost, StringComparer.OrdinalIgnoreCase))
+            || uri.Port != 443 || uri.Host.Length == 0)
         {
-            throw new UnsafeInput("Source must use an explicitly allowed public HTTPS host.");
+            throw new UnsafeInput("Source must use a public HTTPS host without credentials on port 443.");
         }
-        try
-        {
-            IPAddress[] addresses = await Dns.GetHostAddressesAsync(uri.IdnHost, cancellationToken);
-            if (addresses.Length == 0 || addresses.Any(address => !IsPublicAddress(address)))
-            {
-                throw new UnsafeInput("Source resolved to a non-public address.");
-            }
-        }
-        catch (SocketException)
-        {
-            throw new RuntimeFailure("Source hostname did not resolve.");
-        }
+        await ResolvePublicSourceAsync(uri.IdnHost, cancellationToken, resolver);
         return uri;
     }
 
-    public static async Task<byte[]> FetchPrimarySourceAsync(string url, IEnumerable<string> allowedHosts, int maxBytes = 1_000_000, CancellationToken cancellationToken = default)
+    public static async Task<byte[]> FetchPrimarySourceAsync(string url, int maxBytes = 1_000_000, CancellationToken cancellationToken = default,
+        Func<string, CancellationToken, Task<IPAddress[]>>? resolver = null, HttpMessageHandler? transport = null)
     {
-        string[] hosts = allowedHosts.ToArray();
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         timeout.CancelAfter(TimeSpan.FromSeconds(15));
         using var handler = new SocketsHttpHandler
@@ -122,11 +111,7 @@ public static partial class Runtime
             UseProxy = false,
             ConnectCallback = async (context, token) =>
             {
-                IPAddress[] addresses = await Dns.GetHostAddressesAsync(context.DnsEndPoint.Host, token);
-                if (addresses.Length == 0 || addresses.Any(address => !IsPublicAddress(address)))
-                {
-                    throw new UnsafeInput("Source connection resolved to a non-public address.");
-                }
+                IPAddress[] addresses = await ResolvePublicSourceAsync(context.DnsEndPoint.Host, token, resolver);
                 var socket = new Socket(SocketType.Stream, ProtocolType.Tcp);
                 try
                 {
@@ -140,10 +125,10 @@ public static partial class Runtime
                 }
             }
         };
-        using var client = new HttpClient(handler);
+        using var client = new HttpClient(transport ?? handler);
         client.DefaultRequestHeaders.UserAgent.ParseAdd("DevBookImprovement/1");
         client.DefaultRequestHeaders.Accept.ParseAdd("text/markdown, text/plain;q=0.9, text/html;q=0.8");
-        Uri target = await ValidateSourceUrlAsync(url, hosts, timeout.Token);
+        Uri target = await ValidateSourceUrlAsync(url, timeout.Token, resolver);
         try
         {
             for (var redirects = 0; redirects <= 5; redirects++)
@@ -155,7 +140,7 @@ public static partial class Runtime
                     {
                         throw new UnsafeInput("Source redirect limit exceeded or location missing.");
                     }
-                    target = await ValidateSourceUrlAsync(new Uri(target, response.Headers.Location).AbsoluteUri, hosts, timeout.Token);
+                    target = await ValidateSourceUrlAsync(new Uri(target, response.Headers.Location).AbsoluteUri, timeout.Token, resolver);
                     continue;
                 }
                 response.EnsureSuccessStatusCode();
@@ -187,6 +172,24 @@ public static partial class Runtime
             throw new RuntimeFailure("Source retrieval failed.");
         }
         throw new RuntimeFailure("Source retrieval did not complete.");
+    }
+
+    public static async Task<IPAddress[]> ResolvePublicSourceAsync(string host, CancellationToken cancellationToken = default,
+        Func<string, CancellationToken, Task<IPAddress[]>>? resolver = null)
+    {
+        try
+        {
+            IPAddress[] addresses = await (resolver is null ? Dns.GetHostAddressesAsync(host, cancellationToken) : resolver(host, cancellationToken));
+            if (addresses.Length == 0 || addresses.Any(address => !IsPublicAddress(address)))
+            {
+                throw new UnsafeInput("Source resolved to a non-public address.");
+            }
+            return addresses;
+        }
+        catch (SocketException)
+        {
+            throw new RuntimeFailure("Source hostname did not resolve.");
+        }
     }
 
     private static bool IsPublicAddress(IPAddress address)
