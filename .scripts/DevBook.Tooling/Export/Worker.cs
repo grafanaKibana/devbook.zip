@@ -189,6 +189,7 @@ public static partial class Worker
             }
             string root = Repository.FindRoot(values.GetValueOrDefault("--repo-root"));
             JsonObject config = JsonData.ParseObject(await File.ReadAllTextAsync(Path.Combine(root, ".github/devbook-improvement.json")));
+            config = Pilot.Configure(config, () => Git.Text(root, "rev-parse", "HEAD"));
             JsonObject result;
             if (args[0] == "fixture")
             {

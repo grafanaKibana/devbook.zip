@@ -455,7 +455,7 @@ public sealed partial class ImprovementEngine
             copy["url"] = state.Obj("feedback").Obj(item.Str("key")).Str("url", item.Str("key"));
             return copy;
         }));
-        int generation = prState.Int("generation", state.Obj("topics").Obj(batch.Str("topic_id")).Int("generation", 1));
+        int generation = prState.Int("generation", state.Obj("topics").Obj(batch.Str("topic_id")).Int("generation", config.Int("initial_generation", 1)));
         string branch = prState.Str("branch", Core.BranchFor(batch.Str("topic"), generation));
         Dictionary<string, string> links = paths.ToDictionary(path => path, path => $"https://github.com/{config.Str("repo")}/blob/{string.Join('/', branch.Split('/').Select(Uri.EscapeDataString))}/{string.Join('/', path.Split('/').Select(Uri.EscapeDataString))}");
         Dictionary<string, string> sources = changes.OfType<JsonObject>().SelectMany(edit => edit.Arr("sources").OfType<JsonObject>()).GroupBy(source => source.Str("claim")).ToDictionary(group => group.Key, group => group.Last().Str("url"));

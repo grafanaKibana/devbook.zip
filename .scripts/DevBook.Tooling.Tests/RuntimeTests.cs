@@ -9,6 +9,36 @@ namespace DevBook.Tooling.Tests;
 
 public sealed class RuntimeTests
 {
+    [Theory]
+    [InlineData("main", 1)]
+    [InlineData("feature/devbook-improvement-setup", 1810001)]
+    public async Task Publication_targets_the_configured_base_with_a_distinct_pilot_generation(string baseBranch, int generation)
+    {
+        // Arrange
+        var api = new RuntimeApi { BaseBranch = baseBranch };
+        var store = new MemoryStateStore(Core.NewState());
+        await new DurableLease(store, "fixture").AcquireAsync();
+        var runtime = new GitHubRuntime(api, store, baseBranch, leaseOwner: "fixture", activation: () => { });
+        JsonObject request = RuntimeFixtures.Request("Original", "Reviewed candidate");
+        string branch = Runtime.ExpectedManagedBranch(RuntimeFixtures.Topic, generation);
+        request["generation"] = generation;
+        request["branch"] = branch;
+
+        // Act
+        JsonObject result = await runtime.PublishAsync(request);
+
+        // Assert
+        result.Str("status").Should().Be("awaiting_export");
+        api.Pr.Obj("base").Str("ref").Should().Be(baseBranch);
+        api.Pr.Obj("head").Str("ref").Should().Be(branch);
+        api.Pr.Bool("draft").Should().BeTrue();
+        Runtime.ValidPrIdentity(api.Pr, api.Repo, baseBranch, RuntimeFixtures.Topic, generation).Should().BeTrue();
+        Runtime.ValidPrIdentity(api.Pr, api.Repo, "wrong-base", RuntimeFixtures.Topic, generation).Should().BeFalse();
+        result.Obj("export_request").Str("branch").Should().Be(branch);
+        api.PrCreates.Should().Be(1);
+        api.ForceWrites.Should().Be(0);
+    }
+
     [Fact]
     public async Task Publication_reuses_marked_pr_and_renews_review_only_for_owner_requested_fixes()
     {

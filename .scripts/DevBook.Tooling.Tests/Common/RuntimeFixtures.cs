@@ -46,6 +46,7 @@ internal static class RuntimeFixtures
 internal sealed class RuntimeApi : IGitHubApi
 {
     public string Repo => "owner/repo";
+    public string BaseBranch { get; init; } = "main";
     public string Head { get; private set; } = "base";
     public string Source { get; private set; } = "Original";
     public JsonObject Pr { get; private set; } = new();
@@ -66,11 +67,11 @@ internal sealed class RuntimeApi : IGitHubApi
         if (method == "GET" && path.StartsWith("/git/ref/heads/", StringComparison.Ordinal))
         {
             string branch = Uri.UnescapeDataString(path["/git/ref/heads/".Length..]);
-            if (branch != "main" && !branchExists)
+            if (branch != BaseBranch && !branchExists)
             {
                 throw new GitHubApiFailure("HTTP 404", 404);
             }
-            result = new JsonObject { ["object"] = new JsonObject { ["sha"] = branch == "main" ? "base" : Head } };
+            result = new JsonObject { ["object"] = new JsonObject { ["sha"] = branch == BaseBranch ? "base" : Head } };
         }
         else if (method == "POST" && path == "/git/refs")
         {
@@ -132,8 +133,8 @@ internal sealed class RuntimeApi : IGitHubApi
                 ["state"] = "open",
                 ["draft"] = true,
                 ["body"] = data["body"]?.DeepClone(),
-                ["head"] = new JsonObject { ["ref"] = RuntimeFixtures.Branch, ["sha"] = Head, ["repo"] = new JsonObject { ["full_name"] = Repo } },
-                ["base"] = new JsonObject { ["ref"] = "main", ["sha"] = "base", ["repo"] = new JsonObject { ["full_name"] = Repo } }
+                ["head"] = new JsonObject { ["ref"] = data.Str("head"), ["sha"] = Head, ["repo"] = new JsonObject { ["full_name"] = Repo } },
+                ["base"] = new JsonObject { ["ref"] = data.Str("base"), ["sha"] = "base", ["repo"] = new JsonObject { ["full_name"] = Repo } }
             };
             result = Pr.Copy();
         }

@@ -71,9 +71,35 @@ Topic: Programming/NET. Improve `Tasks.md` and `Async Await.md` for mechanism cl
 
 ## Safe activation
 
+### One-off test before merging PR181
+
+The existing registered workflow can be dispatched from `feature/devbook-improvement-setup` without merging the implementation. GitHub documents [API/CLI dispatch to another branch once a workflow has run](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#workflow_dispatch). Use its explicit `pilot=true` input only after reviewing and publishing the pilot implementation. A [credential-free branch dispatch](https://github.com/grafanaKibana/devbook.zip/actions/runs/41181051583) verifies the GitHub dispatch path; it does not verify model access or publication.
+
+The pilot requires the verified owner's manual dispatch, this exact same-repository workflow/ref, and an authorized 40-character commit SHA in repository variable `DEVBOOK_IMPROVEMENT_PILOT_SHA`. The workflow SHA, local checkout and current remote base must agree. Keep both `DEVBOOK_IMPROVEMENT_ACTIVATED=false` and `DEVBOOK_IMPROVEMENT_SCHEDULE_ENABLED=false`. Pilot-scoped activation/subscription confirmations apply only to that explicitly authorized run; account usage credits must still be confirmed disabled. No scheduled event can enter the pilot path.
+
+The pilot overlays the existing policy in memory: two notes, one draft PR, base `feature/devbook-improvement-setup`, and state branch `maintenance/devbook-improvement-pr181-test-state`. Reserved generation `1810001` keeps its topic branch distinct from initial production generations. Author/reviewer rules, source policy, validators, genuine export and publication guards stay the same. The draft's diff contains only note improvements and their generated output against the setup branch, so it can be reviewed before PR181 merges. A no-worthwhile-changes or quota outcome remains valid; the system never fabricates an edit to force PR creation.
+
+After explicit commit/publication approval, temporarily add the exact setup branch to the existing protected environment's branch policy and authorize only the reviewed SHA. Run a protected `mode=dry-run,with_model=true,pilot=true`, inspect its artifacts, then dispatch `mode=apply,pilot=true` against the same unchanged branch/SHA. The saved author proposal can resume without another author call. Keep the SHA grant through rendering/publication; after completion or interruption, remove that grant and the temporary branch policy. Do not alter the existing `main` policy or credentials. Revoke access before handing the test PR to the owner; never merge or close it automatically.
+
+Preserve pilot state and evidence, including any quota reset/cooldown. The pilot uses the same subscription as future production: isolated state does not imply fresh quota. Check its cooldown before any later live run, and wait for the recorded reset or conservative recheck when needed. A failed/stale export can be resumed only by explicitly reauthorizing its reviewed SHA after inspecting the original run, head and journal.
+
+```sh
+gh workflow run 401735063 --ref feature/devbook-improvement-setup \
+  -f mode=dry-run -f with_model=true -f pilot=true -f model=claude-sonnet-5-5 \
+  --repo grafanaKibana/devbook.zip
+# After inspecting the protected proposal and verifying the same authorized SHA:
+gh workflow run 401735063 --ref feature/devbook-improvement-setup \
+  -f mode=apply -f pilot=true -f model=claude-sonnet-5-5 \
+  --repo grafanaKibana/devbook.zip
+```
+
+Removing `DEVBOOK_IMPROVEMENT_PILOT_SHA` prevents new pilot jobs, while removing the temporary environment policy prevents secret access from the setup branch. Explicitly cancel an already-running job when an immediate stop is required. The production controls below remain separate.
+
+### Production activation
+
 Activation publishes the workflow and provisions access. Keep scheduled processing disabled until the native hosted fixture, protected pilot and exact-head checks succeed. A previous Python fixture result does not verify this rewrite:
 
-0. Manually merge the current Qard contracts and this scoped native improvement rewrite to `main`. The worker requires its current Qard validator/template/reader contracts. GitHub requires the workflow on the default branch for its scheduled and manual entry points. Existing uncommitted notes and unrelated checkout changes do not belong in either setup publication.
+0. Manually merge the current Qard contracts and this scoped native improvement rewrite to `main` before production activation. The worker requires its current Qard validator/template/reader contracts. The workflow must be on the default branch for scheduling and the manual Actions UI; the registered-workflow API/CLI pilot above can run before merge. Existing uncommitted notes and unrelated checkout changes do not belong in either setup publication.
 
 1. Create the protected `devbook-improvement-production` environment with deployment restricted to `main`. Keep `DEVBOOK_IMPROVEMENT_SCHEDULE_ENABLED=false` as a repository Actions variable throughout setup. Do not configure a required reviewer for every run: the explicit one-time activation gates below authorize unattended scheduled opportunities.
 2. Install the pinned CLI and run the official subscription-token flow locally. Then let `gh` read the token through its hidden prompt and store it in the protected environment. Never send it through chat or place it in shell history:
@@ -153,7 +179,7 @@ The command invokes the same verified Syncer flow and stages only `Web/content`,
 
 ## Pause, disable, and recover
 
-- Pause unattended work by setting `DEVBOOK_IMPROVEMENT_SCHEDULE_ENABLED=false`; protected manual dry-runs and explicitly requested manual apply remain available. Set `DEVBOOK_IMPROVEMENT_ACTIVATED=false` for an emergency stop that disables every live model/apply run. Either setting returns scheduled opportunities to the credential-free demo path.
+- Pause unattended work by setting `DEVBOOK_IMPROVEMENT_SCHEDULE_ENABLED=false`; protected manual dry-runs and explicitly requested manual apply remain available. Set `DEVBOOK_IMPROVEMENT_ACTIVATED=false` to disable production model/apply runs. Either setting returns scheduled opportunities to the credential-free demo path. The separately authorized premerge pilot already requires both flags false: revoke `DEVBOOK_IMPROVEMENT_PILOT_SHA` and its temporary environment branch allowance to stop new pilot access, and explicitly cancel an in-flight job when required.
 - Disable all opportunities from the Actions UI by disabling `DevBook Improvement`; cancel any already-running export explicitly when stopping it is required. Open draft PRs and the state branch remain intact.
 - A quota episode resumes automatically after the recorded `next_check_at`; do not add short retry schedules. Clear a cooldown only when its persisted evidence is wrong and record why.
 - A source/hash or branch CAS conflict preserves the proposal and pauses that topic. If any authoritative topic note changed on `main` since its PR generation, authoring and feedback fixes pause until GitHub ancestry proves the topic branch includes current `main`. Merge current `main` into that branch through normal reviewed Git work, resolve conflicts, then re-run; unrelated topic queues continue. Never force-push or discard user edits. Pause reasons are recorded in the control state and run artifacts.

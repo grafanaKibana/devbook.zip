@@ -44,6 +44,7 @@ public static class EngineCommand
             string configPath = Path.GetFullPath(Path.Combine(root, options.GetValueOrDefault("--config", ".github/devbook-improvement.json")));
             string output = Path.GetFullPath(Path.Combine(root, options.GetValueOrDefault("--output-dir", "artifacts/devbook-improvement")));
             JsonObject config = JsonData.ParseObject(await File.ReadAllTextAsync(configPath));
+            config = Pilot.Configure(config, () => Git.Text(root, "rev-parse", "HEAD"));
             if (options.TryGetValue("--model", out string? selectedModel))
             {
                 config["model"] = selectedModel;

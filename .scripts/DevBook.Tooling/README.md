@@ -67,8 +67,11 @@ The exact default model is `claude-sonnet-5-5`; Claude Code is pinned to `2.1.28
 | `mode=apply` | Protected draft PR update, then automatic render/publish |
 | `mode=fixture` | Genuine isolated hosted Obsidian/Syncer test; artifacts only |
 | `model` | Exact verified identifier, with no fallback |
+| `pilot=true` | Owner-authorized, exact-SHA PR181 test with isolated state and a draft targeting the setup branch; production and scheduling stay off |
 
 PR-triggered runs execute only credential-free tests/fixtures. Protected jobs require the configured base-branch workflow and activation gates. Disabled schedules run the credential-free demo.
+
+A one-off test before merging PR181 uses the same maintenance/render/publication jobs through an explicit manual pilot path. It selects at most two notes, preserves the normal author/reviewer and validation rules, and includes the genuine Quartz output in its draft PR. It needs a temporary exact-branch environment allowance and reviewed-SHA grant, both removed afterward. See the [premerge pilot procedure](../../docs/devbook-improvement.md#one-off-test-before-merging-pr181); passing tests alone grants no credential access.
 
 ## Run locally without credentials
 
@@ -115,4 +118,4 @@ A generated bundle accepts only `Web/content`, generated Syncer styles and the r
 
 Retries wait at least six hours and stop after three attempts per source head. Inspect the failed run and persisted operation before resuming; never clear all state or force-push to bypass a conflict. The [runbook](../../docs/devbook-improvement.md#pause-disable-and-recover) covers recovery and the optional local handoff.
 
-Pause unattended work with `DEVBOOK_IMPROVEMENT_SCHEDULE_ENABLED=false`. Stop live work with `DEVBOOK_IMPROVEMENT_ACTIVATED=false`. Disable **DevBook Improvement** in Actions to stop all opportunities; explicitly cancel a running job when required. Keep the state branch and draft PRs. The additional Codex reviewer experiment stays disabled pending a decision about the existing integration.
+Pause unattended work with `DEVBOOK_IMPROVEMENT_SCHEDULE_ENABLED=false`. Stop production model/apply work with `DEVBOOK_IMPROVEMENT_ACTIVATED=false`. The premerge pilot requires both flags false and has its own access grant: delete `DEVBOOK_IMPROVEMENT_PILOT_SHA` and remove its temporary environment branch allowance to stop new pilot access. Disable **DevBook Improvement** in Actions to stop all opportunities; explicitly cancel a running job when required. Keep the state branch and draft PRs. The additional Codex reviewer experiment stays disabled pending a decision about the existing integration.

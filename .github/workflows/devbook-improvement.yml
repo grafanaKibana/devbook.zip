@@ -29,9 +29,20 @@ on:
         required: true
         default: false
         type: boolean
+      pilot:
+        description: One-off PR181 test; requires an exact authorized SHA and disabled production
+        required: true
+        default: false
+        type: boolean
 
 permissions:
   contents: read
+
+env:
+  DEVBOOK_IMPROVEMENT_PILOT: ${{ github.event_name == 'workflow_dispatch' && inputs.pilot && 'true' || 'false' }}
+  DEVBOOK_IMPROVEMENT_PILOT_SHA: ${{ vars.DEVBOOK_IMPROVEMENT_PILOT_SHA }}
+  DEVBOOK_IMPROVEMENT_PRODUCTION_ACTIVATED: ${{ vars.DEVBOOK_IMPROVEMENT_ACTIVATED || 'false' }}
+  DEVBOOK_IMPROVEMENT_SCHEDULE_ENABLED: ${{ vars.DEVBOOK_IMPROVEMENT_SCHEDULE_ENABLED || 'false' }}
 
 # Covers source work, rendering, and publication; never cancel an in-flight write.
 concurrency:
@@ -77,7 +88,12 @@ jobs:
 
   maintenance:
     if: >-
-      github.ref == 'refs/heads/main' &&
+      (github.ref == 'refs/heads/main' ||
+      (github.event_name == 'workflow_dispatch' && inputs.pilot &&
+      github.ref == 'refs/heads/feature/devbook-improvement-setup' &&
+      vars.DEVBOOK_IMPROVEMENT_PILOT_SHA != '' && github.sha == vars.DEVBOOK_IMPROVEMENT_PILOT_SHA &&
+      github.actor_id == '45916288' && github.actor == 'grafanaKibana' &&
+      vars.DEVBOOK_IMPROVEMENT_ACTIVATED != 'true' && vars.DEVBOOK_IMPROVEMENT_SCHEDULE_ENABLED != 'true')) &&
       ((github.event_name == 'schedule' && vars.DEVBOOK_IMPROVEMENT_ACTIVATED == 'true' && vars.DEVBOOK_IMPROVEMENT_SCHEDULE_ENABLED == 'true') ||
       (github.event_name == 'workflow_dispatch' && (inputs.mode == 'apply' || (inputs.mode == 'dry-run' && inputs.with_model))))
     runs-on: ubuntu-latest
@@ -91,13 +107,23 @@ jobs:
         env:
           REQUESTED_MODE: ${{ github.event_name == 'schedule' && 'apply' || inputs.mode }}
           EVENT_NAME: ${{ github.event_name }}
-          ACTIVATED: ${{ vars.DEVBOOK_IMPROVEMENT_ACTIVATED }}
-          SUBSCRIPTION_ONLY: ${{ vars.DEVBOOK_IMPROVEMENT_SUBSCRIPTION_ONLY_CONFIRMED }}
+          ACTIVATED: ${{ inputs.pilot && 'true' || vars.DEVBOOK_IMPROVEMENT_ACTIVATED }}
+          SUBSCRIPTION_ONLY: ${{ inputs.pilot && 'true' || vars.DEVBOOK_IMPROVEMENT_SUBSCRIPTION_ONLY_CONFIRMED }}
           USAGE_CREDITS_DISABLED: ${{ vars.DEVBOOK_IMPROVEMENT_USAGE_CREDITS_DISABLED_CONFIRMED }}
           PR_WORKFLOWS_CONFIRMED: ${{ vars.DEVBOOK_IMPROVEMENT_PR_WORKFLOWS_CONFIRMED }}
         run: |
           set -euo pipefail
-          test "$GITHUB_REF" = refs/heads/main
+          if [ "$DEVBOOK_IMPROVEMENT_PILOT" = true ]; then
+            test "$GITHUB_EVENT_NAME" = workflow_dispatch
+            test "$GITHUB_REF" = refs/heads/feature/devbook-improvement-setup
+            test "$GITHUB_SHA" = "$DEVBOOK_IMPROVEMENT_PILOT_SHA"
+            test "$GITHUB_ACTOR_ID" = 45916288
+            test "$GITHUB_ACTOR" = grafanaKibana
+            test "$DEVBOOK_IMPROVEMENT_PRODUCTION_ACTIVATED" = false
+            test "$DEVBOOK_IMPROVEMENT_SCHEDULE_ENABLED" = false
+          else
+            test "$GITHUB_REF" = refs/heads/main
+          fi
           test "$ACTIVATED" = true
           test "$SUBSCRIPTION_ONLY" = true
           test "$USAGE_CREDITS_DISABLED" = true
@@ -135,8 +161,8 @@ jobs:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           DEVBOOK_GITHUB_TOKEN: ${{ secrets.DEVBOOK_GITHUB_TOKEN }}
           DEVBOOK_IMPROVEMENT_MODE: ${{ github.event_name == 'schedule' && 'apply' || inputs.mode }}
-          DEVBOOK_IMPROVEMENT_ACTIVATED: ${{ vars.DEVBOOK_IMPROVEMENT_ACTIVATED }}
-          DEVBOOK_IMPROVEMENT_SUBSCRIPTION_ONLY_CONFIRMED: ${{ vars.DEVBOOK_IMPROVEMENT_SUBSCRIPTION_ONLY_CONFIRMED }}
+          DEVBOOK_IMPROVEMENT_ACTIVATED: ${{ inputs.pilot && 'true' || vars.DEVBOOK_IMPROVEMENT_ACTIVATED }}
+          DEVBOOK_IMPROVEMENT_SUBSCRIPTION_ONLY_CONFIRMED: ${{ inputs.pilot && 'true' || vars.DEVBOOK_IMPROVEMENT_SUBSCRIPTION_ONLY_CONFIRMED }}
           DEVBOOK_IMPROVEMENT_USAGE_CREDITS_DISABLED_CONFIRMED: ${{ vars.DEVBOOK_IMPROVEMENT_USAGE_CREDITS_DISABLED_CONFIRMED }}
           DEVBOOK_IMPROVEMENT_PR_WORKFLOWS_CONFIRMED: ${{ vars.DEVBOOK_IMPROVEMENT_PR_WORKFLOWS_CONFIRMED }}
           MODEL: ${{ github.event_name == 'schedule' && (vars.DEVBOOK_IMPROVEMENT_MODEL || 'claude-sonnet-5-5') || inputs.model }}
@@ -230,7 +256,13 @@ jobs:
   publish:
     needs: [maintenance, render]
     if: >-
-      always() && !cancelled() && github.ref == 'refs/heads/main' &&
+      always() && !cancelled() &&
+      (github.ref == 'refs/heads/main' ||
+      (github.event_name == 'workflow_dispatch' && inputs.pilot &&
+      github.ref == 'refs/heads/feature/devbook-improvement-setup' &&
+      vars.DEVBOOK_IMPROVEMENT_PILOT_SHA != '' && github.sha == vars.DEVBOOK_IMPROVEMENT_PILOT_SHA &&
+      github.actor_id == '45916288' && github.actor == 'grafanaKibana' &&
+      vars.DEVBOOK_IMPROVEMENT_ACTIVATED != 'true' && vars.DEVBOOK_IMPROVEMENT_SCHEDULE_ENABLED != 'true')) &&
       (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') &&
       needs.maintenance.result == 'success' && needs.maintenance.outputs.export_ready == 'true' &&
       (needs.maintenance.outputs.export_mode == 'finalize' || (needs.render.result == 'success' && needs.render.outputs.ready == 'true'))
@@ -240,10 +272,20 @@ jobs:
     steps:
       - name: Verify trusted workflow and activation
         env:
-          ACTIVATED: ${{ vars.DEVBOOK_IMPROVEMENT_ACTIVATED }}
+          ACTIVATED: ${{ inputs.pilot && 'true' || vars.DEVBOOK_IMPROVEMENT_ACTIVATED }}
         run: |
           set -euo pipefail
-          test "$GITHUB_REF" = refs/heads/main
+          if [ "$DEVBOOK_IMPROVEMENT_PILOT" = true ]; then
+            test "$GITHUB_EVENT_NAME" = workflow_dispatch
+            test "$GITHUB_REF" = refs/heads/feature/devbook-improvement-setup
+            test "$GITHUB_SHA" = "$DEVBOOK_IMPROVEMENT_PILOT_SHA"
+            test "$GITHUB_ACTOR_ID" = 45916288
+            test "$GITHUB_ACTOR" = grafanaKibana
+            test "$DEVBOOK_IMPROVEMENT_PRODUCTION_ACTIVATED" = false
+            test "$DEVBOOK_IMPROVEMENT_SCHEDULE_ENABLED" = false
+          else
+            test "$GITHUB_REF" = refs/heads/main
+          fi
           test "$ACTIVATED" = true
       - uses: actions/checkout@v4
         with:
@@ -267,8 +309,8 @@ jobs:
           EXPORT_MODE: ${{ needs.maintenance.outputs.export_mode }}
           DEVBOOK_GITHUB_TOKEN: ${{ secrets.DEVBOOK_GITHUB_TOKEN }}
           DEVBOOK_IMPROVEMENT_MODE: apply
-          DEVBOOK_IMPROVEMENT_ACTIVATED: ${{ vars.DEVBOOK_IMPROVEMENT_ACTIVATED }}
-          DEVBOOK_IMPROVEMENT_SUBSCRIPTION_ONLY_CONFIRMED: ${{ vars.DEVBOOK_IMPROVEMENT_SUBSCRIPTION_ONLY_CONFIRMED }}
+          DEVBOOK_IMPROVEMENT_ACTIVATED: ${{ inputs.pilot && 'true' || vars.DEVBOOK_IMPROVEMENT_ACTIVATED }}
+          DEVBOOK_IMPROVEMENT_SUBSCRIPTION_ONLY_CONFIRMED: ${{ inputs.pilot && 'true' || vars.DEVBOOK_IMPROVEMENT_SUBSCRIPTION_ONLY_CONFIRMED }}
           DEVBOOK_IMPROVEMENT_USAGE_CREDITS_DISABLED_CONFIRMED: ${{ vars.DEVBOOK_IMPROVEMENT_USAGE_CREDITS_DISABLED_CONFIRMED }}
           DEVBOOK_IMPROVEMENT_PR_WORKFLOWS_CONFIRMED: ${{ vars.DEVBOOK_IMPROVEMENT_PR_WORKFLOWS_CONFIRMED }}
         run: |
