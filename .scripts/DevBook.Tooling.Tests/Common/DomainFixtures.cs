@@ -12,6 +12,12 @@ internal static class DomainFixtures
     public const string Card = "<!-- qard-source: original -->\n<!-- qard-id: stable_1 -->\n> [!qard]- What is the operating idea?\n> The original answer.\n";
     public const string Note = "---\ntopic: [Programming]\nsubtopic: [NET]\nlevel: [\"2\"]\npriority: Medium\nstatus: Creation\npublish: false\n---\nThe operating idea has a concrete boundary.\n\n# Questions\n\n" + Card;
 
+    public static void CreateReviewContract(string root)
+    {
+        Directory.CreateDirectory(System.IO.Path.Combine(root, ".codex/agents"));
+        File.WriteAllText(System.IO.Path.Combine(root, ".codex/agents/note-reviewer.toml"), "Fixture review contract");
+    }
+
     public static JsonObject Edit(string kind = "rewrite", string target = "same", string? after = null) => new()
     {
         ["path"] = Path,
@@ -41,5 +47,42 @@ internal static class DomainFixtures
         ["hash"] = LegacyIdentity.Digest(content ?? Note),
         ["topic"] = Core.TopicFor(path),
         ["violations"] = new JsonArray()
+    };
+
+    public static JsonObject UnchangedReview(JsonObject payload) => new()
+    {
+        ["verdict"] = "CLEAN",
+        ["notes"] = new JsonArray(payload.RequiredObject("current").Select(item => (JsonNode)new JsonObject
+        {
+            ["path"] = item.Key,
+            ["verdict"] = "CLEAN",
+            ["summary"] = "The complete unchanged fixture note remains accurate and clear.",
+            ["page_type"] = "concept",
+            ["split_suggestion"] = "Keep one concept",
+            ["target_resolution"] = "JUSTIFIED UNCHANGED",
+            ["findings"] = new JsonArray(),
+            ["current_text_evidence"] = new JsonArray(new JsonObject
+            {
+                ["quote"] = item.Value!.GetValue<string>(),
+                ["line_start"] = 1,
+                ["reason"] = "Complete current fixture text inspected independently."
+            }),
+            ["source_checks"] = new JsonArray(),
+            ["rejection_equivalence"] = new JsonArray(payload.Arr("rejected_proposals").OfType<JsonObject>()
+                .Where(rejection => rejection.Str("path") == item.Key).Select(rejection => (JsonNode)new JsonObject
+                {
+                    ["fingerprint"] = rejection.Str("fingerprint"),
+                    ["equivalent"] = false,
+                    ["reason"] = "Keeping the unchanged baseline does not repeat the rejected fixture edit."
+                }).ToArray()),
+            ["quality"] = new JsonObject
+            {
+                ["accuracy"] = "PASS",
+                ["clarity"] = "PASS",
+                ["rules_compliance"] = "PASS",
+                ["question_quality"] = "PASS",
+                ["identity_safety"] = "PASS"
+            }
+        }).ToArray())
     };
 }

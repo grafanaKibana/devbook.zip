@@ -114,7 +114,12 @@ public sealed partial class ImprovementEngine
 
     private async Task<string> FetchSourceAsync(string url, CancellationToken cancellationToken)
     {
-        byte[] data = await Runtime.FetchPrimarySourceAsync(url, config.Arr("allowed_source_hosts").Strings(), 180_000, cancellationToken);
+        int maximumBytes = config.Int("max_source_bytes", 250_000);
+        if (maximumBytes is < 1 or > 1_000_000)
+        {
+            throw new RuntimeFailure("max_source_bytes must be between 1 and 1000000.");
+        }
+        byte[] data = await Runtime.FetchPrimarySourceAsync(url, config.Arr("allowed_source_hosts").Strings(), maximumBytes, cancellationToken);
         if (data.AsSpan().StartsWith("%PDF"u8))
         {
             throw new UnsafeInput("PDF evidence needs a readable primary HTML/text source.");
@@ -222,7 +227,7 @@ public sealed partial class ImprovementEngine
             {
                 foreach (JsonObject record in pr.Arr("proposal_records").OfType<JsonObject>())
                 {
-                    selectionState = Core.RecordOutcome(selectionState, record.RequiredObject("batch"), record.RequiredObject("proposal"), record.RequiredObject("result"));
+                    selectionState = Core.RecordOutcome(selectionState, record.RequiredObject("batch"), record.RequiredObject("proposal"), record.RequiredObject("result"), record["review"] as JsonObject);
                 }
             }
         }
@@ -235,11 +240,19 @@ public sealed partial class ImprovementEngine
             }
         }
 
+        (selectionState, notes) = ManualSelection.Apply(selectionState, notes, config);
         JsonObject? batch = Queue.SelectBatch(selectionState, notes, rules, config);
         await SaveAsync(state, "reconcile maintenance queue", cancellationToken);
         if (batch is null)
         {
             return new JsonObject { ["status"] = paused.Count == 0 ? "no_changes" : "topics_paused", ["paused_topics"] = Copies(paused.Order().Select(value => JsonValue.Create(value))), ["model_calls"] = 0 };
+        }
+        if (config.Str("target_note").Length != 0)
+        {
+            foreach (JsonObject note in batch.Arr("notes").OfType<JsonObject>())
+            {
+                note["selection_reason"] = "manual_recheck";
+            }
         }
 
         if (batch.Arr("notes").Count == 0 && batch.Arr("feedback").Count != 0)
@@ -253,6 +266,8 @@ public sealed partial class ImprovementEngine
         }
 
         Dictionary<string, string> selected = batch.Arr("notes").OfType<JsonObject>().ToDictionary(note => note.Str("path"), note => note.Str("content"));
+        var knownViolations = new JsonObject(batch.Arr("notes").OfType<JsonObject>().Select(note =>
+            new KeyValuePair<string, JsonNode?>(note.Str("path"), note.Arr("violations").Copy())));
         JsonObject prState = batch.Obj("pr");
         JsonArray history = prState.Arr("proposal_records").Copy();
         prState.Remove("proposal_records");
@@ -261,7 +276,8 @@ public sealed partial class ImprovementEngine
         string[] feedbackKeys = batch.Arr("feedback").OfType<JsonObject>().Select(item => item.Str("key")).Order(StringComparer.Ordinal).ToArray();
         JsonArray keys = Copies(feedbackKeys.Select(value => JsonValue.Create(value)));
         JsonObject pending = state.Obj("pending_author_proposal");
-        bool compatible = JsonNode.DeepEquals(pending["source_hashes"], hashes) && JsonNode.DeepEquals(pending["feedback_keys"], keys) && pending.Str("rules_hash") == rules;
+        bool compatible = JsonNode.DeepEquals(pending["source_hashes"], hashes) && JsonNode.DeepEquals(pending["feedback_keys"], keys) && pending.Str("rules_hash") == rules
+            && pending.Str("target_note") == config.Str("target_note") && pending.Str("review_focus") == config.Str("review_focus");
         JsonObject proposal;
         if (compatible)
         {
@@ -302,6 +318,8 @@ public sealed partial class ImprovementEngine
                     ["topic"] = batch.Str("topic"),
                     ["notes"] = ObjectMap(selected),
                     ["note_hashes"] = hashes.Copy(),
+                    ["known_violations"] = knownViolations.Copy(),
+                    ["review_focus"] = config.Str("review_focus"),
                     ["feedback"] = batch.Arr("feedback").Copy(),
                     ["rules"] = rulesText,
                     ["rejected_proposals"] = state.Arr("rejections").Copy(),
@@ -322,6 +340,8 @@ public sealed partial class ImprovementEngine
                 ["source_hashes"] = hashes.Copy(),
                 ["feedback_keys"] = keys.Copy(),
                 ["rules_hash"] = rules,
+                ["target_note"] = config.Str("target_note"),
+                ["review_focus"] = config.Str("review_focus"),
                 ["prepared_source_version"] = 1,
                 ["prepared_at"] = Core.FormatTime(clock.GetUtcNow())
             };
@@ -350,16 +370,11 @@ public sealed partial class ImprovementEngine
             return await QuarantineAsync(state, pending, "source_budget",
                 $"Proposal has {sourceEntries.Length} distinct source URLs, exceeding the per-run limit of {sourceLimit}.", cancellationToken);
         }
-        if (proposal.Arr("edits").Count == 0 && decisions.Count == 0)
+        bool hasEdits = proposal.Arr("edits").Count != 0;
+        if (hasEdits)
         {
-            state = Core.RecordOutcome(state, batch, proposal, result);
-            state.Remove("pending_author_proposal");
-            state["cooldown"] = null;
-            await SaveAsync(state, "record successful keep or feedback clarification", cancellationToken);
-            await FeedbackReceiptAsync(proposal, batch, null, apply, cancellationToken);
-            return new JsonObject { ["status"] = "no_worthwhile_changes", ["proposal"] = proposal, ["model_calls"] = modelCalls };
+            await PrepareDatesAsync(result, selected, prState.Str("head_sha", baseSha ?? "HEAD"), Runtime.ParseTime(pending.Str("prepared_at"))!.Value, cancellationToken);
         }
-        await PrepareDatesAsync(result, selected, prState.Str("head_sha", baseSha ?? "HEAD"), Runtime.ParseTime(pending.Str("prepared_at"))!.Value, cancellationToken);
         Dictionary<string, string> candidate = Map(result.RequiredObject("sources"));
         Dictionary<string, string> current = allNotes.OfType<JsonObject>().ToDictionary(note => note.Str("path"), note => note.Str("content"));
         foreach (KeyValuePair<string, string> item in candidate)
@@ -370,7 +385,7 @@ public sealed partial class ImprovementEngine
         HashSet<string> paths = rawPr.Arr("changed_paths").Strings().Concat(proposal.Arr("edits").OfType<JsonObject>().Select(edit => edit.Str("path"))).ToHashSet();
         Dictionary<string, string> cumulativeBase = paths.ToDictionary(path => path, path => baseline[path]);
         Dictionary<string, string> cumulativeCurrent = paths.ToDictionary(path => path, path => current[path]);
-        string diff = await Review.DiffAsync(cumulativeBase, cumulativeCurrent, cancellationToken);
+        string diff = hasEdits ? await Review.DiffAsync(cumulativeBase, cumulativeCurrent, cancellationToken) : "";
         int noteLimit = config.Int("max_pr_notes", 16);
         int lineLimit = config.Int("max_pr_lines", 1200);
         int changedLines = Review.ChangedLines(diff);
@@ -413,6 +428,8 @@ public sealed partial class ImprovementEngine
                 ["before"] = ObjectMap(selected),
                 ["current"] = ObjectMap(candidate),
                 ["proposal"] = proposal.Copy(),
+                ["review_focus"] = config.Str("review_focus"),
+                ["known_violations"] = knownViolations.Copy(),
                 ["primary_sources"] = fetched,
                 ["rejected_proposals"] = state.Arr("rejections").Copy(),
                 ["feedback"] = batch.Arr("feedback").Copy(),
@@ -436,18 +453,31 @@ public sealed partial class ImprovementEngine
             await SaveAsync(state, "preserve blocked semantic review", cancellationToken);
             return new JsonObject { ["status"] = "review_blocked", ["proposal"] = proposal, ["review"] = review, ["model_calls"] = modelCalls };
         }
+        string[] violationPaths = proposal.Arr("dispositions").OfType<JsonObject>()
+            .Where(disposition => disposition.Str("outcome") == "keep" && knownViolations[disposition.Str("path")] is JsonArray { Count: > 0 })
+            .Select(disposition => disposition.Str("path")).ToArray();
+        if (violationPaths.Length != 0)
+        {
+            pending["completed_review"] = review.Copy();
+            return await QuarantineAsync(state, pending, "keep_structural_validation",
+                "Keep disposition leaves known native inventory violations in: " + string.Join(", ", violationPaths), cancellationToken);
+        }
         if (proposal.Arr("edits").Count == 0)
         {
-            if (apply)
+            bool keep = decisions.Count == 0;
+            if (apply || keep)
             {
-                state = Core.RecordOutcome(state, batch, proposal, result);
-                Proposal.PersistDecisions(state, decisions);
+                state = Core.RecordOutcome(state, batch, proposal, result, review);
+                if (apply)
+                {
+                    Proposal.PersistDecisions(state, decisions);
+                }
                 state.Remove("pending_author_proposal");
                 state["cooldown"] = null;
-                await SaveAsync(state, "record independently verified feedback decision", cancellationToken);
-                await FeedbackReceiptAsync(proposal, batch, null, true, cancellationToken);
+                await SaveAsync(state, "record independently verified keep or feedback decision", cancellationToken);
+                await FeedbackReceiptAsync(proposal, batch, null, apply, cancellationToken);
             }
-            return new JsonObject { ["status"] = apply ? "no_worthwhile_changes" : "proposed", ["proposal"] = proposal, ["review"] = review, ["model_calls"] = modelCalls };
+            return new JsonObject { ["status"] = apply || keep ? "no_worthwhile_changes" : "proposed", ["proposal"] = proposal, ["review"] = review, ["model_calls"] = modelCalls };
         }
         Dictionary<string, string> validationExpected = new(cumulativeBase);
         foreach (KeyValuePair<string, string> item in selected)

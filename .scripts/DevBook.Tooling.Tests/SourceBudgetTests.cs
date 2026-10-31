@@ -21,7 +21,7 @@ public sealed class SourceBudgetTests
     {
         // Arrange
         string root = Path.Combine(Path.GetTempPath(), "source-budget-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(root);
+        DomainFixtures.CreateReviewContract(root);
         try
         {
             var notes = new JsonArray(DomainFixtures.NoteRecord(BadPath, Source), DomainFixtures.NoteRecord(GoodPath, Source));
@@ -79,7 +79,7 @@ public sealed class SourceBudgetTests
             settled.Str("status").Should().Be("no_changes");
             model.Paths.Last().Should().Be(GoodPath);
             model.Paths.Should().HaveCount(savedProposal ? 1 : 2);
-            model.Reviews.Should().Be(0);
+            model.Reviews.Should().Be(1);
             fetches.Should().Be(unsupportedHost ? 1 : 0);
             after.State.Obj("notes").Obj(GoodPath).Str("outcome").Should().Be("keep");
             after.State.Obj("invalid_proposals").Count.Should().Be(1);
@@ -95,7 +95,7 @@ public sealed class SourceBudgetTests
     {
         // Arrange
         string root = Path.Combine(Path.GetTempPath(), "source-retry-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(root);
+        DomainFixtures.CreateReviewContract(root);
         try
         {
             JsonObject proposal = WithSources(1);
@@ -168,7 +168,8 @@ public sealed class SourceBudgetTests
         public Task<JsonObject> ReviewAsync(JsonObject payload, CancellationToken cancellationToken = default)
         {
             Reviews++;
-            throw new InvalidOperationException("Blocked sources and keep outcomes do not reach review.");
+            payload.RequiredObject("proposal").Arr("edits").Should().BeEmpty();
+            return Task.FromResult(DomainFixtures.UnchangedReview(payload));
         }
     }
 }

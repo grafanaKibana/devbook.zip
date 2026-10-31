@@ -31,7 +31,7 @@ The two projects share one solution and build together. `Scripts` contains file-
 ## A regular opportunity
 
 1. Reconcile state, topic PRs, and verified-owner comments/reviews. Consolidated feedback goes first.
-2. Select up to four notes from one directory-derived topic. Skip unchanged reviewed versions. “No worthwhile changes” succeeds.
+2. Select up to four notes from one directory-derived topic. Skip unchanged independently reviewed versions. A keep succeeds only after the separate reviewer supplies current-text evidence; older author-only keeps receive a one-time review check.
 3. Ask the author for guarded block replacements with public web research. Prepare source dates against the current topic parent **before** the independent reviewer sees the final candidate.
 4. Validate complete notes, protected Qard metadata, source hashes, primary sources, and the cumulative PR diff. Create or update the topic’s draft PR.
 5. In the **same workflow run**, a separate macOS job starts pinned genuine Obsidian/Syncer in a disposable profile. A protected Ubuntu publisher adds only verified generated files and the source-bound receipt, then dispatches/checks exact-head validation.
@@ -68,10 +68,13 @@ The exact default model is `claude-sonnet-5-5`; Claude Code is pinned to `2.1.28
 | `mode=fixture` | Genuine isolated hosted Obsidian/Syncer test; artifacts only |
 | `model` | Exact verified identifier, with no fallback |
 | `pilot=true` | Owner-authorized, exact-SHA PR181 test with isolated state and a draft targeting the setup branch; production and scheduling stay off |
+| `note` + `focus` | Recheck one exact `Vault/Home/...md` note for a concrete issue; live use requires an allowlisted owner’s manual dispatch |
 
 PR-triggered runs execute only credential-free tests/fixtures. Protected jobs require the configured base-branch workflow and activation gates. Disabled schedules run the credential-free demo.
 
 A one-off test before merging PR181 uses the same maintenance/render/publication jobs through an explicit manual pilot path. It selects at most two notes, preserves the normal author/reviewer and validation rules, and includes the genuine Quartz output in its draft PR. It needs a temporary exact-branch environment allowance and reviewed-SHA grant, both removed afterward. See the [premerge pilot procedure](../../docs/devbook-improvement.md#one-off-test-before-merging-pr181); passing tests alone grants no credential access.
+
+Targeting changes selection for that run without clearing stored history. The focus is supplied to both author and reviewer and is bound to any resumable proposal. Holds, rejected proposals, PR limits and review freezes still apply; focus is not permission to reconsider a rejected proposal or append unrelated work to a frozen PR. Existing publication recovery retains its normal priority. Scheduled runs do not take manual note/focus inputs. A justified, independently reviewed keep remains a valid outcome.
 
 ## Run locally without credentials
 
@@ -104,7 +107,7 @@ Use the pinned compatible app from the workflow when the installed bundle differ
 
 Author and reviewer have built-in **WebSearch** and **WebFetch** for public primary documentation and papers. Prompts prohibit putting private note text, paths, owner feedback, or unpublished identifiers into searches. Deterministic source retrieval independently checks accepted URLs against configured public hosts. Pages and comments remain data, never tool instructions.
 
-The model has no shell, local file tools, MCP servers, or Git credentials. Built-in web tools avoid an extra Context7 account/key; no separately billed API fallback is configured. Subscription OAuth alone cannot prevent enabled account overage, so usage credits must remain disabled and be confirmed during activation.
+The model has no shell, local file tools, MCP servers, or Git credentials. Built-in web tools avoid an extra Context7 account/key; no separately billed API fallback is configured. The exact source-host policy includes the current `developers.openai.com` and `platform.claude.com` documentation hosts. Retrieval prefers Markdown and accepts bounded Markdown/plain text/HTML. `max_source_bytes` defaults to 250,000 (supported range 1–1,000,000); the run's source-count and model-input limits still apply. Successful live result artifacts include `model_diagnostics`: safe timing, turn, token/search and permission-denial counts when the pinned CLI reports them. Diagnostic records omit prompts, note text, URLs, queries and denied tool inputs. Subscription OAuth alone cannot prevent enabled account overage, so usage credits must remain disabled and be confirmed during activation.
 
 Actual reported reset times are persisted. Unknown resets use a conservative 24-hour recheck without inventing a reset time. Weekly exhaustion pauses all new model work, including feedback fixes. Cooldown skips succeed quietly and emit at most one episode notice. Already-produced export can finish without another model call. No precise remaining-quota telemetry is claimed.
 

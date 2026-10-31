@@ -109,7 +109,7 @@ public sealed class RecoveryBranchConflictTests
 
             // Assert
             nextGeneration.Str("status").Should().Be("no_worthwhile_changes");
-            model.Paths.Should().Equal(OtherPath, LaterPath);
+            model.Paths.Should().Equal(OtherPath, LaterPath, TopicPath);
             afterClosure.State.Obj("topics").Obj(Topic).Int("generation").Should().Be(2);
             afterClosure.State.Obj("topics").Obj(Topic).Obj("publication_conflict").Int("generation").Should().Be(1);
             afterClosure.State.Obj("invalidated_operations").ContainsKey("interrupted-op").Should().BeTrue();
@@ -224,6 +224,7 @@ public sealed class RecoveryBranchConflictTests
 
         public NoteFiles()
         {
+            DomainFixtures.CreateReviewContract(Root);
             foreach (string path in new[] { TopicPath, OtherPath, LaterPath })
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(Path.Combine(Root, path))!);
@@ -249,19 +250,19 @@ public sealed class RecoveryBranchConflictTests
 
         public Task<JsonObject> AuthorAsync(JsonObject payload, CancellationToken cancellationToken = default)
         {
-            string path = payload.RequiredObject("notes").Single().Key;
-            Paths.Add(path);
+            string[] paths = payload.RequiredObject("notes").Select(item => item.Key).ToArray();
+            Paths.AddRange(paths);
             return Task.FromResult(new JsonObject
             {
                 ["version"] = 1,
                 ["edits"] = new JsonArray(),
-                ["dispositions"] = new JsonArray(new JsonObject { ["path"] = path, ["outcome"] = "keep", ["reason"] = "No worthwhile changes." }),
+                ["dispositions"] = new JsonArray(paths.Select(path => (JsonNode)new JsonObject { ["path"] = path, ["outcome"] = "keep", ["reason"] = "No worthwhile changes." }).ToArray()),
                 ["feedback"] = new JsonArray()
             });
         }
 
         public Task<JsonObject> ReviewAsync(JsonObject payload, CancellationToken cancellationToken = default) =>
-            throw new InvalidOperationException("Keep outcomes do not need review.");
+            Task.FromResult(DomainFixtures.UnchangedReview(payload));
     }
 
     private sealed class RecoveryApi : IGitHubApi

@@ -224,7 +224,7 @@ public static class Core
         return result;
     }
 
-    private static bool ActorAllowed(JsonObject item, JsonNode allowlist)
+    internal static bool ActorAllowed(JsonObject item, JsonNode allowlist)
     {
         JsonObject actor = item["author"] as JsonObject ?? item["user"] as JsonObject ?? item;
         JsonNode? id = actor["id"] ?? actor["database_id"] ?? actor["databaseId"] ?? actor["author_id"];
@@ -268,7 +268,7 @@ public static class Core
         return new JsonArray(queued.OrderBy(item => item.Str("updated_at"), StringComparer.Ordinal).ThenBy(item => item.Str("key"), StringComparer.Ordinal).Select(item => (JsonNode)item).ToArray());
     }
 
-    public static JsonObject RecordOutcome(JsonObject state, JsonObject batch, JsonObject proposal, JsonObject result)
+    public static JsonObject RecordOutcome(JsonObject state, JsonObject batch, JsonObject proposal, JsonObject result, JsonObject? review = null)
     {
         JsonObject current = CopyState(state);
         Dictionary<string, JsonObject> dispositions = proposal.Arr("dispositions").OfType<JsonObject>().ToDictionary(item => item.Str("path"));
@@ -287,6 +287,22 @@ public static class Core
             record["rules_hash"] = batch["rules_hash"]?.DeepClone();
             record["outcome"] = dispositions[path].Str("outcome");
             record["violation_hash"] = LegacyIdentity.ViolationHash(note.Arr("violations"));
+            JsonObject? noteReview = review?.Arr("notes").OfType<JsonObject>().FirstOrDefault(item => item.Str("path") == path);
+            if (record.Str("outcome") == "keep" && review?.Str("verdict") == "CLEAN" && noteReview is not null)
+            {
+                string currentText = result.Obj("sources")[path] is JsonValue text ? text.GetValue<string>() : note.Str("content");
+                var evidence = new JsonObject
+                {
+                    ["content_hash"] = LegacyIdentity.Digest(currentText),
+                    ["rules_hash"] = batch.Str("rules_hash"),
+                    ["review"] = noteReview.Copy()
+                };
+                if (Review.VerifiedKeep(evidence, path, currentText, batch.Str("rules_hash"))
+                    && !JsonNode.DeepEquals(record["keep_review"], evidence))
+                {
+                    record["keep_review"] = evidence;
+                }
+            }
             current.RequiredObject("notes")[path] = record;
         }
         foreach (JsonObject item in proposal.Arr("feedback").OfType<JsonObject>())

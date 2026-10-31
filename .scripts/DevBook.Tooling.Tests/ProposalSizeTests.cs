@@ -23,7 +23,7 @@ public sealed class ProposalSizeTests
     {
         // Arrange
         string root = Path.Combine(Path.GetTempPath(), "proposal-size-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(root);
+        DomainFixtures.CreateReviewContract(root);
         try
         {
             var notes = new JsonArray(DomainFixtures.NoteRecord(FirstPath, Source), DomainFixtures.NoteRecord(SecondPath, Source), DomainFixtures.NoteRecord(OtherPath, Source));
@@ -108,7 +108,7 @@ public sealed class ProposalSizeTests
             model.Batches.Should().Be(savedProposal ? 1 : 2);
             model.Paths.Last().Should().Be(OtherPath);
             model.Paths.Count(path => path == FirstPath || path == SecondPath).Should().Be(savedProposal ? 0 : 2);
-            model.Reviews.Should().Be(0);
+            model.Reviews.Should().Be(1);
             after.State.Obj("notes").Obj(OtherPath).Str("outcome").Should().Be("keep");
             after.State.Obj("invalid_proposals").Count.Should().Be(existingPr ? 0 : 1);
         }
@@ -161,7 +161,8 @@ public sealed class ProposalSizeTests
         public Task<JsonObject> ReviewAsync(JsonObject payload, CancellationToken cancellationToken = default)
         {
             Reviews++;
-            throw new InvalidOperationException("Held size failures and unchanged notes do not reach review.");
+            payload.RequiredObject("proposal").Arr("edits").Should().BeEmpty();
+            return Task.FromResult(DomainFixtures.UnchangedReview(payload));
         }
     }
 }

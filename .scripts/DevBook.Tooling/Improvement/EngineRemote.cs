@@ -36,7 +36,7 @@ public sealed partial class ImprovementEngine
                 {
                     JsonObject rejected = record.RequiredObject("result").Copy();
                     rejected["outcome"] = "closed_without_merge";
-                    state = Core.RecordOutcome(state, record.RequiredObject("batch"), record.RequiredObject("proposal"), rejected);
+                    state = Core.RecordOutcome(state, record.RequiredObject("batch"), record.RequiredObject("proposal"), rejected, record["review"] as JsonObject);
                 }
                 foreach (string path in prior.Arr("proposal_records").OfType<JsonObject>().SelectMany(record => record.RequiredObject("proposal").Arr("edits").OfType<JsonObject>()).Select(edit => edit.Str("path")).Distinct())
                 {
@@ -243,7 +243,7 @@ public sealed partial class ImprovementEngine
             }
             if (needsOutcome)
             {
-                state = Core.RecordOutcome(state, receipt.RequiredObject("batch"), receipt.RequiredObject("proposal"), receipt.RequiredObject("result"));
+                state = Core.RecordOutcome(state, receipt.RequiredObject("batch"), receipt.RequiredObject("proposal"), receipt.RequiredObject("result"), receipt["review"] as JsonObject);
                 Proposal.PersistDecisions(state, receipt.Arr("decisions"));
                 EnsureObject(state, "finalized_exports")[pair.Key] = new JsonObject { ["head_sha"] = head };
             }
@@ -272,7 +272,7 @@ public sealed partial class ImprovementEngine
             {
                 throw new Conflict("Completed operation lacks source/review receipts.");
             }
-            state = Core.RecordOutcome(state, receipt.RequiredObject("batch"), receipt.RequiredObject("proposal"), receipt.RequiredObject("result"));
+            state = Core.RecordOutcome(state, receipt.RequiredObject("batch"), receipt.RequiredObject("proposal"), receipt.RequiredObject("result"), receipt["review"] as JsonObject);
             Proposal.PersistDecisions(state, receipt.Arr("decisions"));
             string key = $"{receipt.Str("topic_id")}:{receipt.Int("generation")}";
             JsonObject row = EnsureObject(state.RequiredObject("prs"), key);

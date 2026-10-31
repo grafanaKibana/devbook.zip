@@ -65,7 +65,7 @@ public sealed class CandidateValidationTests
         settled.Str("status").Should().Be("no_changes");
         model.Paths.Count(path => path == BadPath).Should().Be(savedProposal ? 0 : 1);
         model.Paths.Last().Should().Be(OtherPath);
-        model.Reviews.Should().Be(1);
+        model.Reviews.Should().Be(2);
         File.ReadAllText(Path.Combine(fixture.Root, BadPath)).Should().Be(Source);
         Git.Text(fixture.Root, "status", "--porcelain").Should().BeEmpty();
     }
@@ -178,6 +178,10 @@ public sealed class CandidateValidationTests
         public Task<JsonObject> ReviewAsync(JsonObject payload, CancellationToken cancellationToken = default)
         {
             Reviews++;
+            if (payload.RequiredObject("proposal").Arr("edits").Count == 0)
+            {
+                return Task.FromResult(DomainFixtures.UnchangedReview(payload));
+            }
             string[] lines = payload.RequiredObject("current").Str(BadPath).Split('\n');
             int line = Array.IndexOf(lines, "The clarified mechanism.");
             return Task.FromResult(new JsonObject
