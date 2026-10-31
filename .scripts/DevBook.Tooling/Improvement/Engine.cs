@@ -301,6 +301,7 @@ public sealed partial class ImprovementEngine
                 {
                     ["topic"] = batch.Str("topic"),
                     ["notes"] = ObjectMap(selected),
+                    ["note_hashes"] = hashes.Copy(),
                     ["feedback"] = batch.Arr("feedback").Copy(),
                     ["rules"] = rulesText,
                     ["rejected_proposals"] = state.Arr("rejections").Copy(),
