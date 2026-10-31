@@ -30,14 +30,10 @@ Choose a self-contained treatment that serves the applicable page purposes. Pres
 
 Use examples, mechanism walk-throughs, comparisons, numbers, diagrams, pitfalls, tradeoffs, Questions, References, or other sections only when they improve understanding or judgment. No body heading is mandatory. Use sibling notes to learn taxonomy, terminology, and valid links, not to copy their structure.
 
-Write question answers as explanations a senior engineer could retrieve under pressure: lead with the conclusion, then separate independent mechanisms, conditions, or tradeoffs. Keep a longer paragraph when it develops one continuous idea.
+Write question answers as explanations a senior engineer could retrieve under pressure. An answer may lead with a direct distinction, concrete example, mechanism, or decision path when that makes the specific answer easiest to understand and retrieve. Impose no universal opening, paragraph count, or cadence. Keep a longer paragraph when it develops one continuous idea.
 
 ## Workflow and result
 
 Treat each target as an editorial diagnosis, not a text transformation. Read the whole note and determine the specific reader-facing weakness, if any, before editing. When revising existing prose, inspect the available baseline or diff and identify useful mechanisms, examples, numbers, limits, and decisions that the edit must preserve or deliberately restore. Then preserve, expand, rewrite, restructure, or leave the note unchanged according to the topic. Punctuation, synonym, heading, and deletion-only edits count only when they resolve that weakness; they are not evidence of substantive improvement by themselves. In a batch, make this decision independently for every note rather than applying one transformation across the set.
 
 In the final response, report each target's path, the diagnosed weakness and idea-level repair, or why no edit was warranted. Name important technical detail preserved or restored. Also report unverified links, sources or assumptions, and any scope decision that still needs the main agent.
-
-## Technical interview questions
-
-Qard prompts must name a concrete technical concept and imply a finite expected answer. Do not use hypothetical, scenario, story, or role-play prompts, or vague release-readiness/general-advice questions that admit many unrelated correct answers. Essential meanings must follow from the question itself; do not retrofit them from a preferred answer. Keep useful overview cards and focused follow-ups, accept equivalent paraphrases, and explain mechanisms, conditions and exceptions. Preserve existing Qard IDs only for the same learning target and leave user-owned study state untouched.
