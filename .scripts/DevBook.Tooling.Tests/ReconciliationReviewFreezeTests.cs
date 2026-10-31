@@ -14,6 +14,78 @@ public sealed class ReconciliationReviewFreezeTests
     private const string Source = "The original mechanism.\n";
     private static readonly string TopicId = Core.TopicId(Core.TopicFor(ProposedPath));
 
+    [Theory]
+    [InlineData(true, false, null)]
+    [InlineData(false, false, "markdown.code-fence-language")]
+    [InlineData(true, true, "qard.duplicate-id")]
+    public async Task FeedbackKeepsUseReconciledNativeViolations(bool fixedFence, bool duplicateId, string? violation)
+    {
+        // Arrange
+        string root = Path.Combine(Path.GetTempPath(), "reconciliation-validation-" + Guid.NewGuid().ToString("N"));
+        string original = DomainFixtures.Note + "\n```\nExample.\n```\n";
+        string unrelated = DomainFixtures.Note.Replace("stable_1", "stable_2");
+        string branch = fixedFence ? original.Replace("```\nExample.", "```text\nExample.") : original;
+        if (duplicateId)
+        {
+            branch = branch.Replace("stable_1", "stable_2");
+        }
+        Directory.CreateDirectory(Path.GetDirectoryName(Path.Combine(root, ProposedPath))!);
+        File.WriteAllText(Path.Combine(root, ProposedPath), original);
+        File.WriteAllText(Path.Combine(root, UnrelatedPath), unrelated);
+        DomainFixtures.CreateReviewContract(root);
+        try
+        {
+            JsonObject state = Core.NewState();
+            state.RequiredObject("prs")[TopicId + ":1"] = new JsonObject
+            {
+                ["topic_id"] = TopicId,
+                ["generation"] = 1,
+                ["number"] = 7,
+                ["status"] = "open",
+                ["draft"] = true,
+                ["base_note_hashes"] = new JsonObject
+                {
+                    [ProposedPath] = LegacyIdentity.Digest(original),
+                    [UnrelatedPath] = LegacyIdentity.Digest(unrelated)
+                }
+            };
+            var api = new ReviewApi { Draft = true, BranchSource = branch, OwnerFeedback = new JsonArray(RuntimeFixtures.OwnerComment()) };
+            var store = new MemoryStateStore(state);
+            var model = new ReconciledKeepModel();
+            var config = new JsonObject { ["repo"] = api.Repo, ["owner_allowlist"] = RuntimeFixtures.Allowlist() };
+            var publisher = new GitHubRuntime(api, store, activation: () => { });
+            var engine = new ImprovementEngine(root, config, store, model, api, publisher,
+                notesLoader: () => Core.Inventory(root), snapshotShaLoader: () => "base");
+
+            // Act
+            JsonObject result = await engine.RunAsync(withModel: true);
+            JsonObject saved = (await store.ReadAsync()).State;
+
+            // Assert
+            model.AuthorPayload.RequiredObject("notes").Str(ProposedPath).Should().Be(branch);
+            model.AuthorPayload.RequiredObject("note_hashes").Str(ProposedPath).Should().Be(LegacyIdentity.Digest(branch));
+            JsonArray violations = model.AuthorPayload.RequiredObject("known_violations").RequiredArray(ProposedPath);
+            violations.OfType<JsonObject>().Select(item => item.Str("code")).Should().Equal(violation is null ? [] : [violation]);
+            JsonNode.DeepEquals(model.ReviewPayload["known_violations"], model.AuthorPayload["known_violations"]).Should().BeTrue();
+            if (violation is null)
+            {
+                result.Str("status").Should().Be("no_worthwhile_changes");
+                saved.RequiredObject("notes").RequiredObject(ProposedPath).Str("outcome").Should().Be("keep");
+                saved.RequiredObject("feedback").Single().Value!.Str("status").Should().Be("keep");
+            }
+            else
+            {
+                result.Str("status").Should().Be("proposal_blocked");
+                result.Str("stage").Should().Be("keep_structural_validation");
+                saved.Obj("notes").Count.Should().Be(0);
+            }
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
     [Fact]
     public async Task Ready_then_draft_reconciliation_preserves_the_first_review_head_and_freeze()
     {
@@ -100,11 +172,42 @@ public sealed class ReconciliationReviewFreezeTests
             throw new InvalidOperationException("A frozen batch cannot reach review.");
     }
 
+    private sealed class ReconciledKeepModel : IModelProvider
+    {
+        public JsonObject AuthorPayload { get; private set; } = new();
+        public JsonObject ReviewPayload { get; private set; } = new();
+
+        public Task<JsonObject> AuthorAsync(JsonObject payload, CancellationToken cancellationToken = default)
+        {
+            AuthorPayload = payload.Copy();
+            return Task.FromResult(new JsonObject
+            {
+                ["version"] = 1,
+                ["edits"] = new JsonArray(),
+                ["dispositions"] = new JsonArray(new JsonObject { ["path"] = ProposedPath, ["outcome"] = "keep", ["reason"] = "The branch already contains the requested correction." }),
+                ["feedback"] = new JsonArray(payload.Arr("feedback").OfType<JsonObject>().Select(item => (JsonNode)new JsonObject
+                {
+                    ["key"] = item.Str("key"),
+                    ["outcome"] = "keep",
+                    ["reason"] = "The current branch is already corrected."
+                }).ToArray())
+            });
+        }
+
+        public Task<JsonObject> ReviewAsync(JsonObject payload, CancellationToken cancellationToken = default)
+        {
+            ReviewPayload = payload.Copy();
+            return Task.FromResult(DomainFixtures.UnchangedReview(payload));
+        }
+    }
+
     private sealed class ReviewApi : IGitHubApi
     {
         public string Repo => "owner/repo";
         public bool Draft { get; set; }
         public string Head { get; set; } = "reviewed-head";
+        public string BranchSource { get; set; } = "The already-proposed mechanism.\n";
+        public JsonArray OwnerFeedback { get; set; } = new();
 
         public Task<JsonNode?> RequestAsync(string method, string path, JsonNode? payload = null, bool paginate = false, CancellationToken cancellationToken = default)
         {
@@ -125,12 +228,13 @@ public sealed class ReconciliationReviewFreezeTests
                     ["base"] = new JsonObject { ["ref"] = "main", ["repo"] = new JsonObject { ["full_name"] = Repo } }
                 }),
                 "/pulls/7/files?per_page=100" => new JsonArray(new JsonObject { ["filename"] = ProposedPath, ["additions"] = 1, ["deletions"] = 1 }),
-                "/issues/7/comments?per_page=100" or "/pulls/7/comments?per_page=100" or "/pulls/7/reviews?per_page=100" => new JsonArray(),
+                "/issues/7/comments?per_page=100" => OwnerFeedback.Copy(),
+                "/pulls/7/comments?per_page=100" or "/pulls/7/reviews?per_page=100" => new JsonArray(),
                 _ when path.StartsWith("/contents/", StringComparison.Ordinal) => new JsonObject
                 {
                     ["encoding"] = "base64",
                     ["type"] = "file",
-                    ["content"] = Convert.ToBase64String(Encoding.UTF8.GetBytes("The already-proposed mechanism.\n"))
+                    ["content"] = Convert.ToBase64String(Encoding.UTF8.GetBytes(BranchSource))
                 },
                 _ => throw new InvalidOperationException("Unexpected reconciliation request: " + path)
             };

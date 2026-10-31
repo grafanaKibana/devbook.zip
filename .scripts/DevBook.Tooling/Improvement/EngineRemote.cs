@@ -1,6 +1,7 @@
 using System.Text.Json.Nodes;
 using DevBook.Tooling.Export;
 using DevBook.Tooling.Infrastructure;
+using DevBook.Tooling.Vault;
 
 namespace DevBook.Tooling.Improvement;
 
@@ -20,6 +21,7 @@ public sealed partial class ImprovementEngine
         var rows = new JsonArray();
         var managed = new Dictionary<int, JsonObject>();
         var polled = new HashSet<int>();
+        bool loadedBranchNotes = false;
         foreach (JsonObject pr in prs.OfType<JsonObject>())
         {
             (string Topic, int Generation)? marker = Runtime.ParseMarker(pr.Str("body"));
@@ -174,6 +176,7 @@ public sealed partial class ImprovementEngine
                     string text = await publisher.ReadNoteAsync(path, pr.Obj("head").Str("ref"), cancellationToken);
                     note["content"] = text;
                     note["hash"] = LegacyIdentity.Digest(text);
+                    loadedBranchNotes = true;
                 }
                 JsonArray feedback = await Feedback.PollAsync(api, pr.Int("number"), config.Arr("owner_allowlist"), cancellationToken);
                 polled.Add(pr.Int("number"));
@@ -196,6 +199,20 @@ public sealed partial class ImprovementEngine
                 managed[pr.Int("number")] = raw;
             }
             rows.Add(row);
+        }
+        if (loadedBranchNotes)
+        {
+            NoteDocument[] current = notes.OfType<JsonObject>()
+                .Select(note => NoteDocument.Parse(note.Str("content"), note.Str("path"), Path.Combine(root, note.Str("path"))))
+                .Concat(Core.SpecialNotes.Where(path => !byPath.ContainsKey(path) && File.Exists(Path.Combine(root, path)))
+                    .Select(path => NoteDocument.Load(Path.Combine(root, path), root))).ToArray();
+            Issue[] issues = current.SelectMany(note => Validation.ValidateNote(note, Path.Combine(root, "Vault", "Home")))
+                .Concat(Validation.ValidateGlobalQardIds(current)).ToArray();
+            foreach (JsonObject note in notes.OfType<JsonObject>())
+            {
+                note["violations"] = new JsonArray(issues.Where(issue => issue.Path == note.Str("path"))
+                    .Select(issue => (JsonNode)new JsonObject { ["code"] = issue.Code, ["line"] = issue.Line, ["message"] = issue.Message }).ToArray());
+            }
         }
         state = Core.SyncPrs(state, rows, config);
         JsonArray actionable = Copies(allFeedback.OfType<JsonObject>().Where(item => !string.IsNullOrWhiteSpace(item.Str("body"))));
