@@ -380,7 +380,14 @@ public sealed partial class ImprovementEngine
                 throw new RuntimeFailure("Source workload exceeds this run; proposal preserved.");
             }
 
-            fetched[source.Str("url")] = await sourceFetcher(source.Str("url"), cancellationToken);
+            try
+            {
+                fetched[source.Str("url")] = await sourceFetcher(source.Str("url"), cancellationToken);
+            }
+            catch (UnsafeInput error)
+            {
+                return await QuarantineAsync(state, pending, "source_policy", error.Message, cancellationToken);
+            }
         }
         JsonObject review;
         try

@@ -13,9 +13,11 @@ public sealed class SourceBudgetTests
     private const string Source = "---\ncreated: \"2026-01-01T00:00:00.000Z\"\nmodified: \"2026-01-01T00:00:00.000Z\"\n---\n\nThe original mechanism.\n";
 
     [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public async Task Oversized_sources_are_quarantined_before_fetching_and_other_work_proceeds(bool savedProposal)
+    [InlineData(false, false)]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    [InlineData(true, true)]
+    public async Task Invalid_source_workloads_are_quarantined_and_other_work_proceeds(bool savedProposal, bool unsupportedHost)
     {
         // Arrange
         string root = Path.Combine(Path.GetTempPath(), "source-budget-" + Guid.NewGuid().ToString("N"));
@@ -24,7 +26,8 @@ public sealed class SourceBudgetTests
         {
             var notes = new JsonArray(DomainFixtures.NoteRecord(BadPath, Source), DomainFixtures.NoteRecord(GoodPath, Source));
             var config = new JsonObject { ["max_notes_per_run"] = 1 };
-            JsonObject proposal = WithSources(13);
+            JsonObject proposal = unsupportedHost ? WithSources(1, "docs.docker.com") : WithSources(13);
+            string stage = unsupportedHost ? "source_policy" : "source_budget";
             JsonObject state = Core.NewState();
             if (savedProposal)
             {
@@ -45,23 +48,28 @@ public sealed class SourceBudgetTests
             var model = new Author(proposal);
             var fetches = 0;
             ImprovementEngine Engine() => new(root, config, store, model, notesLoader: () => notes.Copy(),
-                sourceFetcher: (_, _) => { fetches++; return Task.FromResult("Primary documentation."); });
+                sourceFetcher: async (url, token) =>
+                {
+                    fetches++;
+                    await Runtime.ValidateSourceUrlAsync(url, ["learn.microsoft.com"], token);
+                    return "Primary documentation.";
+                });
 
-            // Act: quarantine the fresh or saved oversized proposal before network work.
+            // Act: quarantine the fresh or saved invalid proposal without network work.
             JsonObject blocked = await Engine().RunAsync(withModel: true);
             StateSnapshot afterBlocked = await store.ReadAsync();
 
             // Assert
             blocked.Str("status").Should().Be("proposal_blocked");
-            blocked.Str("stage").Should().Be("source_budget");
-            blocked.Str("reason").Should().Contain("13 distinct source URLs").And.Contain("limit of 12");
+            blocked.Str("stage").Should().Be(stage);
+            blocked.Str("reason").Should().Contain(unsupportedHost ? "explicitly allowed public HTTPS host" : "13 distinct source URLs");
             afterBlocked.State["pending_author_proposal"].Should().BeNull();
             JsonObject archived = afterBlocked.State.Obj("invalid_proposals").Single().Value!.AsObject();
-            archived.Obj("blocked_review").Str("stage").Should().Be("source_budget");
+            archived.Obj("blocked_review").Str("stage").Should().Be(stage);
             JsonNode.DeepEquals(archived["proposal"], proposal).Should().BeTrue();
-            fetches.Should().Be(0);
+            fetches.Should().Be(unsupportedHost ? 1 : 0);
 
-            // Act: the unchanged oversized proposal cannot monopolize later opportunities.
+            // Act: the unchanged invalid proposal cannot monopolize later opportunities.
             JsonObject progressed = await Engine().RunAsync(withModel: true);
             JsonObject settled = await Engine().RunAsync(withModel: true);
             StateSnapshot after = await store.ReadAsync();
@@ -72,7 +80,7 @@ public sealed class SourceBudgetTests
             model.Paths.Last().Should().Be(GoodPath);
             model.Paths.Should().HaveCount(savedProposal ? 1 : 2);
             model.Reviews.Should().Be(0);
-            fetches.Should().Be(0);
+            fetches.Should().Be(unsupportedHost ? 1 : 0);
             after.State.Obj("notes").Obj(GoodPath).Str("outcome").Should().Be("keep");
             after.State.Obj("invalid_proposals").Count.Should().Be(1);
         }
@@ -121,9 +129,9 @@ public sealed class SourceBudgetTests
         }
     }
 
-    private static JsonObject WithSources(int count)
+    private static JsonObject WithSources(int count, string host = "learn.microsoft.com")
     {
-        string[] urls = Enumerable.Range(1, count).Select(index => $"https://learn.microsoft.com/dotnet/source-{index}").ToArray();
+        string[] urls = Enumerable.Range(1, count).Select(index => $"https://{host}/dotnet/source-{index}").ToArray();
         return DomainFixtures.Proposal(new JsonObject
         {
             ["path"] = BadPath,
