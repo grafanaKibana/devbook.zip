@@ -68,6 +68,9 @@ public sealed partial class ImprovementEngine
             row["branch"] = pr.Obj("head").Str("ref");
             row["head_sha"] = pr.Obj("head").Str("sha");
             row["frozen"] = prior.Bool("frozen");
+            row["review_started_head_sha"] = prior.Str("review_started_head_sha").Length > 0
+                ? prior["review_started_head_sha"]!.DeepClone()
+                : status == "open" && !pr.Bool("draft", true) ? pr.Obj("head")["sha"]?.DeepClone() : null;
             if (status == "open")
             {
                 if (!topics.TryGetValue(topicKey, out string? topic))
@@ -82,7 +85,7 @@ public sealed partial class ImprovementEngine
                 string[] allPaths = files.OfType<JsonObject>().Select(file => file.Str("filename")).ToArray();
                 string[] paths = allPaths.Where(path => !Receipt.IsExportPath(path)).ToArray();
                 bool automatic = config.Bool("automatic_export");
-                bool otherFreeze = prior.Str("review_started_head_sha").Length > 0 || prior["validation_failure"] is not null || prior.Str("reviewDecision").Length > 0
+                bool otherFreeze = row.Str("review_started_head_sha").Length > 0 || prior["validation_failure"] is not null || prior.Str("reviewDecision").Length > 0
                     || prior.Bool("review_activity") || prior.Bool("has_reviews") || prior.Int("review_count") > 0 || prior["draft"]?.GetValue<bool>() == false
                     || prior.Arr("changed_paths").Count >= config.Int("max_pr_notes", 16) || prior.Int("additions") + prior.Int("deletions") >= config.Int("max_pr_lines", 1200);
                 if (automatic && prior.Str("export_operation_id").Length > 0 && !otherFreeze)
@@ -179,7 +182,7 @@ public sealed partial class ImprovementEngine
                 row["frozen"] = row.Bool("frozen") || feedback.Count > 0 || !pr.Bool("draft", true) || paths.Length >= config.Int("max_pr_notes", 16)
                     || files.OfType<JsonObject>().Sum(file => file.Int("additions") + file.Int("deletions")) >= config.Int("max_pr_lines", 1200);
                 row["changed_paths"] = Copies(paths.Select(value => JsonValue.Create(value)));
-                row["review_started_head_sha"] = prior["review_started_head_sha"]?.DeepClone() ?? (feedback.Count > 0 ? pr.Obj("head")["sha"]?.DeepClone() : null);
+                row["review_started_head_sha"] = row["review_started_head_sha"]?.DeepClone() ?? (feedback.Count > 0 ? pr.Obj("head")["sha"]?.DeepClone() : null);
                 JsonObject raw = pr.Copy();
                 raw["changed_paths"] = Copies(paths.Select(value => JsonValue.Create(value)));
                 managed[pr.Int("number")] = raw;
