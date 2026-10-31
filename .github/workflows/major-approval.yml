@@ -10,7 +10,7 @@ name: Major Release Approval
 on:
   pull_request:
     types: [opened, edited, reopened, synchronize]
-    branches: [main]
+    branches: [main, feature/devbook-improvement-setup]
   issue_comment:
     types: [created]
 

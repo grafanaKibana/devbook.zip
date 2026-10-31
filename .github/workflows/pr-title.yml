@@ -3,7 +3,7 @@ name: PR Title
 on:
   pull_request:
     types: [opened, edited, synchronize, reopened]
-    branches: [main]
+    branches: [main, feature/devbook-improvement-setup]
 
 permissions:
   contents: read

@@ -361,16 +361,21 @@ public sealed partial class ImprovementEngine
         Dictionary<string, string> cumulativeBase = paths.ToDictionary(path => path, path => baseline[path]);
         Dictionary<string, string> cumulativeCurrent = paths.ToDictionary(path => path, path => current[path]);
         string diff = await Review.DiffAsync(cumulativeBase, cumulativeCurrent, cancellationToken);
-        if (batch.Arr("feedback").Count == 0 && (paths.Count > config.Int("max_pr_notes", 16) || Review.ChangedLines(diff) > config.Int("max_pr_lines", 1200)))
+        int noteLimit = config.Int("max_pr_notes", 16);
+        int lineLimit = config.Int("max_pr_lines", 1200);
+        int changedLines = Review.ChangedLines(diff);
+        if (batch.Arr("feedback").Count == 0 && (paths.Count > noteLimit || changedLines > lineLimit))
         {
-            pending["blocked_review"] = new JsonObject { ["reason"] = "PR size limit reached" };
             if (prState.Int("number") > 0)
             {
+                pending["blocked_review"] = new JsonObject { ["reason"] = "PR size limit reached" };
                 state.RequiredObject("prs").RequiredObject($"{batch.Str("topic_id")}:{prState.Int("generation")}")["frozen"] = true;
+                await SaveAsync(state, "freeze at review size limit", cancellationToken);
+                return new JsonObject { ["status"] = "size_limit", ["model_calls"] = modelCalls };
             }
 
-            await SaveAsync(state, "freeze at review size limit", cancellationToken);
-            return new JsonObject { ["status"] = "size_limit", ["model_calls"] = modelCalls };
+            return await QuarantineAsync(state, pending, "pr_size",
+                $"Cumulative PR has {paths.Count} notes (limit {noteLimit}) and {changedLines} changed lines (limit {lineLimit}).", cancellationToken);
         }
         var fetched = new JsonObject();
         foreach (JsonObject source in sourceEntries)
