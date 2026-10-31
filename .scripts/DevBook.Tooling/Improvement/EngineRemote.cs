@@ -28,10 +28,6 @@ public sealed partial class ImprovementEngine
                 continue;
             }
             (string topicKey, int generation) = marker.Value;
-            if (!topics.TryGetValue(topicKey, out string? topic))
-            {
-                throw new Conflict("Managed PR topic no longer exists; reconcile manually.");
-            }
             string status = Runtime.Lifecycle(pr);
             JsonObject prior = state.Obj("prs").Obj($"{topicKey}:{generation}");
             if (status == "closed" && prior.Str("status") == "open")
@@ -74,6 +70,14 @@ public sealed partial class ImprovementEngine
             row["frozen"] = prior.Bool("frozen");
             if (status == "open")
             {
+                if (!topics.TryGetValue(topicKey, out string? topic))
+                {
+                    row["base_conflict"] = true;
+                    row["frozen"] = true;
+                    row["pause_reason"] = "Managed PR topic no longer exists; reconcile this PR manually.";
+                    rows.Add(row);
+                    continue;
+                }
                 JsonArray files = await Runtime.ArrayAsync(api, $"/pulls/{pr.Int("number")}/files?per_page=100", cancellationToken);
                 string[] allPaths = files.OfType<JsonObject>().Select(file => file.Str("filename")).ToArray();
                 string[] paths = allPaths.Where(path => !Receipt.IsExportPath(path)).ToArray();
