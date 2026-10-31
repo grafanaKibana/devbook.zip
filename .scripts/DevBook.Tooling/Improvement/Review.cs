@@ -6,6 +6,17 @@ namespace DevBook.Tooling.Improvement;
 
 public static class Review
 {
+    public static bool VerifiedKeep(JsonObject evidence, string path, string current, string rulesHash)
+    {
+        if (evidence.Str("content_hash") != LegacyIdentity.Digest(current) || evidence.Str("rules_hash") != rulesHash
+            || evidence["review"] is not JsonObject noteReview)
+        {
+            return false;
+        }
+        return Clean(new JsonObject { ["verdict"] = "CLEAN", ["notes"] = new JsonArray(noteReview.Copy()) },
+            new Dictionary<string, string> { [path] = current }, new JsonObject(), new JsonArray(), new JsonArray());
+    }
+
     public static bool Clean(JsonObject review, IReadOnlyDictionary<string, string> candidates, JsonObject proposal, JsonArray rejected, JsonArray feedback)
     {
         if (review.Str("verdict") != "CLEAN")

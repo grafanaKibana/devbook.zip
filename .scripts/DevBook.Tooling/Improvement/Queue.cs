@@ -34,6 +34,8 @@ public static class Queue
                 : prior is null ? (1, "new")
                 : prior.Str("content_hash") != hash ? (2, "changed")
                 : prior.Str("outcome") is not ("keep" or "changed") ? (3, "unchecked")
+                : prior.Str("outcome") == "keep" && prior.Str("rules_hash") == rulesHash
+                    && !Review.VerifiedKeep(prior.Obj("keep_review"), path, note.Str("content"), rulesHash) ? (3, "keep_unverified")
                 : note.Arr("violations").Count != 0 && prior.Str("violation_hash") != LegacyIdentity.ViolationHash(note.Arr("violations")) ? (4, "violations")
                 : prior.Str("rules_hash") != rulesHash ? (5, "rules_changed") : (99, "");
             if (reason.Length == 0)

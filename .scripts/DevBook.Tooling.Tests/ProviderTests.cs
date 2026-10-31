@@ -51,6 +51,81 @@ public sealed class ProviderTests
             Directory.Exists(call.WorkingDirectory).Should().BeFalse();
         }
         runner.Requests.Where(request => request.Arguments.Contains("--version")).Should().OnlyContain(request => !request.Environment!.ContainsKey("CLAUDE_CODE_OAUTH_TOKEN"));
+        provider.Diagnostics.Should().HaveCount(2);
+        provider.Diagnostics[0]!.AsObject().Select(item => item.Key).Should().BeEquivalentTo("role", "model");
+        provider.Diagnostics[1]!.Str("role").Should().Be("review");
+    }
+
+    [Fact]
+    public async Task PrimaryDocumentationHostsAreAvailableWithoutAllowingLookalikes()
+    {
+        // Arrange
+        string root = Repository.FindRoot(AppContext.BaseDirectory);
+        JsonObject config = JsonData.ParseObject(await File.ReadAllTextAsync(Path.Combine(root, ".github/devbook-improvement.json")));
+        config["claude_executable"] = "/usr/bin/true";
+        var runner = new ProviderRunner();
+        var provider = new ClaudeProvider(config, runner, environment: name => name == "CLAUDE_CODE_OAUTH_TOKEN" ? "fixture-oauth-value" : null);
+        string[] hosts = config.Arr("allowed_source_hosts").Strings().ToArray();
+
+        // Act
+        await provider.AuthorAsync(new JsonObject());
+        ProcessRequest call = runner.Requests.Single(request => request.Arguments.Contains("--print"));
+        string allowedTools = call.Arguments[call.Arguments.ToList().IndexOf("--allowedTools") + 1];
+        Func<Task> lookalike = async () => await Runtime.ValidateSourceUrlAsync("https://developers.openai.com.untrusted.example/docs", hosts);
+        Func<Task> unrelated = async () => await Runtime.ValidateSourceUrlAsync("https://untrusted.example/docs", hosts);
+
+        // Assert
+        hosts.Should().Contain(["developers.openai.com", "platform.claude.com"]);
+        allowedTools.Should().Contain("WebFetch(domain:developers.openai.com)").And.Contain("WebFetch(domain:platform.claude.com)");
+        allowedTools.Should().NotContain("domain:*");
+        await lookalike.Should().ThrowAsync<UnsafeInput>();
+        await unrelated.Should().ThrowAsync<UnsafeInput>();
+    }
+
+    [Fact]
+    public async Task DiagnosticsRetainResearchCountsWithoutModelTextOrToolInputs()
+    {
+        // Arrange
+        var runner = new ProviderRunner
+        {
+            Metadata = JsonData.ParseObject("""
+                {
+                  "duration_ms": 1400,
+                  "duration_api_ms": 1200,
+                  "num_turns": 3,
+                  "subtype": "success",
+                  "stop_reason": "end_turn",
+                  "usage": {"input_tokens": 100, "output_tokens": 20, "cost_usd": 2, "private": "secret-fixture"},
+                  "modelUsage": {"claude-sonnet-5-5": {"inputTokens": 100, "outputTokens": 20, "webSearchRequests": 2, "costUSD": 2}},
+                  "permission_denials": [
+                    {"tool_name": "WebFetch", "tool_input": {"url": "https://private-note.example/secret-fixture"}},
+                    {"tool_name": "WebFetch", "tool_input": {"prompt": "secret-fixture"}},
+                    {"tool_name": "secret-fixture", "tool_input": "secret-fixture"}
+                  ],
+                  "result": "private-note and secret-fixture",
+                  "session_id": "secret-fixture"
+                }
+                """)
+        };
+        var provider = new ClaudeProvider(new JsonObject { ["claude_executable"] = "/usr/bin/true" }, runner,
+            environment: name => name == "CLAUDE_CODE_OAUTH_TOKEN" ? "fixture-oauth-value" : null);
+
+        // Act
+        await provider.AuthorAsync(new JsonObject { ["notes"] = "private-note" });
+        JsonObject diagnostic = provider.Diagnostics.Single()!.AsObject();
+
+        // Assert
+        diagnostic.Str("role").Should().Be("author");
+        diagnostic.Str("model").Should().Be(ClaudeProvider.DefaultModel);
+        diagnostic.Int("duration_ms").Should().Be(1400);
+        diagnostic.Int("num_turns").Should().Be(3);
+        diagnostic.Str("stop_reason").Should().Be("end_turn");
+        diagnostic.Obj("usage").Int("input_tokens").Should().Be(100);
+        diagnostic.Obj("model_usage").Int("webSearchRequests").Should().Be(2);
+        diagnostic.Obj("permission_denial_counts").Int("WebFetch").Should().Be(2);
+        diagnostic.Obj("permission_denial_counts").Int("other").Should().Be(1);
+        diagnostic.ToJsonString().Should().NotContain("private-note").And.NotContain("secret-fixture")
+            .And.NotContain("tool_input").And.NotContain("session_id").And.NotContain("cost").And.NotContain("result");
     }
 
     [Fact]
@@ -77,6 +152,7 @@ public sealed class ProviderTests
     private sealed class ProviderRunner : IProcessRunner
     {
         public List<ProcessRequest> Requests { get; } = [];
+        public JsonObject Metadata { get; init; } = new();
         public Task<ProcessResult> RunAsync(ProcessRequest request, CancellationToken cancellationToken = default)
         {
             Requests.Add(request with { Environment = request.Environment is null ? null : new Dictionary<string, string>(request.Environment) });
@@ -90,6 +166,10 @@ public sealed class ProviderTests
                 {"verdict":"CHANGES REQUIRED","overall_reason":"Fixture block","notes":[{"path":"Vault/Home/A/B.md","verdict":"CHANGES REQUIRED","summary":"Needs an explanation","page_type":"concept","current_text_evidence":[{"quote":"Current text","line_start":1,"reason":"Missing boundary"}],"target_resolution":"UNRESOLVED","split_suggestion":"Keep together","findings":[],"source_checks":[],"rejection_equivalence":[],"quality":{"accuracy":"PASS","clarity":"FAIL","rules_compliance":"PASS","question_quality":"NOT APPLICABLE","identity_safety":"NOT APPLICABLE"}}]}
                 """) : new JsonObject { ["version"] = 1, ["edits"] = new JsonArray(), ["dispositions"] = new JsonArray(), ["feedback"] = new JsonArray() };
             var envelope = new JsonObject { ["modelUsage"] = new JsonObject { [ClaudeProvider.DefaultModel] = new JsonObject() }, ["structured_output"] = structured };
+            foreach (KeyValuePair<string, JsonNode?> item in Metadata)
+            {
+                envelope[item.Key] = item.Value?.DeepClone();
+            }
             return Task.FromResult(new ProcessResult(0, Encoding.UTF8.GetBytes(envelope.ToJsonString()), []));
         }
     }

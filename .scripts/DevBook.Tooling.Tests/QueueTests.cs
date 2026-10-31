@@ -31,7 +31,20 @@ public sealed class QueueTests
         // Act
         state = Core.RecordOutcome(state, batch, keep, new JsonObject { ["sources"] = new JsonObject() });
 
-        // Assert
+        // Assert: a legacy author-only keep needs one independent recheck.
+        ImprovementQueue.SelectBatch(state, notes, "rules")!.Arr("notes").Single()!.Str("selection_reason").Should().Be("keep_unverified");
+        state.Obj("notes").Obj(DomainFixtures.Path).Str("outcome").Should().Be("keep");
+
+        // Arrange: the independent reviewer supplies current-text evidence.
+        JsonObject review = DomainFixtures.UnchangedReview(new JsonObject
+        {
+            ["current"] = new JsonObject { [DomainFixtures.Path] = DomainFixtures.Note }
+        });
+
+        // Act
+        state = Core.RecordOutcome(state, batch, keep, new JsonObject { ["sources"] = new JsonObject() }, review);
+
+        // Assert: the verified unchanged version is skipped.
         ImprovementQueue.SelectBatch(state, notes, "rules").Should().BeNull();
 
         // Arrange: feedback spans two notes in one topic.

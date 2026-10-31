@@ -12,14 +12,14 @@ public static class EngineCommand
     {
         if (args.Contains("--help"))
         {
-            Console.WriteLine("DevBook.Tooling improvement [--demo | --dry-run | --apply] [--with-model] [--config <root-relative-json>] [--model <id>] [--output-dir <root-relative-dir>] [--repo-root <path>]");
+            Console.WriteLine("DevBook.Tooling improvement [--demo | --dry-run | --apply] [--with-model] [--note <Vault/Home/path.md> --focus <issue>] [--config <root-relative-json>] [--model <id>] [--output-dir <root-relative-dir>] [--repo-root <path>]");
             return 0;
         }
         try
         {
             var options = new Dictionary<string, string>(StringComparer.Ordinal);
             var flags = new HashSet<string>();
-            var valued = new HashSet<string> { "--config", "--model", "--output-dir", "--repo-root" };
+            var valued = new HashSet<string> { "--config", "--model", "--output-dir", "--repo-root", "--note", "--focus" };
             var switches = new HashSet<string> { "--demo", "--dry-run", "--apply", "--with-model" };
             for (var index = 0; index < args.Length; index++)
             {
@@ -45,6 +45,7 @@ public static class EngineCommand
             string output = Path.GetFullPath(Path.Combine(root, options.GetValueOrDefault("--output-dir", "artifacts/devbook-improvement")));
             JsonObject config = JsonData.ParseObject(await File.ReadAllTextAsync(configPath));
             config = Pilot.Configure(config, () => Git.Text(root, "rev-parse", "HEAD"));
+            config = ManualSelection.Configure(config, root, options.GetValueOrDefault("--note", ""), options.GetValueOrDefault("--focus", ""));
             if (options.TryGetValue("--model", out string? selectedModel))
             {
                 config["model"] = selectedModel;
@@ -53,6 +54,10 @@ public static class EngineCommand
             using var deadline = new CancellationTokenSource(TimeSpan.FromMinutes(config.Int("max_run_minutes", 35)));
             if (flags.Contains("--demo"))
             {
+                if (config.Str("target_note").Length != 0)
+                {
+                    throw new ArgumentException("Targeted notes use --dry-run or --apply, not the synthetic demo.");
+                }
                 result = await Demo.RunAsync(root, config, deadline.Token);
             }
             else if (!flags.Contains("--apply") && !flags.Contains("--with-model"))
@@ -61,6 +66,7 @@ public static class EngineCommand
             }
             else
             {
+                ManualSelection.RequireManualOwner(config);
                 bool apply = flags.Contains("--apply");
                 if (apply)
                 {
@@ -89,7 +95,9 @@ public static class EngineCommand
                 try
                 {
                     var publisher = new GitHubRuntime(api, store, config.Str("base_branch", "main"), config.Arr("required_check_contexts").Strings(), owner);
-                    result = await new ImprovementEngine(root, config, store, new ClaudeProvider(config), api, publisher).RunAsync(apply, true, deadline.Token);
+                    var provider = new ClaudeProvider(config);
+                    result = await new ImprovementEngine(root, config, store, provider, api, publisher).RunAsync(apply, true, deadline.Token);
+                    result["model_diagnostics"] = provider.Diagnostics.Copy();
                 }
                 finally
                 {

@@ -20,7 +20,7 @@ public sealed class InvalidProposalTests
         const string feedbackKey = "comment:7:revision";
         const string otherFeedbackKey = "comment:8:revision";
         string root = Path.Combine(Path.GetTempPath(), "invalid-proposal-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(root);
+        DomainFixtures.CreateReviewContract(root);
         try
         {
             var notes = new JsonArray(DomainFixtures.NoteRecord(badPath), DomainFixtures.NoteRecord(otherPath), DomainFixtures.NoteRecord(goodPath));
@@ -117,7 +117,7 @@ public sealed class InvalidProposalTests
             after.State.RequiredObject("invalid_proposals").Count.Should().Be(1);
             after.State.RequiredObject("feedback").Obj(feedbackKey).Str("status").Should().Be("pending");
             after.State.RequiredArray("rejections").Strings().Should().Equal("existing-owner-rejection");
-            model.Reviews.Should().Be(0);
+            model.Reviews.Should().Be(2);
         }
         finally
         {
@@ -151,7 +151,8 @@ public sealed class InvalidProposalTests
         public Task<JsonObject> ReviewAsync(JsonObject payload, CancellationToken cancellationToken = default)
         {
             Reviews++;
-            throw new InvalidOperationException("Invalid edits and successful keep outcomes do not reach review.");
+            payload.RequiredObject("proposal").Arr("edits").Should().BeEmpty();
+            return Task.FromResult(DomainFixtures.UnchangedReview(payload));
         }
     }
 }

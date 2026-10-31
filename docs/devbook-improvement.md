@@ -30,6 +30,12 @@ Built-in WebSearch and WebFetch use the existing subscription pool; no additiona
 
 The isolated environment pins background Haiku routing to the same exact requested Sonnet identifier, preserving exclusive-model verification even when fetch needs extraction. A live activation smoke must verify this behavior on the pinned CLI. Context7 was considered, but its separate free monthly allowance and CI credential are unnecessary while built-in tools suffice.
 
+The host policy includes the current `developers.openai.com` and `platform.claude.com` documentation endpoints. Retrieval requests Markdown preferentially and accepts Markdown, HTML or plain text. Each source is bounded by `max_source_bytes`, default 250,000 and supported range 1–1,000,000; the source-count and model-input caps remain enforced. Use a paper's versioned full-text HTML when available because PDF extraction is unavailable. Result artifacts expose safe optional `model_diagnostics` counts for search activity, denied tool names, turns, timing and token usage. They exclude raw envelopes, prompts, note text, query URLs and denied tool inputs. These diagnostics do not measure remaining subscription quota.
+
+## Reviewed keep decisions
+
+An empty author edit list still goes through the separate complete-note reviewer and the existing `Review.Clean` gate. Successful keeps persist per-note current-text evidence bound to the source and rules versions. A failed review stays held with its findings; it is not recorded as a successful keep. Reviewer quota handling preserves the proposal for resumption without another author call. Pure keeps do not prepare dates or modify source. Legacy author-only keeps receive the explicit `keep_unverified` selection reason once; durable history and rejected proposals are preserved. Keeps within a mixed changed/unchanged batch retain the same independent review evidence.
+
 ## Pull request behavior
 
 Each open topic generation has one stable branch and one draft PR identified by a machine marker. Later batches append to that PR until it reaches a configured size or owner review begins. Once frozen, only edits caused by queued owner feedback may enter. Freeze is a bot scope restriction: it never locks your vault or branch. It starts when the verified owner posts a comment/review, marks the draft ready, or the PR reaches its configured limit. Merely viewing the PR does not start review. Automatic export waiting no longer freezes a PR by itself. Generated export commits remain allowed so the proposed note changes can be rendered. A merged PR starts a fresh generation from current `main`; a closed unmerged PR stays closed, and its rejected proposal fingerprints and learning-target lineage remain suppressed.
@@ -94,6 +100,10 @@ gh workflow run 401735063 --ref feature/devbook-improvement-setup \
 ```
 
 Removing `DEVBOOK_IMPROVEMENT_PILOT_SHA` prevents new pilot jobs, while removing the temporary environment policy prevents secret access from the setup branch. Explicitly cancel an already-running job when an immediate stop is required. The production controls below remain separate.
+
+Manual `dry-run` and `apply` accept optional paired `note` and `focus` inputs (`--note` and `--focus` locally). `note` is one existing authorable `Vault/Home/...md` path. `focus` states the concrete issue to investigate and reaches both author and reviewer; changing either invalidates reuse of an older saved proposal. Live targeting requires a matching numeric ID/login from the owner allowlist and an owner-triggered `workflow_dispatch`. It rechecks only that note without clearing history, bypassing holds/rejections/freezes, or processing other topics' feedback. Existing publication recovery retains priority. Scheduled runs ignore these manual inputs. Selection-only local dry-runs need no credentials.
+
+For the LLM attention-mask test, target `Vault/Home/AI & ML/LLM/LLM.md` and ask for verification of current/earlier input positions versus shifted next-token targets in the body and transformer-comparison card. The versioned primary text is [Attention Is All You Need v7, sections 3.1 and 3.2.3](https://arxiv.org/html/1706.03762v7). The learning target stays the same and its ID-less card remains ID-less. First inspect the protected targeted dry-run; apply its saved proposal on the same authorized SHA only after independent review and validation. Keep production and scheduling false and remove the temporary grants after completion.
 
 ### Production activation
 

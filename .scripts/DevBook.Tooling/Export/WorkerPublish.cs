@@ -452,7 +452,7 @@ public static partial class Worker
         _ = BoundOperation(final, request);
         foreach (JsonObject record in records.OfType<JsonObject>())
         {
-            final = Core.RecordOutcome(final, record.Obj("batch"), record.Obj("proposal"), record.Obj("result"));
+            final = Core.RecordOutcome(final, record.Obj("batch"), record.Obj("proposal"), record.Obj("result"), record["review"] as JsonObject);
         }
         Proposal.PersistDecisions(final, reviewed.Arr("decisions"));
         JsonObject finalized = final.Obj("finalized_exports").Copy();

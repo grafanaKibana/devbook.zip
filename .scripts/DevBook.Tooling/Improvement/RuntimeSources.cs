@@ -142,6 +142,7 @@ public static partial class Runtime
         };
         using var client = new HttpClient(handler);
         client.DefaultRequestHeaders.UserAgent.ParseAdd("DevBookImprovement/1");
+        client.DefaultRequestHeaders.Accept.ParseAdd("text/markdown, text/plain;q=0.9, text/html;q=0.8");
         Uri target = await ValidateSourceUrlAsync(url, hosts, timeout.Token);
         try
         {
@@ -159,9 +160,9 @@ public static partial class Runtime
                 }
                 response.EnsureSuccessStatusCode();
                 string? mediaType = response.Content.Headers.ContentType?.MediaType;
-                if (mediaType is not ("text/html" or "text/plain"))
+                if (mediaType is not ("text/html" or "text/markdown" or "text/plain"))
                 {
-                    throw new UnsafeInput("Source must provide bounded textual evidence; PDF extraction is unavailable.");
+                    throw new UnsafeInput("Source must provide bounded HTML, Markdown or plain-text evidence; PDF extraction is unavailable.");
                 }
                 await using Stream content = await response.Content.ReadAsStreamAsync(timeout.Token);
                 using var data = new MemoryStream();

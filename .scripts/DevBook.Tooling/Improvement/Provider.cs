@@ -30,6 +30,7 @@ public sealed class ClaudeProvider : IModelProvider
     private readonly TimeProvider clock;
     private readonly Func<string, string?> environment;
     public int TimeoutSeconds { get; set; }
+    public JsonArray Diagnostics { get; } = new();
 
     public ClaudeProvider(JsonObject config, IProcessRunner? runner = null, TimeProvider? clock = null, Func<string, string?>? environment = null)
     {
@@ -173,6 +174,7 @@ public sealed class ClaudeProvider : IModelProvider
             {
                 throw new ClaudeProviderException("Reviewer overall verdict conflicts with per-note results.");
             }
+            Diagnostics.Add(SafeDiagnostics(role, model, envelope));
             return structured.Copy();
         }
         finally
@@ -189,6 +191,60 @@ public sealed class ClaudeProvider : IModelProvider
                 InvocationGate.Release();
             }
         }
+    }
+
+    private static JsonObject SafeDiagnostics(string role, string model, JsonObject envelope)
+    {
+        JsonObject result = NumericCounts(envelope, ["duration_ms", "duration_api_ms", "num_turns"]);
+        result["role"] = role;
+        result["model"] = model;
+        string subtype = envelope.Str("subtype");
+        if (subtype is "success" or "error_max_turns" or "error_max_budget_usd" or "error_during_execution" or "error_max_structured_output_retries")
+        {
+            result["subtype"] = subtype;
+        }
+        string stopReason = envelope.Str("stop_reason");
+        if (stopReason is "end_turn" or "max_tokens" or "stop_sequence" or "tool_use" or "pause_turn" or "refusal")
+        {
+            result["stop_reason"] = stopReason;
+        }
+
+        JsonObject usage = NumericCounts(envelope.Obj("usage"), ["input_tokens", "output_tokens", "cache_creation_input_tokens", "cache_read_input_tokens"]);
+        if (usage.Count != 0)
+        {
+            result["usage"] = usage;
+        }
+        JsonObject modelUsage = NumericCounts(envelope.Obj("modelUsage").Obj(model),
+            ["inputTokens", "outputTokens", "cacheReadInputTokens", "cacheCreationInputTokens", "webSearchRequests"]);
+        if (modelUsage.Count != 0)
+        {
+            result["model_usage"] = modelUsage;
+        }
+        if (envelope["permission_denials"] is JsonArray denials)
+        {
+            var counts = new JsonObject();
+            foreach (JsonNode? denial in denials)
+            {
+                string name = denial is JsonObject item ? item.Str("tool_name") : "";
+                string label = name is "WebSearch" or "WebFetch" ? name : "other";
+                counts[label] = counts.Int(label) + 1;
+            }
+            result["permission_denial_counts"] = counts;
+        }
+        return result;
+    }
+
+    private static JsonObject NumericCounts(JsonObject source, IEnumerable<string> keys)
+    {
+        var result = new JsonObject();
+        foreach (string key in keys)
+        {
+            if (source[key] is JsonValue value && value.TryGetValue(out long count) && count >= 0)
+            {
+                result[key] = value.DeepClone();
+            }
+        }
+        return result;
     }
 
     public static ClaudeQuotaException? Quota(string evidence, DateTimeOffset now)

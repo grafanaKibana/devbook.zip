@@ -24,7 +24,7 @@ public sealed class TerminalTopicTests
     {
         // Arrange
         string root = Path.Combine(Path.GetTempPath(), "terminal-topic-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(root);
+        DomainFixtures.CreateReviewContract(root);
         try
         {
             JsonObject state = Core.NewState();
@@ -165,7 +165,7 @@ public sealed class TerminalTopicTests
         }
 
         public Task<JsonObject> ReviewAsync(JsonObject payload, CancellationToken cancellationToken = default) =>
-            throw new InvalidOperationException("Keep outcomes do not need candidate review.");
+            Task.FromResult(DomainFixtures.UnchangedReview(payload));
     }
 
     private sealed class HistoricalApi(string status) : IGitHubApi
