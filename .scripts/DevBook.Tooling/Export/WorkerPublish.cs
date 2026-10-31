@@ -233,9 +233,10 @@ public static partial class Worker
         }, cancellationToken);
         await AssertBoundLeaseAsync(store, request, owner, cancellationToken);
         await api.RequestAsync("PATCH", "/git/refs/heads/" + Uri.EscapeDataString(branch), new JsonObject { ["sha"] = commitSha, ["force"] = false }, cancellationToken: cancellationToken);
-        if (await CurrentPrAsync(api, config, number, branch, commitSha, cancellationToken) is null)
+        (JsonObject? publishedPr, string propagationError) = await AwaitGeneratedHeadAsync(api, config, store, request, owner, commitSha, checkWait, cancellationToken);
+        if (publishedPr is null)
         {
-            return await StaleAsync(store, request, owner, "Managed head changed after generated ref update.", cancellationToken);
+            return await StaleAsync(store, request, owner, propagationError, cancellationToken);
         }
         await RecordAsync(store, request, owner, "record generated branch update", (_, operation) =>
         {
@@ -248,6 +249,59 @@ public static partial class Worker
 
     private static bool ExactExportCommit(JsonObject commit, string parent) => commit.Str("message") == ExportCommitMessage
         && commit["parents"] is JsonArray { Count: 1 } parents && parents[0].Str("sha") == parent;
+
+    private static async Task<(JsonObject? Pr, string Error)> AwaitGeneratedHeadAsync(IGitHubApi api, JsonObject config,
+        IStateStore store, JsonObject request, string owner, string generatedHead, ExportCheckWait? wait, CancellationToken cancellationToken)
+    {
+        const string timeout = "Timed out waiting for PR head propagation after the generated Git ref update; export paused for recovery.";
+        TimeProvider clock = wait?.Clock ?? TimeProvider.System;
+        Func<TimeSpan, CancellationToken, Task> delay = wait?.Delay ?? ((duration, token) => Task.Delay(duration, token));
+        DateTimeOffset deadline = clock.GetUtcNow().AddSeconds(30);
+        using var bounded = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        bounded.CancelAfter(TimeSpan.FromSeconds(30));
+        try
+        {
+            while (clock.GetUtcNow() < deadline)
+            {
+                await AssertBoundLeaseAsync(store, request, owner, bounded.Token);
+                JsonObject pr = await Runtime.ObjectAsync(api, "GET", $"/pulls/{request.Int("pr_number")}", cancellationToken: bounded.Token);
+                try
+                {
+                    if (!Identity(pr, config, request.Int("pr_number"), request.Str("branch")))
+                    {
+                        return (null, "Managed PR closed after generated ref update.");
+                    }
+                }
+                catch (UnsafeInput)
+                {
+                    return (null, "Managed PR identity changed after generated ref update.");
+                }
+                string prHead = pr.Obj("head").Str("sha");
+                if (prHead != generatedHead && prHead != request.Str("expected_head"))
+                {
+                    return (null, "Managed PR head changed after generated ref update.");
+                }
+                JsonObject reference = await Runtime.ObjectAsync(api, "GET", "/git/ref/heads/" + Uri.EscapeDataString(request.Str("branch")), cancellationToken: bounded.Token);
+                if (reference.Obj("object").Str("sha") != generatedHead)
+                {
+                    return (null, "Managed Git ref changed after generated ref update.");
+                }
+                if (prHead == generatedHead)
+                {
+                    return (pr, "");
+                }
+                TimeSpan remaining = deadline - clock.GetUtcNow();
+                if (remaining > TimeSpan.Zero)
+                {
+                    await delay(TimeSpan.FromSeconds(Math.Min(2, remaining.TotalSeconds)), bounded.Token);
+                }
+            }
+        }
+        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested && bounded.IsCancellationRequested)
+        {
+        }
+        return (null, timeout);
+    }
 
     private static JsonObject FinalizedResult(JsonObject request, JsonObject finalized) => new()
     {
@@ -371,10 +425,11 @@ public static partial class Worker
             await AssertBoundLeaseAsync(store, request, owner, cancellationToken);
             await api.RequestAsync("PATCH", "/git/refs/heads/" + Uri.EscapeDataString(request.Str("branch")),
                 new JsonObject { ["sha"] = head, ["force"] = false }, cancellationToken: cancellationToken);
-            pr = await CurrentPrAsync(api, config, request.Int("pr_number"), request.Str("branch"), head, cancellationToken);
+            string propagationError;
+            (pr, propagationError) = await AwaitGeneratedHeadAsync(api, config, store, request, owner, head, checkWait, cancellationToken);
             if (pr is null)
             {
-                return await StaleAsync(store, request, owner, "Managed head changed after generated ref recovery.", cancellationToken);
+                return await StaleAsync(store, request, owner, propagationError, cancellationToken);
             }
             await RecordAsync(store, request, owner, "record recovered generated branch update", (_, op) =>
             {

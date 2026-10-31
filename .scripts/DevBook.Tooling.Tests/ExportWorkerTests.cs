@@ -10,6 +10,105 @@ namespace DevBook.Tooling.Tests;
 
 public sealed class ExportWorkerTests
 {
+    [Theory]
+    [InlineData(false, "lag")]
+    [InlineData(true, "lag")]
+    [InlineData(false, "foreign-head")]
+    [InlineData(true, "foreign-head")]
+    [InlineData(false, "foreign-ref")]
+    [InlineData(true, "foreign-ref")]
+    [InlineData(false, "closed")]
+    [InlineData(true, "closed")]
+    [InlineData(false, "identity")]
+    [InlineData(true, "identity")]
+    [InlineData(false, "timeout")]
+    [InlineData(true, "timeout")]
+    public async Task GeneratedRefPublicationWaitsOnlyForSafePrHeadPropagation(bool recovery, string scenario)
+    {
+        // Arrange
+        var fixture = new WorkerFixture();
+        fixture.Api.ChecksReady = true;
+        var store = new MemoryStateStore(fixture.State);
+        if (recovery)
+        {
+            fixture.Api.FailBeforeRefOnce = true;
+
+            // Act: save a verified generated commit before its ref write is interrupted.
+            Func<Task> interrupted = () => Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store);
+
+            // Assert
+            await interrupted.Should().ThrowAsync<RuntimeFailure>();
+        }
+
+        // Arrange: Git accepts the ref before the PR head reflects that update.
+        fixture.Api.AfterRefUpdate = () =>
+        {
+            fixture.Api.PrHeadAfterRef = FakeExportApi.SourceHead;
+            switch (scenario)
+            {
+                case "foreign-head":
+                    fixture.Api.PrHeadAfterRef = FakeExportApi.OwnerChangedHead;
+                    break;
+                case "foreign-ref":
+                    fixture.Api.Head = FakeExportApi.OwnerChangedHead;
+                    break;
+                case "closed":
+                    fixture.Api.Pr["state"] = "closed";
+                    break;
+                case "identity":
+                    fixture.Api.Pr["body"] = "Owner replaced the managed identity.";
+                    break;
+            }
+        };
+        var clock = new CheckClock(DateTimeOffset.UtcNow);
+        DateTimeOffset started = clock.GetUtcNow();
+        var delays = 0;
+        var wait = new ExportCheckWait(clock, (duration, token) =>
+        {
+            token.ThrowIfCancellationRequested();
+            clock.Advance(duration);
+            delays++;
+            if (scenario == "lag")
+            {
+                fixture.Api.PrHeadAfterRef = null;
+            }
+            return Task.CompletedTask;
+        });
+
+        // Act
+        JsonObject result = recovery
+            ? await Worker.FinalizeAsync(fixture.Api, fixture.Config, store, fixture.Request, checkWait: wait)
+            : await Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store, checkWait: wait);
+        JsonObject state = (await store.ReadAsync()).State;
+
+        // Assert
+        fixture.Api.RefWrites.Should().Be(1);
+        fixture.Api.CommitWrites.Should().Be(1);
+        if (scenario == "lag")
+        {
+            result.Str("status").Should().Be("exported");
+            delays.Should().Be(1);
+            state.Obj("finalized_exports").ContainsKey(fixture.Request.Str("op_id")).Should().BeTrue();
+        }
+        else
+        {
+            result.Str("status").Should().Be("stale");
+            state.Obj("export_operations").Obj(fixture.Request.Str("op_id")).Obj("evidence").Bool("export_paused").Should().BeTrue();
+            state.Obj("finalized_exports").Count.Should().Be(0);
+            fixture.Api.Comments.Should().BeEmpty();
+            if (scenario == "timeout")
+            {
+                result.Str("reason").Should().Contain("Timed out");
+                (clock.GetUtcNow() - started).Should().Be(TimeSpan.FromSeconds(30));
+                delays.Should().Be(15);
+            }
+            else
+            {
+                delays.Should().Be(0);
+            }
+        }
+    }
+
     [Fact]
     public async Task GeneratedOnlyPublicationPreservesBinaryDeletionAndResumesChecksWithoutAnotherCommit()
     {
@@ -420,6 +519,8 @@ public sealed class ExportWorkerTests
         public int Dispatches { get; private set; }
         public int DraftConversions { get; private set; }
         public Func<Task>? BeforeDraftConversion { get; set; }
+        public Action? AfterRefUpdate { get; set; }
+        public string? PrHeadAfterRef { get; set; }
         public JsonObject Pr { get; }
         public List<JsonObject> Comments { get; } = [];
         public Dictionary<string, byte[]> Blobs { get; } = new(StringComparer.Ordinal);
@@ -451,7 +552,7 @@ public sealed class ExportWorkerTests
             JsonNode? response;
             if (method == "GET" && path == "/pulls/1")
             {
-                Pr.Obj("head")["sha"] = Head;
+                Pr.Obj("head")["sha"] = RefWrites > 0 ? PrHeadAfterRef ?? Head : Head;
                 response = Pr.Copy();
             }
             else if (method == "GET" && path.StartsWith("/pulls?", StringComparison.Ordinal))
@@ -535,6 +636,7 @@ public sealed class ExportWorkerTests
                 }
                 Head = payload.Str("sha");
                 RefWrites++;
+                AfterRefUpdate?.Invoke();
                 response = new JsonObject { ["object"] = new JsonObject { ["sha"] = Head } };
             }
             else if (method == "POST" && path == "/actions/workflows/vault-validation.yml/dispatches")
