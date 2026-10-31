@@ -73,6 +73,14 @@ public sealed partial class ImprovementEngine
                 : status == "open" && !pr.Bool("draft", true) ? pr.Obj("head")["sha"]?.DeepClone() : null;
             if (status == "open")
             {
+                JsonObject topicState = state.Obj("topics").Obj(topicKey);
+                if (topicState.Int("generation") == generation && topicState.Obj("publication_conflict").Int("generation", -1) == generation)
+                {
+                    row["base_conflict"] = true;
+                    row["pause_reason"] = topicState.Obj("publication_conflict").Str("reason");
+                    rows.Add(row);
+                    continue;
+                }
                 if (!topics.TryGetValue(topicKey, out string? topic))
                 {
                     row["base_conflict"] = true;

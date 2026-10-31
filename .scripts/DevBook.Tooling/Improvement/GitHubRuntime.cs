@@ -188,7 +188,7 @@ public sealed class GitHubRuntime
         return JsonNode.DeepEquals(revisions, revision.Obj("processed"));
     }
 
-    public async Task ArchivePendingAsync(string opId, string collection, JsonObject evidence, bool freeze = false, JsonObject? terminalPr = null, CancellationToken cancellationToken = default)
+    public async Task ArchivePendingAsync(string opId, string collection, JsonObject evidence, bool freeze = false, JsonObject? terminalPr = null, CancellationToken cancellationToken = default, bool pauseTopic = false, JsonObject? observedPr = null)
     {
         if (collection is not ("terminal_operations" or "invalidated_operations" or "failed_operations" or "export_operations"))
         {
@@ -200,6 +200,12 @@ public sealed class GitHubRuntime
         if (op.Str("op_id") != opId)
         {
             throw new Conflict("Journal operation changed before archival.");
+        }
+        if (observedPr is not null && (!pauseTopic || observedPr.Int("number") < 1 || Runtime.Lifecycle(observedPr) != "open"
+            || !Runtime.ValidPrIdentity(observedPr, api.Repo, baseBranch, op.Str("topic"), op.Int("generation"))
+            || (op.Int("pr_number") > 0 && op.Int("pr_number") != observedPr.Int("number"))))
+        {
+            throw new Conflict("Paused publication lost its verified owning PR identity.");
         }
         JsonObject merged = op.Obj("evidence").Copy();
         foreach (KeyValuePair<string, JsonNode?> item in evidence)
@@ -213,7 +219,25 @@ public sealed class GitHubRuntime
         archived[opId] = op.Copy();
         state[collection] = archived;
         state["pending_operation"] = null;
-        if (freeze || terminalPr is not null || collection == "export_operations")
+        if (pauseTopic)
+        {
+            string topic = op.Str("topic");
+            JsonObject topics = state.Obj("topics").Copy();
+            JsonObject row = topics.Obj(topic).Copy();
+            row["generation"] = Math.Max(row.Int("generation", 1), op.Int("generation"));
+            JsonObject conflict = evidence.Copy();
+            conflict["op_id"] = opId;
+            conflict["generation"] = op["generation"]?.DeepClone();
+            conflict["paused_at"] = Runtime.Iso(clock.GetUtcNow());
+            row["publication_conflict"] = conflict;
+            topics[topic] = row;
+            state["topics"] = topics;
+            if (state.Obj("pending_author_proposal").Str("topic_id") == topic)
+            {
+                state.Remove("pending_author_proposal");
+            }
+        }
+        if (freeze || terminalPr is not null || collection == "export_operations" || observedPr is not null)
         {
             string key = $"{op.Str("topic")}:{op.Int("generation")}";
             JsonObject prs = state.Obj("prs").Copy();
@@ -221,11 +245,25 @@ public sealed class GitHubRuntime
             JsonObject receipt = op.Obj("receipts");
             pr["topic_id"] = op["topic"]?.DeepClone();
             pr["generation"] = op["generation"]?.DeepClone();
-            pr["number"] = op["pr_number"]?.DeepClone() ?? merged["pr_number"]?.DeepClone();
+            pr["number"] = op.Int("pr_number") > 0 ? op["pr_number"]!.DeepClone()
+                : merged.Int("pr_number") > 0 ? merged["pr_number"]!.DeepClone() : null;
             pr["branch"] = op["branch"]?.DeepClone();
             pr["status"] = "open";
             pr["frozen"] = pr.Bool("frozen") || freeze || terminalPr is not null;
             pr["head_sha"] = merged["commit_sha"]?.DeepClone();
+            if (observedPr is not null)
+            {
+                pr["number"] = observedPr["number"]?.DeepClone();
+                pr["head_sha"] = merged["observed_head"]?.DeepClone();
+                if (!observedPr.Bool("draft", true))
+                {
+                    pr["frozen"] = true;
+                    if (pr.Str("review_started_head_sha").Length == 0)
+                    {
+                        pr["review_started_head_sha"] = observedPr.Obj("head")["sha"]?.DeepClone();
+                    }
+                }
+            }
             if (terminalPr is not null)
             {
                 pr["number"] = terminalPr["number"]?.DeepClone();
@@ -525,6 +563,35 @@ public sealed class GitHubRuntime
         return new JsonObject { ["op_id"] = opId, ["commit_sha"] = commitSha, ["pr"] = pr.Copy(), ["status"] = "committed", ["checks"] = checks.Checks, ["vault_validation"] = checks.VaultValidation };
     }
 
+    private async Task<(string? Head, JsonObject? Pause)> CheckRecoveryBranchAsync(JsonObject operation, string phase, string commitSha, JsonObject? observedPr, CancellationToken cancellationToken)
+    {
+        string? current = null;
+        try
+        {
+            current = await RefShaAsync(operation.Str("branch"), cancellationToken);
+        }
+        catch (GitHubApiFailure error) when (error.Status == 404)
+        {
+        }
+        string expected = phase is "prepared" or "commit_created" ? operation.Str("parent_head") : commitSha;
+        if (current is not null && (current == expected || (phase == "commit_created" && commitSha.Length > 0 && current == commitSha)))
+        {
+            return (current, null);
+        }
+        string reason = current is null ? "Topic branch disappeared during recovery." : "Topic branch changed during recovery.";
+        await ArchivePendingAsync(operation.Str("op_id"), "invalidated_operations", new JsonObject
+        {
+            ["reason"] = reason,
+            ["branch"] = operation["branch"]?.DeepClone(),
+            ["recovery_phase"] = phase,
+            ["expected_head"] = expected,
+            ["observed_head"] = current,
+            ["candidate_commit_sha"] = commitSha,
+            ["pr_number"] = observedPr?["number"]?.DeepClone()
+        }, cancellationToken: cancellationToken, pauseTopic: true, observedPr: observedPr);
+        return (current, new JsonObject { ["op_id"] = operation["op_id"]?.DeepClone(), ["status"] = "topic_paused", ["reason"] = reason, ["model_calls"] = 0 });
+    }
+
     public async Task<JsonObject?> RecoverPendingAsync(CancellationToken cancellationToken = default)
     {
         JsonObject? operation = (await store.ReadAsync(cancellationToken)).State["pending_operation"] as JsonObject;
@@ -550,7 +617,7 @@ public sealed class GitHubRuntime
         }
         JsonObject evidence = op.Obj("evidence");
         string commitSha = evidence.Str("commit_sha");
-        int number = op.Int("pr_number", evidence.Int("pr_number"));
+        int number = op.Int("pr_number") > 0 ? op.Int("pr_number") : evidence.Int("pr_number");
         JsonObject? selected = null;
         if (number > 0)
         {
@@ -562,8 +629,15 @@ public sealed class GitHubRuntime
         }
         else
         {
-            selected = (await Runtime.ArrayAsync(api, "/pulls?state=all&per_page=100", cancellationToken)).OfType<JsonObject>()
-                .FirstOrDefault(pr => Runtime.Lifecycle(pr) != "open" && Runtime.ValidPrIdentity(pr, api.Repo, baseBranch, topic, generation));
+            JsonObject[] matches = (await Runtime.ArrayAsync(api, "/pulls?state=all&per_page=100", cancellationToken)).OfType<JsonObject>()
+                .Where(pr => Runtime.ValidPrIdentity(pr, api.Repo, baseBranch, topic, generation)).ToArray();
+            selected = matches.FirstOrDefault(pr => Runtime.Lifecycle(pr) != "open")
+                ?? Runtime.ManagedPr(matches, api.Repo, baseBranch, topic, generation, branch);
+            number = selected?.Int("number") ?? 0;
+            if (number > 0)
+            {
+                op["pr_number"] = number;
+            }
         }
         if (selected is not null && Runtime.Lifecycle(selected) != "open")
         {
@@ -582,9 +656,16 @@ public sealed class GitHubRuntime
                 throw new Conflict("Journal candidate fingerprint changed.");
             }
         }
+        (string? observedHead, JsonObject? pause) = phase is "prepared" or "commit_created" or "branch_updated" or "pr_updated"
+            ? await CheckRecoveryBranchAsync(op, phase, commitSha, selected, cancellationToken)
+            : (null, null);
+        if (pause is not null)
+        {
+            return pause;
+        }
         if (number > 0 && phase is "prepared" or "commit_created")
         {
-            bool applied = commitSha.Length != 0 && await RefShaAsync(branch, cancellationToken) == commitSha;
+            bool applied = commitSha.Length != 0 && observedHead == commitSha;
             if (!applied && !await FeedbackUnchangedAsync(number, op.Obj("feedback_revision"), null, cancellationToken))
             {
                 await ArchivePendingAsync(opId, "invalidated_operations", new JsonObject { ["reason"] = "Owner feedback changed before recovery" }, cancellationToken: cancellationToken);
@@ -602,11 +683,18 @@ public sealed class GitHubRuntime
         if (phase == "commit_created")
         {
             await AssertLeaseAsync(cancellationToken);
-            string current = await RefShaAsync(branch, cancellationToken);
             if (number > 0)
             {
                 selected = await RequireOpenPrAsync(number, topic, generation, branch, cancellationToken);
-                if (!await EnsureDraftForSourceAsync(selected, op, current != commitSha, cancellationToken))
+            }
+            (string? current, JsonObject? branchPause) = await CheckRecoveryBranchAsync(op, phase, commitSha, selected, cancellationToken);
+            if (branchPause is not null)
+            {
+                return branchPause;
+            }
+            if (number > 0)
+            {
+                if (!await EnsureDraftForSourceAsync(selected!, op, current != commitSha, cancellationToken))
                 {
                     return new JsonObject { ["op_id"] = opId, ["commit_sha"] = commitSha, ["status"] = "review_started" };
                 }
@@ -627,14 +715,18 @@ public sealed class GitHubRuntime
         if (phase == "branch_updated")
         {
             await AssertLeaseAsync(cancellationToken);
-            if (await RefShaAsync(branch, cancellationToken) != commitSha)
-            {
-                throw new Conflict("Topic branch changed during recovery.");
-            }
             if (number > 0)
             {
                 selected = await RequireOpenPrAsync(number, topic, generation, branch, cancellationToken);
-                await EnsureDraftForSourceAsync(selected, op, false, cancellationToken);
+            }
+            (_, JsonObject? branchPause) = await CheckRecoveryBranchAsync(op, phase, commitSha, selected, cancellationToken);
+            if (branchPause is not null)
+            {
+                return branchPause;
+            }
+            if (number > 0)
+            {
+                await EnsureDraftForSourceAsync(selected!, op, false, cancellationToken);
             }
             (JsonObject pr, bool created) = await EnsurePrAsync(topic, generation, branch, op.Str("title"), op.Str("body"), cancellationToken);
             await journal.AdvanceAsync(opId, "pr_updated", new JsonObject { ["pr_number"] = pr["number"]?.DeepClone(), ["created"] = created }, cancellationToken);
@@ -643,9 +735,10 @@ public sealed class GitHubRuntime
         if (phase == "pr_updated")
         {
             await AssertLeaseAsync(cancellationToken);
-            if (await RefShaAsync(branch, cancellationToken) != commitSha)
+            (_, JsonObject? branchPause) = await CheckRecoveryBranchAsync(op, phase, commitSha, selected, cancellationToken);
+            if (branchPause is not null)
             {
-                throw new Conflict("Topic branch changed before publication finalization.");
+                return branchPause;
             }
             if (op.Bool("export_required"))
             {

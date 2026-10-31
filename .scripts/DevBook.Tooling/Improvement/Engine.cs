@@ -211,6 +211,7 @@ public sealed partial class ImprovementEngine
         (state, Dictionary<int, JsonObject> prs, JsonArray feedback) = await RemoteViewAsync(state, notes, baseSha, apply, cancellationToken);
         string rules = Core.RulesVersion(root);
         HashSet<string> paused = state.Obj("prs").Select(item => item.Value).OfType<JsonObject>().Where(pr => pr.Str("status") == "open" && pr.Bool("base_conflict")).Select(pr => pr.Str("topic_id")).ToHashSet();
+        paused.UnionWith(state.Obj("topics").Where(item => item.Value.Obj("publication_conflict").Int("generation", -1) == item.Value.Int("generation", 0)).Select(item => item.Key));
         HashSet<string> heldPaths = notes.OfType<JsonObject>().Where(note => Held(state, note, rules)).Select(note => note.Str("path")).ToHashSet();
         JsonArray allNotes = notes.Copy();
         notes = Copies(notes.OfType<JsonObject>().Where(note => !paused.Contains(Core.TopicId(note.Str("topic"))) && !heldPaths.Contains(note.Str("path"))));
