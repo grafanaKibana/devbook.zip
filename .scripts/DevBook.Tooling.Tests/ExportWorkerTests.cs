@@ -301,7 +301,7 @@ public sealed class ExportWorkerTests
         public void Advance(TimeSpan duration) => current += duration;
     }
 
-    private sealed class WorkerFixture
+    internal sealed class WorkerFixture
     {
         public FakeExportApi Api { get; }
         public JsonObject Config { get; }
@@ -404,7 +404,7 @@ public sealed class ExportWorkerTests
         }
     }
 
-    private sealed class FakeExportApi : IGitHubApi
+    internal sealed class FakeExportApi : IGitHubApi
     {
         public const string SourceHead = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
         public const string MainHead = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
@@ -453,6 +453,10 @@ public sealed class ExportWorkerTests
             {
                 Pr.Obj("head")["sha"] = Head;
                 response = Pr.Copy();
+            }
+            else if (method == "GET" && path.StartsWith("/pulls?", StringComparison.Ordinal))
+            {
+                response = new JsonArray(Pr.Copy());
             }
             else if (method == "GET" && path.StartsWith("/git/ref/heads/", StringComparison.Ordinal))
             {

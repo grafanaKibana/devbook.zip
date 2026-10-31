@@ -330,14 +330,15 @@ public sealed partial class ImprovementEngine
         }
         catch (ProposalException error)
         {
-            JsonObject failed = CreateHold(state, pending);
-            failed["blocked_review"] = new JsonObject { ["stage"] = "deterministic_application", ["reason"] = error.Message };
-            failed["failed_at"] = Core.FormatTime(clock.GetUtcNow());
-            EnsureObject(state, "invalid_proposals")[LegacyIdentity.Digest(pending.ToJsonString())] = failed.Copy();
-            EnsureObject(state, "held_proposals")[batch.Str("topic_id")] = failed;
-            state.Remove("pending_author_proposal");
-            await SaveAsync(state, "quarantine invalid author proposal", cancellationToken);
-            return new JsonObject { ["status"] = "proposal_blocked", ["reason"] = error.Message, ["model_calls"] = modelCalls };
+            return await QuarantineAsync(state, pending, "deterministic_application", error.Message, cancellationToken);
+        }
+        JsonObject[] sourceEntries = proposal.Arr("edits").OfType<JsonObject>().SelectMany(edit => edit.Arr("sources").OfType<JsonObject>())
+            .GroupBy(source => source.Str("url"), StringComparer.Ordinal).Select(group => group.First()).ToArray();
+        int sourceLimit = config.Int("max_sources_per_run", 12);
+        if (sourceEntries.Length > sourceLimit)
+        {
+            return await QuarantineAsync(state, pending, "source_budget",
+                $"Proposal has {sourceEntries.Length} distinct source URLs, exceeding the per-run limit of {sourceLimit}.", cancellationToken);
         }
         if (proposal.Arr("edits").Count == 0 && decisions.Count == 0)
         {
@@ -372,14 +373,9 @@ public sealed partial class ImprovementEngine
             return new JsonObject { ["status"] = "size_limit", ["model_calls"] = modelCalls };
         }
         var fetched = new JsonObject();
-        foreach (JsonObject source in proposal.Arr("edits").OfType<JsonObject>().SelectMany(edit => edit.Arr("sources").OfType<JsonObject>()))
+        foreach (JsonObject source in sourceEntries)
         {
-            if (fetched.ContainsKey(source.Str("url")))
-            {
-                continue;
-            }
-
-            if (fetched.Count >= config.Int("max_sources_per_run", 12) || clock.GetElapsedTime(started).TotalMinutes >= config.Int("max_run_minutes", 35) - 1)
+            if (clock.GetElapsedTime(started).TotalMinutes >= config.Int("max_run_minutes", 35) - 1)
             {
                 throw new RuntimeFailure("Source workload exceeds this run; proposal preserved.");
             }
@@ -544,6 +540,18 @@ public sealed partial class ImprovementEngine
         }
 
         return response;
+    }
+
+    private async Task<JsonObject> QuarantineAsync(JsonObject state, JsonObject pending, string stage, string reason, CancellationToken cancellationToken)
+    {
+        JsonObject failed = CreateHold(state, pending);
+        failed["blocked_review"] = new JsonObject { ["stage"] = stage, ["reason"] = reason };
+        failed["failed_at"] = Core.FormatTime(clock.GetUtcNow());
+        EnsureObject(state, "invalid_proposals")[LegacyIdentity.Digest(pending.ToJsonString())] = failed.Copy();
+        EnsureObject(state, "held_proposals")[pending.Str("topic_id")] = failed;
+        state.Remove("pending_author_proposal");
+        await SaveAsync(state, "quarantine invalid author proposal", cancellationToken);
+        return new JsonObject { ["status"] = "proposal_blocked", ["stage"] = stage, ["reason"] = reason, ["model_calls"] = modelCalls };
     }
 
     private static JsonObject CreateHold(JsonObject state, JsonObject pending)

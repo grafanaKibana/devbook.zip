@@ -102,11 +102,16 @@ public static partial class Worker
     {
         await AssertBoundLeaseAsync(store, request, owner, cancellationToken);
         string artifactHash = LegacyIdentity.Fingerprint(bundle);
-        JsonObject op = BoundOperation((await store.ReadAsync(cancellationToken)).State, request);
+        JsonObject state = (await store.ReadAsync(cancellationToken)).State;
+        JsonObject op = BoundOperation(state, request);
         string priorHash = op.Obj("evidence").Str("export_artifact_hash");
         if (priorHash.Length != 0 && priorHash != artifactHash)
         {
             throw new Conflict("A different export bundle already owns this operation; preserve it rather than replacing its publication journal.");
+        }
+        if (state.Obj("finalized_exports")[request.Str("op_id")] is JsonObject finalized)
+        {
+            return FinalizedResult(request, finalized);
         }
         string expected = request.Str("expected_head");
         string branch = request.Str("branch");
@@ -244,6 +249,15 @@ public static partial class Worker
     private static bool ExactExportCommit(JsonObject commit, string parent) => commit.Str("message") == ExportCommitMessage
         && commit["parents"] is JsonArray { Count: 1 } parents && parents[0].Str("sha") == parent;
 
+    private static JsonObject FinalizedResult(JsonObject request, JsonObject finalized) => new()
+    {
+        ["status"] = "exported",
+        ["commit_sha"] = Bundle.ExactHead(finalized.Str("head_sha")),
+        ["pr_number"] = request.Int("pr_number"),
+        ["model_calls"] = 0,
+        ["resumed"] = true
+    };
+
     private static async Task<string?> RecognizeAppliedAsync(IGitHubApi api, JsonObject config, JsonObject request,
         Dictionary<string, GitTreeEntry> predicted, CancellationToken cancellationToken)
     {
@@ -302,6 +316,10 @@ public static partial class Worker
         await AssertBoundLeaseAsync(store, request, owner, cancellationToken);
         JsonObject state = (await store.ReadAsync(cancellationToken)).State;
         JsonObject operation = BoundOperation(state, request);
+        if (state.Obj("finalized_exports")[request.Str("op_id")] is JsonObject finalizedExport)
+        {
+            return FinalizedResult(request, finalizedExport);
+        }
         string head = operation.Obj("evidence").Str("export_commit_sha");
         if (head.Length == 0)
         {
@@ -364,10 +382,6 @@ public static partial class Worker
                 evidence["export_phase"] = "branch_updated";
                 op["evidence"] = evidence;
             }, cancellationToken);
-        }
-        if (state.Obj("finalized_exports")[request.Str("op_id")] is not null)
-        {
-            return new JsonObject { ["status"] = "exported", ["commit_sha"] = head, ["pr_number"] = request.Int("pr_number"), ["model_calls"] = 0, ["resumed"] = true };
         }
         PublicationChecks checks = await AwaitChecksAsync(api, config, store, request, owner, head, checkWait, cancellationToken);
         if (checks.Status == "stale")
@@ -471,6 +485,7 @@ public static partial class Worker
         {
             final.Obj("held_proposals").Remove(request.Str("topic_id"));
         }
+        OperationJournal.CompactFinalizedExports(final);
         await store.WriteAsync(final, finalSnapshot, "maintenance: finalize verified generated export", cancellationToken);
         return new JsonObject { ["status"] = "exported", ["commit_sha"] = head, ["pr_number"] = request.Int("pr_number"), ["model_calls"] = 0 };
     }

@@ -416,6 +416,11 @@ public sealed class GitHubRuntime
             currentPr = await RequireOpenPrAsync(currentPr.Int("number"), topic, generation, branch, cancellationToken);
             await Runtime.EnsureDraftForMutationAsync(api, currentPr, cancellationToken);
         }
+        if (currentPr is not null && !await FeedbackUnchangedAsync(currentPr.Int("number"), feedbackRevision, null, cancellationToken))
+        {
+            await ArchivePendingAsync(opId, "invalidated_operations", new JsonObject { ["reason"] = "Owner feedback changed before branch update" }, cancellationToken: cancellationToken);
+            return new JsonObject { ["op_id"] = opId, ["commit_sha"] = commitSha, ["status"] = "feedback_changed" };
+        }
         await AssertLeaseAsync(cancellationToken);
         await UpdateBranchCasAsync(branch, branchHead, commitSha, cancellationToken);
         await journal.AdvanceAsync(opId, "branch_updated", new JsonObject { ["branch_sha"] = commitSha }, cancellationToken);

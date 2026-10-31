@@ -7,6 +7,7 @@ namespace DevBook.Tooling.Improvement;
 
 public sealed class StateBranchStore(IGitHubApi api, string branch = Runtime.StateBranch, string path = Runtime.StatePath) : IStateStore
 {
+    private const int MaximumEncodedStateLength = 32_000_000;
     private string RefPath => "/git/ref/heads/" + Uri.EscapeDataString(branch);
     private string UpdateRefPath => "/git/refs/heads/" + Uri.EscapeDataString(branch);
 
@@ -49,7 +50,7 @@ public sealed class StateBranchStore(IGitHubApi api, string branch = Runtime.Sta
         }
         string blobSha = entries[0].Str("sha");
         JsonObject blob = await Runtime.ObjectAsync(api, "GET", $"/git/blobs/{blobSha}", cancellationToken: cancellationToken);
-        if (blob.Str("encoding") != "base64" || blob.Str("content").Length > 32_000_000)
+        if (blob.Str("encoding") != "base64" || blob.Str("content").Count(character => !char.IsWhiteSpace(character)) > MaximumEncodedStateLength)
         {
             throw new RuntimeFailure("State blob encoding or size is invalid.");
         }
@@ -87,6 +88,10 @@ public sealed class StateBranchStore(IGitHubApi api, string branch = Runtime.Sta
     private async Task<(string Commit, string Blob)> CreateStateCommitAsync(JsonObject state, string parent, string parentTree, string message, CancellationToken cancellationToken)
     {
         string encoded = Convert.ToBase64String(Encoding.UTF8.GetBytes(state.ToJsonString(JsonData.Options) + "\n"));
+        if (encoded.Length > MaximumEncodedStateLength)
+        {
+            throw new RuntimeFailure("State exceeds its readable size limit; preserve the current state branch and compact finalized records before retrying.");
+        }
         JsonObject blob = await Runtime.ObjectAsync(api, "POST", "/git/blobs", new JsonObject { ["content"] = encoded, ["encoding"] = "base64" }, cancellationToken);
         JsonObject tree = await Runtime.ObjectAsync(api, "POST", "/git/trees", new JsonObject
         {
@@ -187,6 +192,35 @@ public sealed class DurableLease(IStateStore store, string owner, int ttlSeconds
 public sealed class OperationJournal(IStateStore store, TimeProvider? timeProvider = null)
 {
     private readonly TimeProvider clock = timeProvider ?? TimeProvider.System;
+
+    public static void CompactFinalizedExports(JsonObject state)
+    {
+        foreach (KeyValuePair<string, JsonNode?> pair in state.Obj("export_operations"))
+        {
+            if (pair.Value is not JsonObject operation || operation.Bool("compacted")
+                || state.Obj("finalized_exports")[pair.Key] is not JsonObject finalized)
+            {
+                continue;
+            }
+            string prKey = $"{operation.Str("topic")}:{operation.Int("generation")}";
+            bool terminal = state.Obj("prs").Obj(prKey).Str("status") is "closed" or "merged";
+            if (!state.Obj("export_feedback_receipts").Bool(pair.Key) && !terminal)
+            {
+                continue;
+            }
+            JsonObject receipt = operation.RequiredObject("receipts");
+            operation["receipt_hash"] = LegacyIdentity.Fingerprint(receipt);
+            operation["receipt_record_count"] = Math.Max(1, receipt.Arr("records").Count);
+            operation.Remove("candidate");
+            operation.Remove("body");
+            operation.Remove("receipts");
+            operation["compacted"] = true;
+            if (terminal && !state.Obj("export_feedback_receipts").Bool(pair.Key))
+            {
+                finalized["feedback_terminal"] = true;
+            }
+        }
+    }
 
     public async Task<JsonObject> PrepareAsync(JsonObject operation, CancellationToken cancellationToken = default)
     {

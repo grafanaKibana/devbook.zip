@@ -203,6 +203,7 @@ public sealed partial class ImprovementEngine
                 item["status"] = "withdrawn";
             }
         }
+        OperationJournal.CompactFinalizedExports(state);
         return (state, managed, allFeedback);
     }
 
@@ -212,24 +213,32 @@ public sealed partial class ImprovementEngine
             .OrderBy(pair => pair.Value!.Obj("receipts").Arr("records").Count).ThenBy(pair => pair.Value!.Str("updated_at"), StringComparer.Ordinal).ThenBy(pair => pair.Key, StringComparer.Ordinal).ToArray();
         foreach (KeyValuePair<string, JsonNode?> pair in operations)
         {
+            JsonObject finalized = EnsureObject(state, "finalized_exports");
+            bool needsOutcome = !finalized.ContainsKey(pair.Key);
+            bool needsFeedback = postFeedback && !EnsureObject(state, "export_feedback_receipts").Bool(pair.Key)
+                && !finalized.Obj(pair.Key).Bool("feedback_terminal");
+            if (!needsOutcome && !needsFeedback)
+            {
+                continue;
+            }
             JsonObject receipt = pair.Value!.RequiredObject("receipts");
             if (receipt.Count == 0)
             {
                 throw new Conflict("Export handoff lacks reviewed proposal receipts.");
             }
-            JsonObject finalized = EnsureObject(state, "finalized_exports");
-            if (!finalized.ContainsKey(pair.Key))
+            if (needsOutcome)
             {
                 state = Core.RecordOutcome(state, receipt.RequiredObject("batch"), receipt.RequiredObject("proposal"), receipt.RequiredObject("result"));
                 Proposal.PersistDecisions(state, receipt.Arr("decisions"));
                 EnsureObject(state, "finalized_exports")[pair.Key] = new JsonObject { ["head_sha"] = head };
             }
-            if (postFeedback && !EnsureObject(state, "export_feedback_receipts").Bool(pair.Key))
+            if (needsFeedback)
             {
                 await FeedbackReceiptAsync(receipt.RequiredObject("proposal"), receipt.RequiredObject("batch"), head, true, cancellationToken);
                 EnsureObject(state, "export_feedback_receipts")[pair.Key] = true;
             }
         }
+        OperationJournal.CompactFinalizedExports(state);
         return state;
     }
 
