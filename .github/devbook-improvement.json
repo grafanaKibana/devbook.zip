@@ -62,8 +62,8 @@
     "rules_version": 1,
     "authoritative_paths": [
       "AGENTS.md",
-      ".claude/agents/note-writer.md",
-      ".claude/agents/note-reviewer.md",
+      ".codex/agents/note-writer.toml",
+      ".codex/agents/note-reviewer.toml",
       ".codex/skills/obsidian-markdown/SKILL.md",
       "Vault/Templates/Pages/Template - Concept Page.md",
       "Vault/Templates/Pages/Template - Index.md",

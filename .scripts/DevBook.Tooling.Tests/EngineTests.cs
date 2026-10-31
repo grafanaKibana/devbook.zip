@@ -17,7 +17,7 @@ public sealed class EngineTests
         using var fixture = new KeepDecisionKeepFixture();
         JsonObject captured = Core.LoadContentAuthorities(fixture.Root);
         string original = Core.RulesVersion(captured);
-        string writer = Path.Combine(fixture.Root, ".claude/agents/note-writer.md");
+        string writer = Path.Combine(fixture.Root, ".codex/agents/note-writer.toml");
         File.AppendAllText(writer, "\nCurrent technical question policy");
 
         // Act
@@ -33,13 +33,13 @@ public sealed class EngineTests
     {
         // Arrange
         using var fixture = new KeepDecisionKeepFixture();
-        File.Delete(Path.Combine(fixture.Root, ".claude/agents/note-writer.md"));
+        File.Delete(Path.Combine(fixture.Root, ".codex/agents/note-writer.toml"));
 
         // Act
         Action construct = () => fixture.Engine();
 
         // Assert
-        construct.Should().Throw<FileNotFoundException>().WithMessage("*note-writer.md*");
+        construct.Should().Throw<FileNotFoundException>().WithMessage("*note-writer.toml*");
         fixture.Model.Authors.Should().Be(0);
         fixture.Model.Reviews.Should().Be(0);
     }
