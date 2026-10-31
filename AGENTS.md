@@ -64,7 +64,7 @@ The recurring DevBook-improvement workflow satisfies this gate with a separate r
 - Ground Quartz changes in the [official documentation](https://quartz.jzhao.xyz) with a documentation-specialist/librarian pass before implementation; prefer configuration/plugins over custom code. Authored surfaces are `Web/quartz.config.yaml`, `Web/quartz.ts`, `Web/quartz/styles/custom.scss` and `Web/custom/`. Do not edit other engine files under `Web/quartz/`.
 - Follow [DESIGN.md](DESIGN.md) and [StepTrace design guidance](Web/custom/steptrace/DESIGN.md). Node 22 and the Web README own build details. Preserve the committed `quartz.lock.json` baseline; do not commit deployment-time plugin updates automatically. No secrets in site configuration.
 
-The [improvement runbook](docs/devbook-improvement.md) owns scheduled operation, state, quotas and activation. Topic PRs require manual review/merge; credentials and production activation remain separately confirmed. Scheduled candidates prepare dates before independent review; isolated rendering consumes immutable source.
+The [improvement runbook](.scripts/DevBook.Tooling/README.md) owns scheduled operation, state, quotas and activation. Topic PRs require manual review/merge; credentials and production activation remain separately confirmed. Scheduled candidates prepare dates before independent review; isolated rendering consumes immutable source.
 
 ## RAG playground and Obsidian tools
 

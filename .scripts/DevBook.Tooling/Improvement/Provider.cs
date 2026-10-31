@@ -22,9 +22,15 @@ public sealed class ClaudeQuotaException(string kind, DateTimeOffset? resetAt, D
 
 public sealed class ClaudeProvider : IModelProvider
 {
-    public const string DefaultModel = "claude-sonnet-5-5";
+    public const string DefaultModel = "claude-opus-5-5";
     private static readonly SemaphoreSlim InvocationGate = new(1, 1);
-    private static readonly JsonObject Protocol = LoadProtocol();
+    private static readonly byte[] ProtocolBytes = ReadProtocol();
+    private static readonly JsonObject Protocol = JsonNode.Parse(ProtocolBytes)!.AsObject();
+    public static string EvaluationHash(JsonObject config) => LegacyIdentity.Fingerprint(new JsonObject
+    {
+        ["model"] = config.Str("model", DefaultModel),
+        ["protocol_hash"] = Convert.ToHexStringLower(System.Security.Cryptography.SHA256.HashData(ProtocolBytes))
+    });
     private readonly JsonObject config;
     private readonly IProcessRunner runner;
     private readonly TimeProvider clock;
@@ -43,23 +49,18 @@ public sealed class ClaudeProvider : IModelProvider
         {
             throw new ArgumentException("Invalid Claude call budget.");
         }
-        foreach (string host in config.Arr("allowed_source_hosts").Strings())
-        {
-            if (!Regex.IsMatch(host, @"^[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?\.[a-z]{2,}$"))
-            {
-                throw new ArgumentException("Research hosts must be plain public hostnames.");
-            }
-        }
     }
 
     public Task<JsonObject> AuthorAsync(JsonObject payload, CancellationToken cancellationToken = default) => InvokeAsync("author", payload, cancellationToken);
     public Task<JsonObject> ReviewAsync(JsonObject payload, CancellationToken cancellationToken = default) => InvokeAsync("review", payload, cancellationToken);
 
-    private static JsonObject LoadProtocol()
+    private static byte[] ReadProtocol()
     {
         using Stream stream = typeof(ClaudeProvider).Assembly.GetManifestResourceStream("DevBook.Tooling.Improvement.ProviderProtocol.json")
             ?? throw new InvalidOperationException("Provider protocol resource missing.");
-        return JsonNode.Parse(stream)!.AsObject();
+        using var bytes = new MemoryStream();
+        stream.CopyTo(bytes);
+        return bytes.ToArray();
     }
 
     private string Executable()
@@ -84,7 +85,6 @@ public sealed class ClaudeProvider : IModelProvider
             throw new ClaudeProviderException("Claude input exceeds the 10 MiB maintenance limit.");
         }
         string model = config.Str("model", DefaultModel);
-        string[] hosts = config.Arr("allowed_source_hosts").Strings().Distinct().Order(StringComparer.Ordinal).ToArray();
         string executable = Executable();
         await InvocationGate.WaitAsync(cancellationToken);
         string temporary = Path.Combine(Path.GetTempPath(), "devbook-claude-" + Guid.NewGuid().ToString("N"));
@@ -97,7 +97,7 @@ public sealed class ClaudeProvider : IModelProvider
             }
             string settings = Path.Combine(temporary, "settings.json");
             string mcp = Path.Combine(temporary, "mcp.json");
-            string[] allowed = ["WebSearch", .. hosts.Select(host => $"WebFetch(domain:{host})")];
+            string[] allowed = ["WebSearch", "WebFetch"];
             File.WriteAllText(settings, new JsonObject
             {
                 ["switchModelsOnFlag"] = false,
@@ -123,9 +123,9 @@ public sealed class ClaudeProvider : IModelProvider
             safeEnvironment["ANTHROPIC_DEFAULT_HAIKU_MODEL"] = model;
             JsonObject schema = Protocol.RequiredObject(role == "author" ? "proposal_schema" : "review_schema");
             string systemPrompt = Protocol.Str(role == "author" ? "author_prompt" : "review_prompt") + "\n\n"
-                + Protocol.Str("research_prompt") + "\nApproved primary-source hosts: " + string.Join(", ", hosts);
+                + Protocol.Str("research_prompt");
             string[] arguments = ["--print", "--output-format", "json", "--json-schema", schema.ToJsonString(), "--model", model,
-                "--safe-mode", "--restricted", "--tools", hosts.Length > 0 ? "WebSearch,WebFetch" : "WebSearch",
+                "--safe-mode", "--restricted", "--tools", "WebSearch,WebFetch",
                 "--allowedTools", string.Join(',', allowed), "--disallowed-tools", "mcp__*", "--mcp-config", mcp,
                 "--strict-mcp-config", "--no-session-persistence", "--permission-mode", "dontAsk", "--permission-prompts", "none",
                 "--setting-sources", "", "--settings", settings, "--system-prompt", systemPrompt,

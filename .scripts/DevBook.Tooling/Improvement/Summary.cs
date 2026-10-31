@@ -64,6 +64,8 @@ public static class Summary
             if (target is null)
             {
                 item["_reasons"] = new JsonArray(item.Str("reason"));
+                item["_problems"] = new JsonArray(item.Str("problem"));
+                item["_benefits"] = new JsonArray(item.Str("reader_benefit"));
                 combined.Add(item);
                 if (id is not null)
                 {
@@ -78,6 +80,11 @@ public static class Summary
                 : item.Str("after");
             priorItem.RequiredArray("_reasons").Add(item.Str("reason"));
             priorItem["reason"] = string.Join("; ", priorItem.Arr("_reasons").Strings().Where(reason => reason.Length != 0).Distinct());
+            foreach ((string field, string collected) in new[] { ("problem", "_problems"), ("reader_benefit", "_benefits") })
+            {
+                priorItem.RequiredArray(collected).Add(item.Str(field));
+                priorItem[field] = string.Join("; ", priorItem.Arr(collected).Strings().Where(value => value.Length != 0).Distinct());
+            }
             var sources = new JsonArray();
             foreach (JsonNode? source in priorItem.Arr("sources").Concat(item.Arr("sources")))
             {
@@ -117,58 +124,40 @@ public static class Summary
             item["before"] = before;
             item["after"] = after;
             item.Remove("_reasons");
+            item.Remove("_problems");
+            item.Remove("_benefits");
             result.Add(item);
         }
         return result;
     }
 
-    public static string Render(string topic, IReadOnlyDictionary<string, string> baseline, IReadOnlyDictionary<string, string> current,
-        JsonArray changes, JsonArray feedback, JsonArray validation, IReadOnlyDictionary<string, string> sources, IReadOnlyDictionary<string, string>? noteLinks = null)
+    public static string Render(IReadOnlyDictionary<string, string> baseline, IReadOnlyDictionary<string, string> current,
+        JsonArray changes, JsonArray feedback, IReadOnlyDictionary<string, string>? noteLinks = null)
     {
         noteLinks ??= new Dictionary<string, string>();
-        string Reference(string path) => noteLinks.TryGetValue(path, out string? link) ? $"[`{path}`]({link})" : $"`{path}`";
-        string[] affected = baseline.Keys.Union(current.Keys).Where(path => baseline.GetValueOrDefault(path) != current.GetValueOrDefault(path)).Order(StringComparer.Ordinal).ToArray();
+        string Reference(string path)
+        {
+            string label = path.StartsWith("Vault/Home/", StringComparison.Ordinal) ? path["Vault/Home/".Length..] : path;
+            return noteLinks.TryGetValue(path, out string? link) ? $"[`{label}`]({link})" : $"`{label}`";
+        }
         JsonObject[] final = CoalesceChanges(baseline, current, changes).OfType<JsonObject>().ToArray();
         Dictionary<string, int> counts = new[] { "add", "rewrite", "split", "remove", "replace" }.ToDictionary(kind => kind, kind => final.Count(item => item.Str("kind") == kind));
-        var lines = new List<string>
-        {
-            "## 1. Scope and purpose", "", $"Topic: **{topic}**", "",
-            "Improve the affected notes and study questions through the changes described below.", "",
-            affected.Length == 0 ? "Affected notes: none." : "Affected notes:"
-        };
-        lines.AddRange(affected.Select(path => $"- {Reference(path)}"));
-        lines.AddRange(["", "## 2. Note improvements", ""]);
-        string[] noteChanges = final.Where(item => item.Str("kind") == "note").Select(item => $"- {Reference(item.Str("path"))} — {item.Str("reason")}").ToArray();
+        var lines = new List<string> { "## 1. Note improvements", "" };
+        string[] noteChanges = final.Where(item => item.Str("kind") == "note").Select(item => $"- {Reference(item.Str("path"))} — {Rationale(item)}").ToArray();
         lines.AddRange(noteChanges.Length == 0 ? ["- No prose-only note changes."] : noteChanges);
-        lines.AddRange(["", "## 3. Questions and answers", "", $"- Added: {counts["add"]}", $"- Rewritten: {counts["rewrite"]}", $"- Split: {counts["split"]}", $"- Proposed for removal: {counts["remove"]}", $"- Replaced: {counts["replace"]}", "", "## 4. Significant question changes", ""]);
+        lines.AddRange(["", "## 2. Questions and answers", "", $"- Added: {counts["add"]}", $"- Rewritten: {counts["rewrite"]}", $"- Split: {counts["split"]}", $"- Proposed for removal: {counts["remove"]}", $"- Replaced: {counts["replace"]}", "", "## 3. Significant question changes", ""]);
         JsonObject[] questions = final.Where(item => item.Str("kind") != "note").ToArray();
         foreach (JsonObject item in questions)
         {
-            lines.AddRange([$"- {Reference(item.Str("path"))}", $"  - Before: {VisibleCards(item.Str("before"))}", $"  - After: {VisibleCards(item.Str("after"))}", $"  - Coverage rationale: {item.Str("reason")}", $"  - Identity: {IdentitySummary(item)}"]);
+            lines.AddRange([$"- {Reference(item.Str("path"))}", $"  - Before: {VisibleCards(item.Str("before"))}", $"  - After: {VisibleCards(item.Str("after"))}", $"  - Rationale: {Rationale(item)}"]);
         }
         if (questions.Length == 0)
         {
             lines.Add("- No significant question changes.");
         }
-        lines.AddRange(["", "## 5. User feedback", ""]);
+        lines.AddRange(["", "## 4. User feedback", ""]);
         string[] feedbackLines = feedback.OfType<JsonObject>().Select(item => $"- {item.Str("url", item.Str("key", "feedback"))}: {item.Str("outcome", "pending")} — {item.Str("reason")}").ToArray();
         lines.AddRange(feedbackLines.Length == 0 ? ["- No owner feedback in this batch."] : feedbackLines);
-        lines.AddRange(["", "## 6. Validation", ""]);
-        foreach (JsonNode? item in validation)
-        {
-            lines.Add(item is JsonObject check ? $"- {check.Str("check")}: {check.Str("result")}" : $"- {item?.GetValue<string>()}");
-        }
-        if (validation.Count == 0)
-        {
-            lines.Add("- No validation results recorded.");
-        }
-        HashSet<string> sourceUrls = final.SelectMany(item => item.Arr("sources").OfType<JsonObject>()).Select(source => source.Str("url")).ToHashSet();
-        KeyValuePair<string, string>[] visibleSources = sources.Where(pair => sourceUrls.Contains(pair.Value)).OrderBy(pair => pair.Key, StringComparer.Ordinal).ToArray();
-        if (visibleSources.Length != 0)
-        {
-            lines.Add("- Factual sources:");
-            lines.AddRange(visibleSources.Select(pair => $"  - [{pair.Key}]({pair.Value})"));
-        }
         return EscapeManagedTokens(string.Join('\n', lines).TrimEnd() + "\n");
     }
 
@@ -184,23 +173,15 @@ public static class Summary
         return visible.Length == 0 ? "None" : string.Join(" / ", visible);
     }
 
-    private static string IdentitySummary(JsonObject change)
+    private static string Rationale(JsonObject change)
     {
-        string[] before = Proposal.Ids(change.Str("before"));
-        string[] after = Proposal.Ids(change.Str("after"));
-        if (before.Length != 0 && before.SequenceEqual(after))
-        {
-            return $"Qard ID `{before[0]}` preserved; existing review history remains attached.";
-        }
-        if (before.Length != 0 && change.Str("kind") is "replace" or "split")
-        {
-            return $"Qard ID `{before[0]}` retired; replacement target(s) remain ID-less, so review history is not transferred.";
-        }
-        if (before.Length != 0 && change.Str("kind") == "remove")
-        {
-            return $"Qard ID `{before[0]}` retired; its review history is no longer attached to an active target.";
-        }
-        return change.Str("kind") == "add" ? "New learning target remains ID-less; no review history is attached." : "Learning target remains ID-less; no review history is transferred.";
+        string explanation = string.Join(' ', new[] { change.Str("problem"), change.Str("reason"), change.Str("reader_benefit") }
+            .Where(value => !string.IsNullOrWhiteSpace(value)).Select(value => value.Trim()).Distinct(StringComparer.Ordinal)
+            .Select(value => ".!?".Contains(value[^1]) ? value : value + "."));
+        string[] citations = change.Arr("sources").OfType<JsonObject>().Where(source => source.Str("url").Length != 0)
+            .GroupBy(source => source.Str("url"), StringComparer.Ordinal)
+            .Select(group => $"[{group.First().Str("claim", "Source")}]({group.Key})").ToArray();
+        return citations.Length == 0 ? explanation : $"{explanation} {string.Join(", ", citations)}";
     }
 
     private static string EscapeManagedTokens(string value) => value.Replace(StartToken, "&lt;!-- devbook-improvement:start").Replace(EndPrefix, "&lt;!-- devbook-improvement:end");

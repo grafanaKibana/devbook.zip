@@ -25,6 +25,8 @@ internal static class DomainFixtures
         ["before"] = Card,
         ["after"] = after ?? Card.Replace("The original answer.", "The answer explains its mechanism and boundary."),
         ["reason"] = "Explain the mechanism and boundary.",
+        ["problem"] = "The existing explanation omits a material mechanism or boundary.",
+        ["reader_benefit"] = "The correction restores the mechanism for recall and engineering decisions.",
         ["kind"] = kind,
         ["learning_target"] = target,
         ["essential_meanings"] = new JsonArray("The operating mechanism", "The important boundary"),
@@ -52,6 +54,7 @@ internal static class DomainFixtures
     public static JsonObject UnchangedReview(JsonObject payload) => new()
     {
         ["verdict"] = "CLEAN",
+        ["change_checks"] = ChangeChecks(payload),
         ["notes"] = new JsonArray(payload.RequiredObject("current").Select(item => (JsonNode)new JsonObject
         {
             ["path"] = item.Key,
@@ -85,4 +88,11 @@ internal static class DomainFixtures
             }
         }).ToArray())
     };
+    public static JsonArray ChangeChecks(JsonObject payload, string verdict = "WORTHWHILE") => new(Enumerable.Range(0, payload.Obj("proposal").Arr("edits").Count)
+        .Select(index => (JsonNode)new JsonObject
+        {
+            ["edit_index"] = index,
+            ["verdict"] = verdict,
+            ["reason"] = "The fixture correction restores its demonstrated mechanism and boundary."
+        }).ToArray());
 }

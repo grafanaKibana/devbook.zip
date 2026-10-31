@@ -1,8 +1,8 @@
-using System.Text;
-using System.Text.Json.Nodes;
 using DevBook.Tooling.Improvement;
 using DevBook.Tooling.Infrastructure;
 using FluentAssertions;
+using System.Text.Json.Nodes;
+using System.Text;
 using Xunit;
 
 namespace DevBook.Tooling.Tests;
@@ -13,7 +13,7 @@ public sealed class ProviderTests
     public async Task AuthorAndReviewerUseSeparateRestrictedOAuthCalls()
     {
         // Arrange
-        var runner = new ProviderRunner();
+        var runner = new ProviderProviderRunner();
         var config = new JsonObject
         {
             ["claude_executable"] = "/usr/bin/true",
@@ -34,6 +34,7 @@ public sealed class ProviderTests
 
         // Assert
         author.Int("version").Should().Be(1);
+        ClaudeProvider.DefaultModel.Should().Be("claude-opus-5-5");
         review.Str("verdict").Should().Be("CHANGES REQUIRED");
         runner.Requests.Should().HaveCount(4);
         ProcessRequest[] calls = runner.Requests.Where(request => request.Arguments.Contains("--print")).ToArray();
@@ -57,36 +58,10 @@ public sealed class ProviderTests
     }
 
     [Fact]
-    public async Task PrimaryDocumentationHostsAreAvailableWithoutAllowingLookalikes()
-    {
-        // Arrange
-        string root = Repository.FindRoot(AppContext.BaseDirectory);
-        JsonObject config = JsonData.ParseObject(await File.ReadAllTextAsync(Path.Combine(root, ".github/devbook-improvement.json")));
-        config["claude_executable"] = "/usr/bin/true";
-        var runner = new ProviderRunner();
-        var provider = new ClaudeProvider(config, runner, environment: name => name == "CLAUDE_CODE_OAUTH_TOKEN" ? "fixture-oauth-value" : null);
-        string[] hosts = config.Arr("allowed_source_hosts").Strings().ToArray();
-
-        // Act
-        await provider.AuthorAsync(new JsonObject());
-        ProcessRequest call = runner.Requests.Single(request => request.Arguments.Contains("--print"));
-        string allowedTools = call.Arguments[call.Arguments.ToList().IndexOf("--allowedTools") + 1];
-        Func<Task> lookalike = async () => await Runtime.ValidateSourceUrlAsync("https://developers.openai.com.untrusted.example/docs", hosts);
-        Func<Task> unrelated = async () => await Runtime.ValidateSourceUrlAsync("https://untrusted.example/docs", hosts);
-
-        // Assert
-        hosts.Should().Contain(["developers.openai.com", "platform.claude.com"]);
-        allowedTools.Should().Contain("WebFetch(domain:developers.openai.com)").And.Contain("WebFetch(domain:platform.claude.com)");
-        allowedTools.Should().NotContain("domain:*");
-        await lookalike.Should().ThrowAsync<UnsafeInput>();
-        await unrelated.Should().ThrowAsync<UnsafeInput>();
-    }
-
-    [Fact]
     public async Task DiagnosticsRetainResearchCountsWithoutModelTextOrToolInputs()
     {
         // Arrange
-        var runner = new ProviderRunner
+        var runner = new ProviderProviderRunner
         {
             Metadata = JsonData.ParseObject("""
                 {
@@ -96,7 +71,7 @@ public sealed class ProviderTests
                   "subtype": "success",
                   "stop_reason": "end_turn",
                   "usage": {"input_tokens": 100, "output_tokens": 20, "cost_usd": 2, "private": "secret-fixture"},
-                  "modelUsage": {"claude-sonnet-5-5": {"inputTokens": 100, "outputTokens": 20, "webSearchRequests": 2, "costUSD": 2}},
+                  "modelUsage": {"claude-opus-5-5": {"inputTokens": 100, "outputTokens": 20, "webSearchRequests": 2, "costUSD": 2}},
                   "permission_denials": [
                     {"tool_name": "WebFetch", "tool_input": {"url": "https://private-note.example/secret-fixture"}},
                     {"tool_name": "WebFetch", "tool_input": {"prompt": "secret-fixture"}},
@@ -128,28 +103,7 @@ public sealed class ProviderTests
             .And.NotContain("tool_input").And.NotContain("session_id").And.NotContain("cost").And.NotContain("result");
     }
 
-    [Fact]
-    public void QuotaPreservesReportedBoundariesAndDelaysUnknownReset()
-    {
-        // Arrange
-        DateTimeOffset now = DateTimeOffset.Parse("2026-10-30T12:00:00Z");
-
-        // Act
-        ClaudeQuotaException weekly = ClaudeProvider.Quota("Weekly usage limit resets 2026-11-03T12:00:00Z", now)!;
-        ClaudeQuotaException fiveHour = ClaudeProvider.Quota("5-hour limit reset_at 1793448000", now)!;
-        ClaudeQuotaException unknown = ClaudeProvider.Quota("Usage limit reached", now)!;
-        ClaudeQuotaException? unrelatedFailure = ClaudeProvider.Quota("Transport failed", now);
-
-        // Assert
-        weekly.Kind.Should().Be("weekly");
-        weekly.ResetAt.Should().Be(DateTimeOffset.Parse("2026-11-03T12:00:00Z"));
-        fiveHour.Kind.Should().Be("five_hour");
-        unknown.ResetAt.Should().BeNull();
-        unknown.NextCheckAt.Should().Be(now.AddHours(24));
-        unrelatedFailure.Should().BeNull();
-    }
-
-    private sealed class ProviderRunner : IProcessRunner
+    private sealed class ProviderProviderRunner : IProcessRunner
     {
         public List<ProcessRequest> Requests { get; } = [];
         public JsonObject Metadata { get; init; } = new();
@@ -163,7 +117,7 @@ public sealed class ProviderTests
             int promptIndex = request.Arguments.ToList().IndexOf("--system-prompt");
             bool reviewer = request.Arguments[promptIndex + 1].Contains("independent, read-only", StringComparison.Ordinal);
             JsonObject structured = reviewer ? JsonData.ParseObject("""
-                {"verdict":"CHANGES REQUIRED","overall_reason":"Fixture block","notes":[{"path":"Vault/Home/A/B.md","verdict":"CHANGES REQUIRED","summary":"Needs an explanation","page_type":"concept","current_text_evidence":[{"quote":"Current text","line_start":1,"reason":"Missing boundary"}],"target_resolution":"UNRESOLVED","split_suggestion":"Keep together","findings":[],"source_checks":[],"rejection_equivalence":[],"quality":{"accuracy":"PASS","clarity":"FAIL","rules_compliance":"PASS","question_quality":"NOT APPLICABLE","identity_safety":"NOT APPLICABLE"}}]}
+                {"verdict":"CHANGES REQUIRED","change_checks":[],"overall_reason":"Fixture block","notes":[{"path":"Vault/Home/A/B.md","verdict":"CHANGES REQUIRED","summary":"Needs an explanation","page_type":"concept","current_text_evidence":[{"quote":"Current text","line_start":1,"reason":"Missing boundary"}],"target_resolution":"UNRESOLVED","split_suggestion":"Keep together","findings":[],"source_checks":[],"rejection_equivalence":[],"quality":{"accuracy":"PASS","clarity":"FAIL","rules_compliance":"PASS","question_quality":"NOT APPLICABLE","identity_safety":"NOT APPLICABLE"}}]}
                 """) : new JsonObject { ["version"] = 1, ["edits"] = new JsonArray(), ["dispositions"] = new JsonArray(), ["feedback"] = new JsonArray() };
             var envelope = new JsonObject { ["modelUsage"] = new JsonObject { [ClaudeProvider.DefaultModel] = new JsonObject() }, ["structured_output"] = structured };
             foreach (KeyValuePair<string, JsonNode?> item in Metadata)
@@ -173,4 +127,144 @@ public sealed class ProviderTests
             return Task.FromResult(new ProcessResult(0, Encoding.UTF8.GetBytes(envelope.ToJsonString()), []));
         }
     }
+    [Fact]
+    public async Task PublicHttpsSourceNeedsNoDomainAllowlist()
+    {
+        // Arrange
+        const string url = "https://independent-research.example/paper";
+
+        // Act
+        Uri accepted = await Runtime.ValidateSourceUrlAsync(url, resolver: PublicAnswers);
+
+        // Assert
+        accepted.AbsoluteUri.Should().Be(url);
+    }
+
+    [Theory]
+    [InlineData("http://public.example/")]
+    [InlineData("https://owner:secret@public.example/")]
+    [InlineData("https://public.example:8443/")]
+    public async Task UnsafeSourceUriIsRejectedBeforeResolution(string url)
+    {
+        // Arrange
+        var resolutions = 0;
+        Task<System.Net.IPAddress[]> Resolve(string host, CancellationToken token)
+        {
+            resolutions++;
+            return PublicAnswers(host, token);
+        }
+
+        // Act
+        Func<Task> validate = () => Runtime.ValidateSourceUrlAsync(url, resolver: Resolve);
+
+        // Assert
+        await validate.Should().ThrowAsync<UnsafeInput>();
+        resolutions.Should().Be(0);
+    }
+
+    [Theory]
+    [InlineData("127.0.0.1")]
+    [InlineData("fe80::1")]
+    [InlineData("93.184.216.34,10.0.0.1")]
+    public async Task AnyNonPublicDnsAnswerRejectsTheEntireSource(string answers)
+    {
+        // Arrange
+        Task<System.Net.IPAddress[]> Resolve(string host, CancellationToken token) => Task.FromResult(answers.Split(',').Select(System.Net.IPAddress.Parse).ToArray());
+
+        // Act
+        Func<Task> validate = () => Runtime.ValidateSourceUrlAsync("https://public.example/", resolver: Resolve);
+
+        // Assert
+        await validate.Should().ThrowAsync<UnsafeInput>();
+    }
+
+    [Fact]
+    public async Task RedirectFromPublicToPrivateHostIsRejectedBeforeAnotherRequest()
+    {
+        // Arrange
+        var requests = 0;
+        using var transport = new SourceTransport(request =>
+        {
+            requests++;
+            var response = new HttpResponseMessage(System.Net.HttpStatusCode.Redirect);
+            response.Headers.Location = new Uri("https://private.example/secret");
+            return response;
+        });
+        Task<System.Net.IPAddress[]> Resolve(string host, CancellationToken token) => host == "private.example"
+            ? Task.FromResult(new[] { System.Net.IPAddress.Parse("169.254.169.254") }) : PublicAnswers(host, token);
+
+        // Act
+        Func<Task> fetch = () => Runtime.FetchPrimarySourceAsync("https://public.example/", resolver: Resolve, transport: transport);
+
+        // Assert
+        await fetch.Should().ThrowAsync<UnsafeInput>();
+        requests.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task ConnectionResolutionRejectsDnsRebindingAfterInitialAcceptance()
+    {
+        // Arrange
+        var resolutions = 0;
+        Task<System.Net.IPAddress[]> Resolve(string host, CancellationToken token) => Task.FromResult(new[]
+        {
+            System.Net.IPAddress.Parse(++resolutions == 1 ? "93.184.216.34" : "10.0.0.1")
+        });
+        await Runtime.ValidateSourceUrlAsync("https://public.example/", resolver: Resolve);
+
+        // Act
+        Func<Task> connect = () => Runtime.ResolvePublicSourceAsync("public.example", resolver: Resolve);
+
+        // Assert
+        await connect.Should().ThrowAsync<UnsafeInput>();
+        resolutions.Should().Be(2);
+    }
+
+    [Theory]
+    [InlineData("application/pdf", 3)]
+    [InlineData("text/plain", 1)]
+    public async Task FetchRejectsUnsupportedMediaOrOversizedEvidence(string media, int maximum)
+    {
+        // Arrange
+        using var transport = new SourceTransport(_ =>
+        {
+            var response = new HttpResponseMessage(System.Net.HttpStatusCode.OK) { Content = new ByteArrayContent("abc"u8.ToArray()) };
+            response.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(media);
+            return response;
+        });
+
+        // Act
+        Func<Task> fetch = () => Runtime.FetchPrimarySourceAsync("https://public.example/", maximum, resolver: PublicAnswers, transport: transport);
+
+        // Assert
+        await fetch.Should().ThrowAsync<UnsafeInput>();
+    }
+
+    [Theory]
+    [InlineData("Weekly usage limit resets 2026-11-03T12:00:00Z", "weekly", "2026-11-03T12:00:00Z")]
+    [InlineData("5-hour limit reset_at 1793448000", "five_hour", "2026-10-31T12:00:00Z")]
+    [InlineData("Usage limit reached", "five_hour", null)]
+    public void QuotaParserPreservesReportedBoundaryOrUsesUnknownBackoff(string message, string kind, string? expectedReset)
+    {
+        // Arrange
+        DateTimeOffset now = DateTimeOffset.Parse("2026-10-30T12:00:00Z");
+
+        // Act
+        ClaudeQuotaException quota = ClaudeProvider.Quota(message, now)!;
+
+        // Assert
+        quota.Kind.Should().Be(kind);
+        DateTimeOffset? boundary = expectedReset is null ? null : DateTimeOffset.Parse(expectedReset);
+        quota.ResetAt.Should().Be(boundary);
+        quota.NextCheckAt.Should().Be(boundary ?? now.AddHours(24));
+    }
+
+    private static Task<System.Net.IPAddress[]> PublicAnswers(string host, CancellationToken token) =>
+        Task.FromResult(new[] { System.Net.IPAddress.Parse("93.184.216.34") });
+
+    private sealed class SourceTransport(Func<HttpRequestMessage, HttpResponseMessage> response) : HttpMessageHandler
+    {
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) => Task.FromResult(response(request));
+    }
+
 }

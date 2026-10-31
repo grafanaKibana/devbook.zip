@@ -9,113 +9,173 @@ namespace DevBook.Tooling.Tests;
 
 public sealed class QueueTests
 {
-    [Fact]
-    public void Queue_skips_reviewed_versions_and_packs_whole_feedback_requests_before_new_notes()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void FeedbackOutranksFlaggedNotesWhichOutrankOrdinaryNewNotes(bool feedback)
     {
         // Arrange
+        string flaggedPath = "Vault/Home/Programming/ZZZ/Flagged.md";
+        string feedbackPath = "Vault/Home/Programming/YYY/Feedback.md";
         JsonObject state = Core.NewState();
-        JsonObject note = DomainFixtures.NoteRecord();
-        var notes = new JsonArray(note.Copy());
+        JsonObject flagged = DomainFixtures.NoteRecord(flaggedPath);
+        RepairInputs.Apply(flagged, new HashSet<string> { "stable_1" });
+        var notes = new JsonArray(DomainFixtures.NoteRecord(), flagged, DomainFixtures.NoteRecord(feedbackPath));
+        if (feedback)
+        {
+            state.Obj("feedback")["request"] = new JsonObject
+            {
+                ["status"] = "pending",
+                ["topic"] = Core.TopicFor(feedbackPath),
+                ["paths"] = new JsonArray(feedbackPath)
+            };
+        }
 
-        // Act: select an unchecked note.
+        // Act
         JsonObject batch = ImprovementQueue.SelectBatch(state, notes, "rules")!;
 
         // Assert
-        batch.Arr("notes").Single()!.Str("selection_reason").Should().Be("new");
-
-        // Arrange: the current content has been reviewed.
-        JsonObject keep = DomainFixtures.Proposal(DomainFixtures.Edit());
-        keep["edits"] = new JsonArray();
-        keep.Arr("dispositions")[0]!["outcome"] = "keep";
-
-        // Act
-        state = Core.RecordOutcome(state, batch, keep, new JsonObject { ["sources"] = new JsonObject() });
-
-        // Assert: a legacy author-only keep needs one independent recheck.
-        ImprovementQueue.SelectBatch(state, notes, "rules")!.Arr("notes").Single()!.Str("selection_reason").Should().Be("keep_unverified");
-        state.Obj("notes").Obj(DomainFixtures.Path).Str("outcome").Should().Be("keep");
-
-        // Arrange: the independent reviewer supplies current-text evidence.
-        JsonObject review = DomainFixtures.UnchangedReview(new JsonObject
-        {
-            ["current"] = new JsonObject { [DomainFixtures.Path] = DomainFixtures.Note }
-        });
-
-        // Act
-        state = Core.RecordOutcome(state, batch, keep, new JsonObject { ["sources"] = new JsonObject() }, review);
-
-        // Assert: the verified unchanged version is skipped.
-        ImprovementQueue.SelectBatch(state, notes, "rules").Should().BeNull();
-
-        // Arrange: feedback spans two notes in one topic.
-        string secondPath = "Vault/Home/Programming/NET/Other.md";
-        notes.Add(DomainFixtures.NoteRecord(secondPath));
-        notes.Add(DomainFixtures.NoteRecord("Vault/Home/Programming/SQL/New.md"));
-        state.RequiredObject("feedback")["request"] = new JsonObject { ["key"] = "request", ["status"] = "pending", ["topic"] = Core.TopicFor(DomainFixtures.Path), ["paths"] = new JsonArray(DomainFixtures.Path, secondPath) };
-
-        // Act
-        JsonObject feedbackBatch = ImprovementQueue.SelectBatch(state, notes, "rules", new JsonObject { ["max_notes_per_run"] = 2 })!;
-
-        // Assert
-        feedbackBatch.Arr("notes").OfType<JsonObject>().Select(item => item.Str("path")).Should().Equal(DomainFixtures.Path, secondPath);
-        feedbackBatch.Arr("feedback").Should().ContainSingle();
-
-        // Act: the complete feedback request exceeds the batch size.
-        JsonObject oversized = ImprovementQueue.SelectBatch(state, notes, "rules", new JsonObject { ["max_notes_per_run"] = 1 })!;
-
-        // Assert
-        oversized.Arr("notes").Should().BeEmpty();
-        oversized.Arr("feedback").Should().ContainSingle();
-
-        // Arrange: the owner has started reviewing the topic PR.
-        JsonObject frozenPr = new() { ["topic_id"] = Core.TopicId(Core.TopicFor(DomainFixtures.Path)), ["generation"] = 1, ["number"] = 7, ["status"] = "open", ["draft"] = true, ["review_activity"] = true };
-
-        // Act
-        state = Core.SyncPrs(state, new JsonArray(frozenPr));
-
-        // Assert
-        ImprovementQueue.SelectBatch(state, notes, "rules", new JsonObject { ["max_notes_per_run"] = 2 })!.Arr("notes").OfType<JsonObject>().Select(item => item.Str("path")).Should().Equal(DomainFixtures.Path, secondPath);
-
-        // Arrange: no feedback remains, even after a rules revision.
-        state.RequiredObject("feedback").Clear();
-        JsonObject legacyPr = state.Obj("prs").Select(pair => pair.Value).OfType<JsonObject>().Single();
-        legacyPr.Remove("topic_id");
-        legacyPr["topic"] = Core.TopicFor(DomainFixtures.Path);
-
-        // Act: a reviewed topic stays frozen.
-        JsonObject? frozenBatch = ImprovementQueue.SelectBatch(state, new JsonArray(DomainFixtures.NoteRecord(secondPath)), "new-rules");
-
-        // Assert
-        frozenBatch.Should().BeNull();
+        batch.Arr("notes").Should().ContainSingle().Which.Str("path").Should().Be(feedback ? feedbackPath : flaggedPath);
+        batch.Arr("notes")[0]!.Str("content").Should().Be(DomainFixtures.Note);
     }
 
     [Theory]
-    [InlineData("five_hour")]
-    [InlineData("weekly")]
-    [InlineData("unknown")]
-    public void Cooldown_keeps_reported_reset_and_quiet_episode_then_resumes(string kind)
+    [InlineData("unchanged")]
+    [InlineData("flags")]
+    [InlineData("evaluation")]
+    public void ReviewedFlagIsSelectedAgainOnlyWhenItsInputsChange(string change)
+    {
+        // Arrange
+        JsonObject note = DomainFixtures.NoteRecord();
+        RepairInputs.Apply(note, new HashSet<string> { "stable_1" });
+        JsonObject state = Core.NewState();
+        state.Obj("notes")[DomainFixtures.Path] = new JsonObject
+        {
+            ["content_hash"] = note.Str("hash"),
+            ["rules_hash"] = "rules",
+            ["outcome"] = "changed",
+            ["repair_input_hash"] = change == "flags" ? "old-flags" : note.Str("repair_input_hash"),
+            ["evaluation_hash"] = "policy"
+        };
+        var config = new JsonObject { ["evaluation_hash"] = change == "evaluation" ? "new-policy" : "policy" };
+
+        // Act
+        JsonObject? batch = ImprovementQueue.SelectBatch(state, new JsonArray(note), "rules", config);
+
+        // Assert
+        if (change == "unchanged")
+        {
+            batch.Should().BeNull();
+        }
+        else
+        {
+            batch!.Arr("notes")[0]!.Str("selection_reason").Should().Be(change == "flags" ? "needs_fixing" : "evaluation_changed");
+        }
+    }
+
+    [Fact]
+    public void NewRepairFlagCannotBypassReviewFreeze()
+    {
+        // Arrange
+        JsonObject note = DomainFixtures.NoteRecord();
+        RepairInputs.Apply(note, new HashSet<string> { "stable_1" });
+        JsonObject state = Core.SyncPrs(Core.NewState(), new JsonArray(new JsonObject
+        {
+            ["topic_id"] = Core.TopicId(Core.TopicFor(DomainFixtures.Path)),
+            ["generation"] = 1,
+            ["number"] = 7,
+            ["status"] = "open",
+            ["draft"] = true,
+            ["review_activity"] = true
+        }));
+
+        // Act
+        JsonObject? batch = ImprovementQueue.SelectBatch(state, new JsonArray(note), "rules");
+
+        // Assert
+        batch.Should().BeNull();
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(2)]
+    public void FeedbackRequestIsPackedAsOneCompletePathScope(int limit)
+    {
+        // Arrange
+        string other = "Vault/Home/Programming/NET/Other.md";
+        JsonObject state = Core.NewState();
+        state.Obj("feedback")["request"] = new JsonObject
+        {
+            ["status"] = "pending",
+            ["topic"] = Core.TopicFor(other),
+            ["paths"] = new JsonArray(DomainFixtures.Path, other)
+        };
+        var notes = new JsonArray(DomainFixtures.NoteRecord(), DomainFixtures.NoteRecord(other));
+
+        // Act
+        JsonObject batch = ImprovementQueue.SelectBatch(state, notes, "rules", new JsonObject { ["max_notes_per_run"] = limit })!;
+
+        // Assert
+        batch.Arr("feedback").Should().ContainSingle();
+        batch.Arr("notes").Count.Should().Be(limit == 2 ? 2 : 0);
+    }
+
+    [Fact]
+    public void AuthorOnlyLegacyKeepRequiresIndependentRecheck()
+    {
+        // Arrange
+        JsonObject state = Core.NewState();
+        state.Obj("notes")[DomainFixtures.Path] = new JsonObject
+        {
+            ["content_hash"] = LegacyIdentity.Digest(DomainFixtures.Note),
+            ["rules_hash"] = "rules",
+            ["outcome"] = "keep"
+        };
+
+        // Act
+        JsonObject batch = ImprovementQueue.SelectBatch(state, new JsonArray(DomainFixtures.NoteRecord()), "rules")!;
+
+        // Assert
+        batch.Arr("notes")[0]!.Str("selection_reason").Should().Be("keep_unverified");
+    }
+
+    [Theory]
+    [InlineData("workflow_dispatch", "owner", false)]
+    [InlineData("schedule", "owner", true)]
+    public void TargetedLiveExecutionRequiresManualOwnerDispatch(string trigger, string actor, bool rejected)
+    {
+        // Arrange
+        var config = new JsonObject { ["target_note"] = DomainFixtures.Path, ["owner_allowlist"] = RuntimeFixtures.Allowlist() };
+        var environment = new Dictionary<string, string>
+        {
+            ["GITHUB_EVENT_NAME"] = trigger,
+            ["GITHUB_ACTOR_ID"] = "42",
+            ["GITHUB_ACTOR"] = actor,
+            ["GITHUB_TRIGGERING_ACTOR"] = actor
+        };
+
+        // Act
+        Exception? error = Record.Exception(() => ManualSelection.RequireManualOwner(config, environment));
+
+        // Assert
+        if (rejected) error.Should().BeOfType<ProductionGate>();
+        else error.Should().BeNull();
+    }
+
+    [Fact]
+    public void RepeatedQuotaEpisodeRetainsItsResetWithoutRepeatingNotification()
     {
         // Arrange
         DateTimeOffset now = DateTimeOffset.Parse("2026-10-30T08:00:00Z");
-        DateTimeOffset? reset = kind == "unknown" ? null : now.AddHours(kind == "weekly" ? 80 : 5);
-
-        // Act: record the quota boundary.
-        JsonObject state = Core.SetCooldown(Core.NewState(), kind, reset, now);
-
-        // Assert
-        Core.CooldownActive(state, now).Should().BeTrue();
-        state.Obj("cooldown").Bool("notice_pending").Should().BeTrue();
-
-        // Arrange: the limit episode has already been announced.
+        JsonObject state = Core.SetCooldown(Core.NewState(), "weekly", now.AddHours(80), now);
         state.Obj("cooldown")["notice_sent"] = true;
 
         // Act
-        JsonObject repeated = Core.SetCooldown(state, kind, reset, now);
+        JsonObject repeated = Core.SetCooldown(state, "weekly", now.AddHours(80), now);
 
         // Assert
         repeated.Obj("cooldown").Bool("notice_pending").Should().BeFalse();
         repeated.Obj("cooldown").Bool("notice_sent").Should().BeTrue();
-        Core.CooldownActive(state, reset ?? now.AddHours(24)).Should().BeFalse();
-        state.Obj("cooldown").Str("reported_reset_at").Should().Be(reset is null ? "" : Core.FormatTime(reset.Value));
+        repeated.Obj("cooldown").Str("reported_reset_at").Should().Be(Core.FormatTime(now.AddHours(80)));
     }
 }

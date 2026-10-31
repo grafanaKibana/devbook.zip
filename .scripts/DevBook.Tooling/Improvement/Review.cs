@@ -13,7 +13,7 @@ public static class Review
         {
             return false;
         }
-        return Clean(new JsonObject { ["verdict"] = "CLEAN", ["notes"] = new JsonArray(noteReview.Copy()) },
+        return Clean(new JsonObject { ["verdict"] = "CLEAN", ["notes"] = new JsonArray(noteReview.Copy()), ["change_checks"] = new JsonArray() },
             new Dictionary<string, string> { [path] = current }, new JsonObject(), new JsonArray(), new JsonArray());
     }
 
@@ -22,6 +22,21 @@ public static class Review
         if (review.Str("verdict") != "CLEAN")
         {
             return false;
+        }
+
+        if (review["change_checks"] is not JsonArray checks || checks.Count != proposal.Arr("edits").Count)
+        {
+            return false;
+        }
+        var indices = new HashSet<int>();
+        foreach (JsonNode? entry in checks)
+        {
+            if (entry is not JsonObject check || check["edit_index"] is not JsonValue indexValue
+                || !indexValue.TryGetValue(out int index) || index < 0 || index >= proposal.Arr("edits").Count
+                || !indices.Add(index) || check.Str("verdict") != "WORTHWHILE" || string.IsNullOrWhiteSpace(check.Str("reason")))
+            {
+                return false;
+            }
         }
 
         JsonObject[] notes = review.Arr("notes").OfType<JsonObject>().ToArray();

@@ -1,84 +1,16 @@
 # DevBook improvement action
 
-A recurring queue for DevBook notes and Qard interview cards. Every six hours, the action selects a small topic batch, asks Claude Sonnet 5.5 to improve it, independently reviews the complete notes, validates the result, and updates a draft PR with the source **and genuine published Quartz output**. You review and merge manually. The action never merges.
+A bounded GitHub Actions queue for DevBook notes and Qard interview cards. Every six hours, an opportunity selects a small topic batch, asks Claude Opus 5.5 to discover worthwhile improvements, independently reviews complete notes and each proposed change, validates the result, and updates a draft PR with source and genuine published Quartz output. The owner reviews and merges manually; the action never merges or enables auto-merge.
 
-[Workflow](../../.github/workflows/devbook-improvement.yml) · [Configuration](../../.github/devbook-improvement.json) · [Activation and recovery runbook](../../docs/devbook-improvement.md)
+[Workflow](../../.github/workflows/devbook-improvement.yml) · [Configuration](../../.github/devbook-improvement.json) · [Authoring contract](../../AGENTS.md) · [Local publishing](../../Web/README.md)
 
-Open [DevBook.Tooling.slnx](../DevBook.Tooling.slnx) for the tooling executable and its adjacent xUnit project. The executable owns the `improvement` and `export` commands. PascalCase `.cs` file-based scripts expose the shared vault tools used by hooks and manual publishing. The improvement, validation, migration and publishing paths need no Python; the unrelated release/changelog tool remains Python. Production activation and unattended operation require the separate runbook phase; tests passing do not activate them.
+This README owns setup, operation, quotas and recovery. Production credentials, first real PR publication and schedule activation remain separately confirmed actions. Until activated, scheduled opportunities run the credential-free demo. Passing tests does not activate production.
 
-## Project layout
+## Tooling and local checks
 
-```text
-.scripts/
-  DevBook.Tooling.slnx
-  DevBook.Tooling/
-    DevBook.Tooling.csproj
-    Program.cs
-    Improvement/
-    Export/
-    Vault/
-    Infrastructure/
-    Scripts/
-      ValidateVault.cs
-      SyncQuartz.cs
-      ...
-  DevBook.Tooling.Tests/
-    DevBook.Tooling.Tests.csproj
-```
+Open [DevBook.Tooling.slnx](../DevBook.Tooling.slnx) for the executable and adjacent xUnit/FluentAssertions test project. `Improvement/` owns the queue, JSON model contracts, state and GitHub orchestration; `Vault/` owns validation, Qard migration, dates, rollups and Roadmap; `Export/` owns desktop Syncer rendering, receipts and generated-only publication. `Program.cs` dispatches `improvement` and `export`. PascalCase file-based entry points under `Scripts/` share that implementation and are excluded from project compilation because each has its own entry point. The RAG application keeps its own solution; the unrelated changelog generator remains Python.
 
-The two projects share one solution and build together. `Scripts` contains file-based entry points, visible in the project but excluded from its compilation because each has its own entry point. Tests stay in their own assembly so test dependencies do not enter the application. Test methods group setup, the operation and its expected result into Arrange, Act and Assert sections. The separate RAG application under `Platform/DevBook` keeps its own solution.
-
-## A regular opportunity
-
-1. Reconcile state, topic PRs, and verified-owner comments/reviews. Consolidated feedback goes first.
-2. Select up to four notes from one directory-derived topic. Skip unchanged independently reviewed versions. A keep succeeds only after the separate reviewer supplies current-text evidence; older author-only keeps receive a one-time review check.
-3. Ask the author for guarded block replacements with public web research. Prepare source dates against the current topic parent **before** the independent reviewer sees the final candidate.
-4. Validate complete notes, protected Qard metadata, source hashes, primary sources, and the cumulative PR diff. Create or update the topic’s draft PR.
-5. In the **same workflow run**, a separate macOS job starts pinned genuine Obsidian/Syncer in a disposable profile. A protected Ubuntu publisher adds only verified generated files and the source-bound receipt, then dispatches/checks exact-head validation.
-
-The jobs separate credentials: maintenance has subscription OAuth and the dedicated GitHub token; rendering has repository read access only; publication has the dedicated GitHub token and executes trusted code. Rendering consumes immutable committed source and never prepares or changes note dates. A source-only draft can appear briefly while its output job runs. Review the complete PR after export and checks pass.
-
-## What freezes mean
-
-Each topic generation has one stable branch and machine-marked PR. New batches append until the PR reaches a size limit, the owner comments/reviews, or the draft is marked ready. Then the bot stops adding unrelated content to that PR. It can still implement your queued feedback and publish the corresponding output.
-
-This does not lock your files, prevent your commits, or require immediate action. Merely viewing the PR does not freeze it. Waiting for automatic export alone does not freeze it. If all three PR slots fill and none can accept work, later opportunities keep the queue without making unnecessary model calls. After merge, the topic can start another batch. Closing without merge suppresses those proposals independently of file/rule hashes.
-
-## Defaults and inputs
-
-| Setting | Default |
-|---|---:|
-| Notes per opportunity | 4 |
-| Notes / changed lines per PR | 16 / 1,200 |
-| Open managed PRs | 3 |
-| Author or reviewer call | 900 seconds, 20 turns |
-| Maintenance / job budget | 35 / 40 minutes |
-| Export checks / polling | 600 seconds / 10 seconds |
-| Simultaneous model calls | 1 |
-| Schedule | `23 */6 * * *` UTC |
-
-The exact default model is `claude-sonnet-5-5`; Claude Code is pinned to `2.1.285`. Scheduled runs may use repository variable `DEVBOOK_IMPROVEMENT_MODEL`; manual runs expose `model`. Unsupported/mixed model evidence fails closed. Limits, owners, source hosts and validators live in the configuration. Optional `export_check_wait_seconds` (0–600) and `export_check_poll_seconds` (1–60) bound the publisher’s exact-head wait; zero wait performs one snapshot for fixtures or deliberate recovery probes. Pending checks resume without another model call or export.
-
-| Manual input | Behavior |
-|---|---|
-| `mode=demo` | Credential-free fake-transport flow through the real engine |
-| `mode=dry-run`, `with_model=false` | Current repository selection; no model or writes |
-| `mode=dry-run`, `with_model=true` | Protected author/reviewer proposal; control-state writes only |
-| `mode=apply` | Protected draft PR update, then automatic render/publish |
-| `mode=fixture` | Genuine isolated hosted Obsidian/Syncer test; artifacts only |
-| `model` | Exact verified identifier, with no fallback |
-| `pilot=true` | Owner-authorized, exact-SHA PR181 test with isolated state and a draft targeting the setup branch; production and scheduling stay off |
-| `note` + `focus` | Recheck one exact `Vault/Home/...md` note for a concrete issue; live use requires an allowlisted owner’s manual dispatch |
-
-PR-triggered runs execute only credential-free tests/fixtures. Protected jobs require the configured base-branch workflow and activation gates. Disabled schedules run the credential-free demo.
-
-A one-off test before merging PR181 uses the same maintenance/render/publication jobs through an explicit manual pilot path. It selects at most two notes, preserves the normal author/reviewer and validation rules, and includes the genuine Quartz output in its draft PR. It needs a temporary exact-branch environment allowance and reviewed-SHA grant, both removed afterward. See the [premerge pilot procedure](../../docs/devbook-improvement.md#one-off-test-before-merging-pr181); passing tests alone grants no credential access.
-
-Targeting changes selection for that run without clearing stored history. The focus is supplied to both author and reviewer and is bound to any resumable proposal. Holds, rejected proposals, PR limits and review freezes still apply; focus is not permission to reconsider a rejected proposal or append unrelated work to a frozen PR. Existing publication recovery retains its normal priority. Scheduled runs do not take manual note/focus inputs. A justified, independently reviewed keep remains a valid outcome.
-
-## Run locally without credentials
-
-Install .NET SDK **10.0.100**. Enter `.scripts` so its `global.json` selects that exact SDK:
+Install .NET SDK **10.0.100** and enter `.scripts` so `global.json` selects it:
 
 ```sh
 cd .scripts
@@ -90,35 +22,175 @@ dotnet run --project DevBook.Tooling -- improvement --repo-root .. --demo --outp
 dotnet run --project DevBook.Tooling -- improvement --repo-root .. --dry-run --output-dir /tmp/devbook-selection
 ```
 
-Project commands use normal incremental builds. The shared file-based scripts use `--no-cache` so they pick up current tooling changes instead of reusing an older cached copy.
+Project commands use incremental builds. File-based scripts use `--no-cache` to pick up current tooling changes. Tests keep JSON fixtures and visible Arrange/Act/Assert groups for queue, identity, model, state, feedback, quota, publication and export contracts. Full-vault validation and genuine export are separate checks.
 
-The compact suite uses xUnit and FluentAssertions for core queue, identity, state, feedback, lifecycle, quota, date and export contracts. It does not reproduce every old parser/regression permutation. Full-vault validation and genuine export remain separate checks.
-
-The demo produces `result.json`, `proposed.patch`, `pr-summary.md`, and separate `question-changes.json`, using fixture model/GitHub boundaries. It makes no live model request or PR. A Mac desktop fixture uses the same native export code:
+The demo writes `result.json`, `proposed.patch`, `pr-summary.md` and `question-changes.json` through fake model/GitHub/rendering boundaries. It makes no live model request or PR. A local genuine desktop fixture uses the native exporter:
 
 ```sh
 dotnet run --project DevBook.Tooling -- export fixture --repo-root .. \
   --app-bundle /Applications/Obsidian.app --output /tmp/devbook-export-fixture
 ```
 
-Use the pinned compatible app from the workflow when the installed bundle differs. The hosted fixture pins Obsidian `1.14.5`, verifies the installer hash/signature, and proves Datacore rendering, card/layout markers, media bytes, unchanged source, and receipt bindings. Verify hosted success on the exact revision before activation.
+Use the workflow's pinned compatible bundle when the installed app differs. Hosted credential-free `mode=fixture` pins Obsidian **1.14.5**, verifies its installer hash/signature, and checks startup, Datacore rendering, Qard/layout markers, unchanged source/media and receipt bindings. Local success does not prove hosted GUI startup or live model judgment.
 
-## Web tools and quota
+## Selection and review
 
-Author and reviewer have built-in **WebSearch** and **WebFetch** for public primary documentation and papers. Prompts prohibit putting private note text, paths, owner feedback, or unpublished identifiers into searches. Deterministic source retrieval independently checks accepted URLs against configured public hosts. Pages and comments remain data, never tool instructions.
+1. Reconcile state, topic PRs and verified-owner feedback. Complete scoped feedback goes first.
+2. Prioritize eligible whole notes containing active **Needs fixing** Qard cards, then other eligible notes. A topic is the note's parent directory relative to `Vault/Home`; generated and dashboard pages are excluded by default.
+3. Give the author complete notes, current rules and relevant repair IDs. It identifies concrete defects or important gaps, proposes guarded replacements, and explains the correction and reader benefit. A flag is context, not proof that an edit is needed.
+4. Prepare changed source dates against the current topic parent **before** independent review. The separate read-only reviewer checks complete current notes, sources, identity, rejection history, and whether every edit materially improves understanding, recall or engineering judgment. Cosmetic churn, unsupported defects, redundancy and unnecessary expansion fail review.
+5. Validate metadata, whole-note hashes and the cumulative diff; update the draft PR. Separate render/publication jobs add verified output and check the exact final head in the same workflow run.
 
-The model has no shell, local file tools, MCP servers, or Git credentials. Built-in web tools avoid an extra Context7 account/key; no separately billed API fallback is configured. The exact source-host policy includes the current `developers.openai.com` and `platform.claude.com` documentation hosts. Retrieval prefers Markdown and accepts bounded Markdown/plain text/HTML. `max_source_bytes` defaults to 250,000 (supported range 1–1,000,000); the run's source-count and model-input limits still apply. Successful live result artifacts include `model_diagnostics`: safe timing, turn, token/search and permission-denial counts when the pinned CLI reports them. Diagnostic records omit prompts, note text, URLs, queries and denied tool inputs. Subscription OAuth alone cannot prevent enabled account overage, so usage credits must remain disabled and be confirmed during activation.
+Needs fixing is read from the checked-out repository's Qard data snapshot and matched to card IDs in current note content. A local flag reaches scheduled Actions only after its Qard data update reaches the base branch; the action has no access to running Obsidian state. Only matched repair IDs reach the model. Missing data means no flags; malformed data blocks model work with a diagnostic. Orphan flags do not invent note mappings. Maintenance never writes plugin state, flags, schedules, history, settings or saved sessions; session membership does not exclude a card from content improvement.
 
-Actual reported reset times are persisted. Unknown resets use a conservative 24-hour recheck without inventing a reset time. Weekly exhaustion pauses all new model work, including feedback fixes. Cooldown skips succeed quietly and emit at most one episode notice. Already-produced export can finish without another model call. No precise remaining-quota telemetry is claimed.
+A successful changed or independently reviewed unchanged outcome records the repair input with the note version. An unchanged flag already covered by that outcome does not repeatedly select the note. Source, rules, model/protocol, repair-input changes or owner feedback can require another review; flags never override holds, rejections, freezes or PR limits. A false→true flag transition entirely between runs cannot be detected when the observed repair IDs and note remain unchanged.
 
-## Identity, state, and recovery
+A keep still requires independent complete-note `CLEAN` evidence: exact current-text quotes, 1-based lines and meaningful reasons. Failed reviews stay held; reviewer quota exhaustion preserves proposals without another author call. Pure keeps change neither dates nor source. Legacy author-only keeps need a one-time independent check. Existing Qard IDs survive only for the same learning target; new targets, replacements and split children stay ID-less. Reverse-linked target transformations pause for manual treatment.
 
-Existing Qard IDs survive only for the same learning target. New targets, replacements and split children remain ID-less. Plugin state, schedules, history and saved sessions stay untouched; being in a session does not exclude a card from content improvement.
+## Topic PRs and feedback
 
-State remains version 1 on `maintenance/devbook-improvement-state`; unknown fields, rejections, feedback revisions and journals survive the port. Native fingerprints preserve the old computed identities. Old export receipts remain readable but require a genuine new export against the complete native policy. Old topic branches lacking the native baseline, or pending operations lacking the prepared-source contract, pause with preserved evidence instead of being silently rewritten.
+Each topic generation has one stable branch and machine-marked draft PR. Batches append until a size limit, a verified-owner comment/review, or marking the draft ready freezes unrelated additions. Scoped owner corrections and their generated output remain allowed. Viewing a PR or waiting for automatic export does not freeze it. A freeze restricts bot additions, not owner edits. Full PR slots preserve the queue without unnecessary model calls. Merge starts a new generation; closure without merge suppresses those proposals independently of hashes.
 
-A generated bundle accepts only `Web/content`, generated Syncer styles and the receipt. The publisher checks current PR identity/head, complete Git trees, byte/mode bindings and size/path limits before a non-force update. It resumes an exact already-published export through validation rather than creating another export commit. Closed/merged or conflicting PRs receive no stale writes.
+The managed body covers the cumulative diff against `main` in four sections: **Note improvements**, **Questions and answers**, **Significant question changes**, and **User feedback**. Explanations connect the original issue, correction and benefit, with useful sources and before/after question wording. Historical records use saved reasons without inventing benefits. Only the machine-marked section is replaced; owner text and existing generated descriptions outside it survive.
 
-Retries wait at least six hours and stop after three attempts per source head. Inspect the failed run and persisted operation before resuming; never clear all state or force-push to bypass a conflict. The [runbook](../../docs/devbook-improvement.md#pause-disable-and-recover) covers recovery and the optional local handoff.
+Comments, inline comments and submitted reviews count only when the configured numeric owner ID and login agree. Edited feedback receives a new revision fingerprint. Explicit reject/reconsider decisions must cite verified feedback and pass an independent check quoting the actual request; silence, approval and general feedback imply neither. Rejecting a published proposal restores its original block/identity only while the exact saved replacement remains present, after the same review and guarded publication. Rejection history updates after successful publication or a reviewed decision needing no content change. Closing an unmerged PR suppresses all its proposals. The action never resolves discussions for the owner.
 
-Pause unattended work with `DEVBOOK_IMPROVEMENT_SCHEDULE_ENABLED=false`. Stop production model/apply work with `DEVBOOK_IMPROVEMENT_ACTIVATED=false`. The premerge pilot requires both flags false and has its own access grant: delete `DEVBOOK_IMPROVEMENT_PILOT_SHA` and remove its temporary environment branch allowance to stop new pilot access. Disable **DevBook Improvement** in Actions to stop all opportunities; explicitly cancel a running job when required. Keep the state branch and draft PRs. The additional Codex reviewer experiment stays disabled pending a decision about the existing integration.
+## Defaults and manual inputs
+
+| Setting | Default |
+| --- | ---: |
+| Notes per opportunity | 4 |
+| Notes / changed lines per PR | 16 / 1,200 |
+| Open managed PRs | 3 |
+| Author or reviewer call | 900 seconds, 20 turns |
+| Maintenance / job budget | 35 / 40 minutes |
+| Export checks / polling | 600 seconds / 10 seconds |
+| Simultaneous model calls | 1 |
+| Schedule | `23 */6 * * *` UTC |
+
+The exact default model is `claude-opus-5-5`; Claude Code is pinned to `2.1.285` and enforces its compatible minimum. Schedules honor repository variable `DEVBOOK_IMPROVEMENT_MODEL`; manual runs expose `model`, and local CLI runs without `--model` use configuration. Overrides must be deliberate exact identifiers. Missing, mixed or mismatched `modelUsage` fails closed, with no fallback. Background/helper routing uses the same requested model. Model/protocol changes invalidate cached evaluation evidence without relabeling historical records.
+
+| Manual input | Behavior |
+| --- | --- |
+| `mode=demo` | Credential-free fake-transport flow through the real engine |
+| `mode=dry-run`, `with_model=false` | Current selection; no model or writes |
+| `mode=dry-run`, `with_model=true` | Protected proposal; control-state/lease writes only |
+| `mode=apply` | Protected draft PR update followed by automatic render/publication |
+| `mode=fixture` | Genuine isolated hosted Obsidian/Syncer check; artifacts only |
+| `model` | Exact model identifier, with no fallback |
+| `note` + `focus` | Recheck one exact authorable `Vault/Home/...md` note for a concrete issue |
+
+Targeted inputs are paired (`--note`/`--focus` locally); live use requires an allowlisted owner's manual dispatch. Both author and reviewer receive the focus. Changing it invalidates reuse of a saved proposal. Targeting preserves history, holds, rejections, freezes and limits, and does not process unrelated topic feedback. Existing publication recovery retains priority. Schedules ignore these inputs. PR-triggered runs remain credential-free; protected live jobs require the `main` workflow and activation gates.
+
+## Public research and subscription quota
+
+Author and reviewer have only built-in **WebSearch** and **WebFetch** for public primary documentation and papers. There is no domain whitelist. Prompts prohibit sending private note text, paths, owner feedback or unpublished identifiers in searches. External pages, notes and comments remain untrusted data. The model has no shell, local file tools, MCP servers or Git credentials. No extra research-service key or separately billed provider fallback is configured.
+
+Deterministic retrieval independently checks evidence URLs: HTTPS on port 443, no embedded credentials, public addresses only, DNS checks at validation and connection, and checks on every redirect (at most five). Proxy use is disabled. Retrieval has a 15-second deadline and accepts Markdown, plain text or HTML; PDF extraction is unavailable. Prefer versioned full-text HTML for papers. `max_source_bytes` defaults to 250,000 (range 1–1,000,000); source-count and model-input limits also apply.
+
+Live calls require `CLAUDE_CODE_OAUTH_TOKEN` from the supported subscription `claude setup-token` flow. The child process clears API-key, alternate-provider and unrelated host variables. OAuth alone cannot prevent enabled account usage credits, so credits must remain disabled and be confirmed during activation.
+
+Only a nonzero CLI exit or error envelope can establish quota exhaustion; note text cannot. Reported resets are persisted. With no reset timestamp, `reset_at` remains null and a conservative 24-hour recheck is stored separately. Weekly exhaustion pauses all new author/reviewer work, including feedback fixes. Cooldown skips succeed quietly and notify at most once per episode; genuine provider failures remain visible. Already-produced export/check finalization can finish without a model call. No precise remaining-quota telemetry is claimed, and the workflow does not attempt to exhaust subscription quota or infer inactivity on other devices.
+
+Optional `model_diagnostics` report safe timing, turn, token/search and permission-denial counts when the pinned CLI provides them. They omit prompts, note text, URLs, queries, raw envelopes and denied tool inputs. They do not measure remaining subscription quota.
+
+## Protected activation
+
+These are setup instructions, not authorization to provision credentials, publish a first real PR or enable scheduling. Keep production and scheduling disabled until each corresponding check succeeds. The protected environment permits only `main`; credential-free branch/PR fixtures need no temporary secret grants.
+
+1. Manually merge the reviewed tooling and current Qard authoring/reader contracts to `main`. Scheduling and protected maintenance use that branch. Keep unrelated local work out of publication.
+2. Create protected environment `devbook-improvement-production`, restricted to `main`. Credentials belong there; control variables below belong in **repository Actions variables**, because job selection precedes environment-variable availability. Per-run required reviewers are unnecessary only after explicit unattended activation is authorized.
+3. Install the pinned CLI and create the subscription token locally. Use hidden prompts to store it; never put tokens in chat, shell history or committed configuration:
+
+   ```sh
+   npm install --global @anthropic-ai/claude-code@2.1.285
+   claude setup-token
+   gh secret set CLAUDE_CODE_OAUTH_TOKEN --env devbook-improvement-production --repo grafanaKibana/devbook.zip
+   ```
+
+4. Create a dedicated fine-grained automation token restricted to `grafanaKibana/devbook.zip`: **Contents**, **Pull requests**, **Issues**, **Actions** read/write; **Checks**, **Commit statuses**, **Metadata** read. Store it with `gh secret set DEVBOOK_GITHUB_TOKEN --env devbook-improvement-production --repo grafanaKibana/devbook.zip` and its hidden prompt. The default `GITHUB_TOKEN` does not reliably trigger required downstream workflows from its pushes. GitHub App per-run token minting is not implemented; static installation tokens expire too soon to substitute safely.
+5. Confirm Claude account usage credits are off. Set the corresponding confirmation only after inspecting that setting. Run credential-free `demo`, selection `dry-run` and hosted `fixture` on the exact revision; inspect artifacts, unchanged source/media, genuine rendering and receipt bindings.
+6. After confirming subscription-token creation, set `DEVBOOK_IMPROVEMENT_SUBSCRIPTION_ONLY_CONFIRMED=true` and `DEVBOOK_IMPROVEMENT_ACTIVATED=true` for authorized protected manual tests, keeping scheduling false. Verify harmless public WebSearch/WebFetch use with no permission denials and exclusive requested `modelUsage`; verify the GitHub token can maintain the state branch and dispatch `vault-validation.yml`. Gate values permit tests; they do not prove access works.
+7. Run protected `dry-run` with `with_model=true`. It reads GitHub and writes control state/lease, but makes no note, topic-branch or PR changes. Inspect the patch, question-change report, per-edit benefit checks, independent current-text review and validation.
+8. With scheduling still false, run the separately authorized first manual `apply`. Inspect the small draft PR and wait for automatic export and exact-head `pr-title`/`major-approval` validation. Verify secret-free rendering, expected-head publication and stale-artifact rejection. Missing, failed or pending checks never authorize merge.
+9. Only after the first managed PR proves required checks, set `DEVBOOK_IMPROVEMENT_PR_WORKFLOWS_CONFIRMED=true`. Separately authorize `DEVBOOK_IMPROVEMENT_SCHEDULE_ENABLED=true`. Review any existing model override before publication so the intended exact model is used.
+
+| Repository Actions variable | Safe initial value | Purpose |
+| --- | --- | --- |
+| `DEVBOOK_IMPROVEMENT_ACTIVATED` | `false` | Permit live model/apply jobs |
+| `DEVBOOK_IMPROVEMENT_SCHEDULE_ENABLED` | `false` | Permit unattended opportunities |
+| `DEVBOOK_IMPROVEMENT_SUBSCRIPTION_ONLY_CONFIRMED` | `false` | Subscription-token creation verified |
+| `DEVBOOK_IMPROVEMENT_USAGE_CREDITS_DISABLED_CONFIRMED` | `false` | Account overage checked off |
+| `DEVBOOK_IMPROVEMENT_PR_WORKFLOWS_CONFIRMED` | `false` | First PR exact-head checks verified |
+| `DEVBOOK_IMPROVEMENT_MODEL` | optional | Deliberate exact model override |
+
+Set an authorized variable with `gh variable set NAME --body VALUE --repo grafanaKibana/devbook.zip`. Once the workflow is on `main`, credential-free hosted checks are:
+
+```sh
+gh workflow run devbook-improvement.yml --ref main -f mode=demo --repo grafanaKibana/devbook.zip
+gh workflow run devbook-improvement.yml --ref main -f mode=dry-run -f with_model=false --repo grafanaKibana/devbook.zip
+gh workflow run devbook-improvement.yml --ref main -f mode=fixture --repo grafanaKibana/devbook.zip
+```
+
+## Verified export and publication
+
+The author writes only `Vault/Home` Markdown. A reviewed source commit persists an exact-head request and source/review receipts in `export_operations`, then releases the maintenance lease. Rendering and publication continue in the same workflow; interrupted requests can resume later without another model call. Already-proposed source versions remain recorded while export runs.
+
+The renderer starts pinned genuine Obsidian in a disposable macOS profile/vault with trusted plugins, repository read access and no protected production/model secrets. Shared Syncer verification checks checkout/vault identity, indexed source inventory, Preserve support, defaults, awaited publishing, zero failed/skipped notes and source stability. Dates were prepared before review; rendering consumes immutable committed source. It materializes filesystem timestamps from metadata/history without rewriting source or generated bytes. Plugins start after native indexing, with Syncer last; app updates are disabled and the fresh profile uses Electron's test-only mock Keychain without real credentials. Original settings restore only after the owned process is proven stopped.
+
+The protected publisher executes trusted code with the dedicated GitHub token. It accepts only `Web/content`, generated Syncer styles and `.devbook-improvement/syncer-export.json`; verifies PR identity, exact source head, complete Git trees, path/schema/size and byte/mode bindings; then updates without force and dispatches `vault-validation.yml`. Races preserve newer heads. Replaying an exact already-published artifact resumes validation without another export commit; human successor commits are not that recovery case. Closed/merged or conflicting PRs receive no stale writes.
+
+Exact-head checks poll for up to 600 seconds at 10-second intervals. `export_check_wait_seconds` (0–600) and `export_check_poll_seconds` (1–60) configure those bounds; zero wait takes one snapshot. Polling rechecks PR/head/lease and reserves 30 seconds for finalization. Budget expiry preserves `awaiting_checks` for checks-only resume; failures stay failures. More than 100 check runs on a commit produces an error rather than accepting incomplete evidence.
+
+A source-only draft can appear briefly. It is ready for complete review after export and required checks pass. The required `pr-title` gate checks the receipt against complete current source/generated trees; owner edits or feedback fixes invalidate freshness and queue another export. `publish: true` controls output, and deployment follows the existing tracked-output flow after manual merge. Receipts detect stale/mismatched content; trusted workflow code, job isolation and owner review supply provenance. The hosted GUI fixture is required; Obsidian Headless is not assumed to publish community plugins. Recheck hosted-runner billing if repository visibility or runner choice changes.
+
+Export retries wait at least six hours and stop after three attempts per source head, retaining `export_paused`/`export_error`. Inspect the failed job, original request/artifact and current head; repair the cause before rerunning. A paused bound needs a reviewed, narrowly scoped state update preserving history. Manual `apply` can then select resumable work. Missing validation dispatch has a separate three-attempt/six-hour bound per generated head; saved intent prevents immediate duplicates. Observed queued/running/failed runs are never redispatched by polling. Still-missing validation six hours after the third dispatch pauses with an actionable error. Model work/generated files are not repeated to repair checks.
+
+### Manual export recovery
+
+Automatic export is the default. Deliberately setting `automatic_export: false` makes changed source await local export and freezes unrelated additions. Use a clean dedicated checkout of the exact managed PR head and open **that checkout's** Vault in Obsidian:
+
+```sh
+cd .scripts
+test "$(dotnet --version)" = 10.0.100
+dotnet run --no-cache --file DevBook.Tooling/Scripts/SyncExport.cs -- export --repo-root .. --expected-head <current-PR-head-sha>
+```
+
+This uses the verified [local Syncer flow](../../Web/README.md) and stages only generated content/styles and the receipt. Committing/pushing requires explicit approval. It never switches, resets or stashes the checkout. Failed/ambiguous exports retain reviewable files; inspect them before retrying. Never hand-edit `Web/content`, discard source to clear a failure, or bypass a stale receipt.
+
+## Pause, stop and recover
+
+- Set `DEVBOOK_IMPROVEMENT_SCHEDULE_ENABLED=false` to pause unattended work; protected manual runs remain available. Set `DEVBOOK_IMPROVEMENT_ACTIVATED=false` to stop production model/apply work. Disabled scheduled opportunities run the credential-free demo.
+- Disable **DevBook Improvement** in Actions to stop all new opportunities. Explicitly cancel an already-running job when immediate stopping is required; flag changes do not cancel it. Preserve draft PRs and the state branch.
+- Rotate compromised OAuth/automation tokens in the protected environment, then run protected dry-run before apply. Cooldowns resume at persisted `next_check_at`; clear one only when its evidence is wrong and record why. Do not add short retry schedules.
+
+State stays version 1 on `maintenance/devbook-improvement-state`. Preserve unknown fields, Qard identities, retired IDs, rejection fingerprints, feedback revisions, review evidence, cooldowns and journals. Do not clear all state or force-push around a conflict. Stop scheduling and wait for active jobs before a reviewed state repair; use the current state-branch/file version as its CAS guard and change only the affected field.
+
+| Evidence / condition | Recovery |
+| --- | --- |
+| Source/hash or branch CAS conflict | Preserve the candidate and inspect exact expected/observed heads. If authoritative topic content changed on `main`, merge current `main` into the topic branch through reviewed Git work and resolve conflicts before retrying. Unrelated topics continue. |
+| Write-ahead journal with ambiguous GitHub state | Reconcile its branch, PR marker and exact operation ID before new work. Leave ambiguous evidence intact; never blindly replay publication. |
+| Owner advanced/removed a pending branch | Evidence moves to `invalidated_operations`; `topics.<topic-id>.publication_conflict` pauses that generation. Inspect archive/current content, reconcile the intended base, then clear only that marker through guarded reviewed state repair. Preserve archive and owner-review freeze; run protected dry-run before apply. Closing/merging advances the generation without reviving it. |
+| Saved owner-feedback revisions changed | Unapplied candidates move to `invalidated_operations`, releasing the journal for current feedback. Already-completed branch writes reconcile as applied. |
+| Saved model/protocol or repair inputs changed | Preserve the incompatible unreviewed proposal in the held-proposal flow. If another hold cannot safely retain both, pause that topic with the pending envelope intact. Re-review current inputs; never stamp old evidence with new policy or replay archived edits. |
+| `feedback_needs_scope` | Complete feedback cannot fit the batch; it stays pending without a model call. Narrow the request or deliberately review a higher note bound. Fitting requests can proceed first. |
+| Owning PR closed/merged | Archive pending publication in `terminal_operations` and release the queue without branch writes; preserve closure rejections/merged history. |
+| Terminal failed check | Retain exact head, check evidence and proposal receipts in `failed_operations`; release the global journal. The PR stays frozen to unrelated additions; owner corrections and other topics can proceed. Repair the cause and run another bounded opportunity; never mark/merge around it. |
+
+Old receipts remain readable, but Python-policy receipts require genuine re-export against the complete native source/project/SDK/default/plugin policy. Managed content branches need the native tooling baseline from `main`; update through normal reviewed Git work, never automatically copy tooling into content-only PRs. Pending operations lacking the prepared-source contract pause with original candidates/evidence intact. Inspect and restart a reviewed current proposal rather than adding dates to an already-reviewed candidate. Already-reviewed publication journals remain immutable recovery evidence. Local hooks prepare/stage dates under export/source/index locks; scheduled candidates prepare dates before review, and committed-head rendering only reads them.
+
+## Operational references
+
+- [Claude Code authentication](https://code.claude.com/docs/en/authentication)
+- [Claude Code CLI reference](https://code.claude.com/docs/en/cli-usage)
+- [Claude Code tools](https://code.claude.com/docs/en/tools)
+- [Claude model configuration](https://code.claude.com/docs/en/model-config)
+- [Claude usage credits](https://support.claude.com/en/articles/12429409-manage-usage-credits-for-paid-claude-plans)
+- [GitHub Actions token behavior](https://docs.github.com/en/actions/concepts/security/github_token)
+- [GitHub Actions variable availability](https://docs.github.com/en/actions/reference/workflows-and-actions/variables)
+- [Fine-grained token permissions](https://docs.github.com/en/rest/authentication/permissions-required-for-fine-grained-personal-access-tokens)
+- [GitHub scheduled events](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows)
+- [Obsidian desktop CLI](https://obsidian.md/help/cli)
+- [Syncer CLI integration](https://saberzero1.github.io/quartz-syncer-docs/guides/cli)
+- [GitHub-hosted runner policy](https://docs.github.com/en/actions/reference/runners/github-hosted-runners)
+- [Electron macOS mock-Keychain tests](https://github.com/electron/electron/pull/53790)

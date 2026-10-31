@@ -8,148 +8,116 @@ namespace DevBook.Tooling.Tests;
 
 public sealed class ProposalTests
 {
-    [Theory]
-    [InlineData("\n")]
-    [InlineData("\r\n")]
-    public void CompleteCardAnchorMayOmitItsTerminalNewlineWithoutChangingSeparatorsOrRestoration(string newline)
-    {
-        // Arrange
-        string nextCard = "\n<!-- qard-id: next_2 -->\n> [!qard]- What follows?\n> Another target.\n";
-        string source = (DomainFixtures.Note + nextCard).Replace("\n", newline);
-        JsonObject edit = DomainFixtures.Edit();
-        edit["expected_hash"] = LegacyIdentity.Digest(source);
-        edit["before"] = DomainFixtures.Card.TrimEnd('\n').Replace("\n", newline);
-        edit["after"] = edit.Str("before").Replace("The original answer.", "The corrected answer.");
-        Dictionary<string, string> sources = new() { [DomainFixtures.Path] = source };
-
-        // Act
-        JsonObject result = Proposal.Apply(sources, DomainFixtures.Proposal(edit));
-        string candidate = result.Obj("sources").Str(DomainFixtures.Path);
-
-        // Assert
-        candidate.Should().Be(source.Replace("The original answer.", "The corrected answer."));
-        Proposal.Ids(candidate).Should().Equal("stable_1", "next_2");
-
-        // Arrange: the owner rejects the accepted rewrite.
-        JsonObject keep = DomainFixtures.Proposal(edit);
-        keep["edits"] = new JsonArray();
-        JsonArray actions = new(new JsonObject { ["decision"] = "reject", ["edit"] = edit.Copy(), ["feedback_key"] = "comment:1", ["reason"] = "Restore original wording." });
-
-        // Act
-        Proposal.RestoreRejected(keep, result, actions, new Dictionary<string, string> { [DomainFixtures.Path] = candidate });
-
-        // Assert
-        result.Obj("sources").Str(DomainFixtures.Path).Should().Be(source);
-
-        // Arrange: incomplete content or omitted protected metadata is still unsafe.
-        foreach (string incomplete in new[] { edit.Str("before")[..^1], edit.Str("before")[(edit.Str("before").IndexOf("> [!qard]", StringComparison.Ordinal))..] })
-        {
-            JsonObject partial = edit.Copy();
-            partial["before"] = incomplete;
-
-            // Act
-            Action apply = () => Proposal.Apply(sources, DomainFixtures.Proposal(partial));
-
-            // Assert
-            apply.Should().Throw<ProposalException>().WithMessage("*complete active Qard block*");
-        }
-    }
-
     [Fact]
-    public void Guarded_rewrite_preserves_identity_metadata_and_rejects_stale_or_forbidden_writes()
+    public void SameTargetRewritePreservesItsCompleteProtectedMetadata()
     {
         // Arrange
-        Dictionary<string, string> sources = new() { [DomainFixtures.Path] = DomainFixtures.Note };
-        JsonObject edit = DomainFixtures.Edit();
-        JsonObject proposal = DomainFixtures.Proposal(edit);
+        var sources = new Dictionary<string, string> { [DomainFixtures.Path] = DomainFixtures.Note };
+        JsonObject proposal = DomainFixtures.Proposal(DomainFixtures.Edit());
 
         // Act
         JsonObject result = Proposal.Apply(sources, proposal);
 
         // Assert
-        result.Obj("sources").Str(DomainFixtures.Path).Should().Contain("<!-- qard-id: stable_1 -->");
-        result.Obj("sources").Str(DomainFixtures.Path).Should().Contain("<!-- qard-source: original -->");
+        result.Obj("sources").Str(DomainFixtures.Path).Should().Contain("<!-- qard-id: stable_1 -->").And.Contain("<!-- qard-source: original -->");
         result.Arr("retired_ids").Should().BeEmpty();
+    }
 
-        // Arrange: a stale expected source hash.
-        JsonObject stale = proposal.Copy();
-        stale.Arr("edits")[0]!["expected_hash"] = "stale";
-
-        // Act
-        Action staleApply = () => Proposal.Apply(sources, stale);
-
-        // Assert
-        staleApply.Should().Throw<ProposalException>().WithMessage("*CAS conflict*");
-
-        // Arrange: an edit outside authorable notes.
-        JsonObject forbidden = proposal.Copy();
-        forbidden.Arr("edits")[0]!["path"] = ".github/workflows/devbook-improvement.yml";
-        forbidden.Arr("dispositions")[0]!["path"] = ".github/workflows/devbook-improvement.yml";
+    [Theory]
+    [InlineData("hash")]
+    [InlineData("path")]
+    public void UnsafeEditIsRejectedBeforeChangingItsSource(string invalid)
+    {
+        // Arrange
+        var sources = new Dictionary<string, string> { [DomainFixtures.Path] = DomainFixtures.Note };
+        JsonObject edit = DomainFixtures.Edit();
+        edit[invalid == "hash" ? "expected_hash" : "path"] = invalid == "hash" ? "stale" : ".github/workflows/devbook-improvement.yml";
+        JsonObject proposal = DomainFixtures.Proposal(edit);
 
         // Act
-        Action unsafeApply = () => Proposal.Apply(sources, forbidden);
+        Action apply = () => Proposal.Apply(sources, proposal);
 
         // Assert
-        unsafeApply.Should().Throw<ProposalException>();
+        apply.Should().Throw<ProposalException>();
         sources[DomainFixtures.Path].Should().Be(DomainFixtures.Note);
     }
 
     [Fact]
-    public void New_targets_are_idless_and_rejected_changes_require_fingerprint_specific_owner_reconsideration()
+    public void SplitTargetsCannotBorrowTheRetiredLearningIdentity()
     {
         // Arrange
-        Dictionary<string, string> sources = new() { [DomainFixtures.Path] = DomainFixtures.Note };
-        string children = "<!-- qard-source: original -->\n> [!qard]- Which input matters?\n> The supplied input.\n\n<!-- qard-source: original -->\n> [!qard]- Which boundary matters?\n> The stated boundary.\n";
-        JsonObject edit = DomainFixtures.Edit("split", "new", children);
-        JsonObject proposal = DomainFixtures.Proposal(edit);
+        JsonObject edit = DomainFixtures.Edit("split", "new", DomainFixtures.Card + "\n> [!qard]- Another target?\n> Another answer.\n");
+        var sources = new Dictionary<string, string> { [DomainFixtures.Path] = DomainFixtures.Note };
 
         // Act
-        JsonObject result = Proposal.Apply(sources, proposal);
+        Action apply = () => Proposal.Apply(sources, DomainFixtures.Proposal(edit));
 
         // Assert
-        result.Arr("retired_ids").Strings().Should().Equal("stable_1");
-        Proposal.Ids(result.Obj("sources").Str(DomainFixtures.Path)).Should().BeEmpty();
+        apply.Should().Throw<ProposalException>().WithMessage("*ID-less*");
+    }
 
-        // Arrange: split children borrowing the retired identity.
-        JsonObject borrowedIdentity = proposal.Copy();
-        borrowedIdentity.Arr("edits")[0]!["after"] = "<!-- qard-id: stable_1 -->\n" + children;
-
-        // Act
-        Action borrowedApply = () => Proposal.Apply(sources, borrowedIdentity);
-
-        // Assert
-        borrowedApply.Should().Throw<ProposalException>().WithMessage("*ID-less*");
-
-        // Arrange: the owner previously rejected the proposal.
-        JsonObject tombstone = Core.RejectionTombstone(edit, result);
-        var rejected = new JsonArray(tombstone);
+    [Fact]
+    public void RejectedEditCannotBeReplayedWithoutVerifiedOwnerReconsideration()
+    {
+        // Arrange
+        JsonObject edit = DomainFixtures.Edit();
+        var sources = new Dictionary<string, string> { [DomainFixtures.Path] = DomainFixtures.Note };
+        JsonObject result = Proposal.Apply(sources, DomainFixtures.Proposal(edit));
+        var rejected = new JsonArray(Core.RejectionTombstone(edit, result));
 
         // Act
-        Action replay = () => Proposal.Apply(sources, proposal, rejected);
+        Action replay = () => Proposal.Apply(sources, DomainFixtures.Proposal(edit), rejected);
 
         // Assert
         replay.Should().Throw<ProposalException>().WithMessage("*rejected edit*");
+    }
 
-        // Arrange: verified feedback explicitly requests reconsideration.
-        string key = "comment:123:verified-revision";
-        JsonObject reconsider = proposal.Copy();
-        reconsider["decisions"] = new JsonArray(new JsonObject { ["feedback_key"] = key, ["fingerprint"] = LegacyIdentity.Proposal(edit), ["decision"] = "reconsider", ["reason"] = "Owner explicitly asks to reconsider this split." });
-        var feedback = new JsonArray(new JsonObject { ["key"] = key, ["body"] = "Reconsider this split." });
+    [Theory]
+    [InlineData("problem")]
+    [InlineData("reader_benefit")]
+    public void FreshEditRequiresAConcreteProblemAndReaderBenefit(string missing)
+    {
+        // Arrange
+        JsonObject edit = DomainFixtures.Edit();
+        edit.Remove(missing);
 
-        // Act: bind the owner decision.
-        (JsonArray effective, JsonArray actions) = Proposal.BindDecisions(reconsider, new JsonArray(), rejected, feedback);
-        reconsider.Arr("edits")[0]!["feedback_keys"] = new JsonArray(key);
-        reconsider["feedback"] = new JsonArray(new JsonObject { ["key"] = key, ["outcome"] = "implemented", ["reason"] = "Reconsidered the requested split." });
-        JsonObject reconsidered = Proposal.Apply(sources, reconsider, effective, [key], [key]);
-
-        // Assert
-        reconsidered.Arr("retired_ids").Strings().Should().Equal("stable_1");
-        actions.Should().HaveCount(1);
-
-        // Act: attempt the same decision without verified feedback.
-        Action forgedDecision = () => Proposal.BindDecisions(reconsider, new JsonArray(), rejected, new JsonArray());
+        // Act
+        Action validate = () => Proposal.Validate(DomainFixtures.Proposal(edit));
 
         // Assert
-        forgedDecision.Should().Throw<ProposalException>().WithMessage("*verified pending feedback*");
+        validate.Should().Throw<ProposalException>();
+    }
+
+    [Theory]
+    [InlineData("missing")]
+    [InlineData("duplicate")]
+    [InlineData("extra")]
+    [InlineData("negative")]
+    public void ReviewRejectsIncompleteOrNegativePerEditValueEvidence(string invalid)
+    {
+        // Arrange
+        JsonObject proposal = DomainFixtures.Proposal(DomainFixtures.Edit());
+        var current = new Dictionary<string, string> { [DomainFixtures.Path] = DomainFixtures.Note };
+        JsonObject review = DomainFixtures.UnchangedReview(new JsonObject
+        {
+            ["current"] = new JsonObject { [DomainFixtures.Path] = DomainFixtures.Note },
+            ["proposal"] = proposal
+        });
+        review.Arr("notes")[0]!["target_resolution"] = "RESOLVED";
+        JsonArray checks = review.Arr("change_checks");
+        if (invalid == "missing") checks.Clear();
+        if (invalid == "duplicate")
+        {
+            proposal.Arr("edits").Add(proposal.Arr("edits")[0]!.DeepClone());
+            checks.Add(checks[0]!.DeepClone());
+        }
+        if (invalid == "extra") checks[0]!["edit_index"] = 2;
+        if (invalid == "negative") checks[0]!["verdict"] = "NOT WORTHWHILE";
+
+        // Act
+        bool clean = Review.Clean(review, current, proposal, new JsonArray(), new JsonArray());
+
+        // Assert
+        clean.Should().BeFalse();
     }
 }

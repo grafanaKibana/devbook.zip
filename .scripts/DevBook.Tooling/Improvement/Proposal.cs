@@ -9,7 +9,7 @@ public sealed class ProposalException(string message) : IOException(message);
 
 public static class Proposal
 {
-    private static readonly HashSet<string> EditKeys = ["path", "expected_hash", "before", "after", "reason", "kind", "learning_target", "essential_meanings", "sources", "feedback_keys"];
+    private static readonly HashSet<string> EditKeys = ["path", "expected_hash", "before", "after", "reason", "kind", "learning_target", "essential_meanings", "sources", "feedback_keys", "problem", "reader_benefit"];
     private static readonly HashSet<string> Kinds = ["note", "rewrite", "add", "replace", "split", "remove"];
     private static readonly Regex MetadataPattern = new(@"^[ \t]*<!--[ \t]*(?<key>qard-[A-Za-z0-9_-]+):[ \t]*(?<value>.*?)[ \t]*-->[ \t]*$");
     private static readonly Regex HiddenQardPattern = new(@"<!--[ \t]*qard-[A-Za-z0-9_-]+:[\s\S]*?-->");
@@ -99,9 +99,13 @@ public static class Proposal
             {
                 throw new ProposalException("invalid edit kind or learning target");
             }
-            if (!new[] { "path", "expected_hash", "before", "reason" }.All(key => Text(edit, key)) || !Text(edit, "after", true))
+            if (!new[] { "path", "expected_hash", "before", "reason", "problem", "reader_benefit" }.All(key => Text(edit, key)) || !Text(edit, "after", true))
             {
                 throw new ProposalException("edit string fields are invalid");
+            }
+            if (string.IsNullOrWhiteSpace(edit.Str("problem")) || string.IsNullOrWhiteSpace(edit.Str("reader_benefit")))
+            {
+                throw new ProposalException("edits require a concrete problem and reader benefit");
             }
             if (!StringList(edit, "essential_meanings", true) || (edit.Str("kind") != "note" && edit.Arr("essential_meanings").Count == 0))
             {
