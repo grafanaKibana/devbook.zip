@@ -75,5 +75,9 @@
   "rejections": [],
   "retired_ids": {},
   "cooldown": null,
-  "lease": null
+  "lease": {
+    "owner": "41198297868:1",
+    "acquired_at": "2026-10-31T11:48:31Z",
+    "expires_at": "2026-10-31T12:25:31Z"
+  }
 }
