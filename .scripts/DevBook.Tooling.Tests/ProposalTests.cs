@@ -8,6 +8,53 @@ namespace DevBook.Tooling.Tests;
 
 public sealed class ProposalTests
 {
+    [Theory]
+    [InlineData("\n")]
+    [InlineData("\r\n")]
+    public void CompleteCardAnchorMayOmitItsTerminalNewlineWithoutChangingSeparatorsOrRestoration(string newline)
+    {
+        // Arrange
+        string nextCard = "\n<!-- qard-id: next_2 -->\n> [!qard]- What follows?\n> Another target.\n";
+        string source = (DomainFixtures.Note + nextCard).Replace("\n", newline);
+        JsonObject edit = DomainFixtures.Edit();
+        edit["expected_hash"] = LegacyIdentity.Digest(source);
+        edit["before"] = DomainFixtures.Card.TrimEnd('\n').Replace("\n", newline);
+        edit["after"] = edit.Str("before").Replace("The original answer.", "The corrected answer.");
+        Dictionary<string, string> sources = new() { [DomainFixtures.Path] = source };
+
+        // Act
+        JsonObject result = Proposal.Apply(sources, DomainFixtures.Proposal(edit));
+        string candidate = result.Obj("sources").Str(DomainFixtures.Path);
+
+        // Assert
+        candidate.Should().Be(source.Replace("The original answer.", "The corrected answer."));
+        Proposal.Ids(candidate).Should().Equal("stable_1", "next_2");
+
+        // Arrange: the owner rejects the accepted rewrite.
+        JsonObject keep = DomainFixtures.Proposal(edit);
+        keep["edits"] = new JsonArray();
+        JsonArray actions = new(new JsonObject { ["decision"] = "reject", ["edit"] = edit.Copy(), ["feedback_key"] = "comment:1", ["reason"] = "Restore original wording." });
+
+        // Act
+        Proposal.RestoreRejected(keep, result, actions, new Dictionary<string, string> { [DomainFixtures.Path] = candidate });
+
+        // Assert
+        result.Obj("sources").Str(DomainFixtures.Path).Should().Be(source);
+
+        // Arrange: incomplete content or omitted protected metadata is still unsafe.
+        foreach (string incomplete in new[] { edit.Str("before")[..^1], edit.Str("before")[(edit.Str("before").IndexOf("> [!qard]", StringComparison.Ordinal))..] })
+        {
+            JsonObject partial = edit.Copy();
+            partial["before"] = incomplete;
+
+            // Act
+            Action apply = () => Proposal.Apply(sources, DomainFixtures.Proposal(partial));
+
+            // Assert
+            apply.Should().Throw<ProposalException>().WithMessage("*complete active Qard block*");
+        }
+    }
+
     [Fact]
     public void Guarded_rewrite_preserves_identity_metadata_and_rejects_stale_or_forbidden_writes()
     {
