@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-02-27T15:52:18.000Z
-modified: 2026-10-28T12:33:42.000Z
-published: 2026-10-28T20:52:55.136Z
+modified: 2026-11-02T09:03:54.806Z
+published: 2026-11-02T11:10:14.405Z
 topic:
   - AI & ML
 subtopic:
@@ -187,7 +187,7 @@ A pipeline without a reranker is the baseline, and its measured failures show wh
 
 <!-- qard-id: 2525edd1-368e-4d10-a58a-4bc82c562674 -->
 
-> [!qard]- When can reranking worsen retrieval quality, and when can it fail to improve it?
+> [!qard]- How can reranker failures be distinguished from first-stage retrieval limits?
 > A reranker trained on short web passages may misjudge long technical documents or unfamiliar terminology. It can then worsen results by pushing relevant evidence from inside the first-stage top-k to below that cutoff. A small candidate set or low first-stage recall causes a different failure. A reranker only reorders the candidates it receives, so it cannot add relevant evidence that is missing from them.
 >
 > Domain queries tell these cases apart when [[Monitoring#Retrieval Quality Metrics|recall and precision]] are measured at matched points:

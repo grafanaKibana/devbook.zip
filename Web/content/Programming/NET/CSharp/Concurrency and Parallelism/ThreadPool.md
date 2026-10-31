@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-02-18T20:04:43.000Z
-modified: 2026-10-28T12:33:42.000Z
-published: 2026-10-28T20:52:55.170Z
+modified: 2026-11-02T09:03:54.806Z
+published: 2026-11-02T11:10:14.417Z
 topic:
   - Programming
 subtopic:
@@ -139,9 +139,12 @@ var result = await _http.GetStringAsync(url);
 
 # Questions
 
-> [!qard]- What is the .NET ThreadPool for, and what work does it not suit?
+> [!qard]- What is the .NET ThreadPool for?
 > The ThreadPool is a per-process set of reusable background worker threads that runs short pieces of queued work, such as Task Parallel Library tasks, timer callbacks and asynchronous I/O completions. Reusing threads avoids creating and destroying a thread for each small job, and the runtime adjusts the number of workers to optimize throughput.
 >
+> [Microsoft: The managed thread pool](https://learn.microsoft.com/en-us/dotnet/standard/threading/the-managed-thread-pool)
+
+> [!qard]- Which work is a poor fit for .NET ThreadPool workers?
 > Pool threads are shared and interchangeable, so the pool does not suit work that holds a thread for a long time or needs control over the thread:
 >
 > - **Long blocking work:** the pool has a maximum size and, above its minimum, may wait before adding threads. Many blocked workers can keep queued work from starting, which is ThreadPool starvation.
@@ -152,8 +155,13 @@ var result = await _http.GetStringAsync(url);
 
 <!-- qard-id: edf13b89-d008-4f64-854a-624e7253a01c -->
 
-> [!qard]- What is ThreadPool starvation, and how does it usually start?
-> ThreadPool starvation is a state in which queued work items and continuations wait because no pool worker is available to run them. It usually starts when workers are blocked rather than busy, through synchronous blocking on pool threads: most often sync-over-async calls such as `.Result` or `.Wait()` on a task, or synchronous I/O in request code.
+> [!qard]- What is ThreadPool starvation?
+> ThreadPool starvation is a state in which queued work items and continuations cannot start promptly because no pool worker is available. It is distinct from CPU saturation: the queue can grow while CPU use remains low when workers are blocked.
+>
+> [Microsoft: Debug ThreadPool starvation](https://learn.microsoft.com/en-us/dotnet/core/diagnostics/debug-threadpool-starvation) · [Microsoft: The managed thread pool](https://learn.microsoft.com/en-us/dotnet/standard/threading/the-managed-thread-pool)
+
+> [!qard]- How can synchronous blocking produce ThreadPool starvation?
+> Starvation can develop when workers block rather than execute useful work, often through `.Result`, `.Wait()`, or synchronous I/O on pool threads.
 >
 > A typical progression:
 >

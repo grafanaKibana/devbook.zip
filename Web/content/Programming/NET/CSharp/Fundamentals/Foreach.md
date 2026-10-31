@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-02-15T16:27:13.000Z
-modified: 2026-10-28T12:33:42.000Z
-published: 2026-10-28T20:52:55.170Z
+modified: 2026-11-02T09:03:54.806Z
+published: 2026-11-02T11:10:14.417Z
 topic:
   - Programming
 subtopic:
@@ -84,6 +84,8 @@ Two boundaries are easy to miss:
 
 **Deferred work captures more than the item.** Since C# 5, each `foreach` iteration has its own iteration variable, so lambdas do not all observe the final item. Captured mutable state outside the loop is still shared, and closures can outlive resources used during enumeration.
 
+**Source binding differs from deferred work.** LINQ operators receive their source object when called. Later reassignment of the caller's source variable does not replace that object inside the query. Changes to the object itself, and separately captured predicate variables, can still change a later enumeration.
+
 **Multiple enumeration.** An `IEnumerable<T>` may repeat I/O, database work, or side effects every time it is enumerated. Materialization is worthwhile only when a stable snapshot or repeated traversal is actually needed.
 
 # Tradeoffs
@@ -142,6 +144,19 @@ Two boundaries are easy to miss:
 
 > [!qard]- When is `yield return` useful compared with a materialized collection?
 > `yield return` produces values on demand, so a consumer can stop early without first building the whole result. The iterator body runs during enumeration; enumerating again runs it again and may observe changed state. A materialized collection is preferable when a stable snapshot or repeated traversal is needed. [Microsoft: yield statement](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/yield)
+
+> [!qard]- Does a deferred LINQ query follow later reassignment of its source variable?
+> No. An operator receives the source object when the pipeline is constructed. Reassigning the caller's variable cannot replace the source already passed to it:
+>
+> ```csharp
+> int[] source = [1, 2, 3];
+> var query = source.Where(n => n > 1);
+> source = [10, 20];
+> // Prints 2, 3 from the original source.
+> Console.WriteLine(string.Join(", ", query));
+> ```
+>
+> Deferred execution postpones enumeration, not evaluation of the source argument. Mutation of the same source object can affect a later enumeration, and variables separately captured by a predicate remain live. Materializing the results creates a snapshot of those results. [Microsoft: Enumerable.Where](https://learn.microsoft.com/en-us/dotnet/api/system.linq.enumerable.where?view=net-10.0)
 
 # References
 

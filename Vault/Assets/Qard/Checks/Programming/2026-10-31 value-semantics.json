@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "createdAt": 1793453111918,
+  "mastery": "Assets/Qard/Courses/Programming Mastery.md",
+  "course": "Programming",
+  "objective": "value-semantics",
+  "title": "Explain what value-type and reference-type assignment copy, including shared reference fields",
+  "goal": "explain",
+  "questions": [
+    {
+      "id": "c1",
+      "type": "long",
+      "prompt": "A C# `struct` named `Parcel` has two fields: `int Weight` and `List<string> Labels`.\n\n```csharp\nvar first = new Parcel\n{\n    Weight = 5,\n    Labels = new List<string> { \"fragile\" }\n};\nvar second = first;\nsecond.Weight = 8;\nsecond.Labels.Add(\"express\");\nsecond.Labels = new List<string> { \"returned\" };\n```\n\nAfterwards, `first.Weight` is still `5`, and `first.Labels` contains `\"fragile\"` and `\"express\"`. Explain why changing the weight, adding a label, and replacing the list have these different effects. State what `second = first` copies.",
+      "marks": 4,
+      "rubric": [
+        {
+          "point": "Struct assignment copies the field values into a separate struct value.",
+          "marks": 1
+        },
+        {
+          "point": "The Weight fields are independent, so assigning 8 to second.Weight leaves first.Weight at 5.",
+          "marks": 1
+        },
+        {
+          "point": "The Labels reference is copied without cloning the list, so adding express mutates the list initially shared by both structs.",
+          "marks": 1
+        },
+        {
+          "point": "Replacing second.Labels changes only that struct's reference field; first.Labels still refers to the original list.",
+          "marks": 1
+        }
+      ],
+      "model": "`second = first` copies every field of the struct. Each struct therefore has its own `Weight` value and its own `Labels` reference field.\n\nChanging `second.Weight` affects only the copied integer. The copied `Labels` reference initially points to the same list as `first.Labels`; the list itself was not copied. Adding `\"express\"` therefore changes their shared list.\n\nAssigning a new list to `second.Labels` replaces only the reference stored in `second`. `first.Labels` continues to point to the original list containing `\"fragile\"` and `\"express\"`.",
+      "source": {
+        "path": "Home/Programming/NET/CSharp/Fundamentals/Types/Types.md",
+        "heading": "Copy and Storage Boundaries"
+      },
+      "objective": "value-semantics",
+      "goal": "explain"
+    },
+    {
+      "id": "c2",
+      "type": "long",
+      "prompt": "A C# `class` named `Meter` has a mutable `int Reading` field.\n\n```csharp\nvar primary = new Meter { Reading = 10 };\nvar backup = primary;\nbackup.Reading = 25;\nbackup = new Meter { Reading = 0 };\n```\n\nThe field change makes `primary.Reading` become `25`, but the final assignment leaves it at `25`. Explain why. Include what `backup = primary` copies and what the final assignment changes.",
+      "marks": 3,
+      "rubric": [
+        {
+          "point": "Class assignment copies the object reference, so primary and backup initially refer to one Meter instance.",
+          "marks": 1
+        },
+        {
+          "point": "Changing backup.Reading mutates that shared instance, so primary observes 25.",
+          "marks": 1
+        },
+        {
+          "point": "The final assignment redirects only backup to a new Meter; primary still refers to the previous instance.",
+          "marks": 1
+        }
+      ],
+      "model": "`backup = primary` copies the reference to the existing `Meter`, without copying the object. Both variables initially refer to the same instance, so changing its `Reading` through `backup` is also visible through `primary`.\n\nThe final assignment creates another `Meter` and stores its reference in `backup`. It changes which object `backup` refers to. `primary` still refers to the earlier object, whose reading remains `25`.",
+      "source": {
+        "path": "Home/Programming/NET/CSharp/Fundamentals/Types/Types.md",
+        "heading": "Copy and Storage Boundaries"
+      },
+      "objective": "value-semantics",
+      "goal": "explain"
+    }
+  ],
+  "answers": {},
+  "marks": {},
+  "status": "ready"
+}

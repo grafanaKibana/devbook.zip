@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-02-18T20:04:43.000Z
-modified: 2026-10-28T12:33:42.000Z
-published: 2026-10-28T20:52:55.169Z
+modified: 2026-11-02T09:03:54.806Z
+published: 2026-11-02T11:10:14.416Z
 topic:
   - Programming
 subtopic:
@@ -238,6 +238,19 @@ Concurrency is bounded according to the scarce resource. `Parallel.ForEachAsync`
 > A caller that must store, share or await the result more than once calls `AsTask()` once and uses the resulting `Task`.
 >
 > [Microsoft: ValueTask](https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.valuetask?view=net-10.0)
+
+> [!qard]- Why must the task returned by `await Task.WhenAny(...)` usually be awaited again?
+> The first await obtains a completed input task, not that task's result. `WhenAny` itself completes successfully even when the selected task faulted or was canceled. Awaiting the selected task observes its result, failure, or cancellation:
+>
+> ```csharp
+> Task<string> finished = await Task.WhenAny(first, second);
+> string result = await finished;
+> ```
+>
+> The other input tasks continue running unless separately canceled. A requested delay is not a guarantee of which continuation completes first. [Microsoft: Task.WhenAny](https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.task.whenany?view=net-10.0)
+
+> [!qard]- In what order does `Task.WhenAll<T>` return successful results?
+> Results follow the order of the supplied tasks, not their completion order. If the inputs are `first`, `second`, and `third`, element 0 is the result of `first` even if it finishes last. Completion-order processing needs a different composition, such as observing tasks from `WhenEach`; it must not reinterpret the `WhenAll` array as a completion log. [Microsoft: Task.WhenAll](https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.task.whenall?view=net-10.0)
 
 # References
 

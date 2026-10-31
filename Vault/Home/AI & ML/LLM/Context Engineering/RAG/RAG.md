@@ -11,7 +11,7 @@ qard-deck: "AI & ML"
 qard-topic: "LLM/Context Engineering/RAG/RAG"
 flashcard_uid: "33e0a516"
 created: "2026-02-27T01:19:52.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-02T09:03:54.806Z"
 ---
 
 Retrieval-Augmented Generation (RAG) retrieves evidence from a corpus and gives it to the model for generation. Knowledge can then change without retraining the model, and the answer can point back to the source that supported it.
@@ -87,14 +87,14 @@ The two techniques can work together. Fine-tuning can stabilize format or refusa
 > [Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks (Lewis et al.)](https://arxiv.org/abs/2005.11401)
 
 <!-- qard-id: 19ad841c-2c3b-4042-aa7b-e7324d145b10 -->
-> [!qard]- How should an advanced RAG stage, such as reranking or query rewriting, be introduced and evaluated?
+> [!qard]- What experiment justifies adding an advanced stage to a RAG pipeline?
 > An advanced stage is introduced as a controlled experiment. It targets a specific failure measured on the current pipeline, and it stays only if it beats that baseline by enough to justify its added latency, cost and maintenance.
 >
 > 1. **Baseline:** the current pipeline is measured on representative cases, and the failure the new stage should fix is identified. An example is relevant evidence ranked too low to reach the prompt.
 > 2. **Isolated change:** where practical, only that stage changes. A broad change to several stages can hide which component helped and which one regressed.
 > 3. **Same comparison:** baseline and candidate run on the same cases. They are measured on the targeted metric, on end-to-end answer quality and on operational measures such as p95 latency and cost per query.
 > 4. **Decision:** the stage is kept only when its quality gain outweighs its latency, cost and maintenance burden. Otherwise the simpler pipeline remains.
-> 
+>
 > Changing exactly one thing is not always feasible. A feature flag, a controlled rollout or an ablation that removes one component at a time can still attribute an effect to a specific stage.
 >
 > [Rules of Machine Learning (Google)](https://developers.google.com/machine-learning/guides/rules-of-ml)

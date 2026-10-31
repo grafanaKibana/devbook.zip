@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-03-06T22:43:56.000Z
-modified: 2026-10-28T12:33:42.000Z
-published: 2026-10-28T20:52:55.188Z
+modified: 2026-11-02T09:03:54.806Z
+published: 2026-11-02T11:10:14.427Z
 topic:
   - Software Architecture
 subtopic:
@@ -267,8 +267,8 @@ A modular monolith is the default for a product that needs durable boundaries bu
 
 <!-- qard-id: 77e3a78b-e6d8-4560-9399-33f66b9fc20b -->
 
-> [!qard]- When is a modular monolith a better fit than microservices, and what signals justify extracting a module?
-> A modular monolith fits better when strong module boundaries are valuable but one deployment, in-process calls and local transactions still serve the system well. Extracting a module is justified when it repeatedly needs independent release, scaling or isolation, and that need outweighs the cost of a new network boundary.
+> [!qard]- When is a modular monolith a better fit than microservices?
+> A modular monolith fits better when strong module boundaries are valuable but one deployment, in-process calls, and local transactions still serve the system well.
 >
 > | Aspect | Module inside a modular monolith | Module extracted as a service |
 > |---|---|---|
@@ -278,7 +278,10 @@ A modular monolith is the default for a product that needs durable boundaries bu
 > | Transactions | Can share one local transaction with another module when both `DbContext` instances use the same `DbConnection` and `DbTransaction`; using the same database alone is not enough | Commits only to its own store and cannot join the caller's transaction. When a local commit must also announce a change, an outbox records the message in that commit for later publication. Workflows spanning several services' commits may also need idempotent consumers and sometimes a saga |
 > | Operations | Shares one pipeline and runtime with the rest of the application | Needs its own pipeline, telemetry and on-call ownership |
 >
-> The extraction signals are recurring costs of the shared unit. The module's changes keep waiting behind unrelated releases, its load forces the whole application to scale, or its failures and resource use must be contained away from other features. Keeping the same contract interface does not make a remote call local. Deadlines, safe retries, cross-boundary observability and transaction boundaries must therefore be designed explicitly, with an outbox wherever a local commit must durably publish a message.
+> [Azure: Microservices architecture style](https://learn.microsoft.com/en-us/azure/architecture/guide/architecture-styles/microservices) · [Azure: Saga pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/saga) · [EF Core: Using transactions](https://learn.microsoft.com/en-us/ef/core/saving/transactions) · [Azure: Transactional outbox with Azure Cosmos DB](https://learn.microsoft.com/en-us/azure/architecture/databases/guide/transactional-out-box-cosmos) · [Azure: Retry pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/retry)
+
+> [!qard]- What signals justify extracting a modular-monolith module?
+> Extraction is justified when recurring costs of the shared deployment outweigh the added network and operational costs. The module's changes keep waiting behind unrelated releases, its load forces the whole application to scale, or its failures and resource use must be contained away from other features. Keeping the same contract interface does not make a remote call local. Deadlines, safe retries, cross-boundary observability and transaction boundaries must therefore be designed explicitly, with an outbox wherever a local commit must durably publish a message.
 >
 > [Azure: Microservices architecture style](https://learn.microsoft.com/en-us/azure/architecture/guide/architecture-styles/microservices) · [Azure: Saga pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/saga) · [EF Core: Using transactions](https://learn.microsoft.com/en-us/ef/core/saving/transactions) · [Azure: Transactional outbox with Azure Cosmos DB](https://learn.microsoft.com/en-us/azure/architecture/databases/guide/transactional-out-box-cosmos) · [Azure: Retry pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/retry)
 

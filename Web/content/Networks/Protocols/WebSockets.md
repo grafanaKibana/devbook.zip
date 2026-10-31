@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-06-20T08:45:59.000Z
-modified: 2026-10-28T12:33:42.000Z
-published: 2026-10-28T20:52:55.166Z
+modified: 2026-11-02T09:03:54.806Z
+published: 2026-11-02T11:10:14.414Z
 topic:
   - Networks
 subtopic:
@@ -116,18 +116,21 @@ Every long-lived option needs a queue policy. The policy bounds per-client memor
 
 # Questions
 
-> [!qard]- What is WebSocket, and how is a WebSocket connection opened?
+> [!qard]- What communication model does WebSocket provide?
 > WebSocket is a protocol for full-duplex, message-based communication over one long-lived connection: once the connection is open, either side can send a message at any time. It starts with an HTTP handshake, which lets it use the usual web ports and work with HTTP proxies and other intermediaries.
 >
+> `ws://` runs over plain TCP and `wss://` runs over TLS.
+>
+> The protocol provides framing and two-way delivery. It does not define request–response correlation, reconnection or resuming after a disconnect, so applications that need them build them on top.
+>
+> [RFC 6455: WebSocket](https://www.rfc-editor.org/rfc/rfc6455.html)
+
+> [!qard]- How does the HTTP/1.1 WebSocket opening handshake work?
 > The HTTP/1.1 opening handshake defined by RFC 6455 works as follows:
 >
 > 1. The client sends an HTTP `GET` request with `Upgrade: websocket`, `Connection: Upgrade` and a random `Sec-WebSocket-Key`.
 > 2. A server that accepts replies `101 Switching Protocols` with a `Sec-WebSocket-Accept` value computed from that key. The value shows that the server understood the request as a WebSocket handshake rather than ordinary HTTP.
 > 3. From then on, the same TCP connection carries WebSocket frames instead of HTTP messages. Data frames carry text or binary messages, and control frames carry ping, pong and the closing handshake.
->
-> `ws://` runs over plain TCP and `wss://` runs over TLS.
->
-> The protocol provides framing and two-way delivery. It does not define request–response correlation, reconnection or resuming after a disconnect, so applications that need them build them on top.
 >
 > [RFC 6455: WebSocket](https://www.rfc-editor.org/rfc/rfc6455.html)
 

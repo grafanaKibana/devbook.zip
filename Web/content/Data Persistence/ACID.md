@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-02-10T01:40:47.000Z
-modified: 2026-10-28T12:33:42.000Z
-published: 2026-10-28T20:52:55.159Z
+modified: 2026-11-02T09:03:54.806Z
+published: 2026-11-02T11:10:14.411Z
 topic:
   - Data Persistence
 subtopic: []
@@ -169,7 +169,7 @@ await db.SaveChangesAsync();
 
 <!-- qard-id: 46fa4cf2-efe3-4a7c-a44a-eeb444d9ca02 -->
 
-> [!qard]- What does ACID mean for a database transaction, and where do its guarantees stop?
+> [!qard]- What does ACID mean for a database transaction?
 > ACID names four guarantees a database gives a transaction, a group of reads and writes that ends in one commit decision. They hold only inside that database and only as strongly as its configured isolation and durability settings allow.
 >
 > - **Atomicity:** the transaction has one outcome. Either all of its writes commit or none do, so a crash or error cannot leave a partial commit.
@@ -177,7 +177,10 @@ await db.SaveChangesAsync();
 > - **Isolation:** concurrent transactions are limited in what they can observe of each other and in which combined results can commit. The configured isolation level sets how strict this is.
 > - **Durability:** once the database acknowledges a commit, the changes survive the failures its durability configuration covers, such as a crash.
 >
-> The guarantees stop at these boundaries:
+> [Microsoft: ACID properties](https://learn.microsoft.com/en-us/windows/win32/cossdk/acid-properties) · [PostgreSQL: Asynchronous commit](https://www.postgresql.org/docs/current/wal-async-commit.html)
+
+> [!qard]- Where do the guarantees of a local ACID transaction stop?
+> Local ACID guarantees stop at these boundaries:
 >
 > - **Configuration:** weaker settings narrow the guarantees. For example, PostgreSQL asynchronous commit can acknowledge a commit before it is durably logged, so a crash can lose the most recently committed transactions.
 > - **Retries:** atomicity does not make an operation safe to repeat. If a client times out after the server has committed and then retries, the work is applied twice. Making the operation idempotent prevents this, for example with a unique request ID.

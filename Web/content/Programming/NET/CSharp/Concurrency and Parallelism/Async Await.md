@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-02-10T16:03:55.000Z
-modified: 2026-10-28T12:33:42.000Z
-published: 2026-10-28T20:52:55.168Z
+modified: 2026-11-02T09:03:54.806Z
+published: 2026-11-02T11:10:14.415Z
 topic:
   - Programming
 subtopic:
@@ -154,7 +154,7 @@ public async void OnButtonClick(object sender, EventArgs e) { ... }
 Fix: `async Task` replaces `async void` everywhere except event handlers.
 
 **Unnecessary `Task.Run` wrapping**
-Wrapping already-async I/O in `Task.Run` wastes a thread pool thread for no benefit.
+Wrapping already-async I/O in `Task.Run` adds a ThreadPool scheduling hop without making the I/O more asynchronous. The worker can return once the I/O has been initiated; it need not stay occupied for the whole wait.
 
 ```csharp
 // Pointless — GetAsync is already async
@@ -199,8 +199,8 @@ A faulted `WhenAll` task records every failure in its `Exception` property, but 
 
 <!-- qard-id: 52ff6f00-16ec-4741-9be4-2551798fc8ee -->
 
-> [!qard]- What does `ConfigureAwait(false)` change, and when is it useful?
-> `ConfigureAwait(false)` tells an `await` that its continuation does not need to resume through the captured `SynchronizationContext` or non-default `TaskScheduler`. It is mainly useful in general-purpose library code that never needs its caller's context.
+> [!qard]- What does `ConfigureAwait(false)` change?
+> `ConfigureAwait(false)` tells an `await` that its continuation does not need to resume through the captured `SynchronizationContext` or non-default `TaskScheduler`.
 >
 > **What changes:**
 >
@@ -210,10 +210,15 @@ A faulted `WhenAll` task records every failure in its `Exception` property, but 
 > **What it does not do:**
 >
 > - It does not force a thread switch. If the awaited task has already completed, the method continues synchronously on the current thread, still inside the original context.
+>
 > - It does not stop `ExecutionContext` flow. Ambient state such as `AsyncLocal<T>` values still reaches the continuation by default.
+>
 > - It is not a reliable fix for code that blocks on asynchronous work. Every `await` along the path would need it; keeping the call chain asynchronous is the durable fix.
 >
-> **Where it fits:**
+> [Microsoft: Task.ConfigureAwait](https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.task.configureawait?view=net-10.0) · [.NET Blog: ConfigureAwait FAQ](https://devblogs.microsoft.com/dotnet/configureawait-faq/) · [Microsoft: HttpContext in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/use-http-context?view=aspnetcore-10.0)
+
+> [!qard]- When is `ConfigureAwait(false)` useful?
+> It fits code that does not require the caller's scheduling context.
 >
 > - **Reusable libraries:** library code stays independent of whatever context its caller has and avoids the cost of queuing back to it.
 > - **UI code:** usually keeps the default, because code after the `await` often updates controls that belong to the UI thread.
@@ -239,17 +244,40 @@ A faulted `WhenAll` task records every failure in its `Exception` property, but 
 
 <!-- qard-id: 21176d6e-4394-438b-b511-e3f91affc308 -->
 
-> [!qard]- When is `Task.Run` useful, and why is it usually wrong around asynchronous I/O?
-> `Task.Run` is useful for moving CPU-bound work off a thread that must stay responsive, typically a UI thread. Around an API that is already asynchronous it gains nothing: the I/O does not finish sooner, and the wrapper only adds a ThreadPool scheduling hop.
+> [!qard]- When is `Task.Run` useful?
+> It moves CPU-bound work off a thread that must remain responsive, such as a UI thread. A UI handler can await `Task.Run(() => BuildReport(data))` while it continues processing input. The calculation still occupies a ThreadPool worker and consumes CPU; the benefit is responsiveness, not free computation.
 >
-> - **What it does:** queues a delegate to the ThreadPool and returns a task that represents that work.
-> - **Useful case:** a UI event handler awaits `Task.Run(() => BuildReport(data))`, so the UI thread keeps handling input during a long calculation. The calculation still consumes CPU and occupies a pool thread while it runs.
-> - **Already-asynchronous I/O:** `await Task.Run(() => client.GetStringAsync(url))` only starts the same request from a pool thread. The wait was already threadless, so awaiting `client.GetStringAsync(url)` directly gives the same result with less overhead.
-> - **Synchronous blocking I/O:** wrapping a blocking call does not make it asynchronous. The block moves to a pool thread, which stays occupied for the whole wait.
->
-> On a server, request code already runs on ThreadPool threads, so wrapping work in `Task.Run` and immediately awaiting it frees nothing and adds scheduling and pool pressure.
+> `Task.Run` queues a delegate to the ThreadPool and returns a task representing that work.
 >
 > [Microsoft: Task-based asynchronous programming](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/task-based-asynchronous-programming) · [Microsoft: ASP.NET Core best practices](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/best-practices?view=aspnetcore-10.0)
+
+> [!qard]- Why does wrapping already-asynchronous I/O in `Task.Run` add no useful asynchrony?
+> The I/O API already returns a task without holding a thread through its wait. A Task.Run wrapper only adds a ThreadPool scheduling hop to start the same operation. Awaiting the API directly avoids that hop.
+>
+> Wrapping synchronous blocking I/O is different but still holds a pool worker for the entire wait. On a server, request code already runs on pool workers, so awaiting a Task.Run wrapper creates pool pressure without freeing a net thread.
+>
+> [Microsoft: Task-based asynchronous programming](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/task-based-asynchronous-programming) · [Microsoft: ASP.NET Core best practices](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/best-practices?view=aspnetcore-10.0)
+
+> [!qard]- Why does `GetAsync() ?? throw` fail to reject a null result from `Task<string?>`?
+> The expression checks the returned task reference, not the string that the task eventually produces. A non-null task can complete successfully with a null result. The result guard belongs after the await:
+>
+> ```csharp
+> static async Task<string> GetRequiredAsync()
+> {
+>     return await GetAsync()
+>         ?? throw new InvalidOperationException("Value is required.");
+> }
+> ```
+>
+> `Task<string?>` describes a task whose result may be null; it does not make the task itself nullable. [Microsoft: async return types](https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/async-return-types)
+
+> [!qard]- Why does a caller's `try`/`catch` miss a later exception from an unawaited `async Task` method?
+> The async method records the failure on its returned task. Calling it starts execution but does not rethrow that later failure into the caller's stack. Awaiting the task inside the `try` observes and rethrows its failure there. Observing an unrelated delay does not observe the failed task.
+>
+> Modern .NET does not terminate the process by default merely because a task's exception goes unobserved. That policy is not failure handling: the operation still needs code that observes completion and reports failure. [Microsoft: async return types](https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/async-return-types) · [Microsoft: UnobservedTaskException](https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.taskscheduler.unobservedtaskexception?view=net-10.0)
+
+> [!qard]- Why can an `async void` handler's exception escape a `try`/`catch` around the event invocation?
+> An `async void` method returns no task for its caller to observe. Its exceptions are delivered through the captured `SynchronizationContext`, or through the runtime's unhandled-exception path when no suitable context exists, rather than through the caller's invocation stack. The handler handles its own failures or delegates work to an awaited path. A Task-returning method instead makes completion and failure observable to its owner. [Microsoft: async return types](https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/async-return-types)
 
 # References
 

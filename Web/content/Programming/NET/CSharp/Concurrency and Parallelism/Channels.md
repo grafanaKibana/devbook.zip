@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-14T20:57:52.000Z
-modified: 2026-10-28T12:33:42.000Z
-published: 2026-10-28T20:52:55.168Z
+modified: 2026-11-02T09:03:54.806Z
+published: 2026-11-02T11:10:14.415Z
 topic:
   - Programming
 subtopic:
@@ -121,8 +121,8 @@ A bounded `Channel<T>` fits asynchronous producer-consumer work that belongs to 
 
 <!-- qard-id: a09669e4-9708-4a01-a2a2-f26c9e01c72f -->
 
-> [!qard]- What is a `Channel<T>`, and what reliability does it provide?
-> `Channel<T>` is an in-process, in-memory queue that hands items from producers to consumers, with asynchronous waiting on both sides. Its reliability ends at the process boundary. Queued items are not persisted, so a crash loses them, and code on other hosts cannot read them.
+> [!qard]- What is a `Channel<T>`?
+> `Channel<T>` is an in-process, in-memory queue that hands items from producers to consumers, with asynchronous waiting on both sides.
 >
 > How it works:
 >
@@ -132,7 +132,10 @@ A bounded `Channel<T>` fits asynchronous producer-consumer work that belongs to 
 >
 > A typical use is an HTTP endpoint that queues a job while a `BackgroundService` in the same process handles it.
 >
-> Reliability limits:
+> [Microsoft: Channels](https://learn.microsoft.com/en-us/dotnet/core/extensions/channels) · [Microsoft: Queued background tasks](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/host/hosted-services?view=aspnetcore-10.0)
+
+> [!qard]- What delivery guarantees does an in-memory `Channel<T>` lack?
+> It provides in-process handoff, not durable delivery.
 >
 > - **No persistence:** buffered items exist only in that process's memory and are lost if it crashes.
 > - **No cross-host delivery:** only code inside the same process can read the channel.

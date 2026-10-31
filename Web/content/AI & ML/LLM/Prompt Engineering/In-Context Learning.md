@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-02-28T13:40:02.000Z
-modified: 2026-10-28T12:33:42.000Z
-published: 2026-10-28T20:52:55.140Z
+modified: 2026-11-02T09:03:54.806Z
+published: 2026-11-02T11:10:14.408Z
 topic:
   - AI & ML
 subtopic:
@@ -161,7 +161,7 @@ Zero-shot is the starting baseline. One example is added for a stubborn output c
 
 <!-- qard-id: 72a29801-08d8-4f28-a17b-c5049c397cfc -->
 
-> [!qard]- How does in-context learning work, and how does it differ from fine-tuning and retrieval?
+> [!qard]- How does in-context learning differ from fine-tuning and retrieval?
 > In-context learning adapts a pretrained model to a task through instructions and examples placed in the prompt. The model still predicts the next token, and the examples shift that prediction by showing the task structure, the label space and the output format. No weights change, so the effect applies only to requests that include the examples.
 >
 > | Aspect | In-context learning | Fine-tuning | Retrieval |

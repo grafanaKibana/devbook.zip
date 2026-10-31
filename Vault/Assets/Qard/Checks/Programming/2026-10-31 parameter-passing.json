@@ -1,0 +1,76 @@
+{
+  "version": 1,
+  "createdAt": 1793461622082,
+  "mastery": "Assets/Qard/Courses/Programming Mastery.md",
+  "course": "Programming",
+  "objective": "parameter-passing",
+  "title": "Predict how by-value parameters and ref, out, or in affect caller storage",
+  "goal": "explain",
+  "questions": [
+    {
+      "id": "c1",
+      "type": "long",
+      "prompt": "Consider this C# code:\n\n```csharp\nclass Meter\n{\n    public int Reading;\n}\n\nstatic void Reset(Meter item)\n{\n    item.Reading = 12;\n    item = new Meter { Reading = 0 };\n}\n\nvar current = new Meter { Reading = 7 };\nvar saved = current;\nReset(current);\n```\n\nExplain why `current.Reading` and `saved.Reading` are both `12` afterward. Then explain what each would contain if the parameter were changed to `ref Meter item` and the call to `Reset(ref current)`. Distinguish the caller's variables from the objects they reference.",
+      "marks": 4,
+      "rubric": [
+        {
+          "point": "Explains that the by-value parameter receives a copy of the object reference, so changing Reading mutates the object shared by current and saved.",
+          "marks": 1
+        },
+        {
+          "point": "Explains that assigning a new Meter to the by-value parameter changes only the parameter's reference, leaving both caller variables pointing to the object whose Reading is 12.",
+          "marks": 1
+        },
+        {
+          "point": "Explains that ref aliases current's storage, so assigning the new Meter replaces current's reference and makes current.Reading equal 0.",
+          "marks": 1
+        },
+        {
+          "point": "Explains that saved remains a separate variable pointing to the original object, whose Reading is 12.",
+          "marks": 1
+        }
+      ],
+      "model": "By value, `item` holds a copy of the reference stored in `current`. All three variables initially refer to the same object, so `item.Reading = 12` changes the object visible through both `current` and `saved`. Assigning a new object to `item` then changes only that local parameter. Both caller variables still see `12`.\n\nWith `ref`, `item` aliases the variable `current`. The first assignment still changes the original object's reading to `12`. The second assignment replaces the reference stored in `current`, so `current.Reading` becomes `0`. `saved` is a separate variable and still references the original object, so `saved.Reading` remains `12`.",
+      "source": {
+        "path": "Home/Programming/NET/CSharp/Fundamentals/Methods.md",
+        "heading": "Input Parameters"
+      },
+      "objective": "parameter-passing",
+      "goal": "explain"
+    },
+    {
+      "id": "c2",
+      "type": "long",
+      "prompt": "A developer writes these methods:\n\n```csharp\nstatic bool TryGetLimit(bool available, out int limit)\n{\n    if (!available)\n        return false;\n\n    limit = 30;\n    return true;\n}\n\nstatic int ReadLimit(in int limit)\n{\n    limit = 30;\n    return limit;\n}\n```\n\nNeither method compiles. Explain each error in terms of access to caller storage. For `TryGetLimit`, explain why returning `false` does not remove the assignment requirement and give a minimal correction. Also explain why an uninitialized local can be passed as `out` but cannot be passed as `in`.",
+      "marks": 4,
+      "rubric": [
+        {
+          "point": "Explains that out must be assigned on every normal return path, including a return of false.",
+          "marks": 1
+        },
+        {
+          "point": "Gives a correction that assigns limit before the false return and explains that the assignment writes into the caller's variable.",
+          "marks": 1
+        },
+        {
+          "point": "Explains that in provides readonly access through the parameter, so limit = 30 is forbidden and should be removed.",
+          "marks": 1
+        },
+        {
+          "point": "Explains that out supplies an assigned value on normal return, whereas in reads an existing value and therefore requires an initialized argument.",
+          "marks": 1
+        }
+      ],
+      "model": "`out limit` aliases the caller's variable and must be assigned before every normal return. Returning `false` is still a normal return; the Boolean does not change that contract. A minimal correction is:\n\n```csharp\nif (!available)\n{\n    limit = 0;\n    return false;\n}\n```\n\nThat assignment writes `0` into the caller's variable even though the method reports failure.\n\n`in limit` permits reading through the parameter but forbids assigning to it. Removing `limit = 30;` makes `ReadLimit` return the supplied value.\n\nAn `out` argument can be an uninitialized local because the method must assign it before returning normally. An `in` argument must already be initialized because the method receives an existing value to read.",
+      "source": {
+        "path": "Home/Programming/NET/CSharp/Fundamentals/Methods.md",
+        "heading": "Input Parameters"
+      },
+      "objective": "parameter-passing",
+      "goal": "explain"
+    }
+  ],
+  "answers": {},
+  "marks": {},
+  "status": "ready"
+}

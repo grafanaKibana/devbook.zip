@@ -10,7 +10,7 @@ qard-deck: "Computer Science"
 qard-topic: "Algorithms/Paradigms/Memoization"
 flashcard_uid: "0f376618"
 created: "2026-07-12T19:33:38.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-02T09:03:54.806Z"
 ---
 
 Naive recursive `fib(50)` makes over 40 billion calls even though the recurrence has only 51 argument values from `0` through `50`. The recursion keeps forgetting that it already solved states such as `fib(48)`. Memoization fixes that repetition by caching each result under its arguments. A repeated call returns the stored value instead of entering the same subtree again.
@@ -154,37 +154,43 @@ Memoization fits a naturally recursive recurrence when only a fraction of the po
 
 # Questions
 
-> [!qard]- What is memoization, and when does it improve performance?
+> [!qard]- What is memoization?
 > Memoization caches a function's results by argument. The first call with a given set of arguments computes the result and stores it. Later calls with the same arguments return the stored result instead of computing it again.
->
-> It improves performance only when the same arguments recur. Naive recursive Fibonacci is the classic case: `fib(n)` calls `fib(n - 1)` and `fib(n - 2)`, and both branches keep recomputing the same smaller values. The number of calls therefore grows exponentially, although only `n + 1` distinct arguments exist. With memoization each argument is computed once, and the time becomes linear in `n`. In general, the time drops to roughly the number of distinct argument sets times the work per call.
 >
 > In a recursive function, the recursive calls must also go through the cache. Calls to the raw, uncached function bypass it and bring the repeated work back.
 >
-> - **No repeats, no gain:** if every call has distinct arguments, as with the unique subarrays in merge sort, the cache never hits and only adds lookup and storage overhead.
-> - **Memory:** a long-lived cache keeps one entry per distinct argument set unless it is bounded. An evicted entry is recomputed when it is requested again.
-> 
 > Applied to a recurrence with overlapping subproblems, memoization is the top-down form of dynamic programming.
 >
 > [MIT 6.006: Memoization](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-fall-2011/ea1cb4a29625017bdbcaf2dfd61b179e_MIT6_006F11_lec19_orig.pdf)
 
+> [!qard]- When does memoization improve performance?
+> It improves performance only when the same arguments recur. Naive recursive Fibonacci is the classic case: `fib(n)` calls `fib(n - 1)` and `fib(n - 2)`, and both branches keep recomputing the same smaller values. The number of calls therefore grows exponentially, although only `n + 1` distinct arguments exist. With memoization each argument is computed once, and the time becomes linear in `n`. In general, the time drops to roughly the number of distinct argument sets times the work per call.
+>
+> - **No repeats, no gain:** if every call has distinct arguments, as with the unique subarrays in merge sort, the cache never hits and only adds lookup and storage overhead.
+> - **Memory:** a long-lived cache keeps one entry per distinct argument set unless it is bounded. An evicted entry is recomputed when it is requested again.
+>
+> [MIT 6.006: Memoization](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-fall-2011/ea1cb4a29625017bdbcaf2dfd61b179e_MIT6_006F11_lec19_orig.pdf)
+
 <!-- qard-id: 8a2ffe34-cdd8-4e4c-a363-728820006ecc -->
-> [!qard]- What is dynamic programming, and what does a typical DP solution need to define?
+> [!qard]- What is dynamic programming?
 > Dynamic programming solves a problem through a recurrence over smaller subproblems. It stores each subproblem's result so later steps reuse it instead of recomputing it. In finite, one-pass DP, the dependencies between subproblems are acyclic, so each distinct subproblem is solved only once.
 >
-> A typical DP solution defines:
+> Storing results pays off when different paths reach the same state (overlapping subproblems). Optimal substructure means an optimum can be built from optimal answers to subproblems. It matters only when the goal is to choose an optimum. Counting and decision problems use the same machinery without optimizing.
+>
+> [MIT 6.006: Dynamic Programming](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/28461a74f81101874a13d9679a40584d_MIT6_006S20_lec16.pdf) · [MIT 6.006: Memoization](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-fall-2011/ea1cb4a29625017bdbcaf2dfd61b179e_MIT6_006F11_lec19_orig.pdf)
+
+> [!qard]- What must a dynamic programming solution define?
+> A dynamic programming solution defines:
 >
 > - **State (subproblem):** what each subproblem means, such as `best(a)`, the fewest coins that make amount `a`. The state must capture everything the remaining answer depends on, so every path that reaches the same state needs the same answer.
 > - **Stored result:** the value kept for each state, such as a minimum, a count or a yes/no answer.
 > - **Base cases:** states answered directly, such as `best(0) = 0`.
 > - **Recurrence:** how a state's result is computed from the results of the states it depends on, such as `best(a) = 1 + min(best(a - c))` over usable coins `c`.
 > - **Evaluation order:** for a finite set of states with acyclic dependencies, an order that solves every dependency before any state that reads it. Memoized recursion follows that order on demand, and tabulation writes it out as loops.
-> 
+>
 > In this one-pass form, the running time is roughly the number of distinct states times the work to compute one state from its stored dependencies.
 >
 > If the dependencies form a cycle, no such order exists, and a single recursive or tabulated pass cannot solve the problem. Such problems need another method that can revisit states until their values converge, such as a graph shortest-path algorithm or repeated updates.
->
-> Storing results pays off when different paths reach the same state (overlapping subproblems). Optimal substructure means an optimum can be built from optimal answers to subproblems. It matters only when the goal is to choose an optimum. Counting and decision problems use the same machinery without optimizing.
 >
 > [MIT 6.006: Dynamic Programming](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/28461a74f81101874a13d9679a40584d_MIT6_006S20_lec16.pdf) · [MIT 6.006: Memoization](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-fall-2011/ea1cb4a29625017bdbcaf2dfd61b179e_MIT6_006F11_lec19_orig.pdf)
 

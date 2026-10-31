@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-02-10T01:40:47.000Z
-modified: 2026-10-28T12:33:42.000Z
-published: 2026-10-28T20:52:55.185Z
+modified: 2026-11-02T09:03:54.806Z
+published: 2026-11-02T11:10:14.427Z
 topic:
   - Software Architecture
 subtopic:
@@ -114,12 +114,15 @@ public sealed class CsvReportGenerator : IReportGenerator
 
 <!-- qard-id: 71b3b8bb-0597-491f-99ec-b6c24e7cf3ed -->
 
-> [!qard]- How does Information Expert reduce coupling, and when should another principle override it?
+> [!qard]- How does Information Expert reduce coupling?
 > Information Expert assigns a responsibility to the object that already holds the information needed to perform it. This reduces coupling because callers no longer reach into that object's data to apply its rule themselves. They depend only on the result, and the rule lives in one place instead of being duplicated by each caller.
 >
 > **Example:** `Order` owns its line items, so `Order.Total` calculates the total. An `OrderService` that summed `order.LineItems` itself would depend on the internal structure of `Order`, and other callers could repeat the same calculation.
 >
-> Information Expert identifies a strong candidate, not an automatic winner. Another principle should prevail when keeping the behavior on the data holder would:
+> [Craig Larman: Applying UML and Patterns, Information Expert (sample chapter)](https://www.informit.com/content/images/0130925691/samplechapter/0130925691.pdf) · [[Software Architecture/Patterns/Design Patterns/GRASP#The Nine Principles|GRASP principles]] · [[Software Architecture/Patterns/Design Patterns/GRASP#Treating Information Expert as an Absolute|Information Expert limits]] · [[Software Architecture/Patterns/Design Patterns/GRASP#Tradeoffs|GRASP tradeoffs]]
+
+> [!qard]- When should another responsibility-assignment principle override Information Expert?
+> Holding the required data makes an object a strong candidate, not an automatic winner. Another principle should prevail when keeping the behavior on the data holder would:
 >
 > - **Pull infrastructure into a domain object:** behavior that needs I/O, such as persistence or sending email, belongs in a separate collaborator. Pure Fabrication justifies such a non-domain object, for example a mapper or a gateway.
 > - **Coordinate several aggregates:** a policy that needs information beyond one object's boundary fits a separate collaborator that coordinates them.

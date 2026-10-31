@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-03-05T22:12:38.000Z
-modified: 2026-10-28T12:33:42.000Z
-published: 2026-10-28T20:52:55.185Z
+modified: 2026-11-02T09:03:54.806Z
+published: 2026-11-02T11:10:14.427Z
 topic:
   - Software Architecture
 subtopic:
@@ -168,7 +168,7 @@ New record fields participate in the compiler-generated copy automatically. Refe
 
 <!-- qard-id: ceccd6bd-3ed8-4f4d-80fa-9b805e5ee7a9 -->
 
-> [!qard]- What separates a shallow copy from a deep copy, and which nested objects must a deep copy duplicate?
+> [!qard]- What separates a shallow copy from a deep copy?
 > A shallow copy creates a new outer object, but its reference-type fields still point to the same nested objects as the original. A deep copy also duplicates nested objects, so changing them through the copy does not affect the original. A practical deep copy duplicates the mutable nested state that must evolve independently, not everything reachable.
 >
 > | Aspect | Shallow copy | Deep copy |
@@ -179,7 +179,10 @@ New record fields participate in the compiler-generated copy automatically. Refe
 > | Adding an item to a nested `List<T>` | The change is visible through both objects. | Only the object that was changed sees it. |
 > | .NET mechanisms | `Object.MemberwiseClone()` and `record with { }`. | A copy constructor or copy method that duplicates chosen members. |
 >
-> Where the boundary goes:
+> [Microsoft: Object.MemberwiseClone](https://learn.microsoft.com/en-us/dotnet/api/system.object.memberwiseclone?view=net-10.0) · [Microsoft: Records (C# reference)](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record) · [[Software Architecture/Patterns/Design Patterns/Creational/Prototype#Pitfalls|Prototype pitfalls]]
+
+> [!qard]- Which nested objects should a practical deep copy duplicate?
+> The copy policy duplicates mutable state that the new object must own and change independently, rather than everything reachable.
 >
 > - **Duplicated:** mutable state that the copy owns and changes independently, such as an order's line items and its shipping address.
 > - **Shared:** immutable objects, such as immutable collections, because neither copy can change them.

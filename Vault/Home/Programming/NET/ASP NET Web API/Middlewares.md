@@ -11,7 +11,7 @@ qard-deck: "Programming"
 qard-topic: "NET/ASP NET Web API/Middlewares"
 flashcard_uid: "7fb97c90"
 created: "2026-02-10T01:40:47.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-10-31T09:00:37.443Z"
 ---
 
 ASP.NET Core middleware forms an ordered chain around endpoint execution. Each component can inspect the inbound request, call the next delegate, and then observe the outbound response. This is the right boundary for behavior that spans many endpoint types, such as exception handling, request logging, CORS, or authentication.
@@ -153,28 +153,28 @@ app.UseWhen(
 
 | Option | Best for | Weakness |
 |---|---|---|
-| Middleware | App-wide cross-cutting concerns (logging, auth, exception handling, CORS) | No direct MVC action context. Coverage depends on registration order and branches; static-file middleware can short-circuit later components |
-| MVC action filters | Concerns tied to controllers/actions and model/action context | Only applies to MVC pipeline. Not available for Minimal APIs |
-| Endpoint filters | Minimal API endpoint-scoped behavior | Not used by MVC controllers |
+| Middleware | App-wide cross-cutting concerns (logging, auth, exception handling, CORS) | No direct controller action context. Coverage depends on registration order and branches; static-file middleware can short-circuit later components |
+| Controller action filters | Concerns tied to Web API controllers/actions and model/action context | Their stages do not apply to Minimal API handlers |
+| Endpoint filters | Minimal API handler behavior, or explicit attachment to mapped controller actions | Invocation context differs from controller model-state and action-result context |
 
-Middleware fits a concern that belongs outside a particular endpoint model or must cover several request types. Filters fit logic that needs MVC action context or Minimal API invocation context.
+Middleware fits a concern that belongs outside a particular endpoint model or must cover several request types. Filters fit logic that needs controller action context or endpoint-handler invocation context.
 
 # Questions
 
 <!-- qard-id: 044cb1c8-912a-42fc-82d3-f9e2167680f6 -->
-> [!qard]- How does middleware differ from an MVC action filter?
-> Middleware runs in the general ASP.NET Core request pipeline for every request that reaches it, and it can run before an endpoint is selected. An MVC action filter runs only inside MVC, around a controller action after that action has been selected. It can read and change the action's arguments and result.
+> [!qard]- How does middleware differ from an action filter in an ASP.NET Core controller-based Web API?
+> Middleware runs in the general ASP.NET Core request pipeline for every request that reaches it, and it can run before an endpoint is selected. A controller action filter runs around a selected Web API controller action. It can read and change the action's arguments and result.
 >
-> | Aspect | Middleware | MVC action filter |
+> | Aspect | Middleware | Controller action filter |
 > |---|---|---|
-> | Position | A pipeline component that runs in registration order and can run before routing selects an endpoint. | Runs inside MVC after action selection, immediately before and after the action method. |
-> | Requests covered | Every request that reaches it, including static files, Minimal API endpoints and requests that never enter MVC. An earlier component that short-circuits, or a branch that bypasses it, removes that coverage. | Only the controller actions the filter is applied to. |
+> | Position | A pipeline component that runs in registration order and can run before routing selects an endpoint. | Runs after controller action selection, immediately before and after the action method. |
+> | Requests covered | Every request that reaches it, including static files, Minimal API endpoints and requests that do not invoke controllers. An earlier component that short-circuits, or a branch that bypasses it, removes that coverage. | Only the controller actions the filter is applied to. |
 > | Context | `HttpContext` and the rest of the pipeline. It has no model-bound arguments or action result. | Action context: model-bound arguments, which it can read or replace before the action runs, and the result, which it can inspect or replace afterward. |
 > | Fits | Concerns that span endpoint types, such as exception handling, request logging, CORS and authentication. | Behavior that depends on action arguments or results for a set of controllers or actions. |
 >
-> Minimal API endpoints do not run MVC action filters. Their endpoint-scoped equivalent is endpoint filters.
+> Minimal API handlers do not run controller action filters; endpoint filters provide handler-scoped behavior. Endpoint filters can also be explicitly attached to mapped controller actions, but they use an invocation context rather than controller-filter context.
 >
-> [Microsoft: Filters in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/mvc/controllers/filters?view=aspnetcore-10.0) · [Microsoft: Middleware in Minimal API apps](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/minimal-apis/middleware?view=aspnetcore-10.0)
+> [Microsoft: Filters in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/mvc/controllers/filters?view=aspnetcore-10.0) · [Microsoft: Middleware in Minimal API apps](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/minimal-apis/middleware?view=aspnetcore-10.0) · [Microsoft: Endpoint filters](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/minimal-apis/min-api-filters?view=aspnetcore-10.0)
 
 <!-- qard-id: 8d463f18-1072-4f4b-b785-c13f213e9fc9 -->
 > [!qard]- How can an ASP.NET Core application handle unhandled exceptions consistently?

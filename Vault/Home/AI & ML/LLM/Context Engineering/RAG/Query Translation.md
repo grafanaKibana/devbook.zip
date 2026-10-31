@@ -10,7 +10,7 @@ qard-deck: "AI & ML"
 qard-topic: "LLM/Context Engineering/RAG/Query Translation"
 flashcard_uid: "cffd0779"
 created: "2026-02-27T12:56:16.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-02T09:03:54.806Z"
 ---
 
 Query translation changes a user's wording before search so that retrieval sees language closer to the corpus. Someone asks, "Can partners burst above limits now?" The relevant document is titled "Q3 Quota Policy Update — Partner Tier Burst Allowance." Both describe the same policy, but a single query embedding may place them in different neighborhoods. Translation searches more of that space without changing the corpus or the [[Embeddings|embedding model]].
@@ -143,12 +143,12 @@ Direct retrieval provides the control. Multi-query or RAG-Fusion earns its cost 
 # Questions
 
 <!-- qard-id: 53a89faf-27cb-4f67-94fe-18e9373b2852 -->
-> [!qard]- What does query translation change in a RAG retrieval pipeline, and what can it not fix?
+> [!qard]- What is the scope of query translation in a RAG retrieval pipeline?
 > Query translation changes only the queries sent to retrieval. A model turns the user's request into one or more retrieval inputs, such as paraphrases, a broader step-back question, sub-questions or a hypothetical answer. Each input is then searched against the existing index. Translation cannot fix problems in the corpus or in the index itself.
 >
 > - **What it can help:** vocabulary mismatch, where the user and the corpus describe the same idea in different words; requests whose parts need separate searches; and questions that also need broader background. For example, “Can partners burst above limits now?” and a document titled “Partner Tier Burst Allowance” describe the same policy, and a rewrite closer to the document's wording can reach it.
 > - **What it cannot fix:** evidence missing from the corpus, chunks that split the needed text, a weak embedding model or a broken index. Every variant still searches the same chunks and vectors.
-> 
+>
 > The work after search depends on the technique. Lists retrieved for several phrasings of one question are usually deduplicated and fused before reranking or generation. Decomposition can instead answer each sub-question from its own evidence and then synthesize the partial answers into one response. In every case, the benefit is measured against direct retrieval on the same queries.
 >
 > Sources:
@@ -158,19 +158,27 @@ Direct retrieval provides the control. Multi-query or RAG-Fusion earns its cost 
 > - [[Query Translation#How Each Rewrite Changes Search|Query Translation: How Each Rewrite Changes Search]]
 
 <!-- qard-id: 63c5e250-74a4-4dec-8e14-ffd1ae425738 -->
-> [!qard]- How can query translation change retrieval quality, and how should that change be evaluated?
-> Translation can raise recall by searching wordings closer to the corpus's vocabulary. It can lower precision when a rewrite drifts from the request's entities or constraints. Its effect is measured by comparing translated retrieval with direct retrieval on the same labeled queries.
+> [!qard]- How can query translation improve or worsen retrieval quality?
+> Translation can raise recall by searching wordings closer to the corpus's vocabulary. It can lower precision when a rewrite drifts from the request's entities or constraints.
 >
 > - **Gain:** a rewrite such as “partner tier throttling policy” can match documents that use words the user did not, so relevant evidence missed by the original wording enters the results.
 > - **Loss:** a rewrite can stay on topic yet change the request. When “`HttpClient` connection timeout” becomes “network timeout troubleshooting”, operating-system material can crowd out .NET-specific evidence. Fusing the result lists does not remove drift, because a document ranked highly by one bad variant can still pass the cutoff.
-> 
+>
+> Two common controls limit drift: the original query stays among the searched variants, and rewrites that alter entities, identifiers, versions or other material constraints are rejected.
+>
+> Sources:
+> - [Query Rewriting for Retrieval-Augmented Large Language Models (Ma et al., EMNLP 2023)](https://arxiv.org/html/2305.14283)
+> - [RAG-Fusion: a New Take on Retrieval-Augmented Generation (Rackauckas, 2024)](https://arxiv.org/html/2402.03367)
+> - [RAG solution design and evaluation guide (Azure Architecture Center)](https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/rag/rag-solution-design-and-evaluation-guide)
+
+> [!qard]- How should a query-translation change be evaluated?
+> Query translation is evaluated by comparing translated retrieval with direct retrieval on the same labeled queries.
+>
 > How the change is evaluated:
 >
 > 1. Direct retrieval is the control, run on the same labeled queries.
 > 2. Results are split by query class, such as vague questions and identifier-heavy ones, because a technique can help one class and hurt another.
 > 3. Recall@k and Precision@k are measured at the cutoffs the pipeline actually uses. A rise in Recall@20 with a fall in Precision@5 means more relevant candidates appear within 20 results while the top five carry more noise. By itself, that result does not show what survives reranking or reaches the generator.
-> 
-> Two common controls limit drift: the original query stays among the searched variants, and rewrites that alter entities, identifiers, versions or other material constraints are rejected.
 >
 > Sources:
 > - [Query Rewriting for Retrieval-Augmented Large Language Models (Ma et al., EMNLP 2023)](https://arxiv.org/html/2305.14283)

@@ -3,7 +3,7 @@ publish: true
 title: About
 created: 2026-07-12T07:42:37.000Z
 modified: 2026-08-13T19:23:03.000Z
-published: 2026-10-28T20:52:55.143Z
+published: 2026-10-31T08:53:28.476Z
 tags:
   - MetricsIgnore
 summary: The purpose, scope, and AI-assisted authorship of this software engineering notebook.

@@ -1,0 +1,429 @@
+{
+  "sourceSnapshots": [
+    {
+      "path": "Home/Programming/NET/CSharp/Fundamentals/Exception Handling.md",
+      "text": "---\ntopic: [Programming]\nsubtopic: [NET]\nsummary: \"Handling failures and cleanup during normal control transfer and stack unwinding in C#.\"\nlevel: [\"4\"]\npriority: Medium\nstatus: Ready to Repeat\npublish: true\nqard-deck: \"Programming\"\nqard-topic: \"NET/CSharp/Fundamentals/Exception Handling\"\nflashcard_uid: \"6e5f7fa4\"\ncreated: \"2026-02-15T16:27:13.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\n---\n\nExceptions carry failures across method boundaries when normal execution cannot continue. A `try` block marks code whose failure may be handled nearby. A matching `catch` decides whether recovery is possible, and `finally` protects cleanup that must happen while the stack unwinds. For disposable resources, `using` and `await using` usually express that cleanup more directly.\n\n- `try` contains code that may throw.\n- `catch` handles exceptions for which local recovery or translation is defined.\n- `finally` normally runs when leaving the `try` block (success or failure) and is used for cleanup.\n- `throw;` rethrows the current exception and preserves the original stack trace.\n- If no matching `catch` exists in the current method, the runtime searches up caller frames for a compatible handler (including `when` filters). After a handler is selected, the stack is unwound and `finally` blocks run on the path to that handler.\n\n# Handler Boundaries\n\n```csharp\ntry\n{\n    await ProcessAsync(ct);\n}\ncatch (ArgumentException ex)\n{\n    Console.WriteLine(ex.Message);\n    throw;\n}\ncatch (Exception ex) when (ex is not OperationCanceledException)\n{\n    Log(ex);\n    throw;\n}\nfinally\n{\n    Cleanup();\n}\n```\n\n# `throw` Keyword\n\n`throw` reports that the current operation cannot produce its promised result. The exception type is part of the API contract: it tells callers whether the problem is a bad argument, invalid state, timeout, cancellation, or something domain-specific.\n\n## What a Throw Preserves\n\n- The stack trace identifies the path to the failure.\n- A specific type lets a boundary select the failures it can handle.\n- An inner exception keeps the lower-level cause when a boundary adds domain context.\n\n## Choosing an Exception\n\n- Public argument validation normally uses `ArgumentNullException`, `ArgumentException`, or `ArgumentOutOfRangeException`.\n- `InvalidOperationException` fits a call that is valid in general but invalid for the object's current state.\n- A domain exception is useful when callers need a stable, catchable failure contract that built-in types cannot express.\n- A throw expression keeps a small guard clause close to the value it protects.\n\n```csharp\npublic static string NormalizeName(string? value)\n{\n    var name = value ?? throw new ArgumentNullException(nameof(value));\n    if (name.Length > 100)\n    {\n        throw new ArgumentOutOfRangeException(nameof(value), \"Name is too long.\");\n    }\n\n    return name.Trim();\n}\n```\n\n# Custom Exceptions\n\nA custom type fits when callers need to distinguish the failure from other exceptions. Such a type derives from `Exception`, keeps useful state immutable, and preserves an inner exception when the custom type translates a lower-level failure.\n\n```csharp\npublic sealed class OrderNotFoundException(int orderId)\n    : Exception($\"Order {orderId} was not found.\")\n{\n    public int OrderId { get; } = orderId;\n}\n```\n\nA built-in type is better when it already communicates the contract (`ArgumentException`, `KeyNotFoundException`, or `TimeoutException`). Legacy binary-serialization constructors do not belong in new exception types unless an old remoting contract still requires them.\n\n# Aggregated and Cross-Boundary Exceptions\n\n- **`AggregateException`** represents multiple failures from parallel or task-based work. Awaiting a faulted `Task.WhenAll` propagates one exception, while the completed task's `Exception` property retains the aggregate. `Flatten()` removes nested aggregates, and `Handle(predicate)` marks selected inner exceptions as handled. [[Tasks]] describes how task-based work aggregates these failures.\n- **`ExceptionDispatchInfo`** captures an exception so it can be thrown later without replacing its original throw-site information:\n\n  ```csharp\n  ExceptionDispatchInfo? captured = null;\n  try { Work(); } catch (Exception ex) { captured = ExceptionDispatchInfo.Capture(ex); }\n  // ...later, elsewhere...\n  captured?.Throw(); // original throw-site preserved\n  ```\n\n  This is useful when infrastructure must move a failure across an asynchronous or queue boundary without pretending the later throw site caused it.\n\n# Global / Last-Chance Handlers\n\nUnhandled exceptions need an application boundary that records the failure and converts it only when the host has a valid response model.\n\n- ASP.NET Core can use `app.UseExceptionHandler(...)` to log a failure and return a Problem Details response.\n- `AppDomain.CurrentDomain.UnhandledException` offers last-chance observation before termination. It is not a recovery hook.\n- `TaskScheduler.UnobservedTaskException` reports a fault whose task exception was never observed. It does not make fire-and-forget work reliable.\n- `AppDomain.CurrentDomain.FirstChanceException` runs for every throw before handler selection, which makes it a diagnostic instrument rather than ordinary production logging.\n\n# Pitfalls\n\n- **Exceptions as routine branching.** A cache miss or validation rejection may be an expected result. A `Try*` method, nullable result, or explicit domain result makes that path visible and avoids paying for stack capture on normal traffic.\n- **`throw ex;` in `catch`**: this restarts the stack trace at the rethrow point and loses the original call path. `throw;` inside the same `catch` preserves debugging context.\n- **Throwing in `finally`**: a new exception from `finally` can mask the original failure from `try`/`catch`. Keeping `finally` focused on cleanup that raises no new exceptions prevents that masking.\n- **Overly generic exception types**: throwing `Exception` makes handling and telemetry less actionable. Specific built-in types (`ArgumentException`, `InvalidOperationException`, and related types) communicate intent.\n\n# Tradeoffs\n\n- **Exceptions versus result values.** Exceptions carry unexpected failures naturally through .NET infrastructure. Result values make expected rejection paths explicit in signatures. The useful dividing line is whether the caller is expected to branch on the outcome.\n- **Catch width.** A broad catch is appropriate at a host boundary that logs and translates failures. Deeper in the application, a catch belongs only where the failure can be handled, enriched, or rolled back meaningfully.\n- **Exception filters.** A `when` filter runs before stack unwinding and can select a handler without catching and rethrowing. Filter logic needs to stay predictable. A filter that returns `false` leaves handler search to continue.\n\n# Questions\n\n> [!qard]- When should a .NET method throw an exception instead of returning a failure result?\n> A method throws when it cannot deliver what it promises and callers are not expected to branch on that outcome in normal flow. It returns a failure result when the outcome is common and expected, so callers routinely check it.\n>\n> | Aspect | Throwing an exception | Returning a failure result |\n> |---|---|---|\n> | Fits when | The failure is unexpected for this call, such as an invalid argument, an invalid object state or an unavailable dependency. | The outcome is part of normal flow, such as a cache miss, unparsable user input or a rejected validation. |\n> | If the caller ignores it | A synchronous throw propagates up the call stack until a handler catches it, so the caller cannot skip it by not checking. A `Task`-returning async method stores the exception on that `Task`; it surfaces only when the code that owns the task awaits or otherwise observes it, so an ignored faulted task can go unnoticed. | The failure can be silently ignored if the caller never checks the result. |\n> | Cost when it happens | Throwing and unwinding are expensive, which matters when the outcome occurs on every request. | Reporting the outcome costs about the same as success. |\n> | Typical .NET shape | A specific exception type such as `ArgumentException` or `InvalidOperationException`. | A `Try` method such as `int.TryParse` returning `bool`, `null` or default for a common miss, or an explicit result type. |\n>\n> Many APIs offer both forms: `int.Parse` throws on bad input, while `int.TryParse` returns `false`. The caller then picks the form that matches how often failure is expected.\n>\n> [Microsoft: Best practices for exceptions](https://learn.microsoft.com/en-us/dotnet/standard/exceptions/best-practices-for-exceptions) · [Microsoft: TaskScheduler.UnobservedTaskException](https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.taskscheduler.unobservedtaskexception?view=net-10.0)\n\n<!-- qard-id: 47c1a77e-18c3-47f2-beec-be36bdb47219 -->\n> [!qard]- What is the difference between `throw;` and `throw ex;` inside a `catch` block?\n> `throw;` rethrows the current exception while preserving its original stack trace. `throw ex;` starts the visible stack at the rethrow site and loses the original path. [Microsoft: exception handling statements](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/exception-handling-statements)\n\n<!-- qard-id: 0d4bb361-db0d-4d8f-b57e-1ec0c12ca36e -->\n> [!qard]- When should an exception be wrapped instead of rethrown directly?\n> An exception should be wrapped when a boundary must add meaning that the original lacks: context about the operation that failed, or translation into a stable failure type that callers of that layer are expected to handle. The original goes into the new exception's `InnerException`, so its type, message and stack trace stay available.\n>\n> For example, a data-access layer can translate a database provider's exception into a domain-level `OrderStoreUnavailableException`. Callers then handle one stable type and do not depend on the provider.\n>\n> When the catch block only logs, cleans up or decides it cannot handle the failure, `throw;` rethrows the original with its stack trace intact. Wrapping without adding meaning only lengthens the exception chain. It can also change which outer handlers match. A `catch` matches its declared type and types derived from it, so a handler that caught the original stops matching when the wrapper's type is neither that type nor derived from it.\n>\n> [Microsoft: Best practices for exceptions](https://learn.microsoft.com/en-us/dotnet/standard/exceptions/best-practices-for-exceptions) · [Microsoft: Exception-handling statements](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/exception-handling-statements)\n\n<!-- qard-id: d8eb2954-a6b6-4720-b753-13e6f473ae67 -->\n> [!qard]- Why is throwing from `finally` dangerous?\n> An exception that escapes `finally` while another exception is already propagating replaces that exception. The original stops propagating, so callers, outer handlers and any later logging see only the cleanup error, which usually says little about the real cause.\n>\n> For example, a `try` block fails with a timeout, and closing a connection in `finally` then throws an exception that escapes the block. The caller receives the close failure, and the timeout no longer appears in the propagated exception.\n>\n> Cleanup in `finally` is therefore kept simple, and any failure it can raise is caught and logged inside the `finally` block so the original exception keeps propagating.\n>\n> [Microsoft: Exception-handling statements](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/exception-handling-statements) · [Microsoft: Best practices for exceptions](https://learn.microsoft.com/en-us/dotnet/standard/exceptions/best-practices-for-exceptions)\n\n<!-- qard-id: 9ffe22a9-8db4-43a7-acea-929d5baa0d53 -->\n> [!qard]- When might `finally` not execute?\n> `finally` runs when control leaves its `try` block while the process keeps executing: normal completion, a jump such as `return` or `break`, or an exception unwinding through it. It does not run when the process ends without unwinding or when control never leaves the `try` block.\n>\n> - **Immediate process termination:** `Environment.FailFast` ends the process without running pending `finally` blocks or finalizers. A stack overflow, or the process being killed by the operating system or an orchestrator, ends it just as abruptly.\n> - **Unhandled exceptions:** cleanup is reliable when a handler exists and the stack unwinds to it. If no handler is found, whether `finally` blocks run depends on how the runtime and operating system end the process.\n> - **Control never leaves the `try` block:** an infinite loop or a deadlock inside it means `finally` is never reached.\n>\n> `finally` is therefore in-process cleanup, not crash recovery. State that must survive a crash relies on durable mechanisms such as transactions or recovery logic that runs on restart.\n>\n> [Microsoft: Exception-handling statements](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/exception-handling-statements) · [Microsoft: Environment.FailFast](https://learn.microsoft.com/en-us/dotnet/api/system.environment.failfast?view=net-10.0)\n\n# References\n\n- [Best practices for exceptions](https://learn.microsoft.com/dotnet/standard/exceptions/best-practices-for-exceptions)"
+    }
+  ],
+  "version": 1,
+  "createdAt": 1793547999299,
+  "topic": "Choose a failure and cleanup boundary that preserves the cause and releases owned resources",
+  "notes": [
+    "Home/Programming/NET/CSharp/Fundamentals/Exception Handling.md"
+  ],
+  "mastery": "Assets/Qard/Courses/Programming Mastery.md",
+  "course": "Programming",
+  "objective": "failure-contracts",
+  "steps": [
+    {
+      "title": "Recall method calls",
+      "explain": "A variable stores a value. For an `int` parameter passed by value, a method call copies the argument's value into the parameter. The caller's variable and the parameter are separate storage locations.\n\nIn the check, `count` starts at `4`. Calling `Advance(count)` gives the parameter `value` its own copy of `4`. Adding one changes that parameter to `5`; it does not write into `count`.\n\nReturning a value is another operation. `return value;` supplies `5` as the result of the call. The caller's assignment stores that result in `next`. Therefore, `count` remains `4`, and `next` becomes `5`.\n\nThese are standard C# parameter-passing rules. Your **Exception Handling** note builds on this call-and-return structure: an exception carries a failure across method boundaries when normal execution cannot continue. Understanding where a result normally goes gives us a starting point for tracing what happens when a call fails.",
+      "connect": "This opening check revisits method calls and caller storage from your earlier parameter-passing lesson. Next, we will trace a call that throws, then choose where to handle its failure and release resources.",
+      "checkFirst": true,
+      "check": {
+        "id": "k1",
+        "type": "calc",
+        "prompt": "Consider this C# code:\n\n```csharp\nint count = 4;\nint next = Advance(count);\n\nstatic int Advance(int value)\n{\n    value += 1;\n    return value;\n}\n```\n\nAfter the call completes, what values do `count` and `next` contain, and how do parameter passing and the return value explain them?",
+        "marks": 3,
+        "rubric": [
+          {
+            "point": "States that count remains 4.",
+            "marks": 1
+          },
+          {
+            "point": "Explains that the by-value int parameter receives a copy, so changing value does not change count.",
+            "marks": 1
+          },
+          {
+            "point": "States that next becomes 5 because Advance returns its updated parameter value and the caller assigns that result to next.",
+            "marks": 1
+          }
+        ],
+        "model": "`count` is `4`, and `next` is `5`. The parameter `value` receives a copy of `count`, so incrementing it changes only that copy. The method returns `5`, which the caller assigns to `next`.",
+        "source": {
+          "path": "Home/Programming/NET/CSharp/Fundamentals/Exception Handling.md"
+        },
+        "objective": "failure-contracts",
+        "goal": "apply"
+      },
+      "misconceptions": [
+        {
+          "signs": "Says count becomes 5 because the method changes its argument.",
+          "reteach": "There is no `ref` parameter here. The `int` value is copied into `value`, so the increment changes the parameter's storage while `count` stays `4`."
+        },
+        {
+          "signs": "Says next is 4 because count never changes.",
+          "reteach": "`next` receives the method's return value. The parameter changes to `5` before it is returned, so the returned value is `5` even though `count` stays `4`."
+        },
+        {
+          "signs": "Says returning 5 also writes 5 back into count.",
+          "reteach": "`return` supplies a result to the call expression. The assignment names its destination: `next = Advance(count)`. It does not assign the result to `count`."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "Trace a failure to its handler",
+      "explain": "A method call normally returns control to its caller. If the call produces a value, the caller can then assign that value to its storage. A thrown exception interrupts this normal path: the call does not supply a result, so an assignment waiting for that result does not happen.\n\nYour **Exception Handling** note explains how execution finds another path. Starting where the exception was thrown, the runtime searches outward through enclosing handlers and callers for a matching `catch`. The exception's type determines which handlers can match.\n\nOnce a handler is selected, execution unwinds toward it. Any `finally` blocks on that path run before the selected handler begins. This lets a method perform its cleanup even when a caller handles its failure. Cleanup and recovery can therefore belong to different methods.\n\nAfter a `catch` finishes normally, execution continues after its associated `try`/`catch` statement. It does not return to the failed statement. Earlier changes are not automatically undone: exceptions redirect control; they do not roll back storage.",
+      "connect": "The previous step separated a method call from the caller's storage. Now that distinction explains why a failed call leaves its pending assignment unfinished, while unwinding gives the method a place to release resources it owns.",
+      "checkFirst": true,
+      "check": {
+        "id": "k2",
+        "type": "long",
+        "prompt": "Trace this C# code. What is printed, in order, and why does `value` have that final value? Assume the print calls succeed.\n\n```csharp\nint value = 7;\ntry\n{\n    value = Read();\n    Console.WriteLine(\"assigned\");\n}\ncatch (InvalidOperationException)\n{\n    Console.WriteLine(\"caught\");\n}\nConsole.WriteLine(value);\n\nstatic int Read()\n{\n    try\n    {\n        throw new InvalidOperationException();\n    }\n    finally\n    {\n        Console.WriteLine(\"cleanup\");\n    }\n}\n```",
+        "marks": 4,
+        "rubric": [
+          {
+            "point": "Places `cleanup` first because Read's finally runs during unwinding before the caller's handler executes.",
+            "marks": 1
+          },
+          {
+            "point": "Places `caught` next because InvalidOperationException matches the caller's catch.",
+            "marks": 1
+          },
+          {
+            "point": "Places `7` last because Read supplies no result, so the assignment does not replace the existing value.",
+            "marks": 1
+          },
+          {
+            "point": "Explains that `assigned` is skipped and execution continues after the try/catch rather than returning to the failed statement.",
+            "marks": 1
+          }
+        ],
+        "model": "The output is:\n\n```text\ncleanup\ncaught\n7\n```\n\nThe exception matches the caller's `catch`. Before that handler runs, unwinding executes `Read`'s `finally`, printing `cleanup`. The handler then prints `caught`.\n\n`Read()` never returns a value, so `value = Read()` never completes its assignment. `value` remains `7`. The remaining statement in the `try`, which would print `assigned`, is skipped. After the handler finishes, execution continues after the `try`/`catch` and prints `7`.",
+        "source": {
+          "path": "Home/Programming/NET/CSharp/Fundamentals/Exception Handling.md",
+          "heading": "Handler Boundaries"
+        },
+        "objective": "failure-contracts",
+        "goal": "apply"
+      },
+      "misconceptions": [
+        {
+          "signs": "Prints `caught` before `cleanup`, or omits `cleanup`.",
+          "reteach": "Selecting a handler and executing it are separate steps. After selecting the caller's handler, the runtime unwinds out of `Read`, running its `finally` before entering that handler."
+        },
+        {
+          "signs": "Says `value` becomes 0 or receives an exception.",
+          "reteach": "The assignment needs a returned integer. Throwing supplies no integer, so this assignment never writes to `value`. Its previous value, `7`, remains."
+        },
+        {
+          "signs": "Includes `assigned` after the handler, or says the failed call is retried automatically.",
+          "reteach": "A normally completed handler continues after its associated `try`/`catch`. It does not resume inside the interrupted `try` or retry the failed call."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "Preserve or translate the cause",
+      "explain": "An exception carries information about a failed operation: its type identifies the kind of failure, and its stack trace records the path to it. A handler that cannot recover still needs to pass that information to its caller.\n\nYour **Exception Handling** note distinguishes two choices.\n\nIf the failure already means what callers need it to mean, use `throw;` inside the `catch`. This rethrows the current exception and preserves its original stack trace. Logging the failure does not itself create a reason to change its type. Using `throw ex;` restarts the stack trace at the rethrow point, losing the original call path.\n\nWrapping is useful when a boundary must give the failure new meaning. A report-loading method might expose `ReportLoadException` so callers can handle report failures without depending on storage details. It can throw `new ReportLoadException(\"Could not load report.\", ex)`. Passing `ex` as the inner exception preserves the underlying cause, including its stack trace.\n\nThat translation changes handler selection: an outer `catch (IOException)` does not match an unrelated `ReportLoadException` merely because its inner exception is an `IOException`. Wrapping therefore needs to serve the caller's failure contract.",
+      "connect": "The previous step traced a failure to a matching handler. Now that handler must decide what failure to pass onward, preserving the cause before the next step adds cleanup for owned resources.",
+      "checkFirst": true,
+      "check": {
+        "id": "k3",
+        "type": "long",
+        "prompt": "Both methods below catch an `IOException` and cannot recover. Complete each `catch` body, then briefly explain how each choice preserves the cause.\n\n**A.** The method only records the failure. Its callers already handle `IOException`.\n\n```csharp\ncatch (IOException ex)\n{\n    Log(ex);\n    // Pass the failure onward.\n}\n```\n\n**B.** The report-loading API promises callers a `ReportLoadException` for storage failures. Assume that type has a constructor accepting a message and an inner exception.\n\n```csharp\ncatch (IOException ex)\n{\n    // Translate the failure for this API's callers.\n}\n```",
+        "marks": 4,
+        "rubric": [
+          {
+            "point": "A uses `throw;` after logging.",
+            "marks": 1
+          },
+          {
+            "point": "Explains that A preserves the original exception type and original stack trace.",
+            "marks": 1
+          },
+          {
+            "point": "B throws a `ReportLoadException` with useful report-loading context and passes `ex` as its inner exception.",
+            "marks": 1
+          },
+          {
+            "point": "Explains that B exposes the promised failure type while keeping the original cause and its stack trace available through `InnerException`.",
+            "marks": 1
+          }
+        ],
+        "model": "**A:**\n\n```csharp\ncatch (IOException ex)\n{\n    Log(ex);\n    throw;\n}\n```\n\nThe failure already has the type callers expect. `throw;` preserves that exception and its original stack trace.\n\n**B:**\n\n```csharp\ncatch (IOException ex)\n{\n    throw new ReportLoadException(\"Could not load report.\", ex);\n}\n```\n\nThe wrapper provides the API's promised `ReportLoadException`. Its `InnerException` retains the original `IOException`, including its message and stack trace.",
+        "source": {
+          "path": "Home/Programming/NET/CSharp/Fundamentals/Exception Handling.md",
+          "heading": "Questions"
+        },
+        "objective": "failure-contracts",
+        "goal": "apply"
+      },
+      "misconceptions": [
+        {
+          "signs": "Uses `throw ex;` in A and says it preserves the original call path.",
+          "reteach": "`throw ex;` restarts the stack trace at this throw. Inside the active `catch`, `throw;` passes the current exception onward with its original stack trace intact."
+        },
+        {
+          "signs": "Creates `ReportLoadException` using only `ex.Message`.",
+          "reteach": "Copying a message keeps only text. Passing `ex` as the inner exception retains the original exception's type, message, stack trace and any further nested cause."
+        },
+        {
+          "signs": "Uses `throw;` in B because callers can handle the original storage exception.",
+          "reteach": "B promises callers a report-level failure type. Rethrowing `IOException` preserves diagnostics but does not meet that contract. Wrapping with `ex` supplies the promised type and keeps the storage failure available as the cause."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "Release owned resources",
+      "explain": "Owning a resource means being responsible for ending its lifetime. Passing a resource reference into another method does not, by itself, transfer that responsibility.\n\nSuppose a method opens a file and then processes it. Processing can finish normally or throw. Cleanup placed after processing covers only normal completion: an exception skips that statement. Cleanup therefore needs a boundary that covers both exits.\n\nYour **Exception Handling** note identifies `finally` as that boundary. During normal execution or stack unwinding to a handler, it runs when control leaves the protected block. For disposable resources, `using` expresses this disposal boundary directly; `await using` handles asynchronous disposal. Place the boundary around the work that needs the resource, immediately after successful acquisition. A borrowed resource stays under its owner's control unless ownership was explicitly transferred.\n\nThe previous step preserved the cause through rethrowing or translation. Cleanup must preserve it too: if disposal throws while another exception is propagating, the disposal exception can replace the original. `using` does not prevent this. Where cleanup can fail, handle and record that secondary failure without letting it replace the primary one. If the operation succeeded, a cleanup failure still needs to be reported as a failure.\n\nThese are in-process cleanup boundaries; they do not guarantee cleanup after abrupt process termination.",
+      "connect": "Rethrowing or translating preserves why the operation failed. Choosing an ownership boundary completes the design: cleanup is attempted on both success and failure, while the original cause remains available.",
+      "checkFirst": true,
+      "check": {
+        "id": "k4",
+        "type": "long",
+        "prompt": "A method receives a caller-owned stream and successfully opens a second stream that it owns. It processes both streams. Processing can throw `TimeoutException`, and disposing the owned stream can also throw. An outer caller handles failures.\n\nExplain a cleanup design that respects ownership, covers successful and failed processing, and preserves the processing failure when disposal also fails. Include what should happen if processing succeeds but disposal fails. Code is optional.",
+        "marks": 4,
+        "rubric": [
+          {
+            "point": "Disposes the stream the method owns and leaves the caller-owned stream open because ownership was not transferred.",
+            "marks": 1
+          },
+          {
+            "point": "Places disposal in a finally boundary, or an equivalent disposal scope, covering both successful processing and stack unwinding after failure.",
+            "marks": 1
+          },
+          {
+            "point": "When both processing and disposal fail, prevents the disposal exception from replacing the TimeoutException; records the cleanup failure safely and preserves the original exception and stack trace.",
+            "marks": 1
+          },
+          {
+            "point": "When processing succeeds but disposal fails, reports or propagates the cleanup failure instead of reporting overall success.",
+            "marks": 1
+          }
+        ],
+        "model": "The method disposes only the stream it opened. The caller retains responsibility for the stream it supplied.\n\nAfter opening its stream, the method puts processing inside a `try` with disposal in `finally`. This attempts disposal after successful processing and when an exception unwinds toward the outer handler.\n\nThe method tracks whether processing failed. If processing throws, it preserves that exception—for example, by recording that a primary failure exists and using `throw;` in the processing `catch`. During cleanup, a disposal exception is caught and recorded through a reporting path that does not itself throw. The original `TimeoutException` then continues to the caller with its stack trace preserved. An ordinary `using` alone would not prevent disposal from masking it.\n\nIf processing succeeded, there is no primary failure to preserve. A disposal exception should propagate, or be explicitly reported as a failed outcome, so the method does not claim success.",
+        "source": {
+          "path": "Home/Programming/NET/CSharp/Fundamentals/Exception Handling.md",
+          "heading": "Pitfalls"
+        },
+        "objective": "failure-contracts",
+        "goal": "apply"
+      },
+      "misconceptions": [
+        {
+          "signs": "Places disposal after processing, or only inside catch.",
+          "reteach": "Code after processing is skipped when processing throws. Code inside catch is skipped when processing succeeds. A `finally` boundary covers both exits during ordinary execution and stack unwinding."
+        },
+        {
+          "signs": "Disposes both streams because the method used both.",
+          "reteach": "Using a resource does not establish ownership. The method owns the stream it opened; the caller still owns the supplied stream and may need it after the call."
+        },
+        {
+          "signs": "Assumes using preserves the processing exception automatically, or suppresses every disposal failure.",
+          "reteach": "`using` arranges disposal, but a disposal exception can replace an exception already propagating. Preserve the primary failure and record the cleanup failure separately. When processing succeeded, the cleanup failure must still make the outcome a failure."
+        }
+      ],
+      "figure": ""
+    }
+  ],
+  "state": [
+    {
+      "asks": [],
+      "answer": {
+        "text": "count will be 4, next will be 5. count didnt changed because when we passing int, which is value type to the parameter, we passing copy of its value, not the reference to the variable",
+        "confidence": "sure"
+      },
+      "mark": {
+        "awarded": [
+          true,
+          true,
+          false
+        ],
+        "annotations": [
+          {
+            "quote": "count will be 4",
+            "kind": "correct",
+            "note": "You correctly identified that count stays unchanged."
+          },
+          {
+            "quote": "we passing copy of its value",
+            "kind": "correct",
+            "note": "You correctly explained that the parameter receives a copy."
+          },
+          {
+            "quote": "next will be 5",
+            "kind": "missing",
+            "note": "You needed to explain how the returned value is assigned to next."
+          }
+        ],
+        "mistake": "incomplete",
+        "feedback": "You identified both values and explained the copy, but did not explain the return and assignment.",
+        "score": 2
+      },
+      "reply": "Your values and explanation of the copied parameter are correct. What does `return value` supply to the caller, and where does the caller store it?"
+    },
+    {
+      "asks": [],
+      "answer": {
+        "text": "we will have the following:\n\n\"cleanup\"\n\"caught\"\n7\n\nthe value is 7 because we Read didnt reassigned it, and rather throw an exception, after which was a cleanup. Then exception was caught",
+        "confidence": "sure"
+      },
+      "mark": {
+        "awarded": [
+          true,
+          true,
+          true,
+          false
+        ],
+        "annotations": [
+          {
+            "quote": "after which was a cleanup",
+            "kind": "correct",
+            "note": "You placed cleanup before the handler."
+          },
+          {
+            "quote": "Then exception was caught",
+            "kind": "correct",
+            "note": "You identified that the exception is caught after cleanup."
+          },
+          {
+            "quote": "the value is 7",
+            "kind": "correct",
+            "note": "You recognized that the failed call does not reassign the value."
+          },
+          {
+            "quote": "",
+            "kind": "missing",
+            "note": "You needed to explain that `assigned` is skipped and execution continues after the `try`/`catch`."
+          }
+        ],
+        "mistake": "incomplete",
+        "feedback": "You traced the output and value correctly, but did not explain what happens to the remaining statement in the `try`.",
+        "score": 3
+      },
+      "reply": "Your output and explanation of `value` are correct. What happens to `Console.WriteLine(\"assigned\")`, and where does execution continue after the catch finishes?"
+    },
+    {
+      "asks": [],
+      "answer": {
+        "text": "A:\ncatch (IOException ex)\n{\n    Log(ex);\n    throw; re-trowing original exception to preserve the trace\n}\n\ncatch (IOException ex)\n{\n    throw new ReportLoadException(ex) // Assuming that ReportLoadException have construction that accepts the Exception and fills all the fields from ex, preserving trace\n}",
+        "confidence": "unsure"
+      },
+      "mark": {
+        "awarded": [
+          true,
+          false,
+          false,
+          false
+        ],
+        "annotations": [
+          {
+            "quote": "throw;",
+            "kind": "correct",
+            "note": "You rethrow the caught exception after logging it."
+          },
+          {
+            "quote": "preserve the trace",
+            "kind": "missing",
+            "note": "You needed to state that the original exception type and stack trace are both preserved."
+          },
+          {
+            "quote": "new ReportLoadException(ex)",
+            "kind": "missing",
+            "note": "You needed to use the specified message-and-inner-exception constructor, providing report-loading context and passing `ex` as the inner exception."
+          },
+          {
+            "quote": "preserving trace",
+            "kind": "missing",
+            "note": "You needed to explain that callers receive the promised `ReportLoadException` and can find the original cause and its stack trace through `InnerException`."
+          },
+          {
+            "quote": "fills all the fields from ex",
+            "kind": "vague",
+            "note": "You assume a constructor copies the original exception's fields, but the prompt specifies a message and an inner exception."
+          }
+        ],
+        "mistake": "incomplete",
+        "feedback": "Your rethrow is correct, but the explanation and translation need the original type, report context, and inner-exception relationship made explicit.",
+        "score": 1
+      },
+      "reply": "Your `throw;` choice is right. What happens to the exception’s type as well as its stack trace? For B, use the constructor described in the question: what message would give report-loading context, and where would `ex` go so the original cause remains accessible?"
+    },
+    {
+      "asks": [],
+      "answer": {
+        "unknown": true
+      },
+      "mark": {
+        "score": 0,
+        "awarded": [
+          false,
+          false,
+          false,
+          false
+        ],
+        "annotations": [],
+        "mistake": "unknown",
+        "feedback": "You said you didn't know. The model answer shows what was needed."
+      },
+      "reply": "No problem. Read the explanation, then look at the model answer."
+    }
+  ],
+  "current": 3,
+  "probe": {
+    "questions": [],
+    "answers": {},
+    "submitted": true,
+    "marks": {},
+    "findings": "There was no probe, so there is no answer yet to show what you understand about failure and cleanup boundaries."
+  },
+  "map": {
+    "title": "Failure and cleanup boundaries",
+    "plan": "We will start with method calls and caller storage from your earlier parameter-passing lesson, using a small example to check what you remember. Then we will use the Exception Handling note to trace a failure, preserve its cause, and release resources owned by the method.",
+    "mermaid": "graph TD\nA[\"Method calls and caller storage\"] --> B[\"Failure travels to a handler\"]\nB --> C[\"Preserve or translate the cause\"]\nC --> D[\"Release owned resources without masking failure\"]",
+    "objective": "failure-contracts",
+    "steps": [
+      {
+        "title": "Recall method calls",
+        "why": "A quick check of method calls and caller storage gives us a starting point for tracing a failure across methods."
+      },
+      {
+        "title": "Trace a failure to its handler",
+        "why": "Following the failure shows where recovery can happen and where cleanup runs."
+      },
+      {
+        "title": "Preserve or translate the cause",
+        "why": "Choosing between rethrowing and wrapping keeps the information callers need to understand the failure."
+      },
+      {
+        "title": "Release owned resources",
+        "why": "Choosing a cleanup boundary completes the operation without losing the original failure."
+      }
+    ]
+  },
+  "stepsFor": "[\"Failure and cleanup boundaries\",[\"Recall method calls\",\"Trace a failure to its handler\",\"Preserve or translate the cause\",\"Release owned resources\"]]",
+  "accepted": true,
+  "finishedAt": 1793548738401,
+  "close": {
+    "summary": "The lesson connected method calls and caller storage to exception propagation, cause preservation, and resource cleanup. You correctly identified values and explained parameter copying, but did not explain how a returned value reaches the caller through assignment. You traced failure output and the resulting value correctly, but omitted that an exception skips the remaining statements in the `try` block. Your rethrow syntax was correct; explaining the preserved exception type and stack trace, and translating a failure with report context and the original exception as `InnerException`, need more practice. Resource ownership and cleanup were the largest gap: choosing `using`, `await using`, or `finally`, releasing resources owned by the method, and preventing cleanup failures from masking the original cause.",
+    "cards": [
+      {
+        "front": "A caller starts with `int result = 10;` and executes `try { result = Calculate(); PrintDone(); } catch (InvalidOperationException) { }`. What happens if `Calculate()` returns `8`, or throws `InvalidOperationException`?",
+        "back": "If it returns `8`, the assignment stores `8` in `result`, then `PrintDone()` runs. If it throws, no value returns, the assignment never happens, and `PrintDone()` is skipped. The matching catch runs; `result` remains `10`."
+      },
+      {
+        "front": "Inside a catch that cannot recover and needs no new failure context, how should the exception be propagated, and what is preserved?",
+        "back": "Use `throw;`. It rethrows the same exception, preserving its type and original stack trace. `throw ex;` restarts the stack trace at the rethrow site."
+      },
+      {
+        "front": "A report boundary catches `IOException ex` and must translate it into `InvalidOperationException` with report context. What should it throw, and where is the original cause?",
+        "back": "For example: `throw new InvalidOperationException(\"Could not generate report 42.\", ex);`. The outer exception supplies the new type and report context. Its `InnerException` is the original `IOException`, retaining that exception's message and stack trace."
+      },
+      {
+        "front": "A method opens its own disposable stream and also receives a caller-owned stream. How should it arrange cleanup, including when work throws?",
+        "back": "Use `using` for its owned stream, or `await using` for asynchronous disposal. Leave the caller-owned stream open unless ownership was explicitly transferred. Use `finally` for other required cleanup; a cleanup exception that escapes during unwinding can mask the original failure."
+      }
+    ],
+    "noteEdit": {
+      "path": "Home/Programming/NET/CSharp/Fundamentals/Exception Handling.md",
+      "heading": "Handler Boundaries",
+      "text": "Cleanup follows resource ownership. A method normally owns resources it acquires and releases them when their scope ends, including during exception unwinding: `using` calls `Dispose()`, and `await using` awaits `DisposeAsync()`. A resource borrowed from a caller remains the caller's responsibility unless the contract explicitly transfers ownership. Other required cleanup belongs in `finally`; acquisition that throws before returning a resource leaves nothing for that declaration to dispose. Disposal can also throw, so `using` alone does not guarantee preservation of an earlier failure: when both failures are possible, the boundary needs an explicit policy that preserves the original cause and records the cleanup failure."
+    },
+    "cardState": {},
+    "note": "Assets/Qard/Lessons/2026-11-01 Choose a failure and cleanup boundary that preserves the cau.md",
+    "nextCheck": "2026-11-04"
+  }
+}

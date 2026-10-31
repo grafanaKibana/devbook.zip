@@ -1,0 +1,9 @@
+{
+  "id": "devbook-learn-sync",
+  "name": "DevBook Learn Sync",
+  "version": "0.1.0",
+  "minAppVersion": "1.7.2",
+  "description": "Track changes to existing Learn source notes without resetting study progress.",
+  "author": "DevBook",
+  "isDesktopOnly": false
+}

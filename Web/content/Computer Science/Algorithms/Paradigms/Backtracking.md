@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-06-20T05:33:50.000Z
-modified: 2026-10-28T12:33:42.000Z
-published: 2026-10-28T20:52:55.146Z
+modified: 2026-11-02T09:03:54.806Z
+published: 2026-11-02T11:10:14.409Z
 topic:
   - Computer Science
 subtopic:
@@ -155,7 +155,7 @@ Appending the live buffer as a solution stores a reference that later choices ov
 
 <!-- qard-id: 919b1d09-824b-4832-afeb-7606885b2743 -->
 
-> [!qard]- How does backtracking work, and how does it relate to brute-force search?
+> [!qard]- How does backtracking prune a brute-force search?
 > Backtracking is a form of brute-force search that builds candidates one choice at a time. It abandons a partial candidate as soon as that candidate is known to be unsuitable.
 >
 > The search process:

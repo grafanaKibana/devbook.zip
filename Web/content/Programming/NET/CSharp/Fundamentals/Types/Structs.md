@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-02-18T19:18:52.000Z
-modified: 2026-10-28T12:33:42.000Z
-published: 2026-10-28T20:52:55.172Z
+modified: 2026-11-02T09:03:54.806Z
+published: 2026-11-02T11:10:14.421Z
 topic:
   - Programming
 subtopic:
@@ -12,6 +12,8 @@ level:
   - "4"
 priority: Medium
 status: Ready to Repeat
+qard-deck: Programming
+qard-topic: NET/CSharp/Fundamentals/Types/Structs
 ---
 
 A struct is a C# value type. Assignment copies its fields as a new value, including any references those fields contain. That behavior fits small, immutable data representing one logical value, such as a coordinate or money amount.
@@ -132,6 +134,50 @@ Constrained generic calls can invoke interface members without first converting 
 
 Calls to members declared on `object` deserve the same care. The JIT can use constrained calls, while some interface or object-typed paths require a box. `EqualityComparer<T>.Default` is usually the right generic equality boundary.
 
+# Copies During Disposal
+
+A `using (existingValue)` statement captures the resource expression once. For a struct, that captures a value copy. Mutating the copy during `Dispose` does not change fields on the original local:
+
+```csharp
+var resource = new Resource();
+using (resource) { }
+// Prints False: disposal changed the captured copy.
+Console.WriteLine(resource.IsDisposed);
+
+public struct Resource : IDisposable
+{
+    public bool IsDisposed { get; private set; }
+    public void Dispose() => IsDisposed = true;
+}
+```
+
+The disposal call for this value-type case need not box. The distinction comes from the captured value, not an obligatory conversion to `IDisposable`. A reference-type resource instead copies a reference to the same object. A `using` declaration that declares the resource has its own resource variable; the copy observation above applies specifically to capturing an existing struct expression.
+
+# User-Defined Conversions
+
+A struct can define conversions between itself and another type. An `implicit` conversion needs no cast at the call site, so it should preserve information and avoid surprising failures. An `explicit` conversion makes the caller acknowledge validation, information loss, or another meaningful change.
+
+```csharp
+public readonly struct Percentage
+{
+    public decimal Value { get; }
+
+    public Percentage(decimal value)
+    {
+        if (value is < 0 or > 100)
+        {
+            throw new ArgumentOutOfRangeException(nameof(value));
+        }
+        Value = value;
+    }
+
+    public static implicit operator decimal(Percentage value) => value.Value;
+    public static explicit operator Percentage(decimal value) => new(value);
+}
+```
+
+Converting a valid `Percentage` to `decimal` preserves its number. Converting an arbitrary decimal back can fail validation, so it requires a cast. A conversion can also make a built-in arithmetic operator applicable without declaring that operator on the struct. Exposing that convenience indiscriminately can discard the domain meaning of a unit or validated value.
+
 # Memory Layout
 
 A struct's managed size includes field storage and alignment padding. For example, a `bool` followed by a `long` may occupy 16 bytes rather than nine. `[StructLayout(LayoutKind.Sequential)]` preserves field order for layout-sensitive interop, while `Explicit` uses `[FieldOffset]`. Auto layout leaves ordering to the runtime and is unsuitable for unmanaged interop.
@@ -169,6 +215,14 @@ Readonly values remove most accidental mutation paths. APIs that need in-place u
 - **Struct or class:** a struct gives value-copy semantics and can avoid a separate object allocation. A class makes identity sharing cheap and avoids copying a large payload.
 - **Readonly or mutable:** readonly is the safe default for value objects. Mutable structs fit narrow low-level APIs where mutation is explicit.
 - **By value or by reference:** by-value calls are simplest and often fastest for small values. Ref semantics earn their complexity only when measurement shows copy cost matters.
+
+# Questions
+
+> [!qard]- Why can `using(existingStruct)` dispose a copy without changing the original struct's disposal flag?
+> The using statement evaluates and captures the resource expression once. Capturing a struct copies its fields, and `Dispose` operates on that captured resource value. Its field mutation is not a mutation of the original local. The value-type disposal path does not require boxing to explain this result. Reference-type resources copy a reference to the same object, and using declarations that introduce their own resource variable are a different source shape. [C# specification: using statement](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/statements#1314-the-using-statement)
+
+> [!qard]- When should a user-defined conversion be explicit instead of implicit?
+> An explicit conversion fits when it can lose information, fail validation, or surprise a caller. An implicit conversion participates without a cast in assignment and overload applicability, so it should preserve information and behave predictably. A validated percentage can convert implicitly to its decimal value, but constructing one from an arbitrary decimal should be explicit because the input may be outside the allowed range. [Microsoft: user-defined conversions](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/operators/user-defined-conversion-operators)
 
 # References
 

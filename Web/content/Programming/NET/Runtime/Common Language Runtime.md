@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-02-10T16:03:55.000Z
-modified: 2026-10-28T12:33:42.000Z
-published: 2026-10-28T20:52:55.172Z
+modified: 2026-11-02T09:03:54.806Z
+published: 2026-11-02T11:10:14.423Z
 topic:
   - Programming
 subtopic:
@@ -127,9 +127,14 @@ Managed exception dispatch uses two logical passes. The search pass walks frames
 
 <!-- qard-id: 1df86558-fa6b-4e81-85a8-817e1ea6a4b7 -->
 
-> [!qard]- How do managed and unmanaged code differ, and why does interop require careful lifetime management?
+> [!qard]- How do managed and unmanaged code differ?
 > Managed code runs under the CLR and relies on its services, such as garbage collection of managed objects, exception handling and the runtime type system. Unmanaged (native) code runs outside those services. It follows a native platform ABI and its own ownership rules, such as explicit freeing or reference counting.
 >
+> Interop declarations must also match the native ABI, including calling convention and data layout; that determines call correctness rather than resource lifetime.
+>
+> [Microsoft: Native interoperability ABI support](https://learn.microsoft.com/en-us/dotnet/standard/native-interop/abi-support) · [Microsoft: SafeHandle class](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.safehandle)
+
+> [!qard]- Why does interop require explicit resource lifetime management?
 > Interop needs careful lifetime management because the GC manages only one side of the boundary:
 >
 > - The GC tracks managed objects only. It cannot tell when a native handle or buffer is no longer needed.
@@ -142,7 +147,7 @@ Managed exception dispatch uses two logical passes. The search pass walks frames
 
 <!-- qard-id: 58941e73-5fa8-4d3c-bbdf-87e201b3d6d8 -->
 
-> [!qard]- How does .NET turn IL into machine code, and when do JIT, ReadyToRun and Native AOT each fit?
+> [!qard]- How does .NET turn IL into machine code?
 > Assemblies normally contain IL, which the processor cannot run directly. By default the runtime's JIT compiler turns each method into machine code when it is first needed. ReadyToRun moves part of that work to publish time while keeping the JIT. Native AOT moves all of it to publish time and ships no JIT.
 >
 > | Aspect | JIT | ReadyToRun | Native AOT |
@@ -152,6 +157,9 @@ Managed exception dispatch uses two logical passes. The search pass walks frames
 > | Runtime flexibility | Dynamic loading and runtime code generation work. | Same as JIT, because the IL is kept. | Restricted: no runtime code generation, and code must work with trimming. |
 > | Main cost | Compilation time on first use. | Larger assemblies built for a specific target. | Compatibility constraints and platform-specific output. |
 >
+> [Microsoft: .NET application publishing overview](https://learn.microsoft.com/en-us/dotnet/core/deploying/) · [Microsoft: Native AOT deployment](https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/)
+
+> [!qard]- When do JIT, ReadyToRun, and Native AOT each fit?
 > JIT is the flexible default, especially when an app loads code dynamically or generates code at run time. ReadyToRun reduces startup compilation without giving up the JIT. Native AOT fits startup- and footprint-sensitive deployments whose code and dependencies work with AOT and trimming. ReadyToRun trades larger assemblies for less startup compilation, while Native AOT trades runtime flexibility for startup and footprint benefits, so the choice rests on measured startup and footprint needs and on the runtime features the app requires. Native AOT is not a universal upgrade.
 >
 > [Microsoft: .NET application publishing overview](https://learn.microsoft.com/en-us/dotnet/core/deploying/) · [Microsoft: Native AOT deployment](https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/)

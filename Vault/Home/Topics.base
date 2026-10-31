@@ -4,6 +4,11 @@ filters:
     - '!file.ext.containsAny("base", "canvas")'
     - '!file.path.startsWith("Templates")'
     - '!file.path.startsWith("Assets")'
+formulas:
+  study_area: 'if(file.path.startsWith("Home/Programming/"), "01 Programming", if(file.path.startsWith("Home/Computer Science/"), "02 Computer Science", if(file.path.startsWith("Home/Software Design/"), "03 Software Design", if(file.path.startsWith("Home/Networks/"), "04 Networks", if(file.path.startsWith("Home/Data Persistence/"), "05 Data Persistence", if(file.path.startsWith("Home/Security/"), "06 Security", if(file.path.startsWith("Home/Software Architecture/"), "07 Software Architecture", if(file.path.startsWith("Home/DevOps/") || file.path.startsWith("Home/Cloud/"), "08 DevOps and Cloud", if(file.path.startsWith("Home/AI & ML/"), "09 AI and ML", "10 Other")))))))))'
+properties:
+  formula.study_area:
+    displayName: Study area
 views:
   - type: table
     name: Table
@@ -38,3 +43,70 @@ views:
       - property: file.name
         direction: DESC
     cardSize: 300
+  - type: table
+    name: Learn next
+    filters:
+      and:
+        - 'file.path.startsWith("Home/")'
+        - 'status == "Ready to Repeat" || status == "Repetition"'
+    groupBy:
+      property: formula.study_area
+      direction: ASC
+    order:
+      - file.name
+      - formula.study_area
+      - subtopic
+      - status
+      - priority
+      - level
+    sort:
+      - property: formula.study_area
+        direction: ASC
+      - property: file.folder
+        direction: ASC
+      - property: file.name
+        direction: ASC
+  - type: table
+    name: Needs material
+    filters:
+      and:
+        - 'file.path.startsWith("Home/")'
+        - 'status == "Creation" || status == "Not-Started"'
+    groupBy:
+      property: formula.study_area
+      direction: ASC
+    order:
+      - file.name
+      - formula.study_area
+      - subtopic
+      - status
+      - priority
+    sort:
+      - property: formula.study_area
+        direction: ASC
+      - property: file.folder
+        direction: ASC
+      - property: file.name
+        direction: ASC
+  - type: table
+    name: Previously learned
+    filters:
+      and:
+        - 'file.path.startsWith("Home/")'
+        - 'status == "Done"'
+    groupBy:
+      property: formula.study_area
+      direction: ASC
+    order:
+      - file.name
+      - formula.study_area
+      - subtopic
+      - status
+      - priority
+    sort:
+      - property: formula.study_area
+        direction: ASC
+      - property: file.folder
+        direction: ASC
+      - property: file.name
+        direction: ASC

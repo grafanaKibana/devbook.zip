@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-14T20:57:52.000Z
-modified: 2026-10-28T12:33:42.000Z
-published: 2026-10-28T20:52:55.169Z
+modified: 2026-11-02T09:03:54.806Z
+published: 2026-11-02T11:10:14.415Z
 topic:
   - Programming
 subtopic:
@@ -97,8 +97,13 @@ For short synchronous state changes inside one process, `lock` is the smallest c
 
 # Questions
 
-> [!qard]- What is a race condition, and how does `lock` prevent it?
-> A race condition occurs when the result depends on the timing of threads that access shared state concurrently. `lock` prevents it by letting only one thread at a time run code protected by the same lock object, so one protected update cannot interleave with another.
+> [!qard]- What is a race condition?
+> A race condition occurs when a result depends on the timing of concurrent accesses to shared state. A read-modify-write sequence such as `_count++` can let two threads read the same old value, then overwrite one another's updates. A run that happens to produce the expected result does not prove the code is race-free.
+>
+> [Microsoft: Managed threading best practices](https://learn.microsoft.com/en-us/dotnet/standard/threading/managed-threading-best-practices) · [Microsoft: `lock` statement](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/lock)
+
+> [!qard]- How does `lock` prevent a lost-update race?
+> `lock` lets only one thread at a time run code protected by the same lock object, so protected updates cannot interleave.
 >
 > For example, two threads run `_count++` on a shared field. The increment is three steps: read the value, add one and write the result back.
 >
@@ -148,6 +153,15 @@ For short synchronous state changes inside one process, `lock` is the smallest c
 > With a one-permit `SemaphoreSlim`, a method that holds the permit and then calls code that waits on the same semaphore ends up waiting for itself. Without a timeout or cancellation, `Wait()` blocks forever and `WaitAsync()` never completes. The permit therefore belongs at one boundary in the call chain, with `Release()` in `finally` so that each acquisition is released exactly once.
 >
 > [Microsoft: `lock` statement](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/lock) · [Monitor.Enter](https://learn.microsoft.com/en-us/dotnet/api/system.threading.monitor.enter?view=net-10.0) · [SemaphoreSlim API](https://learn.microsoft.com/en-us/dotnet/api/system.threading.semaphoreslim?view=net-10.0)
+
+> [!qard]- When is `Interlocked` sufficient instead of `lock`?
+> `Interlocked` fits a supported atomic update to one shared location, such as incrementing a counter or exchanging a reference. Its read-modify-write operation cannot lose an update through interleaving:
+>
+> ```csharp
+> Interlocked.Increment(ref completedCount);
+> ```
+>
+> That one atomic operation does not make a sequence of operations or several related fields atomic. A check-then-update rule or a multi-field invariant needs a suitable synchronization design, often one lock around the entire decision and change. In a worker-count example, waiting for every worker to finish is also necessary before asserting the final count. [Microsoft: Interlocked](https://learn.microsoft.com/en-us/dotnet/api/system.threading.interlocked?view=net-10.0)
 
 # References
 

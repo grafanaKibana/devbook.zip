@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-02-15T16:27:13.000Z
-modified: 2026-10-28T12:33:42.000Z
-published: 2026-10-28T20:52:55.171Z
+modified: 2026-11-02T09:03:54.806Z
+published: 2026-11-02T11:10:14.419Z
 topic:
   - Programming
 subtopic:
@@ -112,7 +112,7 @@ var ctor = Expression.Lambda<Func<Jobs>>(Expression.New(typeof(Jobs))).Compile()
 
 # Questions
 
-> [!qard]- What is reflection in .NET, and what is it used for?
+> [!qard]- What is reflection in .NET?
 > Reflection is the ability of running code to inspect .NET metadata, such as assemblies, types, members and attributes, and to use that metadata to create objects or call members that the calling code does not name at compile time.
 >
 > It works in two phases:
@@ -120,7 +120,10 @@ var ctor = Expression.Lambda<Func<Jobs>>(Expression.New(typeof(Jobs))).Compile()
 > 1. **Inspect:** code obtains a `Type`, for example through `typeof(T)`, an object's `GetType()` or a loaded assembly. Objects such as `MethodInfo`, `PropertyInfo` and `ConstructorInfo` then describe its members, signatures and attributes.
 > 2. **Act (optional):** code creates an instance of a discovered type or invokes a discovered member late-bound, for example with `Activator.CreateInstance` or `MethodInfo.Invoke`.
 >
-> Typical uses are reading custom attributes, examining and instantiating types from an assembly, such as plug-ins that implement a known interface, and late binding to members selected at runtime.
+> [Microsoft: reflection overview](https://learn.microsoft.com/en-us/dotnet/fundamentals/reflection/overview) · [Microsoft: attributes and reflection](https://learn.microsoft.com/en-us/dotnet/csharp/advanced-topics/reflection-and-attributes/)
+
+> [!qard]- When is runtime reflection useful?
+> It is useful for reading custom attributes, examining and instantiating types from an assembly, such as plug-ins that implement a known interface, and late binding to members selected at runtime.
 >
 > The trade-off is a weaker contract. A misspelled member name or an incompatible signature is discovered only when the code runs, not by the compiler.
 >
@@ -164,6 +167,20 @@ var ctor = Expression.Lambda<Func<Jobs>>(Expression.New(typeof(Jobs))).Compile()
 > | Reflection | Code has to discover or read metadata at runtime, such as plug-ins loaded from a folder, members named by data, or attributes that a framework reads from known types | It is the most flexible option, but mistakes surface at runtime and repeated lookup and invocation cost more. In trimmed deployments, which include Native AOT, members reached only dynamically can be removed unless annotations such as `DynamicallyAccessedMembers` or explicit registration preserve them |
 >
 > [Microsoft: reflection overview](https://learn.microsoft.com/en-us/dotnet/fundamentals/reflection/overview) · [Microsoft: attributes and reflection](https://learn.microsoft.com/en-us/dotnet/csharp/advanced-topics/reflection-and-attributes/) · [Microsoft: source generators overview](https://learn.microsoft.com/en-us/dotnet/csharp/roslyn-sdk/source-generators-overview) · [Microsoft: prepare libraries for trimming](https://learn.microsoft.com/en-us/dotnet/core/deploying/trimming/prepare-libraries-for-trimming) · [C# specification: function member invocation](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#1266-function-member-invocation)
+
+> [!qard]- Why can name-only `GetMethod` throw before `Invoke` is reached?
+> More than one matching overload can make lookup throw `AmbiguousMatchException`. The arguments that would later be passed to `Invoke` do not select a `MethodInfo` retroactively. Lookup supplies the intended parameter types as well as visibility and instance/static flags:
+>
+> ```csharp
+> MethodInfo? method = typeof(Handler).GetMethod(
+>     "Handle",
+>     BindingFlags.Public | BindingFlags.Instance,
+>     binder: null,
+>     types: [typeof(string)],
+>     modifiers: null);
+> ```
+>
+> A null result means no matching member; an ambiguous result is a different lookup failure. Invocation begins only after selecting the member. [Microsoft: Type.GetMethod](https://learn.microsoft.com/en-us/dotnet/api/system.type.getmethod?view=net-10.0)
 
 # References
 

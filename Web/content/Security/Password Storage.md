@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-18T07:07:47.000Z
-modified: 2026-10-28T12:33:42.000Z
-published: 2026-10-28T20:52:55.177Z
+modified: 2026-11-02T09:03:54.806Z
+published: 2026-11-02T11:10:14.424Z
 topic:
   - Security
 subtopic:
@@ -53,7 +53,7 @@ A stolen verifier table gives an attacker an offline test with no service-side r
 
 # Questions
 
-> [!qard]- How should a service store and verify user passwords?
+> [!qard]- How should a service store user passwords?
 > A service stores each password as a verifier produced by a slow, salted password-hashing function. It never stores plaintext, reversibly encrypted text or a fast general-purpose hash. The service only needs to check a password, not recover it, and the function's deliberate cost makes each guess against a stolen table expensive.
 >
 > **Storing:** OWASP currently recommends Argon2id with at least 19 MiB of memory, 2 iterations and a parallelism of 1. That configuration is a floor, and the cost is raised as far as the authentication servers can sustain. When Argon2id is unavailable, scrypt is the next option, and PBKDF2 fits systems that require FIPS-140 compliance. A maintained library generates a unique random salt for every password. It encodes the algorithm, its cost parameters, the salt and the derived output in one record:
@@ -62,7 +62,10 @@ A stolen verifier table gives an attacker an offline test with no service-side r
 > $argon2id$v=19$m=19456,t=2,p=1$<salt>$<output>
 > ```
 >
-> **Verifying a login:**
+> [OWASP: Password Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html)
+
+> [!qard]- How should a service verify a submitted password?
+> Verification uses the algorithm, parameters, salt, and derived output stored in the password-verifier record.
 >
 > 1. The algorithm, parameters and salt are read from the stored record.
 > 2. The same function runs on the submitted password with those stored settings.
@@ -75,12 +78,15 @@ A stolen verifier table gives an attacker an offline test with no service-side r
 
 <!-- qard-id: ca2e1f98-cc85-4972-913e-da79d30894eb -->
 
-> [!qard]- In password storage, what protection does a pepper add, and what does it cost?
-> A pepper is a secret key that is applied in addition to each password's salt. It is shared by all password records and stored outside the database. It protects against theft of the database alone: without the key, a stolen verifier cannot be tested against guessed passwords. In exchange, the system must protect and keep available one more critical secret, and rotation becomes harder. The pepper also does not replace a slow password-hashing function.
+> [!qard]- What protection does a password pepper add?
+> A pepper is a secret key that is applied in addition to each password's salt. It is shared by all password records and stored outside the database. It protects against theft of the database alone: without the key, a stolen verifier cannot be tested against guessed passwords. The pepper also does not replace a slow password-hashing function.
 >
 > **How it protects:** a salt is stored next to its verifier, so a thief who copies the table has everything needed to hash a guess and compare the result. A pepper is kept elsewhere, such as in a secrets vault or an HSM, and serves as the key for an extra step after password hashing. OWASP describes hashing the password as usual and then applying HMAC to the result, with the pepper as the key. NIST describes that extra secret-key step as either a keyed hash or an encryption operation. Without the key, a thief cannot compute the stored value for any guess.
 >
-> **What it costs:**
+> [OWASP: Password Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html) · [NIST SP 800-63B-4: Password verifiers](https://pages.nist.gov/800-63-4/sp800-63b/authenticators/#passwordver)
+
+> [!qard]- What operational costs does a password pepper introduce?
+> A pepper adds a critical secret to password verification:
 >
 > - **A critical secret:** every login needs the pepper. If it leaks along with the table, for example when the application host is compromised, the extra protection is gone. If it is lost, no existing verifier can be checked, and every user must reset their password.
 > - **Harder rotation:** how existing records move to a new pepper depends on the construction. With a one-way keyed hash such as HMAC, a record can be rebuilt only from the password: at the user's next successful login or through a reset. With reversible encryption, stored values can instead be decrypted with the old key, while it is still available, and re-encrypted under the new key. Re-encryption changes only the records currently stored. A copy of the table already stolen together with the compromised key remains open to offline guessing.
