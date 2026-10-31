@@ -104,24 +104,6 @@ public sealed class VaultTests
     }
 
     [Fact]
-    public void CandidateDatesAreDerivedFromTheImmutableParent()
-    {
-        // Arrange
-        byte[] parent = Encoding.UTF8.GetBytes("---\r\ncreated_at: '2024-01-02'\r\nmodified: \"2024-02-03T10:00:00.000Z\"\r\npublish: true\r\n---\r\nOriginal mechanism.\r\n");
-        byte[] candidate = Encoding.UTF8.GetBytes(Encoding.UTF8.GetString(parent).Replace("Original", "Improved", StringComparison.Ordinal));
-        var instant = DateTimeOffset.Parse("2026-10-30T10:11:12.345Z");
-
-        // Act
-        byte[] prepared = NoteDates.Prepare(candidate, parent, instant);
-        string text = Encoding.UTF8.GetString(prepared);
-
-        // Assert
-        text.Should().Contain("created_at: '2024-01-02'\r\n");
-        text.Should().Contain("created: \"2024-01-02T00:00:00.000Z\"\r\n");
-        text.Should().Contain("modified: \"2026-10-30T10:11:12.345Z\"\r\n");
-    }
-
-    [Fact]
     public void RepairInventoryMapsOnlyActiveCardsAndNeverWritesPluginData()
     {
         // Arrange

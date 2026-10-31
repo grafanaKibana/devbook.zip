@@ -131,11 +131,27 @@ public sealed class ProviderTests
         provider.Diagnostics.Should().BeEmpty();
     }
 
+    [Fact]
+    public async Task ReviewerSchemaRejectsNotApplicableTargetResolution()
+    {
+        // Arrange
+        var runner = new ProviderProviderRunner { TargetResolution = "NOT APPLICABLE" };
+        var provider = new ClaudeProvider(new JsonObject { ["claude_executable"] = "/usr/bin/true" }, runner,
+            environment: name => name == "CLAUDE_CODE_OAUTH_TOKEN" ? "fixture-oauth-value" : null);
+
+        // Act
+        Func<Task> review = async () => await provider.ReviewAsync(new JsonObject { ["topic"] = "fixture" });
+
+        // Assert
+        await review.Should().ThrowAsync<ClaudeProviderException>().WithMessage("*target_resolution*enum*");
+    }
+
     private sealed class ProviderProviderRunner : IProcessRunner
     {
         public List<ProcessRequest> Requests { get; } = [];
         public JsonObject Metadata { get; init; } = new();
         public ProcessResult? Failure { get; init; }
+        public string? TargetResolution { get; init; }
         public Task<ProcessResult> RunAsync(ProcessRequest request, CancellationToken cancellationToken = default)
         {
             Requests.Add(request with { Environment = request.Environment is null ? null : new Dictionary<string, string>(request.Environment) });
@@ -152,6 +168,10 @@ public sealed class ProviderTests
             JsonObject structured = reviewer ? JsonData.ParseObject("""
                 {"verdict":"CHANGES REQUIRED","change_checks":[],"overall_reason":"Fixture block","notes":[{"path":"Vault/Home/A/B.md","verdict":"CHANGES REQUIRED","summary":"Needs an explanation","page_type":"concept","current_text_evidence":[{"quote":"Current text","line_start":1,"reason":"Missing boundary"}],"target_resolution":"UNRESOLVED","split_suggestion":"Keep together","findings":[],"source_checks":[],"rejection_equivalence":[],"quality":{"accuracy":"PASS","clarity":"FAIL","rules_compliance":"PASS","question_quality":"NOT APPLICABLE","identity_safety":"NOT APPLICABLE"}}]}
                 """) : new JsonObject { ["version"] = 1, ["edits"] = new JsonArray(), ["dispositions"] = new JsonArray(), ["feedback"] = new JsonArray() };
+            if (reviewer && TargetResolution is not null)
+            {
+                structured.Arr("notes")[0]!["target_resolution"] = TargetResolution;
+            }
             var envelope = new JsonObject { ["modelUsage"] = new JsonObject { [ClaudeProvider.DefaultModel] = new JsonObject() }, ["structured_output"] = structured };
             foreach (KeyValuePair<string, JsonNode?> item in Metadata)
             {
