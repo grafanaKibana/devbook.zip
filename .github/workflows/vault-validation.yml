@@ -25,15 +25,21 @@ jobs:
         working-directory: Web
         run: npm ci
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-dotnet@v5
         with:
-          python-version: "3.13"
+          dotnet-version: 10.0.100
 
       - name: Test note review hooks
         run: node --test .codex/hooks/tests/note-review-hooks.test.mjs
 
-      - name: Test vault validator
-        run: python -m unittest discover -s .scripts/tests -p 'test_*.py'
+      - name: Test native tooling core
+        working-directory: .scripts
+        run: |
+          test "$(dotnet --version)" = 10.0.100
+          dotnet test DevBook.Tooling.slnx --configuration Release
 
       - name: Validate full vault
-        run: python .scripts/validate-vault.py --all
+        working-directory: .scripts
+        run: |
+          test "$(dotnet --version)" = 10.0.100
+          dotnet run --no-cache --file DevBook.Tooling/Scripts/ValidateVault.cs -- --all --repo-root ..

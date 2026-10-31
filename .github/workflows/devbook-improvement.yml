@@ -1,0 +1,346 @@
+name: DevBook Improvement
+
+on:
+  schedule:
+    - cron: "23 */6 * * *"
+  pull_request:
+    paths:
+      - .github/workflows/devbook-improvement.yml
+      - .github/devbook-improvement.json
+      - .scripts/DevBook.Tooling/**
+      - .scripts/DevBook.Tooling.Tests/**
+      - .scripts/*.slnx
+      - .scripts/global.json
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Credential-free demo/fixture, selection, or protected maintenance
+        required: true
+        default: demo
+        type: choice
+        options: [demo, dry-run, apply, fixture]
+      model:
+        description: Exact Claude model identifier; no fallback is configured
+        required: true
+        default: claude-sonnet-5-5
+        type: string
+      with_model:
+        description: Use protected subscription OAuth for a manual dry-run
+        required: true
+        default: false
+        type: boolean
+      pilot:
+        description: One-off PR181 test; requires an exact authorized SHA and disabled production
+        required: true
+        default: false
+        type: boolean
+      note:
+        description: Optional exact Vault/Home note for an owner-requested recheck
+        required: false
+        type: string
+      focus:
+        description: Concrete issue to investigate in the targeted note
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  DEVBOOK_IMPROVEMENT_PILOT: ${{ github.event_name == 'workflow_dispatch' && inputs.pilot && 'true' || 'false' }}
+  DEVBOOK_IMPROVEMENT_PILOT_SHA: ${{ vars.DEVBOOK_IMPROVEMENT_PILOT_SHA }}
+  DEVBOOK_IMPROVEMENT_PRODUCTION_ACTIVATED: ${{ vars.DEVBOOK_IMPROVEMENT_ACTIVATED || 'false' }}
+  DEVBOOK_IMPROVEMENT_SCHEDULE_ENABLED: ${{ vars.DEVBOOK_IMPROVEMENT_SCHEDULE_ENABLED || 'false' }}
+
+# Covers source work, rendering, and publication; never cancel an in-flight write.
+concurrency:
+  group: devbook-improvement
+  cancel-in-progress: false
+
+jobs:
+  demo:
+    if: >-
+      github.event_name == 'pull_request' ||
+      (github.event_name == 'schedule' && (vars.DEVBOOK_IMPROVEMENT_ACTIVATED != 'true' || vars.DEVBOOK_IMPROVEMENT_SCHEDULE_ENABLED != 'true')) ||
+      (github.event_name == 'workflow_dispatch' && (inputs.mode == 'demo' || (inputs.mode == 'dry-run' && inputs.with_model == false)))
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.100
+      - name: Test native core and run credential-free flow
+        working-directory: .scripts
+        env:
+          MODEL: ${{ inputs.model || 'claude-sonnet-5-5' }}
+          SELECT_ONLY: ${{ github.event_name == 'workflow_dispatch' && inputs.mode == 'dry-run' }}
+          TARGET_NOTE: ${{ github.event_name == 'workflow_dispatch' && inputs.note || '' }}
+          REVIEW_FOCUS: ${{ github.event_name == 'workflow_dispatch' && inputs.focus || '' }}
+        run: |
+          set -euo pipefail
+          test "$(dotnet --version)" = 10.0.100
+          dotnet test DevBook.Tooling.slnx --configuration Release
+          mode=demo
+          if [ "$SELECT_ONLY" = true ]; then mode=dry-run; fi
+          dotnet run --project DevBook.Tooling -- improvement --repo-root .. \
+            --config .github/devbook-improvement.json --model "$MODEL" --"$mode" \
+            --note "$TARGET_NOTE" --focus "$REVIEW_FOCUS" \
+            --output-dir artifacts/devbook-improvement
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: devbook-improvement-${{ github.run_id }}
+          path: artifacts/devbook-improvement
+          if-no-files-found: warn
+          overwrite: true
+
+  maintenance:
+    if: >-
+      (github.ref == 'refs/heads/main' ||
+      (github.event_name == 'workflow_dispatch' && inputs.pilot &&
+      github.ref == 'refs/heads/feature/devbook-improvement-setup' &&
+      vars.DEVBOOK_IMPROVEMENT_PILOT_SHA != '' && github.sha == vars.DEVBOOK_IMPROVEMENT_PILOT_SHA &&
+      github.actor_id == '45916288' && github.actor == 'grafanaKibana' &&
+      vars.DEVBOOK_IMPROVEMENT_ACTIVATED != 'true' && vars.DEVBOOK_IMPROVEMENT_SCHEDULE_ENABLED != 'true')) &&
+      ((github.event_name == 'schedule' && vars.DEVBOOK_IMPROVEMENT_ACTIVATED == 'true' && vars.DEVBOOK_IMPROVEMENT_SCHEDULE_ENABLED == 'true') ||
+      (github.event_name == 'workflow_dispatch' && (inputs.mode == 'apply' || (inputs.mode == 'dry-run' && inputs.with_model))))
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    environment: devbook-improvement-production
+    outputs:
+      export_ready: ${{ steps.maintain.outputs.export_ready }}
+      export_mode: ${{ steps.maintain.outputs.export_mode }}
+    steps:
+      - name: Check protected activation gates
+        env:
+          REQUESTED_MODE: ${{ github.event_name == 'schedule' && 'apply' || inputs.mode }}
+          EVENT_NAME: ${{ github.event_name }}
+          ACTIVATED: ${{ inputs.pilot && 'true' || vars.DEVBOOK_IMPROVEMENT_ACTIVATED }}
+          SUBSCRIPTION_ONLY: ${{ inputs.pilot && 'true' || vars.DEVBOOK_IMPROVEMENT_SUBSCRIPTION_ONLY_CONFIRMED }}
+          USAGE_CREDITS_DISABLED: ${{ vars.DEVBOOK_IMPROVEMENT_USAGE_CREDITS_DISABLED_CONFIRMED }}
+          PR_WORKFLOWS_CONFIRMED: ${{ vars.DEVBOOK_IMPROVEMENT_PR_WORKFLOWS_CONFIRMED }}
+        run: |
+          set -euo pipefail
+          if [ "$DEVBOOK_IMPROVEMENT_PILOT" = true ]; then
+            test "$GITHUB_EVENT_NAME" = workflow_dispatch
+            test "$GITHUB_REF" = refs/heads/feature/devbook-improvement-setup
+            test "$GITHUB_SHA" = "$DEVBOOK_IMPROVEMENT_PILOT_SHA"
+            test "$GITHUB_ACTOR_ID" = 45916288
+            test "$GITHUB_ACTOR" = grafanaKibana
+            test "$DEVBOOK_IMPROVEMENT_PRODUCTION_ACTIVATED" = false
+            test "$DEVBOOK_IMPROVEMENT_SCHEDULE_ENABLED" = false
+          else
+            test "$GITHUB_REF" = refs/heads/main
+          fi
+          test "$ACTIVATED" = true
+          test "$SUBSCRIPTION_ONLY" = true
+          test "$USAGE_CREDITS_DISABLED" = true
+          case "$REQUESTED_MODE" in dry-run|apply) ;; *) exit 1 ;; esac
+          if [ "$REQUESTED_MODE" = apply ] && [ "$EVENT_NAME" = schedule ]; then
+            test "$PR_WORKFLOWS_CONFIRMED" = true
+          fi
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          token: ${{ secrets.DEVBOOK_GITHUB_TOKEN }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.100
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: Web/package-lock.json
+      - name: Install repository validation dependencies
+        run: npm ci --prefix Web
+      - name: Install locked Quartz plugins
+        working-directory: Web
+        run: |
+          npx quartz plugin install
+          git diff --exit-code -- quartz.lock.json
+      - name: Install pinned Claude Code
+        run: npm install --global @anthropic-ai/claude-code@2.1.285
+      - name: Run bounded maintenance and persist export handoff
+        id: maintain
+        working-directory: .scripts
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          DEVBOOK_GITHUB_TOKEN: ${{ secrets.DEVBOOK_GITHUB_TOKEN }}
+          DEVBOOK_IMPROVEMENT_MODE: ${{ github.event_name == 'schedule' && 'apply' || inputs.mode }}
+          DEVBOOK_IMPROVEMENT_ACTIVATED: ${{ inputs.pilot && 'true' || vars.DEVBOOK_IMPROVEMENT_ACTIVATED }}
+          DEVBOOK_IMPROVEMENT_SUBSCRIPTION_ONLY_CONFIRMED: ${{ inputs.pilot && 'true' || vars.DEVBOOK_IMPROVEMENT_SUBSCRIPTION_ONLY_CONFIRMED }}
+          DEVBOOK_IMPROVEMENT_USAGE_CREDITS_DISABLED_CONFIRMED: ${{ vars.DEVBOOK_IMPROVEMENT_USAGE_CREDITS_DISABLED_CONFIRMED }}
+          DEVBOOK_IMPROVEMENT_PR_WORKFLOWS_CONFIRMED: ${{ vars.DEVBOOK_IMPROVEMENT_PR_WORKFLOWS_CONFIRMED }}
+          MODEL: ${{ github.event_name == 'schedule' && (vars.DEVBOOK_IMPROVEMENT_MODEL || 'claude-sonnet-5-5') || inputs.model }}
+          TARGET_NOTE: ${{ github.event_name == 'workflow_dispatch' && inputs.note || '' }}
+          REVIEW_FOCUS: ${{ github.event_name == 'workflow_dispatch' && inputs.focus || '' }}
+        run: |
+          set -euo pipefail
+          test "$(dotnet --version)" = 10.0.100
+          dotnet run --project DevBook.Tooling -- improvement --repo-root .. \
+            --config .github/devbook-improvement.json --model "$MODEL" \
+            --note "$TARGET_NOTE" --focus "$REVIEW_FOCUS" \
+            --"$DEVBOOK_IMPROVEMENT_MODE" --with-model --output-dir artifacts/devbook-improvement
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: devbook-improvement-${{ github.run_id }}
+          path: artifacts/devbook-improvement
+          if-no-files-found: warn
+          overwrite: true
+      - uses: actions/upload-artifact@v4
+        if: steps.maintain.outputs.export_ready == 'true'
+        with:
+          name: devbook-export-request-${{ github.run_id }}
+          path: artifacts/devbook-improvement/export-request.json
+          if-no-files-found: error
+          retention-days: 7
+          overwrite: true
+
+  render:
+    needs: maintenance
+    if: >-
+      always() && !cancelled() &&
+      (github.event_name == 'pull_request' ||
+      (github.event_name == 'workflow_dispatch' && inputs.mode == 'fixture') ||
+      (needs.maintenance.result == 'success' && needs.maintenance.outputs.export_ready == 'true' && needs.maintenance.outputs.export_mode == 'render'))
+    runs-on: macos-15
+    timeout-minutes: 20
+    outputs:
+      ready: ${{ steps.export.outputs.ready }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.100
+      - uses: actions/download-artifact@v4
+        if: needs.maintenance.outputs.export_mode == 'render'
+        with:
+          name: devbook-export-request-${{ github.run_id }}
+          path: artifacts/request
+      - name: Install pinned genuine Obsidian desktop
+        env:
+          APP_ROOT: ${{ runner.temp }}/devbook-obsidian
+        run: |
+          set -euo pipefail
+          mkdir -p "$APP_ROOT/mount"
+          curl --fail --location --retry 2 \
+            https://github.com/obsidianmd/obsidian-releases/releases/download/v1.14.5/Obsidian-1.14.5.dmg \
+            --output "$APP_ROOT/Obsidian.dmg"
+          printf '%s  %s\n' be79e6410d80fa705218aa4e8cb24ce8418cf16e13be4036227a5659b1f6aab2 "$APP_ROOT/Obsidian.dmg" | shasum -a 256 --check
+          hdiutil attach "$APP_ROOT/Obsidian.dmg" -readonly -nobrowse -mountpoint "$APP_ROOT/mount"
+          trap 'hdiutil detach "$APP_ROOT/mount" || true' EXIT
+          ditto "$APP_ROOT/mount/Obsidian.app" "$APP_ROOT/Obsidian.app"
+          codesign --verify --deep --strict "$APP_ROOT/Obsidian.app"
+      - name: Render through isolated desktop profile
+        id: export
+        working-directory: .scripts
+        env:
+          EXPORT_MODE: ${{ needs.maintenance.outputs.export_mode == 'render' && 'render' || 'fixture' }}
+          APP_BUNDLE: ${{ runner.temp }}/devbook-obsidian/Obsidian.app
+          DEVBOOK_EXPORT_READ_TOKEN: ${{ needs.maintenance.outputs.export_mode == 'render' && github.token || '' }}
+        run: |
+          set -euo pipefail
+          test "$(dotnet --version)" = 10.0.100
+          if [ "$EXPORT_MODE" = fixture ]; then
+            dotnet run --project DevBook.Tooling -- export fixture --repo-root .. \
+              --app-bundle "$APP_BUNDLE" --output ../artifacts/export
+          else
+            dotnet run --project DevBook.Tooling -- export render --repo-root .. \
+              --request ../artifacts/request/export-request.json --app-bundle "$APP_BUNDLE" --output ../artifacts/export
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: devbook-syncer-export-${{ github.run_id }}
+          path: artifacts/export
+          if-no-files-found: warn
+          retention-days: 7
+          overwrite: true
+
+  publish:
+    needs: [maintenance, render]
+    if: >-
+      always() && !cancelled() &&
+      (github.ref == 'refs/heads/main' ||
+      (github.event_name == 'workflow_dispatch' && inputs.pilot &&
+      github.ref == 'refs/heads/feature/devbook-improvement-setup' &&
+      vars.DEVBOOK_IMPROVEMENT_PILOT_SHA != '' && github.sha == vars.DEVBOOK_IMPROVEMENT_PILOT_SHA &&
+      github.actor_id == '45916288' && github.actor == 'grafanaKibana' &&
+      vars.DEVBOOK_IMPROVEMENT_ACTIVATED != 'true' && vars.DEVBOOK_IMPROVEMENT_SCHEDULE_ENABLED != 'true')) &&
+      (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') &&
+      needs.maintenance.result == 'success' && needs.maintenance.outputs.export_ready == 'true' &&
+      (needs.maintenance.outputs.export_mode == 'finalize' || (needs.render.result == 'success' && needs.render.outputs.ready == 'true'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: devbook-improvement-production
+    steps:
+      - name: Verify trusted workflow and activation
+        env:
+          ACTIVATED: ${{ inputs.pilot && 'true' || vars.DEVBOOK_IMPROVEMENT_ACTIVATED }}
+        run: |
+          set -euo pipefail
+          if [ "$DEVBOOK_IMPROVEMENT_PILOT" = true ]; then
+            test "$GITHUB_EVENT_NAME" = workflow_dispatch
+            test "$GITHUB_REF" = refs/heads/feature/devbook-improvement-setup
+            test "$GITHUB_SHA" = "$DEVBOOK_IMPROVEMENT_PILOT_SHA"
+            test "$GITHUB_ACTOR_ID" = 45916288
+            test "$GITHUB_ACTOR" = grafanaKibana
+            test "$DEVBOOK_IMPROVEMENT_PRODUCTION_ACTIVATED" = false
+            test "$DEVBOOK_IMPROVEMENT_SCHEDULE_ENABLED" = false
+          else
+            test "$GITHUB_REF" = refs/heads/main
+          fi
+          test "$ACTIVATED" = true
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.100
+      - uses: actions/download-artifact@v4
+        with:
+          name: devbook-export-request-${{ github.run_id }}
+          path: artifacts/request
+      - uses: actions/download-artifact@v4
+        if: needs.maintenance.outputs.export_mode == 'render'
+        with:
+          name: devbook-syncer-export-${{ github.run_id }}
+          path: artifacts/export
+      - name: Publish generated files or resume exact-head validation
+        working-directory: .scripts
+        env:
+          EXPORT_MODE: ${{ needs.maintenance.outputs.export_mode }}
+          DEVBOOK_GITHUB_TOKEN: ${{ secrets.DEVBOOK_GITHUB_TOKEN }}
+          DEVBOOK_IMPROVEMENT_MODE: apply
+          DEVBOOK_IMPROVEMENT_ACTIVATED: ${{ inputs.pilot && 'true' || vars.DEVBOOK_IMPROVEMENT_ACTIVATED }}
+          DEVBOOK_IMPROVEMENT_SUBSCRIPTION_ONLY_CONFIRMED: ${{ inputs.pilot && 'true' || vars.DEVBOOK_IMPROVEMENT_SUBSCRIPTION_ONLY_CONFIRMED }}
+          DEVBOOK_IMPROVEMENT_USAGE_CREDITS_DISABLED_CONFIRMED: ${{ vars.DEVBOOK_IMPROVEMENT_USAGE_CREDITS_DISABLED_CONFIRMED }}
+          DEVBOOK_IMPROVEMENT_PR_WORKFLOWS_CONFIRMED: ${{ vars.DEVBOOK_IMPROVEMENT_PR_WORKFLOWS_CONFIRMED }}
+        run: |
+          set -euo pipefail
+          test "$(dotnet --version)" = 10.0.100
+          if [ "$EXPORT_MODE" = finalize ]; then
+            dotnet run --project DevBook.Tooling -- export finalize --repo-root .. \
+              --request ../artifacts/request/export-request.json --output ../artifacts/publication
+          else
+            dotnet run --project DevBook.Tooling -- export publish --repo-root .. \
+              --request ../artifacts/request/export-request.json --bundle ../artifacts/export/bundle.json --output ../artifacts/publication
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: devbook-publication-${{ github.run_id }}
+          path: artifacts/publication
+          if-no-files-found: warn
+          overwrite: true

@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "repo": "grafanaKibana/devbook.zip",
+  "base_branch": "main",
+  "state_branch": "maintenance/devbook-improvement-state",
+  "model": "claude-sonnet-5-5",
+  "claude_code_version": "2.1.285",
+  "model_timeout_seconds": 900,
+  "max_model_turns": 20,
+  "max_source_bytes": 250000,
+  "unknown_reset_recheck_hours": 24,
+  "max_run_minutes": 35,
+  "max_notes_per_run": 4,
+  "max_pr_notes": 16,
+  "max_pr_lines": 1200,
+  "max_open_prs": 3,
+  "owner_allowlist": [
+    {
+      "id": 45916288,
+      "login": "grafanaKibana"
+    }
+  ],
+  "allowed_source_hosts": [
+    "arxiv.org",
+    "code.claude.com",
+    "csrc.nist.gov",
+    "datatracker.ietf.org",
+    "developer.mozilla.org",
+    "developers.openai.com",
+    "docs.anthropic.com",
+    "docs.github.com",
+    "docs.python.org",
+    "grafana.com",
+    "jmlr.org",
+    "kubernetes.io",
+    "learn.microsoft.com",
+    "opentelemetry.io",
+    "platform.claude.com",
+    "openai.github.io",
+    "nvlpubs.nist.gov",
+    "www.jmlr.org",
+    "www.nist.gov",
+    "www.w3.org",
+    "www.rfc-editor.org"
+  ],
+  "required_check_contexts": [
+    "pr-title",
+    "major-approval"
+  ],
+  "validator_commands": [
+    [
+      "dotnet",
+      "run",
+      "--no-cache",
+      "--file",
+      "DevBook.Tooling/Scripts/ValidateVault.cs",
+      "--",
+      "--all",
+      "--repo-root",
+      ".."
+    ],
+    [
+      "dotnet",
+      "test",
+      "DevBook.Tooling.Tests/DevBook.Tooling.Tests.csproj",
+      "--configuration",
+      "Release"
+    ],
+    [
+      "node",
+      "--test",
+      ".codex/hooks/tests/note-review-hooks.test.mjs"
+    ],
+    [
+      "npm",
+      "--prefix",
+      "Web",
+      "run",
+      "test",
+      "--",
+      "custom/transformers/publishing.test.ts"
+    ]
+  ],
+  "content_quality": {
+    "rules_version": 1,
+    "authoritative_paths": [
+      "AGENTS.md",
+      ".codex/agents/note-writer.toml",
+      ".codex/agents/note-reviewer.toml",
+      ".codex/skills/obsidian-markdown/SKILL.md",
+      "Vault/Templates/Pages/Template - Concept Page.md",
+      "Vault/Templates/Pages/Template - Index.md",
+      "Vault/Templates/Blocks/Template - Callout.md"
+    ]
+  },
+  "automatic_export": true
+}

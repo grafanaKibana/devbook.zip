@@ -3,7 +3,7 @@ name: PR Title
 on:
   pull_request:
     types: [opened, edited, synchronize, reopened]
-    branches: [main]
+    branches: [main, feature/devbook-improvement-setup]
 
 permissions:
   contents: read
@@ -23,3 +23,26 @@ jobs:
             echo "::error::PR title must start with 'feature:', 'notes:', 'docs:', 'bug:', 'fix:' or 'maintenance:' (append '!' for a breaking/major change, e.g. 'feature!:'). Got: ${TITLE:-<empty>}"
             exit 1
           fi
+
+      # Keep export freshness inside an already-required check; a draft flag
+      # alone does not prevent marking a stale public-note PR ready manually.
+      - uses: actions/checkout@v4
+        if: startsWith(github.head_ref, 'notes/automated-')
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v5
+        if: startsWith(github.head_ref, 'notes/automated-')
+        with:
+          dotnet-version: 10.0.100
+
+      - name: Verify managed-note Quartz export handoff
+        if: startsWith(github.head_ref, 'notes/automated-')
+        env:
+          DEVBOOK_EXPORT_HEAD_REF: ${{ github.head_ref }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        working-directory: .scripts
+        run: |
+          set -euo pipefail
+          test "$(dotnet --version)" = 10.0.100
+          dotnet run --no-cache --file DevBook.Tooling/Scripts/SyncExport.cs -- verify --repo-root .. --base-ref "$BASE_SHA"

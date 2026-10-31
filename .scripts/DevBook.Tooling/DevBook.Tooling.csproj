@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="Scripts/**/*.cs" />
+    <None Include="Scripts/**/*.cs" />
+    <EmbeddedResource Include="Infrastructure/LegacyCaseFold.json" />
+    <EmbeddedResource Include="Improvement/ProviderProtocol.json" />
+  </ItemGroup>
+</Project>

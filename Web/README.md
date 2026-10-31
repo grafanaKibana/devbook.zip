@@ -8,7 +8,7 @@ This directory turns the notes in [`../Vault/`](../Vault) into a fast static web
 
 ```text
 Obsidian  (Vault/Home, publish: true notes)
-   │  Quartz Syncer plugin: renders in-note Dataview/Datacore/Bases → static HTML,
+   │  Quartz Syncer plugin: renders in-note Datacore/Bases → static HTML,
    │  preserves %% markers, strips the "Home" vault-root folder
    │  pre-commit waits for export and stages Web/content/ and Syncer styles
    ▼
@@ -19,7 +19,7 @@ Web/public/  →  devbook.zip
 ```
 
 - **Author** notes in Obsidian under `Vault/Home/`. Only `publish: true` notes ever leave the vault.
-- **Commit** staged vault changes — the pre-commit hook waits for Quartz Syncer to render in-note Dataview/Datacore/Bases to static HTML, verifies publication and cleanup, and stages generated output into that same commit. Treat `Web/content/` as generated output; edit notes in `Vault/`.
+- **Commit** staged vault changes — the pre-commit hook waits for Quartz Syncer to render in-note Datacore/Bases to static HTML, verifies publication and cleanup, and stages generated output into that same commit. Treat `Web/content/` as generated output; edit notes in `Vault/`.
 - **Build & deploy** — Vercel runs the Quartz build from `Web/` on each push; production deploys from `main`.
 
 ## Local development
@@ -34,8 +34,8 @@ It installs the locked npm dependencies in `Web/`, enables this checkout’s Git
 
 **Manual prerequisites before running setup:**
 
-1. Install Git, Bash, Python 3.9 or later, Node 22 with npm, and Obsidian desktop. Activate Node 22 in the shell; `Web/.node-version` records the project version. No pip packages are needed.
-2. Open this checkout’s `Vault/` folder in Obsidian and allow community plugins. Enable the bundled Quartz Syncer, Datacore and Dataview plugins, and Git for commits inside Obsidian. Keep the bundled Syncer build described below.
+1. Install Git, Bash, the pinned .NET SDK 10.0.100, Node 22 with npm, and Obsidian desktop. Activate Node 22 in the shell; `Web/.node-version` records the project version. The `.scripts/global.json` SDK pin applies when commands run inside `.scripts`.
+2. Open this checkout’s `Vault/` folder in Obsidian and allow community plugins. Enable the bundled Quartz Syncer and Datacore plugins, and Git for commits inside Obsidian. Keep the bundled Syncer build described below.
 3. Enable **Settings → General → Command line interface** and follow Obsidian’s registration prompt. Keep the vault open while setup runs. See the [Obsidian CLI setup guide](https://obsidian.md/help/cli).
 
 **Manual steps before the first commit/push:** configure Git’s name/email if missing, authenticate Git for GitHub access when pulling or pushing, and let Datacore finish indexing. Setup leaves identity and credentials under your control. Local export needs no Syncer GitHub token. Once ready, commits from desktop Obsidian Git run the same blocking pre-commit export as terminal commits.
@@ -51,12 +51,12 @@ Before exporting, the hook applies the shared defaults through Syncer’s suppor
 The first vault commit configures Syncer automatically. To configure it before using manual Syncer commands, run this from the repository root after opening the vault:
 
 ```bash
-python3 .scripts/sync-quartz.py --configure-only
+(cd .scripts && dotnet run --no-cache --file DevBook.Tooling/Scripts/SyncQuartz.cs -- --configure-only --repo-root ..)
 ```
 
 This command only configures the connected checkout; it does not export, stage files, or require clean vault source. Setup updates an existing local `data.json` without replacing unrelated settings; new clones let Syncer create it.
 
-Stage all intended vault source changes before committing. Partially staged, unstaged, or untracked source blocks export, as do pre-existing generated-output changes. The hook waits for Obsidian and Syncer indexes to match the files on disk before publishing or deleting pages. Asset changes, including Markdown assets under `Vault/Assets/`, republish all eligible notes through Syncer’s existing publisher so an unchanged note cannot leave an edited image stale. Media cleanup uses Syncer’s compiled-reference-aware operation, preserving images produced only by Datacore/Dataview queries. Its native safety guard may retain unused media; a no-change/withheld result is logged explicitly rather than reported as verified removal. A failed or skipped note, an unrendered query, a cleanup error, a wrong connected vault, failed configuration, concurrent source edits, or a timeout blocks the commit. Failures include the operation, failed-note details or bounded process diagnostics, without dumping settings or credentials. Inspect `git status` and the Git metadata log (`git rev-parse --git-path quartz-syncer-publish.log`), fix the cause, then review any partial generated output before committing or restoring it separately and retrying. Do not discard vault source to clear an export failure. The default timeout is 600 seconds per CLI command and index-readiness wait (`QUARTZ_SYNC_TIMEOUT` overrides it); a timeout does not cancel work already running inside Obsidian. Source-free commits skip export.
+Stage all intended vault source changes before committing. Partially staged, unstaged, or untracked source blocks export, as do pre-existing generated-output changes. The hook waits for Obsidian and Syncer indexes to match the files on disk before publishing or deleting pages. Asset changes, including Markdown assets under `Vault/Assets/`, republish all eligible notes through Syncer’s existing publisher so an unchanged note cannot leave an edited image stale. Media cleanup uses Syncer’s compiled-reference-aware operation, preserving images produced only by Datacore queries. Its native safety guard may retain unused media; a no-change/withheld result is logged explicitly rather than reported as verified removal. A failed or skipped note, an unrendered query, a cleanup error, a wrong connected vault, failed configuration, concurrent source edits, or a timeout blocks the commit. Failures include the operation, failed-note details or bounded process diagnostics, without dumping settings or credentials. Inspect `git status` and the Git metadata log (`git rev-parse --git-path quartz-syncer-publish.log`), fix the cause, then review any partial generated output before committing or restoring it separately and retrying. Do not discard vault source to clear an export failure. The default overall local export budget is 600 seconds, shared by maintenance, CLI commands and index-readiness waits. `QUARTZ_SYNC_TIMEOUT` accepts finite positive seconds within the supported deadline range and overrides that local default. The isolated scheduled renderer supplies its own bounded remaining budget, which takes precedence over the environment override. A timeout does not cancel work already running inside Obsidian. Source-free commits skip export. Local commit preparation writes source `created`/`modified` under the same lock and staging guards. The recurring improvement system prepares selected candidates before independent review, then runs this genuine exporter in a source-immutable isolated job; it adds published output to the same draft PR automatically. See the [improvement runbook](../docs/devbook-improvement.md).
 
 Quartz requires **Node 22** (`.node-version`).
 
@@ -85,7 +85,7 @@ Do **not** edit anything else under `quartz/` — `npx quartz upgrade` overwrite
 
 ## Dashboards & custom code
 
-The vault's old DataviewJS dashboards are handled two ways on the static site:
+The vault's Datacore dashboards are handled two ways on the static site:
 
 - **Topics dashboard** (homepage) — an in-note `datacorejsx` block in `Home/index.md` that Quartz Syncer renders to static HTML at publish. No component.
 - **Questions** — a Quartz component (`custom/components/questions-index.tsx`) fed by a transformer, because cross-vault `[!qard]` interview and compatible `[!QUESTION]` callout aggregation needs the build's full-content access. Folder paths still own topic and subtopic grouping.

@@ -1,0 +1,24 @@
+{
+  "emptyFolderBehavior": "Keep",
+  "excludePaths": [
+    "Assets/components"
+  ],
+  "includePaths": [
+    "Home",
+    "Assets"
+  ],
+  "notePriorities": [],
+  "rescueAttachmentUsedByMultipleNotesMode": "prompt",
+  "shouldDeleteConflictingAttachments": false,
+  "shouldDeleteEmptyNoteFolders": false,
+  "shouldHandleDeletions": true,
+  "shouldHandleRenames": true,
+  "shouldRenameAttachmentFiles": false,
+  "shouldRenameAttachmentFolder": true,
+  "shouldRescueSharedAttachments": false,
+  "shouldUpdateFileNameAliases": true,
+  "treatAsAttachmentExtensions": [
+    ".excalidraw.md",
+    "property:excalidraw-plugin"
+  ]
+}
