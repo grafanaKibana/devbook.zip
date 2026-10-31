@@ -144,7 +144,7 @@ public sealed class ClaudeProvider : IModelProvider
             string evidence = (completed.Stderr + "\n" + (completed.ExitCode == 0 ? "" : completed.Stdout)).Replace(oauth, "[REDACTED]", StringComparison.Ordinal);
             if (completed.ExitCode != 0)
             {
-                throw Quota(evidence, clock.GetUtcNow()) ?? new ClaudeProviderException($"Claude {role} invocation failed with exit code {completed.ExitCode}.", evidence);
+                throw Quota(evidence, clock.GetUtcNow()) ?? new ClaudeProviderException($"Claude {role} invocation failed with exit code {completed.ExitCode} (category: {FailureCategory(completed.Stdout, completed.Stderr)}).", evidence);
             }
             JsonObject envelope;
             try
@@ -159,7 +159,7 @@ public sealed class ClaudeProvider : IModelProvider
             {
                 evidence += "\n" + string.Join('\n', new[] { "error", "message", "result" }.Select(key => envelope.Str(key)));
                 evidence = evidence.Replace(oauth, "[REDACTED]", StringComparison.Ordinal);
-                throw Quota(evidence, clock.GetUtcNow()) ?? new ClaudeProviderException($"Claude {role} invocation returned an error.", evidence);
+                throw Quota(evidence, clock.GetUtcNow()) ?? new ClaudeProviderException($"Claude {role} invocation returned an error (category: {FailureCategory(completed.Stdout, completed.Stderr, envelope)}).", evidence);
             }
             JsonObject usage = envelope.Obj("modelUsage");
             if (usage.Count != 1 || !usage.ContainsKey(model))
@@ -247,9 +247,47 @@ public sealed class ClaudeProvider : IModelProvider
         return result;
     }
 
+    private static string FailureCategory(string stdout, string stderr, JsonObject? envelope = null)
+    {
+        if (envelope is null)
+        {
+            try
+            {
+                envelope = JsonNode.Parse(stdout) as JsonObject;
+            }
+            catch (JsonException)
+            {
+                // A failed CLI process may return plain text instead of JSON.
+            }
+        }
+        string Classify(string value) => Regex.IsMatch(value, "context_length_exceeded|prompt_too_long|context length.{0,32}exceeded|prompt.{0,8}too long|prompt.{0,24}exceeds|context window|input.{0,24}(?:too large|too long)|input.{0,24}token.{0,24}limit|request.{0,24}too large", RegexOptions.IgnoreCase) ? "context_input_limit"
+            : Regex.IsMatch(value, "authentication_error|unauthorized|not logged in|invalid (?:oauth|access) token|token (?:has )?expired", RegexOptions.IgnoreCase) ? "authentication"
+            : Regex.IsMatch(value, "model_not_found|not_found_error|unknown model|model.{0,50}(?:unavailable|not found|not available|not supported)", RegexOptions.IgnoreCase) ? "model_unavailable"
+            : Regex.IsMatch(value, "error_max_turns|max(?:imum)?[-_ ]turns|maximum number of turns", RegexOptions.IgnoreCase) ? "max_turns"
+            : Regex.IsMatch(value, "error_max_structured_output_retries|structured[_ -]output|json[_ -]schema", RegexOptions.IgnoreCase) ? "structured_output" : "unknown";
+        string category = Classify(envelope.Str("terminal_reason"));
+        if (category == "unknown")
+        {
+            category = Classify(string.Join(' ', envelope.Str("subtype"), envelope.Obj("error").Str("type"), envelope.Obj("error").Str("code"), envelope.Str("code")));
+        }
+        if (category != "unknown")
+        {
+            return category;
+        }
+        IEnumerable<string> errors = envelope.Arr("errors").OfType<JsonValue>()
+            .Select(value => value.TryGetValue(out string? text) ? text ?? "" : "");
+        string details = envelope is null ? stdout : string.Join('\n', new[] { envelope.Obj("error").Str("message"), envelope.Str("error"), envelope.Str("message") }
+            .Concat(errors).Where(value => value.Length != 0));
+        if (details.Length == 0)
+        {
+            details = envelope.Str("result");
+        }
+        return Classify(stderr + "\n" + details);
+    }
+
     public static ClaudeQuotaException? Quota(string evidence, DateTimeOffset now)
     {
-        if (!Regex.IsMatch(evidence, "usage limit|quota|weekly limit|5[- ]hour limit|five[- ]hour limit", RegexOptions.IgnoreCase))
+        if (!Regex.IsMatch(evidence, "usage limit|quota|weekly limit|5[- ]hour limit|five[- ]hour limit|you(?:['’]ve| have) (?:hit|reached) your limit", RegexOptions.IgnoreCase))
         {
             return null;
         }
@@ -267,7 +305,8 @@ public sealed class ClaudeProvider : IModelProvider
                 reset = DateTimeOffset.FromUnixTimeSeconds(long.Parse(epoch.Groups[1].Value, CultureInfo.InvariantCulture));
             }
         }
-        string kind = Regex.IsMatch(evidence, "week(?:ly)?", RegexOptions.IgnoreCase) ? "weekly" : "five_hour";
+        string kind = Regex.IsMatch(evidence, "week(?:ly)?", RegexOptions.IgnoreCase) ? "weekly"
+            : Regex.IsMatch(evidence, "5[- ]hour|five[- ]hour", RegexOptions.IgnoreCase) ? "five_hour" : "unknown";
         return new ClaudeQuotaException(kind, reset, reset ?? now.AddHours(24), evidence);
     }
 

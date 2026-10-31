@@ -103,16 +103,49 @@ public sealed class ProviderTests
             .And.NotContain("tool_input").And.NotContain("session_id").And.NotContain("cost").And.NotContain("result");
     }
 
+    [Fact]
+    public async Task FailedCliReportsOnlyAClosedCategoryWithoutPrivateErrorText()
+    {
+        // Arrange
+        const string secret = "sk-ant-oat-fixture-private-token";
+        var envelope = new JsonObject
+        {
+            ["type"] = "result",
+            ["subtype"] = "error_during_execution",
+            ["terminal_reason"] = "api_error",
+            ["is_error"] = true,
+            ["errors"] = new JsonArray("Context length limit exceeded: private-note " + secret + " https://private-note.example/secret"),
+            ["result"] = "authentication_error https://private-note.example/secret"
+        };
+        var runner = new ProviderProviderRunner { Failure = new ProcessResult(1, Encoding.UTF8.GetBytes(envelope.ToJsonString()), []) };
+        var provider = new ClaudeProvider(new JsonObject { ["claude_executable"] = "/usr/bin/true" }, runner,
+            environment: name => name == "CLAUDE_CODE_OAUTH_TOKEN" ? secret : null);
+
+        // Act
+        Func<Task> invoke = async () => await provider.ReviewAsync(new JsonObject { ["notes"] = "private-note" });
+
+        // Assert
+        var failure = await invoke.Should().ThrowAsync<ClaudeProviderException>();
+        failure.Which.Message.Should().Be("Claude review invocation failed with exit code 1 (category: context_input_limit).");
+        failure.Which.Message.Should().NotContain(secret).And.NotContain("private-note").And.NotContain("https://");
+        provider.Diagnostics.Should().BeEmpty();
+    }
+
     private sealed class ProviderProviderRunner : IProcessRunner
     {
         public List<ProcessRequest> Requests { get; } = [];
         public JsonObject Metadata { get; init; } = new();
+        public ProcessResult? Failure { get; init; }
         public Task<ProcessResult> RunAsync(ProcessRequest request, CancellationToken cancellationToken = default)
         {
             Requests.Add(request with { Environment = request.Environment is null ? null : new Dictionary<string, string>(request.Environment) });
             if (request.Arguments.Contains("--version"))
             {
                 return Task.FromResult(new ProcessResult(0, "2.1.285 (Claude Code)"u8.ToArray(), []));
+            }
+            if (Failure is not null)
+            {
+                return Task.FromResult(Failure);
             }
             int promptIndex = request.Arguments.ToList().IndexOf("--system-prompt");
             bool reviewer = request.Arguments[promptIndex + 1].Contains("independent, read-only", StringComparison.Ordinal);
@@ -243,7 +276,7 @@ public sealed class ProviderTests
     [Theory]
     [InlineData("Weekly usage limit resets 2026-11-03T12:00:00Z", "weekly", "2026-11-03T12:00:00Z")]
     [InlineData("5-hour limit reset_at 1793448000", "five_hour", "2026-10-31T12:00:00Z")]
-    [InlineData("Usage limit reached", "five_hour", null)]
+    [InlineData("You’ve hit your limit", "unknown", null)]
     public void QuotaParserPreservesReportedBoundaryOrUsesUnknownBackoff(string message, string kind, string? expectedReset)
     {
         // Arrange

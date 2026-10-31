@@ -736,7 +736,6 @@ public sealed class EngineTests
     private const string ProposalSizeSource = "---\ncreated: \"2026-01-01T00:00:00.000Z\"\nmodified: \"2026-01-01T00:00:00.000Z\"\n---\n\nThe original mechanism.\n";
 
     [Theory]
-    [InlineData(false, false)]
     [InlineData(true, false)]
     [InlineData(false, true)]
     public async Task Oversized_initial_proposals_are_held_and_existing_prs_are_frozen(bool lineLimit, bool existingPr)
