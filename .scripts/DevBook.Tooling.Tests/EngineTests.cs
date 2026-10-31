@@ -11,6 +11,56 @@ public sealed class EngineTests
 {
 
     [Fact]
+    public void CapturedRulesVersionStaysStableWhenTheLiveContractChanges()
+    {
+        // Arrange
+        using var fixture = new KeepDecisionKeepFixture();
+        JsonObject captured = Core.LoadContentAuthorities(fixture.Root);
+        string original = Core.RulesVersion(captured);
+        string writer = Path.Combine(fixture.Root, ".claude/agents/note-writer.md");
+        File.AppendAllText(writer, "\nCurrent technical question policy");
+
+        // Act
+        string changed = Core.RulesVersion(fixture.Root);
+
+        // Assert
+        changed.Should().NotBe(original);
+        Core.RulesVersion(captured).Should().Be(original);
+    }
+
+    [Fact]
+    public void MissingRequiredContractBlocksBeforeModelCalls()
+    {
+        // Arrange
+        using var fixture = new KeepDecisionKeepFixture();
+        File.Delete(Path.Combine(fixture.Root, ".claude/agents/note-writer.md"));
+
+        // Act
+        Action construct = () => fixture.Engine();
+
+        // Assert
+        construct.Should().Throw<FileNotFoundException>().WithMessage("*note-writer.md*");
+        fixture.Model.Authors.Should().Be(0);
+        fixture.Model.Reviews.Should().Be(0);
+    }
+
+    [Fact]
+    public void CardReviewRejectsNotApplicableQuestionQuality()
+    {
+        // Arrange
+        var payload = new JsonObject { ["current"] = new JsonObject { [DomainFixtures.Path] = DomainFixtures.Note } };
+        JsonObject review = DomainFixtures.UnchangedReview(payload);
+        review.Arr("notes")[0]!["quality"]!["question_quality"] = "NOT APPLICABLE";
+        var candidates = new Dictionary<string, string> { [DomainFixtures.Path] = DomainFixtures.Note };
+
+        // Act
+        bool accepted = Review.Clean(review, candidates, new JsonObject(), new JsonArray(), new JsonArray());
+
+        // Assert
+        accepted.Should().BeFalse();
+    }
+
+    [Fact]
     public async Task ReviewerQuotaResumesTheExactDatedCandidateWithoutAnotherAuthorCall()
     {
         // Arrange
@@ -101,7 +151,7 @@ public sealed class EngineTests
                     ["current_text_evidence"] = new JsonArray(new JsonObject { ["quote"] = "The clarified mechanism.", ["line_start"] = line, ["reason"] = "Current target explained" }),
                     ["source_checks"] = new JsonArray(),
                     ["rejection_equivalence"] = new JsonArray(),
-                    ["quality"] = new JsonObject { ["accuracy"] = "PASS", ["clarity"] = "PASS", ["rules_compliance"] = "PASS", ["question_quality"] = "NOT APPLICABLE", ["identity_safety"] = "NOT APPLICABLE" }
+                    ["quality"] = new JsonObject { ["accuracy"] = "PASS", ["clarity"] = "PASS", ["rules_compliance"] = "PASS", ["question_quality"] = "PASS", ["identity_safety"] = "PASS" }
                 })
             });
         }
@@ -141,14 +191,15 @@ public sealed class EngineTests
     }
 
     [Fact]
-    public async Task IndependentReviewerRejectsFalseKeepBeforeRecordingAnOutcome()
+    public async Task IndependentQuestionQualityFailureBlocksKeepBeforePublication()
     {
         // Arrange
         using var fixture = new KeepDecisionKeepFixture();
-        fixture.Model.RejectKeep = true;
+        fixture.Model.FailQuestionQuality = true;
+        var publicationApi = new RuntimeApi();
 
         // Act
-        JsonObject blocked = await fixture.Engine().RunAsync(withModel: true);
+        JsonObject blocked = await fixture.Engine(publicationApi).RunAsync(apply: true, withModel: true);
         JsonObject state = (await fixture.Store.ReadAsync()).State;
 
         // Assert
@@ -159,6 +210,10 @@ public sealed class EngineTests
         fixture.Model.Authors.Should().Be(1);
         fixture.Model.Reviews.Should().Be(1);
         fixture.Validations.Should().Be(0);
+        publicationApi.Commits.Should().Be(0);
+        publicationApi.PrCreates.Should().Be(0);
+        state.Obj("export_operations").Count.Should().Be(0);
+        state["pending_operation"].Should().BeNull();
     }
 
     [Fact]
@@ -230,12 +285,13 @@ public sealed class EngineTests
 
         public KeepDecisionKeepFixture()
         {
-            Directory.CreateDirectory(Path.Combine(Root, ".codex/agents"));
-            File.WriteAllText(Path.Combine(Root, ".codex/agents/note-reviewer.toml"), "Fixture review contract");
+            DomainFixtures.CreateReviewContract(Root);
             Model = new KeepDecisionKeepModel(Clock);
         }
 
-        public ImprovementEngine Engine() => new(Root, new JsonObject(), Store, Model, clock: Clock,
+        public ImprovementEngine Engine(RuntimeApi? publicationApi = null) => new(Root, new JsonObject(), Store, Model, clock: Clock,
+            publisher: publicationApi is null ? null : new GitHubRuntime(publicationApi, Store, activation: () => { }),
+            snapshotShaLoader: () => "base",
             notesLoader: () =>
             {
                 JsonObject note = DomainFixtures.NoteRecord(content: Source);
@@ -269,7 +325,7 @@ public sealed class EngineTests
     {
         public int Authors { get; private set; }
         public int Reviews { get; private set; }
-        public bool RejectKeep { get; set; }
+        public bool FailQuestionQuality { get; set; }
         public bool LimitFirstReview { get; set; }
         public bool MixedBatch { get; set; }
         public JsonObject AuthorPayload { get; private set; } = new();
@@ -317,10 +373,9 @@ public sealed class EngineTests
                 throw new ClaudeQuotaException("weekly", clock.GetUtcNow().AddHours(1), clock.GetUtcNow().AddHours(1));
             }
             JsonObject review = DomainFixtures.UnchangedReview(payload);
-            if (RejectKeep)
+            if (FailQuestionQuality)
             {
-                review["verdict"] = "CHANGES REQUIRED";
-                review.RequiredArray("notes")[0]!["verdict"] = "CHANGES REQUIRED";
+                review.RequiredArray("notes")[0]!["quality"]!["question_quality"] = "FAIL";
             }
             return Task.FromResult(review);
         }
@@ -524,8 +579,7 @@ public sealed class EngineTests
 
         public CandidateValidationRepositoryFixture()
         {
-            Directory.CreateDirectory(Path.Combine(Root, ".codex/agents"));
-            File.WriteAllText(Path.Combine(Root, ".codex/agents/note-reviewer.toml"), "Fixture complete-note review contract");
+            DomainFixtures.CreateReviewContract(Root);
             foreach (string path in new[] { CandidateValidationBadPath, CandidateValidationOtherPath })
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(Path.Combine(Root, path))!);
@@ -588,7 +642,7 @@ public sealed class EngineTests
                     ["current_text_evidence"] = new JsonArray(new JsonObject { ["quote"] = lines[line], ["line_start"] = line + 1, ["reason"] = "The current explanation addresses the target." }),
                     ["source_checks"] = new JsonArray(),
                     ["rejection_equivalence"] = new JsonArray(),
-                    ["quality"] = new JsonObject { ["accuracy"] = "PASS", ["clarity"] = "PASS", ["rules_compliance"] = "PASS", ["question_quality"] = "NOT APPLICABLE", ["identity_safety"] = "NOT APPLICABLE" }
+                    ["quality"] = new JsonObject { ["accuracy"] = "PASS", ["clarity"] = "PASS", ["rules_compliance"] = "PASS", ["question_quality"] = "PASS", ["identity_safety"] = "PASS" }
                 })
             });
         }
@@ -736,7 +790,6 @@ public sealed class EngineTests
     private const string ProposalSizeSource = "---\ncreated: \"2026-01-01T00:00:00.000Z\"\nmodified: \"2026-01-01T00:00:00.000Z\"\n---\n\nThe original mechanism.\n";
 
     [Theory]
-    [InlineData(false, false)]
     [InlineData(true, false)]
     [InlineData(false, true)]
     public async Task Oversized_initial_proposals_are_held_and_existing_prs_are_frozen(bool lineLimit, bool existingPr)
@@ -871,7 +924,7 @@ public sealed class EngineTests
         {
             await File.WriteAllTextAsync(Path.Combine(root, DomainFixtures.Path), DomainFixtures.Note);
             await File.WriteAllTextAsync(Path.Combine(root, ".scripts/snapshot.txt"), "verified\n");
-            await File.WriteAllTextAsync(Path.Combine(root, ".codex/agents/note-reviewer.toml"), "Fixture review contract");
+            DomainFixtures.CreateReviewContract(root);
             Git.Run(root, "init", "--quiet", "--initial-branch=main");
             Git.Run(root, "config", "user.name", "Fixture");
             Git.Run(root, "config", "user.email", "fixture@example.invalid");

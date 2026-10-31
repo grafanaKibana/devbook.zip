@@ -153,43 +153,19 @@ public static partial class Worker
         if (commitSha.Length == 0)
         {
             JsonObject parent = await Runtime.ObjectAsync(api, "GET", $"/git/commits/{expected}", cancellationToken: cancellationToken);
-            var changes = new JsonArray();
-            foreach (KeyValuePair<string, byte[]?> item in files.OrderBy(item => item.Key, StringComparer.Ordinal))
-            {
-                await AssertBoundLeaseAsync(store, request, owner, cancellationToken);
-                string? sha = null;
-                if (item.Value is not null)
-                {
-                    JsonObject blob = await Runtime.ObjectAsync(api, "POST", "/git/blobs", new JsonObject
-                    {
-                        ["encoding"] = "base64",
-                        ["content"] = Convert.ToBase64String(item.Value)
-                    }, cancellationToken);
-                    sha = blob.Str("sha");
-                    if (sha != Bundle.BlobSha(item.Value))
-                    {
-                        throw new RuntimeFailure("GitHub blob hash differs from the verified export.");
-                    }
-                }
-                changes.Add(new JsonObject { ["path"] = item.Key, ["mode"] = "100644", ["type"] = "blob", ["sha"] = sha });
-            }
-            await AssertBoundLeaseAsync(store, request, owner, cancellationToken);
-            JsonObject tree = await Runtime.ObjectAsync(api, "POST", "/git/trees", new JsonObject
-            {
-                ["base_tree"] = parent.Obj("tree")["sha"]?.DeepClone(),
-                ["tree"] = changes
-            }, cancellationToken);
+            string treeSha = await TreeUpload.UploadAsync(api, parent.Obj("tree").Str("sha"), files,
+                token => AssertBoundLeaseAsync(store, request, owner, token), cancellationToken);
             await RecordAsync(store, request, owner, "journal generated commit attempt", (_, operation) =>
             {
                 JsonObject evidence = operation.Obj("evidence");
-                evidence["export_tree_sha"] = tree["sha"]?.DeepClone();
+                evidence["export_tree_sha"] = treeSha;
                 evidence["export_commit_attempted_at"] = Runtime.Iso();
                 operation["evidence"] = evidence;
             }, cancellationToken);
             JsonObject commit = await Runtime.ObjectAsync(api, "POST", "/git/commits", new JsonObject
             {
                 ["message"] = ExportCommitMessage,
-                ["tree"] = tree["sha"]?.DeepClone(),
+                ["tree"] = treeSha,
                 ["parents"] = new JsonArray(expected)
             }, cancellationToken);
             commitSha = Bundle.ExactHead(commit.Str("sha"));

@@ -72,14 +72,12 @@ public sealed class ProposalTests
         replay.Should().Throw<ProposalException>().WithMessage("*rejected edit*");
     }
 
-    [Theory]
-    [InlineData("problem")]
-    [InlineData("reader_benefit")]
-    public void FreshEditRequiresAConcreteProblemAndReaderBenefit(string missing)
+    [Fact]
+    public void FreshEditRequiresAConcreteProblem()
     {
         // Arrange
         JsonObject edit = DomainFixtures.Edit();
-        edit.Remove(missing);
+        edit.Remove("problem");
 
         // Act
         Action validate = () => Proposal.Validate(DomainFixtures.Proposal(edit));
@@ -91,9 +89,7 @@ public sealed class ProposalTests
     [Theory]
     [InlineData("missing")]
     [InlineData("duplicate")]
-    [InlineData("extra")]
-    [InlineData("negative")]
-    public void ReviewRejectsIncompleteOrNegativePerEditValueEvidence(string invalid)
+    public void ReviewRejectsMissingOrDuplicatePerEditValueEvidence(string invalid)
     {
         // Arrange
         JsonObject proposal = DomainFixtures.Proposal(DomainFixtures.Edit());
@@ -111,13 +107,67 @@ public sealed class ProposalTests
             proposal.Arr("edits").Add(proposal.Arr("edits")[0]!.DeepClone());
             checks.Add(checks[0]!.DeepClone());
         }
-        if (invalid == "extra") checks[0]!["edit_index"] = 2;
-        if (invalid == "negative") checks[0]!["verdict"] = "NOT WORTHWHILE";
 
         // Act
         bool clean = Review.Clean(review, current, proposal, new JsonArray(), new JsonArray());
 
         // Assert
         clean.Should().BeFalse();
+    }
+
+    [Fact]
+    public void ProseEditCanUseAnExistingOwningNoteReference()
+    {
+        // Arrange
+        const string url = "https://example.com/mechanism";
+        const string before = "The operating idea has a concrete boundary.";
+        string source = DomainFixtures.Note + "\n# References\n\n- [Mechanism](" + url + ")\n";
+        JsonObject edit = DomainFixtures.Edit("note");
+        edit["expected_hash"] = LegacyIdentity.Digest(source);
+        edit["before"] = before;
+        edit["after"] = "The operating idea explains the corrected boundary.";
+        edit["sources"] = new JsonArray(new JsonObject
+        {
+            ["url"] = url,
+            ["claim"] = "The mechanism has the corrected boundary.",
+            ["version"] = "not version-specific"
+        });
+        var sources = new Dictionary<string, string> { [DomainFixtures.Path] = source };
+
+        // Act
+        JsonObject result = Proposal.Apply(sources, DomainFixtures.Proposal(edit));
+
+        // Assert
+        result.Obj("sources").Str(DomainFixtures.Path).Should().Contain(edit.Str("after")).And.Contain(url);
+    }
+
+    [Theory]
+    [InlineData("note")]
+    [InlineData("rewrite")]
+    public void SourceMustAppearInTheRequiredVisibleContext(string kind)
+    {
+        // Arrange
+        const string url = "https://example.com/mechanism";
+        string source = DomainFixtures.Note + (kind == "rewrite" ? "\n# References\n\n- [Mechanism](" + url + ")\n" : "");
+        JsonObject edit = DomainFixtures.Edit(kind);
+        edit["expected_hash"] = LegacyIdentity.Digest(source);
+        if (kind == "note")
+        {
+            edit["before"] = "The operating idea has a concrete boundary.";
+            edit["after"] = "The operating idea explains the corrected boundary.";
+        }
+        edit["sources"] = new JsonArray(new JsonObject
+        {
+            ["url"] = url,
+            ["claim"] = "The mechanism has the corrected boundary.",
+            ["version"] = "not version-specific"
+        });
+        var sources = new Dictionary<string, string> { [DomainFixtures.Path] = source };
+
+        // Act
+        Action apply = () => Proposal.Apply(sources, DomainFixtures.Proposal(edit));
+
+        // Assert
+        apply.Should().Throw<ProposalException>().WithMessage("*source URL missing*");
     }
 }

@@ -49,6 +49,7 @@ public static class EngineCommand
             {
                 config["model"] = selectedModel;
             }
+            JsonObject contentAuthorities = Core.LoadContentAuthorities(root);
             JsonObject result;
             using var deadline = new CancellationTokenSource(TimeSpan.FromMinutes(config.Int("max_run_minutes", 35)));
             if (flags.Contains("--demo"))
@@ -61,7 +62,7 @@ public static class EngineCommand
             }
             else if (!flags.Contains("--apply") && !flags.Contains("--with-model"))
             {
-                result = await new ImprovementEngine(root, config, new MemoryStateStore(Core.NewState())).RunAsync(cancellationToken: deadline.Token);
+                result = await new ImprovementEngine(root, config, new MemoryStateStore(Core.NewState()), contentAuthorities: contentAuthorities).RunAsync(cancellationToken: deadline.Token);
             }
             else
             {
@@ -94,8 +95,8 @@ public static class EngineCommand
                 try
                 {
                     var publisher = new GitHubRuntime(api, store, config.Str("base_branch", "main"), config.Arr("required_check_contexts").Strings(), owner);
-                    var provider = new ClaudeProvider(config);
-                    result = await new ImprovementEngine(root, config, store, provider, api, publisher).RunAsync(apply, true, deadline.Token);
+                    var provider = new ClaudeProvider(config, contentAuthorities: contentAuthorities);
+                    result = await new ImprovementEngine(root, config, store, provider, api, publisher, contentAuthorities: contentAuthorities).RunAsync(apply, true, deadline.Token);
                     result["model_diagnostics"] = provider.Diagnostics.Copy();
                 }
                 finally

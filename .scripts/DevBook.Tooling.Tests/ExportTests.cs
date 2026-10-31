@@ -10,24 +10,6 @@ namespace DevBook.Tooling.Tests;
 public sealed class ExportTests
 {
     [Fact]
-    public void ReceiptBindsNativePolicySourceAndGeneratedBytes()
-    {
-        // Arrange
-        GitTreeEntry[] entries = [.. Receipt.RequiredPolicyPaths.Select(path => new GitTreeEntry(path, "100644", "blob", new string('a', 40))),
-            new(".scripts/DevBook.Tooling/Infrastructure/LegacyCaseFold.json", "100644", "blob", new string('b', 40)),
-            new("Vault/Home/Programming/Card.md", "100644", "blob", new string('c', 40)),
-            new("Web/content/Programming/Card.md", "100644", "blob", new string('d', 40)),
-            new("Web/content/Assets/Image.png", "100644", "blob", new string('e', 40))];
-
-        // Act
-        JsonObject receipt = Receipt.Make(entries);
-
-        // Assert
-        Receipt.Validate(receipt, entries).Should().BeTrue();
-        receipt.Obj("policy").ContainsKey(".scripts/DevBook.Tooling/Infrastructure/LegacyCaseFold.json").Should().BeTrue();
-    }
-
-    [Fact]
     public async Task ImmutableExportStagesGeneratedOutputAndPreservesUndatedSources()
     {
         // Arrange
@@ -164,10 +146,11 @@ public sealed class ExportTests
     {
         // Arrange
         GitTreeEntry[] entries = [.. Receipt.RequiredPolicyPaths.Select(path => new GitTreeEntry(path, "100644", "blob", new string('a', 40))),
+            new(".scripts/DevBook.Tooling/Infrastructure/LegacyCaseFold.json", "100644", "blob", new string('b', 40)),
             new("Vault/Home/Programming/Card.md", "100644", "blob", new string('c', 40)),
             new("Web/content/Programming/Card.md", "100644", "blob", new string('d', 40))];
         JsonObject receipt = Receipt.Make(entries);
-        GitTreeEntry[] changed = [.. entries.Select((entry, index) => index == 0 ? entry with { Sha = new string('b', 40) } : entry)];
+        GitTreeEntry[] changed = [.. entries.Select(entry => entry.Path.EndsWith("LegacyCaseFold.json", StringComparison.Ordinal) ? entry with { Sha = new string('f', 40) } : entry)];
 
         // Act
         Action validate = () => Receipt.Validate(receipt, changed);

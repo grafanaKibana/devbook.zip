@@ -146,7 +146,15 @@ internal sealed class DemoApi : IGitHubApi
             foreach (JsonObject item in input.Arr("tree").OfType<JsonObject>())
             {
                 string name = item.Str("path");
-                if (item["sha"] is null)
+                if (item["content"] is JsonValue content)
+                {
+                    if (item.ContainsKey("sha"))
+                    {
+                        throw new InvalidOperationException("Fixture tree entry cannot contain both content and sha.");
+                    }
+                    entries[name] = Entry(name, Encoding.UTF8.GetBytes(content.GetValue<string>()));
+                }
+                else if (item["sha"] is null)
                 {
                     entries.Remove(name);
                 }

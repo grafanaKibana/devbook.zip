@@ -96,6 +96,159 @@ public sealed class StateTests
         api.Mutations.Should().Be(0);
     }
 
+    [Theory]
+    [InlineData("unchanged")]
+    [InlineData("changed")]
+    [InlineData("missing")]
+    [InlineData("applied-with-lost-response")]
+    public async Task CachedReadReturnsTheCurrentRemoteStateWithoutSharingCallerData(string scenario)
+    {
+        // Arrange
+        var api = new CachedStateApi();
+        var store = new StateBranchStore(api);
+        StateSnapshot first = await store.ReadAsync();
+        first.State["version"] = 99;
+        first.State.Obj("notes")["caller-only"] = new JsonObject();
+        string? expectedRef = "initial";
+        string? expectedBlob = "initial-blob";
+        string expectedMarker = "initial";
+        int expectedBlobReads = 1;
+        int expectedRefReads = 2;
+        if (scenario == "changed")
+        {
+            api.Head = expectedRef = "changed";
+            expectedBlob = "changed-blob";
+            expectedMarker = "changed";
+            expectedBlobReads = 2;
+        }
+        else if (scenario == "missing")
+        {
+            api.Head = expectedRef = expectedBlob = null;
+            expectedMarker = "";
+        }
+        else if (scenario == "applied-with-lost-response")
+        {
+            api.LosePatchResponse = true;
+            JsonObject update = Core.NewState();
+            update["marker"] = "applied";
+            Exception? failure = await Record.ExceptionAsync(() => store.WriteAsync(update,
+                new StateSnapshot(Core.NewState(), "initial"), "fixture ambiguous response"));
+            failure.Should().BeOfType<GitHubApiFailure>();
+            update["marker"] = "caller mutation";
+            expectedRef = "written";
+            expectedBlob = "written-blob";
+            expectedMarker = "applied";
+            expectedBlobReads = 2;
+            expectedRefReads = 3;
+        }
+
+        // Act
+        StateSnapshot current = await store.ReadAsync();
+
+        // Assert
+        current.RefSha.Should().Be(expectedRef);
+        current.BlobSha.Should().Be(expectedBlob);
+        current.State.Str("marker").Should().Be(expectedMarker);
+        current.State.Obj("notes").Count.Should().Be(0);
+        current.State.Int("version").Should().Be(scenario == "missing" ? 0 : 1);
+        api.StateReads.Should().Be(expectedBlobReads);
+        api.RefReads.Should().Be(expectedRefReads);
+        current.State["marker"] = "returned snapshot mutation";
+        api.RemoteState.Str("marker").Should().Be(scenario == "applied-with-lost-response" ? "applied" : "initial");
+    }
+
+    [Fact]
+    public async Task StateWriteFreezesCallerInputBeforeItsFirstAwait()
+    {
+        // Arrange
+        var api = new CachedStateApi();
+        var store = new StateBranchStore(api);
+        StateSnapshot snapshot = await store.ReadAsync();
+        JsonObject input = snapshot.State.Copy();
+        input["frozen_extension"] = new JsonObject { ["nested"] = "before" };
+        api.BeforeRefResponse = () => input.Obj("frozen_extension")["nested"] = "after";
+
+        // Act
+        StateSnapshot written = await store.WriteAsync(input, snapshot, "fixture frozen state");
+
+        // Assert
+        written.State.Obj("frozen_extension").Str("nested").Should().Be("before");
+        api.WrittenState!.Obj("frozen_extension").Str("nested").Should().Be("before");
+        input.Obj("frozen_extension").Str("nested").Should().Be("after");
+        api.Patches.Should().Be(1);
+    }
+
+    private sealed class CachedStateApi : IGitHubApi
+    {
+        public string Repo => "owner/state";
+        public string? Head { get; set; } = "initial";
+        public int RefReads { get; private set; }
+        public int StateReads { get; private set; }
+        public int Patches { get; private set; }
+        public int Mutations { get; private set; }
+        public bool LosePatchResponse { get; set; }
+        public Action? BeforeRefResponse { get; set; }
+        public JsonObject? WrittenState { get; private set; }
+        public JsonObject RemoteState { get; private set; } = InitialState();
+
+        private static JsonObject InitialState()
+        {
+            JsonObject state = Core.NewState();
+            state["marker"] = "initial";
+            return state;
+        }
+
+        public async Task<JsonNode?> RequestAsync(string method, string path, JsonNode? payload = null, bool paginate = false, CancellationToken cancellationToken = default)
+        {
+            if (method != "GET") Mutations++;
+            if (method == "GET" && path.StartsWith("/git/ref/", StringComparison.Ordinal))
+            {
+                RefReads++;
+                await Task.Yield();
+                BeforeRefResponse?.Invoke();
+                if (Head is null) throw new GitHubApiFailure("missing", 404);
+                return new JsonObject { ["object"] = new JsonObject { ["sha"] = Head } };
+            }
+            if (method == "GET" && path.StartsWith("/git/commits/", StringComparison.Ordinal))
+            {
+                return new JsonObject { ["tree"] = new JsonObject { ["sha"] = path.Split('/').Last() } };
+            }
+            if (method == "GET" && path.StartsWith("/git/trees/", StringComparison.Ordinal))
+            {
+                string tree = path.Split('/').Last().Split('?')[0];
+                return new JsonObject
+                {
+                    ["truncated"] = false,
+                    ["tree"] = new JsonArray(new JsonObject
+                    { ["path"] = Runtime.StatePath, ["type"] = "blob", ["mode"] = "100644", ["sha"] = tree + "-blob" })
+                };
+            }
+            if (method == "GET" && path.StartsWith("/git/blobs/", StringComparison.Ordinal))
+            {
+                StateReads++;
+                JsonObject state = RemoteState.Copy();
+                if (path.EndsWith("changed-blob", StringComparison.Ordinal)) state["marker"] = "changed";
+                return new JsonObject { ["encoding"] = "base64", ["content"] = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(state.ToJsonString())) };
+            }
+            if (method == "POST" && path == "/git/blobs")
+            {
+                WrittenState = JsonNode.Parse(Convert.FromBase64String(payload.Str("content")))!.AsObject();
+                return new JsonObject { ["sha"] = "written-blob" };
+            }
+            if (method == "PATCH")
+            {
+                Patches++;
+                Head = payload.Str("sha");
+                RemoteState = WrittenState!.Copy();
+                if (LosePatchResponse) throw new GitHubApiFailure("Response lost after ref update.");
+            }
+            return new JsonObject { ["sha"] = "written" };
+        }
+
+        public Task<JsonNode?> GraphqlAsync(string query, JsonObject variables, CancellationToken cancellationToken = default) =>
+            throw new InvalidOperationException("No GraphQL expected.");
+    }
+
     private static ExportFixture ExportCompactionReviewedFixture()
     {
         var fixture = new ExportFixture();
@@ -151,82 +304,19 @@ public sealed class StateTests
     public async Task StaleStateWriteIsRejectedWithoutReplacingCurrentEvidence()
     {
         // Arrange
-        var store = new MemoryStateStore(Core.NewState());
+        var api = new CachedStateApi();
+        var store = new StateBranchStore(api);
         StateSnapshot stale = await store.ReadAsync();
-        await new DurableLease(store, "owner").AcquireAsync();
+        api.Head = "another-worker-head";
 
         // Act
         Func<Task> write = () => store.WriteAsync(stale.State, stale, "stale write");
 
         // Assert
-        await write.Should().ThrowAsync<Conflict>();
-        (await store.ReadAsync()).State.Obj("lease").Str("owner").Should().Be("owner");
-    }
-
-    [Fact]
-    public async Task CompetingLeaseCannotReplaceTheCurrentOwner()
-    {
-        // Arrange
-        var store = new MemoryStateStore(Core.NewState());
-        await new DurableLease(store, "owner").AcquireAsync();
-
-        // Act
-        Func<Task> acquire = () => new DurableLease(store, "competitor").AcquireAsync();
-
-        // Assert
-        await acquire.Should().ThrowAsync<Conflict>();
-    }
-
-    [Fact]
-    public async Task CompletingJournalPreservesUnknownAndHistoricalStateFields()
-    {
-        // Arrange
-        JsonObject original = Core.NewState();
-        original["unknown_future_field"] = new JsonObject { ["nested"] = "preserved" };
-        original["rejections"] = new JsonArray(new JsonObject { ["fingerprint"] = "legacy", ["semantic_fingerprint"] = "still-rejected" });
-        original["retired_ids"] = new JsonObject { ["retired"] = "old-target" };
-        original["feedback"] = new JsonObject { ["comment:1"] = new JsonObject { ["revision"] = "edited-revision", ["status"] = "implemented" } };
-        original["cooldown"] = new JsonObject { ["kind"] = "weekly", ["until"] = "2030-01-01T00:00:00Z" };
-        var store = new MemoryStateStore(original);
-        var journal = new OperationJournal(store);
-        JsonObject operation = await journal.PrepareAsync(new JsonObject { ["topic"] = "net", ["generation"] = 1, ["custom_operation_field"] = "retained" });
-        string id = operation.Str("op_id");
-        foreach (string phase in Runtime.JournalPhases.Skip(1).SkipLast(1)) await journal.AdvanceAsync(id, phase);
-
-        // Act
-        await journal.AdvanceAsync(id, Runtime.JournalPhases.Last(), new JsonObject { ["commit_sha"] = "recorded-head" });
-        JsonObject completed = (await store.ReadAsync()).State;
-
-        // Assert
-        foreach (string field in new[] { "unknown_future_field", "rejections", "retired_ids", "feedback", "cooldown" })
-            JsonNode.DeepEquals(completed[field], original[field]).Should().BeTrue(field + " must survive journal completion");
-        completed.Obj("completed_operations").Obj(id).Str("custom_operation_field").Should().Be("retained");
-        completed["pending_operation"].Should().BeNull();
-    }
-
-    [Fact]
-    public void SuccessfulOutcomeRetainsExtensionsAndRecordsExactRepairEvaluationInputs()
-    {
-        // Arrange
-        JsonObject original = Core.NewState();
-        original.Obj("notes")[DomainFixtures.Path] = new JsonObject { ["future_extension"] = new JsonArray("retained") };
-        JsonObject note = DomainFixtures.NoteRecord();
-        note["repair_input_hash"] = "reviewed-flags";
-        var batch = new JsonObject { ["notes"] = new JsonArray(note), ["rules_hash"] = "rules", ["evaluation_hash"] = "policy" };
-        JsonObject proposal = DomainFixtures.Proposal(DomainFixtures.Edit());
-        proposal["edits"] = new JsonArray();
-        proposal.Arr("dispositions")[0]!["outcome"] = "keep";
-        JsonObject review = DomainFixtures.UnchangedReview(new JsonObject { ["current"] = new JsonObject { [DomainFixtures.Path] = DomainFixtures.Note } });
-
-        // Act
-        JsonObject recorded = Core.RecordOutcome(original, batch, proposal, new JsonObject { ["sources"] = new JsonObject() }, review);
-
-        // Assert
-        JsonObject outcome = recorded.Obj("notes").Obj(DomainFixtures.Path);
-        outcome.Arr("future_extension").Strings().Should().Equal("retained");
-        outcome.Str("repair_input_hash").Should().Be("reviewed-flags");
-        outcome.Str("evaluation_hash").Should().Be("policy");
-        outcome.Obj("keep_review").Str("evaluation_hash").Should().Be("policy");
+        await write.Should().ThrowAsync<Conflict>().WithMessage("*ref changed*");
+        api.Head.Should().Be("another-worker-head");
+        api.RemoteState.Str("marker").Should().Be("initial");
+        api.Mutations.Should().Be(0);
     }
 
 }

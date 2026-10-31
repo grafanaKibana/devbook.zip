@@ -238,7 +238,10 @@ public static class Proposal
             {
                 throw new ProposalException("wikilink removal requires explicit target-specific semantic rationale");
             }
-            ValidateSourcePlacement(path, after, edit.Arr("sources"));
+            if (edit.Str("kind") != "note")
+            {
+                ValidateSourcePlacement(path, after, edit.Arr("sources"));
+            }
             if (!grouped.TryGetValue(path, out List<(int Start, int End, JsonObject Edit)>? edits))
             {
                 edits = [];
@@ -270,6 +273,10 @@ public static class Proposal
             if (!BlockIdPattern.Matches(candidate).Cast<Match>().Select(match => match.Value).Order(StringComparer.Ordinal).SequenceEqual(BlockIdPattern.Matches(sources[item.Key]).Cast<Match>().Select(match => match.Value).Order(StringComparer.Ordinal)))
             {
                 throw new ProposalException("proposal must preserve block IDs exactly");
+            }
+            foreach (var edit in item.Value.Where(edit => edit.Edit.Str("kind") == "note"))
+            {
+                ValidateSourcePlacement(item.Key, edit.Edit.Str("after"), edit.Edit.Arr("sources"), candidate);
             }
             candidates[item.Key] = candidate;
         }
@@ -388,7 +395,7 @@ public static class Proposal
         });
     }
 
-    private static void ValidateSourcePlacement(string path, string after, JsonArray entries)
+    private static void ValidateSourcePlacement(string path, string after, JsonArray entries, string? sourceContext = null)
     {
         if (Regex.IsMatch(after, @"(?:\]\(#Questions\)|\[\[[^\]]*#Questions(?:\|[^\]]*)?\]\])", RegexOptions.IgnoreCase))
         {
@@ -401,9 +408,9 @@ public static class Proposal
                 throw new ProposalException("source entries require nonempty url, claim, and version");
             }
             string url = entry.Str("url");
-            if (!url.StartsWith("https://", StringComparison.Ordinal) || !after.Contains(url, StringComparison.Ordinal))
+            if (!url.StartsWith("https://", StringComparison.Ordinal) || !(sourceContext ?? after).Contains(url, StringComparison.Ordinal))
             {
-                throw new ProposalException($"source URL missing from changed answer: {url}");
+                throw new ProposalException($"source URL missing from {(sourceContext is null ? "changed answer" : "owning note")}: {url}");
             }
             if (QardScanner.Scan(after).Any(card => card.Front.Contains(url, StringComparison.Ordinal)))
             {

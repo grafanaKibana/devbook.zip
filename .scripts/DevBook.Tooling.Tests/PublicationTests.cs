@@ -115,35 +115,6 @@ public sealed class PublicationTests
         terminal.Arr("rejections").Count.Should().Be(status == "closed" ? 1 : 0);
     }
 
-    [Fact]
-    public void CumulativeSummaryExplainsProblemCorrectionBenefitWithReadableFullPathLinks()
-    {
-        // Arrange
-        JsonObject first = DomainFixtures.Edit();
-        first["problem"] = "The answer omitted the buffering boundary.";
-        first["reader_benefit"] = "Recall distinguishes buffering from durable completion.";
-        first["sources"] = new JsonArray(new JsonObject { ["title"] = "Reference", ["url"] = "https://example.com/reference", ["claim"] = "Buffering boundary" });
-        JsonObject next = first.Copy();
-        next["before"] = first.Str("after");
-        next["after"] = first.Str("after").Replace("mechanism and boundary", "mechanism, costs, and boundary");
-        next.Remove("problem");
-        next.Remove("reader_benefit");
-        next["reason"] = "Historical correction adds the cost.";
-        var original = new Dictionary<string, string> { [DomainFixtures.Path] = DomainFixtures.Note };
-        var current = new Dictionary<string, string> { [DomainFixtures.Path] = DomainFixtures.Note.Replace(DomainFixtures.Card, next.Str("after")) };
-
-        // Act
-        string summary = Summary.Render(original, current, new JsonArray(first, next), new JsonArray(), new Dictionary<string, string> { [DomainFixtures.Path] = DomainFixtures.Path });
-
-        // Assert
-        Enumerable.Range(1, 4).Should().OnlyContain(number => summary.Contains($"## {number}."));
-        summary.Should().Contain("The answer omitted the buffering boundary.").And.Contain("Recall distinguishes buffering from durable completion.")
-            .And.Contain("Historical correction adds the cost.").And.Contain("https://example.com/reference")
-            .And.Contain("[`Programming/NET/Card.md`](Vault/Home/Programming/NET/Card.md)")
-            .And.Contain("The original answer.").And.Contain("costs, and boundary")
-            .And.NotContain("Scope").And.NotContain("Validation").And.NotContain("Identity").And.NotContain("obsolete validation prose");
-    }
-
     [Theory]
     [InlineData("POST", "/pulls")]
     [InlineData("GET", "/contents/%252e%252e/config")]

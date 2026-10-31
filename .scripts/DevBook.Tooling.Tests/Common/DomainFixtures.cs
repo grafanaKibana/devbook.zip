@@ -14,8 +14,12 @@ internal static class DomainFixtures
 
     public static void CreateReviewContract(string root)
     {
-        Directory.CreateDirectory(System.IO.Path.Combine(root, ".codex/agents"));
-        File.WriteAllText(System.IO.Path.Combine(root, ".codex/agents/note-reviewer.toml"), "Fixture review contract");
+        foreach (string relative in Core.ContentAuthorities)
+        {
+            string path = System.IO.Path.Combine(root, relative);
+            Directory.CreateDirectory(System.IO.Path.GetDirectoryName(path)!);
+            File.WriteAllText(path, "Fixture content authority: " + relative);
+        }
     }
 
     public static JsonObject Edit(string kind = "rewrite", string target = "same", string? after = null) => new()

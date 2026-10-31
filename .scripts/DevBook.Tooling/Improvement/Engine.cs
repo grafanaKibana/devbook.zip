@@ -10,6 +10,7 @@ public sealed partial class ImprovementEngine
 {
     private readonly string root;
     private readonly JsonObject config;
+    private readonly JsonObject contentAuthorities;
     private readonly IStateStore store;
     private readonly IModelProvider? model;
     private readonly IGitHubApi? api;
@@ -27,10 +28,12 @@ public sealed partial class ImprovementEngine
     public ImprovementEngine(string root, JsonObject config, IStateStore store, IModelProvider? model = null, IGitHubApi? api = null,
         GitHubRuntime? publisher = null, Func<JsonArray>? notesLoader = null,
         Func<Dictionary<string, string>, Dictionary<string, string>, CancellationToken, Task<JsonArray>>? validator = null,
-        Func<string, CancellationToken, Task<string>>? sourceFetcher = null, TimeProvider? clock = null, Func<string>? snapshotShaLoader = null)
+        Func<string, CancellationToken, Task<string>>? sourceFetcher = null, TimeProvider? clock = null, Func<string>? snapshotShaLoader = null, JsonObject? contentAuthorities = null)
     {
         this.root = Path.GetFullPath(root);
         this.config = config.Copy();
+        this.contentAuthorities = contentAuthorities?.Copy() ?? Core.LoadContentAuthorities(this.root);
+        _ = Core.RulesVersion(this.contentAuthorities);
         this.store = store;
         this.model = model;
         this.api = api;
@@ -115,9 +118,9 @@ public sealed partial class ImprovementEngine
     private async Task<string> FetchSourceAsync(string url, CancellationToken cancellationToken)
     {
         int maximumBytes = config.Int("max_source_bytes", 250_000);
-        if (maximumBytes is < 1 or > 1_000_000)
+        if (maximumBytes is < 1 or > 2_000_000)
         {
-            throw new RuntimeFailure("max_source_bytes must be between 1 and 1000000.");
+            throw new RuntimeFailure("max_source_bytes must be between 1 and 2000000.");
         }
         byte[] data = await Runtime.FetchPrimarySourceAsync(url, maximumBytes, cancellationToken);
         if (data.AsSpan().StartsWith("%PDF"u8))
@@ -125,7 +128,7 @@ public sealed partial class ImprovementEngine
             throw new UnsafeInput("PDF evidence needs a readable primary HTML/text source.");
         }
 
-        return Encoding.UTF8.GetString(data);
+        return Runtime.SourceEvidenceText(data);
     }
 
     private async Task<JsonArray> ValidateAsync(Dictionary<string, string> expected, Dictionary<string, string> candidate, CancellationToken cancellationToken)
@@ -214,7 +217,7 @@ public sealed partial class ImprovementEngine
 
         Dictionary<string, string> baseline = notes.OfType<JsonObject>().ToDictionary(note => note.Str("path"), note => note.Str("content"));
         (state, Dictionary<int, JsonObject> prs, JsonArray feedback) = await RemoteViewAsync(state, notes, baseSha, apply, cancellationToken);
-        string rules = Core.RulesVersion(root);
+        string rules = Core.RulesVersion(contentAuthorities);
         string evaluation = ClaudeProvider.EvaluationHash(config);
         config["evaluation_hash"] = evaluation;
         JsonObject saved = state.Obj("pending_author_proposal");
@@ -334,14 +337,7 @@ public sealed partial class ImprovementEngine
                 await SaveAsync(state, "preserve incompatible author proposal", cancellationToken);
                 return new JsonObject { ["status"] = "pending_held", ["reason"] = "Saved proposal inputs changed; original evidence was preserved.", ["model_calls"] = modelCalls };
             }
-            var rulesText = new JsonObject();
-            foreach (string path in Core.ContentAuthorities)
-            {
-                if (File.Exists(Path.Combine(root, path)))
-                {
-                    rulesText[path] = File.ReadAllText(Path.Combine(root, path));
-                }
-            }
+            JsonObject rulesText = contentAuthorities.Copy();
 
             JsonArray open = Copies(history.OfType<JsonObject>().SelectMany(record => record.Obj("proposal").Arr("edits").OfType<JsonObject>()).Select(edit =>
             {
@@ -471,7 +467,7 @@ public sealed partial class ImprovementEngine
         {
             review = await CallAsync(true, new JsonObject
             {
-                ["rules"] = File.ReadAllText(Path.Combine(root, ".codex/agents/note-reviewer.toml")),
+                ["rules"] = contentAuthorities.Copy(),
                 ["before"] = ObjectMap(selected),
                 ["current"] = ObjectMap(candidate),
                 ["proposal"] = proposal.Copy(),
