@@ -5,7 +5,6 @@
       "name": "Default",
       "fileVisibility": "supported",
       "hiddenFolders": [
-        "/Assets",
         "/Templates"
       ],
       "hiddenTags": [],
@@ -133,6 +132,7 @@
     "calendarPlacement": "synced",
     "calendarLeftPlacement": "synced",
     "calendarWeeksToShow": "synced",
+    "defaultListMode": "synced",
     "compactItemHeight": "synced",
     "compactItemHeightScaleText": "synced",
     "featureImageSize": "synced",
@@ -207,6 +207,7 @@
   },
   "showReleaseNotes": true,
   "checkForUpdatesOnStart": true,
+  "showMarkdownPointBannerAtTop": true,
   "pinNavigationBanner": true,
   "showNoteCount": true,
   "separateNoteCounts": true,
@@ -587,12 +588,21 @@
   "folderBackgroundColors": {},
   "folderSortOverrides": {},
   "folderTreeSortOverrides": {},
+  "folderChildOrder": {
+    "/": [
+      "Home",
+      "Assets",
+      "Templates",
+      "Qard"
+    ]
+  },
   "folderAppearances": {},
   "tagIcons": {},
   "tagColors": {},
   "tagBackgroundColors": {},
   "tagSortOverrides": {},
   "tagTreeSortOverrides": {},
+  "tagChildOrder": {},
   "tagAppearances": {
     "__untagged__": {
       "mode": "compact"
@@ -634,6 +644,7 @@
   "propertyBackgroundColors": {},
   "propertySortOverrides": {},
   "propertyTreeSortOverrides": {},
+  "propertyChildOrder": {},
   "propertyAppearances": {},
   "virtualFolderColors": {},
   "virtualFolderBackgroundColors": {},
@@ -660,13 +671,7 @@
     "#404040",
     "#404040"
   ],
-  "lastShownVersion": "3.4.3",
-  "rootFolderOrder": [
-    "Home",
-    "Assets",
-    "Templates",
-    "Qard"
-  ],
+  "lastShownVersion": "3.5.0",
   "rootTagOrder": [],
   "rootPropertyOrder": []
 }

@@ -19,7 +19,7 @@ _site/
 .sisyphus/
 .omo/
 .omc/
-.opencode
+.opencode/
 .claude/launch.json
 .impeccable/
 
@@ -28,7 +28,7 @@ _site/
 Vault/.obsidian/plugins/quartz-syncer/data.json
 **/.obsidian/workspace.json
 Vault/.obsidian/plugins/qard/study-backups/
-Vault/Assets/Docs/
+Vault/.obsidian/plugins/devbook-learn-sync/data.json
 
 # Python bytecode caches (never track compiled artifacts)
 __pycache__/
@@ -43,5 +43,4 @@ __pycache__/
 
 # Reproducible product capture runtime (generated locally and in CI).
 /.product-captures-cache/
-/docs/assets/product-captures/gallery.html
-/docs/assets/product-captures/manifest.json
+/docs/assets/product-captures/
