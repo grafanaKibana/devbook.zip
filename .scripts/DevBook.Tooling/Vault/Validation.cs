@@ -462,7 +462,7 @@ public static class Validation
         return violations.Strings().ToHashSet(StringComparer.Ordinal);
     }
 
-    public static ValidationResult Validate(string root, string mode, bool useBaseline = true)
+    public static ValidationResult Validate(string root, string mode, bool useBaseline = true, bool includeRepositoryChecks = true)
     {
         root = System.IO.Path.GetFullPath(root);
         string vault = System.IO.Path.Combine(root, "Vault");
@@ -477,7 +477,7 @@ public static class Validation
         {
             issues.AddRange(ValidateWikilinks(note, index));
         }
-        if (mode == "all")
+        if (mode == "all" && includeRepositoryChecks)
         {
             issues.AddRange(ValidateExpectedHubs(root, allNotes, Directory.EnumerateDirectories(home, "*", SearchOption.AllDirectories)));
             issues.AddRange(ValidateAttachmentLocations(root, Directory.EnumerateFiles(vault, "*", SearchOption.AllDirectories)));

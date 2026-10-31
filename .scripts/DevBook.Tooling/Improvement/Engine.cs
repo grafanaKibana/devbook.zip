@@ -128,7 +128,15 @@ public sealed partial class ImprovementEngine
         using var isolated = new IsolatedRepository(root, validationSnapshotSha ?? snapshotShaLoader());
         Dictionary<string, string> baseline = expected.Keys.ToDictionary(path => path, path => File.ReadAllText(Runtime.ValidateNotePath(isolated.Path, path)));
         Runtime.ApplyGuardedSources(isolated.Path, baseline, expected);
+        HashSet<string> existingIssues = Validation.Validate(isolated.Path, "all", includeRepositoryChecks: false).Issues
+            .Select(issue => issue.BaselineId).ToHashSet(StringComparer.Ordinal);
         Runtime.ApplyGuardedSources(isolated.Path, expected, candidate);
+        Issue[] introduced = Validation.Validate(isolated.Path, "all", includeRepositoryChecks: false).Issues
+            .Where(issue => !existingIssues.Contains(issue.BaselineId)).ToArray();
+        if (introduced.Length != 0)
+        {
+            throw new CandidateValidationFailure("Candidate introduces vault violations:\n" + string.Join('\n', introduced.Select(issue => issue.Render())));
+        }
         JsonArray commands = config.Arr("validator_commands");
         if (commands.Count == 0)
         {
@@ -451,7 +459,16 @@ public sealed partial class ImprovementEngine
             validationCandidate[item.Key] = item.Value;
         }
 
-        JsonArray validation = await validator(validationExpected, validationCandidate, cancellationToken);
+        JsonArray validation;
+        try
+        {
+            validation = await validator(validationExpected, validationCandidate, cancellationToken);
+        }
+        catch (CandidateValidationFailure error)
+        {
+            pending["completed_review"] = review.Copy();
+            return await QuarantineAsync(state, pending, "repository_validation", error.Message, cancellationToken);
+        }
         history.Add(new JsonObject { ["batch"] = batch.Copy(), ["proposal"] = proposal.Copy(), ["result"] = result.Copy(), ["review"] = review.Copy() });
         JsonArray changes = Copies(history.OfType<JsonObject>().SelectMany(record => record.RequiredObject("proposal").Arr("edits")));
         JsonArray cumulativeFeedback = Copies(history.OfType<JsonObject>().SelectMany(record => record.RequiredObject("proposal").Arr("feedback").OfType<JsonObject>()).Select(item =>

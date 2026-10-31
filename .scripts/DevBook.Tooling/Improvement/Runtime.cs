@@ -10,6 +10,7 @@ public class RuntimeFailure(string message) : InvalidOperationException(message)
 public sealed class Conflict(string message) : RuntimeFailure(message);
 public sealed class UnsafeInput(string message) : RuntimeFailure(message);
 public sealed class ProductionGate(string message) : RuntimeFailure(message);
+public sealed class CandidateValidationFailure(string message) : RuntimeFailure(message);
 
 public sealed record PublicationChecks(string Status, JsonObject Checks, string? VaultValidation);
 
