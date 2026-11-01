@@ -61,8 +61,8 @@ public sealed class ProviderTests
             JsonNode.DeepEquals(transported, authorities).Should().BeTrue();
             system.Should().Contain("JUSTIFIED UNCHANGED").And.Contain("JSON schema overrides Markdown");
             system.Should().Contain("Do not use hypothetical, scenario").And.Contain("finite expected answer");
-            transported.ContainsKey(".codex/agents/note-writer.toml").Should().BeTrue();
-            transported.ContainsKey(".codex/agents/note-reviewer.toml").Should().BeTrue();
+            transported.ContainsKey(".claude/agents/note-writer.md").Should().BeTrue();
+            transported.ContainsKey(".claude/agents/note-reviewer.md").Should().BeTrue();
             system.Should().NotContain(injection).And.NotContain("CALLER RULE INJECTION");
             string input = Encoding.UTF8.GetString(call.StandardInput!);
             input.Should().Contain("<untrusted-input>").And.Contain(injection).And.NotContain("CALLER RULE INJECTION");

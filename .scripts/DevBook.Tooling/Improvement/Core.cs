@@ -9,7 +9,7 @@ namespace DevBook.Tooling.Improvement;
 public static class Core
 {
     public const int StateVersion = 1;
-    public static readonly string[] ContentAuthorities = ["AGENTS.md", ".codex/agents/note-reviewer.toml", ".codex/agents/note-writer.toml", ".codex/skills/obsidian-markdown/SKILL.md", "Vault/Templates/Pages/Template - Concept Page.md", "Vault/Templates/Pages/Template - Index.md", "Vault/Templates/Blocks/Template - Callout.md"];
+    public static readonly string[] ContentAuthorities = ["AGENTS.md", ".claude/agents/note-reviewer.md", ".claude/agents/note-writer.md", ".codex/skills/obsidian-markdown/SKILL.md", "Vault/Templates/Pages/Template - Concept Page.md", "Vault/Templates/Pages/Template - Index.md", "Vault/Templates/Blocks/Template - Callout.md"];
     public static readonly HashSet<string> SpecialNotes = ["Vault/Home/index.md", "Vault/Home/Questions.md", "Vault/Home/About.md", "Vault/Home/Changelog.md"];
 
     public static string TopicFor(string path)
