@@ -10,7 +10,7 @@ name: Major Release Approval
 on:
   pull_request:
     types: [opened, edited, reopened, synchronize]
-    branches: [main]
+    branches: [main, feature/devbook-improvement-test-20261101]
   issue_comment:
     types: [created]
 
