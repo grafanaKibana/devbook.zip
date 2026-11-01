@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-02-27T15:52:18.000Z
-modified: 2026-10-28T12:33:42.000Z
-published: 2026-10-31T08:53:28.452Z
+modified: 2026-11-01T16:22:35.730Z
+published: 2026-11-01T16:24:34.000Z
 topic:
   - AI & ML
 subtopic:
@@ -139,7 +139,9 @@ Mitigation: the reranker is evaluated on domain query-document pairs before adop
 
 Reranking can only reorder what retrieval found. When the relevant document never enters the candidate set, the fix belongs in [[Chunking]], [[Embeddings|embedding model selection]], query expansion, or another first-stage decision. A stronger reranker cannot recover missing evidence.
 
-Diagnostic: low first-stage candidate Recall@N establishes an upstream ceiling. If Recall@N is high, demotion is established only when relevant evidence inside the first-stage top-k falls outside the reranked top-k at the same k. Low post-rerank Recall@k alone does not establish demotion: evidence can stay beyond k in both orders even after its rank improves, and such exclusion can occur even when the query needs no more relevant evidence than k can hold; on its own it does not show whether a larger k or a better ranking is the right repair.
+Diagnostic: candidate Recall@N before reranking is checked first. When it is low, the relevant evidence never entered the candidate set, and the ceiling sits in the first stage. When it is high, the first-stage order and the reranked order are both cut at the same final k. Relevant evidence that was inside the first-stage top-k but falls outside the reranked top-k was demoted by the reranker.
+
+A low post-rerank Recall@k does not show demotion by itself. Relevant evidence can sit beyond k in both orders even when reranking improved its rank. Exclusion in both orders also does not mean k is too small: k is the limit only when the query needs more distinct relevant pieces than k can hold. Otherwise the repair is better ranking, not a larger cutoff.
 
 # Tradeoffs
 
