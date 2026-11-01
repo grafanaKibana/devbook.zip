@@ -1,6 +1,6 @@
 # DevBook improvement action
 
-A bounded GitHub Actions queue for DevBook notes and Qard interview cards. Every six hours, an opportunity selects a small topic batch, asks Claude Opus 5.5 to discover worthwhile improvements, independently reviews complete notes and each proposed change, validates the result, and updates a draft PR with source and genuine published Quartz output. The owner reviews and merges manually; the action never merges or enables auto-merge.
+A bounded GitHub Actions queue for DevBook notes and Qard interview cards. Every six hours, an opportunity selects a small topic batch, asks Claude Sonnet 5.5 to refine existing notes for learning, independently reviews complete notes and each proposed change, validates the result, and updates a draft PR with source and genuine published Quartz output. The owner reviews and merges manually; the action never merges or enables auto-merge.
 
 [Workflow](../../.github/workflows/devbook-improvement.yml) · [Configuration](../../.github/devbook-improvement.json) · [Authoring contract](../../AGENTS.md) · [Local publishing](../../Web/README.md)
 
@@ -37,11 +37,13 @@ Use the workflow's pinned compatible bundle when the installed app differs. Host
 
 1. Reconcile state, topic PRs and verified-owner feedback. Complete scoped feedback goes first.
 2. Prioritize eligible whole notes containing active **Needs fixing** Qard cards, then other eligible notes. A topic is the note's parent directory relative to `Vault/Home`; generated and dashboard pages are excluded by default.
-3. Give the author complete notes, current rules and relevant repair IDs. It identifies concrete defects or important gaps, proposes guarded replacements, and explains the correction and reader benefit. A flag is context, not proof that an edit is needed.
-4. Prepare changed source dates against the current topic parent **before** independent review. The separate read-only reviewer checks complete current notes, sources, identity, rejection history, and whether every edit materially improves understanding, recall or engineering judgment. Cosmetic churn, unsupported defects, redundancy and unnecessary expansion fail review.
+3. Give the author complete notes, current rules and relevant repair IDs. It refines each whole note for learning: wording, factual accuracy, proofreading, terminology, explanation order, readability, repetition, applicable structure and existing Qard content. Strong passages stay intact. Several small edits can form one coherent improvement. A flag is context, not proof that an edit is needed.
+4. Prepare changed source dates against the current topic parent **before** independent review. The separate read-only reviewer judges the combined before/after learning benefit and each edit's contribution, checking complete current notes, sources, identity and rejection history. A useful overall revision cannot excuse an incorrect, harmful or gratuitous edit. Arbitrary rephrasing, cosmetic churn, unsupported defects, redundancy and unnecessary expansion fail review.
 5. Validate metadata, whole-note hashes and the cumulative diff; update the draft PR. Separate render/publication jobs add verified output and check the exact final head in the same workflow run.
 
 Both model calls use one captured, required rule bundle: `AGENTS.md`, the [Claude writer](../../.claude/agents/note-writer.md) and [reviewer](../../.claude/agents/note-reviewer.md) contracts, Markdown guidance and templates. Codex remains the source of truth: the [Codex writer](../../.codex/agents/note-writer.toml) and [reviewer](../../.codex/agents/note-reviewer.toml) instruction text is mirrored in those Claude files, which are what the pipeline reads. Those texts become trusted content instructions; notes, feedback and sources remain untrusted data. The pipeline uses the contracts in separate restricted Claude calls rather than launching their file-tool agent definitions. Its JSON output protocol and fixed web-only permissions govern each call. Every selected complete note is an assigned audit target, including keeps with an empty focus.
+
+Refinement takes priority over expansion. Add an explanation, example, section or card only to repair a concrete error or essential learning gap that the existing material does not address adequately. Missing optional sections are not defects. The author describes the note-level benefit and each edit's contribution without inventing a major problem for every small correction. Length and edit count are not quality targets; preserve mechanisms, conditions and exceptions.
 
 The pipeline prompts additionally enforce the requested direct technical questions with a finite expected answer. Scenario, hypothetical and role-play prompts, and vague general-advice or release-readiness questions, fail review. Essential meanings must follow from the question itself; correct paraphrases remain valid.
 
@@ -50,6 +52,8 @@ Needs fixing is read from the checked-out repository's Qard data snapshot and ma
 A successful changed or independently reviewed unchanged outcome records the repair input with the note version. An unchanged flag already covered by that outcome does not repeatedly select the note. Source, rules, model/protocol, repair-input changes or owner feedback can require another review; flags never override holds, rejections, freezes or PR limits. A false→true flag transition entirely between runs cannot be detected when the observed repair IDs and note remain unchanged.
 
 A keep still requires independent complete-note `CLEAN` evidence: exact current-text quotes, 1-based lines and meaningful reasons. Failed reviews stay held; reviewer quota exhaustion preserves proposals without another author call. Pure keeps change neither dates nor source. Legacy author-only keeps need a one-time independent check. Existing Qard IDs survive only for the same learning target; new targets, replacements and split children stay ID-less. Reverse-linked target transformations pause for manual treatment.
+
+Ordinary opportunities are incremental, so different runs can inspect different notes and produce different findings. Compatible interrupted proposals resume from saved evidence; reviewed unchanged notes wait for a reason to be revisited. A separate consistency comparison must freeze the complete notes, source evidence, rules, model/protocol, focus, feedback and rejection history, then compare underlying findings rather than exact wording. This queue does not make three calls per note, and the Sonnet default does not guarantee identical findings. Tests and the credential-free demo verify orchestration and prompt delivery; live editorial quality remains a separate check.
 
 ## Topic PRs and feedback
 
@@ -72,7 +76,7 @@ Comments, inline comments and submitted reviews count only when the configured n
 | Simultaneous model calls | 1 |
 | Schedule | `23 */6 * * *` UTC |
 
-The exact default model is `claude-opus-5-5`; Claude Code is pinned to `2.1.285` and enforces its compatible minimum. Schedules honor repository variable `DEVBOOK_IMPROVEMENT_MODEL`; manual runs expose `model`, and local CLI runs without `--model` use configuration. Overrides must be deliberate exact identifiers. Missing, mixed or mismatched `modelUsage` fails closed, with no fallback. Background/helper routing uses the same requested model. Model/protocol changes invalidate cached evaluation evidence without relabeling historical records.
+The exact default model is `claude-sonnet-5-5`; Claude Code is pinned to `2.1.285` and enforces its compatible minimum. Schedules honor repository variable `DEVBOOK_IMPROVEMENT_MODEL`; manual runs expose `model`, and local CLI runs without `--model` use configuration. Overrides must be deliberate exact identifiers. Missing, mixed or mismatched `modelUsage` fails closed, with no fallback. Background/helper routing uses the same requested model. Model/protocol changes invalidate cached evaluation evidence without relabeling historical records.
 
 | Manual input | Behavior |
 | --- | --- |

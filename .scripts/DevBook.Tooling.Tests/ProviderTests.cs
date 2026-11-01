@@ -38,7 +38,7 @@ public sealed class ProviderTests
 
         // Assert
         author.Int("version").Should().Be(1);
-        ClaudeProvider.DefaultModel.Should().Be("claude-opus-5-5");
+        ClaudeProvider.DefaultModel.Should().Be("claude-sonnet-5-5");
         review.Str("verdict").Should().Be("CHANGES REQUIRED");
         runner.Requests.Should().HaveCount(4);
         ProcessRequest[] calls = runner.Requests.Where(request => request.Arguments.Contains("--print")).ToArray();
@@ -68,6 +68,14 @@ public sealed class ProviderTests
             input.Should().Contain("<untrusted-input>").And.Contain(injection).And.NotContain("CALLER RULE INJECTION");
             Directory.Exists(call.WorkingDirectory).Should().BeFalse();
         }
+        string[] taskPrompts = calls.Select(call => call.Arguments[call.Arguments.ToList().IndexOf("--system-prompt") + 1]
+            .Split("Trusted content-governance contracts:", StringSplitOptions.None)[0]).ToArray();
+        taskPrompts[0].Should().Contain("coherent whole-note refinement pass")
+            .And.Contain("concrete error or essential learning gap")
+            .And.Contain("each edit's contribution");
+        taskPrompts[1].Should().Contain("combined before/after learning benefit")
+            .And.Contain("every edit must contribute")
+            .And.Contain("incorrect, harmful or gratuitous member edit");
         runner.Requests.Where(request => request.Arguments.Contains("--version")).Should().OnlyContain(request => !request.Environment!.ContainsKey("CLAUDE_CODE_OAUTH_TOKEN"));
         provider.Diagnostics.Should().HaveCount(2);
         provider.Diagnostics[0]!.AsObject().Select(item => item.Key).Should().BeEquivalentTo("role", "model");
@@ -88,7 +96,7 @@ public sealed class ProviderTests
                   "subtype": "success",
                   "stop_reason": "end_turn",
                   "usage": {"input_tokens": 100, "output_tokens": 20, "cost_usd": 2, "private": "secret-fixture"},
-                  "modelUsage": {"claude-opus-5-5": {"inputTokens": 100, "outputTokens": 20, "webSearchRequests": 2, "costUSD": 2}},
+                  "modelUsage": {"claude-sonnet-5-5": {"inputTokens": 100, "outputTokens": 20, "webSearchRequests": 2, "costUSD": 2}},
                   "permission_denials": [
                     {"tool_name": "WebFetch", "tool_input": {"url": "https://private-note.example/secret-fixture"}},
                     {"tool_name": "WebFetch", "tool_input": {"prompt": "secret-fixture"}},

@@ -22,7 +22,7 @@ public sealed class ClaudeQuotaException(string kind, DateTimeOffset? resetAt, D
 
 public sealed class ClaudeProvider : IModelProvider
 {
-    public const string DefaultModel = "claude-opus-5-5";
+    public const string DefaultModel = "claude-sonnet-5-5";
     private static readonly SemaphoreSlim InvocationGate = new(1, 1);
     private static readonly byte[] ProtocolBytes = ReadProtocol();
     private static readonly JsonObject Protocol = JsonNode.Parse(ProtocolBytes)!.AsObject();
