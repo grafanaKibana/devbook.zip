@@ -22,7 +22,7 @@ on:
       model:
         description: Exact Claude model identifier; no fallback is configured
         required: true
-        default: claude-opus-5-5
+        default: claude-sonnet-5-5
         type: string
       with_model:
         description: Use protected subscription OAuth for a manual dry-run
@@ -64,7 +64,7 @@ jobs:
       - name: Test native core and run credential-free flow
         working-directory: .scripts
         env:
-          MODEL: ${{ inputs.model || 'claude-opus-5-5' }}
+          MODEL: ${{ inputs.model || 'claude-sonnet-5-5' }}
           SELECT_ONLY: ${{ github.event_name == 'workflow_dispatch' && inputs.mode == 'dry-run' }}
           TARGET_NOTE: ${{ github.event_name == 'workflow_dispatch' && inputs.note || '' }}
           REVIEW_FOCUS: ${{ github.event_name == 'workflow_dispatch' && inputs.focus || '' }}
@@ -150,7 +150,7 @@ jobs:
           DEVBOOK_IMPROVEMENT_SUBSCRIPTION_ONLY_CONFIRMED: ${{ vars.DEVBOOK_IMPROVEMENT_SUBSCRIPTION_ONLY_CONFIRMED }}
           DEVBOOK_IMPROVEMENT_USAGE_CREDITS_DISABLED_CONFIRMED: ${{ vars.DEVBOOK_IMPROVEMENT_USAGE_CREDITS_DISABLED_CONFIRMED }}
           DEVBOOK_IMPROVEMENT_PR_WORKFLOWS_CONFIRMED: ${{ vars.DEVBOOK_IMPROVEMENT_PR_WORKFLOWS_CONFIRMED }}
-          MODEL: ${{ github.event_name == 'schedule' && (vars.DEVBOOK_IMPROVEMENT_MODEL || 'claude-opus-5-5') || inputs.model }}
+          MODEL: ${{ github.event_name == 'schedule' && (vars.DEVBOOK_IMPROVEMENT_MODEL || 'claude-sonnet-5-5') || inputs.model }}
           TARGET_NOTE: ${{ github.event_name == 'workflow_dispatch' && inputs.note || '' }}
           REVIEW_FOCUS: ${{ github.event_name == 'workflow_dispatch' && inputs.focus || '' }}
         run: |
