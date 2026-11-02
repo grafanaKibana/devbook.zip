@@ -425,6 +425,10 @@ public sealed class ExportWorkerTests
             {
                 response = new JsonArray(Pr.Copy());
             }
+            else if (method == "GET" && path == "/pulls/1/files?per_page=100")
+            {
+                response = new JsonArray(new JsonObject { ["filename"] = DomainFixtures.Path });
+            }
             else if (method == "GET" && path.StartsWith("/git/ref/heads/", StringComparison.Ordinal))
             {
                 string name = Uri.UnescapeDataString(path["/git/ref/heads/".Length..]);

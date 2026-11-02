@@ -16,6 +16,15 @@ public sealed partial class ImprovementEngine
         }
         JsonArray prs = await Runtime.ArrayAsync(api, "/pulls?state=all&per_page=100", cancellationToken);
         Dictionary<string, string> topics = notes.OfType<JsonObject>().GroupBy(note => Core.TopicId(note.Str("topic"))).ToDictionary(group => group.Key, group => group.First().Str("topic"));
+        var legacyTopics = new Dictionary<string, string>();
+        foreach (JsonObject note in notes.OfType<JsonObject>())
+        {
+            string[] folders = note.Str("path").Split('/').Skip(2).SkipLast(1).ToArray();
+            for (var count = 2; count <= folders.Length; count++)
+            {
+                legacyTopics[Core.TopicId(string.Join('/', folders.Take(count)))] = Core.TopicId(note.Str("topic"));
+            }
+        }
         Dictionary<string, JsonObject> byPath = notes.OfType<JsonObject>().ToDictionary(note => note.Str("path"));
         var allFeedback = new JsonArray();
         var rows = new JsonArray();
@@ -70,24 +79,41 @@ public sealed partial class ImprovementEngine
             row["branch"] = pr.Obj("head").Str("ref");
             row["head_sha"] = pr.Obj("head").Str("sha");
             row["frozen"] = prior.Bool("frozen");
+            row["blocked_topic_ids"] = !topics.ContainsKey(topicKey) && legacyTopics.TryGetValue(topicKey, out string? broadTopic)
+                ? new JsonArray(broadTopic) : new JsonArray();
             row["review_started_head_sha"] = prior.Str("review_started_head_sha").Length > 0
                 ? prior["review_started_head_sha"]!.DeepClone()
                 : status == "open" && !pr.Bool("draft", true) ? pr.Obj("head")["sha"]?.DeepClone() : null;
             if (status == "open")
             {
-                JsonObject topicState = state.Obj("topics").Obj(topicKey);
-                if (topicState.Int("generation") == generation && topicState.Obj("publication_conflict").Int("generation", -1) == generation)
-                {
-                    row["base_conflict"] = true;
-                    row["pause_reason"] = topicState.Obj("publication_conflict").Str("reason");
-                    rows.Add(row);
-                    continue;
-                }
                 if (!topics.TryGetValue(topicKey, out string? topic))
                 {
                     row["base_conflict"] = true;
                     row["frozen"] = true;
                     row["pause_reason"] = "Managed PR topic no longer exists; reconcile this PR manually.";
+                    JsonArray legacyFiles = await Runtime.ArrayAsync(api, $"/pulls/{pr.Int("number")}/files?per_page=100", cancellationToken);
+                    string[] legacyPaths = legacyFiles.OfType<JsonObject>().Select(file => file.Str("filename"))
+                        .Concat(prior.Arr("changed_paths").Strings()).Concat(prior.Obj("base_note_hashes").Select(pair => pair.Key))
+                        .Where(path => !Receipt.IsExportPath(path)).Distinct().ToArray();
+                    var blockedTopics = row.Arr("blocked_topic_ids").Strings().ToHashSet();
+                    foreach (string path in legacyPaths)
+                    {
+                        Runtime.ValidateRelativeNotePath(path);
+                        blockedTopics.Add(Core.TopicId(Core.TopicFor(path)));
+                    }
+                    row["blocked_topic_ids"] = Copies(blockedTopics.Order(StringComparer.Ordinal).Select(value => JsonValue.Create(value)));
+                    if (row.Arr("blocked_topic_ids").Count != 0)
+                    {
+                        row["pause_reason"] = "Legacy nested-topic PR remains open; its top-level topic is paused until this PR closes or merges.";
+                    }
+                    rows.Add(row);
+                    continue;
+                }
+                JsonObject topicState = state.Obj("topics").Obj(topicKey);
+                if (topicState.Int("generation") == generation && topicState.Obj("publication_conflict").Int("generation", -1) == generation)
+                {
+                    row["base_conflict"] = true;
+                    row["pause_reason"] = topicState.Obj("publication_conflict").Str("reason");
                     rows.Add(row);
                     continue;
                 }

@@ -45,34 +45,57 @@ public sealed class StateTests
         finalized.State.Arr("rejections").Should().ContainSingle();
     }
 
-    [Fact]
-    public async Task MaintenanceReconcilesTerminalPrsAfterTheirExportReceiptsWereCompacted()
+    [Theory]
+    [InlineData("open")]
+    [InlineData("closed")]
+    [InlineData("merged")]
+    public async Task LegacyNestedTopicPausesItsBroadTopicUntilThePrIsTerminal(string status)
     {
         // Arrange
-        const string status = "merged";
-
         var fixture = ExportCompactionReviewedFixture();
         fixture.Api.ChecksReady = true;
         var store = new MemoryStateStore(fixture.State);
         await Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store);
         StateSnapshot snapshot = await store.ReadAsync();
         snapshot.State["cooldown"] = null;
+        if (status == "open")
+        {
+            snapshot.State.Obj("topics")[fixture.Request.Str("topic_id")] = new JsonObject
+            {
+                ["generation"] = 1,
+                ["publication_conflict"] = new JsonObject { ["generation"] = 1, ["reason"] = "Existing publication conflict" }
+            };
+        }
         await store.WriteAsync(snapshot.State, snapshot, "fixture resume maintenance");
-        fixture.Api.Pr["state"] = "closed";
+        fixture.Api.Pr["state"] = status == "open" ? "open" : "closed";
         fixture.Api.Pr["merged"] = status == "merged";
         var publisher = new GitHubRuntime(fixture.Api, store, activation: () => { });
         var engine = new ImprovementEngine(Repository.FindRoot(), fixture.Config, store, api: fixture.Api, publisher: publisher,
-            notesLoader: () => new JsonArray(DomainFixtures.NoteRecord()), snapshotShaLoader: () => ExportApi.MainHead);
+            notesLoader: () => new JsonArray(DomainFixtures.NoteRecord(status == "open" ? "Vault/Home/Programming/CSharp/Moved.md" : DomainFixtures.Path)),
+            snapshotShaLoader: () => ExportApi.MainHead);
 
         // Act
-        await engine.RunAsync();
+        JsonObject result = await engine.RunAsync();
         JsonObject reconciled = (await store.ReadAsync()).State;
         JsonObject terminalPr = reconciled.Obj("prs").Obj(fixture.Key);
 
         // Assert
         terminalPr.Str("status").Should().Be(status);
-        terminalPr["proposal_records"].Should().BeNull();
-        terminalPr.Obj("terminal_audit").Int("record_count").Should().Be(1);
+        result.Str("status").Should().Be(status == "open" ? "topics_paused" : "selected");
+        if (status == "open")
+        {
+            terminalPr.Bool("base_conflict").Should().BeTrue();
+            terminalPr.Arr("blocked_topic_ids").Strings().Should().Equal(Core.TopicId("Programming"));
+            terminalPr.Arr("proposal_records").Count.Should().Be(1);
+        }
+        else
+        {
+            terminalPr["proposal_records"].Should().BeNull();
+            terminalPr.Obj("terminal_audit").Int("record_count").Should().Be(1);
+            reconciled.Obj("topics").Obj(fixture.Request.Str("topic_id")).Int("generation").Should().Be(2);
+            result.Obj("batch").Str("topic").Should().Be("Programming");
+        }
+        reconciled.Arr("rejections").Count.Should().Be(status == "closed" ? 2 : 1);
         reconciled.Obj("export_operations").Obj(fixture.Request.Str("op_id")).Bool("compacted").Should().BeTrue();
         reconciled.Obj("feedback").Obj("comment:kept").Str("status").Should().Be("implemented");
         fixture.Api.CommitWrites.Should().Be(1);

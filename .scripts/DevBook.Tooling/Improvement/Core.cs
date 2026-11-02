@@ -19,7 +19,7 @@ public static class Core
         {
             throw new ArgumentException($"not an authorable Vault/Home note: {path}");
         }
-        return string.Join('/', parts.Skip(2).SkipLast(1));
+        return parts[2];
     }
 
     public static string TopicId(string topic)

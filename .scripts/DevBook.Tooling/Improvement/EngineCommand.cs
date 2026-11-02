@@ -12,14 +12,14 @@ public static class EngineCommand
     {
         if (args.Contains("--help"))
         {
-            Console.WriteLine("DevBook.Tooling improvement [--demo | --dry-run | --apply] [--with-model] [--note <Vault/Home/path.md> --focus <issue>] [--config <root-relative-json>] [--model <id>] [--output-dir <root-relative-dir>] [--repo-root <path>]");
+            Console.WriteLine("DevBook.Tooling improvement [--demo | --dry-run | --apply] [--with-model] [--config <root-relative-json>] [--model <id>] [--output-dir <root-relative-dir>] [--repo-root <path>]");
             return 0;
         }
         try
         {
             var options = new Dictionary<string, string>(StringComparer.Ordinal);
             var flags = new HashSet<string>();
-            var valued = new HashSet<string> { "--config", "--model", "--output-dir", "--repo-root", "--note", "--focus" };
+            var valued = new HashSet<string> { "--config", "--model", "--output-dir", "--repo-root" };
             var switches = new HashSet<string> { "--demo", "--dry-run", "--apply", "--with-model" };
             for (var index = 0; index < args.Length; index++)
             {
@@ -44,7 +44,6 @@ public static class EngineCommand
             string configPath = Path.GetFullPath(Path.Combine(root, options.GetValueOrDefault("--config", ".github/devbook-improvement.json")));
             string output = Path.GetFullPath(Path.Combine(root, options.GetValueOrDefault("--output-dir", "artifacts/devbook-improvement")));
             JsonObject config = JsonData.ParseObject(await File.ReadAllTextAsync(configPath));
-            config = ManualSelection.Configure(config, root, options.GetValueOrDefault("--note", ""), options.GetValueOrDefault("--focus", ""));
             if (options.TryGetValue("--model", out string? selectedModel))
             {
                 config["model"] = selectedModel;
@@ -54,10 +53,6 @@ public static class EngineCommand
             using var deadline = new CancellationTokenSource(TimeSpan.FromMinutes(config.Int("max_run_minutes", 35)));
             if (flags.Contains("--demo"))
             {
-                if (config.Str("target_note").Length != 0)
-                {
-                    throw new ArgumentException("Targeted notes use --dry-run or --apply, not the synthetic demo.");
-                }
                 result = await Demo.RunAsync(root, config, deadline.Token);
             }
             else if (!flags.Contains("--apply") && !flags.Contains("--with-model"))
@@ -66,7 +61,6 @@ public static class EngineCommand
             }
             else
             {
-                ManualSelection.RequireManualOwner(config);
                 bool apply = flags.Contains("--apply");
                 if (apply)
                 {

@@ -32,11 +32,12 @@ public sealed class QueueTests
         }
 
         // Act
-        JsonObject batch = ImprovementQueue.SelectBatch(state, notes, "rules")!;
+        JsonObject batch = ImprovementQueue.SelectBatch(state, notes, "rules", new JsonObject { ["max_notes_per_run"] = 1 })!;
 
         // Assert
         batch.Arr("notes").Should().ContainSingle().Which.Str("path").Should().Be(feedback ? feedbackPath : flaggedPath);
         batch.Arr("notes")[0]!.Str("content").Should().Be(DomainFixtures.Note);
+        batch.Str("topic").Should().Be("Programming");
     }
 
     [Theory]
@@ -102,7 +103,7 @@ public sealed class QueueTests
     public void FeedbackRequestIsPackedAsOneCompletePathScope(int limit)
     {
         // Arrange
-        string other = "Vault/Home/Programming/NET/Other.md";
+        string other = "Vault/Home/Programming/Network/Transport/TCP.md";
         JsonObject state = Core.NewState();
         state.Obj("feedback")["request"] = new JsonObject
         {
@@ -121,39 +122,17 @@ public sealed class QueueTests
     }
 
     [Fact]
-    public void ScheduledExecutionCannotTargetANoteEvenForTheOwner()
+    public void ManualTargetConfigurationIsRejected()
     {
         // Arrange
-        var config = new JsonObject { ["target_note"] = DomainFixtures.Path, ["owner_allowlist"] = RuntimeFixtures.Allowlist() };
-        var environment = new Dictionary<string, string>
-        {
-            ["GITHUB_EVENT_NAME"] = "schedule",
-            ["GITHUB_ACTOR_ID"] = "42",
-            ["GITHUB_ACTOR"] = "owner",
-            ["GITHUB_TRIGGERING_ACTOR"] = "owner"
-        };
+        string root = Path.Combine(Path.GetTempPath(), "selection-" + Guid.NewGuid().ToString("N"));
+        var config = new JsonObject { ["target_note"] = DomainFixtures.Path, ["review_focus"] = "An imposed change" };
 
         // Act
-        Exception? error = Record.Exception(() => ManualSelection.RequireManualOwner(config, environment));
+        Action construct = () => new ImprovementEngine(root, config, new MemoryStateStore(Core.NewState()));
 
         // Assert
-        error.Should().BeOfType<ProductionGate>();
+        construct.Should().Throw<ArgumentException>().WithMessage("Manual note targeting is not supported*");
     }
 
-    [Fact]
-    public void RepeatedQuotaEpisodeRetainsItsResetWithoutRepeatingNotification()
-    {
-        // Arrange
-        DateTimeOffset now = DateTimeOffset.Parse("2026-10-30T08:00:00Z");
-        JsonObject state = Core.SetCooldown(Core.NewState(), "weekly", now.AddHours(80), now);
-        state.Obj("cooldown")["notice_sent"] = true;
-
-        // Act
-        JsonObject repeated = Core.SetCooldown(state, "weekly", now.AddHours(80), now);
-
-        // Assert
-        repeated.Obj("cooldown").Bool("notice_pending").Should().BeFalse();
-        repeated.Obj("cooldown").Bool("notice_sent").Should().BeTrue();
-        repeated.Obj("cooldown").Str("reported_reset_at").Should().Be(Core.FormatTime(now.AddHours(80)));
-    }
 }

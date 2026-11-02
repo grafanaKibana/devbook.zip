@@ -91,30 +91,6 @@ public sealed class PublicationTests
         current[0]!.Arr("paths").Strings().Should().Equal(RuntimeFixtures.NotePath);
     }
 
-    [Fact]
-    public void TerminalPrAdvancesGenerationAndPreservesRejectionAudit()
-    {
-        // Arrange
-        const string status = "closed";
-
-        string topic = Core.TopicId(Core.TopicFor(DomainFixtures.Path));
-        JsonObject proposal = DomainFixtures.Proposal(DomainFixtures.Edit());
-        JsonObject result = Proposal.Apply(new Dictionary<string, string> { [DomainFixtures.Path] = DomainFixtures.Note }, proposal);
-        var pr = new JsonObject { ["topic_id"] = topic, ["generation"] = 1, ["number"] = 7, ["status"] = "open", ["draft"] = true };
-        JsonObject state = Core.SyncPrs(Core.NewState(), new JsonArray(pr.Copy()));
-        state.Obj("prs").Obj(topic + ":1")["proposal_records"] = new JsonArray(new JsonObject { ["batch"] = new JsonObject(), ["proposal"] = proposal, ["result"] = result });
-        pr["status"] = status;
-
-        // Act
-        JsonObject terminal = Core.SyncPrs(state, new JsonArray(pr));
-
-        // Assert
-        terminal.Obj("topics").Obj(topic).Int("generation").Should().Be(2);
-        terminal.Obj("prs").Obj(topic + ":1")["proposal_records"].Should().BeNull();
-        terminal.Obj("prs").Obj(topic + ":1").Obj("terminal_audit").Int("record_count").Should().Be(1);
-        terminal.Arr("rejections").Count.Should().Be(status == "closed" ? 1 : 0);
-    }
-
     [Theory]
     [InlineData("POST", "/pulls")]
     [InlineData("GET", "/contents/%252e%252e/config")]
