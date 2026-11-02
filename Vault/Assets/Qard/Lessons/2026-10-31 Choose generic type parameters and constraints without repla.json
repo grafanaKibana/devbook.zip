@@ -1,0 +1,563 @@
+{
+  "sourceSnapshots": [
+    {
+      "path": "Home/Programming/NET/CSharp/Fundamentals/Generics.md",
+      "text": "---\ntopic: [Programming]\nsubtopic: [NET]\nsummary: \"Type-safe, reusable code without duplicating logic per type, including constraints and variance.\"\nlevel: [\"4\"]\npriority: Medium\nstatus: Ready to Repeat\npublish: true\nqard-deck: \"Programming\"\nqard-topic: \"NET/CSharp/Fundamentals/Generics\"\nflashcard_uid: \"3fc98b91\"\ncreated: \"2026-02-18T20:04:43.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\n---\n\nGenerics parameterize code by type. `List<T>` can store any `T` while the compiler still checks every read and write. That is a stronger contract than accepting `object` and recovering the real type with casts. For value types, generic collections also avoid the boxing required by older object-based APIs.\n\n- `T` is a placeholder for a type chosen by the caller.\n- `List<T>` is an open generic type definition. `List<int>` is a closed constructed type.\n- Constraints (`where T : ...`) are capability contracts that unlock members safely.\n- The runtime specializes generic code for value-type arguments and can share code between reference-type arguments.\n\n# Use Cases\n\n- Collections preserve the element or key type throughout an API.\n- Algorithms can require only the operations they use, such as comparison or numeric operators.\n- Generic result and handler types can keep payload types explicit without duplicating infrastructure.\n\nA generic abstraction should still represent one real behavior. `IRepository<TEntity>` is not useful merely because every entity happens to support create, read, update, and delete operations. Different aggregates often need different contracts.\n\n# Constraints\n\nConstraints tell the compiler what operations are valid for `T`. They also document the smallest capability the algorithm expects.\n\n- `where T : class` - `T` must be a reference type.\n- `where T : struct` - `T` must be a non-nullable value type.\n- `where T : notnull` - nullable analysis warns when a nullable type argument is used.\n- `where T : unmanaged` - `T` is a non-nullable unmanaged type whose fields are also unmanaged. This is not identical to every platform's definition of blittable.\n- `where T : new()` - `T` must have a public parameterless constructor.\n- `where T : BaseType` - `T` must inherit from a specific base type.\n- `where T : ISomeInterface` - `T` must implement a specific interface.\n\n# Variance\n\nVariance controls safe assignment between constructed interface or delegate types when their type arguments are related by inheritance.\n\n- Invariance (default): `List<string>` is not assignable to `List<object>`.\n- Covariance (`out T`): allows a more derived type where a base type is expected for producer-only APIs (for example, `IEnumerable<string>` to `IEnumerable<object>`).\n- Contravariance (`in T`): allows a less derived type where a more derived type is expected for consumer-only APIs (for example, `IComparer<object>` as `IComparer<string>`).\n- Variance is supported on interfaces and delegates marked with `in`/`out`, and only for reference-type substitutions.\n\n```csharp\nIEnumerable<string> names = new List<string> { \"Ada\", \"Linus\" };\nIEnumerable<object> objects = names; // covariance\n\nAction<object> printAny = o => Console.WriteLine(o);\nAction<string> printString = printAny; // contravariance\n\nList<string> list = new();\n// List<object> invalid = list; // does not compile (invariance)\n```\n\n# Example\n\n```csharp\npublic static T CreateAndValidate<T>()\n    where T : EntityBase, IValidatable, new()\n{\n    var value = new T();\n    value.Validate();\n    return value;\n}\n```\n\n# Generic Math (.NET 7+)\n\nGeneric code once had no static contract for operators such as `+`. Static abstract interface members changed that. `INumber<T>` declares numeric operators and identities, so a `where T : INumber<T>` constraint makes arithmetic available on the type parameter.\n\n```csharp\npublic static T Sum<T>(ReadOnlySpan<T> values) where T : INumber<T>\n{\n    T total = T.Zero;\n    foreach (var v in values) total += v;   // operators resolved via the interface\n    return total;\n}\n```\n\nThe same static-member mechanism supports contracts such as `IParsable<TSelf>`, where parsing belongs to the type rather than an instance.\n\n# Reflection over Generics\n\nAn open generic such as `List<>` has unassigned type parameters and cannot be instantiated. Reflection can close it at runtime with `MakeGenericType`. Generic methods use `MakeGenericMethod`.\n\n```csharp\nType closed = typeof(List<>).MakeGenericType(itemType); // e.g. List<Order>\nvar list = Activator.CreateInstance(closed);\n```\n\n`where T : struct, Enum` admits enum value types, while `allows ref struct` tells the compiler that a type argument may be stack-only. Code using that anti-constraint must obey the ref-safety rules for every possible `T`.\n\n# Pitfalls\n\n- An unconstrained `T` exposes only operations valid for every type. The smallest constraint that the algorithm actually needs makes the required operations available without internal casts.\n- **Static state belongs to each closed type.** `Cache<int>` and `Cache<string>` receive separate copies of a `static` field declared on `Cache<T>`.\n- **Value-type specialization can grow native code.** Separate value-type instantiations can produce separate JIT-compiled bodies. The specialization avoids the boxing that `object`-based storage requires and preserves value semantics, but many large instantiations increase startup and code-size costs.\n- `default(T)` is `null` for reference types and zero-initialized data for value types. Either result may look valid in a domain model, so absence should have an explicit contract.\n- A concrete base-class constraint couples the abstraction to one hierarchy. A behavioral interface avoids that coupling when inheritance is not itself part of the requirement.\n\n# Tradeoffs\n\n- **Generics versus `object`.** Non-generic collections box value types when storing them as `object`. `List<int>` keeps integers unboxed and removes casts at the read boundary.\n- **Generics versus inheritance.** A generic API carries a concrete type argument through compile-time checks. Inheritance allows one base reference to dispatch to different runtime implementations. The choice is about when variation is known, not a blanket performance rule.\n- **Specialization versus code sharing.** The CLR normally specializes code for value-type arguments and shares compatible code for reference-type arguments. This balances value-type performance against native code size.\n\n# Questions\n\n<!-- qard-id: 051626ec-488b-484a-affe-9b09e168fb5e -->\n> [!qard]- What do generics add to a C# API?\n> Generics let one implementation take a type as a parameter. The same code then works with many types, while the compiler still checks the type of every value that goes in or comes out.\n>\n> Compared with an API that accepts `object`:\n>\n> - **Type safety:** an `object`-based API needs casts on the way out, so a wrong type fails only at runtime. A `List<string>` instead rejects an `int` at compile time and returns strings without casts.\n> - **No storage boxing for value types:** an `object`-based collection boxes each `int` it stores, while `List<int>` stores the integers directly. Generic code can still box a value-type `T` through conversions, such as converting it to `object` or to an interface type.\n>\n> **Constraints** such as `where T : IComparable<T>` narrow which type arguments are allowed. In return, the generic code may use the members that the constraint guarantees, such as `CompareTo`.\n>\n> [Microsoft: generic types and methods](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/types/generics) · [Microsoft: constraints on type parameters](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/generics/constraints-on-type-parameters) · [C# specification: boxing conversions](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/conversions#1029-boxing-conversions)\n\n<!-- qard-id: 96d2fdb0-3c95-4eb1-91da-258a4574cde2 -->\n> [!qard]- Why does `IEnumerable<string>` assign to `IEnumerable<object>`, but `List<string>` does not assign to `List<object>`?\n> `IEnumerable<T>` declares its type parameter covariant (`out T`), so the conversion is allowed. `List<T>` is invariant, so it is not.\n>\n> - **`IEnumerable<string>` as `IEnumerable<object>`:** the interface only hands `T` values out. Every string read from the sequence is also an object, so reading strings as objects is safe.\n> - **`List<string>` as `List<object>`:** `List<T>` also takes `T` values in, for example through `Add`. If the conversion were allowed, code could add an `int` through the `List<object>` reference, and the original `List<string>` would then hold a non-string.\n>\n> Variance also has to be declared, and C# allows it only on generic interfaces and delegates. A generic class such as `List<T>` is therefore always invariant, whatever its members do.\n>\n> [Microsoft: covariance and contravariance](https://learn.microsoft.com/en-us/dotnet/standard/generics/covariance-and-contravariance)\n\n<!-- qard-id: 222e6ef2-bb7d-4c83-b731-ffd892537b23 -->\n> [!qard]- When should a generic interface type parameter be marked `out` or `in`?\n> A type parameter can be marked `out` when the interface only produces `T`, and `in` when it only consumes `T`. When `T` flows both in and out, it stays invariant.\n>\n> | Marking | Where `T` may appear | Conversion it enables |\n> |---|---|---|\n> | `out` (covariant) | Only in output positions, such as method return types | A more derived type argument can stand in for a less derived one: `IEnumerable<string>` converts to `IEnumerable<object>` |\n> | `in` (contravariant) | Only in input positions, such as method parameter types | A less derived type argument can stand in for a more derived one: `IComparer<object>` converts to `IComparer<string>` |\n> | None (invariant) | In both input and output positions | No conversion, because either direction would allow an unsafe read or write |\n>\n> The compiler enforces these positions, so it accepts a variant marking only when the interface's members keep it safe.\n>\n> Variance conversions work only when the type arguments are reference types. `IEnumerable<int>` does not convert to `IEnumerable<object>`, because a value-type argument makes the constructed type invariant.\n>\n> [Microsoft: covariance and contravariance](https://learn.microsoft.com/en-us/dotnet/standard/generics/covariance-and-contravariance)\n\n<!-- qard-id: dd86df45-1404-46cf-8c09-84cb046ef4f3 -->\n> [!qard]- A generic method uses `default(T)` as a fallback. Why can this be dangerous?\n> `default(T)` is not one fixed value. It is `null` when `T` is a reference type, and a zero-initialized value such as `0` or `false` when `T` is a value type. Those values can also be legitimate data, so returning `default(T)` to signal that nothing was found or that something failed makes absence look like a real result.\n>\n> For example, a `GetOrDefault<T>` method that returns `default(T)` for a missing key returns `0` when `T` is `int`. A caller then cannot tell a missing entry from a stored `0`.\n>\n> When that distinction matters, the API reports absence separately from the value:\n>\n> - **`Try` method:** returns `bool` for success and the value through an `out T` parameter.\n> - **Result type:** carries the success or failure state together with the value.\n> - **Nullable contract:** returns `T?`, with `null` meaning absence. This works only when `null` is never legitimate data and the return type can actually hold `null` for the type argument. For a value type that requires `Nullable<T>`, for example `T?` under a `where T : struct` constraint, whose `HasValue` separates a missing entry from a stored `0`. With an unconstrained `T`, `T?` adds no null state for a value-type argument, so `GetOrDefault<int>` would still return `0`.\n>\n> [Microsoft: default keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/default) · [Microsoft: nullable value types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/nullable-value-types)\n\n# References\n\n- [Generics in C#](https://learn.microsoft.com/dotnet/csharp/programming-guide/generics/)\n- [Covariance and contravariance in C#](https://ericlippert.com/2007/10/16/covariance-and-contravariance-in-c-part-1/)"
+    }
+  ],
+  "version": 1,
+  "createdAt": 1793473563147,
+  "topic": "Choose generic type parameters and constraints without replacing type safety with object casts",
+  "notes": [
+    "Home/Programming/NET/CSharp/Fundamentals/Generics.md"
+  ],
+  "mastery": "Assets/Qard/Courses/Programming Mastery.md",
+  "course": "Programming",
+  "objective": "generic-contracts",
+  "steps": [
+    {
+      "title": "Types and assignment",
+      "explain": "A variable has a type. For the assignments here, the compiler checks whether the expression on the right can be implicitly converted to the variable’s type on the left.\n\nStart with a value type:\n\n```csharp\nint first = 4;\nint second = first;\nsecond = 9;\n```\n\nBoth variables hold integer values. Assigning `first` to `second` copies its value, so changing `second` leaves `first` equal to `4`.\n\nReference types copy references instead. Consider:\n\n```csharp\nstring name = \"Ada\";\nobject stored = name;\n```\n\nEvery string is an object, so the second assignment is allowed. It copies the reference: both variables refer to the same string. It does not create a different object or change the string’s runtime type.\n\nHowever, the expression `stored` has compile-time type `object`. An `object` variable can also refer to values that are not strings. Therefore, `string restored = stored;` is rejected: there is no implicit conversion from `object` to `string`.\n\nThe opening of **Generics** describes preserving types across reads and writes. This example shows why that matters: storing a string through `object` loses the compile-time guarantee that a later read produces a string.",
+      "connect": "This first step makes assignment checks and copying explicit, without assuming the earlier value and reference semantics checks were mastered. Next, a type parameter will let an API carry a chosen type through both input and output.",
+      "checkFirst": true,
+      "check": {
+        "id": "k1",
+        "type": "long",
+        "prompt": "Consider each assignment below:\n\n```csharp\nstring name = \"Ada\";\nobject stored = name;\nstring restored = stored;\n```\n\nExplain why the second assignment is allowed and whether the third assignment compiles. Distinguish the compile-time type of `stored` from the runtime type of the object it refers to.",
+        "marks": 3,
+        "rubric": [
+          {
+            "point": "Explains that assigning name to stored is allowed because string has an implicit reference conversion to object.",
+            "marks": 1
+          },
+          {
+            "point": "States that the third assignment fails at compile time because object does not implicitly convert to string.",
+            "marks": 1
+          },
+          {
+            "point": "Distinguishes stored's compile-time type object from the referenced object's runtime type string.",
+            "marks": 1
+          }
+        ],
+        "model": "The second assignment is allowed because a string can be implicitly converted to `object`. It copies the reference to the string. The expression `stored` has compile-time type `object`, although the referenced object's runtime type is `string`. The third assignment fails at compile time because there is no implicit conversion from `object` to `string`.",
+        "source": {
+          "path": "Home/Programming/NET/CSharp/Fundamentals/Generics.md"
+        },
+        "objective": "generic-contracts",
+        "goal": "explain"
+      },
+      "misconceptions": [
+        {
+          "signs": "Says the third assignment compiles because stored contains a string.",
+          "reteach": "The referenced object is a string, but the expression `stored` has type `object`. This assignment requires an implicit conversion from `object` to `string`, which C# does not provide."
+        },
+        {
+          "signs": "Says assigning name to stored creates a new object or changes the string into an object.",
+          "reteach": "This reference assignment copies a reference to the existing string. The string remains a string; the destination variable exposes it through the broader type `object`."
+        },
+        {
+          "signs": "Says the second assignment fails because string and object are different types.",
+          "reteach": "Assignment does not always require identical types. Every string is an object, so C# provides an implicit reference conversion from `string` to `object`. The reverse direction lacks that guarantee."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "Carry a type through an API",
+      "explain": "A method’s declared return type tells the compiler what type its result has. Returning a string through an `object` return type gives the caller an `object` expression, even though the value is still a string.\n\nYour **Generics** note describes a type parameter as a placeholder for a type chosen by the caller. This lets one method connect its input type to its output type:\n\n```csharp\nstatic T Echo<T>(T value) => value;\n\nstring name = Echo<string>(\"Ada\");\nint count = Echo<int>(3);\n```\n\nFor the first call, substitute `string` for every `T`: the parameter accepts a string and the result has type `string`. For the second, substitute `int`: both become `int`. One implementation preserves the type relationship in both calls.\n\nC# can also infer the type argument from the input: `Echo(\"Ada\")` uses `T = string`. Inference happens during compilation; it does not inspect the returned value at runtime.\n\nAn `object` parameter and return type accept many values, but their signatures do not express this relationship. A repeated `T` does, so the caller can use the result with its chosen type without a cast.",
+      "connect": "The previous step established that assignment depends on types. A type parameter carries that information across a method call, preserving the compiler’s checks as an API becomes reusable.",
+      "checkFirst": false,
+      "check": {
+        "id": "k2",
+        "type": "long",
+        "prompt": "Consider these methods and three independent declarations:\n\n```csharp\nstatic T Pass<T>(T value) => value;\nstatic object PassObject(object value) => value;\n\nvar a = Pass(\"Ada\");\nvar b = PassObject(\"Ada\");\nstring c = Pass(7);\n```\n\nWhat are the compile-time types of `a` and `b`, and does the declaration of `c` compile? Explain each answer using the method signatures.",
+        "marks": 3,
+        "rubric": [
+          {
+            "point": "Identifies a as string because the argument infers T as string and the return type is T.",
+            "marks": 1
+          },
+          {
+            "point": "Identifies b as object because PassObject declares object as its return type, regardless of the returned value being a string.",
+            "marks": 1
+          },
+          {
+            "point": "States that c does not compile because Pass(7) infers T as int, returns int, and int cannot be implicitly assigned to string.",
+            "marks": 1
+          }
+        ],
+        "model": "`a` has compile-time type `string`: the string argument makes `T` be `string`, and `Pass` returns `T`.\n\n`b` has compile-time type `object`: `PassObject` declares that return type. `var` uses the expression’s compile-time type, even though the returned value is a string.\n\nThe declaration of `c` does not compile. `Pass(7)` infers `T = int`, so its result has type `int`. There is no implicit conversion from `int` to `string`.",
+        "source": {
+          "path": "Home/Programming/NET/CSharp/Fundamentals/Generics.md",
+          "heading": "Questions"
+        },
+        "objective": "generic-contracts",
+        "goal": "explain"
+      },
+      "misconceptions": [
+        {
+          "signs": "Says b is string because the method returns \"Ada\".",
+          "reteach": "`\"Ada\"` remains a string value, but the call expression has the declared return type `object`. `var` uses that compile-time type; it does not inspect the runtime value."
+        },
+        {
+          "signs": "Says a is object because a generic method accepts different types.",
+          "reteach": "`T` is a type parameter, not another name for `object`. In `Pass(\"Ada\")`, the compiler substitutes `string` for `T` in both the parameter and return type."
+        },
+        {
+          "signs": "Says c compiles because the destination chooses string or generics convert 7 to text.",
+          "reteach": "Here, the argument `7` makes `T` be `int`. The destination does not change that inference, and the generic method performs no conversion to text. Assignment therefore fails during compilation."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "Find the operations an algorithm needs",
+      "explain": "A method body must be valid for every type its declaration permits. An unconstrained `T` permits both value types, such as `int`, and reference types, such as `string`.\n\nReturning an existing value of type `T` requires no knowledge of its members. The input already has the promised return type. Copying or returning that value follows the chosen type’s value or reference semantics.\n\nReading `value.Length` requires more information: an accessible `Length` member. A string has one; an integer does not. Knowing that a value has type `T` preserves its type, but does not establish that this operation exists. Calling the method only with strings does not repair its declaration: the body must satisfy the declared contract.\n\nThis gives a way to discover the contract: examine each operation the algorithm performs and identify the capability it requires. Returning an input needs no extra capability. Reading a length needs a length contract. Comparing values needs a comparison contract.\n\nYour **Generics** note calls constraints “capability contracts.” They make required operations available through compiler-checked guarantees. Casting through `object` supplies no such guarantee; an unsupported value can still reach a failing cast.",
+      "connect": "The previous step kept the caller’s chosen type connected across inputs and outputs. Now the algorithm’s operations determine which additional guarantees that type needs.",
+      "checkFirst": true,
+      "check": {
+        "id": "k3",
+        "type": "long",
+        "prompt": "Consider these declarations independently:\n\n```csharp\nstatic T Echo<T>(T value) => value;\n\nstatic int Measure<T>(T value) => value.Length;\n```\n\nWhy does `Echo` compile while `Measure` does not, and what capability must `Measure` require to read `Length` safely without casts? No constraint syntax is needed.",
+        "marks": 3,
+        "rubric": [
+          {
+            "point": "Explains that Echo returns an input already typed as T, which matches its declared return type.",
+            "marks": 1
+          },
+          {
+            "point": "Explains that unconstrained T does not guarantee a Length member; a permitted type such as int lacks it.",
+            "marks": 1
+          },
+          {
+            "point": "States that Measure needs a compiler-visible contract guaranteeing an accessible Length member whose value can be returned as int.",
+            "marks": 1
+          }
+        ],
+        "model": "`Echo` receives a `T` and returns that same value as `T`, so the return type matches without requiring any members. `Measure` permits types such as `int`, which have no `Length` member, so its body is invalid. It needs a compiler-visible contract guaranteeing an accessible `Length` member returning `int`, such as an interface constraint that declares that property.",
+        "source": {
+          "path": "Home/Programming/NET/CSharp/Fundamentals/Generics.md",
+          "heading": "Constraints"
+        },
+        "objective": "generic-contracts",
+        "goal": "explain"
+      },
+      "misconceptions": [
+        {
+          "signs": "Says Measure compiles because the compiler discovers Length from whichever type the caller supplies.",
+          "reteach": "The caller chooses `T`, but the declaration determines which choices are permitted. With no constraint, `int` is permitted too. The body must be valid under that whole contract."
+        },
+        {
+          "signs": "Says T must be a reference type, or Echo works only for reference types.",
+          "reteach": "`T` can represent a value type or a reference type. Returning a value already typed as `T` works for either. Reference-type status alone also does not guarantee `Length`."
+        },
+        {
+          "signs": "Suggests casting value through object to string as the required guarantee.",
+          "reteach": "That cast leaves `Measure<int>(42)` permitted by the declaration, but the cast fails at runtime. A constraint makes the required capability part of the contract, so unsupported type arguments are rejected at compile time."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "Choose the smallest useful constraint",
+      "explain": "A generic method is checked against what its declaration guarantees about `T`. If its body calls `value.Validate()`, the compiler needs a guarantee that this operation exists.\n\nYour **Generics** note calls constraints capability contracts. Given `interface IValidatable { void Validate(); }`, the constraint `where T : IValidatable` supplies exactly that guarantee. The method can call `Validate()` directly, and a type argument that does not implement the interface is rejected at compile time.\n\nNow consider what else the method needs. If it receives an existing value, it does not need `new()`: that constraint would require a public parameterless constructor for no reason. If validation works for both classes and structs, adding `class` would exclude suitable structs without enabling any required operation.\n\nThe smallest useful constraint guarantees every operation the body needs without imposing unrelated requirements. Keeping the parameter and return type as `T` also preserves the caller's type through the API. No conversion to `object` or recovery cast is needed.",
+      "connect": "The previous step identified the operations the algorithm needs. This step turns those operations into a compiler-checked contract while keeping suitable type arguments available.",
+      "checkFirst": true,
+      "check": {
+        "id": "k4",
+        "type": "long",
+        "prompt": "Given this interface and method:\n\n```csharp\npublic interface IValidatable\n{\n    void Validate();\n}\n\npublic static T ValidateAndReturn<T>(T value)\n    // Add the constraint here.\n{\n    value.Validate();\n    return value;\n}\n```\n\nWrite the smallest useful constraint. Explain what makes `value.Validate()` legal, why neither `class` nor `new()` is needed, and when a call using a type that does not implement `IValidatable` is rejected.",
+        "marks": 4,
+        "rubric": [
+          {
+            "point": "Writes `where T : IValidatable` without additional constraints.",
+            "marks": 1
+          },
+          {
+            "point": "Explains that the interface constraint guarantees the `Validate()` member to the compiler.",
+            "marks": 1
+          },
+          {
+            "point": "Explains both that `class` would unnecessarily exclude suitable structs and that `new()` is unnecessary because the method receives an existing value.",
+            "marks": 1
+          },
+          {
+            "point": "States that a type argument not implementing `IValidatable` is rejected at compile time.",
+            "marks": 1
+          }
+        ],
+        "model": "```csharp\nwhere T : IValidatable\n```\n\nThe constraint guarantees that `T` implements `IValidatable`, so the compiler permits `value.Validate()`. Both classes and structs can implement this interface, so `class` would exclude suitable structs. The method receives its value and never constructs a `T`, so `new()` is unnecessary. A call using a type argument that does not implement `IValidatable` fails at compile time.",
+        "source": {
+          "path": "Home/Programming/NET/CSharp/Fundamentals/Generics.md",
+          "heading": "Constraints"
+        },
+        "objective": "generic-contracts",
+        "goal": "apply"
+      },
+      "misconceptions": [
+        {
+          "signs": "Uses `where T : class` as the guarantee that `Validate()` exists.",
+          "reteach": "`class` guarantees that `T` is a reference type. It says nothing about a `Validate()` member. `IValidatable` guarantees the operation this method needs."
+        },
+        {
+          "signs": "Adds `new()` because the method works with an instance of `T`.",
+          "reteach": "Receiving an instance and constructing one are different operations. This method receives `value`; only a body that needs `new T()` requires the constructor constraint."
+        },
+        {
+          "signs": "Casts `value` to `IValidatable` and expects unsuitable types to fail at runtime.",
+          "reteach": "A cast checks compatibility when execution reaches it. The interface constraint makes compatibility part of the method's contract, so unsuitable type arguments are rejected before execution."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "Design a contract without object casts",
+      "explain": "A method’s parameter type determines what it accepts, and its return type determines what the caller can use directly. A type parameter connects those two boundaries: accepting `T` and returning `T` preserves the chosen type through the method.\n\nThe **Generics** note adds the other half: constraints make required operations available inside the method. If the method calls `Validate()`, an `IValidatable` constraint provides that operation. Returning `T` then preserves the caller’s type without a cast.\n\nThese decisions solve separate problems. Using only `IValidatable` as the parameter and return type exposes validation, but the return contract no longer preserves a more specific type such as `Invoice`. Using unconstrained `T` preserves the type, but does not guarantee a `Validate()` method.\n\nCombining `T` with `where T : IValidatable` provides both guarantees. No `new()` constraint is needed when the caller supplies the value. No `class` constraint is needed when the algorithm requires no reference-specific operation. The contract follows from what flows through the API and what its implementation actually does.",
+      "connect": "The previous step chose the smallest constraint needed by an algorithm. This step combines that capability guarantee with a type parameter that preserves the caller’s type across the API.",
+      "checkFirst": true,
+      "check": {
+        "id": "k5",
+        "type": "long",
+        "prompt": "Given this interface:\n\n```csharp\npublic interface IValidatable\n{\n    void Validate();\n}\n```\n\nWrite a public static generic method `ValidateAndReturn` that accepts a caller-supplied value, calls its `Validate()` method, and returns the resulting value with the same compile-time type `T`. Use the smallest necessary constraint and no casts. Assume inputs are non-null; both classes and structs implementing the interface must be supported.\n\nThen explain why this caller needs no cast, assuming `Invoice` implements `IValidatable` and has a public parameterless constructor:\n\n```csharp\nInvoice invoice = ValidateAndReturn(new Invoice());\n```\n\nWhy would returning `IValidatable` instead weaken this caller’s contract?",
+        "marks": 4,
+        "rubric": [
+          {
+            "point": "Declares a generic method with a parameter of type T and return type T.",
+            "marks": 1
+          },
+          {
+            "point": "Uses only the necessary constraint, where T : IValidatable, permitting both implementing classes and structs.",
+            "marks": 1
+          },
+          {
+            "point": "Calls Validate() on the supplied value and returns that value without casts or constructing a replacement.",
+            "marks": 1
+          },
+          {
+            "point": "Explains that T is inferred as Invoice, so the result is statically Invoice; returning IValidatable would expose only the interface type and prevent direct assignment to Invoice.",
+            "marks": 1
+          }
+        ],
+        "model": "```csharp\npublic static T ValidateAndReturn<T>(T value)\n    where T : IValidatable\n{\n    value.Validate();\n    return value;\n}\n```\n\nThe argument makes `T` equal to `Invoice`, so the method returns an `Invoice` and the assignment needs no cast. The constraint lets the implementation call `Validate()` safely.\n\nReturning `IValidatable` would give the caller an interface-typed result. Even if the runtime value were an `Invoice`, direct assignment to an `Invoice` variable would fail to compile. Recovering that type would require a cast or type check.\n\nThe method receives its value, so it needs no `new()` constraint. It also requires no reference-specific behavior, so it needs no `class` constraint.",
+        "source": {
+          "path": "Home/Programming/NET/CSharp/Fundamentals/Generics.md",
+          "heading": "Constraints"
+        },
+        "objective": "generic-contracts",
+        "goal": "apply"
+      },
+      "misconceptions": [
+        {
+          "signs": "Accepts or returns object and casts to IValidatable or Invoice.",
+          "reteach": "An `object` boundary does not preserve the caller’s specific type in the signature. A cast asks for a runtime check. Accepting and returning `T`, constrained to `IValidatable`, gives the compiler both the type relationship and the required operation."
+        },
+        {
+          "signs": "Accepts and returns IValidatable, claiming this preserves Invoice as the return type.",
+          "reteach": "The runtime value can still be an `Invoice`, but the declared result type is only `IValidatable`. Returning `T` preserves the specific type chosen for that call."
+        },
+        {
+          "signs": "Leaves T unconstrained or adds class or new() constraints.",
+          "reteach": "Unconstrained `T` does not guarantee `Validate()`. The interface constraint supplies that guarantee. `class` would unnecessarily exclude structs, and `new()` would require construction capability even though the caller already supplies the value."
+        }
+      ],
+      "figure": ""
+    }
+  ],
+  "state": [
+    {
+      "asks": [],
+      "answer": {
+        "text": "The second var will be boxed to the object, third one will throw, since we trying to put object to string without unboxing",
+        "confidence": "sure"
+      },
+      "mark": {
+        "awarded": [
+          false,
+          false,
+          false
+        ],
+        "annotations": [
+          {
+            "quote": "will be boxed to the object",
+            "kind": "wrong",
+            "note": "You describe boxing, but `string` is a reference type, so this assignment does not box it."
+          },
+          {
+            "quote": "third one will throw",
+            "kind": "wrong",
+            "note": "You describe a runtime exception, but the compiler rejects the assignment before it can run."
+          },
+          {
+            "quote": "",
+            "kind": "missing",
+            "note": "You needed to explain that `string` has an implicit reference conversion to `object`."
+          },
+          {
+            "quote": "",
+            "kind": "missing",
+            "note": "You needed to state that the third assignment fails to compile because `object` does not implicitly convert to `string`."
+          },
+          {
+            "quote": "",
+            "kind": "missing",
+            "note": "You needed to distinguish the compile-time type `object` from the referenced object's runtime type `string`."
+          }
+        ],
+        "mistake": "misconception",
+        "feedback": "You confused reference conversion with boxing and a compile-time error with a runtime exception.",
+        "score": 0
+      },
+      "reply": "`string` is a reference type, so assigning it to `object` does not box it. The third line fails before the program runs. What type does the compiler see for the expression `stored`, regardless of the object it refers to?"
+    },
+    {
+      "asks": [],
+      "answer": {
+        "text": "Compile time for a would be a string since we infer the type from the param and return it. b would be object since PassObject returns object, and when we pass string into it, we storing string`s refference and store it into object viriable. C will not compile, since we cannot implicitly convert int to string because we have strongly typed language",
+        "confidence": "sure"
+      },
+      "mark": {
+        "awarded": [
+          true,
+          true,
+          false
+        ],
+        "annotations": [
+          {
+            "quote": "a would be a string since we infer the type",
+            "kind": "correct",
+            "note": "You identify the inferred type and connect it to the return value."
+          },
+          {
+            "quote": "b would be object since PassObject returns object",
+            "kind": "correct",
+            "note": "You use the method's declared return type to determine the type of b."
+          },
+          {
+            "quote": "we cannot implicitly convert int to string",
+            "kind": "vague",
+            "note": "You identify the conversion error, but you do not explain how Pass(7) produces an int."
+          },
+          {
+            "quote": "",
+            "kind": "missing",
+            "note": "You needed to state that 7 makes T infer as int, so Pass returns int."
+          }
+        ],
+        "mistake": "incomplete",
+        "feedback": "You identified all three outcomes, but your explanation of c omits the inferred type and return type.",
+        "score": 2
+      },
+      "reply": "Your outcomes are right. For `c`, trace the method signature: what type does the argument `7` give `T`, and what does that make the return type?"
+    },
+    {
+      "asks": [
+        {
+          "q": "Show how code will look before and after fix",
+          "a": "**Before:** casting through `object` makes the code compile, but it assumes every `T` is a string. An `int` causes a runtime exception.\n\n```csharp\nstatic int GetLength<T>(T value)\n{\n    return ((string)(object)value).Length;\n}\n```\n\n**After:** if the operation is specifically for strings, state that in the parameter type:\n\n```csharp\nstatic int GetLength(string value)\n{\n    return value.Length;\n}\n```\n\nThe compiler now rejects an `int` at the call site. No generic parameter is needed because the method accepts one concrete type.\n\nFor an algorithm that must work with several types, the **Generics** note recommends a constraint that guarantees the required capability. Those types need to share an appropriate interface; a generic constraint cannot require a `Length` property by name alone."
+        }
+      ],
+      "answer": {
+        "text": "It doesnt compile because not every T have .Length, which looks like string property. To make it work we need to hav generic constaint to string",
+        "confidence": "unsure"
+      },
+      "mark": {
+        "awarded": [
+          false,
+          true,
+          false
+        ],
+        "annotations": [
+          {
+            "quote": "not every T have .Length",
+            "kind": "correct",
+            "note": "You correctly identify that unconstrained T does not guarantee Length."
+          },
+          {
+            "quote": "generic constaint to string",
+            "kind": "wrong",
+            "note": "You cannot use the sealed class string as a generic type constraint."
+          },
+          {
+            "quote": "",
+            "kind": "missing",
+            "note": "You needed to explain that Echo returns a value already typed as T, matching its return type."
+          },
+          {
+            "quote": "",
+            "kind": "missing",
+            "note": "You needed to identify a compiler-visible contract that guarantees an accessible Length member returning int."
+          }
+        ],
+        "mistake": "misconception",
+        "feedback": "You identified why Measure fails, but omitted why Echo works and proposed an invalid constraint.",
+        "score": 1
+      },
+      "reply": "You correctly spotted that not every `T` has `Length`. A generic constraint cannot use `string` directly. What contract could promise a `Length` property returning `int`, and why does returning the existing `T` in `Echo` need no such contract?"
+    },
+    {
+      "asks": [],
+      "answer": {
+        "text": "where T : IValidatable will make every T inherit from the IValidatable, which guarantees T will have such method. neither class nor new() is needed since these terms not related to this problem. \n\n> when a call using a type that does not implement IValidatable is rejected.\ncompile time? Idk question is vague",
+        "confidence": "unsure"
+      },
+      "mark": {
+        "awarded": [
+          true,
+          true,
+          false,
+          true
+        ],
+        "annotations": [
+          {
+            "quote": "where T : IValidatable",
+            "kind": "correct",
+            "note": "You chose the required interface constraint without adding extra constraints."
+          },
+          {
+            "quote": "guarantees T will have such method",
+            "kind": "correct",
+            "note": "You identified the guarantee that lets the compiler accept the method call."
+          },
+          {
+            "quote": "these terms not related to this problem",
+            "kind": "vague",
+            "note": "You identified that the extra constraints are unnecessary, but you did not explain their effects."
+          },
+          {
+            "quote": "these terms not related to this problem",
+            "kind": "missing",
+            "note": "You needed to explain that `class` excludes suitable structs and that `new()` is unnecessary because the method receives an existing value."
+          },
+          {
+            "quote": "compile time?",
+            "kind": "correct",
+            "note": "You identified when an unsuitable type argument is rejected."
+          }
+        ],
+        "mistake": "incomplete",
+        "feedback": "You chose the right constraint and rejection time, but did not explain why each additional constraint is unnecessary.",
+        "score": 3
+      },
+      "reply": "Your constraint and compile-time answer are right. For the missing explanation, consider what `class` excludes and whether the method creates a new `T` or receives one. Also, a type *implements* an interface; it does not inherit from it in the same sense as a base class.",
+      "figure": {
+        "path": "Assets/Qard/Figures/csharp/smallest-useful-generic-constraint.svg",
+        "caption": "ValidateAndReturn<T> needs only where T : IValidatable to call value.Validate(). Neither new() nor class enables a required operation; accepting and returning T preserves the caller’s type.",
+        "brief": "The one figure that would make \"Choose the smallest useful constraint\" clearest."
+      }
+    },
+    {
+      "asks": [],
+      "answer": {
+        "text": "public T ValidateAndReturn(T value) where T : IValidatable\n{\n    value.Validate()\n    return value;\n}\n\nthere is no need to cast since constraing already guaranteed that value will come with required method",
+        "confidence": "sure"
+      },
+      "mark": {
+        "awarded": [
+          true,
+          true,
+          false,
+          false
+        ],
+        "annotations": [
+          {
+            "quote": "public T ValidateAndReturn(T value)",
+            "kind": "correct",
+            "note": "You use T for both the parameter and return type, though you still need to declare the method's type parameter."
+          },
+          {
+            "quote": "where T : IValidatable",
+            "kind": "correct",
+            "note": "You use the necessary constraint, which permits both implementing classes and structs."
+          },
+          {
+            "quote": "value.Validate()",
+            "kind": "missing",
+            "note": "You need a semicolon after this call for the method to compile."
+          },
+          {
+            "quote": "there is no need to cast since constraing already guaranteed that value will come with required method",
+            "kind": "vague",
+            "note": "You explain why Validate is available, but that constraint alone does not explain the caller's return type."
+          },
+          {
+            "quote": "",
+            "kind": "missing",
+            "note": "You need to explain that T is inferred as Invoice and that an IValidatable return type cannot be assigned directly to an Invoice variable."
+          }
+        ],
+        "mistake": "incomplete",
+        "feedback": "You chose the right constraint, but the declaration and call need syntax fixes, and the return-type explanation is incomplete.",
+        "score": 2
+      },
+      "reply": "Your constraint makes `Validate()` available. What must you add after the method name to declare `T`, and after the `Validate()` call to complete the statement? For the caller, consider what type the compiler infers for `T` and what type it sees if the method returns `IValidatable` instead."
+    }
+  ],
+  "current": 4,
+  "probe": {
+    "questions": [],
+    "answers": {},
+    "submitted": true,
+    "marks": {},
+    "findings": "You have not answered a probe for this objective yet, so your understanding of generic contracts is not established. Your earlier value-semantics checks showed some gaps, so the lesson will keep that foundation explicit."
+  },
+  "map": {
+    "title": "Building type-safe generic contracts",
+    "plan": "We will start with types and assignment, connecting them to your earlier work on value and reference semantics without assuming those checks were mastered. Using the Generics note, we will then trace how a type parameter preserves a type across an API and how constraints make required operations available safely.",
+    "mermaid": "graph TD\nA[\"Types govern which values can be assigned\"] --> B[\"A type parameter preserves the chosen type\"]\nB --> C[\"Unconstrained code has limited operations\"]\nC --> D[\"Constraints express required capabilities\"]\nD --> E[\"Choose type parameters and constraints without casts\"]",
+    "objective": "generic-contracts",
+    "steps": [
+      {
+        "title": "Types and assignment",
+        "why": "Assignment gives us a concrete starting point for examining what the compiler can check."
+      },
+      {
+        "title": "Carry a type through an API",
+        "why": "A type parameter connects inputs and outputs so the compiler can preserve the caller's chosen type."
+      },
+      {
+        "title": "Find the operations an algorithm needs",
+        "why": "An unconstrained type parameter supports only operations valid for every permitted type."
+      },
+      {
+        "title": "Choose the smallest useful constraint",
+        "why": "A constraint grants the required capability while rejecting unsuitable type arguments before the code runs."
+      },
+      {
+        "title": "Design a contract without object casts",
+        "why": "Combining the type parameter and its constraints lets you preserve type safety across the whole API."
+      }
+    ]
+  },
+  "stepsFor": "[\"Building type-safe generic contracts\",[\"Types and assignment\",\"Carry a type through an API\",\"Find the operations an algorithm needs\",\"Choose the smallest useful constraint\",\"Design a contract without object casts\"]]",
+  "accepted": true,
+  "finishedAt": 1793474987339,
+  "close": {
+    "summary": "The lesson connected assignment rules to generic API contracts: reference conversions versus boxing, compile-time errors versus runtime failures, how a type parameter carries a type through an API, and how constraints make required operations available without casts.\n\nYou identified the outcomes in the type-preservation check and later chose the appropriate constraint and compile-time rejection point. Your explanations still omitted some inferred type arguments and return types. You also confused reference conversion with boxing, proposed an invalid constraint, and needed corrections to generic declaration and call syntax. Explaining why extra constraints are unnecessary remains a gap.\n\nYour confidence sometimes exceeded the accuracy or completeness of your answers. Further practice should trace the argument’s compile-time type, infer `T`, substitute it into the return type, and justify each constraint from an operation the method actually performs.",
+    "cards": [
+      {
+        "front": "Classify these C# statements independently: `object a = \"hello\";`, `object b = 42;`, and `int c = \"42\";`. Which involves boxing, and which fails?",
+        "back": "`a` uses an implicit reference conversion from `string` to `object`; no boxing occurs. `b` boxes the `int` value. `c` fails at compile time because a string cannot be implicitly converted to `int`; it does not reach a runtime exception."
+      },
+      {
+        "front": "Given `static T Echo<T>(T value) => value;`, what are the inferred `T` and return type for `Echo(42)` and for `Echo(input)` when `object input = 42;`?",
+        "back": "`Echo(42)` infers `T = int` and returns `int`. `Echo(input)` infers `T = object` and returns `object`, because inference uses the argument’s compile-time type. The assignment to `input` already boxed 42; Echo does not recover its original compile-time type."
+      },
+      {
+        "front": "Why does `static T Echo<T>(T value) => value;` compile, while `static int Measure<T>(T value) => value.Length;` fails? Show a constraint-based fix for Measure.",
+        "back": "Echo only returns a value already typed as `T`. Measure fails because unconstrained `T` does not guarantee a `Length` member. Declare the capability and constrain `T`:\n\n```csharp\ninterface IHasLength\n{\n    int Length { get; }\n}\n\nstatic int Measure<T>(T value) where T : IHasLength\n    => value.Length;\n```\n\nOnly types implementing `IHasLength` satisfy this contract; a matching property alone is insufficient."
+      },
+      {
+        "front": "A method reads `IHasLength.Length` and returns its input with the caller’s type preserved. Give its declaration and a call for a struct `Label : IHasLength`. Why are `class`, `struct`, and `new()` unnecessary?",
+        "back": "```csharp\nstatic T Inspect<T>(T value) where T : IHasLength\n{\n    _ = value.Length;\n    return value;\n}\n\nvar result = Inspect(new Label());\n```\n\n`T` is inferred as `Label`, so the return type is `Label`. The interface guarantees the only required member. `class` and `struct` would restrict the type category without helping the operation; `new()` is unnecessary because the method creates no `T`. A type argument that does not implement the interface is rejected at compile time."
+      }
+    ],
+    "noteEdit": {
+      "path": "Home/Programming/NET/CSharp/Fundamentals/Generics.md",
+      "heading": "Constraints",
+      "text": "An unconstrained method such as `static T Echo<T>(T value) => value;` can return its input because that requires no type-specific member. In `Echo(42)`, inference chooses `T = int`, making the return type `int`; if the argument is declared as `object`, inference instead chooses `object`, regardless of the value's runtime type. Accessing `value.Length` requires a contract that declares that member: given `interface IHasLength { int Length { get; } }`, the declaration `static int Measure<T>(T value) where T : IHasLength => value.Length;` is valid. A matching property alone does not satisfy the interface constraint. Additional `class`, `struct`, or `new()` constraints are unnecessary when the method only reads `Length`; they restrict callers without enabling any required operation."
+    },
+    "cardState": {},
+    "note": "Assets/Qard/Lessons/2026-10-31 Choose generic type parameters and constraints without repla.md",
+    "nextCheck": "2026-11-03"
+  }
+}

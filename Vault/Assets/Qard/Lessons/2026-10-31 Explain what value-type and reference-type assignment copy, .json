@@ -1,0 +1,572 @@
+{
+  "sourceSnapshots": [
+    {
+      "path": "Home/Programming/NET/CSharp/Fundamentals/Types/Types.md",
+      "text": "---\ntitle: C# Types\ntopic: [Programming]\nsubtopic: [NET]\nsummary: \"How C# types define shape, behavior, and value versus reference assignment semantics.\"\ntags: [FolderNote]\npublish: true\nstatus: Creation\npriority: Medium\nlevel: [\"4\"]\nqard-deck: \"Programming\"\nqard-topic: \"NET/CSharp/Fundamentals/Types/Types\"\nflashcard_uid: \"a5c39ae2\"\ncreated: \"2026-02-10T16:03:55.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\n---\n\nA C# type defines what values exist, which operations are valid, and what assignment copies. Value types copy their contained value. Reference types copy a reference to one object. That distinction controls aliasing and equality long before stack-versus-heap details matter.\n\nThe folder separates the main forms. Classes and record classes are reference types. Structs and record structs are value types. Strings, delegates, and events add specialized behavior on top of the same type system.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# Copy and Storage Boundaries\n\n- **Assignment:** a value-type assignment copies every field. Reference fields inside that value still point to the same objects. A reference-type assignment copies the object reference, so both variables can observe mutations to one instance.\n- **Arguments:** parameters are passed by value unless marked `ref`, `out`, or `in`. Passing a reference type by value copies the reference, not the object.\n- **Storage:** value types may live inline inside heap objects and arrays. References may be local variables. Declaration kind does not dictate one physical location.\n- **Boxing:** conversion from a value type to `object` or an interface value copies it into a box. Constrained generic calls can often avoid that allocation. Nullable value types box differently: a populated `Nullable<T>` boxes its underlying `T` value, and an empty one converts to a `null` reference without allocating a box.\n\n# Pitfalls\n\n- **Hidden aliases.** Several references can point at one mutable object. Ownership must be clear. Shared models are easier to reason about when immutable.\n- **Mutable value copies.** A property, indexer, or `foreach` variable usually exposes a struct copy. Mutation may be rejected by the compiler or affect only the copy. Readonly structs and whole-value replacement keep that boundary visible.\n- **Equality chosen by accident.** Classes use reference equality unless they define another contract. Record classes and record structs synthesize value equality, while ordinary structs inherit field-based default equality. Domain identity should decide, not syntax convenience.\n\n# Tradeoffs\n\n- **Class or struct:** a class makes shared identity and inheritance available. A struct gives value-copy semantics and can avoid a separate allocation, but large copies and boxing may cost more.\n- **Record class or conventional class:** records fit data whose contents define equality. Identity-rich entities usually need conventional class semantics.\n- **Interface or constrained generic:** an interface value gives runtime polymorphism but boxes a struct. A constrained generic can preserve static typing and avoid the box.\n\n# Examples\n\n```csharp\nvar h = new Holder { Counter = new Counter { Value = 0 } };\n\n// Property access returns a copy of the struct value.\nh.Counter.Inc();\nConsole.WriteLine(h.Counter.Value); // 0\n\n// Fix: replace the whole value after mutation.\nvar c = h.Counter;\nc.Inc();\nh.Counter = c;\nConsole.WriteLine(h.Counter.Value); // 1\n\npublic struct Counter\n{\n    public int Value;\n    public void Inc() => Value++;\n}\n\npublic sealed class Holder\n{\n    public Counter Counter { get; set; }\n}\n```\n\nThe direct `h.Counter.Inc()` call compiles, but it mutates the temporary value returned by the property and then discards that copy. A direct field assignment such as `h.Counter.Value = 1` is rejected with CS1612. Reading the value into `c`, mutating it, and assigning it back persists the change.\n\n# Questions\n\n<!-- qard-id: d8eb59cf-ad2d-43be-954f-44db23f34d38 -->\n> [!qard]- Why might changing a struct inside `foreach` not update the collection, and how can it be fixed?\n> In an ordinary (non-`ref`) `foreach`, each struct element reaches the loop body as a copy held in a read-only iteration variable. Changes to the copy's own fields never reach the stored element.\n>\n> - Assigning the iteration variable, or one of its fields, is rejected by the compiler.\n> - Calling a mutating method on it compiles, but the method changes the copy's fields rather than the stored element's, so the update is silently lost.\n>\n> The copy is shallow. When a field of the struct refers to an object, such as a `List<T>`, the copy and the stored element refer to the same object. A change made to that object through the copy, such as adding an item, therefore remains visible through the collection. Only changes to the struct's own field values are lost.\n>\n> The stored elements can be updated in two ways:\n>\n> - **Indexed write-back:** a loop by index reads `items[i]` into a local, changes the local and assigns it back to `items[i]`, replacing the whole element value.\n> - **`ref` iteration:** when the collection exposes its elements by reference, as `Span<T>` does, `foreach (ref var item in span)` makes `item` an alias for the stored element, so changes apply in place.\n>\n> Mutable structs make this mistake easy. Immutable structs, updated by creating a new value and assigning it back, keep the copy boundary visible.\n>\n> Sources: [Microsoft Learn: Iteration statements](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/iteration-statements) · [Microsoft Learn: Structure types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/struct) · [Microsoft Learn: Value types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/value-types)\n\n<!-- qard-id: b89f32ef-f23d-488d-a26a-78ebe0051826 -->\n> [!qard]- Where does boxing commonly happen, and how can it be reduced?\n> Boxing happens wherever a value type is converted to `object` or to an interface it implements. The runtime allocates an object on the managed heap and copies the value into it. A nullable value type is boxed according to its contents: a populated `int?` boxes its underlying `int` value, and an empty one converts to a `null` reference without allocating.\n>\n> Common places:\n>\n> - **`object`-typed variables, collections and parameters:** `object o = 42;`, adding an `int` to a `List<object>` or an `ArrayList`, or passing a struct to a parameter of type `object`.\n> - **Interface-typed variables and parameters:** assigning a struct to an `IComparable` variable, or passing it where an interface type is declared.\n>\n> Each box is a separate heap allocation that the garbage collector must later reclaim. The box also holds a copy, so later changes to the original value do not affect it.\n>\n> Ways to reduce boxing:\n>\n> - **Generic collections and APIs:** a generic collection such as `List<int>` is specialized for `int`, so adding an element stores the value without converting it to `object`.\n> - **Constrained generics instead of interface-typed parameters:** a method such as `Max<T>(T a, T b) where T : IComparable<T>` can call `CompareTo` on a struct argument without converting it to the interface type, provided the struct itself implements that member.\n>\n> These changes matter mainly in frequently executed code. They justify extra API complexity where profiling shows boxing allocations are significant.\n>\n> Sources: [Microsoft Learn: Boxing and unboxing](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/types/boxing-and-unboxing) · [Microsoft Learn: Nullable value types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/nullable-value-types#boxing-and-unboxing) · [Microsoft Learn: Generic classes and methods](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/types/generics) · [Microsoft Learn: OpCodes.Constrained](https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.constrained?view=net-10.0)\n\n<!-- qard-id: d5bda60c-1799-4e4a-ab36-7624ae085e3a -->\n> [!qard]- When should a type be a `struct`, `class`, or `record class`?\n> The choice follows the semantics the type needs. A `struct` fits a small value that is copied field by field, a `class` fits an object with its own identity, and a `record class` fits a reference type whose contents define its equality. Copying, mutation and measured allocation costs then confirm or adjust that semantic choice.\n>\n> | Aspect | `struct` | `class` | `record class` |\n> |---|---|---|---|\n> | Assignment and passing | Copies every field, so each variable holds its own field values. The copy is shallow: a reference-type field copies only the reference, so both copies can still point to one object. | Copies a reference, so several variables can share and observe one object. | Copies a reference, as a class does. |\n> | Default equality | `Equals` is true when both have the same type and the same stored values. | Equality holds only when both references point to the same object, even if every field matches. | Compiler-generated `Equals` and `==` compare the type and member values. The generated `GetHashCode` compares nothing; it returns hash codes compatible with that equality, so equal records hash equally. |\n> | Mutation | A change to a copy's own fields affects only that copy, so such changes are easy to lose. A change to an object reached through a reference field is visible through every copy that shares it. | A change is visible through every reference to the object. | Positional properties are init-only by default, and a `with` expression creates a modified shallow copy whose reference-type members still point to the same objects. |\n> | Allocation and cost | Stored inline in the variable, field or array element that holds it, with no allocation of its own. Large values make every copy expensive, and boxing allocates. | One heap allocation per instance. | One heap allocation per instance, as with a class. |\n> | Inheritance | Cannot derive from another struct or class or serve as a base type, though it can implement interfaces. | Supports class inheritance. | Can inherit only from another record. |\n> | Typical fit | Small data-centric values with little behavior, such as a coordinate. | Entities with identity, a lifecycle or polymorphic behavior. | Data defined by its contents, such as messages or DTOs. |\n>\n> Sources: [Microsoft Learn: Structure types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/struct) · [Microsoft Learn: Value types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/value-types) · [Microsoft Learn: Classes (C# language specification)](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/classes) · [Microsoft Learn: Records](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record)\n\n# References\n\n- [C# type system](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/types/)"
+    }
+  ],
+  "version": 1,
+  "createdAt": 1793447487320,
+  "topic": "Explain what value-type and reference-type assignment copy, including shared reference fields",
+  "notes": [
+    "Home/Programming/NET/CSharp/Fundamentals/Types/Types.md"
+  ],
+  "mastery": "Assets/Qard/Courses/Programming Mastery.md",
+  "course": "Programming",
+  "objective": "value-semantics",
+  "steps": [
+    {
+      "title": "Trace a reference assignment",
+      "explain": "A variable holds a value. For a class variable, that value is a reference identifying an object. The variable and the object it refers to are separate things.\n\nYour **C# Types** note states under **Copy and Storage Boundaries** that reference-type assignment copies the object reference. Follow that rule through the example: `new Box` creates one object, and `a` holds a reference to it. Then `b = a` copies the reference stored in `a` into `b`. Both references identify the same object. This assignment creates no additional `Box`.\n\nNext, `b.Value = 9` follows the reference in `b` and changes the object's field. Reading `a.Value` follows the reference in `a` to that same object, so it reads `9`.\n\nThe boundary is between the reference and its target: assignment copies the reference; field access follows it. There are two variables holding references to one shared object.",
+      "connect": "This first step addresses the idea that reference assignment creates another object. Locating what gets copied prepares us to trace a struct assignment and, later, a reference field inside a struct.",
+      "checkFirst": true,
+      "check": {
+        "id": "k1",
+        "type": "long",
+        "prompt": "What does this code print, and how does what `b = a` copies explain that result?\n\n```csharp\nvar a = new Box { Value = 4 };\nvar b = a;\nb.Value = 9;\nConsole.WriteLine(a.Value);\n\npublic sealed class Box\n{\n    public int Value;\n}\n```",
+        "marks": 3,
+        "rubric": [
+          {
+            "point": "States that the code prints 9.",
+            "marks": 1
+          },
+          {
+            "point": "States that b = a copies the reference stored in a, without creating or copying a Box object.",
+            "marks": 1
+          },
+          {
+            "point": "Explains that changing b.Value changes the single object also referenced by a.",
+            "marks": 1
+          }
+        ],
+        "model": "It prints `9`. The assignment `b = a` copies the reference to the existing `Box`. Both variables refer to that one object, so `b.Value = 9` changes the field that `a.Value` then reads.",
+        "source": {
+          "path": "Home/Programming/NET/CSharp/Fundamentals/Types/Types.md",
+          "heading": "Copy and Storage Boundaries"
+        },
+        "objective": "value-semantics",
+        "goal": "apply"
+      },
+      "misconceptions": [
+        {
+          "signs": "Answers 4 because b receives a separate Box with copied fields.",
+          "reteach": "`b = a` copies the reference held in `a`. It does not construct another `Box`. Both references lead to the object whose `Value` becomes `9`."
+        },
+        {
+          "signs": "Answers 9 because assignment copies the object and keeps both objects synchronized.",
+          "reteach": "There is only one `Box` here. Nothing synchronizes separate objects: both variables reach the same field in the same object."
+        },
+        {
+          "signs": "Answers 9 because a and b become the same variable.",
+          "reteach": "`a` and `b` remain separate variables. Each holds a reference to the same object. Changing `b.Value` changes that object; it does not change either variable's stored reference."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "Follow a reference field",
+      "explain": "A struct stores field values. A reference-type field stores a reference to an object. These two facts let us extend the previous step without changing the assignment rule.\n\nAs **C# Types → Copy and Storage Boundaries** explains, assigning a struct copies every field. For an `int` field, the copied value is the number. For an array field, the copied value is the reference, because arrays are reference types. Assignment does not create another array.\n\nThe two structs therefore hold separate fields containing references to the same array. Changing an array element follows one of those references and changes the shared array. Reading that element through the other struct reveals the change.\n\nChanging the copied struct’s `int` field works differently: it replaces a value inside that struct alone. This is a **shallow copy**: the struct’s fields are copied, while objects reached through reference fields remain shared.",
+      "connect": "The previous step established that each struct copy has its own fields. This step follows what a reference field contains, explaining how separate struct values can still share one object.",
+      "checkFirst": true,
+      "check": {
+        "id": "k2",
+        "type": "long",
+        "prompt": "What does each `Console.WriteLine` print? Explain why changing `b.Number` and changing `b.Items[0]` affect `a` differently.\n\n```csharp\nvar a = new Sample { Number = 1, Items = new int[] { 2 } };\nvar b = a;\n\nb.Number = 8;\nb.Items[0] = 9;\n\nConsole.WriteLine(a.Number);\nConsole.WriteLine(a.Items[0]);\n\nstruct Sample\n{\n    public int Number;\n    public int[] Items;\n}\n```",
+        "marks": 4,
+        "rubric": [
+          {
+            "point": "States that the first line prints 1.",
+            "marks": 1
+          },
+          {
+            "point": "Explains that b has its own Number field, so assigning 8 to it leaves a.Number unchanged.",
+            "marks": 1
+          },
+          {
+            "point": "States that the second line prints 9.",
+            "marks": 1
+          },
+          {
+            "point": "Explains that struct assignment copied the array reference, so both Items fields refer to the same array whose element was changed.",
+            "marks": 1
+          }
+        ],
+        "model": "The output is:\n\n```text\n1\n9\n```\n\n`var b = a` copies both field values. Each struct has its own `Number` field, so assigning `8` to `b.Number` leaves `a.Number` at `1`.\n\nThe value copied from `a.Items` is a reference to the array. Both `Items` fields therefore refer to the same array. Assigning `9` to `b.Items[0]` changes that shared array, so `a.Items[0]` reads `9`.",
+        "source": {
+          "path": "Home/Programming/NET/CSharp/Fundamentals/Types/Types.md",
+          "heading": "Copy and Storage Boundaries"
+        },
+        "objective": "value-semantics",
+        "goal": "apply"
+      },
+      "misconceptions": [
+        {
+          "signs": "Predicts 1 and 2 because copying the struct also copies the array.",
+          "reteach": "The struct copy copies what each field stores. `Items` stores an array reference, so that reference is copied. No second array is created; changing an element changes the array reached through both references."
+        },
+        {
+          "signs": "Predicts 8 and 9 because a and b are two references to the same struct.",
+          "reteach": "`Sample` is a struct, so assigning it creates a separate struct value with its own fields. Changing `b.Number` affects only that copy. The array is shared because the separate `Items` fields contain references to the same array."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "Follow a reference field",
+      "explain": "A struct stores field values. A reference-type field stores a reference to an object. These two facts let us extend the previous step without changing the assignment rule.\n\nAs **C# Types → Copy and Storage Boundaries** explains, assigning a struct copies every field. For an `int` field, the copied value is the number. For an array field, the copied value is the reference, because arrays are reference types. Assignment does not create another array.\n\nThe two structs therefore hold separate fields containing references to the same array. Changing an array element follows one of those references and changes the shared array. Reading that element through the other struct reveals the change.\n\nChanging the copied struct’s `int` field works differently: it replaces a value inside that struct alone. This is a **shallow copy**: the struct’s fields are copied, while objects reached through reference fields remain shared.",
+      "connect": "The previous step established that each struct copy has its own fields. This step follows what a reference field contains, explaining how separate struct values can still share one object.",
+      "checkFirst": true,
+      "check": {
+        "id": "k3",
+        "type": "long",
+        "prompt": "What does each `Console.WriteLine` print? Explain why changing `b.Number` and changing `b.Items[0]` affect `a` differently.\n\n```csharp\nvar a = new Sample { Number = 1, Items = new int[] { 2 } };\nvar b = a;\n\nb.Number = 8;\nb.Items[0] = 9;\n\nConsole.WriteLine(a.Number);\nConsole.WriteLine(a.Items[0]);\n\nstruct Sample\n{\n    public int Number;\n    public int[] Items;\n}\n```",
+        "marks": 4,
+        "rubric": [
+          {
+            "point": "States that the first line prints 1.",
+            "marks": 1
+          },
+          {
+            "point": "Explains that b has its own Number field, so assigning 8 to it leaves a.Number unchanged.",
+            "marks": 1
+          },
+          {
+            "point": "States that the second line prints 9.",
+            "marks": 1
+          },
+          {
+            "point": "Explains that struct assignment copied the array reference, so both Items fields refer to the same array whose element was changed.",
+            "marks": 1
+          }
+        ],
+        "model": "The output is:\n\n```text\n1\n9\n```\n\n`var b = a` copies both field values. Each struct has its own `Number` field, so assigning `8` to `b.Number` leaves `a.Number` at `1`.\n\nThe value copied from `a.Items` is a reference to the array. Both `Items` fields therefore refer to the same array. Assigning `9` to `b.Items[0]` changes that shared array, so `a.Items[0]` reads `9`.",
+        "source": {
+          "path": "Home/Programming/NET/CSharp/Fundamentals/Types/Types.md",
+          "heading": "Copy and Storage Boundaries"
+        },
+        "objective": "value-semantics",
+        "goal": "apply"
+      },
+      "misconceptions": [
+        {
+          "signs": "Predicts 1 and 2 because copying the struct also copies the array.",
+          "reteach": "The struct copy copies what each field stores. `Items` stores an array reference, so that reference is copied. No second array is created; changing an element changes the array reached through both references."
+        },
+        {
+          "signs": "Predicts 8 and 9 because a and b are two references to the same struct.",
+          "reteach": "`Sample` is a struct, so assigning it creates a separate struct value with its own fields. Changing `b.Number` affects only that copy. The array is shared because the separate `Items` fields contain references to the same array."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "Predict what mutations affect",
+      "explain": "An assignment stores a value in its destination. For a reference variable, that value is a reference to an object. For a struct variable, it is the struct’s field values, including any references stored in those fields. This is the assignment boundary described in **C# Types**, under **Copy and Storage Boundaries**.\n\nThe previous step established that two struct copies can hold references to the same object. To predict a change, identify exactly what receives the write.\n\nChanging an integer field in one struct updates that struct’s field. The other struct has its own integer field, so its value stays unchanged.\n\nChanging a field of an object reached through a reference updates that object. Every reference still pointing to that object observes the change.\n\nAssigning a different object reference to one struct’s reference field updates only that field. Other references keep pointing to the earlier object, with any mutations already made to it.\n\nThese outcomes follow from tracking the destination of each write; they need no stack-versus-heap rule.",
+      "connect": "The previous step followed the shared reference inside two struct copies. Now combine that with reference assignment to predict which writes change a local field and which change an object shared by several references.",
+      "checkFirst": true,
+      "check": {
+        "id": "k4",
+        "type": "long",
+        "prompt": "What does this code print? Explain how each mutation determines the final values, including the value seen through `alias`.\n\n```csharp\nusing System;\n\nvar original = new Box { Value = 10 };\nvar alias = original;\n\nvar a = new Snapshot { Count = 1, Shared = original };\nvar b = a;\n\nb.Count = 2;\nb.Shared.Value = 20;\nb.Shared = new Box { Value = 30 };\n\nConsole.WriteLine(\n    $\"{a.Count}, {b.Count}, {a.Shared.Value}, {b.Shared.Value}, {alias.Value}\");\n\npublic sealed class Box\n{\n    public int Value;\n}\n\npublic struct Snapshot\n{\n    public int Count;\n    public Box Shared;\n}\n```",
+        "marks": 4,
+        "rubric": [
+          {
+            "point": "Predicts a.Count = 1 and b.Count = 2, explaining that struct assignment copied Count into a separate field.",
+            "marks": 1
+          },
+          {
+            "point": "Explains that b.Shared.Value = 20 mutates the Box initially shared by both structs, so a.Shared.Value becomes 20.",
+            "marks": 1
+          },
+          {
+            "point": "Predicts b.Shared.Value = 30, explaining that assigning the new Box changes only b.Shared and leaves a.Shared pointing to the earlier Box.",
+            "marks": 1
+          },
+          {
+            "point": "Predicts alias.Value = 20, explaining that reference assignment copied the reference to the original Box rather than creating another Box.",
+            "marks": 1
+          }
+        ],
+        "model": "It prints:\n\n```text\n1, 2, 20, 30, 20\n```\n\n`b = a` copies both struct fields. Each struct has its own `Count`, so `b.Count = 2` leaves `a.Count` at 1.\n\nThe copied `Shared` field contains a reference to the same `Box`. Therefore, `b.Shared.Value = 20` changes the object also reached through `a.Shared`, `original`, and `alias`.\n\n`b.Shared = new Box { Value = 30 }` replaces only the reference stored in `b.Shared`. That field now points to the new Box. `a.Shared` and `alias` still point to the earlier Box, whose value remains 20.",
+        "source": {
+          "path": "Home/Programming/NET/CSharp/Fundamentals/Types/Types.md",
+          "heading": "Copy and Storage Boundaries"
+        },
+        "objective": "value-semantics",
+        "goal": "apply"
+      },
+      "misconceptions": [
+        {
+          "signs": "Predicts a.Count = 2 because changing b changes a.",
+          "reteach": "`Snapshot` is a struct. `b = a` copies its field values into `b`; it does not make `b` another name for `a`. Writing `b.Count` changes only that copy’s integer field."
+        },
+        {
+          "signs": "Predicts a.Shared.Value = 10 or alias.Value = 10 because assignment copied the Box.",
+          "reteach": "A field-by-field struct copy copies a reference field’s reference, not the referenced object. Likewise, `alias = original` copies a reference. All those references initially reach one Box, so mutating its `Value` is visible through each of them."
+        },
+        {
+          "signs": "Predicts a.Shared.Value = 30 or alias.Value = 30 after b.Shared is reassigned.",
+          "reteach": "`b.Shared.Value = 20` writes into the shared object. `b.Shared = new Box { Value = 30 }` writes a new reference into one struct field. Other references still reach the earlier Box, which retains the value 20."
+        }
+      ],
+      "figure": ""
+    }
+  ],
+  "state": [
+    {
+      "asks": [],
+      "answer": {
+        "text": "9",
+        "confidence": "sure"
+      },
+      "mark": {
+        "awarded": [
+          true,
+          false,
+          false
+        ],
+        "annotations": [
+          {
+            "quote": "9",
+            "kind": "correct",
+            "note": "You identified the correct output."
+          },
+          {
+            "quote": "",
+            "kind": "missing",
+            "note": "You needed to state what `b = a` copies and whether it creates another `Box`."
+          },
+          {
+            "quote": "",
+            "kind": "missing",
+            "note": "You needed to explain how changing `b.Value` affects what `a.Value` reads."
+          }
+        ],
+        "mistake": "incomplete",
+        "feedback": "You gave the correct output but did not explain how the assignment leads to it.",
+        "score": 1
+      },
+      "reply": "`9` is correct. What does `b = a` copy, and what does that mean for the object reached through `a` and `b`?"
+    },
+    {
+      "asks": [],
+      "answer": {
+        "text": "It will print 8, 2\n\nI thouhg that it would be 8,9 but you gave me a hint by saying \"why changing b.Number and changing b.Items[0] affect a differently\"\n\nChanging b affects a because we are changing the object using the same reference. I would assume the same for the array, but it looks like it is not the case.",
+        "confidence": "unsure"
+      },
+      "mark": {
+        "awarded": [
+          false,
+          false,
+          false,
+          false
+        ],
+        "annotations": [
+          {
+            "quote": "It will print 8, 2",
+            "kind": "wrong",
+            "note": "You predicted both output values incorrectly."
+          },
+          {
+            "quote": "Changing b affects a",
+            "kind": "wrong",
+            "note": "You treated the two struct variables as references to the same struct."
+          },
+          {
+            "quote": "It will print 8, 2",
+            "kind": "missing",
+            "note": "You needed to state that the first line prints 1."
+          },
+          {
+            "quote": "Changing b affects a",
+            "kind": "missing",
+            "note": "You needed to explain that b has its own Number field, so assigning 8 leaves a.Number unchanged."
+          },
+          {
+            "quote": "It will print 8, 2",
+            "kind": "missing",
+            "note": "You needed to state that the second line prints 9."
+          },
+          {
+            "quote": "I would assume the same for the array",
+            "kind": "missing",
+            "note": "You needed to explain that the copied Items fields hold references to the same array, whose element was changed."
+          }
+        ],
+        "mistake": "misconception",
+        "feedback": "You treated the struct variables as sharing one struct, instead of following the reference stored in the copied array field.",
+        "score": 0
+      },
+      "reply": "Your first instinct about the array was useful. As **C# Types → Copy and Storage Boundaries** explains, assignment copies a struct’s fields. What value does `b.Number` receive, and what value does `b.Items` receive? Then consider which assignment replaces a field and which follows a reference to change an array element.",
+      "reteach": "`Sample` is a struct, so assigning it creates a separate struct value with its own fields. Changing `b.Number` affects only that copy. The array is shared because the separate `Items` fields contain references to the same array.",
+      "figure": {
+        "path": "Assets/Qard/Figures/csharp/struct-copy-shared-array-reference.svg",
+        "caption": "After b = a, setting b.Number = 9 leaves a.Number at 3. Setting b.Items[0] = 7 changes the single shared array to [7, 2], so both a.Items[0] and b.Items[0] read 7.",
+        "brief": "The one figure that would make \"Follow a reference field\" clearest."
+      }
+    },
+    {
+      "asks": [],
+      "answer": {
+        "text": "It would be 1 and 9, since we are copying the struct, whcih doesnt change a object. While array is the ref type that is shared between the object, the value in it will be changed from the b, as well",
+        "confidence": "sure"
+      },
+      "mark": {
+        "awarded": [
+          true,
+          false,
+          true,
+          true
+        ],
+        "annotations": [
+          {
+            "quote": "1 and 9",
+            "kind": "correct",
+            "note": "You identified both output values."
+          },
+          {
+            "quote": "we are copying the struct",
+            "kind": "vague",
+            "note": "You identified the struct copy, but did not explain which field is separate."
+          },
+          {
+            "quote": "whcih doesnt change a object",
+            "kind": "missing",
+            "note": "You needed to state that b has its own Number field, so assigning 8 leaves a.Number unchanged."
+          },
+          {
+            "quote": "array is the ref type that is shared",
+            "kind": "correct",
+            "note": "You recognised that both structs refer to the same array."
+          }
+        ],
+        "mistake": "incomplete",
+        "feedback": "You have the correct output and shared-array explanation, but need to explain why the Number fields are independent.",
+        "score": 3
+      },
+      "reply": "Your output and explanation of the shared array are correct. What does copying the struct give `a` and `b` for their `Number` fields?"
+    },
+    {
+      "asks": [],
+      "answer": {
+        "text": "1 (since Snapshot is a struct which doesnt get reference copy, and it wasnchaged ), 2(copy which was directly changed), 20 (when it was shared ref, b.Shared.Value changed also the a.Shared.Value via ref), 30 (Shared was reinstanced for b, with new value 30), 20 (when it was shared ref, b.Shared.Value changed also the a.Shared.Value via ref)",
+        "confidence": "sure"
+      },
+      "mark": {
+        "awarded": [
+          true,
+          true,
+          true,
+          false
+        ],
+        "annotations": [
+          {
+            "quote": "Snapshot is a struct which doesnt get reference copy",
+            "kind": "correct",
+            "note": "You correctly identify that the struct copy has its own Count field."
+          },
+          {
+            "quote": "b.Shared.Value changed also the a.Shared.Value via ref",
+            "kind": "correct",
+            "note": "You correctly identify that both fields initially refer to the same Box."
+          },
+          {
+            "quote": "Shared was reinstanced for b, with new value 30",
+            "kind": "correct",
+            "note": "You correctly identify that b.Shared now refers to a new Box."
+          },
+          {
+            "quote": "20 (when it was shared ref, b.Shared.Value changed also the a.Shared.Value via ref)",
+            "kind": "missing",
+            "note": "You needed to explain that assigning original to alias copied the reference, so alias still points to the original Box."
+          }
+        ],
+        "mistake": "incomplete",
+        "feedback": "You predicted every value correctly, but did not explain how alias came to reference the original Box.",
+        "score": 3
+      },
+      "reply": "Your output is correct. What does `var alias = original` copy, and which Box does `alias` still point to after `b.Shared` is reassigned?",
+      "retry": {
+        "text": "What does var alias = `original` copy - original ref\nwhich Box does alias still point to after b.Shared is reassigned - `original`",
+        "mark": {
+          "awarded": [
+            false,
+            false,
+            false,
+            false
+          ],
+          "annotations": [
+            {
+              "quote": "original ref",
+              "kind": "vague",
+              "note": "You correctly identify that the reference is copied, but you also need to state the final value seen through alias."
+            },
+            {
+              "quote": "",
+              "kind": "missing",
+              "note": "You need to give both Count values and explain why changing b.Count leaves a.Count unchanged."
+            },
+            {
+              "quote": "",
+              "kind": "missing",
+              "note": "You need to explain which Box b.Shared.Value changes and give the value seen through a.Shared."
+            },
+            {
+              "quote": "",
+              "kind": "missing",
+              "note": "You need to give the final value seen through b.Shared and explain what its reassignment changes."
+            },
+            {
+              "quote": "",
+              "kind": "missing",
+              "note": "You need to give the final value seen through alias and connect it to the copied reference."
+            }
+          ],
+          "mistake": "incomplete",
+          "feedback": "You identified the copied reference and its target, but did not give the final values or explain all the mutations.",
+          "score": 0
+        },
+        "reply": "You have the right idea about `alias`: it still points to the original Box. What value was written into that Box before `b.Shared` was reassigned? Then trace the two `Count` fields and the new Box separately."
+      }
+    }
+  ],
+  "current": 3,
+  "probe": {
+    "questions": [
+      {
+        "id": "p1",
+        "type": "mcq",
+        "prompt": "When one variable of a reference type is assigned to another, what is copied?",
+        "marks": 1,
+        "options": [
+          "A reference to the same object",
+          "A separate copy of the object",
+          "A copy of each object field",
+          "A reference to a new object"
+        ],
+        "answer": 0,
+        "rubric": [
+          {
+            "point": "Identifies that assignment copies the reference, so both variables refer to the same object.",
+            "marks": 1
+          }
+        ],
+        "model": "The reference is copied, so both variables refer to the same object.",
+        "source": {
+          "path": "Home/Programming/NET/CSharp/Fundamentals/Types/Types.md",
+          "heading": "Copy and Storage Boundaries"
+        },
+        "objective": "value-semantics",
+        "goal": "recognise"
+      },
+      {
+        "id": "p2",
+        "type": "mcq",
+        "prompt": "A struct `S` contains an `int Count` and a `List<int> Items`. After `var b = a;`, what do `a` and `b` share?",
+        "marks": 1,
+        "options": [
+          "The same `Items` list",
+          "The same `Count` storage",
+          "A separate copy of the list",
+          "A separate copy of every field"
+        ],
+        "answer": 0,
+        "rubric": [
+          {
+            "point": "Recognizes that the struct fields are copied, but the reference field still points to the same list.",
+            "marks": 1
+          }
+        ],
+        "model": "The struct’s fields are copied. `Count` is an independent value in each struct, but the copied `Items` references point to the same list.",
+        "source": {
+          "path": "Home/Programming/NET/CSharp/Fundamentals/Types/Types.md",
+          "heading": "Copy and Storage Boundaries"
+        },
+        "objective": "value-semantics",
+        "goal": "apply"
+      }
+    ],
+    "answers": {
+      "p1": {
+        "choice": 3,
+        "confidence": "sure"
+      },
+      "p2": {
+        "choice": 3
+      }
+    },
+    "submitted": true,
+    "marks": {
+      "p1": {
+        "score": 0,
+        "awarded": [
+          false
+        ],
+        "annotations": [],
+        "mistake": "misconception",
+        "feedback": "The answer is “A reference to the same object”."
+      },
+      "p2": {
+        "score": 0,
+        "awarded": [
+          false
+        ],
+        "annotations": [],
+        "mistake": "misconception",
+        "feedback": "The answer is “The same `Items` list”."
+      }
+    },
+    "findings": "You chose a new object for reference-type assignment and a full field copy for struct assignment; both answers show a misconception about what assignment copies."
+  },
+  "map": {
+    "title": "Trace What Assignment Copies",
+    "plan": "You have identified the relevant types—references and structs—but your answers suggest the copy boundary is unclear. Start by tracing a reference assignment to see that both variables point to one object, then compare it with a struct copy, including what happens when one field is itself a reference.",
+    "mermaid": "graph TD\nA[\"Reference assignment copies a reference\"] --> B[\"Both variables point to one object\"]\nB --> C[\"Struct assignment copies each field\"]\nC --> D[\"Value fields are independent; reference fields can share objects\"]\nD --> E[\"Explain value-type and reference-type assignment, including shared reference fields\"]",
+    "objective": "value-semantics",
+    "steps": [
+      {
+        "title": "Trace a reference assignment",
+        "why": "Your first answer picked a new object, so begin by following the copied reference to its target."
+      },
+      {
+        "title": "Compare struct fields",
+        "why": "Once the reference copy is clear, compare how a struct copies its individual fields."
+      },
+      {
+        "title": "Follow a reference field",
+        "why": "A struct copy can still share an object when one of its copied fields is a reference."
+      },
+      {
+        "title": "Predict what mutations affect",
+        "why": "Following each variable and object shows which changes stay local and which are visible through shared references."
+      }
+    ]
+  },
+  "stepsFor": "[\"Trace What Assignment Copies\",[\"Trace a reference assignment\",\"Compare struct fields\",\"Follow a reference field\",\"Predict what mutations affect\"]]",
+  "accepted": true,
+  "finishedAt": 1793453076025,
+  "close": {
+    "summary": "The lesson traced reference assignment, struct assignment, and shared reference fields. Reference assignment copies a reference, so two variables can point to one object. Struct assignment copies the struct’s field values: numeric fields become independent, while reference fields can still point to the same array or object.\n\nYou progressed from confusing assignment with object duplication or shared struct storage to correctly predicting the checked values and explaining the shared array. The remaining gap is explaining the copy boundary consistently: why changing one struct’s `Number` leaves the other unchanged, and how assigning a `Box` reference creates an alias to the original object.",
+    "cards": [
+      {
+        "front": "For a class `Box`, what does `var alias = original;` copy, and why does changing `alias.Number` affect `original.Number`?",
+        "back": "It copies the reference stored in `original`. Both variables point to the same Box, so changing its Number through either variable changes that one object."
+      },
+      {
+        "front": "A struct has an `int Number` field. After `var b = a;`, why does assigning `b.Number = 9` leave `a.Number` unchanged?",
+        "back": "Struct assignment copies the field values into a separate struct value. Each struct has its own Number field, so assigning b.Number changes only b."
+      },
+      {
+        "front": "A struct has an `int[] Items` field. After `var b = a;`, why is `b.Items[0] = 9` visible through `a.Items[0]`?",
+        "back": "The struct copy copies the array reference, without duplicating the array. Both Items fields point to the same array, so changing an element changes the shared object."
+      },
+      {
+        "front": "After copying a struct with `var b = a;`, how do `b.Items[0] = 9` and `b.Items = new int[] { 9 }` differ when Items is an array field?",
+        "back": "The first mutates the shared array, so a observes the changed element. The second replaces only b’s Items reference; a’s Items still points to the original array."
+      }
+    ],
+    "cardState": {},
+    "note": "Assets/Qard/Lessons/2026-10-31 Explain what value-type and reference-type assignment copy, .md",
+    "nextCheck": "2026-11-03"
+  }
+}

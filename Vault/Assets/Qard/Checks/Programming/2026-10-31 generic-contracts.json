@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "createdAt": 1793475024606,
+  "mastery": "Assets/Qard/Courses/Programming Mastery.md",
+  "course": "Programming",
+  "objective": "generic-contracts",
+  "title": "Choose generic type parameters and constraints without replacing type safety with object casts",
+  "goal": "explain",
+  "questions": [
+    {
+      "id": "c1",
+      "type": "long",
+      "prompt": "An `IDescribable` interface declares `string Describe()`. A helper receives an existing value, calls `Describe()`, and returns that value with its original static type. Unrelated classes and structs should be supported.\n\nExplain why `T DescribeAndReturn<T>(T value) where T : IDescribable` fits this contract. Why would accepting and returning `object` with an internal cast weaken it, and why are `class`, a shared base class, and `new()` unnecessary constraints?",
+      "marks": 4,
+      "rubric": [
+        {
+          "point": "Explains that the interface constraint guarantees Describe() is available to the generic implementation.",
+          "marks": 1
+        },
+        {
+          "point": "Explains that using T for both parameter and return type preserves the caller's concrete static type.",
+          "marks": 1
+        },
+        {
+          "point": "Explains that the generic constraint rejects unsupported type arguments at compile time, whereas an object-to-interface cast can fail at runtime.",
+          "marks": 1
+        },
+        {
+          "point": "Explains that class excludes structs, a base-class constraint imposes an unnecessary hierarchy, and new() is unnecessary because the value already exists.",
+          "marks": 1
+        }
+      ],
+      "model": "`where T : IDescribable` guarantees that the implementation can call `Describe()` without a cast. Using the same `T` for the input and return type preserves the caller's concrete static type.\n\nAn `object` parameter accepts values that do not implement `IDescribable`, so an internal cast can fail at runtime. Returning `object` also loses the specific return type and requires the caller to recover it. The generic constraint checks the required capability at compile time.\n\n`class` would exclude supported structs. A shared base class would impose an inheritance relationship the operation does not need. `new()` would require a public parameterless constructor even though the helper receives an existing value and constructs nothing.",
+      "source": {
+        "path": "Home/Programming/NET/CSharp/Fundamentals/Generics.md",
+        "heading": "Constraints"
+      },
+      "objective": "generic-contracts",
+      "goal": "explain"
+    },
+    {
+      "id": "c2",
+      "type": "long",
+      "prompt": "A conversion helper invokes a supplied function and returns its result. It must support converting a `SensorReading` into a `string`.\n\nCompare these signatures:\n\n- `T Convert<T>(T input, Func<T, T> convert)`\n- `TResult Convert<TSource, TResult>(TSource input, Func<TSource, TResult> convert)`\n\nExplain why the second signature expresses the required type relationships better. Does its implementation need constraints on either type parameter if it only invokes `convert(input)`? Explain.",
+      "marks": 3,
+      "rubric": [
+        {
+          "point": "Explains that the first signature uses one type parameter for both input and output, so it cannot express SensorReading and string as distinct static types without widening the contract.",
+          "marks": 1
+        },
+        {
+          "point": "Explains that the second signature allows distinct source and result types while requiring the function to accept TSource and produce TResult, preserving compile-time checks without object casts.",
+          "marks": 1
+        },
+        {
+          "point": "Explains that no constraints are needed because invoking the typed function requires no additional capabilities from TSource or TResult.",
+          "marks": 1
+        }
+      ],
+      "model": "The first signature ties the input and output to the same `T`. It cannot directly preserve `SensorReading` as the input type and `string` as the result type. Choosing `object` to accommodate both would lose that precise relationship.\n\nThe second signature represents those types independently: `TSource` can be `SensorReading` and `TResult` can be `string`. The delegate connects them by accepting the source type and returning the result type. The compiler checks this relationship, and callers receive a `string` without casting.\n\nNeither type parameter needs a constraint. The helper only invokes the supplied delegate; it does not construct either type or call members on their values.",
+      "source": {
+        "path": "Home/Programming/NET/CSharp/Fundamentals/Generics.md",
+        "heading": "Pitfalls"
+      },
+      "objective": "generic-contracts",
+      "goal": "explain"
+    }
+  ],
+  "answers": {},
+  "marks": {},
+  "status": "ready"
+}

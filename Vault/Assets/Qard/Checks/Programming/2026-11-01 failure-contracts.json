@@ -1,0 +1,76 @@
+{
+  "version": 1,
+  "createdAt": 1793548780517,
+  "mastery": "Assets/Qard/Courses/Programming Mastery.md",
+  "course": "Programming",
+  "objective": "failure-contracts",
+  "title": "Choose a failure and cleanup boundary that preserves the cause and releases owned resources",
+  "goal": "explain",
+  "questions": [
+    {
+      "id": "c1",
+      "type": "long",
+      "prompt": "A document archive adapter receives a provider-specific exception while saving a document. Its callers are meant to handle a stable `ArchiveUnavailableException`, regardless of the storage provider. A developer proposes logging the provider exception and throwing a new `ArchiveUnavailableException` containing only its message.\n\nExplain where translation belongs, how it should preserve the cause, and why a higher layer that only logs the failure should handle propagation differently.",
+      "marks": 4,
+      "rubric": [
+        {
+          "point": "Places translation at the archive adapter boundary because it converts provider-specific failures into the stable contract promised to callers.",
+          "marks": 1
+        },
+        {
+          "point": "Keeps the original exception as InnerException so its type, stack trace and other diagnostic information remain available.",
+          "marks": 1
+        },
+        {
+          "point": "Explains that copying the message or logging separately does not preserve the original cause in the propagated exception chain.",
+          "marks": 1
+        },
+        {
+          "point": "Explains that a higher layer which only logs should use throw; because it adds no new failure meaning and should preserve the existing stack trace.",
+          "marks": 1
+        }
+      ],
+      "model": "Translation belongs at the archive adapter boundary, where provider failures become the stable `ArchiveUnavailableException` contract that callers understand. The wrapper should describe the archive operation and retain the provider exception as its `InnerException`. Copying only the message loses the original exception's structured information and stack trace from the propagated chain; a separate log entry does not repair that chain.\n\nA higher layer that only logs adds no new meaning. It should use `throw;` to propagate the existing exception with its stack trace preserved.",
+      "source": {
+        "path": "Home/Programming/NET/CSharp/Fundamentals/Exception Handling.md",
+        "heading": "What a Throw Preserves"
+      },
+      "objective": "failure-contracts",
+      "goal": "explain"
+    },
+    {
+      "id": "c2",
+      "type": "long",
+      "prompt": "An image conversion method creates and owns a temporary workspace. It writes its result to a stream supplied by its caller, which must remain open. Conversion fails because the input is corrupt. While unwinding toward an outer handler, workspace cleanup also throws.\n\nExplain where cleanup belongs, which resource the method should release, and how the cleanup failure should be handled so the caller can still diagnose the conversion failure. Does replacing explicit `finally` cleanup with `using` alone solve the competing-failures problem? Explain.",
+      "marks": 4,
+      "rubric": [
+        {
+          "point": "Places workspace cleanup in a finally-protected scope or an equivalent using scope so it is attempted on both normal completion and exception unwinding.",
+          "marks": 1
+        },
+        {
+          "point": "Releases the owned workspace while leaving the caller-owned stream open.",
+          "marks": 1
+        },
+        {
+          "point": "Contains and records the cleanup failure separately while allowing the original conversion exception to propagate, because an escaping cleanup exception would mask it.",
+          "marks": 1
+        },
+        {
+          "point": "Explains that using ensures disposal is attempted but does not prevent Dispose from throwing and masking an already-propagating exception.",
+          "marks": 1
+        }
+      ],
+      "model": "The method should protect workspace cleanup with `finally`, or a suitable `using` scope, so cleanup is attempted when conversion succeeds or the stack unwinds. It owns the workspace and should release it. The supplied stream remains open because its caller owns it.\n\nWith the conversion exception already propagating, a cleanup exception that escapes would replace it. The cleanup boundary should catch and record the cleanup failure separately, allowing the original conversion exception to continue to the outer handler. Cleanup can be attempted without guaranteeing that a failing cleanup operation succeeds.\n\n`using` alone does not resolve this conflict. It arranges disposal through `finally` semantics, but `Dispose` can still throw and mask the conversion failure.",
+      "source": {
+        "path": "Home/Programming/NET/CSharp/Fundamentals/Exception Handling.md",
+        "heading": "Pitfalls"
+      },
+      "objective": "failure-contracts",
+      "goal": "explain"
+    }
+  ],
+  "answers": {},
+  "marks": {},
+  "status": "ready"
+}
