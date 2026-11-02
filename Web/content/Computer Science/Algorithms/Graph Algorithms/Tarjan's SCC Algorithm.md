@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-07-26T20:18:51.000Z
-modified: 2026-10-28T12:33:42.000Z
-published: 2026-10-31T08:53:28.485Z
+modified: 2026-11-02T08:43:03.905Z
+published: 2026-11-02T08:44:20.000Z
 topic:
   - Computer Science
 subtopic:
@@ -107,14 +107,14 @@ The components leave in reverse topological order of the condensation: `{D, E}` 
 >         }
 >
 >         var component = new List<int>();
->         int w;
+>         int popped;
 >         do
 >         {
->             w = _stack.Pop();
->             _onStack[w] = false;
->             component.Add(w);
+>             popped = _stack.Pop();
+>             _onStack[popped] = false;
+>             component.Add(popped);
 >         }
->         while (w != v);
+>         while (popped != v);
 >
 >         _components.Add(component);
 >     }
