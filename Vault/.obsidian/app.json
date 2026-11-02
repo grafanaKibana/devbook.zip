@@ -12,5 +12,6 @@
   "userIgnoreFilters": [
     "Assets/"
   ],
-  "newFileLocation": "current"
+  "newFileLocation": "current",
+  "settingsPopoutWindow": false
 }

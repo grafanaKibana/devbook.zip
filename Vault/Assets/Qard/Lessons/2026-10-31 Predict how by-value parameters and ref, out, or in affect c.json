@@ -1,0 +1,449 @@
+{
+  "sourceSnapshots": [
+    {
+      "path": "Home/Programming/NET/CSharp/Fundamentals/Methods.md",
+      "text": "---\ntopic: [Programming]\nsubtopic: [NET]\nsummary: \"C#'s unit of behavior, covering parameter modifiers and dispatch keywords.\"\nlevel: [\"4\"]\npriority: Medium\nstatus: Ready to Repeat\npublish: true\nqard-deck: \"Programming\"\nqard-topic: \"NET/CSharp/Fundamentals/Methods\"\nflashcard_uid: \"a3e803d0\"\ncreated: \"2026-02-15T16:27:13.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\n---\n\nMethods define where behavior begins and what data may cross the boundary. The parameter list is part of that contract. By-value parameters isolate the caller's variable, `ref` and `out` expose it for reassignment, and `in` exposes storage as readonly. `params` changes how an expanded argument list is collected at the call site.\n\nInheritance adds a separate question: which implementation runs? `virtual` and `override` use runtime dispatch. `new` hides a member and leaves selection to the compile-time type of the reference. Similar syntax, very different behavior.\n\n# Input Parameters\n\n## Ref\n\n`ref` aliases the caller's storage rather than copying its current value into a new parameter variable.\n\n- The caller must initialize the variable.\n- The method can read and write the variable.\n\nFor reference types, `ref` allows the callee to replace the caller's reference rather than only mutate the referenced object:\n\n```csharp\nclass MyClass {}\n\nstatic void ModifyReference(ref MyClass obj)\n{\n    obj = new MyClass();\n}\n\nvar myObj = new MyClass();\nModifyReference(ref myObj);\n```\n\nFor value types, `ref` allows the callee to update the caller's variable:\n\n```csharp\nstatic void InitializeAndModify(ref int value)\n{\n    value = 10;\n}\n\nint num = 0;\nInitializeAndModify(ref num);\n```\n\n## In\n\n`in` is a readonly by-reference parameter. It can avoid copying a large struct, though the compiler may still create a temporary for argument expressions that are not variables.\n\n- The caller must initialize the argument.\n- The method can read, but cannot assign to the parameter.\n- It is most useful when measurements show that copying a large readonly struct matters.\n\n```csharp\nstatic void ProcessData(in int value)\n{\n    // value = 10; // Compile-time error\n    Console.WriteLine(value);\n}\n```\n\n## Out\n\n`out` also aliases caller storage, but the value flows outward. The caller need not initialize it, and every normal return path must assign it. This supports `Try*` APIs that separate success from the produced value.\n\n```csharp\nstatic bool TryDivide(int a, int b, out int result)\n{\n    if (b == 0) { result = 0; return false; }\n    result = a / b;\n    return true;\n}\n\nif (TryDivide(10, 2, out var quotient))   // 'quotient' declared inline\n    Console.WriteLine(quotient);           // 5\n```\n\n`Dictionary.TryGetValue` shows the boundary well: a missing key is expected input, so a Boolean result is clearer than an exception.\n\n## Params\n\n`params` lets callers provide zero or more arguments without constructing the parameter collection explicitly. C# 13 extended the feature beyond arrays to recognized collection types.\n\n- Must be the last parameter in the method signature.\n- Individual arguments or no arguments use expanded form, which constructs the declared `params` collection at the call site.\n- Normal form accepts one expression implicitly convertible to the declared parameter type. An array works only when that array-to-parameter conversion exists, including the applicable array-to-span conversion.\n\n```csharp\nstatic int Sum(params int[] numbers)\n{\n    int total = 0;\n    foreach (var n in numbers)\n        total += n;\n    return total;\n}\n\nSum(1, 2, 3);   // 6\nSum();           // 0\nSum(new[] { 4, 5 }); // 9 — explicit array also works\n```\n\nC# 13 permits collection types such as `Span<T>`, `ReadOnlySpan<T>`, and types with a suitable collection-builder shape. Allocation behavior still depends on the declared parameter type and whether the call uses expanded or normal form.\n\n```csharp\nstatic int Sum(params ReadOnlySpan<int> numbers)\n{\n    int total = 0;\n    foreach (var n in numbers)\n        total += n;\n    return total;\n}\n```\n\n# Inheritance Method Keywords\n\n## Virtual\n\n`virtual` marks a base implementation as an extension point. Calls through a base reference still select the most-derived override at runtime.\n\n- Enables runtime polymorphism.\n- Calls are resolved by the runtime type, not just the variable type.\n\n```csharp\nclass Animal\n{\n    public virtual string Speak() => \"...\";\n}\n```\n\n## Override\n\n`override` supplies the derived implementation of a virtual or abstract member while keeping the same dispatch slot.\n\n- Signature must match the base member.\n- The derived method can still call the base implementation with `base.MethodName()`.\n\n```csharp\nclass Dog : Animal\n{\n    public override string Speak() => \"Woof\";\n}\n```\n\n## New\n\n`new` declares a separate member that hides one inherited with the same name. It does not join the base member's dispatch slot.\n\n- Behavior depends on the compile-time type of the variable.\n- `new` is appropriate only as a deliberate choice when member hiding, rather than polymorphism, is the required behavior.\n\n```csharp\nclass Animal\n{\n    public string Category() => \"Animal\";\n}\n\nclass Dog : Animal\n{\n    public new string Category() => \"Dog\";\n}\n```\n\n## Virtual Vs Override Vs New in One Example\n\n```csharp\nclass Animal\n{\n    public virtual string Speak() => \"...\";\n    public string Category() => \"Animal\";\n}\n\nclass Dog : Animal\n{\n    public override string Speak() => \"Woof\";\n    public new string Category() => \"Dog\";\n}\n\nAnimal asAnimal = new Dog();\nDog asDog = new Dog();\n\nConsole.WriteLine(asAnimal.Speak());    // Woof (runtime dispatch)\nConsole.WriteLine(asDog.Speak());       // Woof\nConsole.WriteLine(asAnimal.Category()); // Animal (member hiding)\nConsole.WriteLine(asDog.Category());    // Dog\n```\n\nBoth objects have the same runtime type. Only the lookup rule changes: runtime type for `Speak`, compile-time reference type for `Category`.\n\n# Other Method Forms\n\n- **`ref return` and `ref readonly return`** return an alias to existing storage. The writable form lets a caller update that storage. The readonly form avoids a copy without granting mutation. Ref-safety rules prevent the alias from outliving its source.\n- **Local functions** name behavior inside another method. A `static` local function cannot capture outer state, and a direct call needs no delegate. A lambda is the natural form when the method must produce a `Func` or `Action` value.\n- **Extension methods** are static methods whose first parameter has the `this` modifier. They participate in normal static overload resolution and do not modify the extended type.\n- **Expression-bodied members** use shorter syntax for a single expression. Their call and dispatch semantics do not change.\n\n**Overload resolution** compares the applicable candidates and their required conversions. Optional and named arguments affect applicability, while an unresolved tie is a compile error. Modern compilers can cache some static method-group conversions, but capturing lambdas and instance targets still need their own lifetime analysis.\n\n# Pitfalls\n\n- Optional defaults are copied into the caller at compile time. Changing a library's default does not affect an already compiled consumer, so a default-value change can create version-dependent behavior.\n- An `in` parameter does not guarantee zero copies. Conversions and non-variable arguments can require temporaries, and readonly access to a mutable struct may trigger defensive copies.\n- Member hiding with `new` makes the result depend on the reference's compile-time type. That split is hard to reason about in public APIs unless compatibility requires it.\n\n# Tradeoffs\n\n| Decision | Option A | Option B | When A | When B |\n| --- | --- | --- | --- | --- |\n| **By-value vs `in`** | By-value copies the value | `in` passes a readonly alias | Small values and ordinary APIs | Large readonly structs on a measured hot path |\n| **`in` vs `ref`** | `in` forbids reassignment through the parameter | `ref` permits it | The callee only reads | Mutation or rebinding is part of the contract |\n| **`override` vs `new`** | `override` uses runtime polymorphism | `new` uses compile-time hiding | Derived behavior must work through base references | A deliberate compatibility split requires a separate member |\n| **`params T[]` vs `params ReadOnlySpan<T>`** | Array form is broadly compatible and can be retained by the callee | Span form is stack-only and cannot escape | The method or caller needs array semantics | Synchronous processing benefits from span-based calls |\n\nBy-value parameters and ordinary virtual dispatch are the default. By-reference semantics fit when aliasing is part of the API or profiling shows that struct copies matter. `new` fits only when compile-time hiding is the intended contract.\n\n# Questions\n\n> [!qard]- How do `ref`, `out`, and `in` parameters differ?\n> All three pass the argument by reference instead of copying its value. For `ref` and `out`, the parameter always aliases the caller's variable. For `in`, it aliases the caller's variable when the argument is a variable of the parameter's type. An `in` argument that is not a variable, or that needs a conversion, can instead be copied into a temporary, and the parameter then refers to that temporary. The three modifiers differ in which direction data may flow through the reference.\n>\n> | Modifier | How data flows through the reference | Typical use |\n> |---|---|---|\n> | `ref` | Both ways. The caller must initialize the variable, and the method can read it and assign it. The caller sees any assignment | Updating or replacing the caller's variable |\n> | `out` | Outward. The caller can pass an unassigned variable. The method cannot read it before assigning it and must assign it before every normal return | Returning an extra result, as in `Try` methods such as `Dictionary.TryGetValue` |\n> | `in` | Inward and readonly. The caller must initialize the argument, and the method can read the parameter but cannot assign it | Avoiding copies of a large struct on a measured hot path |\n>\n> Without a modifier, the parameter is a copy, so assigning it never changes the caller's variable.\n>\n> [Microsoft: method parameters](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/method-parameters)\n\n<!-- qard-id: a16bf465-c1ae-4bca-909c-6f7462f37ca6 -->\n> [!qard]- Why would a method need `ref` when the argument is already a reference type?\n> A reference-type argument passes a copy of the reference. The method can mutate the shared object through that copy, but assigning a different object changes only its local copy. `ref` aliases the caller’s variable, allowing the method to replace the reference stored there. [Microsoft: method parameters](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/method-parameters)\n\n<!-- qard-id: 1fe4393b-4d8c-4e2c-9ae5-769106b13e65 -->\n> [!qard]- What does an `in` parameter do, and when is it useful?\n> An `in` parameter passes a value by readonly reference, so the method cannot assign through that parameter. It may avoid copying a large struct in a measured hot path, but conversions and non-variable arguments can still require a temporary. [Microsoft: method parameters](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/method-parameters)\n\n<!-- qard-id: 19ea3788-056c-4ed6-8bc6-2087ae866f65 -->\n> [!qard]- How does C# apply an optional parameter's default value, and why can already-compiled callers keep an old default?\n> The default is applied at the call site. When an ordinary compiled call omits an optional argument, the compiler inserts the declared default value into the caller's code, and the method receives it like any other argument.\n>\n> The declaration rules fit that mechanism:\n>\n> - **The default must be a compile-time value:** a constant expression, `default(S)`, or `new S()` where `S` is a value type. The compiler has to be able to write the value into each call.\n> - **Optional parameters come after all required parameters.** Named arguments let a call supply a later optional argument while omitting earlier ones.\n>\n> **Versioning consequence:** the default lives in each caller's compiled code. If a library changes a default, callers compiled against the old version keep passing the old value until they are recompiled. A public default value is therefore part of the library's compatibility contract.\n>\n> [Microsoft: named and optional arguments](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/named-and-optional-arguments) · [C#: 12.6.2.3 Run-time evaluation of argument lists](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#12623-run-time-evaluation-of-argument-lists)\n\n<!-- qard-id: ffd19d60-4643-4ede-92ff-83ba55b3f613 -->\n> [!qard]- When `Animal a = new Dog();` calls `a.Category()`, what makes the call run `Dog`'s implementation, and what does that commit the `Animal` API to?\n> `Animal.Category()` must be declared `virtual`, and `Dog` must implement `Category()` with `override`. The call is then resolved by the runtime type of the object, `Dog`, rather than by the declared type of the variable, `Animal`.\n>\n> Methods are non-virtual by default. A non-virtual `a.Category()` binds to `Animal.Category()` because `a` is declared as `Animal`, even when `Dog` declares its own `Category()` with `new`.\n>\n> **Commitment for the base API:** a virtual member is an extension point. Derived classes can replace its behavior, unless an override along the hierarchy is marked `sealed`, which stops classes below it from overriding the member again. Ordinary calls to the member on such an object run the most-derived override, including calls made from code inside `Animal`. An explicit `base.Category()` call in a derived class is the exception: it runs the base class's implementation rather than the most-derived override. `Animal` can therefore no longer assume that its own implementation of that member is the one that runs.\n>\n> [Microsoft: virtual keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/virtual) · [Microsoft: new modifier](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/new-modifier) · [Microsoft: base keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/base) · [Microsoft: sealed modifier](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/sealed)\n\n<!-- qard-id: 13e7573c-4ba4-4f2b-a316-4f2dcb52ccd6 -->\n> [!qard]- A base method is not virtual, but a derived class needs different behavior. What are the options, and which ones work through a base-class reference?\n> Only virtual dispatch makes a call through a base-class reference run derived code. Making the base member `virtual` and overriding it is therefore the only option that works through such a reference. Hiding with `new` affects only derived-typed references, and composition moves the variation out of inheritance.\n>\n> | Option | Call through a base reference | Fits when |\n> |---|---|---|\n> | Base member made `virtual`, derived member marked `override` | Runs the derived implementation, chosen by the object's runtime type | The base type can be changed and derived objects are meant to substitute for base objects |\n> | Derived member declared with `new` (hiding) | Still runs the base implementation. Only references typed as the derived class reach the new member | Hiding itself is the intended behavior, such as a deliberate compatibility split, not polymorphism |\n> | Composition | No inheritance dispatch is involved. The class delegates the varying step to an object it holds | The base cannot be changed, or the variation is not a natural subtype relationship |\n>\n> Hiding is the common trap. The same object behaves differently depending on whether it is referenced as the derived type or as the base type.\n>\n> [Microsoft: virtual keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/virtual) · [Microsoft: new modifier](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/new-modifier)\n\n# References\n\n- [Method parameters](https://learn.microsoft.com/dotnet/csharp/language-reference/keywords/method-parameters#reference-parameters)\n- [C# 13: Calling methods is easier and faster](https://devblogs.microsoft.com/dotnet/csharp13-calling-methods-is-easier-and-faster/)"
+    }
+  ],
+  "version": 1,
+  "createdAt": 1793460366508,
+  "topic": "Predict how by-value parameters and ref, out, or in affect caller storage",
+  "notes": [
+    "Home/Programming/NET/CSharp/Fundamentals/Methods.md"
+  ],
+  "mastery": "Assets/Qard/Courses/Programming Mastery.md",
+  "course": "Programming",
+  "objective": "parameter-passing",
+  "steps": [
+    {
+      "title": "Variables and copied values",
+      "explain": "A variable provides storage for a value. With `int count = 4;`, `count` names the variable, and `4` is the value currently stored there. Assignment replaces the value in the variable named on the left.\n\nConsider:\n\n```csharp\nint count = 4;\nint saved = count;\ncount = 9;\n```\n\nThe second line reads the current value of `count` and stores that value in a separate variable, `saved`. Both variables now hold `4`. The third line replaces the value in `count` with `9`. It does not assign anything to `saved`, which still holds `4`.\n\nEqual values do not mean shared storage. Copying a value also creates no continuing connection between the variables.\n\nThe **Methods** note applies this distinction to calls: an ordinary by-value parameter receives a copy of the argument's value. Before tracing methods, the reliable starting point is to identify which variable each assignment changes.",
+      "connect": "This first step rebuilds the distinction between storage and its contents. We will use it to distinguish parameters that receive copied values from parameters that provide access to caller storage.",
+      "checkFirst": true,
+      "check": {
+        "id": "k1",
+        "type": "long",
+        "prompt": "What does this code print, and why?\n\n```csharp\nint first = 6;\nint second = first;\nfirst = 11;\nsecond = second + 2;\nConsole.WriteLine($\"{first}, {second}\");\n```",
+        "marks": 3,
+        "rubric": [
+          {
+            "point": "States that the printed value of first is 11.",
+            "marks": 1
+          },
+          {
+            "point": "States that the printed value of second is 8.",
+            "marks": 1
+          },
+          {
+            "point": "Explains that second receives a copy of 6 in separate storage, so later assignments to either variable do not update the other.",
+            "marks": 1
+          }
+        ],
+        "model": "It prints `11, 8`. `second` receives a copy of the value `6` held in `first`. Assigning `11` to `first` changes only `first`. Adding `2` to `second` changes its stored value from `6` to `8`; the variables have separate storage.",
+        "source": {
+          "path": "Home/Programming/NET/CSharp/Fundamentals/Methods.md",
+          "heading": "Questions"
+        },
+        "objective": "parameter-passing",
+        "goal": "apply"
+      },
+      "misconceptions": [
+        {
+          "signs": "Answers `13, 13`, treating first and second as names for the same storage.",
+          "reteach": "`int second = first;` declares a separate variable and copies the integer into it. It does not make `second` another name for `first`. Each later assignment changes only the variable on its left."
+        },
+        {
+          "signs": "Answers `11, 13`, treating second as if it automatically follows changes to first.",
+          "reteach": "The initializer reads `first` once, when that line executes. It copies `6`, not a rule to keep reading `first`. When the final addition runs, `second` still holds `6`, so it becomes `8`."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "By-value parameters",
+      "explain": "A variable holds a value. Passing an argument **by value** gives the method a separate parameter variable containing a copy of that value. This is the default for the ordinary parameters discussed in the **Methods** note.\n\nFor an `int`, the copied value is the number. Assigning another number to the parameter changes the parameter's storage. The caller's variable keeps its value because the assignment does not target that variable.\n\nFor an array, the value being copied is a **reference to the array**, not the array itself. The caller's variable and the parameter are separate storage locations, but their references initially reach the same array. An assignment such as `items[0] = 8` changes an element in that shared array, so the caller can observe it.\n\nAn assignment such as `items = new[] { 99 }` targets something different: the parameter variable. It replaces only the parameter's reference. The caller's variable still refers to the original array.\n\nThe Methods note's Questions section makes this distinction: a copied reference permits mutation of the shared object, while replacing the caller's reference requires access to the caller's variable.",
+      "connect": "The previous step established that copying a value creates a separate variable. Applying that rule at a method call explains why by-value parameters cannot reassign caller variables, providing the baseline for comparing `ref`, `out`, and `in`.",
+      "checkFirst": true,
+      "check": {
+        "id": "k2",
+        "type": "long",
+        "prompt": "What does this code print? Explain how copying each argument leads to that result.\n\n```csharp\nint number = 3;\nint[] items = { 4 };\n\nChange(number, items);\nConsole.WriteLine($\"{number}, {items[0]}\");\n\nstatic void Change(int number, int[] items)\n{\n    number = 7;\n    items[0] = 8;\n    items = new[] { 99 };\n    items[0] = 100;\n}\n```",
+        "marks": 4,
+        "rubric": [
+          {
+            "point": "States that the caller's number remains 3.",
+            "marks": 1
+          },
+          {
+            "point": "States that the caller's items[0] becomes 8.",
+            "marks": 1
+          },
+          {
+            "point": "Explains that the int parameter contains a copied number, so assigning 7 changes only the parameter.",
+            "marks": 1
+          },
+          {
+            "point": "Explains that the copied reference initially reaches the original array, but reassigning the parameter makes only it reach the new array; the final element assignment affects that new array.",
+            "marks": 1
+          }
+        ],
+        "model": "It prints `3, 8`.\n\nThe `number` parameter receives a copy of `3`. Assigning `7` changes only that parameter, so the caller's `number` remains `3`.\n\nThe `items` parameter receives a copy of the array reference. Both references initially reach the original array, so `items[0] = 8` changes its element. Assigning a new array to the parameter replaces only the parameter's reference. The final assignment changes the new array's element to `100`; the caller still refers to the original array containing `8`.",
+        "source": {
+          "path": "Home/Programming/NET/CSharp/Fundamentals/Methods.md",
+          "heading": "Questions"
+        },
+        "objective": "parameter-passing",
+        "goal": "apply"
+      },
+      "misconceptions": [
+        {
+          "signs": "Predicts `7, 8`, saying the number assignment changes the caller's variable.",
+          "reteach": "The parameter and caller variable have separate storage. Copying `3` into the parameter does not connect their future assignments; `number = 7` targets only the parameter."
+        },
+        {
+          "signs": "Predicts `3, 4`, saying the array is copied and all changes stay inside the method.",
+          "reteach": "The copied value is the array reference. No array copy occurs here. Both references initially reach the same array, so changing its first element is visible to the caller."
+        },
+        {
+          "signs": "Predicts `3, 100`, saying replacing the array parameter also replaces the caller's reference.",
+          "reteach": "Sharing an array does not mean sharing the variable that holds its reference. Reassigning `items` redirects only the parameter. The caller keeps its reference to the original array, whose element is now `8`."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "Writable aliases: ref and out",
+      "explain": "A variable has storage that holds its current value. In the previous step, a by-value parameter received a copy: assigning the parameter changed that copy.\n\nThe **Methods** note describes another possibility: an **alias**, a second name for the same storage. With `ref` or `out`, assigning the parameter writes directly into the caller’s variable. There is no separate parameter value to copy back later.\n\nThe difference is who must supply the initial value:\n\n- **`ref`**: the caller must supply an initialized variable. The method can read its existing value and replace it. This fits updating an existing result.\n- **`out`**: the caller may supply an uninitialized variable. The method must assign the parameter before reading it and before every normal return. This fits producing a result.\n\nAn initialized variable can also be passed with `out`, but the method still cannot read that parameter before assigning it. These are compiler-enforced contracts.\n\nFor reference types, the same rule applies to the stored reference: assigning a new object through either writable alias replaces the reference in the caller’s variable.",
+      "connect": "By-value assignment changed only the parameter’s copy. `ref` and `out` explain when assignment instead replaces the value in caller storage; their initialization rules distinguish updating a value from producing one.",
+      "checkFirst": false,
+      "check": {
+        "id": "k3",
+        "type": "long",
+        "prompt": "Consider this C# code:\n\n```csharp\nstatic void Bump(ref int value)\n{\n    value += 2;\n}\n\nstatic void Produce(out int value)\n{\n    value = 9;\n}\n\nint a = 4;\nint b;\nBump(ref a);\nProduce(out b);\n```\n\nWhat are the final values of `a` and `b`, and why do the assignments reach those variables? Explain why `a` must be initialized before its call while `b` need not be, and what `Produce` must do before returning normally.",
+        "marks": 4,
+        "rubric": [
+          {
+            "point": "States that a becomes 6 because the ref parameter aliases a and updates its storage.",
+            "marks": 1
+          },
+          {
+            "point": "States that b becomes 9 because the out parameter aliases b and assigns its storage.",
+            "marks": 1
+          },
+          {
+            "point": "Explains that ref requires an initialized caller variable because the method is allowed to read its incoming value.",
+            "marks": 1
+          },
+          {
+            "point": "Explains that out permits an uninitialized caller variable because the method must assign the parameter before every normal return.",
+            "marks": 1
+          }
+        ],
+        "model": "`a` becomes **6**. `value` in `Bump` aliases `a`, so reading and adding 2 updates `a` itself.\n\n`b` becomes **9**. `value` in `Produce` aliases `b`, so its assignment writes into `b`.\n\nA `ref` argument must already be initialized because the method may read its incoming value, as `Bump` does. An `out` argument need not be initialized because the method must produce its value: `Produce` must assign `value` before every normal return and cannot read it before assigning it.",
+        "source": {
+          "path": "Home/Programming/NET/CSharp/Fundamentals/Methods.md",
+          "heading": "Input Parameters"
+        },
+        "objective": "parameter-passing",
+        "goal": "apply"
+      },
+      "misconceptions": [
+        {
+          "signs": "Says a stays 4 or b remains uninitialized because only local parameters change.",
+          "reteach": "That reasoning applies to by-value parameters. Here, each parameter aliases caller storage. Assigning `value` directly changes `a` or `b`."
+        },
+        {
+          "signs": "Says both variables must be initialized, or that a can be uninitialized too.",
+          "reteach": "`ref` allows the method to read an incoming value, so the caller must initialize it. `out` requires the method to supply a value, so the caller can leave it uninitialized."
+        },
+        {
+          "signs": "Says Produce can return without assigning value, or can read its incoming value first.",
+          "reteach": "An `out` parameter starts as unassigned inside the method, even if the caller initialized its variable. The method must assign it before reading it and before every normal return."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "Readonly access with in",
+      "explain": "`ref` gives a method an alias: another way to access the same storage. Reading through it reads that storage; assigning through it changes that storage.\n\nThe **Methods** note, under **Input Parameters → In**, introduces a narrower permission: `in` provides a readonly reference. The method can read through the parameter, but cannot assign through it. A variable passed to an `in` parameter must already be initialized, because the method receives an input rather than producing an initial value.\n\nFor example, `Read(in count)` can refer directly to the initialized `int` variable `count`. Inside `Read`, assigning to its `in int` parameter is a compile-time error.\n\nAn expression such as `count + 2` produces a value but does not identify a variable whose storage can be passed directly. C# allows `Read(count + 2)` with the call-site `in` omitted: it stores the result in a temporary and passes a readonly reference to that temporary. Evaluating the addition does not change `count`.\n\nThis explains the note's warning that `in` does **not guarantee zero copies**. It can avoid copying a large struct, but some arguments require temporaries. Readonly also describes access through the parameter; it does not make a referenced object immutable.",
+      "connect": "`ref` and `out` permit assignment to caller storage through the parameter; `in` permits reading through a readonly reference. To predict a call, identify the storage being referenced and whether the parameter permits writing to it.",
+      "checkFirst": false,
+      "check": {
+        "id": "k4",
+        "type": "long",
+        "prompt": "Trace this code. What does it print, what storage does `value` refer to in each call, and would uncommenting the assignment compile? Explain how the parameter rules determine your answer.\n\n```csharp\nstatic void Show(in int value)\n{\n    // value = 20;\n    Console.WriteLine(value);\n}\n\nint number = 6;\nShow(in number);\nShow(number + 3);\nConsole.WriteLine(number);\n```",
+        "marks": 4,
+        "rubric": [
+          {
+            "point": "Gives the output as 6, 9, 6 in that order, with number remaining unchanged.",
+            "marks": 1
+          },
+          {
+            "point": "Explains that the first call passes a readonly reference to the caller's number variable.",
+            "marks": 1
+          },
+          {
+            "point": "Explains that the second call evaluates number + 3 into a temporary holding 9 and passes a readonly reference to that temporary.",
+            "marks": 1
+          },
+          {
+            "point": "States that uncommenting value = 20 causes a compile-time error because an in parameter cannot be assigned to.",
+            "marks": 1
+          }
+        ],
+        "model": "The output is:\n\n```text\n6\n9\n6\n```\n\nIn `Show(in number)`, `value` refers to the caller's `number` storage through a readonly reference.\n\nIn `Show(number + 3)`, the expression produces `9`. The compiler stores that result in a temporary, and `value` refers to that temporary through a readonly reference. The addition does not assign to `number`, so it remains `6`.\n\nUncommenting `value = 20` makes the method fail to compile. Assignment through an `in` parameter is forbidden, whether the parameter refers to caller storage or a temporary.",
+        "source": {
+          "path": "Home/Programming/NET/CSharp/Fundamentals/Methods.md",
+          "heading": "Input Parameters → In"
+        },
+        "objective": "parameter-passing",
+        "goal": "apply"
+      },
+      "misconceptions": [
+        {
+          "signs": "Says value = 20 would compile and change number because in passes by reference.",
+          "reteach": "Sharing storage and having permission to write are separate properties. `in` provides a reference but forbids assignment through it. `ref` provides a writable reference."
+        },
+        {
+          "signs": "Says Show(number + 3) cannot compile because an expression is not a variable.",
+          "reteach": "With call-site `in` omitted, C# can evaluate an expression into temporary storage and pass a readonly reference to it. The method receives storage even though the argument expression does not name a variable."
+        },
+        {
+          "signs": "Predicts that the final number is 9 because the second call evaluates number + 3.",
+          "reteach": "`number + 3` computes a new value; it does not assign that value to `number`. The temporary holds `9`, while the caller's variable still holds `6`."
+        }
+      ],
+      "figure": ""
+    }
+  ],
+  "state": [
+    {
+      "asks": [],
+      "answer": {
+        "text": "11, 8, because int is a struct which copying the values, not ref, so first is not changed o addition, and second did not changed on the reassigmend of first",
+        "confidence": "sure"
+      },
+      "mark": {
+        "awarded": [
+          true,
+          true,
+          true
+        ],
+        "annotations": [
+          {
+            "quote": "11, 8",
+            "kind": "correct",
+            "note": "You identified both printed values."
+          },
+          {
+            "quote": "second did not changed on the reassigmend of first",
+            "kind": "correct",
+            "note": "You explained that assigning to one variable does not change the other."
+          }
+        ],
+        "mistake": "none",
+        "feedback": "You correctly traced both values and recognized that the variables have separate storage.",
+        "score": 3
+      },
+      "reply": "Correct: `second` receives a copy of `6`, so later assignments to either variable affect only that variable. Next, we can apply the same idea to method parameters."
+    },
+    {
+      "asks": [],
+      "answer": {
+        "text": "3,4. initial var numbers were not changed coz they were passed to the void method, and value method params just have initial copies, not actual variable ref. So changing them in inner scope dont change anything. It might be confusing for the person since in the method body, outer variables visible too, but since params have the same name, they have higher priority",
+        "confidence": "sure"
+      },
+      "mark": {
+        "awarded": [
+          true,
+          false,
+          true,
+          false
+        ],
+        "annotations": [
+          {
+            "quote": "3,4",
+            "kind": "correct",
+            "note": "You correctly predict that the caller's number remains 3."
+          },
+          {
+            "quote": "value method params just have initial copies",
+            "kind": "correct",
+            "note": "You recognize that the number parameter receives a copy, so assigning to it does not change the caller's variable."
+          },
+          {
+            "quote": "So changing them in inner scope dont change anything.",
+            "kind": "wrong",
+            "note": "You overlook that a copied array reference still reaches the original array."
+          },
+          {
+            "quote": "3,4",
+            "kind": "missing",
+            "note": "You needed to state that the caller's array element becomes 8."
+          },
+          {
+            "quote": "So changing them in inner scope dont change anything.",
+            "kind": "missing",
+            "note": "You needed to explain that both references initially reach the original array, but reassigning the parameter makes it reach a new array, which the final assignment changes."
+          }
+        ],
+        "mistake": "misconception",
+        "feedback": "You correctly handled the copied integer but treated the array itself as a copy.",
+        "score": 2
+      },
+      "reply": "Your reasoning about `number` is right. For `items`, the copied value is a reference: both variables initially reach the same array. What does `items[0] = 8` change before the parameter is reassigned?",
+      "reteach": "The copied value is the array reference. No array copy occurs here. Both references initially reach the same array, so changing its first element is visible to the caller."
+    },
+    {
+      "asks": [],
+      "answer": {
+        "text": "a = 6, b = 9. Assigment reached variables because we passed them in to ref/out params which passing variable by ref. a must be inititialized because if not, there is not ref to pass. While its ok to not init the b, because it can (and should) be init in the method",
+        "confidence": "sure"
+      },
+      "mark": {
+        "awarded": [
+          true,
+          true,
+          false,
+          true
+        ],
+        "annotations": [
+          {
+            "quote": "a = 6, b = 9.",
+            "kind": "correct",
+            "note": "You gave both final values."
+          },
+          {
+            "quote": "passing variable by ref",
+            "kind": "correct",
+            "note": "You identified that the parameters refer to the caller’s variables."
+          },
+          {
+            "quote": "because if not, there is not ref to pass",
+            "kind": "wrong",
+            "note": "You can refer to a variable’s storage even when it has no assigned value."
+          },
+          {
+            "quote": "because if not, there is not ref to pass",
+            "kind": "missing",
+            "note": "You needed to explain that a ref parameter may read the variable’s incoming value."
+          },
+          {
+            "quote": "it can (and should) be init in the method",
+            "kind": "correct",
+            "note": "You identified that the method must assign the out parameter."
+          }
+        ],
+        "mistake": "misconception",
+        "feedback": "Your values and aliasing explanation are right, but your reason for the ref initialization requirement is incorrect.",
+        "score": 3
+      },
+      "reply": "You correctly traced both writes. A variable can have storage before it has an assigned value. In `Bump`, what operation needs an existing value before it can update `a`?"
+    },
+    {
+      "asks": [],
+      "answer": {
+        "text": "6 (number storage) and 9(methid parameter storage). Commented code would not compile because in omit changing the param value/",
+        "confidence": "sure"
+      },
+      "mark": {
+        "awarded": [
+          false,
+          true,
+          false,
+          true
+        ],
+        "annotations": [
+          {
+            "quote": "6 (number storage)",
+            "kind": "correct",
+            "note": "You identified the caller's storage for the first call."
+          },
+          {
+            "quote": "9(methid parameter storage)",
+            "kind": "vague",
+            "note": "You identified the value, but the expression is stored in a temporary that the parameter refers to."
+          },
+          {
+            "quote": "9(methid parameter storage).",
+            "kind": "missing",
+            "note": "You also needed to give the final output and state what happens to number."
+          },
+          {
+            "quote": "9(methid parameter storage)",
+            "kind": "missing",
+            "note": "You needed to identify the temporary holding 9 and the readonly reference to it."
+          },
+          {
+            "quote": "Commented code would not compile",
+            "kind": "correct",
+            "note": "You correctly recognized that assignment to an in parameter fails to compile."
+          }
+        ],
+        "mistake": "incomplete",
+        "feedback": "You identified the first storage location and the assignment error, but missed the final output and the temporary.",
+        "score": 2
+      },
+      "reply": "You have the first call and the assignment rule right. For the second call, what storage holds the result of `number + 3`? Then check the final `Console.WriteLine`: did evaluating the addition assign anything to `number`?"
+    }
+  ],
+  "current": 3,
+  "probe": {
+    "questions": [],
+    "answers": {},
+    "submitted": true,
+    "marks": {},
+    "findings": "There was no probe, so your current understanding of parameter passing is untested. Your earlier value-semantics lesson provides a starting point, though its checks showed some gaps."
+  },
+  "map": {
+    "title": "From copied values to caller storage",
+    "plan": "We will start with variables holding values, then revisit copying because your earlier checks showed some gaps. Using the Methods note, we will trace what each parameter modifier allows a method to do to caller storage.",
+    "mermaid": "graph TD\nA[\"Variables hold values\"] --> B[\"By-value parameters copy values\"]\nB --> C[\"Reference values can point to the same object\"]\nC --> D[\"ref and out alias caller storage\"]\nD --> E[\"in provides readonly access, sometimes to a temporary\"]\nE --> F[\"Predict effects on caller storage\"]",
+    "objective": "parameter-passing",
+    "steps": [
+      {
+        "title": "Variables and copied values",
+        "why": "A clear distinction between a variable and the value it holds gives us a reliable starting point for tracing a call."
+      },
+      {
+        "title": "By-value parameters",
+        "why": "Tracing a copied value shows why assigning a parameter leaves the caller's variable unchanged, even when a copied reference still reaches the same object."
+      },
+      {
+        "title": "Writable aliases: ref and out",
+        "why": "Comparing these aliases explains when a method can replace the caller's value and what initialization each contract requires."
+      },
+      {
+        "title": "Readonly access with in",
+        "why": "Tracing readonly access and possible temporaries completes the prediction of how each modifier affects caller storage."
+      }
+    ]
+  },
+  "stepsFor": "[\"From copied values to caller storage\",[\"Variables and copied values\",\"By-value parameters\",\"Writable aliases: ref and out\",\"Readonly access with in\"]]",
+  "accepted": true,
+  "finishedAt": 1793461585204,
+  "close": {
+    "summary": "The lesson traced variables, copied values, and caller storage through by-value, `ref`, `out`, and `in` parameters. You completed variables and copying checks at 3/3 and correctly predicted the copied integer's behavior. In by-value checks (2/4), you treated the array itself as copied; the copied value is its reference, so element changes reach the shared array. In `ref` and `out` checks (3/4), your values and aliasing explanation were correct, but the initialization rationale needs review: `ref` permits reading the existing value before writing. In `in` checks (2/4), you identified the first storage location and rejected assignment through the parameter, but missed the final output and the temporary created for an expression argument. You reported being sure throughout; tracing the exact storage each parameter refers to remains the main practice target.",
+    "cards": [
+      {
+        "front": "An initialized integer `x` is passed to `void Set(int value)`, which assigns `value = 10`. Does `x` change, and why?",
+        "back": "No. The parameter holds a copy of the integer. Assigning `value` changes only the parameter's storage."
+      },
+      {
+        "front": "Given `int[] a = { 1 };`, a call to `Change(a)` runs `void Change(int[] p) { p[0] = 7; p = new[] { 9 }; }`. What is `a[0]` afterward, and why?",
+        "back": "`7`. The reference is copied, so `p[0] = 7` mutates the shared array. Reassigning `p` changes only the parameter's reference; `a` still refers to the original array."
+      },
+      {
+        "front": "Why must a caller initialize a `ref` argument even if the method immediately overwrites it, while an `out` argument may be uninitialized?",
+        "back": "`ref` permits reading the existing value, so definite assignment is required at the call site regardless of the method body. `out` forbids reading before assignment and requires assignment before every normal return."
+      },
+      {
+        "front": "What does each call print, and which storage does `value` refer to?\n```csharp\nstatic void Show(in int value, ref int other)\n{\n    other = 9;\n    Console.WriteLine(value);\n}\n\nint x = 4;\nShow(in x, ref x);\nx = 4;\nShow(x + 0, ref x);\n```",
+        "back": "The first prints `9`: both parameters alias `x`. The second prints `4`: `value` refers to a temporary holding the expression result, while `other` aliases `x`. `in` prevents assignment through `value`; it does not freeze storage against changes through another alias."
+      }
+    ],
+    "cardState": {},
+    "note": "Assets/Qard/Lessons/2026-10-31 Predict how by-value parameters and ref, out, or in affect c.md",
+    "nextCheck": "2026-11-03"
+  }
+}
