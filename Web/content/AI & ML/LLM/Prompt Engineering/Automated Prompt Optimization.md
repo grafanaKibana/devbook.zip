@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-02-28T13:40:02.000Z
-modified: 2026-10-28T12:33:42.000Z
-published: 2026-10-31T08:53:28.467Z
+modified: 2026-11-02T11:45:32.558Z
+published: 2026-11-02T11:50:13.000Z
 topic:
   - AI & ML
 subtopic:
@@ -23,6 +23,26 @@ The method does not remove judgment. It moves judgment into the objective, datas
 Zhou et al. (2022) frame instruction discovery as search. An LLM proposes instruction candidates, each candidate runs against a validation set, and the measured objective determines which prompt survives. The prompt behaves like a small program. The evaluator supplies its tests.
 
 In the paper's experiments, APE found a zero-shot reasoning instruction that outperformed the familiar "Let's think step by step" trigger on several benchmarks. That result is evidence that small wording changes can matter. It is not evidence that one discovered phrase transfers unchanged to every model or task.
+
+A simplified candidate scoring loop:
+
+```python
+# Generate candidate prompts, score each on a validation set, keep the best
+candidates = llm.generate(
+    f"Generate 5 instruction variants for this task: {task_description}",
+    n=5
+)
+
+scores = []
+for candidate in candidates:
+    correct = 0
+    for example in validation_set:
+        output = llm.complete(candidate + "\n" + example["input"])
+        correct += (output.strip() == example["expected"])
+    scores.append(correct / len(validation_set))
+
+best_prompt = candidates[scores.index(max(scores))]
+```
 
 # Active-Prompt
 
@@ -62,26 +82,6 @@ print(answer)  # 447
 ```
 
 The interpreter returns an exact result for the program it receives. If the program encodes the problem incorrectly, it returns the wrong answer just as exactly. The same boundary appears in tool-using agents: language selects and parameterizes a tool. The tool performs the deterministic operation.
-
-**APE-style candidate scoring loop** (simplified):
-
-```python
-# Generate candidate prompts, score each on a validation set, keep the best
-candidates = llm.generate(
-    f"Generate 5 instruction variants for this task: {task_description}",
-    n=5
-)
-
-scores = []
-for candidate in candidates:
-    correct = 0
-    for example in validation_set:
-        output = llm.complete(candidate + "\n" + example["input"])
-        correct += (output.strip() == example["expected"])
-    scores.append(correct / len(validation_set))
-
-best_prompt = candidates[scores.index(max(scores))]
-```
 
 # Pitfalls
 
