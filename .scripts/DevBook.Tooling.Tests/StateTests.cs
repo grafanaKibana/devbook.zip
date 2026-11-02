@@ -191,7 +191,18 @@ public sealed class StateTests
         string expectedMarker = "initial";
         int expectedBlobReads = 1;
         int expectedRefReads = 2;
-        if (scenario == "changed")
+        if (scenario == "unchanged")
+        {
+            JsonObject update = Core.NewState();
+            update["marker"] = "applied";
+            await store.WriteAsync(update, new StateSnapshot(Core.NewState(), "initial"), "fixture acknowledged write");
+            api.RefResponses.Enqueue("initial");
+            expectedRef = "written";
+            expectedBlob = "written-blob";
+            expectedMarker = "applied";
+            expectedRefReads = 4;
+        }
+        else if (scenario == "changed")
         {
             api.Head = expectedRef = "changed";
             expectedBlob = "changed-blob";
@@ -231,7 +242,7 @@ public sealed class StateTests
         api.StateReads.Should().Be(expectedBlobReads);
         api.RefReads.Should().Be(expectedRefReads);
         current.State["marker"] = "returned snapshot mutation";
-        api.RemoteState.Str("marker").Should().Be(scenario == "applied-with-lost-response" ? "applied" : "initial");
+        api.RemoteState.Str("marker").Should().Be(scenario == "changed" ? "initial" : "applied");
     }
 
     [Fact]
@@ -241,6 +252,8 @@ public sealed class StateTests
         var api = new CachedStateApi();
         var store = new StateBranchStore(api);
         StateSnapshot snapshot = await store.ReadAsync();
+        snapshot = await store.WriteAsync(snapshot.State, snapshot, "fixture prior acknowledged write");
+        api.RefResponses.Enqueue("initial");
         JsonObject input = snapshot.State.Copy();
         input["frozen_extension"] = new JsonObject { ["nested"] = "before" };
         api.BeforeRefResponse = () => input.Obj("frozen_extension")["nested"] = "after";
@@ -252,7 +265,7 @@ public sealed class StateTests
         written.State.Obj("frozen_extension").Str("nested").Should().Be("before");
         api.WrittenState!.Obj("frozen_extension").Str("nested").Should().Be("before");
         input.Obj("frozen_extension").Str("nested").Should().Be("after");
-        api.Patches.Should().Be(1);
+        api.Patches.Should().Be(2);
     }
 
     private sealed class CachedStateApi : IGitHubApi
@@ -265,6 +278,7 @@ public sealed class StateTests
         public int Mutations { get; private set; }
         public bool LosePatchResponse { get; set; }
         public Action? BeforeRefResponse { get; set; }
+        public Queue<string> RefResponses { get; } = new();
         public JsonObject? WrittenState { get; private set; }
         public JsonObject RemoteState { get; private set; } = InitialState();
 
@@ -284,7 +298,7 @@ public sealed class StateTests
                 await Task.Yield();
                 BeforeRefResponse?.Invoke();
                 if (Head is null) throw new GitHubApiFailure("missing", 404);
-                return new JsonObject { ["object"] = new JsonObject { ["sha"] = Head } };
+                return new JsonObject { ["object"] = new JsonObject { ["sha"] = RefResponses.TryDequeue(out string? observed) ? observed : Head } };
             }
             if (method == "GET" && path.StartsWith("/git/commits/", StringComparison.Ordinal))
             {
