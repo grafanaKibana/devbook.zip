@@ -8,6 +8,7 @@ namespace DevBook.Tooling.Improvement;
 public sealed class StateBranchStore(IGitHubApi api, string branch = Runtime.StateBranch, string path = Runtime.StatePath) : IStateStore
 {
     private StateSnapshot? cached;
+    private readonly HashSet<string> supersededRefs = new(StringComparer.Ordinal);
     private const int MaximumEncodedStateLength = 32_000_000;
     private string RefPath => "/git/ref/heads/" + Uri.EscapeDataString(branch);
     private string UpdateRefPath => "/git/refs/heads/" + Uri.EscapeDataString(branch);
@@ -31,7 +32,7 @@ public sealed class StateBranchStore(IGitHubApi api, string branch = Runtime.Sta
         JsonObject reference;
         try
         {
-            reference = await Runtime.ObjectAsync(api, "GET", RefPath, cancellationToken: cancellationToken);
+            reference = await ReadVisibleRefAsync(cancellationToken);
         }
         catch (GitHubApiFailure error) when (error.Status == 404)
         {
@@ -85,7 +86,7 @@ public sealed class StateBranchStore(IGitHubApi api, string branch = Runtime.Sta
         {
             throw new Conflict("State branch must be provisioned during confirmed activation.");
         }
-        JsonObject current = await Runtime.ObjectAsync(api, "GET", RefPath, cancellationToken: cancellationToken);
+        JsonObject current = await ReadVisibleRefAsync(cancellationToken);
         if (current.Obj("object").Str("sha") != expected.RefSha)
         {
             throw new Conflict("State ref changed before write.");
@@ -93,9 +94,27 @@ public sealed class StateBranchStore(IGitHubApi api, string branch = Runtime.Sta
         JsonObject parent = await Runtime.ObjectAsync(api, "GET", $"/git/commits/{expected.RefSha}", cancellationToken: cancellationToken);
         (string commit, string blob) = await CreateStateCommitAsync(frozen, expected.RefSha, parent.Obj("tree").Str("sha"), message, cancellationToken);
         await api.RequestAsync("PATCH", UpdateRefPath, new JsonObject { ["sha"] = commit, ["force"] = false }, cancellationToken: cancellationToken);
+        supersededRefs.Add(expected.RefSha);
         var written = new StateSnapshot(frozen, commit, blob);
         cached = written;
         return Copy(written);
+    }
+
+    private async Task<JsonObject> ReadVisibleRefAsync(CancellationToken cancellationToken)
+    {
+        for (int attempt = 0; ; attempt++)
+        {
+            JsonObject reference = await Runtime.ObjectAsync(api, "GET", RefPath, cancellationToken: cancellationToken);
+            if (!supersededRefs.Contains(reference.Obj("object").Str("sha")))
+            {
+                return reference;
+            }
+            if (attempt >= 15)
+            {
+                throw new Conflict("State ref still shows a superseded acknowledged write; preserve state before retrying.");
+            }
+            await Task.Delay(TimeSpan.FromSeconds(2), cancellationToken);
+        }
     }
 
     private static StateSnapshot Copy(StateSnapshot snapshot) =>
