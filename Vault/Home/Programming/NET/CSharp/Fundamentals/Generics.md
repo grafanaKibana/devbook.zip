@@ -10,7 +10,7 @@ qard-deck: "Programming"
 qard-topic: "NET/CSharp/Fundamentals/Generics"
 flashcard_uid: "3fc98b91"
 created: "2026-02-18T20:04:43.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-02T06:35:25.617Z"
 ---
 
 Generics parameterize code by type. `List<T>` can store any `T` while the compiler still checks every read and write. That is a stronger contract than accepting `object` and recovering the real type with casts. For value types, generic collections also avoid the boxing required by older object-based APIs.
@@ -39,6 +39,8 @@ Constraints tell the compiler what operations are valid for `T`. They also docum
 - `where T : new()` - `T` must have a public parameterless constructor.
 - `where T : BaseType` - `T` must inherit from a specific base type.
 - `where T : ISomeInterface` - `T` must implement a specific interface.
+- `where T : struct, Enum` - `T` must be an enum type. `Enum` alone also admits the `System.Enum` base class, so `struct` narrows it to enum value types.
+- `where T : allows ref struct` (C# 13, .NET 9) - an anti-constraint: `T` may be a stack-only `ref struct`. Code using it must obey the ref-safety rules for every possible `T`.
 
 # Variance
 
@@ -95,8 +97,6 @@ An open generic such as `List<>` has unassigned type parameters and cannot be in
 Type closed = typeof(List<>).MakeGenericType(itemType); // e.g. List<Order>
 var list = Activator.CreateInstance(closed);
 ```
-
-`where T : struct, Enum` admits enum value types, while `allows ref struct` tells the compiler that a type argument may be stack-only. Code using that anti-constraint must obey the ref-safety rules for every possible `T`.
 
 # Pitfalls
 
