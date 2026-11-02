@@ -4,6 +4,7 @@ using DevBook.Tooling.Infrastructure;
 using ExportApi = DevBook.Tooling.Tests.ExportWorkerTests.FakeExportApi;
 using ExportFixture = DevBook.Tooling.Tests.ExportWorkerTests.WorkerFixture;
 using FluentAssertions;
+using System.Text;
 using System.Text.Json.Nodes;
 using Xunit;
 
@@ -164,24 +165,27 @@ public sealed class StateTests
     public async Task OversizedStateIsRejectedBeforeCreatingAnUnreadableRemoteBlob()
     {
         // Arrange
-        JsonObject state = Core.NewState();
-        state["oversized_extension"] = new string('x', 24_000_000);
-        var api = new ExportCompactionStateSizeApi();
+        JsonObject saved = OperationalState();
+        saved["workload_history"] = new JsonObject { ["already-saved"] = LargeAuditRecord() };
+        var api = new CachedStateApi(saved);
         var store = new StateBranchStore(api);
+        StateSnapshot snapshot = await store.ReadAsync();
+        JsonObject state = snapshot.State.Copy();
+        state["oversized_extension"] = new string('x', 24_000_000);
 
         // Act
-        Func<Task> write = () => store.WriteAsync(state, new StateSnapshot(Core.NewState(), "current-state"), "fixture oversized state");
+        Func<Task> write = () => store.WriteAsync(state, snapshot, "fixture oversized state");
 
         // Assert
         await write.Should().ThrowAsync<RuntimeFailure>().WithMessage("*readable size limit*");
         api.Mutations.Should().Be(0);
+        api.Head.Should().Be("initial");
+        JsonNode.DeepEquals(api.RemoteState, saved).Should().BeTrue();
+        state.Str("oversized_extension").Length.Should().Be(24_000_000);
     }
 
-    [Theory]
-    [InlineData("unchanged")]
-    [InlineData("changed")]
-    [InlineData("applied-with-lost-response")]
-    public async Task CachedReadReturnsTheCurrentRemoteStateWithoutSharingCallerData(string scenario)
+    [Fact]
+    public async Task CachedReadReturnsTheCurrentRemoteStateWithoutSharingCallerData()
     {
         // Arrange
         var api = new CachedStateApi();
@@ -189,105 +193,229 @@ public sealed class StateTests
         StateSnapshot first = await store.ReadAsync();
         first.State["version"] = 99;
         first.State.Obj("notes")["caller-only"] = new JsonObject();
-        string? expectedRef = "initial";
-        string? expectedBlob = "initial-blob";
-        string expectedMarker = "initial";
-        int expectedBlobReads = 1;
-        int expectedRefReads = 2;
-        Exception? writeFailure = null;
-        if (scenario == "unchanged")
-        {
-            JsonObject update = Core.NewState();
-            update["marker"] = "applied";
-            await store.WriteAsync(update, new StateSnapshot(Core.NewState(), "initial"), "fixture acknowledged write");
-            api.RefResponses.Enqueue("initial");
-            expectedRef = "written";
-            expectedBlob = "written-blob";
-            expectedMarker = "applied";
-            expectedRefReads = 4;
-        }
-        else if (scenario == "changed")
-        {
-            api.Head = expectedRef = "changed";
-            expectedBlob = "changed-blob";
-            expectedMarker = "changed";
-            expectedBlobReads = 2;
-        }
-        else if (scenario == "applied-with-lost-response")
-        {
-            api.LosePatchResponse = true;
-            JsonObject update = Core.NewState();
-            update["marker"] = "applied";
-            writeFailure = await Record.ExceptionAsync(() => store.WriteAsync(update,
-                new StateSnapshot(Core.NewState(), "initial"), "fixture ambiguous response"));
-            update["marker"] = "caller mutation";
-            expectedRef = "written";
-            expectedBlob = "written-blob";
-            expectedMarker = "applied";
-            expectedBlobReads = 2;
-            expectedRefReads = 3;
-        }
+        JsonObject changed = OperationalState();
+        changed["marker"] = "changed";
+        api.Seed("changed", changed, "initial");
+        StateSnapshot currentParent = await store.ReadAsync();
+        JsonObject attempted = currentParent.State.Copy();
+        attempted["workload_history"] = new JsonObject { ["unsaved"] = LargeAuditRecord() };
+        api.RejectPatch = true;
+        Exception? failedWrite = await Record.ExceptionAsync(() => store.WriteAsync(attempted, currentParent, "fixture rejected publication"));
 
         // Act
         StateSnapshot current = await store.ReadAsync();
-        string currentMarker = current.State.Str("marker");
+        string marker = current.State.Str("marker");
         current.State["marker"] = "returned snapshot mutation";
 
         // Assert
-        if (scenario == "applied-with-lost-response") writeFailure.Should().BeOfType<GitHubApiFailure>();
-        current.RefSha.Should().Be(expectedRef);
-        current.BlobSha.Should().Be(expectedBlob);
-        currentMarker.Should().Be(expectedMarker);
+        failedWrite.Should().BeOfType<GitHubApiFailure>();
+        current.RefSha.Should().Be("changed");
+        current.BlobSha.Should().Be("changed-blob");
+        marker.Should().Be("changed");
         current.State.Obj("notes").Count.Should().Be(0);
         current.State.Int("version").Should().Be(1);
-        api.StateReads.Should().Be(expectedBlobReads);
-        api.RefReads.Should().Be(expectedRefReads);
-        api.RemoteState.Str("marker").Should().Be(scenario == "changed" ? "initial" : "applied");
+        api.StateReads.Should().Be(2);
+        api.RefReads.Should().Be(4);
+        api.Patches.Should().Be(1);
+        api.RemoteState.Str("marker").Should().Be("changed");
+        api.CommitWrites.Should().Be(2);
+        api.RemoteState.ContainsKey("workload_history").Should().BeFalse();
+        api.Parent(api.Head!).Should().Be("initial");
     }
 
     [Fact]
     public async Task StateWriteFreezesCallerInputBeforeItsFirstAwait()
     {
         // Arrange
-        var api = new CachedStateApi();
+        JsonObject original = OperationalState();
+        original["focused_workload"] = new JsonObject { ["id"] = "unsaved", ["status"] = "active", ["audit"] = "earlier focused version" };
+        var api = new CachedStateApi(original);
         var store = new StateBranchStore(api);
         StateSnapshot snapshot = await store.ReadAsync();
         snapshot = await store.WriteAsync(snapshot.State, snapshot, "fixture prior acknowledged write");
+        string acknowledged = snapshot.RefSha!;
         api.RefResponses.Enqueue("initial");
         JsonObject input = snapshot.State.Copy();
         input["frozen_extension"] = new JsonObject { ["nested"] = "before" };
+        input["workload_history"] = new JsonObject { ["unsaved"] = LargeAuditRecord() };
+        JsonObject frozen = input.Copy();
+        snapshot.State["workload_history"] = input["workload_history"]!.DeepClone();
         api.BeforeRefResponse = () => input.Obj("frozen_extension")["nested"] = "after";
 
         // Act
         StateSnapshot written = await store.WriteAsync(input, snapshot, "fixture frozen state");
+        JsonObject saved = written.State.Copy();
+        written.State.Obj("frozen_extension")["nested"] = "returned mutation";
+        snapshot.State.Obj("focused_workload")["audit"] = "caller snapshot mutation";
+        StateSnapshot cached = await store.ReadAsync();
+        JsonObject cachedState = cached.State.Copy();
+        cached.State.Obj("frozen_extension")["nested"] = "cached snapshot mutation";
 
         // Assert
-        written.State.Obj("frozen_extension").Str("nested").Should().Be("before");
-        api.WrittenState!.Obj("frozen_extension").Str("nested").Should().Be("before");
+        frozen.Obj("workload_history").ToJsonString(JsonData.Options).Length.Should().BeLessThan(1_048_576);
+        Encoding.UTF8.GetByteCount(frozen.Obj("workload_history").ToJsonString(JsonData.Options)).Should().BeGreaterThan(1_048_576);
+        saved.Obj("workload_history").Count.Should().Be(0);
+        string intermediate = api.Parent(written.RefSha!);
+        api.Parent(intermediate).Should().Be(acknowledged);
+        JsonNode.DeepEquals(api.StateAt(intermediate), frozen).Should().BeTrue();
+        JsonObject expected = frozen.Copy();
+        expected["workload_history"] = new JsonObject();
+        JsonNode.DeepEquals(saved, expected).Should().BeTrue();
+        JsonNode.DeepEquals(api.RemoteState, expected).Should().BeTrue();
         input.Obj("frozen_extension").Str("nested").Should().Be("after");
+        JsonNode.DeepEquals(cachedState, expected).Should().BeTrue();
+        api.RemoteState.Obj("frozen_extension").Str("nested").Should().Be("before");
+        api.StateAt("initial").Obj("focused_workload").Str("audit").Should().Be("earlier focused version");
         api.Patches.Should().Be(2);
+        api.CommitWrites.Should().Be(3);
+        api.ForcedUpdates.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task LeaseAcquisitionBoundsSavedLegacyHistoryBeforeTheGlobalSizeGuard()
+    {
+        // Arrange
+        JsonObject original = OperationalState();
+        var history = new JsonObject { ["large-old-prefix"] = "" };
+        for (int index = 0; index < 64; index++) history[$"saved-{index:D2}"] = new JsonObject { ["audit"] = $"whole record {index}" };
+        original["workload_history"] = history;
+        int overhead = Encoding.UTF8.GetByteCount(original.ToJsonString(JsonData.Options) + "\n");
+        history["large-old-prefix"] = new string('x', 23_999_970 - overhead);
+        JsonObject withLease = original.Copy();
+        withLease["lease"] = new JsonObject { ["owner"] = "new-worker", ["acquired_at"] = "2026-11-02T12:00:00Z", ["expires_at"] = "2026-11-02T12:20:00Z" };
+        int encodedBefore = Convert.ToBase64String(Encoding.UTF8.GetBytes(original.ToJsonString(JsonData.Options) + "\n")).Length;
+        int encodedAfter = Convert.ToBase64String(Encoding.UTF8.GetBytes(withLease.ToJsonString(JsonData.Options) + "\n")).Length;
+        var newestTwentyOne = new JsonObject(history.Skip(history.Count - 21).Select(pair => new KeyValuePair<string, JsonNode?>(pair.Key, pair.Value?.DeepClone())));
+        var api = new CachedStateApi(original);
+        var lease = new DurableLease(new StateBranchStore(api), "new-worker");
+
+        // Act
+        StateSnapshot acquired = await lease.AcquireAsync();
+
+        // Assert
+        encodedBefore.Should().BeLessThanOrEqualTo(32_000_000);
+        encodedAfter.Should().BeGreaterThan(32_000_000);
+        Encoding.UTF8.GetByteCount(newestTwentyOne.ToJsonString(JsonData.Options)).Should().BeLessThan(1_048_576);
+        acquired.State.Obj("workload_history").Select(pair => pair.Key).Should().Equal(history.Skip(history.Count - 20).Select(pair => pair.Key));
+        foreach (KeyValuePair<string, JsonNode?> row in acquired.State.Obj("workload_history")) JsonNode.DeepEquals(row.Value, history[row.Key]).Should().BeTrue();
+        Encoding.UTF8.GetByteCount(acquired.State.Obj("workload_history").ToJsonString(JsonData.Options)).Should().BeLessThanOrEqualTo(1_048_576);
+        JsonObject expected = original.Copy();
+        expected["workload_history"] = acquired.State["workload_history"]!.DeepClone();
+        expected["lease"] = acquired.State["lease"]!.DeepClone();
+        JsonNode.DeepEquals(acquired.State, expected).Should().BeTrue();
+        acquired.State.Obj("lease").Str("owner").Should().Be("new-worker");
+        api.Parent(acquired.RefSha!).Should().Be("initial");
+        JsonNode.DeepEquals(api.StateAt("initial"), original).Should().BeTrue();
+        api.CommitWrites.Should().Be(1);
+        api.Patches.Should().Be(1);
+        api.ForcedUpdates.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task CanceledCompactingEngineWritePreservesExactAttemptAndFullAncestorEvidence()
+    {
+        // Arrange
+        JsonObject original = OperationalState();
+        JsonObject published = LargeAuditRecord();
+        published["status"] = "published";
+        original["focused_workload"] = published.Copy();
+        var api = new CachedStateApi(original);
+        using var caller = new CancellationTokenSource();
+        var cancellation = new OperationCanceledException("Final ref response canceled after application.", caller.Token);
+        api.AfterPatch = () => { caller.Cancel(); throw cancellation; };
+        var engine = new ImprovementEngine(Repository.FindRoot(), new JsonObject(), new StateBranchStore(api),
+            notesLoader: () => new JsonArray(), snapshotShaLoader: () => "unused-before-model-loop");
+
+        // Act
+        Exception? failure = await Record.ExceptionAsync(() => engine.RunAsync(withModel: true, cancellationToken: caller.Token));
+
+        // Assert
+        failure.Should().BeSameAs(cancellation);
+        api.Patches.Should().Be(1);
+        api.CommitWrites.Should().Be(2);
+        api.RefReads.Should().Be(3);
+        api.ForcedUpdates.Should().Be(0);
+        JsonObject saved = api.RemoteState;
+        saved.Obj("workload_history").Count.Should().Be(0);
+        saved.Obj("focused_workload").Str("status").Should().Be("active");
+        saved.Obj("focused_workload").Str("id").Should().NotBe(published.Str("id"));
+        JsonObject archived = api.StateAt(api.Parent(api.Head!));
+        JsonNode.DeepEquals(archived.Obj("workload_history")[published.Str("id")], published).Should().BeTrue();
+        api.Parent(api.Parent(api.Head!)).Should().Be("initial");
+        JsonObject expected = original.Copy();
+        expected["focused_workload"] = saved["focused_workload"]!.DeepClone();
+        expected["workload_history"] = new JsonObject();
+        JsonNode.DeepEquals(saved, expected).Should().BeTrue();
+        JsonNode.DeepEquals(api.StateAt("initial"), original).Should().BeTrue();
+    }
+
+    private static JsonObject LargeAuditRecord() => new()
+    {
+        ["id"] = "unsaved",
+        ["status"] = "incompatible",
+        ["audit"] = new string('界', 400_000),
+        ["future_metadata"] = new JsonObject { ["owner"] = "original", ["revision"] = 7 }
+    };
+
+    private static JsonObject OperationalState()
+    {
+        JsonObject state = Core.NewState();
+        state["marker"] = "initial";
+        state["focused_workload"] = new JsonObject { ["id"] = "current", ["status"] = "active", ["accepted_records"] = new JsonArray() };
+        state["pending_author_proposal"] = new JsonObject { ["workload_id"] = "parked", ["proposal"] = DomainFixtures.Proposal(DomainFixtures.Edit()) };
+        state["pending_operation"] = new JsonObject { ["op_id"] = "journal", ["evidence"] = new JsonObject { ["head"] = "retained" } };
+        state["export_operations"] = new JsonObject { ["export"] = new JsonObject { ["receipt_hash"] = "verified", ["phase"] = "prepared" } };
+        state["held_proposals"] = new JsonObject { ["hold"] = new JsonObject { ["reason"] = "retain" } };
+        state.Arr("rejections").Add(new JsonObject { ["fingerprint"] = "rejected" });
+        state.Obj("feedback")["comment:1"] = new JsonObject { ["revision"] = "owner-revision", ["status"] = "pending" };
+        state["cooldown"] = new JsonObject { ["until"] = "2020-01-01T00:00:00Z" };
+        state["future_extension"] = new JsonObject { ["nested"] = new JsonArray("retained", 7, null) };
+        return state;
     }
 
     private sealed class CachedStateApi : IGitHubApi
     {
+        private readonly Dictionary<string, JsonObject> blobs = new(StringComparer.Ordinal);
+        private readonly Dictionary<string, JsonObject> trees = new(StringComparer.Ordinal);
+        private readonly Dictionary<string, JsonObject> commits = new(StringComparer.Ordinal);
+        private int nextObject;
         public string Repo => "owner/state";
-        public string? Head { get; set; } = "initial";
+        public string? Head { get; set; }
         public int RefReads { get; private set; }
         public int StateReads { get; private set; }
         public int Patches { get; private set; }
         public int Mutations { get; private set; }
-        public bool LosePatchResponse { get; set; }
-        public Action? BeforeRefResponse { get; set; }
+        public int CommitWrites { get; private set; }
+        public int ForcedUpdates { get; private set; }
+        public bool RejectPatch { get; set; }
         public Queue<string> RefResponses { get; } = new();
-        public JsonObject? WrittenState { get; private set; }
-        public JsonObject RemoteState { get; private set; } = InitialState();
+        public Action? BeforeRefResponse { get; set; }
+        public Action? AfterPatch { get; set; }
+        public JsonObject RemoteState => StateAt(Head!);
 
-        private static JsonObject InitialState()
+        public CachedStateApi(JsonObject? state = null) => Seed("initial", state ?? OperationalState());
+
+        public void Seed(string sha, JsonObject state, string? parent = null)
         {
-            JsonObject state = Core.NewState();
-            state["marker"] = "initial";
-            return state;
+            blobs.Add(sha + "-blob", new JsonObject { ["encoding"] = "base64", ["content"] = Convert.ToBase64String(Encoding.UTF8.GetBytes(state.ToJsonString(JsonData.Options) + "\n")) });
+            trees.Add(sha + "-tree", Tree(sha + "-blob"));
+            commits.Add(sha, new JsonObject { ["tree"] = new JsonObject { ["sha"] = sha + "-tree" }, ["parents"] = parent is null ? new JsonArray() : new JsonArray(parent) });
+            Head = sha;
         }
+
+        public string Parent(string commit) => commits[commit].Arr("parents")[0]!.GetValue<string>();
+        public JsonObject StateAt(string commit)
+        {
+            string tree = commits[commit].Obj("tree").Str("sha");
+            string blob = trees[tree].Arr("tree")[0]!.Str("sha");
+            return JsonNode.Parse(Convert.FromBase64String(blobs[blob].Str("content")))!.AsObject();
+        }
+
+        private static JsonObject Tree(string blob) => new()
+        {
+            ["truncated"] = false,
+            ["tree"] = new JsonArray(new JsonObject { ["path"] = Runtime.StatePath, ["type"] = "blob", ["mode"] = "100644", ["sha"] = blob })
+        };
 
         public async Task<JsonNode?> RequestAsync(string method, string path, JsonNode? payload = null, bool paginate = false, CancellationToken cancellationToken = default)
         {
@@ -300,40 +428,40 @@ public sealed class StateTests
                 if (Head is null) throw new GitHubApiFailure("missing", 404);
                 return new JsonObject { ["object"] = new JsonObject { ["sha"] = RefResponses.TryDequeue(out string? observed) ? observed : Head } };
             }
-            if (method == "GET" && path.StartsWith("/git/commits/", StringComparison.Ordinal))
-            {
-                return new JsonObject { ["tree"] = new JsonObject { ["sha"] = path.Split('/').Last() } };
-            }
-            if (method == "GET" && path.StartsWith("/git/trees/", StringComparison.Ordinal))
-            {
-                string tree = path.Split('/').Last().Split('?')[0];
-                return new JsonObject
-                {
-                    ["truncated"] = false,
-                    ["tree"] = new JsonArray(new JsonObject
-                    { ["path"] = Runtime.StatePath, ["type"] = "blob", ["mode"] = "100644", ["sha"] = tree + "-blob" })
-                };
-            }
+            if (method == "GET" && path.StartsWith("/git/commits/", StringComparison.Ordinal)) return commits[path.Split('/').Last()].Copy();
+            if (method == "GET" && path.StartsWith("/git/trees/", StringComparison.Ordinal)) return trees[path.Split('/').Last().Split('?')[0]].Copy();
             if (method == "GET" && path.StartsWith("/git/blobs/", StringComparison.Ordinal))
             {
                 StateReads++;
-                JsonObject state = RemoteState.Copy();
-                if (path.EndsWith("changed-blob", StringComparison.Ordinal)) state["marker"] = "changed";
-                return new JsonObject { ["encoding"] = "base64", ["content"] = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(state.ToJsonString())) };
+                return blobs[path.Split('/').Last()].Copy();
             }
-            if (method == "POST" && path == "/git/blobs")
+            string sha = $"object-{++nextObject}";
+            if (method == "POST" && path == "/git/blobs") blobs.Add(sha, payload!.AsObject().Copy());
+            else if (method == "POST" && path == "/git/trees")
             {
-                WrittenState = JsonNode.Parse(Convert.FromBase64String(payload.Str("content")))!.AsObject();
-                return new JsonObject { ["sha"] = "written-blob" };
+                trees[payload.Str("base_tree")].Should().NotBeNull();
+                trees.Add(sha, Tree(payload!.Arr("tree")[0]!.Str("sha")));
             }
-            if (method == "PATCH")
+            else if (method == "POST" && path == "/git/commits")
+            {
+                CommitWrites++;
+                string tree = payload.Str("tree");
+                trees.ContainsKey(tree).Should().BeTrue();
+                string parent = payload!.Arr("parents")[0]!.GetValue<string>();
+                commits.ContainsKey(parent).Should().BeTrue();
+                commits.Add(sha, new JsonObject { ["tree"] = new JsonObject { ["sha"] = tree }, ["parents"] = payload!["parents"]!.DeepClone() });
+            }
+            else if (method == "PATCH" && path.StartsWith("/git/refs/", StringComparison.Ordinal))
             {
                 Patches++;
+                if (payload.Bool("force")) ForcedUpdates++;
+                if (RejectPatch) throw new GitHubApiFailure("Ref rejected before application.");
+                commits.ContainsKey(payload.Str("sha")).Should().BeTrue();
                 Head = payload.Str("sha");
-                RemoteState = WrittenState!.Copy();
-                if (LosePatchResponse) throw new GitHubApiFailure("Response lost after ref update.");
+                AfterPatch?.Invoke();
             }
-            return new JsonObject { ["sha"] = "written" };
+            else throw new InvalidOperationException($"Unexpected {method} {path}.");
+            return new JsonObject { ["sha"] = sha };
         }
 
         public Task<JsonNode?> GraphqlAsync(string query, JsonObject variables, CancellationToken cancellationToken = default) =>
@@ -370,27 +498,6 @@ public sealed class StateTests
         return fixture;
     }
 
-    private sealed class ExportCompactionStateSizeApi : IGitHubApi
-    {
-        public string Repo => "owner/state-size";
-        public int Mutations { get; private set; }
-
-        public Task<JsonNode?> RequestAsync(string method, string path, JsonNode? payload = null, bool paginate = false, CancellationToken cancellationToken = default)
-        {
-            if (method != "GET")
-            {
-                Mutations++;
-                throw new InvalidOperationException("Oversized state reached a remote mutation.");
-            }
-            JsonNode response = path.StartsWith("/git/ref/", StringComparison.Ordinal)
-                ? new JsonObject { ["object"] = new JsonObject { ["sha"] = "current-state" } }
-                : new JsonObject { ["tree"] = new JsonObject { ["sha"] = "current-tree" } };
-            return Task.FromResult<JsonNode?>(response);
-        }
-
-        public Task<JsonNode?> GraphqlAsync(string query, JsonObject variables, CancellationToken cancellationToken = default) =>
-            throw new InvalidOperationException("No GraphQL mutation expected.");
-    }
     [Fact]
     public async Task StaleStateWriteIsRejectedWithoutReplacingCurrentEvidence()
     {
@@ -398,7 +505,9 @@ public sealed class StateTests
         var api = new CachedStateApi();
         var store = new StateBranchStore(api);
         StateSnapshot stale = await store.ReadAsync();
-        api.Head = "another-worker-head";
+        stale.State["workload_history"] = new JsonObject { ["unsaved"] = LargeAuditRecord() };
+        JsonObject original = api.RemoteState;
+        api.Seed("another-worker-head", original, "initial");
 
         // Act
         Func<Task> write = () => store.WriteAsync(stale.State, stale, "stale write");
@@ -406,7 +515,8 @@ public sealed class StateTests
         // Assert
         await write.Should().ThrowAsync<Conflict>().WithMessage("*ref changed*");
         api.Head.Should().Be("another-worker-head");
-        api.RemoteState.Str("marker").Should().Be("initial");
+        JsonNode.DeepEquals(api.RemoteState, original).Should().BeTrue();
+        stale.State.Obj("workload_history").ContainsKey("unsaved").Should().BeTrue();
         api.Mutations.Should().Be(0);
     }
 

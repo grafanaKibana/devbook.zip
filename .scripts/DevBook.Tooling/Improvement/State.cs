@@ -10,19 +10,33 @@ public sealed class StateBranchStore(IGitHubApi api, string branch = Runtime.Sta
     private StateSnapshot? cached;
     private readonly HashSet<string> supersededRefs = new(StringComparer.Ordinal);
     private const int MaximumEncodedStateLength = 32_000_000;
+    private const int MaximumHistoryRecords = 20;
+    private const int MaximumHistoryBytes = 1_048_576;
+    private CanceledWriteAttempt? canceledWrite;
+    private sealed record CanceledWriteAttempt(JsonObject Input, StateSnapshot Intended);
     private string RefPath => "/git/ref/heads/" + Uri.EscapeDataString(branch);
     private string UpdateRefPath => "/git/refs/heads/" + Uri.EscapeDataString(branch);
 
     public async Task<StateSnapshot> ProvisionAsync(JsonObject state, string baseSha, CancellationToken cancellationToken = default)
     {
-        ValidateState(state);
+        JsonObject frozen = state.Copy();
+        ValidateState(frozen);
         StateSnapshot existing = await ReadAsync(cancellationToken);
         if (existing.RefSha is not null)
         {
             return existing;
         }
+        (JsonObject final, string[] removed) = BoundHistory(frozen);
+        string finalEncoded = EncodeState(final);
+        string? archiveEncoded = removed.Length > 0 ? EncodeState(frozen) : null;
         JsonObject parent = await Runtime.ObjectAsync(api, "GET", $"/git/commits/{baseSha}", cancellationToken: cancellationToken);
-        (string commit, _) = await CreateStateCommitAsync(state, baseSha, parent.Obj("tree").Str("sha"), "maintenance: initialize improvement state", cancellationToken);
+        string parentCommit = baseSha;
+        string parentTree = parent.Obj("tree").Str("sha");
+        if (archiveEncoded is not null)
+        {
+            (parentCommit, _, parentTree) = await CreateStateCommitAsync(archiveEncoded, parentCommit, parentTree, "maintenance: preserve initial workload history", cancellationToken);
+        }
+        var (commit, _, _) = await CreateStateCommitAsync(finalEncoded, parentCommit, parentTree, "maintenance: initialize improvement state", cancellationToken);
         await api.RequestAsync("POST", "/git/refs", new JsonObject { ["ref"] = $"refs/heads/{branch}", ["sha"] = commit }, cancellationToken: cancellationToken);
         return await ReadAsync(cancellationToken);
     }
@@ -80,6 +94,7 @@ public sealed class StateBranchStore(IGitHubApi api, string branch = Runtime.Sta
 
     public async Task<StateSnapshot> WriteAsync(JsonObject state, StateSnapshot expected, string message, CancellationToken cancellationToken = default)
     {
+        canceledWrite = null;
         JsonObject frozen = state.Copy();
         ValidateState(frozen);
         if (expected.RefSha is null)
@@ -91,13 +106,73 @@ public sealed class StateBranchStore(IGitHubApi api, string branch = Runtime.Sta
         {
             throw new Conflict("State ref changed before write.");
         }
+        (JsonObject final, string[] removed) = BoundHistory(frozen);
+        JsonObject? archive = null;
+        if (removed.Length > 0)
+        {
+            StateSnapshot? cachedSnapshot = cached;
+            StateSnapshot persisted = cachedSnapshot is not null && cachedSnapshot.RefSha == expected.RefSha
+                ? cachedSnapshot : await ReadAsync(cancellationToken);
+            if (persisted.RefSha != expected.RefSha) throw new Conflict("State ref changed before history retention.");
+            JsonObject persistedHistory = persisted.State.Obj("workload_history");
+            archive = frozen.Copy();
+            foreach (string key in removed)
+            {
+                if (persistedHistory.TryGetPropertyValue(key, out JsonNode? saved)
+                    && JsonNode.DeepEquals(saved, frozen.Obj("workload_history")[key]))
+                {
+                    archive.Obj("workload_history").Remove(key);
+                }
+            }
+            if (JsonNode.DeepEquals(archive["workload_history"], final["workload_history"])) archive = null;
+        }
+        string finalEncoded = EncodeState(final);
+        string? archiveEncoded = archive is null ? null : EncodeState(archive);
         JsonObject parent = await Runtime.ObjectAsync(api, "GET", $"/git/commits/{expected.RefSha}", cancellationToken: cancellationToken);
-        (string commit, string blob) = await CreateStateCommitAsync(frozen, expected.RefSha, parent.Obj("tree").Str("sha"), message, cancellationToken);
-        await api.RequestAsync("PATCH", UpdateRefPath, new JsonObject { ["sha"] = commit, ["force"] = false }, cancellationToken: cancellationToken);
+        string parentCommit = expected.RefSha;
+        string parentTree = parent.Obj("tree").Str("sha");
+        if (archiveEncoded is not null)
+        {
+            (parentCommit, _, parentTree) = await CreateStateCommitAsync(archiveEncoded, parentCommit, parentTree, "maintenance: preserve workload history before retention", cancellationToken);
+        }
+        var (commit, blob, _) = await CreateStateCommitAsync(finalEncoded, parentCommit, parentTree, message, cancellationToken);
+        var written = new StateSnapshot(final, commit, blob);
+        try
+        {
+            await api.RequestAsync("PATCH", UpdateRefPath, new JsonObject { ["sha"] = commit, ["force"] = false }, cancellationToken: cancellationToken);
+        }
+        catch (OperationCanceledException)
+        {
+            canceledWrite = new CanceledWriteAttempt(frozen.Copy(), Copy(written));
+            throw;
+        }
         supersededRefs.Add(expected.RefSha);
-        var written = new StateSnapshot(frozen, commit, blob);
         cached = written;
         return Copy(written);
+    }
+
+    internal bool MatchesCanceledWrite(JsonObject input, StateSnapshot observed) =>
+        canceledWrite is { } attempt
+        && JsonNode.DeepEquals(input, attempt.Input)
+        && observed.RefSha == attempt.Intended.RefSha
+        && observed.BlobSha == attempt.Intended.BlobSha
+        && JsonNode.DeepEquals(observed.State, attempt.Intended.State);
+
+    private static (JsonObject State, string[] Removed) BoundHistory(JsonObject frozen)
+    {
+        JsonObject final = frozen.Copy();
+        if (!frozen.TryGetPropertyValue("workload_history", out JsonNode? value)) return (final, []);
+        if (value is not JsonObject history) throw new RuntimeFailure("Workload history must be an object; preserve the current state branch before retrying.");
+        var retained = new JsonObject();
+        foreach (KeyValuePair<string, JsonNode?> row in history.Reverse().Take(MaximumHistoryRecords))
+        {
+            var candidate = new JsonObject(new[] { new KeyValuePair<string, JsonNode?>(row.Key, row.Value?.DeepClone()) }
+                .Concat(retained.Select(pair => new KeyValuePair<string, JsonNode?>(pair.Key, pair.Value?.DeepClone()))));
+            if (Encoding.UTF8.GetByteCount(candidate.ToJsonString(JsonData.Options)) > MaximumHistoryBytes) break;
+            retained = candidate;
+        }
+        final["workload_history"] = retained;
+        return (final, history.Where(pair => !retained.ContainsKey(pair.Key)).Select(pair => pair.Key).ToArray());
     }
 
     private async Task<JsonObject> ReadVisibleRefAsync(CancellationToken cancellationToken)
@@ -120,13 +195,18 @@ public sealed class StateBranchStore(IGitHubApi api, string branch = Runtime.Sta
     private static StateSnapshot Copy(StateSnapshot snapshot) =>
         new(snapshot.State.Copy(), snapshot.RefSha, snapshot.BlobSha);
 
-    private async Task<(string Commit, string Blob)> CreateStateCommitAsync(JsonObject state, string parent, string parentTree, string message, CancellationToken cancellationToken)
+    private static string EncodeState(JsonObject state)
     {
         string encoded = Convert.ToBase64String(Encoding.UTF8.GetBytes(state.ToJsonString(JsonData.Options) + "\n"));
         if (encoded.Length > MaximumEncodedStateLength)
         {
             throw new RuntimeFailure("State exceeds its readable size limit; preserve the current state branch and compact finalized records before retrying.");
         }
+        return encoded;
+    }
+
+    private async Task<(string Commit, string Blob, string Tree)> CreateStateCommitAsync(string encoded, string parent, string parentTree, string message, CancellationToken cancellationToken)
+    {
         JsonObject blob = await Runtime.ObjectAsync(api, "POST", "/git/blobs", new JsonObject { ["content"] = encoded, ["encoding"] = "base64" }, cancellationToken);
         JsonObject tree = await Runtime.ObjectAsync(api, "POST", "/git/trees", new JsonObject
         {
@@ -139,7 +219,7 @@ public sealed class StateBranchStore(IGitHubApi api, string branch = Runtime.Sta
             ["tree"] = tree["sha"]?.DeepClone(),
             ["parents"] = new JsonArray(parent)
         }, cancellationToken);
-        return (commit.Str("sha"), blob.Str("sha"));
+        return (commit.Str("sha"), blob.Str("sha"), tree.Str("sha"));
     }
 
     internal static void ValidateState(JsonObject state)

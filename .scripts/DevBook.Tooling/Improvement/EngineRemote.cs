@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using DevBook.Tooling.Export;
 using DevBook.Tooling.Infrastructure;
@@ -161,7 +162,7 @@ public sealed partial class ImprovementEngine
                     {
                         receipt = await Receipt.RemoteAsync(api, pr.Obj("head").Str("sha"), cancellationToken);
                     }
-                    catch (Exception error) when (error is IOException or RuntimeFailure)
+                    catch (Exception error) when (error is IOException or RuntimeFailure or InvalidDataException or JsonException or FormatException)
                     {
                         row["base_conflict"] = true;
                         row["frozen"] = true;

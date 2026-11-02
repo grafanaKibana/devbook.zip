@@ -105,7 +105,8 @@ public sealed partial class ImprovementEngine
             if (remaining <= 0) throw;
             using var checkpoint = new CancellationTokenSource(TimeSpan.FromSeconds(Math.Min(30, remaining)), clock);
             StateSnapshot observed = await store.ReadAsync(checkpoint.Token);
-            if (JsonNode.DeepEquals(observed.State, state))
+            if (JsonNode.DeepEquals(observed.State, state)
+                || store is StateBranchStore branchStore && branchStore.MatchesCanceledWrite(state, observed))
             {
                 expectedSnapshot = observed;
             }

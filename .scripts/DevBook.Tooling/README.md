@@ -195,8 +195,20 @@ This uses the verified [local Syncer flow](../../Web/README.md) and stages only 
 
 State stays version 1 on `maintenance/devbook-improvement-state`. Preserve unknown fields, Qard identities, retired IDs, rejection fingerprints, feedback revisions, review evidence, cooldowns and journals. Do not clear all state or force-push around a conflict. Stop scheduling and wait for active jobs before a reviewed state repair; use the current state-branch/file version as its CAS guard and change only the affected field.
 
+Every state-branch save, including lease acquisition, bounds `workload_history` to **20 whole records** and **1,048,576 UTF-8 serialized bytes**, including keys and JSON formatting. These fixed defaults retain the newest contiguous suffix in insertion order, stopping when the next record cannot fit; timestamps do not reorder it. If the newest record alone exceeds the byte budget, current history is empty. Retention leaves all other fields unchanged, including unknown fields, focused workload, pending proposals, journals, rejections and cooldowns.
+
+Removed records must already match complete entries in the actual persisted parent history. Otherwise, new or changed evidence is saved in full at the same `.devbook-improvement/state.json` path in an ordinary intermediate ancestor before one final non-force ref update publishes bounded state. Unsaved evidence is never dropped to fit. The unchanged **32,000,000 base64-character** state guard fails clearly before publication if non-history data or required intermediate evidence is too large. An applied save interrupted by cancellation is recognized only with proof of that exact attempted transaction; the caller still receives the original cancellation.
+
+Older full records remain in Git ancestry; total repository history continues growing. Recovery requires the complete state-branch ancestry from a separately authorized fetch; shallow clones may omit evidence. Replace `<state-ref>` with the fetched local state ref and `<commit>` with a commit from its log, then inspect read-only. Do not rewrite that history or delete the state branch: audit recovery depends on its ancestry. No separate archive files are created.
+
+```bash
+git log <state-ref> -- .devbook-improvement/state.json
+git show <commit>:.devbook-improvement/state.json
+```
+
 | Evidence / condition | Recovery |
 | --- | --- |
+| Missing/invalid export receipt, malformed receipt JSON or invalid base64 | Only the owning managed PR freezes with a diagnostic; its evidence remains intact and other eligible topics continue. Inspect the receipt and repair/re-export through the guarded flow. Cancellation and unrelated programming errors retain their existing handling. |
 | Source/hash or branch CAS conflict | Preserve the candidate and inspect exact expected/observed heads. If authoritative topic content changed on `main`, merge current `main` into the topic branch through reviewed Git work and resolve conflicts before retrying. Unrelated topics continue. |
 | Write-ahead journal with ambiguous GitHub state | Reconcile its branch, PR marker and exact operation ID before new work. Leave ambiguous evidence intact; never blindly replay publication. |
 | Owner advanced/removed a pending branch | Evidence moves to `invalidated_operations`; `topics.<topic-id>.publication_conflict` pauses that generation. Inspect archive/current content, reconcile the intended base, then clear only that marker through guarded reviewed state repair. Preserve archive and owner-review freeze; run protected dry-run before apply. Closing/merging advances the generation without reviving it. |

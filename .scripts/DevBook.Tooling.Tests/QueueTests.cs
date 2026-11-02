@@ -1,4 +1,6 @@
+using System.Text;
 using System.Text.Json.Nodes;
+using DevBook.Tooling.Export;
 using DevBook.Tooling.Improvement;
 using DevBook.Tooling.Infrastructure;
 using FluentAssertions;
@@ -175,20 +177,115 @@ public sealed class QueueTests
     }
 
     [Fact]
-    public void ThreeOtherOpenTopicsDoNotBlockANewTopic()
+    public async Task ThreeMalformedReceiptsPauseTheirTopicsWithoutBlockingANewTopic()
     {
         // Arrange
+        using var fixture = new WorkloadFixture(1);
+        var api = new ReceiptReconciliationApi();
         JsonObject state = Core.NewState();
-        foreach (string topic in new[] { "Networks", "Databases", "Algorithms" })
-            state.Obj("prs")[topic] = new JsonObject { ["topic_id"] = Core.TopicId(topic), ["status"] = "open", ["draft"] = true };
+        var originals = new Dictionary<string, JsonObject>();
+        string[] topics = ["Networks", "Databases", "Algorithms"];
+        for (var index = 0; index < topics.Length; index++)
+        {
+            string topic = topics[index];
+            string topicId = Core.TopicId(topic);
+            string key = $"{topicId}:1";
+            string path = $"Vault/Home/{topic}/Other.md";
+            JsonObject note = DomainFixtures.NoteRecord(path);
+            fixture.Notes.Add(note);
+            string head = new((char)('a' + index), 40);
+            string receiptSha = new((char)('d' + index), 40);
+            api.Prs.Add(new JsonObject
+            {
+                ["number"] = index + 1,
+                ["state"] = "open",
+                ["draft"] = true,
+                ["body"] = Runtime.Marker(topicId, 1),
+                ["head"] = new JsonObject
+                {
+                    ["ref"] = Runtime.ExpectedManagedBranch(topicId, 1),
+                    ["sha"] = head,
+                    ["repo"] = new JsonObject { ["full_name"] = api.Repo }
+                },
+                ["base"] = new JsonObject
+                {
+                    ["ref"] = "main",
+                    ["sha"] = api.BaseSha,
+                    ["repo"] = new JsonObject { ["full_name"] = api.Repo }
+                }
+            });
+            JsonObject prior = new()
+            {
+                ["topic_id"] = topicId,
+                ["generation"] = 1,
+                ["number"] = index + 1,
+                ["status"] = "open",
+                ["draft"] = true,
+                ["base_note_hashes"] = new JsonObject { [path] = note.Str("hash") },
+                ["changed_paths"] = new JsonArray(path),
+                ["proposal_records"] = new JsonArray(new JsonObject
+                {
+                    ["proposal"] = DomainFixtures.Proposal(DomainFixtures.Edit()),
+                    ["review"] = new JsonObject { ["verdict"] = "CLEAN", ["evidence"] = $"review-{topic}" },
+                    ["source_evidence"] = new JsonObject { ["original"] = $"source-{topic}" }
+                }),
+                ["export_receipt"] = new JsonObject { ["original"] = $"export-{topic}" },
+                ["unknown_evidence"] = new JsonObject { ["nested"] = new JsonArray(topic, "preserve") }
+            };
+            state.Obj("prs")[key] = prior;
+            originals[key] = prior.Copy();
+            api.Responses[$"/pulls/{index + 1}/files?per_page=100"] = new JsonArray(
+                new JsonObject { ["filename"] = path }, new JsonObject { ["filename"] = "Web/content/Other.md" });
+            var entries = new JsonArray(Receipt.RequiredPolicyPaths.Append(path).Append("Web/content/Other.md")
+                .Select(input => (JsonNode)new JsonObject
+                { ["path"] = input, ["mode"] = "100644", ["type"] = "blob", ["sha"] = new string('1', 40) }).ToArray());
+            if (index > 0)
+            {
+                entries.Add(new JsonObject
+                { ["path"] = Receipt.PathName, ["mode"] = "100644", ["type"] = "blob", ["sha"] = receiptSha });
+                api.Responses[$"/git/blobs/{receiptSha}"] = new JsonObject
+                {
+                    ["encoding"] = "base64",
+                    ["content"] = index == 1 ? Convert.ToBase64String(Encoding.UTF8.GetBytes("{malformed-json")) : "!invalid-base64!"
+                };
+            }
+            api.Responses[$"/git/trees/{head}?recursive=1"] = new JsonObject { ["truncated"] = false, ["tree"] = entries };
+        }
+        var store = new MemoryStateStore(state);
+        fixture.Config["repo"] = api.Repo;
+        var publisher = new GitHubRuntime(api, store, activation: () => { });
+        var engine = new ImprovementEngine(fixture.Root, fixture.Config, store, fixture.Model, api, publisher,
+            notesLoader: () => fixture.Notes.Copy(), clock: fixture.Clock, snapshotShaLoader: () => api.BaseSha);
 
         // Act
-        JsonObject? batch = ImprovementQueue.SelectBatch(state, new JsonArray(DomainFixtures.NoteRecord()), "rules");
+        JsonObject result = await engine.RunAsync();
 
         // Assert
-        batch.Should().NotBeNull();
-        batch!.Str("topic").Should().Be("Programming");
-        batch.Arr("notes").Should().ContainSingle();
+        JsonObject final = (await store.ReadAsync()).State;
+        result.Str("status").Should().Be("selected");
+        result.Obj("batch").Str("topic").Should().Be("Programming");
+        result.Obj("batch").Arr("notes").Should().ContainSingle().Which.Str("path").Should().Be(fixture.Notes[0]!.Str("path"));
+        result.Int("model_calls").Should().Be(0);
+        result.Bool("mutated").Should().BeFalse();
+        fixture.Model.Authors.Should().BeEmpty();
+        fixture.Model.Reviews.Should().BeEmpty();
+        final.Obj("prs").Count.Should().Be(3);
+        foreach ((string key, JsonObject original) in originals)
+        {
+            JsonObject row = final.Obj("prs").Obj(key);
+            row.Str("status").Should().Be("open");
+            row.Bool("frozen").Should().BeTrue();
+            row.Bool("base_conflict").Should().BeTrue();
+            row.Str("pause_reason").Should().NotBeNullOrWhiteSpace();
+            foreach (string field in new[] { "proposal_records", "export_receipt", "unknown_evidence", "base_note_hashes", "changed_paths" })
+                JsonNode.DeepEquals(row[field], original[field]).Should().BeTrue($"{key} must retain {field}");
+        }
+        final.Obj("prs").Obj($"{Core.TopicId("Networks")}:1").Str("pause_reason").Should().Contain("receipt is missing");
+        final.Obj("prs").Obj($"{Core.TopicId("Databases")}:1").Str("pause_reason").Should().Contain("property name");
+        final.Obj("prs").Obj($"{Core.TopicId("Algorithms")}:1").Str("pause_reason").Should().Contain("Base-64");
+        api.Requests.Should().Contain("GET /git/blobs/" + new string('e', 40));
+        api.Requests.Should().Contain("GET /git/blobs/" + new string('f', 40));
+        api.Requests.Should().OnlyContain(request => request.StartsWith("GET ", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -235,6 +332,36 @@ public sealed class QueueTests
 
         // Assert
         construct.Should().Throw<ArgumentException>().WithMessage("Manual note targeting is not supported*");
+    }
+
+    private sealed class ReceiptReconciliationApi : IGitHubApi
+    {
+        public string Repo => "owner/repo";
+        public string BaseSha { get; } = new('0', 40);
+        public JsonArray Prs { get; } = new();
+        public Dictionary<string, JsonNode> Responses { get; } = new(StringComparer.Ordinal);
+        public List<string> Requests { get; } = [];
+
+        public Task<JsonNode?> RequestAsync(string method, string path, JsonNode? payload = null,
+            bool paginate = false, CancellationToken cancellationToken = default)
+        {
+            Requests.Add($"{method} {path}");
+            if (method != "GET") throw new InvalidOperationException($"Unexpected remote mutation: {method} {path}");
+            JsonNode response = path switch
+            {
+                "/git/ref/heads/main" => new JsonObject { ["object"] = new JsonObject { ["sha"] = BaseSha } },
+                "/pulls?state=all&per_page=100" => Prs,
+                _ => Responses.TryGetValue(path, out JsonNode? value) ? value
+                    : throw new InvalidOperationException($"Unexpected fixture request: {method} {path}")
+            };
+            return Task.FromResult<JsonNode?>(response.DeepClone());
+        }
+
+        public Task<JsonNode?> GraphqlAsync(string query, JsonObject variables, CancellationToken cancellationToken = default)
+        {
+            Requests.Add("GRAPHQL");
+            throw new InvalidOperationException("Unexpected remote GraphQL mutation.");
+        }
     }
 
 }
