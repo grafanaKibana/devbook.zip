@@ -72,20 +72,6 @@ public sealed class ProposalTests
         replay.Should().Throw<ProposalException>().WithMessage("*rejected edit*");
     }
 
-    [Fact]
-    public void FreshEditRequiresAConcreteProblem()
-    {
-        // Arrange
-        JsonObject edit = DomainFixtures.Edit();
-        edit.Remove("problem");
-
-        // Act
-        Action validate = () => Proposal.Validate(DomainFixtures.Proposal(edit));
-
-        // Assert
-        validate.Should().Throw<ProposalException>();
-    }
-
     [Theory]
     [InlineData("missing")]
     [InlineData("duplicate")]

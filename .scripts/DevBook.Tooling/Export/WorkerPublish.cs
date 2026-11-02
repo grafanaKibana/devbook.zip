@@ -484,6 +484,7 @@ public static partial class Worker
         foreach (JsonObject record in records.OfType<JsonObject>())
         {
             final = Core.RecordOutcome(final, record.Obj("batch"), record.Obj("proposal"), record.Obj("result"), record["review"] as JsonObject);
+            Core.CompleteReviewHolds(final, record.Obj("batch"), record["review_evidence"] as JsonObject);
         }
         Proposal.PersistDecisions(final, reviewed.Arr("decisions"));
         JsonObject finalized = final.Obj("finalized_exports").Copy();
@@ -511,11 +512,7 @@ public static partial class Worker
         {
             final.Remove("pending_author_proposal");
         }
-        JsonObject held = final.Obj("held_proposals").Obj(request.Str("topic_id"));
-        if (JsonNode.DeepEquals(held["proposal"], reviewed["proposal"]))
-        {
-            final.Obj("held_proposals").Remove(request.Str("topic_id"));
-        }
+        Core.CompleteReviewHolds(final, reviewed.Obj("batch"), reviewed["review_evidence"] as JsonObject);
         OperationJournal.CompactFinalizedExports(final);
         await store.WriteAsync(final, finalSnapshot, "maintenance: finalize verified generated export", cancellationToken);
         return new JsonObject { ["status"] = "exported", ["commit_sha"] = head, ["pr_number"] = request.Int("pr_number"), ["model_calls"] = 0 };

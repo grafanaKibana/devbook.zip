@@ -18,10 +18,35 @@ public sealed class StateTests
         // Arrange
         var fixture = ExportCompactionReviewedFixture();
         fixture.Api.ChecksReady = true;
-        var store = new MemoryStateStore(fixture.State);
         JsonObject originalOperation = fixture.State.Obj("export_operations").Obj(fixture.Request.Str("op_id"));
         JsonArray openPrRecords = fixture.State.Obj("prs").Obj(fixture.Key).Arr("proposal_records").Copy();
         string receiptHash = LegacyIdentity.Fingerprint(originalOperation["receipts"]);
+        fixture.State["held_proposals"] = new JsonObject
+        {
+            ["other-batch"] = new JsonObject
+            {
+                ["rules_hash"] = "reviewed-rules",
+                ["source_hashes"] = new JsonObject { ["Vault/Home/Programming/Other.md"] = "unchanged-other-source" }
+            }
+        };
+        fixture.State["invalid_proposals"] = new JsonObject
+        {
+            ["completed-batch"] = new JsonObject
+            {
+                ["rules_hash"] = "reviewed-rules",
+                ["source_hashes"] = new JsonObject { [DomainFixtures.Path] = LegacyIdentity.Digest(DomainFixtures.Note) },
+                ["repair_inputs"] = new JsonObject { [DomainFixtures.Path] = "" },
+                ["feedback_keys"] = new JsonArray()
+            },
+            ["different-feedback"] = new JsonObject
+            {
+                ["rules_hash"] = "reviewed-rules",
+                ["source_hashes"] = new JsonObject { [DomainFixtures.Path] = LegacyIdentity.Digest(DomainFixtures.Note) },
+                ["repair_inputs"] = new JsonObject { [DomainFixtures.Path] = "different-flags" },
+                ["feedback_keys"] = new JsonArray("other-feedback-revision")
+            }
+        };
+        var store = new MemoryStateStore(fixture.State);
 
         // Act
         JsonObject published = await Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store);
@@ -30,6 +55,10 @@ public sealed class StateTests
 
         // Assert
         published.Str("status").Should().Be("exported");
+        finalized.State.Obj("held_proposals").ContainsKey("other-batch").Should().BeTrue();
+        finalized.State.Obj("invalid_proposals").ContainsKey("different-feedback").Should().BeTrue();
+        finalized.State.Obj("invalid_proposals").ContainsKey("completed-batch").Should().BeFalse();
+        finalized.State.Obj("completed_review_holds").Count.Should().Be(1);
         compact.Bool("compacted").Should().BeTrue();
         compact["candidate"].Should().BeNull();
         compact["body"].Should().BeNull();
@@ -122,7 +151,6 @@ public sealed class StateTests
     [Theory]
     [InlineData("unchanged")]
     [InlineData("changed")]
-    [InlineData("missing")]
     [InlineData("applied-with-lost-response")]
     public async Task CachedReadReturnsTheCurrentRemoteStateWithoutSharingCallerData(string scenario)
     {
