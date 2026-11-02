@@ -55,9 +55,8 @@ public sealed partial class ImprovementEngine
         HashSet<string> available = notes.OfType<JsonObject>().Select(note => note.Str("path")).ToHashSet();
         string topic = paths.Length == 0 ? "" : Core.TopicFor(paths[0]);
         JsonObject? pr = Queue.OpenPrForTopic(state, topic);
-        if (config.Int("max_review_repairs_per_batch", 1) == 0 || paths.Length == 0 || paths.Length > config.Int("max_notes_per_run", 4) || paths.Any(path => !available.Contains(path))
-            || paused.Contains(Core.TopicId(topic)) || pr?.Bool("frozen") == true
-            || pr is null && state.Obj("prs").Count(item => item.Value.Str("status") == "open") >= config.Int("max_open_prs", 3))
+        if (config.Int("max_review_repairs_per_batch", 1) == 0 || paths.Length != 1 || paths.Any(path => !available.Contains(path))
+            || paused.Contains(Core.TopicId(topic)) || pr is not null && pending.Arr("feedback_keys").Count == 0)
         {
             HoldIncompatiblePending(state, pending, "repair_scope_paused");
             JsonObject parked = state.Obj("held_proposals").Obj(pending.Str("topic_id"));
@@ -80,7 +79,7 @@ public sealed partial class ImprovementEngine
             bool resume = hold.Obj("incompatibility").Str("stage") == "repair_scope_paused"
                 && hold.Str("review_repair_key").Length > 0 && hold.Str("evaluation_hash") == evaluation
                 && state.Obj("parked_review_repairs").Str(hold.Str("review_repair_key")) == LegacyIdentity.Fingerprint(hold);
-            if ((!resume && !CanPrepareRepair(state, hold)) || paths.Length == 0 || paths.Length > config.Int("max_notes_per_run", 4) || hold.Str("target_note").Length > 0 || hold.Str("review_focus").Length > 0
+            if ((!resume && !CanPrepareRepair(state, hold)) || paths.Length != 1 || hold.Str("target_note").Length > 0 || hold.Str("review_focus").Length > 0
                 || hold["feedback_keys"] is not JsonArray || hold.Str("rules_hash") != rules
                 || paths.Any(path => !available.ContainsKey(path) || available[path].Str("hash") != hold.Obj("source_hashes").Str(path))
                 || !JsonNode.DeepEquals(hold["repair_inputs"], RepairInputsFor(paths.Select(path => available[path])))
@@ -90,8 +89,8 @@ public sealed partial class ImprovementEngine
             }
             string topic = Core.TopicFor(paths[0]);
             JsonObject? pr = Queue.OpenPrForTopic(state, topic);
-            if (paths.Any(path => Core.TopicFor(path) != topic) || paused.Contains(Core.TopicId(topic)) || pr?.Bool("frozen") == true
-                || pr is null && state.Obj("prs").Count(item => item.Value.Str("status") == "open") >= config.Int("max_open_prs", 3))
+            if (paused.Contains(Core.TopicId(topic)) || pr is not null
+                || workload?.Str("topic").Length > 0 && workload.Str("topic") != topic)
             {
                 continue;
             }

@@ -50,7 +50,7 @@ public static class EngineCommand
             }
             JsonObject contentAuthorities = Core.LoadContentAuthorities(root);
             JsonObject result;
-            using var deadline = new CancellationTokenSource(TimeSpan.FromMinutes(config.Int("max_run_minutes", 35)));
+            using var deadline = new CancellationTokenSource(TimeSpan.FromMinutes(39));
             if (flags.Contains("--demo"))
             {
                 result = await Demo.RunAsync(root, config, deadline.Token);
@@ -84,7 +84,7 @@ public static class EngineCommand
                 }
                 string owner = (Environment.GetEnvironmentVariable("GITHUB_RUN_ID") ?? "local") + ":" + (Environment.GetEnvironmentVariable("GITHUB_RUN_ATTEMPT") ?? "1");
                 using FileStream localLock = Runtime.LocalLock(Path.Combine(Path.GetTempPath(), "devbook-improvement.lock"));
-                var lease = new DurableLease(store, owner, config.Int("max_run_minutes", 35) * 60 + 120);
+                var lease = new DurableLease(store, owner, 40 * 60);
                 await lease.AcquireAsync(deadline.Token);
                 try
                 {
@@ -106,7 +106,7 @@ public static class EngineCommand
                 Console.WriteLine(new JsonObject(result.Where(item => new[] { "status", "topic", "model_calls", "notice" }.Contains(item.Key))
                     .Select(item => new KeyValuePair<string, JsonNode?>(item.Key, item.Value?.DeepClone()))).ToJsonString());
             }
-            return 0;
+            return result.Str("status") is "provider_error" or "finalization_failed" or "caller_cancelled" ? 1 : 0;
         }
         catch (Exception error) when (error is ArgumentException or IOException or RuntimeFailure or JsonException or TimeoutException or OperationCanceledException)
         {

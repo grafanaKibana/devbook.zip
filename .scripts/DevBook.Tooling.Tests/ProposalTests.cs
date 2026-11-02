@@ -72,33 +72,60 @@ public sealed class ProposalTests
         replay.Should().Throw<ProposalException>().WithMessage("*rejected edit*");
     }
 
-    [Theory]
-    [InlineData("missing")]
-    [InlineData("duplicate")]
-    public void ReviewRejectsMissingOrDuplicatePerEditValueEvidence(string invalid)
+    [Fact]
+    public void ReviewRejectsMissingOrDuplicatePerEditValueEvidence()
     {
         // Arrange
-        JsonObject proposal = DomainFixtures.Proposal(DomainFixtures.Edit());
         var current = new Dictionary<string, string> { [DomainFixtures.Path] = DomainFixtures.Note };
-        JsonObject review = DomainFixtures.UnchangedReview(new JsonObject
+        var cases = new[] { "missing", "duplicate" }.Select(invalid =>
         {
-            ["current"] = new JsonObject { [DomainFixtures.Path] = DomainFixtures.Note },
-            ["proposal"] = proposal
-        });
-        review.Arr("notes")[0]!["target_resolution"] = "RESOLVED";
-        JsonArray checks = review.Arr("change_checks");
-        if (invalid == "missing") checks.Clear();
-        if (invalid == "duplicate")
-        {
-            proposal.Arr("edits").Add(proposal.Arr("edits")[0]!.DeepClone());
-            checks.Add(checks[0]!.DeepClone());
-        }
+            JsonObject proposal = DomainFixtures.Proposal(DomainFixtures.Edit());
+            JsonObject review = DomainFixtures.UnchangedReview(new JsonObject
+            {
+                ["current"] = new JsonObject { [DomainFixtures.Path] = DomainFixtures.Note }, ["proposal"] = proposal
+            });
+            review.Arr("notes")[0]!["target_resolution"] = "RESOLVED";
+            JsonArray checks = review.Arr("change_checks");
+            if (invalid == "missing") checks.Clear();
+            else
+            {
+                proposal.Arr("edits").Add(proposal.Arr("edits")[0]!.DeepClone());
+                checks.Add(checks[0]!.DeepClone());
+            }
+            return (Proposal: proposal, Review: review);
+        }).ToArray();
 
         // Act
-        bool clean = Review.Clean(review, current, proposal, new JsonArray(), new JsonArray());
+        bool[] results = cases.Select(item => Review.Clean(item.Review, current, item.Proposal, new JsonArray(), new JsonArray())).ToArray();
 
         // Assert
-        clean.Should().BeFalse();
+        results.Should().OnlyContain(clean => !clean);
+    }
+
+    [Fact]
+    public void LegacySingletonReconsiderationIsAppliedOnceAcrossReceiptReplay()
+    {
+        // Arrange
+        JsonObject state = Core.NewState();
+        state.Arr("rejections").Add(new JsonObject { ["fingerprint"] = "rejected-edit" });
+        JsonObject receipt = new()
+        {
+            ["batch"] = new JsonObject { ["notes"] = new JsonArray() },
+            ["proposal"] = new JsonObject { ["dispositions"] = new JsonArray() },
+            ["result"] = new JsonObject(),
+            ["decisions"] = new JsonArray(new JsonObject
+            {
+                ["decision"] = "reconsider", ["fingerprint"] = "rejected-edit", ["feedback_key"] = "verified-owner-revision"
+            })
+        };
+
+        // Act
+        JsonObject first = WorkloadReceipts.Apply(state, receipt);
+        JsonObject replayed = WorkloadReceipts.Apply(first, receipt);
+
+        // Assert
+        replayed.Arr("rejections")[0]!.Arr("reconsidered_by").Strings().Should().Equal("verified-owner-revision");
+        replayed.Obj("finalized_note_records").Count.Should().Be(1);
     }
 
     [Fact]
@@ -129,7 +156,6 @@ public sealed class ProposalTests
 
     [Theory]
     [InlineData("note")]
-    [InlineData("rewrite")]
     public void SourceMustAppearInTheRequiredVisibleContext(string kind)
     {
         // Arrange

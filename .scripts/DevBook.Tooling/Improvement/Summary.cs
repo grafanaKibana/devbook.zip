@@ -132,7 +132,7 @@ public static class Summary
     }
 
     public static string Render(IReadOnlyDictionary<string, string> baseline, IReadOnlyDictionary<string, string> current,
-        JsonArray changes, JsonArray feedback, IReadOnlyDictionary<string, string>? noteLinks = null)
+        JsonArray changes, JsonArray feedback, IReadOnlyDictionary<string, string>? noteLinks = null, JsonObject? coverage = null)
     {
         noteLinks ??= new Dictionary<string, string>();
         string Reference(string path)
@@ -143,6 +143,12 @@ public static class Summary
         JsonObject[] final = CoalesceChanges(baseline, current, changes).OfType<JsonObject>().ToArray();
         Dictionary<string, int> counts = new[] { "add", "rewrite", "split", "remove", "replace" }.ToDictionary(kind => kind, kind => final.Count(item => item.Str("kind") == kind));
         var lines = new List<string> { "## 1. Note improvements", "" };
+        if (coverage is not null)
+        {
+            lines.Add($"Reviewed {coverage.Arr("notes").Count} notes in {coverage.Str("topic")}; improved {coverage.Int("improved_count")}. "
+                + $"Calls: {coverage.Int("model_calls")}; elapsed: {coverage["elapsed_seconds"]?.GetValue<double>() ?? 0:0} seconds; stop: {coverage.Str("stop_reason")}.");
+            lines.Add("");
+        }
         string[] noteChanges = final.Where(item => item.Str("kind") == "note").Select(item => $"- {Reference(item.Str("path"))} — {Rationale(item)}").ToArray();
         lines.AddRange(noteChanges.Length == 0 ? ["- No prose-only note changes."] : noteChanges);
         lines.AddRange(["", "## 2. Questions and answers", "", $"- Added: {counts["add"]}", $"- Rewritten: {counts["rewrite"]}", $"- Split: {counts["split"]}", $"- Proposed for removal: {counts["remove"]}", $"- Replaced: {counts["replace"]}", "", "## 3. Significant question changes", ""]);
@@ -157,7 +163,7 @@ public static class Summary
         }
         lines.AddRange(["", "## 4. User feedback", ""]);
         string[] feedbackLines = feedback.OfType<JsonObject>().Select(item => $"- {item.Str("url", item.Str("key", "feedback"))}: {item.Str("outcome", "pending")} — {item.Str("reason")}").ToArray();
-        lines.AddRange(feedbackLines.Length == 0 ? ["- No owner feedback in this batch."] : feedbackLines);
+        lines.AddRange(feedbackLines.Length == 0 ? ["- No owner feedback in this workload."] : feedbackLines);
         return EscapeManagedTokens(string.Join('\n', lines).TrimEnd() + "\n");
     }
 

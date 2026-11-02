@@ -10,11 +10,9 @@
   "max_review_repairs_per_batch": 1,
   "max_source_bytes": 2000000,
   "unknown_reset_recheck_hours": 24,
-  "max_run_minutes": 35,
-  "max_notes_per_run": 4,
-  "max_pr_notes": 16,
+  "max_run_minutes": 30,
+  "max_pr_notes": 5,
   "max_pr_lines": 1200,
-  "max_open_prs": 3,
   "owner_allowlist": [
     {
       "id": 45916288,
@@ -71,5 +69,7 @@
       "Vault/Templates/Blocks/Template - Callout.md"
     ]
   },
-  "automatic_export": true
+  "automatic_export": true,
+  "max_model_calls_per_run": 20,
+  "max_nearby_question_notes": 4
 }

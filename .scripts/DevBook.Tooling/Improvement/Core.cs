@@ -9,6 +9,7 @@ namespace DevBook.Tooling.Improvement;
 public static class Core
 {
     public const int StateVersion = 1;
+    public const string FocusedReviewVersion = "focused-whole-note-v1";
     public static readonly string[] ContentAuthorities = ["AGENTS.md", ".claude/agents/note-reviewer.md", ".claude/agents/note-writer.md", ".codex/skills/obsidian-markdown/SKILL.md", "Vault/Templates/Pages/Template - Concept Page.md", "Vault/Templates/Pages/Template - Index.md", "Vault/Templates/Blocks/Template - Callout.md"];
     public static readonly HashSet<string> SpecialNotes = ["Vault/Home/index.md", "Vault/Home/Questions.md", "Vault/Home/About.md", "Vault/Home/Changelog.md"];
 
@@ -175,7 +176,7 @@ public static class Core
 
     public static JsonObject SyncPrs(JsonObject state, JsonArray prs, JsonObject? config = null)
     {
-        int maxNotes = config.Int("max_pr_notes", 16);
+        int maxNotes = config.Int("max_pr_notes", 5);
         int maxLines = config.Int("max_pr_lines", 1200);
         if (maxNotes < 1 || maxLines < 1)
         {
@@ -290,7 +291,7 @@ public static class Core
         return new JsonArray(queued.OrderBy(item => item.Str("updated_at"), StringComparer.Ordinal).ThenBy(item => item.Str("key"), StringComparer.Ordinal).Select(item => (JsonNode)item).ToArray());
     }
 
-    public static JsonObject RecordOutcome(JsonObject state, JsonObject batch, JsonObject proposal, JsonObject result, JsonObject? review = null)
+    public static JsonObject RecordOutcome(JsonObject state, JsonObject batch, JsonObject proposal, JsonObject result, JsonObject? review = null, bool processFeedback = true)
     {
         JsonObject current = CopyState(state);
         Dictionary<string, JsonObject> dispositions = proposal.Arr("dispositions").OfType<JsonObject>().ToDictionary(item => item.Str("path"));
@@ -312,6 +313,10 @@ public static class Core
             {
                 record["repair_input_hash"] = note.Str("repair_input_hash");
                 record["evaluation_hash"] = batch["evaluation_hash"]?.DeepClone();
+                if (batch.Str("review_process") == FocusedReviewVersion)
+                {
+                    record["review_process"] = FocusedReviewVersion;
+                }
             }
             record["violation_hash"] = LegacyIdentity.ViolationHash(note.Arr("violations"));
             JsonObject? noteReview = review?.Arr("notes").OfType<JsonObject>().FirstOrDefault(item => item.Str("path") == path);
@@ -325,15 +330,32 @@ public static class Core
                     ["evaluation_hash"] = batch["evaluation_hash"]?.DeepClone(),
                     ["review"] = noteReview.Copy()
                 };
+                if (batch.Str("review_process") == FocusedReviewVersion)
+                {
+                    evidence["review_process"] = FocusedReviewVersion;
+                }
                 if (Review.VerifiedKeep(evidence, path, currentText, batch.Str("rules_hash"))
                     && !JsonNode.DeepEquals(record["keep_review"], evidence))
                 {
+                    if (record["keep_review"] is JsonNode previous)
+                    {
+                        if (record["keep_review_history"] is not JsonObject history)
+                        {
+                            history = new JsonObject();
+                            if (record["keep_review_history"] is JsonNode previousHistory)
+                            {
+                                history[LegacyIdentity.Fingerprint(previousHistory)] = previousHistory.DeepClone();
+                            }
+                            record["keep_review_history"] = history;
+                        }
+                        history[LegacyIdentity.Fingerprint(previous)] = previous.DeepClone();
+                    }
                     record["keep_review"] = evidence;
                 }
             }
             current.RequiredObject("notes")[path] = record;
         }
-        foreach (JsonObject item in proposal.Arr("feedback").OfType<JsonObject>())
+        foreach (JsonObject item in proposal.Arr("feedback").OfType<JsonObject>().Where(_ => processFeedback))
         {
             if (current.Obj("feedback")[item.Str("key")] is JsonObject feedback)
             {

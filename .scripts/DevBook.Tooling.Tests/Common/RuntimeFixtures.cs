@@ -55,10 +55,27 @@ internal sealed class RuntimeApi : IGitHubApi
     public int PrCreates { get; private set; }
     public int DraftConversions { get; private set; }
     public int ForceWrites { get; private set; }
+    public int Acknowledgments { get; private set; }
+    public Dictionary<string, string> SourceFiles { get; } = new(StringComparer.Ordinal);
+    public Dictionary<string, string> BaseSourceFiles { get; } = new(StringComparer.Ordinal);
     public bool FailPrCreateOnce { get; set; }
     private bool branchExists;
     private readonly Dictionary<string, string> blobs = new();
     private string pendingContent = "";
+
+    public void SeedManagedPr(string topic, string source)
+    {
+        branchExists = true;
+        Head = "fixture-source";
+        Source = source;
+        Pr = new JsonObject
+        {
+            ["number"] = 1, ["node_id"] = "PR_fixture", ["state"] = "open", ["draft"] = true,
+            ["body"] = Runtime.Marker(topic, 1),
+            ["head"] = new JsonObject { ["ref"] = Runtime.ExpectedManagedBranch(topic, 1), ["sha"] = Head, ["repo"] = new JsonObject { ["full_name"] = Repo } },
+            ["base"] = new JsonObject { ["ref"] = BaseBranch, ["sha"] = "base", ["repo"] = new JsonObject { ["full_name"] = Repo } }
+        };
+    }
 
     public Task<JsonNode?> RequestAsync(string method, string path, JsonNode? payload = null, bool paginate = false, CancellationToken cancellationToken = default)
     {
@@ -81,7 +98,14 @@ internal sealed class RuntimeApi : IGitHubApi
         }
         else if (method == "GET" && path.StartsWith("/contents/", StringComparison.Ordinal))
         {
-            result = new JsonObject { ["encoding"] = "base64", ["type"] = "file", ["content"] = Convert.ToBase64String(Encoding.UTF8.GetBytes(Source)) };
+            string notePath = Uri.UnescapeDataString(path["/contents/".Length..].Split('?')[0]);
+            bool baseSnapshot = path.EndsWith("ref=base", StringComparison.Ordinal) || path.EndsWith("ref=main", StringComparison.Ordinal);
+            string text = (baseSnapshot ? BaseSourceFiles : SourceFiles).GetValueOrDefault(notePath, Source);
+            result = new JsonObject { ["encoding"] = "base64", ["type"] = "file", ["content"] = Convert.ToBase64String(Encoding.UTF8.GetBytes(text)) };
+        }
+        else if (method == "GET" && path.StartsWith("/compare/", StringComparison.Ordinal))
+        {
+            result = new JsonObject { ["merge_base_commit"] = new JsonObject { ["sha"] = "base" } };
         }
         else if (method == "GET" && path.StartsWith("/git/commits/", StringComparison.Ordinal))
         {
@@ -147,13 +171,19 @@ internal sealed class RuntimeApi : IGitHubApi
             Pr["body"] = data["body"]?.DeepClone();
             result = Pr.Copy();
         }
+        else if (method == "POST" && path == "/issues/1/comments")
+        {
+            Acknowledgments++;
+            Comments.Add(new JsonObject { ["id"] = 100 + Acknowledgments, ["body"] = data.Str("body") });
+            result = new JsonObject();
+        }
         else if (method == "GET" && path.StartsWith("/issues/1/comments?", StringComparison.Ordinal))
         {
             result = Comments.Copy();
         }
         else if (method == "GET" && path.StartsWith("/pulls/1/files?", StringComparison.Ordinal))
         {
-            result = new JsonArray(new JsonObject { ["filename"] = RuntimeFixtures.NotePath });
+            result = SourceFiles.Count == 0 ? new JsonArray(new JsonObject { ["filename"] = RuntimeFixtures.NotePath }) : new JsonArray(SourceFiles.Keys.Select(file => (JsonNode)new JsonObject { ["filename"] = file }).ToArray());
         }
         else if (method == "GET" && (path.StartsWith("/pulls/1/comments?", StringComparison.Ordinal) || path.StartsWith("/pulls/1/reviews?", StringComparison.Ordinal)))
         {

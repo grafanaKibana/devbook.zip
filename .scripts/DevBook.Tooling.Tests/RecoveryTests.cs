@@ -46,7 +46,7 @@ public sealed class RecoveryTests
         // Assert
         paused.Str("status").Should().Be("topic_paused");
         archived.State["pending_operation"].Should().BeNull();
-        archived.State["pending_author_proposal"].Should().BeNull();
+        archived.State.Obj("pending_author_proposal").Obj("proposal").Str("audit").Should().Be("original author proposal");
         JsonObject audit = archived.State.Obj("invalidated_operations").Obj("interrupted-op");
         audit.Str("phase").Should().Be(phase);
         JsonNode.DeepEquals(audit["candidate"], operation["candidate"]).Should().BeTrue();
@@ -66,7 +66,7 @@ public sealed class RecoveryTests
             owningPr.Str("head_sha").Should().Be(missing ? "" : "owner-head");
             owningPr.Bool("frozen").Should().Be(observedReview);
             owningPr.Str("review_started_head_sha").Should().Be(observedReview ? "owner-head" : "");
-            JsonNode.DeepEquals(owningPr["proposal_records"], operation.Obj("receipts")["records"]).Should().BeTrue();
+            JsonNode.DeepEquals(owningPr["proposal_records"], WorkloadReceipts.Records(operation.Obj("receipts"))).Should().BeTrue();
         }
     }
 

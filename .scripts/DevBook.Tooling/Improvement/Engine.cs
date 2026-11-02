@@ -77,6 +77,11 @@ public sealed partial class ImprovementEngine
 
     private async Task SaveAsync(JsonObject state, string reason, CancellationToken cancellationToken)
     {
+        if (workload is not null)
+        {
+            CheckpointElapsed();
+            state["focused_workload"] = workload.Copy();
+        }
         expectedSnapshot ??= await store.ReadAsync(cancellationToken);
         foreach (string key in new[] { "lease", "pending_operation", "completed_operations" })
         {
@@ -86,7 +91,30 @@ public sealed partial class ImprovementEngine
             }
         }
 
-        expectedSnapshot = await store.WriteAsync(state, expectedSnapshot, "maintenance: " + reason, cancellationToken);
+        try
+        {
+            expectedSnapshot = await store.WriteAsync(state, expectedSnapshot, "maintenance: " + reason, cancellationToken);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            double remaining = 40 * 60 - clock.GetElapsedTime(started).TotalSeconds;
+            if (remaining <= 0) throw;
+            using var checkpoint = new CancellationTokenSource(TimeSpan.FromSeconds(Math.Min(30, remaining)), clock);
+            StateSnapshot observed = await store.ReadAsync(checkpoint.Token);
+            if (JsonNode.DeepEquals(observed.State, state))
+            {
+                expectedSnapshot = observed;
+            }
+            else if (JsonNode.DeepEquals(observed.State, expectedSnapshot.State))
+            {
+                expectedSnapshot = await store.WriteAsync(state, observed, "maintenance: preserve canceled checkpoint " + reason, checkpoint.Token);
+            }
+            else
+            {
+                throw new Conflict("State changed while preserving a canceled content checkpoint; concurrent state was retained.");
+            }
+            throw;
+        }
     }
 
     private string CheckoutSnapshotSha()
@@ -106,26 +134,22 @@ public sealed partial class ImprovementEngine
             throw new RuntimeFailure("Model provider missing.");
         }
 
-        if (modelCalls >= 4)
-        {
-            throw new RuntimeFailure("This opportunity reached its four-call model budget; pending work is preserved.");
-        }
-        double remaining = config.Int("max_run_minutes", 35) * 60 - clock.GetElapsedTime(started).TotalSeconds;
-        if (remaining < 30)
-        {
-            throw new RuntimeFailure("Run deadline reached; saved proposal can resume.");
-        }
-
-        int budget = Math.Min(config.Int("model_timeout_seconds", 900), (int)remaining - 10);
+        await ReserveCallAsync(review, cancellationToken);
+        EnsureContentBudget();
+        int budget = Math.Max(1, (int)Math.Min(Math.Min(900, config.Int("model_timeout_seconds", 900)), RemainingContentSeconds()));
         if (model is ClaudeProvider claude)
         {
             claude.TimeoutSeconds = budget;
         }
-
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        deadline.CancelAfter(TimeSpan.FromSeconds(budget));
+        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(budget), clock);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeout.Token);
         modelCalls++;
-        return review ? await model.ReviewAsync(payload, deadline.Token) : await model.AuthorAsync(payload, deadline.Token);
+        JsonObject response = review ? await model.ReviewAsync(payload, deadline.Token) : await model.AuthorAsync(payload, deadline.Token);
+        if (workload is not null)
+        {
+            workload["responses_received"] = workload.Int("responses_received") + 1;
+        }
+        return response;
     }
 
     private async Task<string> FetchSourceAsync(string url, CancellationToken cancellationToken)
@@ -179,7 +203,7 @@ public sealed partial class ImprovementEngine
         return new JsonObject { ["status"] = "cooldown", ["stage"] = stage, ["notice"] = notice, ["cooldown"] = cooldown.Copy(), ["model_calls"] = modelCalls };
     }
 
-    public async Task<JsonObject> RunAsync(bool apply = false, bool withModel = false, CancellationToken cancellationToken = default)
+    private async Task<JsonObject> RunOneAsync(bool apply, bool withModel, CancellationToken cancellationToken)
     {
         JsonObject state = await InitialStateAsync(cancellationToken);
         if (apply && publisher is not null)
@@ -233,6 +257,44 @@ public sealed partial class ImprovementEngine
         string rules = Core.RulesVersion(contentAuthorities);
         string evaluation = ClaudeProvider.EvaluationHash(config);
         config["evaluation_hash"] = evaluation;
+        JsonObject blockedPending = state.Obj("pending_author_proposal");
+        string[] blockedPaths = blockedPending.Obj("source_hashes").Select(item => item.Key).ToArray();
+        if (blockedPaths.Length == 1 && blockedPending.Arr("feedback_keys").Count == 0
+            && Queue.OpenPrForTopic(state, Core.TopicFor(blockedPaths[0])) is not null)
+        {
+            EnsureObject(state, "parked_author_proposals")[LegacyIdentity.Fingerprint(blockedPending)] = blockedPending.Copy();
+            state.Remove("pending_author_proposal");
+        }
+        if (state.Obj("pending_author_proposal").Count == 0)
+        {
+            foreach ((string parkedId, JsonNode? value) in state.Obj("parked_author_proposals").ToArray())
+            {
+                if (value is not JsonObject parked) continue;
+                string[] parkedPaths = parked.Obj("source_hashes").Select(item => item.Key).ToArray();
+                if (parkedPaths.Length != 1 || Queue.OpenPrForTopic(state, Core.TopicFor(parkedPaths[0])) is not null
+                    || workload?.Str("topic").Length > 0 && workload.Str("topic") != Core.TopicFor(parkedPaths[0])) continue;
+                state["pending_author_proposal"] = parked.Copy();
+                state.RequiredObject("parked_author_proposals").Remove(parkedId);
+                break;
+            }
+        }
+        if (state.Obj("pending_author_proposal").Count == 0)
+        {
+            foreach (JsonObject deferred in state.Obj("deferred_proposals").Select(item => item.Value).OfType<JsonObject>())
+            {
+                string[] deferredPaths = deferred.Obj("source_hashes").Select(item => item.Key).ToArray();
+                if (deferredPaths.Length != 1 || deferred.Str("resumed_by").Length > 0 || deferred.Str("workload_id") == workload?.Str("id")
+                    || workload?.Str("topic").Length > 0 && workload.Str("topic") != Core.TopicFor(deferredPaths[0])
+                    || deferred.Str("evaluation_hash") != evaluation || deferred.Str("rules_hash") != rules
+                    || Queue.OpenPrForTopic(state, Core.TopicFor(deferredPaths[0])) is not null
+                    || !notes.OfType<JsonObject>().Any(note => note.Str("path") == deferredPaths[0] && note.Str("hash") == deferred.Obj("source_hashes").Str(deferredPaths[0]))) continue;
+                deferred["resumed_by"] = workload?.Str("id");
+                JsonObject resumed = deferred.Copy();
+                resumed["workload_id"] = workload?.Str("id");
+                state["pending_author_proposal"] = resumed;
+                break;
+            }
+        }
         JsonObject saved = state.Obj("pending_author_proposal");
         if (saved.Count != 0)
         {
@@ -240,7 +302,7 @@ public sealed partial class ImprovementEngine
             JsonObject currentHashes = ObjectMap(notes.OfType<JsonObject>().Where(note => savedPaths.Contains(note.Str("path")))
                 .ToDictionary(note => note.Str("path"), note => LegacyIdentity.Digest(note.Str("content"))));
             JsonObject currentRepair = RepairInputsFor(notes.OfType<JsonObject>().Where(note => savedPaths.Contains(note.Str("path"))));
-            if (saved.Str("target_note").Length != 0 || saved.Str("review_focus").Length != 0
+            if (savedPaths.Count != 1 || saved.Str("target_note").Length != 0 || saved.Str("review_focus").Length != 0
                 || savedPaths.Any(path => saved.Str("topic_id") != Core.TopicId(Core.TopicFor(path)))
                 || saved.Str("evaluation_hash") != evaluation || saved.Str("rules_hash") != rules
                 || !JsonNode.DeepEquals(saved["repair_inputs"], currentRepair) || !JsonNode.DeepEquals(saved["source_hashes"], currentHashes))
@@ -303,7 +365,21 @@ public sealed partial class ImprovementEngine
         {
             notes = Copies(notes.OfType<JsonObject>().Where(note => repairPaths.Contains(note.Str("path"))));
         }
+        if (workload is not null && workload.Str("topic").Length > 0)
+        {
+            HashSet<string> attempted = workload.Arr("attempted_paths").Strings().Concat(workload.Arr("accepted_records").OfType<JsonObject>()
+                .SelectMany(record => record.Obj("batch").Arr("notes").OfType<JsonObject>()).Select(note => note.Str("path"))).ToHashSet();
+            notes = Copies(notes.OfType<JsonObject>().Where(note => note.Str("topic") == workload.Str("topic") && !attempted.Contains(note.Str("path"))));
+        }
+        JsonObject unfinished = state.Obj("pending_author_proposal");
+        if (unfinished.Obj("source_hashes").Count == 1 && !state.Obj("feedback").Any(item => item.Value.Str("status") == "pending"))
+        {
+            string path = unfinished.Obj("source_hashes").First().Key;
+            JsonArray resumable = Copies(notes.OfType<JsonObject>().Where(note => note.Str("path") == path));
+            if (resumable.Count != 0) notes = resumable;
+        }
         JsonObject? batch = Queue.SelectBatch(selectionState, notes, rules, config);
+        if (batch is not null && batch.Arr("feedback").Count > 0) batch = PrepareFeedbackBatch(state, batch, allNotes);
         await SaveAsync(state, "reconcile maintenance queue", cancellationToken);
         if (batch is null)
         {
@@ -311,7 +387,7 @@ public sealed partial class ImprovementEngine
         }
         if (batch.Arr("notes").Count == 0 && batch.Arr("feedback").Count != 0)
         {
-            return new JsonObject { ["status"] = "feedback_needs_scope", ["batch"] = batch, ["model_calls"] = 0 };
+            return new JsonObject { ["status"] = batch.Str("feedback_hold_reason").Length > 0 ? "feedback_needs_scope" : "feedback_scope_complete", ["batch"] = batch, ["model_calls"] = 0 };
         }
 
         if (!withModel)
@@ -319,6 +395,15 @@ public sealed partial class ImprovementEngine
             return new JsonObject { ["status"] = "selected", ["batch"] = batch, ["model_calls"] = 0, ["mutated"] = false };
         }
 
+        if (workload is not null)
+        {
+            workload["topic"] = batch.Str("topic");
+            workload["topic_id"] = batch.Str("topic_id");
+            workload["current_batch"] = batch.Copy();
+            workload["base_sha"] = baseSha;
+            workload["phase"] = "evaluating";
+            await SaveAsync(state, "checkpoint focused note selection", cancellationToken);
+        }
         Dictionary<string, string> selected = batch.Arr("notes").OfType<JsonObject>().ToDictionary(note => note.Str("path"), note => note.Str("content"));
         var knownViolations = new JsonObject(batch.Arr("notes").OfType<JsonObject>().Select(note =>
             new KeyValuePair<string, JsonNode?>(note.Str("path"), note.Arr("violations").Copy())));
@@ -368,7 +453,7 @@ public sealed partial class ImprovementEngine
             HashSet<string?> selectedFolders = selected.Keys.Select(Path.GetDirectoryName).ToHashSet();
             foreach (JsonObject note in notes.OfType<JsonObject>()
                 .Where(note => !selected.ContainsKey(note.Str("path")) && selectedFolders.Contains(Path.GetDirectoryName(note.Str("path"))))
-                .OrderBy(note => note.Str("path"), StringComparer.Ordinal).Take(config.Int("max_notes_per_run", 4)))
+                .OrderBy(note => note.Str("path"), StringComparer.Ordinal).Take(config.Int("max_nearby_question_notes", 4)))
             {
                 nearby.Add(new JsonObject { ["path"] = note.Str("path"), ["cards"] = Copies(Proposal.QardSpans(note.Str("content")).Select(span => JsonValue.Create(span.Text))) });
             }
@@ -405,6 +490,7 @@ public sealed partial class ImprovementEngine
             }
             pending = new JsonObject
             {
+                ["workload_id"] = workload?.Str("id"),
                 ["topic_id"] = batch.Str("topic_id"),
                 ["batch"] = batch.Copy(),
                 ["proposal"] = proposal.Copy(),
@@ -421,6 +507,7 @@ public sealed partial class ImprovementEngine
                 if (repairContext.ContainsKey(key)) pending[key] = repairContext[key]?.DeepClone();
             }
             state["pending_author_proposal"] = pending;
+            if (workload is not null) workload["phase"] = "author_completed";
             await SaveAsync(state, "save source-matched author proposal", cancellationToken);
         }
         JsonArray decisions;
@@ -458,13 +545,27 @@ public sealed partial class ImprovementEngine
             current[item.Key] = item.Value;
         }
 
-        HashSet<string> paths = rawPr.Arr("changed_paths").Strings().Concat(proposal.Arr("edits").OfType<JsonObject>().Select(edit => edit.Str("path"))).ToHashSet();
+        JsonObject[] stagedFeedback = state.Obj("feedback_workloads").Obj(batch.Str("feedback_scope_id")).Obj("records")
+            .Select(item => item.Value).OfType<JsonObject>().ToArray();
+        foreach (JsonObject prior in stagedFeedback)
+        {
+            foreach (KeyValuePair<string, JsonNode?> source in prior.Obj("result").Obj("sources")) current[source.Key] = source.Value!.GetValue<string>();
+        }
+        foreach (KeyValuePair<string, string> item in candidate) current[item.Key] = item.Value;
+        HashSet<string> paths = rawPr.Arr("changed_paths").Strings().Concat(prState.Arr("changed_paths").Strings())
+            .Concat(stagedFeedback.SelectMany(record => record.Obj("proposal").Arr("edits").OfType<JsonObject>()).Select(edit => edit.Str("path")))
+            .Concat(proposal.Arr("edits").OfType<JsonObject>().Select(edit => edit.Str("path"))).ToHashSet();
         Dictionary<string, string> cumulativeBase = paths.ToDictionary(path => path, path => baseline[path]);
         Dictionary<string, string> cumulativeCurrent = paths.ToDictionary(path => path, path => current[path]);
         string diff = hasEdits ? await Review.DiffAsync(cumulativeBase, cumulativeCurrent, cancellationToken) : "";
-        int noteLimit = config.Int("max_pr_notes", 16);
+        int noteLimit = config.Int("max_pr_notes", 5);
         int lineLimit = config.Int("max_pr_lines", 1200);
         int changedLines = Review.ChangedLines(diff);
+        if (batch.Arr("feedback").Count > 0 && changedLines > lineLimit)
+        {
+            await HoldFeedbackLineLimitAsync(state, batch, pending, changedLines, cancellationToken);
+            return new JsonObject { ["status"] = "feedback_needs_scope", ["reason"] = "Cumulative authored PR source exceeds the line ceiling.", ["model_calls"] = modelCalls };
+        }
         if (batch.Arr("feedback").Count == 0 && (paths.Count > noteLimit || changedLines > lineLimit))
         {
             if (prState.Int("number") > 0)
@@ -478,23 +579,43 @@ public sealed partial class ImprovementEngine
             return await QuarantineAsync(state, pending, "pr_size",
                 $"Cumulative PR has {paths.Count} notes (limit {noteLimit}) and {changedLines} changed lines (limit {lineLimit}).", cancellationToken);
         }
-        var fetched = new JsonObject();
+        if (workload is not null && batch.Arr("feedback").Count == 0 && hasEdits)
+        {
+            Dictionary<string, string> aggregateBefore = new(selected);
+            Dictionary<string, string> aggregateAfter = new(candidate);
+            foreach (JsonObject prior in workload.Arr("accepted_records").OfType<JsonObject>())
+            {
+                foreach (JsonObject note in prior.Obj("batch").Arr("notes").OfType<JsonObject>()) aggregateBefore[note.Str("path")] = note.Str("content");
+                foreach (KeyValuePair<string, JsonNode?> source in prior.Obj("result").Obj("sources")) aggregateAfter[source.Key] = source.Value!.GetValue<string>();
+            }
+            if (Review.ChangedLines(await Review.DiffAsync(aggregateBefore, aggregateAfter, cancellationToken)) > lineLimit)
+            {
+                EnsureObject(state, "deferred_proposals")[LegacyIdentity.Fingerprint(pending)] = pending.Copy();
+                state.Remove("pending_author_proposal");
+                await SaveAsync(state, "defer note beyond remaining workload capacity", cancellationToken);
+                return new JsonObject { ["status"] = "size_deferred", ["reason"] = "Note fits alone but exceeds this workload's remaining authored line capacity." };
+            }
+        }
+        JsonObject fetched = pending.Obj("primary_sources").Copy();
         foreach (JsonObject source in sourceEntries)
         {
-            if (clock.GetElapsedTime(started).TotalMinutes >= config.Int("max_run_minutes", 35) - 1)
-            {
-                throw new RuntimeFailure("Source workload exceeds this run; proposal preserved.");
-            }
-
+            EnsureContentBudget();
             try
             {
                 string url = source.Str("url");
-                if (!sourceEvidenceCache.TryGetValue(url, out string? text))
+                if (!fetched.ContainsKey(url))
                 {
-                    text = await sourceFetcher(url, cancellationToken);
-                    sourceEvidenceCache[url] = text;
+                    if (!sourceEvidenceCache.TryGetValue(url, out string? text))
+                    {
+                        await ReserveContentPhaseAsync(state, "source", cancellationToken);
+                        text = await sourceFetcher(url, cancellationToken);
+                        sourceEvidenceCache[url] = text;
+                    }
+                    fetched[url] = text;
+                    pending["primary_sources"] = fetched.Copy();
+                    if (workload is not null) workload["phase"] = "source_completed";
+                    await SaveAsync(state, "preserve completed primary source retrieval", cancellationToken);
                 }
-                fetched[url] = text;
             }
             catch (UnsafeInput error)
             {
@@ -504,7 +625,7 @@ public sealed partial class ImprovementEngine
         JsonObject review;
         try
         {
-            review = await CallAsync(true, new JsonObject
+            review = pending["completed_review"] is JsonObject completed ? completed.Copy() : await CallAsync(true, new JsonObject
             {
                 ["rules"] = contentAuthorities.Copy(),
                 ["before"] = ObjectMap(selected),
@@ -543,6 +664,7 @@ public sealed partial class ImprovementEngine
                 ["evaluation_hash"] = evaluation
             };
         }
+        if (workload is not null) workload["phase"] = "review_completed";
         pending["completed_review"] = review.Copy();
         await SaveAsync(state, "preserve bound independent review", cancellationToken);
         if (state["cooldown"] is not null)
@@ -558,9 +680,9 @@ public sealed partial class ImprovementEngine
             {
                 PrepareRepair(state, pending, review, evaluation);
                 await SaveAsync(state, "queue bounded repair from semantic review", cancellationToken);
-                if (clock.GetElapsedTime(started).TotalMinutes < config.Int("max_run_minutes", 35) - 1)
+                if (CanStartAuthor())
                 {
-                    return await RunAsync(apply, withModel, cancellationToken);
+                    return await RunOneAsync(apply, withModel, cancellationToken);
                 }
                 return new JsonObject { ["status"] = "repair_pending", ["model_calls"] = modelCalls };
             }
@@ -580,6 +702,20 @@ public sealed partial class ImprovementEngine
         if (proposal.Arr("edits").Count == 0)
         {
             bool keep = decisions.Count == 0;
+            if (batch.Arr("feedback").Count > 0)
+            {
+                var feedbackRecord = new JsonObject
+                {
+                    ["record_id"] = LegacyIdentity.Fingerprint(new JsonObject { ["workload_id"] = workload?.Str("id"), ["hashes"] = hashes.Copy(), ["proposal"] = proposal.Copy() }),
+                    ["workload_id"] = workload?.Str("id"), ["batch"] = batch.Copy(), ["proposal"] = proposal.Copy(),
+                    ["result"] = result.Copy(), ["review"] = review.Copy(), ["decisions"] = decisions.Copy(),
+                    ["review_evidence"] = pending["review_evidence"]?.DeepClone(), ["source_hashes"] = hashes.Copy(),
+                    ["prepared_source_version"] = 1, ["prepared_at"] = pending.Str("prepared_at"), ["rules_hash"] = rules, ["evaluation_hash"] = evaluation
+                };
+                state.Remove("pending_author_proposal");
+                await RecordFeedbackProgressAsync(state, feedbackRecord, cancellationToken);
+                return new JsonObject { ["status"] = "no_worthwhile_changes", ["proposal"] = proposal, ["review"] = review, ["model_calls"] = modelCalls };
+            }
             if (apply || keep)
             {
                 state = Core.RecordOutcome(state, batch, proposal, result, review);
@@ -607,17 +743,51 @@ public sealed partial class ImprovementEngine
             validationCandidate[item.Key] = item.Value;
         }
 
+        if (workload is not null)
+        {
+            foreach (JsonObject prior in workload.Arr("accepted_records").OfType<JsonObject>())
+            {
+                foreach (JsonObject note in prior.Obj("batch").Arr("notes").OfType<JsonObject>()) validationExpected[note.Str("path")] = note.Str("content");
+                foreach (KeyValuePair<string, JsonNode?> source in prior.Obj("result").Obj("sources")) validationCandidate[source.Key] = source.Value!.GetValue<string>();
+            }
+        }
+        string feedbackScope = batch.Str("feedback_scope_id");
+        if (feedbackScope.Length > 0)
+        {
+            foreach (JsonObject prior in state.Obj("feedback_workloads").Obj(feedbackScope).Obj("records").Select(item => item.Value).OfType<JsonObject>())
+            {
+                foreach (JsonObject note in prior.Obj("batch").Arr("notes").OfType<JsonObject>()) validationExpected[note.Str("path")] = note.Str("content");
+                foreach (KeyValuePair<string, JsonNode?> source in prior.Obj("result").Obj("sources")) validationCandidate[source.Key] = source.Value!.GetValue<string>();
+            }
+        }
+        EnsureContentBudget();
         JsonArray validation;
         try
         {
+            await ReserveContentPhaseAsync(state, "validation", cancellationToken);
             validation = await validator(validationExpected, validationCandidate, cancellationToken);
+            if (workload is not null) workload["phase"] = "validation_completed";
+            await SaveAsync(state, "preserve completed repository validation", cancellationToken);
+            EnsureContentBudget();
         }
         catch (CandidateValidationFailure error)
         {
             pending["completed_review"] = review.Copy();
             return await QuarantineAsync(state, pending, "repository_validation", error.Message, cancellationToken);
         }
-        history.Add(new JsonObject { ["batch"] = batch.Copy(), ["proposal"] = proposal.Copy(), ["result"] = result.Copy(), ["review"] = review.Copy(), ["review_evidence"] = pending["review_evidence"]?.DeepClone() });
+        var accepted = new JsonObject
+        {
+            ["record_id"] = LegacyIdentity.Fingerprint(new JsonObject { ["workload_id"] = workload?.Str("id"), ["hashes"] = hashes.Copy(), ["proposal"] = proposal.Copy() }),
+            ["workload_id"] = workload?.Str("id"), ["batch"] = batch.Copy(), ["proposal"] = proposal.Copy(),
+            ["result"] = result.Copy(), ["review"] = review.Copy(), ["decisions"] = decisions.Copy(),
+            ["review_evidence"] = pending["review_evidence"]?.DeepClone(), ["source_hashes"] = hashes.Copy(),
+            ["prepared_source_version"] = 1, ["prepared_at"] = pending.Str("prepared_at"),
+            ["rules_hash"] = rules, ["evaluation_hash"] = evaluation,
+            ["calls_reserved"] = workload?.Int("calls_reserved") ?? modelCalls,
+            ["elapsed_seconds"] = workload is null ? 0 : ElapsedSeconds(workload),
+            ["accepted_at"] = Core.FormatTime(clock.GetUtcNow()), ["phase"] = "accepted"
+        };
+        history.Add(accepted.Copy());
         JsonArray changes = Copies(history.OfType<JsonObject>().SelectMany(record => record.RequiredObject("proposal").Arr("edits")));
         JsonArray cumulativeFeedback = Copies(history.OfType<JsonObject>().SelectMany(record => record.RequiredObject("proposal").Arr("feedback").OfType<JsonObject>()).Select(item =>
         {
@@ -654,34 +824,20 @@ public sealed partial class ImprovementEngine
             ["diff"] = diff,
             ["model_calls"] = modelCalls
         };
-        if (!apply)
-        {
-            return response;
-        }
-
-        if (publisher is null)
-        {
-            throw new RuntimeFailure("Apply requires a publication runtime.");
-        }
-
         JsonObject records = new()
         {
-            ["batch"] = batch.Copy(),
-            ["proposal"] = proposal.Copy(),
-            ["result"] = result.Copy(),
-            ["review"] = review.Copy(),
-            ["review_evidence"] = pending["review_evidence"]?.DeepClone(),
-            ["records"] = history.Copy(),
-            ["topic_id"] = batch.Str("topic_id"),
-            ["generation"] = generation,
-            ["decisions"] = decisions.Copy(),
-            ["base_note_hashes"] = ObjectMap(allNotes.OfType<JsonObject>().Where(note => note.Str("topic") == batch.Str("topic")).ToDictionary(note => note.Str("path"), note => LegacyIdentity.Digest(baseline[note.Str("path")])))
+            ["version"] = 2, ["workload_id"] = workload?.Str("id"),
+            ["records"] = new JsonArray(accepted.Copy()), ["proposal_history"] = history.Copy(),
+            ["topic_id"] = batch.Str("topic_id"), ["generation"] = generation,
+            ["base_note_hashes"] = ObjectMap(allNotes.OfType<JsonObject>().Where(note => note.Str("topic") == batch.Str("topic")).ToDictionary(note => note.Str("path"), note => LegacyIdentity.Digest(baseline[note.Str("path")])) )
         };
-        JsonObject publication = await publisher.PublishAsync(new JsonObject
+        JsonObject request = new JsonObject
         {
             ["topic"] = batch.Str("topic_id"),
             ["generation"] = generation,
             ["branch"] = branch,
+            ["base_sources"] = ObjectMap(cumulativeBase),
+            ["pr_sources"] = ObjectMap(cumulativeCurrent),
             ["expected_sources"] = ObjectMap(selected),
             ["candidate"] = ObjectMap(candidate.Where(item => selected[item.Key] != item.Value).ToDictionary(item => item.Key, item => item.Value)),
             ["title"] = "notes: improve " + batch.Str("topic"),
@@ -702,20 +858,22 @@ public sealed partial class ImprovementEngine
             ["automatic_export"] = config.Bool("automatic_export"),
             ["prepared_source_version"] = 1,
             ["prepared_at"] = pending.Str("prepared_at")
-        }, cancellationToken);
-        response["publication"] = publication.Copy();
-        response["status"] = publication.Str("status", "published");
-        if (publication["export_request"] is JsonObject request)
+        };
+        response["accepted_record"] = accepted.Copy();
+        response["publication_request"] = request;
+        state.Remove("pending_author_proposal");
+        if (workload is not null)
         {
-            response["export_request"] = request.Copy();
-            response["export_mode"] = "render";
+            workload.Arr("accepted_records").Add(accepted.Copy());
+            workload["last_request"] = response["publication_request"]!.DeepClone();
+            workload["validation"] = validation.Copy();
         }
-
-        if (response.Str("status") is not ("awaiting_checks" or "awaiting_export"))
+        if (batch.Arr("feedback").Count > 0)
         {
-            await FinalizeCompletedAsync(cancellationToken);
+            accepted["publication_request"] = request.Copy();
+            await RecordFeedbackProgressAsync(state, accepted, cancellationToken);
         }
-
+        await SaveAsync(state, "save independently accepted focused note", cancellationToken);
         return response;
     }
 

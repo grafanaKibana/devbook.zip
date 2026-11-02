@@ -225,6 +225,7 @@ public sealed class OperationJournal(IStateStore store, TimeProvider? timeProvid
                 continue;
             }
             JsonObject receipt = operation.RequiredObject("receipts");
+            operation["workload_id"] = receipt["workload_id"]?.DeepClone() ?? operation["workload_id"]?.DeepClone();
             operation["receipt_hash"] = LegacyIdentity.Fingerprint(receipt);
             operation["receipt_record_count"] = Math.Max(1, receipt.Arr("records").Count);
             operation.Remove("candidate");
@@ -305,6 +306,7 @@ public sealed class OperationJournal(IStateStore store, TimeProvider? timeProvid
         var compact = new JsonObject
         {
             ["op_id"] = opId,
+            ["workload_id"] = op.Obj("receipts")["workload_id"]?.DeepClone() ?? op["workload_id"]?.DeepClone(),
             ["topic"] = op["topic"]?.DeepClone(),
             ["generation"] = op["generation"]?.DeepClone(),
             ["head_sha"] = evidence["head_sha"]?.DeepClone() ?? evidence["commit_sha"]?.DeepClone(),

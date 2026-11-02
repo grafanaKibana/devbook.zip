@@ -232,10 +232,8 @@ public sealed class GitHubRuntime
             row["publication_conflict"] = conflict;
             topics[topic] = row;
             state["topics"] = topics;
-            if (state.Obj("pending_author_proposal").Str("topic_id") == topic)
-            {
-                state.Remove("pending_author_proposal");
-            }
+            // Parked proposals retain their own ownership and remain available for reconciliation.
+
         }
         if (freeze || terminalPr is not null || collection == "export_operations" || observedPr is not null)
         {
@@ -282,7 +280,7 @@ public sealed class GitHubRuntime
             }
             if (receipt["records"] is not null)
             {
-                pr["proposal_records"] = receipt["records"]!.DeepClone();
+                pr["proposal_records"] = WorkloadReceipts.History(receipt);
             }
             if (receipt["base_note_hashes"] is not null)
             {
@@ -469,7 +467,7 @@ public sealed class GitHubRuntime
             Feedback.ValidateFrozenEdits(request.Arr("edits"), request.Arr("pending_feedback"));
         }
         await AssertLeaseAsync(cancellationToken);
-        string opId = Guid.NewGuid().ToString("N")[..16];
+        string opId = request.Str("operation_id", Guid.NewGuid().ToString("N")[..16]);
         var sourceHashes = new JsonObject();
         var candidateHashes = new JsonObject();
         foreach (KeyValuePair<string, JsonNode?> item in expected)

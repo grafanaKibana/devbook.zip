@@ -14,7 +14,9 @@ public static class Demo
         try
         {
             JsonObject config = configuration.Copy();
-            config["max_notes_per_run"] = 1;
+            config["max_pr_notes"] = 5;
+            config["max_run_minutes"] = 30;
+            config["max_model_calls_per_run"] = 20;
             config["automatic_export"] = true;
             config["owner_allowlist"] = new JsonArray(new JsonObject { ["id"] = 45916288, ["login"] = "grafanaKibana" });
             foreach (string path in Core.ContentAuthorities)
@@ -83,12 +85,19 @@ public static class Demo
                 steps.Add(new JsonObject { ["stage"] = "generated-only fixture export", ["status"] = exported.Str("status"), ["commit_sha"] = exported.Str("commit_sha") });
             }
             JsonObject first = await Opportunity();
-            steps.Add(new JsonObject { ["stage"] = "first topic batch", ["status"] = first.Str("status") });
+            if (model.AuthorCalls != 2 || model.ReviewCalls != 2 || first.Obj("coverage").Int("improved_count") != 2)
+            {
+                throw new RuntimeFailure("Native demo did not independently review two complete notes in one workload.");
+            }
+            steps.Add(new JsonObject { ["stage"] = "two single-note reviews, one topic PR", ["status"] = first.Str("status"), ["coverage"] = first["coverage"]?.DeepClone() });
             await FinishExport(first);
             api.Pr!["body"] = "Owner-written context stays here.\n\n" + api.Pr.Str("body");
             JsonObject second = await Opportunity();
-            steps.Add(new JsonObject { ["stage"] = "append second batch to same PR", ["status"] = second.Str("status") });
-            await FinishExport(second);
+            if (second.Int("model_calls") != 0 || second["export_request"] is not null)
+            {
+                throw new RuntimeFailure("Native demo attempted ordinary additions to an open topic PR.");
+            }
+            steps.Add(new JsonObject { ["stage"] = "open topic skipped", ["status"] = second.Str("status"), ["model_calls"] = second.Int("model_calls") });
             api.OwnerFeedback("Clarify the scheduling boundary.", clock.GetUtcNow());
             JsonObject feedback = await Opportunity();
             steps.Add(new JsonObject { ["stage"] = "verified inline feedback", ["status"] = feedback.Str("status") });

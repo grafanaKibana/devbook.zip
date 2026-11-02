@@ -19,6 +19,29 @@ public sealed class StateTests
         var fixture = ExportCompactionReviewedFixture();
         fixture.Api.ChecksReady = true;
         JsonObject originalOperation = fixture.State.Obj("export_operations").Obj(fixture.Request.Str("op_id"));
+        const string secondPath = "Vault/Home/Programming/NET/Other.md";
+        JsonObject secondEdit = DomainFixtures.Edit();
+        secondEdit["path"] = secondPath;
+        JsonObject secondProposal = DomainFixtures.Proposal(secondEdit);
+        JsonObject secondBatch = new()
+        {
+            ["notes"] = new JsonArray(DomainFixtures.NoteRecord(secondPath)),
+            ["rules_hash"] = "reviewed-rules", ["review_process"] = Core.FocusedReviewVersion
+        };
+        JsonObject secondResult = Proposal.Apply(new Dictionary<string, string> { [secondPath] = DomainFixtures.Note }, secondProposal);
+        JsonObject receipts = originalOperation.Obj("receipts");
+        receipts["version"] = 2;
+        receipts["workload_id"] = "accepted-workload";
+        receipts.Arr("records")[0]!["record_id"] = "first-record";
+        receipts.Arr("records").Add(new JsonObject
+        {
+            ["record_id"] = "second-record", ["batch"] = secondBatch,
+            ["proposal"] = secondProposal, ["result"] = secondResult,
+            ["review"] = DomainFixtures.UnchangedReview(new JsonObject { ["current"] = secondResult.Obj("sources").Copy() })
+        });
+        receipts["proposal_history"] = receipts.Arr("records").Copy();
+        fixture.State.Obj("prs").Obj(fixture.Key)["proposal_records"] = receipts.Arr("records").Copy();
+        fixture.State["pending_author_proposal"] = new JsonObject { ["workload_id"] = "another-workload", ["audit"] = "retain parked work" };
         JsonArray openPrRecords = fixture.State.Obj("prs").Obj(fixture.Key).Arr("proposal_records").Copy();
         string receiptHash = LegacyIdentity.Fingerprint(originalOperation["receipts"]);
         fixture.State["held_proposals"] = new JsonObject
@@ -64,7 +87,10 @@ public sealed class StateTests
         compact["body"].Should().BeNull();
         compact["receipts"].Should().BeNull();
         compact.Str("receipt_hash").Should().Be(receiptHash);
-        compact.Int("receipt_record_count").Should().Be(1);
+        compact.Int("receipt_record_count").Should().Be(2);
+        compact.Str("workload_id").Should().Be("accepted-workload");
+        finalized.State.Obj("notes").Obj(secondPath).Str("outcome").Should().Be("changed");
+        finalized.State.Obj("pending_author_proposal").Str("audit").Should().Be("retain parked work");
         compact.Str("prepared_at").Should().Be(originalOperation.Str("prepared_at"));
         compact.Str("future_extension").Should().Be("preserved");
         compact.Obj("evidence").Str("export_verified_head").Should().Be(ExportApi.GeneratedHead);
