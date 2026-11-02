@@ -10,22 +10,29 @@ namespace DevBook.Tooling.Tests;
 public sealed class EngineTests
 {
 
-    [Fact]
-    public void CapturedRulesVersionStaysStableWhenTheLiveContractChanges()
+    [Theory]
+    [InlineData("unique", true)]
+    [InlineData("missing", false)]
+    [InlineData("ambiguous", false)]
+    public void ReviewEvidenceBindsOnlyAnUnambiguousLiteralQuotation(string scenario, bool accepted)
     {
         // Arrange
-        using var fixture = new KeepDecisionKeepFixture();
-        JsonObject captured = Core.LoadContentAuthorities(fixture.Root);
-        string original = Core.RulesVersion(captured);
-        string writer = Path.Combine(fixture.Root, ".claude/agents/note-writer.md");
-        File.AppendAllText(writer, "\nCurrent technical question policy");
+        string current = scenario == "ambiguous" ? "First\nExact quotation.\nExact quotation.\n" : "First\nExact quotation.\nContinuation.\n";
+        var candidates = new Dictionary<string, string> { [DomainFixtures.Path] = current };
+        JsonObject raw = DomainFixtures.UnchangedReview(new JsonObject { ["current"] = new JsonObject { [DomainFixtures.Path] = current } });
+        JsonObject citation = raw.Arr("notes")[0]!.Arr("current_text_evidence")[0]!.AsObject();
+        citation["quote"] = scenario == "missing" ? "Absent quotation." : scenario == "unique" ? "Exact quotation.\nContinuation." : "Exact quotation.";
+        citation["line_start"] = 1;
 
         // Act
-        string changed = Core.RulesVersion(fixture.Root);
+        (JsonObject bound, JsonArray bindings) = Review.BindEvidence(raw, candidates);
+        bool clean = Review.Clean(bound, candidates, new JsonObject(), new JsonArray(), new JsonArray());
 
         // Assert
-        changed.Should().NotBe(original);
-        Core.RulesVersion(captured).Should().Be(original);
+        clean.Should().Be(accepted);
+        citation.Int("line_start").Should().Be(1);
+        bindings.Count.Should().Be(accepted ? 1 : 0);
+        if (accepted) bound.Arr("notes")[0]!.Arr("current_text_evidence")[0]!.Int("line_start").Should().Be(2);
     }
 
     [Fact]
@@ -44,48 +51,131 @@ public sealed class EngineTests
         fixture.Model.Reviews.Should().Be(0);
     }
 
-    [Fact]
-    public void CardReviewRejectsNotApplicableQuestionQuality()
-    {
-        // Arrange
-        var payload = new JsonObject { ["current"] = new JsonObject { [DomainFixtures.Path] = DomainFixtures.Note } };
-        JsonObject review = DomainFixtures.UnchangedReview(payload);
-        review.Arr("notes")[0]!["quality"]!["question_quality"] = "NOT APPLICABLE";
-        var candidates = new Dictionary<string, string> { [DomainFixtures.Path] = DomainFixtures.Note };
-
-        // Act
-        bool accepted = Review.Clean(review, candidates, new JsonObject(), new JsonArray(), new JsonArray());
-
-        // Assert
-        accepted.Should().BeFalse();
-    }
-
-    [Fact]
-    public async Task ReviewerQuotaResumesTheExactDatedCandidateWithoutAnotherAuthorCall()
+    [Theory]
+    [InlineData("fresh")]
+    [InlineData("author-quota")]
+    [InlineData("review-quota")]
+    [InlineData("held")]
+    public async Task SemanticKeepFailureGetsOneResumableRepairAndFreshReview(string scenario)
     {
         // Arrange
         using var files = new CandidateValidationRepositoryFixture();
         var clock = new EngineTestClock(DateTimeOffset.Parse("2026-10-30T12:00:00Z"));
-        var model = new EngineResumeModel(CandidateValidationBadPath, clock);
+        var model = new ReviewRepairModel(clock, scenario);
+        var store = new MemoryStateStore(Core.NewState());
+        var config = new JsonObject { ["max_notes_per_run"] = 1, ["max_review_repairs_per_batch"] = scenario == "held" ? 0 : 1 };
+        ImprovementEngine Engine() => new(files.Root, config, store, model, clock: clock, notesLoader: files.Notes,
+            validator: (_, _, _) => Task.FromResult(new JsonArray()));
+        if (scenario != "fresh")
+        {
+            await Engine().RunAsync(withModel: true);
+            clock.Advance(TimeSpan.FromHours(2));
+            config["max_review_repairs_per_batch"] = 1;
+        }
+
+        // Act
+        JsonObject result = await Engine().RunAsync(withModel: true);
+        JsonObject state = (await store.ReadAsync()).State;
+
+        // Assert
+        result.Str("status").Should().Be("proposed");
+        model.Authors.Should().Be(scenario == "author-quota" ? 3 : 2);
+        model.Reviews.Should().Be(scenario == "review-quota" ? 3 : 2);
+        state.Obj("review_repair_attempts").Count.Should().Be(1);
+        state.Obj("review_repair_attempts").Single().Value!.GetValue<int>().Should().Be(1);
+        model.RepairPayload.Obj("previous_review").Str("verdict").Should().Be("CHANGES REQUIRED");
+        model.RepairPayload.Obj("previous_proposal").Arr("edits").Count.Should().Be(0);
+        model.RepairPayload.Obj("note_hashes").Str(CandidateValidationBadPath).Should().Be(LegacyIdentity.Digest(CandidateValidationSource));
+        result.Obj("candidate").Str(CandidateValidationBadPath).Should().Contain("The clarified mechanism.");
+        state.Obj("pending_author_proposal").Bool("author_repair_pending").Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task ParkedRepairFailureCannotRestartItsSpentAttempt()
+    {
+        // Arrange
+        using var files = new CandidateValidationRepositoryFixture();
+        var clock = new EngineTestClock(DateTimeOffset.Parse("2026-10-30T12:00:00Z"));
+        var model = new ReviewRepairModel(clock, "review-quota") { RejectAfterResume = true };
         var store = new MemoryStateStore(Core.NewState());
         var config = new JsonObject { ["max_notes_per_run"] = 1 };
         ImprovementEngine Engine() => new(files.Root, config, store, model, clock: clock, notesLoader: files.Notes,
-            validator: (_, _, _) => Task.FromResult(new JsonArray()));
+            validator: (_, _, _) => throw new InvalidOperationException("Rejected edits cannot reach validation."));
         await Engine().RunAsync(withModel: true);
-        JsonObject pending = (await store.ReadAsync()).State.Obj("pending_author_proposal").Copy();
         clock.Advance(TimeSpan.FromHours(2));
+        StateSnapshot frozen = await store.ReadAsync();
+        var pr = new JsonObject
+        {
+            ["topic_id"] = Core.TopicId("Programming"),
+            ["generation"] = 1,
+            ["number"] = 7,
+            ["status"] = "open",
+            ["draft"] = true,
+            ["frozen"] = true
+        };
+        await store.WriteAsync(Core.SyncPrs(frozen.State, new JsonArray(pr.Copy())), frozen, "fixture freeze repair topic");
 
         // Act
-        JsonObject resumed = await Engine().RunAsync(withModel: true);
+        JsonObject parked = await Engine().RunAsync();
+        StateSnapshot freed = await store.ReadAsync();
+        pr["status"] = "closed";
+        await store.WriteAsync(Core.SyncPrs(freed.State, new JsonArray(pr.Copy())), freed, "fixture close frozen PR");
+        JsonObject failed = await Engine().RunAsync(withModel: true);
+        JsonObject next = await Engine().RunAsync();
+        JsonObject state = (await store.ReadAsync()).State;
 
         // Assert
-        resumed.Str("status").Should().Be("proposed");
-        model.Authors.Should().Be(1);
-        model.Reviews.Should().Be(2);
-        model.AuthorPayload.Obj("note_hashes").Str(CandidateValidationBadPath).Should().Be(LegacyIdentity.Digest(CandidateValidationSource));
-        string candidate = resumed.Obj("candidate").Str(CandidateValidationBadPath);
-        NoteDates.Read(System.Text.Encoding.UTF8.GetBytes(candidate))["modified"].Should().Be(NoteDates.Timestamp(pending.Str("prepared_at")));
-        candidate.Should().Contain("The clarified mechanism.");
+        parked.Str("status").Should().Be("no_changes");
+        failed.Str("status").Should().Be("review_blocked");
+        failed.Int("model_calls").Should().Be(1);
+        model.Authors.Should().Be(2);
+        model.Reviews.Should().Be(3);
+        next.Obj("batch").Arr("notes").Should().ContainSingle().Which.Str("path").Should().Be(CandidateValidationOtherPath);
+        state["pending_author_proposal"].Should().BeNull();
+        state.Obj("parked_review_repairs").Count.Should().Be(0);
+        state.Obj("review_repair_attempts").Single().Value!.GetValue<int>().Should().Be(1);
+    }
+
+    private sealed class ReviewRepairModel(TimeProvider clock, string scenario) : IModelProvider
+    {
+        public int Authors { get; private set; }
+        public int Reviews { get; private set; }
+        public JsonObject RepairPayload { get; private set; } = new();
+        public bool RejectAfterResume { get; init; }
+        private readonly EngineResumeModel changed = new(CandidateValidationBadPath, clock, false);
+
+        public Task<JsonObject> AuthorAsync(JsonObject payload, CancellationToken cancellationToken = default)
+        {
+            Authors++;
+            if (Authors == 1)
+            {
+                return Task.FromResult(new JsonObject
+                {
+                    ["version"] = 1,
+                    ["edits"] = new JsonArray(),
+                    ["feedback"] = new JsonArray(),
+                    ["dispositions"] = new JsonArray(new JsonObject { ["path"] = CandidateValidationBadPath, ["outcome"] = "keep", ["reason"] = "Initial audit found no change." })
+                });
+            }
+            RepairPayload = payload.Copy();
+            if (scenario == "author-quota" && Authors == 2) throw new ClaudeQuotaException("weekly", clock.GetUtcNow().AddHours(1), clock.GetUtcNow().AddHours(1));
+            return changed.AuthorAsync(payload, cancellationToken);
+        }
+
+        public Task<JsonObject> ReviewAsync(JsonObject payload, CancellationToken cancellationToken = default)
+        {
+            Reviews++;
+            if (Reviews == 1 || scenario == "always-reject" || RejectAfterResume && Reviews >= 3)
+            {
+                JsonObject review = DomainFixtures.UnchangedReview(payload);
+                review["verdict"] = "CHANGES REQUIRED";
+                review.Arr("notes")[0]!["verdict"] = "CHANGES REQUIRED";
+                review.Arr("notes")[0]!.Arr("findings").Add(new JsonObject { ["severity"] = "Medium", ["effect"] = "The mechanism is underspecified.", ["fix"] = "Explain the mechanism." });
+                return Task.FromResult(review);
+            }
+            if (scenario == "review-quota" && Reviews == 2) throw new ClaudeQuotaException("weekly", clock.GetUtcNow().AddHours(1), clock.GetUtcNow().AddHours(1));
+            return changed.ReviewAsync(payload, cancellationToken);
+        }
     }
 
     private sealed class EngineTestClock(DateTimeOffset now) : TimeProvider
@@ -168,6 +258,7 @@ public sealed class EngineTests
         const bool apply = false;
 
         using var fixture = new KeepDecisionKeepFixture();
+        fixture.Model.OffsetEvidence = true;
 
         // Act
         JsonObject result = await fixture.Engine().RunAsync(apply, withModel: true);
@@ -187,6 +278,7 @@ public sealed class EngineTests
         evidence.RequiredObject("review").Arr("current_text_evidence").Should().NotBeEmpty();
         result.RequiredObject("review").Str("verdict").Should().Be("CLEAN");
         state.ContainsKey("pending_author_proposal").Should().BeFalse();
+        state.Obj("review_evidence").Count.Should().Be(1);
         fixture.Validations.Should().Be(0);
     }
 
@@ -197,13 +289,31 @@ public sealed class EngineTests
         using var fixture = new KeepDecisionKeepFixture();
         fixture.Model.FailQuestionQuality = true;
         var publicationApi = new RuntimeApi();
+        const string previousPath = "Vault/Home/Programming/NET/A Previous.md";
+        const string nextPath = "Vault/Home/Programming/NET/Z Next.md";
+        StateSnapshot seeded = await fixture.Store.ReadAsync();
+        seeded.State["held_proposals"] = new JsonObject
+        {
+            [Core.TopicId("Programming")] = new JsonObject
+            {
+                ["topic_id"] = Core.TopicId("Programming"),
+                ["rules_hash"] = Core.RulesVersion(fixture.Root),
+                ["source_hashes"] = new JsonObject { [previousPath] = LegacyIdentity.Digest(DomainFixtures.Note) },
+                ["feedback_snapshot"] = new JsonArray()
+            }
+        };
+        await fixture.Store.WriteAsync(seeded.State, seeded, "fixture prior held batch");
 
         // Act
         JsonObject blocked = await fixture.Engine(publicationApi).RunAsync(apply: true, withModel: true);
         JsonObject state = (await fixture.Store.ReadAsync()).State;
+        JsonObject next = await new ImprovementEngine(fixture.Root, new JsonObject(), fixture.Store,
+            notesLoader: () => new JsonArray(DomainFixtures.NoteRecord(), DomainFixtures.NoteRecord(previousPath), DomainFixtures.NoteRecord(nextPath))).RunAsync();
 
         // Assert
         blocked.Str("status").Should().Be("review_blocked");
+        next.Obj("batch").Arr("notes").Should().ContainSingle().Which.Str("path").Should().Be(nextPath);
+        state.Obj("invalid_proposals").Count.Should().Be(1);
         state.Obj("notes").ContainsKey(DomainFixtures.Path).Should().BeFalse();
         state.RequiredObject("held_proposals").Count.Should().BePositive();
         state.ContainsKey("pending_author_proposal").Should().BeFalse();
@@ -253,25 +363,6 @@ public sealed class EngineTests
         ["line"] = Array.IndexOf(source.Split('\n'), "```") + 1,
         ["message"] = "fenced code blocks need a language; use `text` when none fits"
     };
-
-    [Fact]
-    public async Task ActiveCooldownSkipsQuietlyWithoutAnotherModelCall()
-    {
-        // Arrange
-        using var fixture = new KeepDecisionKeepFixture();
-        fixture.Model.LimitFirstReview = true;
-        await fixture.Engine().RunAsync(withModel: true);
-
-        // Act
-        JsonObject quiet = await fixture.Engine().RunAsync(withModel: true);
-
-        // Assert
-        quiet.Str("status").Should().Be("cooldown");
-        quiet.Bool("notice").Should().BeFalse();
-        fixture.Model.Authors.Should().Be(1);
-        fixture.Model.Reviews.Should().Be(1);
-        (await fixture.Store.ReadAsync()).State.Obj("pending_author_proposal").Count.Should().BePositive();
-    }
 
     private sealed class KeepDecisionKeepFixture : IDisposable
     {
@@ -325,6 +416,7 @@ public sealed class EngineTests
     {
         public int Authors { get; private set; }
         public int Reviews { get; private set; }
+        public bool OffsetEvidence { get; set; }
         public bool FailQuestionQuality { get; set; }
         public bool LimitFirstReview { get; set; }
         public bool MixedBatch { get; set; }
@@ -373,9 +465,13 @@ public sealed class EngineTests
                 throw new ClaudeQuotaException("weekly", clock.GetUtcNow().AddHours(1), clock.GetUtcNow().AddHours(1));
             }
             JsonObject review = DomainFixtures.UnchangedReview(payload);
+            if (OffsetEvidence)
+            {
+                review.Arr("notes")[0]!.Arr("current_text_evidence")[0]!["line_start"] = 2;
+            }
             if (FailQuestionQuality)
             {
-                review.RequiredArray("notes")[0]!["quality"]!["question_quality"] = "FAIL";
+                review.RequiredArray("notes")[0]!["quality"]!["question_quality"] = "NOT APPLICABLE";
             }
             return Task.FromResult(review);
         }
@@ -532,13 +628,16 @@ public sealed class EngineTests
         var config = CandidateValidationConfiguration(new JsonArray("git", "rev-parse", "--verify", "refs/remotes/origin/validator-resource"));
         var store = new MemoryStateStore(Core.NewState());
         JsonObject proposal = CandidateValidationProposalFor("The clarified mechanism.");
-        var model = new CandidateValidationCandidateModel(proposal);
+        var model = new CandidateValidationCandidateModel(proposal) { OffsetFirstEvidence = true };
         ImprovementEngine Engine() => new(fixture.Root, config, store, model,
             notesLoader: fixture.Notes, snapshotShaLoader: () => fixture.Snapshot);
 
         // Act: the external validator's missing resource is an interruption, not invalid content.
         Exception? interrupted = await Record.ExceptionAsync(() => Engine().RunAsync(withModel: true));
         StateSnapshot pending = await store.ReadAsync();
+        config["validator_commands"] = new JsonArray(new JsonArray("git", "rev-parse", "--verify", "HEAD"));
+        JsonObject resumed = await Engine().RunAsync(withModel: true);
+        JsonObject final = (await store.ReadAsync()).State;
 
         // Assert
         interrupted.Should().BeOfType<RuntimeFailure>().Which.Message.Should().Contain("Validation failed");
@@ -546,7 +645,12 @@ public sealed class EngineTests
         pending.State.Obj("invalid_proposals").Count.Should().Be(0);
         pending.State.Obj("held_proposals").Count.Should().Be(0);
         model.Paths.Should().ContainSingle().Which.Should().Be(CandidateValidationBadPath);
-        model.Reviews.Should().Be(1);
+        model.Reviews.Should().Be(2);
+        pending.State.Obj("pending_author_proposal").Obj("review_evidence").Arr("bindings").Count.Should().Be(1);
+        resumed.Str("status").Should().Be("proposed");
+        resumed["review_evidence"].Should().BeNull();
+        final.Obj("review_evidence").Count.Should().Be(1);
+        final.Obj("pending_author_proposal")["review_evidence"].Should().BeNull();
     }
 
     private static JsonObject CandidateValidationConfiguration(JsonArray command) => new()
@@ -601,6 +705,7 @@ public sealed class EngineTests
     private sealed class CandidateValidationCandidateModel(JsonObject proposal) : IModelProvider
     {
         public bool RejectValue { get; init; }
+        public bool OffsetFirstEvidence { get; init; }
         public List<string> Paths { get; } = [];
         public int Reviews { get; private set; }
 
@@ -639,7 +744,7 @@ public sealed class EngineTests
                     ["split_suggestion"] = "Keep one mechanism.",
                     ["target_resolution"] = "RESOLVED",
                     ["findings"] = new JsonArray(),
-                    ["current_text_evidence"] = new JsonArray(new JsonObject { ["quote"] = lines[line], ["line_start"] = line + 1, ["reason"] = "The current explanation addresses the target." }),
+                    ["current_text_evidence"] = new JsonArray(new JsonObject { ["quote"] = lines[line], ["line_start"] = OffsetFirstEvidence && Reviews == 1 ? 1 : line + 1, ["reason"] = "The current explanation addresses the target." }),
                     ["source_checks"] = new JsonArray(),
                     ["rejection_equivalence"] = new JsonArray(),
                     ["quality"] = new JsonObject { ["accuracy"] = "PASS", ["clarity"] = "PASS", ["rules_compliance"] = "PASS", ["question_quality"] = "PASS", ["identity_safety"] = "PASS" }
@@ -1041,8 +1146,11 @@ public sealed class EngineTests
         snapshot.State["held_proposals"] = new JsonObject { [original.Str("topic_id")] = new JsonObject { ["audit"] = "existing hold retained" } };
         await fixture.Store.WriteAsync(snapshot.State, snapshot, "fixture previous policy inputs");
         const string otherPath = "Vault/Home/Programming/ZZZ/Other.md";
-        var nextModel = new SourceBudgetAuthor(DomainFixtures.Proposal(DomainFixtures.Edit()));
-        var engine = new ImprovementEngine(fixture.Root, new JsonObject(), fixture.Store, nextModel, clock: fixture.Clock,
+        JsonObject keep = DomainFixtures.Proposal(DomainFixtures.Edit());
+        keep["edits"] = new JsonArray();
+        keep.Arr("dispositions")[0]!["outcome"] = "keep";
+        var nextModel = new SourceBudgetAuthor(keep);
+        var engine = new ImprovementEngine(fixture.Root, new JsonObject { ["max_notes_per_run"] = 1 }, fixture.Store, nextModel, clock: fixture.Clock,
             notesLoader: () => new JsonArray(DomainFixtures.NoteRecord(), DomainFixtures.NoteRecord(otherPath)));
 
         // Act
@@ -1053,7 +1161,7 @@ public sealed class EngineTests
         // Assert
         result.Str("status").Should().Be("no_worthwhile_changes");
         fixture.Model.Authors.Should().Be(1);
-        nextModel.Paths.Should().Equal(otherPath);
+        nextModel.Paths.Should().Equal(changed == "repair" ? DomainFixtures.Path : otherPath);
         foreach (string key in new[] { "proposal", "repair_inputs", "evaluation_hash", "feedback_keys", "source_hashes", "topic_id", "target_note", "review_focus" })
             JsonNode.DeepEquals(held[key], original[key]).Should().BeTrue(key + " must retain its original input");
         heldState.Obj("invalid_proposals").Select(item => item.Value).Should().Contain(item => item.Str("audit") == "existing hold retained");

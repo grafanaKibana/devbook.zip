@@ -289,6 +289,7 @@ public sealed partial class ImprovementEngine
             if (needsOutcome)
             {
                 state = Core.RecordOutcome(state, receipt.RequiredObject("batch"), receipt.RequiredObject("proposal"), receipt.RequiredObject("result"), receipt["review"] as JsonObject);
+                Core.CompleteReviewHolds(state, receipt.RequiredObject("batch"), receipt["review_evidence"] as JsonObject);
                 Proposal.PersistDecisions(state, receipt.Arr("decisions"));
                 EnsureObject(state, "finalized_exports")[pair.Key] = new JsonObject { ["head_sha"] = head };
             }
@@ -327,7 +328,7 @@ public sealed partial class ImprovementEngine
             await FeedbackReceiptAsync(receipt.RequiredObject("proposal"), receipt.RequiredObject("batch"), operation.Obj("evidence").Str("head_sha"), true, cancellationToken);
             EnsureObject(state, "finalized_operations")[pair.Key] = true;
             state.Remove("pending_author_proposal");
-            EnsureObject(state, "held_proposals").Remove(receipt.Str("topic_id"));
+            Core.CompleteReviewHolds(state, receipt.RequiredObject("batch"), receipt["review_evidence"] as JsonObject);
         }
         await SaveAsync(state, "finalize verified publication receipts", cancellationToken);
         foreach (string id in state.Obj("completed_operations").Select(pair => pair.Key).ToArray())

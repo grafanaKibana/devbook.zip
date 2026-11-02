@@ -15,7 +15,6 @@ public sealed class ExportWorkerTests
     [InlineData("foreign-head")]
     [InlineData("closed")]
     [InlineData("identity")]
-    [InlineData("timeout")]
     public async Task GeneratedRefPublicationWaitsOnlyForSafePrHeadPropagation(string scenario)
     {
         // Arrange

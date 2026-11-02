@@ -7,6 +7,7 @@
   "claude_code_version": "2.1.285",
   "model_timeout_seconds": 900,
   "max_model_turns": 20,
+  "max_review_repairs_per_batch": 1,
   "max_source_bytes": 2000000,
   "unknown_reset_recheck_hours": 24,
   "max_run_minutes": 35,

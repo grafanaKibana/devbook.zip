@@ -7,6 +7,61 @@ namespace DevBook.Tooling.Improvement;
 
 public static class Review
 {
+    public static (JsonObject Review, JsonArray Bindings) BindEvidence(JsonObject review, IReadOnlyDictionary<string, string> candidates)
+    {
+        JsonObject bound = review.Copy();
+        var bindings = new JsonArray();
+        foreach (JsonObject note in bound.Arr("notes").OfType<JsonObject>())
+        {
+            string path = note.Str("path");
+            if (!candidates.TryGetValue(path, out string? current))
+            {
+                continue;
+            }
+
+            string[] lines = current.Replace("\r\n", "\n", StringComparison.Ordinal).Split('\n');
+            JsonArray evidence = note.Arr("current_text_evidence");
+            for (var citationIndex = 0; citationIndex < evidence.Count; citationIndex++)
+            {
+                if (evidence[citationIndex] is not JsonObject citation
+                    || citation["line_start"] is not JsonValue lineValue
+                    || !lineValue.TryGetValue(out int reportedLine) || reportedLine < 1)
+                {
+                    continue;
+                }
+
+                string quote = citation.Str("quote");
+                if (string.IsNullOrWhiteSpace(quote))
+                {
+                    continue;
+                }
+
+                int lineCount = quote.Count(character => character == '\n') + 1;
+                bool Matches(int line) => string.Join('\n', lines.Skip(line - 1).Take(lineCount)).Contains(quote, StringComparison.Ordinal);
+                if (Matches(reportedLine))
+                {
+                    continue;
+                }
+
+                int[] matches = Enumerable.Range(1, lines.Length).Where(Matches).Take(2).ToArray();
+                if (matches.Length != 1)
+                {
+                    continue;
+                }
+
+                citation["line_start"] = matches[0];
+                bindings.Add(new JsonObject
+                {
+                    ["path"] = path,
+                    ["citation_index"] = citationIndex,
+                    ["reported_line_start"] = reportedLine,
+                    ["resolved_line_start"] = matches[0]
+                });
+            }
+        }
+        return (bound, bindings);
+    }
+
     public static bool VerifiedKeep(JsonObject evidence, string path, string current, string rulesHash)
     {
         if (evidence.Str("content_hash") != LegacyIdentity.Digest(current) || evidence.Str("rules_hash") != rulesHash

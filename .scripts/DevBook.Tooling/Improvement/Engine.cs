@@ -24,6 +24,7 @@ public sealed partial class ImprovementEngine
     private readonly long started;
     private StateSnapshot? expectedSnapshot;
     private int modelCalls;
+    private readonly Dictionary<string, string> sourceEvidenceCache = new();
 
     public ImprovementEngine(string root, JsonObject config, IStateStore store, IModelProvider? model = null, IGitHubApi? api = null,
         GitHubRuntime? publisher = null, Func<JsonArray>? notesLoader = null,
@@ -35,6 +36,10 @@ public sealed partial class ImprovementEngine
         if (config.ContainsKey("target_note") || config.ContainsKey("review_focus"))
         {
             throw new ArgumentException("Manual note targeting is not supported; every run uses the improvement queue.");
+        }
+        if (config.Int("max_review_repairs_per_batch", 1) is < 0 or > 1)
+        {
+            throw new ArgumentException("max_review_repairs_per_batch must be 0 or 1.");
         }
         this.contentAuthorities = contentAuthorities?.Copy() ?? Core.LoadContentAuthorities(this.root);
         _ = Core.RulesVersion(this.contentAuthorities);
@@ -101,6 +106,10 @@ public sealed partial class ImprovementEngine
             throw new RuntimeFailure("Model provider missing.");
         }
 
+        if (modelCalls >= 4)
+        {
+            throw new RuntimeFailure("This opportunity reached its four-call model budget; pending work is preserved.");
+        }
         double remaining = config.Int("max_run_minutes", 35) * 60 - clock.GetElapsedTime(started).TotalSeconds;
         if (remaining < 30)
         {
@@ -243,7 +252,12 @@ public sealed partial class ImprovementEngine
         paused.UnionWith(state.Obj("prs").Select(item => item.Value).OfType<JsonObject>().Where(pr => pr.Str("status") == "open")
             .SelectMany(pr => pr.Arr("blocked_topic_ids").Strings()));
         paused.UnionWith(state.Obj("topics").Where(item => item.Value.Obj("publication_conflict").Int("generation", -1) == item.Value.Int("generation", 0)).Select(item => item.Key));
-        HashSet<string> heldPaths = notes.OfType<JsonObject>().Where(note => Held(state, note, rules)).Select(note => note.Str("path")).ToHashSet();
+        ParkBlockedRepair(state, notes, paused);
+        PromoteHeldRepair(state, notes, paused, rules, evaluation);
+        JsonObject repairPending = state.Obj("pending_author_proposal");
+        HashSet<string> repairPaths = repairPending.Str("review_repair_key").Length > 0
+            ? repairPending.Obj("source_hashes").Select(item => item.Key).ToHashSet() : [];
+        HashSet<string> heldPaths = notes.OfType<JsonObject>().Where(note => !repairPaths.Contains(note.Str("path")) && Held(state, note, rules)).Select(note => note.Str("path")).ToHashSet();
         JsonArray allNotes = notes.Copy();
         notes = Copies(notes.OfType<JsonObject>().Where(note => !paused.Contains(Core.TopicId(note.Str("topic"))) && !heldPaths.Contains(note.Str("path"))));
         JsonObject selectionState = state.Copy();
@@ -285,6 +299,10 @@ public sealed partial class ImprovementEngine
             }
         }
 
+        if (repairPaths.Count > 0 && !state.Obj("feedback").Any(item => item.Value.Str("status") == "pending"))
+        {
+            notes = Copies(notes.OfType<JsonObject>().Where(note => repairPaths.Contains(note.Str("path"))));
+        }
         JsonObject? batch = Queue.SelectBatch(selectionState, notes, rules, config);
         await SaveAsync(state, "reconcile maintenance queue", cancellationToken);
         if (batch is null)
@@ -318,8 +336,10 @@ public sealed partial class ImprovementEngine
         bool compatible = JsonNode.DeepEquals(pending["source_hashes"], hashes) && JsonNode.DeepEquals(pending["feedback_keys"], keys) && pending.Str("rules_hash") == rules
             && pending.Str("topic_id") == batch.Str("topic_id") && pending.Str("target_note").Length == 0 && pending.Str("review_focus").Length == 0
             && pending.Str("evaluation_hash") == evaluation && JsonNode.DeepEquals(pending["repair_inputs"], repairInputs);
+        bool repairAuthor = compatible && pending.Bool("author_repair_pending");
+        JsonObject repairContext = repairAuthor ? pending.Copy() : new JsonObject();
         JsonObject proposal;
-        if (compatible)
+        if (compatible && !repairAuthor)
         {
             if (pending.Int("prepared_source_version") != 1 || Runtime.ParseTime(pending.Str("prepared_at")) is null)
             {
@@ -330,7 +350,7 @@ public sealed partial class ImprovementEngine
         }
         else
         {
-            if (pending.Count != 0)
+            if (pending.Count != 0 && !repairAuthor)
             {
                 HoldIncompatiblePending(state, pending, "inputs_changed");
                 await SaveAsync(state, "preserve incompatible author proposal", cancellationToken);
@@ -353,6 +373,14 @@ public sealed partial class ImprovementEngine
                 nearby.Add(new JsonObject { ["path"] = note.Str("path"), ["cards"] = Copies(Proposal.QardSpans(note.Str("content")).Select(span => JsonValue.Create(span.Text))) });
             }
 
+            if (repairAuthor && !pending.Bool("repair_reserved"))
+            {
+                EnsureObject(state, "parked_review_repairs").Remove(pending.Str("review_repair_key"));
+                EnsureObject(state, "review_repair_attempts")[pending.Str("review_repair_key")] = 1;
+                pending["repair_reserved"] = true;
+                repairContext = pending.Copy();
+                await SaveAsync(state, "reserve bounded review repair", cancellationToken);
+            }
             try
             {
                 proposal = await CallAsync(false, new JsonObject
@@ -366,7 +394,8 @@ public sealed partial class ImprovementEngine
                     ["rules"] = rulesText,
                     ["rejected_proposals"] = state.Arr("rejections").Copy(),
                     ["open_proposals"] = open,
-                    ["previous_review"] = state.Obj("held_proposals").Obj(batch.Str("topic_id"))["blocked_review"]?.DeepClone(),
+                    ["previous_review"] = repairContext["repair_review"]?.DeepClone(),
+                    ["previous_proposal"] = repairContext["repair_previous_proposal"]?.DeepClone(),
                     ["nearby_questions"] = nearby
                 }, cancellationToken);
             }
@@ -387,6 +416,10 @@ public sealed partial class ImprovementEngine
                 ["prepared_source_version"] = 1,
                 ["prepared_at"] = Core.FormatTime(clock.GetUtcNow())
             };
+            foreach (string key in new[] { "review_repair_key", "repair_reserved", "repair_review", "repair_previous_proposal", "previous_evaluation_hash" })
+            {
+                if (repairContext.ContainsKey(key)) pending[key] = repairContext[key]?.DeepClone();
+            }
             state["pending_author_proposal"] = pending;
             await SaveAsync(state, "save source-matched author proposal", cancellationToken);
         }
@@ -407,10 +440,11 @@ public sealed partial class ImprovementEngine
         JsonObject[] sourceEntries = proposal.Arr("edits").OfType<JsonObject>().SelectMany(edit => edit.Arr("sources").OfType<JsonObject>())
             .GroupBy(source => source.Str("url"), StringComparer.Ordinal).Select(group => group.First()).ToArray();
         int sourceLimit = config.Int("max_sources_per_run", 12);
-        if (sourceEntries.Length > sourceLimit)
+        int totalSources = sourceEvidenceCache.Keys.Union(sourceEntries.Select(source => source.Str("url"))).Count();
+        if (totalSources > sourceLimit)
         {
             return await QuarantineAsync(state, pending, "source_budget",
-                $"Proposal has {sourceEntries.Length} distinct source URLs, exceeding the per-run limit of {sourceLimit}.", cancellationToken);
+                $"Opportunity has {totalSources} distinct source URLs, exceeding the per-run limit of {sourceLimit}.", cancellationToken);
         }
         bool hasEdits = proposal.Arr("edits").Count != 0;
         if (hasEdits)
@@ -454,7 +488,13 @@ public sealed partial class ImprovementEngine
 
             try
             {
-                fetched[source.Str("url")] = await sourceFetcher(source.Str("url"), cancellationToken);
+                string url = source.Str("url");
+                if (!sourceEvidenceCache.TryGetValue(url, out string? text))
+                {
+                    text = await sourceFetcher(url, cancellationToken);
+                    sourceEvidenceCache[url] = text;
+                }
+                fetched[url] = text;
             }
             catch (UnsafeInput error)
             {
@@ -476,13 +516,35 @@ public sealed partial class ImprovementEngine
                 ["primary_sources"] = fetched,
                 ["rejected_proposals"] = state.Arr("rejections").Copy(),
                 ["feedback"] = batch.Arr("feedback").Copy(),
-                ["recorded_decisions"] = decisions.Copy()
+                ["recorded_decisions"] = decisions.Copy(),
+                ["previous_review"] = pending["repair_review"]?.DeepClone()
             }, cancellationToken);
         }
         catch (ClaudeQuotaException error)
         {
             return await CooldownAsync(error, "review", cancellationToken);
         }
+        if (pending["review_evidence"] is JsonObject previousEvidence)
+        {
+            EnsureObject(state, "review_evidence")[LegacyIdentity.Fingerprint(previousEvidence)] = previousEvidence.Copy();
+            pending.Remove("review_evidence");
+        }
+        JsonObject rawReview = review.Copy();
+        JsonArray evidenceBindings;
+        (review, evidenceBindings) = Review.BindEvidence(review, candidate);
+        if (evidenceBindings.Count > 0)
+        {
+            pending["review_evidence"] = new JsonObject
+            {
+                ["raw_review"] = rawReview,
+                ["bindings"] = evidenceBindings,
+                ["source_hashes"] = ObjectMap(candidate.ToDictionary(item => item.Key, item => LegacyIdentity.Digest(item.Value))),
+                ["rules_hash"] = rules,
+                ["evaluation_hash"] = evaluation
+            };
+        }
+        pending["completed_review"] = review.Copy();
+        await SaveAsync(state, "preserve bound independent review", cancellationToken);
         if (state["cooldown"] is not null)
         {
             state["cooldown"] = null;
@@ -491,7 +553,17 @@ public sealed partial class ImprovementEngine
         if (!Review.Clean(review, candidate, proposal, state.Arr("rejections"), batch.Arr("feedback")))
         {
             pending["blocked_review"] = review.Copy();
-            EnsureObject(state, "held_proposals")[batch.Str("topic_id")] = CreateHold(pending);
+            StoreHold(state, CreateHold(pending));
+            if (CanPrepareRepair(state, pending) && HasRepairFinding(review, selected.Keys))
+            {
+                PrepareRepair(state, pending, review, evaluation);
+                await SaveAsync(state, "queue bounded repair from semantic review", cancellationToken);
+                if (clock.GetElapsedTime(started).TotalMinutes < config.Int("max_run_minutes", 35) - 1)
+                {
+                    return await RunAsync(apply, withModel, cancellationToken);
+                }
+                return new JsonObject { ["status"] = "repair_pending", ["model_calls"] = modelCalls };
+            }
             state.Remove("pending_author_proposal");
             await SaveAsync(state, "preserve blocked semantic review", cancellationToken);
             return new JsonObject { ["status"] = "review_blocked", ["proposal"] = proposal, ["review"] = review, ["model_calls"] = modelCalls };
@@ -515,6 +587,7 @@ public sealed partial class ImprovementEngine
                 {
                     Proposal.PersistDecisions(state, decisions);
                 }
+                Core.CompleteReviewHolds(state, batch, pending["review_evidence"] as JsonObject);
                 state.Remove("pending_author_proposal");
                 state["cooldown"] = null;
                 await SaveAsync(state, "record independently verified keep or feedback decision", cancellationToken);
@@ -544,7 +617,7 @@ public sealed partial class ImprovementEngine
             pending["completed_review"] = review.Copy();
             return await QuarantineAsync(state, pending, "repository_validation", error.Message, cancellationToken);
         }
-        history.Add(new JsonObject { ["batch"] = batch.Copy(), ["proposal"] = proposal.Copy(), ["result"] = result.Copy(), ["review"] = review.Copy() });
+        history.Add(new JsonObject { ["batch"] = batch.Copy(), ["proposal"] = proposal.Copy(), ["result"] = result.Copy(), ["review"] = review.Copy(), ["review_evidence"] = pending["review_evidence"]?.DeepClone() });
         JsonArray changes = Copies(history.OfType<JsonObject>().SelectMany(record => record.RequiredObject("proposal").Arr("edits")));
         JsonArray cumulativeFeedback = Copies(history.OfType<JsonObject>().SelectMany(record => record.RequiredObject("proposal").Arr("feedback").OfType<JsonObject>()).Select(item =>
         {
@@ -573,6 +646,7 @@ public sealed partial class ImprovementEngine
             ["topic"] = batch.Str("topic"),
             ["proposal"] = proposal.Copy(),
             ["review"] = review.Copy(),
+            ["review_evidence"] = pending["review_evidence"]?.DeepClone(),
             ["candidate"] = ObjectMap(candidate),
             ["summary"] = summary,
             ["validation"] = validation.Copy(),
@@ -596,6 +670,7 @@ public sealed partial class ImprovementEngine
             ["proposal"] = proposal.Copy(),
             ["result"] = result.Copy(),
             ["review"] = review.Copy(),
+            ["review_evidence"] = pending["review_evidence"]?.DeepClone(),
             ["records"] = history.Copy(),
             ["topic_id"] = batch.Str("topic_id"),
             ["generation"] = generation,
@@ -650,7 +725,7 @@ public sealed partial class ImprovementEngine
         failed["blocked_review"] = new JsonObject { ["stage"] = stage, ["reason"] = reason };
         failed["failed_at"] = Core.FormatTime(clock.GetUtcNow());
         EnsureObject(state, "invalid_proposals")[LegacyIdentity.Digest(pending.ToJsonString())] = failed.Copy();
-        EnsureObject(state, "held_proposals")[pending.Str("topic_id")] = failed;
+        StoreHold(state, failed);
         state.Remove("pending_author_proposal");
         await SaveAsync(state, "quarantine invalid author proposal", cancellationToken);
         return new JsonObject { ["status"] = "proposal_blocked", ["stage"] = stage, ["reason"] = reason, ["model_calls"] = modelCalls };
@@ -679,14 +754,8 @@ public sealed partial class ImprovementEngine
             hold["blocked_review"] = hold["incompatibility"]!.DeepClone();
         }
         JsonObject archive = EnsureObject(state, "invalid_proposals");
-        string topic = pending.Str("topic_id");
-        JsonObject holds = EnsureObject(state, "held_proposals");
-        if (holds[topic] is JsonObject previous)
-        {
-            archive[LegacyIdentity.Fingerprint(previous)] = previous.Copy();
-        }
         archive[LegacyIdentity.Fingerprint(pending)] = hold.Copy();
-        holds[topic] = hold;
+        StoreHold(state, hold);
         state.Remove("pending_author_proposal");
     }
 
@@ -698,6 +767,7 @@ public sealed partial class ImprovementEngine
             .Select(item => item.Str("key")).Order(StringComparer.Ordinal).ToArray();
         return state.Obj("held_proposals").Concat(state.Obj("invalid_proposals")).Select(item => item.Value).OfType<JsonObject>()
             .Any(hold => hold.Obj("source_hashes").Str(path) == note.Str("hash") && hold.Str("rules_hash") == rules
+                && hold.Obj("repair_inputs").Str(path) == note.Str("repair_input_hash")
                 && (hold["feedback_snapshot"] as JsonArray ?? hold.Obj("batch").Arr("feedback")).OfType<JsonObject>()
                     .Where(item => item.Arr("paths").Strings().Contains(path)).Select(item => item.Str("key"))
                     .Order(StringComparer.Ordinal).SequenceEqual(keys));

@@ -363,6 +363,47 @@ public static class Core
         return current;
     }
 
+    public static void CompleteReviewHolds(JsonObject state, JsonObject batch, JsonObject? evidence = null)
+    {
+        JsonObject Map(string key)
+        {
+            if (state[key] is not JsonObject value)
+            {
+                value = new JsonObject();
+                state[key] = value;
+            }
+            return value;
+        }
+        JsonObject hashes = new(batch.Arr("notes").OfType<JsonObject>().Select(note =>
+            new KeyValuePair<string, JsonNode?>(note.Str("path"), JsonValue.Create(note.Str("hash")))));
+        JsonObject repairInputs = new(batch.Arr("notes").OfType<JsonObject>().Select(note =>
+            new KeyValuePair<string, JsonNode?>(note.Str("path"), JsonValue.Create(note.Str("repair_input_hash")))));
+        string[] feedbackKeys = batch.Arr("feedback").OfType<JsonObject>().Select(item => item.Str("key")).Order(StringComparer.Ordinal).ToArray();
+        foreach (string collection in new[] { "held_proposals", "invalid_proposals" })
+        {
+            foreach ((string key, JsonNode? value) in state.Obj(collection).ToArray())
+            {
+                if (hashes.Count == 0 || value is not JsonObject hold || hold.Str("rules_hash") != batch.Str("rules_hash")
+                    || hold["feedback_keys"] is not JsonArray || !JsonNode.DeepEquals(hold["source_hashes"], hashes) || !JsonNode.DeepEquals(hold["repair_inputs"], repairInputs)
+                    || !hold.Arr("feedback_keys").Strings().Order(StringComparer.Ordinal).SequenceEqual(feedbackKeys))
+                {
+                    continue;
+                }
+                Map("completed_review_holds")[LegacyIdentity.Fingerprint(hold)] = hold.Copy();
+                string repairKey = hold.Str("review_repair_key");
+                if (state.Obj("parked_review_repairs").Str(repairKey) == LegacyIdentity.Fingerprint(hold))
+                {
+                    Map("parked_review_repairs").Remove(repairKey);
+                }
+                state.RequiredObject(collection).Remove(key);
+            }
+        }
+        if (evidence is { Count: > 0 })
+        {
+            Map("review_evidence")[LegacyIdentity.Fingerprint(evidence)] = evidence.Copy();
+        }
+    }
+
     public static string FormatTime(DateTimeOffset value)
     {
         DateTime utc = value.UtcDateTime;

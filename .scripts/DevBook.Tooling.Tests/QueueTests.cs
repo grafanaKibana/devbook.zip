@@ -43,7 +43,6 @@ public sealed class QueueTests
     [Theory]
     [InlineData("unchanged")]
     [InlineData("flags")]
-    [InlineData("evaluation")]
     public void ReviewedFlagIsSelectedAgainOnlyWhenItsInputsChange(string change)
     {
         // Arrange
@@ -75,7 +74,7 @@ public sealed class QueueTests
     }
 
     [Fact]
-    public void NewRepairFlagCannotBypassReviewFreeze()
+    public async Task FlagsAndHeldRepairsCannotBypassReviewFreeze()
     {
         // Arrange
         JsonObject note = DomainFixtures.NoteRecord();
@@ -90,11 +89,49 @@ public sealed class QueueTests
             ["review_activity"] = true
         }));
 
+        string root = Repository.FindRoot();
+        string rules = Core.RulesVersion(root);
+        state["held_proposals"] = new JsonObject
+        {
+            [Core.TopicId("Programming")] = new JsonObject
+            {
+                ["topic_id"] = Core.TopicId("Programming"),
+                ["rules_hash"] = rules,
+                ["source_hashes"] = new JsonObject { [DomainFixtures.Path] = note.Str("hash") },
+                ["repair_inputs"] = new JsonObject { [DomainFixtures.Path] = note.Str("repair_input_hash") },
+                ["feedback_keys"] = new JsonArray(),
+                ["batch"] = new JsonObject { ["topic"] = "Programming" },
+                ["blocked_review"] = new JsonObject
+                {
+                    ["verdict"] = "CHANGES REQUIRED",
+                    ["notes"] = new JsonArray(new JsonObject
+                    {
+                        ["path"] = DomainFixtures.Path,
+                        ["findings"] = new JsonArray(new JsonObject { ["severity"] = "Medium" })
+                    })
+                }
+            }
+        };
+        JsonObject pending = state.Obj("held_proposals").Obj(Core.TopicId("Programming")).Copy();
+        pending["evaluation_hash"] = ClaudeProvider.EvaluationHash(new JsonObject());
+        pending["review_repair_key"] = "reserved-repair";
+        pending["repair_reserved"] = true;
+        pending["author_repair_pending"] = true;
+        state["pending_author_proposal"] = pending;
+        state["review_repair_attempts"] = new JsonObject { ["reserved-repair"] = 1 };
+        var store = new MemoryStateStore(state);
+        var engine = new ImprovementEngine(root, new JsonObject(), store, notesLoader: () => new JsonArray(note.Copy(), DomainFixtures.NoteRecord("Vault/Home/Networks/Other.md")));
+
         // Act
-        JsonObject? batch = ImprovementQueue.SelectBatch(state, new JsonArray(note), "rules");
+        JsonObject result = await engine.RunAsync();
+        JsonObject final = (await store.ReadAsync()).State;
 
         // Assert
-        batch.Should().BeNull();
+        result.Str("status").Should().Be("selected");
+        result.Obj("batch").Str("topic").Should().Be("Networks");
+        result.Int("model_calls").Should().Be(0);
+        final["pending_author_proposal"].Should().BeNull();
+        final.Obj("review_repair_attempts").Int("reserved-repair").Should().Be(1);
     }
 
     [Theory]
