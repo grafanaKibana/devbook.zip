@@ -10,7 +10,7 @@ qard-deck: "Data Persistence"
 qard-topic: "ORMs/Entity Framework"
 flashcard_uid: "920a0510"
 created: "2026-02-10T16:03:55.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-02T09:03:54.806Z"
 ---
 
 Entity Framework Core (EF Core) is a cross-platform .NET ORM. A database provider maps its model and query pipeline to a specific engine. Microsoft ships providers for SQL Server, SQLite, and Azure Cosmos DB. PostgreSQL and MySQL support comes from external provider packages with their own compatibility schedules.
@@ -220,8 +220,8 @@ Schema changes take provider-specific locks and may scan or rewrite a large tabl
 > [EF Core DbContext lifetime, configuration, and initialization](https://learn.microsoft.com/en-us/ef/core/dbcontext-configuration/) · [EF Core advanced performance topics and context pooling](https://learn.microsoft.com/en-us/ef/core/performance/advanced-performance-topics)
 
 <!-- qard-id: dd44ad40-d794-44fa-bdc0-f28f8e0e801a -->
-> [!qard]- How does EF Core change tracking work, and when is a no-tracking query appropriate?
-> EF Core change tracking records the entities that a `DbContext` loads, adds or attaches. It then compares their current values with remembered original values to decide what `SaveChanges` must write. A no-tracking query fits results that are only read and will not be updated through that context.
+> [!qard]- How does EF Core change tracking work?
+> EF Core change tracking records the entities that a `DbContext` loads, adds or attaches. It then compares their current values with remembered original values to decide what `SaveChanges` must write.
 >
 > With the default snapshot strategy, tracking works in four steps:
 >
@@ -229,7 +229,12 @@ Schema changes take provider-specific locks and may scan or rewrite a large tabl
 > 2. **Modify:** application code changes ordinary properties. Under this strategy, assigning a property does not notify EF Core.
 > 3. **Detect:** before `SaveChanges` writes, automatic change detection compares current values with the snapshot and marks changed entities and properties as modified.
 > 4. **Save:** `SaveChanges` sends the inserts, updates and deletes that the tracked entity states require.
-> 
+>
+> [EF Core: Tracking vs. no-tracking queries](https://learn.microsoft.com/en-us/ef/core/querying/tracking) · [EF Core: Change detection](https://learn.microsoft.com/en-us/ef/core/change-tracking/change-detection)
+
+> [!qard]- When is an EF Core no-tracking query appropriate?
+> A no-tracking query fits results that are only read and will not be updated through that context.
+>
 > `.AsNoTracking()` skips setting up this tracking information, which usually makes read-only queries cheaper. In exchange, `SaveChanges` neither detects nor saves changes to the returned objects. A plain no-tracking query also skips identity resolution, so one row returned twice becomes two separate objects. Later use of such a detached object for an update requires attaching it, stating which entity or properties are modified and handling concurrency. The context never recorded the object's original values.
 >
 > [EF Core: Tracking vs. no-tracking queries](https://learn.microsoft.com/en-us/ef/core/querying/tracking) · [EF Core: Change detection](https://learn.microsoft.com/en-us/ef/core/change-tracking/change-detection)
@@ -256,7 +261,7 @@ Schema changes take provider-specific locks and may scan or rewrite a large tabl
 > [EF Core: Handling concurrency conflicts](https://learn.microsoft.com/en-us/ef/core/saving/concurrency)
 
 <!-- qard-id: 5e9681ff-5093-4fb4-b6ff-b76f1501d587 -->
-> [!qard]- What is the N+1 query problem, and how can it be detected?
+> [!qard]- What is the N+1 query problem?
 > The N+1 query problem occurs when one query loads N parent rows and code then triggers a separate query for each parent's related data. The result is N + 1 round trips instead of one or two. In EF Core it commonly comes from lazy loading: accessing a navigation inside a loop can issue a query per item.
 >
 > ```csharp
@@ -267,13 +272,19 @@ Schema changes take provider-specific locks and may scan or rewrite a large tabl
 >
 > Each extra query adds a round trip, so the cost grows with the number of parents. A page that seems fast with little test data can degrade as production data grows.
 >
-> **Detection:**
+> [EF Core: Efficient querying](https://learn.microsoft.com/en-us/ef/core/performance/efficient-querying)
+
+> [!qard]- How can an N+1 query path be detected?
+> An N+1 path is detected through database command behavior:
 >
 > - **Command count per operation:** counting the database commands that one request or test issues reveals N+1 when the count grows with the number of parent rows.
 > - **Logged SQL:** the log shows the same statement repeated many times, with only the key parameter changing.
 > - **Traces:** one request contains many short, sequential database spans.
-> 
-> **Fixes** reduce the round trips. Options include a projection that selects only the related columns the result needs, an `Include` that eager-loads the navigation, or a deliberate second query that loads the related rows for all parents at once. The right choice depends on the result shape and consistency needs. No single collection-size threshold decides it.
+>
+> [EF Core: Efficient querying](https://learn.microsoft.com/en-us/ef/core/performance/efficient-querying)
+
+> [!qard]- How can an EF Core query avoid N+1 round trips?
+> N+1 fixes reduce the round trips. Options include a projection that selects only the related columns the result needs, an `Include` that eager-loads the navigation, or a deliberate second query that loads the related rows for all parents at once. The right choice depends on the result shape and consistency needs. No single collection-size threshold decides it.
 >
 > [EF Core: Efficient querying](https://learn.microsoft.com/en-us/ef/core/performance/efficient-querying)
 

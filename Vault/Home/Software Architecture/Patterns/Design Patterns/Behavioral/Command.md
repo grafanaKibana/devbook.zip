@@ -10,7 +10,7 @@ qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Behavioral/Command"
 flashcard_uid: "dd0e4ff8"
 created: "2026-03-05T22:12:46.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-02T09:03:54.806Z"
 ---
 
 A restaurant ticket is a command in paper form. It records the requested meal, waits in the kitchen queue, and tells the chef what to prepare. The waiter does not cook and the chef does not take the order. The ticket keeps the request separate from its execution.
@@ -206,14 +206,17 @@ This in-memory history fits a local UI action whose execution and undo each comp
 > [GoF: Design Patterns](https://www.oreilly.com/library/view/design-patterns-elements/0201633612/) · [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Command#Solution|Command: solution and limits]] · [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Command#Commands in UI, Messaging, and Data Access|Command: delegates and .NET examples]]
 
 <!-- qard-id: 559a25cf-a9b0-4267-850e-0575572aa65b -->
-> [!qard]- How does MediatR implement the Command pattern, and what does it add?
+> [!qard]- How does MediatR represent the roles of the Command pattern?
 > MediatR represents a command as a request object that carries the operation's data, and `Send` dispatches it to the one handler registered for that request type. It splits classic Command into parts: the request holds the data, the handler holds the execution logic that a classic command would put in `Execute`, and the mediator acts as the invoker that finds the right handler.
 >
-> What it adds:
+> [MediatR: behaviors](https://github.com/LuckyPennySoftware/MediatR/wiki/Behaviors) · [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Command#Commands in UI, Messaging, and Data Access|Command: MediatR request and handler]]
+
+> [!qard]- When does MediatR dispatch justify its indirection?
+> MediatR dispatch earns its cost when several callers need the same operation or shared policies need to wrap handler execution.
 >
 > - **Decoupled callers:** a controller or other sender depends only on the mediator and the request type, not on the handler or the services the handler uses.
 > - **Pipeline behaviors:** shared policies such as validation or logging wrap every handler call without being repeated in each handler.
-> 
+>
 > The cost is indirection: following a call from sender to handler requires knowing the registrations. A direct service call stays clearer for one small, fixed interaction. MediatR is one way to realize a command-style design, not a requirement of the Command pattern.
 >
 > [MediatR: behaviors](https://github.com/LuckyPennySoftware/MediatR/wiki/Behaviors) · [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Command#Commands in UI, Messaging, and Data Access|Command: MediatR request and handler]]

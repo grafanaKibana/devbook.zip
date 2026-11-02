@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-06-12T18:21:46.000Z
-modified: 2026-10-28T12:33:42.000Z
-published: 2026-10-31T08:53:28.448Z
+modified: 2026-11-02T09:03:54.806Z
+published: 2026-11-02T09:04:02.372Z
 topic:
   - AI & ML
 subtopic:
@@ -140,12 +140,22 @@ Binary judgments often calibrate more reliably than broad numeric scales. Prompt
 
 <!-- qard-id: 93e287a9-2061-488e-ae8b-95393678099a -->
 
-> [!qard]- Why can aggregate retrieval metrics hide regressions, and when is a segment drop actionable?
-> An aggregate metric averages over all queries, so a gain on large, healthy segments can outweigh a serious loss on a small one. A segment drop is actionable when it matters to that segment's users and is too large to explain as sampling noise.
+> [!qard]- Why can aggregate retrieval metrics hide a segment regression?
+> An aggregate metric averages over all queries, so a gain on large, healthy segments can outweigh a serious loss on a small one.
 >
 > Example: a change raises overall Recall@5 by 2%, while recall for one tenant's query cluster falls by 15%. A gate on the global average passes, yet that tenant now receives worse evidence.
 >
-> Slicing results by dimensions that change the retrieval problem, such as tenant, language, query class or document source, exposes such losses. Slicing has its own risk. A small segment has few labeled queries, so its score depends heavily on which queries happen to be in the set. A segment drop is credible and actionable when:
+> Slicing results by dimensions that change the retrieval problem, such as tenant, language, query class or document source, exposes such losses.
+>
+> Sources:
+>
+> - [Rules of Machine Learning (Google)](https://developers.google.com/machine-learning/guides/rules-of-ml)
+> - [[Evaluation Metrics#Aggregate Metrics Mask Segment Regressions|Evaluation Metrics: Aggregate Metrics Mask Segment Regressions]]
+
+> [!qard]- When is a drop in a segment's retrieval metric actionable?
+> A segment drop is actionable when it matters to that segment's users and is too large to explain as sampling noise.
+>
+> Slicing has its own risk. A small segment has few labeled queries, so its score depends heavily on which queries happen to be in the set. A segment drop is credible and actionable when:
 >
 > - the segment has enough labeled queries, representative of its real traffic, for its score to be meaningful;
 > - the drop exceeds the uncertainty that comes from that limited query sample, for example by falling outside a confidence interval computed over the segment's queries;
@@ -162,7 +172,7 @@ Binary judgments often calibrate more reliably than broad numeric scales. Prompt
 
 <!-- qard-id: f85d000b-ccfc-45ce-9b8a-b98babd40c07 -->
 
-> [!qard]- In a RAGAS evaluation, what does high Faithfulness with low Context Recall suggest, and what should be checked first?
+> [!qard]- How should high Faithfulness with low Context Recall be investigated in a RAGAS evaluation?
 > It suggests that the answer stays consistent with the context it received, but that context lacks evidence the reference answer needs. The first check is the measurement itself: the reference answer, the captured context and the metric configuration. Retrieval is investigated once those are confirmed sound.
 >
 > - **Faithfulness:** the share of claims in the response that the supplied context supports. It does not show whether that context was complete.

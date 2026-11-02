@@ -10,7 +10,7 @@ qard-deck: "Programming"
 qard-topic: "NET/CSharp/Fundamentals/Types/Classes"
 flashcard_uid: "0928b940"
 created: "2026-02-18T19:18:52.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-02T09:03:54.806Z"
 ---
 
 A class defines a reference type with object identity. Assignment copies a reference, so two variables can point at the same instance and observe the same mutations. Shared identity fits services and mutable domain entities. But it also creates aliasing bugs when ownership is unclear.
@@ -186,6 +186,46 @@ The feature also applies to structs, interfaces, and records. Partial methods fo
 - **Constructor chaining** uses `: this(...)` to delegate to another constructor and `: base(...)` to select the base constructor. Instance field initializers run before the constructor body. A failed static constructor usually causes later initialization attempts for that type to throw `TypeInitializationException` again.
 - **File-local types (C# 11)** use `file class X` to limit a top-level type to one source file. This is useful when generated helper types must not collide across files.
 
+# Initialization Order
+
+Fields begin with their type's default values. Initializers then run in textual order within a type, so reading a later field can observe its default:
+
+```csharp
+class Defaults
+{
+    public static int First = Second;
+    public static int Second = 10;
+}
+```
+
+After this type initializes, `Defaults.First` is 0 and `Defaults.Second` is 10. This is not a definite-assignment error: fields already have default values before their initializers execute.
+
+Instance construction has a separate order. A derived class's instance field initializers run before its base constructor is invoked, while the base constructor body still runs before the derived body. The following classes make the distinction visible:
+
+```csharp
+class Base
+{
+    static Base() => Console.WriteLine("Base static");
+    public Base() => Console.WriteLine("Base body");
+}
+
+class Derived : Base
+{
+    private readonly int _value = InitializeField();
+
+    static Derived() => Console.WriteLine("Derived static");
+    public Derived() => Console.WriteLine("Derived body");
+
+    private static int InitializeField()
+    {
+        Console.WriteLine("Derived field");
+        return 1;
+    }
+}
+```
+
+With neither type initialized previously, a first `new Derived()` from unrelated code prints: Derived static → Derived field → Base static → Base body → Derived body. Both classes have explicit static constructors here. Removing them, adding earlier uses, or changing initializer dependencies can change when type initialization occurs; [[Home/Programming/NET/Runtime/Runtime|Runtime]] explains that timing separately.
+
 # Pitfalls
 
 1. **Accidental reference equality.** For a class that does not overload `==`, the operator compares references. Separate instances with equal field values still compare unequal. A record supplies value equality. A conventional class can implement `IEquatable<T>`, override `Equals` and `GetHashCode`, and overload the operators when operator syntax is part of the contract.
@@ -212,8 +252,8 @@ The feature also applies to structs, interfaces, and records. Partial methods fo
 # Questions
 
 <!-- qard-id: 4102b2b9-4b17-458b-b927-b8b6b4559709 -->
-> [!qard]- What is the difference between an abstract class and an interface with default members, and when is an abstract class a better fit?
-> An abstract class is a partial implementation that derived classes extend through single inheritance, and it can hold per-object state. An interface is a contract that a type can implement alongside any number of other interfaces. Default members let it supply behavior, but not instance state. An abstract class is the better fit when the derived types genuinely share instance state, construction rules or `protected` extension points.
+> [!qard]- How does an abstract class differ from an interface with default members?
+> An abstract class is a partial implementation that derived classes extend through single inheritance, and it can hold per-object state. An interface is a contract that a type can implement alongside any number of other interfaces. Default members let it supply behavior, but not instance state.
 >
 > | Aspect | Abstract class | Interface with default members |
 > |---|---|---|
@@ -222,7 +262,12 @@ The feature also applies to structs, interfaces, and records. Partial methods fo
 > | Construction and hooks | Can declare constructors and `protected` members, so the base controls how derived objects are initialized and which extension points they get. | Cannot declare instance constructors, so it cannot control how implementers are initialized. |
 > | Coupling | Derived classes depend on the base's constructors, protected members and the order in which it calls them, so changes to the base can break them. | Implementers depend only on the contract, which is easier to evolve when no shared state is needed. |
 >
-> For example, a `Shape` base that stores a `Color` and declares an abstract `Area()` shares state across all shapes, so an abstract class fits. A capability such as `IComparable<T>`, implemented by otherwise unrelated types, fits an interface.
+> [Microsoft: abstract](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/abstract) · [Microsoft: interface](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/interface) · [C# specification: classes](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/classes)
+
+> [!qard]- When is an abstract class a better fit than an interface with default members?
+> An abstract class fits when derived types genuinely share instance state, construction rules, or protected extension points. The shared implementation then needs the same per-object data and initialization discipline.
+>
+> A capability contract that unrelated types can implement without inheriting shared state fits an interface better. For example, a Shape base can hold Color and a constructor, while IComparable<T> describes a capability across otherwise unrelated types. The abstract class consumes the one base-class slot and couples derived types to its construction and protected surface.
 >
 > [Microsoft: abstract](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/abstract) · [Microsoft: interface](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/interface) · [C# specification: classes](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/classes)
 
@@ -281,9 +326,12 @@ The feature also applies to structs, interfaces, and records. Partial methods fo
 > [Microsoft: partial members](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/partial-member) · [C# specification: classes (partial methods)](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/classes)
 
 <!-- qard-id: f4c9ae99-2c35-4108-8f4f-199349060aeb -->
-> [!qard]- When a class does not overload `==`, why do two separately created instances with equal fields compare unequal, and how can value equality be added?
+> [!qard]- When a class does not overload `==`, why do separately created instances with equal fields compare unequal?
 > For a class, `==` without an overload compares references: it is `true` only when both operands refer to the same object. Two separately created instances are two objects, so they compare unequal even when every field matches. `Equals(object)` compares references in the same way only when neither the class nor any of its base classes overrides it, so the implementation inherited from `Object` applies; the absence of an `==` overload alone does not guarantee this.
 >
+> [Microsoft: define value equality](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/statements-expressions-operators/how-to-define-value-equality-for-a-type) · [Microsoft: records](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record)
+
+> [!qard]- How can a conventional class implement value equality?
 > Value equality is added by deciding which fields make two instances equal and applying that rule consistently:
 >
 > - implement `IEquatable<T>.Equals(T)` and override `Equals(object)` to compare those fields;
@@ -293,6 +341,18 @@ The feature also applies to structs, interfaces, and records. Partial methods fo
 > A `record class` generates all of these members, comparing the runtime type and every field, so it is the shorter choice when that generated equality matches the domain.
 >
 > [Microsoft: define value equality](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/statements-expressions-operators/how-to-define-value-equality-for-a-type) · [Microsoft: records](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record)
+
+> [!qard]- Why can a static field initializer read a later field's default value?
+> Static fields receive their default values before the explicit initializers run. Those initializers then run in textual order within the type. With `static int first = second; static int second = 10;`, initializing `first` reads the current 0 in `second`; the later assignment to `second` does not recompute `first`. Cross-type initialization dependencies can expose similarly incomplete state, so initialization should not depend on a later assignment already having happened. [C# specification: field initialization](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/classes#1556-static-field-initialization)
+
+> [!qard]- Why can a derived instance field initializer run before the base constructor body?
+> For a constructor that invokes a base constructor, C# executes the derived instance field initializers before that base constructor invocation. The base constructor body still finishes before the derived body starts. Initializer execution and constructor-body execution are therefore different parts of the sequence. Constructor chaining and separate static initialization must also be considered when tracing a particular program; there is no single unconditional order for every hierarchy. [C# specification: instance constructors](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/classes#1511-instance-constructors)
+
+> [!qard]- Why is a default interface member unavailable through the implementing class's own member lookup?
+> A default interface implementation supplies behavior for calls through that interface; it does not add an ordinary inherited member to the class. If `IWorker` defines `Run()` and `Worker : IWorker` defines none, `((IWorker)worker).Run()` can use the default while `worker.Run()` does not compile. A public `Worker.Run()` would become callable through the class; an explicit `IWorker.Run()` implementation would still require interface access. [Microsoft: interfaces](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/types/interfaces)
+
+> [!qard]- Which default implementation runs when a derived interface reimplements a base interface member?
+> The most-specific applicable implementation runs. If `IDerived : IBase` explicitly supplies `void IBase.Run()`, an object implementing `IDerived` uses that implementation even when called through an `IBase` reference. Two unrelated interfaces that each declare their own `Run` are separate interface members, not one inherited class method. Class member lookup and interface dispatch are different questions. [C# specification: interfaces](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/interfaces)
 
 # References
 

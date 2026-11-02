@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-03-05T22:12:46.000Z
-modified: 2026-10-28T12:33:42.000Z
-published: 2026-10-31T08:53:28.565Z
+modified: 2026-11-02T09:03:54.806Z
+published: 2026-11-02T09:04:02.380Z
 topic:
   - Software Architecture
 subtopic:
@@ -215,8 +215,15 @@ It fits poorly when behavior must change at runtime or when inheritance exists o
 
 <!-- qard-id: 6f925cbd-8e7f-4f10-a0f2-f6cc3294b014 -->
 
-> [!qard]- What is the "Hollywood Principle," and how does Template Method apply it?
-> The Hollywood Principle means the framework or base class owns the control flow and calls supplied extension points. Template Method applies it by fixing the algorithm’s sequence while subclasses implement selected hooks; subclasses follow that protocol instead of driving the whole operation. [[Software Architecture/Patterns/Design Patterns/Behavioral/Template Method#Solution|Template Method implementation]]
+> [!qard]- What is the Hollywood Principle?
+> The Hollywood Principle means that the framework or base class owns control flow and calls supplied extension points. Extension code follows the owner's calling protocol rather than driving the whole operation itself.
+>
+> [[Software Architecture/Patterns/Design Patterns/Behavioral/Template Method#Solution|Template Method implementation]]
+
+> [!qard]- How does Template Method apply the Hollywood Principle?
+> The base class fixes the algorithm's sequence and invokes abstract or virtual hooks at the steps it owns. Subclasses implement those hooks without controlling when they run, so the base class calls the extension code.
+>
+> [[Software Architecture/Patterns/Design Patterns/Behavioral/Template Method#Solution|Template Method implementation]]
 
 # References
 

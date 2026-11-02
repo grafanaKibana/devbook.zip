@@ -10,7 +10,7 @@ qard-deck: "Computer Science"
 qard-topic: "Algorithms/Paradigms/Backtracking"
 flashcard_uid: "bbcb105b"
 created: "2026-06-20T05:33:50.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-02T09:03:54.806Z"
 ---
 
 The eight-queens problem has 4,426,165,368 ways to place eight pieces on 64 squares, but only 92 valid arrangements. Generating every board before testing it wastes almost all the work on positions whose first few queens already conflict.
@@ -149,7 +149,7 @@ Appending the live buffer as a solution stores a reference that later choices ov
 # Questions
 
 <!-- qard-id: 919b1d09-824b-4832-afeb-7606885b2743 -->
-> [!qard]- How does backtracking work, and how does it relate to brute-force search?
+> [!qard]- How does backtracking prune a brute-force search?
 > Backtracking is a form of brute-force search that builds candidates one choice at a time. It abandons a partial candidate as soon as that candidate is known to be unsuitable.
 >
 > The search process:

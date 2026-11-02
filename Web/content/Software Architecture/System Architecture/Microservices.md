@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-02-10T01:40:47.000Z
-modified: 2026-10-28T12:33:42.000Z
-published: 2026-10-31T08:53:28.573Z
+modified: 2026-11-02T09:03:54.806Z
+published: 2026-11-02T09:04:02.380Z
 topic:
   - Software Architecture
 subtopic:
@@ -190,10 +190,13 @@ A useful stop rule is simple. If extracting `Catalog` creates its own pipeline, 
 
 <!-- qard-id: 2f039fe1-5942-48b0-8416-ab06d23915ef -->
 
-> [!qard]- Why do microservices create distributed data consistency problems, and what keeps a cross-service workflow reliable?
+> [!qard]- Why do microservices create distributed data consistency problems?
 > Each service commits only to its own datastore, so a business operation that spans several services has no single local ACID transaction by default. One service can commit while a later step fails, which leaves partial business state. While the workflow runs, other services can also observe intermediate state, so the overall result is eventually consistent rather than atomic.
 >
-> A reliable cross-service workflow combines separate mechanisms, each covering a different failure:
+> [Azure: Saga pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/saga) · [Azure: Transactional outbox with Azure Cosmos DB](https://learn.microsoft.com/en-us/azure/architecture/databases/guide/transactional-out-box-cosmos) · [Azure: Event-driven architecture style](https://learn.microsoft.com/en-us/azure/architecture/guide/architecture-styles/event-driven)
+
+> [!qard]- Which failure modes must a reliable cross-service workflow handle?
+> A cross-service workflow needs separate mechanisms for partial commits, lost publications, duplicate deliveries, and retried effects.
 >
 > | Mechanism | Failure it handles | How it handles it |
 > |---|---|---|
@@ -208,16 +211,21 @@ A useful stop rule is simple. If extracting `Catalog` creates its own pipeline, 
 
 <!-- qard-id: b0b30416-18f1-43d0-be97-f7d92c1bd721 -->
 
-> [!qard]- What architecture usually fits a new product, and what evidence would justify moving to microservices?
-> A new product is usually best served by a monolith, ideally a modular monolith with explicit internal boundaries. Moving toward microservices is justified one capability at a time, when measured evidence shows that a stable capability repeatedly needs independent deployment, scaling, ownership or isolation, and the team can operate the resulting distributed system.
->
-> **Why one deployment usually fits first:**
+> [!qard]- What architecture usually fits a new product?
+> A new product is usually best served by a monolith, ideally a modular monolith with explicit internal boundaries.
 >
 > - Domain boundaries in a new product are still moving. Inside one deployment, moving a boundary is an ordinary refactoring; between services, it means changing contracts, data ownership and deployments.
 > - Calls between collocated modules stay in-process, and transactions across those modules can stay local. These internal calls need no network failure handling or cross-service consistency work yet. Calls to external dependencies, such as a database or a third-party API, can still fail.
 > - One deployable unit is cheaper to operate than many services, each with its own pipeline, telemetry and on-call duty.
 >
-> **What counts as evidence:** measured costs of the shared deployment, such as release wait time, change collisions between teams, one workload saturating while the rest of the application is idle, or incidents in one area spreading to unrelated features. A preference for microservices or an expected future scale is not evidence by itself.
+> This is a conditional starting point, not a universal monolith-first rule.
+>
+> [Azure: Microservices architecture style](https://learn.microsoft.com/en-us/azure/architecture/guide/architecture-styles/microservices)
+
+> [!qard]- What evidence justifies moving a capability to microservices?
+> A stable capability must repeatedly need independent deployment, scaling, ownership, or isolation, and the team must be able to operate the resulting distributed system.
+>
+> **Measured pressure:** measured costs of the shared deployment, such as release wait time, change collisions between teams, one workload saturating while the rest of the application is idle, or incidents in one area spreading to unrelated features. A preference for microservices or an expected future scale is not evidence by itself.
 >
 > **Operational readiness:** every extracted service adds network failure modes for its callers. A workflow whose steps commit to independently owned state also becomes eventually consistent. An extraction that only serves reads need not create such a workflow. Without distributed tracing, on-call ownership and experience with asynchronous consistency, those costs outweigh the gain.
 >

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-02-10T16:03:55.000Z
-modified: 2026-10-28T12:33:42.000Z
-published: 2026-10-31T08:53:28.515Z
+modified: 2026-11-02T09:03:54.806Z
+published: 2026-11-02T09:04:02.376Z
 topic:
   - Data Persistence
 subtopic:
@@ -303,7 +303,7 @@ An OLTP design starts by writing down candidate keys and functional dependencies
 
 <!-- qard-id: 61f5acfa-1113-408f-9deb-acd3b5e6b958 -->
 
-> [!qard]- What conditions justify denormalizing a table, and what risks does it introduce?
+> [!qard]- What conditions justify denormalizing a table?
 > Denormalization is justified when three conditions hold:
 >
 > - A specific read path has a measured latency or resource problem.
@@ -312,7 +312,10 @@ An OLTP design starts by writing down candidate keys and functional dependencies
 >
 > High read volume alone does not justify it.
 >
-> The risk is that the same fact now lives in two places, and every change must reach both:
+> [PostgreSQL: Materialized views](https://www.postgresql.org/docs/current/rules-materializedviews.html)
+
+> [!qard]- What consistency risks does denormalization introduce?
+> The same fact now lives in two places, and every change must reach both:
 >
 > - **Drift:** a write path that updates the source but misses the copy leaves them silently inconsistent.
 > - **Staleness:** a copy updated asynchronously or on a schedule serves old data between updates. A PostgreSQL materialized view, for example, changes only when `REFRESH MATERIALIZED VIEW` runs.

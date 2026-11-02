@@ -10,7 +10,7 @@ qard-deck: "AI & ML"
 qard-topic: "LLM/Safety/OWASP vulnerabilities on AI LLM"
 flashcard_uid: "c24fd7d3"
 created: "2026-02-15T15:01:57.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-02T09:03:54.806Z"
 ---
 
 The OWASP Top 10 for LLM Applications (2025 edition) is a risk catalog for systems that embed language models. Its central boundary is awkward: untrusted natural language influences a probabilistic model, and the result may drive deterministic code, retrieval, or tool calls. Prompts can mix data with instructions. Model output is therefore untrusted input to the next component.
@@ -144,7 +144,7 @@ Privilege separation is the baseline because it limits harm even when the model 
 
 # Questions
 
-> [!qard]- What is prompt injection, and how does indirect prompt injection differ from direct prompt injection?
+> [!qard]- How do direct and indirect prompt injection enter an LLM's context?
 > Prompt injection is input that changes a language model's behavior or output in a way the application did not intend. Direct and indirect injection differ in where that input enters the model's context.
 >
 > | Aspect | Direct injection | Indirect injection |
@@ -172,13 +172,21 @@ Privilege separation is the baseline because it limits harm even when the model 
 > [OWASP SQL Injection Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html) · [OWASP LLM01:2025 Prompt Injection](https://genai.owasp.org/llmrisk/llm01-prompt-injection/)
 
 <!-- qard-id: 4c869882-dbf3-4b42-99ec-760b65df4849 -->
-> [!qard]- Why should a system prompt not be treated as a secret or authorization boundary?
-> A system prompt can be disclosed, and the model follows its instructions only probabilistically. It therefore cannot keep secrets or reliably decide what a caller is allowed to do.
+> [!qard]- Why must secrets stay out of system prompts?
+> A system prompt can be disclosed.
 >
 > - **Not a secret:** adversarial queries can reveal the prompt. Any API keys, database credentials or other sensitive data placed in it can leak with it. Revealed internal rules, filtering criteria or role descriptions can also help an attacker plan further attacks.
+>
+> Secure designs keep credentials outside the prompt and assume that the prompt may be exposed. That assumption does not make every prompt harmless to publish. It means that the system stays protected if the prompt leaks.
+>
+> [OWASP LLM07:2025 System Prompt Leakage](https://genai.owasp.org/llmrisk/llm072025-system-prompt-leakage/) · [OWASP LLM06:2025 Excessive Agency](https://genai.owasp.org/llmrisk/llm062025-excessive-agency/)
+
+> [!qard]- Why can't system-prompt instructions enforce authorization?
+> The model follows prompt instructions only probabilistically, so those instructions cannot reliably decide what a caller is allowed to do.
+>
 > - **Not an authorization boundary:** an instruction such as "only administrators may delete records" does not stop a manipulated or mistaken model from requesting a deletion. Enforcement belongs in deterministic code or the downstream service, which checks each requested action against the caller's actual permissions.
-> 
-> Secure designs keep credentials and authorization decisions outside the prompt and assume that the prompt may be exposed. That assumption does not make every prompt harmless to publish. It means that the system stays protected if the prompt leaks.
+>
+> Authorization decisions remain in deterministic application code or the downstream service.
 >
 > [OWASP LLM07:2025 System Prompt Leakage](https://genai.owasp.org/llmrisk/llm072025-system-prompt-leakage/) · [OWASP LLM06:2025 Excessive Agency](https://genai.owasp.org/llmrisk/llm062025-excessive-agency/)
 

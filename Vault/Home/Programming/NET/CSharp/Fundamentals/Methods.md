@@ -10,7 +10,7 @@ qard-deck: "Programming"
 qard-topic: "NET/CSharp/Fundamentals/Methods"
 flashcard_uid: "a3e803d0"
 created: "2026-02-15T16:27:13.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-02T09:03:54.806Z"
 ---
 
 Methods define where behavior begins and what data may cross the boundary. The parameter list is part of that contract. By-value parameters isolate the caller's variable, `ref` and `out` expose it for reassignment, and `in` exposes storage as readonly. `params` changes how an expanded argument list is collected at the call site.
@@ -202,6 +202,8 @@ Both objects have the same runtime type. Only the lookup rule changes: runtime t
 - **Extension methods** are static methods whose first parameter has the `this` modifier. They participate in normal static overload resolution and do not modify the extended type.
 - **Expression-bodied members** use shorter syntax for a single expression. Their call and dispatch semantics do not change.
 
+A method's signature does not include its generic constraints, and `object` and `dynamic` cannot distinguish signatures. Methods differing only in either respect are duplicate declarations, not ambiguous choices at a call site.
+
 **Overload resolution** compares the applicable candidates and their required conversions. Optional and named arguments affect applicability, while an unresolved tie is a compile error. Modern compilers can cache some static method-group conversions, but capturing lambdas and instance targets still need their own lifetime analysis.
 
 # Pitfalls
@@ -241,8 +243,15 @@ By-value parameters and ordinary virtual dispatch are the default. By-reference 
 > A reference-type argument passes a copy of the reference. The method can mutate the shared object through that copy, but assigning a different object changes only its local copy. `ref` aliases the caller’s variable, allowing the method to replace the reference stored there. [Microsoft: method parameters](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/method-parameters)
 
 <!-- qard-id: 1fe4393b-4d8c-4e2c-9ae5-769106b13e65 -->
-> [!qard]- What does an `in` parameter do, and when is it useful?
-> An `in` parameter passes a value by readonly reference, so the method cannot assign through that parameter. It may avoid copying a large struct in a measured hot path, but conversions and non-variable arguments can still require a temporary. [Microsoft: method parameters](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/method-parameters)
+> [!qard]- What does an `in` parameter prevent the callee from changing?
+> It prevents assignment through the readonly parameter alias. With a reference-type argument, the callee cannot replace the caller's reference through the parameter, but it can call methods that mutate the referenced object. Readonly passing does not make that object immutable. With a mutable struct receiver, calling a potentially mutating member can operate on a defensive copy instead.
+>
+> [Microsoft: method parameters](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/method-parameters)
+
+> [!qard]- When can an `in` parameter improve performance?
+> It can avoid copying a large readonly struct on a measured hot path. Conversions and non-variable arguments can still require temporaries, and readonly access to a mutable struct can trigger defensive copies. Indirection also has a cost, so a small value may be cheaper to pass by value.
+>
+> [Microsoft: method parameters](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/method-parameters)
 
 <!-- qard-id: 19ea3788-056c-4ed6-8bc6-2087ae866f65 -->
 > [!qard]- How does C# apply an optional parameter's default value, and why can already-compiled callers keep an old default?
@@ -258,12 +267,15 @@ By-value parameters and ordinary virtual dispatch are the default. By-reference 
 > [Microsoft: named and optional arguments](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/named-and-optional-arguments) · [C#: 12.6.2.3 Run-time evaluation of argument lists](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#12623-run-time-evaluation-of-argument-lists)
 
 <!-- qard-id: ffd19d60-4643-4ede-92ff-83ba55b3f613 -->
-> [!qard]- When `Animal a = new Dog();` calls `a.Category()`, what makes the call run `Dog`'s implementation, and what does that commit the `Animal` API to?
+> [!qard]- When `Animal a = new Dog();` calls `a.Category()`, what makes the call run `Dog`'s implementation?
 > `Animal.Category()` must be declared `virtual`, and `Dog` must implement `Category()` with `override`. The call is then resolved by the runtime type of the object, `Dog`, rather than by the declared type of the variable, `Animal`.
 >
 > Methods are non-virtual by default. A non-virtual `a.Category()` binds to `Animal.Category()` because `a` is declared as `Animal`, even when `Dog` declares its own `Category()` with `new`.
 >
-> **Commitment for the base API:** a virtual member is an extension point. Derived classes can replace its behavior, unless an override along the hierarchy is marked `sealed`, which stops classes below it from overriding the member again. Ordinary calls to the member on such an object run the most-derived override, including calls made from code inside `Animal`. An explicit `base.Category()` call in a derived class is the exception: it runs the base class's implementation rather than the most-derived override. `Animal` can therefore no longer assume that its own implementation of that member is the one that runs.
+> [Microsoft: virtual keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/virtual) · [Microsoft: new modifier](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/new-modifier) · [Microsoft: base keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/base) · [Microsoft: sealed modifier](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/sealed)
+
+> [!qard]- What does declaring a base-class method `virtual` commit that API to?
+> A virtual member is an extension point. Derived classes can replace its behavior, unless an override along the hierarchy is marked `sealed`, which stops classes below it from overriding the member again. Ordinary calls to the member on such an object run the most-derived override, including calls made from code inside the base class. An explicit call through `base` in a derived class is the exception: it runs the base class's implementation rather than the most-derived override. The base class can therefore no longer assume that its own implementation of that member is the one that runs.
 >
 > [Microsoft: virtual keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/virtual) · [Microsoft: new modifier](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/new-modifier) · [Microsoft: base keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/base) · [Microsoft: sealed modifier](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/sealed)
 
@@ -280,6 +292,40 @@ By-value parameters and ordinary virtual dispatch are the default. By-reference 
 > Hiding is the common trap. The same object behaves differently depending on whether it is referenced as the derived type or as the base type.
 >
 > [Microsoft: virtual keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/virtual) · [Microsoft: new modifier](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/new-modifier)
+
+> [!qard]- Can overloads differ only by `object` versus `dynamic`, or by generic constraints?
+> No. Neither distinction gives these methods different signatures. `M(object value)` and `M(dynamic value)` collide, as do two `M<T>(T value)` declarations distinguished only by `where T : class` versus `where T : struct`. The compiler rejects the duplicate declarations before resolving any call. `dynamic` still changes binding of operations that use it; sharing this signature representation does not make its behavior identical to `object`. [C# specification: signatures and overloading](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/basic-concepts#76-signatures-and-overloading)
+
+> [!qard]- Which receiver type controls extension-method lookup?
+> The compile-time type controls lookup. With `Base value = new Derived()`, a method declared only on `Derived` is not found through `value`; an applicable extension for `Base` can be selected instead. An applicable instance method found by ordinary lookup takes precedence over an extension. Generic constraints determine whether an extension candidate is applicable, not whether runtime dispatch replaces it. [Microsoft: extension methods](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/extension-methods)
+
+> [!qard]- Why can `Print<T>(T value)` beat `Print(Base value)` for an argument declared as `Derived`?
+> Type inference can infer `T` as `Derived`, giving the generic candidate an identity conversion. The non-generic candidate needs a conversion from `Derived` to `Base`, so it is a worse match. The generic candidate does not win merely because its constraints are satisfied; constraints must hold for applicability, and otherwise-equivalent candidates have additional tie-breakers. An argument declared as `object` is considered as `object`, even when its runtime value is a string. [C# specification: overload resolution](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#1264-overload-resolution)
+
+> [!qard]- Why can adding an applicable derived overload change a call that previously used a base overload?
+> Method lookup can find an applicable declaration on the derived type and exclude base declarations before the better-function-member comparison. For a derived `Process(double)` and inherited `Process(int)`, `derived.Process(5)` can select the derived member using the implicit int-to-double conversion. This is a lookup rule, not virtual dispatch or a blanket rule that every same-named derived method excludes every base member. Public overload additions can therefore change source behavior when callers recompile. [C# specification: method invocations](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#128103-method-invocations)
+
+> [!qard]- When does a returned `ref` let a caller change the original storage?
+> The caller must retain the alias with a `ref` local or another ref-aware operation. Ordinary assignment reads and copies the value instead:
+>
+> ```csharp
+> static ref int Larger(ref int first, ref int second)
+> {
+>     if (first > second)
+>     {
+>         return ref first;
+>     }
+>     return ref second;
+> }
+>
+> int a = 5;
+> int b = 10;
+> ref int selected = ref Larger(ref a, ref b);
+> // This changes b to 100.
+> selected = 100;
+> ```
+>
+> A separate `out` assignment copies a value into its own destination; it does not create another alias to the returned storage. Ref-safety rules prevent returning storage whose lifetime is too short, such as an ordinary local that disappears when the method returns. [Microsoft: ref returns and ref locals](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/jump-statements#ref-returns)
 
 # References
 

@@ -10,7 +10,7 @@ qard-deck: "Programming"
 qard-topic: "NET/ASP NET Web API/Filters"
 flashcard_uid: "ef27222b"
 created: "2026-02-19T23:08:30.000Z"
-modified: "2026-10-31T09:00:37.443Z"
+modified: "2026-11-02T09:03:54.806Z"
 ---
 
 Controller filters in ASP.NET Core Web APIs wrap defined stages of controller execution. They fit cross-cutting behavior that needs action arguments, model state, controller metadata, or the action result. A correlation-ID rule tied only to selected controllers is one example. An application-wide correlation ID usually belongs in middleware.
@@ -134,7 +134,7 @@ Attributes cannot receive runtime services through their own constructors, so at
 >
 > [Microsoft: Filters in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/mvc/controllers/filters?view=aspnetcore-10.0)
 <!-- qard-id: ec8874e5-0ca6-4d53-a3dd-6594e0a512e3 -->
-> [!qard]- Which exceptions can controller exception filters handle in an ASP.NET Core Web API, and what happens afterward?
+> [!qard]- Which exceptions can controller exception filters handle in an ASP.NET Core Web API?
 > Controller exception filters handle only unhandled exceptions raised during controller creation, model binding, action filters or the action method. They are not a before-and-after stage; they run only when such an exception occurs.
 >
 > **Not covered:**
@@ -142,9 +142,11 @@ Attributes cannot receive runtime services through their own constructors, so at
 > - Exceptions from authorization filters and resource filters, which run outside that part of the pipeline.
 > - Exceptions from result filters or from executing the action result.
 > - Exceptions from middleware, routing or Minimal API handlers, which run outside the controller-filter pipeline.
-> 
-> **After an exception filter runs:**
 >
+>
+> [Microsoft: Filters in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/mvc/controllers/filters?view=aspnetcore-10.0)
+
+> [!qard]- What happens after an ASP.NET Core controller exception filter handles an exception?
 > - **Handled:** the filter sets `ExceptionHandled` to `true` or assigns a `Result`, and the exception stops propagating. A supplied `Result` is executed as the response. Ordinary result filters do not run around it; only always-run result filters, such as `IAlwaysRunResultFilter` implementations, do.
 > - **Not handled:** the exception leaves the controller-filter pipeline and continues to outer middleware, such as exception-handling middleware.
 > 

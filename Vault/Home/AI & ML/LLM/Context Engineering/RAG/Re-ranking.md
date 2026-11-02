@@ -10,7 +10,7 @@ qard-deck: "AI & ML"
 qard-topic: "LLM/Context Engineering/RAG/Re-ranking"
 flashcard_uid: "16bb24ca"
 created: "2026-02-27T15:52:18.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-02T09:03:54.806Z"
 ---
 
 Re-ranking is a second-stage rescoring or reordering pass over candidates returned by [[Retrieval]]. It may use a cross-encoder or LLM, lexical scores such as BM25, rank fusion such as RRF, or a diversity rule such as MMR. First-stage retrieval is built for fast recall across a large corpus. The second stage has a narrower job: improve the short list before context reaches the generator.
@@ -181,7 +181,7 @@ A pipeline without a reranker is the baseline, and its measured failures show wh
 > [Retrieve & Re-Rank (Sentence Transformers)](https://sbert.net/examples/sentence_transformer/applications/retrieve_rerank/README.html) · [Optimizing LLM accuracy (OpenAI)](https://developers.openai.com/api/docs/guides/optimizing-llm-accuracy)
 
 <!-- qard-id: 2525edd1-368e-4d10-a58a-4bc82c562674 -->
-> [!qard]- When can reranking worsen retrieval quality, and when can it fail to improve it?
+> [!qard]- How can reranker failures be distinguished from first-stage retrieval limits?
 > A reranker trained on short web passages may misjudge long technical documents or unfamiliar terminology. It can then worsen results by pushing relevant evidence from inside the first-stage top-k to below that cutoff. A small candidate set or low first-stage recall causes a different failure. A reranker only reorders the candidates it receives, so it cannot add relevant evidence that is missing from them.
 >
 > Domain queries tell these cases apart when [[Monitoring#Retrieval Quality Metrics|recall and precision]] are measured at matched points:

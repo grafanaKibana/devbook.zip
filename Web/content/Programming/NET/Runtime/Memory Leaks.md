@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-02-10T16:03:55.000Z
-modified: 2026-10-28T12:33:42.000Z
-published: 2026-10-31T08:53:28.540Z
+modified: 2026-11-02T09:03:54.806Z
+published: 2026-11-02T09:04:02.379Z
 topic:
   - Programming
 subtopic:
@@ -475,6 +475,9 @@ The governing rule is ownership, not syntax. Each subscription, cache entry, tim
 > This type needs a finalizer only because it holds a raw native pointer directly. When a `SafeHandle` owns the native resource, the type implements `Dispose()` and `Dispose(bool)` without a finalizer, and the `SafeHandle` supplies the finalization fallback.
 >
 > [Microsoft: Implement a Dispose method](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose) · [Microsoft: Finalizers](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/finalizers)
+
+> [!qard]- What must code assume about an array returned by `ArrayPool<T>.Rent`?
+> It may be larger than the requested length and may contain data from a previous use. Only the requested or actual-data region belongs to the operation's logical contents; array capacity is not a data-length marker. Code initializes values before reading them, returns the array to its pool when finished, and stops using it after return. A later rental need not return the same array. Returning with an appropriate clearing policy avoids retaining references or exposing old sensitive data to later renters; `clearArray` is false by default. [Microsoft: ArrayPool.Rent](https://learn.microsoft.com/en-us/dotnet/api/system.buffers.arraypool-1.rent?view=net-10.0) · [Microsoft: ArrayPool.Return](https://learn.microsoft.com/en-us/dotnet/api/system.buffers.arraypool-1.return?view=net-10.0)
 
 # References
 

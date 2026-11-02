@@ -10,7 +10,7 @@ qard-deck: "Programming"
 qard-topic: "NET/CSharp/Fundamentals/Types/Records"
 flashcard_uid: "c03985b0"
 created: "2026-02-18T19:18:52.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-02T09:03:54.806Z"
 ---
 
 Records are C# types for models whose contents define equality. The compiler supplies value-based equality and a useful `ToString`. Positional records also get properties and deconstruction. A `with` expression creates a copy with selected members changed. This fits DTOs, messages, and other data that should compare by value instead of object identity.
@@ -242,15 +242,17 @@ public record Wrapper(List<int> Items);
 
 # Questions
 
-> [!qard]- What is a C# record, and what does the compiler generate for it?
-> A record is a class or struct declared with `record`, whose equality is based on its data rather than its identity. The compiler generates the members that make it behave as a data value:
+> [!qard]- What is a C# record?
+> A record is a class or struct declared with record whose generated equality compares data rather than object identity. `record` alone means record class, a reference type that can inherit from another record class; record struct is a value type. Records fit data carriers such as DTOs, messages, and value objects. Identity-rich entities, such as typical Entity Framework entities, usually fit conventional classes.
 >
-> - **Value equality:** `Equals`, `GetHashCode`, `==` and `!=` treat two records as equal when they have the same runtime type and equal field values, each field compared with its own type's equality. Two separately created `record class` instances with equal data compare equal, unlike two ordinary class instances.
+> [Microsoft: records](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record)
+
+> [!qard]- Which members does the compiler synthesize for a positional record?
+> - **Value equality and hashing:** `Equals` and `==` compare the runtime type and field values, using each field type's equality; `!=` negates equality. `GetHashCode` computes a compatible hash, so equal records have equal hashes. Separately created `record class` instances with equal data can therefore compare equal.
 > - **Nondestructive mutation:** `p with { Age = 31 }` copies the record and changes the listed members. The copy is shallow, so referenced objects are shared.
 > - **Readable `ToString`:** prints the type name and public members, such as `Person { Name = Alice, Age = 30 }`.
 > - **Positional members:** `record Person(string Name, int Age)` also generates a primary constructor, a public property for each parameter and `Deconstruct`. These properties are init-only for `record class` and `readonly record struct`, but settable for a plain `record struct`.
-> 
-> `record` alone means `record class`, a reference type that can inherit from another record class, while `record struct` is a value type. Records fit DTOs, messages and value objects. Types whose identity matters more than their current data, such as Entity Framework Core entities, fit ordinary classes better.
+>
 >
 > [Microsoft: records](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record)
 

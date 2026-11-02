@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-09-29T12:13:16.000Z
-modified: 2026-10-28T12:33:42.000Z
-published: 2026-10-31T08:53:28.450Z
+modified: 2026-11-02T09:03:54.806Z
+published: 2026-11-02T09:04:02.374Z
 topic:
   - AI & ML
 subtopic:
@@ -157,14 +157,28 @@ Fast-changing evidence may justify caching embeddings and retrieval results with
 
 <!-- qard-id: 5cb490e8-881c-4bf7-832b-d7d2d8ceeb1d -->
 
-> [!qard]- How do caches help a RAG pipeline, and what makes a cache hit safe?
-> Each cache layer skips a different expensive step: an embedding cache skips the embedding call, a retrieval cache skips search and reranking, and a response cache skips generation. A hit is safe only when three conditions hold: the key or a validation check covers every input that could change that stage's result, the caller is currently allowed to see the value, and the entry is fresh enough for its sources.
+> [!qard]- Which pipeline work does each RAG cache layer avoid?
+> Each cache layer skips a different expensive step: an embedding cache skips the embedding call, a retrieval cache skips search and reranking, and a response cache skips generation.
 >
-> | Layer | Stores | Work skipped on a hit | Key must cover | Main risk |
-> |---|---|---|---|---|
-> | Embedding | The vector for a processed text | The embedding call, at ingestion or query time | Text hash, embedding model, dimensions and preprocessing version | Vectors from an old model mixed with new ones, which makes similarity scores meaningless |
-> | Retrieval | Ranked document IDs and scores | Vector search and reranking | Processed query, index version, filters, top-k, retriever settings, tenant and authorization context | Stale lists after an index update, or results computed for another tenant |
-> | Response | The final answer | Generation | The retrieval inputs plus prompt template, selected evidence, generation model and settings, and any conversation state that changes meaning | Answers grounded in outdated evidence, or served to a caller who may not see that evidence |
+> | Layer | Stores | Work skipped on a hit |
+> | --- | --- | --- |
+> | Embedding | The vector for a processed text | The embedding call, at ingestion or query time |
+> | Retrieval | Ranked document IDs and scores | Vector search and reranking |
+> | Response | The final answer | Generation |
+>
+> Sources:
+>
+> - [Cache-Aside pattern (Azure Architecture Center)](https://learn.microsoft.com/en-us/azure/architecture/patterns/cache-aside)
+> - [[RAG Caching#Flow|RAG Caching: Flow]]
+
+> [!qard]- When is a RAG cache hit safe to reuse?
+> A hit is safe only when three conditions hold: the key or a validation check covers every input that could change that stage's result, the caller is currently allowed to see the value, and the entry is fresh enough for its sources.
+>
+> | Layer | Key must cover | Main risk |
+> | --- | --- | --- |
+> | Embedding | Text hash, embedding model, dimensions and preprocessing version | Vectors from an old model mixed with new ones, which makes similarity scores meaningless |
+> | Retrieval | Processed query, index version, filters, top-k, retriever settings, tenant and authorization context | Stale lists after an index update, or results computed for another tenant |
+> | Response | The retrieval inputs plus prompt template, selected evidence, generation model and settings, and any conversation state that changes meaning | Answers grounded in outdated evidence, or served to a caller who may not see that evidence |
 >
 > Freshness follows the sources. A time-to-live bounds staleness, and known source or permission changes invalidate entries before it expires. Fast-changing evidence can justify caching embeddings and retrieval results while not caching final answers.
 >

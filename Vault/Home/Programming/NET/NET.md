@@ -11,7 +11,7 @@ qard-deck: "Programming"
 qard-topic: "NET/NET"
 flashcard_uid: "f0f708ed"
 created: "2026-02-10T01:40:47.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-02T09:03:54.806Z"
 ---
 
 .NET is a cross-platform application stack built from a runtime, base libraries, SDK tooling, languages, and higher-level frameworks. The runtime executes managed code and owns services such as garbage collection. The SDK restores, builds, tests, and publishes projects. C# and F# target the same runtime model, while ASP.NET Core and other frameworks add application-specific abstractions.
@@ -28,8 +28,8 @@ return FolderStructureMap;
 # Questions
 
 <!-- qard-id: 290f9386-ef5a-4148-8677-71811ce19253 -->
-> [!qard]- What are the main layers of .NET, and why does it help to separate them?
-> A practical model splits .NET into languages and compilers, SDK tooling, the runtime, the base libraries and application frameworks. Separating them helps because each owns different behavior, so naming the owning layer turns a vague symptom into a testable hypothesis.
+> [!qard]- What are the main layers of .NET?
+> A practical model splits .NET into languages and compilers, SDK tooling, the runtime, the base libraries and application frameworks.
 >
 > | Layer | What it owns | Example of a problem it owns |
 > |---|---|---|
@@ -39,9 +39,13 @@ return FolderStructureMap;
 > | Base libraries | Shared APIs such as collections, I/O, networking and threading primitives. | The behavior or cost of a specific API, such as a collection or stream. |
 > | Application frameworks | Application models such as ASP.NET Core, WPF or .NET MAUI, including pipelines like HTTP middleware. | A slow or misordered request pipeline. |
 >
-> A symptom often appears in a different layer from its cause. Rising memory shows up as garbage-collection activity in the runtime even when application code is keeping objects reachable. A slow HTTP request can come from the framework pipeline, synchronous I/O in application code or the generated machine code. “.NET is slow” is not a useful hypothesis until the owning part is named.
 >
-> This is a conceptual map rather than an official fixed taxonomy, and component and version boundaries change between releases.
+> This is a conceptual map rather than an official fixed taxonomy; component and version boundaries can change.
+>
+> Sources: [Microsoft Learn: Introduction to .NET](https://learn.microsoft.com/en-us/dotnet/core/introduction) · [Microsoft Learn: Common Language Runtime overview](https://learn.microsoft.com/en-us/dotnet/standard/clr)
+
+> [!qard]- Why does identifying the owning .NET layer help diagnose a symptom?
+> Each layer owns different behavior, so naming the owning layer turns a vague symptom into a testable hypothesis. A symptom can appear elsewhere from its cause: rising memory appears as GC activity even when application code keeps objects reachable; a slow HTTP request can come from the framework pipeline, synchronous application I/O, or generated machine code. The diagnosis follows the responsible mechanism rather than treating all of .NET as one component.
 >
 > Sources: [Microsoft Learn: Introduction to .NET](https://learn.microsoft.com/en-us/dotnet/core/introduction) · [Microsoft Learn: Common Language Runtime overview](https://learn.microsoft.com/en-us/dotnet/standard/clr)
 
