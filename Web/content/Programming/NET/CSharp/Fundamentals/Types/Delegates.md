@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-02-18T19:18:52.000Z
-modified: 2026-10-28T12:33:42.000Z
-published: 2026-10-31T08:53:28.538Z
+modified: 2026-11-02T09:03:54.806Z
+published: 2026-11-02T09:04:02.378Z
 topic:
   - Programming
 subtopic:
@@ -139,9 +139,12 @@ The extra local gives each iteration separate storage. This is needed whenever l
 
 <!-- qard-id: c922b7d0-655f-4f50-89fd-bfc97950ccfa -->
 
-> [!qard]- What is a delegate, and what does a delegate value carry?
+> [!qard]- What is a delegate?
 > A delegate is a type that represents references to methods with a particular signature. The delegate type fixes the parameter and return types. A delegate value packages a compatible method so it can be stored, passed and invoked later like any other value.
 >
+> [Microsoft: delegates](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/delegates/) · [C# specification: delegates](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/delegates) · [Microsoft: Delegate.CreateDelegate](https://learn.microsoft.com/en-us/dotnet/api/system.delegate.createdelegate?view=net-10.0)
+
+> [!qard]- What state does a delegate value carry?
 > A delegate value carries:
 >
 > - **Method:** the method to call, which must be compatible with the delegate's signature.
@@ -167,22 +170,32 @@ The extra local gives each iteration separate storage. This is needed whenever l
 >
 > [Microsoft: delegates](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/delegates/) · [C# specification: delegates](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/delegates) · [Microsoft: Delegate.CreateDelegate](https://learn.microsoft.com/en-us/dotnet/api/system.delegate.createdelegate?view=net-10.0)
 
-> [!qard]- When a multicast delegate is invoked, in what order do its methods run, and what happens to return values and exceptions?
-> Its methods run synchronously, one after another, in invocation-list order, which is the order in which they were combined. For a non-`void` delegate, the caller receives only the last method's return value. If any method throws, the exception propagates to the caller and the remaining methods are not invoked.
+> [!qard]- In what order does a multicast delegate invoke its methods?
+> Synchronously, one after another, in invocation-list order. That is the order in which the methods were combined; a direct multicast invocation does not schedule them in parallel.
+>
+> [C# specification: delegates (delegate invocation)](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/delegates)
+
+> [!qard]- Which return value does a non-void multicast delegate expose?
+> Only the last invoked method's return value. Earlier return values are discarded:
 >
 > ```csharp
 > Func<int> f = () => 1;
 > f += () => 2;
 > f += () => 3;
-> int result = f(); // 3; the results 1 and 2 are discarded
+> int result = f(); // 3
 > ```
 >
-> Consequences:
->
-> - **Lost results:** every result is available only by enumerating `GetInvocationList()` and invoking each delegate separately.
-> - **One failure skips later handlers:** an event raised with a single call stops at the first subscriber that throws. Isolating subscribers requires invoking each entry from `GetInvocationList()` inside its own `try`/`catch`.
+> Collecting every return value requires enumerating GetInvocationList(), invoking each entry, and storing its result.
 >
 > [C# specification: delegates (delegate invocation)](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/delegates)
+
+> [!qard]- What happens when a method in a multicast delegate throws?
+> The exception propagates to the caller and the remaining invocation-list entries are skipped. One event subscriber can therefore stop later subscribers from running. Isolating failures requires invoking entries from GetInvocationList() separately inside their own try/catch blocks.
+>
+> [C# specification: delegates (delegate invocation)](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/delegates)
+
+> [!qard]- Why do callbacks from a `for` loop often observe the loop variable's final value?
+> The callbacks capture one shared variable, not a snapshot of its value at each assignment. When they run after the loop, they read the same storage containing its final value. Declaring a local inside the loop body gives each iteration separate storage; capturing that local preserves the intended value. A `Select(i => () => Use(i))` invocation instead has its own value parameter `i` for each call, so those callbacks do not share the for-loop variable. This distinction does not depend on the C#5 change to foreach iteration variables. [C# specification: anonymous function expressions](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#1222-anonymous-function-expressions)
 
 # References
 

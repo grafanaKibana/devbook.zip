@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-03-05T22:12:46.000Z
-modified: 2026-10-28T12:33:42.000Z
-published: 2026-10-31T08:53:28.564Z
+modified: 2026-11-02T09:03:54.806Z
+published: 2026-11-02T09:04:02.379Z
 topic:
   - Software Architecture
 subtopic:
@@ -147,10 +147,13 @@ Cross-cutting fraud screening can sit in a pipeline behavior shared by every rel
 
 # Questions
 
-> [!qard]- What is the Mediator pattern, and how does MediatR's request dispatch differ from it?
+> [!qard]- What is the Mediator pattern?
 > The Mediator pattern moves the rules for how a group of objects interact into one mediator object. The participants, called colleagues, notify the mediator instead of calling each other, and the mediator decides which other colleagues react. A many-to-many web of dependencies becomes hub-and-spoke coordination, so a colleague can be changed or added without the others knowing about it. Air traffic control is the usual analogy: pilots coordinate through the tower rather than with every nearby aircraft.
 >
-> MediatR follows the same decoupling direction but solves a narrower problem:
+> [GoF: Design Patterns](https://www.oreilly.com/library/view/design-patterns-elements/0201633612/) · [[Software Architecture/Patterns/Design Patterns/Behavioral/Mediator#In-Process Dispatch and Message Routing|Mediator: MediatR dispatch]]
+
+> [!qard]- How does MediatR request dispatch differ from classic Mediator?
+> MediatR follows the same decoupling direction but solves a narrower problem.
 >
 > | Aspect | Classic Mediator | MediatR `Send` |
 > |---|---|---|

@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-06-11T07:39:53.000Z
-modified: 2026-10-28T12:33:42.000Z
-published: 2026-10-31T08:53:28.467Z
+modified: 2026-11-02T09:03:54.806Z
+published: 2026-11-02T09:04:02.375Z
 topic:
   - AI & ML
 subtopic:
@@ -122,7 +122,7 @@ Versions should be pinned where the provider allows it. A model change behind an
 
 <!-- qard-id: d37397ec-330a-4742-a8ef-22a28b395047 -->
 
-> [!qard]- How do classifier routing and cascading differ when choosing an LLM for each request, and how can they be combined?
+> [!qard]- How do classifier routing and cascading differ when selecting an LLM?
 > A classifier router predicts which model should handle a request before anything is generated. A cascade generates with a lower-cost model first and escalates to a stronger model only when an observable check on that output fails.
 >
 > | Aspect | Classifier routing | Cascade |
@@ -132,6 +132,9 @@ Versions should be pinned where the provider allows it. A model change behind an
 > | Typical failure | A false “easy” prediction sends a hard request to a weaker model. Quality drops silently unless something downstream checks the answer. | Escalated requests pay for duplicate generation and extra latency, which can dominate p95. If many requests escalate, the cascade can cost more than always using the stronger model. |
 > | What it depends on | Predictable difficulty signals, and a classifier evaluated on per-route recall for hard and safety-sensitive requests. | A cheap, reliable gate. A weak gate escalates too often or lets bad answers through. |
 >
+> Sources: [FrugalGPT (Chen et al.)](https://arxiv.org/abs/2305.05176) · [Microsoft Foundry Model Router](https://learn.microsoft.com/en-us/azure/ai-foundry/openai/concepts/model-router?view=foundry) · [OpenAI evals](https://developers.openai.com/api/docs/guides/evals)
+
+> [!qard]- How can classifier routing and cascading be combined?
 > **Combining them:** the classifier chooses the starting model, and a cascade gate checks that model's output. Requests predicted to be hard go straight to the stronger model. Requests predicted to be easy start on the cheaper model with the gate behind it. The gate then catches some misroutes that classifier routing alone would serve unnoticed.
 >
 > The combined policy is judged on end-to-end task success, cost per successful task and tail latency, not on classifier accuracy alone. Managed routers such as Microsoft Foundry Model Router package per-request model selection as a product feature, and they still need the same evaluation on the target workload.

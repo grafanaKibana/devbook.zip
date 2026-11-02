@@ -10,7 +10,7 @@ qard-deck: "Programming"
 qard-topic: "NET/CSharp/Fundamentals/Generics"
 flashcard_uid: "3fc98b91"
 created: "2026-02-18T20:04:43.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-02T09:03:54.806Z"
 ---
 
 Generics parameterize code by type. `List<T>` can store any `T` while the compiler still checks every read and write. That is a stronger contract than accepting `object` and recovering the real type with casts. For value types, generic collections also avoid the boxing required by older object-based APIs.
@@ -167,6 +167,9 @@ var list = Activator.CreateInstance(closed);
 > - **Nullable contract:** returns `T?`, with `null` meaning absence. This works only when `null` is never legitimate data and the return type can actually hold `null` for the type argument. For a value type that requires `Nullable<T>`, for example `T?` under a `where T : struct` constraint, whose `HasValue` separates a missing entry from a stored `0`. With an unconstrained `T`, `T?` adds no null state for a value-type argument, so `GetOrDefault<int>` would still return `0`.
 > 
 > [Microsoft: default keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/default) · [Microsoft: nullable value types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/nullable-value-types)
+
+> [!qard]- Do different closed forms of a generic type share its static fields?
+> No. `Cache<int>` and `Cache<string>` have separate copies of every static field declared on `Cache<T>`. Incrementing `Cache<int>.Count` leaves `Cache<string>.Count` unchanged. This separation follows type identity and does not depend on whether the CLR shares native method code between compatible instantiations. A per-type cache can use it deliberately; a process-wide total must live outside that generic type's per-instantiation state. [Microsoft: generic classes](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/generics/generic-classes)
 
 # References
 

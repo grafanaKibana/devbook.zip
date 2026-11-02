@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-02-27T12:56:16.000Z
-modified: 2026-10-28T12:33:42.000Z
-published: 2026-10-31T08:53:28.457Z
+modified: 2026-11-02T09:03:54.806Z
+published: 2026-11-02T09:04:02.374Z
 topic:
   - AI & ML
 subtopic:
@@ -113,7 +113,7 @@ The simplest model that establishes a credible recall baseline is the right star
 
 <!-- qard-id: bb5874a0-b6ba-4318-ab29-25a6079c807a -->
 
-> [!qard]- What is an embedding, and how does it support semantic retrieval?
+> [!qard]- How do embeddings support semantic retrieval?
 > An embedding is a vector of numbers that a model produces for a piece of text. The model places texts with related meaning close together, so the distance between two vectors measures how related the texts are. The vector's length is set by the model and, for some models such as OpenAI's `text-embedding-3` family, by a requested output size.
 >
 > Semantic retrieval relies on that geometry:
@@ -128,13 +128,17 @@ The simplest model that establishes a credible recall baseline is the right star
 
 <!-- qard-id: cbeb031d-1919-44df-9d70-3df6fafd8901 -->
 
-> [!qard]- How do Matryoshka embeddings reduce vector storage, and how should a shorter vector be validated?
+> [!qard]- How do Matryoshka embeddings reduce vector storage?
 > Matryoshka Representation Learning (MRL) trains an embedding so that its first dimensions already form a useful coarse representation, and later dimensions add finer detail. A prefix of the vector, such as its first 256 values, therefore still works as a lower-dimensional embedding. Storing only that prefix reduces vector storage.
 >
 > - **Storage:** at the same data type, 256 values instead of 1536 is one-sixth of the raw vector payload. IDs, metadata and index structures do not shrink by the same factor, so the whole index shrinks less.
 > - **Search cost:** shorter vectors also reduce distance-computation work.
 > - **Availability:** shortening is model-specific. OpenAI's `text-embedding-3` models accept a `dimensions` parameter. A vector truncated manually is re-normalized before cosine or dot-product search.
-> - **Risk:** fewer dimensions can lower retrieval quality on a particular corpus.
+>
+> [Embeddings guide (OpenAI)](https://developers.openai.com/api/docs/guides/embeddings) · [Matryoshka Representation Learning (arXiv)](https://arxiv.org/abs/2205.13147)
+
+> [!qard]- How should a shorter embedding dimension be validated?
+> Fewer embedding dimensions can lower retrieval quality on a particular corpus.
 >
 > A shorter vector is validated by running the same labeled queries at each candidate dimension and comparing Recall@k and latency. The preferred dimension is the smallest one that still meets the recall and latency targets. A design that re-scores candidates with full-length vectors has to store them elsewhere or recompute them, which adds storage, API cost or latency.
 >

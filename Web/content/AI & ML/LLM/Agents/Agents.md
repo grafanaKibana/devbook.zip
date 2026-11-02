@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-02-10T16:03:55.000Z
-modified: 2026-10-28T12:33:42.000Z
-published: 2026-10-31T08:53:28.445Z
+modified: 2026-11-02T09:03:54.806Z
+published: 2026-11-02T09:04:02.372Z
 tags:
   - FolderNote
 topic:
@@ -106,10 +106,13 @@ Memory systems usually repeat three operations: `record → recall → consolida
 
 <!-- qard-id: 33550e71-28d8-4ee2-b8c5-28bc5fc1d793 -->
 
-> [!qard]- How can errors compound during an autonomous agent run, and what controls contain them?
+> [!qard]- How can errors compound during an autonomous agent run?
 > Errors compound because each step builds on what earlier steps produced. An agent reasons over earlier observations, acts, and feeds the new result into its next decision. A wrong assumption or misread tool result therefore does not stay one bad output: it becomes the premise for later actions. For example, an agent that looks up the wrong order can then refund, email and log against that order, with every step consistent with the original mistake.
 >
-> Several design controls contain this risk:
+> [ReAct: Synergizing Reasoning and Acting in Language Models](https://arxiv.org/abs/2210.03629) · [Building Effective AI Agents](https://www.anthropic.com/engineering/building-effective-agents)
+
+> [!qard]- Which controls contain error propagation during an autonomous agent run?
+> Several design controls contain the risk that an earlier mistake becomes the premise for later actions:
 >
 > - **Step, cost or time limits** set for the task end a run that keeps acting without converging, so drift has a bounded cost.
 > - **Checks against expected outcomes**, such as tests or validation of tool results, can catch bad progress before more steps depend on it.

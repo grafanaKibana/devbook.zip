@@ -10,7 +10,7 @@ qard-deck: "AI & ML"
 qard-topic: "LLM/Context Engineering/RAG/Evaluation/Retrieval Evaluation Sets"
 flashcard_uid: "476f3199"
 created: "2026-06-12T18:21:46.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-02T09:03:54.806Z"
 ---
 
 A retrieval evaluation set pairs queries with chunks judged relevant to them so [[Evaluation Metrics|retrieval metrics]] have ground truth. [[Building an Evaluation Set]] covers general dataset construction. This note focuses on the retrieval-specific part: deciding which chunks count, then avoiding distortions introduced by chunk-anchored synthetic questions.
@@ -63,8 +63,8 @@ The structure fits retrieval metrics directly: a query goes in, and the source c
 # Questions
 
 <!-- qard-id: 68b4fc0a-ef08-471b-92c9-7e9ef9055056 -->
-> [!qard]- How should retrieval metrics and cutoffs be chosen when a query has several relevant chunks?
-> The metric depends on how the relevant chunks contribute to the answer, and the cutoff must match what each pipeline stage actually passes on.
+> [!qard]- Which retrieval metric fits a query with several relevant chunks?
+> The metric depends on how the relevant chunks contribute to the answer.
 >
 > | Relevance shape | Success means | Fitting metric | Misleading metric |
 > |---|---|---|---|
@@ -74,12 +74,21 @@ The structure fits retrieval metrics directly: a query goes in, and the source c
 >
 > Example: “How do plans A and B differ on refunds?” needs one policy chunk per plan. A result containing only plan A has `HitRate@5 = 1` but complementary recall of `1/2`.
 >
+> Sources:
+> - [RAG evaluators and document retrieval metrics (Microsoft Foundry)](https://learn.microsoft.com/en-us/azure/foundry/concepts/evaluation-evaluators/rag-evaluators?view=foundry)
+> - [Retrieve & Re-Rank (Sentence Transformers)](https://sbert.net/examples/sentence_transformer/applications/retrieve_rerank/README.html)
+> - [Context Recall (Ragas)](https://docs.ragas.io/en/stable/concepts/metrics/available_metrics/context_recall/)
+> - [[Retrieval Evaluation Sets#When One Query Has Several Relevant Chunks|Retrieval Evaluation Sets: When One Query Has Several Relevant Chunks]]
+
+> [!qard]- Which cutoff should a retrieval evaluation measure?
+> The cutoff must match what each pipeline stage actually passes on.
+>
 > Cutoffs:
 >
 > - The final k equals the number of chunks the generator receives. A larger k credits evidence that never reaches the model.
 > - For complementary evidence, k must be at least the size of the required set. Otherwise recall cannot reach `1.0`.
 > - In a retrieve-then-rerank pipeline, first-stage Recall@N shows whether the evidence entered the candidate set, and the final top-k shows what reaches generation. Either measurement alone can hide a loss at the other stage.
-> 
+>
 > Sources:
 > - [RAG evaluators and document retrieval metrics (Microsoft Foundry)](https://learn.microsoft.com/en-us/azure/foundry/concepts/evaluation-evaluators/rag-evaluators?view=foundry)
 > - [Retrieve & Re-Rank (Sentence Transformers)](https://sbert.net/examples/sentence_transformer/applications/retrieve_rerank/README.html)

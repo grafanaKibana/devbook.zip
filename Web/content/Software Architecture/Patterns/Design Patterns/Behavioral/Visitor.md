@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-03-05T22:12:46.000Z
-modified: 2026-10-28T12:33:42.000Z
-published: 2026-10-31T08:53:28.565Z
+modified: 2026-11-02T09:03:54.806Z
+published: 2026-11-02T09:04:02.380Z
 topic:
   - Software Architecture
 subtopic:
@@ -227,10 +227,17 @@ Visitor fits a stable element set that receives new cross-cutting operations. Pa
 
 <!-- qard-id: 2203e8b7-3c85-4898-a81c-24b8a34892c5 -->
 
-> [!qard]- What is double dispatch, and why does the Visitor pattern need it?
-> Double dispatch chooses the code to run from the runtime types of two objects, here the element and the visitor. Visitor needs it because an ordinary virtual call dispatches on only one runtime type, and ordinary C# overload resolution picks a `Visit` overload at compile time from the argument's static type. Through an `ICartItem` reference, the concrete element type is not available for that choice.
+> [!qard]- What is double dispatch?
+> Double dispatch chooses the implementation from the runtime types of two objects participating in one operation. An ordinary virtual call dispatches only on the receiver's runtime type; ordinary C# overload resolution chooses parameter overloads from compile-time types.
 >
-> Visitor recovers it in two dispatches:
+> Visitor combines dispatch on an element with dispatch on a visitor so both runtime types influence the operation that runs.
+>
+> [[Software Architecture/Patterns/Design Patterns/Behavioral/Visitor#Solution|Visitor implementation]] · [[Software Architecture/Patterns/Design Patterns/Behavioral/Visitor#Pitfalls|Visitor pitfalls]]
+
+> [!qard]- Why does Visitor need an `Accept` call before `Visit`?
+> Through an `ICartItem` reference, ordinary C# overload resolution sees only `ICartItem`, not the concrete element type. A direct `visitor.Visit(item)` therefore cannot select an overload from the element's runtime type.
+>
+> The `Accept` method recovers the concrete type in two dispatches:
 >
 > 1. The caller invokes `item.Accept(visitor)`. Virtual dispatch on `item` runs the concrete element's `Accept`, such as `PhysicalProduct.Accept`.
 > 2. Inside that method, `this` has the static type `PhysicalProduct`, so `visitor.Visit(this)` binds to the `Visit(PhysicalProduct)` overload at compile time.
@@ -242,7 +249,7 @@ Visitor fits a stable element set that receives new cross-cutting operations. Pa
 
 <!-- qard-id: 60362454-c9c3-4efc-aef1-35553bd028bb -->
 
-> [!qard]- When does EF Core use `ExpressionVisitor`, and what does it do?
+> [!qard]- How does EF Core use `ExpressionVisitor` during query translation?
 > EF Core uses expression visitors when it translates a LINQ query for execution. A series of visitor passes walks the query's expression tree, reshapes it into a form the provider can handle, and translates the supported parts into the provider's query, such as SQL.
 >
 > - **Traversal:** `ExpressionVisitor` provides node-specific visit methods, so a pass can handle method calls, member access or constants differently.

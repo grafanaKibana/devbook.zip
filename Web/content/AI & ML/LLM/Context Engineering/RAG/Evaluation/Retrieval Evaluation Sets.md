@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-06-12T18:21:46.000Z
-modified: 2026-10-28T12:33:42.000Z
-published: 2026-10-31T08:53:28.449Z
+modified: 2026-11-02T09:03:54.806Z
+published: 2026-11-02T09:04:02.373Z
 topic:
   - AI & ML
 subtopic:
@@ -68,8 +68,8 @@ The structure fits retrieval metrics directly: a query goes in, and the source c
 
 <!-- qard-id: 68b4fc0a-ef08-471b-92c9-7e9ef9055056 -->
 
-> [!qard]- How should retrieval metrics and cutoffs be chosen when a query has several relevant chunks?
-> The metric depends on how the relevant chunks contribute to the answer, and the cutoff must match what each pipeline stage actually passes on.
+> [!qard]- Which retrieval metric fits a query with several relevant chunks?
+> The metric depends on how the relevant chunks contribute to the answer.
 >
 > | Relevance shape | Success means | Fitting metric | Misleading metric |
 > |---|---|---|---|
@@ -78,6 +78,16 @@ The structure fits retrieval metrics directly: a query goes in, and the source c
 > | Graded: some chunks are more useful than others | The most useful chunks rank highest | nDCG@k with graded labels, such as `2` for direct evidence, `1` for support and `0` for irrelevant | Binary recall or precision, which discard the grades |
 >
 > Example: “How do plans A and B differ on refunds?” needs one policy chunk per plan. A result containing only plan A has `HitRate@5 = 1` but complementary recall of `1/2`.
+>
+> Sources:
+>
+> - [RAG evaluators and document retrieval metrics (Microsoft Foundry)](https://learn.microsoft.com/en-us/azure/foundry/concepts/evaluation-evaluators/rag-evaluators?view=foundry)
+> - [Retrieve & Re-Rank (Sentence Transformers)](https://sbert.net/examples/sentence_transformer/applications/retrieve_rerank/README.html)
+> - [Context Recall (Ragas)](https://docs.ragas.io/en/stable/concepts/metrics/available_metrics/context_recall/)
+> - [[Retrieval Evaluation Sets#When One Query Has Several Relevant Chunks|Retrieval Evaluation Sets: When One Query Has Several Relevant Chunks]]
+
+> [!qard]- Which cutoff should a retrieval evaluation measure?
+> The cutoff must match what each pipeline stage actually passes on.
 >
 > Cutoffs:
 >

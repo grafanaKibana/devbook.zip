@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-02-27T01:19:52.000Z
-modified: 2026-10-28T12:33:42.000Z
-published: 2026-10-31T08:53:28.451Z
+modified: 2026-11-02T09:03:54.806Z
+published: 2026-11-02T09:04:02.374Z
 tags:
   - FolderNote
 topic:
@@ -90,7 +90,7 @@ The two techniques can work together. Fine-tuning can stabilize format or refusa
 
 <!-- qard-id: 19ad841c-2c3b-4042-aa7b-e7324d145b10 -->
 
-> [!qard]- How should an advanced RAG stage, such as reranking or query rewriting, be introduced and evaluated?
+> [!qard]- What experiment justifies adding an advanced stage to a RAG pipeline?
 > An advanced stage is introduced as a controlled experiment. It targets a specific failure measured on the current pipeline, and it stays only if it beats that baseline by enough to justify its added latency, cost and maintenance.
 >
 > 1. **Baseline:** the current pipeline is measured on representative cases, and the failure the new stage should fix is identified. An example is relevant evidence ranked too low to reach the prompt.

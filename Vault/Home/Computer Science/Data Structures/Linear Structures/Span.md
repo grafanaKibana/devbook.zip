@@ -6,8 +6,10 @@ level: ["4"]
 priority: Medium
 status: Done
 publish: true
+qard-deck: "Computer Science"
+qard-topic: "Data Structures/Linear Structures/Span"
 created: "2026-02-19T22:34:10.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-02T09:03:54.806Z"
 ---
 
 Parsing a 4 KB network buffer often means passing a small middle section to another method. Treating `buffer[100..200]` as a new `byte[]` allocates an array and copies 100 bytes. Repeating that for every packet creates avoidable garbage. A `Span<T>` describes the same section as a reference and a length over the original buffer, so the view is created without copying its bytes.
@@ -200,6 +202,22 @@ Backing-store lifetime still matters. A span over `stackalloc` memory is valid o
 | `Memory<T>` | Yes | Array or other owned buffer | A view must live on the heap or cross an async boundary |
 
 `Span<T>` is the zero-copy view for synchronous code over contiguous memory. Its stack-only lifetime is the price. `Memory<T>` adds enough indirection to live in fields and survive `await`, which decides the choice whenever a managed-memory view must cross an async boundary. `ArraySegment<T>` covers the older, array-only version of that heap-storable view. A fresh array is warranted when the data needs independent ownership instead of another alias to the same storage.
+
+# Questions
+
+> [!qard]- Why does writing through an array-backed span slice change the array?
+> A span slice is a non-owning view over the same storage. Slicing changes the first-element reference and length without copying the elements, so a write through the slice updates the corresponding array element.
+>
+> ```csharp
+> int[] values = [10, 20, 30];
+> Span<int> tail = values.AsSpan(1);
+> tail[0] = 200;
+> Console.WriteLine(values[1]); // 200
+> ```
+>
+> `tail.ToArray()` instead copies the viewed elements into a separate array. Mutating that copy does not change the original array. The span itself never owns or releases the backing storage.
+>
+> [Microsoft: Memory and spans](https://learn.microsoft.com/en-us/dotnet/standard/memory-and-spans/)
 
 # References
 

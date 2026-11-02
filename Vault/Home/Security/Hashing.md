@@ -10,7 +10,7 @@ qard-deck: "Security"
 qard-topic: "Hashing"
 flashcard_uid: "bca46ee1"
 created: "2026-06-20T19:32:24.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-02T09:03:54.806Z"
 ---
 
 A cryptographic hash maps an arbitrary-length byte string to a fixed-length digest. A secure general-purpose hash is designed to resist finding an input for a chosen digest and finding two inputs with the same digest. There is no decryption key. Inputs from a small or predictable domain can still be guessed and hashed, which is why a digest is not a way to hide passwords or identifiers.
@@ -99,14 +99,19 @@ SHA-256 is a common fingerprint when the protocol permits it. HMAC fits a shared
 
 # Questions
 
-> [!qard]- What is a cryptographic hash function, and what security properties does it provide?
-> A cryptographic hash function maps input of any length to a fixed-length digest, such as 256 bits for SHA-256. It uses no key and has no decryption operation. It is designed so that the digest can represent the data in comparisons and integrity checks:
+> [!qard]- What is a cryptographic hash function?
+> A cryptographic hash function maps input of any length to a fixed-length digest, such as 256 bits for SHA-256. It uses no key and has no decryption operation. It is designed so that the digest can represent the data in comparisons and integrity checks.
+>
+> Sources: [NIST FIPS 180-4: Secure Hash Standard](https://csrc.nist.gov/pubs/fips/180-4/upd1/final)
+
+> [!qard]- What security properties should a cryptographic hash function provide?
+> A cryptographic hash function is designed to provide these properties:
 >
 > - **Deterministic:** the same bytes always produce the same digest, so anyone can recompute and compare it.
 > - **Preimage resistance:** given a digest, finding any input that produces it is computationally infeasible.
 > - **Second-preimage resistance:** given one input, finding a different input with the same digest is infeasible, so a known file cannot be replaced by a different file with a matching digest.
 > - **Collision resistance:** finding any two different inputs with the same digest is infeasible. Signatures and attacker-facing file identities rely on this property. An attacker who could produce such a pair could get one input approved and then substitute the other.
-> 
+>
 > These properties do not hide a value drawn from a small or predictable set. Passwords, phone numbers or IDs can be recovered by hashing likely candidates and comparing digests. Once practical collisions are found, as they have been for MD5 and SHA-1, the function no longer suits uses that depend on collision resistance, such as signatures.
 >
 > Sources: [NIST FIPS 180-4: Secure Hash Standard](https://csrc.nist.gov/pubs/fips/180-4/upd1/final)

@@ -11,7 +11,7 @@ qard-deck: "DevOps"
 qard-topic: "Deployment Strategies/Deployment Strategies"
 flashcard_uid: "f7d6b407"
 created: "2026-02-10T01:40:47.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-02T09:03:54.806Z"
 ---
 
 A deployment strategy decides how a new artifact replaces the old one, how users are exposed to it, and how that exposure can be reversed. The choice trades spare capacity and rollout complexity against the size and duration of a failed release.
@@ -83,7 +83,7 @@ The question is not which strategy is universally safest. It is which failure ca
 
 # Questions
 
-> [!qard]- What are the main deployment strategies, and how do they differ?
+> [!qard]- How do the main deployment strategies differ?
 > Deployment strategies differ in how the new version replaces the old one and how quickly users are exposed to it. Recreate stops the old version before starting the new one. Rolling replaces instances in batches. Blue-green switches traffic to a fully prepared copy. Canary sends a small share of traffic to the new version first. They trade spare capacity and rollout complexity against downtime, the number of users a defect can reach, and how fast a release can be reversed.
 >
 > | Strategy | Mechanism | User exposure | Main cost | Reversal |
@@ -100,8 +100,19 @@ The question is not which strategy is universally safest. It is which failure ca
 > [Kubernetes: Deployment strategy](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy) · [AWS: Deployment methods](https://docs.aws.amazon.com/whitepapers/latest/practicing-continuous-integration-continuous-delivery/deployment-methods.html)
 
 <!-- qard-id: ff5bb659-796b-4880-846e-a20a2b0fd672 -->
-> [!qard]- When does canary fit better than blue-green deployment, and what does each approach cost?
-> Canary fits better when a small, representative share of production traffic can be routed to the new version and its health measured before exposure grows. Blue-green fits better when a complete candidate environment can be tested before traffic is switched to it. Canary costs traffic control and reliable per-cohort telemetry; blue-green costs near-duplicate capacity plus a safe cutover and switch-back path.
+> [!qard]- When does canary fit better than blue-green deployment?
+> Canary fits better when a small, representative share of production traffic can be routed to the new version and its health measured before exposure grows. Blue-green fits better when a complete candidate environment can be tested before traffic is switched to it.
+>
+> Routing limits direct exposure, not total impact. The canary and the old version can share databases, caches, queues and downstream services. If the canary corrupts shared data or overloads a shared dependency, requests still served by the old version can fail too. A small cohort therefore contains a defect only as far as its failure domain is isolated.
+>
+> A canary is only as useful as its evidence. Expanding exposure needs a metric, a threshold and an observation window long enough to show the failure that matters. A fixed pause is not evidence by itself, and very low traffic can leave a small cohort inconclusive.
+>
+> Neither strategy removes compatibility requirements. While both versions exist, shared schemas, messages and external side effects must work for both. If the new version writes data the old one cannot read, moving traffic back does not restore the previous system.
+>
+> [AWS: Deployment methods](https://docs.aws.amazon.com/whitepapers/latest/practicing-continuous-integration-continuous-delivery/deployment-methods.html) · [Google SRE Workbook: Canarying releases](https://sre.google/workbook/canarying-releases/#dependencies_and_isolation)
+
+> [!qard]- What operational costs distinguish canary from blue-green deployment?
+> Canary requires controlled traffic routing and reliable telemetry per version. Blue-green requires near-duplicate capacity while the release decision remains open, plus a safe cutover and switch-back path.
 >
 > | Aspect | Canary | Blue-green |
 > |---|---|---|
@@ -109,12 +120,6 @@ The question is not which strategy is universally safest. It is which failure ca
 > | Direct exposure to the new version | Only the current cohort's requests run the new version until the next expansion step, so a missed defect directly reaches only that cohort. | With a single switch, all requests are routed to the new version at once, so a missed defect can affect any request that exercises the defective code path. |
 > | Main cost | Routing a controlled share of traffic, telemetry separated by version, and a phase in which both versions serve live traffic. | Close to a second full environment while the decision is open, plus a reliable traffic switch. |
 > | Reversal | Removing the canary from traffic. | Switching traffic back, which works only while the old environment is still running and compatible. |
->
-> Routing limits direct exposure, not total impact. The canary and the old version can share databases, caches, queues and downstream services. If the canary corrupts shared data or overloads a shared dependency, requests still served by the old version can fail too. A small cohort therefore contains a defect only as far as its failure domain is isolated.
->
-> A canary is only as useful as its evidence. Expanding exposure needs a metric, a threshold and an observation window long enough to show the failure that matters. A fixed pause is not evidence by itself, and very low traffic can leave a small cohort inconclusive.
->
-> Neither strategy removes compatibility requirements. While both versions exist, shared schemas, messages and external side effects must work for both. If the new version writes data the old one cannot read, moving traffic back does not restore the previous system.
 >
 > [AWS: Deployment methods](https://docs.aws.amazon.com/whitepapers/latest/practicing-continuous-integration-continuous-delivery/deployment-methods.html) · [Google SRE Workbook: Canarying releases](https://sre.google/workbook/canarying-releases/#dependencies_and_isolation)
 

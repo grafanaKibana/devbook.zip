@@ -11,7 +11,7 @@ qard-deck: "Data Persistence"
 qard-topic: "SQL/Normalization Denormalization"
 flashcard_uid: "ab5a8eb2"
 created: "2026-02-10T16:03:55.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-02T09:03:54.806Z"
 ---
 
 Normalization uses functional, multivalued, and join dependencies to separate facts that have different keys. The goal is not to remove every repeated value. It is to prevent insertion, update, and deletion anomalies by giving each fact one authoritative dependency boundary. If a customer's current address is one fact, changing it should not require finding every order row that happened to repeat it.
@@ -297,28 +297,31 @@ An OLTP design starts by writing down candidate keys and functional dependencies
 > [Codd: Further Normalization of the Data Base Relational Model](https://apollo.inf.upol.cz/~urbanec/teaching/2021/data2/files/codd2.pdf) · [Fagin: Multivalued Dependencies and a New Normal Form for Relational Databases](https://www.comp.nus.edu.sg/~lingtw/papers/fagin.pdf) · [Fagin: Project-Join Normal Form](https://citeseerx.ist.psu.edu/document?doi=4735fc168eb72ef96817384aa5d40d5b6016d713&repid=rep1&type=pdf)
 
 <!-- qard-id: 61f5acfa-1113-408f-9deb-acd3b5e6b958 -->
-> [!qard]- What conditions justify denormalizing a table, and what risks does it introduce?
+> [!qard]- What conditions justify denormalizing a table?
 > Denormalization is justified when three conditions hold:
 >
 > - A specific read path has a measured latency or resource problem.
 > - Cheaper fixes, such as an index or a corrected query plan, do not meet its target.
 > - Keeping a stored copy up to date costs less than recomputing the result on every read.
-> 
+>
 > High read volume alone does not justify it.
 >
-> The risk is that the same fact now lives in two places, and every change must reach both:
+> [PostgreSQL: Materialized views](https://www.postgresql.org/docs/current/rules-materializedviews.html)
+
+> [!qard]- What consistency risks does denormalization introduce?
+> The same fact now lives in two places, and every change must reach both:
 >
 > - **Drift:** a write path that updates the source but misses the copy leaves them silently inconsistent.
 > - **Staleness:** a copy updated asynchronously or on a schedule serves old data between updates. A PostgreSQL materialized view, for example, changes only when `REFRESH MATERIALIZED VIEW` runs.
 > - **Write cost and contention:** each source change also updates the copy. A stored `TotalOrderAmount` on `Customers` adds an update to every order write, and concurrent orders for the same customer contend on that one row.
-> 
+>
 > A safe design therefore names four things:
 >
 > - the authoritative source;
 > - the acceptable freshness;
 > - how the copy is updated, either in the same transaction or by an asynchronous projection;
 > - a reconciliation check that detects and repairs drift.
-> 
+>
 > [PostgreSQL: Materialized views](https://www.postgresql.org/docs/current/rules-materializedviews.html)
 
 <!-- qard-id: 5b6ce553-cc6a-41a8-a22d-da5fc5fb740c -->
