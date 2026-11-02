@@ -7,7 +7,7 @@ priority: Medium
 status: Ready to Repeat
 publish: true
 created: "2026-07-10T06:24:36.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-02T08:43:03.905Z"
 ---
 
 A package manager cannot order two packages that depend on each other through a cycle. For dependency analysis, the whole cycle behaves as one unit.
@@ -41,6 +41,8 @@ Kosaraju uses two ordinary traversals:
 3. Pop vertices in decreasing finish time and DFS from each still-unvisited vertex in `Gᵀ`; each tree is one SCC.
 
 Individual vertex finish times are not a topological order inside an SCC. The useful property is at component level: decreasing maximum finish time orders the SCCs of `G`'s condensation DAG from sources onward. The selected source SCC becomes a sink in `Gᵀ`, so the second DFS cannot escape it.
+
+Gabow's path-based variant also uses one DFS but replaces low-link values with two stacks: one holds all active vertices, the other holds the boundaries of candidate components along the current path. An edge to an active vertex pops boundaries down to that vertex's position, merging the cycle it closes. When a vertex finishes while still on top of the boundary stack, the vertices above it on the active stack form one SCC.
 
 %% tab: Complexity %%
 
