@@ -450,15 +450,11 @@ public static partial class Worker
             return await StaleAsync(store, request, owner, "Managed head changed after export validation.", cancellationToken);
         }
         JsonObject reviewed = operation.Obj("receipts");
-        if (reviewed.Count == 0 || reviewed["batch"] is not JsonObject || reviewed["proposal"] is not JsonObject || reviewed["result"] is not JsonObject)
+        if (reviewed.Count == 0 || WorkloadReceipts.Records(reviewed).Count == 0)
         {
             throw new Conflict("Export operation lacks independently reviewed proposal receipts; retain it for recovery.");
         }
-        JsonArray records = reviewed.Arr("records");
-        if (records.Count == 0)
-        {
-            records = new JsonArray(new JsonObject { ["batch"] = reviewed["batch"]!.DeepClone(), ["proposal"] = reviewed["proposal"]!.DeepClone(), ["result"] = reviewed["result"]!.DeepClone() });
-        }
+        JsonArray records = WorkloadReceipts.Records(reviewed);
         foreach (JsonObject record in records.OfType<JsonObject>())
         {
             await AssertBoundLeaseAsync(store, request, owner, cancellationToken);
@@ -481,12 +477,7 @@ public static partial class Worker
         AssertLease(finalSnapshot.State, owner);
         JsonObject final = finalSnapshot.State.Copy();
         _ = BoundOperation(final, request);
-        foreach (JsonObject record in records.OfType<JsonObject>())
-        {
-            final = Core.RecordOutcome(final, record.Obj("batch"), record.Obj("proposal"), record.Obj("result"), record["review"] as JsonObject);
-            Core.CompleteReviewHolds(final, record.Obj("batch"), record["review_evidence"] as JsonObject);
-        }
-        Proposal.PersistDecisions(final, reviewed.Arr("decisions"));
+        final = WorkloadReceipts.Apply(final, reviewed);
         JsonObject finalized = final.Obj("finalized_exports").Copy();
         finalized[request.Str("op_id")] = new JsonObject { ["head_sha"] = head, ["validated_at"] = Runtime.Iso() };
         final["finalized_exports"] = finalized;
@@ -506,13 +497,6 @@ public static partial class Worker
         finalEvidence["export_phase"] = "finalized";
         finalEvidence["export_verified_head"] = head;
         finalOp["evidence"] = finalEvidence;
-        JsonObject pendingAuthor = final.Obj("pending_author_proposal");
-        if (pendingAuthor.Str("topic_id") == request.Str("topic_id")
-            && JsonNode.DeepEquals(pendingAuthor["proposal"], reviewed["proposal"]))
-        {
-            final.Remove("pending_author_proposal");
-        }
-        Core.CompleteReviewHolds(final, reviewed.Obj("batch"), reviewed["review_evidence"] as JsonObject);
         OperationJournal.CompactFinalizedExports(final);
         await store.WriteAsync(final, finalSnapshot, "maintenance: finalize verified generated export", cancellationToken);
         return new JsonObject { ["status"] = "exported", ["commit_sha"] = head, ["pr_number"] = request.Int("pr_number"), ["model_calls"] = 0 };

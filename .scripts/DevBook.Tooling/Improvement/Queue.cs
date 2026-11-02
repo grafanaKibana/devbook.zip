@@ -13,16 +13,9 @@ public static class Queue
     public static JsonObject? SelectBatch(JsonObject state, JsonArray notes, string rulesHash, JsonObject? config = null)
     {
         config ??= new JsonObject();
-        int limit = config.Int("max_notes_per_run", 4);
-        int maximumOpen = config.Int("max_open_prs", 3);
-        if (limit < 1 || maximumOpen < 1)
-        {
-            throw new InvalidDataException("queue limits must be positive");
-        }
         JsonObject current = Core.CopyState(state);
         Dictionary<string, JsonObject[]> feedbackByTopic = current.Obj("feedback").Select(pair => pair.Value).OfType<JsonObject>().Where(item => item.Str("status") == "pending" && item["topic"] is not null)
             .GroupBy(item => item.Str("topic")).ToDictionary(group => group.Key, group => group.ToArray());
-        int openCount = current.Obj("prs").Select(pair => pair.Value).Count(pr => pr.Str("status") == "open");
         var candidates = new Dictionary<string, List<Candidate>>(StringComparer.Ordinal);
         foreach (JsonObject note in notes.OfType<JsonObject>())
         {
@@ -37,7 +30,8 @@ public static class Queue
                 : prior.Str("content_hash") != hash ? (2, "changed")
                 : prior.Str("outcome") is not ("keep" or "changed") ? (3, "unchecked")
                 : prior.Str("outcome") == "keep" && prior.Str("rules_hash") == rulesHash
-                    && (!Review.VerifiedKeep(prior.Obj("keep_review"), path, note.Str("content"), rulesHash)
+                    && (prior.Obj("keep_review").Str("review_process") != Core.FocusedReviewVersion
+                        || !Review.VerifiedKeep(prior.Obj("keep_review"), path, note.Str("content"), rulesHash)
                         || evaluationHash.Length != 0 && prior.Str("evaluation_hash") == evaluationHash
                             && prior.Obj("keep_review").Str("evaluation_hash") != evaluationHash) ? (3, "keep_unverified")
                 : note.Arr("violations").Count != 0 && prior.Str("violation_hash") != LegacyIdentity.ViolationHash(note.Arr("violations")) ? (4, "violations")
@@ -67,34 +61,19 @@ public static class Queue
             {
                 return scopeBatch;
             }
-            if (pr is null && openCount >= maximumOpen && feedback.Length == 0)
+            if (pr is not null && feedback.Length == 0)
             {
                 continue;
             }
             List<Candidate> rows = candidates[topic].OrderBy(row => row.NeedsFixing ? 0 : 1).ThenBy(row => row.Priority).ThenBy(row => row.PathKey, StringComparer.Ordinal).ToList();
-            if (pr?.Bool("frozen") == true)
+            if (feedback.Length != 0)
             {
-                if (feedback.Length == 0)
-                {
-                    continue;
-                }
                 HashSet<string> allowedPaths = feedback.SelectMany(item => item.Arr("paths").Strings()).ToHashSet();
                 rows.RemoveAll(row => !allowedPaths.Contains(row.Note.Str("path")));
             }
-            HashSet<string> available = rows.Select(row => row.Note.Str("path")).ToHashSet();
-            var requested = new HashSet<string>();
-            foreach (JsonObject item in feedback)
-            {
-                HashSet<string> paths = item.Arr("paths").Strings().ToHashSet();
-                if (paths.IsSubsetOf(available) && requested.Union(paths).Count() <= limit)
-                {
-                    requested.UnionWith(paths);
-                }
-            }
-            Candidate[] selected = rows.OrderBy(row => requested.Contains(row.Note.Str("path")) ? 0 : 1)
-                .ThenBy(row => row.NeedsFixing ? 0 : 1).ThenBy(row => row.Priority).ThenBy(row => row.PathKey, StringComparer.Ordinal).Take(limit).ToArray();
+            Candidate[] selected = rows.Take(1).ToArray();
             HashSet<string> selectedPaths = selected.Select(row => row.Note.Str("path")).ToHashSet();
-            JsonObject[] scopedFeedback = feedback.Where(item => item.Arr("paths").Strings().ToHashSet().IsSubsetOf(selectedPaths)).ToArray();
+            JsonObject[] scopedFeedback = feedback.Where(item => item.Arr("paths").Strings().Any(selectedPaths.Contains)).ToArray();
             if (feedback.Length != 0 && scopedFeedback.Length == 0)
             {
                 scopeBatch ??= MakeBatch(topic, [], feedback, rulesHash, config.Str("evaluation_hash"), pr);
@@ -125,6 +104,7 @@ public static class Queue
             ["feedback"] = new JsonArray(feedback.Select(item => item.DeepClone()).ToArray()),
             ["rules_hash"] = rulesHash,
             ["evaluation_hash"] = evaluationHash,
+            ["review_process"] = Core.FocusedReviewVersion,
             ["pr"] = pr?.DeepClone()
         };
     }

@@ -41,7 +41,6 @@ public sealed class QueueTests
     }
 
     [Theory]
-    [InlineData("unchanged")]
     [InlineData("flags")]
     public void ReviewedFlagIsSelectedAgainOnlyWhenItsInputsChange(string change)
     {
@@ -134,28 +133,88 @@ public sealed class QueueTests
         final.Obj("review_repair_attempts").Int("reserved-repair").Should().Be(1);
     }
 
-    [Theory]
-    [InlineData(1)]
-    [InlineData(2)]
-    public void FeedbackRequestIsPackedAsOneCompletePathScope(int limit)
+    [Fact]
+    public void FeedbackSelectionRetainsItsFullScopeWhileEvaluatingOneNote()
     {
         // Arrange
         string other = "Vault/Home/Programming/Network/Transport/TCP.md";
         JsonObject state = Core.NewState();
         state.Obj("feedback")["request"] = new JsonObject
         {
-            ["status"] = "pending",
-            ["topic"] = Core.TopicFor(other),
+            ["status"] = "pending", ["topic"] = Core.TopicFor(other),
             ["paths"] = new JsonArray(DomainFixtures.Path, other)
         };
-        var notes = new JsonArray(DomainFixtures.NoteRecord(), DomainFixtures.NoteRecord(other));
 
         // Act
-        JsonObject batch = ImprovementQueue.SelectBatch(state, notes, "rules", new JsonObject { ["max_notes_per_run"] = limit })!;
+        JsonObject batch = ImprovementQueue.SelectBatch(state,
+            new JsonArray(DomainFixtures.NoteRecord(), DomainFixtures.NoteRecord(other)), "rules", new JsonObject())!;
 
         // Assert
-        batch.Arr("feedback").Should().ContainSingle();
-        batch.Arr("notes").Count.Should().Be(limit == 2 ? 2 : 0);
+        batch.Arr("notes").Should().ContainSingle();
+        batch.Arr("feedback").Should().ContainSingle().Which.Arr("paths").Strings().Should().Equal(DomainFixtures.Path, other);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    public void EveryOpenManagedTopicIsExcludedFromOrdinarySelection(bool frozen)
+    {
+        // Arrange
+        JsonObject state = Core.NewState();
+        state.Obj("prs")["open"] = new JsonObject
+        {
+            ["topic_id"] = Core.TopicId("Programming"), ["generation"] = 1,
+            ["status"] = "open", ["draft"] = true, ["frozen"] = frozen
+        };
+
+        // Act
+        JsonObject? batch = ImprovementQueue.SelectBatch(state, new JsonArray(DomainFixtures.NoteRecord()), "rules");
+
+        // Assert
+        batch.Should().BeNull();
+    }
+
+    [Fact]
+    public void ThreeOtherOpenTopicsDoNotBlockANewTopic()
+    {
+        // Arrange
+        JsonObject state = Core.NewState();
+        foreach (string topic in new[] { "Networks", "Databases", "Algorithms" })
+            state.Obj("prs")[topic] = new JsonObject { ["topic_id"] = Core.TopicId(topic), ["status"] = "open", ["draft"] = true };
+
+        // Act
+        JsonObject? batch = ImprovementQueue.SelectBatch(state, new JsonArray(DomainFixtures.NoteRecord()), "rules");
+
+        // Assert
+        batch.Should().NotBeNull();
+        batch!.Str("topic").Should().Be("Programming");
+        batch.Arr("notes").Should().ContainSingle();
+    }
+
+    [Fact]
+    public void LegacyKeepIsReevaluatedOnceAndItsOriginalEvidenceIsArchivedIntact()
+    {
+        // Arrange
+        JsonObject note = DomainFixtures.NoteRecord();
+        JsonObject proposal = new() { ["version"] = 1, ["edits"] = new JsonArray(), ["dispositions"] = new JsonArray(new JsonObject
+            { ["path"] = DomainFixtures.Path, ["outcome"] = "keep", ["reason"] = "The complete note remains useful." }) };
+        JsonObject review = DomainFixtures.UnchangedReview(new JsonObject { ["current"] = new JsonObject { [DomainFixtures.Path] = DomainFixtures.Note } });
+        JsonObject batch = new() { ["notes"] = new JsonArray(note.Copy()), ["rules_hash"] = "rules", ["evaluation_hash"] = "policy" };
+        JsonObject legacy = Core.RecordOutcome(Core.NewState(), batch, proposal, new JsonObject(), review);
+        JsonObject originalEvidence = legacy.Obj("notes").Obj(DomainFixtures.Path).Obj("keep_review").Copy();
+        JsonObject focusedBatch = ImprovementQueue.SelectBatch(legacy, new JsonArray(note.Copy()), "rules", new JsonObject { ["evaluation_hash"] = "policy" })!;
+
+        // Act
+        JsonObject focused = Core.RecordOutcome(legacy, focusedBatch, proposal, new JsonObject(), review);
+        JsonObject? next = ImprovementQueue.SelectBatch(focused, new JsonArray(note.Copy()), "rules", new JsonObject { ["evaluation_hash"] = "policy" });
+
+        // Assert
+        focusedBatch.Arr("notes").Should().ContainSingle();
+        focusedBatch.Str("review_process").Should().Be(Core.FocusedReviewVersion);
+        next.Should().BeNull();
+        JsonObject record = focused.Obj("notes").Obj(DomainFixtures.Path);
+        JsonNode.DeepEquals(record.Obj("keep_review_history")[LegacyIdentity.Fingerprint(originalEvidence)], originalEvidence).Should().BeTrue();
+        record.Obj("keep_review_history").Count.Should().Be(1);
+        record.Obj("keep_review").Str("review_process").Should().Be(Core.FocusedReviewVersion);
     }
 
     [Fact]

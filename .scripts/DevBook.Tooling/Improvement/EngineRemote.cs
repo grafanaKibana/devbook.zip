@@ -123,7 +123,7 @@ public sealed partial class ImprovementEngine
                 bool automatic = config.Bool("automatic_export");
                 bool otherFreeze = row.Str("review_started_head_sha").Length > 0 || prior["validation_failure"] is not null || prior.Str("reviewDecision").Length > 0
                     || prior.Bool("review_activity") || prior.Bool("has_reviews") || prior.Int("review_count") > 0 || prior["draft"]?.GetValue<bool>() == false
-                    || prior.Arr("changed_paths").Count >= config.Int("max_pr_notes", 16) || prior.Int("additions") + prior.Int("deletions") >= config.Int("max_pr_lines", 1200);
+                    || prior.Arr("changed_paths").Count >= config.Int("max_pr_notes", 5) || prior.Int("additions") + prior.Int("deletions") >= config.Int("max_pr_lines", 1200);
                 if (automatic && prior.Str("export_operation_id").Length > 0 && !otherFreeze)
                 {
                     row["frozen"] = false;
@@ -216,7 +216,7 @@ public sealed partial class ImprovementEngine
                     entry["paths"] = Copies(scoped.Select(value => JsonValue.Create(value)));
                     allFeedback.Add(entry);
                 }
-                row["frozen"] = row.Bool("frozen") || feedback.Count > 0 || !pr.Bool("draft", true) || paths.Length >= config.Int("max_pr_notes", 16)
+                row["frozen"] = row.Bool("frozen") || feedback.Count > 0 || !pr.Bool("draft", true) || paths.Length >= config.Int("max_pr_notes", 5)
                     || files.OfType<JsonObject>().Sum(file => file.Int("additions") + file.Int("deletions")) >= config.Int("max_pr_lines", 1200);
                 row["changed_paths"] = Copies(paths.Select(value => JsonValue.Create(value)));
                 row["review_started_head_sha"] = row["review_started_head_sha"]?.DeepClone() ?? (feedback.Count > 0 ? pr.Obj("head")["sha"]?.DeepClone() : null);
@@ -288,14 +288,15 @@ public sealed partial class ImprovementEngine
             }
             if (needsOutcome)
             {
-                state = Core.RecordOutcome(state, receipt.RequiredObject("batch"), receipt.RequiredObject("proposal"), receipt.RequiredObject("result"), receipt["review"] as JsonObject);
-                Core.CompleteReviewHolds(state, receipt.RequiredObject("batch"), receipt["review_evidence"] as JsonObject);
-                Proposal.PersistDecisions(state, receipt.Arr("decisions"));
+                state = WorkloadReceipts.Apply(state, receipt);
                 EnsureObject(state, "finalized_exports")[pair.Key] = new JsonObject { ["head_sha"] = head };
             }
             if (needsFeedback)
             {
-                await FeedbackReceiptAsync(receipt.RequiredObject("proposal"), receipt.RequiredObject("batch"), head, true, cancellationToken);
+                foreach (JsonObject record in WorkloadReceipts.Records(receipt).OfType<JsonObject>())
+                {
+                    await FeedbackReceiptAsync(record.RequiredObject("proposal"), record.RequiredObject("batch"), head, true, cancellationToken);
+                }
                 EnsureObject(state, "export_feedback_receipts")[pair.Key] = true;
             }
         }
@@ -318,17 +319,18 @@ public sealed partial class ImprovementEngine
             {
                 throw new Conflict("Completed operation lacks source/review receipts.");
             }
-            state = Core.RecordOutcome(state, receipt.RequiredObject("batch"), receipt.RequiredObject("proposal"), receipt.RequiredObject("result"), receipt["review"] as JsonObject);
-            Proposal.PersistDecisions(state, receipt.Arr("decisions"));
+            state = WorkloadReceipts.Apply(state, receipt);
             string key = $"{receipt.Str("topic_id")}:{receipt.Int("generation")}";
             JsonObject row = EnsureObject(state.RequiredObject("prs"), key);
-            row["proposal_records"] = receipt.Arr("records").Copy();
+            row["proposal_records"] = WorkloadReceipts.History(receipt);
             row["head_sha"] = operation.Obj("evidence")["head_sha"]?.DeepClone();
             row["base_note_hashes"] = receipt["base_note_hashes"]?.DeepClone();
-            await FeedbackReceiptAsync(receipt.RequiredObject("proposal"), receipt.RequiredObject("batch"), operation.Obj("evidence").Str("head_sha"), true, cancellationToken);
+            foreach (JsonObject record in WorkloadReceipts.Records(receipt).OfType<JsonObject>())
+            {
+                await FeedbackReceiptAsync(record.RequiredObject("proposal"), record.RequiredObject("batch"), operation.Obj("evidence").Str("head_sha"), true, cancellationToken);
+            }
             EnsureObject(state, "finalized_operations")[pair.Key] = true;
-            state.Remove("pending_author_proposal");
-            Core.CompleteReviewHolds(state, receipt.RequiredObject("batch"), receipt["review_evidence"] as JsonObject);
+
         }
         await SaveAsync(state, "finalize verified publication receipts", cancellationToken);
         foreach (string id in state.Obj("completed_operations").Select(pair => pair.Key).ToArray())

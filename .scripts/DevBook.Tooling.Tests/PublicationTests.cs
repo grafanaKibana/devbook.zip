@@ -73,22 +73,94 @@ public sealed class PublicationTests
     }
 
     [Fact]
-    public void EditedOwnerFeedbackGetsANewRevisionAndUntrustedAuthorsAreExcluded()
+    public async Task CompleteAllKeepFeedbackIsAcknowledgedOnceWithoutAnyPublicationOperation()
     {
         // Arrange
-        JsonObject owner = RuntimeFixtures.OwnerComment();
-        JsonArray previous = Feedback.Normalize(new JsonArray(owner.Copy()), new JsonArray(), new JsonArray(), RuntimeFixtures.Allowlist(), [RuntimeFixtures.NotePath]);
-        owner["body"] = "Please explain the corrected boundary too.";
-        JsonObject stranger = owner.Copy();
-        stranger.Obj("user")["id"] = 999;
+        using var fixture = new WorkloadFixture(2);
+        string topic = Core.TopicId("Programming");
+        var api = new RuntimeApi();
+        api.SeedManagedPr(topic, fixture.Notes[0]!.Str("content"));
+        foreach (JsonObject note in fixture.Notes.OfType<JsonObject>()) api.SourceFiles[note.Str("path")] = note.Str("content");
+        fixture.Config["repo"] = api.Repo;
+        fixture.Config["base_branch"] = "main";
+        JsonObject comment = RuntimeFixtures.OwnerComment();
+        comment["paths"] = new JsonArray(fixture.Notes.OfType<JsonObject>().Select(note => (JsonNode)JsonValue.Create(note.Str("path"))!).ToArray());
+        api.Comments.Add(comment);
+        fixture.Config["owner_allowlist"] = RuntimeFixtures.Allowlist();
+        var runtime = new GitHubRuntime(api, fixture.Store, activation: () => { });
+        ImprovementEngine Engine() => new(fixture.Root, fixture.Config, fixture.Store, fixture.Model, api: api, publisher: runtime,
+            notesLoader: () => fixture.Notes.Copy(), clock: fixture.Clock, snapshotShaLoader: () => "base",
+            validator: (_, _, _) => Task.FromResult(new JsonArray()));
 
         // Act
-        JsonArray current = Feedback.Normalize(new JsonArray(owner, stranger), new JsonArray(), new JsonArray(), RuntimeFixtures.Allowlist(), [RuntimeFixtures.NotePath]);
+        JsonObject result = await Engine().RunAsync(apply: true, withModel: true);
+        await Engine().RunAsync(apply: true, withModel: true);
+        JsonObject saved = (await fixture.Store.ReadAsync()).State;
 
         // Assert
-        current.Should().ContainSingle();
-        current[0]!.Str("key").Should().NotBe(previous[0]!.Str("key"));
-        current[0]!.Arr("paths").Strings().Should().Equal(RuntimeFixtures.NotePath);
+        result.Str("status").Should().Be("no_worthwhile_changes", "result: {0}", result.ToJsonString());
+        fixture.Model.Authors.Should().HaveCount(2);
+        fixture.Model.Reviews.Should().HaveCount(2);
+        saved.Obj("feedback_workloads").Select(pair => pair.Value).Should().ContainSingle(item => item.Str("status") == "completed");
+        saved.Obj("feedback").Select(pair => pair.Value).Should().OnlyContain(item => item.Str("status") == "keep");
+        api.Commits.Should().Be(0);
+        api.PrCreates.Should().Be(0);
+        api.Acknowledgments.Should().Be(1);
+        saved["pending_operation"].Should().BeNull();
+        saved.Obj("completed_operations").Count.Should().Be(0);
+        saved.Obj("export_operations").Count.Should().Be(0);
+    }
+
+    [Theory]
+    [InlineData(20, false)]
+    [InlineData(200, true)]
+    public async Task FeedbackLineCapacityIncludesTheExistingPrAgainstItsAuthoritativeBase(int correctionLines, bool blocked)
+    {
+        // Arrange
+        using var fixture = new WorkloadFixture(2);
+        string path = fixture.Notes[0]!.Str("path");
+        string baseline = fixture.Notes[0]!.Str("content");
+        string existing = baseline + string.Join("\n", Enumerable.Range(0, 1100).Select(line => $"Existing authored detail {line}.")) + "\n";
+        var api = new RuntimeApi();
+        api.SeedManagedPr(Core.TopicId("Programming"), existing);
+        api.SourceFiles[path] = existing;
+        api.BaseSourceFiles[path] = baseline;
+        string stagedPath = fixture.Notes[1]!.Str("path");
+        api.SourceFiles[stagedPath] = fixture.Notes[1]!.Str("content");
+        api.BaseSourceFiles[stagedPath] = fixture.Notes[1]!.Str("content");
+        JsonObject comment = RuntimeFixtures.OwnerComment();
+        comment["paths"] = new JsonArray(path, stagedPath);
+        api.Comments.Add(comment);
+        fixture.Config["repo"] = api.Repo;
+        fixture.Config["base_branch"] = "main";
+        fixture.Config["owner_allowlist"] = RuntimeFixtures.Allowlist();
+        fixture.Model.Change = _ => true;
+        fixture.Model.ChangedCard = call => DomainFixtures.Card.Replace("The original answer.", "The clarified mechanism.")
+            + string.Join("\n", Enumerable.Range(0, call == 1 ? 50 : correctionLines).Select(line => $"Corrected mechanism detail {line}.")) + "\n";
+        var publisher = new GitHubRuntime(api, fixture.Store, activation: () => { });
+        var engine = new ImprovementEngine(fixture.Root, fixture.Config, fixture.Store, fixture.Model, api: api, publisher: publisher,
+            notesLoader: () => fixture.Notes.Copy(), clock: fixture.Clock, snapshotShaLoader: () => "base",
+            validator: (_, _, _) => Task.FromResult(new JsonArray()));
+
+        // Act
+        JsonObject result = await engine.RunAsync(apply: blocked, withModel: true);
+        JsonObject saved = (await fixture.Store.ReadAsync()).State;
+
+        // Assert
+        result.Str("status").Should().Be(blocked ? "feedback_needs_scope" : "proposed", "result: {0}", result.ToJsonString());
+        fixture.Model.Authors.Should().HaveCount(2);
+        fixture.Model.Reviews.Should().HaveCount(blocked ? 1 : 2);
+        if (blocked)
+        {
+            JsonObject scope = saved.Obj("feedback_workloads").Single().Value!.AsObject();
+            scope.Str("status").Should().Be("feedback_needs_scope");
+            scope.Str("hold_reason").Should().Contain("1200");
+            scope.Obj("size_hold_proposal").Count.Should().BePositive();
+            scope.Obj("records").Count.Should().Be(1);
+            api.Commits.Should().Be(0);
+            api.PrCreates.Should().Be(0);
+        }
+        else result.Obj("candidate").ContainsKey(path).Should().BeTrue();
     }
 
     [Theory]

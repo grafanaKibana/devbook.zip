@@ -29,6 +29,7 @@ public sealed class ClaudeProvider : IModelProvider
     public static string EvaluationHash(JsonObject config) => LegacyIdentity.Fingerprint(new JsonObject
     {
         ["model"] = config.Str("model", DefaultModel),
+        ["review_process"] = Core.FocusedReviewVersion,
         ["protocol_hash"] = Convert.ToHexStringLower(System.Security.Cryptography.SHA256.HashData(ProtocolBytes))
     });
     private readonly JsonObject config;
