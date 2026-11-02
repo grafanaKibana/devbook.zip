@@ -25,7 +25,7 @@ public static partial class Worker
         _ = Bundle.ExactHead(request.Str("expected_head"));
     }
 
-    public static ExportOpportunity SelectOpportunity(JsonObject state, DateTimeOffset now)
+    public static ExportOpportunity SelectOpportunity(JsonObject state, DateTimeOffset now, int prNumber = 0)
     {
         JsonObject copy = state.Copy();
         JsonObject operations = copy.Obj("export_operations");
@@ -35,12 +35,14 @@ public static partial class Worker
             {
                 continue;
             }
+            if (prNumber > 0 && operation.Int("pr_number", operation.Obj("evidence").Int("pr_number")) != prNumber) continue;
             JsonObject evidence = operation.Obj("evidence");
             if (evidence.Bool("export_paused") || evidence.Bool("export_terminal"))
             {
                 continue;
             }
             JsonObject request = evidence.Obj("export_request");
+            if (prNumber > 0 && request.Int("pr_number") != prNumber) continue;
             try
             {
                 ValidateRequest(request);

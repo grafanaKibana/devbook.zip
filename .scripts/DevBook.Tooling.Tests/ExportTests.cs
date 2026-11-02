@@ -43,16 +43,10 @@ public sealed class ExportTests
         competing.Should().Throw<SyncException>();
     }
 
-    private sealed class PublishingHookRunner(ProcessResult result) : IProcessRunner
-    {
-        public Task<ProcessResult> RunAsync(ProcessRequest request, CancellationToken cancellationToken = default) => Task.FromResult(result);
-    }
-
     private sealed class PublishingPublishingFixture : IDisposable
     {
         public string Root { get; } = Path.Combine(Path.GetTempPath(), "devbook-publishing-" + Guid.NewGuid().ToString("N"));
         public List<string> Calls { get; } = [];
-        public bool Skipped { get; set; }
         private readonly JsonObject Publishingsettings;
 
         public PublishingPublishingFixture()
@@ -121,7 +115,7 @@ public sealed class ExportTests
             else if (arguments[0] == "quartz-syncer:publish")
             {
                 File.WriteAllText(Path.Combine(Root, "Web/content/Card.md"), "Rendered through fixture CLI boundary\n");
-                data = new JsonObject { ["skipped"] = Skipped ? 1 : 0, ["failures"] = new JsonArray() };
+                data = new JsonObject { ["skipped"] = 0, ["failures"] = new JsonArray() };
             }
             else if (arguments[0] == "eval" && arguments[1].Contains("cleanOrphanedMedia", StringComparison.Ordinal))
             {

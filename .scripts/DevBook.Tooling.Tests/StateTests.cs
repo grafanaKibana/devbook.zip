@@ -26,7 +26,8 @@ public sealed class StateTests
         JsonObject secondBatch = new()
         {
             ["notes"] = new JsonArray(DomainFixtures.NoteRecord(secondPath)),
-            ["rules_hash"] = "reviewed-rules", ["review_process"] = Core.FocusedReviewVersion
+            ["rules_hash"] = "reviewed-rules",
+            ["review_process"] = Core.FocusedReviewVersion
         };
         JsonObject secondResult = Proposal.Apply(new Dictionary<string, string> { [secondPath] = DomainFixtures.Note }, secondProposal);
         JsonObject receipts = originalOperation.Obj("receipts");
@@ -35,8 +36,10 @@ public sealed class StateTests
         receipts.Arr("records")[0]!["record_id"] = "first-record";
         receipts.Arr("records").Add(new JsonObject
         {
-            ["record_id"] = "second-record", ["batch"] = secondBatch,
-            ["proposal"] = secondProposal, ["result"] = secondResult,
+            ["record_id"] = "second-record",
+            ["batch"] = secondBatch,
+            ["proposal"] = secondProposal,
+            ["result"] = secondResult,
             ["review"] = DomainFixtures.UnchangedReview(new JsonObject { ["current"] = secondResult.Obj("sources").Copy() })
         });
         receipts["proposal_history"] = receipts.Arr("records").Copy();
@@ -191,6 +194,7 @@ public sealed class StateTests
         string expectedMarker = "initial";
         int expectedBlobReads = 1;
         int expectedRefReads = 2;
+        Exception? writeFailure = null;
         if (scenario == "unchanged")
         {
             JsonObject update = Core.NewState();
@@ -209,19 +213,13 @@ public sealed class StateTests
             expectedMarker = "changed";
             expectedBlobReads = 2;
         }
-        else if (scenario == "missing")
-        {
-            api.Head = expectedRef = expectedBlob = null;
-            expectedMarker = "";
-        }
         else if (scenario == "applied-with-lost-response")
         {
             api.LosePatchResponse = true;
             JsonObject update = Core.NewState();
             update["marker"] = "applied";
-            Exception? failure = await Record.ExceptionAsync(() => store.WriteAsync(update,
+            writeFailure = await Record.ExceptionAsync(() => store.WriteAsync(update,
                 new StateSnapshot(Core.NewState(), "initial"), "fixture ambiguous response"));
-            failure.Should().BeOfType<GitHubApiFailure>();
             update["marker"] = "caller mutation";
             expectedRef = "written";
             expectedBlob = "written-blob";
@@ -232,16 +230,18 @@ public sealed class StateTests
 
         // Act
         StateSnapshot current = await store.ReadAsync();
+        string currentMarker = current.State.Str("marker");
+        current.State["marker"] = "returned snapshot mutation";
 
         // Assert
+        if (scenario == "applied-with-lost-response") writeFailure.Should().BeOfType<GitHubApiFailure>();
         current.RefSha.Should().Be(expectedRef);
         current.BlobSha.Should().Be(expectedBlob);
-        current.State.Str("marker").Should().Be(expectedMarker);
+        currentMarker.Should().Be(expectedMarker);
         current.State.Obj("notes").Count.Should().Be(0);
-        current.State.Int("version").Should().Be(scenario == "missing" ? 0 : 1);
+        current.State.Int("version").Should().Be(1);
         api.StateReads.Should().Be(expectedBlobReads);
         api.RefReads.Should().Be(expectedRefReads);
-        current.State["marker"] = "returned snapshot mutation";
         api.RemoteState.Str("marker").Should().Be(scenario == "changed" ? "initial" : "applied");
     }
 

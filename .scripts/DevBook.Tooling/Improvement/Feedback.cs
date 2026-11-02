@@ -7,11 +7,18 @@ namespace DevBook.Tooling.Improvement;
 public static class Feedback
 {
     public const string ReceiptMarker = "<!-- devbook-feedback-result:";
+    public const string FixCommand = "/devbook fix";
+
+    public static bool IsOwner(JsonObject user, JsonArray allowlist) => Id(user["id"]) >= 0
+        && allowlist.OfType<JsonObject>().Any(owner => Id(owner["id"]) == Id(user["id"])
+            && LegacyIdentity.CaseFold(owner.Str("login")) == LegacyIdentity.CaseFold(user.Str("login"))
+            && user.Str("login").Length != 0);
 
     public static JsonArray Normalize(JsonArray ordinary, JsonArray inline, JsonArray reviews, JsonArray allowlist, IEnumerable<string>? scopedPaths = null)
     {
-        HashSet<(long Id, string Login)> trusted = allowlist.OfType<JsonObject>().Select(item => (Id: Id(item["id"]), Login: LegacyIdentity.CaseFold(item.Str("login"))))
-            .Where(identity => identity.Id >= 0 && identity.Login.Length != 0).ToHashSet();
+        HashSet<long> unpublishedReviews = reviews.OfType<JsonObject>()
+            .Where(review => review.Str("state").ToUpperInvariant() is "PENDING" or "DISMISSED")
+            .Select(review => Id(review["id"])).Where(id => id >= 0).ToHashSet();
         string[] existingPaths = (scopedPaths ?? []).Where(path => path.Length != 0).Distinct().Order(StringComparer.Ordinal).ToArray();
         var result = new List<JsonObject>();
         foreach ((string kind, JsonArray items) in new[] { ("comment", ordinary), ("inline", inline), ("review", reviews) })
@@ -20,12 +27,14 @@ public static class Feedback
             {
                 JsonObject user = item.Obj("user");
                 long actorId = Id(user["id"]);
-                if (!trusted.Contains((actorId, LegacyIdentity.CaseFold(user.Str("login")))))
+                if (!IsOwner(user, allowlist))
                 {
                     continue;
                 }
                 string body = item.Str("body");
-                if (kind == "comment" && body.Contains(ReceiptMarker, StringComparison.Ordinal))
+                if (kind == "comment" && (body.Contains(ReceiptMarker, StringComparison.Ordinal) || body.Trim() == FixCommand)
+                    || kind == "review" && (item.Str("state").ToUpperInvariant() is "PENDING" or "DISMISSED" || string.IsNullOrWhiteSpace(body))
+                    || kind == "inline" && unpublishedReviews.Contains(Id(item["pull_request_review_id"])))
                 {
                     continue;
                 }

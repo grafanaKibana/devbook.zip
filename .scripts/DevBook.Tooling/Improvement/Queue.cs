@@ -15,6 +15,7 @@ public static class Queue
         config ??= new JsonObject();
         JsonObject current = Core.CopyState(state);
         Dictionary<string, JsonObject[]> feedbackByTopic = current.Obj("feedback").Select(pair => pair.Value).OfType<JsonObject>().Where(item => item.Str("status") == "pending" && item["topic"] is not null)
+            .Where(item => config.Int("feedback_pr") == 0 || item.Int("pr_number") == config.Int("feedback_pr"))
             .GroupBy(item => item.Str("topic")).ToDictionary(group => group.Key, group => group.ToArray());
         var candidates = new Dictionary<string, List<Candidate>>(StringComparer.Ordinal);
         foreach (JsonObject note in notes.OfType<JsonObject>())
@@ -57,6 +58,10 @@ public static class Queue
         {
             JsonObject? pr = OpenPrForTopic(current, topic);
             JsonObject[] feedback = feedbackByTopic.GetValueOrDefault(topic) ?? [];
+            if (config.Int("feedback_pr") > 0 && (pr?.Int("number") != config.Int("feedback_pr") || feedback.Length == 0))
+            {
+                continue;
+            }
             if (scopeBatch is not null && feedback.Length == 0)
             {
                 return scopeBatch;

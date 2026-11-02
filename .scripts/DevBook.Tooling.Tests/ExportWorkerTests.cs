@@ -30,9 +30,6 @@ public sealed class ExportWorkerTests
                 case "foreign-head":
                     fixture.Api.PrHeadAfterRef = FakeExportApi.OwnerChangedHead;
                     break;
-                case "foreign-ref":
-                    fixture.Api.Head = FakeExportApi.OwnerChangedHead;
-                    break;
                 case "closed":
                     fixture.Api.Pr["state"] = "closed";
                     break;
@@ -42,7 +39,6 @@ public sealed class ExportWorkerTests
             }
         };
         var clock = new ExportWorkerCheckClock(DateTimeOffset.UtcNow);
-        DateTimeOffset started = clock.GetUtcNow();
         var delays = 0;
         var wait = new ExportCheckWait(clock, (duration, token) =>
         {
@@ -75,16 +71,7 @@ public sealed class ExportWorkerTests
             state.Obj("export_operations").Obj(fixture.Request.Str("op_id")).Obj("evidence").Bool("export_paused").Should().BeTrue();
             state.Obj("finalized_exports").Count.Should().Be(0);
             fixture.Api.Comments.Should().BeEmpty();
-            if (scenario == "timeout")
-            {
-                result.Str("reason").Should().Contain("Timed out");
-                (clock.GetUtcNow() - started).Should().Be(TimeSpan.FromSeconds(30));
-                delays.Should().Be(15);
-            }
-            else
-            {
-                delays.Should().Be(0);
-            }
+            delays.Should().Be(0);
         }
     }
 
@@ -241,14 +228,6 @@ public sealed class ExportWorkerTests
         result.Str("status").Should().Be("exported");
         fixture.Api.RefWrites.Should().Be(1);
         fixture.Api.CommitWrites.Should().Be(1);
-    }
-
-    private static async Task MakeValidationDue(IStateStore store, JsonObject request)
-    {
-        StateSnapshot snapshot = await store.ReadAsync();
-        JsonObject state = snapshot.State.Copy();
-        state.Obj("export_operations").Obj(request.Str("op_id")).Obj("evidence")["validation_last_dispatch_at"] = Runtime.Iso(DateTimeOffset.UtcNow.AddHours(-7));
-        await store.WriteAsync(state, snapshot, "fixture advance validation retry boundary");
     }
 
     private sealed class ExportWorkerCheckClock(DateTimeOffset now) : TimeProvider

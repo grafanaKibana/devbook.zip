@@ -123,7 +123,7 @@ public static partial class Worker
             string? applied = await RecognizeAppliedAsync(api, config, request, predicted, cancellationToken);
             if (applied is null)
             {
-                return await StaleAsync(store, request, owner, "Source head changed or PR closed before generated publication.", cancellationToken);
+                return await MarkStaleAsync(store, request, owner, "Source head changed or PR closed before generated publication.", cancellationToken);
             }
             await RecordAsync(store, request, owner, "recover applied generated export", (_, operation) =>
             {
@@ -139,7 +139,7 @@ public static partial class Worker
         }
         if (!await CurrentBaseAsync(api, config, current, expected, cancellationToken))
         {
-            return await StaleAsync(store, request, owner, "Topic branch requires the current base before export publication.", cancellationToken);
+            return await MarkStaleAsync(store, request, owner, "Topic branch requires the current base before export publication.", cancellationToken);
         }
         await RecordAsync(store, request, owner, "prepare generated export publication", (_, operation) =>
         {
@@ -193,13 +193,13 @@ public static partial class Worker
         current = await CurrentPrAsync(api, config, number, branch, expected, cancellationToken);
         if (current is null)
         {
-            return await StaleAsync(store, request, owner, "Source head changed during generated commit creation.", cancellationToken);
+            return await MarkStaleAsync(store, request, owner, "Source head changed during generated commit creation.", cancellationToken);
         }
         await AssertBoundLeaseAsync(store, request, owner, cancellationToken);
         await EnsureDraftForExportAsync(api, store, request, owner, current, cancellationToken);
         if (await CurrentPrAsync(api, config, number, branch, expected, cancellationToken) is null)
         {
-            return await StaleAsync(store, request, owner, "Managed head changed while renewing draft review.", cancellationToken);
+            return await MarkStaleAsync(store, request, owner, "Managed head changed while renewing draft review.", cancellationToken);
         }
         await RecordAsync(store, request, owner, "journal generated ref update", (_, operation) =>
         {
@@ -212,7 +212,7 @@ public static partial class Worker
         (JsonObject? publishedPr, string propagationError) = await AwaitGeneratedHeadAsync(api, config, store, request, owner, commitSha, checkWait, cancellationToken);
         if (publishedPr is null)
         {
-            return await StaleAsync(store, request, owner, propagationError, cancellationToken);
+            return await MarkStaleAsync(store, request, owner, propagationError, cancellationToken);
         }
         await RecordAsync(store, request, owner, "record generated branch update", (_, operation) =>
         {
@@ -308,9 +308,6 @@ public static partial class Worker
             && Bundle.SameLeaves((await Bundle.TreeAsync(api, head, cancellationToken)).Values, predicted.Values) ? head : null;
     }
 
-    private static Task<JsonObject> StaleAsync(IStateStore store, JsonObject request, string owner, string reason, CancellationToken cancellationToken) =>
-        MarkStaleAsync(store, request, owner, reason, cancellationToken);
-
     private static async Task<JsonObject> MarkStaleAsync(IStateStore store, JsonObject request, string owner, string reason, CancellationToken cancellationToken)
     {
         await RecordAsync(store, request, owner, "pause stale export operation", (_, operation) =>
@@ -372,7 +369,7 @@ public static partial class Worker
             JsonObject? sourcePr = await CurrentPrAsync(api, config, request.Int("pr_number"), request.Str("branch"), request.Str("expected_head"), cancellationToken);
             if (sourcePr is null || !await CurrentBaseAsync(api, config, sourcePr, request.Str("expected_head"), cancellationToken))
             {
-                return await StaleAsync(store, request, owner, "Managed head or PR lifecycle changed before export checks.", cancellationToken);
+                return await MarkStaleAsync(store, request, owner, "Managed head or PR lifecycle changed before export checks.", cancellationToken);
             }
             Dictionary<string, GitTreeEntry> original = await Bundle.TreeAsync(api, request.Str("expected_head"), cancellationToken);
             Dictionary<string, GitTreeEntry> generated = await Bundle.TreeAsync(api, head, cancellationToken);
@@ -396,7 +393,7 @@ public static partial class Worker
             }, cancellationToken);
             if (await CurrentPrAsync(api, config, request.Int("pr_number"), request.Str("branch"), request.Str("expected_head"), cancellationToken) is null)
             {
-                return await StaleAsync(store, request, owner, "Managed source changed during generated ref recovery.", cancellationToken);
+                return await MarkStaleAsync(store, request, owner, "Managed source changed during generated ref recovery.", cancellationToken);
             }
             await AssertBoundLeaseAsync(store, request, owner, cancellationToken);
             await api.RequestAsync("PATCH", "/git/refs/heads/" + Uri.EscapeDataString(request.Str("branch")),
@@ -405,7 +402,7 @@ public static partial class Worker
             (pr, propagationError) = await AwaitGeneratedHeadAsync(api, config, store, request, owner, head, checkWait, cancellationToken);
             if (pr is null)
             {
-                return await StaleAsync(store, request, owner, propagationError, cancellationToken);
+                return await MarkStaleAsync(store, request, owner, propagationError, cancellationToken);
             }
             await RecordAsync(store, request, owner, "record recovered generated branch update", (_, op) =>
             {
@@ -417,7 +414,7 @@ public static partial class Worker
         PublicationChecks checks = await AwaitChecksAsync(api, config, store, request, owner, head, checkWait, cancellationToken);
         if (checks.Status == "stale")
         {
-            return await StaleAsync(store, request, owner, "Managed head or PR lifecycle changed while waiting for exact-head checks.", cancellationToken);
+            return await MarkStaleAsync(store, request, owner, "Managed head or PR lifecycle changed while waiting for exact-head checks.", cancellationToken);
         }
         await RecordAsync(store, request, owner, "record generated exact-head check results", (_, op) =>
         {
@@ -447,7 +444,7 @@ public static partial class Worker
         }
         if (await CurrentPrAsync(api, config, request.Int("pr_number"), request.Str("branch"), head, cancellationToken) is null)
         {
-            return await StaleAsync(store, request, owner, "Managed head changed after export validation.", cancellationToken);
+            return await MarkStaleAsync(store, request, owner, "Managed head changed after export validation.", cancellationToken);
         }
         JsonObject reviewed = operation.Obj("receipts");
         if (reviewed.Count == 0 || WorkloadReceipts.Records(reviewed).Count == 0)
@@ -463,7 +460,7 @@ public static partial class Worker
         pr = await CurrentPrAsync(api, config, request.Int("pr_number"), request.Str("branch"), head, cancellationToken);
         if (pr is null)
         {
-            return await StaleAsync(store, request, owner, "Managed head changed while recording feedback results.", cancellationToken);
+            return await MarkStaleAsync(store, request, owner, "Managed head changed while recording feedback results.", cancellationToken);
         }
         string statusLine = $"<!-- devbook-export-validation -->Quartz export: verified in `{head}`; required checks and full-vault validation passed on that exact head.";
         string updatedBody = Regex.Replace(pr.Str("body"), @"(?m)^<!-- devbook-export-validation -->.*$", _ => statusLine);
@@ -497,7 +494,7 @@ public static partial class Worker
         finalEvidence["export_phase"] = "finalized";
         finalEvidence["export_verified_head"] = head;
         finalOp["evidence"] = finalEvidence;
-        OperationJournal.CompactFinalizedExports(final);
+        OperationJournal.CompactFinalizedExports(final, request.Int("pr_number"));
         await store.WriteAsync(final, finalSnapshot, "maintenance: finalize verified generated export", cancellationToken);
         return new JsonObject { ["status"] = "exported", ["commit_sha"] = head, ["pr_number"] = request.Int("pr_number"), ["model_calls"] = 0 };
     }

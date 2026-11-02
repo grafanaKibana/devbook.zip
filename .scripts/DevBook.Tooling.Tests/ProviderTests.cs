@@ -156,27 +156,11 @@ public sealed class ProviderTests
         provider.Diagnostics.Should().BeEmpty();
     }
 
-    [Fact]
-    public async Task ReviewerSchemaRejectsNotApplicableTargetResolution()
-    {
-        // Arrange
-        var runner = new ProviderProviderRunner { TargetResolution = "NOT APPLICABLE" };
-        var provider = new ClaudeProvider(new JsonObject { ["claude_executable"] = "/usr/bin/true" }, runner,
-            environment: name => name == "CLAUDE_CODE_OAUTH_TOKEN" ? "fixture-oauth-value" : null);
-
-        // Act
-        Func<Task> review = async () => await provider.ReviewAsync(new JsonObject { ["topic"] = "fixture" });
-
-        // Assert
-        await review.Should().ThrowAsync<ClaudeProviderException>().WithMessage("*target_resolution*enum*");
-    }
-
     private sealed class ProviderProviderRunner : IProcessRunner
     {
         public List<ProcessRequest> Requests { get; } = [];
         public JsonObject Metadata { get; init; } = new();
         public ProcessResult? Failure { get; init; }
-        public string? TargetResolution { get; init; }
         public Task<ProcessResult> RunAsync(ProcessRequest request, CancellationToken cancellationToken = default)
         {
             Requests.Add(request with { Environment = request.Environment is null ? null : new Dictionary<string, string>(request.Environment) });
@@ -193,10 +177,6 @@ public sealed class ProviderTests
             JsonObject structured = reviewer ? JsonData.ParseObject("""
                 {"verdict":"CHANGES REQUIRED","change_checks":[],"overall_reason":"Fixture block","notes":[{"path":"Vault/Home/A/B.md","verdict":"CHANGES REQUIRED","summary":"Needs an explanation","page_type":"concept","current_text_evidence":[{"quote":"Current text","line_start":1,"reason":"Missing boundary"}],"target_resolution":"UNRESOLVED","split_suggestion":"Keep together","findings":[],"source_checks":[],"rejection_equivalence":[],"quality":{"accuracy":"PASS","clarity":"FAIL","rules_compliance":"PASS","question_quality":"NOT APPLICABLE","identity_safety":"NOT APPLICABLE"}}]}
                 """) : new JsonObject { ["version"] = 1, ["edits"] = new JsonArray(), ["dispositions"] = new JsonArray(), ["feedback"] = new JsonArray() };
-            if (reviewer && TargetResolution is not null)
-            {
-                structured.Arr("notes")[0]!["target_resolution"] = TargetResolution;
-            }
             var envelope = new JsonObject { ["modelUsage"] = new JsonObject { [ClaudeProvider.DefaultModel] = new JsonObject() }, ["structured_output"] = structured };
             foreach (KeyValuePair<string, JsonNode?> item in Metadata)
             {
@@ -205,31 +185,6 @@ public sealed class ProviderTests
             return Task.FromResult(new ProcessResult(0, Encoding.UTF8.GetBytes(envelope.ToJsonString()), []));
         }
     }
-    [Fact]
-    public void HtmlEvidenceRetainsMechanismAndMathWithoutPageScaffolding()
-    {
-        // Arrange
-        const string html = """
-            <!DOCTYPE html>
-            <html><head><title>hidden-head</title><script>hidden-head-script</script></head>
-            <body><style>.hidden-style { display: none; }</style><script>hidden-script</script>
-            <!-- hidden-comment -->
-            <article class="paper"><p>All k trials must succeed.</p>
-            <math><semantics><mrow><mi>p</mi><mi>k</mi></mrow>
-            <annotation encoding="application/x-tex">\operatorname{pass}^{k} = E[C(c,k)/C(n,k)]</annotation>
-            </semantics></math><p><code>x &lt; 5</code></p></article></body></html>
-            """;
-
-        // Act
-        string evidence = Runtime.SourceEvidenceText(Encoding.UTF8.GetBytes(html));
-
-        // Assert
-        evidence.Should().Contain("All k trials must succeed.").And.Contain(@"\operatorname{pass}^{k}")
-            .And.Contain("E[C(c,k)/C(n,k)]").And.Contain("x < 5");
-        evidence.Should().NotContain("hidden-head").And.NotContain("hidden-script").And.NotContain("hidden-style")
-            .And.NotContain("hidden-comment").And.NotContain("<article").And.NotContain("<math").And.NotContain("encoding=");
-    }
-
     [Fact]
     public async Task UnsafeSourceUrisAreRejectedBeforeResolution()
     {

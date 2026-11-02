@@ -242,6 +242,7 @@ public static class Core
         }
         foreach (JsonObject entry in result.Obj("prs").Select(pair => pair.Value).OfType<JsonObject>())
         {
+            if (config.Int("feedback_pr") > 0 && entry.Int("number") != config.Int("feedback_pr")) continue;
             PruneTerminalRecords(result, entry);
         }
         return result;

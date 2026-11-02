@@ -6,11 +6,17 @@ on:
   pull_request:
     paths:
       - .github/workflows/devbook-improvement.yml
+      - .github/workflows/devbook-improvement-feedback.yml
       - .github/devbook-improvement.json
       - .scripts/DevBook.Tooling/**
       - .scripts/DevBook.Tooling.Tests/**
       - .scripts/*.slnx
       - .scripts/global.json
+  issue_comment:
+    types: [created, edited]
+  workflow_run:
+    workflows: [DevBook Improvement Feedback]
+    types: [completed]
   workflow_dispatch:
     inputs:
       mode:
@@ -37,8 +43,41 @@ permissions:
 concurrency:
   group: devbook-improvement
   cancel-in-progress: false
+  queue: max
 
 jobs:
+  feedback:
+    if: >-
+      github.ref == 'refs/heads/main' && vars.DEVBOOK_IMPROVEMENT_ACTIVATED == 'true' &&
+      (github.event_name == 'issue_comment' || github.event_name == 'workflow_run')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: read
+      issues: read
+      pull-requests: read
+    outputs:
+      feedback_pr: ${{ steps.admit.outputs.feedback_pr }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.100
+      - name: Authenticate feedback wakeup against current GitHub data
+        id: admit
+        working-directory: .scripts
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = refs/heads/main
+          dotnet run --project DevBook.Tooling -- improvement --repo-root .. \
+            --check-feedback-trigger --output-dir artifacts/feedback-admission
+
   demo:
     if: >-
       github.event_name == 'pull_request' ||
@@ -76,10 +115,13 @@ jobs:
           overwrite: true
 
   maintenance:
+    needs: feedback
     if: >-
+      always() && !cancelled() &&
       github.ref == 'refs/heads/main' &&
       ((github.event_name == 'schedule' && vars.DEVBOOK_IMPROVEMENT_ACTIVATED == 'true' && vars.DEVBOOK_IMPROVEMENT_SCHEDULE_ENABLED == 'true') ||
-      (github.event_name == 'workflow_dispatch' && (inputs.mode == 'apply' || (inputs.mode == 'dry-run' && inputs.with_model))))
+      (github.event_name == 'workflow_dispatch' && (inputs.mode == 'apply' || (inputs.mode == 'dry-run' && inputs.with_model))) ||
+      (needs.feedback.result == 'success' && needs.feedback.outputs.feedback_pr != '' && needs.feedback.outputs.feedback_pr != '0'))
     runs-on: ubuntu-latest
     timeout-minutes: 40
     environment: devbook-improvement-production
@@ -89,7 +131,7 @@ jobs:
     steps:
       - name: Check protected activation gates
         env:
-          REQUESTED_MODE: ${{ github.event_name == 'schedule' && 'apply' || inputs.mode }}
+          REQUESTED_MODE: ${{ (github.event_name == 'schedule' || needs.feedback.outputs.feedback_pr != '' && needs.feedback.outputs.feedback_pr != '0') && 'apply' || inputs.mode }}
           EVENT_NAME: ${{ github.event_name }}
           ACTIVATED: ${{ vars.DEVBOOK_IMPROVEMENT_ACTIVATED }}
           SUBSCRIPTION_ONLY: ${{ vars.DEVBOOK_IMPROVEMENT_SUBSCRIPTION_ONLY_CONFIRMED }}
@@ -102,7 +144,7 @@ jobs:
           test "$SUBSCRIPTION_ONLY" = true
           test "$USAGE_CREDITS_DISABLED" = true
           case "$REQUESTED_MODE" in dry-run|apply) ;; *) exit 1 ;; esac
-          if [ "$REQUESTED_MODE" = apply ] && [ "$EVENT_NAME" = schedule ]; then
+          if [ "$REQUESTED_MODE" = apply ] && [ "$EVENT_NAME" != workflow_dispatch ]; then
             test "$PR_WORKFLOWS_CONFIRMED" = true
           fi
       - uses: actions/checkout@v4
@@ -134,18 +176,21 @@ jobs:
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           DEVBOOK_GITHUB_TOKEN: ${{ secrets.DEVBOOK_GITHUB_TOKEN }}
-          DEVBOOK_IMPROVEMENT_MODE: ${{ github.event_name == 'schedule' && 'apply' || inputs.mode }}
+          DEVBOOK_IMPROVEMENT_MODE: ${{ (github.event_name == 'schedule' || needs.feedback.outputs.feedback_pr != '' && needs.feedback.outputs.feedback_pr != '0') && 'apply' || inputs.mode }}
           DEVBOOK_IMPROVEMENT_ACTIVATED: ${{ vars.DEVBOOK_IMPROVEMENT_ACTIVATED }}
           DEVBOOK_IMPROVEMENT_SUBSCRIPTION_ONLY_CONFIRMED: ${{ vars.DEVBOOK_IMPROVEMENT_SUBSCRIPTION_ONLY_CONFIRMED }}
           DEVBOOK_IMPROVEMENT_USAGE_CREDITS_DISABLED_CONFIRMED: ${{ vars.DEVBOOK_IMPROVEMENT_USAGE_CREDITS_DISABLED_CONFIRMED }}
           DEVBOOK_IMPROVEMENT_PR_WORKFLOWS_CONFIRMED: ${{ vars.DEVBOOK_IMPROVEMENT_PR_WORKFLOWS_CONFIRMED }}
-          MODEL: ${{ github.event_name == 'schedule' && (vars.DEVBOOK_IMPROVEMENT_MODEL || 'claude-sonnet-5-5') || inputs.model }}
+          MODEL: ${{ github.event_name == 'workflow_dispatch' && inputs.model || vars.DEVBOOK_IMPROVEMENT_MODEL || 'claude-sonnet-5-5' }}
+          FEEDBACK_PR: ${{ needs.feedback.outputs.feedback_pr || '0' }}
         run: |
           set -euo pipefail
           test "$(dotnet --version)" = 10.0.100
+          feedback=()
+          if [ "$FEEDBACK_PR" -gt 0 ]; then feedback=(--feedback-pr "$FEEDBACK_PR"); fi
           dotnet run --project DevBook.Tooling -- improvement --repo-root .. \
             --config .github/devbook-improvement.json --model "$MODEL" \
-            --"$DEVBOOK_IMPROVEMENT_MODE" --with-model --output-dir artifacts/devbook-improvement
+            --"$DEVBOOK_IMPROVEMENT_MODE" --with-model "${feedback[@]}" --output-dir artifacts/devbook-improvement
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -232,7 +277,7 @@ jobs:
     if: >-
       always() && !cancelled() &&
       github.ref == 'refs/heads/main' &&
-      (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') &&
+      (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'issue_comment' || github.event_name == 'workflow_run') &&
       needs.maintenance.result == 'success' && needs.maintenance.outputs.export_ready == 'true' &&
       (needs.maintenance.outputs.export_mode == 'finalize' || (needs.render.result == 'success' && needs.render.outputs.ready == 'true'))
     runs-on: ubuntu-latest

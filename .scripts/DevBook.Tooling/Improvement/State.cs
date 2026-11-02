@@ -228,7 +228,7 @@ public sealed class OperationJournal(IStateStore store, TimeProvider? timeProvid
 {
     private readonly TimeProvider clock = timeProvider ?? TimeProvider.System;
 
-    public static void CompactFinalizedExports(JsonObject state)
+    public static void CompactFinalizedExports(JsonObject state, int prNumber = 0)
     {
         foreach (KeyValuePair<string, JsonNode?> pair in state.Obj("export_operations"))
         {
@@ -237,6 +237,8 @@ public sealed class OperationJournal(IStateStore store, TimeProvider? timeProvid
             {
                 continue;
             }
+            JsonObject evidence = operation.Obj("evidence");
+            if (prNumber > 0 && operation.Int("pr_number", evidence.Int("pr_number", evidence.Obj("export_request").Int("pr_number"))) != prNumber) continue;
             string prKey = $"{operation.Str("topic")}:{operation.Int("generation")}";
             bool terminal = state.Obj("prs").Obj(prKey).Str("status") is "closed" or "merged";
             if (!state.Obj("export_feedback_receipts").Bool(pair.Key) && !terminal)

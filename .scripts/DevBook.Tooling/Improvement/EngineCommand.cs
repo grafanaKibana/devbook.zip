@@ -12,15 +12,15 @@ public static class EngineCommand
     {
         if (args.Contains("--help"))
         {
-            Console.WriteLine("DevBook.Tooling improvement [--demo | --dry-run | --apply] [--with-model] [--config <root-relative-json>] [--model <id>] [--output-dir <root-relative-dir>] [--repo-root <path>]");
+            Console.WriteLine("DevBook.Tooling improvement [--demo | --dry-run | --apply | --check-feedback-trigger] [--with-model] [--feedback-pr <number>] [--config <root-relative-json>] [--model <id>] [--output-dir <root-relative-dir>] [--repo-root <path>]");
             return 0;
         }
         try
         {
             var options = new Dictionary<string, string>(StringComparer.Ordinal);
             var flags = new HashSet<string>();
-            var valued = new HashSet<string> { "--config", "--model", "--output-dir", "--repo-root" };
-            var switches = new HashSet<string> { "--demo", "--dry-run", "--apply", "--with-model" };
+            var valued = new HashSet<string> { "--config", "--model", "--output-dir", "--repo-root", "--feedback-pr" };
+            var switches = new HashSet<string> { "--demo", "--dry-run", "--apply", "--with-model", "--check-feedback-trigger" };
             for (var index = 0; index < args.Length; index++)
             {
                 if (valued.Contains(args[index]) && index + 1 < args.Length)
@@ -36,7 +36,7 @@ public static class EngineCommand
                     throw new ArgumentException("Unknown or incomplete option: " + args[index]);
                 }
             }
-            if (new[] { "--demo", "--dry-run", "--apply" }.Count(flags.Contains) > 1)
+            if (new[] { "--demo", "--dry-run", "--apply", "--check-feedback-trigger" }.Count(flags.Contains) > 1)
             {
                 throw new ArgumentException("Choose one execution mode.");
             }
@@ -44,6 +44,29 @@ public static class EngineCommand
             string configPath = Path.GetFullPath(Path.Combine(root, options.GetValueOrDefault("--config", ".github/devbook-improvement.json")));
             string output = Path.GetFullPath(Path.Combine(root, options.GetValueOrDefault("--output-dir", "artifacts/devbook-improvement")));
             JsonObject config = JsonData.ParseObject(await File.ReadAllTextAsync(configPath));
+            if (config.ContainsKey("feedback_pr"))
+            {
+                throw new ArgumentException("feedback_pr is an authenticated per-run option, not persistent configuration.");
+            }
+            int feedbackPr = 0;
+            if (options.TryGetValue("--feedback-pr", out string? target))
+            {
+                if (!int.TryParse(target, out feedbackPr) || feedbackPr < 1 || flags.Contains("--demo")
+                    || flags.Contains("--check-feedback-trigger") || !flags.Contains("--apply") && !flags.Contains("--with-model"))
+                {
+                    throw new ArgumentException("--feedback-pr requires a positive PR number and protected live execution.");
+                }
+            }
+            if (flags.Contains("--check-feedback-trigger"))
+            {
+                using var admissionDeadline = new CancellationTokenSource(TimeSpan.FromMinutes(2));
+                JsonObject admission = await ResolveFeedbackTriggerAsync(config,
+                    new GhApi(config.Str("repo"), "GITHUB_TOKEN", readOnly: true), admissionDeadline.Token);
+                WriteArtifacts(output, admission);
+                WriteWorkflowOutputs(output, admission);
+                Console.WriteLine(admission.ToJsonString());
+                return 0;
+            }
             if (options.TryGetValue("--model", out string? selectedModel))
             {
                 config["model"] = selectedModel;
@@ -76,6 +99,23 @@ public static class EngineCommand
                     throw new ProductionGate("Live operation is restricted to the configured base-branch workflow.");
                 }
                 var api = new GhApi(config.Str("repo"));
+                if ((Environment.GetEnvironmentVariable("GITHUB_EVENT_NAME") is "issue_comment" or "workflow_run") && feedbackPr == 0)
+                {
+                    throw new ProductionGate("Feedback events require an admitted target PR.");
+                }
+                if (feedbackPr > 0)
+                {
+                    JsonObject admission = await ResolveFeedbackTriggerAsync(config,
+                        new GhApi(config.Str("repo"), readOnly: true), deadline.Token);
+                    if (admission.Int("feedback_pr") != feedbackPr)
+                    {
+                        WriteArtifacts(output, admission);
+                        WriteWorkflowOutputs(output, admission);
+                        Console.WriteLine(admission.ToJsonString());
+                        return 0;
+                    }
+                    config["feedback_pr"] = feedbackPr;
+                }
                 var store = new StateBranchStore(api, config.Str("state_branch", Runtime.StateBranch));
                 if ((await store.ReadAsync(deadline.Token)).RefSha is null)
                 {
@@ -115,6 +155,22 @@ public static class EngineCommand
         }
     }
 
+    private static async Task<JsonObject> ResolveFeedbackTriggerAsync(JsonObject config, IGitHubApi api, CancellationToken cancellationToken)
+    {
+        if (Environment.GetEnvironmentVariable("GITHUB_REF") != "refs/heads/" + config.Str("base_branch", "main"))
+        {
+            throw new ProductionGate("Feedback admission requires the configured base-branch workflow.");
+        }
+        string eventPath = Environment.GetEnvironmentVariable("GITHUB_EVENT_PATH") ?? "";
+        if (eventPath.Length == 0 || new FileInfo(eventPath).Length > 1_000_000)
+        {
+            throw new ProductionGate("A bounded GitHub event payload is required for feedback admission.");
+        }
+        JsonObject payload = JsonData.ParseObject(await File.ReadAllTextAsync(eventPath, cancellationToken));
+        return await FeedbackTrigger.ResolveAsync(config, Environment.GetEnvironmentVariable("GITHUB_EVENT_NAME") ?? "",
+            payload, api, cancellationToken);
+    }
+
     public static void WriteArtifacts(string directory, JsonObject result)
     {
         Directory.CreateDirectory(directory);
@@ -145,7 +201,7 @@ public static class EngineCommand
             return;
         }
         JsonObject? request = result["export_request"] as JsonObject;
-        var lines = new List<string> { "export_ready=" + (request is null ? "false" : "true") };
+        var lines = new List<string> { "export_ready=" + (request is null ? "false" : "true"), "feedback_pr=" + result.Int("feedback_pr") };
         if (request is not null)
         {
             Worker.ValidateRequest(request);

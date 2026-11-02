@@ -38,10 +38,9 @@ public sealed partial class ImprovementEngine
     private async Task ReserveCallAsync(bool review, CancellationToken cancellationToken)
     {
         EnsureContentBudget();
-        int reserved = workload?.Int("calls_reserved") ?? modelCalls;
+        int reserved = workload!.Int("calls_reserved");
         if (reserved + (review ? 1 : 2) > config.Int("max_model_calls_per_run", 20)) throw new WorkloadLimit("call_limit");
-        if (workload is null) return;
-        workload["calls_reserved"] = reserved + 1;
+        workload!["calls_reserved"] = reserved + 1;
         workload["phase"] = review ? "review_reserved" : "author_reserved";
         workload["reservation_deadline"] = Core.FormatTime(clock.GetUtcNow().AddSeconds(Math.Min(Math.Min(900, config.Int("model_timeout_seconds", 900)), RemainingContentSeconds())));
         JsonObject state = await InitialStateAsync(cancellationToken);
@@ -51,8 +50,7 @@ public sealed partial class ImprovementEngine
     private async Task ReserveContentPhaseAsync(JsonObject state, string phase, CancellationToken cancellationToken)
     {
         EnsureContentBudget();
-        if (workload is null) return;
-        workload["phase"] = phase + "_reserved";
+        workload!["phase"] = phase + "_reserved";
         workload["reservation_deadline"] = Core.FormatTime(clock.GetUtcNow().AddSeconds(RemainingContentSeconds()));
         await SaveAsync(state, "reserve bounded " + phase + " content phase", cancellationToken);
         EnsureContentBudget();
@@ -60,6 +58,18 @@ public sealed partial class ImprovementEngine
 
     public async Task<JsonObject> RunAsync(bool apply = false, bool withModel = false, CancellationToken cancellationToken = default)
     {
+        if (FeedbackPr > 0)
+        {
+            JsonObject current = await InitialStateAsync(cancellationToken);
+            if (FeedbackScopePause(current) is JsonObject pause) return pause;
+            JsonObject pending = current.Obj("pending_author_proposal");
+            if (CanParkPublishedProposal(current, pending))
+            {
+                EnsureObject(current, "parked_author_proposals")[LegacyIdentity.Fingerprint(pending)] = pending.Copy();
+                current.Remove("pending_author_proposal");
+                await SaveAsync(current, "preserve published workload's unused ordinary proposal", cancellationToken);
+            }
+        }
         if (!withModel) return await RunOneAsync(apply, false, cancellationToken);
         if (apply) await ReplayFeedbackAcknowledgmentsAsync(cancellationToken);
         JsonObject state = await InitialStateAsync(cancellationToken);
@@ -105,10 +115,18 @@ public sealed partial class ImprovementEngine
             if (workload.Count > 0) EnsureObject(state, "workload_history")[workload.Str("id")] = workload.Copy();
             workload = new JsonObject
             {
-                ["version"] = 1, ["id"] = Guid.NewGuid().ToString("N"), ["status"] = "active", ["phase"] = "selecting",
-                ["started_at"] = Core.FormatTime(clock.GetUtcNow()), ["elapsed_seconds"] = 0d,
-                ["calls_reserved"] = 0, ["responses_received"] = 0, ["attempted_paths"] = new JsonArray(),
-                ["accepted_records"] = new JsonArray(), ["outcomes"] = new JsonArray()
+                ["version"] = 1,
+                ["id"] = Guid.NewGuid().ToString("N"),
+                ["status"] = "active",
+                ["phase"] = "selecting",
+                ["started_at"] = Core.FormatTime(clock.GetUtcNow()),
+                ["elapsed_seconds"] = 0d,
+                ["calls_reserved"] = 0,
+                ["responses_received"] = 0,
+                ["attempted_paths"] = new JsonArray(),
+                ["accepted_records"] = new JsonArray(),
+                ["outcomes"] = new JsonArray(),
+                ["feedback_pr"] = FeedbackPr
             };
         }
         else if (workload.Str("phase").EndsWith("_reserved", StringComparison.Ordinal)
@@ -183,8 +201,11 @@ public sealed partial class ImprovementEngine
             {
                 return new JsonObject
                 {
-                    ["status"] = "caller_cancelled", ["stop_reason"] = stop, ["durable_recovery"] = true,
-                    ["coverage"] = Coverage(), ["model_calls"] = workload.Int("calls_reserved")
+                    ["status"] = "caller_cancelled",
+                    ["stop_reason"] = stop,
+                    ["durable_recovery"] = true,
+                    ["coverage"] = Coverage(),
+                    ["model_calls"] = workload.Int("calls_reserved")
                 };
             }
             using var publication = CancellationTokenSource.CreateLinkedTokenSource(grace.Token, cancellationToken);
@@ -231,7 +252,8 @@ public sealed partial class ImprovementEngine
 
     private JsonObject Coverage() => new()
     {
-        ["topic"] = workload?.Str("topic"), ["notes"] = workload?.Arr("outcomes").Copy(),
+        ["topic"] = workload?.Str("topic"),
+        ["notes"] = workload?.Arr("outcomes").Copy(),
         ["improved_count"] = workload?.Arr("accepted_records").Count ?? 0,
         ["model_calls"] = workload?.Int("calls_reserved") ?? modelCalls,
         ["calls_reserved"] = workload?.Int("calls_reserved") ?? modelCalls,
@@ -327,12 +349,21 @@ public sealed partial class ImprovementEngine
         }
         var response = new JsonObject
         {
-            ["status"] = "proposed", ["topic"] = saved.Str("topic"), ["candidate"] = saved["candidate"]?.DeepClone(),
-            ["summary"] = saved.Str("summary"), ["diff"] = saved.Str("diff"), ["question_changes"] = saved["question_changes"]?.DeepClone(),
+            ["status"] = "proposed",
+            ["topic"] = saved.Str("topic"),
+            ["candidate"] = saved["candidate"]?.DeepClone(),
+            ["summary"] = saved.Str("summary"),
+            ["diff"] = saved.Str("diff"),
+            ["question_changes"] = saved["question_changes"]?.DeepClone(),
             ["validation"] = saved.Arr("validation").Copy(),
-            ["proposal"] = records.OfType<JsonObject>().Last().Obj("proposal").Copy(), ["review"] = records.OfType<JsonObject>().Last().Obj("review").Copy(),
-            ["coverage"] = Coverage(), ["stop_reason"] = saved.Str("stop_reason"), ["model_calls"] = saved.Int("calls_reserved"),
-            ["error"] = saved["error"]?.DeepClone(), ["cooldown"] = saved["cooldown"]?.DeepClone(), ["notice"] = saved.Bool("quota_notice")
+            ["proposal"] = records.OfType<JsonObject>().Last().Obj("proposal").Copy(),
+            ["review"] = records.OfType<JsonObject>().Last().Obj("review").Copy(),
+            ["coverage"] = Coverage(),
+            ["stop_reason"] = saved.Str("stop_reason"),
+            ["model_calls"] = saved.Int("calls_reserved"),
+            ["error"] = saved["error"]?.DeepClone(),
+            ["cooldown"] = saved["cooldown"]?.DeepClone(),
+            ["notice"] = saved.Bool("quota_notice")
         };
         if (!apply)
         {

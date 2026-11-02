@@ -67,6 +67,18 @@ The managed body covers the cumulative diff against `main` in four sections: **N
 
 Comments, inline comments and submitted reviews count only when the configured numeric owner ID and login agree. Edited feedback receives a new revision fingerprint. Explicit reject/reconsider decisions must cite verified feedback and pass an independent check quoting the actual request; silence, approval and general feedback imply neither. Rejecting a published proposal restores its original block/identity only while the exact saved replacement remains present, after the same review and guarded publication. Rejection history updates after successful publication or a reviewed decision needing no content change. Closing an unmerged PR suppresses all its proposals. The complete verified-owner revision, original path set and guarded PR head remain authoritative while each path receives its own independent review. Partial scopes retain per-path evidence across bounded runs without publishing or acknowledging the whole request. Mixed changes publish only after every scoped path passes, and terminal processing waits for verified publication/export. A complete all-keep scope can finish atomically after fresh revision/head/source checks and any required existing export is current, then acknowledge without a publication operation or empty commit. Requests adding paths beyond the five-note cap enter `feedback_needs_scope`; legacy larger PRs may receive explicit fixes limited to their existing paths. The action never resolves discussions for the owner.
 
+### Fast feedback
+
+After these workflows reach `main` and production access is separately activated, submitting an allowlisted owner's review queues feedback work without waiting for the six-hour schedule. In **Files changed**, finish the pending review with **Submit review**, choose **Comment** or **Request changes**, and submit. Pending reviews remain private and are not processed. One submitted review consolidates its published comments; there is no model invocation for each inline comment.
+
+For ordinary comments or an explicit retry, post exactly `/devbook fix` as a PR conversation comment. Outer whitespace is allowed; quoted commands and extra text are not commands. Only the configured owner's numeric ID and login can request work, and the worker rechecks the current comment after queuing. The command is excluded from author feedback. Other published comments remain available for the next command or ordinary opportunity.
+
+Both triggers process the latest published feedback on that existing managed PR only. They cannot select fresh notes, open another PR or publish unrelated saved work. Incompatible unfinished work causes a preserved, visible pause; inactive held proposals remain untouched. No pending feedback is a successful no-op. Fixes retain independent review, guarded updates, native export and final-head checks, followed by the existing result comment with commit references.
+
+The review signal has no checkout, secrets or write permission. A `workflow_run` receiver on trusted `main` authenticates the signal's workflow identity, original and rerun actors, repository and unique PR association through GitHub's API. The command receiver likewise runs on `main`; it treats comment text as data. Admission repeats before protected worker state/model initialization. Missing or ambiguous source associations fail closed. Default-branch delivery and protected access require a separately authorized hosted test; local fixtures do not prove them.
+
+Requests enter the same non-canceling queue as ordinary maintenance and publication. GitHub retains at most 100 pending runs with `queue: max`; unrelated comment wakeups may briefly occupy that queue before being ignored. Queue overflow, a saved quota cooldown, incomplete publication, or the 30-minute/20-call bound can delay work. Published feedback and processed revisions persist: use a later ordinary opportunity or another `/devbook fix` after the cause clears. No automatic retry chain or short quota polling is added. Starting promptly does not guarantee immediate completion; runner availability, review, export and checks still take time.
+
 ## Defaults and manual inputs
 
 | Setting | Default |
@@ -177,7 +189,7 @@ This uses the verified [local Syncer flow](../../Web/README.md) and stages only 
 
 ## Pause, stop and recover
 
-- Set `DEVBOOK_IMPROVEMENT_SCHEDULE_ENABLED=false` to pause unattended work; protected manual runs remain available. Set `DEVBOOK_IMPROVEMENT_ACTIVATED=false` to stop production model/apply work. Disabled scheduled opportunities run the credential-free demo.
+- Set `DEVBOOK_IMPROVEMENT_SCHEDULE_ENABLED=false` to pause scheduled new-note opportunities; activated review/command feedback and protected manual runs remain available. Set `DEVBOOK_IMPROVEMENT_ACTIVATED=false` to stop all production model/apply work, including fast feedback. Disabled scheduled opportunities run the credential-free demo.
 - Disable **DevBook Improvement** in Actions to stop all new opportunities. Explicitly cancel an already-running job when immediate stopping is required; flag changes do not cancel it. Preserve draft PRs and the state branch.
 - Rotate compromised OAuth/automation tokens in the protected environment, then run protected dry-run before apply. Cooldowns resume at persisted `next_check_at`; clear one only when its evidence is wrong and record why. Do not add short retry schedules.
 

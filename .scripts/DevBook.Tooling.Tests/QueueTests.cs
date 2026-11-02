@@ -40,9 +40,8 @@ public sealed class QueueTests
         batch.Str("topic").Should().Be("Programming");
     }
 
-    [Theory]
-    [InlineData("flags")]
-    public void ReviewedFlagIsSelectedAgainOnlyWhenItsInputsChange(string change)
+    [Fact]
+    public void ReviewedFlagIsSelectedAgainOnlyWhenItsInputsChange()
     {
         // Arrange
         JsonObject note = DomainFixtures.NoteRecord();
@@ -53,23 +52,16 @@ public sealed class QueueTests
             ["content_hash"] = note.Str("hash"),
             ["rules_hash"] = "rules",
             ["outcome"] = "changed",
-            ["repair_input_hash"] = change == "flags" ? "old-flags" : note.Str("repair_input_hash"),
+            ["repair_input_hash"] = "old-flags",
             ["evaluation_hash"] = "policy"
         };
-        var config = new JsonObject { ["evaluation_hash"] = change == "evaluation" ? "new-policy" : "policy" };
+        var config = new JsonObject { ["evaluation_hash"] = "policy" };
 
         // Act
         JsonObject? batch = ImprovementQueue.SelectBatch(state, new JsonArray(note), "rules", config);
 
         // Assert
-        if (change == "unchanged")
-        {
-            batch.Should().BeNull();
-        }
-        else
-        {
-            batch!.Arr("notes")[0]!.Str("selection_reason").Should().Be(change == "flags" ? "needs_fixing" : "evaluation_changed");
-        }
+        batch!.Arr("notes")[0]!.Str("selection_reason").Should().Be("needs_fixing");
     }
 
     [Fact]
@@ -139,31 +131,40 @@ public sealed class QueueTests
         // Arrange
         string other = "Vault/Home/Programming/Network/Transport/TCP.md";
         JsonObject state = Core.NewState();
+        state.Obj("prs")["target"] = new JsonObject
+        { ["number"] = 7, ["topic_id"] = Core.TopicId("Programming"), ["status"] = "open" };
         state.Obj("feedback")["request"] = new JsonObject
         {
-            ["status"] = "pending", ["topic"] = Core.TopicFor(other),
+            ["status"] = "pending",
+            ["pr_number"] = 7,
+            ["topic"] = Core.TopicFor(other),
             ["paths"] = new JsonArray(DomainFixtures.Path, other)
         };
 
+        state.Obj("feedback")["unrelated"] = new JsonObject
+        { ["status"] = "pending", ["pr_number"] = 8, ["topic"] = "Networks", ["paths"] = new JsonArray("Vault/Home/Networks/Other.md") };
+
         // Act
         JsonObject batch = ImprovementQueue.SelectBatch(state,
-            new JsonArray(DomainFixtures.NoteRecord(), DomainFixtures.NoteRecord(other)), "rules", new JsonObject())!;
+            new JsonArray(DomainFixtures.NoteRecord(), DomainFixtures.NoteRecord(other), DomainFixtures.NoteRecord("Vault/Home/Networks/Other.md")), "rules", new JsonObject { ["feedback_pr"] = 7 })!;
 
         // Assert
         batch.Arr("notes").Should().ContainSingle();
         batch.Arr("feedback").Should().ContainSingle().Which.Arr("paths").Strings().Should().Equal(DomainFixtures.Path, other);
     }
 
-    [Theory]
-    [InlineData(false)]
-    public void EveryOpenManagedTopicIsExcludedFromOrdinarySelection(bool frozen)
+    [Fact]
+    public void EveryOpenManagedTopicIsExcludedFromOrdinarySelection()
     {
         // Arrange
         JsonObject state = Core.NewState();
         state.Obj("prs")["open"] = new JsonObject
         {
-            ["topic_id"] = Core.TopicId("Programming"), ["generation"] = 1,
-            ["status"] = "open", ["draft"] = true, ["frozen"] = frozen
+            ["topic_id"] = Core.TopicId("Programming"),
+            ["generation"] = 1,
+            ["status"] = "open",
+            ["draft"] = true,
+            ["frozen"] = false
         };
 
         // Act
@@ -195,8 +196,13 @@ public sealed class QueueTests
     {
         // Arrange
         JsonObject note = DomainFixtures.NoteRecord();
-        JsonObject proposal = new() { ["version"] = 1, ["edits"] = new JsonArray(), ["dispositions"] = new JsonArray(new JsonObject
-            { ["path"] = DomainFixtures.Path, ["outcome"] = "keep", ["reason"] = "The complete note remains useful." }) };
+        JsonObject proposal = new()
+        {
+            ["version"] = 1,
+            ["edits"] = new JsonArray(),
+            ["dispositions"] = new JsonArray(new JsonObject
+            { ["path"] = DomainFixtures.Path, ["outcome"] = "keep", ["reason"] = "The complete note remains useful." })
+        };
         JsonObject review = DomainFixtures.UnchangedReview(new JsonObject { ["current"] = new JsonObject { [DomainFixtures.Path] = DomainFixtures.Note } });
         JsonObject batch = new() { ["notes"] = new JsonArray(note.Copy()), ["rules_hash"] = "rules", ["evaluation_hash"] = "policy" };
         JsonObject legacy = Core.RecordOutcome(Core.NewState(), batch, proposal, new JsonObject(), review);

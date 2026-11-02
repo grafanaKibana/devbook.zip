@@ -33,6 +33,7 @@ public sealed partial class ImprovementEngine
         bool loadedBranchNotes = false;
         foreach (JsonObject pr in prs.OfType<JsonObject>())
         {
+            if (FeedbackPr > 0 && pr.Int("number") != FeedbackPr) continue;
             (string Topic, int Generation)? marker = Runtime.ParseMarker(pr.Str("body"));
             if (marker is null || !Runtime.ValidPrIdentity(pr, config.Str("repo"), config.Str("base_branch", "main"), marker.Value.Topic, marker.Value.Generation))
             {
@@ -263,7 +264,7 @@ public sealed partial class ImprovementEngine
                 item["status"] = "withdrawn";
             }
         }
-        OperationJournal.CompactFinalizedExports(state);
+        OperationJournal.CompactFinalizedExports(state, FeedbackPr);
         return (state, managed, allFeedback);
     }
 
@@ -273,6 +274,7 @@ public sealed partial class ImprovementEngine
             .OrderBy(pair => pair.Value!.Obj("receipts").Arr("records").Count).ThenBy(pair => pair.Value!.Str("updated_at"), StringComparer.Ordinal).ThenBy(pair => pair.Key, StringComparer.Ordinal).ToArray();
         foreach (KeyValuePair<string, JsonNode?> pair in operations)
         {
+            if (FeedbackPr > 0 && !FeedbackOperationMatches(pair.Value!.AsObject())) continue;
             JsonObject finalized = EnsureObject(state, "finalized_exports");
             bool needsOutcome = !finalized.ContainsKey(pair.Key);
             bool needsFeedback = postFeedback && !EnsureObject(state, "export_feedback_receipts").Bool(pair.Key)
@@ -300,7 +302,7 @@ public sealed partial class ImprovementEngine
                 EnsureObject(state, "export_feedback_receipts")[pair.Key] = true;
             }
         }
-        OperationJournal.CompactFinalizedExports(state);
+        OperationJournal.CompactFinalizedExports(state, FeedbackPr);
         return state;
     }
 
@@ -314,6 +316,7 @@ public sealed partial class ImprovementEngine
                 continue;
             }
             JsonObject operation = pair.Value!.AsObject();
+            if (!FeedbackOperationMatches(operation)) continue;
             JsonObject receipt = operation.RequiredObject("receipts");
             if (receipt.Count == 0)
             {
@@ -335,7 +338,7 @@ public sealed partial class ImprovementEngine
         await SaveAsync(state, "finalize verified publication receipts", cancellationToken);
         foreach (string id in state.Obj("completed_operations").Select(pair => pair.Key).ToArray())
         {
-            if (state.Obj("finalized_operations").Bool(id))
+            if (state.Obj("finalized_operations").Bool(id) && FeedbackOperationMatches(state.Obj("completed_operations").Obj(id)))
             {
                 await new OperationJournal(store, clock).CompactFinalizedAsync(id, cancellationToken);
             }
@@ -344,7 +347,8 @@ public sealed partial class ImprovementEngine
 
     private async Task FeedbackReceiptAsync(JsonObject proposal, JsonObject batch, string? head, bool apply, CancellationToken cancellationToken)
     {
-        if (!apply || api is null || batch.Obj("pr").Int("number") < 1 || proposal.Arr("feedback").Count == 0)
+        if (!apply || api is null || batch.Obj("pr").Int("number") < 1 || proposal.Arr("feedback").Count == 0
+            || FeedbackPr > 0 && batch.Obj("pr").Int("number") != FeedbackPr)
         {
             return;
         }

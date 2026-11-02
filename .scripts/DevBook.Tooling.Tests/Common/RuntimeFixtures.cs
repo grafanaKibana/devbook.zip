@@ -51,6 +51,10 @@ internal sealed class RuntimeApi : IGitHubApi
     public string Source { get; private set; } = "Original";
     public JsonObject Pr { get; private set; } = new();
     public JsonArray Comments { get; } = new();
+    public JsonArray Reviews { get; } = new();
+    public JsonArray InlineComments { get; } = new();
+    public JsonObject SignalRun { get; set; } = new();
+    public JsonObject SignalWorkflow { get; set; } = new() { ["id"] = 99, ["path"] = ".github/workflows/devbook-improvement-feedback.yml" };
     public int Commits { get; private set; }
     public int PrCreates { get; private set; }
     public int DraftConversions { get; private set; }
@@ -58,7 +62,6 @@ internal sealed class RuntimeApi : IGitHubApi
     public int Acknowledgments { get; private set; }
     public Dictionary<string, string> SourceFiles { get; } = new(StringComparer.Ordinal);
     public Dictionary<string, string> BaseSourceFiles { get; } = new(StringComparer.Ordinal);
-    public bool FailPrCreateOnce { get; set; }
     private bool branchExists;
     private readonly Dictionary<string, string> blobs = new();
     private string pendingContent = "";
@@ -70,7 +73,10 @@ internal sealed class RuntimeApi : IGitHubApi
         Source = source;
         Pr = new JsonObject
         {
-            ["number"] = 1, ["node_id"] = "PR_fixture", ["state"] = "open", ["draft"] = true,
+            ["number"] = 1,
+            ["node_id"] = "PR_fixture",
+            ["state"] = "open",
+            ["draft"] = true,
             ["body"] = Runtime.Marker(topic, 1),
             ["head"] = new JsonObject { ["ref"] = Runtime.ExpectedManagedBranch(topic, 1), ["sha"] = Head, ["repo"] = new JsonObject { ["full_name"] = Repo } },
             ["base"] = new JsonObject { ["ref"] = BaseBranch, ["sha"] = "base", ["repo"] = new JsonObject { ["full_name"] = Repo } }
@@ -81,7 +87,10 @@ internal sealed class RuntimeApi : IGitHubApi
     {
         JsonObject data = payload as JsonObject ?? new JsonObject();
         JsonNode? result;
-        if (method == "GET" && path.StartsWith("/git/ref/heads/", StringComparison.Ordinal))
+        if (method == "GET" && path.StartsWith("/actions/workflows/", StringComparison.Ordinal)) result = SignalWorkflow.Copy();
+        else if (method == "GET" && path.StartsWith("/actions/runs/", StringComparison.Ordinal)) result = SignalRun.Copy();
+        else if (method == "GET" && path.StartsWith("/issues/comments/", StringComparison.Ordinal)) result = Comments.OfType<JsonObject>().Single(comment => path.EndsWith("/" + comment.Int("id"), StringComparison.Ordinal)).Copy();
+        else if (method == "GET" && path.StartsWith("/git/ref/heads/", StringComparison.Ordinal))
         {
             string branch = Uri.UnescapeDataString(path["/git/ref/heads/".Length..]);
             if (branch != BaseBranch && !branchExists)
@@ -144,11 +153,6 @@ internal sealed class RuntimeApi : IGitHubApi
         }
         else if (method == "POST" && path == "/pulls")
         {
-            if (FailPrCreateOnce)
-            {
-                FailPrCreateOnce = false;
-                throw new RuntimeFailure("Ambiguous fixture failure before PR creation.");
-            }
             PrCreates++;
             Pr = new JsonObject
             {
@@ -187,13 +191,13 @@ internal sealed class RuntimeApi : IGitHubApi
         }
         else if (method == "GET" && (path.StartsWith("/pulls/1/comments?", StringComparison.Ordinal) || path.StartsWith("/pulls/1/reviews?", StringComparison.Ordinal)))
         {
-            result = new JsonArray();
+            result = path.Contains("/reviews?", StringComparison.Ordinal) ? Reviews.Copy() : InlineComments.Copy();
         }
         else
         {
             throw new InvalidOperationException($"Unexpected fixture request: {method} {path}");
         }
-        return Task.FromResult<JsonNode?>(result);
+        return Task.FromResult(result is null ? null : JsonNode.Parse(result.ToJsonString()));
     }
 
     public Task<JsonNode?> GraphqlAsync(string query, JsonObject variables, CancellationToken cancellationToken = default)

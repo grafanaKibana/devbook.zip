@@ -6,6 +6,57 @@ namespace DevBook.Tooling.Improvement;
 
 public sealed partial class ImprovementEngine
 {
+    private int FeedbackPr => config.Int("feedback_pr");
+
+    private bool FeedbackBatchMatches(JsonObject batch) => batch.Obj("pr").Int("number") == FeedbackPr && batch.Arr("feedback").Count > 0;
+
+    private bool FeedbackOperationMatches(JsonObject operation)
+    {
+        if (FeedbackPr == 0) return true;
+        if (operation.Int("pr_number", operation.Obj("evidence").Int("pr_number")) != FeedbackPr) return false;
+        JsonObject export = operation.Obj("evidence").Obj("export_request");
+        if (export.Count > 0 && export.Int("pr_number") != FeedbackPr) return false;
+        JsonArray records = WorkloadReceipts.Records(operation.Obj("receipts"));
+        return records.Count > 0 && records.OfType<JsonObject>().All(record => FeedbackBatchMatches(record.Obj("batch")));
+    }
+
+    private static bool CanParkPublishedProposal(JsonObject state, JsonObject pending)
+    {
+        JsonObject saved = state.Obj("focused_workload");
+        string[] paths = pending.Obj("source_hashes").Select(pair => pair.Key).ToArray();
+        return saved.Str("status") == "published" && pending.Str("workload_id").Length > 0
+            && pending.Str("workload_id") == saved.Str("id") && pending.Arr("feedback_keys").Count == 0
+            && paths.Length == 1 && Queue.OpenPrForTopic(state, Core.TopicFor(paths[0])) is not null;
+    }
+
+    private JsonObject? FeedbackScopePause(JsonObject state)
+    {
+        if (FeedbackPr == 0) return null;
+        string reason = "";
+        JsonObject saved = state.Obj("focused_workload");
+        bool resumable = saved.Str("status") == "active" || saved.Str("status") == "sealed" && saved.Arr("accepted_records").Count > 0;
+        bool matching = (saved.Int("feedback_pr") == FeedbackPr
+                || FeedbackBatchMatches(state.Obj("feedback_workloads").Obj(saved.Str("feedback_scope_id"))))
+            && saved.Arr("accepted_records").OfType<JsonObject>().All(record => FeedbackBatchMatches(record.Obj("batch")))
+            && (saved.Obj("current_batch").Count == 0 || FeedbackBatchMatches(saved.Obj("current_batch")));
+        if (resumable && !matching) reason = "Finish the saved ordinary or other-PR workload before processing this feedback.";
+        JsonObject pending = state.Obj("pending_author_proposal");
+        if (pending.Count > 0 && !FeedbackBatchMatches(pending.Obj("batch")) && !CanParkPublishedProposal(state, pending))
+            reason = "An unrelated author proposal is awaiting recovery; it was preserved.";
+        if (state["pending_operation"] is JsonObject operation && !FeedbackOperationMatches(operation)) reason = "An unrelated publication is awaiting recovery; it was preserved.";
+        if (state.Obj("export_operations").Any(pair => pair.Value is JsonObject export
+            && export.Int("pr_number", export.Obj("evidence").Int("pr_number")) == FeedbackPr
+            && state.Obj("finalized_exports")[pair.Key] is null && !FeedbackOperationMatches(export)))
+            reason = "Finish the PR's saved ordinary export before processing new feedback.";
+        return reason.Length == 0 ? null : new JsonObject
+        {
+            ["status"] = "feedback_paused",
+            ["reason"] = reason,
+            ["feedback_pr"] = FeedbackPr,
+            ["model_calls"] = 0
+        };
+    }
+
     private JsonObject PrepareFeedbackBatch(JsonObject state, JsonObject batch, JsonArray notes)
     {
         if (batch.Arr("feedback").Count == 0) return batch;
@@ -16,13 +67,20 @@ public sealed partial class ImprovementEngine
         string head = batch.Obj("pr").Str("head_sha");
         JsonObject sourceHashes = ObjectMap(notes.OfType<JsonObject>().Where(note => paths.Contains(note.Str("path")))
             .ToDictionary(note => note.Str("path"), note => LegacyIdentity.Digest(note.Str("content"))));
-        var identity = new JsonObject { ["feedback"] = feedback.Copy(), ["head_sha"] = head, ["source_hashes"] = sourceHashes.Copy(),
-            ["rules_hash"] = batch.Str("rules_hash"), ["evaluation_hash"] = batch.Str("evaluation_hash") };
+        var identity = new JsonObject
+        {
+            ["feedback"] = feedback.Copy(),
+            ["head_sha"] = head,
+            ["source_hashes"] = sourceHashes.Copy(),
+            ["rules_hash"] = batch.Str("rules_hash"),
+            ["evaluation_hash"] = batch.Str("evaluation_hash")
+        };
         string id = LegacyIdentity.Fingerprint(identity);
         JsonObject scopes = EnsureObject(state, "feedback_workloads");
         foreach ((string oldId, JsonNode? value) in scopes.ToArray())
         {
-            if (oldId != id && value is JsonObject old && old.Str("topic") == batch.Str("topic") && old.Str("status") == "pending")
+            if (oldId != id && value is JsonObject old && old.Str("topic") == batch.Str("topic") && old.Str("status") == "pending"
+                && (FeedbackPr == 0 || old.Obj("pr").Int("number") == FeedbackPr))
             {
                 old["status"] = "invalidated";
                 old["invalidated_reason"] = "feedback revision, guarded head or evaluation inputs changed";
@@ -30,9 +88,14 @@ public sealed partial class ImprovementEngine
         }
         JsonObject scope = scopes[id] as JsonObject ?? new JsonObject
         {
-            ["id"] = id, ["topic"] = batch.Str("topic"), ["status"] = "pending", ["head_sha"] = head,
-            ["feedback"] = feedback.Copy(), ["paths"] = Copies(paths.Select(path => JsonValue.Create(path))),
-            ["pr"] = batch.Obj("pr").Copy(), ["records"] = new JsonObject(),
+            ["id"] = id,
+            ["topic"] = batch.Str("topic"),
+            ["status"] = "pending",
+            ["head_sha"] = head,
+            ["feedback"] = feedback.Copy(),
+            ["paths"] = Copies(paths.Select(path => JsonValue.Create(path))),
+            ["pr"] = batch.Obj("pr").Copy(),
+            ["records"] = new JsonObject(),
             ["source_hashes"] = sourceHashes.Copy()
         };
         if (!scopes.ContainsKey(id)) scopes[id] = scope;
@@ -163,7 +226,8 @@ public sealed partial class ImprovementEngine
     {
         JsonObject state = await InitialStateAsync(cancellationToken);
         foreach (JsonObject scope in state.Obj("feedback_workloads").Select(pair => pair.Value).OfType<JsonObject>()
-            .Where(scope => scope.Str("status") == "completed" && scope.Bool("ack_pending")))
+            .Where(scope => scope.Str("status") == "completed" && scope.Bool("ack_pending")
+                && (FeedbackPr == 0 || scope.Obj("pr").Int("number") == FeedbackPr)))
         {
             var results = new JsonArray();
             foreach (JsonObject feedback in scope.Arr("feedback").OfType<JsonObject>())
@@ -188,7 +252,9 @@ public sealed partial class ImprovementEngine
 
     private JsonObject FeedbackResult(string status) => new()
     {
-        ["status"] = status, ["coverage"] = Coverage(), ["model_calls"] = workload?.Int("calls_reserved") ?? modelCalls,
+        ["status"] = status,
+        ["coverage"] = Coverage(),
+        ["model_calls"] = workload?.Int("calls_reserved") ?? modelCalls,
         ["stop_reason"] = workload?.Str("stop_reason")
     };
 }

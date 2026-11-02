@@ -171,7 +171,6 @@ public sealed class RecoveryTests
     private sealed class RecoveryBranchConflictNoteFiles : IDisposable
     {
         public string Root { get; } = Path.Combine(Path.GetTempPath(), "recovery-topic-" + Guid.NewGuid().ToString("N"));
-        public bool IncludeLater { get; set; }
 
         public RecoveryBranchConflictNoteFiles()
         {
@@ -183,50 +182,18 @@ public sealed class RecoveryTests
             }
         }
 
-        public JsonArray Notes()
-        {
-            var notes = new JsonArray(DomainFixtures.NoteRecord(RecoveryBranchConflictTopicPath, RecoveryBranchConflictSource), DomainFixtures.NoteRecord(RecoveryBranchConflictOtherPath, RecoveryBranchConflictSource));
-            if (IncludeLater)
-            {
-                notes.Add(DomainFixtures.NoteRecord(RecoveryBranchConflictLaterPath, RecoveryBranchConflictSource));
-            }
-            return notes;
-        }
         public void Dispose() => Directory.Delete(Root, recursive: true);
-    }
-
-    private sealed class RecoveryBranchConflictKeepModel : IModelProvider
-    {
-        public List<string> Paths { get; } = [];
-
-        public Task<JsonObject> AuthorAsync(JsonObject payload, CancellationToken cancellationToken = default)
-        {
-            string[] paths = payload.RequiredObject("notes").Select(item => item.Key).ToArray();
-            Paths.AddRange(paths);
-            return Task.FromResult(new JsonObject
-            {
-                ["version"] = 1,
-                ["edits"] = new JsonArray(),
-                ["dispositions"] = new JsonArray(paths.Select(path => (JsonNode)new JsonObject { ["path"] = path, ["outcome"] = "keep", ["reason"] = "No worthwhile changes." }).ToArray()),
-                ["feedback"] = new JsonArray()
-            });
-        }
-
-        public Task<JsonObject> ReviewAsync(JsonObject payload, CancellationToken cancellationToken = default) =>
-            Task.FromResult(DomainFixtures.UnchangedReview(payload));
     }
 
     private sealed class RecoveryBranchConflictRecoveryApi : IGitHubApi
     {
         public string Repo => "owner/repo";
         public string Head { get; set; } = "owner-head";
-        public string OwnerSource => "Owner's concurrent note edit.";
         public bool Missing { get; init; }
         public bool ReadFailure { get; init; }
         public bool HasPr { get; init; }
         public bool Draft { get; set; } = true;
         public bool InterruptPrUpdate { get; init; }
-        public bool PrClosed { get; set; }
         public int Writes { get; private set; }
         public int BranchWrites { get; private set; }
         public List<string> Paths { get; } = [];
@@ -234,7 +201,7 @@ public sealed class RecoveryTests
         private JsonObject RecoveryBranchConflictPr() => new()
         {
             ["number"] = 7,
-            ["state"] = PrClosed ? "closed" : "open",
+            ["state"] = "open",
             ["draft"] = Draft,
             ["body"] = Runtime.Marker(RecoveryBranchConflictTopic, 1),
             ["head"] = new JsonObject { ["ref"] = RecoveryBranchConflictBranch, ["sha"] = Head, ["repo"] = new JsonObject { ["full_name"] = Repo } },
@@ -358,6 +325,40 @@ public sealed class RecoveryTests
 
         public Task<JsonNode?> GraphqlAsync(string query, JsonObject variables, CancellationToken cancellationToken = default) =>
             Inner.GraphqlAsync(query, variables, cancellationToken);
+    }
+
+    [Theory]
+    [InlineData("focused_workload")]
+    [InlineData("pending_operation")]
+    public async Task FeedbackEntryPreservesUnrelatedUnfinishedWorkBeforeAnyRecovery(string savedWork)
+    {
+        // Arrange
+        using var fixture = new WorkloadFixture(1);
+        fixture.Config["feedback_pr"] = 1;
+        var api = new RuntimeApi();
+        api.SeedManagedPr(Core.TopicId("Programming"), fixture.Notes[0]!.Str("content"));
+        api.Comments.Add(RuntimeFixtures.OwnerComment());
+        JsonObject state = Core.NewState();
+        state[savedWork] = savedWork == "focused_workload"
+            ? new JsonObject { ["id"] = "ordinary", ["status"] = "active", ["accepted_records"] = new JsonArray(new JsonObject { ["audit"] = "accepted ordinary content" }) }
+            : new JsonObject { ["op_id"] = "unrelated", ["pr_number"] = 2, ["phase"] = "prepared", ["candidate"] = new JsonObject { [DomainFixtures.Path] = "preserved" } };
+        var store = new MemoryStateStore(state);
+        var publisher = new GitHubRuntime(api, store, activation: () => { });
+        var engine = new ImprovementEngine(fixture.Root, fixture.Config, store, fixture.Model, api: api, publisher: publisher,
+            notesLoader: () => fixture.Notes.Copy(), clock: fixture.Clock, snapshotShaLoader: () => "base");
+
+        // Act
+        JsonObject result = await engine.RunAsync(apply: true, withModel: true);
+        JsonObject saved = (await store.ReadAsync()).State;
+
+        // Assert
+        result.Str("status").Should().Be("feedback_paused");
+        result.Int("model_calls").Should().Be(0);
+        JsonNode.DeepEquals(saved, state).Should().BeTrue();
+        fixture.Model.Authors.Should().BeEmpty();
+        fixture.Model.Reviews.Should().BeEmpty();
+        api.Commits.Should().Be(0);
+        api.Acknowledgments.Should().Be(0);
     }
 
 }

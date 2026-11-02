@@ -12,9 +12,12 @@ public static class WorkloadReceipts
         {
             records.Add(new JsonObject
             {
-                ["batch"] = receipt["batch"]!.DeepClone(), ["proposal"] = receipt["proposal"]!.DeepClone(),
-                ["result"] = receipt["result"]!.DeepClone(), ["review"] = receipt["review"]?.DeepClone(),
-                ["review_evidence"] = receipt["review_evidence"]?.DeepClone(), ["decisions"] = receipt.Arr("decisions").Copy()
+                ["batch"] = receipt["batch"]!.DeepClone(),
+                ["proposal"] = receipt["proposal"]!.DeepClone(),
+                ["result"] = receipt["result"]!.DeepClone(),
+                ["review"] = receipt["review"]?.DeepClone(),
+                ["review_evidence"] = receipt["review_evidence"]?.DeepClone(),
+                ["decisions"] = receipt.Arr("decisions").Copy()
             });
         }
         foreach (JsonObject record in records.OfType<JsonObject>())
@@ -29,7 +32,8 @@ public static class WorkloadReceipts
     public static JsonObject Apply(JsonObject state, JsonObject receipt)
     {
         JsonObject applied = state.Obj("finalized_note_records").Copy();
-        foreach (JsonObject record in Records(receipt).OfType<JsonObject>())
+        JsonArray records = Records(receipt);
+        foreach (JsonObject record in records.OfType<JsonObject>())
         {
             string id = record.Str("record_id");
             if (applied.Bool(id)) continue;
@@ -50,7 +54,7 @@ public static class WorkloadReceipts
         }
         JsonObject pending = state.Obj("pending_author_proposal");
         bool owned = receipt.Str("workload_id").Length > 0
-            ? pending.Str("workload_id") == receipt.Str("workload_id") && Records(receipt).OfType<JsonObject>().Any(record => JsonNode.DeepEquals(record["proposal"], pending["proposal"]))
+            ? pending.Str("workload_id") == receipt.Str("workload_id") && records.OfType<JsonObject>().Any(record => JsonNode.DeepEquals(record["proposal"], pending["proposal"]))
             : pending.Str("topic_id") == receipt.Str("topic_id") && JsonNode.DeepEquals(pending["proposal"], receipt["proposal"]);
         if (owned) state.Remove("pending_author_proposal");
         return state;

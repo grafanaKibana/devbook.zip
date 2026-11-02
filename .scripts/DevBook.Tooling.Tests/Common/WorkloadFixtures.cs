@@ -39,6 +39,7 @@ internal sealed class WorkloadModel : IModelProvider
     public Func<int, CancellationToken, Task>? BeforeReview { get; set; }
     public bool MultipleEdits { get; set; }
     public Func<int, string>? ChangedCard { get; set; }
+    public Action<JsonObject>? ConfigureEdit { get; set; }
 
     public async Task<JsonObject> AuthorAsync(JsonObject payload, CancellationToken cancellationToken = default)
     {
@@ -58,6 +59,7 @@ internal sealed class WorkloadModel : IModelProvider
                 edit["after"] = edit.Str("after").Replace("stable_1", "stable_" + LegacyIdentity.Digest(path)[..8]);
                 edit["expected_hash"] = payload.RequiredObject("note_hashes").Str(path);
                 edit["feedback_keys"] = new JsonArray(payload.Arr("feedback").OfType<JsonObject>().Select(item => (JsonNode)JsonValue.Create(item.Str("key"))!).ToArray());
+                ConfigureEdit?.Invoke(edit);
                 edits.Add(edit);
                 if (MultipleEdits)
                 {
@@ -70,11 +72,18 @@ internal sealed class WorkloadModel : IModelProvider
             }
             dispositions.Add(new JsonObject { ["path"] = path, ["outcome"] = change ? "changed" : "keep", ["reason"] = change ? "Restore the mechanism." : "The complete note remains useful." });
         }
-        return new JsonObject { ["version"] = 1, ["edits"] = edits, ["dispositions"] = dispositions,
+        return new JsonObject
+        {
+            ["version"] = 1,
+            ["edits"] = edits,
+            ["dispositions"] = dispositions,
             ["feedback"] = new JsonArray(payload.Arr("feedback").OfType<JsonObject>().Select(item => (JsonNode)new JsonObject
             {
-                ["key"] = item.Str("key"), ["outcome"] = change ? "implemented" : "keep", ["reason"] = "The complete scoped note was independently reviewed."
-            }).ToArray()) };
+                ["key"] = item.Str("key"),
+                ["outcome"] = change ? "implemented" : "keep",
+                ["reason"] = "The complete scoped note was independently reviewed."
+            }).ToArray())
+        };
     }
 
     public async Task<JsonObject> ReviewAsync(JsonObject payload, CancellationToken cancellationToken = default)
@@ -84,6 +93,10 @@ internal sealed class WorkloadModel : IModelProvider
         JsonObject review = DomainFixtures.UnchangedReview(payload);
         if (payload.Obj("proposal").Arr("edits").Count != 0)
             foreach (JsonObject note in review.Arr("notes").OfType<JsonObject>()) note["target_resolution"] = "RESOLVED";
+        foreach (JsonObject note in review.Arr("notes").OfType<JsonObject>())
+            note["source_checks"] = new JsonArray(payload.Obj("proposal").Arr("edits").OfType<JsonObject>().Where(edit => edit.Str("path") == note.Str("path"))
+                .SelectMany(edit => edit.Arr("sources").OfType<JsonObject>()).Select(source => (JsonNode)new JsonObject
+                { ["url"] = source.Str("url"), ["claim"] = source.Str("claim"), ["result"] = "SUPPORTED", ["reason"] = "Fixture evidence supports the corrected boundary." }).ToArray());
         return review;
     }
 }

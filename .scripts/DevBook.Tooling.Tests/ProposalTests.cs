@@ -82,7 +82,8 @@ public sealed class ProposalTests
             JsonObject proposal = DomainFixtures.Proposal(DomainFixtures.Edit());
             JsonObject review = DomainFixtures.UnchangedReview(new JsonObject
             {
-                ["current"] = new JsonObject { [DomainFixtures.Path] = DomainFixtures.Note }, ["proposal"] = proposal
+                ["current"] = new JsonObject { [DomainFixtures.Path] = DomainFixtures.Note },
+                ["proposal"] = proposal
             });
             review.Arr("notes")[0]!["target_resolution"] = "RESOLVED";
             JsonArray checks = review.Arr("change_checks");
@@ -115,7 +116,9 @@ public sealed class ProposalTests
             ["result"] = new JsonObject(),
             ["decisions"] = new JsonArray(new JsonObject
             {
-                ["decision"] = "reconsider", ["fingerprint"] = "rejected-edit", ["feedback_key"] = "verified-owner-revision"
+                ["decision"] = "reconsider",
+                ["fingerprint"] = "rejected-edit",
+                ["feedback_key"] = "verified-owner-revision"
             })
         };
 
@@ -129,45 +132,15 @@ public sealed class ProposalTests
     }
 
     [Fact]
-    public void ProseEditCanUseAnExistingOwningNoteReference()
+    public void SourceMustAppearInTheRequiredVisibleContext()
     {
         // Arrange
         const string url = "https://example.com/mechanism";
-        const string before = "The operating idea has a concrete boundary.";
-        string source = DomainFixtures.Note + "\n# References\n\n- [Mechanism](" + url + ")\n";
+        string source = DomainFixtures.Note;
         JsonObject edit = DomainFixtures.Edit("note");
         edit["expected_hash"] = LegacyIdentity.Digest(source);
-        edit["before"] = before;
+        edit["before"] = "The operating idea has a concrete boundary.";
         edit["after"] = "The operating idea explains the corrected boundary.";
-        edit["sources"] = new JsonArray(new JsonObject
-        {
-            ["url"] = url,
-            ["claim"] = "The mechanism has the corrected boundary.",
-            ["version"] = "not version-specific"
-        });
-        var sources = new Dictionary<string, string> { [DomainFixtures.Path] = source };
-
-        // Act
-        JsonObject result = Proposal.Apply(sources, DomainFixtures.Proposal(edit));
-
-        // Assert
-        result.Obj("sources").Str(DomainFixtures.Path).Should().Contain(edit.Str("after")).And.Contain(url);
-    }
-
-    [Theory]
-    [InlineData("note")]
-    public void SourceMustAppearInTheRequiredVisibleContext(string kind)
-    {
-        // Arrange
-        const string url = "https://example.com/mechanism";
-        string source = DomainFixtures.Note + (kind == "rewrite" ? "\n# References\n\n- [Mechanism](" + url + ")\n" : "");
-        JsonObject edit = DomainFixtures.Edit(kind);
-        edit["expected_hash"] = LegacyIdentity.Digest(source);
-        if (kind == "note")
-        {
-            edit["before"] = "The operating idea has a concrete boundary.";
-            edit["after"] = "The operating idea explains the corrected boundary.";
-        }
         edit["sources"] = new JsonArray(new JsonObject
         {
             ["url"] = url,
