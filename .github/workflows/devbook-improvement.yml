@@ -33,7 +33,7 @@ permissions:
 
 # Covers source work, rendering, and publication; never cancel an in-flight write.
 concurrency:
-  group: devbook-improvement
+  group: devbook-improvement-focused-test-20261102
   cancel-in-progress: false
 
 jobs:
