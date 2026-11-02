@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "repo": "grafanaKibana/devbook.zip",
-  "base_branch": "main",
-  "state_branch": "maintenance/devbook-improvement-state",
+  "base_branch": "feature/devbook-improvement-repair-test-20261102",
+  "state_branch": "maintenance/devbook-improvement-repair-test-20261102-state",
   "model": "claude-sonnet-5-5",
   "claude_code_version": "2.1.285",
   "model_timeout_seconds": 900,
@@ -71,5 +71,6 @@
       "Vault/Templates/Blocks/Template - Callout.md"
     ]
   },
-  "automatic_export": true
+  "automatic_export": true,
+  "initial_generation": 1813201
 }
