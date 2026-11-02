@@ -11,7 +11,7 @@ qard-deck: "AI & ML"
 qard-topic: "LLM/Loop Engineering/Loop Engineering"
 flashcard_uid: "3d544ed9"
 created: "2026-07-13T18:58:50.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-02T11:42:14.050Z"
 ---
 
 Loop engineering designs the runtime around repeated model calls. It controls the observe → decide → act cycle, defines when work is finished, checks progress between steps, and hands uncertain decisions to a person.
@@ -64,7 +64,7 @@ Each iteration adds calls and results to the history. Without intervention, cont
 > - **Why it matters:** budget exhaustion is not success. If partial output is presented as a final answer or silently truncated, callers treat unfinished work as done and the failure stays hidden.
 > - **What follows:** where the application configures it, the partial state and the unresolved work pass to a continuation run or to a person. Otherwise the run ends with an explicit error.
 > 
-> Platform behavior differs. The OpenAI Agents SDK treats reaching `max_turns` as an error condition and supports a handler for that case. With Anthropic task budgets, a task that exceeds its budget can end with a partial result.
+> Platform behavior differs. The OpenAI Agents SDK treats reaching `max_turns` as an error condition and supports a handler for that case. Anthropic task budgets (beta, `task-budgets-2026-03-13`) are advisory: the model paces itself against a token countdown, and the API does not stop it at the budget. A hard cap needs `max_tokens` per request plus the runtime's own iteration or token limit.
 >
 > Sources: [OpenAI Agents SDK: Running agents](https://openai.github.io/openai-agents-python/running_agents/) · [Anthropic task budgets](https://platform.claude.com/docs/en/build-with-claude/task-budgets)
 
