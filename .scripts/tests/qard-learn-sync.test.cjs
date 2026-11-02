@@ -1,8 +1,44 @@
 'use strict';
 
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
 const test = require('node:test');
 const { inspectCourse, reconcileCourse, renameSourcePath, sourceSnapshot } = require('../qard-learn-sync/core.cjs');
+
+test('vault card sources belong to their subject Learn course and all objective sources resolve', async () => {
+  const vault = path.resolve(__dirname, '../../Vault');
+  const coursesDirectory = path.join(vault, 'Assets/Qard/Courses');
+  const sourcesBySubject = new Map();
+  for (const file of fs.readdirSync(coursesDirectory).filter(file => file.endsWith('.md'))) {
+    // The production parser also validates unique IDs and an acyclic prerequisite graph.
+    const course = inspectCourse(fs.readFileSync(path.join(coursesDirectory, file), 'utf8'));
+    assert.ok(!sourcesBySubject.has(course.course), `Duplicate course: ${course.course}`);
+    const sources = new Set();
+    for (const objective of course.rows) {
+      assert.ok(objective.notes.length <= 4, `${file}: ${objective.id} exceeds Learn's four-source context limit`);
+      for (const source of objective.notes) {
+        const relative = source.replace(/\.md$/, '') + '.md';
+        assert.ok(relative.startsWith(`Home/${course.course}/`), `${file}: source outside subject: ${source}`);
+        assert.ok(fs.existsSync(path.join(vault, relative)), `${file}: unresolved source: ${source}`);
+        sources.add(relative);
+      }
+    }
+    sourcesBySubject.set(course.course, sources);
+  }
+  const missing = [];
+  let cardSources = 0;
+  for (const relative of fs.readdirSync(path.join(vault, 'Home'), { recursive: true }).filter(file => file.endsWith('.md'))) {
+    const source = `Home/${relative.split(path.sep).join('/')}`;
+    const snapshot = await sourceSnapshot(fs.readFileSync(path.join(vault, source), 'utf8'));
+    if (!snapshot.cards) continue;
+    cardSources++;
+    const subject = source.split('/')[1];
+    if (!sourcesBySubject.get(subject)?.has(source)) missing.push(source);
+  }
+  assert.ok(cardSources > 0, 'Expected real vault card sources');
+  assert.deepEqual(missing, [], 'Card-owning notes missing their subject Learn source association');
+});
 
 const DAY = '2026-10-31';
 const source = (letter, cards = 1) => ({ revision: letter.repeat(64), cards });
