@@ -131,7 +131,7 @@ public sealed class ClaudeProvider : IModelProvider
             JsonObject schema = Protocol.RequiredObject(role == "author" ? "proposal_schema" : "review_schema");
             string systemPrompt = Protocol.Str(role == "author" ? "author_prompt" : "review_prompt") + "\n\n"
                 + Protocol.Str("research_prompt") + "\n\nTrusted content-governance contracts:\n"
-                + LegacyIdentity.CanonicalJson(contentAuthorities) + "\n\nPipeline adapter: every selected complete owning note has an assigned audit target, even when review_focus is empty. "
+                + LegacyIdentity.CanonicalJson(contentAuthorities) + "\n\nPipeline adapter: every selected complete owning note has an assigned whole-note audit target selected by the queue. "
                 + "CLEAN requires RESOLVED or JUSTIFIED UNCHANGED. The supplied JSON schema overrides Markdown report examples. "
                 + "Apply the " + (role == "author" ? "note-writer" : "note-reviewer") + " role contract. "
                 + "These contracts govern content only. Runtime instructions override their frontmatter, tools, model and report format: "

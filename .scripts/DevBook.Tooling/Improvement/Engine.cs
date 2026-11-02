@@ -32,6 +32,10 @@ public sealed partial class ImprovementEngine
     {
         this.root = Path.GetFullPath(root);
         this.config = config.Copy();
+        if (config.ContainsKey("target_note") || config.ContainsKey("review_focus"))
+        {
+            throw new ArgumentException("Manual note targeting is not supported; every run uses the improvement queue.");
+        }
         this.contentAuthorities = contentAuthorities?.Copy() ?? Core.LoadContentAuthorities(this.root);
         _ = Core.RulesVersion(this.contentAuthorities);
         this.store = store;
@@ -227,13 +231,17 @@ public sealed partial class ImprovementEngine
             JsonObject currentHashes = ObjectMap(notes.OfType<JsonObject>().Where(note => savedPaths.Contains(note.Str("path")))
                 .ToDictionary(note => note.Str("path"), note => LegacyIdentity.Digest(note.Str("content"))));
             JsonObject currentRepair = RepairInputsFor(notes.OfType<JsonObject>().Where(note => savedPaths.Contains(note.Str("path"))));
-            if (saved.Str("evaluation_hash") != evaluation || saved.Str("rules_hash") != rules
+            if (saved.Str("target_note").Length != 0 || saved.Str("review_focus").Length != 0
+                || savedPaths.Any(path => saved.Str("topic_id") != Core.TopicId(Core.TopicFor(path)))
+                || saved.Str("evaluation_hash") != evaluation || saved.Str("rules_hash") != rules
                 || !JsonNode.DeepEquals(saved["repair_inputs"], currentRepair) || !JsonNode.DeepEquals(saved["source_hashes"], currentHashes))
             {
                 HoldIncompatiblePending(state, saved, saved.Str("evaluation_hash") != evaluation ? "evaluation_changed" : "inputs_changed");
             }
         }
         HashSet<string> paused = state.Obj("prs").Select(item => item.Value).OfType<JsonObject>().Where(pr => pr.Str("status") == "open" && pr.Bool("base_conflict")).Select(pr => pr.Str("topic_id")).ToHashSet();
+        paused.UnionWith(state.Obj("prs").Select(item => item.Value).OfType<JsonObject>().Where(pr => pr.Str("status") == "open")
+            .SelectMany(pr => pr.Arr("blocked_topic_ids").Strings()));
         paused.UnionWith(state.Obj("topics").Where(item => item.Value.Obj("publication_conflict").Int("generation", -1) == item.Value.Int("generation", 0)).Select(item => item.Key));
         HashSet<string> heldPaths = notes.OfType<JsonObject>().Where(note => Held(state, note, rules)).Select(note => note.Str("path")).ToHashSet();
         JsonArray allNotes = notes.Copy();
@@ -277,21 +285,12 @@ public sealed partial class ImprovementEngine
             }
         }
 
-        (selectionState, notes) = ManualSelection.Apply(selectionState, notes, config);
         JsonObject? batch = Queue.SelectBatch(selectionState, notes, rules, config);
         await SaveAsync(state, "reconcile maintenance queue", cancellationToken);
         if (batch is null)
         {
             return new JsonObject { ["status"] = paused.Count == 0 ? "no_changes" : "topics_paused", ["paused_topics"] = Copies(paused.Order().Select(value => JsonValue.Create(value))), ["model_calls"] = 0 };
         }
-        if (config.Str("target_note").Length != 0)
-        {
-            foreach (JsonObject note in batch.Arr("notes").OfType<JsonObject>())
-            {
-                note["selection_reason"] = "manual_recheck";
-            }
-        }
-
         if (batch.Arr("notes").Count == 0 && batch.Arr("feedback").Count != 0)
         {
             return new JsonObject { ["status"] = "feedback_needs_scope", ["batch"] = batch, ["model_calls"] = 0 };
@@ -317,7 +316,7 @@ public sealed partial class ImprovementEngine
             new KeyValuePair<string, JsonNode?>(note.Str("path"), note.Arr("needs_fixing_ids").Copy())));
         JsonObject pending = state.Obj("pending_author_proposal");
         bool compatible = JsonNode.DeepEquals(pending["source_hashes"], hashes) && JsonNode.DeepEquals(pending["feedback_keys"], keys) && pending.Str("rules_hash") == rules
-            && pending.Str("target_note") == config.Str("target_note") && pending.Str("review_focus") == config.Str("review_focus")
+            && pending.Str("topic_id") == batch.Str("topic_id") && pending.Str("target_note").Length == 0 && pending.Str("review_focus").Length == 0
             && pending.Str("evaluation_hash") == evaluation && JsonNode.DeepEquals(pending["repair_inputs"], repairInputs);
         JsonObject proposal;
         if (compatible)
@@ -346,7 +345,10 @@ public sealed partial class ImprovementEngine
                 return entry;
             }));
             var nearby = new JsonArray();
-            foreach (JsonObject note in notes.OfType<JsonObject>().Where(note => note.Str("topic") == batch.Str("topic") && !selected.ContainsKey(note.Str("path"))))
+            HashSet<string?> selectedFolders = selected.Keys.Select(Path.GetDirectoryName).ToHashSet();
+            foreach (JsonObject note in notes.OfType<JsonObject>()
+                .Where(note => !selected.ContainsKey(note.Str("path")) && selectedFolders.Contains(Path.GetDirectoryName(note.Str("path"))))
+                .OrderBy(note => note.Str("path"), StringComparer.Ordinal).Take(config.Int("max_notes_per_run", 4)))
             {
                 nearby.Add(new JsonObject { ["path"] = note.Str("path"), ["cards"] = Copies(Proposal.QardSpans(note.Str("content")).Select(span => JsonValue.Create(span.Text))) });
             }
@@ -360,7 +362,6 @@ public sealed partial class ImprovementEngine
                     ["note_hashes"] = hashes.Copy(),
                     ["known_violations"] = knownViolations.Copy(),
                     ["needs_fixing_ids"] = needsFixing.Copy(),
-                    ["review_focus"] = config.Str("review_focus"),
                     ["feedback"] = batch.Arr("feedback").Copy(),
                     ["rules"] = rulesText,
                     ["rejected_proposals"] = state.Arr("rejections").Copy(),
@@ -383,8 +384,6 @@ public sealed partial class ImprovementEngine
                 ["rules_hash"] = rules,
                 ["evaluation_hash"] = evaluation,
                 ["repair_inputs"] = repairInputs.Copy(),
-                ["target_note"] = config.Str("target_note"),
-                ["review_focus"] = config.Str("review_focus"),
                 ["prepared_source_version"] = 1,
                 ["prepared_at"] = Core.FormatTime(clock.GetUtcNow())
             };
@@ -473,7 +472,6 @@ public sealed partial class ImprovementEngine
                 ["proposal"] = proposal.Copy(),
                 ["edit_indices"] = new JsonArray(Enumerable.Range(0, proposal.Arr("edits").Count).Select(index => (JsonNode?)JsonValue.Create(index)).ToArray()),
                 ["needs_fixing_ids"] = needsFixing.Copy(),
-                ["review_focus"] = config.Str("review_focus"),
                 ["known_violations"] = knownViolations.Copy(),
                 ["primary_sources"] = fetched,
                 ["rejected_proposals"] = state.Arr("rejections").Copy(),

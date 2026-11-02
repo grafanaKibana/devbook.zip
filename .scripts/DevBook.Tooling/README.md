@@ -36,7 +36,7 @@ Use the workflow's pinned compatible bundle when the installed app differs. Host
 ## Selection and review
 
 1. Reconcile state, topic PRs and verified-owner feedback. Complete scoped feedback goes first.
-2. Prioritize eligible whole notes containing active **Needs fixing** Qard cards, then other eligible notes. A topic is the note's parent directory relative to `Vault/Home`; generated and dashboard pages are excluded by default.
+2. Prioritize eligible whole notes containing active **Needs fixing** Qard cards, then other eligible notes. A topic is the first folder below `Vault/Home`, such as `Programming` or `Network`, including all its descendants. Generated and dashboard pages are excluded by default. The queue selects both topic and notes; scheduled and manually triggered runs use the same selection policy, with no note/focus override.
 3. Give the author complete notes, current rules and relevant repair IDs. It refines each whole note for learning: wording, factual accuracy, proofreading, terminology, explanation order, readability, repetition, applicable structure and existing Qard content. Strong passages stay intact. Several small edits can form one coherent improvement. A flag is context, not proof that an edit is needed.
 4. Prepare changed source dates against the current topic parent **before** independent review. The separate read-only reviewer judges the combined before/after learning benefit and each edit's contribution, checking complete current notes, sources, identity and rejection history. A useful overall revision cannot excuse an incorrect, harmful or gratuitous edit. Arbitrary rephrasing, cosmetic churn, unsupported defects, redundancy and unnecessary expansion fail review.
 5. Validate metadata, whole-note hashes and the cumulative diff; update the draft PR. Separate render/publication jobs add verified output and check the exact final head in the same workflow run.
@@ -58,6 +58,8 @@ Ordinary opportunities are incremental, so different runs can inspect different 
 ## Topic PRs and feedback
 
 Each topic generation has one stable branch and machine-marked draft PR. Batches append until a size limit, a verified-owner comment/review, or marking the draft ready freezes unrelated additions. Scoped owner corrections and their generated output remain allowed. Viewing a PR or waiting for automatic export does not freeze it. A freeze restricts bot additions, not owner edits. Full PR slots preserve the queue without unnecessary model calls. Merge starts a new generation; closure without merge suppresses those proposals independently of hashes.
+
+Existing nested-topic PRs retain their markers and history. While one remains open, its containing top-level topic pauses to prevent an overlapping PR. Closing or merging it releases that pause on the next reconciliation. Incompatible saved proposals are held with their original evidence; historical outcomes and rejected edits remain intact. Nearby-card context is limited to at most one batch of other notes from the selected notes' immediate folders; selected notes are always supplied in full.
 
 The managed body covers the cumulative diff against `main` in four sections: **Note improvements**, **Questions and answers**, **Significant question changes**, and **User feedback**. Explanations connect the original issue, correction and benefit, with useful sources and before/after question wording. Historical records use saved reasons without inventing benefits. Only the machine-marked section is replaced; owner text and existing generated descriptions outside it survive.
 
@@ -86,9 +88,8 @@ The exact default model is `claude-sonnet-5-5`; Claude Code is pinned to `2.1.28
 | `mode=apply` | Protected draft PR update followed by automatic render/publication |
 | `mode=fixture` | Genuine isolated hosted Obsidian/Syncer check; artifacts only |
 | `model` | Exact model identifier, with no fallback |
-| `note` + `focus` | Recheck one exact authorable `Vault/Home/...md` note for a concrete issue |
 
-Targeted inputs are paired (`--note`/`--focus` locally); live use requires an allowlisted owner's manual dispatch. Both author and reviewer receive the focus. Changing it invalidates reuse of a saved proposal. Targeting preserves history, holds, rejections, freezes and limits, and does not process unrelated topic feedback. Existing publication recovery retains priority. Schedules ignore these inputs. PR-triggered runs remain credential-free; protected live jobs require the `main` workflow and activation gates.
+Manual triggers start an ordinary queue opportunity; they cannot select a note or supply an editorial focus. Legacy targeting configuration is rejected. Existing publication recovery retains priority. PR-triggered runs remain credential-free; protected live jobs require the `main` workflow and activation gates.
 
 ## Public research and subscription quota
 

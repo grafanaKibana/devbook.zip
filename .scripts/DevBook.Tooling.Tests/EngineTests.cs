@@ -178,7 +178,7 @@ public sealed class EngineTests
         result.Int("model_calls").Should().Be(2);
         fixture.Model.Reviews.Should().Be(1);
         fixture.Model.ReviewPayload.RequiredObject("current").Str(DomainFixtures.Path).Should().Be(DomainFixtures.Note);
-        fixture.Model.ReviewPayload.Str("review_focus").Should().BeEmpty();
+        fixture.Model.ReviewPayload.ContainsKey("review_focus").Should().BeFalse();
         JsonObject record = state.RequiredObject("notes").RequiredObject(DomainFixtures.Path);
         record.Str("outcome").Should().Be("keep");
         JsonObject evidence = record.RequiredObject("keep_review");
@@ -1019,9 +1019,9 @@ public sealed class EngineTests
     }
 
     [Theory]
-    [InlineData("evaluation")]
+    [InlineData("selection")]
     [InlineData("repair")]
-    public async Task ChangedEvaluationOrRepairInputPreservesTheOriginalPendingEnvelope(string changed)
+    public async Task ChangedSelectionOrRepairInputPreservesTheOriginalPendingEnvelope(string changed)
     {
         // Arrange
         using var fixture = new KeepDecisionKeepFixture();
@@ -1030,10 +1030,15 @@ public sealed class EngineTests
         fixture.Clock.Advance(TimeSpan.FromHours(2));
         StateSnapshot snapshot = await fixture.Store.ReadAsync();
         JsonObject original = snapshot.State.Obj("pending_author_proposal").Copy();
-        if (changed == "evaluation") snapshot.State.Obj("pending_author_proposal")["evaluation_hash"] = "previous-model-policy";
+        if (changed == "selection")
+        {
+            snapshot.State.Obj("pending_author_proposal")["topic_id"] = Core.TopicId("Programming/NET");
+            snapshot.State.Obj("pending_author_proposal")["target_note"] = DomainFixtures.Path;
+            snapshot.State.Obj("pending_author_proposal")["review_focus"] = "Previously supplied manual focus";
+        }
         else snapshot.State.Obj("pending_author_proposal")["repair_inputs"] = new JsonObject { [DomainFixtures.Path] = "previous-flags" };
         original = snapshot.State.Obj("pending_author_proposal").Copy();
-        snapshot.State["held_proposals"] = new JsonObject { [Core.TopicId(Core.TopicFor(DomainFixtures.Path))] = new JsonObject { ["audit"] = "existing hold retained" } };
+        snapshot.State["held_proposals"] = new JsonObject { [original.Str("topic_id")] = new JsonObject { ["audit"] = "existing hold retained" } };
         await fixture.Store.WriteAsync(snapshot.State, snapshot, "fixture previous policy inputs");
         const string otherPath = "Vault/Home/Programming/ZZZ/Other.md";
         var nextModel = new SourceBudgetAuthor(DomainFixtures.Proposal(DomainFixtures.Edit()));
@@ -1049,7 +1054,7 @@ public sealed class EngineTests
         result.Str("status").Should().Be("no_worthwhile_changes");
         fixture.Model.Authors.Should().Be(1);
         nextModel.Paths.Should().Equal(otherPath);
-        foreach (string key in new[] { "proposal", "repair_inputs", "evaluation_hash", "feedback_keys", "source_hashes" })
+        foreach (string key in new[] { "proposal", "repair_inputs", "evaluation_hash", "feedback_keys", "source_hashes", "topic_id", "target_note", "review_focus" })
             JsonNode.DeepEquals(held[key], original[key]).Should().BeTrue(key + " must retain its original input");
         heldState.Obj("invalid_proposals").Select(item => item.Value).Should().Contain(item => item.Str("audit") == "existing hold retained");
     }
