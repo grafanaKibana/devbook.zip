@@ -280,24 +280,24 @@
     },
     "044cb1c8-912a-42fc-82d3-f9e2167680f6": {
       "cardId": "044cb1c8-912a-42fc-82d3-f9e2167680f6",
-      "lastReviewed": 1793605938958,
-      "due": 1793692338958,
-      "interval": 1,
+      "lastReviewed": 1793713697647,
+      "due": 1793886497647,
+      "interval": 2,
       "ease": 2.5,
-      "reviewCount": 4,
+      "reviewCount": 5,
       "lapses": 2,
-      "lastRating": 4,
+      "lastRating": 2,
       "fsrs": {
-        "due": 1793692338958,
-        "stability": 1.09195833,
-        "difficulty": 8.90829661,
-        "elapsed_days": 2,
-        "scheduled_days": 1,
-        "reps": 4,
+        "due": 1793886497647,
+        "stability": 1.77637464,
+        "difficulty": 9.26050479,
+        "elapsed_days": 1,
+        "scheduled_days": 2,
+        "reps": 5,
         "lapses": 0,
         "learning_steps": 0,
         "state": 2,
-        "last_review": 1793605938958,
+        "last_review": 1793713697647,
         "version": 1,
         "source": "reviews"
       },
@@ -410,24 +410,24 @@
     },
     "d5bda60c-1799-4e4a-ab36-7624ae085e3a": {
       "cardId": "d5bda60c-1799-4e4a-ab36-7624ae085e3a",
-      "lastReviewed": 1793460577871,
-      "due": 1793460637871,
-      "interval": 0.0006944444444444445,
+      "lastReviewed": 1793713382747,
+      "due": 1793713742747,
+      "interval": 0.004166666666666667,
       "ease": 2.5,
-      "reviewCount": 1,
+      "reviewCount": 2,
       "lapses": 1,
-      "lastRating": 1,
+      "lastRating": 2,
       "fsrs": {
-        "due": 1793460637871,
-        "stability": 0.212,
-        "difficulty": 6.4133,
-        "elapsed_days": 0,
+        "due": 1793713742747,
+        "stability": 1.74494784,
+        "difficulty": 7.60420977,
+        "elapsed_days": 3,
         "scheduled_days": 0,
-        "reps": 1,
+        "reps": 2,
         "lapses": 0,
         "learning_steps": 0,
         "state": 1,
-        "last_review": 1793460577871,
+        "last_review": 1793713382747,
         "version": 1,
         "source": "reviews"
       },
@@ -436,24 +436,24 @@
     },
     "a16bf465-c1ae-4bca-909c-6f7462f37ca6": {
       "cardId": "a16bf465-c1ae-4bca-909c-6f7462f37ca6",
-      "lastReviewed": 1793606399691,
-      "due": 1793606999691,
-      "interval": 0.006944444444444444,
+      "lastReviewed": 1793713598594,
+      "due": 1794750398594,
+      "interval": 12,
       "ease": 2.5,
-      "reviewCount": 2,
+      "reviewCount": 3,
       "lapses": 0,
       "lastRating": 3,
       "fsrs": {
-        "due": 1793606999691,
-        "stability": 6.57470191,
-        "difficulty": 5.10228691,
-        "elapsed_days": 2,
-        "scheduled_days": 0,
-        "reps": 2,
+        "due": 1794750398594,
+        "stability": 9.71075366,
+        "difficulty": 5.09241299,
+        "elapsed_days": 1,
+        "scheduled_days": 12,
+        "reps": 3,
         "lapses": 0,
-        "learning_steps": 1,
-        "state": 1,
-        "last_review": 1793606399691,
+        "learning_steps": 0,
+        "state": 2,
+        "last_review": 1793713598594,
         "version": 1,
         "source": "reviews"
       }
@@ -480,7 +480,9 @@
         "last_review": 1793606151223,
         "version": 1,
         "source": "reviews"
-      }
+      },
+      "needsFixing": true,
+      "flagsAt": 1793713536206
     },
     "19ea3788-056c-4ed6-8bc6-2087ae866f65": {
       "cardId": "19ea3788-056c-4ed6-8bc6-2087ae866f65",
@@ -536,24 +538,24 @@
     },
     "13e7573c-4ba4-4f2b-a316-4f2dcb52ccd6": {
       "cardId": "13e7573c-4ba4-4f2b-a316-4f2dcb52ccd6",
-      "lastReviewed": 1793606379473,
-      "due": 1793606439473,
-      "interval": 0.0006944444444444445,
+      "lastReviewed": 1793713480285,
+      "due": 1793713840285,
+      "interval": 0.004166666666666667,
       "ease": 2.5,
-      "reviewCount": 2,
+      "reviewCount": 3,
       "lapses": 2,
-      "lastRating": 1,
+      "lastRating": 2,
       "fsrs": {
-        "due": 1793606439473,
-        "stability": 0.11279815,
-        "difficulty": 8.80630447,
-        "elapsed_days": 2,
+        "due": 1793713840285,
+        "stability": 0.48186872,
+        "difficulty": 9.19279765,
+        "elapsed_days": 1,
         "scheduled_days": 0,
-        "reps": 2,
+        "reps": 3,
         "lapses": 0,
         "learning_steps": 0,
         "state": 1,
-        "last_review": 1793606379473,
+        "last_review": 1793713480285,
         "version": 1,
         "source": "reviews"
       }
@@ -829,6 +831,46 @@
       "scheduler": "fsrs",
       "desiredRetention": 0.9,
       "deck": "Programming"
+    },
+    {
+      "introduced": false,
+      "cardId": "d5bda60c-1799-4e4a-ab36-7624ae085e3a",
+      "at": 1793713382747,
+      "rating": 2,
+      "scheduled": true,
+      "scheduler": "fsrs",
+      "desiredRetention": 0.9,
+      "deck": "Programming"
+    },
+    {
+      "introduced": false,
+      "cardId": "13e7573c-4ba4-4f2b-a316-4f2dcb52ccd6",
+      "at": 1793713480285,
+      "rating": 2,
+      "scheduled": true,
+      "scheduler": "fsrs",
+      "desiredRetention": 0.9,
+      "deck": "Programming"
+    },
+    {
+      "introduced": false,
+      "cardId": "a16bf465-c1ae-4bca-909c-6f7462f37ca6",
+      "at": 1793713598594,
+      "rating": 3,
+      "scheduled": true,
+      "scheduler": "fsrs",
+      "desiredRetention": 0.9,
+      "deck": "Programming"
+    },
+    {
+      "introduced": false,
+      "cardId": "044cb1c8-912a-42fc-82d3-f9e2167680f6",
+      "at": 1793713697647,
+      "rating": 2,
+      "scheduled": true,
+      "scheduler": "fsrs",
+      "desiredRetention": 0.9,
+      "deck": "Programming"
     }
   ],
   "links": {},
@@ -853,31 +895,34 @@
       105775
     ],
     "tutor|codex|gpt-6.1-terra": [
-      9116,
-      11337,
-      9444,
       9043,
       11078,
       11016,
       8328,
       10555,
-      8404
+      8404,
+      10040,
+      10971,
+      11165
     ],
     "figure|codex|gpt-6.1-sol": [
       19713,
-      17733
+      17733,
+      31225
     ],
     "close|codex|gpt-6.1-sol": [
       23415,
       26609,
       34333,
-      33493
+      33493,
+      27735
     ],
     "check-write|codex|gpt-6.1-sol": [
       35878,
       36839,
       37219,
-      42092
+      42092,
+      38874
     ],
     "probe|codex|gpt-6.1-terra": [
       383303,
@@ -1086,6 +1131,44 @@
         "costUsd": 0,
         "costCalls": 0
       }
+    },
+    "2026-11-03": {
+      "Tutoring|tutor|codex|gpt-6.1-terra": {
+        "calls": 3,
+        "input": 112956,
+        "output": 905,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "costUsd": 0,
+        "costCalls": 0
+      },
+      "Figures|illustrator|codex|gpt-6.1-sol": {
+        "calls": 1,
+        "input": 38957,
+        "output": 1391,
+        "cacheRead": 86528,
+        "cacheWrite": 0,
+        "costUsd": 0,
+        "costCalls": 0
+      },
+      "Lesson wrap-ups|writer|codex|gpt-6.1-sol": {
+        "calls": 1,
+        "input": 46760,
+        "output": 801,
+        "cacheRead": 75904,
+        "cacheWrite": 0,
+        "costUsd": 0,
+        "costCalls": 0
+      },
+      "Writing checks|writer|codex|gpt-6.1-sol": {
+        "calls": 1,
+        "input": 41380,
+        "output": 1627,
+        "cacheRead": 116608,
+        "cacheWrite": 0,
+        "costUsd": 0,
+        "costCalls": 0
+      }
     }
   },
   "study": {
@@ -1169,9 +1252,11 @@
       "tests|": 0.6
     },
     "2026-11-03": {
-      "browsing|": 10.7,
-      "planning|": 3.8,
-      "cards|Programming": 19.4
+      "browsing|": 180.5,
+      "planning|": 11.4,
+      "cards|Programming": 420.5,
+      "lessons|Programming": 1577.4,
+      "cards|": 3
     }
   },
   "statistics": {
@@ -1211,6 +1296,12 @@
         2,
         1,
         2
+      ],
+      "2026-11-03": [
+        0,
+        3,
+        1,
+        0
       ]
     },
     "cards": {
@@ -1330,7 +1421,7 @@
       ],
       "044cb1c8-912a-42fc-82d3-f9e2167680f6": [
         2,
-        1,
+        2,
         0,
         1
       ],
@@ -1360,14 +1451,14 @@
       ],
       "d5bda60c-1799-4e4a-ab36-7624ae085e3a": [
         1,
-        0,
+        1,
         0,
         0
       ],
       "a16bf465-c1ae-4bca-909c-6f7462f37ca6": [
         0,
         1,
-        1,
+        2,
         0
       ],
       "1fe4393b-4d8c-4e2c-9ae5-769106b13e65": [
@@ -1390,46 +1481,14 @@
       ],
       "13e7573c-4ba4-4f2b-a316-4f2dcb52ccd6": [
         2,
-        0,
+        1,
         0,
         0
       ]
     },
     "partialHistory": false
   },
-  "sessions": [
-    {
-      "id": "5a31b970-2abc-4c3a-a8c5-ae4a231dd914",
-      "title": "Programming",
-      "cardIds": [
-        "b115f4c1-4ffb-413c-917b-d5fcdb62cb05",
-        "d8eb59cf-ad2d-43be-954f-44db23f34d38",
-        "b89f32ef-f23d-488d-a26a-78ebe0051826",
-        "d5bda60c-1799-4e4a-ab36-7624ae085e3a",
-        "19ea3788-056c-4ed6-8bc6-2087ae866f65",
-        "ffd19d60-4643-4ede-92ff-83ba55b3f613",
-        "13e7573c-4ba4-4f2b-a316-4f2dcb52ccd6",
-        "ec8874e5-0ca6-4d53-a3dd-6594e0a512e3",
-        "1fe4393b-4d8c-4e2c-9ae5-769106b13e65",
-        "a16bf465-c1ae-4bca-909c-6f7462f37ca6",
-        "044cb1c8-912a-42fc-82d3-f9e2167680f6"
-      ],
-      "position": 3,
-      "style": "normal",
-      "results": [],
-      "createdAt": 1793696953397,
-      "updatedAt": 1793696958535,
-      "remainingIds": [],
-      "mode": "due",
-      "repeatLearning": true,
-      "learning": [],
-      "skippedIds": [
-        "b115f4c1-4ffb-413c-917b-d5fcdb62cb05",
-        "d8eb59cf-ad2d-43be-954f-44db23f34d38",
-        "b89f32ef-f23d-488d-a26a-78ebe0051826"
-      ]
-    }
-  ],
+  "sessions": [],
   "exams": [
     {
       "id": "027e0d94-42e5-4fc5-8e71-9de4c580643e",
@@ -1705,7 +1764,8 @@
     "session:eef84e77-c45e-4439-9097-63d2bc958a2a",
     "session:55cd7bf0-f08d-4d1b-aedb-15234df18b48",
     "session:3209b6bf-6503-4744-b60e-742dcf4f03f8",
-    "session:5a957934-3459-4fde-b95a-1702bf1f77c2"
+    "session:5a957934-3459-4fde-b95a-1702bf1f77c2",
+    "session:5a31b970-2abc-4c3a-a8c5-ae4a231dd914"
   ],
   "settingsAt": 1793568963505,
   "totals": {
@@ -1868,9 +1928,11 @@
           "tests|": 0.6
         },
         "2026-11-03": {
-          "browsing|": 10.7,
-          "planning|": 3.8,
-          "cards|Programming": 19.4
+          "browsing|": 180.5,
+          "planning|": 11.4,
+          "cards|Programming": 420.5,
+          "lessons|Programming": 1577.4,
+          "cards|": 3
         }
       },
       "usage": {
@@ -2059,6 +2121,44 @@
             "input": 86653,
             "output": 408,
             "cacheRead": 0,
+            "cacheWrite": 0,
+            "costUsd": 0,
+            "costCalls": 0
+          }
+        },
+        "2026-11-03": {
+          "Tutoring|tutor|codex|gpt-6.1-terra": {
+            "calls": 3,
+            "input": 112956,
+            "output": 905,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "costUsd": 0,
+            "costCalls": 0
+          },
+          "Figures|illustrator|codex|gpt-6.1-sol": {
+            "calls": 1,
+            "input": 38957,
+            "output": 1391,
+            "cacheRead": 86528,
+            "cacheWrite": 0,
+            "costUsd": 0,
+            "costCalls": 0
+          },
+          "Lesson wrap-ups|writer|codex|gpt-6.1-sol": {
+            "calls": 1,
+            "input": 46760,
+            "output": 801,
+            "cacheRead": 75904,
+            "cacheWrite": 0,
+            "costUsd": 0,
+            "costCalls": 0
+          },
+          "Writing checks|writer|codex|gpt-6.1-sol": {
+            "calls": 1,
+            "input": 41380,
+            "output": 1627,
+            "cacheRead": 116608,
             "cacheWrite": 0,
             "costUsd": 0,
             "costCalls": 0
