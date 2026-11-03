@@ -22864,10 +22864,11 @@
     "automatic_export": true,
     "prepared_source_version": 1,
     "prepared_at": "2026-11-03T09:57:43.792940Z",
-    "phase": "commit_created",
-    "updated_at": "2026-11-03T10:00:02Z",
+    "phase": "branch_updated",
+    "updated_at": "2026-11-03T10:00:12Z",
     "evidence": {
-      "commit_sha": "2e74431ca64bfa47b0e631d62c0d8c7bdb0dca9b"
+      "commit_sha": "2e74431ca64bfa47b0e631d62c0d8c7bdb0dca9b",
+      "branch_sha": "2e74431ca64bfa47b0e631d62c0d8c7bdb0dca9b"
     }
   },
   "export_operations": {
