@@ -71,6 +71,10 @@ public sealed class ExportTests
             Git.Run(Root, "config", "user.email", "fixture@example.invalid");
             Git.Run(Root, "add", "--all");
             Git.Run(Root, "-c", "core.hooksPath=/dev/null", "commit", "--quiet", "-m", "fixture");
+            foreach (string path in Directory.EnumerateFiles(Path.Combine(Root, "Vault"), "*", SearchOption.AllDirectories))
+            {
+                File.SetLastWriteTimeUtc(path, new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddTicks(7_000));
+            }
         }
 
         public Task<string> CommandAsync(IReadOnlyList<string> arguments, CancellationToken cancellationToken)
@@ -96,7 +100,7 @@ public sealed class ExportTests
                 {
                     string name = Path.GetRelativePath(Path.Combine(Root, "Vault"), path).Replace('\\', '/');
                     var file = new FileInfo(path);
-                    stats[name] = new JsonObject { ["mtime"] = new DateTimeOffset(file.LastWriteTimeUtc).ToUnixTimeMilliseconds(), ["size"] = file.Length };
+                    stats[name] = new JsonObject { ["mtime"] = Math.Round((file.LastWriteTimeUtc - DateTime.UnixEpoch).TotalMilliseconds), ["size"] = file.Length };
                 }
                 return Task.FromResult(new JsonObject
                 {

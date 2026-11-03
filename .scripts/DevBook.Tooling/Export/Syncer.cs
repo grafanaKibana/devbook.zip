@@ -456,7 +456,7 @@ public static class Syncer
                 JsonNode? entry = values[path];
                 if (entry is not JsonObject || entry["mtime"] is not JsonValue mtime || !mtime.TryGetValue(out double milliseconds)
                     || entry["size"]?.GetValue<long>() != file.Length
-                    || Math.Abs(milliseconds - new DateTimeOffset(file.LastWriteTimeUtc).ToUnixTimeMilliseconds()) >= 1)
+                    || Math.Abs(milliseconds - (file.LastWriteTimeUtc - DateTime.UnixEpoch).TotalMilliseconds) >= 1)
                 {
                     return false;
                 }
