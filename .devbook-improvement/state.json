@@ -1142,11 +1142,11 @@
     "version": 1,
     "id": "caa35096ca95474e9f400801cb20cb18",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-03T19:45:09.882761Z",
-    "elapsed_seconds": 250.9476496,
+    "elapsed_seconds": 282.069689,
     "calls_reserved": 7,
-    "responses_received": 6,
+    "responses_received": 7,
     "attempted_paths": [
       "Vault/Home/Programming/NET/ASP NET Web API/Filters.md",
       "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md"
@@ -1244,7 +1244,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-03T19:49:20.829920Z",
+    "checkpoint_at": "2026-11-03T19:49:51.951959Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
@@ -5812,6 +5812,70 @@
       "Vault/Home/Programming/NET/CSharp/Fundamentals/Methods.md": "585c5cf07d62743fa5906021218081ef4982d360595eda4807575e11b5254c72"
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-03T19:49:16.804578Z"
+    "prepared_at": "2026-11-03T19:49:16.804578Z",
+    "completed_review": {
+      "verdict": "CHANGES REQUIRED",
+      "overall_reason": "The note is technically accurate, but the author kept it unchanged even though the Category card is still flawed. That card's question is not self-contained, and its answer cites sources that do not support it.",
+      "notes": [
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Methods.md",
+          "verdict": "CHANGES REQUIRED",
+          "summary": "The prose, code samples and most cards are accurate and well ordered. The flagged Category card still has a question-quality defect. Its question refers to Animal, Dog and Category without defining them, and its answer cites the base and sealed pages, which have nothing to do with it. The keep disposition called the source list 'longer than needed' but left it.",
+          "page_type": "Concept note (publish: true). Optional Questions and References sections are present. Qard IDs are protected metadata.",
+          "current_text_evidence": [
+            {
+              "quote": "When `Animal a = new Dog();` calls `a.Category()`, what makes the call run `Dog`'s implementation?",
+              "line_start": 270,
+              "reason": "The question relies on types and a method that are defined only elsewhere in the note, where Category is non-virtual and hidden with `new`. Essential meanings do not follow from the question, so it is not self-contained."
+            },
+            {
+              "quote": "[Microsoft: base keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/base) · [Microsoft: sealed modifier]",
+              "line_start": 274,
+              "reason": "The base and sealed pages are irrelevant to the Category answer. They look copied from the neighbouring virtual card, so the answer-side sources are padded."
+            },
+            {
+              "quote": "How does C# apply an optional parameter's default value, and why can already-compiled callers keep an old default?",
+              "line_start": 257,
+              "reason": "This card is acceptable. It covers one dependent mechanism-and-consequence explanation, and its answer is accurate."
+            },
+            {
+              "quote": "Both objects have the same runtime type. Only the lookup rule changes",
+              "line_start": 196,
+              "reason": "The prose is accurate and well ordered, and it reads as a whiteboard explanation. It needs no rewrite."
+            }
+          ],
+          "target_resolution": "UNRESOLVED",
+          "split_suggestion": "No split: parameter modifiers, dispatch keywords and overload resolution form one coherent Methods topic, and length alone is not a reason to separate them.",
+          "findings": [
+            {
+              "severity": "Medium",
+              "dimension": "Question quality",
+              "location": "Questions, Category card (qard-id ffd19d60-4643-4ede-92ff-83ba55b3f613)",
+              "evidence": "The question mentions `Animal a`, `Dog` and `Category()` without declaring them. Its answer then says the method must be virtual, which contradicts the note's own non-virtual `new` example.",
+              "effect": "A reader cannot answer from the question alone and may recall the wrong setup. The card is not self-contained.",
+              "fix": "Keep the existing ID and rewrite the question as a direct, self-contained one, such as: which modifiers on a base member and a derived member make a call through a base-typed reference run the derived implementation? Then trim the sources to the virtual and new pages."
+            },
+            {
+              "severity": "Medium",
+              "dimension": "References on the answer side",
+              "location": "Category card source line",
+              "evidence": "The base and sealed pages are cited, but the answer never uses either.",
+              "effect": "The card carries sources that do not support it, which clutters it and weakens verification.",
+              "fix": "Remove the base and sealed links from this card."
+            }
+          ],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "FAIL",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "change_checks": []
+    }
   }
 }
