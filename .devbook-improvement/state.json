@@ -188,11 +188,11 @@
     "version": 1,
     "id": "8ee974ce274c4cbcba9dfc3e56cb0691",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-03T09:17:25.556001Z",
-    "elapsed_seconds": 275.9671473,
+    "elapsed_seconds": 285.11401570000004,
     "calls_reserved": 9,
-    "responses_received": 8,
+    "responses_received": 9,
     "attempted_paths": [
       "Vault/Home/Programming/NET/ASP NET Web API/Filters.md",
       "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md",
@@ -1709,7 +1709,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-03T09:22:01.522733Z",
+    "checkpoint_at": "2026-11-03T09:22:10.669602Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
@@ -2516,5 +2516,53 @@
       "rules_hash": "82a04e65ab00760ab41233edf8129ba880e8d1cec5477811d321548e627e215a",
       "evaluation_hash": "5a3fa995c63f53372dd78ead04ba8f98f001da6bbdef06a9844aa9812c855360"
     }
+  },
+  "pending_author_proposal": {
+    "workload_id": "8ee974ce274c4cbcba9dfc3e56cb0691",
+    "topic_id": "programming-e6aba2bd",
+    "batch": {
+      "topic": "Programming",
+      "topic_id": "programming-e6aba2bd",
+      "notes": [
+        {
+          "path": "Vault/Home/Programming/NET/ASP NET Web API/ASP NET Web API.md",
+          "content": "---\ntopic: [Programming]\nsubtopic: [NET]\nsummary: \"How ASP.NET Core routes each HTTP request through middleware to handlers or controllers.\"\nlevel: [\"4\"]\npriority: High\ntags: [FolderNote]\n\npublish: true\nstatus: Creation\ncreated: \"2026-02-14T21:59:03.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\n---\n\nAn ASP.NET Core API is an ordered HTTP pipeline ending at a selected endpoint. Middleware handles concerns that span requests. Routing selects a Minimal API handler or controller action. Filters and endpoint code handle work that depends on the selected operation.\n\nThe main design decision is where each concern belongs. Authentication, exception handling, and request logging usually sit in middleware. Authorization metadata, model binding, validation, and response mapping stay closer to the endpoint. A misplaced concern either runs too broadly or gets copied across handlers.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# Request Flow\n\nThe request moves inward through middleware until routing and endpoint execution take over. The response then unwinds through the same middleware in reverse order, which is why registration order affects both request and response behavior.\n\n```mermaid\nsequenceDiagram\n  participant Client\n  participant Middleware\n  participant Routing\n  participant Endpoint\n\n  Client->>Middleware: Request\n  Middleware->>Routing: Route match\n  Routing->>Endpoint: Invoke\n  Endpoint->>Middleware: Result\n  Middleware->>Client: Response\n```\n\n# Endpoint Examples\n\nMinimal API:\n\n```csharp\nvar app = WebApplication.CreateBuilder(args).Build();\n\napp.MapGet(\"/health\", () => Results.Ok(new { status = \"ok\" }));\n\napp.Run();\n```\n\nController style:\n\n```csharp\n[ApiController]\n[Route(\"api/orders\")]\npublic sealed class OrdersController : ControllerBase\n{\n    [HttpGet(\"{id}\")]\n    public ActionResult<OrderDto> GetById(string id) => Ok(new OrderDto(id));\n}\n```\n\n# References\n\n- [ASP.NET Core web API documentation](https://learn.microsoft.com/en-us/aspnet/core/web-api/?view=aspnetcore-10.0)\n",
+          "hash": "80a77805481a8a17a566f98debd65ceba8d69144cf9bc04bfdb031b521e28661",
+          "topic": "Programming",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "82a04e65ab00760ab41233edf8129ba880e8d1cec5477811d321548e627e215a",
+      "evaluation_hash": "5a3fa995c63f53372dd78ead04ba8f98f001da6bbdef06a9844aa9812c855360",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/Programming/NET/ASP NET Web API/ASP NET Web API.md",
+          "outcome": "keep",
+          "reason": "I read the whole note and found no verified defect, and there are no known violations or flagged cards. The opening correctly describes the pipeline as ordered middleware ending at a selected endpoint. It also separates broad concerns such as authentication, exception handling and logging from endpoint-level concerns such as authorization metadata, binding and validation. The request-flow section's reverse-order unwinding matches the documented ASP.NET Core middleware model, and the sequence diagram agrees with it. The Minimal API and controller snippets are valid, compact illustrations. They intentionally omit registration code such as AddControllers/MapControllers and the OrderDto definition, which is acceptable for a hub overview. The frontmatter keeps the FolderNote tag, the datacorejsx map block is intact, and the References section holds one authoritative Microsoft link. Further edits would be cosmetic."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/Programming/NET/ASP NET Web API/ASP NET Web API.md": "80a77805481a8a17a566f98debd65ceba8d69144cf9bc04bfdb031b521e28661"
+    },
+    "feedback_keys": [],
+    "rules_hash": "82a04e65ab00760ab41233edf8129ba880e8d1cec5477811d321548e627e215a",
+    "evaluation_hash": "5a3fa995c63f53372dd78ead04ba8f98f001da6bbdef06a9844aa9812c855360",
+    "repair_inputs": {
+      "Vault/Home/Programming/NET/ASP NET Web API/ASP NET Web API.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-03T09:22:10.669540Z"
   }
 }
