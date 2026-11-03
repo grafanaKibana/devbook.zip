@@ -1084,16 +1084,16 @@
     "version": 1,
     "id": "caa35096ca95474e9f400801cb20cb18",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-03T19:45:09.882761Z",
-    "elapsed_seconds": 104.95055660000001,
+    "elapsed_seconds": 128.0981245,
     "calls_reserved": 3,
-    "responses_received": 2,
+    "responses_received": 3,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-03T19:46:54.832829Z",
+    "checkpoint_at": "2026-11-03T19:47:17.980401Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
@@ -4981,15 +4981,67 @@
     },
     "proposal": {
       "version": 1,
-      "edits": [],
+      "edits": [
+        {
+          "path": "Vault/Home/Programming/NET/ASP NET Web API/Filters.md",
+          "expected_hash": "34862c04ee18444085e97f5dce6e6dc92dc19b86fc992a6e4eb8135b0138391f",
+          "before": "`[Authorize]` contributes authorization metadata. Under default endpoint routing, authorization middleware enforces that metadata before the controller endpoint runs. Duplicating policy checks in an action filter creates two access-control paths. Within a filter type, the usual nesting is global, controller, then action on the way in and the reverse on the way out. If a filter implements both sync and async forms of the same stage, the runtime invokes only the async interface. The filter's synchronous methods then run only when that async implementation calls them, as the default async methods of `ActionFilterAttribute` do, so custom filter logic belongs in one form per stage.",
+          "after": "# Ordering and Sync Versus Async Forms\n\nWithin a filter type, the usual nesting is global, controller, then action on the way in and the reverse on the way out. If a filter implements both sync and async forms of the same stage, the runtime invokes only the async interface. The filter's synchronous methods then run only when that async implementation calls them, as the default async methods of `ActionFilterAttribute` do, so custom filter logic belongs in one form per stage.",
+          "reason": "Moves ordering and sync/async rules out of the attachment section into their own heading; the authorization point is kept once, in Pitfalls.",
+          "kind": "note",
+          "learning_target": "same",
+          "essential_meanings": [
+            "Ordering and sync/async rules are separate from attachment mechanics"
+          ],
+          "sources": [],
+          "feedback_keys": [],
+          "problem": "The paragraph under the attachment heading mixes authorization metadata, scope nesting and the sync/async rule, which are unrelated to how filters are attached, and repeats the authorization point from Pitfalls.",
+          "reader_benefit": "Attachment mechanics and ordering rules can each be found and re-entered directly."
+        },
+        {
+          "path": "Vault/Home/Programming/NET/ASP NET Web API/Filters.md",
+          "expected_hash": "34862c04ee18444085e97f5dce6e6dc92dc19b86fc992a6e4eb8135b0138391f",
+          "before": "- **Authorization in action filters:** a second permission system drifts away from registered policies. Access decisions belong in authentication handlers and authorization policies.",
+          "after": "- **Authorization in action filters:** `[Authorize]` contributes metadata that authorization middleware enforces before the controller endpoint runs under default endpoint routing. Repeating policy checks in an action filter creates a second permission system that drifts away from registered policies. Access decisions belong in authentication handlers and authorization policies.",
+          "reason": "Keeps the authorization-metadata point in one place, where it supports the pitfall.",
+          "kind": "note",
+          "learning_target": "same",
+          "essential_meanings": [
+            "Authorize metadata is enforced by middleware",
+            "Duplicate checks in filters drift"
+          ],
+          "sources": [],
+          "feedback_keys": [],
+          "problem": "The authorization explanation was stranded under the attachment heading.",
+          "reader_benefit": "The pitfall now carries its own mechanism."
+        },
+        {
+          "path": "Vault/Home/Programming/NET/ASP NET Web API/Filters.md",
+          "expected_hash": "34862c04ee18444085e97f5dce6e6dc92dc19b86fc992a6e4eb8135b0138391f",
+          "before": "Because of these gaps, exception-handling middleware is the broader boundary for a uniform API error response.",
+          "after": "Because exception filters miss errors from middleware, routing, resource filters and result execution, exception-handling middleware is the broader boundary for a uniform API error response.",
+          "reason": "Names the gaps so the answer is self-contained.",
+          "kind": "rewrite",
+          "learning_target": "same",
+          "essential_meanings": [
+            "Exception filters have coverage gaps",
+            "Middleware is the broader choice for uniform errors"
+          ],
+          "sources": [],
+          "feedback_keys": [],
+          "problem": "The answer says 'these gaps' without stating them.",
+          "reader_benefit": "The card can be understood and graded on its own."
+        }
+      ],
       "dispositions": [
         {
           "path": "Vault/Home/Programming/NET/ASP NET Web API/Filters.md",
-          "outcome": "keep",
-          "reason": "Audited the whole note against the ASP.NET Core filters documentation as I know it. Checked: stage order and short-circuiting; exception-filter coverage (controller creation, model binding, action filters, action methods; not resource or result filters or result execution); the sync/async rule that only the async interface is invoked; ServiceFilter versus TypeFilter versus IFilterFactory; Order overriding scope; and the endpoint-filter and middleware comparison. All are accurate. The three cards each test one gradeable task. The flagged cards (exception coverage, Order and scope) are correct, self-contained and consistent with the prose. The code examples are coherent and the structure is clear. I did not re-fetch the sources in this pass, so the keep rests on prior knowledge of the documentation. No defect found, and no known native violations."
+          "outcome": "changed",
+          "reason": "Facts match the cited filters documentation. Two editorial fixes: the ordering/sync-async rules now have their own heading instead of sitting under attachment mechanics, with the authorization point kept once in Pitfalls, and the third card names the exception-filter gaps rather than saying 'these gaps'."
         }
       ],
-      "feedback": []
+      "feedback": [],
+      "decisions": []
     },
     "source_hashes": {
       "Vault/Home/Programming/NET/ASP NET Web API/Filters.md": "34862c04ee18444085e97f5dce6e6dc92dc19b86fc992a6e4eb8135b0138391f"
@@ -5001,8 +5053,10 @@
       "Vault/Home/Programming/NET/ASP NET Web API/Filters.md": "578d6ad0ba9e8ee7aa5d90b0a9c088816cb3dd2b85a6170327590d485d2b4292"
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-03T19:45:49.484868Z",
-    "blocked_review": {
+    "prepared_at": "2026-11-03T19:47:17.980368Z",
+    "review_repair_key": "1cb12d9ccd7fcc8097d310914ca72601ee9b147e23bfcc588ab6255970079a9b",
+    "repair_reserved": true,
+    "repair_review": {
       "verdict": "CHANGES REQUIRED",
       "overall_reason": "The facts check out against my knowledge of the ASP.NET Core filters documentation, but two reader-facing defects remain unfixed. One is a mis-sorted paragraph under the attachment heading. The other is a dangling \"these gaps\" reference in a card answer. The keep disposition also says the sources were not re-fetched.",
       "notes": [
@@ -5078,74 +5132,7 @@
       ],
       "feedback": []
     },
-    "repair_review": {
-      "verdict": "CHANGES REQUIRED",
-      "overall_reason": "The facts check out against my knowledge of the ASP.NET Core filters documentation, but two reader-facing defects remain unfixed. One is a mis-sorted paragraph under the attachment heading. The other is a dangling \"these gaps\" reference in a card answer. The keep disposition also says the sources were not re-fetched.",
-      "notes": [
-        {
-          "path": "Vault/Home/Programming/NET/ASP NET Web API/Filters.md",
-          "verdict": "CHANGES REQUIRED",
-          "summary": "The technical content is accurate and the cards are well scoped. Two concrete editorial defects were not addressed. The paragraph under the attachment heading mixes unrelated topics. One card answer refers to \"these gaps\" that the card never states.",
-          "page_type": "Concept — typed frontmatter, optional Questions and References present. Qard IDs and metadata are protected.",
-          "current_text_evidence": [
-            {
-              "quote": "`[Authorize]` contributes authorization metadata.",
-              "line_start": 102,
-              "reason": "This paragraph sits under the heading about ServiceFilter, TypeFilter and IFilterFactory. It combines authorization metadata, scope nesting and the sync/async rule, none of which concern attachment. That hurts re-entry, and the authorization point is repeated in Pitfalls."
-            },
-            {
-              "quote": "Because of these gaps, exception-handling middleware is the broader boundary for a uniform API error response.",
-              "line_start": 153,
-              "reason": "The card answer never lists any gaps. The coverage gaps are in the neighbouring card, so this card is not self-contained."
-            },
-            {
-              "quote": "Exception filters are not a sequential stage; they run only when an unhandled exception occurs.",
-              "line_start": 122,
-              "reason": "This is accurate. The stage-order card is sound and consistent with the prose."
-            },
-            {
-              "quote": "Controller exception filters handle only unhandled exceptions raised during controller creation, model binding, action filters or the action method.",
-              "line_start": 138,
-              "reason": "This matches the documented exception-filter coverage."
-            }
-          ],
-          "target_resolution": "UNRESOLVED",
-          "split_suggestion": "No split: the note covers one coherent topic, controller filters and their boundary with middleware and endpoint filters. The material is not independently separable.",
-          "findings": [
-            {
-              "severity": "Medium",
-              "dimension": "Explanation order / readability",
-              "location": "`# Applying Filters` final paragraph, line 102",
-              "evidence": "A single paragraph under the attachment heading covers [Authorize] enforcement, scope nesting and the sync/async-interface rule.",
-              "effect": "A reader looking for attachment mechanics finds unrelated rules. The sync/async rule is easy to miss, and the authorization point duplicates Pitfalls.",
-              "fix": "Move the nesting and sync/async sentences into their own short section, or into Pitfalls or the ordering prose. Drop the duplicated authorization sentence, keeping it in Pitfalls."
-            },
-            {
-              "severity": "Medium",
-              "dimension": "Question quality",
-              "location": "Third card, line 153",
-              "evidence": "\"Because of these gaps...\" refers to gaps that this card does not state.",
-              "effect": "The answer is not self-contained, so a reader cannot follow why middleware is broader.",
-              "fix": "Rephrase to name the gap, for example: \"Because exception filters miss middleware, routing, resource-filter and result-execution errors, exception-handling middleware is the broader boundary.\""
-            }
-          ],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "FAIL",
-            "question_quality": "FAIL",
-            "identity_safety": "PASS",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "change_checks": []
-    },
-    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "review_repair_key": "1cb12d9ccd7fcc8097d310914ca72601ee9b147e23bfcc588ab6255970079a9b",
-    "author_repair_pending": true,
-    "repair_reserved": true
+    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
   },
   "held_proposals": {
     "programming-e6aba2bd": {
