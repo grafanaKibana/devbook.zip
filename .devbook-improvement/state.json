@@ -188,9 +188,9 @@
     "version": 1,
     "id": "8ee974ce274c4cbcba9dfc3e56cb0691",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "validation_reserved",
     "started_at": "2026-11-03T09:17:25.556001Z",
-    "elapsed_seconds": 214.67411669999998,
+    "elapsed_seconds": 217.07255519999998,
     "calls_reserved": 8,
     "responses_received": 8,
     "attempted_paths": [
@@ -411,7 +411,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-03T09:21:00.229702Z",
+    "checkpoint_at": "2026-11-03T09:21:02.628139Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
@@ -440,7 +440,7 @@
       "pr": null
     },
     "base_sha": "112b9345c266597d4480ef1cd29dcd2fab092b1f",
-    "reservation_deadline": "2026-11-03T09:35:36.953355Z"
+    "reservation_deadline": "2026-11-03T09:47:25.555583Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
