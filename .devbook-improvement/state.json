@@ -3826,14 +3826,14 @@
     "status": "active",
     "phase": "selecting",
     "started_at": "2026-11-03T10:15:07.020719Z",
-    "elapsed_seconds": 6.320945,
+    "elapsed_seconds": 9.9204634,
     "calls_reserved": 0,
     "responses_received": 0,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 205,
-    "checkpoint_at": "2026-11-03T10:15:13.341152Z"
+    "checkpoint_at": "2026-11-03T10:15:16.940670Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
