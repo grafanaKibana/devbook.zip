@@ -1253,16 +1253,17 @@
     "version": 1,
     "id": "caa35096ca95474e9f400801cb20cb18",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-03T19:45:09.882761Z",
-    "elapsed_seconds": 585.4804147,
+    "elapsed_seconds": 589.8019801,
     "calls_reserved": 13,
     "responses_received": 13,
     "attempted_paths": [
       "Vault/Home/Programming/NET/ASP NET Web API/Filters.md",
       "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md",
       "Vault/Home/Programming/NET/CSharp/Fundamentals/Methods.md",
-      "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Types.md"
+      "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Types.md",
+      "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/CancellationToken.md"
     ],
     "accepted_records": [
       {
@@ -2490,10 +2491,73 @@
           },
           "model_calls": 11
         }
+      },
+      {
+        "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/CancellationToken.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/CancellationToken.md",
+                "outcome": "keep",
+                "reason": "I read the whole note. It teaches cooperative cancellation in a sound order: ownership, caller and callee code, the sequence on cancel, RequestAborted, CPU-bound checks, registration callbacks, then pitfalls. The technical claims match my understanding of the .NET cancellation APIs. These include cooperative cancellation, OperationCanceledException propagation, Register returning a disposable CancellationTokenRegistration, Cancel() running callbacks synchronously, CancelAsync arriving in .NET 8, TryReset only before cancellation, linked sources, WaitAsync(timeout, token) not cancelling the underlying work, and disposing sources that own timers. The pitfall examples are bounded and each one shows the fix. The catch-order example and the filter that tells a timeout from a user cancel are correct. The only blemish is an undeclared `id` in one snippet, which is cosmetic. The References section has one relevant Microsoft source in the required bare-link format. The note has no cards and no known violations, so there are no question defects to fix. Rewording it would be churn."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/CancellationToken.md",
+                "verdict": "CLEAN",
+                "summary": "Whole-note audit finds an accurate, well-ordered note (ownership, caller/callee code, propagation sequence, RequestAborted, CPU-bound checks, callbacks, pitfalls) with correct version-specific detail such as CancelAsync in .NET 8. No concrete defect justifies an edit.",
+                "page_type": "Concept — no Questions section; one relevant Microsoft Learn reference in bare-link format; all fences have language identifiers.",
+                "current_text_evidence": [
+                  {
+                    "quote": "The caller owns the request. Each operation decides where it can stop without leaving partial state behind.",
+                    "line_start": 13,
+                    "reason": "Opening states the operating idea and ownership split quickly and concretely."
+                  },
+                  {
+                    "quote": "The check is cheap, but its placement is a latency decision.",
+                    "line_start": 81,
+                    "reason": "Gives engineering judgment on where to place checks rather than just mechanics."
+                  },
+                  {
+                    "quote": "runs registered callbacks synchronously, so a slow callback delays the caller",
+                    "line_start": 93,
+                    "reason": "Accurate mechanism plus the .NET 8 CancelAsync mitigation and the remaining limit."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: cancellation propagation, callbacks and pitfalls form one coherent topic that is jointly useful.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "NOT APPLICABLE",
+                  "identity_safety": "NOT APPLICABLE",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "The note was read in full; its technical claims are correct, the explanation order is sound, voice is direct, and no concrete rule violation or defect exists. Keeping it unchanged is justified, and there are no edits to check.",
+            "change_checks": []
+          },
+          "model_calls": 13
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-03T19:54:55.362688Z",
+    "checkpoint_at": "2026-11-03T19:54:59.684254Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
