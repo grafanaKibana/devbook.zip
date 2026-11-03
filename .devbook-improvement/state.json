@@ -548,9 +548,9 @@
     "version": 1,
     "id": "8ee974ce274c4cbcba9dfc3e56cb0691",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-03T09:17:25.556001Z",
-    "elapsed_seconds": 560.5706515000002,
+    "elapsed_seconds": 563.8022992000002,
     "calls_reserved": 20,
     "responses_received": 20,
     "attempted_paths": [
@@ -562,7 +562,8 @@
       "Vault/Home/Programming/NET/ASP NET Web API/Authentication.md",
       "Vault/Home/Programming/NET/ASP NET Web API/Authorization.md",
       "Vault/Home/Programming/NET/ASP NET Web API/CORS.md",
-      "Vault/Home/Programming/NET/ASP NET Web API/Dependency Injection.md"
+      "Vault/Home/Programming/NET/ASP NET Web API/Dependency Injection.md",
+      "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Async Await.md"
     ],
     "accepted_records": [
       {
@@ -2433,10 +2434,88 @@
           },
           "model_calls": 18
         }
+      },
+      {
+        "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Async Await.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Async Await.md",
+                "outcome": "keep",
+                "reason": "I read the whole note against current .NET async semantics and found no verified defect. The state-machine section matches the compiler's behavior: ordinary async Task methods commonly get a struct state machine, async iterators get a class, and the awaiter completion check, continuation registration and MoveNext resumption are described correctly. The ConfigureAwait material is accurate. It separates SynchronizationContext capture from ExecutionContext flow, notes that an already-completed await continues synchronously, and covers the .NET 8 ConfigureAwaitOptions members correctly. The Pitfalls section covers sync-over-async, unobserved fire-and-forget failures, async void, Task.Run around async I/O, and the way await on WhenAll rethrows only one contained exception. All of it is accurate and has a clear fix. The async-stream example uses EnumeratorCancellation correctly. The existing cards are self-contained and consistent with the prose, with primary Microsoft sources, and the Task.Run, async void and null-guard cards add useful distinct recall. There are no known violations. Edits would be cosmetic churn."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Async Await.md",
+                "verdict": "CLEAN",
+                "summary": "Whole-note audit found no factual, structural, or question-quality defect. The mechanism, ConfigureAwait, pitfalls and cards are accurate, ordered from model to detail to failure modes, and consistent with each other, so leaving it unchanged is correct.",
+                "page_type": "Concept note with Questions and References; Qard identity comments protected.",
+                "current_text_evidence": [
+                  {
+                    "quote": "**async does not mean \"run on another thread.\"**",
+                    "line_start": 18,
+                    "reason": "States the core operating idea and boundary up front."
+                  },
+                  {
+                    "quote": "The awaiter reports whether the operation has already completed. If it has, execution continues without yielding.",
+                    "line_start": 37,
+                    "reason": "Correct description of the IsCompleted fast path and the await mechanism."
+                  },
+                  {
+                    "quote": "**`ExecutionContext`** carries ambient state such as `AsyncLocal<T>` values. It flows across normal awaits even when `ConfigureAwait(false)` is used.",
+                    "line_start": 63,
+                    "reason": "Accurately separates ExecutionContext flow from SynchronizationContext capture."
+                  },
+                  {
+                    "quote": "`ForceYielding` schedules the continuation even when the task has already completed",
+                    "line_start": 71,
+                    "reason": "Correct .NET 8 ConfigureAwaitOptions behavior with proper version condition."
+                  },
+                  {
+                    "quote": "`await` propagates one contained exception rather than throwing the surrounding `AggregateException`",
+                    "line_start": 163,
+                    "reason": "Accurate WhenAll behavior with the practical remedy stated."
+                  },
+                  {
+                    "quote": "Async I/O removes threads as the limit on how many waits can be in flight.",
+                    "line_start": 232,
+                    "reason": "Card answer states mechanism and bounds the claim without overpromising throughput."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: state machine, ConfigureAwait, async streams and pitfalls form one coherent async/await topic; ConfigureAwait could stand alone but is tightly tied to the mechanism.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "The note is technically accurate, well ordered and its cards are bounded with Microsoft primary sources; no concrete defect exists, so the keep disposition is justified.",
+            "change_checks": []
+          },
+          "model_calls": 20
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-03T09:26:46.126242Z",
+    "checkpoint_at": "2026-11-03T09:26:49.357890Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
