@@ -1084,16 +1084,16 @@
     "version": 1,
     "id": "caa35096ca95474e9f400801cb20cb18",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-03T19:45:09.882761Z",
-    "elapsed_seconds": 43.85736970000001,
+    "elapsed_seconds": 73.88749530000001,
     "calls_reserved": 2,
-    "responses_received": 1,
+    "responses_received": 2,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-03T19:45:53.739642Z",
+    "checkpoint_at": "2026-11-03T19:46:23.769766Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
@@ -5001,6 +5001,70 @@
       "Vault/Home/Programming/NET/ASP NET Web API/Filters.md": "578d6ad0ba9e8ee7aa5d90b0a9c088816cb3dd2b85a6170327590d485d2b4292"
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-03T19:45:49.484868Z"
+    "prepared_at": "2026-11-03T19:45:49.484868Z",
+    "completed_review": {
+      "verdict": "CHANGES REQUIRED",
+      "overall_reason": "The facts check out against my knowledge of the ASP.NET Core filters documentation, but two reader-facing defects remain unfixed. One is a mis-sorted paragraph under the attachment heading. The other is a dangling \"these gaps\" reference in a card answer. The keep disposition also says the sources were not re-fetched.",
+      "notes": [
+        {
+          "path": "Vault/Home/Programming/NET/ASP NET Web API/Filters.md",
+          "verdict": "CHANGES REQUIRED",
+          "summary": "The technical content is accurate and the cards are well scoped. Two concrete editorial defects were not addressed. The paragraph under the attachment heading mixes unrelated topics. One card answer refers to \"these gaps\" that the card never states.",
+          "page_type": "Concept — typed frontmatter, optional Questions and References present. Qard IDs and metadata are protected.",
+          "current_text_evidence": [
+            {
+              "quote": "`[Authorize]` contributes authorization metadata.",
+              "line_start": 102,
+              "reason": "This paragraph sits under the heading about ServiceFilter, TypeFilter and IFilterFactory. It combines authorization metadata, scope nesting and the sync/async rule, none of which concern attachment. That hurts re-entry, and the authorization point is repeated in Pitfalls."
+            },
+            {
+              "quote": "Because of these gaps, exception-handling middleware is the broader boundary for a uniform API error response.",
+              "line_start": 153,
+              "reason": "The card answer never lists any gaps. The coverage gaps are in the neighbouring card, so this card is not self-contained."
+            },
+            {
+              "quote": "Exception filters are not a sequential stage; they run only when an unhandled exception occurs.",
+              "line_start": 122,
+              "reason": "This is accurate. The stage-order card is sound and consistent with the prose."
+            },
+            {
+              "quote": "Controller exception filters handle only unhandled exceptions raised during controller creation, model binding, action filters or the action method.",
+              "line_start": 138,
+              "reason": "This matches the documented exception-filter coverage."
+            }
+          ],
+          "target_resolution": "UNRESOLVED",
+          "split_suggestion": "No split: the note covers one coherent topic, controller filters and their boundary with middleware and endpoint filters. The material is not independently separable.",
+          "findings": [
+            {
+              "severity": "Medium",
+              "dimension": "Explanation order / readability",
+              "location": "`# Applying Filters` final paragraph, line 102",
+              "evidence": "A single paragraph under the attachment heading covers [Authorize] enforcement, scope nesting and the sync/async-interface rule.",
+              "effect": "A reader looking for attachment mechanics finds unrelated rules. The sync/async rule is easy to miss, and the authorization point duplicates Pitfalls.",
+              "fix": "Move the nesting and sync/async sentences into their own short section, or into Pitfalls or the ordering prose. Drop the duplicated authorization sentence, keeping it in Pitfalls."
+            },
+            {
+              "severity": "Medium",
+              "dimension": "Question quality",
+              "location": "Third card, line 153",
+              "evidence": "\"Because of these gaps...\" refers to gaps that this card does not state.",
+              "effect": "The answer is not self-contained, so a reader cannot follow why middleware is broader.",
+              "fix": "Rephrase to name the gap, for example: \"Because exception filters miss middleware, routing, resource-filter and result-execution errors, exception-handling middleware is the broader boundary.\""
+            }
+          ],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "FAIL",
+            "question_quality": "FAIL",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "change_checks": []
+    }
   }
 }
