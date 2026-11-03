@@ -308,11 +308,11 @@
     "version": 1,
     "id": "8ee974ce274c4cbcba9dfc3e56cb0691",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-03T09:17:25.556001Z",
-    "elapsed_seconds": 368.65576419999985,
+    "elapsed_seconds": 377.71706469999987,
     "calls_reserved": 13,
-    "responses_received": 12,
+    "responses_received": 13,
     "attempted_paths": [
       "Vault/Home/Programming/NET/ASP NET Web API/Filters.md",
       "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md",
@@ -1978,7 +1978,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-03T09:23:34.211352Z",
+    "checkpoint_at": "2026-11-03T09:23:43.272652Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
@@ -2785,5 +2785,53 @@
       "rules_hash": "82a04e65ab00760ab41233edf8129ba880e8d1cec5477811d321548e627e215a",
       "evaluation_hash": "5a3fa995c63f53372dd78ead04ba8f98f001da6bbdef06a9844aa9812c855360"
     }
+  },
+  "pending_author_proposal": {
+    "workload_id": "8ee974ce274c4cbcba9dfc3e56cb0691",
+    "topic_id": "programming-e6aba2bd",
+    "batch": {
+      "topic": "Programming",
+      "topic_id": "programming-e6aba2bd",
+      "notes": [
+        {
+          "path": "Vault/Home/Programming/NET/ASP NET Web API/Authorization.md",
+          "content": "---\ntopic: [Programming]\nsubtopic: [NET]\nsummary: \"Deciding what an authenticated user may do via roles, claims, or policies.\"\nlevel: [\"1\"]\npriority: Medium\nstatus: Ready to Repeat\npublish: true\ncreated: \"2026-02-19T23:08:30.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\n---\n\nAuthorization decides whether the current principal may perform an operation. Authentication supplies the identity. Authorization evaluates roles, claims, or policy requirements against that identity. When the decision depends on an object already loaded from storage, the object becomes an additional authorization resource.\n\n# Role-Based Authorization\n\nRole checks restrict an endpoint to principals carrying one of the accepted role claims.\n\n```csharp\n// Restrict to users with the \"Admin\" role\n[Authorize(Roles = \"Admin\")]\npublic IActionResult AdminDashboard() => Ok();\n\n// Multiple roles (OR logic — any of these roles grants access)\n[Authorize(Roles = \"Admin,Manager\")]\npublic IActionResult Reports() => Ok();\n```\n\nASP.NET Core reads roles from claims using the configured role-claim type. Roles work for coarse access groups, but they become awkward when permissions vary independently or depend on resource state.\n\n# Policy-Based Authorization\n\nA policy names one or more requirements. Handlers evaluate those requirements outside the controller, leaving the endpoint responsible for selecting the policy rather than implementing its rules.\n\n```csharp\n// Register policies in Program.cs\nbuilder.Services.AddAuthorization(options =>\n{\n    options.AddPolicy(\"CanApproveOrders\", policy =>\n        policy.RequireClaim(\"department\", \"Finance\")\n              .RequireRole(\"Manager\"));\n\n    options.AddPolicy(\"MinimumAge18\", policy =>\n        policy.Requirements.Add(new MinimumAgeRequirement(18)));\n});\n\n// Apply a policy to an endpoint\n[Authorize(Policy = \"CanApproveOrders\")]\npublic IActionResult ApproveOrder(string orderId) => Ok();\n```\n\nCustom requirements implement `IAuthorizationRequirement`. One or more handlers decide whether each requirement succeeds.\n\n```csharp\npublic sealed class MinimumAgeRequirement(int minimumAge) : IAuthorizationRequirement\n{\n    public int MinimumAge { get; } = minimumAge;\n}\n\npublic sealed class MinimumAgeHandler : AuthorizationHandler<MinimumAgeRequirement>\n{\n    protected override Task HandleRequirementAsync(\n        AuthorizationHandlerContext context,\n        MinimumAgeRequirement requirement)\n    {\n        var birthDateClaim = context.User.FindFirst(\"birthdate\");\n        if (birthDateClaim is null) return Task.CompletedTask;\n\n        var birthDate = DateOnly.Parse(birthDateClaim.Value);\n        var age = DateOnly.FromDateTime(DateTime.Today).Year - birthDate.Year;\n\n        if (age >= requirement.MinimumAge)\n            context.Succeed(requirement);\n\n        return Task.CompletedTask;\n    }\n}\n\n// Register the handler\nbuilder.Services.AddSingleton<IAuthorizationHandler, MinimumAgeHandler>();\n```\n\nThe example keeps the handler mechanics visible, but its year-only age calculation is incomplete around birthdays. A production handler should use `DateOnly.TryParse`, leave the requirement unsatisfied when the claim is missing or malformed, and compare the full birth date under a defined time-zone policy.\n\n# Resource-Based Authorization\n\nAn attribute cannot evaluate a document that has not been loaded yet. In that case, the action loads the resource and calls `IAuthorizationService` with both the principal and the object.\n\n```csharp\npublic sealed class DocumentsController(IAuthorizationService authz, IDocumentRepository docs)\n    : ControllerBase\n{\n    [HttpPut(\"{id}\")]\n    public async Task<IActionResult> Update(string id, DocumentDto dto)\n    {\n        var document = await docs.FindAsync(id);\n        if (document is null) return NotFound();\n\n        // Check if the current user can edit this specific document\n        var result = await authz.AuthorizeAsync(User, document, \"CanEditDocument\");\n        if (!result.Succeeded) return Forbid();\n\n        // Proceed with update...\n        return Ok();\n    }\n}\n```\n\nThe `\"CanEditDocument\"` handler receives `document` as `AuthorizationHandlerContext.Resource`. Ownership or workflow-state checks can then use the actual record rather than identifiers supplied by the client.\n\n# Defaults, Fallback, and Advanced Hooks\n\n- **`FallbackPolicy` can make authentication the default.** It applies when an endpoint has no explicit authorization metadata, so a forgotten `[Authorize]` does not silently expose the endpoint.\n\n  ```csharp\n  builder.Services.AddAuthorization(options =>\n  {\n      options.FallbackPolicy = new AuthorizationPolicyBuilder()\n          .RequireAuthenticatedUser().Build();   // everything requires auth unless [AllowAnonymous]\n  });\n  ```\n\n  `DefaultPolicy` is different: a bare `[Authorize]` uses it.\n- **Several handlers can provide OR semantics for one requirement.** Authorization succeeds when any registered handler marks that requirement successful, unless the context has been explicitly failed. Stacking different `[Authorize]` attributes still produces AND semantics across policies.\n- **`RequireAssertion`** keeps a small one-off condition inline with policy registration: `policy.RequireAssertion(ctx => ctx.User.HasClaim(...))`.\n- **`IAuthorizationMiddlewareResultHandler`** changes how challenge and forbid results become HTTP responses, for example by returning a Problem Details body.\n- **Minimal APIs** attach the same policies through endpoint metadata: `app.MapGet(\"/admin\", ...).RequireAuthorization(\"CanApproveOrders\")`.\n\n# Pitfalls\n\n## Inconsistent 403 and 404 Semantics\n\nThe status code itself can become an existence oracle. Returning 404 for missing records and 403 for existing-but-forbidden records tells a caller which identifiers are real.\n\nSensitive resources often need the same 404 response for both cases. For public resources, 403 is more informative and can be the correct contract.\n\nChoose the rule by resource sensitivity and apply it consistently, including timing and response shape where enumeration risk matters.\n\n## Authorization Logic in Controllers\n\nChecks such as `if (user.Role == \"Admin\" || user.Id == resource.OwnerId)` tend to spread across actions. Small differences then create permission drift.\n\nThe controller already has the user and resource, so an inline condition looks cheaper at first.\n\nMove reusable access rules into handlers. The controller should select a policy declaratively or call `AuthorizeAsync` after loading a resource.\n\n# Tradeoffs\n\n- **Roles or policies:** roles are readable for coarse groups such as administrators. Policies express permissions and compose claims or custom handlers without baking those rules into controllers.\n- **Principal-only or resource-based checks:** endpoint metadata is enough when the decision depends only on the principal and request metadata. A loaded entity requires an imperative resource-based check.\n- **Declarative or imperative evaluation:** `[Authorize]` fails before action execution and keeps the rule visible on the endpoint. `AuthorizeAsync` is necessary when the action must first load the object that the handler will inspect.\n\n# References\n\n- [Authorization in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/security/authorization/introduction)\n",
+          "hash": "5a2af81ed2f681e830a149c067fdc18f5a6d0ddd90fe0f056cd400fe2226ac84",
+          "topic": "Programming",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "82a04e65ab00760ab41233edf8129ba880e8d1cec5477811d321548e627e215a",
+      "evaluation_hash": "5a3fa995c63f53372dd78ead04ba8f98f001da6bbdef06a9844aa9812c855360",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/Programming/NET/ASP NET Web API/Authorization.md",
+          "outcome": "keep",
+          "reason": "Read the whole note against ASP.NET Core authorization behavior. Role OR semantics, policy and requirement/handler mechanics, the resource-based AuthorizeAsync flow with Resource, FallbackPolicy versus DefaultPolicy, multiple-handler OR versus stacked-attribute AND, RequireAssertion, IAuthorizationMiddlewareResultHandler and the minimal-API RequireAuthorization are all accurate. The note already flags the year-only age calculation in its example as incomplete. The 403/404 pitfall and tradeoffs are consistent and decision-oriented. Order runs from principal-based to resource-based checks to defaults, with no prerequisite gaps. The prose is concise and direct. There are no cards and no known violations. The reference is an authoritative Microsoft page, so there is nothing to fix."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/Programming/NET/ASP NET Web API/Authorization.md": "5a2af81ed2f681e830a149c067fdc18f5a6d0ddd90fe0f056cd400fe2226ac84"
+    },
+    "feedback_keys": [],
+    "rules_hash": "82a04e65ab00760ab41233edf8129ba880e8d1cec5477811d321548e627e215a",
+    "evaluation_hash": "5a3fa995c63f53372dd78ead04ba8f98f001da6bbdef06a9844aa9812c855360",
+    "repair_inputs": {
+      "Vault/Home/Programming/NET/ASP NET Web API/Authorization.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-03T09:23:43.272643Z"
   }
 }
