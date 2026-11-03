@@ -188,11 +188,11 @@
     "version": 1,
     "id": "8ee974ce274c4cbcba9dfc3e56cb0691",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-03T09:17:25.556001Z",
-    "elapsed_seconds": 191.69245769999998,
+    "elapsed_seconds": 214.67411669999998,
     "calls_reserved": 8,
-    "responses_received": 7,
+    "responses_received": 8,
     "attempted_paths": [
       "Vault/Home/Programming/NET/ASP NET Web API/Filters.md",
       "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md",
@@ -411,7 +411,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-03T09:20:37.248042Z",
+    "checkpoint_at": "2026-11-03T09:21:00.229702Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
@@ -676,6 +676,151 @@
       "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Types.md": "49bdb81af1dd624296bf7d1bfd6f18765be5d264b0e5212dbe55dffb71dcf10e"
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-03T09:20:34.250468Z"
+    "prepared_at": "2026-11-03T09:20:34.250468Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "overall_reason": "The single Storage-bullet edit fixes a real vagueness with accurate wording, and the rest of the note holds up on independent audit.",
+        "notes": [
+          {
+            "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Types.md",
+            "verdict": "CLEAN",
+            "summary": "The Storage bullet previously said only that value types may live inline and references may be locals, which did not contrast the two kinds. The edit states that a value is stored inline in its container and that a reference variable holds only a reference to a separately allocated object. This is accurate and preserves the point that declaration kind does not fix the physical location. The rest of the note (copy semantics, boxing including Nullable<T>, the CS1612 example, the struct/class/record table, the foreach and anonymous-type cards) is accurate and coherent.",
+            "page_type": "FolderNote — keeps the tags: [FolderNote] metadata and the protected datacorejsx map block; optional Questions and References are present and useful.",
+            "current_text_evidence": [
+              {
+                "quote": "- **Storage:** a value type is stored inline in whatever holds it: a local variable, a field of a heap object, or an array element.",
+                "line_start": 31,
+                "reason": "This states the storage rule concretely and correctly, which resolves the vague original wording."
+              },
+              {
+                "quote": "A reference-type variable holds only a reference, and the object it points to is allocated separately.",
+                "line_start": 31,
+                "reason": "This supplies the missing contrast with value storage and is accurate in the general case."
+              },
+              {
+                "quote": "A direct field assignment such as `h.Counter.Value = 1` is rejected with CS1612.",
+                "line_start": 71,
+                "reason": "The example matches the documented compiler behavior for modifying a value-type return value."
+              },
+              {
+                "quote": "Can inherit only from another record.",
+                "line_start": 134,
+                "reason": "The table row is correct, since a record class can derive only from object or another record."
+              },
+              {
+                "quote": "Anonymous types synthesize value-based `Equals` and `GetHashCode`, but do not overload `==`",
+                "line_start": 139,
+                "reason": "The anonymous-type card is accurate, self-contained and cited."
+              }
+            ],
+            "target_resolution": "RESOLVED",
+            "split_suggestion": "No split: the note is a compact hub on value versus reference semantics, and its pitfalls, tradeoffs and cards all depend on that one distinction.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "change_checks": [
+          {
+            "edit_index": 0,
+            "verdict": "WORTHWHILE",
+            "reason": "The original Storage bullet was vague and did not contrast value and reference storage. The new text names the inline locations for values and the separately allocated object behind a reference. It adds no unsupported claims, and the surrounding bullets and cards agree with it."
+          }
+        ],
+        "decision_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Types.md",
+          "citation_index": 2,
+          "reported_line_start": 71,
+          "resolved_line_start": 73
+        },
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Types.md",
+          "citation_index": 3,
+          "reported_line_start": 134,
+          "resolved_line_start": 135
+        },
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Types.md",
+          "citation_index": 4,
+          "reported_line_start": 139,
+          "resolved_line_start": 141
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Types.md": "85afb82fb1de72dac196e8043016c90ff1277ecc93e134bac6c2b1838a829578"
+      },
+      "rules_hash": "82a04e65ab00760ab41233edf8129ba880e8d1cec5477811d321548e627e215a",
+      "evaluation_hash": "5a3fa995c63f53372dd78ead04ba8f98f001da6bbdef06a9844aa9812c855360"
+    },
+    "completed_review": {
+      "verdict": "CLEAN",
+      "overall_reason": "The single Storage-bullet edit fixes a real vagueness with accurate wording, and the rest of the note holds up on independent audit.",
+      "notes": [
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Types.md",
+          "verdict": "CLEAN",
+          "summary": "The Storage bullet previously said only that value types may live inline and references may be locals, which did not contrast the two kinds. The edit states that a value is stored inline in its container and that a reference variable holds only a reference to a separately allocated object. This is accurate and preserves the point that declaration kind does not fix the physical location. The rest of the note (copy semantics, boxing including Nullable<T>, the CS1612 example, the struct/class/record table, the foreach and anonymous-type cards) is accurate and coherent.",
+          "page_type": "FolderNote — keeps the tags: [FolderNote] metadata and the protected datacorejsx map block; optional Questions and References are present and useful.",
+          "current_text_evidence": [
+            {
+              "quote": "- **Storage:** a value type is stored inline in whatever holds it: a local variable, a field of a heap object, or an array element.",
+              "line_start": 31,
+              "reason": "This states the storage rule concretely and correctly, which resolves the vague original wording."
+            },
+            {
+              "quote": "A reference-type variable holds only a reference, and the object it points to is allocated separately.",
+              "line_start": 31,
+              "reason": "This supplies the missing contrast with value storage and is accurate in the general case."
+            },
+            {
+              "quote": "A direct field assignment such as `h.Counter.Value = 1` is rejected with CS1612.",
+              "line_start": 73,
+              "reason": "The example matches the documented compiler behavior for modifying a value-type return value."
+            },
+            {
+              "quote": "Can inherit only from another record.",
+              "line_start": 135,
+              "reason": "The table row is correct, since a record class can derive only from object or another record."
+            },
+            {
+              "quote": "Anonymous types synthesize value-based `Equals` and `GetHashCode`, but do not overload `==`",
+              "line_start": 141,
+              "reason": "The anonymous-type card is accurate, self-contained and cited."
+            }
+          ],
+          "target_resolution": "RESOLVED",
+          "split_suggestion": "No split: the note is a compact hub on value versus reference semantics, and its pitfalls, tradeoffs and cards all depend on that one distinction.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "change_checks": [
+        {
+          "edit_index": 0,
+          "verdict": "WORTHWHILE",
+          "reason": "The original Storage bullet was vague and did not contrast value and reference storage. The new text names the inline locations for values and the separately allocated object behind a reference. It adds no unsupported claims, and the surrounding bullets and cards agree with it."
+        }
+      ],
+      "decision_checks": []
+    }
   }
 }
