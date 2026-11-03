@@ -3820,7 +3820,7 @@
   "focused_workload": {
     "version": 1,
     "id": "c78c94ff68b0409dae9430c91855a657",
-    "status": "sealed",
+    "status": "published",
     "phase": "sealed",
     "started_at": "2026-11-03T09:56:59.574794Z",
     "elapsed_seconds": 161.10381030000002,
