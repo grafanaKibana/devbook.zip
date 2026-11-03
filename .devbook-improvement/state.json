@@ -368,9 +368,9 @@
     "version": 1,
     "id": "8ee974ce274c4cbcba9dfc3e56cb0691",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-03T09:17:25.556001Z",
-    "elapsed_seconds": 403.41048519999987,
+    "elapsed_seconds": 406.5082417999999,
     "calls_reserved": 14,
     "responses_received": 14,
     "attempted_paths": [
@@ -379,7 +379,8 @@
       "Vault/Home/Programming/NET/CSharp/Fundamentals/Methods.md",
       "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Types.md",
       "Vault/Home/Programming/NET/ASP NET Web API/ASP NET Web API.md",
-      "Vault/Home/Programming/NET/ASP NET Web API/Authentication.md"
+      "Vault/Home/Programming/NET/ASP NET Web API/Authentication.md",
+      "Vault/Home/Programming/NET/ASP NET Web API/Authorization.md"
     ],
     "accepted_records": [
       {
@@ -2035,10 +2036,83 @@
           },
           "model_calls": 12
         }
+      },
+      {
+        "path": "Vault/Home/Programming/NET/ASP NET Web API/Authorization.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Programming/NET/ASP NET Web API/Authorization.md",
+                "outcome": "keep",
+                "reason": "Read the whole note against ASP.NET Core authorization behavior. Role OR semantics, policy and requirement/handler mechanics, the resource-based AuthorizeAsync flow with Resource, FallbackPolicy versus DefaultPolicy, multiple-handler OR versus stacked-attribute AND, RequireAssertion, IAuthorizationMiddlewareResultHandler and the minimal-API RequireAuthorization are all accurate. The note already flags the year-only age calculation in its example as incomplete. The 403/404 pitfall and tradeoffs are consistent and decision-oriented. Order runs from principal-based to resource-based checks to defaults, with no prerequisite gaps. The prose is concise and direct. There are no cards and no known violations. The reference is an authoritative Microsoft page, so there is nothing to fix."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "The only note is accurate against ASP.NET Core authorization behavior, clearly ordered, has no known violations, and the keep rationale holds. There are no edits and no cards.",
+            "change_checks": [],
+            "notes": [
+              {
+                "path": "Vault/Home/Programming/NET/ASP NET Web API/Authorization.md",
+                "verdict": "CLEAN",
+                "summary": "The note is technically accurate, ordered from principal-based to resource-based checks to defaults and hooks, and concise. It already flags the weakness of its own age example. No edit is warranted.",
+                "page_type": "Concept — authorable prose; Questions are optional and absent; the single reference is an authoritative Microsoft page; every code fence has a language.",
+                "current_text_evidence": [
+                  {
+                    "quote": "When the decision depends on an object already loaded from storage, the object becomes an additional authorization resource.",
+                    "line_start": 13,
+                    "reason": "The opening states the core idea and the boundary between principal-based and resource-based checks."
+                  },
+                  {
+                    "quote": "its year-only age calculation is incomplete around birthdays",
+                    "line_start": 83,
+                    "reason": "The note discloses the simplification in its sample handler and gives the fix (TryParse, full-date comparison, time-zone policy), so no accuracy defect remains."
+                  },
+                  {
+                    "quote": "The `\"CanEditDocument\"` handler receives `document` as `AuthorizationHandlerContext.Resource`.",
+                    "line_start": 109,
+                    "reason": "This states the resource-based mechanism correctly: AuthorizeAsync(User, resource, policyName) exposes the object as Resource."
+                  },
+                  {
+                    "quote": "Authorization succeeds when any registered handler marks that requirement successful, unless the context has been explicitly failed.",
+                    "line_start": 124,
+                    "reason": "This matches the documented handler semantics: an explicit Fail overrides Succeed, and separate [Authorize] attributes combine with AND."
+                  },
+                  {
+                    "quote": "The status code itself can become an existence oracle.",
+                    "line_start": 133,
+                    "reason": "The pitfall is decision-oriented, names the condition that changes the choice (resource sensitivity), and is not repetitive."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: roles, policies, resource checks, defaults and pitfalls form one coherent authorization topic of moderate length.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "NOT APPLICABLE",
+                  "identity_safety": "NOT APPLICABLE",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ]
+          },
+          "model_calls": 14
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-03T09:24:08.966074Z",
+    "checkpoint_at": "2026-11-03T09:24:12.063831Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
