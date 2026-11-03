@@ -1144,7 +1144,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-03T19:45:09.882761Z",
-    "elapsed_seconds": 282.069689,
+    "elapsed_seconds": 285.9672993,
     "calls_reserved": 7,
     "responses_received": 7,
     "attempted_paths": [
@@ -1244,7 +1244,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-03T19:49:51.951959Z",
+    "checkpoint_at": "2026-11-03T19:49:55.849569Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
@@ -5208,16 +5208,16 @@
         "topic_id": "programming-e6aba2bd",
         "notes": [
           {
-            "path": "Vault/Home/Programming/NET/ASP NET Web API/Filters.md",
-            "content": "---\ntopic: [Programming]\nsubtopic: [NET]\nsummary: \"Filters around ASP.NET Core Web API controller actions and endpoint-handler invocations.\"\nlevel: [\"2\"]\npriority: Medium\nstatus: Ready to Repeat\npublish: true\nqard-deck: \"Programming\"\nqard-topic: \"NET/ASP NET Web API/Filters\"\nflashcard_uid: \"ef27222b\"\ncreated: \"2026-02-19T23:08:30.000Z\"\nmodified: \"2026-11-02T09:03:54.806Z\"\n---\n\nController filters in ASP.NET Core Web APIs wrap defined stages of controller execution. They fit cross-cutting behavior that needs action arguments, model state, controller metadata, or the action result. A correlation-ID rule tied only to selected controllers is one example. An application-wide correlation ID usually belongs in middleware.\n\nThe filter APIs live in `Microsoft.AspNetCore.Mvc`, but they also apply to [Web API controllers derived from `ControllerBase`](https://learn.microsoft.com/en-us/aspnet/core/web-api/?view=aspnetcore-10.0); rendering views is not required. Minimal API handlers use endpoint filters, which have a different invocation context. Endpoint filters can also be [explicitly attached to mapped controller actions](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/minimal-apis/min-api-filters?view=aspnetcore-10.0#register-a-filter-on-controller-actions).\n\nThe boundary matters. Middleware can cover every request type but lacks controller action context. Endpoint code has full local context but duplicates a rule when many actions need it. Filters occupy the space between those two.\n\nController filters run after routing has selected a controller action.\n\n- Authorization filters run first and can short-circuit unauthorized requests.\n- Resource filters run around most of the rest of the pipeline and can short-circuit early.\n- Action filters run before and after the action method.\n- Exception filters observe unhandled exceptions from action execution.\n- Result filters run before and after the action result is executed.\n\nScope and filter type both affect nesting. `IOrderedFilter.Order` can override the default scope order, so a custom order should be treated as part of the endpoint's behavior.\n\n# Example\n\nThis async action filter rejects selected requests without a correlation header:\n\n```csharp\nusing Microsoft.AspNetCore.Mvc;\nusing Microsoft.AspNetCore.Mvc.Filters;\n\npublic sealed class RequireCorrelationIdFilter : IAsyncActionFilter\n{\n    public async Task OnActionExecutionAsync(\n        ActionExecutingContext context,\n        ActionExecutionDelegate next)\n    {\n        if (!context.HttpContext.Request.Headers.ContainsKey(\"X-Correlation-Id\"))\n        {\n            context.Result = new BadRequestObjectResult(new\n            {\n                error = \"X-Correlation-Id header is required\"\n            });\n            return;\n        }\n\n        await next();\n    }\n}\n\n// Program.cs\nbuilder.Services.AddScoped<RequireCorrelationIdFilter>();\n\nbuilder.Services.AddControllers(options =>\n{\n    // Global registration\n    options.Filters.AddService<RequireCorrelationIdFilter>();\n});\n```\n\nFor one action or controller, `[ServiceFilter(typeof(RequireCorrelationIdFilter))]` applies the registered filter without making it global.\n\nAn exception filter can translate an unhandled exception from action execution into an API error result:\n\n```csharp\npublic sealed class ApiExceptionFilter(ILogger<ApiExceptionFilter> logger) : IAsyncExceptionFilter\n{\n    public Task OnExceptionAsync(ExceptionContext context)\n    {\n        logger.LogError(context.Exception, \"Unhandled exception in {Action}\",\n            context.ActionDescriptor.DisplayName);\n\n        context.Result = context.Exception is NotFoundException\n            ? new NotFoundObjectResult(new { error = context.Exception.Message })\n            : new ObjectResult(new { error = \"An unexpected error occurred.\" }) { StatusCode = 500 };\n\n        context.ExceptionHandled = true;\n        return Task.CompletedTask;\n    }\n}\n```\n\nGlobal registration applies it to every controller action: `builder.Services.AddControllers(opts => opts.Filters.Add<ApiExceptionFilter>());`. Middleware remains the broader choice when errors from routing or Minimal API handlers need the same response contract.\n\n# Applying Filters: `[ServiceFilter]` Vs `[TypeFilter]` Vs `IFilterFactory`\n\nAttributes cannot receive runtime services through their own constructors, so attachment determines how the real filter instance is created.\n\n- **`[ServiceFilter(typeof(MyFilter))]`** resolves the filter itself from DI, so `MyFilter` must be registered with the intended lifetime.\n- **`[TypeFilter(typeof(MyFilter))]`** uses `ActivatorUtilities`. Constructor services come from DI, while `Arguments` can supply literal values. The filter type itself does not need registration.\n- **`IFilterFactory`** gives an attribute explicit control over creation of the executable filter and whether the result can be reused.\n- A plain filter attribute can carry literal metadata but cannot accept runtime services in its attribute constructor.\n\n`[Authorize]` contributes authorization metadata. Under default endpoint routing, authorization middleware enforces that metadata before the controller endpoint runs. Duplicating policy checks in an action filter creates two access-control paths. Within a filter type, the usual nesting is global, controller, then action on the way in and the reverse on the way out. If a filter implements both sync and async forms of the same stage, the runtime invokes only the async interface. The filter's synchronous methods then run only when that async implementation calls them, as the default async methods of `ActionFilterAttribute` do, so custom filter logic belongs in one form per stage.\n\n# Pitfalls\n\n- **Blocking I/O:** `.Result` or synchronous remote calls hold request threads while no CPU work is happening. I/O-bound filters should implement the async interface and await the operation.\n- **Authorization in action filters:** a second permission system drifts away from registered policies. Access decisions belong in authentication handlers and authorization policies.\n- **Treating exception filters as global error handling:** exception filters cover unhandled exceptions from controller creation, model binding, action filters, and action methods. They do not cover middleware, routing, resource filters, result filters, or action-result execution. Exception-handling middleware is the safer outer boundary for a uniform API error contract.\n\n# Tradeoffs\n\n| Option | Best for | Weakness |\n|---|---|---|\n| Middleware | App-wide cross-cutting concerns (logging, auth, exception handling) | No direct controller action context |\n| Controller filters | Concerns tied to Web API controllers/actions and model/action context | Their stages do not apply to Minimal API handlers |\n| Endpoint filters | Minimal API handler behavior, or explicit attachment to mapped controller actions | Invocation context differs from controller model-state and action-result context |\n\n# Questions\n\n<!-- qard-id: b5d3f2ba-51a2-4fd2-9508-aa0de30ad608 -->\n> [!qard]- In an ASP.NET Core controller-based Web API, what is the normal order of filter stages?\n> After routing selects a controller action, the filter stages run in this order: authorization, resource, action, then result. Exception filters are not a sequential stage; they run only when an unhandled exception occurs.\n>\n> 1. **Authorization filters** run first and can short-circuit an unauthorized request.\n> 2. **Resource filters** run their before logic next, ahead of model binding, and their after logic last, once the rest of the pipeline has completed.\n> 3. **Action filters** run immediately before and after the action method.\n> 4. **Result filters** run immediately before and after the action result executes.\n> \n> Full flow: authorization → resource (before) → action (before) → action method → action (after) → result (before) → result execution → result (after) → resource (after).\n>\n> Action filters finish before result filters start, so an action filter's after logic can still replace the result. Only resource filters wrap both the action and the result stages.\n>\n> These are controller-filter stages. Minimal API handlers use endpoint filters rather than this staged controller pipeline.\n>\n> [Microsoft: Filters in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/mvc/controllers/filters?view=aspnetcore-10.0)\n<!-- qard-id: ec8874e5-0ca6-4d53-a3dd-6594e0a512e3 -->\n> [!qard]- Which exceptions can controller exception filters handle in an ASP.NET Core Web API?\n> Controller exception filters handle only unhandled exceptions raised during controller creation, model binding, action filters or the action method. They are not a before-and-after stage; they run only when such an exception occurs.\n>\n> **Not covered:**\n>\n> - Exceptions from authorization filters and resource filters, which run outside that part of the pipeline.\n> - Exceptions from result filters or from executing the action result.\n> - Exceptions from middleware, routing or Minimal API handlers, which run outside the controller-filter pipeline.\n>\n>\n> [Microsoft: Filters in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/mvc/controllers/filters?view=aspnetcore-10.0)\n\n> [!qard]- What happens after an ASP.NET Core controller exception filter handles an exception?\n> - **Handled:** the filter sets `ExceptionHandled` to `true` or assigns a `Result`, and the exception stops propagating. A supplied `Result` is executed as the response. Ordinary result filters do not run around it; only always-run result filters, such as `IAlwaysRunResultFilter` implementations, do.\n> - **Not handled:** the exception leaves the controller-filter pipeline and continues to outer middleware, such as exception-handling middleware.\n> \n> Because of these gaps, exception-handling middleware is the broader boundary for a uniform API error response.\n>\n> [Microsoft: Filters in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/mvc/controllers/filters?view=aspnetcore-10.0)\n<!-- qard-id: b115f4c1-4ffb-413c-917b-d5fcdb62cb05 -->\n> [!qard]- Within one ASP.NET Core Web API controller-filter type, how do scope and the `Order` property determine execution order?\n> By default, scope decides the order among filters of one type: global filters wrap controller filters, which wrap action filters. An explicit `Order` value, exposed through `IOrderedFilter`, takes precedence over scope.\n>\n> - **Equal `Order` values:** before logic runs global → controller → action, and after logic runs action → controller → global.\n> - **Different `Order` values:** filters are sorted by `Order` first and by scope second. A lower value runs its before logic earlier and its after logic later, so it wraps filters with higher values regardless of their scope.\n> \n> For example, an action-level action filter with `Order` 0 runs its before logic ahead of a global action filter with `Order` 1.\n>\n> This ordering only arranges filters of the same type. It cannot move an action filter ahead of an authorization filter, because each filter type runs at its own stage of the controller pipeline.\n>\n> [Microsoft: Filters in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/mvc/controllers/filters?view=aspnetcore-10.0)\n\n# References\n\n- [Filters in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/mvc/controllers/filters?view=aspnetcore-10.0)\n",
-            "hash": "34862c04ee18444085e97f5dce6e6dc92dc19b86fc992a6e4eb8135b0138391f",
+            "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Methods.md",
+            "content": "---\ntopic: [Programming]\nsubtopic: [NET]\nsummary: \"C#'s unit of behavior, covering parameter modifiers and dispatch keywords.\"\nlevel: [\"4\"]\npriority: Medium\nstatus: Ready to Repeat\npublish: true\nqard-deck: \"Programming\"\nqard-topic: \"NET/CSharp/Fundamentals/Methods\"\nflashcard_uid: \"a3e803d0\"\ncreated: \"2026-02-15T16:27:13.000Z\"\nmodified: \"2026-11-02T09:03:54.806Z\"\n---\n\nMethods define where behavior begins and what data may cross the boundary. The parameter list is part of that contract. By-value parameters isolate the caller's variable, `ref` and `out` expose it for reassignment, and `in` exposes storage as readonly. `params` changes how an expanded argument list is collected at the call site.\n\nInheritance adds a separate question: which implementation runs? `virtual` and `override` use runtime dispatch. `new` hides a member and leaves selection to the compile-time type of the reference. Similar syntax, very different behavior.\n\n# Input Parameters\n\n## Ref\n\n`ref` aliases the caller's storage rather than copying its current value into a new parameter variable.\n\n- The caller must initialize the variable.\n- The method can read and write the variable.\n\nFor reference types, `ref` allows the callee to replace the caller's reference rather than only mutate the referenced object:\n\n```csharp\nclass MyClass {}\n\nstatic void ModifyReference(ref MyClass obj)\n{\n    obj = new MyClass();\n}\n\nvar myObj = new MyClass();\nModifyReference(ref myObj);\n```\n\nFor value types, `ref` allows the callee to update the caller's variable:\n\n```csharp\nstatic void InitializeAndModify(ref int value)\n{\n    value = 10;\n}\n\nint num = 0;\nInitializeAndModify(ref num);\n```\n\n## In\n\n`in` is a readonly by-reference parameter. It can avoid copying a large struct, though the compiler may still create a temporary for argument expressions that are not variables.\n\n- The caller must initialize the argument.\n- The method can read, but cannot assign to the parameter.\n- It is most useful when measurements show that copying a large readonly struct matters.\n\n```csharp\nstatic void ProcessData(in int value)\n{\n    // value = 10; // Compile-time error\n    Console.WriteLine(value);\n}\n```\n\n## Out\n\n`out` also aliases caller storage, but the value flows outward. The caller need not initialize it, and every normal return path must assign it. This supports `Try*` APIs that separate success from the produced value.\n\n```csharp\nstatic bool TryDivide(int a, int b, out int result)\n{\n    if (b == 0) { result = 0; return false; }\n    result = a / b;\n    return true;\n}\n\nif (TryDivide(10, 2, out var quotient))   // 'quotient' declared inline\n    Console.WriteLine(quotient);           // 5\n```\n\n`Dictionary.TryGetValue` shows the boundary well: a missing key is expected input, so a Boolean result is clearer than an exception.\n\n## Params\n\n`params` lets callers provide zero or more arguments without constructing the parameter collection explicitly. C# 13 extended the feature beyond arrays to recognized collection types.\n\n- Must be the last parameter in the method signature.\n- Individual arguments or no arguments use expanded form, which constructs the declared `params` collection at the call site.\n- Normal form accepts one expression implicitly convertible to the declared parameter type. An array works only when that array-to-parameter conversion exists, including the applicable array-to-span conversion.\n\n```csharp\nstatic int Sum(params int[] numbers)\n{\n    int total = 0;\n    foreach (var n in numbers)\n        total += n;\n    return total;\n}\n\nSum(1, 2, 3);   // 6\nSum();           // 0\nSum(new[] { 4, 5 }); // 9 — explicit array also works\n```\n\nC# 13 permits collection types such as `Span<T>`, `ReadOnlySpan<T>`, and types with a suitable collection-builder shape. Allocation behavior still depends on the declared parameter type and whether the call uses expanded or normal form.\n\n```csharp\nstatic int Sum(params ReadOnlySpan<int> numbers)\n{\n    int total = 0;\n    foreach (var n in numbers)\n        total += n;\n    return total;\n}\n```\n\n# Inheritance Method Keywords\n\n## Virtual\n\n`virtual` marks a base implementation as an extension point. Calls through a base reference still select the most-derived override at runtime.\n\n- Enables runtime polymorphism.\n- Calls are resolved by the runtime type, not just the variable type.\n\n```csharp\nclass Animal\n{\n    public virtual string Speak() => \"...\";\n}\n```\n\n## Override\n\n`override` supplies the derived implementation of a virtual or abstract member while keeping the same dispatch slot.\n\n- Signature must match the base member.\n- The derived method can still call the base implementation with `base.MethodName()`.\n\n```csharp\nclass Dog : Animal\n{\n    public override string Speak() => \"Woof\";\n}\n```\n\n## New\n\n`new` declares a separate member that hides one inherited with the same name. It does not join the base member's dispatch slot.\n\n- Behavior depends on the compile-time type of the variable.\n- `new` is appropriate only as a deliberate choice when member hiding, rather than polymorphism, is the required behavior.\n\n```csharp\nclass Animal\n{\n    public string Category() => \"Animal\";\n}\n\nclass Dog : Animal\n{\n    public new string Category() => \"Dog\";\n}\n```\n\n## Virtual Vs Override Vs New in One Example\n\n```csharp\nclass Animal\n{\n    public virtual string Speak() => \"...\";\n    public string Category() => \"Animal\";\n}\n\nclass Dog : Animal\n{\n    public override string Speak() => \"Woof\";\n    public new string Category() => \"Dog\";\n}\n\nAnimal asAnimal = new Dog();\nDog asDog = new Dog();\n\nConsole.WriteLine(asAnimal.Speak());    // Woof (runtime dispatch)\nConsole.WriteLine(asDog.Speak());       // Woof\nConsole.WriteLine(asAnimal.Category()); // Animal (member hiding)\nConsole.WriteLine(asDog.Category());    // Dog\n```\n\nBoth objects have the same runtime type. Only the lookup rule changes: runtime type for `Speak`, compile-time reference type for `Category`.\n\n# Other Method Forms\n\n- **`ref return` and `ref readonly return`** return an alias to existing storage. The writable form lets a caller update that storage. The readonly form avoids a copy without granting mutation. Ref-safety rules prevent the alias from outliving its source.\n- **Local functions** name behavior inside another method. A `static` local function cannot capture outer state, and a direct call needs no delegate. A lambda is the natural form when the method must produce a `Func` or `Action` value.\n- **Extension methods** are static methods whose first parameter has the `this` modifier. They participate in normal static overload resolution and do not modify the extended type.\n- **Expression-bodied members** use shorter syntax for a single expression. Their call and dispatch semantics do not change.\n\nA method's signature does not include its generic constraints, and `object` and `dynamic` cannot distinguish signatures. Methods differing only in either respect are duplicate declarations, not ambiguous choices at a call site.\n\n**Overload resolution** compares the applicable candidates and their required conversions. Optional and named arguments affect applicability, while an unresolved tie is a compile error. Modern compilers can cache some static method-group conversions, but capturing lambdas and instance targets still need their own lifetime analysis.\n\n# Pitfalls\n\n- Optional defaults are copied into the caller at compile time. Changing a library's default does not affect an already compiled consumer, so a default-value change can create version-dependent behavior.\n- An `in` parameter does not guarantee zero copies. Conversions and non-variable arguments can require temporaries, and readonly access to a mutable struct may trigger defensive copies.\n- Member hiding with `new` makes the result depend on the reference's compile-time type. That split is hard to reason about in public APIs unless compatibility requires it.\n\n# Tradeoffs\n\n| Decision | Option A | Option B | When A | When B |\n| --- | --- | --- | --- | --- |\n| **By-value vs `in`** | By-value copies the value | `in` passes a readonly alias | Small values and ordinary APIs | Large readonly structs on a measured hot path |\n| **`in` vs `ref`** | `in` forbids reassignment through the parameter | `ref` permits it | The callee only reads | Mutation or rebinding is part of the contract |\n| **`override` vs `new`** | `override` uses runtime polymorphism | `new` uses compile-time hiding | Derived behavior must work through base references | A deliberate compatibility split requires a separate member |\n| **`params T[]` vs `params ReadOnlySpan<T>`** | Array form is broadly compatible and can be retained by the callee | Span form is stack-only and cannot escape | The method or caller needs array semantics | Synchronous processing benefits from span-based calls |\n\nBy-value parameters and ordinary virtual dispatch are the default. By-reference semantics fit when aliasing is part of the API or profiling shows that struct copies matter. `new` fits only when compile-time hiding is the intended contract.\n\n# Questions\n\n> [!qard]- How do `ref`, `out`, and `in` parameters differ?\n> All three pass the argument by reference instead of copying its value. For `ref` and `out`, the parameter always aliases the caller's variable. For `in`, it aliases the caller's variable when the argument is a variable of the parameter's type. An `in` argument that is not a variable, or that needs a conversion, can instead be copied into a temporary, and the parameter then refers to that temporary. The three modifiers differ in which direction data may flow through the reference.\n>\n> | Modifier | How data flows through the reference | Typical use |\n> |---|---|---|\n> | `ref` | Both ways. The caller must initialize the variable, and the method can read it and assign it. The caller sees any assignment | Updating or replacing the caller's variable |\n> | `out` | Outward. The caller can pass an unassigned variable. The method cannot read it before assigning it and must assign it before every normal return | Returning an extra result, as in `Try` methods such as `Dictionary.TryGetValue` |\n> | `in` | Inward and readonly. The caller must initialize the argument, and the method can read the parameter but cannot assign it | Avoiding copies of a large struct on a measured hot path |\n>\n> Without a modifier, the parameter is a copy, so assigning it never changes the caller's variable.\n>\n> [Microsoft: method parameters](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/method-parameters)\n\n<!-- qard-id: a16bf465-c1ae-4bca-909c-6f7462f37ca6 -->\n> [!qard]- Why would a method need `ref` when the argument is already a reference type?\n> A reference-type argument passes a copy of the reference. The method can mutate the shared object through that copy, but assigning a different object changes only its local copy. `ref` aliases the caller’s variable, allowing the method to replace the reference stored there. [Microsoft: method parameters](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/method-parameters)\n\n<!-- qard-id: 1fe4393b-4d8c-4e2c-9ae5-769106b13e65 -->\n> [!qard]- What does an `in` parameter prevent the callee from changing?\n> It prevents assignment through the readonly parameter alias. With a reference-type argument, the callee cannot replace the caller's reference through the parameter, but it can call methods that mutate the referenced object. Readonly passing does not make that object immutable. With a mutable struct receiver, calling a potentially mutating member can operate on a defensive copy instead.\n>\n> [Microsoft: method parameters](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/method-parameters)\n\n> [!qard]- When can an `in` parameter improve performance?\n> It can avoid copying a large readonly struct on a measured hot path. Conversions and non-variable arguments can still require temporaries, and readonly access to a mutable struct can trigger defensive copies. Indirection also has a cost, so a small value may be cheaper to pass by value.\n>\n> [Microsoft: method parameters](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/method-parameters)\n\n<!-- qard-id: 19ea3788-056c-4ed6-8bc6-2087ae866f65 -->\n> [!qard]- How does C# apply an optional parameter's default value, and why can already-compiled callers keep an old default?\n> The default is applied at the call site. When an ordinary compiled call omits an optional argument, the compiler inserts the declared default value into the caller's code, and the method receives it like any other argument.\n>\n> The declaration rules fit that mechanism:\n>\n> - **The default must be a compile-time value:** a constant expression, `default(S)`, or `new S()` where `S` is a value type. The compiler has to be able to write the value into each call.\n> - **Optional parameters come after all required parameters.** Named arguments let a call supply a later optional argument while omitting earlier ones.\n> \n> **Versioning consequence:** the default lives in each caller's compiled code. If a library changes a default, callers compiled against the old version keep passing the old value until they are recompiled. A public default value is therefore part of the library's compatibility contract.\n>\n> [Microsoft: named and optional arguments](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/named-and-optional-arguments) · [C#: 12.6.2.3 Run-time evaluation of argument lists](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#12623-run-time-evaluation-of-argument-lists)\n\n<!-- qard-id: ffd19d60-4643-4ede-92ff-83ba55b3f613 -->\n> [!qard]- When `Animal a = new Dog();` calls `a.Category()`, what makes the call run `Dog`'s implementation?\n> `Animal.Category()` must be declared `virtual`, and `Dog` must implement `Category()` with `override`. The call is then resolved by the runtime type of the object, `Dog`, rather than by the declared type of the variable, `Animal`.\n>\n> Methods are non-virtual by default. A non-virtual `a.Category()` binds to `Animal.Category()` because `a` is declared as `Animal`, even when `Dog` declares its own `Category()` with `new`.\n>\n> [Microsoft: virtual keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/virtual) · [Microsoft: new modifier](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/new-modifier) · [Microsoft: base keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/base) · [Microsoft: sealed modifier](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/sealed)\n\n> [!qard]- What does declaring a base-class method `virtual` commit that API to?\n> A virtual member is an extension point. Derived classes can replace its behavior, unless an override along the hierarchy is marked `sealed`, which stops classes below it from overriding the member again. Ordinary calls to the member on such an object run the most-derived override, including calls made from code inside the base class. An explicit call through `base` in a derived class is the exception: it runs the base class's implementation rather than the most-derived override. The base class can therefore no longer assume that its own implementation of that member is the one that runs.\n>\n> [Microsoft: virtual keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/virtual) · [Microsoft: new modifier](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/new-modifier) · [Microsoft: base keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/base) · [Microsoft: sealed modifier](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/sealed)\n\n<!-- qard-id: 13e7573c-4ba4-4f2b-a316-4f2dcb52ccd6 -->\n> [!qard]- A base method is not virtual, but a derived class needs different behavior. What are the options, and which ones work through a base-class reference?\n> Only virtual dispatch makes a call through a base-class reference run derived code. Making the base member `virtual` and overriding it is therefore the only option that works through such a reference. Hiding with `new` affects only derived-typed references, and composition moves the variation out of inheritance.\n>\n> | Option | Call through a base reference | Fits when |\n> |---|---|---|\n> | Base member made `virtual`, derived member marked `override` | Runs the derived implementation, chosen by the object's runtime type | The base type can be changed and derived objects are meant to substitute for base objects |\n> | Derived member declared with `new` (hiding) | Still runs the base implementation. Only references typed as the derived class reach the new member | Hiding itself is the intended behavior, such as a deliberate compatibility split, not polymorphism |\n> | Composition | No inheritance dispatch is involved. The class delegates the varying step to an object it holds | The base cannot be changed, or the variation is not a natural subtype relationship |\n>\n> Hiding is the common trap. The same object behaves differently depending on whether it is referenced as the derived type or as the base type.\n>\n> [Microsoft: virtual keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/virtual) · [Microsoft: new modifier](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/new-modifier)\n\n> [!qard]- Can overloads differ only by `object` versus `dynamic`, or by generic constraints?\n> No. Neither distinction gives these methods different signatures. `M(object value)` and `M(dynamic value)` collide, as do two `M<T>(T value)` declarations distinguished only by `where T : class` versus `where T : struct`. The compiler rejects the duplicate declarations before resolving any call. `dynamic` still changes binding of operations that use it; sharing this signature representation does not make its behavior identical to `object`. [C# specification: signatures and overloading](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/basic-concepts#76-signatures-and-overloading)\n\n> [!qard]- Which receiver type controls extension-method lookup?\n> The compile-time type controls lookup. With `Base value = new Derived()`, a method declared only on `Derived` is not found through `value`; an applicable extension for `Base` can be selected instead. An applicable instance method found by ordinary lookup takes precedence over an extension. Generic constraints determine whether an extension candidate is applicable, not whether runtime dispatch replaces it. [Microsoft: extension methods](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/extension-methods)\n\n> [!qard]- Why can `Print<T>(T value)` beat `Print(Base value)` for an argument declared as `Derived`?\n> Type inference can infer `T` as `Derived`, giving the generic candidate an identity conversion. The non-generic candidate needs a conversion from `Derived` to `Base`, so it is a worse match. The generic candidate does not win merely because its constraints are satisfied; constraints must hold for applicability, and otherwise-equivalent candidates have additional tie-breakers. An argument declared as `object` is considered as `object`, even when its runtime value is a string. [C# specification: overload resolution](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#1264-overload-resolution)\n\n> [!qard]- Why can adding an applicable derived overload change a call that previously used a base overload?\n> Method lookup can find an applicable declaration on the derived type and exclude base declarations before the better-function-member comparison. For a derived `Process(double)` and inherited `Process(int)`, `derived.Process(5)` can select the derived member using the implicit int-to-double conversion. This is a lookup rule, not virtual dispatch or a blanket rule that every same-named derived method excludes every base member. Public overload additions can therefore change source behavior when callers recompile. [C# specification: method invocations](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#128103-method-invocations)\n\n> [!qard]- When does a returned `ref` let a caller change the original storage?\n> The caller must retain the alias with a `ref` local or another ref-aware operation. Ordinary assignment reads and copies the value instead:\n>\n> ```csharp\n> static ref int Larger(ref int first, ref int second)\n> {\n>     if (first > second)\n>     {\n>         return ref first;\n>     }\n>     return ref second;\n> }\n>\n> int a = 5;\n> int b = 10;\n> ref int selected = ref Larger(ref a, ref b);\n> // This changes b to 100.\n> selected = 100;\n> ```\n>\n> A separate `out` assignment copies a value into its own destination; it does not create another alias to the returned storage. Ref-safety rules prevent returning storage whose lifetime is too short, such as an ordinary local that disappears when the method returns. [Microsoft: ref returns and ref locals](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/jump-statements#ref-returns)\n\n# References\n\n- [Method parameters](https://learn.microsoft.com/dotnet/csharp/language-reference/keywords/method-parameters#reference-parameters)\n- [C# 13: Calling methods is easier and faster](https://devblogs.microsoft.com/dotnet/csharp13-calling-methods-is-easier-and-faster/)\n",
+            "hash": "192d71e76e9f6570921c5098668a2f578152bd98b0eb6025b18b2f2f13c34d9c",
             "topic": "Programming",
             "violations": [],
             "needs_fixing_ids": [
-              "b115f4c1-4ffb-413c-917b-d5fcdb62cb05",
-              "ec8874e5-0ca6-4d53-a3dd-6594e0a512e3"
+              "19ea3788-056c-4ed6-8bc6-2087ae866f65",
+              "ffd19d60-4643-4ede-92ff-83ba55b3f613"
             ],
-            "repair_input_hash": "578d6ad0ba9e8ee7aa5d90b0a9c088816cb3dd2b85a6170327590d485d2b4292",
+            "repair_input_hash": "585c5cf07d62743fa5906021218081ef4982d360595eda4807575e11b5254c72",
             "selection_reason": "rules_changed"
           }
         ],
@@ -5229,137 +5229,83 @@
       },
       "proposal": {
         "version": 1,
-        "edits": [
-          {
-            "path": "Vault/Home/Programming/NET/ASP NET Web API/Filters.md",
-            "expected_hash": "34862c04ee18444085e97f5dce6e6dc92dc19b86fc992a6e4eb8135b0138391f",
-            "before": "`[Authorize]` contributes authorization metadata. Under default endpoint routing, authorization middleware enforces that metadata before the controller endpoint runs. Duplicating policy checks in an action filter creates two access-control paths. Within a filter type, the usual nesting is global, controller, then action on the way in and the reverse on the way out. If a filter implements both sync and async forms of the same stage, the runtime invokes only the async interface. The filter's synchronous methods then run only when that async implementation calls them, as the default async methods of `ActionFilterAttribute` do, so custom filter logic belongs in one form per stage.",
-            "after": "# Ordering and Sync Versus Async Forms\n\nWithin a filter type, the usual nesting is global, controller, then action on the way in and the reverse on the way out. If a filter implements both sync and async forms of the same stage, the runtime invokes only the async interface. The filter's synchronous methods then run only when that async implementation calls them, as the default async methods of `ActionFilterAttribute` do, so custom filter logic belongs in one form per stage.",
-            "reason": "Moves ordering and sync/async rules out of the attachment section into their own heading; the authorization point is kept once, in Pitfalls.",
-            "kind": "note",
-            "learning_target": "same",
-            "essential_meanings": [
-              "Ordering and sync/async rules are separate from attachment mechanics"
-            ],
-            "sources": [],
-            "feedback_keys": [],
-            "problem": "The paragraph under the attachment heading mixes authorization metadata, scope nesting and the sync/async rule, which are unrelated to how filters are attached, and repeats the authorization point from Pitfalls.",
-            "reader_benefit": "Attachment mechanics and ordering rules can each be found and re-entered directly."
-          },
-          {
-            "path": "Vault/Home/Programming/NET/ASP NET Web API/Filters.md",
-            "expected_hash": "34862c04ee18444085e97f5dce6e6dc92dc19b86fc992a6e4eb8135b0138391f",
-            "before": "- **Authorization in action filters:** a second permission system drifts away from registered policies. Access decisions belong in authentication handlers and authorization policies.",
-            "after": "- **Authorization in action filters:** `[Authorize]` contributes metadata that authorization middleware enforces before the controller endpoint runs under default endpoint routing. Repeating policy checks in an action filter creates a second permission system that drifts away from registered policies. Access decisions belong in authentication handlers and authorization policies.",
-            "reason": "Keeps the authorization-metadata point in one place, where it supports the pitfall.",
-            "kind": "note",
-            "learning_target": "same",
-            "essential_meanings": [
-              "Authorize metadata is enforced by middleware",
-              "Duplicate checks in filters drift"
-            ],
-            "sources": [],
-            "feedback_keys": [],
-            "problem": "The authorization explanation was stranded under the attachment heading.",
-            "reader_benefit": "The pitfall now carries its own mechanism."
-          },
-          {
-            "path": "Vault/Home/Programming/NET/ASP NET Web API/Filters.md",
-            "expected_hash": "34862c04ee18444085e97f5dce6e6dc92dc19b86fc992a6e4eb8135b0138391f",
-            "before": "Because of these gaps, exception-handling middleware is the broader boundary for a uniform API error response.",
-            "after": "Because exception filters miss errors from middleware, routing, resource filters and result execution, exception-handling middleware is the broader boundary for a uniform API error response.",
-            "reason": "Names the gaps so the answer is self-contained.",
-            "kind": "rewrite",
-            "learning_target": "same",
-            "essential_meanings": [
-              "Exception filters have coverage gaps",
-              "Middleware is the broader choice for uniform errors"
-            ],
-            "sources": [],
-            "feedback_keys": [],
-            "problem": "The answer says 'these gaps' without stating them.",
-            "reader_benefit": "The card can be understood and graded on its own."
-          }
-        ],
+        "edits": [],
         "dispositions": [
           {
-            "path": "Vault/Home/Programming/NET/ASP NET Web API/Filters.md",
-            "outcome": "changed",
-            "reason": "Facts match the cited filters documentation. Two editorial fixes: the ordering/sync-async rules now have their own heading instead of sitting under attachment mechanics, with the authorization point kept once in Pitfalls, and the third card names the exception-filter gaps rather than saying 'these gaps'."
+            "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Methods.md",
+            "outcome": "keep",
+            "reason": "I read the whole note against Microsoft's C# documentation and specification. The ref, in, out and params sections are accurate. They cover the aliasing rules, the temporaries and defensive copies that `in` can need, and the C# 13 params collections with normal versus expanded form. The virtual, override and new section and its combined example correctly show runtime dispatch versus compile-time hiding. The overload-resolution and extension-lookup cards state their conditions correctly. The two flagged cards hold up. The optional-parameter card correctly says the compiler inserts the default at the call site. It correctly limits defaults to constants, `default(S)` and `new S()`, and it draws the right recompilation consequence. The Category card correctly says that running Dog's implementation through an Animal reference needs a virtual base member and an override. It also explains why the note's `new` example gives the base result. Its source list is longer than needed but not wrong. Each card tests one gradeable task, and none of the ID-bearing cards needs retargeting. The note has no known violations, so I made no edit."
           }
         ],
-        "feedback": [],
-        "decisions": []
+        "feedback": []
       },
       "source_hashes": {
-        "Vault/Home/Programming/NET/ASP NET Web API/Filters.md": "34862c04ee18444085e97f5dce6e6dc92dc19b86fc992a6e4eb8135b0138391f"
+        "Vault/Home/Programming/NET/CSharp/Fundamentals/Methods.md": "192d71e76e9f6570921c5098668a2f578152bd98b0eb6025b18b2f2f13c34d9c"
       },
       "feedback_keys": [],
       "rules_hash": "264d16c1cdd0550e8de34525350fcc463d41b1c8095a38a38008f9f84304bb03",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
       "repair_inputs": {
-        "Vault/Home/Programming/NET/ASP NET Web API/Filters.md": "578d6ad0ba9e8ee7aa5d90b0a9c088816cb3dd2b85a6170327590d485d2b4292"
+        "Vault/Home/Programming/NET/CSharp/Fundamentals/Methods.md": "585c5cf07d62743fa5906021218081ef4982d360595eda4807575e11b5254c72"
       },
       "prepared_source_version": 1,
-      "prepared_at": "2026-11-03T19:47:17.980368Z",
-      "review_repair_key": "1cb12d9ccd7fcc8097d310914ca72601ee9b147e23bfcc588ab6255970079a9b",
-      "repair_reserved": true,
-      "repair_review": {
+      "prepared_at": "2026-11-03T19:49:16.804578Z",
+      "completed_review": {
         "verdict": "CHANGES REQUIRED",
-        "overall_reason": "The facts check out against my knowledge of the ASP.NET Core filters documentation, but two reader-facing defects remain unfixed. One is a mis-sorted paragraph under the attachment heading. The other is a dangling \"these gaps\" reference in a card answer. The keep disposition also says the sources were not re-fetched.",
+        "overall_reason": "The note is technically accurate, but the author kept it unchanged even though the Category card is still flawed. That card's question is not self-contained, and its answer cites sources that do not support it.",
         "notes": [
           {
-            "path": "Vault/Home/Programming/NET/ASP NET Web API/Filters.md",
+            "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Methods.md",
             "verdict": "CHANGES REQUIRED",
-            "summary": "The technical content is accurate and the cards are well scoped. Two concrete editorial defects were not addressed. The paragraph under the attachment heading mixes unrelated topics. One card answer refers to \"these gaps\" that the card never states.",
-            "page_type": "Concept — typed frontmatter, optional Questions and References present. Qard IDs and metadata are protected.",
+            "summary": "The prose, code samples and most cards are accurate and well ordered. The flagged Category card still has a question-quality defect. Its question refers to Animal, Dog and Category without defining them, and its answer cites the base and sealed pages, which have nothing to do with it. The keep disposition called the source list 'longer than needed' but left it.",
+            "page_type": "Concept note (publish: true). Optional Questions and References sections are present. Qard IDs are protected metadata.",
             "current_text_evidence": [
               {
-                "quote": "`[Authorize]` contributes authorization metadata.",
-                "line_start": 102,
-                "reason": "This paragraph sits under the heading about ServiceFilter, TypeFilter and IFilterFactory. It combines authorization metadata, scope nesting and the sync/async rule, none of which concern attachment. That hurts re-entry, and the authorization point is repeated in Pitfalls."
+                "quote": "When `Animal a = new Dog();` calls `a.Category()`, what makes the call run `Dog`'s implementation?",
+                "line_start": 270,
+                "reason": "The question relies on types and a method that are defined only elsewhere in the note, where Category is non-virtual and hidden with `new`. Essential meanings do not follow from the question, so it is not self-contained."
               },
               {
-                "quote": "Because of these gaps, exception-handling middleware is the broader boundary for a uniform API error response.",
-                "line_start": 153,
-                "reason": "The card answer never lists any gaps. The coverage gaps are in the neighbouring card, so this card is not self-contained."
+                "quote": "[Microsoft: base keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/base) · [Microsoft: sealed modifier]",
+                "line_start": 274,
+                "reason": "The base and sealed pages are irrelevant to the Category answer. They look copied from the neighbouring virtual card, so the answer-side sources are padded."
               },
               {
-                "quote": "Exception filters are not a sequential stage; they run only when an unhandled exception occurs.",
-                "line_start": 122,
-                "reason": "This is accurate. The stage-order card is sound and consistent with the prose."
+                "quote": "How does C# apply an optional parameter's default value, and why can already-compiled callers keep an old default?",
+                "line_start": 257,
+                "reason": "This card is acceptable. It covers one dependent mechanism-and-consequence explanation, and its answer is accurate."
               },
               {
-                "quote": "Controller exception filters handle only unhandled exceptions raised during controller creation, model binding, action filters or the action method.",
-                "line_start": 138,
-                "reason": "This matches the documented exception-filter coverage."
+                "quote": "Both objects have the same runtime type. Only the lookup rule changes",
+                "line_start": 196,
+                "reason": "The prose is accurate and well ordered, and it reads as a whiteboard explanation. It needs no rewrite."
               }
             ],
             "target_resolution": "UNRESOLVED",
-            "split_suggestion": "No split: the note covers one coherent topic, controller filters and their boundary with middleware and endpoint filters. The material is not independently separable.",
+            "split_suggestion": "No split: parameter modifiers, dispatch keywords and overload resolution form one coherent Methods topic, and length alone is not a reason to separate them.",
             "findings": [
               {
                 "severity": "Medium",
-                "dimension": "Explanation order / readability",
-                "location": "`# Applying Filters` final paragraph, line 102",
-                "evidence": "A single paragraph under the attachment heading covers [Authorize] enforcement, scope nesting and the sync/async-interface rule.",
-                "effect": "A reader looking for attachment mechanics finds unrelated rules. The sync/async rule is easy to miss, and the authorization point duplicates Pitfalls.",
-                "fix": "Move the nesting and sync/async sentences into their own short section, or into Pitfalls or the ordering prose. Drop the duplicated authorization sentence, keeping it in Pitfalls."
+                "dimension": "Question quality",
+                "location": "Questions, Category card (qard-id ffd19d60-4643-4ede-92ff-83ba55b3f613)",
+                "evidence": "The question mentions `Animal a`, `Dog` and `Category()` without declaring them. Its answer then says the method must be virtual, which contradicts the note's own non-virtual `new` example.",
+                "effect": "A reader cannot answer from the question alone and may recall the wrong setup. The card is not self-contained.",
+                "fix": "Keep the existing ID and rewrite the question as a direct, self-contained one, such as: which modifiers on a base member and a derived member make a call through a base-typed reference run the derived implementation? Then trim the sources to the virtual and new pages."
               },
               {
                 "severity": "Medium",
-                "dimension": "Question quality",
-                "location": "Third card, line 153",
-                "evidence": "\"Because of these gaps...\" refers to gaps that this card does not state.",
-                "effect": "The answer is not self-contained, so a reader cannot follow why middleware is broader.",
-                "fix": "Rephrase to name the gap, for example: \"Because exception filters miss middleware, routing, resource-filter and result-execution errors, exception-handling middleware is the broader boundary.\""
+                "dimension": "References on the answer side",
+                "location": "Category card source line",
+                "evidence": "The base and sealed pages are cited, but the answer never uses either.",
+                "effect": "The card carries sources that do not support it, which clutters it and weakens verification.",
+                "fix": "Remove the base and sealed links from this card."
               }
             ],
             "source_checks": [],
             "rejection_equivalence": [],
             "quality": {
               "accuracy": "PASS",
-              "clarity": "FAIL",
+              "clarity": "PASS",
               "question_quality": "FAIL",
               "identity_safety": "PASS",
               "rules_compliance": "PASS"
@@ -5368,25 +5314,71 @@
         ],
         "change_checks": []
       },
-      "repair_previous_proposal": {
-        "version": 1,
-        "edits": [],
-        "dispositions": [
+      "blocked_review": {
+        "verdict": "CHANGES REQUIRED",
+        "overall_reason": "The note is technically accurate, but the author kept it unchanged even though the Category card is still flawed. That card's question is not self-contained, and its answer cites sources that do not support it.",
+        "notes": [
           {
-            "path": "Vault/Home/Programming/NET/ASP NET Web API/Filters.md",
-            "outcome": "keep",
-            "reason": "Audited the whole note against the ASP.NET Core filters documentation as I know it. Checked: stage order and short-circuiting; exception-filter coverage (controller creation, model binding, action filters, action methods; not resource or result filters or result execution); the sync/async rule that only the async interface is invoked; ServiceFilter versus TypeFilter versus IFilterFactory; Order overriding scope; and the endpoint-filter and middleware comparison. All are accurate. The three cards each test one gradeable task. The flagged cards (exception coverage, Order and scope) are correct, self-contained and consistent with the prose. The code examples are coherent and the structure is clear. I did not re-fetch the sources in this pass, so the keep rests on prior knowledge of the documentation. No defect found, and no known native violations."
+            "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Methods.md",
+            "verdict": "CHANGES REQUIRED",
+            "summary": "The prose, code samples and most cards are accurate and well ordered. The flagged Category card still has a question-quality defect. Its question refers to Animal, Dog and Category without defining them, and its answer cites the base and sealed pages, which have nothing to do with it. The keep disposition called the source list 'longer than needed' but left it.",
+            "page_type": "Concept note (publish: true). Optional Questions and References sections are present. Qard IDs are protected metadata.",
+            "current_text_evidence": [
+              {
+                "quote": "When `Animal a = new Dog();` calls `a.Category()`, what makes the call run `Dog`'s implementation?",
+                "line_start": 270,
+                "reason": "The question relies on types and a method that are defined only elsewhere in the note, where Category is non-virtual and hidden with `new`. Essential meanings do not follow from the question, so it is not self-contained."
+              },
+              {
+                "quote": "[Microsoft: base keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/base) · [Microsoft: sealed modifier]",
+                "line_start": 274,
+                "reason": "The base and sealed pages are irrelevant to the Category answer. They look copied from the neighbouring virtual card, so the answer-side sources are padded."
+              },
+              {
+                "quote": "How does C# apply an optional parameter's default value, and why can already-compiled callers keep an old default?",
+                "line_start": 257,
+                "reason": "This card is acceptable. It covers one dependent mechanism-and-consequence explanation, and its answer is accurate."
+              },
+              {
+                "quote": "Both objects have the same runtime type. Only the lookup rule changes",
+                "line_start": 196,
+                "reason": "The prose is accurate and well ordered, and it reads as a whiteboard explanation. It needs no rewrite."
+              }
+            ],
+            "target_resolution": "UNRESOLVED",
+            "split_suggestion": "No split: parameter modifiers, dispatch keywords and overload resolution form one coherent Methods topic, and length alone is not a reason to separate them.",
+            "findings": [
+              {
+                "severity": "Medium",
+                "dimension": "Question quality",
+                "location": "Questions, Category card (qard-id ffd19d60-4643-4ede-92ff-83ba55b3f613)",
+                "evidence": "The question mentions `Animal a`, `Dog` and `Category()` without declaring them. Its answer then says the method must be virtual, which contradicts the note's own non-virtual `new` example.",
+                "effect": "A reader cannot answer from the question alone and may recall the wrong setup. The card is not self-contained.",
+                "fix": "Keep the existing ID and rewrite the question as a direct, self-contained one, such as: which modifiers on a base member and a derived member make a call through a base-typed reference run the derived implementation? Then trim the sources to the virtual and new pages."
+              },
+              {
+                "severity": "Medium",
+                "dimension": "References on the answer side",
+                "location": "Category card source line",
+                "evidence": "The base and sealed pages are cited, but the answer never uses either.",
+                "effect": "The card carries sources that do not support it, which clutters it and weakens verification.",
+                "fix": "Remove the base and sealed links from this card."
+              }
+            ],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "FAIL",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
           }
         ],
-        "feedback": []
+        "change_checks": []
       },
-      "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "feedback_snapshot": [],
-      "blocked_review": {
-        "stage": "deterministic_application",
-        "reason": "card edit must replace one complete active Qard block including adjacent metadata"
-      },
-      "failed_at": "2026-11-03T19:47:21.890440Z"
+      "feedback_snapshot": []
     }
   },
   "parked_review_repairs": {},
@@ -5761,6 +5753,194 @@
         "change_checks": []
       },
       "feedback_snapshot": []
+    },
+    "a983d5e0a6871ca3b1a9b568c36991af8dcf6c243ddd2006156e8eff110a3fc9": {
+      "workload_id": "caa35096ca95474e9f400801cb20cb18",
+      "topic_id": "programming-e6aba2bd",
+      "batch": {
+        "topic": "Programming",
+        "topic_id": "programming-e6aba2bd",
+        "notes": [
+          {
+            "path": "Vault/Home/Programming/NET/ASP NET Web API/Filters.md",
+            "content": "---\ntopic: [Programming]\nsubtopic: [NET]\nsummary: \"Filters around ASP.NET Core Web API controller actions and endpoint-handler invocations.\"\nlevel: [\"2\"]\npriority: Medium\nstatus: Ready to Repeat\npublish: true\nqard-deck: \"Programming\"\nqard-topic: \"NET/ASP NET Web API/Filters\"\nflashcard_uid: \"ef27222b\"\ncreated: \"2026-02-19T23:08:30.000Z\"\nmodified: \"2026-11-02T09:03:54.806Z\"\n---\n\nController filters in ASP.NET Core Web APIs wrap defined stages of controller execution. They fit cross-cutting behavior that needs action arguments, model state, controller metadata, or the action result. A correlation-ID rule tied only to selected controllers is one example. An application-wide correlation ID usually belongs in middleware.\n\nThe filter APIs live in `Microsoft.AspNetCore.Mvc`, but they also apply to [Web API controllers derived from `ControllerBase`](https://learn.microsoft.com/en-us/aspnet/core/web-api/?view=aspnetcore-10.0); rendering views is not required. Minimal API handlers use endpoint filters, which have a different invocation context. Endpoint filters can also be [explicitly attached to mapped controller actions](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/minimal-apis/min-api-filters?view=aspnetcore-10.0#register-a-filter-on-controller-actions).\n\nThe boundary matters. Middleware can cover every request type but lacks controller action context. Endpoint code has full local context but duplicates a rule when many actions need it. Filters occupy the space between those two.\n\nController filters run after routing has selected a controller action.\n\n- Authorization filters run first and can short-circuit unauthorized requests.\n- Resource filters run around most of the rest of the pipeline and can short-circuit early.\n- Action filters run before and after the action method.\n- Exception filters observe unhandled exceptions from action execution.\n- Result filters run before and after the action result is executed.\n\nScope and filter type both affect nesting. `IOrderedFilter.Order` can override the default scope order, so a custom order should be treated as part of the endpoint's behavior.\n\n# Example\n\nThis async action filter rejects selected requests without a correlation header:\n\n```csharp\nusing Microsoft.AspNetCore.Mvc;\nusing Microsoft.AspNetCore.Mvc.Filters;\n\npublic sealed class RequireCorrelationIdFilter : IAsyncActionFilter\n{\n    public async Task OnActionExecutionAsync(\n        ActionExecutingContext context,\n        ActionExecutionDelegate next)\n    {\n        if (!context.HttpContext.Request.Headers.ContainsKey(\"X-Correlation-Id\"))\n        {\n            context.Result = new BadRequestObjectResult(new\n            {\n                error = \"X-Correlation-Id header is required\"\n            });\n            return;\n        }\n\n        await next();\n    }\n}\n\n// Program.cs\nbuilder.Services.AddScoped<RequireCorrelationIdFilter>();\n\nbuilder.Services.AddControllers(options =>\n{\n    // Global registration\n    options.Filters.AddService<RequireCorrelationIdFilter>();\n});\n```\n\nFor one action or controller, `[ServiceFilter(typeof(RequireCorrelationIdFilter))]` applies the registered filter without making it global.\n\nAn exception filter can translate an unhandled exception from action execution into an API error result:\n\n```csharp\npublic sealed class ApiExceptionFilter(ILogger<ApiExceptionFilter> logger) : IAsyncExceptionFilter\n{\n    public Task OnExceptionAsync(ExceptionContext context)\n    {\n        logger.LogError(context.Exception, \"Unhandled exception in {Action}\",\n            context.ActionDescriptor.DisplayName);\n\n        context.Result = context.Exception is NotFoundException\n            ? new NotFoundObjectResult(new { error = context.Exception.Message })\n            : new ObjectResult(new { error = \"An unexpected error occurred.\" }) { StatusCode = 500 };\n\n        context.ExceptionHandled = true;\n        return Task.CompletedTask;\n    }\n}\n```\n\nGlobal registration applies it to every controller action: `builder.Services.AddControllers(opts => opts.Filters.Add<ApiExceptionFilter>());`. Middleware remains the broader choice when errors from routing or Minimal API handlers need the same response contract.\n\n# Applying Filters: `[ServiceFilter]` Vs `[TypeFilter]` Vs `IFilterFactory`\n\nAttributes cannot receive runtime services through their own constructors, so attachment determines how the real filter instance is created.\n\n- **`[ServiceFilter(typeof(MyFilter))]`** resolves the filter itself from DI, so `MyFilter` must be registered with the intended lifetime.\n- **`[TypeFilter(typeof(MyFilter))]`** uses `ActivatorUtilities`. Constructor services come from DI, while `Arguments` can supply literal values. The filter type itself does not need registration.\n- **`IFilterFactory`** gives an attribute explicit control over creation of the executable filter and whether the result can be reused.\n- A plain filter attribute can carry literal metadata but cannot accept runtime services in its attribute constructor.\n\n`[Authorize]` contributes authorization metadata. Under default endpoint routing, authorization middleware enforces that metadata before the controller endpoint runs. Duplicating policy checks in an action filter creates two access-control paths. Within a filter type, the usual nesting is global, controller, then action on the way in and the reverse on the way out. If a filter implements both sync and async forms of the same stage, the runtime invokes only the async interface. The filter's synchronous methods then run only when that async implementation calls them, as the default async methods of `ActionFilterAttribute` do, so custom filter logic belongs in one form per stage.\n\n# Pitfalls\n\n- **Blocking I/O:** `.Result` or synchronous remote calls hold request threads while no CPU work is happening. I/O-bound filters should implement the async interface and await the operation.\n- **Authorization in action filters:** a second permission system drifts away from registered policies. Access decisions belong in authentication handlers and authorization policies.\n- **Treating exception filters as global error handling:** exception filters cover unhandled exceptions from controller creation, model binding, action filters, and action methods. They do not cover middleware, routing, resource filters, result filters, or action-result execution. Exception-handling middleware is the safer outer boundary for a uniform API error contract.\n\n# Tradeoffs\n\n| Option | Best for | Weakness |\n|---|---|---|\n| Middleware | App-wide cross-cutting concerns (logging, auth, exception handling) | No direct controller action context |\n| Controller filters | Concerns tied to Web API controllers/actions and model/action context | Their stages do not apply to Minimal API handlers |\n| Endpoint filters | Minimal API handler behavior, or explicit attachment to mapped controller actions | Invocation context differs from controller model-state and action-result context |\n\n# Questions\n\n<!-- qard-id: b5d3f2ba-51a2-4fd2-9508-aa0de30ad608 -->\n> [!qard]- In an ASP.NET Core controller-based Web API, what is the normal order of filter stages?\n> After routing selects a controller action, the filter stages run in this order: authorization, resource, action, then result. Exception filters are not a sequential stage; they run only when an unhandled exception occurs.\n>\n> 1. **Authorization filters** run first and can short-circuit an unauthorized request.\n> 2. **Resource filters** run their before logic next, ahead of model binding, and their after logic last, once the rest of the pipeline has completed.\n> 3. **Action filters** run immediately before and after the action method.\n> 4. **Result filters** run immediately before and after the action result executes.\n> \n> Full flow: authorization → resource (before) → action (before) → action method → action (after) → result (before) → result execution → result (after) → resource (after).\n>\n> Action filters finish before result filters start, so an action filter's after logic can still replace the result. Only resource filters wrap both the action and the result stages.\n>\n> These are controller-filter stages. Minimal API handlers use endpoint filters rather than this staged controller pipeline.\n>\n> [Microsoft: Filters in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/mvc/controllers/filters?view=aspnetcore-10.0)\n<!-- qard-id: ec8874e5-0ca6-4d53-a3dd-6594e0a512e3 -->\n> [!qard]- Which exceptions can controller exception filters handle in an ASP.NET Core Web API?\n> Controller exception filters handle only unhandled exceptions raised during controller creation, model binding, action filters or the action method. They are not a before-and-after stage; they run only when such an exception occurs.\n>\n> **Not covered:**\n>\n> - Exceptions from authorization filters and resource filters, which run outside that part of the pipeline.\n> - Exceptions from result filters or from executing the action result.\n> - Exceptions from middleware, routing or Minimal API handlers, which run outside the controller-filter pipeline.\n>\n>\n> [Microsoft: Filters in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/mvc/controllers/filters?view=aspnetcore-10.0)\n\n> [!qard]- What happens after an ASP.NET Core controller exception filter handles an exception?\n> - **Handled:** the filter sets `ExceptionHandled` to `true` or assigns a `Result`, and the exception stops propagating. A supplied `Result` is executed as the response. Ordinary result filters do not run around it; only always-run result filters, such as `IAlwaysRunResultFilter` implementations, do.\n> - **Not handled:** the exception leaves the controller-filter pipeline and continues to outer middleware, such as exception-handling middleware.\n> \n> Because of these gaps, exception-handling middleware is the broader boundary for a uniform API error response.\n>\n> [Microsoft: Filters in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/mvc/controllers/filters?view=aspnetcore-10.0)\n<!-- qard-id: b115f4c1-4ffb-413c-917b-d5fcdb62cb05 -->\n> [!qard]- Within one ASP.NET Core Web API controller-filter type, how do scope and the `Order` property determine execution order?\n> By default, scope decides the order among filters of one type: global filters wrap controller filters, which wrap action filters. An explicit `Order` value, exposed through `IOrderedFilter`, takes precedence over scope.\n>\n> - **Equal `Order` values:** before logic runs global → controller → action, and after logic runs action → controller → global.\n> - **Different `Order` values:** filters are sorted by `Order` first and by scope second. A lower value runs its before logic earlier and its after logic later, so it wraps filters with higher values regardless of their scope.\n> \n> For example, an action-level action filter with `Order` 0 runs its before logic ahead of a global action filter with `Order` 1.\n>\n> This ordering only arranges filters of the same type. It cannot move an action filter ahead of an authorization filter, because each filter type runs at its own stage of the controller pipeline.\n>\n> [Microsoft: Filters in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/mvc/controllers/filters?view=aspnetcore-10.0)\n\n# References\n\n- [Filters in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/mvc/controllers/filters?view=aspnetcore-10.0)\n",
+            "hash": "34862c04ee18444085e97f5dce6e6dc92dc19b86fc992a6e4eb8135b0138391f",
+            "topic": "Programming",
+            "violations": [],
+            "needs_fixing_ids": [
+              "b115f4c1-4ffb-413c-917b-d5fcdb62cb05",
+              "ec8874e5-0ca6-4d53-a3dd-6594e0a512e3"
+            ],
+            "repair_input_hash": "578d6ad0ba9e8ee7aa5d90b0a9c088816cb3dd2b85a6170327590d485d2b4292",
+            "selection_reason": "rules_changed"
+          }
+        ],
+        "feedback": [],
+        "rules_hash": "264d16c1cdd0550e8de34525350fcc463d41b1c8095a38a38008f9f84304bb03",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review_process": "focused-whole-note-v1",
+        "pr": null
+      },
+      "proposal": {
+        "version": 1,
+        "edits": [
+          {
+            "path": "Vault/Home/Programming/NET/ASP NET Web API/Filters.md",
+            "expected_hash": "34862c04ee18444085e97f5dce6e6dc92dc19b86fc992a6e4eb8135b0138391f",
+            "before": "`[Authorize]` contributes authorization metadata. Under default endpoint routing, authorization middleware enforces that metadata before the controller endpoint runs. Duplicating policy checks in an action filter creates two access-control paths. Within a filter type, the usual nesting is global, controller, then action on the way in and the reverse on the way out. If a filter implements both sync and async forms of the same stage, the runtime invokes only the async interface. The filter's synchronous methods then run only when that async implementation calls them, as the default async methods of `ActionFilterAttribute` do, so custom filter logic belongs in one form per stage.",
+            "after": "# Ordering and Sync Versus Async Forms\n\nWithin a filter type, the usual nesting is global, controller, then action on the way in and the reverse on the way out. If a filter implements both sync and async forms of the same stage, the runtime invokes only the async interface. The filter's synchronous methods then run only when that async implementation calls them, as the default async methods of `ActionFilterAttribute` do, so custom filter logic belongs in one form per stage.",
+            "reason": "Moves ordering and sync/async rules out of the attachment section into their own heading; the authorization point is kept once, in Pitfalls.",
+            "kind": "note",
+            "learning_target": "same",
+            "essential_meanings": [
+              "Ordering and sync/async rules are separate from attachment mechanics"
+            ],
+            "sources": [],
+            "feedback_keys": [],
+            "problem": "The paragraph under the attachment heading mixes authorization metadata, scope nesting and the sync/async rule, which are unrelated to how filters are attached, and repeats the authorization point from Pitfalls.",
+            "reader_benefit": "Attachment mechanics and ordering rules can each be found and re-entered directly."
+          },
+          {
+            "path": "Vault/Home/Programming/NET/ASP NET Web API/Filters.md",
+            "expected_hash": "34862c04ee18444085e97f5dce6e6dc92dc19b86fc992a6e4eb8135b0138391f",
+            "before": "- **Authorization in action filters:** a second permission system drifts away from registered policies. Access decisions belong in authentication handlers and authorization policies.",
+            "after": "- **Authorization in action filters:** `[Authorize]` contributes metadata that authorization middleware enforces before the controller endpoint runs under default endpoint routing. Repeating policy checks in an action filter creates a second permission system that drifts away from registered policies. Access decisions belong in authentication handlers and authorization policies.",
+            "reason": "Keeps the authorization-metadata point in one place, where it supports the pitfall.",
+            "kind": "note",
+            "learning_target": "same",
+            "essential_meanings": [
+              "Authorize metadata is enforced by middleware",
+              "Duplicate checks in filters drift"
+            ],
+            "sources": [],
+            "feedback_keys": [],
+            "problem": "The authorization explanation was stranded under the attachment heading.",
+            "reader_benefit": "The pitfall now carries its own mechanism."
+          },
+          {
+            "path": "Vault/Home/Programming/NET/ASP NET Web API/Filters.md",
+            "expected_hash": "34862c04ee18444085e97f5dce6e6dc92dc19b86fc992a6e4eb8135b0138391f",
+            "before": "Because of these gaps, exception-handling middleware is the broader boundary for a uniform API error response.",
+            "after": "Because exception filters miss errors from middleware, routing, resource filters and result execution, exception-handling middleware is the broader boundary for a uniform API error response.",
+            "reason": "Names the gaps so the answer is self-contained.",
+            "kind": "rewrite",
+            "learning_target": "same",
+            "essential_meanings": [
+              "Exception filters have coverage gaps",
+              "Middleware is the broader choice for uniform errors"
+            ],
+            "sources": [],
+            "feedback_keys": [],
+            "problem": "The answer says 'these gaps' without stating them.",
+            "reader_benefit": "The card can be understood and graded on its own."
+          }
+        ],
+        "dispositions": [
+          {
+            "path": "Vault/Home/Programming/NET/ASP NET Web API/Filters.md",
+            "outcome": "changed",
+            "reason": "Facts match the cited filters documentation. Two editorial fixes: the ordering/sync-async rules now have their own heading instead of sitting under attachment mechanics, with the authorization point kept once in Pitfalls, and the third card names the exception-filter gaps rather than saying 'these gaps'."
+          }
+        ],
+        "feedback": [],
+        "decisions": []
+      },
+      "source_hashes": {
+        "Vault/Home/Programming/NET/ASP NET Web API/Filters.md": "34862c04ee18444085e97f5dce6e6dc92dc19b86fc992a6e4eb8135b0138391f"
+      },
+      "feedback_keys": [],
+      "rules_hash": "264d16c1cdd0550e8de34525350fcc463d41b1c8095a38a38008f9f84304bb03",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "repair_inputs": {
+        "Vault/Home/Programming/NET/ASP NET Web API/Filters.md": "578d6ad0ba9e8ee7aa5d90b0a9c088816cb3dd2b85a6170327590d485d2b4292"
+      },
+      "prepared_source_version": 1,
+      "prepared_at": "2026-11-03T19:47:17.980368Z",
+      "review_repair_key": "1cb12d9ccd7fcc8097d310914ca72601ee9b147e23bfcc588ab6255970079a9b",
+      "repair_reserved": true,
+      "repair_review": {
+        "verdict": "CHANGES REQUIRED",
+        "overall_reason": "The facts check out against my knowledge of the ASP.NET Core filters documentation, but two reader-facing defects remain unfixed. One is a mis-sorted paragraph under the attachment heading. The other is a dangling \"these gaps\" reference in a card answer. The keep disposition also says the sources were not re-fetched.",
+        "notes": [
+          {
+            "path": "Vault/Home/Programming/NET/ASP NET Web API/Filters.md",
+            "verdict": "CHANGES REQUIRED",
+            "summary": "The technical content is accurate and the cards are well scoped. Two concrete editorial defects were not addressed. The paragraph under the attachment heading mixes unrelated topics. One card answer refers to \"these gaps\" that the card never states.",
+            "page_type": "Concept — typed frontmatter, optional Questions and References present. Qard IDs and metadata are protected.",
+            "current_text_evidence": [
+              {
+                "quote": "`[Authorize]` contributes authorization metadata.",
+                "line_start": 102,
+                "reason": "This paragraph sits under the heading about ServiceFilter, TypeFilter and IFilterFactory. It combines authorization metadata, scope nesting and the sync/async rule, none of which concern attachment. That hurts re-entry, and the authorization point is repeated in Pitfalls."
+              },
+              {
+                "quote": "Because of these gaps, exception-handling middleware is the broader boundary for a uniform API error response.",
+                "line_start": 153,
+                "reason": "The card answer never lists any gaps. The coverage gaps are in the neighbouring card, so this card is not self-contained."
+              },
+              {
+                "quote": "Exception filters are not a sequential stage; they run only when an unhandled exception occurs.",
+                "line_start": 122,
+                "reason": "This is accurate. The stage-order card is sound and consistent with the prose."
+              },
+              {
+                "quote": "Controller exception filters handle only unhandled exceptions raised during controller creation, model binding, action filters or the action method.",
+                "line_start": 138,
+                "reason": "This matches the documented exception-filter coverage."
+              }
+            ],
+            "target_resolution": "UNRESOLVED",
+            "split_suggestion": "No split: the note covers one coherent topic, controller filters and their boundary with middleware and endpoint filters. The material is not independently separable.",
+            "findings": [
+              {
+                "severity": "Medium",
+                "dimension": "Explanation order / readability",
+                "location": "`# Applying Filters` final paragraph, line 102",
+                "evidence": "A single paragraph under the attachment heading covers [Authorize] enforcement, scope nesting and the sync/async-interface rule.",
+                "effect": "A reader looking for attachment mechanics finds unrelated rules. The sync/async rule is easy to miss, and the authorization point duplicates Pitfalls.",
+                "fix": "Move the nesting and sync/async sentences into their own short section, or into Pitfalls or the ordering prose. Drop the duplicated authorization sentence, keeping it in Pitfalls."
+              },
+              {
+                "severity": "Medium",
+                "dimension": "Question quality",
+                "location": "Third card, line 153",
+                "evidence": "\"Because of these gaps...\" refers to gaps that this card does not state.",
+                "effect": "The answer is not self-contained, so a reader cannot follow why middleware is broader.",
+                "fix": "Rephrase to name the gap, for example: \"Because exception filters miss middleware, routing, resource-filter and result-execution errors, exception-handling middleware is the broader boundary.\""
+              }
+            ],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "FAIL",
+              "question_quality": "FAIL",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "change_checks": []
+      },
+      "repair_previous_proposal": {
+        "version": 1,
+        "edits": [],
+        "dispositions": [
+          {
+            "path": "Vault/Home/Programming/NET/ASP NET Web API/Filters.md",
+            "outcome": "keep",
+            "reason": "Audited the whole note against the ASP.NET Core filters documentation as I know it. Checked: stage order and short-circuiting; exception-filter coverage (controller creation, model binding, action filters, action methods; not resource or result filters or result execution); the sync/async rule that only the async interface is invoked; ServiceFilter versus TypeFilter versus IFilterFactory; Order overriding scope; and the endpoint-filter and middleware comparison. All are accurate. The three cards each test one gradeable task. The flagged cards (exception coverage, Order and scope) are correct, self-contained and consistent with the prose. The code examples are coherent and the structure is clear. I did not re-fetch the sources in this pass, so the keep rests on prior knowledge of the documentation. No defect found, and no known native violations."
+          }
+        ],
+        "feedback": []
+      },
+      "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "feedback_snapshot": [],
+      "blocked_review": {
+        "stage": "deterministic_application",
+        "reason": "card edit must replace one complete active Qard block including adjacent metadata"
+      },
+      "failed_at": "2026-11-03T19:47:21.890440Z"
     }
   },
   "pending_author_proposal": {
@@ -5813,7 +5993,7 @@
     },
     "prepared_source_version": 1,
     "prepared_at": "2026-11-03T19:49:16.804578Z",
-    "completed_review": {
+    "blocked_review": {
       "verdict": "CHANGES REQUIRED",
       "overall_reason": "The note is technically accurate, but the author kept it unchanged even though the Category card is still flawed. That card's question is not self-contained, and its answer cites sources that do not support it.",
       "notes": [
@@ -5876,6 +6056,85 @@
         }
       ],
       "change_checks": []
-    }
+    },
+    "repair_previous_proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Methods.md",
+          "outcome": "keep",
+          "reason": "I read the whole note against Microsoft's C# documentation and specification. The ref, in, out and params sections are accurate. They cover the aliasing rules, the temporaries and defensive copies that `in` can need, and the C# 13 params collections with normal versus expanded form. The virtual, override and new section and its combined example correctly show runtime dispatch versus compile-time hiding. The overload-resolution and extension-lookup cards state their conditions correctly. The two flagged cards hold up. The optional-parameter card correctly says the compiler inserts the default at the call site. It correctly limits defaults to constants, `default(S)` and `new S()`, and it draws the right recompilation consequence. The Category card correctly says that running Dog's implementation through an Animal reference needs a virtual base member and an override. It also explains why the note's `new` example gives the base result. Its source list is longer than needed but not wrong. Each card tests one gradeable task, and none of the ID-bearing cards needs retargeting. The note has no known violations, so I made no edit."
+        }
+      ],
+      "feedback": []
+    },
+    "repair_review": {
+      "verdict": "CHANGES REQUIRED",
+      "overall_reason": "The note is technically accurate, but the author kept it unchanged even though the Category card is still flawed. That card's question is not self-contained, and its answer cites sources that do not support it.",
+      "notes": [
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Methods.md",
+          "verdict": "CHANGES REQUIRED",
+          "summary": "The prose, code samples and most cards are accurate and well ordered. The flagged Category card still has a question-quality defect. Its question refers to Animal, Dog and Category without defining them, and its answer cites the base and sealed pages, which have nothing to do with it. The keep disposition called the source list 'longer than needed' but left it.",
+          "page_type": "Concept note (publish: true). Optional Questions and References sections are present. Qard IDs are protected metadata.",
+          "current_text_evidence": [
+            {
+              "quote": "When `Animal a = new Dog();` calls `a.Category()`, what makes the call run `Dog`'s implementation?",
+              "line_start": 270,
+              "reason": "The question relies on types and a method that are defined only elsewhere in the note, where Category is non-virtual and hidden with `new`. Essential meanings do not follow from the question, so it is not self-contained."
+            },
+            {
+              "quote": "[Microsoft: base keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/base) · [Microsoft: sealed modifier]",
+              "line_start": 274,
+              "reason": "The base and sealed pages are irrelevant to the Category answer. They look copied from the neighbouring virtual card, so the answer-side sources are padded."
+            },
+            {
+              "quote": "How does C# apply an optional parameter's default value, and why can already-compiled callers keep an old default?",
+              "line_start": 257,
+              "reason": "This card is acceptable. It covers one dependent mechanism-and-consequence explanation, and its answer is accurate."
+            },
+            {
+              "quote": "Both objects have the same runtime type. Only the lookup rule changes",
+              "line_start": 196,
+              "reason": "The prose is accurate and well ordered, and it reads as a whiteboard explanation. It needs no rewrite."
+            }
+          ],
+          "target_resolution": "UNRESOLVED",
+          "split_suggestion": "No split: parameter modifiers, dispatch keywords and overload resolution form one coherent Methods topic, and length alone is not a reason to separate them.",
+          "findings": [
+            {
+              "severity": "Medium",
+              "dimension": "Question quality",
+              "location": "Questions, Category card (qard-id ffd19d60-4643-4ede-92ff-83ba55b3f613)",
+              "evidence": "The question mentions `Animal a`, `Dog` and `Category()` without declaring them. Its answer then says the method must be virtual, which contradicts the note's own non-virtual `new` example.",
+              "effect": "A reader cannot answer from the question alone and may recall the wrong setup. The card is not self-contained.",
+              "fix": "Keep the existing ID and rewrite the question as a direct, self-contained one, such as: which modifiers on a base member and a derived member make a call through a base-typed reference run the derived implementation? Then trim the sources to the virtual and new pages."
+            },
+            {
+              "severity": "Medium",
+              "dimension": "References on the answer side",
+              "location": "Category card source line",
+              "evidence": "The base and sealed pages are cited, but the answer never uses either.",
+              "effect": "The card carries sources that do not support it, which clutters it and weakens verification.",
+              "fix": "Remove the base and sealed links from this card."
+            }
+          ],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "FAIL",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "change_checks": []
+    },
+    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "review_repair_key": "b93534e9526b699a34ace92b02c074d15f38edf1d0fec15a56733e9002742af2",
+    "author_repair_pending": true
   }
 }
