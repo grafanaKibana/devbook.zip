@@ -1142,13 +1142,14 @@
     "version": 1,
     "id": "caa35096ca95474e9f400801cb20cb18",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-03T19:45:09.882761Z",
-    "elapsed_seconds": 205.76922199999998,
+    "elapsed_seconds": 210.1432519,
     "calls_reserved": 5,
     "responses_received": 5,
     "attempted_paths": [
-      "Vault/Home/Programming/NET/ASP NET Web API/Filters.md"
+      "Vault/Home/Programming/NET/ASP NET Web API/Filters.md",
+      "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -1162,10 +1163,88 @@
           "reason": "card edit must replace one complete active Qard block including adjacent metadata",
           "model_calls": 3
         }
+      },
+      {
+        "path": "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against its text and the ASP.NET Core middleware, filters and error-handling documentation. The explanation order is sound: ordered chain, next/short-circuit, a sequence diagram, registration order, custom middleware (inline and conventional), the scoped-service warning, branching with Map/UseWhen/Run, pitfalls and a comparison table. Technical claims hold: authentication normally continues and authorization challenges; conventional middleware is constructed once and takes scoped services in InvokeAsync; GetEndpoint is only populated after routing; HasStarted limits header changes. The flagged card on middleware versus controller action filters is accurate. It separates position, coverage, context and fit, notes that Minimal API handlers use endpoint filters, and keeps a single comparison task. The other two cards are each a coherent single explanation with primary-source citations. There are no known violations, and no verified defect justifies a change."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md",
+                "verdict": "CLEAN",
+                "summary": "The whole note was read and audited. The explanation order runs from the ordered chain and short-circuit, through the diagram, registration order, custom middleware, branching and pitfalls, to the tradeoffs. The technical claims are accurate and the cards are well scoped, so no edit is warranted.",
+                "page_type": "Concept — typed frontmatter, optional Questions and References present. Qard IDs and the Mermaid and C# fences (all with language identifiers) are intact.",
+                "current_text_evidence": [
+                  {
+                    "quote": "Authentication normally tries to establish `HttpContext.User` and continues. Authorization is the component that challenges or forbids access",
+                    "line_start": 19,
+                    "reason": "Separates authentication from authorization correctly, which matches the documented behavior."
+                  },
+                  {
+                    "quote": "**Conventional middleware is constructed once.**",
+                    "line_start": 124,
+                    "reason": "Scoped dependencies are correctly directed to InvokeAsync parameters, with IMiddleware as the alternative."
+                  },
+                  {
+                    "quote": "**Reading endpoint metadata before routing.**",
+                    "line_start": 150,
+                    "reason": "A real ordering pitfall: GetEndpoint is populated only after routing."
+                  },
+                  {
+                    "quote": "**Wrong registration order.**",
+                    "line_start": 142,
+                    "reason": "A concrete ordering pitfall that explains why registration order is control flow."
+                  },
+                  {
+                    "quote": "In ASP.NET Core 10, when an `IExceptionHandler` reports an exception as handled, the middleware's own diagnostics are suppressed by default.",
+                    "line_start": 184,
+                    "reason": "A version-specific condition that is accurate for .NET 10 and stated with its version."
+                  },
+                  {
+                    "quote": "How does middleware differ from an action filter in an ASP.NET Core controller-based Web API?",
+                    "line_start": 165,
+                    "reason": "The flagged card is one focused comparison task. It is bounded, its table separates position, coverage, context and fit, and it cites Microsoft docs on the answer side."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: middleware pipeline, custom middleware, branching and filter comparison form one cohesive topic, and none is independently useful enough to separate.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "The note is accurate, well ordered and compliant. The flagged card is a single focused comparison with answer-side primary sources. No concrete defect was found, so keeping it unchanged is justified.",
+            "change_checks": []
+          },
+          "model_calls": 5
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-03T19:48:35.651492Z",
+    "checkpoint_at": "2026-11-03T19:48:40.025523Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
