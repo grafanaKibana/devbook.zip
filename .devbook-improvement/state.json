@@ -4892,7 +4892,7 @@
       "prepared_source_version": 1,
       "prepared_at": "2026-11-03T09:20:34.250468Z",
       "phase": "pr_updated",
-      "updated_at": "2026-11-03T09:42:04Z",
+      "updated_at": "2026-11-03T09:42:11Z",
       "evidence": {
         "commit_sha": "0ef6f931dc91dc3b4b32050db766364907cde2a9",
         "branch_sha": "0ef6f931dc91dc3b4b32050db766364907cde2a9",
@@ -4916,7 +4916,8 @@
         "export_phase": "commit_created",
         "export_tree_sha": "be424b8d8bae30bfa8434519de6b2f49aa47b0de",
         "export_commit_attempted_at": "2026-11-03T09:41:59Z",
-        "export_commit_sha": "b929764f2b8ddf145c51b91a886d1ddc8b57d684"
+        "export_commit_sha": "b929764f2b8ddf145c51b91a886d1ddc8b57d684",
+        "export_ref_update_attempted_at": "2026-11-03T09:42:11Z"
       }
     }
   }
