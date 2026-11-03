@@ -9,7 +9,7 @@ publish: true
 qard-deck: "Programming"
 qard-topic: "NET/CSharp/Fundamentals/Types/Structs"
 created: "2026-02-18T19:18:52.000Z"
-modified: "2026-11-02T09:03:54.806Z"
+modified: "2026-11-03T09:52:48.695Z"
 ---
 
 A struct is a C# value type. Assignment copies its fields as a new value, including any references those fields contain. That behavior fits small, immutable data representing one logical value, such as a coordinate or money amount.
@@ -219,6 +219,37 @@ Readonly values remove most accidental mutation paths. APIs that need in-place u
 
 > [!qard]- When should a user-defined conversion be explicit instead of implicit?
 > An explicit conversion fits when it can lose information, fail validation, or surprise a caller. An implicit conversion participates without a cast in assignment and overload applicability, so it should preserve information and behave predictably. A validated percentage can convert implicitly to its decimal value, but constructing one from an arbitrary decimal should be explicit because the input may be outside the allowed range. [Microsoft: user-defined conversions](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/operators/user-defined-conversion-operators)
+
+> [!qard]- Why can calling a member on a struct stored in a `readonly` field or `in` parameter run the member on a copy, and how does `readonly struct` prevent it?
+> A struct instance member receives `this` by reference and may assign its fields, while readonly storage must not change. When the member is not declared `readonly`, the compiler does not inspect its body; it copies the value into a hidden temporary and calls the member on that copy. Every call pays for the copy, and any mutation the member performs lands on the temporary and is lost.
+>
+> ```csharp
+> class Holder
+> {
+>     private readonly Counter counter;
+>     public int Tick() => counter.Next(); // always 1: Next increments a copy
+> }
+>
+> struct Counter { private int n; public int Next() => ++n; }
+> ```
+>
+> A `readonly struct` requires every instance field to be readonly, so no member can mutate `this`, and members run directly on the original storage. A mutable struct gets the same effect per member by marking non-mutating members `readonly`; the compiler already treats auto-implemented `get` accessors as readonly.
+>
+> [Microsoft: structure types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/struct) · [Microsoft: method parameters](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/method-parameters)
+
+> [!qard]- What restrictions apply to a `ref struct`, and why do they exist?
+> A `ref struct` can never be stored on the managed heap. It cannot be boxed or converted to `object`, `ValueType`, or an interface type. It cannot be a field of a class or ordinary struct, a static field, or an array element. A lambda or local function cannot capture it, a variable of the type cannot stay live across an `await` or `yield return`, and the type cannot be declared as a record.
+>
+> The type can hold a reference into stack memory or into the middle of another object, as `Span<T>` over `stackalloc` memory does. A heap copy could outlive that stack frame or referenced data and leave a dangling reference. Keeping every copy where the compiler's ref-safety analysis tracks its lifetime makes such references safe without runtime checks.
+>
+> [Microsoft: ref structure types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/ref-struct)
+
+> [!qard]- Why should a struct that is compared or hashed often implement `IEquatable<T>` instead of relying on inherited `ValueType` equality?
+> Inherited `ValueType.Equals(object)` takes `object`, so comparing two structs boxes both values. It can compare raw bytes when no field is a reference type; otherwise it compares fields through reflection, which is much slower. Inherited `ValueType.GetHashCode` uses one or more fields, not necessarily all of them, so distinct values can share a hash and slow down lookups. By default, `Dictionary<TKey,TValue>` and `HashSet<T>` use `EqualityComparer<T>.Default`, which calls a typed `IEquatable<T>.Equals(T)` without boxing when the struct implements it.
+>
+> A complete implementation pairs `IEquatable<T>.Equals(T)` with `Equals(object)` and `GetHashCode` overrides over the same fields. A struct has no `==` or `!=` by default, so those operators need explicit declarations. A `record struct` synthesizes all of these members.
+>
+> [Microsoft: ValueType.Equals](https://learn.microsoft.com/en-us/dotnet/api/system.valuetype.equals) · [Microsoft: ValueType.GetHashCode](https://learn.microsoft.com/en-us/dotnet/api/system.valuetype.gethashcode) · [Microsoft: define value equality](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/statements-expressions-operators/how-to-define-value-equality-for-a-type)
 
 # References
 
