@@ -1,5 +1,5 @@
 const { Plugin, Notice, TFile } = require('obsidian');
-const { inspectCourse, reconcileCourse, renameSourcePath, sourceSnapshot } = require('./core.cjs');
+const { inspectCourse, reconcileCourse, renameSourcePath, sourceSnapshot, unassignedSources } = require('./core.cjs');
 
 const COURSE_ROOT = 'Assets/Qard/Courses/';
 const SOURCE_ROOT = 'Home/';
@@ -25,6 +25,9 @@ module.exports = class LearnSourceSync extends Plugin {
     this.renames = data?.version === 1 ? (data.renames ?? []) : [];
     this.pending = [];
     this.problems = [];
+    this.unassigned = [];
+    this.coverageComplete = false;
+    this.warningSignature = '';
     this.status = this.addStatusBarItem();
     this.status.setText('Learn sync: starting');
     this.status.addEventListener('click', () => this.showStatus());
@@ -42,19 +45,25 @@ module.exports = class LearnSourceSync extends Plugin {
       }
     }));
     this.registerEvent(this.app.vault.on('rename', (file, oldPath) => {
-      if (this.stopped || !(oldPath.startsWith(SOURCE_ROOT) || file.path.startsWith(SOURCE_ROOT))) return;
-      this.renames.push({ from: oldPath, to: file.path });
-      void this.saveState().catch((error) => this.reportFailure('Could not save rename', error));
+      if (this.stopped) return;
+      if (oldPath.startsWith(SOURCE_ROOT) || file.path.startsWith(SOURCE_ROOT)) {
+        this.renames.push({ from: oldPath, to: file.path });
+        void this.saveState().catch((error) => this.reportFailure('Could not save rename', error));
+      } else if (!(isCourse(oldPath) || isCourse(file.path) || oldPath === COURSE_ROOT.slice(0, -1))) return;
       this.schedule();
     }));
+    this.registerEvent(this.app.vault.on('create', (file) => {
+      if (isSource(file.path) || isCourse(file.path)) this.schedule();
+    }));
     this.registerEvent(this.app.vault.on('delete', (file) => {
+      this.sourceCache.delete(file.path);
       if (isSource(file.path) || file.path.startsWith(SOURCE_ROOT) || isCourse(file.path)) this.schedule();
     }));
     this.app.workspace.onLayoutReady(() => { if (!this.stopped) void this.sync(); });
   }
 
   linkSignature(course) {
-    return JSON.stringify(course.rows.map((row) => [row.id, row.notes]));
+    return JSON.stringify([course.course, course.rows.map((row) => [row.id, row.notes])]);
   }
 
   schedule() {
@@ -79,9 +88,16 @@ module.exports = class LearnSourceSync extends Plugin {
     this.running = true;
     const renames = this.renames.slice();
     let failed = false;
-    const problems = [], pending = [];
+    const problems = [], pending = [], registry = [], inventory = [];
     try {
-      const courses = this.app.vault.getMarkdownFiles().filter((file) => isCourse(file.path));
+      const files = this.app.vault.getMarkdownFiles();
+      const currentPaths = new Set(files.map(file => file.path));
+      for (const path of this.sourceCache.keys()) if (!currentPaths.has(path)) this.sourceCache.delete(path);
+      for (const file of files.filter(file => isSource(file.path))) {
+        if (this.stopped) break;
+        inventory.push({ path: file.path, cards: (await this.source(file)).cards });
+      }
+      const courses = files.filter((file) => isCourse(file.path));
       for (const file of courses) {
         if (this.stopped) break;
         try {
@@ -110,6 +126,7 @@ module.exports = class LearnSourceSync extends Plugin {
           }
           if (this.stopped) break;
           const updated = inspectCourse(result.text);
+          registry.push({ path: file.path, ...updated });
           this.courseLinks.set(file.path, this.linkSignature(updated));
           for (const row of updated.rows) {
             const key = `${file.path}#${row.id}`;
@@ -124,6 +141,16 @@ module.exports = class LearnSourceSync extends Plugin {
         }
       }
       if (!this.stopped) {
+        let unassigned = [];
+        if (!failed) {
+          try {
+            unassigned = unassignedSources(registry, inventory, (link, from) => {
+              const target = this.app.vault.getAbstractFileByPath(link.replace(/\.md$/, '') + '.md')
+                ?? this.app.metadataCache.getFirstLinkpathDest(link, from);
+              return target instanceof TFile ? target.path : undefined;
+            });
+          } catch (error) { failed = true; problems.push(error.message); }
+        }
         if (!failed && renames.length) {
           const remaining = this.renames.slice(renames.length);
           await this.saveState({ renames: remaining });
@@ -131,8 +158,13 @@ module.exports = class LearnSourceSync extends Plugin {
         }
         this.pending = pending;
         this.problems = problems;
-        this.status.setText(problems.length ? `Learn sync: ${problems.length} issue(s)` : pending.length ? `Learn: ${pending.length} source update(s)` : 'Learn sync: up to date');
-        if (show) this.showStatus();
+        this.unassigned = unassigned;
+        this.coverageComplete = !failed;
+        this.status.setText(problems.length ? `Learn sync: ${problems.length} issue(s)` : unassigned.length ? `Learn: ${unassigned.length} unassigned note(s)` : pending.length ? `Learn: ${pending.length} source update(s)` : 'Learn sync: up to date');
+        const signature = JSON.stringify(unassigned);
+        const newWarning = unassigned.length && signature !== this.warningSignature;
+        if (!failed) this.warningSignature = signature;
+        if (show || newWarning) this.showStatus();
       }
     } catch (error) {
       this.reportFailure('Could not finish Learn sync', error);
@@ -143,8 +175,12 @@ module.exports = class LearnSourceSync extends Plugin {
   }
 
   showStatus() {
-    const lines = [this.problems.length ? 'Learn sync needs attention:' : this.pending.length ? 'Source material changed; existing Learn progress is preserved:' : 'Learn sources are up to date.'];
+    const lines = [this.problems.length ? 'Learn sync needs attention:' : this.unassigned.length ? 'Qard notes need Learn assignment:' : this.pending.length ? 'Source material changed; existing Learn progress is preserved:' : 'Learn sources are up to date.'];
+    if (!this.coverageComplete) lines.push('Learn coverage could not be checked completely; fix the reported issues and sync again.');
     lines.push(...this.problems.slice(0, 8));
+    lines.push(...this.unassigned.slice(0, 8).map(item => `${item.path} · ${item.cards} card(s) · ${item.course}`));
+    if (this.unassigned.length) lines.push('Link each note to an existing fitting Learn objective in its subject course; create an objective only for a distinct skill.');
+    if (this.unassigned.length > 8) lines.push(`And ${this.unassigned.length - 8} more unassigned notes.`);
     lines.push(...this.pending.slice(0, 8).map((item) => `${item.course} · ${item.label} (${item.updated})`));
     if (this.pending.length > 8) lines.push(`And ${this.pending.length - 8} more; use Learn source checks as needed.`);
     new Notice(lines.join('\n'), 12000);
@@ -164,6 +200,8 @@ module.exports = class LearnSourceSync extends Plugin {
 
   reportFailure(context, error) {
     if (this.stopped) return;
+    this.coverageComplete = false;
+    this.unassigned = [];
     this.problems = [`${context}: ${error.message || String(error)}`];
     this.status.setText('Learn sync: storage error');
   }

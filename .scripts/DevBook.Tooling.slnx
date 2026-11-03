@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="DevBook.Tooling/DevBook.Tooling.csproj" />
+  <Project Path="DevBook.Tooling.Tests/DevBook.Tooling.Tests.csproj" />
+</Solution>

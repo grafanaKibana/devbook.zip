@@ -8,7 +8,7 @@ DevBook Learn Sync is a local companion plugin. It watches the source notes alre
 | Linked note content or its summary changes | Record the source change against its existing objectives |
 | A source file or folder is renamed while the plugin is running | Maintain the explicit source links |
 | A source disappears | Report the missing source and retain its objective and progress |
-| A new topic appears outside existing objective links | Leave the course unchanged |
+| A note with cards has no objective in its subject course | Show an unassigned-note warning with its path and card count; leave the course unchanged |
 
 The plugin does not create objectives or tests, rewrite learning targets, infer prerequisites, or change states, due dates or assessment evidence. Card schedules, review history, note statuses and Qard settings remain under their existing owners. Unrelated metadata, including stock Qard identity bookkeeping, does not trigger a source-content update.
 
@@ -17,6 +17,10 @@ The plugin does not create objectives or tests, rewrite learning targets, infer 
 Source changes are collected after a short debounce while Obsidian is open. Startup reconciliation detects content changes made while closed. The installation baseline also detects changes made before the plugin's first load. Baselines do not mark material as learned or create due reviews.
 
 The status bar shows **Learn: N source update(s)** when linked material has changed. Click it or run **DevBook Learn Sync: Show Learn source changes** to see the affected objectives. Revisit the linked material and use Teach or Check from the existing Learn objective as appropriate. Existing generated lessons/checks are not rewritten; use fresh material when evaluating a changed explanation.
+
+Unassigned card notes appear as **Learn: N unassigned note(s)**. Click the indicator or use the same status command to see the source paths and card counts. Link the note in the Notes cell of a suitable objective in its subject course; add an objective only when it represents a distinct competency. Source or course edits refresh the warning automatically. Acknowledging source changes cannot dismiss an unassigned-note warning.
+
+The authoring agent must resolve assignment before finishing a note. Its completion hook checks edited notes independently of prose-review receipts; pre-commit and CI also check coverage. Run `node .scripts/qard-learn-sync/check.cjs` for a complete inventory, or add `--json` for machine-readable diagnostics. These checks detect missing associations; semantic fit remains part of note review. The companion does not launch an agent or generate curriculum in the background.
 
 Run **DevBook Learn Sync: Acknowledge Learn source changes** to clear the source-update indicators after addressing them. Acknowledgement only clears those indicators; it does not record a passing answer or change mastery. **Sync existing Learn sources now** performs an immediate reconciliation.
 
@@ -46,7 +50,7 @@ The installer defaults to a dry run. Applying captures source baselines and enab
 
 ```sh
 node --test .scripts/tests/qard-learn-sync*.test.cjs
-python3 .scripts/validate-vault.py --all
+dotnet run --file .scripts/DevBook.Tooling/Scripts/ValidateVault.cs -- --all --repo-root .
 ```
 
 The current native Qard table contract was checked against version 0.6.2. Public API references: [Vault operations and atomic processing](https://docs.obsidian.md/Plugins/Vault), [registered events](https://docs.obsidian.md/Plugins/Events), and [startup timing](https://docs.obsidian.md/plugins/guides/load-time).

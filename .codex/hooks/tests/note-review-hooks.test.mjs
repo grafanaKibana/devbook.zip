@@ -52,3 +52,29 @@ test("scope filtering and legacy path inputs preserve the review gate", (t) => {
     assert.equal(JSON.parse(run("enforce-review.mjs", { session_id: file_path })).decision, "block");
   }
 });
+
+test("a CLEAN prose receipt cannot bypass Learn assignment, and linking clears the gate", (t) => {
+  const { root, note, run } = fixture(t);
+  const payload = { session_id: "assignment" };
+  writeFileSync(resolve(root, note), "> [!qard]- What is copied?\n> The value.\n");
+  run("suggest-review.mjs", { ...payload, tool_input: { file_path: note } });
+  run("review-receipt.mjs", "", ["--session", "assignment", "--verdict", "CLEAN", "--path", note]);
+  const warning = run("enforce-review.mjs", payload);
+  assert.match(warning, /Learn assignment/);
+  assert.match(warning, /Home\/Programming\/Example.md/);
+  assert.equal(JSON.parse(warning).decision, "block");
+  assert.equal(run("enforce-review.mjs", { ...payload, stop_hook_active: true }), "");
+  assert.match(run("enforce-review.mjs", payload), /Learn assignment/);
+
+  const course = resolve(root, "Vault/Assets/Qard/Courses/Programming Mastery.md");
+  mkdirSync(dirname(course), { recursive: true });
+  writeFileSync(course, `---
+qard-mastery: Programming
+---
+| Objective | Label | ID | Group | State | Due | Needs | Notes | Evidence |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Explain copies | Copies | copies | Types | mastered | 2027-01-01 | | [[Home/Programming/Example]] | Existing check |
+`);
+  assert.equal(run("enforce-review.mjs", payload), "");
+  assert.equal(run("enforce-review.mjs", payload), "");
+});

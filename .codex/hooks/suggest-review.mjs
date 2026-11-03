@@ -35,6 +35,7 @@ try {
         hookEventName: "PostToolUse",
         additionalContext:
           `Changed note review required: ${tracked.join(", ")}. ` +
+          "For notes with Qard cards, resolve Learn source assignment before completion: link the note to a semantically fitting existing course objective, or add an objective only for a distinct competency. Preserve objective IDs, prerequisites and progress. Run node .scripts/qard-learn-sync/check.cjs to verify coverage. " +
           "Dispatch the note-reviewer subagent. Only after it returns CLEAN, " +
           `record the hash-bound receipt with: ${receiptCommand}`,
       },

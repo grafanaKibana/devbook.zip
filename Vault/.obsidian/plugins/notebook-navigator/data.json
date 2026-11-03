@@ -157,7 +157,7 @@
     "file": "Home/index.md",
     "createMissingPeriodicNote": true
   },
-  "dualPane": false,
+  "dualPane": true,
   "dualPaneOrientation": "horizontal",
   "narrowSidebarLayout": "vertical",
   "narrowSidebarTriggerMode": "fitPanes",

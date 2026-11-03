@@ -36,7 +36,7 @@ cd devbook.zip
 
 Start with `Vault/Home/index.md`. Notes and interview cards are authored within their owning topics.
 
-For local authoring with the checked export workflow, install Git, Bash, Python 3.9+, Node 22/npm, and Obsidian desktop. Allow the bundled community plugins, enable/register **Settings → General → Command line interface**, keep this vault open, then run:
+For local authoring with the checked export workflow, install Git, Bash, .NET SDK 10.0.100, Node 22/npm, and Obsidian desktop. Allow the bundled community plugins, enable/register **Settings → General → Command line interface**, keep this vault open, then run:
 
 ```bash
 bash .scripts/setup.sh

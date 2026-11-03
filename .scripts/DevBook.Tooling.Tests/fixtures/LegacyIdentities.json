@@ -1,0 +1,70 @@
+{
+  "provenance": "Generated once from pre-rewrite Python core.py and runtime.py; Python Unicode 16.0.0",
+  "vectors": [
+    {
+      "name": "runtime",
+      "value": {
+        "unknown": [
+          "Café < > & 😀",
+          false,
+          null,
+          42
+        ],
+        "β": "literal\nline"
+      },
+      "ascii": false,
+      "spaced": false,
+      "canonical": "{\"unknown\":[\"Café < > & 😀\",false,null,42],\"β\":\"literal\\nline\"}",
+      "digest": "2d065678e24c700ebeafed9550762572e3aaddd137be616669ecdd34f7ff1adc"
+    },
+    {
+      "name": "core-feedback",
+      "value": {
+        "body": "Café <claim> 😀",
+        "state": "COMMENTED",
+        "updated_at": "2026-10-30T08:00:00Z"
+      },
+      "ascii": true,
+      "spaced": false,
+      "canonical": "{\"body\":\"Caf\\u00e9 <claim> \\ud83d\\ude00\",\"state\":\"COMMENTED\",\"updated_at\":\"2026-10-30T08:00:00Z\"}",
+      "digest": "8fe5b3fb62968a6f19b17575419a7f175011de598d584321491a151beaab4a24"
+    },
+    {
+      "name": "violations",
+      "value": [
+        {
+          "code": "qard.empty-back",
+          "line": 12,
+          "message": "Café <back> 😀"
+        }
+      ],
+      "ascii": true,
+      "spaced": true,
+      "canonical": "[{\"code\": \"qard.empty-back\", \"line\": 12, \"message\": \"Caf\\u00e9 <back> \\ud83d\\ude00\"}]",
+      "digest": "df18e0b63d1e3b1e7ec1df49ffda95f883f7980cf7ddbc36ff4c139cf52a870f"
+    }
+  ],
+  "edit": {
+    "path": "Vault/Home/Programming/NET/Café.md",
+    "kind": "rewrite",
+    "learning_target": "same",
+    "before": "Straße\tΣςİ ﬃ\u001c <back> 😀",
+    "after": "STRASSE  σσι̇ FFI\n<back> 😀"
+  },
+  "exact_proposal": "12aa6529f1d9e36e23b47d492e76356827dc8ffe025879faa5a95f59d7a7122a",
+  "semantic_proposal": "4720011d5253dd3c3cf9678af4702b2fa63d80ddfbc938b7fb4bbf0e4c76f019",
+  "feedback": {
+    "id": 41,
+    "kind": "inline",
+    "body": "Café <claim> 😀",
+    "state": "COMMENTED",
+    "updated_at": "2026-10-30T08:00:00Z"
+  },
+  "core_feedback_key": "inline:41:8fe5b3fb62968a6f",
+  "core_feedback_revision": "8fe5b3fb62968a6f19b17575419a7f175011de598d584321491a151beaab4a24",
+  "runtime_fingerprint": "2d065678e24c700ebeafed9550762572e3aaddd137be616669ecdd34f7ff1adc",
+  "casefold": {
+    "input": "Straße\tΣςİ ﬃ\u001c <back> 😀",
+    "expected": "strasse σσi̇ ffi <back> 😀"
+  }
+}
