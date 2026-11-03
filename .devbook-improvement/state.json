@@ -138,13 +138,14 @@
     "version": 1,
     "id": "8ee974ce274c4cbcba9dfc3e56cb0691",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-03T09:17:25.556001Z",
-    "elapsed_seconds": 107.1509853,
+    "elapsed_seconds": 109.8905487,
     "calls_reserved": 4,
     "responses_received": 4,
     "attempted_paths": [
-      "Vault/Home/Programming/NET/ASP NET Web API/Filters.md"
+      "Vault/Home/Programming/NET/ASP NET Web API/Filters.md",
+      "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -220,10 +221,83 @@
           },
           "model_calls": 2
         }
+      },
+      {
+        "path": "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against ASP.NET Core middleware behavior. It covers next/short-circuit semantics, ordering, the 401 flow where authentication only establishes the user and authorization issues the challenge, the conventional-middleware singleton lifetime with scoped services in InvokeAsync, Map/UseWhen/Run branching, HasStarted, and endpoint metadata only being available after routing. The filter and middleware comparison and the table are consistent with each other and with the Microsoft docs they cite. The exception-handler card's .NET 10 note on suppressed diagnostics and the flagged middleware-vs-filter card (middleware before routing, Minimal API and endpoint-filter caveat) are accurate and bounded. Questions are self-contained, cite on the answer side, and the prose is direct. No verified defect, so edits would be cosmetic."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "Whole-note audit found no concrete defect. The keep is justified and no edits were proposed.",
+            "change_checks": [],
+            "notes": [
+              {
+                "path": "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md",
+                "verdict": "CLEAN",
+                "summary": "The note is accurate, ordered from idea to diagram to code to pitfalls to tradeoffs, and its three Qard cards are self-contained and cite sources on the answer side. No concrete defect was found, so leaving it unchanged is justified.",
+                "page_type": "Concept — authorable prose; qard identity comments protected; Questions and References present and valid.",
+                "current_text_evidence": [
+                  {
+                    "quote": "Registration order is control flow.",
+                    "line_start": 54,
+                    "reason": "States the core ordering mechanism directly, and the sample pipeline that follows is consistent with it."
+                  },
+                  {
+                    "quote": "Conventional middleware is constructed once.",
+                    "line_start": 124,
+                    "reason": "Gives the singleton lifetime condition and its fix (scoped services in InvokeAsync, or IMiddleware), which is a key engineering judgment."
+                  },
+                  {
+                    "quote": "`context.GetEndpoint()` is populated only after endpoint selection.",
+                    "line_start": 150,
+                    "reason": "A precise ordering pitfall that matches the routing behavior."
+                  },
+                  {
+                    "quote": "Endpoint filters can also be explicitly attached to mapped controller actions",
+                    "line_start": 175,
+                    "reason": "The comparison caveat is bounded and consistent with the tradeoffs table. The ASP.NET Core MVC test site applies AddEndpointFilterFactory to MapControllers()."
+                  },
+                  {
+                    "quote": "The handler therefore records what an investigation needs.",
+                    "line_start": 184,
+                    "reason": "The exception-handling card states the .NET 10 diagnostics condition and its consequence, and it lists limits (coverage, started responses, swallowing)."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the note covers one coherent topic (the middleware pipeline), and its custom-middleware, branching and filter-comparison sections each depend on that shared model.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ]
+          },
+          "model_calls": 4
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-03T09:19:12.706570Z",
+    "checkpoint_at": "2026-11-03T09:19:15.446134Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
