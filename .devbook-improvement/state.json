@@ -819,6 +819,66 @@
         },
         "review_process": "focused-whole-note-v1"
       }
+    },
+    "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Deadlocks.md": {
+      "content_hash": "f35a7f6b495ebc5132ad28f3e53c2249486e6e62aebb3cd7a87b2cbaf2a3cf36",
+      "rules_hash": "264d16c1cdd0550e8de34525350fcc463d41b1c8095a38a38008f9f84304bb03",
+      "outcome": "keep",
+      "repair_input_hash": "",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "violation_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "keep_review": {
+        "content_hash": "f35a7f6b495ebc5132ad28f3e53c2249486e6e62aebb3cd7a87b2cbaf2a3cf36",
+        "rules_hash": "264d16c1cdd0550e8de34525350fcc463d41b1c8095a38a38008f9f84304bb03",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review": {
+          "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Deadlocks.md",
+          "verdict": "CLEAN",
+          "summary": "The whole note was audited and is accurate, well ordered and concise, with each card testing one task. No concrete defect justifies an edit, so keeping it unchanged is correct.",
+          "page_type": "Concept note. Typed frontmatter, optional Questions and References present, protected Qard IDs.",
+          "current_text_evidence": [
+            {
+              "quote": "A deadlock is a closed waiting cycle: every participant holds something another participant needs, so none can move.",
+              "line_start": 16,
+              "reason": "The opening states the operating idea. It separates a true wait cycle from other stalls."
+            },
+            {
+              "quote": "The service looks deadlocked, but the mechanism is resource starvation rather than a closed wait cycle.",
+              "line_start": 156,
+              "reason": "This states the key boundary: thread-pool starvation versus a real cycle. The same boundary is applied correctly in the third and fourth cards."
+            },
+            {
+              "quote": "The timeout does not preempt another owner. It prevents the caller from waiting forever.",
+              "line_start": 110,
+              "reason": "This is the right condition on Monitor.TryEnter. It does not break no-preemption; it only bounds the wait."
+            },
+            {
+              "quote": "**`SemaphoreSlim` is not reentrant.**",
+              "line_start": 181,
+              "reason": "This is an accurate and useful pitfall. It follows the async-compatible lock alternative introduced just before it."
+            },
+            {
+              "quote": "> [!qard]- How can a production .NET deadlock be diagnosed?",
+              "line_start": 237,
+              "reason": "The card tests one finite diagnostic task. Its dotnet-dump steps (clrstack -all, syncblk) match the Microsoft debug-deadlock walkthrough."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: the note covers one topic, with lock deadlocks, sync-over-async and starvation contrasted. Separating them would lose the comparison.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        },
+        "review_process": "focused-whole-note-v1"
+      }
     }
   },
   "topics": {
@@ -1365,7 +1425,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-03T19:45:09.882761Z",
-    "elapsed_seconds": 809.3127227000001,
+    "elapsed_seconds": 813.8543274000001,
     "calls_reserved": 19,
     "responses_received": 19,
     "attempted_paths": [
@@ -2805,7 +2865,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-03T19:58:39.194999Z",
+    "checkpoint_at": "2026-11-03T19:58:43.736604Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
@@ -3764,6 +3824,73 @@
       ],
       "source_hashes": {
         "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md": "50ae23e90f3a019f34e24ad70b0b97d4fba885210103fc237b640b73241380c4"
+      },
+      "rules_hash": "264d16c1cdd0550e8de34525350fcc463d41b1c8095a38a38008f9f84304bb03",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "a728231d0723b9625c952b26f8d8c3314e1b6fd42e5e089b18b97f4325c3045c": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "notes": [
+          {
+            "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Deadlocks.md",
+            "verdict": "CLEAN",
+            "summary": "The whole note was audited and is accurate, well ordered and concise, with each card testing one task. No concrete defect justifies an edit, so keeping it unchanged is correct.",
+            "page_type": "Concept note. Typed frontmatter, optional Questions and References present, protected Qard IDs.",
+            "current_text_evidence": [
+              {
+                "quote": "A deadlock is a closed waiting cycle: every participant holds something another participant needs, so none can move.",
+                "line_start": 16,
+                "reason": "The opening states the operating idea. It separates a true wait cycle from other stalls."
+              },
+              {
+                "quote": "The service looks deadlocked, but the mechanism is resource starvation rather than a closed wait cycle.",
+                "line_start": 156,
+                "reason": "This states the key boundary: thread-pool starvation versus a real cycle. The same boundary is applied correctly in the third and fourth cards."
+              },
+              {
+                "quote": "The timeout does not preempt another owner. It prevents the caller from waiting forever.",
+                "line_start": 110,
+                "reason": "This is the right condition on Monitor.TryEnter. It does not break no-preemption; it only bounds the wait."
+              },
+              {
+                "quote": "**`SemaphoreSlim` is not reentrant.**",
+                "line_start": 181,
+                "reason": "This is an accurate and useful pitfall. It follows the async-compatible lock alternative introduced just before it."
+              },
+              {
+                "quote": "> [!qard]- How can a production .NET deadlock be diagnosed?",
+                "line_start": 260,
+                "reason": "The card tests one finite diagnostic task. Its dotnet-dump steps (clrstack -all, syncblk) match the Microsoft debug-deadlock walkthrough."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: the note covers one topic, with lock deadlocks, sync-over-async and starvation contrasted. Separating them would lose the comparison.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "overall_reason": "The complete note is accurate and clearly ordered. Its technical conditions are preserved, its cards are independently gradeable, and existing IDs are intact. There are no known violations or proposed edits, so the keep is justified.",
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Deadlocks.md",
+          "citation_index": 4,
+          "reported_line_start": 260,
+          "resolved_line_start": 237
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Deadlocks.md": "f35a7f6b495ebc5132ad28f3e53c2249486e6e62aebb3cd7a87b2cbaf2a3cf36"
       },
       "rules_hash": "264d16c1cdd0550e8de34525350fcc463d41b1c8095a38a38008f9f84304bb03",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
@@ -8017,173 +8144,6 @@
         "reason": "card edit must replace one complete active Qard block including adjacent metadata"
       },
       "failed_at": "2026-11-03T19:47:21.890440Z"
-    }
-  },
-  "pending_author_proposal": {
-    "workload_id": "caa35096ca95474e9f400801cb20cb18",
-    "topic_id": "programming-e6aba2bd",
-    "batch": {
-      "topic": "Programming",
-      "topic_id": "programming-e6aba2bd",
-      "notes": [
-        {
-          "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Deadlocks.md",
-          "content": "---\ntopic: [Programming]\nsubtopic: [NET]\nsummary: \"When execution paths wait forever on resources each other holds, halting progress.\"\nlevel: [\"4\"]\npriority: High\nstatus: Ready to Repeat\npublish: true\nqard-deck: \"Programming\"\nqard-topic: \"NET/CSharp/Concurrency and Parallelism/Deadlocks\"\nflashcard_uid: \"f9642578\"\ncreated: \"2026-02-18T20:04:43.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\n---\n\nA deadlock is a closed waiting cycle: every participant holds something another participant needs, so none can move. In .NET this can happen with ordinary locks or when synchronous code blocks an async continuation. The process may stay healthy enough to answer a liveness probe while the affected work has stopped completely.\n\n# The Four Conditions\n\nClassical resource or lock deadlocks are characterized by all four Coffman conditions simultaneously:\n\n1. **Mutual exclusion** means a resource cannot be shared, as with a [[Locking|lock]] or monitor.\n2. **Hold and wait** means one path keeps a resource while waiting for another.\n3. **No preemption** means the owner must release the resource. Another thread cannot simply take it.\n4. **Circular wait** closes the cycle: A waits for B while B waits for A.\n\nSuch a classical resource deadlock needs all four at once. Consistent lock ordering is usually the cleanest prevention because it removes circular wait.\n\n# Classic Lock Deadlock\n\n```csharp\nprivate static readonly object LockA = new();\nprivate static readonly object LockB = new();\n\npublic void First()\n{\n    lock (LockA)\n    {\n        Thread.Sleep(10); // simulate work while holding A\n        lock (LockB)      // then acquire B\n        {\n            // critical section using A + B\n        }\n    }\n}\n\npublic void Second()\n{\n    lock (LockB)\n    {\n        Thread.Sleep(10); // simulate work while holding B\n        lock (LockA)      // then acquire A — reverse order!\n        {\n            // critical section using B + A\n        }\n    }\n}\n```\n\nThe cycle forms in five steps:\n1. Thread T1 enters `First`, acquires `LockA`.\n2. Thread T2 enters `Second`, acquires `LockB`.\n3. T1 tries to acquire `LockB` — blocked (owned by T2).\n4. T2 tries to acquire `LockA` — blocked (owned by T1).\n5. Neither thread can continue. The wait graph now contains a cycle.\n\n# Async Deadlock (Sync-Over-Async)\n\nAsync code can create the same shape without two explicit locks. The common case blocks a thread that owns a `SynchronizationContext`, while the awaited continuation is queued back to that context.\n\n```csharp\n// In a UI event handler or legacy ASP.NET action:\npublic void OnLoad()\n{\n    // DEADLOCK: blocks the UI thread, which the continuation needs to resume\n    var data = LoadDataAsync().Result;\n    Display(data);\n}\n\nprivate async Task<string> LoadDataAsync()\n{\n    // Default await captures the SynchronizationContext (UI thread).\n    // The continuation needs the UI thread to resume — but it's blocked by .Result.\n    return await _http.GetStringAsync(\"https://api.example.com/data\");\n}\n```\n\nThe dependency is small but fatal:\n- `.Result` blocks the UI/context thread.\n- The `await` inside `LoadDataAsync` captured the `SynchronizationContext` and needs that same thread to resume.\n- Neither can proceed.\n\n# Prevention\n\n**One lock order.** Every code path acquires the same set of locks in the same order. Circular wait then has no way to form.\n\n```csharp\n// Both methods acquire in the same order: LockA → LockB\npublic void First()\n{\n    lock (LockA) { lock (LockB) { /* ... */ } }\n}\n\npublic void Second()\n{\n    lock (LockA) { lock (LockB) { /* ... */ } }\n}\n```\n\n**Bounded waits.** `Monitor.TryEnter` gives the caller a chance to abandon the attempt, release anything already held, and retry later. The timeout does not preempt another owner. It prevents the caller from waiting forever.\n\n```csharp\nbool acquired = Monitor.TryEnter(LockA, TimeSpan.FromMilliseconds(500));\nif (!acquired)\n{\n    // Log, retry, or throw — don't wait forever\n    throw new TimeoutException(\"Could not acquire LockA within 500ms\");\n}\ntry { /* critical section */ }\nfinally { Monitor.Exit(LockA); }\n```\n\n**Async call chains stay async.** Awaiting a task yields the thread instead of holding it while the continuation waits to run.\n\n```csharp\n// Correct: await all the way up\npublic async Task OnLoadAsync()\n{\n    var data = await LoadDataAsync();\n    Display(data);\n}\n```\n\n`ConfigureAwait(false)` can avoid context capture inside library code, but it is not a general bridge from synchronous code to async code. A synchronous boundary should usually be moved outward or given a separate synchronous implementation.\n\n**Lock scope stays small.** I/O and blocking calls stay outside the critical section. The lock protects the state change, not the work used to compute it.\n\n```csharp\n// Bad: I/O inside lock\nlock (_lock) { var result = _http.GetStringAsync(url).Result; }\n\n// Good: I/O outside lock\nvar result = await _http.GetStringAsync(url);\nlock (_lock) { _cache[key] = result; }\n```\n\n# Thread-pool Starvation Can Look the Same\n\nASP.NET Core does not need a `SynchronizationContext` for sync-over-async to cause an outage. Each request blocked on `.Result` or `.Wait()` occupies a pool thread. Under load, continuations compete for the same depleted pool and throughput can collapse before thread injection catches up.\n\n```csharp\n// Under concurrency this exhausts the ThreadPool and the app appears \"deadlocked\"\npublic IActionResult Get() => Ok(_service.LoadAsync().Result); // never block — await instead\n```\n\nThe service looks deadlocked, but the mechanism is resource starvation rather than a closed wait cycle. Keeping the request path async releases pool threads while I/O is pending. Thread-pool behavior is covered in [[ThreadPool]].\n\n# Related Failure Modes\n\n- **Livelock** keeps threads active but unproductive because each reacts to the other. Two identical `Monitor.TryEnter` retry loops can collide indefinitely. Jitter breaks that symmetry.\n- **Lock convoy** queues many threads behind one hot lock. Progress continues, but latency rises and throughput falls as the queue grows.\n\n# Pitfalls\n\n**There may be no exception.** A frozen UI or request timeout may be the first signal. A process dump reveals threads blocked on monitors or synchronous task waits.\n\n**A `lock` cannot span `await`.** The compiler rejects the construct because monitor ownership belongs to a thread, and an async continuation may resume elsewhere. `SemaphoreSlim` supplies async-compatible waiting.\n\n```csharp\nprivate readonly SemaphoreSlim _gate = new(1, 1);\n\npublic async Task UpdateAsync()\n{\n    await _gate.WaitAsync();\n    try { /* critical section */ }\n    finally { _gate.Release(); }\n}\n```\n\n> [!WARNING]\n> **`SemaphoreSlim` is not reentrant.** Unlike `Monitor`/`lock` (and `Mutex`), it has no thread affinity or recursion count. A method holding the only permit self-deadlocks if it calls another method that waits on the same semaphore. The permit belongs at one clear boundary in the call chain.\n\n**Public lock objects hide dependencies.** `lock(this)`, `lock(typeof(X))`, and an interned `string` expose the same monitor to unrelated code. A private `readonly` gate keeps lock ordering inside the component.\n\n**Library calls may take internal locks.** Calling unknown code while holding an application lock creates an ordering dependency that is difficult to see or control.\n\n**Database deadlocks belong to the database lock manager.** Two transactions can touch rows or indexes in opposite orders, after which SQL Server chooses a victim and reports error 1205. The usual response combines consistent access order and short transactions with a bounded retry for the victim. CLR locks do not repair this layer. Database lock behavior is covered in [[Database Locks]].\n\n# Questions\n\n<!-- qard-id: fedf92a4-d6ae-45c5-a26f-25debb161739 -->\n> [!qard]- What are the four Coffman conditions for a resource deadlock?\n> The four conditions are mutual exclusion, hold and wait, no preemption and circular wait. A classical resource deadlock occurs only when all four hold at the same time.\n>\n> 1. **Mutual exclusion:** a resource can be held by only one participant at a time, as with a lock.\n> 2. **Hold and wait:** a participant keeps the resources it holds while waiting for another.\n> 3. **No preemption:** a resource cannot be taken from its holder; only the holder can release it.\n> 4. **Circular wait:** the waiting participants form a closed chain, each waiting for a resource held by the next.\n> \n> For example, thread T1 holds lock A and waits for lock B, while T2 holds B and waits for A. Both locks are exclusive, each thread holds one while waiting, neither lock can be taken away, and the two waits close a cycle.\n>\n> Because all four conditions are required, breaking any one prevents this kind of deadlock. Which condition is practical to break depends on the resources and design. For locks, a single global acquisition order that every code path follows makes circular wait impossible.\n>\n> [Coffman, Elphick and Shoshani: System Deadlocks](https://doi.org/10.1145/356586.356588) · [Microsoft: Dynamic-link library best practices](https://learn.microsoft.com/en-us/windows/win32/Dlls/dynamic-link-library-best-practices)\n\n> [!qard]- How can lock-based deadlocks be prevented in .NET code?\n> Lock-based deadlocks are prevented by making a closed wait cycle impossible, or by ensuring that a thread does not wait forever while it holds locks.\n>\n> - **One global lock order:** every code path that needs several locks acquires them in the same order, such as A before B. No thread can then hold B while waiting for A, so circular wait cannot form.\n> - **Bounded acquisition:** a timed `Monitor.TryEnter` lets a thread give up instead of waiting forever. On failure, the thread releases any locks it already holds, then reports an error or retries after a randomized delay. The timeout does not take the lock from its owner, and identical retry timing could make two threads keep colliding (livelock).\n> - **Short critical sections:** I/O, blocking waits and calls into unknown library code stay outside the lock. Code called while a lock is held may take its own locks, which adds an ordering dependency that is hard to see.\n> - **Private lock objects:** a `private readonly` lock object keeps the lock under the component's control. Locking on `this`, a `Type` or a string lets unrelated code take the same lock and join the ordering.\n> \n> For example, if `First` locks A then B while `Second` locks B then A, two threads can each hold one lock and wait for the other. Changing `Second` to lock A then B removes the cycle.\n>\n> [Microsoft: Dynamic-link library best practices](https://learn.microsoft.com/en-us/windows/win32/Dlls/dynamic-link-library-best-practices) · [Microsoft: `lock` statement](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/lock)\n\n<!-- qard-id: 17deb6e3-a3c1-4265-9148-1a96302dca83 -->\n> [!qard]- When does blocking on an incomplete task deadlock a UI thread?\n> Blocking deadlocks a UI thread when the task cannot complete without running code on that same UI thread. This happens when an `await` inside the task captured the UI `SynchronizationContext`, which runs continuations only on the UI thread.\n>\n> The cycle forms in five steps:\n>\n> 1. A UI event handler calls an async method, such as `LoadDataAsync()`.\n> 2. Inside it, `await` on incomplete I/O captures the UI context, and the method returns an incomplete task.\n> 3. The handler calls `.Result` or `.Wait()` on that task, blocking the UI thread.\n> 4. The I/O completes, and the rest of `LoadDataAsync()` is queued to run on the UI thread.\n> 5. The UI thread waits for the task, while the task waits for the UI thread. Neither can proceed.\n> \n> Awaiting through the whole call chain breaks the cycle, because the handler yields the UI thread instead of blocking it. `ConfigureAwait(false)` in library code avoids capturing the context for those awaits, but it does not make blocking on asynchronous code a safe general bridge.\n>\n> Without a single-threaded context, as in ASP.NET Core, this particular cycle does not form. Blocking still holds a thread-pool thread for each waiting call and can starve the pool under load.\n>\n> [Microsoft: Common async bugs](https://learn.microsoft.com/en-us/dotnet/standard/asynchronous-programming-patterns/common-async-bugs) · [Microsoft: Synchronous wrappers for async methods](https://learn.microsoft.com/en-us/dotnet/standard/asynchronous-programming-patterns/synchronous-wrappers-for-asynchronous-methods)\n\n<!-- qard-id: 7c1fe64c-c539-4207-887a-8a8ad04d355b -->\n> [!qard]- How can a production .NET deadlock be diagnosed?\n> A production deadlock is diagnosed from a process dump by finding a closed wait-for cycle, in which each blocked thread or task waits for something that another member of the cycle holds or must run.\n>\n> 1. **Dump:** `dotnet-dump collect` saves the memory and thread state of the hung process.\n> 2. **Blocked threads:** in `dotnet-dump analyze`, `clrstack -all` shows every managed stack. Deadlocked threads sit in lock acquisitions such as `Monitor.Enter`, or in synchronous task waits such as `.Result` or `.Wait()`.\n> 3. **Monitor owners:** `syncblk` lists which thread owns each monitor. Matching each waiting thread to the lock it wants, and that lock to its owner, shows whether the waits close a cycle.\n> 4. **Async waits:** for a thread blocked on a task, the analysis also needs the task's pending continuation and the context or scheduler it must run on. For example, a continuation bound to the UI context cannot run while the UI thread itself is blocked on that task.\n> \n> The cycle is the evidence. A high thread count, or many blocked threads without a cycle, points to a different problem such as thread-pool starvation.\n>\n> [Microsoft: Debug a .NET deadlock](https://learn.microsoft.com/en-us/dotnet/core/diagnostics/debug-deadlock) · [Microsoft: dotnet-dump](https://learn.microsoft.com/en-us/dotnet/core/diagnostics/dotnet-dump)\n\n# References\n\n- [Diagnosing .NET deadlocks with dotnet-dump](https://learn.microsoft.com/en-us/dotnet/core/diagnostics/debug-deadlock)\n- [Await, UI, and deadlocks](https://devblogs.microsoft.com/dotnet/await-and-ui-and-deadlocks-oh-my/)\n",
-          "hash": "f35a7f6b495ebc5132ad28f3e53c2249486e6e62aebb3cd7a87b2cbaf2a3cf36",
-          "topic": "Programming",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "new"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "264d16c1cdd0550e8de34525350fcc463d41b1c8095a38a38008f9f84304bb03",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Deadlocks.md",
-          "outcome": "keep",
-          "reason": "Audited the whole note against its text and the nearby Async Await, Locking, Mutex and Parallelism cards. The Coffman conditions and the five-step lock-order cycle are correct. The sync-over-async explanation correctly ties the deadlock to a single-threaded SynchronizationContext. The note separates ASP.NET Core thread-pool starvation from a true wait cycle. The prevention advice (one lock order, Monitor.TryEnter timeouts that do not preempt, async all the way, small lock scope, non-reentrant SemaphoreSlim, private lock objects) matches Microsoft documentation. The diagnosis card's dotnet-dump steps (clrstack -all, syncblk) match the documented debug-deadlock walkthrough. The three cards each test one task, and their answers agree with the prose and with the nearby cards. There are no known violations, no flagged cards, no unresolved code-fence language issues and no repeated passages. The structure and the references are appropriate, so edits would be churn."
-        }
-      ],
-      "feedback": []
-    },
-    "source_hashes": {
-      "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Deadlocks.md": "f35a7f6b495ebc5132ad28f3e53c2249486e6e62aebb3cd7a87b2cbaf2a3cf36"
-    },
-    "feedback_keys": [],
-    "rules_hash": "264d16c1cdd0550e8de34525350fcc463d41b1c8095a38a38008f9f84304bb03",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Deadlocks.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-03T19:58:12.280874Z",
-    "review_evidence": {
-      "raw_review": {
-        "verdict": "CLEAN",
-        "notes": [
-          {
-            "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Deadlocks.md",
-            "verdict": "CLEAN",
-            "summary": "The whole note was audited and is accurate, well ordered and concise, with each card testing one task. No concrete defect justifies an edit, so keeping it unchanged is correct.",
-            "page_type": "Concept note. Typed frontmatter, optional Questions and References present, protected Qard IDs.",
-            "current_text_evidence": [
-              {
-                "quote": "A deadlock is a closed waiting cycle: every participant holds something another participant needs, so none can move.",
-                "line_start": 16,
-                "reason": "The opening states the operating idea. It separates a true wait cycle from other stalls."
-              },
-              {
-                "quote": "The service looks deadlocked, but the mechanism is resource starvation rather than a closed wait cycle.",
-                "line_start": 156,
-                "reason": "This states the key boundary: thread-pool starvation versus a real cycle. The same boundary is applied correctly in the third and fourth cards."
-              },
-              {
-                "quote": "The timeout does not preempt another owner. It prevents the caller from waiting forever.",
-                "line_start": 110,
-                "reason": "This is the right condition on Monitor.TryEnter. It does not break no-preemption; it only bounds the wait."
-              },
-              {
-                "quote": "**`SemaphoreSlim` is not reentrant.**",
-                "line_start": 181,
-                "reason": "This is an accurate and useful pitfall. It follows the async-compatible lock alternative introduced just before it."
-              },
-              {
-                "quote": "> [!qard]- How can a production .NET deadlock be diagnosed?",
-                "line_start": 260,
-                "reason": "The card tests one finite diagnostic task. Its dotnet-dump steps (clrstack -all, syncblk) match the Microsoft debug-deadlock walkthrough."
-              }
-            ],
-            "target_resolution": "JUSTIFIED UNCHANGED",
-            "split_suggestion": "No split: the note covers one topic, with lock deadlocks, sync-over-async and starvation contrasted. Separating them would lose the comparison.",
-            "findings": [],
-            "source_checks": [],
-            "rejection_equivalence": [],
-            "quality": {
-              "accuracy": "PASS",
-              "clarity": "PASS",
-              "question_quality": "PASS",
-              "identity_safety": "PASS",
-              "rules_compliance": "PASS"
-            }
-          }
-        ],
-        "overall_reason": "The complete note is accurate and clearly ordered. Its technical conditions are preserved, its cards are independently gradeable, and existing IDs are intact. There are no known violations or proposed edits, so the keep is justified.",
-        "change_checks": []
-      },
-      "bindings": [
-        {
-          "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Deadlocks.md",
-          "citation_index": 4,
-          "reported_line_start": 260,
-          "resolved_line_start": 237
-        }
-      ],
-      "source_hashes": {
-        "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Deadlocks.md": "f35a7f6b495ebc5132ad28f3e53c2249486e6e62aebb3cd7a87b2cbaf2a3cf36"
-      },
-      "rules_hash": "264d16c1cdd0550e8de34525350fcc463d41b1c8095a38a38008f9f84304bb03",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
-    },
-    "completed_review": {
-      "verdict": "CLEAN",
-      "notes": [
-        {
-          "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Deadlocks.md",
-          "verdict": "CLEAN",
-          "summary": "The whole note was audited and is accurate, well ordered and concise, with each card testing one task. No concrete defect justifies an edit, so keeping it unchanged is correct.",
-          "page_type": "Concept note. Typed frontmatter, optional Questions and References present, protected Qard IDs.",
-          "current_text_evidence": [
-            {
-              "quote": "A deadlock is a closed waiting cycle: every participant holds something another participant needs, so none can move.",
-              "line_start": 16,
-              "reason": "The opening states the operating idea. It separates a true wait cycle from other stalls."
-            },
-            {
-              "quote": "The service looks deadlocked, but the mechanism is resource starvation rather than a closed wait cycle.",
-              "line_start": 156,
-              "reason": "This states the key boundary: thread-pool starvation versus a real cycle. The same boundary is applied correctly in the third and fourth cards."
-            },
-            {
-              "quote": "The timeout does not preempt another owner. It prevents the caller from waiting forever.",
-              "line_start": 110,
-              "reason": "This is the right condition on Monitor.TryEnter. It does not break no-preemption; it only bounds the wait."
-            },
-            {
-              "quote": "**`SemaphoreSlim` is not reentrant.**",
-              "line_start": 181,
-              "reason": "This is an accurate and useful pitfall. It follows the async-compatible lock alternative introduced just before it."
-            },
-            {
-              "quote": "> [!qard]- How can a production .NET deadlock be diagnosed?",
-              "line_start": 237,
-              "reason": "The card tests one finite diagnostic task. Its dotnet-dump steps (clrstack -all, syncblk) match the Microsoft debug-deadlock walkthrough."
-            }
-          ],
-          "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: the note covers one topic, with lock deadlocks, sync-over-async and starvation contrasted. Separating them would lose the comparison.",
-          "findings": [],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "PASS",
-            "question_quality": "PASS",
-            "identity_safety": "PASS",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "overall_reason": "The complete note is accurate and clearly ordered. Its technical conditions are preserved, its cards are independently gradeable, and existing IDs are intact. There are no known violations or proposed edits, so the keep is justified.",
-      "change_checks": []
     }
   }
 }
