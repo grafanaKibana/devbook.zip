@@ -12,5 +12,20 @@
     "owner": "41609562724:1",
     "acquired_at": "2026-11-03T09:17:22Z",
     "expires_at": "2026-11-03T09:57:22Z"
+  },
+  "focused_workload": {
+    "version": 1,
+    "id": "8ee974ce274c4cbcba9dfc3e56cb0691",
+    "status": "active",
+    "phase": "selecting",
+    "started_at": "2026-11-03T09:17:25.556001Z",
+    "elapsed_seconds": 0.0022403,
+    "calls_reserved": 0,
+    "responses_received": 0,
+    "attempted_paths": [],
+    "accepted_records": [],
+    "outcomes": [],
+    "feedback_pr": 0,
+    "checkpoint_at": "2026-11-03T09:17:25.557952Z"
   }
 }
