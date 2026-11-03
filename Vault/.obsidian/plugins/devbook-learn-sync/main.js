@@ -25,12 +25,80 @@ var require_core = __commonJS({
       return `${summary}
 ${body}`.replace(/^[ \t]*<!--[ \t]*qard-(?:id|location|siblings|reverse):[^\n]*?-->[ \t]*(?:\r?\n|$)/gm, "").replace(/<!--[ \t]*qard-(?:id|location|siblings|reverse):[^\n]*?-->/g, "").replace(/\r\n/g, "\n").replace(/[ \t]+$/gm, "").replace(/\n{3,}/g, "\n\n").trim();
     };
+    function cardCount(text) {
+      const lines = text.split(/\r?\n/);
+      const header = /^ {0,3}> ?\[!qard\][+-]?(?:[ \t]+(.*))?$/i;
+      const quoted = /^ {0,3}> ?(.*)$/;
+      const opening = (line) => /^ {0,3}(`{3,}|~{3,})/.exec(line)?.[1] || "";
+      const closes = (line, fence2) => {
+        const match = /^ {0,3}(`+|~+)\s*$/.exec(line);
+        return match && match[1][0] === fence2[0] && match[1].length >= fence2.length;
+      };
+      let start = 0, count = 0, fence = "", comment = false;
+      if (lines[0]?.replace(/^\uFEFF/, "") === "---") {
+        const end = lines.findIndex((line, index) => index > 0 && /^(---|\.\.\.)\s*$/.test(line));
+        if (end < 0) return 0;
+        start = end + 1;
+      }
+      for (let index = start; index < lines.length; index++) {
+        const line = lines[index];
+        if (fence) {
+          if (closes(line, fence)) fence = "";
+          continue;
+        }
+        if (comment) {
+          if (line.includes("-->")) comment = false;
+          continue;
+        }
+        fence = opening(line);
+        if (fence) continue;
+        if (/^\s*<!--/.test(line)) {
+          comment = !line.includes("-->");
+          continue;
+        }
+        const match = header.exec(line);
+        if (!match) continue;
+        let end = index + 1, innerFence = opening(match[1] || ""), separator = -1;
+        const body = [];
+        while (end < lines.length) {
+          const content = quoted.exec(lines[end]);
+          if (!content || !innerFence && header.test(lines[end])) break;
+          const value = content[1];
+          if (innerFence) {
+            if (closes(value, innerFence)) innerFence = "";
+          } else {
+            innerFence = opening(value);
+            if (!innerFence && value.trim() === "<!-- qard-answer -->" && separator < 0) separator = body.length;
+          }
+          body.push(value);
+          end++;
+        }
+        const front = separator < 0 ? match[1] || "" : [match[1] || "", ...body.slice(0, separator)].join("\n");
+        const back = (separator < 0 ? body : body.slice(separator + 1)).join("\n");
+        if (front.trim() && back.trim() && !innerFence) count++;
+        index = end - 1;
+      }
+      return count;
+    }
     async function sourceSnapshot2(text) {
       if (typeof text !== "string") fail("expected source Markdown text");
       const bytes = new TextEncoder().encode(contentOf(text));
       const hash = await globalThis.crypto.subtle.digest("SHA-256", bytes);
       const revision = Array.from(new Uint8Array(hash), (byte) => byte.toString(16).padStart(2, "0")).join("");
-      return { revision, cards: (text.match(/^\s*>\s*\[!qard\]/gim) ?? []).length };
+      return { revision, cards: cardCount(text) };
+    }
+    function unassignedSources2(courses, sources, resolveLink = (link) => link.replace(/\.md$/, "") + ".md") {
+      const subjects = /* @__PURE__ */ new Set(), assigned = /* @__PURE__ */ new Set();
+      for (const course of courses) {
+        if (subjects.has(course.course)) fail(`duplicate Learn course ${course.course}`);
+        subjects.add(course.course);
+        for (const row of course.rows) for (const link of row.notes) {
+          vaultPath(link);
+          const target = resolveLink(link, course.path);
+          if (target?.startsWith(`Home/${course.course}/`)) assigned.add(target);
+        }
+      }
+      return sources.filter((source) => source.cards > 0 && /^Home\/[^/]+\/.+\.md$/.test(source.path) && !assigned.has(source.path)).map((source) => ({ path: source.path, cards: source.cards, course: source.path.split("/")[1] })).sort((left, right) => left.path.localeCompare(right.path));
     }
     function linesOf(text) {
       return [...text.matchAll(/([^\r\n]*)(\r\n|\n|$)/g)].filter((match) => match[0] !== "").map((match) => ({ text: match[1], ending: match[2] }));
@@ -231,13 +299,13 @@ ${body}`.replace(/^[ \t]*<!--[ \t]*qard-(?:id|location|siblings|reverse):[^\n]*?
       parseCourse(merged);
       return { text: merged, ...result };
     }
-    module2.exports = { inspectCourse: inspectCourse2, reconcileCourse: reconcileCourse2, renameSourcePath: renamedPath, sourceSnapshot: sourceSnapshot2 };
+    module2.exports = { inspectCourse: inspectCourse2, reconcileCourse: reconcileCourse2, renameSourcePath: renamedPath, sourceSnapshot: sourceSnapshot2, unassignedSources: unassignedSources2 };
   }
 });
 
 // .scripts/qard-learn-sync/plugin.cjs
 var { Plugin, Notice, TFile } = require("obsidian");
-var { inspectCourse, reconcileCourse, renameSourcePath, sourceSnapshot } = require_core();
+var { inspectCourse, reconcileCourse, renameSourcePath, sourceSnapshot, unassignedSources } = require_core();
 var COURSE_ROOT = "Assets/Qard/Courses/";
 var SOURCE_ROOT = "Home/";
 var DEBOUNCE_MS = 1200;
@@ -261,6 +329,9 @@ module.exports = class LearnSourceSync extends Plugin {
     this.renames = data?.version === 1 ? data.renames ?? [] : [];
     this.pending = [];
     this.problems = [];
+    this.unassigned = [];
+    this.coverageComplete = false;
+    this.warningSignature = "";
     this.status = this.addStatusBarItem();
     this.status.setText("Learn sync: starting");
     this.status.addEventListener("click", () => this.showStatus());
@@ -282,12 +353,18 @@ module.exports = class LearnSourceSync extends Plugin {
       }
     }));
     this.registerEvent(this.app.vault.on("rename", (file, oldPath) => {
-      if (this.stopped || !(oldPath.startsWith(SOURCE_ROOT) || file.path.startsWith(SOURCE_ROOT))) return;
-      this.renames.push({ from: oldPath, to: file.path });
-      void this.saveState().catch((error) => this.reportFailure("Could not save rename", error));
+      if (this.stopped) return;
+      if (oldPath.startsWith(SOURCE_ROOT) || file.path.startsWith(SOURCE_ROOT)) {
+        this.renames.push({ from: oldPath, to: file.path });
+        void this.saveState().catch((error) => this.reportFailure("Could not save rename", error));
+      } else if (!(isCourse(oldPath) || isCourse(file.path) || oldPath === COURSE_ROOT.slice(0, -1))) return;
       this.schedule();
     }));
+    this.registerEvent(this.app.vault.on("create", (file) => {
+      if (isSource(file.path) || isCourse(file.path)) this.schedule();
+    }));
     this.registerEvent(this.app.vault.on("delete", (file) => {
+      this.sourceCache.delete(file.path);
       if (isSource(file.path) || file.path.startsWith(SOURCE_ROOT) || isCourse(file.path)) this.schedule();
     }));
     this.app.workspace.onLayoutReady(() => {
@@ -295,7 +372,7 @@ module.exports = class LearnSourceSync extends Plugin {
     });
   }
   linkSignature(course) {
-    return JSON.stringify(course.rows.map((row) => [row.id, row.notes]));
+    return JSON.stringify([course.course, course.rows.map((row) => [row.id, row.notes])]);
   }
   schedule() {
     if (this.stopped) return;
@@ -323,9 +400,16 @@ module.exports = class LearnSourceSync extends Plugin {
     this.running = true;
     const renames = this.renames.slice();
     let failed = false;
-    const problems = [], pending = [];
+    const problems = [], pending = [], registry = [], inventory = [];
     try {
-      const courses = this.app.vault.getMarkdownFiles().filter((file) => isCourse(file.path));
+      const files = this.app.vault.getMarkdownFiles();
+      const currentPaths = new Set(files.map((file) => file.path));
+      for (const path of this.sourceCache.keys()) if (!currentPaths.has(path)) this.sourceCache.delete(path);
+      for (const file of files.filter((file2) => isSource(file2.path))) {
+        if (this.stopped) break;
+        inventory.push({ path: file.path, cards: (await this.source(file)).cards });
+      }
+      const courses = files.filter((file) => isCourse(file.path));
       for (const file of courses) {
         if (this.stopped) break;
         try {
@@ -353,6 +437,7 @@ module.exports = class LearnSourceSync extends Plugin {
           }
           if (this.stopped) break;
           const updated = inspectCourse(result.text);
+          registry.push({ path: file.path, ...updated });
           this.courseLinks.set(file.path, this.linkSignature(updated));
           for (const row of updated.rows) {
             const key = `${file.path}#${row.id}`;
@@ -367,6 +452,18 @@ module.exports = class LearnSourceSync extends Plugin {
         }
       }
       if (!this.stopped) {
+        let unassigned = [];
+        if (!failed) {
+          try {
+            unassigned = unassignedSources(registry, inventory, (link, from) => {
+              const target = this.app.vault.getAbstractFileByPath(link.replace(/\.md$/, "") + ".md") ?? this.app.metadataCache.getFirstLinkpathDest(link, from);
+              return target instanceof TFile ? target.path : void 0;
+            });
+          } catch (error) {
+            failed = true;
+            problems.push(error.message);
+          }
+        }
         if (!failed && renames.length) {
           const remaining = this.renames.slice(renames.length);
           await this.saveState({ renames: remaining });
@@ -374,8 +471,13 @@ module.exports = class LearnSourceSync extends Plugin {
         }
         this.pending = pending;
         this.problems = problems;
-        this.status.setText(problems.length ? `Learn sync: ${problems.length} issue(s)` : pending.length ? `Learn: ${pending.length} source update(s)` : "Learn sync: up to date");
-        if (show) this.showStatus();
+        this.unassigned = unassigned;
+        this.coverageComplete = !failed;
+        this.status.setText(problems.length ? `Learn sync: ${problems.length} issue(s)` : unassigned.length ? `Learn: ${unassigned.length} unassigned note(s)` : pending.length ? `Learn: ${pending.length} source update(s)` : "Learn sync: up to date");
+        const signature = JSON.stringify(unassigned);
+        const newWarning = unassigned.length && signature !== this.warningSignature;
+        if (!failed) this.warningSignature = signature;
+        if (show || newWarning) this.showStatus();
       }
     } catch (error) {
       this.reportFailure("Could not finish Learn sync", error);
@@ -388,8 +490,12 @@ module.exports = class LearnSourceSync extends Plugin {
     }
   }
   showStatus() {
-    const lines = [this.problems.length ? "Learn sync needs attention:" : this.pending.length ? "Source material changed; existing Learn progress is preserved:" : "Learn sources are up to date."];
+    const lines = [this.problems.length ? "Learn sync needs attention:" : this.unassigned.length ? "Qard notes need Learn assignment:" : this.pending.length ? "Source material changed; existing Learn progress is preserved:" : "Learn sources are up to date."];
+    if (!this.coverageComplete) lines.push("Learn coverage could not be checked completely; fix the reported issues and sync again.");
     lines.push(...this.problems.slice(0, 8));
+    lines.push(...this.unassigned.slice(0, 8).map((item) => `${item.path} \xB7 ${item.cards} card(s) \xB7 ${item.course}`));
+    if (this.unassigned.length) lines.push("Link each note to an existing fitting Learn objective in its subject course; create an objective only for a distinct skill.");
+    if (this.unassigned.length > 8) lines.push(`And ${this.unassigned.length - 8} more unassigned notes.`);
     lines.push(...this.pending.slice(0, 8).map((item) => `${item.course} \xB7 ${item.label} (${item.updated})`));
     if (this.pending.length > 8) lines.push(`And ${this.pending.length - 8} more; use Learn source checks as needed.`);
     new Notice(lines.join("\n"), 12e3);
@@ -407,6 +513,8 @@ module.exports = class LearnSourceSync extends Plugin {
   }
   reportFailure(context, error) {
     if (this.stopped) return;
+    this.coverageComplete = false;
+    this.unassigned = [];
     this.problems = [`${context}: ${error.message || String(error)}`];
     this.status.setText("Learn sync: storage error");
   }

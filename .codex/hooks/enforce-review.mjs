@@ -4,11 +4,13 @@
 import {
   clearSession,
   pendingReviews,
+  readState,
   readStdin,
   resolveRepoRoot,
   sessionId,
   shellQuote,
 } from "./note-review-state.mjs";
+import coverage from "../../.scripts/qard-learn-sync/check.cjs";
 
 try {
   const raw = await readStdin();
@@ -23,6 +25,23 @@ try {
   const repoRoot = resolveRepoRoot(payload.cwd ?? process.cwd());
   const id = sessionId(payload);
   const pending = pendingReviews(repoRoot, id);
+  const notes = Object.keys(readState(repoRoot).sessions[id]?.notes ?? {});
+  if (notes.length) {
+    const result = await coverage.checkCoverage({
+      repoRoot,
+      paths: notes.map((note) => note.replace(/^Vault\//, "")),
+    });
+    if (result.unassigned.length || result.problems.length) {
+      process.stdout.write(JSON.stringify({
+        decision: "block",
+        reason: "Learn assignment gate: " + [
+          ...result.problems,
+          ...result.unassigned.map((note) => `${note.path}: ${note.cards} card(s) have no objective in ${note.course}`),
+        ].join("; ") + ". Link each note to a semantically fitting existing Learn objective; add an objective only for a distinct competency. Preserve existing identities, prerequisites and progress. Run node .scripts/qard-learn-sync/check.cjs, then finish the required note review.",
+      }));
+      process.exit(0);
+    }
+  }
   if (pending.length === 0) {
     clearSession(repoRoot, id);
     process.exit(0);
