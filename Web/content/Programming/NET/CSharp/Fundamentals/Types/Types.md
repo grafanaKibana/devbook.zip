@@ -2,8 +2,8 @@
 publish: true
 title: C# Types
 created: 2026-02-10T16:03:55.000Z
-modified: 2026-11-03T09:20:34.250Z
-published: 2026-11-03T09:31:13.000Z
+modified: 2026-11-03T09:57:43.792Z
+published: 2026-11-03T10:00:01.000Z
 tags:
   - FolderNote
 topic:
@@ -30,7 +30,7 @@ The folder separates the main forms. Classes and record classes are reference ty
 
 - **Assignment:** a value-type assignment copies every field. Reference fields inside that value still point to the same objects. A reference-type assignment copies the object reference, so both variables can observe mutations to one instance.
 - **Arguments:** parameters are passed by value unless marked `ref`, `out`, or `in`. Passing a reference type by value copies the reference, not the object.
-- **Storage:** a value type is stored inline in whatever holds it: a local variable, a field of a heap object, or an array element. A reference-type variable holds only a reference, and the object it points to is allocated separately. Declaration kind therefore does not dictate one physical location.
+- **Storage:** a value type is stored inline in whatever holds it: a local variable, a field of a heap object, or an array element. A reference-type variable holds only a reference to an object instance, so the reference and the object are distinct. Where either physically resides is a runtime detail. Declaration kind therefore does not dictate one physical location.
 - **Boxing:** conversion from a value type to `object` or an interface value copies it into a box. Constrained generic calls can often avoid that allocation. Nullable value types box differently: a populated `Nullable<T>` boxes its underlying `T` value, and an empty one converts to a `null` reference without allocating a box.
 
 # Pitfalls
