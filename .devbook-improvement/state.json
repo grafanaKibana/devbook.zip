@@ -17,16 +17,16 @@
     "version": 1,
     "id": "8ee974ce274c4cbcba9dfc3e56cb0691",
     "status": "active",
-    "phase": "evaluating",
+    "phase": "author_reserved",
     "started_at": "2026-11-03T09:17:25.556001Z",
-    "elapsed_seconds": 9.021336600000001,
-    "calls_reserved": 0,
+    "elapsed_seconds": 12.088752400000002,
+    "calls_reserved": 1,
     "responses_received": 0,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-03T09:17:34.576921Z",
+    "checkpoint_at": "2026-11-03T09:17:37.644339Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
@@ -53,6 +53,7 @@
       "review_process": "focused-whole-note-v1",
       "pr": null
     },
-    "base_sha": "112b9345c266597d4480ef1cd29dcd2fab092b1f"
+    "base_sha": "112b9345c266597d4480ef1cd29dcd2fab092b1f",
+    "reservation_deadline": "2026-11-03T09:32:37.375636Z"
   }
 }
