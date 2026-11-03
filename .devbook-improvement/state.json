@@ -659,6 +659,56 @@
         },
         "review_process": "focused-whole-note-v1"
       }
+    },
+    "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/CancellationToken.md": {
+      "content_hash": "2825987d92b27d65647bc14bd069104d769063784b961d0512c75ede69f369fe",
+      "rules_hash": "264d16c1cdd0550e8de34525350fcc463d41b1c8095a38a38008f9f84304bb03",
+      "outcome": "keep",
+      "repair_input_hash": "",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "violation_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "keep_review": {
+        "content_hash": "2825987d92b27d65647bc14bd069104d769063784b961d0512c75ede69f369fe",
+        "rules_hash": "264d16c1cdd0550e8de34525350fcc463d41b1c8095a38a38008f9f84304bb03",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review": {
+          "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/CancellationToken.md",
+          "verdict": "CLEAN",
+          "summary": "Whole-note audit finds an accurate, well-ordered note (ownership, caller/callee code, propagation sequence, RequestAborted, CPU-bound checks, callbacks, pitfalls) with correct version-specific detail such as CancelAsync in .NET 8. No concrete defect justifies an edit.",
+          "page_type": "Concept — no Questions section; one relevant Microsoft Learn reference in bare-link format; all fences have language identifiers.",
+          "current_text_evidence": [
+            {
+              "quote": "The caller owns the request. Each operation decides where it can stop without leaving partial state behind.",
+              "line_start": 13,
+              "reason": "Opening states the operating idea and ownership split quickly and concretely."
+            },
+            {
+              "quote": "The check is cheap, but its placement is a latency decision.",
+              "line_start": 81,
+              "reason": "Gives engineering judgment on where to place checks rather than just mechanics."
+            },
+            {
+              "quote": "runs registered callbacks synchronously, so a slow callback delays the caller",
+              "line_start": 93,
+              "reason": "Accurate mechanism plus the .NET 8 CancelAsync mitigation and the remaining limit."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: cancellation propagation, callbacks and pitfalls form one coherent topic that is jointly useful.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "NOT APPLICABLE",
+            "identity_safety": "NOT APPLICABLE",
+            "rules_compliance": "PASS"
+          }
+        },
+        "review_process": "focused-whole-note-v1"
+      }
     }
   },
   "topics": {
@@ -1205,7 +1255,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-03T19:45:09.882761Z",
-    "elapsed_seconds": 581.5956624,
+    "elapsed_seconds": 585.4804147,
     "calls_reserved": 13,
     "responses_received": 13,
     "attempted_paths": [
@@ -2443,7 +2493,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-03T19:54:51.477936Z",
+    "checkpoint_at": "2026-11-03T19:54:55.362688Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
@@ -7655,96 +7705,6 @@
         "reason": "card edit must replace one complete active Qard block including adjacent metadata"
       },
       "failed_at": "2026-11-03T19:47:21.890440Z"
-    }
-  },
-  "pending_author_proposal": {
-    "workload_id": "caa35096ca95474e9f400801cb20cb18",
-    "topic_id": "programming-e6aba2bd",
-    "batch": {
-      "topic": "Programming",
-      "topic_id": "programming-e6aba2bd",
-      "notes": [
-        {
-          "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/CancellationToken.md",
-          "content": "---\ntopic: [Programming]\nsubtopic: [NET]\nsummary: \"Cooperative cancellation where callers request a stop and callees comply safely.\"\nlevel: [\"4\"]\npriority: Medium\nstatus: Ready to Repeat\npublish: true\ncreated: \"2026-02-18T20:04:43.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\n---\n\n`CancellationToken` carries a request to stop through .NET call chains. The caller owns the request. Each operation decides where it can stop without leaving partial state behind. When a request token disappears halfway down the stack, the client may be gone while database or HTTP work keeps running.\n\nCancellation is cooperative. A `CancellationTokenSource` signals the token, and the callee either passes it to token-aware APIs or checks it at safe points. `OperationCanceledException` then unwinds the operation through normal cleanup.\n\n# How It Works\n\n```csharp\n// Caller side: create a source and pass its token\nusing var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));\nvar result = await DoWorkAsync(cts.Token);\n\n// Or cancel manually\ncts.Cancel();\n```\n\n```csharp\n// Callee side: accept and propagate the token\npublic async Task<OrderDto?> GetOrderAsync(\n    int id,\n    CancellationToken cancellationToken)\n{\n    // 1) Outbound HTTP call is cancellable.\n    using var response = await _httpClient.GetAsync(\n        $\"orders/{id}\",\n        cancellationToken);\n\n    response.EnsureSuccessStatusCode();\n\n    // 2) JSON deserialization is also cancellable.\n    return await response.Content.ReadFromJsonAsync<OrderDto>(\n        cancellationToken: cancellationToken);\n}\n```\n\nWhen cancellation is requested:\n\n1. Caller calls `cts.Cancel()` or the timeout fires.\n2. `GetAsync` observes the token and throws `OperationCanceledException`.\n3. The exception propagates up the call stack.\n4. The boundary classifies it as cancellation rather than an ordinary failure, provided the exception represents the token that controls the operation.\n\nASP.NET Core exposes `HttpContext.RequestAborted` for the request lifetime. Passing it downstream stops waiting promptly when the server detects a disconnected client.\n\n```csharp\npublic async Task<IActionResult> GetOrder(int id)\n{\n    var order = await _service.GetOrderAsync(id, HttpContext.RequestAborted);\n    return Ok(order);\n}\n```\n\n# CPU-Bound Cancellation\n\nFor CPU-bound loops, check the token explicitly:\n\n```csharp\npublic async Task ProcessItemsAsync(\n    IEnumerable<Item> items,\n    CancellationToken cancellationToken)\n{\n    foreach (var item in items)\n    {\n        cancellationToken.ThrowIfCancellationRequested();\n        await ProcessOneAsync(item, cancellationToken);\n    }\n}\n```\n\nThe check is cheap, but its placement is a latency decision. Per item is sensible when items are small. Expensive inner loops may need checks inside the item as well.\n\n# Registration Callbacks\n\nFor an API with no token-aware operation, `token.Register(callback)` bridges cancellation into its completion mechanism. The returned `CancellationTokenRegistration` should be disposed when the operation finishes. Otherwise the source retains the callback and its captured state for the source's remaining lifetime.\n\n```csharp\nvar tcs = new TaskCompletionSource();\nawait using var reg = ct.Register(() => tcs.TrySetCanceled(ct));\n```\n\n> [!WARNING]\n> `Cancel()` runs registered callbacks synchronously, so a slow callback delays the caller and lock reentrancy can deadlock. .NET 8 added `CancelAsync()`, which returns a task representing callback completion and avoids making the initiating call wait synchronously. Cancellation callbacks still need to be short and non-blocking.\n\n`CancellationTokenSource` is disposable, especially when it owns a timer or linked registrations. `TryReset()` supports carefully controlled reuse when cancellation has not been requested, but pooling sources is rarely worth the ownership risk without profile data.\n\n# Pitfalls\n\n**Accepting a token but not forwarding it**\nThe method signature looks cancellable, yet a downstream call receives no token. The operation then keeps running past the cancellation boundary.\n\n```csharp\n// Bug: token accepted but not forwarded\npublic async Task<Data> LoadAsync(CancellationToken cancellationToken)\n{\n    return await _repo.GetAsync(id); // missing cancellationToken\n}\n```\n\nForward the token to downstream work that belongs to the same operation. Deliberately independent work needs a different owner, not an accidental `CancellationToken.None`.\n\n**Swallowing `OperationCanceledException`**\nA broad catch that returns a fallback can turn canceled work into apparent success. That is dangerous when the fallback looks like a valid partial result.\n\n```csharp\n// Bug: cancellation is hidden\ntry { return await DoWorkAsync(ct); }\ncatch (Exception ex) { _logger.LogError(ex, \"Failed\"); return null; }\n```\n\nKeep cancellation distinct from failure. In a broad error handler, rethrow it before handling ordinary exceptions:\n\n```csharp\ntry { return await DoWorkAsync(ct); }\ncatch (OperationCanceledException) { throw; } // re-throw, don't swallow\ncatch (Exception ex) { _logger.LogError(ex, \"Failed\"); return null; }\n```\n\n**Using `CancellationToken.None` inside request flow**\nHardcoding `CancellationToken.None` breaks request-abort propagation. It is correct only where the work intentionally has a lifetime beyond the request and another component owns that lifetime.\n\n**Confusing a timeout with caller cancellation**\nA linked token turns both causes into cancellation at the callee. The boundary can distinguish them by checking which source fired:\n\n```csharp\nusing var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(5));\nusing var linked = CancellationTokenSource.CreateLinkedTokenSource(userToken, timeoutCts.Token);\ntry { await DoWorkAsync(linked.Token); }\ncatch (OperationCanceledException) when (timeoutCts.IsCancellationRequested && !userToken.IsCancellationRequested)\n{\n    throw new TimeoutException(\"Operation exceeded 5s.\"); // a timeout, not a user cancel\n}\n```\n\n`await task.WaitAsync(TimeSpan.FromSeconds(5), ct)` separates the two outcomes for the wait: expiration throws `TimeoutException`, while `ct` throws `OperationCanceledException`. It does not itself cancel the underlying operation, so the operation still needs its own token when continued work would be wasteful.\n\n**Not disposing `CancellationTokenSource`**\n`CancellationTokenSource` implements `IDisposable`. Forgetting to dispose it leaks a timer registration when a timeout is set.\n\n```csharp\n// Correct: dispose via using\nusing var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));\n```\n\n**Canceling at the wrong granularity**\nCanceling a shared source stops every operation that observes it. A linked child source combines parent cancellation with a local timeout or local stop request without canceling the parent.\n\n```csharp\nusing var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(\n    parentToken, localTimeoutToken);\nawait DoWorkAsync(linkedCts.Token);\n```\n\n# References\n\n- [Cancellation in managed threads](https://learn.microsoft.com/en-us/dotnet/standard/threading/cancellation-in-managed-threads)\n",
-          "hash": "2825987d92b27d65647bc14bd069104d769063784b961d0512c75ede69f369fe",
-          "topic": "Programming",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "new"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "264d16c1cdd0550e8de34525350fcc463d41b1c8095a38a38008f9f84304bb03",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/CancellationToken.md",
-          "outcome": "keep",
-          "reason": "I read the whole note. It teaches cooperative cancellation in a sound order: ownership, caller and callee code, the sequence on cancel, RequestAborted, CPU-bound checks, registration callbacks, then pitfalls. The technical claims match my understanding of the .NET cancellation APIs. These include cooperative cancellation, OperationCanceledException propagation, Register returning a disposable CancellationTokenRegistration, Cancel() running callbacks synchronously, CancelAsync arriving in .NET 8, TryReset only before cancellation, linked sources, WaitAsync(timeout, token) not cancelling the underlying work, and disposing sources that own timers. The pitfall examples are bounded and each one shows the fix. The catch-order example and the filter that tells a timeout from a user cancel are correct. The only blemish is an undeclared `id` in one snippet, which is cosmetic. The References section has one relevant Microsoft source in the required bare-link format. The note has no cards and no known violations, so there are no question defects to fix. Rewording it would be churn."
-        }
-      ],
-      "feedback": []
-    },
-    "source_hashes": {
-      "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/CancellationToken.md": "2825987d92b27d65647bc14bd069104d769063784b961d0512c75ede69f369fe"
-    },
-    "feedback_keys": [],
-    "rules_hash": "264d16c1cdd0550e8de34525350fcc463d41b1c8095a38a38008f9f84304bb03",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/CancellationToken.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-03T19:54:28.090523Z",
-    "completed_review": {
-      "verdict": "CLEAN",
-      "notes": [
-        {
-          "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/CancellationToken.md",
-          "verdict": "CLEAN",
-          "summary": "Whole-note audit finds an accurate, well-ordered note (ownership, caller/callee code, propagation sequence, RequestAborted, CPU-bound checks, callbacks, pitfalls) with correct version-specific detail such as CancelAsync in .NET 8. No concrete defect justifies an edit.",
-          "page_type": "Concept — no Questions section; one relevant Microsoft Learn reference in bare-link format; all fences have language identifiers.",
-          "current_text_evidence": [
-            {
-              "quote": "The caller owns the request. Each operation decides where it can stop without leaving partial state behind.",
-              "line_start": 13,
-              "reason": "Opening states the operating idea and ownership split quickly and concretely."
-            },
-            {
-              "quote": "The check is cheap, but its placement is a latency decision.",
-              "line_start": 81,
-              "reason": "Gives engineering judgment on where to place checks rather than just mechanics."
-            },
-            {
-              "quote": "runs registered callbacks synchronously, so a slow callback delays the caller",
-              "line_start": 93,
-              "reason": "Accurate mechanism plus the .NET 8 CancelAsync mitigation and the remaining limit."
-            }
-          ],
-          "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: cancellation propagation, callbacks and pitfalls form one coherent topic that is jointly useful.",
-          "findings": [],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "PASS",
-            "question_quality": "NOT APPLICABLE",
-            "identity_safety": "NOT APPLICABLE",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "overall_reason": "The note was read in full; its technical claims are correct, the explanation order is sound, voice is direct, and no concrete rule violation or defect exists. Keeping it unchanged is justified, and there are no edits to check.",
-      "change_checks": []
     }
   }
 }
