@@ -1142,11 +1142,11 @@
     "version": 1,
     "id": "caa35096ca95474e9f400801cb20cb18",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-03T19:45:09.882761Z",
-    "elapsed_seconds": 315.43817379999996,
+    "elapsed_seconds": 334.61698549999994,
     "calls_reserved": 8,
-    "responses_received": 7,
+    "responses_received": 8,
     "attempted_paths": [
       "Vault/Home/Programming/NET/ASP NET Web API/Filters.md",
       "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md"
@@ -1244,7 +1244,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-03T19:50:25.320445Z",
+    "checkpoint_at": "2026-11-03T19:50:44.499256Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
@@ -5973,12 +5973,42 @@
     },
     "proposal": {
       "version": 1,
-      "edits": [],
+      "edits": [
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Methods.md",
+          "expected_hash": "192d71e76e9f6570921c5098668a2f578152bd98b0eb6025b18b2f2f13c34d9c",
+          "before": "<!-- qard-id: ffd19d60-4643-4ede-92ff-83ba55b3f613 -->\n> [!qard]- When `Animal a = new Dog();` calls `a.Category()`, what makes the call run `Dog`'s implementation?\n> `Animal.Category()` must be declared `virtual`, and `Dog` must implement `Category()` with `override`. The call is then resolved by the runtime type of the object, `Dog`, rather than by the declared type of the variable, `Animal`.\n>\n> Methods are non-virtual by default. A non-virtual `a.Category()` binds to `Animal.Category()` because `a` is declared as `Animal`, even when `Dog` declares its own `Category()` with `new`.\n>\n> [Microsoft: virtual keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/virtual) · [Microsoft: new modifier](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/new-modifier) · [Microsoft: base keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/base) · [Microsoft: sealed modifier](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/sealed)\n",
+          "after": "<!-- qard-id: ffd19d60-4643-4ede-92ff-83ba55b3f613 -->\n> [!qard]- Which modifiers on a base-class method and a same-named derived-class method make a call through a base-typed reference run the derived implementation?\n> The base method must be declared `virtual`, and the derived method must implement it with `override`. The call is then resolved by the runtime type of the object rather than by the declared type of the variable.\n>\n> Methods are non-virtual by default. If the base method is not virtual, a call through a base-typed variable binds to the base implementation, even when the derived class declares its own method with `new`.\n>\n> [Microsoft: virtual keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/virtual) · [Microsoft: new modifier](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/new-modifier)\n",
+          "reason": "Makes the question self-contained and removes unrelated base and sealed sources from the answer.",
+          "kind": "rewrite",
+          "learning_target": "same",
+          "essential_meanings": [
+            "Base member must be virtual and derived member must use override",
+            "Dispatch uses the runtime type, not the variable's declared type",
+            "A non-virtual base method, even hidden with new, binds to the base implementation through a base reference"
+          ],
+          "sources": [
+            {
+              "url": "https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/virtual",
+              "claim": "virtual members are overridden by derived classes and resolved by runtime type",
+              "version": "not version-specific"
+            },
+            {
+              "url": "https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/new-modifier",
+              "claim": "new hides an inherited member and does not participate in virtual dispatch",
+              "version": "not version-specific"
+            }
+          ],
+          "feedback_keys": [],
+          "problem": "The Category card's question refers to Animal, Dog and Category without defining them, so it is not self-contained, and its answer cites base and sealed pages it never uses.",
+          "reader_benefit": "The question can be answered from its own text, and the answer carries only the sources that support it."
+        }
+      ],
       "dispositions": [
         {
           "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Methods.md",
-          "outcome": "keep",
-          "reason": "I read the whole note against Microsoft's C# documentation and specification. The ref, in, out and params sections are accurate. They cover the aliasing rules, the temporaries and defensive copies that `in` can need, and the C# 13 params collections with normal versus expanded form. The virtual, override and new section and its combined example correctly show runtime dispatch versus compile-time hiding. The overload-resolution and extension-lookup cards state their conditions correctly. The two flagged cards hold up. The optional-parameter card correctly says the compiler inserts the default at the call site. It correctly limits defaults to constants, `default(S)` and `new S()`, and it draws the right recompilation consequence. The Category card correctly says that running Dog's implementation through an Animal reference needs a virtual base member and an override. It also explains why the note's `new` example gives the base result. Its source list is longer than needed but not wrong. Each card tests one gradeable task, and none of the ID-bearing cards needs retargeting. The note has no known violations, so I made no edit."
+          "outcome": "changed",
+          "reason": "The prose, code samples and other cards were checked against the current text and Microsoft documentation and are accurate. Only the Category card needed repair: its question is now self-contained and its sources are limited to those that support the answer."
         }
       ],
       "feedback": []
@@ -5993,8 +6023,10 @@
       "Vault/Home/Programming/NET/CSharp/Fundamentals/Methods.md": "585c5cf07d62743fa5906021218081ef4982d360595eda4807575e11b5254c72"
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-03T19:49:16.804578Z",
-    "blocked_review": {
+    "prepared_at": "2026-11-03T19:50:44.499236Z",
+    "review_repair_key": "b93534e9526b699a34ace92b02c074d15f38edf1d0fec15a56733e9002742af2",
+    "repair_reserved": true,
+    "repair_review": {
       "verdict": "CHANGES REQUIRED",
       "overall_reason": "The note is technically accurate, but the author kept it unchanged even though the Category card is still flawed. That card's question is not self-contained, and its answer cites sources that do not support it.",
       "notes": [
@@ -6070,73 +6102,6 @@
       ],
       "feedback": []
     },
-    "repair_review": {
-      "verdict": "CHANGES REQUIRED",
-      "overall_reason": "The note is technically accurate, but the author kept it unchanged even though the Category card is still flawed. That card's question is not self-contained, and its answer cites sources that do not support it.",
-      "notes": [
-        {
-          "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Methods.md",
-          "verdict": "CHANGES REQUIRED",
-          "summary": "The prose, code samples and most cards are accurate and well ordered. The flagged Category card still has a question-quality defect. Its question refers to Animal, Dog and Category without defining them, and its answer cites the base and sealed pages, which have nothing to do with it. The keep disposition called the source list 'longer than needed' but left it.",
-          "page_type": "Concept note (publish: true). Optional Questions and References sections are present. Qard IDs are protected metadata.",
-          "current_text_evidence": [
-            {
-              "quote": "When `Animal a = new Dog();` calls `a.Category()`, what makes the call run `Dog`'s implementation?",
-              "line_start": 270,
-              "reason": "The question relies on types and a method that are defined only elsewhere in the note, where Category is non-virtual and hidden with `new`. Essential meanings do not follow from the question, so it is not self-contained."
-            },
-            {
-              "quote": "[Microsoft: base keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/base) · [Microsoft: sealed modifier]",
-              "line_start": 274,
-              "reason": "The base and sealed pages are irrelevant to the Category answer. They look copied from the neighbouring virtual card, so the answer-side sources are padded."
-            },
-            {
-              "quote": "How does C# apply an optional parameter's default value, and why can already-compiled callers keep an old default?",
-              "line_start": 257,
-              "reason": "This card is acceptable. It covers one dependent mechanism-and-consequence explanation, and its answer is accurate."
-            },
-            {
-              "quote": "Both objects have the same runtime type. Only the lookup rule changes",
-              "line_start": 196,
-              "reason": "The prose is accurate and well ordered, and it reads as a whiteboard explanation. It needs no rewrite."
-            }
-          ],
-          "target_resolution": "UNRESOLVED",
-          "split_suggestion": "No split: parameter modifiers, dispatch keywords and overload resolution form one coherent Methods topic, and length alone is not a reason to separate them.",
-          "findings": [
-            {
-              "severity": "Medium",
-              "dimension": "Question quality",
-              "location": "Questions, Category card (qard-id ffd19d60-4643-4ede-92ff-83ba55b3f613)",
-              "evidence": "The question mentions `Animal a`, `Dog` and `Category()` without declaring them. Its answer then says the method must be virtual, which contradicts the note's own non-virtual `new` example.",
-              "effect": "A reader cannot answer from the question alone and may recall the wrong setup. The card is not self-contained.",
-              "fix": "Keep the existing ID and rewrite the question as a direct, self-contained one, such as: which modifiers on a base member and a derived member make a call through a base-typed reference run the derived implementation? Then trim the sources to the virtual and new pages."
-            },
-            {
-              "severity": "Medium",
-              "dimension": "References on the answer side",
-              "location": "Category card source line",
-              "evidence": "The base and sealed pages are cited, but the answer never uses either.",
-              "effect": "The card carries sources that do not support it, which clutters it and weakens verification.",
-              "fix": "Remove the base and sealed links from this card."
-            }
-          ],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "PASS",
-            "question_quality": "FAIL",
-            "identity_safety": "PASS",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "change_checks": []
-    },
-    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "review_repair_key": "b93534e9526b699a34ace92b02c074d15f38edf1d0fec15a56733e9002742af2",
-    "author_repair_pending": true,
-    "repair_reserved": true
+    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
   }
 }
