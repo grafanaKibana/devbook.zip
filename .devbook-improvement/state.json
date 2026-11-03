@@ -1302,16 +1302,16 @@
     "version": 1,
     "id": "c78c94ff68b0409dae9430c91855a657",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-03T09:56:59.574794Z",
-    "elapsed_seconds": 53.00869659999999,
+    "elapsed_seconds": 82.12306369999999,
     "calls_reserved": 2,
-    "responses_received": 1,
+    "responses_received": 2,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 205,
-    "checkpoint_at": "2026-11-03T09:57:52.582926Z",
+    "checkpoint_at": "2026-11-03T09:58:21.697292Z",
     "feedback_scope_id": "fcd67e13bc430ba5facd6a87402a2d09e4ada2e8f17f6bc55ee28a8fc84d0cb7",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
@@ -7072,6 +7072,66 @@
     "prepared_at": "2026-11-03T09:57:43.792940Z",
     "primary_sources": {
       "https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/value-types": "---\nlayout: Conceptual\ntitle: Value types - C# reference | Microsoft Learn\ncanonicalUrl: https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/value-types\napiPlatform: dotnet\nauthor: BillWagner\nbreadcrumb_path: /dotnet/breadcrumb/toc.json\nfeedback_system: OpenSource\nfeedback_product_url: https://aka.ms/feedback/report?space=61\nms.author: wiwagn\nms.devlang: csharp\nms.service: dotnet-csharp\nms.topic: language-reference\nshow_latex: true\nuhfHeaderId: MSDocsHeader-DotNetCSharp\nms.subservice: lang-reference\nms.update-cycle: 1095-days\ndescription: Value types vs reference types, kinds of value types, and the built-in value types in C#\nms.date: 2026-03-20T00:00:00.0000000Z\nlocale: en-us\ndocument_id: 0948cf18-9971-b2d4-4f59-e045838e6e5f\ndocument_version_independent_id: e2c7e9c5-ebd3-ed68-d2cc-6d8929c654e8\nupdated_at: 2026-03-24T21:53:00.0000000Z\noriginal_content_git_url: https://github.com/dotnet/docs/blob/live/docs/csharp/language-reference/builtin-types/value-types.md\ngitcommit: https://github.com/dotnet/docs/blob/e68b5dd1e557b53c45ca43e61b013bc919619fb9/docs/csharp/language-reference/builtin-types/value-types.md\ngit_commit_id: e68b5dd1e557b53c45ca43e61b013bc919619fb9\nsite_name: Docs\ndepot_name: VS.core-docs\npage_type: conceptual\ntoc_rel: ../toc.json\npdf_url_template: https://learn.microsoft.com/pdfstore/en-us/VS.core-docs/{branchName}{pdfName}\nfeedback_help_link_type: ''\nfeedback_help_link_url: ''\nsearch.mshattr.devlang: csharp\nword_count: 705\nasset_id: csharp/language-reference/builtin-types/value-types\nmoniker_range_name: \nmonikers: []\nitem_type: Content\nsource_path: docs/csharp/language-reference/builtin-types/value-types.md\ncmProducts:\n- https://microsoft-devrel.poolparty.biz/DevRelOfferingOntology/c6f99e62-1cf6-4b71-af9b-649b05f80cce\n- https://authoring-docs-microsoft.poolparty.biz/devrel/7696cda6-0510-47f6-8302-71bb5d2e28cf\nspProducts:\n- https://microsoft-devrel.poolparty.biz/DevRelOfferingOntology/3f56b378-07a9-4fa1-afe8-9889fdc77628\n- https://authoring-docs-microsoft.poolparty.biz/devrel/69c76c32-967e-4c65-b89a-74cc527db725\nplatformId: 3aa53bbc-9e47-812a-d8ea-36af4ae2f63a\n---\n\n# Value types - C# reference | Microsoft Learn\n\n*Value types* and [reference types](../keywords/reference-types) are the two main categories of C# types. A variable of a value type contains an instance of the type. This behavior differs from a variable of a reference type, which contains a reference to an instance of the type. By default, on [assignment](../operators/assignment-operator), passing an argument to a method, and returning a method result, you copy variable values. In the case of value-type variables, you copy the corresponding type instances. The following example demonstrates that behavior:\r\n\r\n```csharp\r\nusing System;\r\n\r\npublic struct MutablePoint\r\n{\r\n    public int X;\r\n    public int Y;\r\n\r\n    public MutablePoint(int x, int y) => (X, Y) = (x, y);\r\n\r\n    public override string ToString() => $\"({X}, {Y})\";\r\n}\r\n\r\npublic class Program\r\n{\r\n    public static void Main()\r\n    {\r\n        var p1 = new MutablePoint(1, 2);\r\n        var p2 = p1;\r\n        p2.Y = 200;\r\n        Console.WriteLine($\"{nameof(p1)} after {nameof(p2)} is modified: {p1}\");\r\n        Console.WriteLine($\"{nameof(p2)}: {p2}\");\r\n\r\n        MutateAndDisplay(p2);\r\n        Console.WriteLine($\"{nameof(p2)} after passing to a method: {p2}\");\r\n    }\r\n\r\n    private static void MutateAndDisplay(MutablePoint p)\r\n    {\r\n        p.X = 100;\r\n        Console.WriteLine($\"Point mutated in a method: {p}\");\r\n    }\r\n}\r\n// Expected output:\r\n// p1 after p2 is modified: (1, 2)\r\n// p2: (1, 200)\r\n// Point mutated in a method: (100, 200)\r\n// p2 after passing to a method: (1, 200)\r\n```\r\n\r\nAs the preceding example shows, operations on a value-type variable affect only that instance of the value type, stored in the variable.\r\n\r\nIf a value type contains a data member of a reference type, you copy only the reference to the instance of the reference type when you copy a value-type instance. Both the copy and original value-type instance have access to the same reference-type instance. The following example demonstrates that behavior:\r\n\r\n```csharp\r\nusing System;\r\nusing System.Collections.Generic;\r\n\r\npublic struct TaggedInteger\r\n{\r\n    public int Number;\r\n    private List<string> tags;\r\n\r\n    public TaggedInteger(int n)\r\n    {\r\n        Number = n;\r\n        tags = new List<string>();\r\n    }\r\n\r\n    public void AddTag(string tag) => tags.Add(tag);\r\n\r\n    public override string ToString() => $\"{Number} [{string.Join(\", \", tags)}]\";\r\n}\r\n\r\npublic class Program\r\n{\r\n    public static void Main()\r\n    {\r\n        var n1 = new TaggedInteger(0);\r\n        n1.AddTag(\"A\");\r\n        Console.WriteLine(n1);  // output: 0 [A]\r\n\r\n        var n2 = n1;\r\n        n2.Number = 7;\r\n        n2.AddTag(\"B\");\r\n\r\n        Console.WriteLine(n1);  // output: 0 [A, B]\r\n        Console.WriteLine(n2);  // output: 7 [A, B]\r\n    }\r\n}\r\n```\r\n\r\nNote\r\n\r\nTo make your code less error-prone and more robust, define and use immutable value types. This article uses mutable value types only for demonstration purposes.\r\n\r\n## Kinds of value types and type constraints\r\n\r\nA value type can be one of the following kinds:\r\n\r\n- A [structure type](struct), which encapsulates data and related functionality.\r\n- An [enumeration type](enum), which is defined by a set of named constants and represents a choice or a combination of choices.\r\n- A [union declaration](union), which defines a closed set of case types that a value can represent.\r\n\r\nA [nullable value type](nullable-value-types)`T?` represents all values of its underlying value type `T` and an additional [null](../keywords/null) value. You can't assign `null` to a variable of a value type, unless it's a nullable value type.\r\n\r\nUse the [`struct` constraint](../../programming-guide/generics/constraints-on-type-parameters) to specify that a type parameter is a non-nullable value type. Both structure and enumeration types satisfy the `struct` constraint. Use `System.Enum` in a base class constraint (that is known as the [enum constraint](../../programming-guide/generics/constraints-on-type-parameters#enum-constraints)) to specify that a type parameter is an enumeration type.\r\n\r\n## Built-in value types\r\n\r\nC# provides the following built-in value types, also known as *simple types*:\r\n\r\n- [Integral numeric types](integral-numeric-types)\r\n- [Floating-point numeric types](floating-point-numeric-types)\r\n- [bool](bool) that represents a Boolean value\r\n- [char](char) that represents a Unicode UTF-16 character\r\n\r\nAll simple types are struct types. They differ from other struct types in that they permit certain additional operations:\r\n\r\n- You can use literals to provide a value of a simple type. For example, `'A'` is a literal of the type `char`, `2001` is a literal of the type `int`, and `12.34m` is a literal of the type `decimal`.\r\n- You can declare constants of the simple types by using the [const](../keywords/const) keyword. For example, you can define `const decimal = 12.34m`. You can't declare constants of other struct types.\r\n- Constant expressions, whose operands are all constants of the simple types, are evaluated at compile time.\r\n\r\nA [value tuple](value-tuples) is a value type, but not a simple type.\r\n\r\n## C# language specification\r\n\r\nFor more information, see the following sections of the [C# language specification](../language-specification/readme):\r\n\r\n- [Value types](../language-specification/types#83-value-types)\r\n- [Simple types](../language-specification/types#835-simple-types)\r\n- [Variables](../language-specification/variables)"
+    },
+    "completed_review": {
+      "verdict": "CLEAN",
+      "overall_reason": "The single Storage-bullet edit removes an unconditional allocation implication, matches Microsoft's value-types documentation, and leaves the rest of the note and all Qard cards and identities untouched.",
+      "notes": [
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Types.md",
+          "verdict": "CLEAN",
+          "summary": "The Storage bullet no longer implies that a referenced object is always allocated separately. It keeps the inline-field and array examples and states that physical location is a runtime detail. The rest of the note was read in full: the assignment, argument and boxing bullets, the pitfalls, the tradeoffs, the struct example and every Qard card are accurate and coherent, and the cards are unchanged.",
+          "page_type": "FolderNote — keeps the FolderNote tag and the protected datacorejsx map block. The optional Questions and References sections are present and valid. Qard identities are intact.",
+          "current_text_evidence": [
+            {
+              "quote": "A reference-type variable holds only a reference to an object instance, so the reference and the object are distinct. Where either physically resides is a runtime detail.",
+              "line_start": 31,
+              "reason": "This is the revised wording. It keeps the reference-versus-object distinction and drops the unconditional heap-allocation implication, which resolves the owner feedback."
+            },
+            {
+              "quote": "a value type is stored inline in whatever holds it: a local variable, a field of a heap object, or an array element.",
+              "line_start": 31,
+              "reason": "The useful inline-field and array examples are preserved, as the feedback asked."
+            },
+            {
+              "quote": "Declaration kind therefore does not dictate one physical location.",
+              "line_start": 31,
+              "reason": "The conclusion now follows from the preceding sentences instead of conflicting with them."
+            },
+            {
+              "quote": "A property, indexer, or `foreach` variable usually exposes a struct copy.",
+              "line_start": 37,
+              "reason": "The surrounding pitfalls are accurate, concise and consistent with the cards, so they need no edit."
+            }
+          ],
+          "target_resolution": "RESOLVED",
+          "split_suggestion": "No split: the folder note is a compact overview of value versus reference semantics, and the sections are tightly related.",
+          "findings": [],
+          "source_checks": [
+            {
+              "url": "https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/value-types",
+              "claim": "A value-type variable contains an instance of the type, whereas a reference-type variable contains a reference to an instance; the docs make no guarantee about physical location.",
+              "result": "SUPPORTED",
+              "reason": "The page states that a value-type variable contains an instance and a reference-type variable contains a reference to an instance. It makes no allocation or location guarantee."
+            }
+          ],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "change_checks": [
+        {
+          "edit_index": 0,
+          "verdict": "WORTHWHILE",
+          "reason": "The old phrase \"allocated separately\" read as a guaranteed heap allocation, which conflicted with the bullet's own conclusion about location. The new wording keeps the reference/object distinction, is supported by the Microsoft docs, and leaves the examples and cards untouched."
+        }
+      ]
     }
   }
 }
