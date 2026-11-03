@@ -78,11 +78,11 @@
     "version": 1,
     "id": "8ee974ce274c4cbcba9dfc3e56cb0691",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-03T09:17:25.556001Z",
-    "elapsed_seconds": 77.6081174,
+    "elapsed_seconds": 104.6984516,
     "calls_reserved": 4,
-    "responses_received": 3,
+    "responses_received": 4,
     "attempted_paths": [
       "Vault/Home/Programming/NET/ASP NET Web API/Filters.md"
     ],
@@ -163,7 +163,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-03T09:18:43.163714Z",
+    "checkpoint_at": "2026-11-03T09:19:10.254036Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
@@ -315,6 +315,149 @@
       "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md": "b51b5992029993e0a5ae495174bd0f38cbbea0bb01a0d69976448ede9db23666"
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-03T09:18:40.171053Z"
+    "prepared_at": "2026-11-03T09:18:40.171053Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "overall_reason": "Whole-note audit found no concrete defect. The keep is justified and no edits were proposed.",
+        "change_checks": [],
+        "notes": [
+          {
+            "path": "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md",
+            "verdict": "CLEAN",
+            "summary": "The note is accurate, ordered from idea to diagram to code to pitfalls to tradeoffs, and its three Qard cards are self-contained and cite sources on the answer side. No concrete defect was found, so leaving it unchanged is justified.",
+            "page_type": "Concept — authorable prose; qard identity comments protected; Questions and References present and valid.",
+            "current_text_evidence": [
+              {
+                "quote": "Registration order is control flow.",
+                "line_start": 55,
+                "reason": "States the core ordering mechanism directly, and the sample pipeline that follows is consistent with it."
+              },
+              {
+                "quote": "Conventional middleware is constructed once.",
+                "line_start": 108,
+                "reason": "Gives the singleton lifetime condition and its fix (scoped services in InvokeAsync, or IMiddleware), which is a key engineering judgment."
+              },
+              {
+                "quote": "`context.GetEndpoint()` is populated only after endpoint selection.",
+                "line_start": 135,
+                "reason": "A precise ordering pitfall that matches the routing behavior."
+              },
+              {
+                "quote": "Endpoint filters can also be explicitly attached to mapped controller actions",
+                "line_start": 152,
+                "reason": "The comparison caveat is bounded and consistent with the tradeoffs table. The ASP.NET Core MVC test site applies AddEndpointFilterFactory to MapControllers()."
+              },
+              {
+                "quote": "The handler therefore records what an investigation needs.",
+                "line_start": 162,
+                "reason": "The exception-handling card states the .NET 10 diagnostics condition and its consequence, and it lists limits (coverage, started responses, swallowing)."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: the note covers one coherent topic (the middleware pipeline), and its custom-middleware, branching and filter-comparison sections each depend on that shared model.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ]
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md",
+          "citation_index": 0,
+          "reported_line_start": 55,
+          "resolved_line_start": 54
+        },
+        {
+          "path": "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md",
+          "citation_index": 1,
+          "reported_line_start": 108,
+          "resolved_line_start": 124
+        },
+        {
+          "path": "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md",
+          "citation_index": 2,
+          "reported_line_start": 135,
+          "resolved_line_start": 150
+        },
+        {
+          "path": "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md",
+          "citation_index": 3,
+          "reported_line_start": 152,
+          "resolved_line_start": 175
+        },
+        {
+          "path": "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md",
+          "citation_index": 4,
+          "reported_line_start": 162,
+          "resolved_line_start": 184
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md": "50ae23e90f3a019f34e24ad70b0b97d4fba885210103fc237b640b73241380c4"
+      },
+      "rules_hash": "82a04e65ab00760ab41233edf8129ba880e8d1cec5477811d321548e627e215a",
+      "evaluation_hash": "5a3fa995c63f53372dd78ead04ba8f98f001da6bbdef06a9844aa9812c855360"
+    },
+    "completed_review": {
+      "verdict": "CLEAN",
+      "overall_reason": "Whole-note audit found no concrete defect. The keep is justified and no edits were proposed.",
+      "change_checks": [],
+      "notes": [
+        {
+          "path": "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md",
+          "verdict": "CLEAN",
+          "summary": "The note is accurate, ordered from idea to diagram to code to pitfalls to tradeoffs, and its three Qard cards are self-contained and cite sources on the answer side. No concrete defect was found, so leaving it unchanged is justified.",
+          "page_type": "Concept — authorable prose; qard identity comments protected; Questions and References present and valid.",
+          "current_text_evidence": [
+            {
+              "quote": "Registration order is control flow.",
+              "line_start": 54,
+              "reason": "States the core ordering mechanism directly, and the sample pipeline that follows is consistent with it."
+            },
+            {
+              "quote": "Conventional middleware is constructed once.",
+              "line_start": 124,
+              "reason": "Gives the singleton lifetime condition and its fix (scoped services in InvokeAsync, or IMiddleware), which is a key engineering judgment."
+            },
+            {
+              "quote": "`context.GetEndpoint()` is populated only after endpoint selection.",
+              "line_start": 150,
+              "reason": "A precise ordering pitfall that matches the routing behavior."
+            },
+            {
+              "quote": "Endpoint filters can also be explicitly attached to mapped controller actions",
+              "line_start": 175,
+              "reason": "The comparison caveat is bounded and consistent with the tradeoffs table. The ASP.NET Core MVC test site applies AddEndpointFilterFactory to MapControllers()."
+            },
+            {
+              "quote": "The handler therefore records what an investigation needs.",
+              "line_start": 184,
+              "reason": "The exception-handling card states the .NET 10 diagnostics condition and its consequence, and it lists limits (coverage, started responses, swallowing)."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: the note covers one coherent topic (the middleware pipeline), and its custom-middleware, branching and filter-comparison sections each depend on that shared model.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ]
+    }
   }
 }
