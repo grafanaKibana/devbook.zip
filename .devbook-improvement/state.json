@@ -483,9 +483,9 @@
     "version": 1,
     "id": "8ee974ce274c4cbcba9dfc3e56cb0691",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-03T09:17:25.556001Z",
-    "elapsed_seconds": 505.7821674999999,
+    "elapsed_seconds": 509.0241006999999,
     "calls_reserved": 18,
     "responses_received": 18,
     "attempted_paths": [
@@ -496,7 +496,8 @@
       "Vault/Home/Programming/NET/ASP NET Web API/ASP NET Web API.md",
       "Vault/Home/Programming/NET/ASP NET Web API/Authentication.md",
       "Vault/Home/Programming/NET/ASP NET Web API/Authorization.md",
-      "Vault/Home/Programming/NET/ASP NET Web API/CORS.md"
+      "Vault/Home/Programming/NET/ASP NET Web API/CORS.md",
+      "Vault/Home/Programming/NET/ASP NET Web API/Dependency Injection.md"
     ],
     "accepted_records": [
       {
@@ -2293,10 +2294,84 @@
           },
           "model_calls": 16
         }
+      },
+      {
+        "path": "Vault/Home/Programming/NET/ASP NET Web API/Dependency Injection.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Programming/NET/ASP NET Web API/Dependency Injection.md",
+                "outcome": "keep",
+                "reason": "I read the whole note against Microsoft's DI documentation for .NET 8–10. The lifetime table is correct, and so is the shorthand that AddDbContext registers a scoped context. The multiple-registration rule is correct: IEnumerable<T> gets all registrations and a single T gets the last one. Keyed services are correctly marked .NET 8. TryAdd/TryAddEnumerable, open generics, ActivatorUtilities, and the missing built-in decorator support (Scrutor) are accurate. The disposal rules are correct: container-created instances are disposed with their scope or the root provider, and instances passed to AddSingleton(instance) stay caller-owned. The captive-dependency section, IServiceScopeFactory worker, and IDbContextFactory advice are sound. The tradeoffs match the built-in container's actual capabilities. The one card is bounded, accurate, and cites sources on the answer side. known_violations is empty and nothing is flagged. The only blemishes are a mildly redundant sentence in the captive-dependency section and an undefined Get action in an example. Both are cosmetic, and fixing them would be churn, not a learning gain."
+              }
+            ],
+            "feedback": [],
+            "decisions": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "Whole-note audit found no factual error, unresolved defect or rule violation. The note is accurate against .NET DI behavior, and the one card is bounded and carries answer-side sources. The proposal is a justified keep with no edits.",
+            "notes": [
+              {
+                "path": "Vault/Home/Programming/NET/ASP NET Web API/Dependency Injection.md",
+                "verdict": "CLEAN",
+                "summary": "The note explains lifetimes, constructor injection, multiple and keyed registrations, captive dependencies, DbContext misuse and disposal accurately and in a sensible order. Remaining blemishes are minor and cosmetic: a mildly repeated sentence about scoped services and singletons, and an undefined Get action in the example. Neither misleads or blocks recall.",
+                "page_type": "Concept — typed frontmatter, optional Questions and References present and valid, MD040 fences all carry language ids, one wikilink with full path and alias, no manual navigation.",
+                "current_text_evidence": [
+                  {
+                    "quote": "Resolving a single `T` returns the last registration, so code that needs every implementation should say so explicitly.",
+                    "line_start": 64,
+                    "reason": "Correct container semantics: IEnumerable<T> gets all registrations and a single T gets the last one. The mechanism is stated with its practical consequence."
+                  },
+                  {
+                    "quote": "A **transient `IDisposable` resolved from the root provider lives until shutdown**",
+                    "line_start": 137,
+                    "reason": "Correct disposal behavior, with the memory-retention consequence and the remedy (scope or factory) explained."
+                  },
+                  {
+                    "quote": "An instance supplied to `AddSingleton(myInstance)` remains caller-owned and is not disposed by the container.",
+                    "line_start": 138,
+                    "reason": "Accurate ownership exception, correctly distinguished from container-created singletons."
+                  },
+                  {
+                    "quote": "A singleton or parallel worker should use `IDbContextFactory<T>` to create and dispose an independent context for each operation.",
+                    "line_start": 131,
+                    "reason": "Sound, actionable guidance that completes the DbContext lifetime explanation."
+                  },
+                  {
+                    "quote": "> [!qard]- What is the difference between `GetService<T>` and `GetRequiredService<T>`?",
+                    "line_start": 149,
+                    "reason": "Self-contained, bounded question with a finite answer (null versus InvalidOperationException) and Microsoft sources on the answer side; identity comment preserved."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the topic is one coherent concept (ASP.NET Core container behavior) and the pattern-level material is already delegated to the linked architecture note.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "change_checks": []
+          },
+          "model_calls": 18
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-03T09:25:51.337757Z",
+    "checkpoint_at": "2026-11-03T09:25:54.579691Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
