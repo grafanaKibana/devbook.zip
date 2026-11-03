@@ -188,11 +188,11 @@
     "version": 1,
     "id": "8ee974ce274c4cbcba9dfc3e56cb0691",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-03T09:17:25.556001Z",
-    "elapsed_seconds": 174.57356759999996,
+    "elapsed_seconds": 188.69489169999997,
     "calls_reserved": 7,
-    "responses_received": 6,
+    "responses_received": 7,
     "attempted_paths": [
       "Vault/Home/Programming/NET/ASP NET Web API/Filters.md",
       "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md",
@@ -411,7 +411,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-03T09:20:20.129154Z",
+    "checkpoint_at": "2026-11-03T09:20:34.250476Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
@@ -607,5 +607,75 @@
       "rules_hash": "82a04e65ab00760ab41233edf8129ba880e8d1cec5477811d321548e627e215a",
       "evaluation_hash": "5a3fa995c63f53372dd78ead04ba8f98f001da6bbdef06a9844aa9812c855360"
     }
+  },
+  "pending_author_proposal": {
+    "workload_id": "8ee974ce274c4cbcba9dfc3e56cb0691",
+    "topic_id": "programming-e6aba2bd",
+    "batch": {
+      "topic": "Programming",
+      "topic_id": "programming-e6aba2bd",
+      "notes": [
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Types.md",
+          "content": "---\ntitle: C# Types\ntopic: [Programming]\nsubtopic: [NET]\nsummary: \"How C# types define shape, behavior, and value versus reference assignment semantics.\"\ntags: [FolderNote]\npublish: true\nstatus: Creation\npriority: Medium\nlevel: [\"4\"]\nqard-deck: \"Programming\"\nqard-topic: \"NET/CSharp/Fundamentals/Types/Types\"\nflashcard_uid: \"a5c39ae2\"\ncreated: \"2026-02-10T16:03:55.000Z\"\nmodified: \"2026-11-02T09:03:54.806Z\"\n---\n\nA C# type defines what values exist, which operations are valid, and what assignment copies. Value types copy their contained value. Reference types copy a reference to one object. That distinction controls aliasing and equality long before stack-versus-heap details matter.\n\nThe folder separates the main forms. Classes and record classes are reference types. Structs and record structs are value types. Strings, delegates, and events add specialized behavior on top of the same type system.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# Copy and Storage Boundaries\n\n- **Assignment:** a value-type assignment copies every field. Reference fields inside that value still point to the same objects. A reference-type assignment copies the object reference, so both variables can observe mutations to one instance.\n- **Arguments:** parameters are passed by value unless marked `ref`, `out`, or `in`. Passing a reference type by value copies the reference, not the object.\n- **Storage:** value types may live inline inside heap objects and arrays. References may be local variables. Declaration kind does not dictate one physical location.\n- **Boxing:** conversion from a value type to `object` or an interface value copies it into a box. Constrained generic calls can often avoid that allocation. Nullable value types box differently: a populated `Nullable<T>` boxes its underlying `T` value, and an empty one converts to a `null` reference without allocating a box.\n\n# Pitfalls\n\n- **Hidden aliases.** Several references can point at one mutable object. Ownership must be clear. Shared models are easier to reason about when immutable.\n- **Mutable value copies.** A property, indexer, or `foreach` variable usually exposes a struct copy. Mutation may be rejected by the compiler or affect only the copy. Readonly structs and whole-value replacement keep that boundary visible.\n- **Equality chosen by accident.** Classes use reference equality unless they define another contract. Record classes and record structs synthesize value equality, while ordinary structs inherit field-based default equality. Domain identity should decide, not syntax convenience.\n\n# Tradeoffs\n\n- **Class or struct:** a class makes shared identity and inheritance available. A struct gives value-copy semantics and can avoid a separate allocation, but large copies and boxing may cost more.\n- **Record class or conventional class:** records fit data whose contents define equality. Identity-rich entities usually need conventional class semantics.\n- **Interface or constrained generic:** an interface value gives runtime polymorphism but boxes a struct. A constrained generic can preserve static typing and avoid the box.\n\n# Examples\n\n```csharp\nvar h = new Holder { Counter = new Counter { Value = 0 } };\n\n// Property access returns a copy of the struct value.\nh.Counter.Inc();\nConsole.WriteLine(h.Counter.Value); // 0\n\n// Fix: replace the whole value after mutation.\nvar c = h.Counter;\nc.Inc();\nh.Counter = c;\nConsole.WriteLine(h.Counter.Value); // 1\n\npublic struct Counter\n{\n    public int Value;\n    public void Inc() => Value++;\n}\n\npublic sealed class Holder\n{\n    public Counter Counter { get; set; }\n}\n```\n\nThe direct `h.Counter.Inc()` call compiles, but it mutates the temporary value returned by the property and then discards that copy. A direct field assignment such as `h.Counter.Value = 1` is rejected with CS1612. Reading the value into `c`, mutating it, and assigning it back persists the change.\n\n# Questions\n\n<!-- qard-id: d8eb59cf-ad2d-43be-954f-44db23f34d38 -->\n> [!qard]- Why might mutating a struct inside `foreach` fail to update the collection?\n> In an ordinary (non-`ref`) `foreach`, each struct element reaches the loop body as a copy held in a read-only iteration variable. Changes to the copy's own fields never reach the stored element.\n>\n> - Assigning the iteration variable, or one of its fields, is rejected by the compiler.\n> - Calling a mutating method on it compiles, but the method changes the copy's fields rather than the stored element's, so the update is silently lost.\n> \n> The copy is shallow. When a field of the struct refers to an object, such as a `List<T>`, the copy and the stored element refer to the same object. A change made to that object through the copy, such as adding an item, therefore remains visible through the collection. Only changes to the struct's own field values are lost.\n>\n>\n> An ordinary struct-valued property has a similar copy boundary: a mutating method call can change only the returned temporary. Direct field assignment through that property may instead be rejected. A property containing a struct enumerator can return a fresh copy on each access, so repeatedly calling MoveNext on the property does not advance one persistent enumerator.\n>\n> Sources: [Microsoft Learn: Iteration statements](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/iteration-statements) · [Microsoft Learn: Structure types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/struct) · [Microsoft Learn: Value types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/value-types)\n\n> [!qard]- How can stored struct elements be updated rather than discarded copies?\n> The stored elements can be updated in two ways. The same read-modify-write-back approach applies to an ordinary struct-valued property:\n>\n> - **Indexed write-back:** a loop by index reads `items[i]` into a local, changes the local and assigns it back to `items[i]`, replacing the whole element value.\n> - **`ref` iteration:** when the collection exposes its elements by reference, as `Span<T>` does, `foreach (ref var item in span)` makes `item` an alias for the stored element, so changes apply in place.\n> \n> Mutable structs make this mistake easy. Immutable structs, updated by creating a new value and assigning it back, keep the copy boundary visible.\n>\n> Sources: [Microsoft Learn: Iteration statements](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/iteration-statements) · [Microsoft Learn: Structure types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/struct) · [Microsoft Learn: Value types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/value-types)\n\n<!-- qard-id: b89f32ef-f23d-488d-a26a-78ebe0051826 -->\n> [!qard]- Where does boxing commonly happen?\n> Boxing happens wherever a value type is converted to `object` or to an interface it implements. The runtime allocates an object on the managed heap and copies the value into it. A nullable value type is boxed according to its contents: a populated `int?` boxes its underlying `int` value, and an empty one converts to a `null` reference without allocating.\n>\n> Common places:\n>\n> - **`object`-typed variables, collections and parameters:** `object o = 42;`, adding an `int` to a `List<object>` or an `ArrayList`, or passing a struct to a parameter of type `object`.\n> - **Interface-typed variables and parameters:** assigning a struct to an `IComparable` variable, or passing it where an interface type is declared.\n> \n> Each box is a separate heap allocation that the garbage collector must later reclaim. The box also holds a copy, so later changes to the original value do not affect it.\n>\n>\n> Sources: [Microsoft Learn: Boxing and unboxing](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/types/boxing-and-unboxing) · [Microsoft Learn: Nullable value types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/nullable-value-types#boxing-and-unboxing) · [Microsoft Learn: Generic classes and methods](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/types/generics) · [Microsoft Learn: OpCodes.Constrained](https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.constrained?view=net-10.0)\n\n> [!qard]- How can boxing be reduced on a measured hot path?\n> The conversion to object or an interface value must be removed from the actual call path.\n>\n> - **Generic collections and APIs:** a generic collection such as `List<int>` is specialized for `int`, so adding an element stores the value without converting it to `object`.\n> - **Constrained generics instead of interface-typed parameters:** a method such as `Max<T>(T a, T b) where T : IComparable<T>` can call `CompareTo` on a struct argument without converting it to the interface type, provided the struct itself implements that member.\n> \n> These changes matter mainly in frequently executed code. They justify extra API complexity where profiling shows boxing allocations are significant.\n>\n> Sources: [Microsoft Learn: Boxing and unboxing](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/types/boxing-and-unboxing) · [Microsoft Learn: Nullable value types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/nullable-value-types#boxing-and-unboxing) · [Microsoft Learn: Generic classes and methods](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/types/generics) · [Microsoft Learn: OpCodes.Constrained](https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.constrained?view=net-10.0)\n\n<!-- qard-id: d5bda60c-1799-4e4a-ab36-7624ae085e3a -->\n> [!qard]- When should a type be a `struct`, `class`, or `record class`?\n> The choice follows the semantics the type needs. A `struct` fits a small value that is copied field by field, a `class` fits an object with its own identity, and a `record class` fits a reference type whose contents define its equality. Copying, mutation and measured allocation costs then confirm or adjust that semantic choice.\n>\n> | Aspect | `struct` | `class` | `record class` |\n> |---|---|---|---|\n> | Assignment and passing | Copies every field, so each variable holds its own field values. The copy is shallow: a reference-type field copies only the reference, so both copies can still point to one object. | Copies a reference, so several variables can share and observe one object. | Copies a reference, as a class does. |\n> | Default equality | `Equals` is true when both have the same type and the same stored values. | Equality holds only when both references point to the same object, even if every field matches. | Compiler-generated `Equals` and `==` compare the type and member values. The generated `GetHashCode` compares nothing; it returns hash codes compatible with that equality, so equal records hash equally. |\n> | Mutation | A change to a copy's own fields affects only that copy, so such changes are easy to lose. A change to an object reached through a reference field is visible through every copy that shares it. | A change is visible through every reference to the object. | Positional properties are init-only by default, and a `with` expression creates a modified shallow copy whose reference-type members still point to the same objects. |\n> | Allocation and cost | Stored inline in the variable, field or array element that holds it, with no allocation of its own. Large values make every copy expensive, and boxing allocates. | One heap allocation per instance. | One heap allocation per instance, as with a class. |\n> | Inheritance | Cannot derive from another struct or class or serve as a base type, though it can implement interfaces. | Supports class inheritance. | Can inherit only from another record. |\n> | Typical fit | Small data-centric values with little behavior, such as a coordinate. | Entities with identity, a lifecycle or polymorphic behavior. | Data defined by its contents, such as messages or DTOs. |\n>\n> Sources: [Microsoft Learn: Structure types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/struct) · [Microsoft Learn: Value types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/value-types) · [Microsoft Learn: Classes (C# language specification)](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/classes) · [Microsoft Learn: Records](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record)\n\n> [!qard]- Why can two anonymous objects compare unequal with `==` but match in `Intersect`?\n> Anonymous types synthesize value-based `Equals` and `GetHashCode`, but do not overload `==`; that operator compares reference identity. Two separately created anonymous objects with the same property names, types, order, and values in the same assembly therefore compare unequal with `==` but equal with `Equals`. `Intersect` uses the default equality comparer, which uses their generated equality and hash rather than the `==` operator. Each property is compared with its own type's equality, not recursively by arbitrary object contents. [Microsoft: anonymous types](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/types/anonymous-types)\n\n# References\n\n- [C# type system](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/types/)\n",
+          "hash": "d6190c14055f806b3cae584589789afcc9dfc6bdf0ee2f7d439cb8ece497ab18",
+          "topic": "Programming",
+          "violations": [],
+          "needs_fixing_ids": [
+            "b89f32ef-f23d-488d-a26a-78ebe0051826",
+            "d5bda60c-1799-4e4a-ab36-7624ae085e3a",
+            "d8eb59cf-ad2d-43be-954f-44db23f34d38"
+          ],
+          "repair_input_hash": "49bdb81af1dd624296bf7d1bfd6f18765be5d264b0e5212dbe55dffb71dcf10e",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "82a04e65ab00760ab41233edf8129ba880e8d1cec5477811d321548e627e215a",
+      "evaluation_hash": "5a3fa995c63f53372dd78ead04ba8f98f001da6bbdef06a9844aa9812c855360",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Types.md",
+          "expected_hash": "d6190c14055f806b3cae584589789afcc9dfc6bdf0ee2f7d439cb8ece497ab18",
+          "before": "- **Storage:** value types may live inline inside heap objects and arrays. References may be local variables. Declaration kind does not dictate one physical location.",
+          "after": "- **Storage:** a value type is stored inline in whatever holds it: a local variable, a field of a heap object, or an array element. A reference-type variable holds only a reference, and the object it points to is allocated separately. Declaration kind therefore does not dictate one physical location.",
+          "reason": "The original sentence 'References may be local variables' did not explain where each kind is stored; the replacement states the inline-versus-separate-object distinction.",
+          "kind": "note",
+          "learning_target": "same",
+          "essential_meanings": [
+            "value types are stored inline in their container",
+            "reference variables hold a reference to a separately allocated object"
+          ],
+          "sources": [],
+          "feedback_keys": [],
+          "problem": "The Storage bullet is vague and its second sentence does not contrast value and reference storage.",
+          "reader_benefit": "Clearer mental model of where values and references live."
+        }
+      ],
+      "dispositions": [
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Types.md",
+          "outcome": "changed",
+          "reason": "Audited the whole note: copy semantics, boxing (including Nullable<T>), CS1612 example, struct/class/record table, foreach and anonymous-type cards all match Microsoft documentation. Only the Storage bullet was vague, and it now states the inline-versus-separate-object distinction."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Types.md": "d6190c14055f806b3cae584589789afcc9dfc6bdf0ee2f7d439cb8ece497ab18"
+    },
+    "feedback_keys": [],
+    "rules_hash": "82a04e65ab00760ab41233edf8129ba880e8d1cec5477811d321548e627e215a",
+    "evaluation_hash": "5a3fa995c63f53372dd78ead04ba8f98f001da6bbdef06a9844aa9812c855360",
+    "repair_inputs": {
+      "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Types.md": "49bdb81af1dd624296bf7d1bfd6f18765be5d264b0e5212dbe55dffb71dcf10e"
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-03T09:20:34.250468Z"
   }
 }
