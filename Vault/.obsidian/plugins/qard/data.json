@@ -1167,6 +1167,11 @@
       "planning|Programming": 34.3,
       "lessons|Programming": 278.6,
       "tests|": 0.6
+    },
+    "2026-11-03": {
+      "browsing|": 10.7,
+      "planning|": 3.8,
+      "cards|Programming": 19.4
     }
   },
   "statistics": {
@@ -1392,7 +1397,39 @@
     },
     "partialHistory": false
   },
-  "sessions": [],
+  "sessions": [
+    {
+      "id": "5a31b970-2abc-4c3a-a8c5-ae4a231dd914",
+      "title": "Programming",
+      "cardIds": [
+        "b115f4c1-4ffb-413c-917b-d5fcdb62cb05",
+        "d8eb59cf-ad2d-43be-954f-44db23f34d38",
+        "b89f32ef-f23d-488d-a26a-78ebe0051826",
+        "d5bda60c-1799-4e4a-ab36-7624ae085e3a",
+        "19ea3788-056c-4ed6-8bc6-2087ae866f65",
+        "ffd19d60-4643-4ede-92ff-83ba55b3f613",
+        "13e7573c-4ba4-4f2b-a316-4f2dcb52ccd6",
+        "ec8874e5-0ca6-4d53-a3dd-6594e0a512e3",
+        "1fe4393b-4d8c-4e2c-9ae5-769106b13e65",
+        "a16bf465-c1ae-4bca-909c-6f7462f37ca6",
+        "044cb1c8-912a-42fc-82d3-f9e2167680f6"
+      ],
+      "position": 3,
+      "style": "normal",
+      "results": [],
+      "createdAt": 1793696953397,
+      "updatedAt": 1793696958535,
+      "remainingIds": [],
+      "mode": "due",
+      "repeatLearning": true,
+      "learning": [],
+      "skippedIds": [
+        "b115f4c1-4ffb-413c-917b-d5fcdb62cb05",
+        "d8eb59cf-ad2d-43be-954f-44db23f34d38",
+        "b89f32ef-f23d-488d-a26a-78ebe0051826"
+      ]
+    }
+  ],
   "exams": [
     {
       "id": "027e0d94-42e5-4fc5-8e71-9de4c580643e",
@@ -1829,6 +1866,11 @@
           "planning|Programming": 34.3,
           "lessons|Programming": 278.6,
           "tests|": 0.6
+        },
+        "2026-11-03": {
+          "browsing|": 10.7,
+          "planning|": 3.8,
+          "cards|Programming": 19.4
         }
       },
       "usage": {

@@ -213,7 +213,7 @@
   "separateNoteCounts": true,
   "showIndentGuides": false,
   "navCountLeaderStyle": "none",
-  "rootLevelSpacing": 3,
+  "rootLevelSpacing": 0,
   "navIndent": 16,
   "navItemHeight": 24,
   "navItemHeightScaleText": true,

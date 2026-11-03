@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-02-18T19:18:52.000Z
-modified: 2026-11-02T09:03:54.806Z
-published: 2026-11-02T09:03:54.806Z
+modified: 2026-11-03T09:52:48.695Z
+published: 2026-11-03T09:52:55.969Z
 topic:
   - Programming
 subtopic:
@@ -375,6 +375,25 @@ public record Wrapper(List<int> Items);
 > `readonly` prevents reassigning the struct's own fields but does not freeze the objects they reference. A reference member compared by reference, such as a `List<T>` under the default comparer, stays stable when its contents change, because its identity does not. That holds only while the effective comparer also compares it by reference. A supplied comparer that compares the list's elements makes the key depend on mutable state again. A record struct key is therefore safe when every component that the effective equality and hash observe is immutable or compared by reference.
 >
 > [Microsoft: records](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record) · [Microsoft: value types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/value-types) · [Microsoft: Dictionary\<TKey,TValue>](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.dictionary-2?view=net-10.0) · [Microsoft: Object.GetHashCode](https://learn.microsoft.com/en-us/dotnet/api/system.object.gethashcode?view=net-10.0)
+
+> [!qard]- How do a positional `record struct` and a positional `readonly record struct` differ, and why does the difference matter?
+> The plain `record struct` generates `get`/`set` positional properties, so `c.Lat = 51.5` compiles. The `readonly` form generates `get`/`init` properties and requires every instance field to be readonly, so the same assignment is a compile error and a changed value comes from `with`. Both are value types with the same generated equality, `ToString`, `Deconstruct`, and `with` support.
+>
+> ```csharp
+> public record struct Coord(double Lat, double Lon);            // Lat { get; set; }
+> public readonly record struct FixedCoord(double Lat, double Lon); // Lat { get; init; }
+> ```
+>
+> The plain form is the outlier among positional records: a `record class` also gets init-only properties. A settable value type invites mutating a local copy taken from a property or method while the stored value stays unchanged. The `readonly` form also lets the compiler call any member through an `in` parameter or `readonly` field without a defensive copy; in the plain form only members declared `readonly` avoid it, including auto-property getters, which are implicitly readonly.
+>
+> [Microsoft: records](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record) · [Microsoft: structure types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/struct)
+
+> [!qard]- How does a positional record such as `record Person(string Name)` differ from a class with a C# 12 primary constructor such as `class Person(string name)`?
+> The record turns `Name` into a public init-only property and adds value equality (`Equals`, `GetHashCode`, `==`, `!=`), a `ToString` that prints member values, `Deconstruct`, and `with`. The class primary constructor only puts `name` in scope throughout the type body. It is not a property, not public, and remains assignable inside the type. The compiler stores it in a hidden field only when an instance member body references it; a parameter used only in field or property initializers needs no storage. Equality stays reference-based, and the class gets no `ToString` override, `Deconstruct`, or `with`.
+>
+> A class primary constructor is a construction shortcut for dependencies or initial state; a positional record is a data-carrier contract. Exposing the class's state still requires a declared property, such as `public string Name { get; } = name;`.
+>
+> [Microsoft: records](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record) · [Microsoft: primary constructors](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/instance-constructors#primary-constructors)
 
 # References
 

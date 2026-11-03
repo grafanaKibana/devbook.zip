@@ -2,7 +2,7 @@
 publish: true
 created: 2026-07-18T07:07:47.000Z
 modified: 2026-10-31T09:00:37.443Z
-published: 2026-10-31T09:00:37.443Z
+published: 2026-10-31T09:00:46.357Z
 topic:
   - Software Architecture
 subtopic:
