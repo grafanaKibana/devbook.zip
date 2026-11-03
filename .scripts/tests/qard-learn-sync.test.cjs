@@ -4,40 +4,47 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const test = require('node:test');
-const { inspectCourse, reconcileCourse, renameSourcePath, sourceSnapshot } = require('../qard-learn-sync/core.cjs');
+const { inspectCourse, reconcileCourse, renameSourcePath, sourceSnapshot, unassignedSources } = require('../qard-learn-sync/core.cjs');
+
+test('source card counts exclude native fenced, frontmatter and commented examples', async () => {
+  const examples = '---\nexample: |\n  > [!qard]- YAML example\n  > Answer\n...\n\n````markdown\n> [!qard]- Fenced example\n> Answer\n```\n> [!qard]- Still fenced\n> Answer\n````\n\n<!--\n> [!qard]- Commented example\n> Answer\n-->\n\n    > [!qard]- Indented example\n    > Answer\n\n> [!qard]- Real question\n> Real answer\n> ```markdown\n> > [!qard]- Example within the answer\n> > Answer\n> ```\n\n> [!qard]- Missing answer\n\n> [!question]- Generic question\n> Generic answer\n';
+  assert.equal((await sourceSnapshot(examples)).cards, 1);
+  assert.equal((await sourceSnapshot('---\n> [!qard]- Unclosed metadata\n> Answer')).cards, 0);
+});
+
+test('coverage requires a source link in its own major-subject course and supports resolved links', () => {
+  const sources = [
+    { path: 'Home/Programming/Types.md', cards: 2 },
+    { path: 'Home/Security/Types.md', cards: 1 },
+    { path: 'Home/Programming/Empty.md', cards: 0 },
+    { path: 'Assets/Example.md', cards: 1 },
+  ];
+  const courses = [{ path: 'Assets/Qard/Courses/Programming.md', course: 'Programming', rows: [{ notes: ['Home/Programming/Types', 'Home/Security/Types'] }] }];
+  assert.deepEqual(unassignedSources(courses, sources), [{ path: 'Home/Security/Types.md', cards: 1, course: 'Security' }]);
+  assert.deepEqual(unassignedSources([{ ...courses[0], rows: [{ notes: ['Types'] }] }], sources,
+    (link, from) => from === courses[0].path && link === 'Types' ? 'Home/Programming/Types.md' : undefined),
+  [{ path: 'Home/Security/Types.md', cards: 1, course: 'Security' }]);
+  assert.throws(() => unassignedSources([...courses, courses[0]], sources), /duplicate.*course/i);
+});
 
 test('vault card sources belong to their subject Learn course and all objective sources resolve', async () => {
-  const vault = path.resolve(__dirname, '../../Vault');
-  const coursesDirectory = path.join(vault, 'Assets/Qard/Courses');
-  const sourcesBySubject = new Map();
-  for (const file of fs.readdirSync(coursesDirectory).filter(file => file.endsWith('.md'))) {
-    // The production parser also validates unique IDs and an acyclic prerequisite graph.
-    const course = inspectCourse(fs.readFileSync(path.join(coursesDirectory, file), 'utf8'));
-    assert.ok(!sourcesBySubject.has(course.course), `Duplicate course: ${course.course}`);
-    const sources = new Set();
+  const { checkCoverage } = require('../qard-learn-sync/check.cjs');
+  const repoRoot = path.resolve(__dirname, '../..');
+  assert.ok(fs.existsSync(path.join(repoRoot, 'Vault/Home/index.md')), 'Expected real vault');
+  assert.deepEqual(await checkCoverage({ repoRoot }), { unassigned: [], problems: [] });
+  const directory = path.join(repoRoot, 'Vault/Assets/Qard/Courses');
+  let cardSourceFound = false;
+  for (const file of fs.readdirSync(directory).filter(file => file.endsWith('.md'))) {
+    const course = inspectCourse(fs.readFileSync(path.join(directory, file), 'utf8'));
     for (const objective of course.rows) {
       assert.ok(objective.notes.length <= 4, `${file}: ${objective.id} exceeds Learn's four-source context limit`);
       for (const source of objective.notes) {
-        const relative = source.replace(/\.md$/, '') + '.md';
-        assert.ok(relative.startsWith(`Home/${course.course}/`), `${file}: source outside subject: ${source}`);
-        assert.ok(fs.existsSync(path.join(vault, relative)), `${file}: unresolved source: ${source}`);
-        sources.add(relative);
+        assert.ok(source.startsWith(`Home/${course.course}/`), `${file}: source outside subject: ${source}`);
+        if (!cardSourceFound) cardSourceFound = (await sourceSnapshot(fs.readFileSync(path.join(repoRoot, 'Vault', source.replace(/\.md$/, '') + '.md'), 'utf8'))).cards > 0;
       }
     }
-    sourcesBySubject.set(course.course, sources);
   }
-  const missing = [];
-  let cardSources = 0;
-  for (const relative of fs.readdirSync(path.join(vault, 'Home'), { recursive: true }).filter(file => file.endsWith('.md'))) {
-    const source = `Home/${relative.split(path.sep).join('/')}`;
-    const snapshot = await sourceSnapshot(fs.readFileSync(path.join(vault, source), 'utf8'));
-    if (!snapshot.cards) continue;
-    cardSources++;
-    const subject = source.split('/')[1];
-    if (!sourcesBySubject.get(subject)?.has(source)) missing.push(source);
-  }
-  assert.ok(cardSources > 0, 'Expected real vault card sources');
-  assert.deepEqual(missing, [], 'Card-owning notes missing their subject Learn source association');
+  assert.ok(cardSourceFound, 'Expected actual card-owning vault sources');
 });
 
 const DAY = '2026-10-31';

@@ -32,6 +32,9 @@ jobs:
       - name: Test note review hooks
         run: node --test .codex/hooks/tests/note-review-hooks.test.mjs
 
+      - name: Test Learn source coverage and progress preservation
+        run: node --test .scripts/tests/qard-learn-sync*.test.cjs
+
       - name: Test native tooling core
         working-directory: .scripts
         run: |

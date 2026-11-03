@@ -18,12 +18,76 @@ const contentOf = (text) => {
     .replace(/<!--[ \t]*qard-(?:id|location|siblings|reverse):[^\n]*?-->/g, '')
     .replace(/\r\n/g, '\n').replace(/[ \t]+$/gm, '').replace(/\n{3,}/g, '\n\n').trim();
 };
+
+// Match stock Qard's block boundaries; Qard remains responsible for card-format diagnostics.
+function cardCount(text) {
+  const lines = text.split(/\r?\n/);
+  const header = /^ {0,3}> ?\[!qard\][+-]?(?:[ \t]+(.*))?$/i;
+  const quoted = /^ {0,3}> ?(.*)$/;
+  const opening = line => /^ {0,3}(`{3,}|~{3,})/.exec(line)?.[1] || '';
+  const closes = (line, fence) => {
+    const match = /^ {0,3}(`+|~+)\s*$/.exec(line);
+    return match && match[1][0] === fence[0] && match[1].length >= fence.length;
+  };
+  let start = 0, count = 0, fence = '', comment = false;
+  if (lines[0]?.replace(/^\uFEFF/, '') === '---') {
+    const end = lines.findIndex((line, index) => index > 0 && /^(---|\.\.\.)\s*$/.test(line));
+    if (end < 0) return 0;
+    start = end + 1;
+  }
+  for (let index = start; index < lines.length; index++) {
+    const line = lines[index];
+    if (fence) { if (closes(line, fence)) fence = ''; continue; }
+    if (comment) { if (line.includes('-->')) comment = false; continue; }
+    fence = opening(line);
+    if (fence) continue;
+    if (/^\s*<!--/.test(line)) { comment = !line.includes('-->'); continue; }
+    const match = header.exec(line);
+    if (!match) continue;
+    let end = index + 1, innerFence = opening(match[1] || ''), separator = -1;
+    const body = [];
+    while (end < lines.length) {
+      const content = quoted.exec(lines[end]);
+      if (!content || (!innerFence && header.test(lines[end]))) break;
+      const value = content[1];
+      if (innerFence) { if (closes(value, innerFence)) innerFence = ''; }
+      else {
+        innerFence = opening(value);
+        if (!innerFence && value.trim() === '<!-- qard-answer -->' && separator < 0) separator = body.length;
+      }
+      body.push(value);
+      end++;
+    }
+    const front = separator < 0 ? (match[1] || '') : [match[1] || '', ...body.slice(0, separator)].join('\n');
+    const back = (separator < 0 ? body : body.slice(separator + 1)).join('\n');
+    if (front.trim() && back.trim() && !innerFence) count++;
+    index = end - 1;
+  }
+  return count;
+}
+
 async function sourceSnapshot(text) {
   if (typeof text !== 'string') fail('expected source Markdown text');
   const bytes = new TextEncoder().encode(contentOf(text));
   const hash = await globalThis.crypto.subtle.digest('SHA-256', bytes);
   const revision = Array.from(new Uint8Array(hash), (byte) => byte.toString(16).padStart(2, '0')).join('');
-  return { revision, cards: (text.match(/^\s*>\s*\[!qard\]/gim) ?? []).length };
+  return { revision, cards: cardCount(text) };
+}
+
+function unassignedSources(courses, sources, resolveLink = link => link.replace(/\.md$/, '') + '.md') {
+  const subjects = new Set(), assigned = new Set();
+  for (const course of courses) {
+    if (subjects.has(course.course)) fail(`duplicate Learn course ${course.course}`);
+    subjects.add(course.course);
+    for (const row of course.rows) for (const link of row.notes) {
+      vaultPath(link);
+      const target = resolveLink(link, course.path);
+      if (target?.startsWith(`Home/${course.course}/`)) assigned.add(target);
+    }
+  }
+  return sources.filter(source => source.cards > 0 && /^Home\/[^/]+\/.+\.md$/.test(source.path) && !assigned.has(source.path))
+    .map(source => ({ path: source.path, cards: source.cards, course: source.path.split('/')[1] }))
+    .sort((left, right) => left.path.localeCompare(right.path));
 }
 
 
@@ -231,4 +295,4 @@ function reconcileCourse(text, { sources, renames = [], day, initialRevisions = 
   return { text: merged, ...result };
 }
 
-module.exports = { inspectCourse, reconcileCourse, renameSourcePath: renamedPath, sourceSnapshot };
+module.exports = { inspectCourse, reconcileCourse, renameSourcePath: renamedPath, sourceSnapshot, unassignedSources };

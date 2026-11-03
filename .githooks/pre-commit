@@ -71,4 +71,8 @@ if ! (cd "$REPO_ROOT/.scripts" && dotnet run --no-cache --file DevBook.Tooling/S
     exit 1
 fi
 
+# Card sources must have deliberate Learn assignment before publication.
+echo "[pre-commit] Checking Learn source assignments..."
+node "$REPO_ROOT/.scripts/qard-learn-sync/check.cjs"
+
 exit 0

@@ -51,6 +51,11 @@ function makeHost(contents = { [COURSE_PATH]: COURSE, [SOURCE_PATH]: SOURCE }, s
   const host = {
     files, timers, notices, writes: 0, savedData, beforeProcess: undefined, beforeRead: undefined, beforeSave: undefined,
     text: p => files.get(p)?.text,
+    create(p, text) {
+      const file = new TFile(p, text);
+      files.set(p, { file, text });
+      vaultEvents.emit('create', file);
+    },
     edit(p, text, emit = true) {
       const entry = files.get(p);
       entry.text = text;
@@ -122,7 +127,9 @@ function makeHost(contents = { [COURSE_PATH]: COURSE, [SOURCE_PATH]: SOURCE }, s
     addCommand(command) { this.commands.push(command); }
     registerEvent(event) { this.events.push(event); }
   }
-  const filename = path.resolve(__dirname, '../qard-learn-sync/plugin.cjs');
+  const filename = process.env.DEVBOOK_LEARN_SYNC_BUNDLE_TEST === '1'
+    ? path.resolve(__dirname, '../../Vault/.obsidian/plugins/devbook-learn-sync/main.js')
+    : path.resolve(__dirname, '../qard-learn-sync/plugin.cjs');
   const localRequire = createRequire(filename);
   const sandbox = {
     module: { exports: {} },
@@ -157,6 +164,91 @@ function progress(text) {
 }
 
 const newCard = '\n> [!qard]- Does a copied reference field clone its target?\n> No, it still points to the same target.\n';
+
+test('new unassigned source warns automatically, cannot be acknowledged away, and clears after linking', async t => {
+  const host = await makeHost().boot(); t.after(() => host.stop());
+  const added = 'Home/Programming/New Topic.md';
+  const before = host.text(COURSE_PATH);
+  host.create(added, SOURCE + newCard);
+  await host.flush();
+  assert.equal(host.plugin.unassigned.length, 1);
+  assert.equal(host.plugin.unassigned[0].path, added);
+  assert.equal(host.plugin.unassigned[0].cards, 2);
+  assert.equal(host.plugin.status.text, 'Learn: 1 unassigned note(s)');
+  assert.match(host.notices.at(-1), /Home\/Programming\/New Topic\.md.*2 card/);
+  assert.match(host.notices.at(-1), /existing.*objective|objective.*existing/i);
+  assert.match(host.notices.at(-1), /distinct/i);
+  assert.equal(host.text(COURSE_PATH), before, 'Coverage warning must not create or alter objectives');
+  const notices = host.notices.length;
+  await host.plugin.sync();
+  assert.equal(host.notices.length, notices, 'Unchanged orphan inventory must not repeat automatic notices');
+  await host.plugin.acknowledge();
+  assert.equal(host.plugin.unassigned.length, 1);
+  host.edit(COURSE_PATH, before.replace('[[Home/Programming/Types#Copies\\|Types]]', '[[Home/Programming/Types#Copies\\|Types]], [[Home/Programming/New Topic]]'));
+  await host.flush();
+  assert.equal(host.plugin.unassigned.length, 0);
+  const updated = inspectCourse(host.text(COURSE_PATH)).rows[0], original = inspectCourse(before).rows[0];
+  for (const field of ['id', 'title', 'label', 'group', 'state', 'due', 'needs', 'evidence']) assert.deepEqual(updated[field], original[field]);
+});
+
+test('cardless creation stays quiet; card edits, moves, removals and course creation refresh coverage', async t => {
+  const host = await makeHost().boot(); t.after(() => host.stop());
+  const added = 'Home/Programming/Unassigned.md';
+  host.create(added, '```markdown\n> [!qard]- Example\n> Answer\n```\n');
+  await host.flush();
+  assert.equal(host.plugin.unassigned.length, 0);
+  host.edit(added, SOURCE);
+  await host.flush();
+  assert.equal(host.plugin.unassigned[0].path, added);
+  host.rename(added, 'Home/Security/Unassigned.md');
+  await host.flush();
+  assert.equal(host.plugin.unassigned[0].course, 'Security');
+  const security = COURSE.replace('qard-mastery: "Programming"', 'qard-mastery: "Security"')
+    .replace('Home/Programming/Types#Copies\\|Types', 'Home/Security/Unassigned');
+  host.create('Assets/Qard/Courses/Security Mastery.md', security);
+  await host.flush();
+  assert.equal(host.plugin.unassigned.length, 0);
+  host.remove('Assets/Qard/Courses/Security Mastery.md');
+  await host.flush();
+  assert.equal(host.plugin.unassigned.length, 1);
+  host.edit('Home/Security/Unassigned.md', 'No cards remain.');
+  await host.flush();
+  assert.equal(host.plugin.unassigned.length, 0);
+  host.edit('Home/Security/Unassigned.md', SOURCE);
+  await host.flush();
+  host.remove('Home/Security/Unassigned.md');
+  await host.flush();
+  assert.equal(host.plugin.unassigned.length, 0);
+});
+
+test('malformed course registry reports incomplete coverage instead of declaring notes unassigned', async t => {
+  const host = await makeHost({ [COURSE_PATH]: COURSE.replace('| mastered |', '| invalid |'), [SOURCE_PATH]: SOURCE }).boot();
+  t.after(() => host.stop());
+  assert.equal(host.plugin.coverageComplete, false);
+  assert.equal(host.plugin.unassigned.length, 0);
+  assert.match(host.plugin.status.text, /issue/);
+  host.plugin.showStatus();
+  assert.match(host.notices.at(-1), /coverage.*could not be checked/i);
+  assert.match(host.notices.at(-1), /unknown state/);
+  assert.equal(host.writes, 0);
+});
+
+test('foreign-subject links do not assign a note and duplicate course identities make coverage incomplete', async t => {
+  const foreign = COURSE.replace('qard-mastery: "Programming"', 'qard-mastery: "Security"');
+  const host = await makeHost({ [COURSE_PATH]: foreign, [SOURCE_PATH]: SOURCE }).boot();
+  t.after(() => host.stop());
+  assert.equal(host.plugin.unassigned.length, 1);
+  assert.equal(host.plugin.unassigned[0].course, 'Programming');
+  host.create('Assets/Qard/Courses/Duplicate.md', foreign);
+  await host.flush();
+  assert.equal(host.plugin.coverageComplete, false);
+  assert.equal(host.plugin.unassigned.length, 0);
+  assert.match(host.plugin.problems.join('\n'), /duplicate.*course/i);
+  host.remove('Assets/Qard/Courses/Duplicate.md');
+  await host.flush();
+  assert.equal(host.plugin.coverageComplete, true);
+  assert.equal(host.plugin.unassigned.length, 1);
+});
 
 test('startup baselines existing sources once and course progress events do not feed back into writes', async t => {
   const host = await makeHost().boot(); t.after(() => host.stop());
