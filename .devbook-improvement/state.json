@@ -308,9 +308,9 @@
     "version": 1,
     "id": "8ee974ce274c4cbcba9dfc3e56cb0691",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-03T09:17:25.556001Z",
-    "elapsed_seconds": 353.3098724999999,
+    "elapsed_seconds": 357.0235776999999,
     "calls_reserved": 12,
     "responses_received": 12,
     "attempted_paths": [
@@ -318,7 +318,8 @@
       "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md",
       "Vault/Home/Programming/NET/CSharp/Fundamentals/Methods.md",
       "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Types.md",
-      "Vault/Home/Programming/NET/ASP NET Web API/ASP NET Web API.md"
+      "Vault/Home/Programming/NET/ASP NET Web API/ASP NET Web API.md",
+      "Vault/Home/Programming/NET/ASP NET Web API/Authentication.md"
     ],
     "accepted_records": [
       {
@@ -1895,10 +1896,89 @@
           },
           "model_calls": 10
         }
+      },
+      {
+        "path": "Vault/Home/Programming/NET/ASP NET Web API/Authentication.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Programming/NET/ASP NET Web API/Authentication.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against current ASP.NET Core behavior. The opening correctly says a handler validates the credential and populates HttpContext.User. The JWT, cookie and multi-scheme snippets match the documented APIs, and the UseAuthentication-before-UseAuthorization order is correct. The claim-mapping warning on MapInboundClaims is accurate. The IClaimsTransformation idempotency note, the JwtBearerEvents hooks and the tradeoffs on revocation and CSRF are accurate. The pitfalls explain mechanism and fix without padding. The single Qard card checks signature, issuer, audience and lifetime, and it is consistent with the note and the cited Microsoft page. No known violations are listed. No factual or editorial defect justifies an edit."
+              }
+            ],
+            "feedback": [],
+            "decisions": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/Programming/NET/ASP NET Web API/Authentication.md",
+                "verdict": "CLEAN",
+                "summary": "The whole note was audited and is accurate and well ordered. It moves from the authentication/authorization split to JWT, cookies, multiple schemes, claims and events, pitfalls and tradeoffs, and it states mechanisms with their conditions. The single Qard card is bounded and has an answer-side Microsoft source. No edit is warranted.",
+                "page_type": "Concept — typed frontmatter, optional Questions and References present and valid, Qard identity comment protected, all code fences carry language identifiers.",
+                "current_text_evidence": [
+                  {
+                    "quote": "a registered authentication handler validates the credential for its scheme and, on success, supplies the `ClaimsPrincipal` exposed through `HttpContext.User`",
+                    "line_start": 17,
+                    "reason": "The opening states the operating idea correctly and separates it from authorization."
+                  },
+                  {
+                    "quote": "it also means an issued token normally remains valid until expiry unless the system adds revocation state",
+                    "line_start": 23,
+                    "reason": "States the key limit of local JWT validation, which feeds the Tradeoffs section."
+                  },
+                  {
+                    "quote": "`TransformAsync(ClaimsPrincipal)` can run more than once, so the transformation must be idempotent.",
+                    "line_start": 112,
+                    "reason": "Accurate behavioral condition for IClaimsTransformation."
+                  },
+                  {
+                    "quote": "Setting `options.MapInboundClaims = false` keeps the original JWT names",
+                    "line_start": 117,
+                    "reason": "The claim-mapping warning is correct for JwtBearerOptions and explains why a lookup for sub can fail."
+                  },
+                  {
+                    "quote": "Middleware order is executable behavior.",
+                    "line_start": 133,
+                    "reason": "The pitfall explains the mechanism (authorization sees an anonymous principal) and the fix, not just a rule."
+                  },
+                  {
+                    "quote": "> [!qard]- What must an API establish before it trusts a bearer JWT?",
+                    "line_start": 154,
+                    "reason": "The card is self-contained and has a finite answer (signature, issuer, audience, lifetime). The answer explains why the checks are independent and cites the Microsoft page."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: cookie, JWT and multi-scheme authentication are one coherent topic. Authorization is already a separate note linked from the opening.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "The independent whole-note review found no factual, editorial, structural or question-quality defect. The keep disposition is justified, there are no edits, and no known violations exist.",
+            "change_checks": []
+          },
+          "model_calls": 12
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-03T09:23:18.865460Z",
+    "checkpoint_at": "2026-11-03T09:23:22.579165Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
