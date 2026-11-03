@@ -19,13 +19,13 @@
     "status": "active",
     "phase": "selecting",
     "started_at": "2026-11-03T09:17:25.556001Z",
-    "elapsed_seconds": 0.0022403,
+    "elapsed_seconds": 6.792393000000001,
     "calls_reserved": 0,
     "responses_received": 0,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-03T09:17:25.557952Z"
+    "checkpoint_at": "2026-11-03T09:17:32.347977Z"
   }
 }
