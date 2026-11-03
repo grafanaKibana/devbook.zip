@@ -308,11 +308,11 @@
     "version": 1,
     "id": "8ee974ce274c4cbcba9dfc3e56cb0691",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-03T09:17:25.556001Z",
-    "elapsed_seconds": 380.81479959999984,
+    "elapsed_seconds": 400.70806319999986,
     "calls_reserved": 14,
-    "responses_received": 13,
+    "responses_received": 14,
     "attempted_paths": [
       "Vault/Home/Programming/NET/ASP NET Web API/Filters.md",
       "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md",
@@ -1978,7 +1978,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-03T09:23:46.370387Z",
+    "checkpoint_at": "2026-11-03T09:24:06.263651Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
@@ -2832,6 +2832,58 @@
       "Vault/Home/Programming/NET/ASP NET Web API/Authorization.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-03T09:23:43.272643Z"
+    "prepared_at": "2026-11-03T09:23:43.272643Z",
+    "completed_review": {
+      "verdict": "CLEAN",
+      "overall_reason": "The only note is accurate against ASP.NET Core authorization behavior, clearly ordered, has no known violations, and the keep rationale holds. There are no edits and no cards.",
+      "change_checks": [],
+      "notes": [
+        {
+          "path": "Vault/Home/Programming/NET/ASP NET Web API/Authorization.md",
+          "verdict": "CLEAN",
+          "summary": "The note is technically accurate, ordered from principal-based to resource-based checks to defaults and hooks, and concise. It already flags the weakness of its own age example. No edit is warranted.",
+          "page_type": "Concept — authorable prose; Questions are optional and absent; the single reference is an authoritative Microsoft page; every code fence has a language.",
+          "current_text_evidence": [
+            {
+              "quote": "When the decision depends on an object already loaded from storage, the object becomes an additional authorization resource.",
+              "line_start": 13,
+              "reason": "The opening states the core idea and the boundary between principal-based and resource-based checks."
+            },
+            {
+              "quote": "its year-only age calculation is incomplete around birthdays",
+              "line_start": 83,
+              "reason": "The note discloses the simplification in its sample handler and gives the fix (TryParse, full-date comparison, time-zone policy), so no accuracy defect remains."
+            },
+            {
+              "quote": "The `\"CanEditDocument\"` handler receives `document` as `AuthorizationHandlerContext.Resource`.",
+              "line_start": 109,
+              "reason": "This states the resource-based mechanism correctly: AuthorizeAsync(User, resource, policyName) exposes the object as Resource."
+            },
+            {
+              "quote": "Authorization succeeds when any registered handler marks that requirement successful, unless the context has been explicitly failed.",
+              "line_start": 124,
+              "reason": "This matches the documented handler semantics: an explicit Fail overrides Succeed, and separate [Authorize] attributes combine with AND."
+            },
+            {
+              "quote": "The status code itself can become an existence oracle.",
+              "line_start": 133,
+              "reason": "The pitfall is decision-oriented, names the condition that changes the choice (resource sensitivity), and is not repetitive."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: roles, policies, resource checks, defaults and pitfalls form one coherent authorization topic of moderate length.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "NOT APPLICABLE",
+            "identity_safety": "NOT APPLICABLE",
+            "rules_compliance": "PASS"
+          }
+        }
+      ]
+    }
   }
 }
