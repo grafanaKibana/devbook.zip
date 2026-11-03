@@ -9,10 +9,10 @@ namespace DevBook.Tooling.Tests;
 public sealed class PublicationTests
 {
     [Fact]
-    public async Task RequestedOwnerCorrectionReusesTheManagedPrAndPreservesHumanText()
+    public async Task SourceCapacityResumesOwnerCorrectionOnItsExistingPrWithoutPartialPublication()
     {
         // Arrange
-        using var fixture = new WorkloadFixture(1);
+        using var fixture = new WorkloadFixture(2);
         const string url = "https://example.com/mechanism";
         string path = fixture.Notes[0]!.Str("path");
         string baseline = fixture.Notes[0]!.Str("content") + "\n# References\n\n- [Mechanism](" + url + ")\n";
@@ -21,11 +21,15 @@ public sealed class PublicationTests
         api.SeedManagedPr(Core.TopicId("Programming"), existing);
         api.SourceFiles[path] = existing;
         api.BaseSourceFiles[path] = baseline;
+        string secondPath = fixture.Notes[1]!.Str("path");
+        string secondBaseline = fixture.Notes[1]!.Str("content");
+        api.SourceFiles[secondPath] = secondBaseline.Replace("The operating idea has a concrete boundary.", "The existing explanation has a concrete boundary.");
+        api.BaseSourceFiles[secondPath] = secondBaseline;
         api.Pr["body"] = "Owner introduction.\n" + api.Pr.Str("body")
             + $"\n<!-- devbook-improvement:start topic={Core.TopicId("Programming")} -->\nPrevious managed summary.\n<!-- devbook-improvement:end -->\nOwner footer.\n";
         api.Pr["draft"] = false;
         JsonObject comment = RuntimeFixtures.OwnerComment();
-        comment["paths"] = new JsonArray(path);
+        comment["paths"] = new JsonArray(path, secondPath);
         api.Comments.Add(comment);
         api.Reviews.Add(new JsonObject
         {
@@ -33,7 +37,7 @@ public sealed class PublicationTests
             ["state"] = "CHANGES_REQUESTED",
             ["body"] = "Clarify the mechanism using its existing reference.",
             ["user"] = new JsonObject { ["id"] = 42, ["login"] = "owner" },
-            ["paths"] = new JsonArray(path)
+            ["paths"] = new JsonArray(path, secondPath)
         });
         api.InlineComments.Add(new JsonObject
         {
@@ -53,7 +57,7 @@ public sealed class PublicationTests
             edit["kind"] = "note";
             edit["before"] = "The existing explanation has a concrete boundary.";
             edit["after"] = "The operating idea explains the corrected boundary.";
-            edit["sources"] = new JsonArray(new JsonObject { ["url"] = url, ["claim"] = "The mechanism has the corrected boundary.", ["version"] = "not version-specific" });
+            WorkloadFixture.AddSources(edit, edit.Str("path") == path ? 10 : 3, edit.Str("path") == path ? "first" : "second");
         };
         StateSnapshot initial = await fixture.Store.ReadAsync();
         initial.State["held_proposals"] = new JsonObject { ["unrelated"] = new JsonObject { ["audit"] = "preserve held ordinary proposal" } };
@@ -96,26 +100,44 @@ public sealed class PublicationTests
 
         // Act
         JsonObject admitted = await FeedbackTrigger.ResolveAsync(fixture.Config, "issue_comment", command, api, CancellationToken.None);
-        fixture.Config["feedback_pr"] = admitted.Int("feedback_pr");
-        var engine = new ImprovementEngine(fixture.Root, fixture.Config, fixture.Store, fixture.Model, api: api, publisher: runtime,
+        ImprovementEngine Engine() => new(fixture.Root, fixture.Config, fixture.Store, fixture.Model, api: api, publisher: runtime,
             notesLoader: () => fixture.Notes.Copy(), clock: fixture.Clock, snapshotShaLoader: () => "base",
             sourceFetcher: (_, _) => Task.FromResult("The mechanism has the corrected boundary."),
             validator: (_, _, _) => Task.FromResult(new JsonArray()));
-        JsonObject result = await engine.RunAsync(apply: true, withModel: true);
+        JsonObject waiting = await Engine().RunAsync(apply: true, withModel: true);
+        JsonObject partial = (await fixture.Store.ReadAsync()).State;
+        int partialCommits = api.Commits;
+        int partialAcknowledgments = api.Acknowledgments;
+        JsonObject pending = partial.Obj("pending_author_proposal").Copy();
+        fixture.Config["feedback_pr"] = admitted.Int("feedback_pr");
+        JsonObject result = await Engine().RunAsync(apply: true, withModel: true);
 
         // Assert
         admitted.Str("status").Should().Be("feedback_ready");
         result.Str("status").Should().Be("awaiting_export", "result: {0}", result.ToJsonString());
-        fixture.Model.Authors.Should().ContainSingle().Which.Arr("feedback").Should().HaveCount(3);
-        fixture.Model.Reviews.Should().ContainSingle();
+        waiting.Str("status").Should().Be("feedback_pending");
+        partial.Obj("focused_workload").Str("status").Should().Be("feedback_waiting");
+        partial.Obj("focused_workload").Str("stop_reason").Should().Be("source_budget");
+        partial.Obj("feedback_workloads").Select(item => item.Value).OfType<JsonObject>().Single(scope => scope.Str("status") == "pending")
+            .Obj("records").Count.Should().Be(1);
+        JsonNode.DeepEquals(partial.Obj("deferred_proposals"), protectedState.Obj("deferred_proposals")).Should().BeTrue();
+        JsonNode.DeepEquals(partial.Obj("held_proposals"), protectedState.Obj("held_proposals")).Should().BeTrue();
+        pending.Obj("source_hashes").Select(item => item.Key).Should().Equal(secondPath);
+        partial.Obj("feedback").Select(item => item.Value).OfType<JsonObject>().Should().OnlyContain(item => item.Str("status") == "pending");
+        partialCommits.Should().Be(0);
+        partialAcknowledgments.Should().Be(0);
+        fixture.Model.Authors.Should().HaveCount(2);
+        fixture.Model.Authors.Should().OnlyContain(payload => payload.Arr("feedback").Count == 3);
+        fixture.Model.Reviews.Should().HaveCount(2);
+        JsonNode.DeepEquals(fixture.Model.Reviews.Last().Obj("proposal"), pending.Obj("proposal")).Should().BeTrue();
         api.PrCreates.Should().Be(0);
         api.Commits.Should().Be(1);
         api.DraftConversions.Should().Be(1);
         api.ForceWrites.Should().Be(0);
         api.Source.Should().Contain("The operating idea explains the corrected boundary.").And.Contain(url);
         JsonObject saved = (await fixture.Store.ReadAsync()).State;
-        JsonNode.DeepEquals(saved.Obj("prs")["unrelated-closed:1"], protectedState.Obj("prs")["unrelated-closed:1"]).Should().BeTrue();
-        JsonNode.DeepEquals(saved.Arr("rejections"), protectedState.Arr("rejections")).Should().BeTrue();
+        JsonNode.DeepEquals(saved.Obj("prs")["unrelated-closed:1"], partial.Obj("prs")["unrelated-closed:1"]).Should().BeTrue();
+        JsonNode.DeepEquals(saved.Arr("rejections"), partial.Arr("rejections")).Should().BeTrue();
         JsonNode.DeepEquals(saved.Obj("parked_author_proposals")[LegacyIdentity.Fingerprint(parkedCandidate)], parkedCandidate).Should().BeTrue();
         JsonNode.DeepEquals(saved.Obj("held_proposals"), protectedState.Obj("held_proposals")).Should().BeTrue();
         JsonNode.DeepEquals(saved.Obj("parked_proposals"), protectedState.Obj("parked_proposals")).Should().BeTrue();

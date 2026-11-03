@@ -47,6 +47,8 @@ internal sealed class RuntimeApi : IGitHubApi
 {
     public string Repo => "owner/repo";
     public string BaseBranch { get; init; } = "main";
+    public string BaseHead { get; set; } = "base";
+    public bool FailBaseRead { get; set; }
     public string Head { get; private set; } = "base";
     public string Source { get; private set; } = "Original";
     public JsonObject Pr { get; private set; } = new();
@@ -93,11 +95,12 @@ internal sealed class RuntimeApi : IGitHubApi
         else if (method == "GET" && path.StartsWith("/git/ref/heads/", StringComparison.Ordinal))
         {
             string branch = Uri.UnescapeDataString(path["/git/ref/heads/".Length..]);
+            if (branch == BaseBranch && FailBaseRead) throw new GitHubApiFailure("HTTP 503", 503);
             if (branch != BaseBranch && !branchExists)
             {
                 throw new GitHubApiFailure("HTTP 404", 404);
             }
-            result = new JsonObject { ["object"] = new JsonObject { ["sha"] = branch == BaseBranch ? "base" : Head } };
+            result = new JsonObject { ["object"] = new JsonObject { ["sha"] = branch == BaseBranch ? BaseHead : Head } };
         }
         else if (method == "POST" && path == "/git/refs")
         {
@@ -108,13 +111,13 @@ internal sealed class RuntimeApi : IGitHubApi
         else if (method == "GET" && path.StartsWith("/contents/", StringComparison.Ordinal))
         {
             string notePath = Uri.UnescapeDataString(path["/contents/".Length..].Split('?')[0]);
-            bool baseSnapshot = path.EndsWith("ref=base", StringComparison.Ordinal) || path.EndsWith("ref=main", StringComparison.Ordinal);
+            bool baseSnapshot = path.EndsWith("ref=" + BaseHead, StringComparison.Ordinal) || path.EndsWith("ref=base", StringComparison.Ordinal) || path.EndsWith("ref=main", StringComparison.Ordinal);
             string text = (baseSnapshot ? BaseSourceFiles : SourceFiles).GetValueOrDefault(notePath, Source);
             result = new JsonObject { ["encoding"] = "base64", ["type"] = "file", ["content"] = Convert.ToBase64String(Encoding.UTF8.GetBytes(text)) };
         }
         else if (method == "GET" && path.StartsWith("/compare/", StringComparison.Ordinal))
         {
-            result = new JsonObject { ["merge_base_commit"] = new JsonObject { ["sha"] = "base" } };
+            result = new JsonObject { ["merge_base_commit"] = new JsonObject { ["sha"] = BaseHead } };
         }
         else if (method == "GET" && path.StartsWith("/git/commits/", StringComparison.Ordinal))
         {

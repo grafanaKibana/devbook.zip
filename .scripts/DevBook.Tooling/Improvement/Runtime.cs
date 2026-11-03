@@ -11,6 +11,12 @@ public sealed class Conflict(string message) : RuntimeFailure(message);
 public sealed class UnsafeInput(string message) : RuntimeFailure(message);
 public sealed class ProductionGate(string message) : RuntimeFailure(message);
 public sealed class CandidateValidationFailure(string message) : RuntimeFailure(message);
+public sealed class StalePublicationBase(string expectedSha, string observedSha)
+    : RuntimeFailure("Base branch changed before publication.")
+{
+    public string ExpectedSha { get; } = expectedSha;
+    public string ObservedSha { get; } = observedSha;
+}
 
 public sealed record PublicationChecks(string Status, JsonObject Checks, string? VaultValidation);
 

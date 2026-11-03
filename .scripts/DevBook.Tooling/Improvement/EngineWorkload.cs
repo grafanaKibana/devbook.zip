@@ -371,22 +371,49 @@ public sealed partial class ImprovementEngine
             return response;
         }
         if (publisher is null) throw new RuntimeFailure("Apply requires a publication runtime.");
-        Dictionary<string, string> guarded = Map(request.RequiredObject("expected_sources"));
-        if (request.Int("expected_pr_number") > 0)
+        JsonObject publication;
+        try
         {
-            foreach (KeyValuePair<string, string> source in guarded)
+            await publisher.RequirePublicationBaseAsync(request.Str("expected_base_sha"), cancellationToken);
+            Dictionary<string, string> guarded = Map(request.RequiredObject("expected_sources"));
+            if (request.Int("expected_pr_number") > 0)
             {
-                if (await publisher.ReadNoteAsync(source.Key, request.Str("branch"), cancellationToken) != source.Value)
+                foreach (KeyValuePair<string, string> source in guarded)
+                {
+                    if (await publisher.ReadNoteAsync(source.Key, request.Str("branch"), cancellationToken) != source.Value)
+                        throw new Conflict("Accepted source changed before focused publication; saved candidate preserved.");
+                }
+            }
+            else
+            {
+                Dictionary<string, string> current = notesLoader().OfType<JsonObject>().ToDictionary(note => note.Str("path"), note => note.Str("content"));
+                if (guarded.Any(source => !current.TryGetValue(source.Key, out string? text) || text != source.Value))
                     throw new Conflict("Accepted source changed before focused publication; saved candidate preserved.");
             }
+            publication = await publisher.PublishAsync(request, cancellationToken);
         }
-        else
+        catch (StalePublicationBase error)
         {
-            Dictionary<string, string> current = notesLoader().OfType<JsonObject>().ToDictionary(note => note.Str("path"), note => note.Str("content"));
-            if (guarded.Any(source => !current.TryGetValue(source.Key, out string? text) || text != source.Value))
-                throw new Conflict("Accepted source changed before focused publication; saved candidate preserved.");
+            saved["status"] = "invalidated";
+            saved["invalidation"] = new JsonObject
+            {
+                ["reason"] = error.Message,
+                ["expected_base_sha"] = error.ExpectedSha,
+                ["observed_base_sha"] = error.ObservedSha,
+                ["at"] = Core.FormatTime(clock.GetUtcNow())
+            };
+            JsonObject invalidated = await InitialStateAsync(cancellationToken);
+            JsonObject scope = invalidated.Obj("feedback_workloads").Obj(saved.Str("feedback_scope_id"));
+            if (scope.Count > 0)
+            {
+                scope["status"] = "invalidated";
+                scope["invalidated_reason"] = error.Message;
+            }
+            await SaveAsync(invalidated, "invalidate focused publication after base changed", cancellationToken);
+            response["status"] = "publication_invalidated";
+            response["invalidation"] = saved["invalidation"]?.DeepClone();
+            return response;
         }
-        JsonObject publication = await publisher.PublishAsync(request, cancellationToken);
         response["publication"] = publication.Copy();
         response["status"] = publication.Str("status", "published");
         if (publication["export_request"] is JsonObject export) { response["export_request"] = export.Copy(); response["export_mode"] = "render"; }

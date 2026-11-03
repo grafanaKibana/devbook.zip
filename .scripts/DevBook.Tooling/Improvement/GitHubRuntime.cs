@@ -55,6 +55,21 @@ public sealed class GitHubRuntime
     public async Task<string> RefShaAsync(string branch, CancellationToken cancellationToken = default) =>
         (await Runtime.ObjectAsync(api, "GET", "/git/ref/heads/" + Uri.EscapeDataString(branch), cancellationToken: cancellationToken)).Obj("object").Str("sha");
 
+    public async Task RequirePublicationBaseAsync(string expectedSha, CancellationToken cancellationToken = default)
+    {
+        activation();
+        await AssertLeaseAsync(cancellationToken);
+        string observedSha = await RefShaAsync(baseBranch, cancellationToken);
+        if (expectedSha.Length == 0 || observedSha.Length == 0)
+        {
+            throw new Conflict("Publication base reference is missing its commit SHA.");
+        }
+        if (observedSha != expectedSha)
+        {
+            throw new StalePublicationBase(expectedSha, observedSha);
+        }
+    }
+
     public async Task<string> ReadNoteAsync(string path, string branch, CancellationToken cancellationToken = default)
     {
         Runtime.ValidateRelativeNotePath(path);
@@ -429,10 +444,7 @@ public sealed class GitHubRuntime
             throw new Conflict("Terminal generation branch cannot be reused.");
         }
         string baseSha = request.Str("expected_base_sha");
-        if (await RefShaAsync(baseBranch, cancellationToken) != baseSha)
-        {
-            throw new Conflict("Base branch changed before publication.");
-        }
+        await RequirePublicationBaseAsync(baseSha, cancellationToken);
         string branchHead = await EnsureBranchAsync(branch, baseSha, cancellationToken);
         if (request.Str("expected_branch_sha") is { Length: > 0 } expectedHead && branchHead != expectedHead)
         {

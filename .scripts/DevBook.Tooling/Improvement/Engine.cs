@@ -386,7 +386,7 @@ public sealed partial class ImprovementEngine
             if (resumable.Count != 0) notes = resumable;
         }
         JsonObject? batch = Queue.SelectBatch(selectionState, notes, rules, config);
-        if (batch is not null && batch.Arr("feedback").Count > 0) batch = PrepareFeedbackBatch(state, batch, allNotes);
+        if (batch is not null && batch.Arr("feedback").Count > 0) batch = PrepareFeedbackBatch(state, batch, allNotes, baseSha);
         await SaveAsync(state, "reconcile maintenance queue", cancellationToken);
         if (batch is null)
         {
@@ -531,11 +531,22 @@ public sealed partial class ImprovementEngine
         JsonObject[] sourceEntries = proposal.Arr("edits").OfType<JsonObject>().SelectMany(edit => edit.Arr("sources").OfType<JsonObject>())
             .GroupBy(source => source.Str("url"), StringComparer.Ordinal).Select(group => group.First()).ToArray();
         int sourceLimit = config.Int("max_sources_per_run", 12);
-        int totalSources = sourceEvidenceCache.Keys.Union(sourceEntries.Select(source => source.Str("url"))).Count();
-        if (totalSources > sourceLimit)
+        if (sourceEntries.Length > sourceLimit)
         {
             return await QuarantineAsync(state, pending, "source_budget",
-                $"Opportunity has {totalSources} distinct source URLs, exceeding the per-run limit of {sourceLimit}.", cancellationToken);
+                $"Proposal has {sourceEntries.Length} distinct source URLs, exceeding the per-run limit of {sourceLimit}.", cancellationToken);
+        }
+        if (sourceEvidenceCache.Keys.Union(sourceEntries.Select(source => source.Str("url"))).Count() > sourceLimit)
+        {
+            const string reason = "Note fits alone but exceeds this workload's remaining source capacity.";
+            if (batch.Arr("feedback").Count > 0)
+            {
+                return new JsonObject { ["status"] = "source_budget", ["reason"] = reason };
+            }
+            EnsureObject(state, "deferred_proposals")[LegacyIdentity.Fingerprint(pending)] = pending.Copy();
+            state.Remove("pending_author_proposal");
+            await SaveAsync(state, "defer note beyond remaining source capacity", cancellationToken);
+            return new JsonObject { ["status"] = "size_deferred", ["reason"] = reason };
         }
         bool hasEdits = proposal.Arr("edits").Count != 0;
         if (hasEdits)

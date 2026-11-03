@@ -57,7 +57,7 @@ public sealed partial class ImprovementEngine
         };
     }
 
-    private JsonObject PrepareFeedbackBatch(JsonObject state, JsonObject batch, JsonArray notes)
+    private JsonObject PrepareFeedbackBatch(JsonObject state, JsonObject batch, JsonArray notes, string? baseSha)
     {
         if (batch.Arr("feedback").Count == 0) return batch;
         JsonArray feedback = Copies(state.Obj("feedback").Select(pair => pair.Value).OfType<JsonObject>()
@@ -70,6 +70,7 @@ public sealed partial class ImprovementEngine
         var identity = new JsonObject
         {
             ["feedback"] = feedback.Copy(),
+            ["base_sha"] = baseSha,
             ["head_sha"] = head,
             ["source_hashes"] = sourceHashes.Copy(),
             ["rules_hash"] = batch.Str("rules_hash"),
@@ -83,7 +84,7 @@ public sealed partial class ImprovementEngine
                 && (FeedbackPr == 0 || old.Obj("pr").Int("number") == FeedbackPr))
             {
                 old["status"] = "invalidated";
-                old["invalidated_reason"] = "feedback revision, guarded head or evaluation inputs changed";
+                old["invalidated_reason"] = "feedback revision, base, guarded head or evaluation inputs changed";
             }
         }
         JsonObject scope = scopes[id] as JsonObject ?? new JsonObject
@@ -91,6 +92,7 @@ public sealed partial class ImprovementEngine
             ["id"] = id,
             ["topic"] = batch.Str("topic"),
             ["status"] = "pending",
+            ["base_sha"] = baseSha,
             ["head_sha"] = head,
             ["feedback"] = feedback.Copy(),
             ["paths"] = Copies(paths.Select(path => JsonValue.Create(path))),

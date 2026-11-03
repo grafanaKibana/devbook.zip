@@ -27,6 +27,18 @@ internal sealed class WorkloadFixture : IDisposable
     public ImprovementEngine Engine() => new(Root, Config, Store, Model, notesLoader: () => Notes.Copy(),
         clock: Clock, snapshotShaLoader: () => "base", validator: (_, _, _) => Task.FromResult(new JsonArray()));
 
+    public static void AddSources(JsonObject edit, int count, string prefix)
+    {
+        string[] urls = Enumerable.Range(0, count).Select(index => $"https://example.com/{prefix}/{index}").ToArray();
+        edit["sources"] = new JsonArray(urls.Select(url => (JsonNode)new JsonObject
+        {
+            ["url"] = url,
+            ["claim"] = "The mechanism has the corrected boundary.",
+            ["version"] = "not version-specific"
+        }).ToArray());
+        edit["after"] = edit.Str("after").TrimEnd() + " " + string.Join(" ", urls.Select(url => $"[Primary source]({url})")) + "\n";
+    }
+
     public void Dispose() => Directory.Delete(Root, recursive: true);
 }
 
@@ -58,7 +70,7 @@ internal sealed class WorkloadModel : IModelProvider
                 edit["before"] = edit.Str("before").Replace("stable_1", "stable_" + LegacyIdentity.Digest(path)[..8]);
                 edit["after"] = edit.Str("after").Replace("stable_1", "stable_" + LegacyIdentity.Digest(path)[..8]);
                 edit["expected_hash"] = payload.RequiredObject("note_hashes").Str(path);
-                edit["feedback_keys"] = new JsonArray(payload.Arr("feedback").OfType<JsonObject>().Select(item => (JsonNode)JsonValue.Create(item.Str("key"))!).ToArray());
+                edit["feedback_keys"] = new JsonArray(payload.Arr("feedback").OfType<JsonObject>().Where(item => item.Arr("paths").Count == 0 || item.Arr("paths").Strings().Contains(path)).Select(item => (JsonNode)JsonValue.Create(item.Str("key"))!).ToArray());
                 ConfigureEdit?.Invoke(edit);
                 edits.Add(edit);
                 if (MultipleEdits)

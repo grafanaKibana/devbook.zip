@@ -40,19 +40,39 @@ public sealed class EngineTests
     }
 
     [Fact]
-    public void MissingRequiredContractBlocksBeforeModelCalls()
+    public async Task PublicationTransportFailurePreservesTheSealedCandidateForRetry()
     {
         // Arrange
-        using var fixture = new KeepDecisionKeepFixture();
-        File.Delete(Path.Combine(fixture.Root, ".claude/agents/note-writer.md"));
+        using var fixture = new WorkloadFixture(1);
+        fixture.Model.Change = _ => true;
+        var api = new RuntimeApi();
+        string path = fixture.Notes[0]!.Str("path");
+        api.SourceFiles[path] = fixture.Notes[0]!.Str("content");
+        fixture.Config["repo"] = api.Repo;
+        await new DurableLease(fixture.Store, "fixture").AcquireAsync();
+        var publisher = new GitHubRuntime(api, fixture.Store, leaseOwner: "fixture", activation: () => { });
+        ImprovementEngine Engine() => new(fixture.Root, fixture.Config, fixture.Store, fixture.Model, api: api, publisher: publisher,
+            notesLoader: () => fixture.Notes.Copy(), clock: fixture.Clock, snapshotShaLoader: () => api.BaseHead,
+            validator: (_, _, _) => Task.FromResult(new JsonArray()));
+        await Engine().RunAsync(withModel: true);
+        JsonObject original = (await fixture.Store.ReadAsync()).State.Obj("focused_workload").Copy();
+        api.FailBaseRead = true;
 
         // Act
-        Action construct = () => fixture.Engine();
+        Exception? failure = await Record.ExceptionAsync(() => Engine().RunAsync(apply: true, withModel: true));
+        JsonObject interrupted = (await fixture.Store.ReadAsync()).State.Obj("focused_workload").Copy();
+        api.FailBaseRead = false;
+        JsonObject retried = await Engine().RunAsync(apply: true, withModel: true);
 
         // Assert
-        construct.Should().Throw<FileNotFoundException>().WithMessage("*note-writer.md*");
-        fixture.Model.Authors.Should().Be(0);
-        fixture.Model.Reviews.Should().Be(0);
+        failure.Should().BeOfType<GitHubApiFailure>().Which.Status.Should().Be(503);
+        JsonNode.DeepEquals(interrupted, original).Should().BeTrue();
+        interrupted.Str("status").Should().Be("sealed");
+        interrupted.ContainsKey("invalidation").Should().BeFalse();
+        retried.Str("status").Should().Be("awaiting_export");
+        fixture.Model.Authors.Should().ContainSingle();
+        fixture.Model.Reviews.Should().ContainSingle();
+        api.Commits.Should().Be(1);
     }
 
     [Fact]
@@ -870,22 +890,50 @@ public sealed class EngineTests
     }
 
     [Fact]
-    public async Task FiveDistinctChangedNotesStopBeforeTheSixthAuthorEvenWithSeveralEditsPerNote()
+    public async Task SourceCapacityDefersOriginalProposalUntilAFreshWorkloadCanReviewIt()
     {
         // Arrange
         using var fixture = new WorkloadFixture(7);
         fixture.Model.Change = _ => true;
         fixture.Model.MultipleEdits = true;
+        fixture.Model.ConfigureEdit = edit => WorkloadFixture.AddSources(edit,
+            fixture.Model.Authors.Count == 2 ? 3 : 10, fixture.Model.Authors.Count == 2 ? "deferred" : "shared");
+        var fetches = new List<string>();
+        ImprovementEngine Engine() => new(fixture.Root, fixture.Config, fixture.Store, fixture.Model,
+            notesLoader: () => fixture.Notes.Copy(), clock: fixture.Clock,
+            sourceFetcher: (url, _) => { fetches.Add(url); return Task.FromResult("The mechanism has the corrected boundary."); },
+            validator: (_, _, _) => Task.FromResult(new JsonArray()));
+        JsonObject collected = await Engine().RunAsync(withModel: true);
+        StateSnapshot previous = await fixture.Store.ReadAsync();
+        JsonObject deferred = previous.State.Obj("deferred_proposals").Single().Value!.AsObject().Copy();
+        string deferredPath = deferred.Obj("source_hashes").Single().Key;
+        int firstFetches = fetches.Count;
+        int firstAuthors = fixture.Model.Authors.Count;
+        int firstReviews = fixture.Model.Reviews.Count;
+        previous.State.Obj("focused_workload")["status"] = "published";
+        previous.State.Obj("deferred_proposals")["unrelated"] = new JsonObject { ["audit"] = "preserve unrelated candidate" };
+        await fixture.Store.WriteAsync(previous.State, previous, "fixture completed preceding PR");
+        fixture.Notes.Clear();
+        fixture.Notes.Add(DomainFixtures.NoteRecord(deferredPath, deferred.Obj("batch").Arr("notes")[0]!.Str("content")));
+        fixture.Config["max_pr_notes"] = 1;
 
         // Act
-        JsonObject result = await fixture.Engine().RunAsync(withModel: true);
+        JsonObject resumed = await Engine().RunAsync(withModel: true);
+        JsonObject saved = (await fixture.Store.ReadAsync()).State;
 
         // Assert
-        fixture.Model.Authors.Should().HaveCount(5);
-        fixture.Model.Reviews.Should().HaveCount(5);
-        result.Obj("candidate").Count.Should().Be(5);
-        result.Int("model_calls").Should().Be(10);
-        (await fixture.Store.ReadAsync()).State.Obj("focused_workload").Arr("accepted_records").Should().HaveCount(5);
+        collected.Obj("candidate").Count.Should().Be(5);
+        firstAuthors.Should().Be(6, "one deferred note does not consume the five improved-note slots");
+        firstReviews.Should().Be(5);
+        firstFetches.Should().Be(10, "the deferred proposal has no source fetch or reviewer call in the exhausted opportunity");
+        fixture.Model.Authors.Should().HaveCount(6, "the saved author response resumes without reauthoring");
+        fixture.Model.Reviews.Should().HaveCount(6);
+        resumed.Obj("candidate").Select(item => item.Key).Should().Equal(deferredPath);
+        JsonNode.DeepEquals(resumed.Obj("proposal"), deferred.Obj("proposal")).Should().BeTrue();
+        fetches.Should().HaveCount(13);
+        saved.Obj("invalid_proposals").Count.Should().Be(0);
+        saved.Obj("held_proposals").Count.Should().Be(0);
+        saved.Obj("deferred_proposals").Obj("unrelated").Str("audit").Should().Be("preserve unrelated candidate");
     }
 
     [Theory]
@@ -924,20 +972,55 @@ public sealed class EngineTests
     }
 
     [Fact]
-    public async Task ExhaustionSealsAllAcceptedNotesIntoOnePartialCandidate()
+    public async Task StaleFeedbackPublicationRetainsEvidenceAndRebindsTheScopeToCurrentBase()
     {
         // Arrange
-        using var fixture = new WorkloadFixture(2);
+        using var fixture = new WorkloadFixture(1);
+        string path = fixture.Notes[0]!.Str("path");
+        var api = new RuntimeApi();
+        api.SeedManagedPr(Core.TopicId("Programming"), fixture.Notes[0]!.Str("content"));
+        api.SourceFiles[path] = fixture.Notes[0]!.Str("content");
+        api.BaseSourceFiles[path] = fixture.Notes[0]!.Str("content");
+        JsonObject comment = RuntimeFixtures.OwnerComment();
+        comment["paths"] = new JsonArray(path);
+        api.Comments.Add(comment);
+        fixture.Config["repo"] = api.Repo;
+        fixture.Config["owner_allowlist"] = RuntimeFixtures.Allowlist();
         fixture.Model.Change = _ => true;
+        await new DurableLease(fixture.Store, "fixture").AcquireAsync();
+        var publisher = new GitHubRuntime(api, fixture.Store, leaseOwner: "fixture", activation: () => { });
+        ImprovementEngine Engine() => new(fixture.Root, fixture.Config, fixture.Store, fixture.Model, api: api, publisher: publisher,
+            notesLoader: () => fixture.Notes.Copy(), clock: fixture.Clock, snapshotShaLoader: () => api.BaseHead,
+            validator: (_, _, _) => Task.FromResult(new JsonArray()));
+        await Engine().RunAsync(withModel: true);
+        JsonObject original = (await fixture.Store.ReadAsync()).State.Obj("focused_workload").Copy();
+        string oldScope = original.Str("feedback_scope_id");
+        JsonObject originalRecords = (await fixture.Store.ReadAsync()).State.Obj("feedback_workloads").Obj(oldScope).Obj("records").Copy();
+        api.BaseHead = "new-base";
 
         // Act
-        JsonObject result = await fixture.Engine().RunAsync(withModel: true);
+        JsonObject invalidated = await Engine().RunAsync(apply: true, withModel: true);
+        JsonObject stale = (await fixture.Store.ReadAsync()).State.Obj("focused_workload").Copy();
+        JsonObject refreshed = await Engine().RunAsync(withModel: true);
+        JsonObject saved = (await fixture.Store.ReadAsync()).State;
 
         // Assert
-        result.Str("status").Should().Be("proposed");
-        result.Obj("candidate").Count.Should().Be(2);
+        invalidated.Str("status").Should().Be("publication_invalidated");
+        stale.Str("status").Should().Be("invalidated");
+        JsonNode.DeepEquals(stale["sealed_request"], original["sealed_request"]).Should().BeTrue();
+        JsonObject old = saved.Obj("feedback_workloads").Obj(oldScope);
+        old.Str("status").Should().Be("invalidated");
+        JsonNode.DeepEquals(old.Obj("records"), originalRecords).Should().BeTrue();
+        string newScope = saved.Obj("focused_workload").Str("feedback_scope_id");
+        newScope.Should().NotBe(oldScope);
+        saved.Obj("feedback_workloads").Obj(newScope).Str("base_sha").Should().Be("new-base");
+        saved.Obj("focused_workload").Obj("sealed_request").Str("expected_base_sha").Should().Be("new-base");
+        refreshed.Str("status").Should().Be("proposed");
         fixture.Model.Authors.Should().HaveCount(2);
-        (await fixture.Store.ReadAsync()).State.Obj("focused_workload").Arr("accepted_records").Should().HaveCount(2);
+        fixture.Model.Reviews.Should().HaveCount(2);
+        api.Commits.Should().Be(0);
+        api.Acknowledgments.Should().Be(0);
+        saved["pending_operation"].Should().BeNull();
     }
 
     [Fact]
@@ -1129,38 +1212,49 @@ public sealed class EngineTests
     }
 
     [Fact]
-    public async Task DeferredOtherTopicReviewRemainsIntactUntilItsTopicBecomesEligible()
+    public async Task ChangedBaseReleasesASealedCandidateBeforeCheckingOutdatedSourceText()
     {
         // Arrange
-        using var programming = new WorkloadFixture(1);
-        using var network = new WorkloadFixture(1);
-        const string networkPath = "Vault/Home/ZZNetworks/Other.md";
-        string networkText = network.Notes[0]!.Str("content").Replace("stable_" + LegacyIdentity.Digest(network.Notes[0]!.Str("path"))[..8], "stable_" + LegacyIdentity.Digest(networkPath)[..8]);
-        network.Notes.Clear();
-        network.Notes.Add(DomainFixtures.NoteRecord(networkPath, networkText));
-        programming.Model.Change = network.Model.Change = _ => true;
-        programming.Model.BeforeReview = network.Model.BeforeReview = (call, _) => call == 1
-            ? Task.FromException(new ClaudeQuotaException("weekly", programming.Clock.GetUtcNow().AddHours(1), programming.Clock.GetUtcNow().AddHours(1))) : Task.CompletedTask;
-        await programming.Engine().RunAsync(withModel: true);
-        await network.Engine().RunAsync(withModel: true);
-        JsonObject deferred = (await network.Store.ReadAsync()).State.Obj("pending_author_proposal").Copy();
-        StateSnapshot saved = await programming.Store.ReadAsync();
-        saved.State["deferred_proposals"] = new JsonObject { ["network"] = deferred.Copy() };
-        await programming.Store.WriteAsync(saved.State, saved, "fixture independent deferred topic");
-        programming.Clock.Advance(TimeSpan.FromHours(2));
-        programming.Notes.Add(DomainFixtures.NoteRecord(networkPath, networkText));
+        using var fixture = new WorkloadFixture(1);
+        fixture.Model.Change = _ => true;
+        var api = new RuntimeApi();
+        fixture.Config["repo"] = api.Repo;
+        await new DurableLease(fixture.Store, "fixture").AcquireAsync();
+        var publisher = new GitHubRuntime(api, fixture.Store, leaseOwner: "fixture", activation: () => { });
+        ImprovementEngine Engine() => new(fixture.Root, fixture.Config, fixture.Store, fixture.Model, api: api, publisher: publisher,
+            notesLoader: () => fixture.Notes.Copy(), clock: fixture.Clock, snapshotShaLoader: () => api.BaseHead,
+            validator: (_, _, _) => Task.FromResult(new JsonArray()));
+        await Engine().RunAsync(withModel: true);
+        StateSnapshot pending = await fixture.Store.ReadAsync();
+        JsonObject original = pending.State.Obj("focused_workload").Copy();
+        pending.State["unrelated_audit"] = new JsonObject { ["owner"] = "preserve" };
+        await fixture.Store.WriteAsync(pending.State, pending, "fixture unrelated evidence");
+        string path = fixture.Notes[0]!.Str("path");
+        string changed = fixture.Notes[0]!.Str("content").Replace("concrete boundary.", "precise boundary.");
+        fixture.Notes[0] = DomainFixtures.NoteRecord(path, changed);
+        api.BaseHead = "new-base";
 
         // Act
-        JsonObject result = await programming.Engine().RunAsync(withModel: true);
-        JsonObject final = (await programming.Store.ReadAsync()).State;
+        JsonObject invalidated = await Engine().RunAsync(apply: true, withModel: true);
+        JsonObject stale = (await fixture.Store.ReadAsync()).State.Obj("focused_workload").Copy();
+        JsonObject refreshed = await Engine().RunAsync(withModel: true);
+        JsonObject saved = (await fixture.Store.ReadAsync()).State;
 
         // Assert
-        result.Obj("candidate").Select(pair => pair.Key).Should().Equal(programming.Notes[0]!.Str("path"));
-        programming.Model.Authors.Should().ContainSingle();
-        programming.Model.Reviews.Should().HaveCount(2);
-        JsonNode.DeepEquals(final.Obj("deferred_proposals")["network"], deferred).Should().BeTrue();
-        final.Obj("invalid_proposals").Count.Should().Be(0);
-        final.Obj("held_proposals").Count.Should().Be(0);
+        invalidated.Str("status").Should().Be("publication_invalidated");
+        stale.Str("status").Should().Be("invalidated");
+        stale.Obj("invalidation").Str("expected_base_sha").Should().Be("base");
+        stale.Obj("invalidation").Str("observed_base_sha").Should().Be("new-base");
+        JsonNode.DeepEquals(stale["sealed_request"], original["sealed_request"]).Should().BeTrue();
+        JsonNode.DeepEquals(stale["accepted_records"], original["accepted_records"]).Should().BeTrue();
+        saved.Obj("workload_history").Obj(original.Str("id")).Str("status").Should().Be("invalidated");
+        saved.Obj("focused_workload").Obj("sealed_request").Str("expected_base_sha").Should().Be("new-base");
+        refreshed.Str("status").Should().Be("proposed");
+        saved.Obj("unrelated_audit").Str("owner").Should().Be("preserve");
+        fixture.Model.Authors.Should().HaveCount(2);
+        api.Commits.Should().Be(0);
+        api.PrCreates.Should().Be(0);
+        saved["pending_operation"].Should().BeNull();
     }
 
     [Fact]
