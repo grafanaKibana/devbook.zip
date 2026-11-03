@@ -78,16 +78,92 @@
     "version": 1,
     "id": "8ee974ce274c4cbcba9dfc3e56cb0691",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-03T09:17:25.556001Z",
-    "elapsed_seconds": 52.4690657,
+    "elapsed_seconds": 55.1494815,
     "calls_reserved": 2,
     "responses_received": 2,
-    "attempted_paths": [],
+    "attempted_paths": [
+      "Vault/Home/Programming/NET/ASP NET Web API/Filters.md"
+    ],
     "accepted_records": [],
-    "outcomes": [],
+    "outcomes": [
+      {
+        "path": "Vault/Home/Programming/NET/ASP NET Web API/Filters.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Programming/NET/ASP NET Web API/Filters.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against Microsoft's ASP.NET Core filters documentation. The stage order (authorization, resource, action, exception, result) and short-circuit behaviour are correct. Scope and Order nesting is correct: equal Order runs global, controller, action on the way in, and a lower Order wraps higher values. The sync/async rule is correct: only the async interface runs, and ActionFilterAttribute's default async methods call the sync ones. Exception-filter coverage is correct: controller creation, model binding, action filters and the action method. IAlwaysRunResultFilter is correctly described as the only result-filter type that runs around an exception filter's result. The ServiceFilter, TypeFilter and IFilterFactory distinctions, the endpoint-filter and middleware comparison, and both code examples match the documented APIs. The flagged order and exception cards are accurate, self-contained and bounded, and their answers explain the mechanisms and exceptions. The prose is concise and each section teaches distinct material, so no edit is warranted."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/Programming/NET/ASP NET Web API/Filters.md",
+                "verdict": "CLEAN",
+                "summary": "Whole-note audit finds the stage order, scope/Order nesting, sync-vs-async rule, exception-filter coverage, and ServiceFilter/TypeFilter/IFilterFactory distinctions consistent with Microsoft's filter documentation. Prose is compact, each section teaches distinct material, and the cards are bounded with mechanism and exceptions, so keeping the note unchanged is justified.",
+                "page_type": "Concept note — typed frontmatter, optional Questions/References present with a single Microsoft primary source, Qard callouts with protected IDs, fenced code blocks all carry csharp identifiers.",
+                "current_text_evidence": [
+                  {
+                    "quote": "Exception filters observe unhandled exceptions from action execution.",
+                    "line_start": 27,
+                    "reason": "Correctly places exception filters as a conditional observer rather than a sequential stage, matching the docs."
+                  },
+                  {
+                    "quote": "If a filter implements both sync and async forms of the same stage, the runtime invokes only the async interface.",
+                    "line_start": 102,
+                    "reason": "Accurate, version-stable behavior with the ActionFilterAttribute caveat preserved."
+                  },
+                  {
+                    "quote": "They do not cover middleware, routing, resource filters, result filters, or action-result execution.",
+                    "line_start": 108,
+                    "reason": "Correct exception-filter scope limit that drives the middleware recommendation."
+                  },
+                  {
+                    "quote": "An explicit `Order` value, exposed through `IOrderedFilter`, takes precedence over scope.",
+                    "line_start": 158,
+                    "reason": "Order card is accurate and self-contained, with a concrete example and the same-type limit."
+                  },
+                  {
+                    "quote": "Controller exception filters handle only unhandled exceptions raised during controller creation, model binding, action filters or the action method.",
+                    "line_start": 138,
+                    "reason": "Exception card is bounded and lists the uncovered cases explicitly."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: controller filters, their ordering, and the middleware/endpoint-filter comparison form one coherent topic and a split would not add independent value.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "No edits proposed; independent full-note audit found no factual, clarity, question-quality or rules defects, and the flagged order and exception cards are accurate and self-contained, so the keep is justified.",
+            "change_checks": []
+          },
+          "model_calls": 2
+        }
+      }
+    ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-03T09:18:18.024651Z",
+    "checkpoint_at": "2026-11-03T09:18:20.705067Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
