@@ -1084,16 +1084,30 @@
     "version": 1,
     "id": "caa35096ca95474e9f400801cb20cb18",
     "status": "active",
-    "phase": "author_completed",
+    "phase": "selecting",
     "started_at": "2026-11-03T19:45:09.882761Z",
-    "elapsed_seconds": 132.00880560000002,
+    "elapsed_seconds": 136.15329920000002,
     "calls_reserved": 3,
     "responses_received": 3,
-    "attempted_paths": [],
+    "attempted_paths": [
+      "Vault/Home/Programming/NET/ASP NET Web API/Filters.md"
+    ],
     "accepted_records": [],
-    "outcomes": [],
+    "outcomes": [
+      {
+        "path": "Vault/Home/Programming/NET/ASP NET Web API/Filters.md",
+        "outcome": "proposal_blocked",
+        "reason": "card edit must replace one complete active Qard block including adjacent metadata",
+        "result": {
+          "status": "proposal_blocked",
+          "stage": "deterministic_application",
+          "reason": "card edit must replace one complete active Qard block including adjacent metadata",
+          "model_calls": 3
+        }
+      }
+    ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-03T19:47:21.891075Z",
+    "checkpoint_at": "2026-11-03T19:47:26.035570Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
