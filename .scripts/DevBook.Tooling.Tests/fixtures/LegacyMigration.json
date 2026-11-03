@@ -1,0 +1,41 @@
+{
+  "source_b64": "LS0tDQp0b3BpYzogW1Byb2dyYW1taW5nXQ0Kc3VidG9waWM6IFtORVRdDQpsZXZlbDogWyIyIl0NCnByaW9yaXR5OiBNZWRpdW0NCnN0YXR1czogQ3JlYXRpb24NCnB1Ymxpc2g6IGZhbHNlDQotLS0NCg0KIyBRdWVzdGlvbnMNCg0KPCEtLSBxYXJkLWlkOiBzdGFibGVfbGVnYWN5IC0tPg0KPiBbIVFVRVNUSU9OXS0gV2hhdCBpcyBjYWbDqT8NCj4gQSBtZWFuaW5nZnVsIGFuc3dlci4NCg==",
+  "applied_b64": "LS0tDQp0b3BpYzogW1Byb2dyYW1taW5nXQ0Kc3VidG9waWM6IFtORVRdDQpsZXZlbDogWyIyIl0NCnByaW9yaXR5OiBNZWRpdW0NCnN0YXR1czogQ3JlYXRpb24NCnB1Ymxpc2g6IGZhbHNlDQpxYXJkLWRlY2s6ICJQcm9ncmFtbWluZyINCnFhcmQtdG9waWM6ICJORVQvTGVnYWN5IENhZsOpIg0KLS0tDQoNCiMgUXVlc3Rpb25zDQoNCjwhLS0gcWFyZC1pZDogc3RhYmxlX2xlZ2FjeSAtLT4NCj4gWyFxYXJkXS0gV2hhdCBpcyBjYWbDqT8NCj4gQSBtZWFuaW5nZnVsIGFuc3dlci4NCg==",
+  "manifest": {
+    "version": 1,
+    "created_at_utc": "2026-10-30T08:00:00+00:00",
+    "files": [
+      {
+        "path": "Vault/Home/Programming/NET/Legacy Café.md",
+        "original_sha256": "2b04828f5917b7dde0e7275d093a2507d37b957e17dacf22ee45f16ec21936a9",
+        "eol": "crlf",
+        "final_newline": true,
+        "headers": [
+          {
+            "line": 13,
+            "original_b64": "PiBbIVFVRVNUSU9OXS0gV2hhdCBpcyBjYWbDqT8NCg==",
+            "front_sha256": "77b2fa2ab4c5c1bcccf1f65c0297d6dbb73b19d37d630d8d97c0f08cabb26374",
+            "back_sha256": "15e8f6a045e009ed246b5c39faab92e654885461141bfc0b3b1a5845f16dcb58",
+            "fold": "-"
+          }
+        ],
+        "seed_values": {
+          "qard-deck": "Programming",
+          "qard-topic": "NET/Legacy Café"
+        },
+        "preserved_metadata": {},
+        "qard_locations": [],
+        "planned_sha256": "82321eb5cd515be3b5e9fc9a3d5f42374bd85bd898cf2eb25cbbaa226e54abf6"
+      }
+    ],
+    "issues": [],
+    "summary": {
+      "home_notes": 1,
+      "target_files": 1,
+      "legacy_interview_cards": 1,
+      "native_qard_cards": 0,
+      "generic_question_cards": 0,
+      "issues": 0
+    }
+  }
+}

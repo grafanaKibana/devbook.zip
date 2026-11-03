@@ -46,7 +46,7 @@ The installer defaults to a dry run. Applying captures source baselines and enab
 
 ```sh
 node --test .scripts/tests/qard-learn-sync*.test.cjs
-python3 .scripts/validate-vault.py --all
+dotnet run --file .scripts/DevBook.Tooling/Scripts/ValidateVault.cs -- --all --repo-root .
 ```
 
 The current native Qard table contract was checked against version 0.6.2. Public API references: [Vault operations and atomic processing](https://docs.obsidian.md/Plugins/Vault), [registered events](https://docs.obsidian.md/Plugins/Events), and [startup timing](https://docs.obsidian.md/plugins/guides/load-time).

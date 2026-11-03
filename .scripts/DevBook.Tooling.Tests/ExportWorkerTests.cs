@@ -1,0 +1,656 @@
+using DevBook.Tooling.Export;
+using DevBook.Tooling.Improvement;
+using DevBook.Tooling.Infrastructure;
+using FluentAssertions;
+using System.Text.Json.Nodes;
+using System.Text;
+using Xunit;
+
+namespace DevBook.Tooling.Tests;
+
+public sealed class ExportWorkerTests
+{
+    [Theory]
+    [InlineData("lag")]
+    [InlineData("foreign-head")]
+    [InlineData("closed")]
+    [InlineData("identity")]
+    public async Task GeneratedRefPublicationWaitsOnlyForSafePrHeadPropagation(string scenario)
+    {
+        // Arrange
+        var fixture = new WorkerFixture();
+        fixture.Api.ChecksReady = true;
+        var store = new MemoryStateStore(fixture.State);
+        // Git accepts the ref before the PR head reflects that update.
+        fixture.Api.AfterRefUpdate = () =>
+        {
+            fixture.Api.PrHeadAfterRef = FakeExportApi.SourceHead;
+            switch (scenario)
+            {
+                case "foreign-head":
+                    fixture.Api.PrHeadAfterRef = FakeExportApi.OwnerChangedHead;
+                    break;
+                case "closed":
+                    fixture.Api.Pr["state"] = "closed";
+                    break;
+                case "identity":
+                    fixture.Api.Pr["body"] = "Owner replaced the managed identity.";
+                    break;
+            }
+        };
+        var clock = new ExportWorkerCheckClock(DateTimeOffset.UtcNow);
+        var delays = 0;
+        var wait = new ExportCheckWait(clock, (duration, token) =>
+        {
+            token.ThrowIfCancellationRequested();
+            clock.Advance(duration);
+            delays++;
+            if (scenario == "lag")
+            {
+                fixture.Api.PrHeadAfterRef = null;
+            }
+            return Task.CompletedTask;
+        });
+
+        // Act
+        JsonObject result = await Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store, checkWait: wait);
+        JsonObject state = (await store.ReadAsync()).State;
+
+        // Assert
+        fixture.Api.RefWrites.Should().Be(1);
+        fixture.Api.CommitWrites.Should().Be(1);
+        if (scenario == "lag")
+        {
+            result.Str("status").Should().Be("exported");
+            delays.Should().Be(1);
+            state.Obj("finalized_exports").ContainsKey(fixture.Request.Str("op_id")).Should().BeTrue();
+        }
+        else
+        {
+            result.Str("status").Should().Be("stale");
+            state.Obj("export_operations").Obj(fixture.Request.Str("op_id")).Obj("evidence").Bool("export_paused").Should().BeTrue();
+            state.Obj("finalized_exports").Count.Should().Be(0);
+            fixture.Api.Comments.Should().BeEmpty();
+            delays.Should().Be(0);
+        }
+    }
+
+    [Fact]
+    public async Task InterruptedGeneratedRefResumesTheSavedBinaryAndDeletionCommit()
+    {
+        // Arrange
+        var fixture = new WorkerFixture();
+        var store = new MemoryStateStore(fixture.State);
+        fixture.Api.FailBeforeRefOnce = true;
+        Exception? interruption = await Record.ExceptionAsync(() => Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store));
+        fixture.Api.ChecksReady = true;
+
+        // Act
+        JsonObject result = await Worker.FinalizeAsync(fixture.Api, fixture.Config, store, fixture.Request);
+
+        // Assert
+        interruption.Should().BeOfType<RuntimeFailure>();
+        result.Str("status").Should().Be("exported");
+        fixture.Api.RefWrites.Should().Be(1);
+        fixture.Api.CommitWrites.Should().Be(1);
+        fixture.Api.ForceWrites.Should().Be(0);
+        fixture.Api.CurrentTree.Should().NotContainKey("Web/content/Removed.md");
+        fixture.Api.Blobs[fixture.Api.CurrentTree["Web/content/Assets/image.png"].Sha].Should().Equal(fixture.Binary);
+        fixture.Api.Comments.Should().ContainSingle();
+    }
+
+    [Fact]
+    public async Task OwnerReadyExportPersistsTheFirstReviewFreezeBeforeReturningToDraft()
+    {
+        // Arrange
+        var fixture = new WorkerFixture();
+        fixture.Api.Pr["draft"] = false;
+        var store = new MemoryStateStore(fixture.State);
+        JsonObject? beforeConversion = null;
+        fixture.Api.BeforeDraftConversion = async () => beforeConversion = (await store.ReadAsync()).State.Obj("prs").Obj(fixture.Key).Copy();
+
+        // Act
+        JsonObject result = await Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store);
+
+        // Assert
+        result.Str("status").Should().Be("awaiting_checks");
+        beforeConversion!.Bool("frozen").Should().BeTrue();
+        beforeConversion.Str("review_started_head_sha").Should().Be(FakeExportApi.SourceHead);
+        fixture.Api.DraftConversions.Should().Be(1);
+        fixture.Api.Pr.Bool("draft").Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task ArtifactOutsideGeneratedPathsIsRejectedBeforeAnyWrite()
+    {
+        // Arrange
+        var fixture = new WorkerFixture();
+        var store = new MemoryStateStore(fixture.State);
+        fixture.Bundle.Obj("files")["Vault/Home/Overwrite.md"] = Convert.ToBase64String("unsafe"u8.ToArray());
+
+        // Act
+        Func<Task> publish = () => Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store);
+
+        // Assert
+        await publish.Should().ThrowAsync<UnsafeInput>();
+        fixture.Api.CommitWrites.Should().Be(0);
+        fixture.Api.RefWrites.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task BoundedTreeBatchesPreserveExactExportBytesAndAccumulatedLeaves()
+    {
+        // Arrange
+        var fixture = new WorkerFixture();
+        var files = new Dictionary<string, byte[]?>(Export.Bundle.Decode(fixture.Bundle), StringComparer.Ordinal);
+        for (var index = 0; index < 400; index++)
+        {
+            files[$"Web/content/{index:D3}-é.md"] = Encoding.UTF8.GetBytes("\uFEFFé😀\r\n\"\\" + new string('x', 16_000));
+        }
+        files["Web/content/Large.md"] = Encoding.UTF8.GetBytes(new string('x', TreeUpload.MaximumRequestBytes));
+        Dictionary<string, GitTreeEntry> expected = await Export.Bundle.TreeAsync(fixture.Api, FakeExportApi.SourceHead);
+        foreach (KeyValuePair<string, byte[]?> file in files)
+        {
+            if (file.Value is null)
+            {
+                expected.Remove(file.Key);
+            }
+            else
+            {
+                expected[file.Key] = new GitTreeEntry(file.Key, "100644", "blob", Export.Bundle.BlobSha(file.Value));
+            }
+        }
+        files[Receipt.PathName] = Encoding.UTF8.GetBytes(Receipt.Make(expected.Values).ToJsonString());
+        Dictionary<string, GitTreeEntry> predicted = await Export.Bundle.PredictAsync(fixture.Api, FakeExportApi.SourceHead, files);
+        var clock = new ExportWorkerCheckClock(DateTimeOffset.UtcNow);
+        var writes = new List<DateTimeOffset>();
+        var wait = new TreeUploadWait(clock, (duration, _) => { clock.Advance(duration); return Task.CompletedTask; });
+
+        // Act
+        string tree = await TreeUpload.UploadAsync(fixture.Api, new string('1', 40), files,
+            _ => { writes.Add(clock.GetUtcNow()); return Task.CompletedTask; }, wait: wait);
+
+        // Assert
+        Export.Bundle.SameLeaves(fixture.Api.Trees[tree].Values, predicted.Values).Should().BeTrue();
+        fixture.Api.TreeRequests.Count.Should().BeGreaterThan(4);
+        fixture.Api.BlobWrites.Should().Be(2);
+        fixture.Api.TreeRequests.Should().OnlyContain(request => request.Arr("tree").Count <= TreeUpload.MaximumEntries
+            && Encoding.UTF8.GetByteCount(LegacyIdentity.CanonicalJson(request)) <= TreeUpload.MaximumRequestBytes);
+        fixture.Api.TreeRequests.SelectMany(request => request.Arr("tree").OfType<JsonObject>())
+            .Count(entry => entry.ContainsKey("content")).Should().Be(402);
+        foreach (KeyValuePair<string, byte[]?> file in files.Where(item => item.Value is not null))
+        {
+            fixture.Api.Blobs[fixture.Api.Trees[tree][file.Key].Sha].Should().Equal(file.Value!);
+        }
+        writes.Zip(writes.Skip(1), (before, after) => after - before).Should().OnlyContain(gap => gap >= TimeSpan.FromSeconds(1));
+        fixture.Api.RefWrites.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task ExpiredLeaseAfterPacingPreventsTheNextImmutableWrite()
+    {
+        // Arrange
+        var fixture = new WorkerFixture();
+        var clock = new ExportWorkerCheckClock(DateTimeOffset.UtcNow);
+        DateTimeOffset expires = clock.GetUtcNow().AddMilliseconds(500);
+        var files = Enumerable.Range(0, 101).ToDictionary(index => $"Web/content/{index:D3}.md", _ => (byte[]?)"text"u8.ToArray());
+        var wait = new TreeUploadWait(clock, (duration, _) => { clock.Advance(duration); return Task.CompletedTask; });
+
+        // Act
+        Func<Task> upload = () => TreeUpload.UploadAsync(fixture.Api, new string('1', 40), files,
+            _ => clock.GetUtcNow() < expires ? Task.CompletedTask : throw new Conflict("Lease expired."), wait: wait);
+
+        // Assert
+        await upload.Should().ThrowAsync<Conflict>();
+        fixture.Api.TreeRequests.Should().ContainSingle();
+        fixture.Api.RefWrites.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task LostTreeResponseRestartsWithoutMovingTheBranchPartially()
+    {
+        // Arrange
+        var fixture = new WorkerFixture();
+        var store = new MemoryStateStore(fixture.State);
+        fixture.Api.FailAfterTreeOnce = true;
+        Exception? interruption = await Record.ExceptionAsync(() => Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store));
+        int writesAfterInterruption = fixture.Api.RefWrites;
+        string firstTree = fixture.Api.Trees.Keys.Last();
+        fixture.Api.ChecksReady = true;
+
+        // Act
+        JsonObject result = await Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store);
+
+        // Assert
+        interruption.Should().BeOfType<RuntimeFailure>();
+        writesAfterInterruption.Should().Be(0);
+        fixture.Api.Trees.Keys.Last().Should().Be(firstTree);
+        result.Str("status").Should().Be("exported");
+        fixture.Api.RefWrites.Should().Be(1);
+        fixture.Api.CommitWrites.Should().Be(1);
+    }
+
+    private sealed class ExportWorkerCheckClock(DateTimeOffset now) : TimeProvider
+    {
+        private DateTimeOffset ExportWorkercurrent = now;
+        public override DateTimeOffset GetUtcNow() => ExportWorkercurrent;
+        public void Advance(TimeSpan duration) => ExportWorkercurrent += duration;
+    }
+
+    internal sealed class WorkerFixture
+    {
+        public FakeExportApi Api { get; }
+        public JsonObject Config { get; }
+        public JsonObject Request { get; }
+        public JsonObject Bundle { get; }
+        public JsonObject State { get; }
+        public string Key { get; }
+        public byte[] Binary { get; } = [0, 255, 128, 10, 0, 32];
+
+        public WorkerFixture()
+        {
+            string topic = Core.TopicId("Programming/NET");
+            string ExportWorkerbranch = Runtime.ExpectedManagedBranch(topic, 1);
+            Key = topic + ":1";
+            Config = new JsonObject
+            {
+                ["repo"] = "owner/devbook",
+                ["export_check_wait_seconds"] = 0,
+                ["base_branch"] = "main",
+                ["owner_allowlist"] = new JsonArray(new JsonObject { ["id"] = 7, ["login"] = "owner" }),
+                ["required_check_contexts"] = new JsonArray("pr-title", "major-approval")
+            };
+            Request = new JsonObject
+            {
+                ["version"] = 1,
+                ["op_id"] = "operation-12345678",
+                ["pr_number"] = 1,
+                ["branch"] = ExportWorkerbranch,
+                ["expected_head"] = FakeExportApi.SourceHead,
+                ["topic_id"] = topic,
+                ["generation"] = 1,
+                ["prepared_source_version"] = 1
+            };
+            GitTreeEntry[] original = [.. Receipt.RequiredPolicyPaths.Select(path => new GitTreeEntry(path, "100644", "blob", new string('e', 40))),
+                new("Vault/Home/Programming/NET/Card.md", "100644", "blob", new string('f', 40)),
+                new("Web/content/Card.md", "100644", "blob", new string('8', 40)),
+                new("Web/content/Removed.md", "100644", "blob", new string('9', 40))];
+            var bytes = new Dictionary<string, byte[]?>(StringComparer.Ordinal)
+            {
+                ["Web/content/Card.md"] = "Updated generated note\n"u8.ToArray(),
+                ["Web/content/Removed.md"] = null,
+                ["Web/content/Assets/image.png"] = Binary
+            };
+            var predicted = original.ToDictionary(item => item.Path, StringComparer.Ordinal);
+            foreach (KeyValuePair<string, byte[]?> item in bytes)
+            {
+                if (item.Value is null)
+                {
+                    predicted.Remove(item.Key);
+                }
+                else
+                {
+                    predicted[item.Key] = new GitTreeEntry(item.Key, "100644", "blob", Export.Bundle.BlobSha(item.Value));
+                }
+            }
+            bytes[Receipt.PathName] = Encoding.UTF8.GetBytes(Receipt.Make(predicted.Values).ToJsonString());
+            var files = new JsonObject();
+            foreach (KeyValuePair<string, byte[]?> item in bytes)
+            {
+                files[item.Key] = item.Value is null ? null : Convert.ToBase64String(item.Value);
+            }
+            Bundle = new JsonObject { ["version"] = 1, ["expected_head"] = FakeExportApi.SourceHead, ["branch"] = ExportWorkerbranch, ["pr_number"] = 1, ["files"] = files };
+            Api = new FakeExportApi(original, topic, ExportWorkerbranch);
+            var feedback = new JsonObject { ["key"] = "inline:7:revision", ["url"] = "https://github.com/owner/devbook/pull/1#discussion_r7" };
+            var batch = new JsonObject { ["notes"] = new JsonArray(), ["feedback"] = new JsonArray(feedback.Copy()), ["pr"] = new JsonObject { ["number"] = 1 } };
+            var proposal = new JsonObject
+            {
+                ["dispositions"] = new JsonArray(),
+                ["feedback"] = new JsonArray(new JsonObject
+                {
+                    ["key"] = "inline:7:revision",
+                    ["outcome"] = "applied",
+                    ["reason"] = "Clarified the requested mechanism."
+                })
+            };
+            var result = new JsonObject { ["sources"] = new JsonObject() };
+            State = Core.NewState();
+            State.Obj("feedback")["inline:7:revision"] = new JsonObject { ["status"] = "pending" };
+            State["cooldown"] = new JsonObject { ["kind"] = "weekly", ["reset_at"] = Runtime.Iso(DateTimeOffset.UtcNow.AddDays(1)) };
+            State.Obj("prs")[Key] = new JsonObject { ["export_required"] = true, ["export_operation_id"] = Request.Str("op_id"), ["head_sha"] = FakeExportApi.SourceHead };
+            State["export_operations"] = new JsonObject
+            {
+                [Request.Str("op_id")] = new JsonObject
+                {
+                    ["op_id"] = Request.Str("op_id"),
+                    ["topic"] = topic,
+                    ["generation"] = 1,
+                    ["branch"] = ExportWorkerbranch,
+                    ["prepared_source_version"] = 1,
+                    ["evidence"] = new JsonObject { ["export_request"] = Request.Copy(), ["export_attempts"] = 1, ["export_last_dispatch_at"] = Runtime.Iso() },
+                    ["receipts"] = new JsonObject
+                    {
+                        ["batch"] = batch,
+                        ["proposal"] = proposal,
+                        ["result"] = result,
+                        ["records"] = new JsonArray(new JsonObject { ["batch"] = batch.Copy(), ["proposal"] = proposal.Copy(), ["result"] = result.Copy() })
+                    }
+                }
+            };
+        }
+    }
+
+    internal sealed class FakeExportApi : IGitHubApi
+    {
+        public const string SourceHead = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+        public const string MainHead = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
+        public const string GeneratedHead = "dddddddddddddddddddddddddddddddddddddddd";
+        public const string OwnerChangedHead = "cccccccccccccccccccccccccccccccccccccccc";
+        public string Repo => "owner/devbook";
+        public string Head { get; set; } = SourceHead;
+        public bool ChecksReady { get; set; }
+        public bool ValidationMissing { get; set; }
+        public bool FailBeforeRefOnce { get; set; }
+        public bool FailAfterTreeOnce { get; set; }
+        public List<JsonObject> TreeRequests { get; } = [];
+        public Dictionary<string, Dictionary<string, GitTreeEntry>> Trees { get; } = new(StringComparer.Ordinal);
+        private string generatedTree = new string('1', 40);
+        public int RefWrites { get; private set; }
+        public int ForceWrites { get; private set; }
+        public int BlobWrites { get; private set; }
+        public int CommitWrites { get; private set; }
+        public int Dispatches { get; private set; }
+        public int DraftConversions { get; private set; }
+        public Func<Task>? BeforeDraftConversion { get; set; }
+        public Action? AfterRefUpdate { get; set; }
+        public string? PrHeadAfterRef { get; set; }
+        public JsonObject Pr { get; }
+        public List<JsonObject> Comments { get; } = [];
+        public Dictionary<string, byte[]> Blobs { get; } = new(StringComparer.Ordinal);
+        public Dictionary<string, GitTreeEntry> CurrentTree { get; private set; }
+        private readonly Dictionary<string, GitTreeEntry> original;
+        private readonly string ExportWorkerbranch;
+
+        public FakeExportApi(IEnumerable<GitTreeEntry> entries, string topic, string ExportWorkerbranch)
+        {
+            original = entries.ToDictionary(item => item.Path, StringComparer.Ordinal);
+            CurrentTree = new(original, StringComparer.Ordinal);
+            Trees[new string('1', 40)] = new(original, StringComparer.Ordinal);
+            this.ExportWorkerbranch = ExportWorkerbranch;
+            Pr = new JsonObject
+            {
+                ["number"] = 1,
+                ["node_id"] = "PR_node",
+                ["state"] = "open",
+                ["draft"] = false,
+                ["user"] = new JsonObject { ["id"] = 7, ["login"] = "owner" },
+                ["body"] = "Owner introduction\n" + Runtime.Marker(topic, 1) + "\n<!-- devbook-improvement:start topic=" + topic
+                    + " -->\nCumulative scope.\n<!-- devbook-export-validation -->Quartz export: awaiting export.\n<!-- devbook-improvement:end -->\nOwner footer",
+                ["head"] = new JsonObject { ["ref"] = ExportWorkerbranch, ["sha"] = Head, ["repo"] = new JsonObject { ["full_name"] = Repo } },
+                ["base"] = new JsonObject { ["ref"] = "main", ["sha"] = MainHead, ["repo"] = new JsonObject { ["full_name"] = Repo } }
+            };
+        }
+
+        public Task<JsonNode?> RequestAsync(string method, string path, JsonNode? payload = null, bool paginate = false, CancellationToken cancellationToken = default)
+        {
+            JsonNode? response;
+            if (method == "GET" && path == "/pulls/1")
+            {
+                Pr.Obj("head")["sha"] = RefWrites > 0 ? PrHeadAfterRef ?? Head : Head;
+                response = Pr.Copy();
+            }
+            else if (method == "GET" && path.StartsWith("/pulls?", StringComparison.Ordinal))
+            {
+                response = new JsonArray(Pr.Copy());
+            }
+            else if (method == "GET" && path == "/pulls/1/files?per_page=100")
+            {
+                response = new JsonArray(new JsonObject { ["filename"] = DomainFixtures.Path });
+            }
+            else if (method == "GET" && path.StartsWith("/git/ref/heads/", StringComparison.Ordinal))
+            {
+                string name = Uri.UnescapeDataString(path["/git/ref/heads/".Length..]);
+                response = new JsonObject { ["object"] = new JsonObject { ["sha"] = name == "main" ? MainHead : Head } };
+            }
+            else if (method == "GET" && path.StartsWith("/compare/", StringComparison.Ordinal))
+            {
+                response = new JsonObject { ["merge_base_commit"] = new JsonObject { ["sha"] = MainHead } };
+            }
+            else if (method == "GET" && path.StartsWith("/git/trees/", StringComparison.Ordinal))
+            {
+                string treeSha = path["/git/trees/".Length..].Split('?')[0];
+                treeSha = treeSha switch
+                {
+                    GeneratedHead => generatedTree,
+                    SourceHead or MainHead or OwnerChangedHead => new string('1', 40),
+                    _ => treeSha
+                };
+                Dictionary<string, GitTreeEntry> entries = Trees[treeSha];
+                response = new JsonObject
+                {
+                    ["truncated"] = false,
+                    ["tree"] = new JsonArray(entries.Values.Select(entry => (JsonNode)new JsonObject
+                    {
+                        ["path"] = entry.Path,
+                        ["mode"] = entry.Mode,
+                        ["type"] = entry.Type,
+                        ["sha"] = entry.Sha
+                    }).ToArray())
+                };
+            }
+            else if (method == "GET" && path.StartsWith("/git/commits/", StringComparison.Ordinal))
+            {
+                string sha = path["/git/commits/".Length..];
+                response = new JsonObject
+                {
+                    ["sha"] = sha,
+                    ["tree"] = new JsonObject { ["sha"] = sha == GeneratedHead ? generatedTree : new string('1', 40) },
+                    ["message"] = sha == GeneratedHead ? Worker.ExportCommitMessage : "Owner source commit",
+                    ["parents"] = new JsonArray(new JsonObject { ["sha"] = sha == GeneratedHead ? SourceHead : MainHead })
+                };
+            }
+            else if (method == "POST" && path == "/git/blobs")
+            {
+                BlobWrites++;
+                byte[] bytes = Convert.FromBase64String(payload.Str("content"));
+                string sha = Export.Bundle.BlobSha(bytes);
+                Blobs[sha] = bytes;
+                response = new JsonObject { ["sha"] = sha };
+            }
+            else if (method == "GET" && path.StartsWith("/git/blobs/", StringComparison.Ordinal))
+            {
+                response = new JsonObject { ["encoding"] = "base64", ["content"] = Convert.ToBase64String(Blobs[path["/git/blobs/".Length..]]) };
+            }
+            else if (method == "POST" && path == "/git/trees")
+            {
+                TreeRequests.Add(payload!.AsObject().Copy());
+                CurrentTree = new(Trees[payload.Str("base_tree")], StringComparer.Ordinal);
+                foreach (JsonObject entry in payload.Arr("tree").OfType<JsonObject>())
+                {
+                    bool inline = entry.ContainsKey("content");
+                    if (inline && entry.ContainsKey("sha"))
+                    {
+                        throw new InvalidOperationException("Tree entry mixes content and sha.");
+                    }
+                    if (!inline && !entry.ContainsKey("sha"))
+                    {
+                        throw new InvalidOperationException("Tree entry requires content or explicit sha.");
+                    }
+                    if (!inline && entry["sha"] is null)
+                    {
+                        CurrentTree.Remove(entry.Str("path"));
+                    }
+                    else
+                    {
+                        string sha = entry.Str("sha");
+                        if (inline)
+                        {
+                            byte[] bytes = Encoding.UTF8.GetBytes(entry.Str("content"));
+                            sha = Export.Bundle.BlobSha(bytes);
+                            Blobs[sha] = bytes;
+                        }
+                        CurrentTree[entry.Str("path")] = new GitTreeEntry(entry.Str("path"), entry.Str("mode"), entry.Str("type"), sha);
+                    }
+                }
+                var identity = new JsonArray(CurrentTree.Values.OrderBy(entry => entry.Path, StringComparer.Ordinal)
+                    .Select(entry => (JsonNode)new JsonObject { ["path"] = entry.Path, ["mode"] = entry.Mode, ["type"] = entry.Type, ["sha"] = entry.Sha }).ToArray());
+                string treeSha = LegacyIdentity.Fingerprint(identity)[..40];
+                Trees[treeSha] = new(CurrentTree, StringComparer.Ordinal);
+                response = new JsonObject { ["sha"] = treeSha };
+                if (FailAfterTreeOnce)
+                {
+                    FailAfterTreeOnce = false;
+                    throw new RuntimeFailure("Simulated lost response after immutable tree creation.");
+                }
+            }
+            else if (method == "POST" && path == "/git/commits")
+            {
+                generatedTree = payload.Str("tree");
+                CommitWrites++;
+                response = new JsonObject { ["sha"] = GeneratedHead };
+            }
+            else if (method == "PATCH" && path.StartsWith("/git/refs/heads/", StringComparison.Ordinal))
+            {
+                ForceWrites += payload.Bool("force") ? 1 : 0;
+                if (FailBeforeRefOnce)
+                {
+                    FailBeforeRefOnce = false;
+                    throw new RuntimeFailure("Simulated transport interruption before the ref write.");
+                }
+                Head = payload.Str("sha");
+                RefWrites++;
+                AfterRefUpdate?.Invoke();
+                response = new JsonObject { ["object"] = new JsonObject { ["sha"] = Head } };
+            }
+            else if (method == "POST" && path == "/actions/workflows/vault-validation.yml/dispatches")
+            {
+                Dispatches++;
+                response = null;
+            }
+            else if (method == "GET" && path.Contains("/check-runs?", StringComparison.Ordinal))
+            {
+                response = new JsonObject
+                {
+                    ["total_count"] = ChecksReady ? 2 : 0,
+                    ["check_runs"] = ChecksReady
+                    ? new JsonArray(new JsonObject { ["id"] = 1, ["name"] = "pr-title", ["head_sha"] = Head, ["conclusion"] = "success" },
+                        new JsonObject { ["id"] = 2, ["name"] = "major-approval", ["head_sha"] = Head, ["conclusion"] = "success" }) : new JsonArray()
+                };
+            }
+            else if (method == "GET" && path.EndsWith("/status", StringComparison.Ordinal))
+            {
+                response = new JsonObject { ["sha"] = Head, ["statuses"] = new JsonArray() };
+            }
+            else if (method == "GET" && path.StartsWith("/actions/workflows/vault-validation.yml/runs", StringComparison.Ordinal))
+            {
+                response = new JsonObject
+                {
+                    ["workflow_runs"] = ValidationMissing || Dispatches == 0 ? new JsonArray() : new JsonArray(new JsonObject
+                    {
+                        ["head_branch"] = ExportWorkerbranch,
+                        ["head_sha"] = Head,
+                        ["conclusion"] = ChecksReady ? "success" : "pending"
+                    })
+                };
+            }
+            else if (method == "GET" && path.StartsWith("/issues/1/comments", StringComparison.Ordinal))
+            {
+                response = new JsonArray(Comments.Select(item => (JsonNode)item.Copy()).ToArray());
+            }
+            else if (method == "POST" && path == "/issues/1/comments")
+            {
+                Comments.Add((JsonObject)payload!.DeepClone());
+                response = new JsonObject { ["id"] = Comments.Count };
+            }
+            else if (method == "PATCH" && path == "/pulls/1")
+            {
+                Pr["body"] = payload!["body"]!.DeepClone();
+                response = Pr.Copy();
+            }
+            else
+            {
+                throw new InvalidOperationException("Unexpected fake GitHub call: " + method + " " + path);
+            }
+            return Task.FromResult(response?.DeepClone());
+        }
+
+        public async Task<JsonNode?> GraphqlAsync(string query, JsonObject variables, CancellationToken cancellationToken = default)
+        {
+            if (BeforeDraftConversion is not null)
+            {
+                await BeforeDraftConversion();
+            }
+            DraftConversions++;
+            Pr["draft"] = true;
+            return new JsonObject();
+        }
+    }
+
+    [Fact]
+    public async Task ManualExportHandoffRemainsFrozenWithoutAnAutomaticDispatchRequest()
+    {
+        // Arrange
+        var api = new RuntimeApi();
+        var store = new MemoryStateStore(Core.NewState());
+        await new DurableLease(store, "fixture").AcquireAsync();
+        var runtime = new GitHubRuntime(api, store, leaseOwner: "fixture", activation: () => { });
+        JsonObject request = RuntimeFixtures.Request("Original", "Reviewed source");
+        request["automatic_export"] = false;
+
+        // Act
+        JsonObject result = await runtime.PublishAsync(request);
+        JsonObject state = (await store.ReadAsync()).State;
+
+        // Assert
+        result.Str("status").Should().Be("awaiting_export");
+        result.Bool("automatic_export").Should().BeFalse();
+        result.ContainsKey("export_request").Should().BeFalse();
+        JsonObject operation = state.Obj("export_operations").Single().Value!.AsObject();
+        operation.Obj("candidate").Str(RuntimeFixtures.NotePath).Should().Be("Reviewed source");
+        operation.Obj("evidence").Int("export_attempts").Should().Be(0);
+        state.Obj("prs").Single().Value!.Bool("frozen").Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task AnotherWorkerLeaseBlocksGeneratedPublication()
+    {
+        // Arrange
+        var fixture = new WorkerFixture();
+        var store = new MemoryStateStore(fixture.State);
+        await new DurableLease(store, "other-worker").AcquireAsync();
+
+        // Act
+        Func<Task> publish = () => Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store);
+
+        // Assert
+        await publish.Should().ThrowAsync<Conflict>();
+        fixture.Api.RefWrites.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task ExhaustedExactHeadValidationPausesWithoutAnotherDispatchOrCommit()
+    {
+        // Arrange
+        var fixture = new WorkerFixture();
+        fixture.Api.ValidationMissing = true;
+        var store = new MemoryStateStore(fixture.State);
+        await Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store);
+        StateSnapshot snapshot = await store.ReadAsync();
+        JsonObject evidence = snapshot.State.Obj("export_operations").Obj(fixture.Request.Str("op_id")).Obj("evidence");
+        evidence["validation_attempts"] = 3;
+        evidence["validation_last_dispatch_at"] = Runtime.Iso(DateTimeOffset.UtcNow.AddHours(-7));
+        await store.WriteAsync(snapshot.State, snapshot, "fixture exhausted validation");
+        int dispatches = fixture.Api.Dispatches;
+
+        // Act
+        JsonObject result = await Worker.FinalizeAsync(fixture.Api, fixture.Config, store, fixture.Request);
+
+        // Assert
+        result.Str("status").Should().Be("checks_failed");
+        fixture.Api.Dispatches.Should().Be(dispatches);
+        fixture.Api.CommitWrites.Should().Be(1);
+        fixture.Api.RefWrites.Should().Be(1);
+        (await store.ReadAsync()).State.Obj("export_operations").Obj(fixture.Request.Str("op_id")).Obj("evidence").Bool("export_paused").Should().BeTrue();
+    }
+
+}
