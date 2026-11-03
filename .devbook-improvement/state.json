@@ -4982,11 +4982,13 @@
     "automatic_export": true,
     "prepared_source_version": 1,
     "prepared_at": "2026-11-03T19:50:44.499236Z",
-    "phase": "branch_updated",
-    "updated_at": "2026-11-03T19:59:42Z",
+    "phase": "pr_updated",
+    "updated_at": "2026-11-03T19:59:51Z",
     "evidence": {
       "commit_sha": "2714202ff7434a2de5464db5f369dd26d67b3e92",
-      "branch_sha": "2714202ff7434a2de5464db5f369dd26d67b3e92"
+      "branch_sha": "2714202ff7434a2de5464db5f369dd26d67b3e92",
+      "pr_number": 209,
+      "created": true
     }
   },
   "export_operations": {
