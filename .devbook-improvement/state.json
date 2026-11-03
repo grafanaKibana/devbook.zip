@@ -1308,10 +1308,10 @@
     "version": 1,
     "id": "caa35096ca95474e9f400801cb20cb18",
     "status": "active",
-    "phase": "author_completed",
+    "phase": "review_reserved",
     "started_at": "2026-11-03T19:45:09.882761Z",
-    "elapsed_seconds": 714.6409146,
-    "calls_reserved": 16,
+    "elapsed_seconds": 719.4792962,
+    "calls_reserved": 17,
     "responses_received": 16,
     "attempted_paths": [
       "Vault/Home/Programming/NET/ASP NET Web API/Filters.md",
@@ -2681,7 +2681,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-03T19:57:04.523190Z",
+    "checkpoint_at": "2026-11-03T19:57:09.361572Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
@@ -2706,7 +2706,7 @@
       "pr": null
     },
     "base_sha": "63c1f0e23fe3009423dc8b17e61a90490801fa15",
-    "reservation_deadline": "2026-11-03T20:11:42.812019Z",
+    "reservation_deadline": "2026-11-03T20:12:08.949050Z",
     "last_request": {
       "topic": "programming-e6aba2bd",
       "generation": 2,
