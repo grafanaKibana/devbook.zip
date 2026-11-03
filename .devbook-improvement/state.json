@@ -1301,10 +1301,10 @@
   "focused_workload": {
     "version": 1,
     "id": "c78c94ff68b0409dae9430c91855a657",
-    "status": "active",
-    "phase": "selecting",
+    "status": "sealed",
+    "phase": "sealed",
     "started_at": "2026-11-03T09:56:59.574794Z",
-    "elapsed_seconds": 158.1941792,
+    "elapsed_seconds": 161.10381030000002,
     "calls_reserved": 2,
     "responses_received": 2,
     "attempted_paths": [
@@ -4678,7 +4678,7 @@
       }
     ],
     "feedback_pr": 205,
-    "checkpoint_at": "2026-11-03T09:59:37.768407Z",
+    "checkpoint_at": "2026-11-03T09:59:40.678039Z",
     "feedback_scope_id": "fcd67e13bc430ba5facd6a87402a2d09e4ada2e8f17f6bc55ee28a8fc84d0cb7",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
@@ -7292,7 +7292,9 @@
         "check": "npm --prefix Web run test -- custom/transformers/publishing.test.ts",
         "result": "passed"
       }
-    ]
+    ],
+    "stop_reason": "feedback_scope_complete",
+    "sealed_at": "2026-11-03T09:59:40.678050Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
