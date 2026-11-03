@@ -3823,17 +3823,19 @@
   "focused_workload": {
     "version": 1,
     "id": "595256925db844ba929b33ff1a099e52",
-    "status": "active",
-    "phase": "selecting",
+    "status": "sealed",
+    "phase": "sealed",
     "started_at": "2026-11-03T10:15:07.020719Z",
-    "elapsed_seconds": 26.4425339,
+    "elapsed_seconds": 29.84424,
     "calls_reserved": 0,
     "responses_received": 0,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 205,
-    "checkpoint_at": "2026-11-03T10:15:33.462741Z"
+    "checkpoint_at": "2026-11-03T10:15:36.864448Z",
+    "stop_reason": "topic_exhausted",
+    "sealed_at": "2026-11-03T10:15:36.864465Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
