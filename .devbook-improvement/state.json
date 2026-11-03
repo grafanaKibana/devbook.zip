@@ -3403,12 +3403,12 @@
         "user_view_type": "public",
         "site_admin": false
       },
-      "body": "<!-- devbook-improvement:start topic=programming-e6aba2bd -->\n## 1. Note improvements\n\nReviewed 10 notes in Programming; improved 1. Calls: 20; elapsed: 567 seconds; stop: call_limit.\n\n- [`Programming/NET/CSharp/Fundamentals/Types/Types.md`](https://github.com/grafanaKibana/devbook.zip/blob/notes/automated-programming-e6aba2bd-g1/Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Types.md) — The Storage bullet is vague and its second sentence does not contrast value and reference storage. The original sentence 'References may be local variables' did not explain where each kind is stored; the replacement states the inline-versus-separate-object distinction. Clearer mental model of where values and references live.\n\n## 2. Questions and answers\n\n- Added: 0\n- Rewritten: 0\n- Split: 0\n- Proposed for removal: 0\n- Replaced: 0\n\n## 3. Significant question changes\n\n- No significant question changes.\n\n## 4. User feedback\n\n- No owner feedback in this workload.\n\n<!-- devbook-export-validation -->Quartz export: verified in `b929764f2b8ddf145c51b91a886d1ddc8b57d684`; required checks and full-vault validation passed on that exact head.\n<!-- devbook-improvement:end -->\n\n<!-- devbook-improvement:topic=programming-e6aba2bd;generation=1 -->\n",
+      "body": "<!-- devbook-improvement:start topic=programming-e6aba2bd -->\n## 1. Note improvements\n\nReviewed 1 notes in Programming; improved 1. Calls: 2; elapsed: 161 seconds; stop: feedback_scope_complete.\n\n- [`Programming/NET/CSharp/Fundamentals/Types/Types.md`](https://github.com/grafanaKibana/devbook.zip/blob/notes/automated-programming-e6aba2bd-g1/Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Types.md) — The Storage bullet is vague and its second sentence does not contrast value and reference storage.; 'The object it points to is allocated separately' reads as an unconditional heap-allocation guarantee, conflicting with the bullet's own point that location is not dictated by declaration kind. The original sentence 'References may be local variables' did not explain where each kind is stored; the replacement states the inline-versus-separate-object distinction.; Removes the unconditional 'allocated separately' implication while keeping the inline-field and array examples and the reference-versus-object distinction. Clearer mental model of where values and references live.; The reference-versus-object distinction stays clear without implying a fixed heap or stack location. [A value-type variable contains an instance of the type, whereas a reference-type variable contains a reference to an instance; the docs make no guarantee about physical location.](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/value-types)\n\n## 2. Questions and answers\n\n- Added: 0\n- Rewritten: 0\n- Split: 0\n- Proposed for removal: 0\n- Replaced: 0\n\n## 3. Significant question changes\n\n- No significant question changes.\n\n## 4. User feedback\n\n- https://github.com/grafanaKibana/devbook.zip/pull/205#issuecomment-6600496750: implemented — Storage bullet rechecked against the full note and Microsoft's value-types documentation. The correction is confined to that bullet, and the inline-field and array examples and the cards are untouched.\n- https://github.com/grafanaKibana/devbook.zip/pull/205#pullrequestreview-5750114769: implemented — The storage wording was narrowed so it no longer implies guaranteed allocation.\n- https://github.com/grafanaKibana/devbook.zip/pull/205#discussion_r4453129053: implemented — The phrase 'allocated separately' was replaced with a reference-versus-instance description that leaves physical location to the runtime.\n\n<!-- devbook-export-validation -->Quartz export: verified in `08a88698974383fabbd7679452da8b0cc3aa3e9f`; required checks and full-vault validation passed on that exact head.\n<!-- devbook-improvement:end -->\n\n<!-- devbook-improvement:topic=programming-e6aba2bd;generation=1 -->\n",
       "created_at": "2026-11-03T09:31:24Z",
-      "updated_at": "2026-11-03T09:54:11Z",
+      "updated_at": "2026-11-03T10:12:16Z",
       "closed_at": null,
       "merged_at": null,
-      "merge_commit_sha": "b3712f86e05b99614dfe6958e589dc43379a92e5",
+      "merge_commit_sha": "d4d7466ea05d8ad2968505119f8e13fa45afa6c0",
       "assignees": [],
       "requested_reviewers": [],
       "requested_teams": [],
@@ -3419,11 +3419,11 @@
       "review_comments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/pulls/205/comments",
       "review_comment_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/pulls/comments{/number}",
       "comments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/issues/205/comments",
-      "statuses_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/statuses/b929764f2b8ddf145c51b91a886d1ddc8b57d684",
+      "statuses_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/statuses/08a88698974383fabbd7679452da8b0cc3aa3e9f",
       "head": {
         "label": "grafanaKibana:notes/automated-programming-e6aba2bd-g1",
         "ref": "notes/automated-programming-e6aba2bd-g1",
-        "sha": "b929764f2b8ddf145c51b91a886d1ddc8b57d684",
+        "sha": "08a88698974383fabbd7679452da8b0cc3aa3e9f",
         "user": {
           "login": "grafanaKibana",
           "id": 45916288,
@@ -3514,7 +3514,7 @@
           "deployments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/deployments",
           "created_at": "2026-02-10T15:48:40Z",
           "updated_at": "2026-11-03T06:46:42Z",
-          "pushed_at": "2026-11-03T09:59:27Z",
+          "pushed_at": "2026-11-03T10:15:19Z",
           "git_url": "git://github.com/grafanaKibana/devbook.zip.git",
           "ssh_url": "git@github.com:grafanaKibana/devbook.zip.git",
           "clone_url": "https://github.com/grafanaKibana/devbook.zip.git",
@@ -3649,7 +3649,7 @@
           "deployments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/deployments",
           "created_at": "2026-02-10T15:48:40Z",
           "updated_at": "2026-11-03T06:46:42Z",
-          "pushed_at": "2026-11-03T09:59:27Z",
+          "pushed_at": "2026-11-03T10:15:19Z",
           "git_url": "git://github.com/grafanaKibana/devbook.zip.git",
           "ssh_url": "git@github.com:grafanaKibana/devbook.zip.git",
           "clone_url": "https://github.com/grafanaKibana/devbook.zip.git",
@@ -3713,7 +3713,7 @@
           "href": "https://api.github.com/repos/grafanaKibana/devbook.zip/pulls/205/commits"
         },
         "statuses": {
-          "href": "https://api.github.com/repos/grafanaKibana/devbook.zip/statuses/b929764f2b8ddf145c51b91a886d1ddc8b57d684"
+          "href": "https://api.github.com/repos/grafanaKibana/devbook.zip/statuses/08a88698974383fabbd7679452da8b0cc3aa3e9f"
         }
       },
       "author_association": "OWNER",
@@ -3826,14 +3826,14 @@
     "status": "active",
     "phase": "selecting",
     "started_at": "2026-11-03T10:15:07.020719Z",
-    "elapsed_seconds": 9.9204634,
+    "elapsed_seconds": 26.4425339,
     "calls_reserved": 0,
     "responses_received": 0,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 205,
-    "checkpoint_at": "2026-11-03T10:15:16.940670Z"
+    "checkpoint_at": "2026-11-03T10:15:33.462741Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
