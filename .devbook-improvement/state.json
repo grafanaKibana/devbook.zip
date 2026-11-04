@@ -2569,9 +2569,9 @@
     "version": 1,
     "id": "8863af0d8e1746298a05f54c5909b04b",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-04T06:42:24.894668Z",
-    "elapsed_seconds": 712.8978280000003,
+    "elapsed_seconds": 716.2897393000003,
     "calls_reserved": 20,
     "responses_received": 20,
     "attempted_paths": [
@@ -2583,7 +2583,8 @@
       "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
       "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md",
       "Vault/Home/AI & ML/LLM/Context Engineering/Context Engineering.md",
-      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Chunking.md"
+      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Chunking.md",
+      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Component-Level Evaluation.md"
     ],
     "accepted_records": [
       {
@@ -4066,10 +4067,84 @@
           },
           "model_calls": 18
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Component-Level Evaluation.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Component-Level Evaluation.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against its text. The opening motivates ablation and links the metric and label notes it depends on. The chunking section defines Token Recall, Precision and IoU, and uses Chroma's reported numbers (87.9% recall and 1.4% precision for the 800/400 setup; 91.3% and 4.5% for the 400-token semantic strategy) with a caveat that they are corpus-specific. The fixed-token-budget advice is a sound control for the chunk-size/top-k confound. The embedding section correctly isolates variables, uses exact search or matched ANN recall, and says no portable threshold exists. The ANN section keeps ANN recall separate from labeled retrieval recall and sweeps ef_search/nprobe against latency. It covers filtered-search ground truth and selectivity levels, and it hedges the claims about drift. The note has no Questions section, so no cards need review. The two references fit the claims, and the known_violations list is empty. Nothing is wrong, unclear or missing enough to justify an edit."
+              }
+            ],
+            "feedback": [],
+            "decisions": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "The single note was audited in full and kept unchanged. It has no concrete defects and no known violations, and there are no edits, feedback or decisions to check.",
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Component-Level Evaluation.md",
+                "verdict": "CLEAN",
+                "summary": "The note explains ablation and then applies it to chunking, embedding comparison and ANN loss. It keeps the mechanism, the conditions and the caveats, and the prose is direct and impersonal. The opening, section order and terminology are coherent, and nothing is repeated or padded. There are no wikilink or code-fence issues and no Questions section to review.",
+                "page_type": "Concept — impersonal whiteboard voice; Questions and References are optional. Only the References section is present, with two descriptive bare link bullets.",
+                "current_text_evidence": [
+                  {
+                    "quote": "Component-level evaluation holds most of the pipeline still and moves one part at a time.",
+                    "line_start": 13,
+                    "reason": "The opening motivates the topic quickly and states the operating idea that the rest of the note relies on."
+                  },
+                  {
+                    "quote": "Token IoU exposes a weakness that Recall@k misses",
+                    "line_start": 27,
+                    "reason": "The note gives the mechanism, the reported numbers and a caveat that they are corpus-specific, so the figures are not over-generalized."
+                  },
+                  {
+                    "quote": "There is no portable percentage threshold that decides the tradeoff for every corpus.",
+                    "line_start": 37,
+                    "reason": "The embedding section states its limit explicitly instead of inventing a threshold."
+                  },
+                  {
+                    "quote": "ANN Recall@k is not retrieval Recall@k.",
+                    "line_start": 43,
+                    "reason": "The note separates the labeled-relevance metric from the exact-search metric, which prevents a common conflation."
+                  },
+                  {
+                    "quote": "Fixed `nprobe`, for example, visits the same number of IVF lists while the number of vectors inside those lists can grow.",
+                    "line_start": 47,
+                    "reason": "The claim is hedged by index family and workload, and the IVF example makes it concrete."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: chunking, embedding and ANN evaluation share one ablation method and are short enough to read together.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "NOT APPLICABLE",
+                  "identity_safety": "NOT APPLICABLE",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "change_checks": []
+          },
+          "model_calls": 20
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-04T06:54:17.791817Z",
+    "checkpoint_at": "2026-11-04T06:54:21.183729Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
