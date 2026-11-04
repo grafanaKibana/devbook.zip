@@ -879,6 +879,66 @@
         },
         "review_process": "focused-whole-note-v1"
       }
+    },
+    "Vault/Home/AI & ML/AI & ML.md": {
+      "content_hash": "078f1c0f1256165849d90ca6382a5d6f6e580a12ea4e73870bf857b5cf31ea76",
+      "rules_hash": "264d16c1cdd0550e8de34525350fcc463d41b1c8095a38a38008f9f84304bb03",
+      "outcome": "keep",
+      "repair_input_hash": "",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "violation_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "keep_review": {
+        "content_hash": "078f1c0f1256165849d90ca6382a5d6f6e580a12ea4e73870bf857b5cf31ea76",
+        "rules_hash": "264d16c1cdd0550e8de34525350fcc463d41b1c8095a38a38008f9f84304bb03",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review": {
+          "path": "Vault/Home/AI & ML/AI & ML.md",
+          "verdict": "CLEAN",
+          "summary": "The whole folder note was audited and no concrete defect was found. The intro gives scope and the key judgment, the folder map block is intact, and the single Qard tests one decision with a correct, conditioned answer. Keeping the note unchanged is justified.",
+          "page_type": "FolderNote: the Datacore folder map is protected. Questions and References are optional. The note keeps the FolderNote tag.",
+          "current_text_evidence": [
+            {
+              "quote": "an impressive model cannot rescue weak evidence or missing monitoring",
+              "line_start": 20,
+              "reason": "The intro states the operating idea of the section: data, evaluation and operations matter more than model choice. A reader can recover the topic quickly."
+            },
+            {
+              "quote": "The first condition makes classic ML a strong candidate. Only the second decides.",
+              "line_start": 31,
+              "reason": "The answer states the decision rule directly. Task and data fit is necessary, and measurement on the real workload is what decides."
+            },
+            {
+              "quote": "an LLM can be the stronger option for some text-classification tasks",
+              "line_start": 34,
+              "reason": "The answer names the exception that limits the rule, so it does not oversimplify classic ML versus LLM."
+            },
+            {
+              "quote": "<!-- qard-id: c28d8736-4f09-48e3-9a55-a635b6e08875 -->",
+              "line_start": 29,
+              "reason": "The Qard identity comment is preserved directly above the callout."
+            },
+            {
+              "quote": "- [Microsoft AI for Beginners](https://microsoft.github.io/AI-For-Beginners/)",
+              "line_start": 43,
+              "reason": "The reference is a bare descriptive link with no trailing annotation, which meets the References contract."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: the folder note is a short hub whose map handles direct-child navigation. It contains no separable concept topics.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "identity_safety": "PASS",
+            "question_quality": "PASS",
+            "rules_compliance": "PASS"
+          }
+        },
+        "review_process": "focused-whole-note-v1"
+      }
     }
   },
   "topics": {
@@ -2031,14 +2091,14 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-04T06:42:24.894668Z",
-    "elapsed_seconds": 53.448901400000004,
+    "elapsed_seconds": 56.654369200000005,
     "calls_reserved": 2,
     "responses_received": 2,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-04T06:43:18.342885Z",
+    "checkpoint_at": "2026-11-04T06:43:21.548355Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -2547,6 +2607,97 @@
       ],
       "source_hashes": {
         "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Deadlocks.md": "f35a7f6b495ebc5132ad28f3e53c2249486e6e62aebb3cd7a87b2cbaf2a3cf36"
+      },
+      "rules_hash": "264d16c1cdd0550e8de34525350fcc463d41b1c8095a38a38008f9f84304bb03",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "293ae3823c6a9e06dc41504b16a6bf7757804700f3b4b1ac695809c44367bae8": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/AI & ML.md",
+            "verdict": "CLEAN",
+            "summary": "The whole folder note was audited and no concrete defect was found. The intro gives scope and the key judgment, the folder map block is intact, and the single Qard tests one decision with a correct, conditioned answer. Keeping the note unchanged is justified.",
+            "page_type": "FolderNote: the Datacore folder map is protected. Questions and References are optional. The note keeps the FolderNote tag.",
+            "current_text_evidence": [
+              {
+                "quote": "an impressive model cannot rescue weak evidence or missing monitoring",
+                "line_start": 19,
+                "reason": "The intro states the operating idea of the section: data, evaluation and operations matter more than model choice. A reader can recover the topic quickly."
+              },
+              {
+                "quote": "The first condition makes classic ML a strong candidate. Only the second decides.",
+                "line_start": 30,
+                "reason": "The answer states the decision rule directly. Task and data fit is necessary, and measurement on the real workload is what decides."
+              },
+              {
+                "quote": "an LLM can be the stronger option for some text-classification tasks",
+                "line_start": 33,
+                "reason": "The answer names the exception that limits the rule, so it does not oversimplify classic ML versus LLM."
+              },
+              {
+                "quote": "<!-- qard-id: c28d8736-4f09-48e3-9a55-a635b6e08875 -->",
+                "line_start": 27,
+                "reason": "The Qard identity comment is preserved directly above the callout."
+              },
+              {
+                "quote": "- [Microsoft AI for Beginners](https://microsoft.github.io/AI-For-Beginners/)",
+                "line_start": 40,
+                "reason": "The reference is a bare descriptive link with no trailing annotation, which meets the References contract."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: the folder note is a short hub whose map handles direct-child navigation. It contains no separable concept topics.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "identity_safety": "PASS",
+              "question_quality": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "overall_reason": "There are no edits. The independent whole-note review found no accuracy, clarity, question-quality, identity or rule defect. The answer is a bounded decision question that names its condition and its exception. The Qard ID and the Datacore block are intact, and the reference format is valid.",
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/AI & ML/AI & ML.md",
+          "citation_index": 0,
+          "reported_line_start": 19,
+          "resolved_line_start": 20
+        },
+        {
+          "path": "Vault/Home/AI & ML/AI & ML.md",
+          "citation_index": 1,
+          "reported_line_start": 30,
+          "resolved_line_start": 31
+        },
+        {
+          "path": "Vault/Home/AI & ML/AI & ML.md",
+          "citation_index": 2,
+          "reported_line_start": 33,
+          "resolved_line_start": 34
+        },
+        {
+          "path": "Vault/Home/AI & ML/AI & ML.md",
+          "citation_index": 3,
+          "reported_line_start": 27,
+          "resolved_line_start": 29
+        },
+        {
+          "path": "Vault/Home/AI & ML/AI & ML.md",
+          "citation_index": 4,
+          "reported_line_start": 40,
+          "resolved_line_start": 43
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/AI & ML/AI & ML.md": "078f1c0f1256165849d90ca6382a5d6f6e580a12ea4e73870bf857b5cf31ea76"
       },
       "rules_hash": "264d16c1cdd0550e8de34525350fcc463d41b1c8095a38a38008f9f84304bb03",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
@@ -9490,197 +9641,6 @@
         "change_checks": []
       },
       "feedback_snapshot": []
-    }
-  },
-  "pending_author_proposal": {
-    "workload_id": "8863af0d8e1746298a05f54c5909b04b",
-    "topic_id": "ai-ml-4edf0823",
-    "batch": {
-      "topic": "AI & ML",
-      "topic_id": "ai-ml-4edf0823",
-      "notes": [
-        {
-          "path": "Vault/Home/AI & ML/AI & ML.md",
-          "content": "---\nicon: astroid\norder: 70\ncolor: \"#10b981\"\ntopic: [AI & ML]\nsubtopic: []\nsummary: \"How learning systems are built, evaluated, and operated: classic ML, LLMs, and agent tooling.\"\ntags: [FolderNote]\npublish: true\nlevel: [\"3\"]\npriority: High\nstatus: Creation\nqard-deck: \"AI & ML\"\nqard-topic: \"AI & ML\"\nflashcard_uid: \"792c6bf3\"\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\n---\n\nAI & ML covers the engineering around systems that learn from data or use trained models. The section moves from classic machine learning to LLM applications and the tooling used to build them. Model choice matters, but production results usually turn on the data and on how the system is evaluated and operated. A gradient-boosted tree and an LLM can fail for the same reason: an impressive model cannot rescue weak evidence or missing monitoring.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# Questions\n\n<!-- qard-id: c28d8736-4f09-48e3-9a55-a635b6e08875 -->\n> [!qard]- When is classic machine learning a better fit than an LLM?\n> Classic machine learning is the better fit when two conditions hold. First, the task is a defined prediction with representative labeled examples and a measurable objective. Second, measurement on the actual workload shows that classic ML meets that objective with a better balance of quality, latency, cost and maintenance than an LLM. The first condition makes classic ML a strong candidate. Only the second decides.\n>\n> - **Task and data fit:** the task has a fixed output to predict, such as a class, a number or a ranking. Labeled examples represent the inputs seen in production, and a metric measures success directly. A model trained on those examples learns that mapping, and the metric checks its quality.\n> - **Why fit alone does not decide:** generative models can also perform classification and regression, and an LLM can be the stronger option for some text-classification tasks. A labeled prediction task can therefore have more than one viable approach.\n> - **Measurement:** both options are evaluated against the same simple, observable objective on the same data. Neither approach is inherently more accurate, faster, cheaper or easier to maintain.\n> \n> Prompting can also try an LLM on a task while its requirements are still changing. Those results need the same measurement before either approach is chosen.\n>\n> [Google: ML problem framing](https://developers.google.com/machine-learning/problem-framing/ml-framing) · [Google: Rules of Machine Learning](https://developers.google.com/machine-learning/guides/rules-of-ml/)\n\n# References\n\n- [Microsoft AI for Beginners](https://microsoft.github.io/AI-For-Beginners/)\n",
-          "hash": "078f1c0f1256165849d90ca6382a5d6f6e580a12ea4e73870bf857b5cf31ea76",
-          "topic": "AI & ML",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "new"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "264d16c1cdd0550e8de34525350fcc463d41b1c8095a38a38008f9f84304bb03",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/AI & ML/AI & ML.md",
-          "outcome": "keep",
-          "reason": "Audited the whole folder note. The intro states the scope (classic ML to LLM applications and tooling) and the key judgment that data, evaluation and operations usually matter more than model choice. The datacore folder map block is intact and protected. The single Qard tests one gradeable decision: when classic ML beats an LLM. Its answer correctly says task/data fit is necessary but measurement decides. That agrees with Google's ML problem framing and Rules of ML guidance, which favor simple, measurable approaches and say to measure rather than assume. Frontmatter is valid (status Creation, FolderNote tag, qard-id preserved). The References bullet is a bare link with no annotation. No known violations exist. No factual or editorial defect justifies a change."
-        }
-      ],
-      "feedback": []
-    },
-    "source_hashes": {
-      "Vault/Home/AI & ML/AI & ML.md": "078f1c0f1256165849d90ca6382a5d6f6e580a12ea4e73870bf857b5cf31ea76"
-    },
-    "feedback_keys": [],
-    "rules_hash": "264d16c1cdd0550e8de34525350fcc463d41b1c8095a38a38008f9f84304bb03",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/AI & ML/AI & ML.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-04T06:43:01.229722Z",
-    "review_evidence": {
-      "raw_review": {
-        "verdict": "CLEAN",
-        "notes": [
-          {
-            "path": "Vault/Home/AI & ML/AI & ML.md",
-            "verdict": "CLEAN",
-            "summary": "The whole folder note was audited and no concrete defect was found. The intro gives scope and the key judgment, the folder map block is intact, and the single Qard tests one decision with a correct, conditioned answer. Keeping the note unchanged is justified.",
-            "page_type": "FolderNote: the Datacore folder map is protected. Questions and References are optional. The note keeps the FolderNote tag.",
-            "current_text_evidence": [
-              {
-                "quote": "an impressive model cannot rescue weak evidence or missing monitoring",
-                "line_start": 19,
-                "reason": "The intro states the operating idea of the section: data, evaluation and operations matter more than model choice. A reader can recover the topic quickly."
-              },
-              {
-                "quote": "The first condition makes classic ML a strong candidate. Only the second decides.",
-                "line_start": 30,
-                "reason": "The answer states the decision rule directly. Task and data fit is necessary, and measurement on the real workload is what decides."
-              },
-              {
-                "quote": "an LLM can be the stronger option for some text-classification tasks",
-                "line_start": 33,
-                "reason": "The answer names the exception that limits the rule, so it does not oversimplify classic ML versus LLM."
-              },
-              {
-                "quote": "<!-- qard-id: c28d8736-4f09-48e3-9a55-a635b6e08875 -->",
-                "line_start": 27,
-                "reason": "The Qard identity comment is preserved directly above the callout."
-              },
-              {
-                "quote": "- [Microsoft AI for Beginners](https://microsoft.github.io/AI-For-Beginners/)",
-                "line_start": 40,
-                "reason": "The reference is a bare descriptive link with no trailing annotation, which meets the References contract."
-              }
-            ],
-            "target_resolution": "JUSTIFIED UNCHANGED",
-            "split_suggestion": "No split: the folder note is a short hub whose map handles direct-child navigation. It contains no separable concept topics.",
-            "findings": [],
-            "source_checks": [],
-            "rejection_equivalence": [],
-            "quality": {
-              "accuracy": "PASS",
-              "clarity": "PASS",
-              "identity_safety": "PASS",
-              "question_quality": "PASS",
-              "rules_compliance": "PASS"
-            }
-          }
-        ],
-        "overall_reason": "There are no edits. The independent whole-note review found no accuracy, clarity, question-quality, identity or rule defect. The answer is a bounded decision question that names its condition and its exception. The Qard ID and the Datacore block are intact, and the reference format is valid.",
-        "change_checks": []
-      },
-      "bindings": [
-        {
-          "path": "Vault/Home/AI & ML/AI & ML.md",
-          "citation_index": 0,
-          "reported_line_start": 19,
-          "resolved_line_start": 20
-        },
-        {
-          "path": "Vault/Home/AI & ML/AI & ML.md",
-          "citation_index": 1,
-          "reported_line_start": 30,
-          "resolved_line_start": 31
-        },
-        {
-          "path": "Vault/Home/AI & ML/AI & ML.md",
-          "citation_index": 2,
-          "reported_line_start": 33,
-          "resolved_line_start": 34
-        },
-        {
-          "path": "Vault/Home/AI & ML/AI & ML.md",
-          "citation_index": 3,
-          "reported_line_start": 27,
-          "resolved_line_start": 29
-        },
-        {
-          "path": "Vault/Home/AI & ML/AI & ML.md",
-          "citation_index": 4,
-          "reported_line_start": 40,
-          "resolved_line_start": 43
-        }
-      ],
-      "source_hashes": {
-        "Vault/Home/AI & ML/AI & ML.md": "078f1c0f1256165849d90ca6382a5d6f6e580a12ea4e73870bf857b5cf31ea76"
-      },
-      "rules_hash": "264d16c1cdd0550e8de34525350fcc463d41b1c8095a38a38008f9f84304bb03",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
-    },
-    "completed_review": {
-      "verdict": "CLEAN",
-      "notes": [
-        {
-          "path": "Vault/Home/AI & ML/AI & ML.md",
-          "verdict": "CLEAN",
-          "summary": "The whole folder note was audited and no concrete defect was found. The intro gives scope and the key judgment, the folder map block is intact, and the single Qard tests one decision with a correct, conditioned answer. Keeping the note unchanged is justified.",
-          "page_type": "FolderNote: the Datacore folder map is protected. Questions and References are optional. The note keeps the FolderNote tag.",
-          "current_text_evidence": [
-            {
-              "quote": "an impressive model cannot rescue weak evidence or missing monitoring",
-              "line_start": 20,
-              "reason": "The intro states the operating idea of the section: data, evaluation and operations matter more than model choice. A reader can recover the topic quickly."
-            },
-            {
-              "quote": "The first condition makes classic ML a strong candidate. Only the second decides.",
-              "line_start": 31,
-              "reason": "The answer states the decision rule directly. Task and data fit is necessary, and measurement on the real workload is what decides."
-            },
-            {
-              "quote": "an LLM can be the stronger option for some text-classification tasks",
-              "line_start": 34,
-              "reason": "The answer names the exception that limits the rule, so it does not oversimplify classic ML versus LLM."
-            },
-            {
-              "quote": "<!-- qard-id: c28d8736-4f09-48e3-9a55-a635b6e08875 -->",
-              "line_start": 29,
-              "reason": "The Qard identity comment is preserved directly above the callout."
-            },
-            {
-              "quote": "- [Microsoft AI for Beginners](https://microsoft.github.io/AI-For-Beginners/)",
-              "line_start": 43,
-              "reason": "The reference is a bare descriptive link with no trailing annotation, which meets the References contract."
-            }
-          ],
-          "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: the folder note is a short hub whose map handles direct-child navigation. It contains no separable concept topics.",
-          "findings": [],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "PASS",
-            "identity_safety": "PASS",
-            "question_quality": "PASS",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "overall_reason": "There are no edits. The independent whole-note review found no accuracy, clarity, question-quality, identity or rule defect. The answer is a bounded decision question that names its condition and its exception. The Qard ID and the Datacore block are intact, and the reference format is valid.",
-      "change_checks": []
     }
   }
 }
