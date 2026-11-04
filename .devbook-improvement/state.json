@@ -1707,6 +1707,71 @@
         },
         "review_process": "focused-whole-note-v1"
       }
+    },
+    "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Tasks.md": {
+      "content_hash": "f13774fd8ca6a4a3bcf2ef532d22422c96737fb29582d96188b1d0f826789ae8",
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "outcome": "keep",
+      "repair_input_hash": "",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "violation_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "keep_review": {
+        "content_hash": "f13774fd8ca6a4a3bcf2ef532d22422c96737fb29582d96188b1d0f826789ae8",
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review": {
+          "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Tasks.md",
+          "verdict": "CLEAN",
+          "summary": "The note is accurate and well ordered. It moves from the Task-versus-thread idea to the mechanism, fan-out and failure aggregation, composition, pitfalls and cards. The prose is direct and keeps the conditions and exceptions. Each card tests one gradeable task. I found no defect that justifies an edit.",
+          "page_type": "Concept — typed frontmatter, optional Questions and References. Qard callouts keep their hidden IDs.",
+          "current_text_evidence": [
+            {
+              "quote": "The abstraction says nothing about whether a thread is currently executing the operation.",
+              "line_start": 17,
+              "reason": "The opening states the central idea, that a Task is not a thread. Later sections and the first card build on it."
+            },
+            {
+              "quote": "The default scheduler is `TaskScheduler.Current`, so behavior can depend on the caller's context.",
+              "line_start": 35,
+              "reason": "This is the correct StartNew caveat. It gives the condition that changes behavior."
+            },
+            {
+              "quote": "Awaiting it propagates one exception, so code that needs the full set must inspect the combined task or the individual tasks after completion.",
+              "line_start": 58,
+              "reason": "This is accurate WhenAll semantics. The catch-when example that follows is consistent with it."
+            },
+            {
+              "quote": "On .NET 9+, `Task.WhenEach` yields each task after it completes.",
+              "line_start": 98,
+              "reason": "The version condition is correct, and the tie order is correctly described as unspecified."
+            },
+            {
+              "quote": "Modern .NET does not terminate the process by default after that event.",
+              "line_start": 112,
+              "reason": "This matches the post-.NET 4.5 unobserved-exception policy."
+            },
+            {
+              "quote": "> [!qard]- Why must the task returned by `await Task.WhenAny(...)` usually be awaited again?",
+              "line_start": 234,
+              "reason": "This is a focused card with a mechanism-based answer and a primary Microsoft source. It tests one gradeable task."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: Task semantics, composition, failure handling and pitfalls are tightly coupled and cohere as one note.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        },
+        "review_process": "focused-whole-note-v1"
+      }
     }
   },
   "topics": {
@@ -3124,7 +3189,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-04T19:55:42.282235Z",
-    "elapsed_seconds": 668.4129112,
+    "elapsed_seconds": 672.3930288,
     "calls_reserved": 17,
     "responses_received": 17,
     "attempted_paths": [
@@ -3536,7 +3601,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-04T20:06:50.694621Z",
+    "checkpoint_at": "2026-11-04T20:06:54.674738Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
@@ -4844,6 +4909,102 @@
       ],
       "source_hashes": {
         "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Parallelism.md": "0762c80eccc69b50a99910148e50a974f2fc319b7678ecbaac56ac862828af5e"
+      },
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "a3424a0d5099a04c087fdf918d1cba44d72249d19dfbc5f0cc804f5acdcaf61e": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "overall_reason": "Independent whole-note audit found no factual, ordering, wording or card-quality defect. The keep is justified and no edits were proposed.",
+        "change_checks": [],
+        "notes": [
+          {
+            "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Tasks.md",
+            "verdict": "CLEAN",
+            "summary": "The note is accurate and well ordered. It moves from the Task-versus-thread idea to the mechanism, fan-out and failure aggregation, composition, pitfalls and cards. The prose is direct and keeps the conditions and exceptions. Each card tests one gradeable task. I found no defect that justifies an edit.",
+            "page_type": "Concept — typed frontmatter, optional Questions and References. Qard callouts keep their hidden IDs.",
+            "current_text_evidence": [
+              {
+                "quote": "The abstraction says nothing about whether a thread is currently executing the operation.",
+                "line_start": 17,
+                "reason": "The opening states the central idea, that a Task is not a thread. Later sections and the first card build on it."
+              },
+              {
+                "quote": "The default scheduler is `TaskScheduler.Current`, so behavior can depend on the caller's context.",
+                "line_start": 34,
+                "reason": "This is the correct StartNew caveat. It gives the condition that changes behavior."
+              },
+              {
+                "quote": "Awaiting it propagates one exception, so code that needs the full set must inspect the combined task or the individual tasks after completion.",
+                "line_start": 59,
+                "reason": "This is accurate WhenAll semantics. The catch-when example that follows is consistent with it."
+              },
+              {
+                "quote": "On .NET 9+, `Task.WhenEach` yields each task after it completes.",
+                "line_start": 89,
+                "reason": "The version condition is correct, and the tie order is correctly described as unspecified."
+              },
+              {
+                "quote": "Modern .NET does not terminate the process by default after that event.",
+                "line_start": 104,
+                "reason": "This matches the post-.NET 4.5 unobserved-exception policy."
+              },
+              {
+                "quote": "> [!qard]- Why must the task returned by `await Task.WhenAny(...)` usually be awaited again?",
+                "line_start": 212,
+                "reason": "This is a focused card with a mechanism-based answer and a primary Microsoft source. It tests one gradeable task."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: Task semantics, composition, failure handling and pitfalls are tightly coupled and cohere as one note.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ]
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Tasks.md",
+          "citation_index": 1,
+          "reported_line_start": 34,
+          "resolved_line_start": 35
+        },
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Tasks.md",
+          "citation_index": 2,
+          "reported_line_start": 59,
+          "resolved_line_start": 58
+        },
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Tasks.md",
+          "citation_index": 3,
+          "reported_line_start": 89,
+          "resolved_line_start": 98
+        },
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Tasks.md",
+          "citation_index": 4,
+          "reported_line_start": 104,
+          "resolved_line_start": 112
+        },
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Tasks.md",
+          "citation_index": 5,
+          "reported_line_start": 212,
+          "resolved_line_start": 234
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Tasks.md": "f13774fd8ca6a4a3bcf2ef532d22422c96737fb29582d96188b1d0f826789ae8"
       },
       "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
@@ -12675,207 +12836,6 @@
         "change_checks": []
       },
       "feedback_snapshot": []
-    }
-  },
-  "pending_author_proposal": {
-    "workload_id": "792178af26484b3da828d4cea1e5f39f",
-    "topic_id": "programming-e6aba2bd",
-    "batch": {
-      "topic": "Programming",
-      "topic_id": "programming-e6aba2bd",
-      "notes": [
-        {
-          "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Tasks.md",
-          "content": "---\ntopic: [Programming]\nsubtopic: [NET]\nsummary: \".NET's core abstraction for asynchronous work, its completion, result, and composition.\"\nlevel: [\"4\"]\npriority: High\nstatus: Ready to Repeat\npublish: true\nqard-deck: \"Programming\"\nqard-topic: \"NET/CSharp/Concurrency and Parallelism/Tasks\"\nflashcard_uid: \"9dbbd8f8\"\ncreated: \"2026-02-18T20:04:43.000Z\"\nmodified: \"2026-11-02T09:03:54.806Z\"\npublished: \"2026-07-08T13:14:17.323Z\"\n---\n\n`Task` is a handle to an operation that may finish later. It records completion, cancellation, or failure and gives other code something to await or combine. The abstraction says nothing about whether a thread is currently executing the operation.\n\nA CPU-bound task may run on a ThreadPool worker. A task representing asynchronous I/O normally spends most of its lifetime waiting for the operating system, with a thread needed only to initiate work and process completion. Keeping that distinction visible prevents needless `Task.Run` calls and misleading thread-count assumptions.\n\n# How It Works\n\n`Task` is the read side of a future/promise pair. `TaskCompletionSource<T>` exposes the write side for adapting callbacks or events to a task-based contract. A task eventually reaches `RanToCompletion`, `Faulted`, or `Canceled`. Its earlier status depends on how it was created and scheduled.\n\n`await` first asks whether the awaiter has completed. If so, execution may continue synchronously. Otherwise, the async state machine registers its continuation and returns control to the caller. The continuation later runs through the captured scheduling context when one applies, or through the default task infrastructure.\n\n**Core forms:**\n- `Task` — represents an operation with no return value.\n- `Task<T>` — represents an operation that produces a value of type `T`.\n- `ValueTask` / `ValueTask<T>` — value-type awaitables that can represent an immediate result, a `Task`, or an `IValueTaskSource`. They can avoid a `Task` allocation in carefully measured APIs, but their consumption rules are stricter.\n\n**Creation and scheduling.** Tasks returned by `async` methods and most framework APIs already represent work in progress. A task created with the `Task` constructor remains in `Created` until scheduled with `Start`, which is rarely useful in application code. `Task.Factory.StartNew` is lower-level and easy to misuse with asynchronous delegates:\n\n- An `async` lambda can produce a nested task that requires `Unwrap`.\n- The default scheduler is `TaskScheduler.Current`, so behavior can depend on the caller's context.\n\n`Task.Run` is the normal way to queue CPU-bound work to the default scheduler. `TaskCreationOptions.LongRunning` is a scheduler hint for work that would otherwise monopolize a worker. The default scheduler typically responds with a non-pool thread, but custom schedulers may behave differently.\n\n**Already-completed tasks.** `Task.CompletedTask`, `Task.FromResult`, `Task.FromException`, and `Task.FromCanceled` express a known outcome without scheduling work. The runtime may cache some completed instances, but that is an implementation optimization rather than a contract to build allocation claims around.\n\n# Example — Parallel Fan-Out\n\n```csharp\npublic async Task<IReadOnlyList<UserDto>> LoadUsersAsync(\n    IEnumerable<int> ids,\n    CancellationToken cancellationToken)\n{\n    var tasks = ids.Select(id => _client.GetUserAsync(id, cancellationToken));\n    var users = await Task.WhenAll(tasks);\n    return users;\n}\n```\n\nEnumerating `ids.Select(...)` creates the request tasks, and `Task.WhenAll` returns a task that completes after all of them finish. `WhenAll` does not start dormant tasks itself. When the operations are independent and their work overlaps, elapsed time approaches the slowest operation rather than the sum. Downstream limits can change that result.\n\n# Failure Aggregation\n\nThe task returned by `WhenAll` waits for every input. If any input faults, the combined task is faulted and retains the collection of unwrapped input failures in its `Exception`. Awaiting it propagates one exception, so code that needs the full set must inspect the combined task or the individual tasks after completion.\n\nThe example below rebuilds an aggregate from the individual tasks. Its catch executes only after `WhenAll` has reached a terminal state, so every input can be inspected.\n\n```csharp\npublic async Task SyncAllAsync(CancellationToken cancellationToken)\n{\n    Task a = _catalog.SyncAsync(cancellationToken);\n    Task b = _pricing.SyncAsync(cancellationToken);\n    Task c = _inventory.SyncAsync(cancellationToken);\n\n    try\n    {\n        await Task.WhenAll(a, b, c);\n    }\n    catch when (a.IsFaulted || b.IsFaulted || c.IsFaulted)\n    {\n        // Inspect all faults, not only the first observed one.\n        var failures = new[] { a, b, c }\n            .Where(t => t.IsFaulted)\n            .SelectMany(t => t.Exception!.Flatten().InnerExceptions)\n            .ToArray();\n\n        throw new AggregateException(\"Batch sync failed\", failures);\n    }\n}\n```\n\n# Composition Patterns\n\n| Pattern | Use case |\n|---------|----------|\n| `Task.WhenAll(tasks)` | Complete after every input. Preserve failures on the combined task |\n| `Task.WhenAny(tasks)` | Return the first completed task, whether successful, faulted, or canceled |\n| `TaskCompletionSource<T>` | Bridge callback/event APIs into task-based APIs |\n| `Task.Run(action)` | Offload CPU-bound work to a pool thread |\n| `ValueTask<T>` | Measured optimization when synchronous completion is common |\n\n## Processing Tasks as They Finish\n\nRepeatedly calling `WhenAny` over a shrinking list adds coordination work and makes early-exit cleanup easy to forget. On .NET 9+, `Task.WhenEach` yields each task after it completes. If several tasks finish together, their exact enumeration order is unspecified:\n\n```csharp\nawait foreach (var finished in Task.WhenEach(tasks))\n{\n    // handle each result/fault once available; ties have no defined order\n    Use(await finished);\n}\n```\n\n`TaskScheduler` decides where scheduled task work runs. Async continuations also interact with `SynchronizationContext`, so continuation placement is broader than `TaskScheduler` alone. For bounded concurrent [[Parallelism|fan-out]] over a collection, `Parallel.ForEachAsync` is often clearer than creating every task up front and gating each one with `SemaphoreSlim`.\n\n# Pitfalls\n\n**Unobserved task exceptions.** A fault stays on its task until observed through `await`, `Wait`, `Result`, or `Exception`. If the task becomes collectible first, the runtime can raise `TaskScheduler.UnobservedTaskException`. Modern .NET does not terminate the process by default after that event. Relying on finalization for reporting is still nondeterministic.\n\n```csharp\n// Exception is lost — the task is never awaited or observed\n_ = SendEmailAsync(user);\n```\n\nThe fault-only continuation below observes the fault, but it is not a general fire-and-forget primitive. Application work should normally be awaited or handed to an owned background queue whose worker logs failures and participates in shutdown.\n\n```csharp\n_ = SendEmailAsync(user).ContinueWith(\n    t => _logger.LogError(t.Exception, \"Email send failed\"),\n    TaskContinuationOptions.OnlyOnFaulted);\n```\n\n**`ValueTask` consumed more than once.** A `ValueTask` backed by `IValueTaskSource` may reuse pooled state, so multiple awaits, concurrent awaits, or mixing `Result` with awaiting can break its contract. A value backed by a `Task` or immediate result is more permissive, but callers should not depend on knowing that representation.\n\n```csharp\nvar vt = GetCachedValueAsync();\nvar r1 = await vt; // OK\nvar r2 = await vt; // WRONG — may read from a recycled object\n```\n\nA single `AsTask()` call converts the `ValueTask` to a `Task` when the result must be cached, shared, or awaited more than once.\n\n**`Task.Run` for asynchronous I/O.** Wrapping an already asynchronous API adds a ThreadPool scheduling hop. The worker normally returns after the I/O has been initiated, so it is inaccurate to say that it stays occupied for the whole wait, but the wrapper still adds no useful asynchrony.\n\n```csharp\n// Pointless — GetStringAsync is already async\nvar result = await Task.Run(() => _http.GetStringAsync(url));\n```\n\nAwaiting the async method directly gives the same asynchrony without the scheduling hop.\n\n**Unbounded fan-out.** Creating thousands of operations can exhaust connection limits, rate limits, memory, or downstream capacity. Pure asynchronous waiting does not consume one ThreadPool worker per task, but every completion and CPU segment still needs processing.\n\n```csharp\n// Dangerous with large collections — no concurrency limit\nvar results = await Task.WhenAll(items.Select(i => ProcessAsync(i)));\n```\n\nConcurrency is bounded according to the scarce resource. `Parallel.ForEachAsync`, a channel-backed worker set, or `SemaphoreSlim` can limit work before it reaches the dependency or [[ThreadPool]].\n\n# Questions\n\n<!-- qard-id: f3889ce8-c8c4-492a-b4a0-d4b3be95ed90 -->\n> [!qard]- Why is `Task` not equivalent to a thread?\n> A `Task` is an object that represents an operation and its eventual outcome: a result, a failure or cancellation. A thread is an execution resource that runs code. A task uses a thread only while code belonging to it is actually running.\n>\n> - **CPU-bound tasks:** with the default scheduler, which `Task.Run` uses, their delegates are queued to the ThreadPool, where a limited set of reusable threads runs many tasks over time instead of one thread per task. A custom `TaskScheduler` decides for itself where its tasks run, and the `LongRunning` hint typically leads the default scheduler to use a separate non-pool thread.\n> - **I/O-bound tasks:** while the operating system performs the I/O, the pending task holds no managed thread. A thread is needed only to start the operation and to run the code that processes its completion.\n> \n> Creating many tasks therefore does not mean one thread per task, and the number of pending tasks does not show how many threads are busy.\n>\n> [Microsoft: Task-based asynchronous programming](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/task-based-asynchronous-programming) · [Microsoft: TaskScheduler](https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.taskscheduler?view=net-10.0) · [Microsoft: TAP I/O-bound tasks](https://learn.microsoft.com/en-us/dotnet/standard/asynchronous-programming-patterns/implementing-the-task-based-asynchronous-pattern#io-bound-tasks)\n\n<!-- qard-id: db5bfc4e-e700-4619-8af4-682ca20127c6 -->\n> [!qard]- Why does awaiting `Task.Run` inside an ASP.NET Core request usually not help?\n> ASP.NET Core already runs request code on ThreadPool threads. When the request awaits `Task.Run`, its own thread returns to the pool while another pool thread runs the work. The request therefore gains no CPU capacity and frees no net thread. It only adds a scheduling hop.\n>\n> - **Blocking work:** inside `Task.Run` it still blocks a pool thread, just a different one. Synchronous I/O does not become asynchronous I/O.\n> - **Already asynchronous APIs:** awaiting them directly gives the same non-blocking wait without the extra hop.\n> - **Long-running or CPU-heavy work:** it competes with other requests for the same pool threads. It belongs outside the request path, for example in a background service or an out-of-process worker fed by a queue, with the result reported to the client asynchronously.\n> \n> [Microsoft: ASP.NET Core best practices](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/best-practices?view=aspnetcore-10.0) · [Microsoft: Task-based asynchronous programming](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/task-based-asynchronous-programming)\n\n<!-- qard-id: 55bddd1a-2bfc-482a-a86b-0be86ea885a5 -->\n> [!qard]- Why can `Task.WhenAll` reduce elapsed time for independent asynchronous calls?\n> The time saving comes from starting the calls before waiting, so their waits overlap. Awaiting each call in turn makes the total roughly the sum of the call times. Starting all of them first and then awaiting `Task.WhenAll` makes the total approach the slowest call.\n>\n> ```csharp\n> // Sequential: the second call starts only after the first finishes\n> var user = await GetUserAsync(id);\n> var orders = await GetOrdersAsync(id);\n> \n> // Overlapped: both calls are in flight before the wait\n> var userTask = GetUserAsync(id);\n> var ordersTask = GetOrdersAsync(id);\n> await Task.WhenAll(userTask, ordersTask);\n> ```\n>\n> `Task.WhenAll` itself only returns a task that completes when every supplied task has completed. It does not start tasks that were never started, and it does not make synchronous work run in parallel. Awaiting the already-started tasks one by one would also overlap them. `WhenAll` adds one wait for all of them that also records every failure.\n>\n> The gain also requires the calls to be independent and the downstream service to handle them concurrently. If it queues or throttles them, the total moves back toward the sum.\n>\n> [Microsoft: Task.WhenAll](https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.task.whenall?view=net-10.0) · [Microsoft: Task-based asynchronous programming](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/task-based-asynchronous-programming)\n\n> [!qard]- How does `Task.WhenAll` report failures when several of its tasks fail?\n> The task returned by `Task.WhenAll` completes only after every supplied task has finished. If any of them faulted, it ends faulted, and its `Exception` holds an `AggregateException` with the failures from all faulted tasks. Awaiting it, however, rethrows only one of those exceptions.\n>\n> - **The other failures:** after `await` throws, the full set is still available on the combined task's `Exception.InnerExceptions` and on each input task's own `Exception`.\n> - **No early exit:** one failure does not stop or cancel the remaining tasks, and `WhenAll` still waits for all of them.\n> - **Cancellation:** when no task faulted but at least one was canceled, the combined task ends canceled.\n> \n> ```csharp\n> Task all = Task.WhenAll(a, b, c);\n> try\n> {\n>     await all;\n> }\n> catch (Exception)\n> {\n>     // await rethrew one failure; the combined task keeps all of them\n>     var failures = all.Exception?.InnerExceptions;\n>     Log(failures);\n>     throw;\n> }\n> ```\n>\n> [Microsoft: Task.WhenAll](https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.task.whenall?view=net-10.0)\n\n<!-- qard-id: cc606580-b441-46d2-82a6-9d4928c9c59e -->\n> [!qard]- When is `ValueTask` worth using instead of `Task`?\n> `ValueTask` is worth it only when profiling shows that `Task` allocations on a hot path matter. The typical case is a method called very often that usually completes synchronously, such as a read served from an internal buffer. `Task` remains the default.\n>\n> - **What it saves:** when the result is already available, `ValueTask<T>` carries it directly instead of allocating a `Task<T>`. It can also wrap a reusable `IValueTaskSource`, so some asynchronous completions avoid an allocation too.\n> - **What it costs:** the struct holds more fields than a single `Task` reference, so returning and copying it costs more. It also has stricter consumption rules: it is awaited only once, never awaited concurrently, and its `Result` is not read before it completes. A pooled source can be reused for another operation after the first consumption, so breaking these rules gives undefined behavior, such as reading another operation's result.\n> \n> A caller that must store, share or await the result more than once calls `AsTask()` once and uses the resulting `Task`.\n>\n> [Microsoft: ValueTask](https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.valuetask?view=net-10.0)\n\n> [!qard]- Why must the task returned by `await Task.WhenAny(...)` usually be awaited again?\n> The first await obtains a completed input task, not that task's result. `WhenAny` itself completes successfully even when the selected task faulted or was canceled. Awaiting the selected task observes its result, failure, or cancellation:\n>\n> ```csharp\n> Task<string> finished = await Task.WhenAny(first, second);\n> string result = await finished;\n> ```\n>\n> The other input tasks continue running unless separately canceled. A requested delay is not a guarantee of which continuation completes first. [Microsoft: Task.WhenAny](https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.task.whenany?view=net-10.0)\n\n> [!qard]- In what order does `Task.WhenAll<T>` return successful results?\n> Results follow the order of the supplied tasks, not their completion order. If the inputs are `first`, `second`, and `third`, element 0 is the result of `first` even if it finishes last. Completion-order processing needs a different composition, such as observing tasks from `WhenEach`; it must not reinterpret the `WhenAll` array as a completion log. [Microsoft: Task.WhenAll](https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.task.whenall?view=net-10.0)\n\n# References\n\n- [Task class](https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.task)\n- [Understanding the whys, whats, and whens of ValueTask](https://devblogs.microsoft.com/dotnet/understanding-the-whys-whats-and-whens-of-valuetask/)\n",
-          "hash": "f13774fd8ca6a4a3bcf2ef532d22422c96737fb29582d96188b1d0f826789ae8",
-          "topic": "Programming",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "new"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Tasks.md",
-          "outcome": "keep",
-          "reason": "Audited the whole note against current text and .NET behavior. The opening separates Task from threads. The mechanism section covers await's completed-awaiter fast path, creation and scheduling (StartNew uses TaskScheduler.Current, Unwrap for async lambdas, LongRunning as a hint), and completed-task factories. Both fan-out examples are correct: WhenAll enumerates the lazy Select, awaiting it rethrows only one exception, and the catch inspects all faults. WhenEach is correctly marked .NET 9+ with unspecified tie order. The pitfalls are accurate: the unobserved-exception policy in modern .NET, ValueTask single-consumption and AsTask, the Task.Run hop around async I/O, and unbounded fan-out. The cards each test one gradeable task and match the prose: WhenAll failure and result order, WhenAny re-await, ValueTask tradeoffs, Task versus thread, and Task.Run in ASP.NET Core. They carry primary Microsoft sources. No known violations are open. I found no factual defect, repetition or ordering problem that justifies an edit."
-        }
-      ],
-      "feedback": []
-    },
-    "source_hashes": {
-      "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Tasks.md": "f13774fd8ca6a4a3bcf2ef532d22422c96737fb29582d96188b1d0f826789ae8"
-    },
-    "feedback_keys": [],
-    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Tasks.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-04T20:06:29.472037Z",
-    "review_evidence": {
-      "raw_review": {
-        "verdict": "CLEAN",
-        "overall_reason": "Independent whole-note audit found no factual, ordering, wording or card-quality defect. The keep is justified and no edits were proposed.",
-        "change_checks": [],
-        "notes": [
-          {
-            "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Tasks.md",
-            "verdict": "CLEAN",
-            "summary": "The note is accurate and well ordered. It moves from the Task-versus-thread idea to the mechanism, fan-out and failure aggregation, composition, pitfalls and cards. The prose is direct and keeps the conditions and exceptions. Each card tests one gradeable task. I found no defect that justifies an edit.",
-            "page_type": "Concept — typed frontmatter, optional Questions and References. Qard callouts keep their hidden IDs.",
-            "current_text_evidence": [
-              {
-                "quote": "The abstraction says nothing about whether a thread is currently executing the operation.",
-                "line_start": 17,
-                "reason": "The opening states the central idea, that a Task is not a thread. Later sections and the first card build on it."
-              },
-              {
-                "quote": "The default scheduler is `TaskScheduler.Current`, so behavior can depend on the caller's context.",
-                "line_start": 34,
-                "reason": "This is the correct StartNew caveat. It gives the condition that changes behavior."
-              },
-              {
-                "quote": "Awaiting it propagates one exception, so code that needs the full set must inspect the combined task or the individual tasks after completion.",
-                "line_start": 59,
-                "reason": "This is accurate WhenAll semantics. The catch-when example that follows is consistent with it."
-              },
-              {
-                "quote": "On .NET 9+, `Task.WhenEach` yields each task after it completes.",
-                "line_start": 89,
-                "reason": "The version condition is correct, and the tie order is correctly described as unspecified."
-              },
-              {
-                "quote": "Modern .NET does not terminate the process by default after that event.",
-                "line_start": 104,
-                "reason": "This matches the post-.NET 4.5 unobserved-exception policy."
-              },
-              {
-                "quote": "> [!qard]- Why must the task returned by `await Task.WhenAny(...)` usually be awaited again?",
-                "line_start": 212,
-                "reason": "This is a focused card with a mechanism-based answer and a primary Microsoft source. It tests one gradeable task."
-              }
-            ],
-            "target_resolution": "JUSTIFIED UNCHANGED",
-            "split_suggestion": "No split: Task semantics, composition, failure handling and pitfalls are tightly coupled and cohere as one note.",
-            "findings": [],
-            "source_checks": [],
-            "rejection_equivalence": [],
-            "quality": {
-              "accuracy": "PASS",
-              "clarity": "PASS",
-              "question_quality": "PASS",
-              "identity_safety": "PASS",
-              "rules_compliance": "PASS"
-            }
-          }
-        ]
-      },
-      "bindings": [
-        {
-          "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Tasks.md",
-          "citation_index": 1,
-          "reported_line_start": 34,
-          "resolved_line_start": 35
-        },
-        {
-          "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Tasks.md",
-          "citation_index": 2,
-          "reported_line_start": 59,
-          "resolved_line_start": 58
-        },
-        {
-          "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Tasks.md",
-          "citation_index": 3,
-          "reported_line_start": 89,
-          "resolved_line_start": 98
-        },
-        {
-          "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Tasks.md",
-          "citation_index": 4,
-          "reported_line_start": 104,
-          "resolved_line_start": 112
-        },
-        {
-          "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Tasks.md",
-          "citation_index": 5,
-          "reported_line_start": 212,
-          "resolved_line_start": 234
-        }
-      ],
-      "source_hashes": {
-        "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Tasks.md": "f13774fd8ca6a4a3bcf2ef532d22422c96737fb29582d96188b1d0f826789ae8"
-      },
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
-    },
-    "completed_review": {
-      "verdict": "CLEAN",
-      "overall_reason": "Independent whole-note audit found no factual, ordering, wording or card-quality defect. The keep is justified and no edits were proposed.",
-      "change_checks": [],
-      "notes": [
-        {
-          "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Tasks.md",
-          "verdict": "CLEAN",
-          "summary": "The note is accurate and well ordered. It moves from the Task-versus-thread idea to the mechanism, fan-out and failure aggregation, composition, pitfalls and cards. The prose is direct and keeps the conditions and exceptions. Each card tests one gradeable task. I found no defect that justifies an edit.",
-          "page_type": "Concept — typed frontmatter, optional Questions and References. Qard callouts keep their hidden IDs.",
-          "current_text_evidence": [
-            {
-              "quote": "The abstraction says nothing about whether a thread is currently executing the operation.",
-              "line_start": 17,
-              "reason": "The opening states the central idea, that a Task is not a thread. Later sections and the first card build on it."
-            },
-            {
-              "quote": "The default scheduler is `TaskScheduler.Current`, so behavior can depend on the caller's context.",
-              "line_start": 35,
-              "reason": "This is the correct StartNew caveat. It gives the condition that changes behavior."
-            },
-            {
-              "quote": "Awaiting it propagates one exception, so code that needs the full set must inspect the combined task or the individual tasks after completion.",
-              "line_start": 58,
-              "reason": "This is accurate WhenAll semantics. The catch-when example that follows is consistent with it."
-            },
-            {
-              "quote": "On .NET 9+, `Task.WhenEach` yields each task after it completes.",
-              "line_start": 98,
-              "reason": "The version condition is correct, and the tie order is correctly described as unspecified."
-            },
-            {
-              "quote": "Modern .NET does not terminate the process by default after that event.",
-              "line_start": 112,
-              "reason": "This matches the post-.NET 4.5 unobserved-exception policy."
-            },
-            {
-              "quote": "> [!qard]- Why must the task returned by `await Task.WhenAny(...)` usually be awaited again?",
-              "line_start": 234,
-              "reason": "This is a focused card with a mechanism-based answer and a primary Microsoft source. It tests one gradeable task."
-            }
-          ],
-          "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: Task semantics, composition, failure handling and pitfalls are tightly coupled and cohere as one note.",
-          "findings": [],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "PASS",
-            "question_quality": "PASS",
-            "identity_safety": "PASS",
-            "rules_compliance": "PASS"
-          }
-        }
-      ]
     }
   }
 }
