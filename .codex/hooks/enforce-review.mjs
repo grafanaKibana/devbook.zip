@@ -37,7 +37,7 @@ try {
         reason: "Learn assignment gate: " + [
           ...result.problems,
           ...result.unassigned.map((note) => `${note.path}: ${note.cards} card(s) have no objective in ${note.course}`),
-        ].join("; ") + ". Link each note to a semantically fitting existing Learn objective; add an objective only for a distinct competency. Preserve existing identities, prerequisites and progress. Run node .scripts/qard-learn-sync/check.cjs, then finish the required note review.",
+        ].join("; ") + ". Resolve reported integrity problems from verified saved evidence; never infer mastery. Link unassigned notes to a semantically fitting existing Learn objective, adding one only for a distinct competency. Preserve existing identities, prerequisites and progress. Run node .scripts/qard-learn-sync/check.cjs, then finish the required note review.",
       }));
       process.exit(0);
     }

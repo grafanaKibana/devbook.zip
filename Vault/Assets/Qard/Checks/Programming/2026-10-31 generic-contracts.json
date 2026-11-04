@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "createdAt": 1793475024606,
+  "createdAt": 1793774027307,
   "mastery": "Assets/Qard/Courses/Programming Mastery.md",
   "course": "Programming",
   "objective": "generic-contracts",
@@ -10,30 +10,26 @@
     {
       "id": "c1",
       "type": "long",
-      "prompt": "An `IDescribable` interface declares `string Describe()`. A helper receives an existing value, calls `Describe()`, and returns that value with its original static type. Unrelated classes and structs should be supported.\n\nExplain why `T DescribeAndReturn<T>(T value) where T : IDescribable` fits this contract. Why would accepting and returning `object` with an internal cast weaken it, and why are `class`, a shared base class, and `new()` unnecessary constraints?",
-      "marks": 4,
+      "prompt": "An archive stores one kind of item. Compare these proposed contracts:\n\n```csharp\n// A\ninterface IArchive<T>\n{\n    void Save(T item);\n    T Load(string key);\n}\n\n// B\ninterface IArchive\n{\n    void Save(object item);\n    object Load(string key);\n}\n```\n\nAn application needs an archive of `Invoice` objects. Explain how A preserves the intended contract when saving and loading, and what responsibility B leaves to runtime checks or caller casts. Use an attempt to save a `TemperatureReading` as a concrete example.",
+      "marks": 3,
       "rubric": [
         {
-          "point": "Explains that the interface constraint guarantees Describe() is available to the generic implementation.",
+          "point": "Explains that choosing IArchive<Invoice> binds both Save's parameter and Load's result to Invoice through the same type parameter.",
           "marks": 1
         },
         {
-          "point": "Explains that using T for both parameter and return type preserves the caller's concrete static type.",
+          "point": "Explains that saving an unrelated TemperatureReading through IArchive<Invoice> is rejected at compile time, whereas B accepts it at the method-call boundary.",
           "marks": 1
         },
         {
-          "point": "Explains that the generic constraint rejects unsupported type arguments at compile time, whereas an object-to-interface cast can fail at runtime.",
-          "marks": 1
-        },
-        {
-          "point": "Explains that class excludes structs, a base-class constraint imposes an unnecessary hierarchy, and new() is unnecessary because the value already exists.",
+          "point": "Explains that A returns Invoice without a cast, whereas B requires a cast or runtime type check and can fail at runtime if the stored value has the wrong type.",
           "marks": 1
         }
       ],
-      "model": "`where T : IDescribable` guarantees that the implementation can call `Describe()` without a cast. Using the same `T` for the input and return type preserves the caller's concrete static type.\n\nAn `object` parameter accepts values that do not implement `IDescribable`, so an internal cast can fail at runtime. Returning `object` also loses the specific return type and requires the caller to recover it. The generic constraint checks the required capability at compile time.\n\n`class` would exclude supported structs. A shared base class would impose an inheritance relationship the operation does not need. `new()` would require a public parameterless constructor even though the helper receives an existing value and constructs nothing.",
+      "model": "With `IArchive<Invoice>`, the same type argument makes `Save` accept an `Invoice` and makes `Load` return an `Invoice`. The compiler rejects `Save(new TemperatureReading())` when `TemperatureReading` is unrelated to `Invoice`.\n\nB accepts either object, so its signature cannot enforce an invoice-only archive. Its implementation must check that rule at runtime. Loading also returns only `object`; the caller must check or cast it. A cast to `Invoice` can fail at runtime if a different kind of item was stored. A preserves this type relationship in the API.",
       "source": {
         "path": "Home/Programming/NET/CSharp/Fundamentals/Generics.md",
-        "heading": "Constraints"
+        "heading": "Tradeoffs"
       },
       "objective": "generic-contracts",
       "goal": "explain"
@@ -41,32 +37,68 @@
     {
       "id": "c2",
       "type": "long",
-      "prompt": "A conversion helper invokes a supplied function and returns its result. It must support converting a `SensorReading` into a `string`.\n\nCompare these signatures:\n\n- `T Convert<T>(T input, Func<T, T> convert)`\n- `TResult Convert<TSource, TResult>(TSource input, Func<TSource, TResult> convert)`\n\nExplain why the second signature expresses the required type relationships better. Does its implementation need constraints on either type parameter if it only invokes `convert(input)`? Explain.",
-      "marks": 3,
+      "prompt": "A method receives an existing value of type `T` and calls its `Describe()` method. That method is declared by `IDescribable`. Both classes and structs implement the interface, and the algorithm never constructs a `T`.\n\nA developer proposes `where T : class, IDescribable, new()`. Explain which constraint the algorithm needs and why each additional constraint unnecessarily restricts callers. Why would removing all constraints and casting the value to `IDescribable` inside the method weaken the contract?",
+      "marks": 4,
       "rubric": [
         {
-          "point": "Explains that the first signature uses one type parameter for both input and output, so it cannot express SensorReading and string as distinct static types without widening the contract.",
+          "point": "Identifies where T : IDescribable as sufficient and explains that it guarantees Describe is available to the generic implementation.",
           "marks": 1
         },
         {
-          "point": "Explains that the second signature allows distinct source and result types while requiring the function to accept TSource and produce TResult, preserving compile-time checks without object casts.",
+          "point": "Explains that class unnecessarily excludes structs that implement IDescribable.",
           "marks": 1
         },
         {
-          "point": "Explains that no constraints are needed because invoking the typed function requires no additional capabilities from TSource or TResult.",
+          "point": "Explains that new() unnecessarily requires a public parameterless constructor because the algorithm receives an existing value and never constructs T.",
+          "marks": 1
+        },
+        {
+          "point": "Explains that an internal cast allows unsuitable type arguments through the public signature and moves detection to runtime, where the cast can fail.",
           "marks": 1
         }
       ],
-      "model": "The first signature ties the input and output to the same `T`. It cannot directly preserve `SensorReading` as the input type and `string` as the result type. Choosing `object` to accommodate both would lose that precise relationship.\n\nThe second signature represents those types independently: `TSource` can be `SensorReading` and `TResult` can be `string`. The delegate connects them by accepting the source type and returning the result type. The compiler checks this relationship, and callers receive a `string` without casting.\n\nNeither type parameter needs a constraint. The helper only invokes the supplied delegate; it does not construct either type or call members on their values.",
+      "model": "The required constraint is `where T : IDescribable`. It guarantees that every permitted `T` supports `Describe()`, so the compiler allows the call without a cast.\n\n`class` excludes valid struct implementations even though the algorithm needs no reference-type behavior. `new()` requires a public parameterless constructor even though the method never creates an instance; it can reject otherwise suitable classes.\n\nWith no constraint, callers can supply a type that does not implement `IDescribable`. Casting inside the method checks that requirement at runtime and can fail. The interface constraint states and enforces the requirement at compile time.",
       "source": {
         "path": "Home/Programming/NET/CSharp/Fundamentals/Generics.md",
-        "heading": "Pitfalls"
+        "heading": "Constraints"
       },
       "objective": "generic-contracts",
       "goal": "explain"
     }
   ],
-  "answers": {},
-  "marks": {},
-  "status": "ready"
+  "answers": {
+    "c1": {
+      "unknown": true
+    },
+    "c2": {
+      "unknown": true
+    }
+  },
+  "marks": {
+    "c1": {
+      "score": 0,
+      "awarded": [
+        false,
+        false,
+        false
+      ],
+      "annotations": [],
+      "mistake": "unknown",
+      "feedback": "You said you didn't know. The model answer shows what was needed."
+    },
+    "c2": {
+      "score": 0,
+      "awarded": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "annotations": [],
+      "mistake": "unknown",
+      "feedback": "You said you didn't know. The model answer shows what was needed."
+    }
+  },
+  "status": "marked",
+  "finishedAt": 1793777921680
 }

@@ -90,6 +90,36 @@ function unassignedSources(courses, sources, resolveLink = link => link.replace(
     .sort((left, right) => left.path.localeCompare(right.path));
 }
 
+function completedLessonProblems(courses, lessons) {
+  const problems = [], byPath = new Map(courses.map(course => [course.path, course]));
+  const validDay = value => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)
+    && Number.isFinite(Date.parse(value + 'T00:00:00Z')) && new Date(value + 'T00:00:00Z').toISOString().slice(0, 10) === value;
+  for (const record of lessons) {
+    const invalid = reason => problems.push(`${record.path}: cannot verify Learn progress (${reason}). Review the stored lesson evidence.`);
+    let lesson;
+    try { lesson = JSON.parse(record.text); }
+    catch { invalid('invalid lesson JSON'); continue; }
+    if (!lesson || typeof lesson !== 'object' || Array.isArray(lesson) || lesson.version !== 1) {
+      invalid('unsupported or invalid lesson format; expected version 1');
+      continue;
+    }
+    const row = byPath.get(lesson.mastery)?.rows.find(row => row.id === lesson.objective);
+    if (!row) continue;
+    if (lesson.finishedAt === undefined && lesson.close === undefined) continue;
+    if (!Number.isFinite(lesson.finishedAt)) { invalid('invalid finishedAt timestamp'); continue; }
+    if (lesson.close === undefined) continue; // Finished lessons may still be awaiting the writer's close result.
+    if (lesson.accepted !== true || !lesson.close || typeof lesson.close !== 'object'
+      || Array.isArray(lesson.close) || !validDay(lesson.close.nextCheck)) {
+      invalid('invalid completed lesson acceptance, close result or nextCheck date');
+      continue;
+    }
+    if (row.state === 'new' && !row.due && !row.evidence) {
+      problems.push(`Possible Learn progress loss: ${lesson.mastery}#${row.id} is new with no due date or evidence, but completed lesson ${record.path} records nextCheck ${lesson.close.nextCheck}. Review lesson/check evidence and recover verified progress.`);
+    }
+  }
+  return problems;
+}
+
 
 function linesOf(text) {
   return [...text.matchAll(/([^\r\n]*)(\r\n|\n|$)/g)]
@@ -295,4 +325,4 @@ function reconcileCourse(text, { sources, renames = [], day, initialRevisions = 
   return { text: merged, ...result };
 }
 
-module.exports = { inspectCourse, reconcileCourse, renameSourcePath: renamedPath, sourceSnapshot, unassignedSources };
+module.exports = { inspectCourse, reconcileCourse, renameSourcePath: renamedPath, sourceSnapshot, unassignedSources, completedLessonProblems };
