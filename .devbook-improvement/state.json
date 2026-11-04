@@ -2089,11 +2089,11 @@
     "version": 1,
     "id": "8863af0d8e1746298a05f54c5909b04b",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-04T06:42:24.894668Z",
-    "elapsed_seconds": 87.25059150000003,
+    "elapsed_seconds": 97.03273750000002,
     "calls_reserved": 3,
-    "responses_received": 2,
+    "responses_received": 3,
     "attempted_paths": [
       "Vault/Home/AI & ML/AI & ML.md"
     ],
@@ -2174,7 +2174,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-04T06:43:52.144576Z",
+    "checkpoint_at": "2026-11-04T06:44:01.926729Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -9718,5 +9718,54 @@
       },
       "feedback_snapshot": []
     }
+  },
+  "pending_author_proposal": {
+    "workload_id": "8863af0d8e1746298a05f54c5909b04b",
+    "topic_id": "ai-ml-4edf0823",
+    "batch": {
+      "topic": "AI & ML",
+      "topic_id": "ai-ml-4edf0823",
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Agents.md",
+          "content": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"Systems where an LLM controls part of the workflow, calling tools, making decisions, or directing other LLMs.\"\ntags: [FolderNote]\npublish: true\nlevel: [\"3\"]\nstatus: Creation\npriority: High\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Agents/Agents\"\nflashcard_uid: \"ef9c99bb\"\ncreated: \"2026-02-10T16:03:55.000Z\"\nmodified: \"2026-11-02T09:03:54.806Z\"\n---\n\nAn agentic system gives an LLM control over part of a workflow: calling tools, making decisions, or directing other LLMs. The term \"agent\" is used loosely, so system design starts with one practical boundary:\n\n- **Workflows** are systems where LLMs and tools are orchestrated through predefined code paths. The developer controls the sequence. The LLM handles individual steps.\n- **Agents** are systems where the LLM dynamically directs its own process and tool usage, deciding what to do next based on results so far.\n\nThe simplest design that meets the need is usually the better choice. A single LLM call with good prompting and retrieval is the simplest starting point. Workflow orchestration belongs next, once a single call falls short. Autonomous agents earn their extra complexity only when the task is genuinely open-ended and unpredictable.\n\nAn agent joins the four steering disciplines of the [[Home/AI & ML/LLM/LLM|engineering ladder]]: precise instructions ([[Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering|Prompt Engineering]]), a curated window ([[Home/AI & ML/LLM/Context Engineering/Context Engineering|Context Engineering]]), a capability surface ([[Home/AI & ML/LLM/Harness Engineering/Harness Engineering|Harness Engineering]] — [[Tool Design]] and [[Model Context Protocol|MCP]]), and a controlled runtime ([[Home/AI & ML/LLM/Loop Engineering/Loop Engineering|Loop Engineering]] — the [[Agent Loop]] and [[Multi-Agentic Systems|multi-agent topologies]]). The design question is how much control to place in code and how much to give the model. Measuring the result is [[Home/AI & ML/LLM/Agents/Evaluation/Evaluation|Agent Evaluation]].\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# The Augmented LLM\n\nAn augmented LLM can use retrieval, [[Tool Design|tools]], and memory. The model decides what to say or which tool to request. The surrounding harness builds the context, validates and runs tool calls, enforces operational limits, and carries selected state into later calls. [[Agent Loop]] follows that boundary across repeated decisions. This single-agent unit should work well before orchestration is added. Model choice, prompts, and clear tool contracts usually matter more than another control layer.\n\n[[Model Context Protocol|Model Context Protocol (MCP)]] standardizes how an augmented LLM connects to external tools and data sources.\n\n# Workflow Patterns\n\nWhen one augmented LLM is not enough and full autonomy is excessive, five workflow patterns cover the middle ground: **prompt chaining**, **routing**, **parallelization**, **orchestrator-workers**, and **evaluator-optimizer**. The first pattern that fits is usually enough. Orchestrator-workers decides subtasks at runtime, making it a useful bridge into [[Multi-Agentic Systems]] for complex coding or research.\n\n[[Home/AI & ML/LLM/Agents/Workflow Patterns|Workflow Patterns]] describes each pattern, its control flow, and the conditions that make it fit.\n\n# Autonomous Agents\n\nAutonomy fits tasks whose steps cannot be predicted and whose control flow cannot be expressed as a fixed workflow. The model uses tools in a loop: observe the latest result, choose an action, execute it, and repeat.\n\n```mermaid\nflowchart TD\n    H[Human task] --> A[Agent plans next step]\n    A --> T[Execute tool or action]\n    T --> E[Observe result]\n    E --> C{Task complete?}\n    C -->|No| A\n    C -->|Yes| R[Return result to human]\n    E -->|Blocked| HI[Ask human for input]\n    HI --> A\n```\n\nThat flexibility costs more model calls and introduces compounding error. A small mistake can become the premise for every later step. Three design principles contain the risk:\n\n1. **Simplicity** — the control loop stays small. Extra branches make failures harder to isolate.\n2. **Transparency** — the runtime records decisions, tool calls, results, and validation outcomes. A useful trace shows where the run diverged without depending on hidden model reasoning.\n3. **Tool quality** — tool descriptions, parameters, errors, and outputs form an API contract. Ambiguous tools produce ambiguous actions.\n\nAgents work best when progress is observable. Tests constrain coding tasks, resolution criteria constrain support work, and cited evidence constrains research. Without a checkable success signal, the loop has no reliable way to distinguish progress from drift. Measuring task success, trajectory quality, tool-call correctness, and reliability across stochastic runs is [[Home/AI & ML/LLM/Agents/Evaluation/Evaluation|Agent Evaluation]].\n\nFor patterns on coordinating multiple agents, see [[Multi-Agentic Systems]].\n\n# Memory Systems\n\nAgent memory is durable state with explicit rules for storage and reuse. It is more than a transcript replayed on every turn or a vector index. Raw messages, tool calls, and results remain trace evidence. A promotion step chooses which observations become durable records, adds scope and provenance, and rejects unverified or duplicate entries. Later calls rebuild a bounded context from applicable rules, stable preferences, relevant memories, and recent state.\n\nA useful design separates five kinds of record. This is an architectural choice, not a universal standard. The separation makes one problem visible: each kind of memory needs a different read path.\n\n| Memory | Represents | Read path |\n| --- | --- | --- |\n| Policy | Authoritative constraints and procedures | Exact, exhaustive lookup |\n| Preference | Stable user or tenant parameters | Exact, exhaustive lookup |\n| Fact | Durable assertions with provenance | Scoped lexical, semantic, or hybrid retrieval |\n| Episode | A completed task or reusable experience | Scoped retrieval over a compact summary |\n| Trace | Raw execution and conversation events | Replay, audit, and extraction source |\n\nDurable records need rules for status, supersession, retention, and deletion. When a record changes, derived indexes and caches must be invalidated. Embeddings are a rebuildable search projection over canonical content, not the only copy of a fact. Authorization scope must be checked before ranking. Relevance metadata cannot enforce access.\n\nMemory systems usually repeat three operations: `record → recall → consolidate`. Consolidation turns raw observations into smaller durable records. Scheduled summaries are another form of derived state. Neither changes model weights or makes answers more accurate by itself. Promoted facts still need provenance, privacy controls, and evaluation.\n\n# Questions\n\n<!-- qard-id: ea50cefb-21a2-42d5-8eed-b2ddc02f1151 -->\n> [!qard]- When does a workflow fit better than an autonomous agent?\n> A workflow fits better when the steps and branches can be defined in advance. Code then controls the path, and the model handles individual steps inside it. An autonomous agent is justified only when the next action must depend on intermediate results that cannot be anticipated, and that flexibility is worth its extra cost and risk.\n>\n> | Aspect | Workflow | Autonomous agent |\n> |---|---|---|\n> | Who chooses the next step | Application code follows predefined paths. The model works inside individual steps or picks one of several predefined branches. | The model decides its next action and tool use from the results so far. |\n> | Predictability | The possible paths are known before the run, so each one can be tested and reproduced. | The path emerges at runtime, so two runs of the same task can take different routes. |\n> | Cost and latency | Easier to predict, because the possible calls follow from the defined paths. | Depend on how many model and tool calls the agent decides to make. |\n> | Failure exposure | Failures occur at known steps, where code can add checks before the next step runs. | An early mistake can become the premise for later steps and compound. |\n>\n> The usual default is the simplest design that meets the need: a single well-prompted call first, a workflow when one call is not enough, and an agent only when no fixed path can express the task.\n>\n> [Building Effective AI Agents](https://www.anthropic.com/engineering/building-effective-agents)\n\n<!-- qard-id: 33550e71-28d8-4ee2-b8c5-28bc5fc1d793 -->\n> [!qard]- How can errors compound during an autonomous agent run?\n> Errors compound because each step builds on what earlier steps produced. An agent reasons over earlier observations, acts, and feeds the new result into its next decision. A wrong assumption or misread tool result therefore does not stay one bad output: it becomes the premise for later actions. For example, an agent that looks up the wrong order can then refund, email and log against that order, with every step consistent with the original mistake.\n>\n> [ReAct: Synergizing Reasoning and Acting in Language Models](https://arxiv.org/abs/2210.03629) · [Building Effective AI Agents](https://www.anthropic.com/engineering/building-effective-agents)\n\n> [!qard]- Which controls contain error propagation during an autonomous agent run?\n> Several design controls contain the risk that an earlier mistake becomes the premise for later actions:\n>\n> - **Step, cost or time limits** set for the task end a run that keeps acting without converging, so drift has a bounded cost.\n> - **Checks against expected outcomes**, such as tests or validation of tool results, can catch bad progress before more steps depend on it.\n> - **Recovery or escalation paths** define what happens when the run cannot proceed safely, such as stopping with a report or asking a human for input.\n> - **Traces** of decisions, tool calls and results show where the run diverged, which makes the failure diagnosable.\n>\n> These controls reduce risk; they do not guarantee that the agent recovers or reaches a correct result.\n>\n> [ReAct: Synergizing Reasoning and Acting in Language Models](https://arxiv.org/abs/2210.03629) · [Building Effective AI Agents](https://www.anthropic.com/engineering/building-effective-agents)\n\n<!-- qard-id: c989c5db-9cf9-4d2e-ae61-774921321d33 -->\n> [!qard]- What makes a task a good fit for an autonomous agent?\n> An agent is useful when the path cannot be fully specified in advance and intermediate results must influence the next action. The outcome still needs criteria that can eventually determine success or failure; delayed feedback can work when execution has a timeout, checkpoints, and a recovery plan. If success stays vague, the system cannot tell whether another action helped. [Building Effective AI Agents](https://www.anthropic.com/engineering/building-effective-agents)\n\n# References\n\n- [Building Effective Agents (Anthropic Engineering)](https://www.anthropic.com/engineering/building-effective-agents)\n- [Microsoft Agent Framework — Overview (Microsoft Learn)](https://learn.microsoft.com/en-us/agent-framework/overview/)\n",
+          "hash": "b81df751eb3f0c1a523bb5b499f744a23a7629b26032f8f5ee788a030feaaca5",
+          "topic": "AI & ML",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "264d16c1cdd0550e8de34525350fcc463d41b1c8095a38a38008f9f84304bb03",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Agents.md",
+          "outcome": "keep",
+          "reason": "Audited the whole note against its text and the Anthropic 'Building Effective Agents' source. The workflow/agent definitions match that source. The simplicity-first ordering, the augmented-LLM description, the loop diagram, and the three principles (simplicity, transparency, tool quality) are accurate and consistent. The memory section hedges its five-way split as an architectural choice and keeps read paths, authorization-before-ranking, and rebuildable embeddings coherent. The cards each test one gradeable task: workflow vs. agent, error compounding, containing controls, and task fit. Each answer names mechanisms and limits and cites a suitable primary source. The links to sibling notes explain why the relationship matters. The intro, the Workflow Patterns pointer and the Autonomous Agents section avoid duplicating each other. No known violations are listed. No factual error, readability gap or card defect was found, so edits would only be cosmetic."
+        }
+      ],
+      "feedback": [],
+      "decisions": []
+    },
+    "source_hashes": {
+      "Vault/Home/AI & ML/LLM/Agents/Agents.md": "b81df751eb3f0c1a523bb5b499f744a23a7629b26032f8f5ee788a030feaaca5"
+    },
+    "feedback_keys": [],
+    "rules_hash": "264d16c1cdd0550e8de34525350fcc463d41b1c8095a38a38008f9f84304bb03",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/AI & ML/LLM/Agents/Agents.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-04T06:44:01.926700Z"
   }
 }
