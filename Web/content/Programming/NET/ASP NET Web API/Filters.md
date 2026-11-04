@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-19T23:08:30.000Z
-modified: 2026-11-02T09:03:54.806Z
+modified: 2026-11-04T13:22:56.731Z
 published: 2026-07-08T13:14:17.319Z
 topic:
   - Programming
@@ -153,6 +153,8 @@ Attributes cannot receive runtime services through their own constructors, so at
 > - Exceptions from middleware, routing or Minimal API handlers, which run outside the controller-filter pipeline.
 >
 > [Microsoft: Filters in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/mvc/controllers/filters?view=aspnetcore-10.0)
+
+<!-- qard-id: 88201824-3803-4d3e-892a-427b12e49301 -->
 
 > [!qard]- What happens after an ASP.NET Core controller exception filter handles an exception?
 >

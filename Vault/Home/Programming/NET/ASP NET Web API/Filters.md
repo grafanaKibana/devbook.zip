@@ -10,7 +10,7 @@ qard-deck: "Programming"
 qard-topic: "NET/ASP NET Web API/Filters"
 flashcard_uid: "ef27222b"
 created: "2026-02-19T23:08:30.000Z"
-modified: "2026-11-02T09:03:54.806Z"
+modified: "2026-11-04T13:22:56.731Z"
 published: "2026-07-08T13:14:17.319Z"
 ---
 
@@ -147,6 +147,7 @@ Attributes cannot receive runtime services through their own constructors, so at
 >
 > [Microsoft: Filters in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/mvc/controllers/filters?view=aspnetcore-10.0)
 
+<!-- qard-id: 88201824-3803-4d3e-892a-427b12e49301 -->
 > [!qard]- What happens after an ASP.NET Core controller exception filter handles an exception?
 > - **Handled:** the filter sets `ExceptionHandled` to `true` or assigns a `Result`, and the exception stops propagating. A supplied `Result` is executed as the response. Ordinary result filters do not run around it; only always-run result filters, such as `IAlwaysRunResultFilter` implementations, do.
 > - **Not handled:** the exception leaves the controller-filter pipeline and continues to outer middleware, such as exception-handling middleware.

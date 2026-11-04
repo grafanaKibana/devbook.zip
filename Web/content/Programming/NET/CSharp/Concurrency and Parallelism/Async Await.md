@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-10T16:03:55.000Z
-modified: 2026-11-02T09:03:54.806Z
+modified: 2026-11-04T13:22:56.731Z
 published: 2026-07-08T13:14:17.320Z
 topic:
   - Programming
@@ -216,6 +216,8 @@ A faulted `WhenAll` task records every failure in its `Exception` property, but 
 > - It is not a reliable fix for code that blocks on asynchronous work. Every `await` along the path would need it; keeping the call chain asynchronous is the durable fix.
 >
 > [Microsoft: Task.ConfigureAwait](https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.task.configureawait?view=net-10.0) · [.NET Blog: ConfigureAwait FAQ](https://devblogs.microsoft.com/dotnet/configureawait-faq/) · [Microsoft: HttpContext in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/use-http-context?view=aspnetcore-10.0)
+
+<!-- qard-id: e7d05eae-7ad2-4308-af04-ab1057a8b613 -->
 
 > [!qard]- When is `ConfigureAwait(false)` useful?
 > It fits code that does not require the caller's scheduling context.
