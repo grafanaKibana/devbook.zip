@@ -2149,11 +2149,11 @@
     "version": 1,
     "id": "8863af0d8e1746298a05f54c5909b04b",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-04T06:42:24.894668Z",
-    "elapsed_seconds": 166.97058720000004,
+    "elapsed_seconds": 186.86717850000005,
     "calls_reserved": 6,
-    "responses_received": 5,
+    "responses_received": 6,
     "attempted_paths": [
       "Vault/Home/AI & ML/AI & ML.md",
       "Vault/Home/AI & ML/LLM/Agents/Agents.md"
@@ -2309,7 +2309,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-04T06:45:11.864570Z",
+    "checkpoint_at": "2026-11-04T06:45:31.761161Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -9968,6 +9968,63 @@
       "Vault/Home/AI & ML/LLM/Agents/Evaluation/Agent Benchmarks.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-04T06:45:08.357772Z"
+    "prepared_at": "2026-11-04T06:45:08.357772Z",
+    "completed_review": {
+      "verdict": "CLEAN",
+      "overall_reason": "The note is accurate and well ordered, and the card is a single gradeable task. I found no concrete defect, so keeping it unchanged is justified.",
+      "change_checks": [],
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Agent Benchmarks.md",
+          "verdict": "CLEAN",
+          "summary": "I read the whole note, including opening, table, leaderboard bullets, internal-workload section, worked example, card and references. The explanation order runs from purpose to benchmarks, then how to read scores, then why public scores miss internal workloads, then an example. The claims match the cited benchmark papers, and the example is internally consistent. No edit is needed.",
+          "page_type": "Concept — optional Questions and References present and valid. Frontmatter is typed, the code fence has a language, and the note has no standalone Links section.",
+          "current_text_evidence": [
+            {
+              "quote": "A leaderboard score cannot make the final selection.",
+              "line_start": 18,
+              "reason": "The opening states the main boundary early: public scores shortlist candidates and do not decide between them. This makes the topic recoverable at once."
+            },
+            {
+              "quote": "| tau-bench | Customer-service tools | Complete a transaction under a domain policy, with a simulated user | pass^1 and pass^k |",
+              "line_start": 25,
+              "reason": "The table row matches the tau-bench paper (policy-bound tool use with a simulated user, pass^k reliability). The other rows (SWE-bench hidden tests, GAIA exact match, AgentBench's 8 environments, BFCL AST/executable accuracy) are likewise consistent with their sources."
+            },
+            {
+              "quote": "`pass^k` requires the task to succeed on every one of `k` attempts, so it exposes intermittent failures that an average hides.",
+              "line_start": 36,
+              "reason": "This states the mechanism and its consequence correctly. It keeps reliability separate from average success."
+            },
+            {
+              "quote": "Human verification improves issue and test quality; it does not isolate public tasks from training.",
+              "line_start": 37,
+              "reason": "The note makes the contamination point precisely and avoids overstating what Verified guarantees."
+            },
+            {
+              "quote": "The example exposes missing evidence rather than a winner.",
+              "line_start": 61,
+              "reason": "The worked example is explicitly framed as an evidence gap. The naive read is corrected without inventing a conclusion."
+            },
+            {
+              "quote": "> [!qard]- Why can one base model produce very different results on the same agent benchmark?",
+              "line_start": 66,
+              "reason": "The card is one gradeable task. It is self-contained, has a dependent mechanism-and-why answer, cites τ-bench on the answer side, and keeps its hidden ID."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: benchmarks, how to read leaderboard scores, and why internal evaluation must decide are one coherent selection argument. A split would fragment it.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "identity_safety": "PASS",
+            "question_quality": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ]
+    }
   }
 }
