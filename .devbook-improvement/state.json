@@ -2274,11 +2274,11 @@
     "version": 1,
     "id": "8863af0d8e1746298a05f54c5909b04b",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-04T06:42:24.894668Z",
-    "elapsed_seconds": 418.0752238000001,
+    "elapsed_seconds": 434.6293498000001,
     "calls_reserved": 12,
-    "responses_received": 11,
+    "responses_received": 12,
     "attempted_paths": [
       "Vault/Home/AI & ML/AI & ML.md",
       "Vault/Home/AI & ML/LLM/Agents/Agents.md",
@@ -3480,7 +3480,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-04T06:49:22.969209Z",
+    "checkpoint_at": "2026-11-04T06:49:39.523335Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -11688,6 +11688,153 @@
       "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-04T06:49:19.603166Z"
+    "prepared_at": "2026-11-04T06:49:19.603166Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+            "verdict": "CLEAN",
+            "summary": "The note is accurate, well ordered and non-repetitive. It separates trajectory scoring from outcome and tool-call scoring, defines the four reference modes correctly, and its example, tradeoff table and pitfalls agree with each other. No concrete defect justifies an edit.",
+            "page_type": "Concept — authorable concept note with optional Questions and References present; Qard ID metadata is protected.",
+            "current_text_evidence": [
+              {
+                "quote": "Outcome scoring cannot distinguish a four-step solve from a lucky recovery after six wrong calls.",
+                "line_start": 16,
+                "reason": "The opening states the operating idea and why outcome scoring and tool-call scoring are insufficient."
+              },
+              {
+                "quote": "**Subset** requires every agent call to belong to the allowed reference set (`agent ⊆ reference`).",
+                "line_start": 26,
+                "reason": "The subset and superset definitions are correct and match the LangSmith trajectory-evals modes. The note gives the safety-gate use for subset and the bloat limitation for superset."
+              },
+              {
+                "quote": "Superset match: PASS (all required present)   <- match alone hides the waste",
+                "line_start": 61,
+                "reason": "The worked example shows concretely why the judge adds information that superset matching cannot."
+              },
+              {
+                "quote": "A practical setup gates every run at episode level, then expands failed or high-risk traces into step-level analysis.",
+                "line_start": 47,
+                "reason": "The step-level versus episode-level section ends in a concrete engineering decision with the cost tradeoff."
+              },
+              {
+                "quote": "Visible task success can make a judge rationalize a messy path.",
+                "line_start": 89,
+                "reason": "The pitfalls name concrete failure conditions (brittleness, long traces, outcome leakage) with mitigations."
+              },
+              {
+                "quote": "> [!qard]- When is reference matching a better way to score an agent's trajectory than an LLM judge?",
+                "line_start": 94,
+                "reason": "The single card is one focused comparison with a bounded finite answer. Its hidden ID is retained, and the answer cites the primary source."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: reference matching, judge scoring and step/episode granularity are facets of one coherent evaluation topic, and the note is compact.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "overall_reason": "The whole-note audit found no factual, editorial or question-quality defect. There are no edits, no known violations, and the keep rationale is supported by the current text.",
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+          "citation_index": 2,
+          "reported_line_start": 61,
+          "resolved_line_start": 62
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+          "citation_index": 3,
+          "reported_line_start": 47,
+          "resolved_line_start": 48
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+          "citation_index": 4,
+          "reported_line_start": 89,
+          "resolved_line_start": 90
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+          "citation_index": 5,
+          "reported_line_start": 94,
+          "resolved_line_start": 95
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md": "98621304f05662b55adae77c1bd4d7f7ef15ec72042d9685d8c7a1e48ea08769"
+      },
+      "rules_hash": "264d16c1cdd0550e8de34525350fcc463d41b1c8095a38a38008f9f84304bb03",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CLEAN",
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+          "verdict": "CLEAN",
+          "summary": "The note is accurate, well ordered and non-repetitive. It separates trajectory scoring from outcome and tool-call scoring, defines the four reference modes correctly, and its example, tradeoff table and pitfalls agree with each other. No concrete defect justifies an edit.",
+          "page_type": "Concept — authorable concept note with optional Questions and References present; Qard ID metadata is protected.",
+          "current_text_evidence": [
+            {
+              "quote": "Outcome scoring cannot distinguish a four-step solve from a lucky recovery after six wrong calls.",
+              "line_start": 16,
+              "reason": "The opening states the operating idea and why outcome scoring and tool-call scoring are insufficient."
+            },
+            {
+              "quote": "**Subset** requires every agent call to belong to the allowed reference set (`agent ⊆ reference`).",
+              "line_start": 26,
+              "reason": "The subset and superset definitions are correct and match the LangSmith trajectory-evals modes. The note gives the safety-gate use for subset and the bloat limitation for superset."
+            },
+            {
+              "quote": "Superset match: PASS (all required present)   <- match alone hides the waste",
+              "line_start": 62,
+              "reason": "The worked example shows concretely why the judge adds information that superset matching cannot."
+            },
+            {
+              "quote": "A practical setup gates every run at episode level, then expands failed or high-risk traces into step-level analysis.",
+              "line_start": 48,
+              "reason": "The step-level versus episode-level section ends in a concrete engineering decision with the cost tradeoff."
+            },
+            {
+              "quote": "Visible task success can make a judge rationalize a messy path.",
+              "line_start": 90,
+              "reason": "The pitfalls name concrete failure conditions (brittleness, long traces, outcome leakage) with mitigations."
+            },
+            {
+              "quote": "> [!qard]- When is reference matching a better way to score an agent's trajectory than an LLM judge?",
+              "line_start": 95,
+              "reason": "The single card is one focused comparison with a bounded finite answer. Its hidden ID is retained, and the answer cites the primary source."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: reference matching, judge scoring and step/episode granularity are facets of one coherent evaluation topic, and the note is compact.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "overall_reason": "The whole-note audit found no factual, editorial or question-quality defect. There are no edits, no known violations, and the keep rationale is supported by the current text.",
+      "change_checks": []
+    }
   }
 }
