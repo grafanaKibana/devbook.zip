@@ -3067,9 +3067,9 @@
     "version": 1,
     "id": "792178af26484b3da828d4cea1e5f39f",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-04T19:55:42.282235Z",
-    "elapsed_seconds": 535.4078288000001,
+    "elapsed_seconds": 540.0263543000001,
     "calls_reserved": 13,
     "responses_received": 13,
     "attempted_paths": [
@@ -3078,7 +3078,8 @@
       "Vault/Home/Programming/NET/CSharp/Fundamentals/Methods.md",
       "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Types.md",
       "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Locking.md",
-      "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Mutex.md"
+      "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Mutex.md",
+      "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Parallelism.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -3329,10 +3330,88 @@
           },
           "model_calls": 11
         }
+      },
+      {
+        "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Parallelism.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Parallelism.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note. The opening separates parallelism from async. The partitioning section correctly names range and dynamic partitioning, including Partitioner.Create(loadBalance: true). The Parallel.ForEachAsync example has the correct (item, token) => ValueTask body signature, and the note itself says ForEach would fit a synchronous body better. The PLINQ prime filter is correct at the edges: n=2 and n=3 give an empty range and count as prime, and n=4 is rejected. The localInit/localFinally Parallel.For overload is used correctly. The Amdahl figure is right: 20% serial caps speedup at 5x. The pitfalls, the tradeoff table and the AggregateException handling match the .NET documentation. All four cards are self-contained and each tests one task. They cover worker-count overhead, MaxDegreeOfParallelism, PLINQ fit and small-input overhead. Their sources are relevant Microsoft docs. No native violations are reported and the repeated phrases are acceptable, so rewrites would be cosmetic only."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "Independent whole-note audit found no accuracy, clarity, question-quality or rules defects. The keep is justified and no edits were proposed.",
+            "notes": [
+              {
+                "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Parallelism.md",
+                "verdict": "CLEAN",
+                "summary": "The note is accurate, well ordered and self-contained. It separates parallelism from async, explains partitioning, gives correct examples, and covers pitfalls and tradeoffs. Its four cards are each one task, with relevant Microsoft sources. Rewrites would be cosmetic only.",
+                "page_type": "Concept — frontmatter, Qard IDs and bare-link References are intact; Questions and References are optional and present; every code fence has a language.",
+                "current_text_evidence": [
+                  {
+                    "quote": "Async code is not automatically parallel.",
+                    "line_start": 19,
+                    "reason": "The opening separates async from parallelism, which sets the boundary of the topic."
+                  },
+                  {
+                    "quote": "Dynamic partitioning** (`Partitioner.Create(source, loadBalance: true)`)",
+                    "line_start": 35,
+                    "reason": "This is the correct API for load-balanced partitioning, and the trade-off is stated."
+                  },
+                  {
+                    "quote": "The body above completes synchronously, so `Parallel.ForEach` would usually express the CPU-bound intent more directly.",
+                    "line_start": 66,
+                    "reason": "The note admits the limits of its own example and states when ForEachAsync is the right choice."
+                  },
+                  {
+                    "quote": ".Where(n => n > 1 && Enumerable.Range(2, (int)Math.Sqrt(n) - 1)",
+                    "line_start": 77,
+                    "reason": "The prime filter is correct at the edges: n=2 and n=3 give an empty range, and n=4 is rejected."
+                  },
+                  {
+                    "quote": "infinite parallel capacity still cannot exceed a fivefold speedup",
+                    "line_start": 104,
+                    "reason": "A 20% serial fraction gives a 5x cap under Amdahl's law, so the arithmetic is right."
+                  },
+                  {
+                    "quote": "Why can a parallel query be slower than a sequential query for small inputs?",
+                    "line_start": 166,
+                    "reason": "This card tests one bounded task: fixed overhead against little work. It is distinct from the worker-count card."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the note covers one coherent topic, CPU-bound parallelism in .NET. Examples, pitfalls and tradeoffs all serve that topic.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "change_checks": []
+          },
+          "model_calls": 13
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-04T20:04:37.689536Z",
+    "checkpoint_at": "2026-11-04T20:04:42.308062Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
