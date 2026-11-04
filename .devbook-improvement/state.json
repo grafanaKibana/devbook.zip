@@ -2149,11 +2149,11 @@
     "version": 1,
     "id": "8863af0d8e1746298a05f54c5909b04b",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-04T06:42:24.894668Z",
-    "elapsed_seconds": 153.75768760000003,
+    "elapsed_seconds": 163.46380810000005,
     "calls_reserved": 5,
-    "responses_received": 4,
+    "responses_received": 5,
     "attempted_paths": [
       "Vault/Home/AI & ML/AI & ML.md",
       "Vault/Home/AI & ML/LLM/Agents/Agents.md"
@@ -2309,7 +2309,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-04T06:44:58.651670Z",
+    "checkpoint_at": "2026-11-04T06:45:08.357791Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -9920,5 +9920,54 @@
       },
       "feedback_snapshot": []
     }
+  },
+  "pending_author_proposal": {
+    "workload_id": "8863af0d8e1746298a05f54c5909b04b",
+    "topic_id": "ai-ml-4edf0823",
+    "batch": {
+      "topic": "AI & ML",
+      "topic_id": "ai-ml-4edf0823",
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Agent Benchmarks.md",
+          "content": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"Public task suites scoring multi-step tool use. Useful to shortlist models, not to decide.\"\nlevel: [\"3\"]\npriority: Medium\nstatus: Done\npublish: true\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Agents/Evaluation/Agent Benchmarks\"\nflashcard_uid: \"f16dc5d5\"\ncreated: \"2026-06-12T18:50:14.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\n---\n\nAgent benchmarks run a model and its scaffold against a fixed public task suite. The tasks usually require several actions: edit a repository until hidden tests pass, operate a website, or combine browsing with calculation. These suites are useful for narrowing a model shortlist and checking whether an evaluation harness produces plausible results.\n\nA leaderboard score cannot make the final selection. It measures the model, prompt, tools, retry policy, and agent loop as one system. Public tasks may also leak into training data, and their distribution rarely resembles a production workload. A private [[Building an Evaluation Set]] must replay the actual tools, tasks, and failure costs before one candidate is selected.\n\n# The Major Benchmarks\n\n| Benchmark | Domain | Task | Headline metric | What it stresses |\n| --- | --- | --- | --- | --- |\n| SWE-bench (and Verified) | Software engineering | Resolve a real GitHub issue so the repo's hidden tests pass | % issues resolved | Long-horizon code navigation and editing. Verifiable end state |\n| tau-bench | Customer-service tools | Complete a transaction under a domain policy, with a simulated user | pass^1 and pass^k | Tool use, policy adherence, reliability across repeated runs |\n| GAIA | General assistant | Answer real-world questions needing browsing, files, and reasoning | % correct (exact-match) | Multi-tool, multi-step reasoning. Easy for humans, hard for models |\n| WebArena | Web navigation | Accomplish goals in self-hosted real web apps | task success rate | Grounded web interaction over long action sequences |\n| AgentBench | 8 environments | Interactive tasks across OS, DB, web, games | per-environment success | Breadth of agentic ability in one harness |\n| BFCL | Function calling | Select and fill the correct function call(s) | AST / executable accuracy | Tool selection and argument correctness, incl. \"no call needed\" |\n\nThe useful comparison starts with task shape. BFCL isolates the unit measured by [[Tool-Call Evaluation]]. SWE-bench Verified tests long-running coding work with an executable end state. τ-bench exposes reliability under policy constraints, while GAIA and WebArena cover browsing-heavy agents. A high score on the wrong task shape says little.\n\n# How to Read an Agent Leaderboard\n\n- **A fixed scaffold isolates the base model.** Planning, retries, tool descriptions, and context management can move the score as much as the base model. A score difference can be attributed to the model only when those parts are held constant. Complete systems with different scaffolds can still be compared as systems when they run the same tasks under the same attempt and cost budgets and report their run conditions, but that comparison does not isolate the model.\n- **Reliability needs its own metric.** `pass@1` reports average success across attempts. `pass^k` requires the task to succeed on every one of `k` attempts, so it exposes intermittent failures that an average hides.\n- **The age and curation of the set affect scores.** Scores on an old public suite may rise because examples or solutions entered training data. Human verification improves issue and test quality; it does not isolate public tasks from training. Public suites such as SWE-bench Verified are therefore potentially contaminated for frontier comparisons, and fresh private or rolling held-out tasks reduce that risk.\n- **Operating metrics may be absent.** Leaderboards often omit token cost, wall-clock latency, and tool-call count. A winning system that spends several dollars and forty calls per task may be the wrong production choice. Those measurements belong in [[Home/AI & ML/LLM/Agents/Evaluation/Evaluation|Agent Evaluation]].\n\n# Why Public Scores Miss Internal Workloads\n\nA benchmark samples one task distribution with its own tools, policies, and error formats. Internal agents face another. A model can lead GAIA and still mishandle a company-specific tool whose description is ambiguous or whose failures require recovery.\n\nPublic scores therefore filter candidates. Private evaluations decide between them. That private set should replay representative work through the real scaffold and score both individual [[Tool-Call Evaluation|tool-call]] decisions and the full [[Trajectory Evaluation|trajectory]]. Cost and repeated-run reliability belong beside task success.\n\n# Example\n\nTwo coding agents reported on SWE-bench Verified:\n\n```text\nSystem A: 48% resolved, single attempt (pass@1), scaffold X, cost unreported\nSystem B: 45% resolved, but pass^3 = 41% and $0.30/task, scaffold Y\n\nNaive read: A wins (48 > 45).\nEngineering read: reliability is not comparable. B reports pass^3 and cost;\nA reports neither, and the systems use different scaffolds. A system choice\nrequires running each with its own scaffold on the same repos, attempt count,\nand budget, with repeated trials.\n```\n\nThe example exposes missing evidence rather than a winner. System B reports repeated-run reliability and cost. System A does not. Its `48%` cannot be called lucky or unreliable from one aggregate alone. Comparing the two complete systems requires repeated trials for both on the same tasks, attempt count, and budget, with each keeping its own scaffold. A shared scaffold is required only to isolate the base model, which is a separate question from choosing between the systems.\n\n# Questions\n\n<!-- qard-id: 0d0c25bd-07f5-4f8d-a204-f23e5016b1ad -->\n> [!qard]- Why can one base model produce very different results on the same agent benchmark?\n> Because an agent benchmark scores a whole system, not the model alone. The result reflects the model together with its scaffold: prompts and policies, tool descriptions, planning and retry logic, context management, and the loop that runs it. Changing the scaffold can move the score even when the base model stays the same.\n>\n> Run conditions also matter. An agent can solve a task on one attempt and fail it on the next. τ-bench reports `pass^k`, the chance that all `k` trials of a task succeed, which exposes inconsistency that a single-attempt score hides.\n>\n> A fair model comparison therefore holds the task set, scaffold and run conditions constant and varies only the model. Comparing scaffolds is a separate experiment with the model held fixed. A leaderboard score describes one benchmark setup, not intrinsic model quality.\n>\n> [τ-bench: A Benchmark for Tool-Agent-User Interaction in Real-World Domains](https://arxiv.org/html/2406.12045)\n\n# References\n\n- [SWE-bench -- can language models resolve real-world GitHub issues (Jimenez et al., 2023)](https://arxiv.org/abs/2310.06770)\n- [GAIA -- a benchmark for general AI assistants (Mialon et al., 2023)](https://arxiv.org/abs/2311.12983)\n- [WebArena -- a realistic web environment for autonomous agents (Zhou et al., 2023)](https://arxiv.org/abs/2307.13854)\n- [tau-bench -- tool-agent-user interaction with pass^k reliability (Yao et al., Sierra, 2024)](https://arxiv.org/abs/2406.12045)\n- [Berkeley Function-Calling Leaderboard -- tool selection and argument accuracy (Gorilla, UC Berkeley)](https://gorilla.cs.berkeley.edu/blogs/8_berkeley_function_calling_leaderboard.html)\n",
+          "hash": "0b5ed93a2279ebdc55c19dc8332487c2deb7fbee24634631b0707268ad31c304",
+          "topic": "AI & ML",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "264d16c1cdd0550e8de34525350fcc463d41b1c8095a38a38008f9f84304bb03",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Agent Benchmarks.md",
+          "outcome": "keep",
+          "reason": "Audited the whole note against its text and its cited papers (SWE-bench, GAIA, WebArena, tau-bench, BFCL). The opening says what the suites are for and where they stop. The benchmark table matches each source: SWE-bench resolves GitHub issues against hidden tests, tau-bench reports pass^k, GAIA uses exact match, AgentBench spans 8 environments, and BFCL scores AST and executable accuracy. The leaderboard section separates scaffold effects, pass@1 versus pass^k, contamination and missing cost data, and the 'why public scores miss internal workloads' section turns that into a selection rule. The worked example is internally consistent and correctly says it shows missing evidence, not a winner. The single card has one gradeable task, a self-contained question and a tau-bench source on the answer side. Wikilinks and code fence language identifiers are valid, and the frontmatter and references follow the contract. There are no known violations. I found no factual error or editorial weakness that would justify a change."
+        }
+      ],
+      "feedback": [],
+      "decisions": []
+    },
+    "source_hashes": {
+      "Vault/Home/AI & ML/LLM/Agents/Evaluation/Agent Benchmarks.md": "0b5ed93a2279ebdc55c19dc8332487c2deb7fbee24634631b0707268ad31c304"
+    },
+    "feedback_keys": [],
+    "rules_hash": "264d16c1cdd0550e8de34525350fcc463d41b1c8095a38a38008f9f84304bb03",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/AI & ML/LLM/Agents/Evaluation/Agent Benchmarks.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-04T06:45:08.357772Z"
   }
 }
