@@ -2942,11 +2942,11 @@
     "version": 1,
     "id": "792178af26484b3da828d4cea1e5f39f",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-04T19:55:42.282235Z",
-    "elapsed_seconds": 387.26116249999995,
+    "elapsed_seconds": 402.52897169999994,
     "calls_reserved": 9,
-    "responses_received": 8,
+    "responses_received": 9,
     "attempted_paths": [
       "Vault/Home/Programming/NET/ASP NET Web API/Filters.md",
       "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md",
@@ -3121,7 +3121,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-04T20:02:09.542869Z",
+    "checkpoint_at": "2026-11-04T20:02:24.810677Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
@@ -11960,5 +11960,71 @@
       },
       "feedback_snapshot": []
     }
+  },
+  "pending_author_proposal": {
+    "workload_id": "792178af26484b3da828d4cea1e5f39f",
+    "topic_id": "programming-e6aba2bd",
+    "batch": {
+      "topic": "Programming",
+      "topic_id": "programming-e6aba2bd",
+      "notes": [
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Locking.md",
+          "content": "---\ntopic: [Programming]\nsubtopic: [NET]\nsummary: \"The default in-process mutual-exclusion primitive: one thread in the critical section at a time.\"\nlevel: [\"4\"]\npriority: High\nstatus: Creation\npublish: true\nqard-deck: \"Programming\"\nqard-topic: \"NET/CSharp/Concurrency and Parallelism/Locking\"\nflashcard_uid: \"15275eaf\"\ncreated: \"2026-07-14T20:57:52.000Z\"\nmodified: \"2026-11-02T09:03:54.806Z\"\npublished: \"2026-07-15T06:00:17.802Z\"\n---\n\n`lock` gives one thread at a time access to a synchronous critical section. It fits small in-process state changes such as updating a counter or taking a snapshot of a shared dictionary. Awaited I/O should normally happen outside that mutation and publish its result inside a short lock. When an invariant genuinely must span asynchronous work, `SemaphoreSlim.WaitAsync` can gate that bounded span; cross-process coordination needs [[Mutex]], and N concurrent holders need [[Semaphore]] rather than mutual exclusion.\n\n# How It Works\n\n`lock (obj) { body }` is sugar over `Monitor`:\n\n```csharp\nlock (_gate) { _count++; }\n\n// the compiler emits:\nbool lockTaken = false;\ntry\n{\n    Monitor.Enter(_gate, ref lockTaken);\n    _count++;\n}\nfinally\n{\n    if (lockTaken) Monitor.Exit(_gate);\n}\n```\n\n`lockTaken` records whether `Monitor.Enter` succeeded. If acquisition throws, the `finally` block does not attempt to release a monitor the thread never owned.\n\n**`Monitor`/`lock` is reentrant.** Its owning thread can acquire the same monitor again. Each acquisition increments a recursion count, so the thread must exit the same number of times. A one-permit [[Semaphore|semaphore]] has no such ownership model and self-deadlocks on a nested wait.\n\n**`System.Threading.Lock` (.NET 9+)** makes this intent explicit. When the operand has type `Lock`, the statement uses `Lock.EnterScope()` and disposes its `ref struct` scope at the closing brace instead of lowering to `Monitor.Enter`:\n\n```csharp\nprivate readonly Lock _gate = new();   // .NET 9+\n\nlock (_gate) { _count++; }             // compiler calls _gate.EnterScope()\n```\n\nA dedicated `Lock` field is harder to misuse than a general `object`. With either type, the gate stays `private readonly`. Locking on `this`, a `Type`, or an interned string exposes the monitor to unrelated code and can create invisible [[Deadlocks|lock-ordering cycles]].\n\n# Example\n\n```csharp\npublic sealed class MetricsBuffer\n{\n    private readonly Lock _gate = new();          // .NET 9+; an `object` pre-9\n    private readonly Dictionary<string, long> _counts = new();\n\n    public void Increment(string name)\n    {\n        lock (_gate)\n        {\n            _counts.TryGetValue(name, out long n);\n            _counts[name] = n + 1;\n        }\n    }\n\n    public IReadOnlyDictionary<string, long> Snapshot()\n    {\n        lock (_gate)\n            return new Dictionary<string, long>(_counts);  // copy out under the lock\n    }\n}\n```\n\nBoth reads and writes use `_gate`. `Snapshot` copies the dictionary while protected, then returns data that callers can enumerate after the live lock has been released.\n\n# Pitfalls\n\n- **A monitor cannot span `await`.** Monitor ownership has thread affinity, while a continuation may resume on another thread. The compiler reports CS1996. Async mutual exclusion uses a [[Semaphore|semaphore]] and `WaitAsync`.\n- **I/O inside a lock turns latency into contention.** Every waiter queues behind the slow operation, increasing the chance of convoys and [[Deadlocks|deadlocks]]. Computation and fetching belong outside the lock, which then protects only the shared-state update.\n- **A public gate leaks synchronization.** `this`, a `Type`, and interned strings can all be locked by unrelated code.\n- **`Monitor.TryEnter(obj, timeout)` bounds acquisition.** It is useful when an external lock order cannot be fully controlled. [[Deadlocks]] covers the ordering mechanics.\n\n# Tradeoffs\n\n- **`lock`/`Monitor`** is synchronous, in-process, reentrant mutual exclusion. Its fast path stays in user mode.\n- **`SemaphoreSlim`** is in-process, supports `WaitAsync`, and can expose more than one permit. It has no thread ownership or reentrancy.\n- **`Mutex`** supplies thread-owned mutual exclusion through an operating-system object and can coordinate named participants across processes.\n\nFor short synchronous state changes inside one process, `lock` is the smallest correct primitive. Ordinary async flows need restructuring so awaited I/O completes before the protected mutation. When the invariant must remain gated across asynchronous work, `SemaphoreSlim.WaitAsync` provides that gate, and the span needs to stay bounded because remote latency becomes contention. A real process boundary justifies `Mutex`. N concurrent entrants make the problem a [[Semaphore]] problem regardless of whether callers wait synchronously or asynchronously.\n\n# Questions\n\n> [!qard]- What is a race condition?\n> A race condition occurs when a result depends on the timing of concurrent accesses to shared state. A read-modify-write sequence such as `_count++` can let two threads read the same old value, then overwrite one another's updates. A run that happens to produce the expected result does not prove the code is race-free.\n>\n> [Microsoft: Managed threading best practices](https://learn.microsoft.com/en-us/dotnet/standard/threading/managed-threading-best-practices) · [Microsoft: `lock` statement](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/lock)\n\n> [!qard]- How does `lock` prevent a lost-update race?\n> `lock` lets only one thread at a time run code protected by the same lock object, so protected updates cannot interleave.\n>\n> For example, two threads run `_count++` on a shared field. The increment is three steps: read the value, add one and write the result back.\n>\n> 1. Thread A reads 5.\n> 2. Thread B reads 5 before A writes.\n> 3. A writes 6.\n> 4. B writes 6.\n> \n> Two increments ran, but one was lost. With `lock (_gate) { _count++; }` in both threads, B cannot read until A has written and released the lock, so the result is 7.\n>\n> The protection covers only code that takes the same lock. Every read and write of the shared state must use that lock object; an unprotected access elsewhere can still interleave with a protected update.\n>\n> [Microsoft: Managed threading best practices](https://learn.microsoft.com/en-us/dotnet/standard/threading/managed-threading-best-practices) · [Microsoft: `lock` statement](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/lock)\n\n<!-- qard-id: e403b36e-6e7b-4f41-826c-e2e258743019 -->\n> [!qard]- When `lock` targets an ordinary object, what does the compiler ensure around the critical section?\n> The compiler acquires the monitor with `Monitor.Enter(obj, ref lockTaken)`, runs the body inside `try`, and exits in `finally` only if acquisition succeeded. This releases ownership on normal and exceptional exits without exiting a monitor the thread never acquired. The specialized `System.Threading.Lock` path in C# 13 uses `EnterScope` instead. [Microsoft: `lock` statement](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/lock) · [Monitor.Enter](https://learn.microsoft.com/en-us/dotnet/api/system.threading.monitor.enter?view=net-10.0)\n\n<!-- qard-id: 2c0335e4-1efa-4aa3-b33b-605b74456ccc -->\n> [!qard]- Why can’t a `lock` block contain `await`?\n> `Monitor` ownership belongs to the thread that entered it, and only that thread can exit it. An awaited continuation may resume on a different thread, which would then try to release a monitor it does not own. The C# compiler therefore rejects `await` inside a `lock` block.\n>\n> Holding a lock across `await` would also make other threads wait for the whole asynchronous operation, turning I/O latency into lock contention.\n>\n> Two alternatives remain:\n>\n> - **Restructure:** the awaited work runs outside the lock, and only the resulting state change runs inside a short `lock`. This fits most cases.\n> - **Async-aware gate:** when an invariant must stay protected across an `await`, a `SemaphoreSlim` with one permit and `await WaitAsync()` provides the gate. It has no thread ownership, so a continuation on another thread can release it. `Release()` belongs in `finally`.\n> \n> [Microsoft: `lock` statement](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/lock) · [Monitor.Enter](https://learn.microsoft.com/en-us/dotnet/api/system.threading.monitor.enter?view=net-10.0) · [SemaphoreSlim API](https://learn.microsoft.com/en-us/dotnet/api/system.threading.semaphoreslim?view=net-10.0)\n\n<!-- qard-id: 9e14d6f6-6dc4-4b82-bda7-880929057d58 -->\n> [!qard]- What does `System.Threading.Lock` change about `lock` in C# 13 and .NET 9+?\n> `System.Threading.Lock` gives the compiler a dedicated synchronization type instead of an arbitrary object. In C# 13, `lock` on that type lowers to an `EnterScope()` guard that releases when the scope exits, rather than the ordinary `Monitor.Enter`/`Exit` pattern. It remains synchronous and cannot span `await`; the type does not promise a universal speedup. [Microsoft: `lock` statement](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/lock)\n\n<!-- qard-id: 0fdc576b-ea0a-41ce-9613-4ec6f7fe0d57 -->\n> [!qard]- How does reentrancy differ between `lock`/`Monitor` and `SemaphoreSlim`?\n> `lock`/`Monitor` is reentrant for its owning thread. `SemaphoreSlim` is not reentrant, because it has no owner.\n>\n> - **`lock`/`Monitor`:** records which thread owns the monitor and how many times it has entered. The owner can enter again without blocking, and other threads can acquire the monitor only after the owner has exited the same number of times.\n> - **`SemaphoreSlim`:** records only how many permits remain, not which thread or asynchronous flow holds them. A second wait from the same code is just another request for a permit.\n> \n> With a one-permit `SemaphoreSlim`, a method that holds the permit and then calls code that waits on the same semaphore ends up waiting for itself. Without a timeout or cancellation, `Wait()` blocks forever and `WaitAsync()` never completes. The permit therefore belongs at one boundary in the call chain, with `Release()` in `finally` so that each acquisition is released exactly once.\n>\n> [Microsoft: `lock` statement](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/lock) · [Monitor.Enter](https://learn.microsoft.com/en-us/dotnet/api/system.threading.monitor.enter?view=net-10.0) · [SemaphoreSlim API](https://learn.microsoft.com/en-us/dotnet/api/system.threading.semaphoreslim?view=net-10.0)\n\n> [!qard]- When is `Interlocked` sufficient instead of `lock`?\n> `Interlocked` fits a supported atomic update to one shared location, such as incrementing a counter or exchanging a reference. Its read-modify-write operation cannot lose an update through interleaving:\n>\n> ```csharp\n> Interlocked.Increment(ref completedCount);\n> ```\n>\n> That one atomic operation does not make a sequence of operations or several related fields atomic. A check-then-update rule or a multi-field invariant needs a suitable synchronization design, often one lock around the entire decision and change. In a worker-count example, waiting for every worker to finish is also necessary before asserting the final count. [Microsoft: Interlocked](https://learn.microsoft.com/en-us/dotnet/api/system.threading.interlocked?view=net-10.0)\n\n# References\n\n- [lock statement](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/lock)\n",
+          "hash": "abdfcc0ff8010ea590a42fa81235041fd89dd7aeb13fd823bf2d2554ecf56999",
+          "topic": "Programming",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Locking.md",
+          "expected_hash": "abdfcc0ff8010ea590a42fa81235041fd89dd7aeb13fd823bf2d2554ecf56999",
+          "before": "> That one atomic operation does not make a sequence of operations or several related fields atomic. A check-then-update rule or a multi-field invariant needs a suitable synchronization design, often one lock around the entire decision and change. In a worker-count example, waiting for every worker to finish is also necessary before asserting the final count. [Microsoft: Interlocked]",
+          "after": "> That one atomic operation does not make a sequence of operations or several related fields atomic. A check-then-update rule or a multi-field invariant needs a suitable synchronization design, often one lock around the entire decision and change. [Microsoft: Interlocked]",
+          "reason": "Removes a dangling reference to an unstated 'worker-count example' so the answer is self-contained and stays on the recall target.",
+          "kind": "rewrite",
+          "learning_target": "same",
+          "essential_meanings": [
+            "Interlocked suits single-location atomic updates",
+            "It does not make multi-step or multi-field invariants atomic; those need a lock"
+          ],
+          "sources": [],
+          "feedback_keys": [],
+          "problem": "The Interlocked answer ends with a sentence about a 'worker-count example' that the question and note never introduce.",
+          "reader_benefit": "The answer reads cleanly on its own without an unexplained scenario."
+        }
+      ],
+      "dispositions": [
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Locking.md",
+          "outcome": "changed",
+          "reason": "Audited the whole note: the Monitor lowering with lockTaken, reentrancy, System.Threading.Lock (.NET 9/C# 13), CS1996 await restriction, SemaphoreSlim alternative and tradeoffs all match Microsoft docs and are coherent. The only defect was an unexplained 'worker-count example' in the Interlocked card, now removed so the answer is self-contained."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Locking.md": "abdfcc0ff8010ea590a42fa81235041fd89dd7aeb13fd823bf2d2554ecf56999"
+    },
+    "feedback_keys": [],
+    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Locking.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-04T20:02:24.810667Z"
   }
 }
