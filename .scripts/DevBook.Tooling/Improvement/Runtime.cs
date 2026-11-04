@@ -64,14 +64,9 @@ public static partial class Runtime
     public static bool ValidPrIdentity(JsonObject pr, string repo, string baseBranch, string topic, int generation) =>
         pr.Obj("head").Str("ref") == ExpectedManagedBranch(topic, generation)
         && pr.Obj("head").Obj("repo").Str("full_name") == repo
-        && (pr.Obj("base").Str("ref") == baseBranch
-            || pr.Obj("stack").Int("number") > 0 && pr.Obj("stack").Obj("base").Str("ref") == baseBranch
-                && IsManagedBranch(pr.Obj("base").Str("ref")))
+        && pr.Obj("base").Str("ref") == baseBranch
         && pr.Obj("base").Obj("repo").Str("full_name") == repo
         && ParseMarker(pr.Str("body")) == (topic, generation);
-
-    public static bool IsManagedBranch(string branch) =>
-        Regex.IsMatch(branch, @"\Anotes/automated-[a-z0-9-]+-g[1-9][0-9]*\z", RegexOptions.CultureInvariant);
 
     public static string Lifecycle(JsonObject pr) =>
         pr["merged_at"] is not null || pr.Bool("merged") ? "merged" : pr.Str("state") == "open" ? "open" : "closed";

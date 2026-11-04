@@ -113,7 +113,7 @@ public static partial class Worker
 
     private static async Task<bool> CurrentBaseAsync(IGitHubApi api, JsonObject config, JsonObject pr, string head, CancellationToken cancellationToken)
     {
-        string baseBranch = pr.Obj("base").Str("ref");
+        string baseBranch = config.Str("base_branch", "main");
         JsonObject reference = await Runtime.ObjectAsync(api, "GET", "/git/ref/heads/" + Uri.EscapeDataString(baseBranch), cancellationToken: cancellationToken);
         string expectedBase = Bundle.ExactHead(reference.Obj("object").Str("sha"));
         if (pr.Obj("base").Str("sha") != expectedBase)

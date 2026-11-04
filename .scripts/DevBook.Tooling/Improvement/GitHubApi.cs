@@ -107,7 +107,7 @@ public sealed class GhApi : IGitHubApi
             }
             throw new RuntimeFailure("Bounded GitHub pagination limit exceeded.");
         }
-        List<string> arguments = ["api", "--method", method, "-H", "X-GitHub-Api-Version: 2026-03-10", $"repos/{Repo}{path}"];
+        List<string> arguments = ["api", "--method", method, $"repos/{Repo}{path}"];
         if (payload is not null)
         {
             arguments.AddRange(["--input", "-"]);
