@@ -8,6 +8,7 @@ status: Ready to Repeat
 publish: true
 created: "2026-02-10T01:40:47.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:14:17.466Z"
 ---
 
 KISS (Keep It Simple, Stupid) favors the least complicated design that satisfies the actual requirements. Simple does not mean improvised or incomplete. It means that the essential state changes, dependencies, and failure modes remain visible without machinery that serves only a hypothetical future.

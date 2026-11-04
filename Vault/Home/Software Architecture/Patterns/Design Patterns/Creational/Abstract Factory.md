@@ -11,6 +11,7 @@ qard-topic: "Patterns/Design Patterns/Creational/Abstract Factory"
 flashcard_uid: "de6b36c6"
 created: "2026-03-05T22:12:38.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:14:17.449Z"
 ---
 
 An application may need a matching set of provider-specific objects: a connection, command, and adapter for one database provider, or several payment components built for the same gateway. Selecting the family once is safer than repeating the provider choice at every construction site.

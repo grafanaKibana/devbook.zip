@@ -8,6 +8,7 @@ status: Ready to Repeat
 publish: true
 created: "2026-02-10T01:40:47.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:14:17.463Z"
 ---
 
 An integration test exercises a boundary between components using enough real implementation to expose its contract. The boundary may be an ASP.NET Core pipeline, a database provider, a message broker, or an HTTP adapter. A unit test can prove a decision in isolation. An integration test proves that configuration, serialization, protocols, and persistence agree at runtime.

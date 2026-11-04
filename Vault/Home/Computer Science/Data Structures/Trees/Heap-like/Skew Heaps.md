@@ -8,6 +8,7 @@ status: Ready to Repeat
 publish: true
 created: "2026-07-09T18:37:04.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-10T14:39:34.308Z"
 ---
 
 Skew heaps are small mergeable priority queues. They store a heap-ordered binary tree and make merge the only structural operation. Insert merges a singleton, and extract-min merges the old root's children.

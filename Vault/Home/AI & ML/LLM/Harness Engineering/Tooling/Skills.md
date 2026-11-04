@@ -8,6 +8,7 @@ level: ["2"]
 priority: Medium
 created: "2026-08-16T07:07:41.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-08-20T20:41:15.495Z"
 ---
 
 Skills package instructions for a recurring task. The runtime advertises a short name and description, then loads the full body only when the skill is selected. This keeps a review checklist or release procedure out of every prompt without hiding it in a private convention.

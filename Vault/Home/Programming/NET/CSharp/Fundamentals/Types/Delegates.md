@@ -11,6 +11,7 @@ qard-topic: "NET/CSharp/Fundamentals/Types/Delegates"
 flashcard_uid: "c751e8da"
 created: "2026-02-18T19:18:52.000Z"
 modified: "2026-11-02T09:03:54.806Z"
+published: "2026-07-08T13:14:17.327Z"
 ---
 
 A delegate is a C# type that describes a callable method signature. A delegate value pairs that signature with a method and, for a closed instance method, its target object. The value can then be stored, passed around, combined with other delegates, and invoked later.

@@ -6,6 +6,7 @@ publish: true
 icon: home
 created: "2026-07-05T15:34:15.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-06T07:55:35.732Z"
 ---
 
 ```datacorejsx

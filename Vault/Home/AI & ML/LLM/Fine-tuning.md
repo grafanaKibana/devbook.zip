@@ -11,6 +11,7 @@ qard-topic: "LLM/Fine-tuning"
 flashcard_uid: "b36582e5"
 created: "2026-06-11T07:39:53.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:28:37.409Z"
 ---
 
 Fine-tuning continues a pretrained model's training on task-specific examples. The resulting behavior lives in the weights, so the same instructions do not need to travel with every request. It works well for stable output conventions, classification boundaries, tool-call reliability, and narrow-task distillation. It makes a poor knowledge store. Facts learned during training have no citation boundary and start aging immediately.

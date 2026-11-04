@@ -8,6 +8,7 @@ status: Creation
 publish: true
 created: "2026-07-10T06:24:36.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-10T05:56:29.171Z"
 ---
 
 A reverse-sorted array exposes insertion sort's movement cost. An element that belongs `k` positions away needs `k` one-slot shifts to get there. Across a fully inverted array, the total shift work equals the number of inversions.

@@ -8,6 +8,7 @@ status: Ready to Repeat
 publish: true
 created: "2026-02-10T01:40:47.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:14:17.359Z"
 ---
 
 A virtual private network carries selected traffic through an authenticated, encrypted tunnel over another network. Routing and policy make remote addresses reachable through a virtual interface. The tunnel does not automatically grant access or place every endpoint on one flat network.

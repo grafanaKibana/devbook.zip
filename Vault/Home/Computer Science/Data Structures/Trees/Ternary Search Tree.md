@@ -8,6 +8,7 @@ status: Ready to Repeat
 publish: true
 created: "2026-07-12T19:33:37.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-12T20:39:23.959Z"
 ---
 
 A plain trie must choose how each node stores its children. A `σ`-wide array wastes slots on sparse branches. A `Dictionary<char, Node>` stores only real branches but hashes each character and loses the array's natural order. A ternary search tree (TST) uses a small **binary search tree keyed on the next character** instead. Each node has three pointers, and character order survives.

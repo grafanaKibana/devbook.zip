@@ -2,7 +2,7 @@
 publish: true
 created: 2026-07-14T20:57:52.000Z
 modified: 2026-11-02T09:03:54.806Z
-published: 2026-11-02T11:10:14.415Z
+published: 2026-07-14T19:22:41.324Z
 topic:
   - Programming
 subtopic:

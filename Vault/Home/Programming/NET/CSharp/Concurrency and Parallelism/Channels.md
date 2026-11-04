@@ -11,6 +11,7 @@ qard-topic: "NET/CSharp/Concurrency and Parallelism/Channels"
 flashcard_uid: "a3dbcc37"
 created: "2026-07-14T20:57:52.000Z"
 modified: "2026-11-02T09:03:54.806Z"
+published: "2026-07-14T19:22:41.324Z"
 ---
 
 `Channel<T>` is an in-memory handoff between producers and consumers. Both sides can wait asynchronously, and a bounded channel makes overload behavior explicit. One common shape is an HTTP endpoint that queues a thumbnail job while a `BackgroundService` drains the work.

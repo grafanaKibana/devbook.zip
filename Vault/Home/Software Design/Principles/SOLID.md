@@ -8,6 +8,7 @@ status: Ready to Repeat
 publish: true
 created: "2026-02-10T01:40:47.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:14:17.467Z"
 ---
 
 SOLID names five principles for managing change, dependencies, and behavioral contracts in object-oriented design. They are diagnostic tools, not a demand for an interface around every class. Each principle identifies a different failure mode:

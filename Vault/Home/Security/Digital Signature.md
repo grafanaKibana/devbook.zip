@@ -9,6 +9,7 @@ status: Ready to Repeat
 publish: true
 created: "2026-02-10T01:40:47.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:14:17.503Z"
 ---
 
 A digital signature binds a message to possession of a private signing key and detects changes made after signing. It does not hide the message or identify a person by itself. Identity comes from the trust system that binds the verification key to a signer.

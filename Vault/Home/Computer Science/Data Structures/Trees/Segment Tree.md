@@ -8,6 +8,7 @@ status: Ready to Repeat
 publish: true
 created: "2026-07-09T18:37:04.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-10T14:39:34.309Z"
 ---
 
 A mutable array of one million latency samples must answer "maximum value in `a[l..r]`" while new samples overwrite old slots.

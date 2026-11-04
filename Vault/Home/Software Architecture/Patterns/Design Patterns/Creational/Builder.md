@@ -11,6 +11,7 @@ qard-topic: "Patterns/Design Patterns/Creational/Builder"
 flashcard_uid: "ad1872ad"
 created: "2026-03-05T22:12:38.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:14:17.449Z"
 ---
 
 A complex object often cannot be created sensibly in one constructor call. Some inputs are optional, others interact, and derived values should never be supplied by callers.

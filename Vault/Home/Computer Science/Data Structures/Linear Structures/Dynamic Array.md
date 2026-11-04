@@ -8,6 +8,7 @@ status: Done
 publish: true
 created: "2026-02-18T19:18:52.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:14:17.344Z"
 ---
 
 A dynamic array keeps array-style indexing while making append practical. It reserves more contiguous slots than it currently uses, so most appends write into spare capacity. Only the append that fills the buffer pays for growth.

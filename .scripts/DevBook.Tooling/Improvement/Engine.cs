@@ -551,7 +551,14 @@ public sealed partial class ImprovementEngine
         bool hasEdits = proposal.Arr("edits").Count != 0;
         if (hasEdits)
         {
-            await PrepareDatesAsync(result, selected, prState.Str("head_sha", baseSha ?? "HEAD"), Runtime.ParseTime(pending.Str("prepared_at"))!.Value, cancellationToken);
+            try
+            {
+                await PrepareDatesAsync(result, selected, prState.Str("head_sha", baseSha ?? "HEAD"), Runtime.ParseTime(pending.Str("prepared_at"))!.Value, cancellationToken);
+            }
+            catch (NoteDateException error)
+            {
+                return await QuarantineAsync(state, pending, "publication_metadata", error.Message, cancellationToken);
+            }
         }
         Dictionary<string, string> candidate = Map(result.RequiredObject("sources"));
         Dictionary<string, string> current = allNotes.OfType<JsonObject>().ToDictionary(note => note.Str("path"), note => note.Str("content"));
@@ -948,6 +955,14 @@ public sealed partial class ImprovementEngine
             }
 
             IReadOnlyList<string>? history = null;
+            byte[] candidate = Encoding.UTF8.GetBytes(text);
+            string[] publicationKeys = NoteDates.PublicationKeys(root);
+            string? publication = null;
+            if (NoteDates.IsPublished(candidate) && NoteDates.Published(candidate, publicationKeys) is null)
+            {
+                publication = NoteDates.RecoverPublished(root, path, publicationKeys)?.Timestamp
+                    ?? throw new NoteDateException($"No verified publication date is available for {path}; run its first successful local export before scheduled improvement.");
+            }
             if (NoteDates.Read(Encoding.UTF8.GetBytes(selected[path]))["created"] is null)
             {
                 if (api is not null)
@@ -960,7 +975,7 @@ public sealed partial class ImprovementEngine
                     history = Git.Text(root, "log", "--follow", "--format=%aI", parentRef, "--", path).Split('\n', StringSplitOptions.RemoveEmptyEntries);
                 }
             }
-            result.RequiredObject("sources")[path] = Encoding.UTF8.GetString(NoteDates.Prepare(Encoding.UTF8.GetBytes(text), Encoding.UTF8.GetBytes(selected[path]), instant, history));
+            result.RequiredObject("sources")[path] = Encoding.UTF8.GetString(NoteDates.Prepare(candidate, Encoding.UTF8.GetBytes(selected[path]), instant, history, publication, publicationKeys));
         }
     }
 }

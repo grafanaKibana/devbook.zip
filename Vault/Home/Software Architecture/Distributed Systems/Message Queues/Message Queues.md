@@ -12,6 +12,7 @@ qard-topic: "Distributed Systems/Message Queues/Message Queues"
 flashcard_uid: "15a348c0"
 created: "2026-02-15T15:01:57.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:14:17.422Z"
 ---
 
 Message queues decouple producers from consumers by buffering messages until consumers are ready. They absorb spikes, isolate failures, and keep systems working when downstream services slow. Queues suit webhook ingestion and background work.

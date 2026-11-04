@@ -8,6 +8,7 @@ status: Ready to Repeat
 publish: true
 created: "2026-06-30T08:23:11.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-10T15:22:44.720Z"
 ---
 
 A network receives connections over time and repeatedly asks whether two nodes share a connected component. Running a graph traversal for every query keeps rediscovering old connectivity. A disjoint set stores that partition directly, so later merges and membership checks work on a parent forest instead of revisiting graph edges.

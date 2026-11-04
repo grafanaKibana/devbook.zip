@@ -12,6 +12,7 @@ qard-topic: "System Architecture/Microservices"
 flashcard_uid: "538ccd0d"
 created: "2026-02-10T01:40:47.000Z"
 modified: "2026-11-02T09:03:54.806Z"
+published: "2026-07-08T13:28:37.398Z"
 ---
 
 Microservices divide a system into services that can be changed and deployed independently. Each service owns a business capability and the data behind it. The useful boundary is deployment independence: separate processes alone do not make a microservice architecture.

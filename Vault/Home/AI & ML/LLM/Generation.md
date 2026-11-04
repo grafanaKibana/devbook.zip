@@ -11,6 +11,7 @@ qard-topic: "LLM/Generation"
 flashcard_uid: "b145e45f"
 created: "2026-02-27T18:09:30.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:28:37.409Z"
 ---
 
 Generation turns a prompt and its context into output. Producing text is easy. Producing text that is reliable, grounded, and usable by the next system is the engineering problem. Sampling controls affect token choice, evidence limits what the answer may claim, and structure determines whether another program can consume it.

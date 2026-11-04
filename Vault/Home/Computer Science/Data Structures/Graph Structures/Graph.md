@@ -8,6 +8,7 @@ status: Ready to Repeat
 publish: true
 created: "2026-02-18T19:18:52.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:14:17.345Z"
 ---
 
 A dependency system stores entities and the connections between them. It asks whether a direct link exists from `u` to `v`, then asks for every neighbor of `u`. Those connections have no inherent order or single root. The stored incidence structure must preserve endpoints, direction, and weight. Its physical layout decides which query is cheap and which needs a scan.

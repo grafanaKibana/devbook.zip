@@ -9,6 +9,7 @@ level: ["4"]
 status: Ready to Repeat
 created: "2026-02-10T01:40:47.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:14:17.499Z"
 ---
 
 Authentication establishes a principal from evidence supplied during a protocol exchange. Authorization decides what that principal may do. A complete design also defines credential enrollment, proof, session continuity, revocation, and recovery. Collapsing those responsibilities into one "authentication method" hides the boundary that failed.

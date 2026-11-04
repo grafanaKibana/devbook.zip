@@ -11,6 +11,7 @@ qard-topic: "Algorithms/Paradigms/Memoization"
 flashcard_uid: "0f376618"
 created: "2026-07-12T19:33:38.000Z"
 modified: "2026-11-02T09:03:54.806Z"
+published: "2026-07-12T20:39:23.957Z"
 ---
 
 Naive recursive `fib(50)` makes over 40 billion calls even though the recurrence has only 51 argument values from `0` through `50`. The recursion keeps forgetting that it already solved states such as `fib(48)`. Memoization fixes that repetition by caching each result under its arguments. A repeated call returns the stored value instead of entering the same subtree again.

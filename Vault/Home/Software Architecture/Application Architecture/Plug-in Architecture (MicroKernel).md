@@ -11,6 +11,7 @@ qard-topic: "Application Architecture/Plug-in Architecture (MicroKernel)"
 flashcard_uid: "9959d912"
 created: "2026-02-10T01:40:47.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:14:17.367Z"
 ---
 
 Plug-in (Microkernel) architecture puts stable product behavior in a small **core** and exposes contracts that **plug-ins** implement. The core can run without knowing any concrete extension. Features are selected at deployment or discovered at runtime, which fits products that vary by customer or accept third-party extensions.

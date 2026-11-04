@@ -8,6 +8,7 @@ status: Ready to Repeat
 publish: true
 created: "2026-02-10T01:40:47.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:14:17.501Z"
 ---
 
 Single Sign-On (SSO) lets several applications trust one identity provider (IdP) for authentication. An existing IdP session can remove the next credential prompt. Each application still validates a new assertion or ID token, applies local authorization, and creates its own session.

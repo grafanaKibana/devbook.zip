@@ -11,6 +11,7 @@ qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Structural/Structural"
 created: "2026-03-05T22:12:32.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-15T11:47:55.161Z"
 ---
 
 Structural patterns organize relationships between objects. They solve different boundary problems: incompatible interfaces, recursive part-whole trees, independently changing dimensions, layered behavior, simplified subsystem access, shared intrinsic state, and controlled access. The right pattern follows from the relationship that must remain stable.

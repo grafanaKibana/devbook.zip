@@ -8,6 +8,7 @@ status: Creation
 publish: true
 created: "2026-07-11T16:12:59.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-12T14:27:20.428Z"
 ---
 
 An ordered dictionary may receive a strongly uneven access stream: a small working set is touched repeatedly while most keys stay cold.

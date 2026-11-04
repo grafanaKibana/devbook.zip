@@ -8,6 +8,7 @@ status: Ready to Repeat
 publish: true
 created: "2026-07-18T07:07:47.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-16T08:35:47.513Z"
 ---
 
 NGINX is an event-driven HTTP server and reverse proxy. A master process owns configuration and worker lifecycle. Worker processes handle connections and requests.

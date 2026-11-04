@@ -11,6 +11,7 @@ qard-topic: "ORMs/Entity Framework"
 flashcard_uid: "920a0510"
 created: "2026-02-10T16:03:55.000Z"
 modified: "2026-11-02T09:03:54.806Z"
+published: "2026-07-08T13:28:37.381Z"
 ---
 
 Entity Framework Core (EF Core) is a cross-platform .NET ORM. A database provider maps its model and query pipeline to a specific engine. Microsoft ships providers for SQL Server, SQLite, and Azure Cosmos DB. PostgreSQL and MySQL support comes from external provider packages with their own compatibility schedules.

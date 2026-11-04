@@ -8,6 +8,7 @@ status: Ready to Repeat
 publish: true
 created: "2026-02-10T01:40:47.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:14:17.341Z"
 ---
 
 A mostly ordered array already contains useful work, such as a sorted log with a few late entries appended out of sequence. A general sort may ignore that structure and pay roughly the same cost as it would on random data. Insertion sort keeps the ordered part as a sorted prefix and folds one new element into it on each step.

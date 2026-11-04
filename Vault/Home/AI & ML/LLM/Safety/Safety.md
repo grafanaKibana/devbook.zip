@@ -12,6 +12,7 @@ qard-topic: "LLM/Safety/Safety"
 flashcard_uid: "920e124b"
 created: "2026-07-13T19:23:03.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-13T19:25:45.048Z"
 ---
 
 Safety cuts across the whole LLM system. [[Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering|Prompt Engineering]] can expose an instruction boundary, while [[Home/AI & ML/LLM/Context Engineering/Context Engineering|Context Engineering]] can admit poisoned evidence. [[Home/AI & ML/LLM/Harness Engineering/Harness Engineering|Harness Engineering]] may expose an overpowered tool, and [[Home/AI & ML/LLM/Loop Engineering/Loop Engineering|Loop Engineering]] can let a bad action repeat. Safety belongs in every layer, much like [[Home/AI & ML/LLM/Evaluation/Evaluation|Evaluation]].

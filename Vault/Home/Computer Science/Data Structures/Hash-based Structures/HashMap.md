@@ -8,6 +8,7 @@ status: Ready to Repeat
 publish: true
 created: "2026-02-20T23:50:18.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:14:17.345Z"
 ---
 
 A cache holds 50K active sessions and repeatedly looks up one session by ID. In a list, each lookup scans until it reaches the matching pair. A hash map derives a bucket index from the key and jumps directly to the small set of entries that could match.

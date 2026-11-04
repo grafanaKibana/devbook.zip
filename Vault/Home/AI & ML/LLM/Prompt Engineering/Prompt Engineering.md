@@ -12,6 +12,7 @@ qard-topic: "LLM/Prompt Engineering/Prompt Engineering"
 flashcard_uid: "008ceb7e"
 created: "2026-02-10T16:03:55.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:14:17.482Z"
 ---
 
 Prompt engineering turns an intention into a task the model can execute and the system can test. Small changes in wording or generation settings can shift output quality because an LLM samples from a probability distribution rather than following a fixed program.
