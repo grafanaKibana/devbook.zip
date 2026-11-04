@@ -24,6 +24,7 @@ public sealed partial class ImprovementEngine
     private readonly long started;
     private StateSnapshot? expectedSnapshot;
     private int modelCalls;
+    private bool stackChecked;
     private readonly Dictionary<string, string> sourceEvidenceCache = new();
 
     public ImprovementEngine(string root, JsonObject config, IStateStore store, IModelProvider? model = null, IGitHubApi? api = null,
@@ -400,6 +401,12 @@ public sealed partial class ImprovementEngine
         if (!withModel)
         {
             return new JsonObject { ["status"] = "selected", ["batch"] = batch, ["model_calls"] = 0, ["mutated"] = false };
+        }
+
+        if (!stackChecked && publisher is not null && batch.Arr("feedback").Count == 0 && batch.Obj("pr").Int("number") == 0)
+        {
+            await publisher.CheckStackReadyAsync(cancellationToken);
+            stackChecked = true;
         }
 
         workload!["topic"] = batch.Str("topic");

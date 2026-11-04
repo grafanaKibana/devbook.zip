@@ -232,6 +232,7 @@ public static class Receipt
         Syncer.GuardSource(context);
         Syncer.GuardOutput(context);
         await Syncer.ExportAsync(context, prepareLocalDates: false, cancellationToken);
+        PublishedDates.Restore(context, original);
         JsonObject current = Make(IndexEntries(context));
         if (!JsonNode.DeepEquals(current["sources"], original["sources"]) || !JsonNode.DeepEquals(current["policy"], original["policy"]))
         {

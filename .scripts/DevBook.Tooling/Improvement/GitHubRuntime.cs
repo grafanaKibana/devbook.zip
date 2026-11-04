@@ -4,7 +4,7 @@ using DevBook.Tooling.Infrastructure;
 
 namespace DevBook.Tooling.Improvement;
 
-public sealed class GitHubRuntime
+public sealed partial class GitHubRuntime
 {
     private readonly IGitHubApi api;
     private readonly IStateStore store;
@@ -158,13 +158,15 @@ public sealed class GitHubRuntime
         await api.RequestAsync("PATCH", "/git/refs/heads/" + Uri.EscapeDataString(branch), new JsonObject { ["sha"] = commitSha, ["force"] = false }, cancellationToken: cancellationToken);
     }
 
-    private async Task<(JsonObject Pr, bool Created)> EnsurePrAsync(string topic, int generation, string branch, string title, string body, CancellationToken cancellationToken)
+    private async Task<(JsonObject Pr, bool Created)> EnsurePrAsync(string topic, int generation, string branch, string title, string body, JsonObject operation, CancellationToken cancellationToken)
     {
         JsonArray prs = await OpenPrsAsync(cancellationToken);
-        JsonObject? found = Runtime.ManagedPr(prs.OfType<JsonObject>(), api.Repo, baseBranch, topic, generation, branch);
+        JsonObject? found = Runtime.ManagedPr(prs.OfType<JsonObject>(), api.Repo, operation.Str("publication_base_branch", baseBranch), topic, generation, branch)
+            ?? Runtime.ManagedPr(prs.OfType<JsonObject>(), api.Repo, baseBranch, topic, generation, branch);
         if (found is not null)
         {
-            JsonObject latest = await RequireOpenPrAsync(found.Int("number"), topic, generation, branch, cancellationToken);
+            JsonObject latest = await EnsureStackAsync(found, operation, cancellationToken);
+            latest = await RequireOpenPrAsync(latest.Int("number"), topic, generation, branch, cancellationToken);
             string mergedBody = Runtime.MergeManagedSection(latest.Str("body"), body, topic);
             JsonObject updated = await Runtime.ObjectAsync(api, "PATCH", $"/pulls/{found.Int("number")}", new JsonObject { ["title"] = title, ["body"] = mergedBody }, cancellationToken);
             return (updated, false);
@@ -173,7 +175,8 @@ public sealed class GitHubRuntime
         {
             throw new Conflict("Terminal generation branch cannot be reused.");
         }
-        JsonObject created = await Runtime.ObjectAsync(api, "POST", "/pulls", new JsonObject { ["title"] = title, ["body"] = body, ["head"] = branch, ["base"] = baseBranch, ["draft"] = true }, cancellationToken);
+        JsonObject created = await Runtime.ObjectAsync(api, "POST", "/pulls", new JsonObject { ["title"] = title, ["body"] = body, ["head"] = branch, ["base"] = operation.Str("publication_base_branch", baseBranch), ["draft"] = true }, cancellationToken);
+        created = await EnsureStackAsync(created, operation, cancellationToken);
         if (!Runtime.ValidPrIdentity(created, api.Repo, baseBranch, topic, generation))
         {
             throw new Conflict("Created PR lost its machine identity.");
@@ -445,7 +448,14 @@ public sealed class GitHubRuntime
         }
         string baseSha = request.Str("expected_base_sha");
         await RequirePublicationBaseAsync(baseSha, cancellationToken);
-        string branchHead = await EnsureBranchAsync(branch, baseSha, cancellationToken);
+        JsonObject publicationBase = currentPr is null ? await StackParentAsync(cancellationToken) : new JsonObject
+        { ["publication_base_branch"] = currentPr.Obj("base").Str("ref"), ["stack_parent_pr"] = 0 };
+        string parentSha = publicationBase.Str("publication_base_sha", baseSha);
+        string branchHead = await EnsureBranchAsync(branch, parentSha, cancellationToken);
+        if (currentPr is null && branchHead != parentSha)
+        {
+            throw new Conflict("Unjournaled topic branch already exists; preserve it for recovery.");
+        }
         if (request.Str("expected_branch_sha") is { Length: > 0 } expectedHead && branchHead != expectedHead)
         {
             throw new Conflict("Topic branch changed before publication.");
@@ -504,6 +514,9 @@ public sealed class GitHubRuntime
             ["branch"] = branch,
             ["parent_head"] = branchHead,
             ["base_head"] = baseSha,
+            ["publication_base_branch"] = publicationBase.Str("publication_base_branch", baseBranch),
+            ["publication_base_sha"] = parentSha,
+            ["stack_parent_pr"] = publicationBase.Int("stack_parent_pr"),
             ["source_hashes"] = sourceHashes,
             ["candidate_hashes"] = candidateHashes,
             ["candidate"] = candidate.Copy(),
@@ -548,6 +561,7 @@ public sealed class GitHubRuntime
             return new JsonObject { ["op_id"] = opId, ["commit_sha"] = commitSha, ["status"] = "feedback_changed" };
         }
         await AssertLeaseAsync(cancellationToken);
+        await RequireStackParentAsync(op, cancellationToken);
         await UpdateBranchCasAsync(branch, branchHead, commitSha, cancellationToken);
         await journal.AdvanceAsync(opId, "branch_updated", new JsonObject { ["branch_sha"] = commitSha }, cancellationToken);
         await AssertLeaseAsync(cancellationToken);
@@ -555,7 +569,7 @@ public sealed class GitHubRuntime
         {
             await RequireOpenPrAsync(expectedNumber, topic, generation, branch, cancellationToken);
         }
-        (JsonObject pr, bool created) = await EnsurePrAsync(topic, generation, branch, request.Str("title"), body, cancellationToken);
+        (JsonObject pr, bool created) = await EnsurePrAsync(topic, generation, branch, request.Str("title"), body, op, cancellationToken);
         await journal.AdvanceAsync(opId, "pr_updated", new JsonObject { ["pr_number"] = pr["number"]?.DeepClone(), ["created"] = created }, cancellationToken);
         if (request.Bool("export_required"))
         {
@@ -632,6 +646,7 @@ public sealed class GitHubRuntime
         if (number > 0)
         {
             selected = await Runtime.ObjectAsync(api, "GET", $"/pulls/{number}", cancellationToken: cancellationToken);
+            selected = await EnsureStackAsync(selected, op, cancellationToken);
             if (!Runtime.ValidPrIdentity(selected, api.Repo, baseBranch, topic, generation))
             {
                 throw new Conflict("Selected managed PR changed identity.");
@@ -640,9 +655,12 @@ public sealed class GitHubRuntime
         else
         {
             JsonObject[] matches = (await Runtime.ArrayAsync(api, "/pulls?state=all&per_page=100", cancellationToken)).OfType<JsonObject>()
-                .Where(pr => Runtime.ValidPrIdentity(pr, api.Repo, baseBranch, topic, generation)).ToArray();
+                .Where(pr => Runtime.ValidPrIdentity(pr, api.Repo, baseBranch, topic, generation)
+                    || Runtime.ValidPrIdentity(pr, api.Repo, op.Str("publication_base_branch", baseBranch), topic, generation)).ToArray();
             selected = matches.FirstOrDefault(pr => Runtime.Lifecycle(pr) != "open")
-                ?? Runtime.ManagedPr(matches, api.Repo, baseBranch, topic, generation, branch);
+                ?? Runtime.ManagedPr(matches, api.Repo, baseBranch, topic, generation, branch)
+                ?? Runtime.ManagedPr(matches, api.Repo, op.Str("publication_base_branch", baseBranch), topic, generation, branch);
+            if (selected is not null) selected = await EnsureStackAsync(selected, op, cancellationToken);
             number = selected?.Int("number") ?? 0;
             if (number > 0)
             {
@@ -717,6 +735,7 @@ public sealed class GitHubRuntime
             if (current != commitSha)
             {
                 await AssertLeaseAsync(cancellationToken);
+                await RequireStackParentAsync(op, cancellationToken);
                 await UpdateBranchCasAsync(branch, op.Str("parent_head"), commitSha, cancellationToken);
             }
             await journal.AdvanceAsync(opId, "branch_updated", new JsonObject { ["branch_sha"] = commitSha }, cancellationToken);
@@ -738,7 +757,7 @@ public sealed class GitHubRuntime
             {
                 await EnsureDraftForSourceAsync(selected!, op, false, cancellationToken);
             }
-            (JsonObject pr, bool created) = await EnsurePrAsync(topic, generation, branch, op.Str("title"), op.Str("body"), cancellationToken);
+            (JsonObject pr, bool created) = await EnsurePrAsync(topic, generation, branch, op.Str("title"), op.Str("body"), op, cancellationToken);
             await journal.AdvanceAsync(opId, "pr_updated", new JsonObject { ["pr_number"] = pr["number"]?.DeepClone(), ["created"] = created }, cancellationToken);
             phase = "pr_updated";
         }
