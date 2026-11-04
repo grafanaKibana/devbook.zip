@@ -3187,9 +3187,9 @@
     "version": 1,
     "id": "792178af26484b3da828d4cea1e5f39f",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-04T19:55:42.282235Z",
-    "elapsed_seconds": 672.3930288,
+    "elapsed_seconds": 677.0874283,
     "calls_reserved": 17,
     "responses_received": 17,
     "attempted_paths": [
@@ -3200,7 +3200,8 @@
       "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Locking.md",
       "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Mutex.md",
       "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Parallelism.md",
-      "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Semaphore.md"
+      "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Semaphore.md",
+      "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Tasks.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -3598,10 +3599,88 @@
           },
           "model_calls": 15
         }
+      },
+      {
+        "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Tasks.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Tasks.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against current text and .NET behavior. The opening separates Task from threads. The mechanism section covers await's completed-awaiter fast path, creation and scheduling (StartNew uses TaskScheduler.Current, Unwrap for async lambdas, LongRunning as a hint), and completed-task factories. Both fan-out examples are correct: WhenAll enumerates the lazy Select, awaiting it rethrows only one exception, and the catch inspects all faults. WhenEach is correctly marked .NET 9+ with unspecified tie order. The pitfalls are accurate: the unobserved-exception policy in modern .NET, ValueTask single-consumption and AsTask, the Task.Run hop around async I/O, and unbounded fan-out. The cards each test one gradeable task and match the prose: WhenAll failure and result order, WhenAny re-await, ValueTask tradeoffs, Task versus thread, and Task.Run in ASP.NET Core. They carry primary Microsoft sources. No known violations are open. I found no factual defect, repetition or ordering problem that justifies an edit."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "Independent whole-note audit found no factual, ordering, wording or card-quality defect. The keep is justified and no edits were proposed.",
+            "change_checks": [],
+            "notes": [
+              {
+                "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Tasks.md",
+                "verdict": "CLEAN",
+                "summary": "The note is accurate and well ordered. It moves from the Task-versus-thread idea to the mechanism, fan-out and failure aggregation, composition, pitfalls and cards. The prose is direct and keeps the conditions and exceptions. Each card tests one gradeable task. I found no defect that justifies an edit.",
+                "page_type": "Concept — typed frontmatter, optional Questions and References. Qard callouts keep their hidden IDs.",
+                "current_text_evidence": [
+                  {
+                    "quote": "The abstraction says nothing about whether a thread is currently executing the operation.",
+                    "line_start": 17,
+                    "reason": "The opening states the central idea, that a Task is not a thread. Later sections and the first card build on it."
+                  },
+                  {
+                    "quote": "The default scheduler is `TaskScheduler.Current`, so behavior can depend on the caller's context.",
+                    "line_start": 35,
+                    "reason": "This is the correct StartNew caveat. It gives the condition that changes behavior."
+                  },
+                  {
+                    "quote": "Awaiting it propagates one exception, so code that needs the full set must inspect the combined task or the individual tasks after completion.",
+                    "line_start": 58,
+                    "reason": "This is accurate WhenAll semantics. The catch-when example that follows is consistent with it."
+                  },
+                  {
+                    "quote": "On .NET 9+, `Task.WhenEach` yields each task after it completes.",
+                    "line_start": 98,
+                    "reason": "The version condition is correct, and the tie order is correctly described as unspecified."
+                  },
+                  {
+                    "quote": "Modern .NET does not terminate the process by default after that event.",
+                    "line_start": 112,
+                    "reason": "This matches the post-.NET 4.5 unobserved-exception policy."
+                  },
+                  {
+                    "quote": "> [!qard]- Why must the task returned by `await Task.WhenAny(...)` usually be awaited again?",
+                    "line_start": 234,
+                    "reason": "This is a focused card with a mechanism-based answer and a primary Microsoft source. It tests one gradeable task."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: Task semantics, composition, failure handling and pitfalls are tightly coupled and cohere as one note.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ]
+          },
+          "model_calls": 17
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-04T20:06:54.674738Z",
+    "checkpoint_at": "2026-11-04T20:06:59.369139Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
