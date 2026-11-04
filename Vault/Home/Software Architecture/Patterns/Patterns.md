@@ -13,6 +13,7 @@ qard-topic: "Patterns/Patterns"
 flashcard_uid: "cfaa4058"
 created: "2026-02-10T01:40:47.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-15T11:47:54.862Z"
 ---
 
 Patterns name recurring design pressures and the tradeoffs of a known response. They give a team shared language for boundaries, dependencies, and change. A useful pattern makes variation easier to see. A premature one hides simple control flow behind indirection.

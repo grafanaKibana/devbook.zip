@@ -9,6 +9,7 @@ using DevBook.Tooling.Infrastructure;
 namespace DevBook.Tooling.Vault;
 
 public sealed class NoteDateException(string message) : InvalidOperationException(message);
+public sealed record PublicationDate(string? Timestamp, string Commit, string Path);
 
 /// <summary>Prepares source dates before review, separately from immutable rendering.</summary>
 public static class NoteDates
@@ -91,7 +92,8 @@ public static class NoteDates
         {
             throw new NoteDateException("Unclosed note frontmatter");
         }
-        var owned = (fields ?? Keys.Keys.ToHashSet(StringComparer.Ordinal)).SelectMany(field => Keys[field]).ToHashSet(StringComparer.Ordinal);
+        var owned = (fields ?? Keys.Keys.ToHashSet(StringComparer.Ordinal))
+            .SelectMany(field => Keys.TryGetValue(field, out string[]? aliases) ? aliases : [field]).ToHashSet(StringComparer.Ordinal);
         for (var index = 1; index < end; index++)
         {
             Match match = Property.Match(lines[index].TrimEnd('\r', '\n'));
@@ -126,6 +128,92 @@ public static class NoteDates
             pair => pair.Value.Select(alias => parsed.Dates.GetValueOrDefault(alias)).FirstOrDefault(value => value is not null), StringComparer.Ordinal);
     }
 
+    public static string[] PublicationKeys(string root)
+    {
+        string path = Path.Combine(root, ".scripts/quartz-syncer.defaults.json");
+        string configured = File.Exists(path)
+            ? JsonNode.Parse(File.ReadAllText(path))?["publishedTimestampKey"]?.GetValue<string>() ?? "published, publishDate, date"
+            : "published, publishDate, date";
+        string[] keys = configured.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Distinct(StringComparer.Ordinal).ToArray();
+        if (keys.Length == 0 || keys.Any(key => !Regex.IsMatch(key, "^[A-Za-z][A-Za-z0-9_-]*$", RegexOptions.CultureInvariant)))
+        {
+            throw new NoteDateException("Publication timestamp keys must be nonempty frontmatter property names");
+        }
+        return ["published", .. keys.Where(key => key != "published")];
+    }
+
+    public static bool IsPublished(byte[] data) => Markdown.SplitFrontmatter(Utf8.GetString(data)).Values
+        .TryGetValue("publish", out FrontmatterValue? value) && value.Value is true;
+
+    public static string? Published(byte[] data, IReadOnlyList<string>? keys = null)
+    {
+        keys ??= ["published", "publishDate", "date"];
+        Metadata metadata = Frontmatter(data, keys.ToHashSet(StringComparer.Ordinal));
+        return keys.Select(key => metadata.Dates.GetValueOrDefault(key)).FirstOrDefault(value => value is not null);
+    }
+
+    public static PublicationDate? RecoverPublished(string root, string sourcePath, IReadOnlyList<string>? keys = null)
+    {
+        keys ??= PublicationKeys(root);
+        if (!Eligible(sourcePath) || sourcePath.Split('/').Any(part => part is "." or ".."))
+        {
+            throw new NoteDateException($"Unsafe publication source path: {sourcePath}");
+        }
+        if (GitText(root, "rev-parse", "--is-shallow-repository") == "true")
+        {
+            throw new NoteDateException("Full Git history is required to recover publication dates; fetch missing history first");
+        }
+        string output = "Web/content/" + sourcePath["Vault/Home/".Length..];
+        string[] tokens = Utf8.GetString(GitBytes(root, "log", "--follow", "--format=%x00COMMIT:%H", "--name-status", "-z", "--", output)).Split('\0');
+        var versions = new List<(string Commit, string Path)>();
+        string commit = "";
+        for (var index = 0; index < tokens.Length;)
+        {
+            string token = tokens[index++];
+            if (token.Length == 0)
+            {
+                continue;
+            }
+            if (token.StartsWith("COMMIT:", StringComparison.Ordinal))
+            {
+                commit = token[7..];
+                if (!Regex.IsMatch(commit, "^[0-9a-f]{40,64}$", RegexOptions.CultureInvariant))
+                {
+                    throw new NoteDateException("Invalid publication history commit");
+                }
+                continue;
+            }
+            string status = token.TrimStart('\n', '\r');
+            if (commit.Length == 0 || !Regex.IsMatch(status, "^(?:[AMD]|[RC][0-9]+)$", RegexOptions.CultureInvariant) || index >= tokens.Length)
+            {
+                throw new NoteDateException("Unsupported publication history entry");
+            }
+            string path = tokens[index++];
+            if (status.StartsWith('R') || status.StartsWith('C'))
+            {
+                if (index >= tokens.Length)
+                {
+                    throw new NoteDateException("Incomplete publication rename history");
+                }
+                path = tokens[index++];
+            }
+            if (status != "D" && path.StartsWith("Web/content/", StringComparison.Ordinal)
+                && path.Split('/').All(part => part is not ("." or "..")))
+            {
+                versions.Add((commit, path));
+            }
+        }
+        foreach ((string revision, string path) in versions.AsEnumerable().Reverse())
+        {
+            string? published = Published(GitBytes(root, "show", revision + ":" + path), keys);
+            if (published is not null)
+            {
+                return new(published, revision, path);
+            }
+        }
+        return versions.Count == 0 ? null : new(null, versions[^1].Commit, versions[^1].Path);
+    }
+
     public static byte[] MeaningfulContent(byte[] data)
     {
         Metadata parsed = Frontmatter(data);
@@ -143,9 +231,9 @@ public static class NoteDates
 
     private static byte[] WithDates(byte[] data, IReadOnlyDictionary<string, string?> dates)
     {
-        if (dates.Keys.Any(key => !Keys.ContainsKey(key)))
+        if (dates.Keys.Any(key => !Keys.ContainsKey(key) && key != "published"))
         {
-            throw new NoteDateException("Only created and modified are owned by this helper");
+            throw new NoteDateException("Only created, modified and published are owned by this helper");
         }
         Metadata parsed = Frontmatter(data, dates.Keys.ToHashSet(StringComparer.Ordinal));
         string newline = Utf8.GetString(data).Contains("\r\n", StringComparison.Ordinal) ? "\r\n" : "\n";
@@ -171,7 +259,8 @@ public static class NoteDates
     }
 
     /// <summary>Transforms a selected candidate against its actual topic-parent bytes without side effects.</summary>
-    public static byte[] Prepare(byte[] candidate, byte[]? parent, DateTimeOffset instant, IReadOnlyList<string>? history = null)
+    public static byte[] Prepare(byte[] candidate, byte[]? parent, DateTimeOffset instant, IReadOnlyList<string>? history = null,
+        string? publication = null, IReadOnlyList<string>? publicationKeys = null)
     {
         IReadOnlyDictionary<string, string?> current = Read(candidate);
         IReadOnlyDictionary<string, string?> previous = parent is null
@@ -181,7 +270,12 @@ public static class NoteDates
         string created = current["created"] ?? previous["created"] ?? (parent is not null && history is { Count: > 0 } ? Timestamp(history[^1]) : now);
         bool meaningful = parent is null || !MeaningfulContent(candidate).AsSpan().SequenceEqual(MeaningfulContent(parent));
         string modified = meaningful ? now : previous["modified"] ?? current["modified"] ?? (history is { Count: > 0 } ? Timestamp(history[0]) : now);
-        return WithDates(candidate, new Dictionary<string, string?> { ["created"] = created, ["modified"] = modified });
+        var dates = new Dictionary<string, string?> { ["created"] = created, ["modified"] = modified };
+        if (Published(candidate, publicationKeys) is null)
+        {
+            dates["published"] = parent is null ? publication : Published(parent, publicationKeys) ?? publication;
+        }
+        return WithDates(candidate, dates);
     }
 
     private static ProcessResult RunGit(string root, params string[] args) => new SystemProcessRunner()
@@ -362,6 +456,7 @@ public static class NoteDates
             }
         }
         var changes = new Dictionary<string, byte[]>(StringComparer.Ordinal);
+        string[] publicationKeys = PublicationKeys(root);
         foreach ((string path, byte[] data) in files)
         {
             string source = renames.GetValueOrDefault(path, path);
@@ -390,13 +485,87 @@ public static class NoteDates
             {
                 cache.Remove(path);
             }
-            changes[path] = Prepare(data, parent, operationInstant, history);
+            PublicationDate? recovered = IsPublished(data) && Published(data, publicationKeys) is null
+                && (parent is null || Published(parent, publicationKeys) is null)
+                ? RecoverPublished(root, source, publicationKeys) : null;
+            if (recovered is { Timestamp: null })
+            {
+                throw new NoteDateException($"Historical export has no recorded publication date: {path} ({recovered.Commit}:{recovered.Path}); recover a date or explicitly author published before exporting.");
+            }
+            changes[path] = Prepare(data, parent, operationInstant, history, recovered?.Timestamp, publicationKeys);
         }
         IReadOnlyList<string> changedPaths = Apply(root, files, changes, true);
         string temporary = cachePath + ".tmp";
         File.WriteAllText(temporary, cache.ToJsonString() + "\n", new UTF8Encoding(false));
         File.Move(temporary, cachePath, true);
         return changedPaths.ToDictionary(path => path, path => SHA256.HashData(changes[path]), StringComparer.Ordinal);
+    }
+
+    /// <summary>Records newly published notes only after a fully verified successful native export.</summary>
+    public static Dictionary<string, byte[]> FinalizePublications(string root, IReadOnlyDictionary<string, byte[]> expectedHashes, DateTimeOffset instant)
+    {
+        Dictionary<string, byte[]> files = Index(root);
+        foreach ((string path, byte[] data) in files)
+        {
+            if (!expectedHashes.TryGetValue(path, out byte[]? expected) || !SHA256.HashData(data).AsSpan().SequenceEqual(expected))
+            {
+                throw new NoteDateException($"Source changed before publication finalization: {path}");
+            }
+        }
+        string[] keys = PublicationKeys(root);
+        Dictionary<string, byte[]> changes = files.Where(pair => IsPublished(pair.Value) && Published(pair.Value, keys) is null)
+            .ToDictionary(pair => pair.Key, pair => WithDates(pair.Value, new Dictionary<string, string?> { ["published"] = Format(instant) }), StringComparer.Ordinal);
+        IReadOnlyList<string> changed = Apply(root, files, changes, true);
+        return changed.ToDictionary(path => path, path => SHA256.HashData(changes[path]), StringComparer.Ordinal);
+    }
+
+    public static void RequirePublications(string root)
+    {
+        Dictionary<string, byte[]> files = Index(root);
+        Guard(root, files);
+        string[] keys = PublicationKeys(root);
+        foreach ((string path, byte[] data) in files)
+        {
+            if (IsPublished(data) && Published(data, keys) is null)
+            {
+                throw new NoteDateException($"Published source lacks its publication date: {path}; run the normal first successful local export before immutable rendering.");
+            }
+        }
+    }
+
+    public static JsonObject BackfillPublished(string root, bool write = false)
+    {
+        Dictionary<string, byte[]> files = Index(root);
+        Guard(root, files);
+        RunGit(root, "diff", "--cached", "--quiet", "--", "Vault/Home").EnsureSuccess("Publication backfill requires clean committed notes");
+        string[] keys = PublicationKeys(root);
+        var changes = new Dictionary<string, byte[]>(StringComparer.Ordinal);
+        var recovered = new JsonArray();
+        var unresolved = new JsonArray();
+        foreach ((string path, byte[] data) in files)
+        {
+            if (!IsPublished(data) || Published(data, keys) is not null)
+            {
+                continue;
+            }
+            PublicationDate? date = RecoverPublished(root, path, keys);
+            if (date?.Timestamp is null)
+            {
+                unresolved.Add(path);
+                continue;
+            }
+            changes[path] = WithDates(data, new Dictionary<string, string?> { ["published"] = date.Timestamp });
+            recovered.Add(new JsonObject { ["path"] = path, ["published"] = date.Timestamp, ["commit"] = date.Commit, ["historical_path"] = date.Path });
+        }
+        if (write)
+        {
+            Apply(root, files, changes, false);
+        }
+        else
+        {
+            Guard(root, files);
+        }
+        return new JsonObject { ["mode"] = write ? "write" : "dry-run", ["recovered"] = recovered, ["unresolved"] = unresolved };
     }
 
     public static Dictionary<string, byte[]> BackfillCreated(string root, bool write = false)
@@ -443,7 +612,7 @@ public static class NoteDates
     {
         if (args.Contains("--help") || args.Contains("-h"))
         {
-            Console.WriteLine("Backfill canonical created metadata from Git without staging. --backfill-created [--write] [--repo-root <checkout>]");
+            Console.WriteLine("Backfill source dates from Git without staging. (--backfill-created | --backfill-published) [--write] [--repo-root <checkout>]");
             return Task.FromResult(0);
         }
         try
@@ -455,16 +624,21 @@ public static class NoteDates
                 {
                     root = Path.GetFullPath(args[++index]);
                 }
-                else if (args[index] is not ("--write" or "--backfill-created"))
+                else if (args[index] is not ("--write" or "--backfill-created" or "--backfill-published"))
                 {
                     throw new ArgumentException($"Unknown or incomplete argument: {args[index]}");
                 }
             }
-            if (!args.Contains("--backfill-created"))
+            if (args.Contains("--backfill-created") == args.Contains("--backfill-published"))
             {
-                throw new ArgumentException("--backfill-created is required");
+                throw new ArgumentException("Choose exactly one of --backfill-created or --backfill-published");
             }
             root ??= Repository.FindRoot();
+            if (args.Contains("--backfill-published"))
+            {
+                Console.WriteLine(BackfillPublished(root, args.Contains("--write")).ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
+                return Task.FromResult(0);
+            }
             Dictionary<string, byte[]> changes = BackfillCreated(root, args.Contains("--write"));
             Console.WriteLine(JsonSerializer.Serialize(new { mode = args.Contains("--write") ? "write" : "dry-run", changed = changes.Keys }, new JsonSerializerOptions { WriteIndented = true }));
             return Task.FromResult(0);

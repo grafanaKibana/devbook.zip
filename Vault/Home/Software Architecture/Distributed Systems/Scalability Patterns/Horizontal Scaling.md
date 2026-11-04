@@ -11,6 +11,7 @@ qard-topic: "Distributed Systems/Scalability Patterns/Horizontal Scaling"
 flashcard_uid: "07349cc0"
 created: "2026-02-28T20:52:28.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:28:37.389Z"
 ---
 
 Horizontal scaling (scale-out) adds service instances and divides work among them. [[Home/Software Architecture/Distributed Systems/Scalability Patterns/Vertical Scaling]] instead gives one instance more resources. Scale-out can increase capacity and reduce the effect of one instance failing, but only while another component does not become the bottleneck.

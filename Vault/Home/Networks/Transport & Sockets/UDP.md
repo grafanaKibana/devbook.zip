@@ -8,6 +8,7 @@ status: Ready to Repeat
 publish: true
 created: "2026-02-10T01:40:47.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:14:17.364Z"
 ---
 
 UDP carries independent datagrams without establishing a transport connection. It does not acknowledge, retransmit, order, or pace them. That small contract is useful when stale data is replaceable, multicast is required, or another protocol such as QUIC supplies the missing machinery. The application otherwise owns loss recovery, duplicate handling, ordering, deadlines, and congestion response.

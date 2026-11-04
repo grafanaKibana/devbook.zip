@@ -8,6 +8,7 @@ status: Ready to Repeat
 publish: true
 created: "2026-07-18T07:07:47.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-16T08:28:54.854Z"
 ---
 
 Authorization evaluates a request such as `(principal, action, resource, context)` and returns a decision. Authentication supplies the principal. It does not prove that the principal may read this invoice, alter this field, or approve this workflow transition. The enforcement point must obtain a decision for every protected operation and deny when no rule matches.

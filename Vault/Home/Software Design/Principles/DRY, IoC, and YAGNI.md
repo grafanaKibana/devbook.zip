@@ -9,6 +9,7 @@ status: Ready to Repeat
 publish: true
 created: "2026-08-10T10:51:19.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-08-10T08:06:35.019Z"
 ---
 
 DRY, Inversion of Control, and YAGNI control different design costs. **DRY** keeps one authoritative representation of knowledge that must change together. **Inversion of Control (IoC)** lets a framework or composition root decide when application code is created and called. **YAGNI** defers features and flexibility that have no current requirement.

@@ -8,6 +8,7 @@ status: Ready to Repeat
 publish: true
 created: "2026-06-20T05:33:50.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:14:17.343Z"
 ---
 
 A service checks whether a key exists before an expensive disk, database, or network lookup. Most queried keys are absent, so the system spends much of its time confirming misses. A [[Home/Computer Science/Data Structures/Hash-based Structures/Hash Set|Hash Set]] answers membership exactly but must retain every key. That may cost more memory than the lookup guard can justify.

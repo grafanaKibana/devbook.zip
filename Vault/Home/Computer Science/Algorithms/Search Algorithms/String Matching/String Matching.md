@@ -9,6 +9,7 @@ level: ["4"]
 status: Creation
 created: "2026-07-12T07:33:07.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-12T14:27:20.411Z"
 ---
 
 String matching finds occurrences of a pattern inside a text. A naive scan costs `O(n·m)` because it may restart the comparison after every mismatch. Faster methods keep the useful part of that failed comparison and avoid checking characters whose relationship is already known.

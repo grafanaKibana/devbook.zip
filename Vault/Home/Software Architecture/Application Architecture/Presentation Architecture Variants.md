@@ -11,6 +11,7 @@ qard-topic: "Application Architecture/Presentation Architecture Variants"
 flashcard_uid: "864352fa"
 created: "2026-07-18T07:07:47.000Z"
 modified: "2026-10-31T09:00:37.443Z"
+published: "2026-07-16T16:55:26.602Z"
 ---
 
 Presentation patterns separate a UI from the state and decisions behind it. Their real differences are ownership: who receives input, where screen state lives, what causes a render, and who chooses the next screen. The patterns fit different interaction models. They are not a maturity ladder, and the smallest boundary that keeps domain behavior out of the UI framework is usually enough.

@@ -11,6 +11,7 @@ qard-topic: "LLM/Context Engineering/RAG/RAG Caching"
 flashcard_uid: "e2208d57"
 created: "2026-09-29T12:13:16.000Z"
 modified: "2026-11-02T09:03:54.806Z"
+published: "2026-09-21T08:43:52.494Z"
 ---
 
 A RAG request can repeat the same expensive work: embed the query, search the index, and generate an answer. Caches remove that work only when their keys capture every input that affects the result.

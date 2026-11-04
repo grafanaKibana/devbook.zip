@@ -8,6 +8,7 @@ status: Ready to Repeat
 publish: true
 created: "2026-07-18T07:07:47.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-16T14:12:14.666Z"
 ---
 
 SSH provides an encrypted, integrity-protected connection for remote shells, command execution, file transfer, and forwarding. Three protocol layers do distinct jobs. The transport layer negotiates algorithms and authenticates the server host. User authentication establishes which account may enter. The connection layer multiplexes shells, commands, and forwarded streams over the protected transport.

@@ -11,6 +11,7 @@ qard-topic: "Patterns/Design Patterns/Structural/Facade"
 flashcard_uid: "514952cf"
 created: "2026-03-05T22:12:42.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:14:17.454Z"
 ---
 
 A hotel concierge gives guests one contact for services that still run independently behind the desk. The concierge adds no new capability. The value is a simpler entry point and knowledge of the required sequence.

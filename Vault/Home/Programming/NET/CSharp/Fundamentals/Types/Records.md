@@ -11,6 +11,7 @@ qard-topic: "NET/CSharp/Fundamentals/Types/Records"
 flashcard_uid: "c03985b0"
 created: "2026-02-18T19:18:52.000Z"
 modified: "2026-11-03T09:52:48.695Z"
+published: "2026-07-08T13:14:17.328Z"
 ---
 
 Records are C# types for models whose contents define equality. The compiler supplies value-based equality and a useful `ToString`. Positional records also get properties and deconstruction. A `with` expression creates a copy with selected members changed. This fits DTOs, messages, and other data that should compare by value instead of object identity.

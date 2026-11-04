@@ -11,6 +11,7 @@ qard-topic: "Patterns/Design Patterns/Creational/Singleton"
 flashcard_uid: "12bb55c5"
 created: "2026-03-05T22:12:38.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:14:17.451Z"
 ---
 
 Singleton combines two decisions: keep one instance within a defined boundary and provide access to it. The boundary is easy to miss. A classical static implementation owns a process-level access point, while `.AddSingleton<T>()` reuses one instance for subsequent resolutions from a particular root service provider and registration. A second provider or direct construction can still create another instance.

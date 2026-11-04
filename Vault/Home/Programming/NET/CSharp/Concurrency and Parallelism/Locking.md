@@ -11,6 +11,7 @@ qard-topic: "NET/CSharp/Concurrency and Parallelism/Locking"
 flashcard_uid: "15275eaf"
 created: "2026-07-14T20:57:52.000Z"
 modified: "2026-11-02T09:03:54.806Z"
+published: "2026-07-15T06:00:17.802Z"
 ---
 
 `lock` gives one thread at a time access to a synchronous critical section. It fits small in-process state changes such as updating a counter or taking a snapshot of a shared dictionary. Awaited I/O should normally happen outside that mutation and publish its result inside a short lock. When an invariant genuinely must span asynchronous work, `SemaphoreSlim.WaitAsync` can gate that bounded span; cross-process coordination needs [[Mutex]], and N concurrent holders need [[Semaphore]] rather than mutual exclusion.

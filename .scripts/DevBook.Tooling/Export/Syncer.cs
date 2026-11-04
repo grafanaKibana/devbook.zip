@@ -506,6 +506,39 @@ public static class Syncer
                 throw new SyncException("Vault source changed while preparing note dates; commit blocked.");
             }
         }
+        else
+        {
+            NoteDates.RequirePublications(context.Root);
+        }
+        await RenderAsync(context, before, cancellationToken);
+        if (prepareLocalDates)
+        {
+            Dictionary<string, byte[]> published = NoteDates.FinalizePublications(context.Root, before, DateTimeOffset.UtcNow);
+            if (published.Count > 0)
+            {
+                foreach (KeyValuePair<string, byte[]> entry in published)
+                {
+                    before[entry.Key] = entry.Value;
+                }
+                if (!SameSnapshot(before, Snapshot(context.Root)))
+                {
+                    throw new SyncException("Vault source changed while recording first publication; commit blocked.");
+                }
+                await RenderAsync(context, before, cancellationToken);
+            }
+        }
+        GuardSource(context);
+        string[] existing = Outputs.Where(path => File.Exists(Path.Combine(context.Root, path)) || Directory.Exists(Path.Combine(context.Root, path))
+            || context.GitText("ls-files", "--", path).Length != 0).ToArray();
+        if (existing.Length != 0)
+        {
+            context.GitBytes(["add", "-A", "--", .. existing]);
+        }
+        Log(context, "Export verified; generated output staged.");
+    }
+
+    private static async Task RenderAsync(SyncerContext context, Dictionary<string, byte[]> before, CancellationToken cancellationToken)
+    {
         GuardSource(context);
         Log(context, "Verified local export destination and settings; starting publication.");
         await WaitForIndexesAsync(context, before, cancellationToken);
@@ -562,13 +595,6 @@ public static class Syncer
             throw new SyncException("Vault source changed during export. Review and stage the changes, then retry.");
         }
         GuardSource(context);
-        string[] existing = Outputs.Where(path => File.Exists(Path.Combine(context.Root, path)) || Directory.Exists(Path.Combine(context.Root, path))
-            || context.GitText("ls-files", "--", path).Length != 0).ToArray();
-        if (existing.Length != 0)
-        {
-            context.GitBytes(["add", "-A", "--", .. existing]);
-        }
-        Log(context, "Export verified; generated output staged.");
     }
 
     public static void Log(SyncerContext context, string message)

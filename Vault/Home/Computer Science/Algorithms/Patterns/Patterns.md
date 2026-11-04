@@ -10,6 +10,7 @@ level: ["4"]
 status: Creation
 created: "2026-06-20T05:33:50.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:28:37.375Z"
 ---
 
 Algorithm patterns are recurring implementation moves that replace repeated work with a maintained invariant. A sliding window carries a range aggregate, prefix sums reuse cumulative work, and a monotonic stack discards candidates that cannot win. They are narrower than [[Home/Computer Science/Algorithms/Paradigms/Paradigms|paradigms]] such as dynamic programming or greedy design: a paradigm shapes the solution, while a pattern describes the mechanism used inside it.

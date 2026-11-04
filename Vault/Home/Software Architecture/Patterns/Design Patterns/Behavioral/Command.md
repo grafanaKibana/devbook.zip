@@ -11,6 +11,7 @@ qard-topic: "Patterns/Design Patterns/Behavioral/Command"
 flashcard_uid: "dd0e4ff8"
 created: "2026-03-05T22:12:46.000Z"
 modified: "2026-11-02T09:03:54.806Z"
+published: "2026-07-08T13:14:17.438Z"
 ---
 
 A restaurant ticket is a command in paper form. It records the requested meal, waits in the kitchen queue, and tells the chef what to prepare. The waiter does not cook and the chef does not take the order. The ticket keeps the request separate from its execution.

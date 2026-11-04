@@ -11,6 +11,7 @@ qard-topic: "Patterns/Design Patterns/Structural/Decorator"
 flashcard_uid: "a1eefa19"
 created: "2026-03-05T22:12:42.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:14:17.453Z"
 ---
 
 Pizza toppings work as layers over one base. Each layer changes the result without changing the dough underneath, and different combinations can be assembled from the same pieces.

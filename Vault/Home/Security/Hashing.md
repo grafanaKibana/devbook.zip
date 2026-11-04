@@ -11,6 +11,7 @@ qard-topic: "Hashing"
 flashcard_uid: "bca46ee1"
 created: "2026-06-20T19:32:24.000Z"
 modified: "2026-11-02T09:03:54.806Z"
+published: "2026-07-08T13:14:17.503Z"
 ---
 
 A cryptographic hash maps an arbitrary-length byte string to a fixed-length digest. A secure general-purpose hash is designed to resist finding an input for a chosen digest and finding two inputs with the same digest. There is no decryption key. Inputs from a small or predictable domain can still be guessed and hashed, which is why a digest is not a way to hide passwords or identifiers.

@@ -12,6 +12,7 @@ qard-topic: "NET/CSharp/Concurrency and Parallelism/Concurrency and Parallelism"
 flashcard_uid: "4b1835fe"
 created: "2026-02-18T20:04:43.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:14:17.321Z"
 ---
 
 Concurrency describes program structure: several operations can be in progress during the same period. Parallelism describes execution: several operations run at the same instant. A single core can interleave concurrent work but cannot execute it in parallel.

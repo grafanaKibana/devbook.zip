@@ -8,6 +8,7 @@ status: Ready to Repeat
 publish: true
 created: "2026-07-09T18:37:04.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-10T14:39:34.301Z"
 ---
 
 A program often needs the i-th value in a sequence without walking through everything before it. An array makes that possible by packing equal-size slots into one contiguous block. The runtime computes `base + i * elementSize` and lands directly on the requested slot. Neighbors in the sequence are neighbors in memory too, which makes sequential scans friendly to CPU caches.

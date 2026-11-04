@@ -8,6 +8,7 @@ status: Ready to Repeat
 publish: true
 created: "2026-02-10T01:40:47.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:14:17.362Z"
 ---
 
 SMTP moves outbound mail into a submission service and relays it between mail servers. IMAP and POP3 solve a different problem: reading messages already stored in a mailbox.

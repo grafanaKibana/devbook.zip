@@ -9,6 +9,7 @@ status: Ready to Repeat
 publish: true
 created: "2026-02-10T01:40:47.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:14:17.363Z"
 ---
 
 A socket is an operating-system endpoint for network communication. An Internet socket endpoint is an IP address plus a port. The address family, socket type, and protocol are selected when the socket is created. Together they determine whether the API exposes a TCP byte stream, UDP datagrams, or another protocol contract.

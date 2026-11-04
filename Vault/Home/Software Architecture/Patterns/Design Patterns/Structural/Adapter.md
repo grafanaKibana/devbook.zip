@@ -11,6 +11,7 @@ qard-topic: "Patterns/Design Patterns/Structural/Adapter"
 flashcard_uid: "dc9183f6"
 created: "2026-03-05T22:12:42.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:14:17.452Z"
 ---
 
 A travel plug adapter lets a US charger connect to a European outlet. It changes neither device. The small piece between them translates one physical interface into the other.

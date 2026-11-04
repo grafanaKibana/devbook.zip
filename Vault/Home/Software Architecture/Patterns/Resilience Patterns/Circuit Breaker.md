@@ -9,6 +9,7 @@ status: Done
 publish: true
 created: "2026-02-10T01:40:47.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:14:17.457Z"
 ---
 
 A circuit breaker stops calls to a dependency after recent failures cross a threshold. While open, it rejects work immediately instead of spending caller capacity on requests that are likely to time out. This contains sustained failure and gives the dependency time to recover.

@@ -11,6 +11,7 @@ qard-topic: "Patterns/Design Patterns/Behavioral/Memento"
 flashcard_uid: "923a41fb"
 created: "2026-03-05T22:12:46.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:14:17.445Z"
 ---
 
 A video-game save point is a memento. It captures enough state to restore a particular moment after a failed attempt. The save system stores that snapshot without needing to understand every internal object that produced it.

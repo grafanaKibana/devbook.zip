@@ -8,6 +8,7 @@ status: Creation
 publish: true
 created: "2026-07-10T06:24:36.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-10T05:57:23.418Z"
 ---
 
 Sorting a million elements and multiplying two large integers can both be split into smaller instances, solved recursively, and assembled from the partial answers. Divide-and-conquer names that shape. Binary search follows only one side of the split, the close variant usually called decrease-and-conquer.

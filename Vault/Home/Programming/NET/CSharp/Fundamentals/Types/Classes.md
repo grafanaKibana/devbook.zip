@@ -11,6 +11,7 @@ qard-topic: "NET/CSharp/Fundamentals/Types/Classes"
 flashcard_uid: "0928b940"
 created: "2026-02-18T19:18:52.000Z"
 modified: "2026-11-02T09:03:54.806Z"
+published: "2026-07-08T13:14:17.327Z"
 ---
 
 A class defines a reference type with object identity. Assignment copies a reference, so two variables can point at the same instance and observe the same mutations. Shared identity fits services and mutable domain entities. But it also creates aliasing bugs when ownership is unclear.

@@ -8,6 +8,7 @@ status: Ready to Repeat
 publish: true
 created: "2026-02-10T01:40:47.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:14:17.364Z"
 ---
 
 TCP/IP names a protocol suite, not one protocol. **IP** carries packets between addressed interfaces across networks. **TCP** runs above IP and turns that best-effort packet service into a reliable, ordered, connection-oriented byte stream. HTTP, gRPC, database protocols, and other application protocols then define meaning on top of that stream.

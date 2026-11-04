@@ -8,6 +8,7 @@ publish: true
 priority: Medium
 created: "2026-06-20T05:33:50.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:14:17.340Z"
 ---
 
 Selection sort finds the maximum of the unsorted region by scanning it from scratch on every round. Each scan throws away ordering information that the previous rounds already uncovered.

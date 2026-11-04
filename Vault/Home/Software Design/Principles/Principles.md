@@ -9,6 +9,7 @@ level: ["4"]
 status: Creation
 created: "2026-02-10T01:40:47.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-15T11:47:56.722Z"
 ---
 
 Principles like SOLID, DRY, KISS, and YAGNI are decision checks, not a scoring system. Each one names a recurring risk: responsibilities that change for different reasons, duplicated rules that drift, unnecessary moving parts, or flexibility built before its requirements are known.

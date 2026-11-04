@@ -11,6 +11,7 @@ qard-topic: "ACID"
 flashcard_uid: "72457a79"
 created: "2026-02-10T01:40:47.000Z"
 modified: "2026-11-02T09:03:54.806Z"
+published: "2026-07-08T13:14:17.348Z"
 ---
 
 ACID describes what a database transaction protects. A **transaction** groups reads and writes behind one commit decision. Atomicity prevents partial commit, consistency preserves declared invariants, isolation constrains concurrent histories, and durability defines what survives after commit.

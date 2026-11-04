@@ -11,6 +11,7 @@ qard-topic: "NET/ASP NET Web API/Filters"
 flashcard_uid: "ef27222b"
 created: "2026-02-19T23:08:30.000Z"
 modified: "2026-11-02T09:03:54.806Z"
+published: "2026-07-08T13:14:17.319Z"
 ---
 
 Controller filters in ASP.NET Core Web APIs wrap defined stages of controller execution. They fit cross-cutting behavior that needs action arguments, model state, controller metadata, or the action result. A correlation-ID rule tied only to selected controllers is one example. An application-wide correlation ID usually belongs in middleware.

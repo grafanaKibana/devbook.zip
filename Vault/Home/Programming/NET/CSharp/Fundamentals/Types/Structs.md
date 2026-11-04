@@ -10,6 +10,7 @@ qard-deck: "Programming"
 qard-topic: "NET/CSharp/Fundamentals/Types/Structs"
 created: "2026-02-18T19:18:52.000Z"
 modified: "2026-11-03T10:42:12.241Z"
+published: "2026-07-08T13:14:17.328Z"
 ---
 
 A struct is a C# value type. Assignment copies its fields as a new value, including any references those fields contain. That behavior fits small, immutable data representing one logical value, such as a coordinate or money amount.

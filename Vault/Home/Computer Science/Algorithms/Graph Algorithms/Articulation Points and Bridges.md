@@ -8,6 +8,7 @@ status: Creation
 publish: true
 created: "2026-07-10T06:24:36.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-10T05:56:46.785Z"
 ---
 
 In an undirected network, a router or cable is a single point of failure when removing it leaves some pair of nodes unable to reach each other.

@@ -11,6 +11,7 @@ qard-topic: "LLM/Agents/Evaluation/Agent Benchmarks"
 flashcard_uid: "f16dc5d5"
 created: "2026-06-12T18:50:14.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:28:37.403Z"
 ---
 
 Agent benchmarks run a model and its scaffold against a fixed public task suite. The tasks usually require several actions: edit a repository until hidden tests pass, operate a website, or combine browsing with calculation. These suites are useful for narrowing a model shortlist and checking whether an evaluation harness produces plausible results.

@@ -11,6 +11,7 @@ qard-topic: "LLM/Harness Engineering/Tooling/Agent Instructions"
 flashcard_uid: "fef75b53"
 created: "2026-08-16T07:07:41.000Z"
 modified: "2026-11-02T09:03:54.806Z"
+published: "2026-08-20T20:41:15.495Z"
 ---
 
 Agent instruction files describe how work gets done in one repository. They capture facts the code cannot reliably explain on its own: which commands are safe, where boundaries sit, what conventions matter, and how a change is proved complete.

@@ -8,6 +8,7 @@ status: Ready to Repeat
 publish: true
 created: "2026-07-11T16:12:59.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-12T14:27:20.404Z"
 ---
 
 A Hamiltonian cycle visits every **vertex** exactly once and returns to its start. An Eulerian cycle asks a different question: it uses every edge exactly once and has a direct degree-based characterization. No polynomial-time test is known for Hamiltonian-cycle existence in general graphs. The decision problem is NP-complete.

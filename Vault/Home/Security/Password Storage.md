@@ -11,6 +11,7 @@ qard-topic: "Password Storage"
 flashcard_uid: "e2367753"
 created: "2026-07-18T07:07:47.000Z"
 modified: "2026-11-02T09:03:54.806Z"
+published: "2026-07-16T08:23:57.845Z"
 ---
 
 A service needs to verify a password, not recover it. The stored record should make each offline guess expensive after a database leak and prevent equal passwords from sharing one verifier. Plaintext, reversible encryption, and fast general-purpose hashes fail that boundary.

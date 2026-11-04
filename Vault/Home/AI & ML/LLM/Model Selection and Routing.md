@@ -11,6 +11,7 @@ qard-topic: "LLM/Model Selection and Routing"
 flashcard_uid: "776eda2e"
 created: "2026-06-11T07:39:53.000Z"
 modified: "2026-11-02T09:03:54.806Z"
+published: "2026-07-08T13:28:37.410Z"
 ---
 
 Model selection decides which models are allowed to serve a workload. Routing makes the per-request choice among them. Frontier models often handle difficult tasks well. Smaller models are usually cheaper and faster. Neither tendency is a contract. A specialized model can win on a narrow task, while a frontier model can miss a latency SLA or regress after a provider update. Production selection is empirical: the least expensive candidate that clears the workload's quality, safety, reliability, and latency gates wins.

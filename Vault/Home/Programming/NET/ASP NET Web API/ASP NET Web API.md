@@ -10,6 +10,7 @@ publish: true
 status: Creation
 created: "2026-02-14T21:59:03.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:14:17.317Z"
 ---
 
 An ASP.NET Core API is an ordered HTTP pipeline ending at a selected endpoint. Middleware handles concerns that span requests. Routing selects a Minimal API handler or controller action. Filters and endpoint code handle work that depends on the selected operation.

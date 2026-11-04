@@ -11,6 +11,7 @@ qard-topic: "LLM/Context Engineering/RAG/Monitoring"
 flashcard_uid: "468101be"
 created: "2026-02-27T12:56:16.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:28:37.414Z"
 ---
 
 RAG monitoring watches a deployed pipeline for regressions in answer quality, latency, and source freshness. Offline [[Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation|Evaluation]] answers whether a version is safe to ship. Monitoring asks whether that version still works on today's traffic.
