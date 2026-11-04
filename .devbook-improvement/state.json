@@ -2149,10 +2149,10 @@
     "version": 1,
     "id": "8863af0d8e1746298a05f54c5909b04b",
     "status": "active",
-    "phase": "evaluating",
+    "phase": "author_reserved",
     "started_at": "2026-11-04T06:42:24.894668Z",
-    "elapsed_seconds": 150.34212150000002,
-    "calls_reserved": 4,
+    "elapsed_seconds": 153.75768760000003,
+    "calls_reserved": 5,
     "responses_received": 4,
     "attempted_paths": [
       "Vault/Home/AI & ML/AI & ML.md",
@@ -2309,7 +2309,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-04T06:44:55.236105Z",
+    "checkpoint_at": "2026-11-04T06:44:58.651670Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -2334,7 +2334,7 @@
       "pr": null
     },
     "base_sha": "63c1f0e23fe3009423dc8b17e61a90490801fa15",
-    "reservation_deadline": "2026-11-04T06:59:05.078789Z"
+    "reservation_deadline": "2026-11-04T06:59:58.356561Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
