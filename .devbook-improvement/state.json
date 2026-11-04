@@ -6487,10 +6487,11 @@
     "automatic_export": true,
     "prepared_source_version": 1,
     "prepared_at": "2026-11-04T06:47:28.050771Z",
-    "phase": "commit_created",
-    "updated_at": "2026-11-04T06:54:42Z",
+    "phase": "branch_updated",
+    "updated_at": "2026-11-04T06:54:46Z",
     "evidence": {
-      "commit_sha": "49f36683f54762f93055ff1888b224d6c847f076"
+      "commit_sha": "49f36683f54762f93055ff1888b224d6c847f076",
+      "branch_sha": "49f36683f54762f93055ff1888b224d6c847f076"
     }
   },
   "export_operations": {
