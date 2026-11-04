@@ -2399,9 +2399,9 @@
     "version": 1,
     "id": "8863af0d8e1746298a05f54c5909b04b",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-04T06:42:24.894668Z",
-    "elapsed_seconds": 512.0432318000001,
+    "elapsed_seconds": 515.5257131000001,
     "calls_reserved": 14,
     "responses_received": 14,
     "attempted_paths": [
@@ -2410,7 +2410,8 @@
       "Vault/Home/AI & ML/LLM/Agents/Evaluation/Agent Benchmarks.md",
       "Vault/Home/AI & ML/LLM/Agents/Evaluation/Evaluation.md",
       "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md",
-      "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md"
+      "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+      "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md"
     ],
     "accepted_records": [
       {
@@ -3682,10 +3683,84 @@
           },
           "model_calls": 12
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md",
+                "outcome": "keep",
+                "reason": "I audited the whole note against the current text and Anthropic's \"Building Effective AI Agents\" taxonomy. The five patterns (chaining with gates, routing, sectioning/voting parallelization, orchestrator-workers with runtime decomposition, evaluator-optimizer with criteria and an iteration cap) match that taxonomy. The Research-system claim is correctly scoped to that system: a lead agent starts 3–5 parallel subagents and scored 90.2% above a single-agent baseline on an internal evaluation. The order runs from fixed control flow to model-chosen flow, and each section states its mechanism and failure condition. The diagrams match their prose. The two cards each test one gradeable task. The comparison card keeps a dependent table together, and the operability card ties its answer to a single why. Both cite the primary source on the answer side. Frontmatter, wikilinks, code-fence languages and the single reference are valid, and known_violations is empty. No defect justifies an edit."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "The single note was read in full and needs no edit. The patterns are accurate and ordered from fixed to model-chosen control flow. Each section states its mechanism and failure condition. The two Qards each test one gradeable task, with IDs intact.",
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md",
+                "verdict": "CLEAN",
+                "summary": "The note covers the five Anthropic workflow patterns accurately and in a sensible order, from fixed control flow to model-chosen flow. Each section gives its mechanism and its failure condition. The Research-system figure is correctly scoped to that system. The two Qards are bounded, and their IDs and answer-side source are intact. No defect justifies an edit.",
+                "page_type": "Concept — typed frontmatter, optional Questions and References present and valid, mermaid fences carry a language identifier.",
+                "current_text_evidence": [
+                  {
+                    "quote": "Application code still owns the outer control flow. The model handles bounded decisions inside it.",
+                    "line_start": 16,
+                    "reason": "The opening states the operating idea and the boundary against autonomous agents."
+                  },
+                  {
+                    "quote": "The number belongs to that system and evaluation, not to the pattern in general.",
+                    "line_start": 74,
+                    "reason": "The 90.2% figure is scoped to the Research system and its internal evaluation, so it is not overgeneralized."
+                  },
+                  {
+                    "quote": "a perfect specialist cannot recover a request sent to the wrong branch.",
+                    "line_start": 43,
+                    "reason": "The routing section names its concrete failure condition."
+                  },
+                  {
+                    "quote": "A vague rubric produces a confident loop with no stable stopping condition",
+                    "line_start": 89,
+                    "reason": "The evaluator-optimizer section names its failure condition and the need for criteria and an iteration cap."
+                  },
+                  {
+                    "quote": "Why is the orchestrator-workers pattern harder to operate than ordinary parallelization",
+                    "line_start": 110,
+                    "reason": "The card is one dependent why-explanation, and its answer cites the primary source."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the five patterns form one coherent taxonomy and are best compared on a single page.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "change_checks": [],
+            "decision_checks": []
+          },
+          "model_calls": 14
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-04T06:50:56.937218Z",
+    "checkpoint_at": "2026-11-04T06:51:00.419700Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
