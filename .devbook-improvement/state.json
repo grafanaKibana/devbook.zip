@@ -2942,11 +2942,11 @@
     "version": 1,
     "id": "792178af26484b3da828d4cea1e5f39f",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-04T19:55:42.282235Z",
-    "elapsed_seconds": 437.32536280000005,
+    "elapsed_seconds": 447.17275400000005,
     "calls_reserved": 10,
-    "responses_received": 9,
+    "responses_received": 10,
     "attempted_paths": [
       "Vault/Home/Programming/NET/ASP NET Web API/Filters.md",
       "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md",
@@ -3133,7 +3133,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-04T20:02:59.607070Z",
+    "checkpoint_at": "2026-11-04T20:03:09.454460Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
@@ -12116,5 +12116,53 @@
       },
       "feedback_snapshot": []
     }
+  },
+  "pending_author_proposal": {
+    "workload_id": "792178af26484b3da828d4cea1e5f39f",
+    "topic_id": "programming-e6aba2bd",
+    "batch": {
+      "topic": "Programming",
+      "topic_id": "programming-e6aba2bd",
+      "notes": [
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Mutex.md",
+          "content": "---\ntopic: [Programming]\nsubtopic: [NET]\nsummary: \"An OS-backed primitive enforcing single-owner access, useful across processes.\"\nlevel: [\"4\"]\npriority: High\nstatus: Ready to Repeat\npublish: true\nqard-deck: \"Programming\"\nqard-topic: \"NET/CSharp/Concurrency and Parallelism/Mutex\"\nflashcard_uid: \"83cc54a7\"\ncreated: \"2026-02-19T22:34:10.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.321Z\"\n---\n\n`Mutex` gives one thread ownership of an operating-system synchronization object. Its useful boundary is the process boundary: a named mutex can keep two local processes from entering the same critical section. Inside one process, `lock` or `SemaphoreSlim` is usually smaller and cheaper.\n\n# How It Works\n\n`Mutex` derives from `WaitHandle` and wraps a native handle exposed through `SafeWaitHandle`. Unlike a semaphore, it tracks an owning thread:\n\n- A thread acquires ownership with `WaitOne`.\n- Other waiters block until the owner releases it.\n- The owning thread must call `ReleaseMutex`.\n- Named mutexes can coordinate processes on one machine. The `Global\\` and `Local\\` prefixes describe Windows Terminal Services scope. They are not portable naming conventions.\n\n**`Mutex` is reentrant.** The owning thread can call `WaitOne` again without blocking, but every successful wait increments a recursion count. Another thread cannot acquire the mutex until the owner has called `ReleaseMutex` the same number of times. `SemaphoreSlim` has no thread ownership and no reentrancy. A nested wait on its only permit blocks itself.\n\n```csharp\nusing var m = new Mutex();\nm.WaitOne();      // count = 1\nm.WaitOne();      // count = 2 — same thread, does not block\n// ...\nm.ReleaseMutex(); // count = 1 — still owned\nm.ReleaseMutex(); // count = 0 — now released for other threads\n```\n\n## Acquiring Multiple Handles\n\nThe `WaitHandle` base type allows several handles to be considered together. `WaitAll` waits for the full set and avoids holding one mutex while sequentially waiting for the next. `WaitAny` returns when one handle becomes available. Abandonment still needs explicit handling: `AbandonedMutexException` can report that a mutex was abandoned while granting ownership of the mutex handles.\n\n```csharp\nvar handles = new WaitHandle[] { mutexA, mutexB };\nWaitHandle.WaitAll(handles);   // wait for the set without partial sequential ownership\n// ...\nmutexB.ReleaseMutex();\nmutexA.ReleaseMutex();\n```\n\n> [!WARNING]\n> `WaitAll` is unsupported on an STA thread, including the usual WinForms and WPF UI threads, and throws `NotSupportedException` there.\n\n# Example\n\n```csharp\nusing var mutex = new Mutex(initiallyOwned: false, name: \"MyApp.SingleWriter\");\n\nif (!mutex.WaitOne(TimeSpan.FromSeconds(1)))\n{\n    return;\n}\n\ntry\n{\n    WriteSharedFile();\n}\nfinally\n{\n    mutex.ReleaseMutex();\n}\n```\n\nSingle-instance application guard using a global mutex:\n\n```csharp\n// Global\\ prefix makes the mutex visible across all Terminal Services sessions on Windows\nconst string MutexName = @\"Global\\MyApp.SingleInstance\";\nusing var mutex = new Mutex(initiallyOwned: false, name: MutexName, createdNew: out bool created);\n\nif (!mutex.WaitOne(0)) // non-blocking check\n{\n    Console.Error.WriteLine(\"Another instance is already running.\");\n    return;\n}\ntry\n{\n    RunApplication();\n}\nfinally\n{\n    mutex.ReleaseMutex();\n}\n```\n\n# Pitfalls\n\n- **The operating-system path is expensive on a hot in-process lock.** A monitor can complete uncontended acquisition in user mode, while `Mutex.WaitOne` crosses the native wait-handle boundary. That cost buys cross-process coordination. Without that requirement it is wasted.\n- **The wrong thread cannot release ownership.** `ReleaseMutex` from a non-owner throws `ApplicationException`. Because an async continuation may move threads, acquisition and release belong in the same synchronous scope. Async in-process code normally uses `SemaphoreSlim.WaitAsync`.\n- **Abandonment transfers ownership, not correctness.** If the owner exits before release, the next waiter receives `AbandonedMutexException` and owns the mutex. The protected file or memory-mapped state may still be inconsistent and must be checked before use.\n- **A shared name is also a security boundary.** Other processes may be able to open or create the same named object. Windows deployments can apply `MutexSecurity`. Other platforms have different backing and permission rules. The deployment needs an explicit threat model rather than assuming process isolation.\n- **Platform behavior is not identical.** Naming scope, backing storage, and lifetime differ across operating systems. A named mutex coordinates local processes, not machines. Distributed ownership needs a lease or lock managed by the shared database or service.\n\n# Tradeoffs\n\n- `Mutex` crosses a process boundary. `lock` stays in-process and avoids the native handle cost.\n- A mutex has one thread owner. A semaphore represents a count and may admit several callers.\n- `SemaphoreSlim` supports asynchronous in-process waiting but cannot be named for process-to-process coordination.\n\nThe decision follows the ownership boundary. A [[Locking|lock]] covers synchronous state inside one process. `Mutex` earns its native cost when separate local processes need one owner. Neither primitive can establish ownership across machines.\n\n# Questions\n\n<!-- qard-id: 6529d8fe-c25a-46f7-94a1-c6241857a6a5 -->\n> [!qard]- When is a named `Mutex` appropriate in .NET?\n> A named `Mutex` fits when separate processes on the same machine must not run a critical section at the same time. Examples are a single-instance application guard and several processes writing one local file. Every process that opens the same name shares one operating-system mutex, and only one thread across those processes can own it at a time.\n>\n> - **Thread ownership:** the thread that acquires the mutex must release it with `ReleaseMutex`; a call from any other thread throws. Acquisition and release therefore stay in one synchronous scope, not around an `await`.\n> - **Inside one process:** `lock` for synchronous code, or `SemaphoreSlim` for asynchronous code, provides exclusion without an operating-system mutex.\n> - **Across machines:** a named mutex cannot coordinate them. Ownership across machines needs a lease or lock managed by a shared database or coordination service.\n> - **Platform:** name visibility and access rules depend on the operating system. On Windows, the `Global\\` and `Local\\` prefixes control whether other Terminal Services sessions see the name.\n> \n> [Microsoft: Mutexes](https://learn.microsoft.com/en-us/dotnet/standard/threading/mutexes) · [Mutex API](https://learn.microsoft.com/en-us/dotnet/api/system.threading.mutex?view=net-10.0) · [SemaphoreSlim API](https://learn.microsoft.com/en-us/dotnet/api/system.threading.semaphoreslim?view=net-10.0)\n\n<!-- qard-id: d5b8cdd5-2b61-416f-91ab-a1584134e62e -->\n> [!qard]- What does `AbandonedMutexException` signal?\n> The previous owner thread terminated without releasing the mutex. The waiting thread receives `AbandonedMutexException` but acquires ownership, so it must still release the mutex. The protected state may have been left halfway through an update and should be validated or recovered before other threads enter. [Microsoft: Mutex class](https://learn.microsoft.com/en-us/dotnet/api/system.threading.mutex?view=net-10.0) · [Microsoft: Mutexes](https://learn.microsoft.com/en-us/dotnet/standard/threading/mutexes)\n\n# References\n\n- [Mutex class](https://learn.microsoft.com/en-us/dotnet/api/system.threading.mutex)\n",
+          "hash": "37cef958ff95ae157eeb3035c43bd43000229e446a6ce9e88be1d5de93ff0729",
+          "topic": "Programming",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Mutex.md",
+          "outcome": "keep",
+          "reason": "Audited the whole note against the current text and my knowledge of the .NET Mutex documentation. WaitHandle/SafeWaitHandle derivation, thread ownership, recursion count, ApplicationException on a non-owner ReleaseMutex, AbandonedMutexException granting ownership, and WaitAll being unsupported on STA threads are all accurate. The Global\\ and Local\\ prefix scope is correctly limited to Windows Terminal Services. The examples use try/finally release correctly. The Pitfalls and Tradeoffs sections are not repetitive and give the lock/SemaphoreSlim/Mutex decision rule. Both cards are single-task, self-contained, cite sources, and match the note. No known violations were reported, and no defect was found that justifies a change."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Mutex.md": "37cef958ff95ae157eeb3035c43bd43000229e446a6ce9e88be1d5de93ff0729"
+    },
+    "feedback_keys": [],
+    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Mutex.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-04T20:03:09.454452Z"
   }
 }
