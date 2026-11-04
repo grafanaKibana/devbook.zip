@@ -8,6 +8,7 @@ status: Done
 publish: true
 created: "2026-02-10T01:40:47.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:14:17.362Z"
 ---
 
 REST is an architectural style for networked systems, not a synonym for JSON over HTTP. It constrains interactions around stable resource identities, a uniform interface, and explicit cache/representation behavior so clients, servers, and intermediaries can evolve with fewer assumptions.

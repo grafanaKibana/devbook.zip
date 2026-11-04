@@ -11,6 +11,7 @@ qard-topic: "Patterns/Design Patterns/Behavioral/Observer"
 flashcard_uid: "a91c4462"
 created: "2026-03-05T22:12:46.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:14:17.446Z"
 ---
 
 A newspaper subscription has the shape of Observer. The publisher keeps a subscriber list and sends each new issue to that list. Subscribers can leave independently, and the publisher does not know how any recipient uses the issue.

@@ -10,6 +10,7 @@ qard-deck: "Programming"
 qard-topic: "NET/CSharp/Fundamentals/Pattern Matching"
 created: "2026-11-02T09:03:54.806Z"
 modified: "2026-11-02T09:03:54.806Z"
+published: "2026-11-02T09:04:02.378Z"
 ---
 
 Pattern matching tests an input's shape and can bind values from a successful match. An `is` expression returns a Boolean; a `switch` expression selects the first arm whose pattern and optional guard match. The patterns describe the case, while arm order decides which matching case wins.

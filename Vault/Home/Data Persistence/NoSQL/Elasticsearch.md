@@ -11,6 +11,7 @@ qard-topic: "NoSQL/Elasticsearch"
 flashcard_uid: "97b928ee"
 created: "2026-07-18T07:07:47.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-16T14:10:17.836Z"
 ---
 
 Elasticsearch is a distributed search and analytics engine built on Apache Lucene. It belongs beside the system of record when a read path needs relevance-ranked full-text search, faceting, geospatial predicates, or aggregations over indexed events. Applications write JSON documents, mappings define field types, analyzers turn text into terms, and Lucene stores those terms and document references in immutable segments.

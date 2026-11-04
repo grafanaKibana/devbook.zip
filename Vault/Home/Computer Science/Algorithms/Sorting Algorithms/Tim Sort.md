@@ -8,6 +8,7 @@ status: Creation
 publish: true
 created: "2026-07-10T06:24:36.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-10T06:05:46.821Z"
 ---
 
 Production data often arrives with some order already present. Logs are mostly time-ordered, appended lists are disturbed near the tail, and exported records may already be grouped. A plain [[Home/Computer Science/Algorithms/Sorting Algorithms/Merge Sort|merge sort]] ignores that structure and discovers the same order again.

@@ -11,6 +11,7 @@ qard-topic: "LLM/Context Engineering/RAG/Chunking"
 flashcard_uid: "6bf1b415"
 created: "2026-02-27T12:56:16.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:14:17.484Z"
 ---
 
 Chunking sets the unit of retrieval. Large chunks carry more surrounding text but waste context on noise. Small chunks can match a query more precisely, yet can separate a rule from the condition that changes it. A useful chunk keeps one recoverable idea together and retains enough source metadata to trace it.

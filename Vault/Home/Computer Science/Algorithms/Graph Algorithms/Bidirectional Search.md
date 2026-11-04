@@ -8,6 +8,7 @@ status: Creation
 publish: true
 created: "2026-07-10T06:24:36.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-10T08:56:48.119Z"
 ---
 
 Finding the shortest path between two specific vertices `s` and `t` with a single BFS means expanding vertices out to distance `d` from `s`. With branching factor `b` and shortest-path length `d`, that frontier grows as `b^d`. At `b = 10, d = 6`, the estimate is about a million vertices, most of them nowhere near `t`.

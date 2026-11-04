@@ -9,6 +9,7 @@ priority: High
 status: Done
 created: "2026-02-10T01:40:47.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-15T11:47:56.354Z"
 ---
 
 System architecture decides which code deploys together, how components communicate, and where durable state survives instance failure. Those decisions sit on different axes: monoliths, modular monoliths, microservices, and SOA define decomposition and governance. Event-driven architecture defines communication. Serverless defines hosting and scaling.

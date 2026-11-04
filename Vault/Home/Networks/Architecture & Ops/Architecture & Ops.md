@@ -9,6 +9,7 @@ level: ["3"]
 status: Creation
 created: "2026-02-10T01:40:47.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:14:17.356Z"
 ---
 
 Network architecture decides how traffic should flow. Network operations proves that it still flows under real load and failure. The work spans routing boundaries, segmentation, capacity, telemetry, and incident response.

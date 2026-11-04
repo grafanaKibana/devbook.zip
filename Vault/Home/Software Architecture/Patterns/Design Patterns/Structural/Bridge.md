@@ -11,6 +11,7 @@ qard-topic: "Patterns/Design Patterns/Structural/Bridge"
 flashcard_uid: "71628ab5"
 created: "2026-03-05T22:12:42.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:14:17.452Z"
 ---
 
 A remote control defines operations such as power and volume. A television brand supplies the hardware-specific implementation. Connecting the two through a stable device interface allows either side to change without rebuilding the other hierarchy.

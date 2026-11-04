@@ -8,6 +8,7 @@ status: Ready to Repeat
 publish: true
 created: "2026-02-18T19:18:52.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-10T14:39:34.300Z"
 ---
 
 A pipeline emits 500K event IDs and must drop repeats. A hash set answers one question directly: is this element already present? `IEqualityComparer<T>.GetHashCode` selects a home bucket or cell. The collision strategy finds the candidates, and `IEqualityComparer<T>.Equals` identifies the matching member.

@@ -8,6 +8,7 @@ status: Creation
 publish: true
 created: "2026-09-29T12:13:16.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-09-21T08:42:39.653Z"
 ---
 
 LLM caching reuses either **prompt computation** or a **completed answer**. Prompt caching saves repeated input processing while still generating a fresh answer. Response caching returns a stored answer and skips generation entirely.

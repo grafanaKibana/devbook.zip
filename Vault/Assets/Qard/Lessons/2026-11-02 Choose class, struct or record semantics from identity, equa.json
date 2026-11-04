@@ -325,19 +325,180 @@
           "q": "whats the difference between class, record, struct, record class, record struct, readonly record struct",
           "a": "The difference comes from two separate choices: **what assignment copies** and **how equality works**.\n\n| Type | Assignment | Default equality |\n|---|---|---|\n| `class` | Copies a reference to the same object | Reference equality unless customized |\n| `struct` | Copies the value’s fields | Field-based `Equals` |\n| `record` / `record class` | Copies a reference to the same object | Generated value equality |\n| `record struct` | Copies the value’s fields | Generated value equality |\n| `readonly record struct` | Copies the value’s fields | Generated value equality; its fields cannot be reassigned after construction |\n\n`record` is shorthand for `record class`. Two separate record-class objects can compare equal, even though they have different identities. A positional `record struct` is mutable by default; its `readonly` variant is not.\n\nClasses and record classes can support inheritance; structs cannot. As the **Structs** and **Records** notes explain, copying is shallow: reference fields still point to the same objects."
         }
-      ]
+      ],
+      "answer": {
+        "text": "Yes, first and second can compare equal, because they are record types, which has been compared by their properties, not references. alias copies the reference of the first so both alias and first refer to the same object now.",
+        "confidence": "sure"
+      },
+      "mark": {
+        "awarded": [
+          false,
+          false,
+          true
+        ],
+        "annotations": [
+          {
+            "quote": "compared by their properties, not references",
+            "kind": "vague",
+            "note": "You identify value comparison, but you need to state that the record types and compared values match."
+          },
+          {
+            "quote": "Yes, first and second can compare equal",
+            "kind": "missing",
+            "note": "You need to explain that their record types and compared values match."
+          },
+          {
+            "quote": "not references",
+            "kind": "missing",
+            "note": "You need to state that the separate `new` expressions create objects with different identities."
+          },
+          {
+            "quote": "alias copies the reference of the first",
+            "kind": "correct",
+            "note": "You correctly explain that `alias` and `first` refer to the same object."
+          }
+        ],
+        "mistake": "incomplete",
+        "feedback": "You explain the alias correctly, but need to make the equality conditions and separate object identities explicit.",
+        "score": 1
+      },
+      "reply": "You have the right distinction between comparing data and copying a reference. What do the two `new` expressions create, and which values match when the records are compared?"
     },
     {
-      "asks": []
+      "asks": [],
+      "answer": {
+        "text": "THe output:\n- 10 because it was the value with what a was initiated\n- 10 because it was the value with what a was initiated\n- false, because RefReading is record, which compares object by their properties, which are unequal 10 != 20.\n- true, because x.Value was 10, then was changed through y.Value, which also changed x since it is the reference type, so x and y refere to the same object, so y.Value = 20 changed both. And because these are recordsm they are compared by their properties values, which are equal",
+        "confidence": "sure"
+      },
+      "mark": {
+        "awarded": [
+          false,
+          false,
+          false,
+          false
+        ],
+        "annotations": [
+          {
+            "quote": "10 because it was the value with what a was initiated",
+            "kind": "wrong",
+            "note": "You overlooked the change made through b."
+          },
+          {
+            "quote": "10 because it was the value with what a was initiated",
+            "kind": "missing",
+            "note": "You needed to state that a.Value is 20 because a and b refer to the same object."
+          },
+          {
+            "quote": "10 because it was the value with what a was initiated",
+            "kind": "missing",
+            "note": "You needed to explain that x.Value remains 10 because y received a value copy."
+          },
+          {
+            "quote": "which are unequal 10 != 20",
+            "kind": "wrong",
+            "note": "You compared the values before accounting for the change through b."
+          },
+          {
+            "quote": "which are unequal 10 != 20",
+            "kind": "missing",
+            "note": "You needed to state that the comparison is True because both records contain 20."
+          },
+          {
+            "quote": "it is the reference type",
+            "kind": "wrong",
+            "note": "You treated ValueReading as a reference type, but it is a record struct."
+          },
+          {
+            "quote": "which are equal",
+            "kind": "missing",
+            "note": "You needed to state that the comparison is False because x contains 10 and y contains 20."
+          }
+        ],
+        "mistake": "misconception",
+        "feedback": "You mixed up reference assignment for the record class with value copying for the record struct.",
+        "score": 0
+      },
+      "reply": "Look at the declaration of each record: one is a **class**, the other a **struct**. Using your **Classes** and **Structs** notes, trace what `b = a` and `y = x` copy before applying the changes. What value does each original variable hold afterward?",
+      "reteach": "`record struct` follows struct assignment rules. The integer field is copied into y, so updating y changes its own storage."
     },
     {
-      "asks": []
+      "asks": [],
+      "figure": {
+        "path": "Assets/Qard/Figures/csharp/csharp-inheritance-default-and-copy-constraints.svg",
+        "caption": "Ordinary classes and record classes form separate inheritance families; structs cannot participate in user-defined type inheritance. default(T) produces null for classes and default-valued fields for structs, while assignment copies references or fields respectively—even for readonly record structs.",
+        "brief": "The one figure that would make \"Apply inheritance and value constraints\" clearest."
+      },
+      "answer": {
+        "text": "public Reading : Sample { ... }",
+        "unknown": true
+      },
+      "mark": {
+        "score": 0,
+        "awarded": [
+          false,
+          false,
+          false,
+          false
+        ],
+        "annotations": [],
+        "mistake": "unknown",
+        "feedback": "You said you didn't know. The model answer shows what was needed."
+      },
+      "reply": "No problem. Read the explanation, then look at the model answer."
     },
     {
-      "asks": []
+      "asks": [],
+      "answer": {
+        "text": "DeliverySession - class - if objects are different no matter the fields, that mean the only thing that allows us identify them is a references, which class using for the comparison. Record and struct doesnt give us this ability\nCell - readonly record struct - all requirements exactly matching the struct features and constraints, including copy by values\nDeliveryEvent - record - it must compare by the fields, not by the ref, and must derive, which only possible with record\n\n> For a DeliveryEvent a, also explain whether var b = a; creates a separate event and how to create a separate event with a different Tick while preserving a.\n\nNo, var b = a will not create separate even, b will just ref to the a, since record is a reference type. To create separate event we need to use `with { Tick = 1234 }`",
+        "confidence": "unsure"
+      },
+      "mark": {
+        "awarded": [
+          false,
+          false,
+          true,
+          true
+        ],
+        "annotations": [
+          {
+            "quote": "DeliverySession - class",
+            "kind": "correct",
+            "note": "You chose the appropriate type for a session with its own identity."
+          },
+          {
+            "quote": "Record and struct doesnt give us this ability",
+            "kind": "wrong",
+            "note": "You can distinguish record class instances by reference even when their values compare equal."
+          },
+          {
+            "quote": "DeliverySession - class",
+            "kind": "missing",
+            "note": "You needed to say that copying a session reference lets both variables observe changes to the same object."
+          },
+          {
+            "quote": "including copy by values",
+            "kind": "missing",
+            "note": "You needed to connect generated equality to matching coordinates and explain how readonly prevents later property mutation."
+          },
+          {
+            "quote": "it must compare by the fields",
+            "kind": "correct",
+            "note": "You connected record equality and inheritance to the event requirements."
+          },
+          {
+            "quote": "b will just ref to the a",
+            "kind": "correct",
+            "note": "You explained that assignment shares the record class instance and identified `with` for a separate event."
+          }
+        ],
+        "mistake": "incomplete",
+        "feedback": "Your type choices are correct, but two justifications omit required behavior.",
+        "score": 2
+      },
+      "reply": "Your choices fit. For `DeliverySession`, what happens when one variable changes the shared object? For `Cell`, explain both coordinate equality and why its properties cannot be changed later. Also, reference identity remains available for record class instances even when their values compare equal."
     }
   ],
-  "current": 1,
+  "current": 4,
   "probe": {
     "questions": [],
     "answers": {},
@@ -374,5 +535,30 @@
     ]
   },
   "stepsFor": "[\"Choosing C# type semantics\",[\"Revisit assignment\",\"Separate identity from equality\",\"Compare record variants\",\"Apply inheritance and value constraints\",\"Choose from a scenario\"]]",
-  "accepted": true
+  "accepted": true,
+  "finishedAt": 1793713181228,
+  "close": {
+    "summary": "The lesson connected assignment, identity, equality, copying, and inheritance to choosing C# type semantics. You correctly predicted the assignment example and explained the struct copy, but omitted why class assignment shares an object. You recognized that `record` means `record class`, but did not fully distinguish separate object identities from value equality. You confused record-class reference assignment with record-struct value copying. Inheritance and value-type constraints required a model answer. Your final scenario choices were correct, but two explanations omitted required behavior, and your confidence was uncertain. Further practice should focus on explaining assignment separately from equality and justifying each choice against copying and inheritance requirements.",
+    "cards": [
+      {
+        "front": "For ordinary assignment `var b = a`, what is copied when the type is a class, record class, struct, or record struct?",
+        "back": "A class or record class copies the reference: both variables refer to the same object. A struct or record struct copies the fields into an independent value. Reference fields still point to shared objects; assignment does not deep-copy them."
+      },
+      {
+        "front": "Given `record Person(string Name);`, what do `a == b` and `ReferenceEquals(a, b)` return for separately created `new Person(\"Ada\")` instances, and why?",
+        "back": "`a == b` is true; `ReferenceEquals(a, b)` is false. `record` means `record class`: the objects have separate identities, but generated equality compares runtime type and instance fields using each field type's equality. Matching list contents alone do not make separate `List<T>` fields equal."
+      },
+      {
+        "front": "How do positional `record struct` and `readonly record struct` differ in mutation, and does either guarantee deep immutability?",
+        "back": "A positional `record struct` generates get/set properties; a positional `readonly record struct` generates get/init properties and requires readonly instance fields. Both copy by value and generate value equality. Neither freezes referenced objects."
+      },
+      {
+        "front": "Which type fits each requirement: shared mutable entity identity; data equality with an extensible inheritance hierarchy; a small immutable value with independent assignment copies?",
+        "back": "Use a conventional class for shared entity identity. Use a record class for generated data equality and inheritance; its explicit base class must also be a record class. Use a readonly record struct for the small immutable value and generated equality. Structs cannot inherit from another class or struct or serve as base types, but can implement interfaces."
+      }
+    ],
+    "cardState": {},
+    "note": "Assets/Qard/Lessons/2026-11-02 Choose class, struct or record semantics from identity, equa.md",
+    "nextCheck": "2026-11-06"
+  }
 }

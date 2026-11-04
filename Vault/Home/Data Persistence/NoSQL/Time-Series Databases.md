@@ -8,6 +8,7 @@ status: Creation
 publish: true
 created: "2026-07-18T07:07:47.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-16T14:47:47.203Z"
 ---
 
 A time-series database organizes timestamped observations for ordered range reads and time-window calculations. It earns its place when ingest rate, retention, compression, or repeated window queries dominate storage cost. A timestamp column alone is not enough. PostgreSQL with time partitioning may handle a moderate workload cleanly. A specialized engine becomes useful when series indexing, compressed chunks, and rollups are the limiting work.

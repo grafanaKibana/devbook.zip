@@ -11,6 +11,7 @@ qard-topic: "NET/CSharp/Concurrency and Parallelism/Deadlocks"
 flashcard_uid: "f9642578"
 created: "2026-02-18T20:04:43.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:28:37.367Z"
 ---
 
 A deadlock is a closed waiting cycle: every participant holds something another participant needs, so none can move. In .NET this can happen with ordinary locks or when synchronous code blocks an async continuation. The process may stay healthy enough to answer a liveness probe while the affected work has stopped completely.

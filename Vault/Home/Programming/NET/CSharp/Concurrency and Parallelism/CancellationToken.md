@@ -8,6 +8,7 @@ status: Ready to Repeat
 publish: true
 created: "2026-02-18T20:04:43.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:14:17.320Z"
 ---
 
 `CancellationToken` carries a request to stop through .NET call chains. The caller owns the request. Each operation decides where it can stop without leaving partial state behind. When a request token disappears halfway down the stack, the client may be gone while database or HTTP work keeps running.

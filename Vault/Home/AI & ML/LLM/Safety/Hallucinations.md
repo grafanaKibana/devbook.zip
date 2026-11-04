@@ -11,6 +11,7 @@ qard-topic: "LLM/Safety/Hallucinations"
 flashcard_uid: "23b732e3"
 created: "2026-02-16T21:15:26.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:28:37.410Z"
 ---
 
 Hallucination is generated content that lacks support from the available evidence. It can be false, or merely impossible to verify from the supplied context. Fluency hides the failure: a language model predicts plausible tokens rather than checking each claim against reality.

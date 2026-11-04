@@ -8,6 +8,7 @@ status: Creation
 publish: true
 created: "2026-07-10T06:24:36.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-10T05:59:09.667Z"
 ---
 
 Quicksort partitions an array around a pivot. A crafted input can force the worst split at every level: one element on one side and everything else on the other. When a standard library sorts untrusted data, this repeated degeneration creates a denial-of-service risk.

@@ -3,6 +3,7 @@ using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using DevBook.Tooling.Improvement;
 using DevBook.Tooling.Infrastructure;
+using DevBook.Tooling.Vault;
 
 namespace DevBook.Tooling.Export;
 
@@ -10,6 +11,14 @@ public static class Fixture
 {
     public const string Branch = "notes/automated-fixture-g1";
     private const string Pixel = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/l9sAAAAASUVORK5CYII=";
+
+    private static readonly (string Name, string Fields, string Expected)[] PublicationDates =
+    [
+        ("Published", "published: \"2026-10-02T00:00:00.000Z\"\npublishDate: \"2026-10-03T00:00:00.000Z\"", "2026-10-02T00:00:00.000Z"),
+        ("Alias", "publishDate: \"2026-10-03T00:00:00.000Z\"\ndate: \"2026-10-04T00:00:00.000Z\"", "2026-10-03T00:00:00.000Z"),
+        ("Date", "date: \"2026-10-04T00:00:00.000Z\"", "2026-10-04T00:00:00.000Z"),
+        ("Custom", "released_at: \"2026-10-05T00:00:00.000Z\"", "2026-10-05T00:00:00.000Z")
+    ];
 
     public static string PrepareCheckout(string trusted, string root)
     {
@@ -51,6 +60,14 @@ public static class Fixture
             Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
             File.Copy(source, destination);
         }
+        string defaultsPath = Path.Combine(root, ".scripts/quartz-syncer.defaults.json");
+        JsonObject defaults = JsonData.ParseObject(File.ReadAllText(defaultsPath));
+        defaults["publishedTimestampKey"] = "released_at, published, publishDate, date";
+        File.WriteAllText(defaultsPath, defaults.ToJsonString(JsonData.Options) + "\n");
+        foreach (var date in PublicationDates)
+        {
+            Write(root, $"Vault/Home/Topic/{date.Name}.md", $"---\npublish: true\n{date.Fields}\n---\nAuthored publication date.\n");
+        }
         Write(root, "Vault/Home/Topic/Example.md", """
             ---
             topic: [Programming]
@@ -61,6 +78,7 @@ public static class Fixture
             publish: true
             created: 2026-10-01T00:00:00.000Z
             modified: 2026-10-01T00:00:00.000Z
+            published: 2026-10-01T00:00:00.000Z
             qard-deck: "Topic"
             qard-topic: "Example"
             ---
@@ -82,6 +100,7 @@ public static class Fixture
             publish: true
             created: 2026-10-01T00:00:00.000Z
             modified: 2026-10-01T00:00:00.000Z
+            published: 2026-10-01T00:00:00.000Z
             ---
 
             ```datacorejsx
@@ -123,6 +142,7 @@ public static class Fixture
         CancellationToken cancellationToken = default)
     {
         using var owned = new OwnedExportCheckout("devbook-export-fixture-");
+        DateTimeOffset deadline = DateTimeOffset.UtcNow.AddSeconds(timeoutSeconds);
         string expected = PrepareCheckout(trusted, owned.Root);
         Dictionary<string, byte[]> source = Desktop.SourceHashes(owned.Root);
         await Desktop.ExportCheckoutAsync(owned.Root, expected, appBundle, timeoutSeconds, cancellationToken);
@@ -145,6 +165,46 @@ public static class Fixture
         {
             throw new RuntimeFailure("Genuine exporter changed fixture source, including the unrelated undated note.");
         }
+        if (Markdown.SplitFrontmatter(exported).Values.GetValueOrDefault("published")?.Text != "2026-10-01T00:00:00.000Z")
+        {
+            throw new RuntimeFailure("Genuine export did not preserve the source publication date.");
+        }
+        foreach (var date in PublicationDates)
+        {
+            string path = $"Web/content/Topic/{date.Name}.md";
+            IReadOnlyDictionary<string, FrontmatterValue> fields = Markdown.SplitFrontmatter(Encoding.UTF8.GetString(files[path]!)).Values;
+            if (!fields.TryGetValue("published", out FrontmatterValue? published) || published.Text != date.Expected)
+            {
+                throw new RuntimeFailure($"Genuine export did not preserve the authored publication date: {date.Name}");
+            }
+        }
+        Receipt.Validate(JsonData.ParseObject(Encoding.UTF8.GetString(files[Receipt.PathName]!)), Receipt.IndexEntries(owned.Root));
+
+        string examplePath = Path.Combine(owned.Root, "Vault/Home/Topic/Example.md");
+        File.WriteAllText(examplePath, File.ReadAllText(examplePath)
+            .Replace("modified: 2026-10-01T00:00:00.000Z", "modified: 2026-11-04T00:00:00.000Z", StringComparison.Ordinal)
+            .Replace("An isolated fixture.", "The second export updates the explanation without changing its publication date.", StringComparison.Ordinal), new UTF8Encoding(false));
+        Git.Run(owned.Root, "add", "--", "Vault/Home/Topic/Example.md");
+        Git.Run(owned.Root, "-c", "core.hooksPath=/dev/null", "-c", "commit.gpgsign=false", "commit", "-qm", "notes: update export fixture explanation");
+        expected = Git.Text(owned.Root, "rev-parse", "HEAD");
+        source = Desktop.SourceHashes(owned.Root);
+        int remaining = (int)(deadline - DateTimeOffset.UtcNow).TotalSeconds;
+        if (remaining <= 0)
+        {
+            throw new RuntimeFailure("Genuine export fixture exhausted its deadline before checking republication.");
+        }
+        await Desktop.ExportCheckoutAsync(owned.Root, expected, appBundle, remaining, cancellationToken);
+        bundle = Bundle.FromCheckout(owned.Root, 1, Branch, expected);
+        files = Bundle.Decode(bundle);
+        exported = Encoding.UTF8.GetString(files["Web/content/Topic/Example.md"]!);
+        IReadOnlyDictionary<string, FrontmatterValue> repeated = Markdown.SplitFrontmatter(exported).Values;
+        if (repeated.GetValueOrDefault("published")?.Text != "2026-10-01T00:00:00.000Z"
+            || repeated.GetValueOrDefault("modified")?.Text != "2026-11-04T00:00:00.000Z"
+            || !exported.Contains("The second export updates the explanation without changing its publication date.", StringComparison.Ordinal)
+            || !Syncer.SameSnapshot(source, Desktop.SourceHashes(owned.Root)))
+        {
+            throw new RuntimeFailure("Republication did not preserve source publication metadata while updating content and modified date.");
+        }
         Receipt.Validate(JsonData.ParseObject(Encoding.UTF8.GetString(files[Receipt.PathName]!)), Receipt.IndexEntries(owned.Root));
         string diff = Encoding.UTF8.GetString(Git.Run(owned.Root, "diff", "--cached", "--no-ext-diff", "--binary"));
         return new JsonObject
@@ -155,6 +215,8 @@ public static class Fixture
             ["rendered_datacore"] = true,
             ["preserved_markers"] = true,
             ["media_unchanged"] = true,
+            ["authored_published_preserved"] = true,
+            ["published_stable_after_edit"] = true,
             ["file_count"] = files.Count,
             ["source_head"] = expected,
             ["bundle"] = bundle,

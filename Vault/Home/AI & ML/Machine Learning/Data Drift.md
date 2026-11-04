@@ -11,6 +11,7 @@ qard-topic: "Machine Learning/Data Drift"
 flashcard_uid: "3212f70c"
 created: "2026-02-16T19:44:24.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:14:17.491Z"
 ---
 
 Data drift means production inputs no longer look like the data used to train a model. Nothing has to crash. The service can keep returning predictions while their quality slips because customers changed behavior, a new camera changed the image distribution, or an upstream pipeline started encoding a field differently.

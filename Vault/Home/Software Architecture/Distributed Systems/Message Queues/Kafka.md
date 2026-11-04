@@ -9,6 +9,7 @@ status: Done
 publish: true
 created: "2026-02-15T15:01:57.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:14:17.385Z"
 ---
 
 Apache Kafka is a distributed event-streaming platform built around an append-only log. Producers append records to topic partitions. Consumers move through those partitions at their own pace and store their position as an offset.

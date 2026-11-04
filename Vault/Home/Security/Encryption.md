@@ -12,6 +12,7 @@ qard-topic: "Encryption"
 flashcard_uid: "929d2414"
 created: "2026-02-10T01:40:47.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:14:17.503Z"
 ---
 
 Encryption transforms plaintext into ciphertext under a key. The security boundary is the set of workloads and people able to obtain that key. Encryption alone targets confidentiality. Authenticated encryption also detects changes to ciphertext and authenticated metadata, but it does not attach a public identity to the sender. That requires a [[Home/Security/Digital Signature|digital signature]] or a protocol with an authenticated peer.

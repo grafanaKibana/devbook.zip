@@ -8,6 +8,7 @@ status: Done
 publish: true
 created: "2026-02-19T22:34:10.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:14:17.347Z"
 ---
 
 Nested work often resumes in reverse order. A bracket matcher suspends the outer expression while it processes an inner pair. Depth-first traversal does the same with unexplored branches. The most recently suspended item must resume first, and a general list does not enforce that rule.

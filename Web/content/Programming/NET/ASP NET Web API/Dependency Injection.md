@@ -3,7 +3,7 @@ publish: true
 title: ASP.NET Core Dependency Injection
 created: 2026-02-19T23:08:30.000Z
 modified: 2026-10-28T12:33:42.000Z
-published: 2026-10-28T12:33:42.000Z
+published: 2026-07-08T13:28:37.366Z
 topic:
   - Programming
 subtopic:

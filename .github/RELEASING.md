@@ -6,15 +6,24 @@ notes, and publishes a GitHub Release + tag. Direct pushes to `main` are blocked
 
 ## Workflow
 
-1. Work happens on a short-lived branch off `main`, in the folder matching its
+`stage` is the integration branch and the one checked out in the local vault;
+`main` is the release and deploy branch. Squash merges are disabled so commits
+survive both hops.
+
+1. Work happens on a short-lived branch off `stage`, in the folder matching its
    type — `notes/…` for vault content, `feature/…`, `docs/…`, `bug/…`,
    `maintenance/…` for everything else.
-2. Open a PR into `main`. The **PR title** must follow the convention (below) —
-   the [`PR Title`](workflows/pr-title.yml) check enforces it and is required.
-3. **Merge it** with a merge commit (the branch's commits are preserved on
-   `main`). The commit prefixes drive the MINOR/PATCH bump + changelog; a
-   **MAJOR** is driven by a `!` in the **PR title** (gated — see below).
-4. The [`Release`](workflows/release.yml) workflow reads the merged PR's title
+2. Open a PR into `stage` (`gh pr create --base stage`). The **PR title** must
+   follow the convention (below) — the [`PR Title`](workflows/pr-title.yml)
+   check enforces it on PRs into `stage` and `main`.
+3. **Merge it** with a merge commit. Obsidian Git commits and pushes local
+   vault changes, including Qard study state, straight to `stage`.
+4. To release, open a promotion PR from `stage` into `main` and use **Update
+   branch** first so main-only changes (DevBook Improvement PRs)
+   reach `stage`. **Merge it** with a merge commit. The commit prefixes drive
+   the MINOR/PATCH bump + changelog; a **MAJOR** is driven by a `!` in the
+   promotion PR's title (gated — see below).
+5. The [`Release`](workflows/release.yml) workflow reads the merged PR's title
    (for a `!` major) and the commits since the last tag (for minor/patch), bumps
    the version, tags it, and publishes the GitHub Release. Done.
 

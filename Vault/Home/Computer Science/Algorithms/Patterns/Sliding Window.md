@@ -8,6 +8,7 @@ status: Ready to Repeat
 publish: true
 created: "2026-06-20T05:33:50.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:14:17.337Z"
 ---
 
 A report needs the largest total among all 30-day spans in a series of 100,000 readings. A sliding window keeps a running total between two boundaries. Moving right adds one reading. Moving left subtracts one. Each new span costs two arithmetic operations instead of another 30-value scan.

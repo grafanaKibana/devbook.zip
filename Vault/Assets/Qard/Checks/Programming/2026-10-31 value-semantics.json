@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "createdAt": 1793453111918,
+  "createdAt": 1793774002049,
   "mastery": "Assets/Qard/Courses/Programming Mastery.md",
   "course": "Programming",
   "objective": "value-semantics",
@@ -10,27 +10,27 @@
     {
       "id": "c1",
       "type": "long",
-      "prompt": "A C# `struct` named `Parcel` has two fields: `int Weight` and `List<string> Labels`.\n\n```csharp\nvar first = new Parcel\n{\n    Weight = 5,\n    Labels = new List<string> { \"fragile\" }\n};\nvar second = first;\nsecond.Weight = 8;\nsecond.Labels.Add(\"express\");\nsecond.Labels = new List<string> { \"returned\" };\n```\n\nAfterwards, `first.Weight` is still `5`, and `first.Labels` contains `\"fragile\"` and `\"express\"`. Explain why changing the weight, adding a label, and replacing the list have these different effects. State what `second = first` copies.",
+      "prompt": "`Shipment` is a mutable struct with public fields `int Weight` and `List<string> Labels`.\n\n```csharp\nvar original = new Shipment\n{\n    Weight = 12,\n    Labels = new List<string> { \"fragile\" }\n};\nvar copy = original;\ncopy.Weight = 20;\ncopy.Labels.Add(\"urgent\");\ncopy.Labels = new List<string> { \"returned\" };\n```\n\nExplain what `copy = original` copies and why changing `Weight`, adding a label, and replacing `Labels` affect `original` differently. Include the final contents of `original`.",
       "marks": 4,
       "rubric": [
         {
-          "point": "Struct assignment copies the field values into a separate struct value.",
+          "point": "Explains that struct assignment copies each field into a separate struct value; it does not recursively clone referenced objects.",
           "marks": 1
         },
         {
-          "point": "The Weight fields are independent, so assigning 8 to second.Weight leaves first.Weight at 5.",
+          "point": "Explains that changing copy.Weight affects only the copy, so original.Weight remains 12.",
           "marks": 1
         },
         {
-          "point": "The Labels reference is copied without cloning the list, so adding express mutates the list initially shared by both structs.",
+          "point": "Explains that the copied Labels reference initially points to the same list, so adding urgent changes the list reachable through original.",
           "marks": 1
         },
         {
-          "point": "Replacing second.Labels changes only that struct's reference field; first.Labels still refers to the original list.",
+          "point": "Explains that replacing copy.Labels changes only that struct's reference field; original.Labels still contains fragile and urgent.",
           "marks": 1
         }
       ],
-      "model": "`second = first` copies every field of the struct. Each struct therefore has its own `Weight` value and its own `Labels` reference field.\n\nChanging `second.Weight` affects only the copied integer. The copied `Labels` reference initially points to the same list as `first.Labels`; the list itself was not copied. Adding `\"express\"` therefore changes their shared list.\n\nAssigning a new list to `second.Labels` replaces only the reference stored in `second`. `first.Labels` continues to point to the original list containing `\"fragile\"` and `\"express\"`.",
+      "model": "`copy = original` copies both field values into a separate struct value. `Weight` contains an integer, while `Labels` contains a reference; the list itself is not copied.\n\nChanging `copy.Weight` affects only the copied integer field. Initially, both `Labels` fields refer to one list, so adding `\"urgent\"` mutates that shared list. Assigning a new list to `copy.Labels` then replaces only the reference stored in `copy`.\n\nFinally, `original.Weight` is `12`, and `original.Labels` contains `\"fragile\"` and `\"urgent\"`.",
       "source": {
         "path": "Home/Programming/NET/CSharp/Fundamentals/Types/Types.md",
         "heading": "Copy and Storage Boundaries"
@@ -41,23 +41,23 @@
     {
       "id": "c2",
       "type": "long",
-      "prompt": "A C# `class` named `Meter` has a mutable `int Reading` field.\n\n```csharp\nvar primary = new Meter { Reading = 10 };\nvar backup = primary;\nbackup.Reading = 25;\nbackup = new Meter { Reading = 0 };\n```\n\nThe field change makes `primary.Reading` become `25`, but the final assignment leaves it at `25`. Explain why. Include what `backup = primary` copies and what the final assignment changes.",
+      "prompt": "`Meter` is a class with a public `int Reading` field.\n\n```csharp\nvar first = new Meter { Reading = 8 };\nvar second = first;\nsecond.Reading = 15;\nsecond = new Meter { Reading = 30 };\n```\n\nA student says: “Because `Reading` is an integer, changing it through `second` cannot affect `first`.” Explain the mistake and why the final assignment to `second` has a different effect. Include the final reading reachable through each variable.",
       "marks": 3,
       "rubric": [
         {
-          "point": "Class assignment copies the object reference, so primary and backup initially refer to one Meter instance.",
+          "point": "Explains that second = first copies the object reference, so both variables initially refer to the same Meter instance.",
           "marks": 1
         },
         {
-          "point": "Changing backup.Reading mutates that shared instance, so primary observes 25.",
+          "point": "Explains that second.Reading = 15 changes a field on the shared instance, so first observes 15 despite the field being an integer.",
           "marks": 1
         },
         {
-          "point": "The final assignment redirects only backup to a new Meter; primary still refers to the previous instance.",
+          "point": "Explains that assigning a new Meter replaces only second's reference; first still reaches the original instance with reading 15, while second reaches the new instance with reading 30.",
           "marks": 1
         }
       ],
-      "model": "`backup = primary` copies the reference to the existing `Meter`, without copying the object. Both variables initially refer to the same instance, so changing its `Reading` through `backup` is also visible through `primary`.\n\nThe final assignment creates another `Meter` and stores its reference in `backup`. It changes which object `backup` refers to. `primary` still refers to the earlier object, whose reading remains `25`.",
+      "model": "`second = first` copies the reference to the `Meter`, so both variables initially reach the same instance. Its integer field has not been copied into a separate object. Changing `second.Reading` therefore changes the shared instance, and `first.Reading` becomes `15`.\n\nThe final assignment replaces the reference held by `second` with a reference to a new instance. It does not change `first` or the original instance. Finally, `first.Reading` is `15` and `second.Reading` is `30`.",
       "source": {
         "path": "Home/Programming/NET/CSharp/Fundamentals/Types/Types.md",
         "heading": "Copy and Storage Boundaries"
@@ -66,7 +66,88 @@
       "goal": "explain"
     }
   ],
-  "answers": {},
-  "marks": {},
-  "status": "ready"
+  "answers": {
+    "c1": {
+      "text": "`copy = original` fully copying the object with their values, not the ref, so changing the weight will change value only for copy, since copy is the the different object. Adding the label will add label to the both original and copy lists, since during copy, the reference was copied to the same object. Replacing Labels in the copy changing its reference. Original will be {Weight = 12, Lables [\"fragile\", \"urgent\"]}",
+      "confidence": "unsure"
+    },
+    "c2": {
+      "text": "The mistake is student doesn't taking into account the `first` and `second` are classes which are reference types. Assigning  second = first assigning ref to the new variable, so changing value from both variables, changing value in the same object. The final assigment will change the ref by instantiation of new object, whcih delink second variable from the first object",
+      "confidence": "sure"
+    }
+  },
+  "marks": {
+    "c1": {
+      "awarded": [
+        false,
+        true,
+        true,
+        true
+      ],
+      "annotations": [
+        {
+          "quote": "fully copying the object with their values, not the ref",
+          "kind": "wrong",
+          "note": "You copy the reference field too; the list itself is not cloned."
+        },
+        {
+          "quote": "fully copying the object with their values, not the ref",
+          "kind": "missing",
+          "note": "You needed to explain that struct assignment copies each field into a separate struct value without recursively cloning referenced objects."
+        },
+        {
+          "quote": "changing the weight will change value only for copy",
+          "kind": "correct",
+          "note": "You correctly identify that changing the copied integer field leaves the original unchanged."
+        },
+        {
+          "quote": "the reference was copied to the same object",
+          "kind": "correct",
+          "note": "You correctly explain why both struct values initially reach the same list."
+        },
+        {
+          "quote": "Replacing Labels in the copy changing its reference",
+          "kind": "correct",
+          "note": "You correctly identify that replacement changes only the copy's reference field."
+        }
+      ],
+      "mistake": "misconception",
+      "feedback": "You traced the final values correctly, but your opening claim contradicts your later explanation that the list reference is copied.",
+      "score": 3
+    },
+    "c2": {
+      "awarded": [
+        true,
+        true,
+        false
+      ],
+      "annotations": [
+        {
+          "quote": "Assigning  second = first assigning ref to the new variable",
+          "kind": "correct",
+          "note": "You correctly explain that assignment copies the reference."
+        },
+        {
+          "quote": "changing value in the same object",
+          "kind": "correct",
+          "note": "You correctly explain that both variables initially access the same object."
+        },
+        {
+          "quote": "whcih delink second variable from the first object",
+          "kind": "vague",
+          "note": "You identify the reference change, but you do not state the final readings."
+        },
+        {
+          "quote": "",
+          "kind": "missing",
+          "note": "You needed to state that first reaches the original instance with reading 15 and second reaches the new instance with reading 30."
+        }
+      ],
+      "mistake": "incomplete",
+      "feedback": "You explained the shared reference and reassignment correctly, but omitted the final reading reachable through each variable.",
+      "score": 2
+    }
+  },
+  "status": "marked",
+  "finishedAt": 1793774947268
 }

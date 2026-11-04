@@ -594,6 +594,18 @@
       "Assets",
       "Templates",
       "Qard"
+    ],
+    "Home": [
+      "Programming",
+      "Computer Science",
+      "Data Persistence",
+      "Networks",
+      "Software Architecture",
+      "Software Design",
+      "AI & ML",
+      "Security",
+      "Cloud",
+      "DevOps"
     ]
   },
   "folderAppearances": {},

@@ -2,7 +2,7 @@
 publish: true
 created: 2026-07-12T07:33:07.000Z
 modified: 2026-10-28T12:33:42.000Z
-published: 2026-10-28T12:33:42.000Z
+published: 2026-07-12T14:27:20.411Z
 tags:
   - FolderNote
 topic:

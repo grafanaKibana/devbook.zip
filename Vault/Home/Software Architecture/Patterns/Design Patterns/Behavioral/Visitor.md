@@ -11,6 +11,7 @@ qard-topic: "Patterns/Design Patterns/Behavioral/Visitor"
 flashcard_uid: "ff80b76c"
 created: "2026-03-05T22:12:46.000Z"
 modified: "2026-11-02T09:03:54.806Z"
+published: "2026-07-08T13:14:17.448Z"
 ---
 
 A museum can keep the same exhibits while offering a new audio tour. Each tour performs a different operation over the fixed exhibit set. Adding a tour is cheap. Adding an exhibit forces every tour to decide what to do with it.

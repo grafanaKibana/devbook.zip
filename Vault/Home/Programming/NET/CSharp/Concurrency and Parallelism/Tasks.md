@@ -11,6 +11,7 @@ qard-topic: "NET/CSharp/Concurrency and Parallelism/Tasks"
 flashcard_uid: "9dbbd8f8"
 created: "2026-02-18T20:04:43.000Z"
 modified: "2026-11-02T09:03:54.806Z"
+published: "2026-07-08T13:14:17.323Z"
 ---
 
 `Task` is a handle to an operation that may finish later. It records completion, cancellation, or failure and gives other code something to await or combine. The abstraction says nothing about whether a thread is currently executing the operation.

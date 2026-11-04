@@ -8,6 +8,7 @@ status: Ready to Repeat
 publish: true
 created: "2026-02-15T15:01:57.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:28:37.400Z"
 ---
 
 Event-driven systems move work forward by representing that something happened and letting handlers react. An order service can publish `OrderPlaced` without calling inventory directly. Inventory handles the event under its own delivery and retry rules. The event should be treated as an immutable fact once published, even if its serialized payload is technically mutable.

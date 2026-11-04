@@ -11,6 +11,7 @@ qard-topic: "LLM/Context Engineering/RAG/Query Translation"
 flashcard_uid: "cffd0779"
 created: "2026-02-27T12:56:16.000Z"
 modified: "2026-11-02T09:03:54.806Z"
+published: "2026-07-08T13:28:37.415Z"
 ---
 
 Query translation changes a user's wording before search so that retrieval sees language closer to the corpus. Someone asks, "Can partners burst above limits now?" The relevant document is titled "Q3 Quota Policy Update — Partner Tier Burst Allowance." Both describe the same policy, but a single query embedding may place them in different neighborhoods. Translation searches more of that space without changing the corpus or the [[Embeddings|embedding model]].

@@ -12,6 +12,7 @@ qard-topic: "NET/ASP NET Web API/Dependency Injection"
 flashcard_uid: "117ac578"
 created: "2026-02-19T23:08:30.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:28:37.366Z"
 ---
 
 ASP.NET Core's built-in container maps service types to creation rules. Registrations in `Program.cs` define the implementation and lifetime. Framework activation then supplies those services to controllers, middleware, filters, and hosted services.

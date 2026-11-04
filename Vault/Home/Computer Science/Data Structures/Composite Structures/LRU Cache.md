@@ -8,6 +8,7 @@ status: Ready to Repeat
 publish: true
 created: "2026-06-20T05:33:50.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:14:17.346Z"
 ---
 
 A bounded cache must find key `k` and choose a victim when no free slot remains. Keeping entries only in recency order makes the victim obvious, but finding an arbitrary key still requires a scan.

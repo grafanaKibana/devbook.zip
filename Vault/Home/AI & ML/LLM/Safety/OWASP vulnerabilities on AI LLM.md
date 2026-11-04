@@ -11,6 +11,7 @@ qard-topic: "LLM/Safety/OWASP vulnerabilities on AI LLM"
 flashcard_uid: "c24fd7d3"
 created: "2026-02-15T15:01:57.000Z"
 modified: "2026-11-02T09:03:54.806Z"
+published: "2026-07-08T13:28:37.411Z"
 ---
 
 The OWASP Top 10 for LLM Applications (2025 edition) is a risk catalog for systems that embed language models. Its central boundary is awkward: untrusted natural language influences a probabilistic model, and the result may drive deterministic code, retrieval, or tool calls. Prompts can mix data with instructions. Model output is therefore untrusted input to the next component.

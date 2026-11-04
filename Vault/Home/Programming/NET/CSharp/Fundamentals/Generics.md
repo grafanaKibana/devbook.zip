@@ -11,6 +11,7 @@ qard-topic: "NET/CSharp/Fundamentals/Generics"
 flashcard_uid: "3fc98b91"
 created: "2026-02-18T20:04:43.000Z"
 modified: "2026-11-02T09:03:54.806Z"
+published: "2026-07-08T13:14:17.325Z"
 ---
 
 Generics parameterize code by type. `List<T>` can store any `T` while the compiler still checks every read and write. That is a stronger contract than accepting `object` and recovering the real type with casts. For value types, generic collections also avoid the boxing required by older object-based APIs.

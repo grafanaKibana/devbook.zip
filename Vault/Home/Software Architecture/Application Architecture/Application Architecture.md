@@ -12,6 +12,7 @@ qard-topic: "Application Architecture/Application Architecture"
 flashcard_uid: "3f90569b"
 created: "2026-02-10T01:40:47.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-15T11:47:54.747Z"
 ---
 
 Application architecture divides code into presentation, application, domain, and infrastructure modules, then controls which modules may call or implement which interfaces. Onion and Clean Architecture invert dependencies so the domain remains independent of the database and web framework.

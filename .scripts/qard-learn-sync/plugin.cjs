@@ -1,8 +1,9 @@
 const { Plugin, Notice, TFile } = require('obsidian');
-const { inspectCourse, reconcileCourse, renameSourcePath, sourceSnapshot, unassignedSources } = require('./core.cjs');
+const { inspectCourse, reconcileCourse, renameSourcePath, sourceSnapshot, unassignedSources, completedLessonProblems } = require('./core.cjs');
 
 const COURSE_ROOT = 'Assets/Qard/Courses/';
 const SOURCE_ROOT = 'Home/';
+const LESSON_ROOT = 'Assets/Qard/Lessons/';
 const DEBOUNCE_MS = 1200;
 const dayOf = () => {
   const day = new Date();
@@ -10,6 +11,8 @@ const dayOf = () => {
 };
 const isSource = (path) => path.startsWith(SOURCE_ROOT) && path.endsWith('.md');
 const isCourse = (path) => path.startsWith(COURSE_ROOT) && path.endsWith('.md');
+const isLesson = path => path.startsWith(LESSON_ROOT) && path.endsWith('.json');
+const inLessons = path => path === LESSON_ROOT.slice(0, -1) || path.startsWith(LESSON_ROOT);
 
 module.exports = class LearnSourceSync extends Plugin {
   async onload() {
@@ -49,21 +52,26 @@ module.exports = class LearnSourceSync extends Plugin {
       if (oldPath.startsWith(SOURCE_ROOT) || file.path.startsWith(SOURCE_ROOT)) {
         this.renames.push({ from: oldPath, to: file.path });
         void this.saveState().catch((error) => this.reportFailure('Could not save rename', error));
-      } else if (!(isCourse(oldPath) || isCourse(file.path) || oldPath === COURSE_ROOT.slice(0, -1))) return;
+      } else if (!(isCourse(oldPath) || isCourse(file.path) || oldPath === COURSE_ROOT.slice(0, -1)
+        || inLessons(oldPath) || inLessons(file.path))) return;
       this.schedule();
     }));
     this.registerEvent(this.app.vault.on('create', (file) => {
-      if (isSource(file.path) || isCourse(file.path)) this.schedule();
+      if (isSource(file.path) || isCourse(file.path) || isLesson(file.path)) this.schedule();
+    }));
+    this.registerEvent(this.app.vault.on('modify', file => {
+      if (isLesson(file.path)) this.schedule();
     }));
     this.registerEvent(this.app.vault.on('delete', (file) => {
       this.sourceCache.delete(file.path);
-      if (isSource(file.path) || file.path.startsWith(SOURCE_ROOT) || isCourse(file.path)) this.schedule();
+      if (isSource(file.path) || file.path.startsWith(SOURCE_ROOT) || isCourse(file.path)
+        || inLessons(file.path)) this.schedule();
     }));
     this.app.workspace.onLayoutReady(() => { if (!this.stopped) void this.sync(); });
   }
 
   linkSignature(course) {
-    return JSON.stringify([course.course, course.rows.map((row) => [row.id, row.notes])]);
+    return JSON.stringify([course.course, course.rows.map((row) => [row.id, row.notes, row.state, row.due, row.evidence])]);
   }
 
   schedule() {
@@ -141,6 +149,15 @@ module.exports = class LearnSourceSync extends Plugin {
         }
       }
       if (!this.stopped) {
+        const lessons = [], progressProblems = [];
+        for (const file of this.app.vault.getFiles().filter(file => isLesson(file.path))) {
+          if (this.stopped) break;
+          try { lessons.push({ path: file.path, text: await this.app.vault.read(file) }); }
+          catch (error) { progressProblems.push(`${file.path}: could not read Learn lesson evidence: ${error.message}`); }
+        }
+        if (this.stopped) return;
+        progressProblems.push(...completedLessonProblems(registry, lessons));
+        problems.push(...progressProblems);
         let unassigned = [];
         if (!failed) {
           try {
@@ -161,8 +178,8 @@ module.exports = class LearnSourceSync extends Plugin {
         this.unassigned = unassigned;
         this.coverageComplete = !failed;
         this.status.setText(problems.length ? `Learn sync: ${problems.length} issue(s)` : unassigned.length ? `Learn: ${unassigned.length} unassigned note(s)` : pending.length ? `Learn: ${pending.length} source update(s)` : 'Learn sync: up to date');
-        const signature = JSON.stringify(unassigned);
-        const newWarning = unassigned.length && signature !== this.warningSignature;
+        const signature = JSON.stringify([unassigned, progressProblems]);
+        const newWarning = (unassigned.length || progressProblems.length) && signature !== this.warningSignature;
         if (!failed) this.warningSignature = signature;
         if (show || newWarning) this.showStatus();
       }

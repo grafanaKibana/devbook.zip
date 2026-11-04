@@ -11,6 +11,7 @@ qard-topic: "NET/CSharp/Fundamentals/Foreach"
 flashcard_uid: "2e8ba405"
 created: "2026-02-15T16:27:13.000Z"
 modified: "2026-11-02T09:03:54.806Z"
+published: "2026-07-08T13:14:17.324Z"
 ---
 
 `foreach` asks a source for one item at a time. Most sources implement `IEnumerable<T>`, but the compiler also accepts types that expose the required enumerator pattern without implementing the interface. This is why arrays, collections, spans, and custom stack-only enumerators can all use the same loop syntax.

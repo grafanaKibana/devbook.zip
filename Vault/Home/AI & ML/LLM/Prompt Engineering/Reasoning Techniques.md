@@ -11,6 +11,7 @@ qard-topic: "LLM/Prompt Engineering/Reasoning Techniques"
 flashcard_uid: "cd09ceaf"
 created: "2026-02-28T13:40:02.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:14:17.482Z"
 ---
 
 Some tasks cannot be answered reliably in one jump. Arithmetic, logic, and planning all require state to survive across several decisions. Reasoning techniques give the model or its surrounding system more room to construct, compare, and check those decisions.

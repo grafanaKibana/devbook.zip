@@ -8,6 +8,7 @@ status: Ready to Repeat
 publish: true
 created: "2026-07-18T07:07:47.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-16T14:12:14.435Z"
 ---
 
 A port number selects a service endpoint on an IP host. IANA registrations provide shared defaults, not proof of what a deployment actually runs. A service may listen elsewhere, another application may own the expected socket, and firewall policy still decides whether traffic reaches it. The listener and negotiated protocol are stronger evidence than a familiar number.

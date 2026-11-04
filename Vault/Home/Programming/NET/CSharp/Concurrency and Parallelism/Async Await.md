@@ -11,6 +11,7 @@ qard-topic: "NET/CSharp/Concurrency and Parallelism/Async Await"
 flashcard_uid: "4a42db52"
 created: "2026-02-10T16:03:55.000Z"
 modified: "2026-11-02T09:03:54.806Z"
+published: "2026-07-08T13:14:17.320Z"
 ---
 
 `async` and `await` let .NET code wait for I/O without holding a thread idle. While a network or database operation is in flight, the worker can return to the pool and run something else. UI applications stay responsive, and servers can keep many requests in progress without assigning a thread to every wait.

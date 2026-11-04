@@ -8,6 +8,7 @@ status: Ready to Repeat
 publish: true
 created: "2026-07-18T07:07:47.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-16T08:28:55.538Z"
 ---
 
 A firewall permits or denies traffic at a defined boundary. It constrains which services can communicate and supplies evidence about rejected paths. It does not authenticate an application user, repair a vulnerable service, or make an allowed connection trustworthy. The useful question is which source, destination, protocol, direction, and zone transition a named workload requires.

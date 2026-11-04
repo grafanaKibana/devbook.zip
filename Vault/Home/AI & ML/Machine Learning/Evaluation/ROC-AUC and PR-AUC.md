@@ -11,6 +11,7 @@ qard-topic: "Machine Learning/Evaluation/ROC-AUC and PR-AUC"
 flashcard_uid: "f1d9f3dc"
 created: "2026-02-17T23:29:46.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:28:37.418Z"
 ---
 
 ROC-AUC and PR-AUC summarize how a binary classifier ranks cases while its score threshold sweeps from strict to permissive. ROC plots true-positive rate against false-positive rate. PR plots precision against recall.

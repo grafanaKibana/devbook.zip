@@ -11,6 +11,7 @@ qard-topic: "NET/CSharp/Fundamentals/Namespaces"
 flashcard_uid: "1f7aec15"
 created: "2026-02-15T16:27:13.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:14:17.326Z"
 ---
 
 A namespace gives a type a qualified name. `Billing.User` and `Identity.User` can coexist because the namespace is part of each type's identity. It also gives IDEs and readers a map of the API.

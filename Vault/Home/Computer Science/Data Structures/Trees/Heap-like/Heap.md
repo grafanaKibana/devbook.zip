@@ -8,6 +8,7 @@ status: Ready to Repeat
 publish: true
 created: "2026-02-20T23:50:18.000Z"
 modified: "2026-10-28T12:33:42.000Z"
+published: "2026-07-08T13:14:17.346Z"
 ---
 
 A scheduler holds thousands of pending tasks. New work keeps arriving, and the earliest deadline must remain cheap to retrieve.
