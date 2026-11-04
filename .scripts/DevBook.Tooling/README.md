@@ -179,8 +179,6 @@ Export retries wait at least six hours and stop after three attempts per source 
 
 ### Manual export recovery
 
-After genuine native rendering, timestamp-only changes to an existing generated Markdown file's automatically synthesized `published` date retain its baseline bytes. Explicit source publication dates, changed prose, links, metadata and dashboard content retain the fresh output. Receipt creation follows that preservation step and still binds the complete resulting tree. This removes incidental full-vault churn; the shared Questions dashboard and receipt can still overlap between branches.
-
 Automatic export is the default. Deliberately setting `automatic_export: false` makes changed source await local export and freezes unrelated additions. Use a clean dedicated checkout of the exact managed PR head and open **that checkout's** Vault in Obsidian:
 
 ```sh
