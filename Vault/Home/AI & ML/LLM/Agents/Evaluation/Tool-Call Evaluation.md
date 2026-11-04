@@ -10,7 +10,7 @@ qard-deck: "AI & ML"
 qard-topic: "LLM/Agents/Evaluation/Tool-Call Evaluation"
 flashcard_uid: "1d83d54c"
 created: "2026-06-12T18:50:14.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-04T06:47:28.050Z"
 ---
 
 A tool call is where an agent stops describing an action and asks a system to perform it. Failures at this boundary are concrete: the agent can name the wrong tool, send the wrong value in valid JSON, invent a function, or repeat a call that changed nothing.
@@ -117,5 +117,5 @@ The riskiest call may be perfectly valid: real tool, valid schema, wrong account
 
 # References
 
-- [Berkeley Function-Calling Leaderboard -- AST and executable accuracy for tool/function calls, including irrelevance detection (Gorilla, UC Berkeley)](https://gorilla.cs.berkeley.edu/blogs/8_berkeley_function_calling_leaderboard.html)
+- [Berkeley Function-Calling Leaderboard (Gorilla, UC Berkeley)](https://gorilla.cs.berkeley.edu/blogs/8_berkeley_function_calling_leaderboard.html)
 - [Tool use (function calling) overview (Anthropic Docs)](https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview)
