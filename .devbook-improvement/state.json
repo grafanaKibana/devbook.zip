@@ -1675,14 +1675,14 @@
     "status": "active",
     "phase": "selecting",
     "started_at": "2026-11-04T06:42:24.894668Z",
-    "elapsed_seconds": 3.4336963,
+    "elapsed_seconds": 7.2302254,
     "calls_reserved": 0,
     "responses_received": 0,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-04T06:42:28.327680Z"
+    "checkpoint_at": "2026-11-04T06:42:32.124209Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
