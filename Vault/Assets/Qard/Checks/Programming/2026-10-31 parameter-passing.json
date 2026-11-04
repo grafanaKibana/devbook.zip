@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "createdAt": 1793461622082,
+  "createdAt": 1793774018957,
   "mastery": "Assets/Qard/Courses/Programming Mastery.md",
   "course": "Programming",
   "objective": "parameter-passing",
@@ -10,27 +10,27 @@
     {
       "id": "c1",
       "type": "long",
-      "prompt": "Consider this C# code:\n\n```csharp\nclass Meter\n{\n    public int Reading;\n}\n\nstatic void Reset(Meter item)\n{\n    item.Reading = 12;\n    item = new Meter { Reading = 0 };\n}\n\nvar current = new Meter { Reading = 7 };\nvar saved = current;\nReset(current);\n```\n\nExplain why `current.Reading` and `saved.Reading` are both `12` afterward. Then explain what each would contain if the parameter were changed to `ref Meter item` and the call to `Reset(ref current)`. Distinguish the caller's variables from the objects they reference.",
+      "prompt": "Assume `Box` is a class with a public writable `int Count` field.\n\n```csharp\nstatic void Adjust(Box item, ref Box replacement)\n{\n    item.Count = 7;\n    item = new Box { Count = 12 };\n    replacement = item;\n}\n```\n\nThe caller runs:\n\n```csharp\nBox first = new Box { Count = 2 };\nBox second = first;\nAdjust(first, ref second);\n```\n\nExplain why `first.Count` ends as `7`, while `second.Count` ends as `12`. Describe what each parameter copies or aliases and why the caller's variables end up referring to different objects.",
       "marks": 4,
       "rubric": [
         {
-          "point": "Explains that the by-value parameter receives a copy of the object reference, so changing Reading mutates the object shared by current and saved.",
+          "point": "`item` receives a copy of the reference in `first`, initially referring to the same object.",
           "marks": 1
         },
         {
-          "point": "Explains that assigning a new Meter to the by-value parameter changes only the parameter's reference, leaving both caller variables pointing to the object whose Reading is 12.",
+          "point": "`item.Count = 7` mutates that shared object, so the change is visible through `first`.",
           "marks": 1
         },
         {
-          "point": "Explains that ref aliases current's storage, so assigning the new Meter replaces current's reference and makes current.Reading equal 0.",
+          "point": "Assigning a new object to `item` changes only the by-value parameter; `first` still refers to the original object.",
           "marks": 1
         },
         {
-          "point": "Explains that saved remains a separate variable pointing to the original object, whose Reading is 12.",
+          "point": "`replacement` aliases `second`, so assigning `item` to it makes `second` refer to the new object whose count is 12.",
           "marks": 1
         }
       ],
-      "model": "By value, `item` holds a copy of the reference stored in `current`. All three variables initially refer to the same object, so `item.Reading = 12` changes the object visible through both `current` and `saved`. Assigning a new object to `item` then changes only that local parameter. Both caller variables still see `12`.\n\nWith `ref`, `item` aliases the variable `current`. The first assignment still changes the original object's reading to `12`. The second assignment replaces the reference stored in `current`, so `current.Reading` becomes `0`. `saved` is a separate variable and still references the original object, so `saved.Reading` remains `12`.",
+      "model": "`item` holds a copy of `first`'s reference. Both initially refer to the original box, so changing `item.Count` changes the object seen through `first` to `7`.\n\nReassigning `item` stores a new reference only in the local parameter. It leaves `first` pointing to the original box. `replacement`, however, aliases the caller's `second` variable. Assigning `item` to `replacement` therefore replaces the reference stored in `second`. The caller finishes with two different objects: `first.Count` is `7`, and `second.Count` is `12`.",
       "source": {
         "path": "Home/Programming/NET/CSharp/Fundamentals/Methods.md",
         "heading": "Input Parameters"
@@ -41,36 +41,170 @@
     {
       "id": "c2",
       "type": "long",
-      "prompt": "A developer writes these methods:\n\n```csharp\nstatic bool TryGetLimit(bool available, out int limit)\n{\n    if (!available)\n        return false;\n\n    limit = 30;\n    return true;\n}\n\nstatic int ReadLimit(in int limit)\n{\n    limit = 30;\n    return limit;\n}\n```\n\nNeither method compiles. Explain each error in terms of access to caller storage. For `TryGetLimit`, explain why returning `false` does not remove the assignment requirement and give a minimal correction. Also explain why an uninitialized local can be passed as `out` but cannot be passed as `in`.",
-      "marks": 4,
+      "prompt": "Consider this method:\n\n```csharp\nstatic bool TryReserve(int available, out int reserved)\n{\n    if (available < 3)\n    {\n        reserved = 0;\n        return false;\n    }\n\n    reserved = 3;\n    return true;\n}\n```\n\nThe caller declares `int count;` without initializing it, then calls `TryReserve(1, out count)`.\n\nExplain why passing the uninitialized variable is allowed, why `count` is assigned even though the method returns `false`, and why deleting `reserved = 0;` would cause a compile error.",
+      "marks": 3,
       "rubric": [
         {
-          "point": "Explains that out must be assigned on every normal return path, including a return of false.",
+          "point": "`out` permits an uninitialized caller variable because the method is responsible for assigning the output.",
           "marks": 1
         },
         {
-          "point": "Gives a correction that assigns limit before the false return and explains that the assignment writes into the caller's variable.",
+          "point": "`reserved` aliases `count`, so the assignment stores 0 in `count`; returning false does not undo or suppress that assignment.",
           "marks": 1
         },
         {
-          "point": "Explains that in provides readonly access through the parameter, so limit = 30 is forbidden and should be removed.",
-          "marks": 1
-        },
-        {
-          "point": "Explains that out supplies an assigned value on normal return, whereas in reads an existing value and therefore requires an initialized argument.",
+          "point": "Every normal return path must assign an `out` parameter; deleting the assignment leaves the false-return path unassigned.",
           "marks": 1
         }
       ],
-      "model": "`out limit` aliases the caller's variable and must be assigned before every normal return. Returning `false` is still a normal return; the Boolean does not change that contract. A minimal correction is:\n\n```csharp\nif (!available)\n{\n    limit = 0;\n    return false;\n}\n```\n\nThat assignment writes `0` into the caller's variable even though the method reports failure.\n\n`in limit` permits reading through the parameter but forbids assigning to it. Removing `limit = 30;` makes `ReadLimit` return the supplied value.\n\nAn `out` argument can be an uninitialized local because the method must assign it before returning normally. An `in` argument must already be initialized because the method receives an existing value to read.",
+      "model": "`out` allows `count` to be uninitialized at the call because the method must produce its value. `reserved` aliases `count`, so `reserved = 0` writes directly into the caller's variable. The Boolean return value reports failure separately and does not cancel that write.\n\nDeleting the assignment would leave a normal return path that does not assign `reserved`. C# rejects that method because an `out` parameter must be assigned before every normal return.",
       "source": {
         "path": "Home/Programming/NET/CSharp/Fundamentals/Methods.md",
-        "heading": "Input Parameters"
+        "heading": "Out"
+      },
+      "objective": "parameter-passing",
+      "goal": "explain"
+    },
+    {
+      "id": "c3",
+      "type": "long",
+      "prompt": "A caller passes an initialized `List<int>` variable to this method using `in`:\n\n```csharp\nstatic void Empty(in List<int> items)\n{\n    items.Clear();\n}\n```\n\nExplain why the caller sees an empty list even though the parameter is readonly. Why would replacing the body with `items = new List<int>();` be rejected?",
+      "marks": 3,
+      "rubric": [
+        {
+          "point": "`in` provides readonly access to the storage holding the caller's reference.",
+          "marks": 1
+        },
+        {
+          "point": "`Clear()` mutates the referenced list without replacing that reference, so the caller observes the mutation.",
+          "marks": 1
+        },
+        {
+          "point": "Assigning a new list would write through the readonly parameter, which `in` forbids; readonly passing does not make the referenced object immutable.",
+          "marks": 1
+        }
+      ],
+      "model": "`in` gives the method a readonly alias to the caller's variable holding the list reference. It prevents writing a replacement reference through `items`.\n\n`Clear()` changes the existing list object without reassigning the reference. The caller refers to that same object and therefore sees an empty list. `items = new List<int>();` would assign through the readonly alias, so it is rejected. The readonly parameter does not make the list itself immutable.",
+      "source": {
+        "path": "Home/Programming/NET/CSharp/Fundamentals/Methods.md",
+        "heading": "Questions"
       },
       "objective": "parameter-passing",
       "goal": "explain"
     }
   ],
-  "answers": {},
-  "marks": {},
-  "status": "ready"
+  "answers": {
+    "c1": {
+      "text": "The first is passed without ref parameter, which makes parameter pass local copy of the reference, so outer variable has been not changed. the second has been changed to 12 because ref param allowed to re-instantiate and replace the reference with the new object with 12, even for the outer object,",
+      "confidence": "sure"
+    },
+    "c2": {
+      "text": "it is allowed because out in TryReserve will guarantee that value will be set after method run by the compiler. count will be asigned regarless of the return value. Compile error will rise because our requires to set out param in all paths of the method",
+      "confidence": "sure"
+    },
+    "c3": {
+      "text": "List is reference type, in makes the reference readonly in its properties direct access, calling the methods are allowed, and in doesnt check what method do and doesnt prevent logic that changing the data"
+    }
+  },
+  "marks": {
+    "c1": {
+      "awarded": [
+        true,
+        false,
+        true,
+        true
+      ],
+      "annotations": [
+        {
+          "quote": "local copy of the reference",
+          "kind": "correct",
+          "note": "You identified that the by-value parameter receives a copy of the reference."
+        },
+        {
+          "quote": "outer variable has been not changed",
+          "kind": "correct",
+          "note": "You recognized that reassigning the local parameter does not replace the caller's reference."
+        },
+        {
+          "quote": "replace the reference with the new object with 12",
+          "kind": "correct",
+          "note": "You explained that the ref parameter allows the caller's second variable to receive the new reference."
+        },
+        {
+          "quote": "",
+          "kind": "missing",
+          "note": "You needed to explain that item.Count = 7 mutates the original shared object, so first.Count becomes 7."
+        }
+      ],
+      "mistake": "incomplete",
+      "feedback": "You explained reference copying and replacement, but omitted the mutation of the original shared object.",
+      "score": 3
+    },
+    "c2": {
+      "awarded": [
+        true,
+        false,
+        true
+      ],
+      "annotations": [
+        {
+          "quote": "will guarantee that value will be set",
+          "kind": "correct",
+          "note": "You identified the method's responsibility to assign the out parameter."
+        },
+        {
+          "quote": "count will be asigned regarless of the return value",
+          "kind": "vague",
+          "note": "You stated that count is assigned, but did not identify the write of 0 through the out parameter."
+        },
+        {
+          "quote": "in all paths of the method",
+          "kind": "correct",
+          "note": "You identified the assignment requirement; more precisely, it applies to every normal return path."
+        },
+        {
+          "quote": "",
+          "kind": "missing",
+          "note": "You needed to explain that reserved aliases count, so reserved = 0 writes 0 to count even when the method returns false."
+        }
+      ],
+      "mistake": "incomplete",
+      "feedback": "You identified the out assignment requirement, but did not explain how the false branch writes 0 to count.",
+      "score": 2
+    },
+    "c3": {
+      "awarded": [
+        true,
+        false,
+        false
+      ],
+      "annotations": [
+        {
+          "quote": "in makes the reference readonly",
+          "kind": "correct",
+          "note": "You identified that the reference held by the parameter is readonly."
+        },
+        {
+          "quote": "doesnt prevent logic that changing the data",
+          "kind": "vague",
+          "note": "You recognized that a method can change data, but did not explain that Clear mutates the same list seen by the caller."
+        },
+        {
+          "quote": "",
+          "kind": "missing",
+          "note": "You needed to state that Clear mutates the existing list, so the caller sees it emptied."
+        },
+        {
+          "quote": "",
+          "kind": "missing",
+          "note": "You needed to explain that assigning a new list would replace the reference through the readonly parameter and is therefore rejected."
+        }
+      ],
+      "mistake": "incomplete",
+      "feedback": "You recognized that readonly access does not prevent mutation, but did not explain the specific effects of Clear and reassignment.",
+      "score": 1
+    }
+  },
+  "status": "marked",
+  "finishedAt": 1793776734357
 }

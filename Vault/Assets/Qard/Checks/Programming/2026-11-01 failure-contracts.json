@@ -70,7 +70,94 @@
       "goal": "explain"
     }
   ],
-  "answers": {},
-  "marks": {},
-  "status": "ready"
+  "answers": {
+    "c1": {
+      "text": "The translation will happen in catch block, where we would re throw with new ArchiveUnavailableException(\"Explanation\", ex). Passing ex will preserve the cause. The higher layer should call the log func, and throw original exception via throw;",
+      "confidence": "unsure"
+    },
+    "c2": {
+      "text": "Clean up should happen in using which compiles to try {} finally {close the stream}, or explicit try {} catch {} finally {close the stream}",
+      "confidence": "guess"
+    }
+  },
+  "marks": {
+    "c1": {
+      "awarded": [
+        false,
+        true,
+        false,
+        true
+      ],
+      "annotations": [
+        {
+          "quote": "The translation will happen in catch block",
+          "kind": "vague",
+          "note": "You identify a catch block, but you do not place it at the archive adapter boundary."
+        },
+        {
+          "quote": "new ArchiveUnavailableException(\"Explanation\", ex)",
+          "kind": "correct",
+          "note": "You retain the original exception as the inner exception."
+        },
+        {
+          "quote": "throw original exception via throw;",
+          "kind": "correct",
+          "note": "You use throw; to propagate the existing exception after logging."
+        },
+        {
+          "quote": "The translation will happen in catch block",
+          "kind": "missing",
+          "note": "You needed to place translation at the archive adapter boundary, where provider failures become the stable contract for callers."
+        },
+        {
+          "quote": "",
+          "kind": "missing",
+          "note": "You needed to explain that copying the message or logging separately does not preserve the original cause in the propagated exception chain."
+        }
+      ],
+      "mistake": "incomplete",
+      "feedback": "You showed how to preserve and rethrow the exception, but omitted the adapter boundary and why a message or log alone is insufficient.",
+      "score": 2
+    },
+    "c2": {
+      "awarded": [
+        true,
+        false,
+        false,
+        false
+      ],
+      "annotations": [
+        {
+          "quote": "Clean up should happen in using",
+          "kind": "correct",
+          "note": "You place cleanup in a using scope, which attempts disposal during exception unwinding."
+        },
+        {
+          "quote": "finally {close the stream}",
+          "kind": "wrong",
+          "note": "You must leave the caller-owned stream open."
+        },
+        {
+          "quote": "",
+          "kind": "missing",
+          "note": "You needed to release the owned workspace while leaving the caller-owned stream open."
+        },
+        {
+          "quote": "",
+          "kind": "missing",
+          "note": "You needed to catch and record the cleanup failure separately so the conversion exception can continue to propagate."
+        },
+        {
+          "quote": "",
+          "kind": "missing",
+          "note": "You needed to explain that using does not prevent Dispose from throwing and masking the conversion failure."
+        }
+      ],
+      "mistake": "misconception",
+      "feedback": "You identified a protected cleanup scope, but closed the wrong resource and did not address competing failures.",
+      "score": 1
+    }
+  },
+  "status": "marked",
+  "finishedAt": 1793778480534
 }

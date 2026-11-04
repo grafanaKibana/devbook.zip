@@ -9,6 +9,7 @@ DevBook Learn Sync is a local companion plugin. It watches the source notes alre
 | A source file or folder is renamed while the plugin is running | Maintain the explicit source links |
 | A source disappears | Report the missing source and retain its objective and progress |
 | A note with cards has no objective in its subject course | Show an unassigned-note warning with its path and card count; leave the course unchanged |
+| A closed completed lesson exists, but its existing objective becomes new with empty due and evidence | Report possible progress loss; keep the warning until the records are reconciled |
 
 The plugin does not create objectives or tests, rewrite learning targets, infer prerequisites, or change states, due dates or assessment evidence. Card schedules, review history, note statuses and Qard settings remain under their existing owners. Unrelated metadata, including stock Qard identity bookkeeping, does not trigger a source-content update.
 
@@ -23,6 +24,8 @@ Unassigned card notes appear as **Learn: N unassigned note(s)**. Click the indic
 The authoring agent must resolve assignment before finishing a note. Its completion hook checks edited notes independently of prose-review receipts; pre-commit and CI also check coverage. Run `node .scripts/qard-learn-sync/check.cjs` for a complete inventory, or add `--json` for machine-readable diagnostics. These checks detect missing associations; semantic fit remains part of note review. The companion does not launch an agent or generate curriculum in the background.
 
 Run **DevBook Learn Sync: Acknowledge Learn source changes** to clear the source-update indicators after addressing them. Acknowledgement only clears those indicators; it does not record a passing answer or change mastery. **Sync existing Learn sources now** performs an immediate reconciliation.
+
+Course state, due and evidence edits and lesson JSON changes also trigger integrity checks. A completed accepted lesson with a saved next-check date must not silently coexist with its existing objective reset to `new` and empty progress. The diagnostic names the course, objective and saved lesson; acknowledgement cannot dismiss it. The same check blocks agent completion, pre-commit and CI. Recover only recorded progress from the lesson or File Recovery, preserving later assessments and card-review history. Removed objectives stay removed. The companion reports the inconsistency without automatically restoring a state or inferring mastery; it cannot stop an external process from overwriting a file.
 
 ## Storage and preservation
 

@@ -70,6 +70,23 @@ test('scoped source paths cannot follow symlink files or directories outside the
   }
 });
 
+test('CLI checks completed-lesson progress even during a scoped source check and never repairs it', async t => {
+  const course = COURSE.replace('| mastered | 2026-12-01 |', '| new | |').replace('Preserve evidence', '');
+  const lesson = { version: 1, mastery: 'Assets/Qard/Courses/Programming.md', objective: 'types',
+    accepted: true, finishedAt: 1793453076025, close: { nextCheck: '2026-11-03' } };
+  const repoRoot = fixture(t, { 'Home/Programming/Types.md': CARD, 'Assets/Qard/Courses/Programming.md': course,
+    'Assets/Qard/Lessons/Done.json': JSON.stringify(lesson) });
+  const result = await checkCoverage({ repoRoot, paths: ['Home/Programming/Types.md'] });
+  assert.equal(result.unassigned.length, 0);
+  assert.match(result.problems.join('\n'), /progress.*loss/i);
+  assert.match(result.problems.join('\n'), /Done\.json/);
+  assert.equal(fs.readFileSync(path.join(repoRoot, 'Vault/Assets/Qard/Courses/Programming.md'), 'utf8'), course);
+  fs.writeFileSync(path.join(repoRoot, 'Vault/Assets/Qard/Courses/Programming.md'), COURSE);
+  assert.deepEqual(await checkCoverage({ repoRoot }), { unassigned: [], problems: [] });
+  fs.writeFileSync(path.join(repoRoot, 'Vault/Assets/Qard/Lessons/Done.json'), '{broken');
+  assert.match((await checkCoverage({ repoRoot })).problems.join('\n'), /Done\.json/);
+});
+
 test('CLI emits stable JSON and an actionable failing result for invalid path arguments', () => {
   const command = path.resolve(__dirname, '../qard-learn-sync/check.cjs');
   const clean = spawnSync(process.execPath, [command, '--json'], { encoding: 'utf8' });

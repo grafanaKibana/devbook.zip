@@ -481,8 +481,8 @@
         "version": 1,
         "source": "reviews"
       },
-      "needsFixing": true,
-      "flagsAt": 1793713536206
+      "flagsAt": 1793713536206,
+      "needsFixing": true
     },
     "19ea3788-056c-4ed6-8bc6-2087ae866f65": {
       "cardId": "19ea3788-056c-4ed6-8bc6-2087ae866f65",
@@ -918,11 +918,15 @@
       27735
     ],
     "check-write|codex|gpt-6.1-sol": [
-      35878,
       36839,
       37219,
       42092,
-      38874
+      38874,
+      39166,
+      50637,
+      57497,
+      44210,
+      38827
     ],
     "probe|codex|gpt-6.1-terra": [
       383303,
@@ -939,6 +943,11 @@
     "ask|codex|gpt-6.1-terra": [
       10109,
       9450
+    ],
+    "check-mark|codex|gpt-6.1-terra": [
+      11960,
+      12706,
+      10930
     ]
   },
   "usage": {
@@ -1169,6 +1178,26 @@
         "costUsd": 0,
         "costCalls": 0
       }
+    },
+    "2026-11-04": {
+      "Writing checks|writer|codex|gpt-6.1-sol": {
+        "calls": 5,
+        "input": 183041,
+        "output": 7564,
+        "cacheRead": 393088,
+        "cacheWrite": 0,
+        "costUsd": 0,
+        "costCalls": 0
+      },
+      "Marking|tutor|codex|gpt-6.1-terra": {
+        "calls": 3,
+        "input": 80716,
+        "output": 1390,
+        "cacheRead": 37632,
+        "cacheWrite": 0,
+        "costUsd": 0,
+        "costCalls": 0
+      }
     }
   },
   "study": {
@@ -1252,11 +1281,21 @@
       "tests|": 0.6
     },
     "2026-11-03": {
-      "browsing|": 180.5,
-      "planning|": 11.4,
+      "browsing|": 398.7,
+      "planning|": 31.6,
       "cards|Programming": 420.5,
-      "lessons|Programming": 1577.4,
-      "cards|": 3
+      "lessons|Programming": 1720.9,
+      "cards|": 3,
+      "planning|Programming": 71.1,
+      "browsing|Programming": 3.3,
+      "tests|": 2.1
+    },
+    "2026-11-04": {
+      "lessons|Programming": 9,
+      "planning|": 13.9,
+      "planning|Programming": 367,
+      "checks|Programming": 2488.7,
+      "browsing|": 159.4
     }
   },
   "statistics": {
@@ -1928,11 +1967,21 @@
           "tests|": 0.6
         },
         "2026-11-03": {
-          "browsing|": 180.5,
-          "planning|": 11.4,
+          "browsing|": 398.7,
+          "planning|": 31.6,
           "cards|Programming": 420.5,
-          "lessons|Programming": 1577.4,
-          "cards|": 3
+          "lessons|Programming": 1720.9,
+          "cards|": 3,
+          "planning|Programming": 71.1,
+          "browsing|Programming": 3.3,
+          "tests|": 2.1
+        },
+        "2026-11-04": {
+          "lessons|Programming": 9,
+          "planning|": 13.9,
+          "planning|Programming": 367,
+          "checks|Programming": 2488.7,
+          "browsing|": 159.4
         }
       },
       "usage": {
@@ -2159,6 +2208,26 @@
             "input": 41380,
             "output": 1627,
             "cacheRead": 116608,
+            "cacheWrite": 0,
+            "costUsd": 0,
+            "costCalls": 0
+          }
+        },
+        "2026-11-04": {
+          "Writing checks|writer|codex|gpt-6.1-sol": {
+            "calls": 5,
+            "input": 183041,
+            "output": 7564,
+            "cacheRead": 393088,
+            "cacheWrite": 0,
+            "costUsd": 0,
+            "costCalls": 0
+          },
+          "Marking|tutor|codex|gpt-6.1-terra": {
+            "calls": 3,
+            "input": 80716,
+            "output": 1390,
+            "cacheRead": 37632,
             "cacheWrite": 0,
             "costUsd": 0,
             "costCalls": 0
