@@ -2942,16 +2942,17 @@
     "version": 1,
     "id": "792178af26484b3da828d4cea1e5f39f",
     "status": "active",
-    "phase": "author_completed",
+    "phase": "selecting",
     "started_at": "2026-11-04T19:55:42.282235Z",
-    "elapsed_seconds": 406.80945099999997,
+    "elapsed_seconds": 411.03413839999996,
     "calls_reserved": 9,
     "responses_received": 9,
     "attempted_paths": [
       "Vault/Home/Programming/NET/ASP NET Web API/Filters.md",
       "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md",
       "Vault/Home/Programming/NET/CSharp/Fundamentals/Methods.md",
-      "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Types.md"
+      "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Types.md",
+      "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Locking.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -3118,10 +3119,21 @@
           "reason": "card edit must replace one complete active Qard block including adjacent metadata",
           "model_calls": 8
         }
+      },
+      {
+        "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Locking.md",
+        "outcome": "proposal_blocked",
+        "reason": "card edit must replace one complete active Qard block including adjacent metadata",
+        "result": {
+          "status": "proposal_blocked",
+          "stage": "deterministic_application",
+          "reason": "card edit must replace one complete active Qard block including adjacent metadata",
+          "model_calls": 9
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-04T20:02:29.091157Z",
+    "checkpoint_at": "2026-11-04T20:02:33.315845Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
