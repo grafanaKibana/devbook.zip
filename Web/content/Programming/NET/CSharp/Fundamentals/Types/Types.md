@@ -3,7 +3,7 @@ publish: true
 title: C# Types
 created: 2026-02-10T16:03:55.000Z
 modified: 2026-11-03T09:57:43.792Z
-published: 2026-11-03T11:17:05.802Z
+published: 2026-11-03T09:57:43.792Z
 tags:
   - FolderNote
 topic:
