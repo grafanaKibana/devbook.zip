@@ -2942,13 +2942,14 @@
     "version": 1,
     "id": "792178af26484b3da828d4cea1e5f39f",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-04T19:55:42.282235Z",
-    "elapsed_seconds": 161.48123410000002,
+    "elapsed_seconds": 165.59472050000002,
     "calls_reserved": 4,
     "responses_received": 4,
     "attempted_paths": [
-      "Vault/Home/Programming/NET/ASP NET Web API/Filters.md"
+      "Vault/Home/Programming/NET/ASP NET Web API/Filters.md",
+      "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -3019,10 +3020,84 @@
           },
           "model_calls": 2
         }
+      },
+      {
+        "path": "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md",
+                "outcome": "keep",
+                "reason": "I read the whole note and checked it against Microsoft's middleware, filters, error-handling and authentication documentation. The sample pipeline order (exception handler, HSTS, HTTPS redirection, static files, routing, CORS, authentication, authorization) matches the documented order. The sequence diagram and the 401 explanation match how authentication and authorization behave: authentication continues, and authorization triggers the challenge. The scoped-service warning for conventional middleware, the Map/UseWhen/Run distinctions and the pitfalls list are correct. The flagged card's claim that endpoint filters can be attached to mapped controller actions is supported by a search: a dotnet test site calls AddEndpointFilterFactory on MapControllers(). The card is bounded and answerable, and its table makes the differences from controller action filters clear. The exception-handling and pipeline cards agree with the prose and do not repeat it unnecessarily. The note has no known violations, so no change is warranted."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "The complete note was audited and no concrete defect was found. The keep is justified, and the flagged card is accurate and bounded.",
+            "notes": [
+              {
+                "path": "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md",
+                "verdict": "CLEAN",
+                "summary": "The note explains the operating idea (an ordered chain that wraps the endpoint, with registration order acting as control flow) and covers the boundaries: short-circuiting, branching, started responses and middleware lifetimes. The flagged filter-comparison card is one focused comparison and its claims about endpoint filters are accurate. No edit is warranted.",
+                "page_type": "Concept — typed frontmatter, optional Questions and References present; Qard IDs are protected and unchanged.",
+                "current_text_evidence": [
+                  {
+                    "quote": "ASP.NET Core middleware forms an ordered chain around endpoint execution.",
+                    "line_start": 18,
+                    "reason": "The opening states the operating idea and the cross-cutting scope quickly."
+                  },
+                  {
+                    "quote": "Registration order is control flow.",
+                    "line_start": 55,
+                    "reason": "The explanation order moves from concept to diagram, ordered pipeline and then custom middleware, so the idea can be re-entered."
+                  },
+                  {
+                    "quote": "**Conventional middleware is constructed once.**",
+                    "line_start": 125,
+                    "reason": "The note gives the lifetime mechanism and its exception (IMiddleware), which is technically sound and non-trivial."
+                  },
+                  {
+                    "quote": "**Wrong registration order.**",
+                    "line_start": 143,
+                    "reason": "The pitfalls are concrete, with consequences and no padding, and they do not repeat the earlier prose."
+                  },
+                  {
+                    "quote": "How does middleware differ from an action filter in an ASP.NET Core controller-based Web API?",
+                    "line_start": 166,
+                    "reason": "This is one focused comparison with a self-contained question. The answer carries mechanism, conditions and primary Microsoft sources, and it is accurate on endpoint filters."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: pipeline order, custom middleware, branching and pitfalls are one coherent topic. Filters appear only as a decision contrast.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "change_checks": [],
+            "decision_checks": []
+          },
+          "model_calls": 4
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-04T19:58:23.762938Z",
+    "checkpoint_at": "2026-11-04T19:58:27.876425Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
