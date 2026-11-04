@@ -1249,6 +1249,66 @@
         },
         "review_process": "focused-whole-note-v1"
       }
+    },
+    "Vault/Home/AI & ML/LLM/Context Engineering/Context Engineering.md": {
+      "content_hash": "5720a0b709cec66798fb586b8d327df0ab4860a0e334eddf8c5eb6a4caae6af9",
+      "rules_hash": "264d16c1cdd0550e8de34525350fcc463d41b1c8095a38a38008f9f84304bb03",
+      "outcome": "keep",
+      "repair_input_hash": "",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "violation_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "keep_review": {
+        "content_hash": "5720a0b709cec66798fb586b8d327df0ab4860a0e334eddf8c5eb6a4caae6af9",
+        "rules_hash": "264d16c1cdd0550e8de34525350fcc463d41b1c8095a38a38008f9f84304bb03",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review": {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/Context Engineering.md",
+          "verdict": "CLEAN",
+          "summary": "The FolderNote explains the operating idea (a finite, shared, unevenly attended window) and gives concrete mechanisms, pitfalls with causes and fixes, and a decision-oriented tradeoff table. Claims carry appropriate conditions, and the two cards are bounded and sourced. I found no defect that warrants an edit.",
+          "page_type": "FolderNote — concept-style prose with a protected Datacore folder-map block; Questions and References are optional and present.",
+          "current_text_evidence": [
+            {
+              "quote": "The target is the smallest well-ordered context that still contains the evidence needed for the task.",
+              "line_start": 21,
+              "reason": "The opening states the operating idea and the engineering target quickly, so the topic is recoverable."
+            },
+            {
+              "quote": "Output needs headroom. The `max_tokens` budget comes from what remains after the input.",
+              "line_start": 51,
+              "reason": "This shows the shared-budget mechanism concretely, with the output reservation as a condition that is easy to miss."
+            },
+            {
+              "quote": "The transcript remains evidence, but it does not automatically return to the prompt.",
+              "line_start": 63,
+              "reason": "Separating memory persistence from per-call context assembly is a clear boundary and a useful engineering decision."
+            },
+            {
+              "quote": "Longer actual input, not the larger limit itself, raises token cost and, depending on model, task and implementation, can lower answer quality and add latency",
+              "line_start": 111,
+              "reason": "The tradeoff claim is hedged accurately and names its conditions instead of overclaiming."
+            },
+            {
+              "quote": "Compaction trades space for possible detail loss: a summary can drop a subtle fact that later matters.",
+              "line_start": 144,
+              "reason": "The card answer gives the mechanism, its exception and the mitigation, and cites primary sources on the answer side."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: budget, techniques, pitfalls and tradeoffs all serve one coherent topic, and the dedicated RAG, Tool Design, Agent Loop and Caching notes already hold the separable subtopics.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        },
+        "review_process": "focused-whole-note-v1"
+      }
     }
   },
   "topics": {
@@ -2401,7 +2461,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-04T06:42:24.894668Z",
-    "elapsed_seconds": 575.0627721000002,
+    "elapsed_seconds": 578.6482793000002,
     "calls_reserved": 16,
     "responses_received": 16,
     "attempted_paths": [
@@ -3760,7 +3820,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-04T06:51:59.956759Z",
+    "checkpoint_at": "2026-11-04T06:52:03.542267Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -12095,106 +12155,6 @@
         "change_checks": []
       },
       "feedback_snapshot": []
-    }
-  },
-  "pending_author_proposal": {
-    "workload_id": "8863af0d8e1746298a05f54c5909b04b",
-    "topic_id": "ai-ml-4edf0823",
-    "batch": {
-      "topic": "AI & ML",
-      "topic_id": "ai-ml-4edf0823",
-      "notes": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Context Engineering/Context Engineering.md",
-          "content": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"Deliberately deciding what fills the finite context window, and in what order, to maximize useful signal.\"\ntags: [FolderNote]\nlevel: [\"2\"]\npriority: High\nstatus: Done\npublish: true\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Context Engineering/Context Engineering\"\nflashcard_uid: \"0d1d06bc\"\ncreated: \"2026-06-11T07:39:53.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\n---\n\nContext engineering decides what the model sees and where it appears in the context window. Instructions compete with examples, retrieved evidence, conversation history, and tool traffic for the same finite budget. Once a system gains retrieval or memory, [[Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering|Prompting]] is only one part of an assembled payload.\n\nOn the [[Home/AI & ML/LLM/LLM|engineering ladder]], context engineering sits between the instruction and the runtime around it. [[Home/AI & ML/LLM/Harness Engineering/Harness Engineering|Harness Engineering]] controls what the model can do. [[Home/AI & ML/LLM/Loop Engineering/Loop Engineering|Loop Engineering]] controls repeated behavior. Context engineering controls the material available for each decision.\n\nThe hard constraint is uneven attention inside a limited window. Models tend to use evidence near the beginning and end better than evidence buried in the middle. And answer quality can decline as otherwise relevant input grows, often called context rot. More context is therefore a poor default. The target is the smallest well-ordered context that still contains the evidence needed for the task.\n\n```mermaid\nflowchart TD\n    subgraph CW[Context window -- finite shared budget]\n      SP[System prompt]\n      H[Conversation history]\n      RC[Retrieved evidence]\n      TS[Tool schemas and results]\n      O[Reserved output space]\n    end\n    SP --> M[Model attention]\n    H --> M\n    RC --> M\n    TS --> M\n```\n\nRetrieval is the main way external evidence enters the window. [[Home/AI & ML/LLM/Context Engineering/RAG/RAG|RAG]] selects and ranks that evidence, then bounds how much of it reaches generation.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# The Context Budget\n\nThe system prompt, conversation history, retrieved documents, tool schemas, tool results, and reserved output space all draw from one token budget. They are accounted for like memory allocations. Deciding what to remove before the total reaches the limit keeps the runtime from truncating an old instruction by accident.\n\nThree costs are easy to miss:\n\n- Output needs headroom. The `max_tokens` budget comes from what remains after the input. [[Generation]] cannot produce tokens that the context limit has already consumed.\n- Tool schemas are sent as input. Names, descriptions, and parameter definitions can consume thousands of tokens before the first call. [[Tool Design]] covers the accuracy cost of oversized toolsets.\n- History grows every turn. Reasoning, calls, and results quietly fill the window during long [[Agent Loop|agent loops]] unless the runtime compacts them.\n\n# Techniques\n\n**Ordering and positioning.** The strongest instructions and evidence go where the model is most likely to use them, usually near the start or end. Ranked retrieval should place its best chunk first. This is the context-assembly side of [[Generation]].\n\n**Selection over stuffing.** A few complete, relevant chunks usually beat a pile of fragments. [[Retrieval]] keeps the candidate set focused, while [[Re-ranking|Reranking]] spends extra work to choose what actually enters the prompt.\n\n**Compaction.** Old turns are replaced with a short record of decisions, constraints, and pending work before history crowds out the task. Tool results should return only fields used by the next decision. [[Tool Design]] shows how oversized API payloads consume context without improving the next decision. [[Home/AI & ML/LLM/Loop Engineering/Loop Engineering|Loop Engineering]] turns token pressure into an explicit compact-or-stop condition.\n\n**Rebuild instead of replay.** A long-lived agent can keep the raw transcript outside the context window. Each turn is rebuilt from the policies, stable preferences, recalled facts or episodes, and recent activity that matter now. The transcript remains evidence, but it does not automatically return to the prompt. The [[Home/AI & ML/LLM/Agents/Agents#Memory Systems|memory system]] decides what may persist. Context engineering decides what belongs in this call.\n\n**Structure.** Explicit sections separate trusted instructions from untrusted data. That makes the payload easier to interpret and supports [[Guardrails|prompt injection]] defenses. [[Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering|prompt anatomy]] supplies the smaller building blocks.\n\n**Offloading.** Bulky intermediate state is stored outside the window, and the context carries a lightweight reference to it. A scratchpad or file can hold detail that is needed later but not on every turn. [[Multi-Agentic Systems]] uses the same idea for shared artifacts.\n\n**Isolation.** Work is split into separate contexts when two concerns need conflicting instructions or large, unrelated toolsets. The context-centric decomposition in [[Multi-Agentic Systems]] keeps each worker's window focused, though coordination adds cost.\n\n**Caching stable prefixes.** A repeated system prompt or fixed tool definition can stay logically present without paying full processing cost each time. [[Home/AI & ML/LLM/LLM Caching#Prompt Caching|Prompt Caching]] covers prefix layout, provider boundaries, and verification of actual reuse.\n\n# Pitfalls\n\n## More Context, Worse Answers\n\n**What goes wrong:** more retrieved documents or a longer system prompt lowers answer quality and raises latency.\n\n**Why it happens:** useful evidence is diluted across the larger input, and some of it lands in the weakly attended middle. Irrelevant tokens still compete for attention.\n\n**How to avoid it:** filtering and reranking reduce the evidence to a smaller set, and quality is measured as context size changes. Added tokens are worth keeping only while they still improve the result.\n\n## Unbounded History Growth\n\n**What goes wrong:** a long run fills the window, after which the runtime drops old messages or rejects the request. The original instruction is often among the first things lost.\n\n**Why it happens:** each iteration appends reasoning and raw tool output without compaction.\n\n**How to avoid it:** tool-result size is capped and cumulative tokens are tracked per iteration, so the runtime compacts or stops before the limit. [[Agent Loop]] traces how repeated oversized results become token explosion across iterations.\n\n## Context Poisoning\n\n**What goes wrong:** one hallucinated fact or injected instruction enters history and is replayed as trusted context on later turns.\n\n**Why it happens:** the runtime replays history without a trust label, and natural-language errors carry no automatic warning.\n\n**How to avoid it:** claims are validated before storage, untrusted content stays separate from instructions, and controls are enforced in code. [[Guardrails]] should not depend on a poisoned prompt obeying itself.\n\n## Tool-Schema Bloat\n\n**What goes wrong:** attaching many tools inflates every request and makes selection less reliable.\n\n**Why it happens:** many clients send every connected schema on every request, even when the task needs only one.\n\n**How to avoid it:** each request exposes only the tools the current task needs, or tool search loads them on demand. [[Tool Design]] covers the degradation seen with large toolsets.\n\n# Tradeoffs\n\n| Lever | What it buys | What it costs | Best when |\n| --- | --- | --- | --- |\n| Larger context window | More room before truncation | Longer actual input, not the larger limit itself, raises token cost and, depending on model, task and implementation, can lower answer quality and add latency | The task truly needs broad material at once |\n| Retrieval + reranking | Dense and traceable evidence | Retrieval infrastructure and tuning | Knowledge-heavy tasks over a large corpus |\n| History compaction | A bounded window over long sessions | Summary cost and possible detail loss | Long conversations and agent runs |\n| Context offloading | Small working context with detail on demand | Extra reads and coordination | Multi-step work with bulky intermediate state |\n| Context isolation (sub-agents) | A focused window for each concern | Coordination overhead and more total tokens | Conflicting instructions or oversized toolsets |\n\nThe smallest context that answers the task is the starting point. Retrieval and reranking control what enters, and compaction frees space before more capacity is added. Offloading or isolation becomes worthwhile only when one focused window cannot hold the work. Once extra context stops improving measured quality, it has become overhead.\n\n# Questions\n\n<!-- qard-id: ddd8a30b-97ea-4f04-8025-704d1c3481ab -->\n> [!qard]- Why can adding more context make answers worse instead of better?\n> Because a model does not use every part of a long input equally well, so extra material can bury or dilute the evidence that the answer depends on.\n>\n> - **Position effects:** in the long-context tasks evaluated in *Lost in the Middle*, some models used relevant information near the beginning or end of the input more reliably than the same information placed in the middle. The size of the effect depends on the model and task.\n> - **Dilution:** irrelevant or redundant text competes with the useful evidence, so adding it can lower answer quality instead of adding information.\n> - **Cost:** extra input tokens also add cost and can add latency, even when they do not improve the answer.\n> \n> Added context is not always harmful. The aim is complete, relevant material placed deliberately, with answer quality and input cost measured on the actual workload as the context grows.\n>\n> [Lost in the Middle](https://arxiv.org/abs/2307.03172) · [Latency optimization](https://developers.openai.com/api/docs/guides/latency-optimization)\n\n<!-- qard-id: ed47de12-495f-495b-8cbb-662c952b3224 -->\n> [!qard]- How can a long-running agent keep useful context within a finite window?\n> By treating the context window as a working set. Each call contains the instructions, evidence and state needed for the next decision. Everything else stays outside the prompt but remains retrievable.\n>\n> The prompt, conversation history, tool results and space reserved for the response all draw from one finite token budget, so they are managed together:\n>\n> - **Selection and ordering:** only material relevant to the current step enters the window, and it is placed deliberately rather than replayed in full.\n> - **Trimmed tool results:** tool output keeps the fields the next decision uses, and stale results that no longer matter are cleared.\n> - **Compaction:** older turns are replaced by a short record of decisions, constraints and open work before history crowds out the task.\n> - **Offloading:** bulky state, such as notes, files or full documents, lives outside the prompt and is reloaded by reference when needed.\n> \n> Compaction trades space for possible detail loss: a summary can drop a subtle fact that later matters. Where exact recovery matters, the source material is kept outside the window instead of being trusted to the summary.\n>\n> [Effective context engineering for AI agents](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents)\n# References\n\n- [Lost in the Middle: How Language Models Use Long Contexts (Liu et al., 2023)](https://arxiv.org/abs/2307.03172)\n- [Effective context engineering for AI agents (Anthropic Engineering)](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents)\n- [Context Rot: How Increasing Input Tokens Impacts LLM Performance (Chroma Research)](https://research.trychroma.com/context-rot)\n",
-          "hash": "5720a0b709cec66798fb586b8d327df0ab4860a0e334eddf8c5eb6a4caae6af9",
-          "topic": "AI & ML",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "new"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "264d16c1cdd0550e8de34525350fcc463d41b1c8095a38a38008f9f84304bb03",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Context Engineering/Context Engineering.md",
-          "outcome": "keep",
-          "reason": "Audited the whole note against its text and the cited primary sources (Lost in the Middle, Anthropic's context engineering post, Chroma's context rot report). The opening, budget section, techniques, pitfalls and tradeoffs are consistent. Uneven attention, context rot, compaction, offloading and isolation are described accurately and with conditions. Tradeoffs correctly says that input length, not the window limit, drives cost. The two Qard cards each test one gradeable task and already carry sources, hedged claims and caveats. Valid frontmatter and fenced blocks. The note has no known violations. No defect was found, so no edit is warranted."
-        }
-      ],
-      "feedback": []
-    },
-    "source_hashes": {
-      "Vault/Home/AI & ML/LLM/Context Engineering/Context Engineering.md": "5720a0b709cec66798fb586b8d327df0ab4860a0e334eddf8c5eb6a4caae6af9"
-    },
-    "feedback_keys": [],
-    "rules_hash": "264d16c1cdd0550e8de34525350fcc463d41b1c8095a38a38008f9f84304bb03",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/AI & ML/LLM/Context Engineering/Context Engineering.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-04T06:51:35.000646Z",
-    "completed_review": {
-      "verdict": "CLEAN",
-      "overall_reason": "Independent whole-note audit found no accuracy, clarity, question-quality or rules defects. The keep is justified, and no edits or rejections were proposed.",
-      "change_checks": [],
-      "notes": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Context Engineering/Context Engineering.md",
-          "verdict": "CLEAN",
-          "summary": "The FolderNote explains the operating idea (a finite, shared, unevenly attended window) and gives concrete mechanisms, pitfalls with causes and fixes, and a decision-oriented tradeoff table. Claims carry appropriate conditions, and the two cards are bounded and sourced. I found no defect that warrants an edit.",
-          "page_type": "FolderNote — concept-style prose with a protected Datacore folder-map block; Questions and References are optional and present.",
-          "current_text_evidence": [
-            {
-              "quote": "The target is the smallest well-ordered context that still contains the evidence needed for the task.",
-              "line_start": 21,
-              "reason": "The opening states the operating idea and the engineering target quickly, so the topic is recoverable."
-            },
-            {
-              "quote": "Output needs headroom. The `max_tokens` budget comes from what remains after the input.",
-              "line_start": 51,
-              "reason": "This shows the shared-budget mechanism concretely, with the output reservation as a condition that is easy to miss."
-            },
-            {
-              "quote": "The transcript remains evidence, but it does not automatically return to the prompt.",
-              "line_start": 63,
-              "reason": "Separating memory persistence from per-call context assembly is a clear boundary and a useful engineering decision."
-            },
-            {
-              "quote": "Longer actual input, not the larger limit itself, raises token cost and, depending on model, task and implementation, can lower answer quality and add latency",
-              "line_start": 111,
-              "reason": "The tradeoff claim is hedged accurately and names its conditions instead of overclaiming."
-            },
-            {
-              "quote": "Compaction trades space for possible detail loss: a summary can drop a subtle fact that later matters.",
-              "line_start": 144,
-              "reason": "The card answer gives the mechanism, its exception and the mitigation, and cites primary sources on the answer side."
-            }
-          ],
-          "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: budget, techniques, pitfalls and tradeoffs all serve one coherent topic, and the dedicated RAG, Tool Design, Agent Loop and Caching notes already hold the separable subtopics.",
-          "findings": [],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "PASS",
-            "question_quality": "PASS",
-            "identity_safety": "PASS",
-            "rules_compliance": "PASS"
-          }
-        }
-      ]
     }
   }
 }
