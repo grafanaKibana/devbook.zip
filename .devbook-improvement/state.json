@@ -3243,11 +3243,7 @@
   "rejections": [],
   "retired_ids": {},
   "cooldown": null,
-  "lease": {
-    "owner": "41901361735:1",
-    "acquired_at": "2026-11-04T19:55:30Z",
-    "expires_at": "2026-11-04T20:35:30Z"
-  },
+  "lease": null,
   "focused_workload": {
     "version": 1,
     "id": "792178af26484b3da828d4cea1e5f39f",
