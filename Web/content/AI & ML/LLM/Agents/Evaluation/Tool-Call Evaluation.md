@@ -1,8 +1,8 @@
 ---
 publish: true
 created: 2026-06-12T18:50:14.000Z
-modified: 2026-10-28T12:33:42.000Z
-published: 2026-10-31T08:53:28.446Z
+modified: 2026-11-04T06:47:28.050Z
+published: 2026-11-04T06:54:41.000Z
 topic:
   - AI & ML
 subtopic:
@@ -122,5 +122,5 @@ The riskiest call may be perfectly valid: real tool, valid schema, wrong account
 
 # References
 
-- [Berkeley Function-Calling Leaderboard -- AST and executable accuracy for tool/function calls, including irrelevance detection (Gorilla, UC Berkeley)](https://gorilla.cs.berkeley.edu/blogs/8_berkeley_function_calling_leaderboard.html)
+- [Berkeley Function-Calling Leaderboard (Gorilla, UC Berkeley)](https://gorilla.cs.berkeley.edu/blogs/8_berkeley_function_calling_leaderboard.html)
 - [Tool use (function calling) overview (Anthropic Docs)](https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview)

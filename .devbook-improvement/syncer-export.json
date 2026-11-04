@@ -338,7 +338,7 @@
       "mode": "100644"
     },
     "Vault/Assets/Qard/Courses/Programming Mastery.md": {
-      "sha": "2744d69c76ffea0c898c34df9d2ad773bc669fc2",
+      "sha": "32af14032742c8a8e585f74dd23b5239fd8a887f",
       "mode": "100644"
     },
     "Vault/Assets/Qard/Courses/Security Mastery.md": {
@@ -650,7 +650,7 @@
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md": {
-      "sha": "263ec52eee4a7f1c3296f711f8d13b61166fe9db",
+      "sha": "a9585163628127d117a05a85432cf3d131c9127c",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md": {
@@ -1742,7 +1742,7 @@
       "mode": "100644"
     },
     "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Records.md": {
-      "sha": "c58d586c59f39a27df321635fe2fff30b03dca43",
+      "sha": "0590bba93de8447867226c9f617fe8329f88cdff",
       "mode": "100644"
     },
     "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Strings.md": {
@@ -1750,7 +1750,7 @@
       "mode": "100644"
     },
     "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Structs.md": {
-      "sha": "d8787ce9698ad8e06a609895ad697d30e184b7f5",
+      "sha": "b4a783a511404689bd6b53e5e3f2f19b8679486d",
       "mode": "100644"
     },
     "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Types.md": {
@@ -2296,7 +2296,7 @@
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md": {
-      "sha": "51a863bde8b8ae476e5f8b79ca22f57c83ab16d3",
+      "sha": "06e87505b10a543c23044087a9bca215d7a240d7",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md": {
@@ -3728,7 +3728,7 @@
       "mode": "100644"
     },
     "Web/content/Programming/NET/CSharp/Fundamentals/Types/Records.md": {
-      "sha": "137f4dd9f49f37f7ee70ca35e39344c51cf35927",
+      "sha": "2b25a238caefbb493ef69707bfd12f41e4f9c8b7",
       "mode": "100644"
     },
     "Web/content/Programming/NET/CSharp/Fundamentals/Types/Strings.md": {
@@ -3736,11 +3736,11 @@
       "mode": "100644"
     },
     "Web/content/Programming/NET/CSharp/Fundamentals/Types/Structs.md": {
-      "sha": "a84c9c0c933f4ba68a6565948f04b889c59cefe8",
+      "sha": "f464d09dbcff0d82cad9708cc07054ca7a7f0c27",
       "mode": "100644"
     },
     "Web/content/Programming/NET/CSharp/Fundamentals/Types/Types.md": {
-      "sha": "46fae49f67d2380fed3145a10dbee27612f2674f",
+      "sha": "51616fee9faf8ec64357addb08568763a17331f9",
       "mode": "100644"
     },
     "Web/content/Programming/NET/NET Standart.md": {
@@ -3776,7 +3776,7 @@
       "mode": "100644"
     },
     "Web/content/Questions.md": {
-      "sha": "152bae28dd3e5a5ce3fe526a12d97f8289398dff",
+      "sha": "c6b231cbe60d577f784e15e2fb8bac0498d4a5bf",
       "mode": "100644"
     },
     "Web/content/Roadmap.canvas": {
@@ -4262,7 +4262,7 @@
       "mode": "100644"
     },
     ".scripts/DevBook.Tooling/Export/Syncer.cs": {
-      "sha": "4d8981d20dad53aa8a053f2cb86798ba18f21afb",
+      "sha": "a430427ed4dfa05a07f22c66765ae8f82d2d3176",
       "mode": "100644"
     },
     ".scripts/DevBook.Tooling/Export/SyncerProbes.cs": {
@@ -4342,7 +4342,7 @@
       "mode": "100644"
     },
     ".scripts/DevBook.Tooling/Improvement/ProviderProtocol.json": {
-      "sha": "e2358f7da9626118375086a92b7262696a4886ca",
+      "sha": "acb32a298db6c46a1a8fb25a0dffdd32bafef562",
       "mode": "100644"
     },
     ".scripts/DevBook.Tooling/Improvement/Queue.cs": {
