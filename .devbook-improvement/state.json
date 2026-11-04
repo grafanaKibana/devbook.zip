@@ -2568,10 +2568,10 @@
   "focused_workload": {
     "version": 1,
     "id": "8863af0d8e1746298a05f54c5909b04b",
-    "status": "active",
-    "phase": "selecting",
+    "status": "sealed",
+    "phase": "sealed",
     "started_at": "2026-11-04T06:42:24.894668Z",
-    "elapsed_seconds": 716.2897393000003,
+    "elapsed_seconds": 719.4879972000003,
     "calls_reserved": 20,
     "responses_received": 20,
     "attempted_paths": [
@@ -4144,7 +4144,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-04T06:54:21.183729Z",
+    "checkpoint_at": "2026-11-04T06:54:24.381985Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -4633,7 +4633,9 @@
         "check": "npm --prefix Web run test -- custom/transformers/publishing.test.ts",
         "result": "passed"
       }
-    ]
+    ],
+    "stop_reason": "call_limit",
+    "sealed_at": "2026-11-04T06:54:24.381986Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
