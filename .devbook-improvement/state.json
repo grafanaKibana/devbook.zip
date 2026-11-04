@@ -2274,15 +2274,16 @@
     "version": 1,
     "id": "8863af0d8e1746298a05f54c5909b04b",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-04T06:42:24.894668Z",
-    "elapsed_seconds": 256.7363167000001,
+    "elapsed_seconds": 260.0474606000001,
     "calls_reserved": 8,
     "responses_received": 8,
     "attempted_paths": [
       "Vault/Home/AI & ML/AI & ML.md",
       "Vault/Home/AI & ML/LLM/Agents/Agents.md",
-      "Vault/Home/AI & ML/LLM/Agents/Evaluation/Agent Benchmarks.md"
+      "Vault/Home/AI & ML/LLM/Agents/Evaluation/Agent Benchmarks.md",
+      "Vault/Home/AI & ML/LLM/Agents/Evaluation/Evaluation.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -2511,10 +2512,84 @@
           },
           "model_calls": 6
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Evaluation.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Evaluation.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against its text. The opening defines trajectory evaluation and the outcome/process split. The mermaid map matches the five bullets. The bullets cover task success, tool-call correctness, trajectory quality, efficiency and robustness, each with its checking mechanism. The pass^k explanation is accurate: the share of tasks solved on all k runs, reported alongside the mean pass rate. The scorecard example is internally consistent (5/5 runs gives pass^5 = 1.0). The tradeoff table names the cost and the condition for using each approach. The reference matches the LangSmith trajectory docs, which describe reference-match and LLM-judge scoring. Wikilinks point to sibling notes. Fences have language identifiers. There are no cards, and none are needed. No native violations are listed. The prose is direct and has no clear defect, so edits would be cosmetic."
+              }
+            ],
+            "feedback": [],
+            "decisions": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "No edits proposed. The independent whole-note audit found no accuracy, clarity, structure or rule defects, so the keep is justified.",
+            "change_checks": [],
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Evaluation.md",
+                "verdict": "CLEAN",
+                "summary": "The note opens with the trajectory-versus-answer idea and the outcome/process split. It then gives a matching diagram, five concrete measures, a consistent scorecard and a decision-oriented tradeoff table. The keep is justified: no factual, terminology, ordering, repetition or rule defect was found, and edits would be cosmetic.",
+                "page_type": "FolderNote — keeps the FolderNote tag and the protected datacorejsx card map; Questions are optional and absent; References contain one real, topic-specific bare link.",
+                "current_text_evidence": [
+                  {
+                    "quote": "Evaluating an [[Home/AI & ML/LLM/Agents/Agents|agent]] means evaluating a *trajectory*, not a single answer.",
+                    "line_start": 15,
+                    "reason": "The opening states the operating idea and the outcome/process boundary at once, so the topic can be re-entered quickly."
+                  },
+                  {
+                    "quote": "Check the resulting state, not the agent's claim about it.",
+                    "line_start": 38,
+                    "reason": "The bullet gives a concrete mechanism and ground-truth checks, in a direct whiteboard voice."
+                  },
+                  {
+                    "quote": "Run each task `k` times and report the share solved on *all* attempts",
+                    "line_start": 44,
+                    "reason": "The pass^k explanation is accurate and keeps the reliability condition. It is paired with the mean pass rate and not left as a bare metric name."
+                  },
+                  {
+                    "quote": "Reliability: solved on 5/5 runs  (pass^5 = 1.0)",
+                    "line_start": 65,
+                    "reason": "The scorecard is internally consistent with k=5 and the stated metric."
+                  },
+                  {
+                    "quote": "Gate releases on **verifiable task success plus efficiency limits**.",
+                    "line_start": 77,
+                    "reason": "The closing decision rule names the condition under which trajectory judgment or reference traces should be added, so the tradeoff table ends in an engineering decision."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the outcome/process split, the measures, the scorecard and the tradeoffs form one coherent topic. Deeper material already lives in the sibling notes Tool-Call Evaluation, Trajectory Evaluation and Agent Benchmarks.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "NOT APPLICABLE",
+                  "identity_safety": "NOT APPLICABLE",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ]
+          },
+          "model_calls": 8
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-04T06:46:41.630300Z",
+    "checkpoint_at": "2026-11-04T06:46:44.941444Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
