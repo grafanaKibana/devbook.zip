@@ -2029,16 +2029,40 @@
     "version": 1,
     "id": "8863af0d8e1746298a05f54c5909b04b",
     "status": "active",
-    "phase": "selecting",
+    "phase": "evaluating",
     "started_at": "2026-11-04T06:42:24.894668Z",
-    "elapsed_seconds": 21.894505199999998,
+    "elapsed_seconds": 24.676659599999997,
     "calls_reserved": 0,
     "responses_received": 0,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-04T06:42:46.788491Z"
+    "checkpoint_at": "2026-11-04T06:42:49.570643Z",
+    "topic": "AI & ML",
+    "topic_id": "ai-ml-4edf0823",
+    "current_batch": {
+      "topic": "AI & ML",
+      "topic_id": "ai-ml-4edf0823",
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/AI & ML.md",
+          "content": "---\nicon: astroid\norder: 70\ncolor: \"#10b981\"\ntopic: [AI & ML]\nsubtopic: []\nsummary: \"How learning systems are built, evaluated, and operated: classic ML, LLMs, and agent tooling.\"\ntags: [FolderNote]\npublish: true\nlevel: [\"3\"]\npriority: High\nstatus: Creation\nqard-deck: \"AI & ML\"\nqard-topic: \"AI & ML\"\nflashcard_uid: \"792c6bf3\"\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\n---\n\nAI & ML covers the engineering around systems that learn from data or use trained models. The section moves from classic machine learning to LLM applications and the tooling used to build them. Model choice matters, but production results usually turn on the data and on how the system is evaluated and operated. A gradient-boosted tree and an LLM can fail for the same reason: an impressive model cannot rescue weak evidence or missing monitoring.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# Questions\n\n<!-- qard-id: c28d8736-4f09-48e3-9a55-a635b6e08875 -->\n> [!qard]- When is classic machine learning a better fit than an LLM?\n> Classic machine learning is the better fit when two conditions hold. First, the task is a defined prediction with representative labeled examples and a measurable objective. Second, measurement on the actual workload shows that classic ML meets that objective with a better balance of quality, latency, cost and maintenance than an LLM. The first condition makes classic ML a strong candidate. Only the second decides.\n>\n> - **Task and data fit:** the task has a fixed output to predict, such as a class, a number or a ranking. Labeled examples represent the inputs seen in production, and a metric measures success directly. A model trained on those examples learns that mapping, and the metric checks its quality.\n> - **Why fit alone does not decide:** generative models can also perform classification and regression, and an LLM can be the stronger option for some text-classification tasks. A labeled prediction task can therefore have more than one viable approach.\n> - **Measurement:** both options are evaluated against the same simple, observable objective on the same data. Neither approach is inherently more accurate, faster, cheaper or easier to maintain.\n> \n> Prompting can also try an LLM on a task while its requirements are still changing. Those results need the same measurement before either approach is chosen.\n>\n> [Google: ML problem framing](https://developers.google.com/machine-learning/problem-framing/ml-framing) · [Google: Rules of Machine Learning](https://developers.google.com/machine-learning/guides/rules-of-ml/)\n\n# References\n\n- [Microsoft AI for Beginners](https://microsoft.github.io/AI-For-Beginners/)\n",
+          "hash": "078f1c0f1256165849d90ca6382a5d6f6e580a12ea4e73870bf857b5cf31ea76",
+          "topic": "AI & ML",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "264d16c1cdd0550e8de34525350fcc463d41b1c8095a38a38008f9f84304bb03",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "base_sha": "63c1f0e23fe3009423dc8b17e61a90490801fa15"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
