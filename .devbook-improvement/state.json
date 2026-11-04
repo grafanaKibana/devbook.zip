@@ -2891,11 +2891,11 @@
     "version": 1,
     "id": "792178af26484b3da828d4cea1e5f39f",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-04T19:55:42.282235Z",
-    "elapsed_seconds": 136.91216050000003,
+    "elapsed_seconds": 157.61611980000004,
     "calls_reserved": 4,
-    "responses_received": 3,
+    "responses_received": 4,
     "attempted_paths": [
       "Vault/Home/Programming/NET/ASP NET Web API/Filters.md"
     ],
@@ -2971,7 +2971,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-04T19:57:59.193865Z",
+    "checkpoint_at": "2026-11-04T19:58:19.897824Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
@@ -11024,6 +11024,145 @@
       "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md": "b51b5992029993e0a5ae495174bd0f38cbbea0bb01a0d69976448ede9db23666"
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-04T19:57:54.537390Z"
+    "prepared_at": "2026-11-04T19:57:54.537390Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "overall_reason": "The complete note was audited and no concrete defect was found. The keep is justified, and the flagged card is accurate and bounded.",
+        "notes": [
+          {
+            "path": "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md",
+            "verdict": "CLEAN",
+            "summary": "The note explains the operating idea (an ordered chain that wraps the endpoint, with registration order acting as control flow) and covers the boundaries: short-circuiting, branching, started responses and middleware lifetimes. The flagged filter-comparison card is one focused comparison and its claims about endpoint filters are accurate. No edit is warranted.",
+            "page_type": "Concept — typed frontmatter, optional Questions and References present; Qard IDs are protected and unchanged.",
+            "current_text_evidence": [
+              {
+                "quote": "ASP.NET Core middleware forms an ordered chain around endpoint execution.",
+                "line_start": 18,
+                "reason": "The opening states the operating idea and the cross-cutting scope quickly."
+              },
+              {
+                "quote": "Registration order is control flow.",
+                "line_start": 54,
+                "reason": "The explanation order moves from concept to diagram, ordered pipeline and then custom middleware, so the idea can be re-entered."
+              },
+              {
+                "quote": "**Conventional middleware is constructed once.**",
+                "line_start": 124,
+                "reason": "The note gives the lifetime mechanism and its exception (IMiddleware), which is technically sound and non-trivial."
+              },
+              {
+                "quote": "**Wrong registration order.**",
+                "line_start": 142,
+                "reason": "The pitfalls are concrete, with consequences and no padding, and they do not repeat the earlier prose."
+              },
+              {
+                "quote": "How does middleware differ from an action filter in an ASP.NET Core controller-based Web API?",
+                "line_start": 165,
+                "reason": "This is one focused comparison with a self-contained question. The answer carries mechanism, conditions and primary Microsoft sources, and it is accurate on endpoint filters."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: pipeline order, custom middleware, branching and pitfalls are one coherent topic. Filters appear only as a decision contrast.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "change_checks": [],
+        "decision_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md",
+          "citation_index": 1,
+          "reported_line_start": 54,
+          "resolved_line_start": 55
+        },
+        {
+          "path": "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md",
+          "citation_index": 2,
+          "reported_line_start": 124,
+          "resolved_line_start": 125
+        },
+        {
+          "path": "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md",
+          "citation_index": 3,
+          "reported_line_start": 142,
+          "resolved_line_start": 143
+        },
+        {
+          "path": "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md",
+          "citation_index": 4,
+          "reported_line_start": 165,
+          "resolved_line_start": 166
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md": "4beaeb1b97235ff7674135f52ac1961bdb91276ed0174ec9625684af2fccff95"
+      },
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CLEAN",
+      "overall_reason": "The complete note was audited and no concrete defect was found. The keep is justified, and the flagged card is accurate and bounded.",
+      "notes": [
+        {
+          "path": "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md",
+          "verdict": "CLEAN",
+          "summary": "The note explains the operating idea (an ordered chain that wraps the endpoint, with registration order acting as control flow) and covers the boundaries: short-circuiting, branching, started responses and middleware lifetimes. The flagged filter-comparison card is one focused comparison and its claims about endpoint filters are accurate. No edit is warranted.",
+          "page_type": "Concept — typed frontmatter, optional Questions and References present; Qard IDs are protected and unchanged.",
+          "current_text_evidence": [
+            {
+              "quote": "ASP.NET Core middleware forms an ordered chain around endpoint execution.",
+              "line_start": 18,
+              "reason": "The opening states the operating idea and the cross-cutting scope quickly."
+            },
+            {
+              "quote": "Registration order is control flow.",
+              "line_start": 55,
+              "reason": "The explanation order moves from concept to diagram, ordered pipeline and then custom middleware, so the idea can be re-entered."
+            },
+            {
+              "quote": "**Conventional middleware is constructed once.**",
+              "line_start": 125,
+              "reason": "The note gives the lifetime mechanism and its exception (IMiddleware), which is technically sound and non-trivial."
+            },
+            {
+              "quote": "**Wrong registration order.**",
+              "line_start": 143,
+              "reason": "The pitfalls are concrete, with consequences and no padding, and they do not repeat the earlier prose."
+            },
+            {
+              "quote": "How does middleware differ from an action filter in an ASP.NET Core controller-based Web API?",
+              "line_start": 166,
+              "reason": "This is one focused comparison with a self-contained question. The answer carries mechanism, conditions and primary Microsoft sources, and it is accurate on endpoint filters."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: pipeline order, custom middleware, branching and pitfalls are one coherent topic. Filters appear only as a decision contrast.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "change_checks": [],
+      "decision_checks": []
+    }
   }
 }
