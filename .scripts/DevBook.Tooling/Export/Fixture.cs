@@ -3,6 +3,7 @@ using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using DevBook.Tooling.Improvement;
 using DevBook.Tooling.Infrastructure;
+using DevBook.Tooling.Vault;
 
 namespace DevBook.Tooling.Export;
 
@@ -10,6 +11,14 @@ public static class Fixture
 {
     public const string Branch = "notes/automated-fixture-g1";
     private const string Pixel = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/l9sAAAAASUVORK5CYII=";
+
+    private static readonly (string Name, string Fields, string Expected)[] PublicationDates =
+    [
+        ("Published", "published: \"2026-10-02T00:00:00.000Z\"\npublishDate: \"2026-10-03T00:00:00.000Z\"", "2026-10-02T00:00:00.000Z"),
+        ("Alias", "publishDate: \"2026-10-03T00:00:00.000Z\"\ndate: \"2026-10-04T00:00:00.000Z\"", "2026-10-03T00:00:00.000Z"),
+        ("Date", "date: \"2026-10-04T00:00:00.000Z\"", "2026-10-04T00:00:00.000Z"),
+        ("Custom", "released_at: \"2026-10-05T00:00:00.000Z\"", "2026-10-05T00:00:00.000Z")
+    ];
 
     public static string PrepareCheckout(string trusted, string root)
     {
@@ -50,6 +59,14 @@ public static class Fixture
             string destination = Path.Combine(root, relative);
             Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
             File.Copy(source, destination);
+        }
+        string defaultsPath = Path.Combine(root, ".scripts/quartz-syncer.defaults.json");
+        JsonObject defaults = JsonData.ParseObject(File.ReadAllText(defaultsPath));
+        defaults["publishedTimestampKey"] = "released_at, published, publishDate, date";
+        File.WriteAllText(defaultsPath, defaults.ToJsonString(JsonData.Options) + "\n");
+        foreach (var date in PublicationDates)
+        {
+            Write(root, $"Vault/Home/Topic/{date.Name}.md", $"---\npublish: true\n{date.Fields}\n---\nAuthored publication date.\n");
         }
         Write(root, "Vault/Home/Topic/Example.md", """
             ---
@@ -145,6 +162,19 @@ public static class Fixture
         {
             throw new RuntimeFailure("Genuine exporter changed fixture source, including the unrelated undated note.");
         }
+        if (Markdown.SplitFrontmatter(exported).Values.ContainsKey("published"))
+        {
+            throw new RuntimeFailure("Disabled publication timestamp fell back to filesystem metadata.");
+        }
+        foreach (var date in PublicationDates)
+        {
+            string path = $"Web/content/Topic/{date.Name}.md";
+            IReadOnlyDictionary<string, FrontmatterValue> fields = Markdown.SplitFrontmatter(Encoding.UTF8.GetString(files[path]!)).Values;
+            if (!fields.TryGetValue("published", out FrontmatterValue? published) || published.Text != date.Expected)
+            {
+                throw new RuntimeFailure($"Genuine export did not preserve the authored publication date: {date.Name}");
+            }
+        }
         Receipt.Validate(JsonData.ParseObject(Encoding.UTF8.GetString(files[Receipt.PathName]!)), Receipt.IndexEntries(owned.Root));
         string diff = Encoding.UTF8.GetString(Git.Run(owned.Root, "diff", "--cached", "--no-ext-diff", "--binary"));
         return new JsonObject
@@ -155,6 +185,8 @@ public static class Fixture
             ["rendered_datacore"] = true,
             ["preserved_markers"] = true,
             ["media_unchanged"] = true,
+            ["published_fallback_disabled"] = true,
+            ["authored_published_preserved"] = true,
             ["file_count"] = files.Count,
             ["source_head"] = expected,
             ["bundle"] = bundle,

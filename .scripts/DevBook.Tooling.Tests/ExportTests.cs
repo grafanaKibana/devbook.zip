@@ -17,30 +17,15 @@ public sealed class ExportTests
         byte[] original = File.ReadAllBytes(Path.Combine(fixture.Root, "Vault/Home/Undated.md"));
         var context = new SyncerContext(fixture.Root, fixture.CommandAsync, timeout: TimeSpan.FromSeconds(10));
         await Syncer.ConfigureAsync(context);
-        GitTreeEntry[] baseline = Receipt.TreeEntries(context);
-        var originalReceipt = new JsonObject
-        {
-            ["sources"] = new JsonObject(baseline.Where(entry => Syncer.IsSource(entry.Path))
-                .Select(entry => KeyValuePair.Create<string, JsonNode?>(entry.Path, new JsonObject { ["sha"] = entry.Sha }))),
-            ["outputs"] = new JsonObject(baseline.Where(entry => Receipt.IsExportPath(entry.Path))
-                .Select(entry => KeyValuePair.Create<string, JsonNode?>(entry.Path, new JsonObject { ["sha"] = entry.Sha })))
-        };
 
         // Act
         await Syncer.ExportAsync(context);
-        PublishedDates.Restore(context, originalReceipt);
 
         // Assert
         File.ReadAllBytes(Path.Combine(fixture.Root, "Vault/Home/Undated.md")).Should().Equal(original);
         fixture.Calls.Should().ContainInOrder("quartz-syncer:cache action=tree-refresh", "quartz-syncer:publish", "quartz-syncer:delete force");
         fixture.Calls.Should().Contain(call => call.Contains("cleanOrphanedMedia", StringComparison.Ordinal));
-        Git.Paths(fixture.Root, "diff", "--cached", "--name-only", "-z").Should().BeEquivalentTo(
-            new[] { "Web/content/Card.md" }.Concat(fixture.DateCases.Where(item => !item.Restore).Select(item => "Web/content/" + item.Name + ".md")));
-        foreach (DateCase item in fixture.DateCases)
-        {
-            File.ReadAllBytes(Path.Combine(fixture.Root, "Web/content/" + item.Name + ".md")).Should()
-                .Equal(Encoding.UTF8.GetBytes(item.Restore ? item.Before : item.After), item.Name);
-        }
+        Git.Paths(fixture.Root, "diff", "--cached", "--name-only", "-z").Should().Equal("Web/content/Card.md");
     }
 
     [Fact]
@@ -58,35 +43,10 @@ public sealed class ExportTests
         competing.Should().Throw<SyncException>();
     }
 
-    private sealed record DateCase(string Name, string Source, string Before, string After, bool Restore);
-
-    private static DateCase Date(string name, string source, string beforeFields = "", string afterFields = "",
-        string afterBody = "Stable body\n", bool restore = false) => new(name, source,
-        "---\npublished: 2026-01-01T00:00:00.000Z\n" + beforeFields + "---\nStable body\n",
-        "---\npublished: 2026-11-01T00:00:00.000Z\n" + afterFields + "---\n" + afterBody, restore);
-
     private sealed class PublishingPublishingFixture : IDisposable
     {
         public string Root { get; } = Path.Combine(Path.GetTempPath(), "devbook-publishing-" + Guid.NewGuid().ToString("N"));
         public List<string> Calls { get; } = [];
-        public DateCase[] DateCases { get; } =
-        [
-            Date("TimestampOnly", "publish: true", restore: true),
-            Date("DependencyChanged", "publish: true", afterBody: "Dependency changed\n"),
-            Date("AuthoredPublished", "published: 2026-01-01"),
-            Date("AuthoredPublishDate", "publishDate: 2026-01-01"),
-            Date("AuthoredDate", "date: 2026-01-01"),
-            Date("QuotedDate", "'date': 2026-01-01"),
-            Date("DuplicateSource", "publish: true\npublish: true"),
-            Date("DuplicateOutput", "publish: true", beforeFields: "published: 2025-01-01T00:00:00.000Z\n",
-                afterFields: "published: 2025-01-01T00:00:00.000Z\n"),
-            Date("MalformedSource", "{date: 2026-01-01}"),
-            Date("MultilineSource", "title: \"Unclosed\n---\ndate: 2026-01-01"),
-            Date("MetadataChanged", "publish: true", beforeFields: "title: Old\n", afterFields: "title: New\n"),
-            Date("BodyPublished", "publish: true", afterBody: "Stable body\npublished: 2026-01-01T00:00:00.000Z\n"),
-            Date("ListMetadata", "publish: true\ntags:\n  - FolderNote", beforeFields: "tags:\n  - FolderNote\n",
-                afterFields: "tags:\n  - FolderNote\n", restore: true)
-        ];
         private readonly JsonObject Publishingsettings;
 
         public PublishingPublishingFixture()
@@ -106,11 +66,6 @@ public sealed class ExportTests
             File.WriteAllText(Path.Combine(Root, "Vault/Home/Card.md"), "---\npublish: true\n---\nA complete card owning note.\n");
             File.WriteAllText(Path.Combine(Root, "Vault/Home/Undated.md"), "---\npublish: false\n---\nUnrelated undated note.\n");
             File.WriteAllText(Path.Combine(Root, "Web/content/Card.md"), "Original generated output\n");
-            foreach (DateCase item in DateCases)
-            {
-                File.WriteAllText(Path.Combine(Root, "Vault/Home/" + item.Name + ".md"), "---\n" + (item.Source.StartsWith("publish:", StringComparison.Ordinal) ? "" : "publish: true\n") + item.Source + "\n---\nStable source\n");
-                File.WriteAllText(Path.Combine(Root, "Web/content/" + item.Name + ".md"), item.Before);
-            }
             Git.Run(Root, "init", "--quiet");
             Git.Run(Root, "config", "user.name", "Fixture");
             Git.Run(Root, "config", "user.email", "fixture@example.invalid");
@@ -153,8 +108,8 @@ public sealed class ExportTests
                     ["observedStats"] = stats,
                     ["metadataStats"] = stats.DeepClone(),
                     ["extendedReady"] = true,
-                    ["nativePublishPaths"] = new JsonArray(stats.Where(item => item.Key != "Home/Undated.md").Select(item => (JsonNode?)JsonValue.Create(item.Key)).ToArray()),
-                    ["extendedPublishPaths"] = new JsonArray(stats.Where(item => item.Key != "Home/Undated.md").Select(item => (JsonNode?)JsonValue.Create(item.Key)).ToArray())
+                    ["nativePublishPaths"] = new JsonArray("Home/Card.md"),
+                    ["extendedPublishPaths"] = new JsonArray("Home/Card.md")
                 }.ToJsonString());
             }
             if (arguments[0] == "quartz-syncer:config")
@@ -164,10 +119,6 @@ public sealed class ExportTests
             else if (arguments[0] == "quartz-syncer:publish")
             {
                 File.WriteAllText(Path.Combine(Root, "Web/content/Card.md"), "Rendered through fixture CLI boundary\n");
-                foreach (DateCase item in DateCases)
-                {
-                    File.WriteAllText(Path.Combine(Root, "Web/content/" + item.Name + ".md"), item.After);
-                }
                 data = new JsonObject { ["skipped"] = 0, ["failures"] = new JsonArray() };
             }
             else if (arguments[0] == "eval" && arguments[1].Contains("cleanOrphanedMedia", StringComparison.Ordinal))
