@@ -1652,6 +1652,61 @@
         },
         "review_process": "focused-whole-note-v1"
       }
+    },
+    "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Semaphore.md": {
+      "content_hash": "8b6d7489b39c3a12d38ff11ff7a03f0f1b8c7e37218c2e4e86a3deccd5412d89",
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "outcome": "keep",
+      "repair_input_hash": "",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "violation_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "keep_review": {
+        "content_hash": "8b6d7489b39c3a12d38ff11ff7a03f0f1b8c7e37218c2e4e86a3deccd5412d89",
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review": {
+          "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Semaphore.md",
+          "verdict": "CLEAN",
+          "summary": "The note explains permits, the SemaphoreSlim and Semaphore split, both examples, concrete pitfalls and tradeoffs. The mechanisms, conditions and exceptions are all present, and the single Qard is one focused comparison. No concrete defect was found, so edits would be cosmetic churn.",
+          "page_type": "Concept — frontmatter intact; optional Questions and References present and valid; no generated navigation or special-page rules apply.",
+          "current_text_evidence": [
+            {
+              "quote": "A wait consumes one permit. `Release` puts it back:",
+              "line_start": 21,
+              "reason": "The mechanism is stated early and plainly, and the bullets that follow keep Semaphore and SemaphoreSlim distinct."
+            },
+            {
+              "quote": "An extra release made while permits are still held stays within the maximum, succeeds, and silently admits one more caller than intended.",
+              "line_start": 67,
+              "reason": "This states the exact condition under which SemaphoreFullException is thrown and its exception, which is the subtle point that is easy to get wrong."
+            },
+            {
+              "quote": "`Task.WhenAll` only composes the tasks supplied to it.",
+              "line_start": 76,
+              "reason": "The tradeoff is accurate and the reasoning is concrete: it explains why the semaphore must be acquired inside each operation."
+            },
+            {
+              "quote": "> [!qard]- When is `SemaphoreSlim` a better fit than `lock`?",
+              "line_start": 83,
+              "reason": "This is one bounded comparison question. The answer carries the mechanism, the await restriction and release discipline, and cites Microsoft primary sources on the answer side. The ID comment is intact."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: the note covers one cohesive primitive, and the Semaphore, SemaphoreSlim and channel comparisons all serve the same decision.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        },
+        "review_process": "focused-whole-note-v1"
+      }
     }
   },
   "topics": {
@@ -3069,7 +3124,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-04T19:55:42.282235Z",
-    "elapsed_seconds": 599.5395386,
+    "elapsed_seconds": 603.2042805,
     "calls_reserved": 15,
     "responses_received": 15,
     "attempted_paths": [
@@ -3411,7 +3466,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-04T20:05:41.821247Z",
+    "checkpoint_at": "2026-11-04T20:05:45.485989Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
@@ -12550,102 +12605,6 @@
         "change_checks": []
       },
       "feedback_snapshot": []
-    }
-  },
-  "pending_author_proposal": {
-    "workload_id": "792178af26484b3da828d4cea1e5f39f",
-    "topic_id": "programming-e6aba2bd",
-    "batch": {
-      "topic": "Programming",
-      "topic_id": "programming-e6aba2bd",
-      "notes": [
-        {
-          "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Semaphore.md",
-          "content": "---\ntopic: [Programming]\nsubtopic: [NET]\nsummary: \"A primitive allowing up to N concurrent holders, for bounded parallelism.\"\nlevel: [\"4\"]\npriority: High\nstatus: Ready to Repeat\npublish: true\nqard-deck: \"Programming\"\nqard-topic: \"NET/CSharp/Concurrency and Parallelism/Semaphore\"\nflashcard_uid: \"d136a9b7\"\ncreated: \"2026-02-19T22:34:10.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.322Z\"\n---\n\nA semaphore represents a fixed number of permits. At most N callers may hold one at the same time, which makes the primitive useful for bounded concurrency rather than single-owner exclusion. `SemaphoreSlim` is the usual in-process choice in .NET because waiting can be asynchronous through `WaitAsync`. The operating-system-backed `Semaphore` exists for synchronous and named cross-process coordination.\n\n# How It Works\n\nA wait consumes one permit. `Release` puts it back:\n\n- `Semaphore`: `WaitOne` consumes one permit.\n- `SemaphoreSlim`: `Wait`/`WaitAsync` consumes one permit.\n- With no permits available, another caller waits.\n- A release allows one waiter to compete for the returned permit.\n- `System.Threading.Semaphore` can be named for cross-process coordination. `SemaphoreSlim` stays inside one process. Named semaphores are Windows-only, and construction with a name throws `PlatformNotSupportedException` on Linux and macOS.\n\n# Example\n\n```csharp\nusing var gate = new SemaphoreSlim(initialCount: 4, maxCount: 4);\n\nawait gate.WaitAsync(cancellationToken);\ntry\n{\n    await ProcessAsync(cancellationToken);\n}\nfinally\n{\n    gate.Release();\n}\n```\n\nNamed `Semaphore` for cross-process bounded access:\n\n```csharp\n// Limit 3 concurrent processes accessing a shared resource\nconst string SemName = \"MyApp.ResourceGate\";\nusing var sem = new Semaphore(initialCount: 3, maximumCount: 3, name: SemName);\n\nif (!sem.WaitOne(TimeSpan.FromSeconds(5)))\n    throw new TimeoutException(\"Could not acquire semaphore slot.\");\ntry\n{\n    AccessSharedResource();\n}\nfinally\n{\n    sem.Release();\n}\n```\n\n# Pitfalls\n\n- **A leaked permit shrinks capacity.** If an exception path skips `Release`, the semaphore permanently admits fewer callers. With four permits, four leaks stop all future work. Acquisition and release belong in one `try/finally` scope.\n- **An extra release expands capacity.** A `SemaphoreSlim` created without an explicit `maxCount` can grow beyond its intended limit. Setting `maxCount` turns the mistake into `SemaphoreFullException` only when the release would raise the count above that maximum. An extra release made while permits are still held stays within the maximum, succeeds, and silently admits one more caller than intended.\n- **Waiters are not guaranteed FIFO order.** A later caller may acquire before an earlier one. A bounded [[Channels|channel]] is a better model when queue order belongs to the contract.\n- **There is no owner or recursion count.** Unlike [[Mutex]] or [[Locking|lock/Monitor]], any code path may call `Release`. A method that holds the only permit and then waits on the same semaphore blocks itself. One boundary should own the acquire/release pair.\n- **Contention creates async waiter state.** An immediately available permit is cheap. A blocked `WaitAsync` must enqueue state for later completion. A bounded [[Channels|channel]] can combine the throttle with the queue when producer/consumer flow is the real problem.\n\n# Tradeoffs\n\n- `SemaphoreSlim` supports asynchronous waiting in one process. `Semaphore` is operating-system-backed and can be named on Windows.\n- A semaphore models capacity. A mutex or lock models one owner.\n- `Task.WhenAll` only composes the tasks supplied to it. If callers eagerly create an unbounded set of async operations, all of them may reach the dependency before `WhenAll` observes completion. Acquiring a semaphore inside each operation limits how many enter the protected work at once.\n\n`SemaphoreSlim` is the direct choice for an in-process async throttle. A named `Semaphore` only earns its heavier boundary when Windows processes on the same machine must share the count. Ordering or buffering turns the problem into a bounded [[Channels|channel]] rather than a bare permit counter.\n\n# Questions\n\n<!-- qard-id: 6d43729c-6478-465f-afd9-5b432d9ad3ae -->\n> [!qard]- When is `SemaphoreSlim` a better fit than `lock`?\n> `SemaphoreSlim` is the better fit when waiting must be asynchronous, such as protected work that contains `await`, or when up to N callers may proceed at once. `lock` remains the simpler fit for a short synchronous section that one thread at a time may enter.\n>\n> | Aspect | `lock` | `SemaphoreSlim` |\n> |---|---|---|\n> | Callers inside at once | One thread, so it only provides mutual exclusion. | Up to the configured count. A count of 1 gives mutual exclusion, and a higher count throttles concurrency. |\n> | How a caller waits | The waiting thread blocks until the lock is free. | `WaitAsync` returns a task, so the caller waits without holding a thread. `Wait` blocks like a lock. |\n> | `await` inside the section | Not allowed by the compiler, because the lock belongs to the thread that entered it. | Allowed, because a permit is not tied to any thread. |\n> | Release | Automatic when the block exits, including after an exception. | Only through an explicit `Release` call, which any code can make. |\n>\n> Because a semaphore tracks no owner, each successful wait is paired with exactly one `Release`, normally in a `finally` block. A missed release permanently removes a permit. An extra release adds a permit beyond the intended limit. A `maxCount` does not reliably prevent this: `Release` throws `SemaphoreFullException` only when it would raise the count above that maximum, so an extra release made while permits are still held succeeds silently.\n>\n> [Microsoft: SemaphoreSlim](https://learn.microsoft.com/en-us/dotnet/api/system.threading.semaphoreslim?view=net-10.0) · [Microsoft: SemaphoreSlim.Release](https://learn.microsoft.com/en-us/dotnet/api/system.threading.semaphoreslim.release?view=net-10.0) · [Microsoft: C# lock statement](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/lock)\n\n# References\n\n- [Overview of synchronization primitives](https://learn.microsoft.com/en-us/dotnet/standard/threading/overview-of-synchronization-primitives)\n",
-          "hash": "8b6d7489b39c3a12d38ff11ff7a03f0f1b8c7e37218c2e4e86a3deccd5412d89",
-          "topic": "Programming",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "new"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Semaphore.md",
-          "outcome": "keep",
-          "reason": "Audited the whole note against the current text and my knowledge of the Microsoft SemaphoreSlim, Semaphore and lock documentation. I did not run new web searches. The opening, permit mechanics, both examples, pitfalls, tradeoffs, the single Qard and the reference are accurate. Specific checks: the examples release in finally, and WaitAsync takes the cancellation token. Named semaphores are Windows-only. Release throws SemaphoreFullException only when the count would exceed maxCount. Waiter order is not guaranteed. A semaphore has no owner. Task.WhenAll only composes the tasks it is given. The Qard tests one focused comparison with a consistent answer. The known_violations list is empty. The note has no concrete defect, and edits would be cosmetic churn."
-        }
-      ],
-      "feedback": [],
-      "decisions": []
-    },
-    "source_hashes": {
-      "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Semaphore.md": "8b6d7489b39c3a12d38ff11ff7a03f0f1b8c7e37218c2e4e86a3deccd5412d89"
-    },
-    "feedback_keys": [],
-    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Semaphore.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-04T20:05:17.921651Z",
-    "completed_review": {
-      "verdict": "CLEAN",
-      "overall_reason": "The whole note was audited independently. It is accurate, well ordered and free of concrete rule violations. The keep disposition is justified, and no edits are needed.",
-      "change_checks": [],
-      "notes": [
-        {
-          "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Semaphore.md",
-          "verdict": "CLEAN",
-          "summary": "The note explains permits, the SemaphoreSlim and Semaphore split, both examples, concrete pitfalls and tradeoffs. The mechanisms, conditions and exceptions are all present, and the single Qard is one focused comparison. No concrete defect was found, so edits would be cosmetic churn.",
-          "page_type": "Concept — frontmatter intact; optional Questions and References present and valid; no generated navigation or special-page rules apply.",
-          "current_text_evidence": [
-            {
-              "quote": "A wait consumes one permit. `Release` puts it back:",
-              "line_start": 21,
-              "reason": "The mechanism is stated early and plainly, and the bullets that follow keep Semaphore and SemaphoreSlim distinct."
-            },
-            {
-              "quote": "An extra release made while permits are still held stays within the maximum, succeeds, and silently admits one more caller than intended.",
-              "line_start": 67,
-              "reason": "This states the exact condition under which SemaphoreFullException is thrown and its exception, which is the subtle point that is easy to get wrong."
-            },
-            {
-              "quote": "`Task.WhenAll` only composes the tasks supplied to it.",
-              "line_start": 76,
-              "reason": "The tradeoff is accurate and the reasoning is concrete: it explains why the semaphore must be acquired inside each operation."
-            },
-            {
-              "quote": "> [!qard]- When is `SemaphoreSlim` a better fit than `lock`?",
-              "line_start": 83,
-              "reason": "This is one bounded comparison question. The answer carries the mechanism, the await restriction and release discipline, and cites Microsoft primary sources on the answer side. The ID comment is intact."
-            }
-          ],
-          "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: the note covers one cohesive primitive, and the Semaphore, SemaphoreSlim and channel comparisons all serve the same decision.",
-          "findings": [],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "PASS",
-            "question_quality": "PASS",
-            "identity_safety": "PASS",
-            "rules_compliance": "PASS"
-          }
-        }
-      ]
     }
   }
 }
