@@ -1432,9 +1432,12 @@
   },
   "topics": {
     "programming-e6aba2bd": {
+      "generation": 3,
+      "last_terminal_status": "merged"
+    },
+    "ai-ml-4edf0823": {
       "generation": 2,
-      "last_terminal_status": "merged",
-      "open_pr_key": "programming-e6aba2bd:2"
+      "last_terminal_status": "merged"
     }
   },
   "prs": {
@@ -1636,14 +1639,14 @@
           "releases_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/releases{/id}",
           "deployments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/deployments",
           "created_at": "2026-02-10T15:48:40Z",
-          "updated_at": "2026-11-03T12:49:06Z",
-          "pushed_at": "2026-11-04T06:53:29Z",
+          "updated_at": "2026-11-04T12:57:14Z",
+          "pushed_at": "2026-11-04T19:55:56Z",
           "git_url": "git://github.com/grafanaKibana/devbook.zip.git",
           "ssh_url": "git@github.com:grafanaKibana/devbook.zip.git",
           "clone_url": "https://github.com/grafanaKibana/devbook.zip.git",
           "svn_url": "https://github.com/grafanaKibana/devbook.zip",
           "homepage": "https://devbook.zip",
-          "size": 232349,
+          "size": 242566,
           "stargazers_count": 0,
           "watchers_count": 0,
           "language": "TypeScript",
@@ -1657,7 +1660,7 @@
           "mirror_url": null,
           "archived": false,
           "disabled": false,
-          "open_issues_count": 10,
+          "open_issues_count": 9,
           "license": {
             "key": "mit",
             "name": "MIT License",
@@ -1673,7 +1676,7 @@
           "topics": [],
           "visibility": "public",
           "forks": 0,
-          "open_issues": 10,
+          "open_issues": 9,
           "watchers": 0,
           "default_branch": "main"
         }
@@ -1771,14 +1774,14 @@
           "releases_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/releases{/id}",
           "deployments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/deployments",
           "created_at": "2026-02-10T15:48:40Z",
-          "updated_at": "2026-11-03T12:49:06Z",
-          "pushed_at": "2026-11-04T06:53:29Z",
+          "updated_at": "2026-11-04T12:57:14Z",
+          "pushed_at": "2026-11-04T19:55:56Z",
           "git_url": "git://github.com/grafanaKibana/devbook.zip.git",
           "ssh_url": "git@github.com:grafanaKibana/devbook.zip.git",
           "clone_url": "https://github.com/grafanaKibana/devbook.zip.git",
           "svn_url": "https://github.com/grafanaKibana/devbook.zip",
           "homepage": "https://devbook.zip",
-          "size": 232349,
+          "size": 242566,
           "stargazers_count": 0,
           "watchers_count": 0,
           "language": "TypeScript",
@@ -1792,7 +1795,7 @@
           "mirror_url": null,
           "archived": false,
           "disabled": false,
-          "open_issues_count": 10,
+          "open_issues_count": 9,
           "license": {
             "key": "mit",
             "name": "MIT License",
@@ -1808,7 +1811,7 @@
           "topics": [],
           "visibility": "public",
           "forks": 0,
-          "open_issues": 10,
+          "open_issues": 9,
           "watchers": 0,
           "default_branch": "main"
         }
@@ -1882,204 +1885,12 @@
       "generation": 2,
       "number": 209,
       "branch": "notes/automated-programming-e6aba2bd-g2",
-      "status": "open",
-      "frozen": false,
-      "head_sha": "09602b2ff71b134549b94e00e662467b51c25c27",
+      "status": "merged",
+      "frozen": true,
+      "head_sha": "66cf0a16d8448afbc0f5958b287660cb85fe2f51",
       "export_required": false,
       "export_operation_id": "caa35096ca95474e",
       "automatic_export": true,
-      "proposal_records": [
-        {
-          "record_id": "2bb47b398056dc887e5e412be38d75e37011ac648ff80819394a2da84cb6d33d",
-          "workload_id": "caa35096ca95474e9f400801cb20cb18",
-          "batch": {
-            "topic": "Programming",
-            "topic_id": "programming-e6aba2bd",
-            "notes": [
-              {
-                "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Methods.md",
-                "content": "---\ntopic: [Programming]\nsubtopic: [NET]\nsummary: \"C#'s unit of behavior, covering parameter modifiers and dispatch keywords.\"\nlevel: [\"4\"]\npriority: Medium\nstatus: Ready to Repeat\npublish: true\nqard-deck: \"Programming\"\nqard-topic: \"NET/CSharp/Fundamentals/Methods\"\nflashcard_uid: \"a3e803d0\"\ncreated: \"2026-02-15T16:27:13.000Z\"\nmodified: \"2026-11-02T09:03:54.806Z\"\n---\n\nMethods define where behavior begins and what data may cross the boundary. The parameter list is part of that contract. By-value parameters isolate the caller's variable, `ref` and `out` expose it for reassignment, and `in` exposes storage as readonly. `params` changes how an expanded argument list is collected at the call site.\n\nInheritance adds a separate question: which implementation runs? `virtual` and `override` use runtime dispatch. `new` hides a member and leaves selection to the compile-time type of the reference. Similar syntax, very different behavior.\n\n# Input Parameters\n\n## Ref\n\n`ref` aliases the caller's storage rather than copying its current value into a new parameter variable.\n\n- The caller must initialize the variable.\n- The method can read and write the variable.\n\nFor reference types, `ref` allows the callee to replace the caller's reference rather than only mutate the referenced object:\n\n```csharp\nclass MyClass {}\n\nstatic void ModifyReference(ref MyClass obj)\n{\n    obj = new MyClass();\n}\n\nvar myObj = new MyClass();\nModifyReference(ref myObj);\n```\n\nFor value types, `ref` allows the callee to update the caller's variable:\n\n```csharp\nstatic void InitializeAndModify(ref int value)\n{\n    value = 10;\n}\n\nint num = 0;\nInitializeAndModify(ref num);\n```\n\n## In\n\n`in` is a readonly by-reference parameter. It can avoid copying a large struct, though the compiler may still create a temporary for argument expressions that are not variables.\n\n- The caller must initialize the argument.\n- The method can read, but cannot assign to the parameter.\n- It is most useful when measurements show that copying a large readonly struct matters.\n\n```csharp\nstatic void ProcessData(in int value)\n{\n    // value = 10; // Compile-time error\n    Console.WriteLine(value);\n}\n```\n\n## Out\n\n`out` also aliases caller storage, but the value flows outward. The caller need not initialize it, and every normal return path must assign it. This supports `Try*` APIs that separate success from the produced value.\n\n```csharp\nstatic bool TryDivide(int a, int b, out int result)\n{\n    if (b == 0) { result = 0; return false; }\n    result = a / b;\n    return true;\n}\n\nif (TryDivide(10, 2, out var quotient))   // 'quotient' declared inline\n    Console.WriteLine(quotient);           // 5\n```\n\n`Dictionary.TryGetValue` shows the boundary well: a missing key is expected input, so a Boolean result is clearer than an exception.\n\n## Params\n\n`params` lets callers provide zero or more arguments without constructing the parameter collection explicitly. C# 13 extended the feature beyond arrays to recognized collection types.\n\n- Must be the last parameter in the method signature.\n- Individual arguments or no arguments use expanded form, which constructs the declared `params` collection at the call site.\n- Normal form accepts one expression implicitly convertible to the declared parameter type. An array works only when that array-to-parameter conversion exists, including the applicable array-to-span conversion.\n\n```csharp\nstatic int Sum(params int[] numbers)\n{\n    int total = 0;\n    foreach (var n in numbers)\n        total += n;\n    return total;\n}\n\nSum(1, 2, 3);   // 6\nSum();           // 0\nSum(new[] { 4, 5 }); // 9 — explicit array also works\n```\n\nC# 13 permits collection types such as `Span<T>`, `ReadOnlySpan<T>`, and types with a suitable collection-builder shape. Allocation behavior still depends on the declared parameter type and whether the call uses expanded or normal form.\n\n```csharp\nstatic int Sum(params ReadOnlySpan<int> numbers)\n{\n    int total = 0;\n    foreach (var n in numbers)\n        total += n;\n    return total;\n}\n```\n\n# Inheritance Method Keywords\n\n## Virtual\n\n`virtual` marks a base implementation as an extension point. Calls through a base reference still select the most-derived override at runtime.\n\n- Enables runtime polymorphism.\n- Calls are resolved by the runtime type, not just the variable type.\n\n```csharp\nclass Animal\n{\n    public virtual string Speak() => \"...\";\n}\n```\n\n## Override\n\n`override` supplies the derived implementation of a virtual or abstract member while keeping the same dispatch slot.\n\n- Signature must match the base member.\n- The derived method can still call the base implementation with `base.MethodName()`.\n\n```csharp\nclass Dog : Animal\n{\n    public override string Speak() => \"Woof\";\n}\n```\n\n## New\n\n`new` declares a separate member that hides one inherited with the same name. It does not join the base member's dispatch slot.\n\n- Behavior depends on the compile-time type of the variable.\n- `new` is appropriate only as a deliberate choice when member hiding, rather than polymorphism, is the required behavior.\n\n```csharp\nclass Animal\n{\n    public string Category() => \"Animal\";\n}\n\nclass Dog : Animal\n{\n    public new string Category() => \"Dog\";\n}\n```\n\n## Virtual Vs Override Vs New in One Example\n\n```csharp\nclass Animal\n{\n    public virtual string Speak() => \"...\";\n    public string Category() => \"Animal\";\n}\n\nclass Dog : Animal\n{\n    public override string Speak() => \"Woof\";\n    public new string Category() => \"Dog\";\n}\n\nAnimal asAnimal = new Dog();\nDog asDog = new Dog();\n\nConsole.WriteLine(asAnimal.Speak());    // Woof (runtime dispatch)\nConsole.WriteLine(asDog.Speak());       // Woof\nConsole.WriteLine(asAnimal.Category()); // Animal (member hiding)\nConsole.WriteLine(asDog.Category());    // Dog\n```\n\nBoth objects have the same runtime type. Only the lookup rule changes: runtime type for `Speak`, compile-time reference type for `Category`.\n\n# Other Method Forms\n\n- **`ref return` and `ref readonly return`** return an alias to existing storage. The writable form lets a caller update that storage. The readonly form avoids a copy without granting mutation. Ref-safety rules prevent the alias from outliving its source.\n- **Local functions** name behavior inside another method. A `static` local function cannot capture outer state, and a direct call needs no delegate. A lambda is the natural form when the method must produce a `Func` or `Action` value.\n- **Extension methods** are static methods whose first parameter has the `this` modifier. They participate in normal static overload resolution and do not modify the extended type.\n- **Expression-bodied members** use shorter syntax for a single expression. Their call and dispatch semantics do not change.\n\nA method's signature does not include its generic constraints, and `object` and `dynamic` cannot distinguish signatures. Methods differing only in either respect are duplicate declarations, not ambiguous choices at a call site.\n\n**Overload resolution** compares the applicable candidates and their required conversions. Optional and named arguments affect applicability, while an unresolved tie is a compile error. Modern compilers can cache some static method-group conversions, but capturing lambdas and instance targets still need their own lifetime analysis.\n\n# Pitfalls\n\n- Optional defaults are copied into the caller at compile time. Changing a library's default does not affect an already compiled consumer, so a default-value change can create version-dependent behavior.\n- An `in` parameter does not guarantee zero copies. Conversions and non-variable arguments can require temporaries, and readonly access to a mutable struct may trigger defensive copies.\n- Member hiding with `new` makes the result depend on the reference's compile-time type. That split is hard to reason about in public APIs unless compatibility requires it.\n\n# Tradeoffs\n\n| Decision | Option A | Option B | When A | When B |\n| --- | --- | --- | --- | --- |\n| **By-value vs `in`** | By-value copies the value | `in` passes a readonly alias | Small values and ordinary APIs | Large readonly structs on a measured hot path |\n| **`in` vs `ref`** | `in` forbids reassignment through the parameter | `ref` permits it | The callee only reads | Mutation or rebinding is part of the contract |\n| **`override` vs `new`** | `override` uses runtime polymorphism | `new` uses compile-time hiding | Derived behavior must work through base references | A deliberate compatibility split requires a separate member |\n| **`params T[]` vs `params ReadOnlySpan<T>`** | Array form is broadly compatible and can be retained by the callee | Span form is stack-only and cannot escape | The method or caller needs array semantics | Synchronous processing benefits from span-based calls |\n\nBy-value parameters and ordinary virtual dispatch are the default. By-reference semantics fit when aliasing is part of the API or profiling shows that struct copies matter. `new` fits only when compile-time hiding is the intended contract.\n\n# Questions\n\n> [!qard]- How do `ref`, `out`, and `in` parameters differ?\n> All three pass the argument by reference instead of copying its value. For `ref` and `out`, the parameter always aliases the caller's variable. For `in`, it aliases the caller's variable when the argument is a variable of the parameter's type. An `in` argument that is not a variable, or that needs a conversion, can instead be copied into a temporary, and the parameter then refers to that temporary. The three modifiers differ in which direction data may flow through the reference.\n>\n> | Modifier | How data flows through the reference | Typical use |\n> |---|---|---|\n> | `ref` | Both ways. The caller must initialize the variable, and the method can read it and assign it. The caller sees any assignment | Updating or replacing the caller's variable |\n> | `out` | Outward. The caller can pass an unassigned variable. The method cannot read it before assigning it and must assign it before every normal return | Returning an extra result, as in `Try` methods such as `Dictionary.TryGetValue` |\n> | `in` | Inward and readonly. The caller must initialize the argument, and the method can read the parameter but cannot assign it | Avoiding copies of a large struct on a measured hot path |\n>\n> Without a modifier, the parameter is a copy, so assigning it never changes the caller's variable.\n>\n> [Microsoft: method parameters](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/method-parameters)\n\n<!-- qard-id: a16bf465-c1ae-4bca-909c-6f7462f37ca6 -->\n> [!qard]- Why would a method need `ref` when the argument is already a reference type?\n> A reference-type argument passes a copy of the reference. The method can mutate the shared object through that copy, but assigning a different object changes only its local copy. `ref` aliases the caller’s variable, allowing the method to replace the reference stored there. [Microsoft: method parameters](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/method-parameters)\n\n<!-- qard-id: 1fe4393b-4d8c-4e2c-9ae5-769106b13e65 -->\n> [!qard]- What does an `in` parameter prevent the callee from changing?\n> It prevents assignment through the readonly parameter alias. With a reference-type argument, the callee cannot replace the caller's reference through the parameter, but it can call methods that mutate the referenced object. Readonly passing does not make that object immutable. With a mutable struct receiver, calling a potentially mutating member can operate on a defensive copy instead.\n>\n> [Microsoft: method parameters](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/method-parameters)\n\n> [!qard]- When can an `in` parameter improve performance?\n> It can avoid copying a large readonly struct on a measured hot path. Conversions and non-variable arguments can still require temporaries, and readonly access to a mutable struct can trigger defensive copies. Indirection also has a cost, so a small value may be cheaper to pass by value.\n>\n> [Microsoft: method parameters](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/method-parameters)\n\n<!-- qard-id: 19ea3788-056c-4ed6-8bc6-2087ae866f65 -->\n> [!qard]- How does C# apply an optional parameter's default value, and why can already-compiled callers keep an old default?\n> The default is applied at the call site. When an ordinary compiled call omits an optional argument, the compiler inserts the declared default value into the caller's code, and the method receives it like any other argument.\n>\n> The declaration rules fit that mechanism:\n>\n> - **The default must be a compile-time value:** a constant expression, `default(S)`, or `new S()` where `S` is a value type. The compiler has to be able to write the value into each call.\n> - **Optional parameters come after all required parameters.** Named arguments let a call supply a later optional argument while omitting earlier ones.\n> \n> **Versioning consequence:** the default lives in each caller's compiled code. If a library changes a default, callers compiled against the old version keep passing the old value until they are recompiled. A public default value is therefore part of the library's compatibility contract.\n>\n> [Microsoft: named and optional arguments](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/named-and-optional-arguments) · [C#: 12.6.2.3 Run-time evaluation of argument lists](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#12623-run-time-evaluation-of-argument-lists)\n\n<!-- qard-id: ffd19d60-4643-4ede-92ff-83ba55b3f613 -->\n> [!qard]- When `Animal a = new Dog();` calls `a.Category()`, what makes the call run `Dog`'s implementation?\n> `Animal.Category()` must be declared `virtual`, and `Dog` must implement `Category()` with `override`. The call is then resolved by the runtime type of the object, `Dog`, rather than by the declared type of the variable, `Animal`.\n>\n> Methods are non-virtual by default. A non-virtual `a.Category()` binds to `Animal.Category()` because `a` is declared as `Animal`, even when `Dog` declares its own `Category()` with `new`.\n>\n> [Microsoft: virtual keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/virtual) · [Microsoft: new modifier](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/new-modifier) · [Microsoft: base keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/base) · [Microsoft: sealed modifier](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/sealed)\n\n> [!qard]- What does declaring a base-class method `virtual` commit that API to?\n> A virtual member is an extension point. Derived classes can replace its behavior, unless an override along the hierarchy is marked `sealed`, which stops classes below it from overriding the member again. Ordinary calls to the member on such an object run the most-derived override, including calls made from code inside the base class. An explicit call through `base` in a derived class is the exception: it runs the base class's implementation rather than the most-derived override. The base class can therefore no longer assume that its own implementation of that member is the one that runs.\n>\n> [Microsoft: virtual keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/virtual) · [Microsoft: new modifier](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/new-modifier) · [Microsoft: base keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/base) · [Microsoft: sealed modifier](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/sealed)\n\n<!-- qard-id: 13e7573c-4ba4-4f2b-a316-4f2dcb52ccd6 -->\n> [!qard]- A base method is not virtual, but a derived class needs different behavior. What are the options, and which ones work through a base-class reference?\n> Only virtual dispatch makes a call through a base-class reference run derived code. Making the base member `virtual` and overriding it is therefore the only option that works through such a reference. Hiding with `new` affects only derived-typed references, and composition moves the variation out of inheritance.\n>\n> | Option | Call through a base reference | Fits when |\n> |---|---|---|\n> | Base member made `virtual`, derived member marked `override` | Runs the derived implementation, chosen by the object's runtime type | The base type can be changed and derived objects are meant to substitute for base objects |\n> | Derived member declared with `new` (hiding) | Still runs the base implementation. Only references typed as the derived class reach the new member | Hiding itself is the intended behavior, such as a deliberate compatibility split, not polymorphism |\n> | Composition | No inheritance dispatch is involved. The class delegates the varying step to an object it holds | The base cannot be changed, or the variation is not a natural subtype relationship |\n>\n> Hiding is the common trap. The same object behaves differently depending on whether it is referenced as the derived type or as the base type.\n>\n> [Microsoft: virtual keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/virtual) · [Microsoft: new modifier](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/new-modifier)\n\n> [!qard]- Can overloads differ only by `object` versus `dynamic`, or by generic constraints?\n> No. Neither distinction gives these methods different signatures. `M(object value)` and `M(dynamic value)` collide, as do two `M<T>(T value)` declarations distinguished only by `where T : class` versus `where T : struct`. The compiler rejects the duplicate declarations before resolving any call. `dynamic` still changes binding of operations that use it; sharing this signature representation does not make its behavior identical to `object`. [C# specification: signatures and overloading](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/basic-concepts#76-signatures-and-overloading)\n\n> [!qard]- Which receiver type controls extension-method lookup?\n> The compile-time type controls lookup. With `Base value = new Derived()`, a method declared only on `Derived` is not found through `value`; an applicable extension for `Base` can be selected instead. An applicable instance method found by ordinary lookup takes precedence over an extension. Generic constraints determine whether an extension candidate is applicable, not whether runtime dispatch replaces it. [Microsoft: extension methods](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/extension-methods)\n\n> [!qard]- Why can `Print<T>(T value)` beat `Print(Base value)` for an argument declared as `Derived`?\n> Type inference can infer `T` as `Derived`, giving the generic candidate an identity conversion. The non-generic candidate needs a conversion from `Derived` to `Base`, so it is a worse match. The generic candidate does not win merely because its constraints are satisfied; constraints must hold for applicability, and otherwise-equivalent candidates have additional tie-breakers. An argument declared as `object` is considered as `object`, even when its runtime value is a string. [C# specification: overload resolution](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#1264-overload-resolution)\n\n> [!qard]- Why can adding an applicable derived overload change a call that previously used a base overload?\n> Method lookup can find an applicable declaration on the derived type and exclude base declarations before the better-function-member comparison. For a derived `Process(double)` and inherited `Process(int)`, `derived.Process(5)` can select the derived member using the implicit int-to-double conversion. This is a lookup rule, not virtual dispatch or a blanket rule that every same-named derived method excludes every base member. Public overload additions can therefore change source behavior when callers recompile. [C# specification: method invocations](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#128103-method-invocations)\n\n> [!qard]- When does a returned `ref` let a caller change the original storage?\n> The caller must retain the alias with a `ref` local or another ref-aware operation. Ordinary assignment reads and copies the value instead:\n>\n> ```csharp\n> static ref int Larger(ref int first, ref int second)\n> {\n>     if (first > second)\n>     {\n>         return ref first;\n>     }\n>     return ref second;\n> }\n>\n> int a = 5;\n> int b = 10;\n> ref int selected = ref Larger(ref a, ref b);\n> // This changes b to 100.\n> selected = 100;\n> ```\n>\n> A separate `out` assignment copies a value into its own destination; it does not create another alias to the returned storage. Ref-safety rules prevent returning storage whose lifetime is too short, such as an ordinary local that disappears when the method returns. [Microsoft: ref returns and ref locals](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/jump-statements#ref-returns)\n\n# References\n\n- [Method parameters](https://learn.microsoft.com/dotnet/csharp/language-reference/keywords/method-parameters#reference-parameters)\n- [C# 13: Calling methods is easier and faster](https://devblogs.microsoft.com/dotnet/csharp13-calling-methods-is-easier-and-faster/)\n",
-                "hash": "192d71e76e9f6570921c5098668a2f578152bd98b0eb6025b18b2f2f13c34d9c",
-                "topic": "Programming",
-                "violations": [],
-                "needs_fixing_ids": [
-                  "19ea3788-056c-4ed6-8bc6-2087ae866f65",
-                  "ffd19d60-4643-4ede-92ff-83ba55b3f613"
-                ],
-                "repair_input_hash": "585c5cf07d62743fa5906021218081ef4982d360595eda4807575e11b5254c72",
-                "selection_reason": "rules_changed"
-              }
-            ],
-            "feedback": [],
-            "rules_hash": "264d16c1cdd0550e8de34525350fcc463d41b1c8095a38a38008f9f84304bb03",
-            "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-            "review_process": "focused-whole-note-v1",
-            "pr": null
-          },
-          "proposal": {
-            "version": 1,
-            "edits": [
-              {
-                "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Methods.md",
-                "expected_hash": "192d71e76e9f6570921c5098668a2f578152bd98b0eb6025b18b2f2f13c34d9c",
-                "before": "<!-- qard-id: ffd19d60-4643-4ede-92ff-83ba55b3f613 -->\n> [!qard]- When `Animal a = new Dog();` calls `a.Category()`, what makes the call run `Dog`'s implementation?\n> `Animal.Category()` must be declared `virtual`, and `Dog` must implement `Category()` with `override`. The call is then resolved by the runtime type of the object, `Dog`, rather than by the declared type of the variable, `Animal`.\n>\n> Methods are non-virtual by default. A non-virtual `a.Category()` binds to `Animal.Category()` because `a` is declared as `Animal`, even when `Dog` declares its own `Category()` with `new`.\n>\n> [Microsoft: virtual keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/virtual) · [Microsoft: new modifier](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/new-modifier) · [Microsoft: base keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/base) · [Microsoft: sealed modifier](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/sealed)\n",
-                "after": "<!-- qard-id: ffd19d60-4643-4ede-92ff-83ba55b3f613 -->\n> [!qard]- Which modifiers on a base-class method and a same-named derived-class method make a call through a base-typed reference run the derived implementation?\n> The base method must be declared `virtual`, and the derived method must implement it with `override`. The call is then resolved by the runtime type of the object rather than by the declared type of the variable.\n>\n> Methods are non-virtual by default. If the base method is not virtual, a call through a base-typed variable binds to the base implementation, even when the derived class declares its own method with `new`.\n>\n> [Microsoft: virtual keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/virtual) · [Microsoft: new modifier](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/new-modifier)\n",
-                "reason": "Makes the question self-contained and removes unrelated base and sealed sources from the answer.",
-                "kind": "rewrite",
-                "learning_target": "same",
-                "essential_meanings": [
-                  "Base member must be virtual and derived member must use override",
-                  "Dispatch uses the runtime type, not the variable's declared type",
-                  "A non-virtual base method, even hidden with new, binds to the base implementation through a base reference"
-                ],
-                "sources": [
-                  {
-                    "url": "https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/virtual",
-                    "claim": "virtual members are overridden by derived classes and resolved by runtime type",
-                    "version": "not version-specific"
-                  },
-                  {
-                    "url": "https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/new-modifier",
-                    "claim": "new hides an inherited member and does not participate in virtual dispatch",
-                    "version": "not version-specific"
-                  }
-                ],
-                "feedback_keys": [],
-                "problem": "The Category card's question refers to Animal, Dog and Category without defining them, so it is not self-contained, and its answer cites base and sealed pages it never uses.",
-                "reader_benefit": "The question can be answered from its own text, and the answer carries only the sources that support it."
-              }
-            ],
-            "dispositions": [
-              {
-                "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Methods.md",
-                "outcome": "changed",
-                "reason": "The prose, code samples and other cards were checked against the current text and Microsoft documentation and are accurate. Only the Category card needed repair: its question is now self-contained and its sources are limited to those that support the answer."
-              }
-            ],
-            "feedback": []
-          },
-          "result": {
-            "sources": {
-              "Vault/Home/Programming/NET/CSharp/Fundamentals/Methods.md": "---\ntopic: [Programming]\nsubtopic: [NET]\nsummary: \"C#'s unit of behavior, covering parameter modifiers and dispatch keywords.\"\nlevel: [\"4\"]\npriority: Medium\nstatus: Ready to Repeat\npublish: true\nqard-deck: \"Programming\"\nqard-topic: \"NET/CSharp/Fundamentals/Methods\"\nflashcard_uid: \"a3e803d0\"\ncreated: \"2026-02-15T16:27:13.000Z\"\nmodified: \"2026-11-03T19:50:44.499Z\"\n---\n\nMethods define where behavior begins and what data may cross the boundary. The parameter list is part of that contract. By-value parameters isolate the caller's variable, `ref` and `out` expose it for reassignment, and `in` exposes storage as readonly. `params` changes how an expanded argument list is collected at the call site.\n\nInheritance adds a separate question: which implementation runs? `virtual` and `override` use runtime dispatch. `new` hides a member and leaves selection to the compile-time type of the reference. Similar syntax, very different behavior.\n\n# Input Parameters\n\n## Ref\n\n`ref` aliases the caller's storage rather than copying its current value into a new parameter variable.\n\n- The caller must initialize the variable.\n- The method can read and write the variable.\n\nFor reference types, `ref` allows the callee to replace the caller's reference rather than only mutate the referenced object:\n\n```csharp\nclass MyClass {}\n\nstatic void ModifyReference(ref MyClass obj)\n{\n    obj = new MyClass();\n}\n\nvar myObj = new MyClass();\nModifyReference(ref myObj);\n```\n\nFor value types, `ref` allows the callee to update the caller's variable:\n\n```csharp\nstatic void InitializeAndModify(ref int value)\n{\n    value = 10;\n}\n\nint num = 0;\nInitializeAndModify(ref num);\n```\n\n## In\n\n`in` is a readonly by-reference parameter. It can avoid copying a large struct, though the compiler may still create a temporary for argument expressions that are not variables.\n\n- The caller must initialize the argument.\n- The method can read, but cannot assign to the parameter.\n- It is most useful when measurements show that copying a large readonly struct matters.\n\n```csharp\nstatic void ProcessData(in int value)\n{\n    // value = 10; // Compile-time error\n    Console.WriteLine(value);\n}\n```\n\n## Out\n\n`out` also aliases caller storage, but the value flows outward. The caller need not initialize it, and every normal return path must assign it. This supports `Try*` APIs that separate success from the produced value.\n\n```csharp\nstatic bool TryDivide(int a, int b, out int result)\n{\n    if (b == 0) { result = 0; return false; }\n    result = a / b;\n    return true;\n}\n\nif (TryDivide(10, 2, out var quotient))   // 'quotient' declared inline\n    Console.WriteLine(quotient);           // 5\n```\n\n`Dictionary.TryGetValue` shows the boundary well: a missing key is expected input, so a Boolean result is clearer than an exception.\n\n## Params\n\n`params` lets callers provide zero or more arguments without constructing the parameter collection explicitly. C# 13 extended the feature beyond arrays to recognized collection types.\n\n- Must be the last parameter in the method signature.\n- Individual arguments or no arguments use expanded form, which constructs the declared `params` collection at the call site.\n- Normal form accepts one expression implicitly convertible to the declared parameter type. An array works only when that array-to-parameter conversion exists, including the applicable array-to-span conversion.\n\n```csharp\nstatic int Sum(params int[] numbers)\n{\n    int total = 0;\n    foreach (var n in numbers)\n        total += n;\n    return total;\n}\n\nSum(1, 2, 3);   // 6\nSum();           // 0\nSum(new[] { 4, 5 }); // 9 — explicit array also works\n```\n\nC# 13 permits collection types such as `Span<T>`, `ReadOnlySpan<T>`, and types with a suitable collection-builder shape. Allocation behavior still depends on the declared parameter type and whether the call uses expanded or normal form.\n\n```csharp\nstatic int Sum(params ReadOnlySpan<int> numbers)\n{\n    int total = 0;\n    foreach (var n in numbers)\n        total += n;\n    return total;\n}\n```\n\n# Inheritance Method Keywords\n\n## Virtual\n\n`virtual` marks a base implementation as an extension point. Calls through a base reference still select the most-derived override at runtime.\n\n- Enables runtime polymorphism.\n- Calls are resolved by the runtime type, not just the variable type.\n\n```csharp\nclass Animal\n{\n    public virtual string Speak() => \"...\";\n}\n```\n\n## Override\n\n`override` supplies the derived implementation of a virtual or abstract member while keeping the same dispatch slot.\n\n- Signature must match the base member.\n- The derived method can still call the base implementation with `base.MethodName()`.\n\n```csharp\nclass Dog : Animal\n{\n    public override string Speak() => \"Woof\";\n}\n```\n\n## New\n\n`new` declares a separate member that hides one inherited with the same name. It does not join the base member's dispatch slot.\n\n- Behavior depends on the compile-time type of the variable.\n- `new` is appropriate only as a deliberate choice when member hiding, rather than polymorphism, is the required behavior.\n\n```csharp\nclass Animal\n{\n    public string Category() => \"Animal\";\n}\n\nclass Dog : Animal\n{\n    public new string Category() => \"Dog\";\n}\n```\n\n## Virtual Vs Override Vs New in One Example\n\n```csharp\nclass Animal\n{\n    public virtual string Speak() => \"...\";\n    public string Category() => \"Animal\";\n}\n\nclass Dog : Animal\n{\n    public override string Speak() => \"Woof\";\n    public new string Category() => \"Dog\";\n}\n\nAnimal asAnimal = new Dog();\nDog asDog = new Dog();\n\nConsole.WriteLine(asAnimal.Speak());    // Woof (runtime dispatch)\nConsole.WriteLine(asDog.Speak());       // Woof\nConsole.WriteLine(asAnimal.Category()); // Animal (member hiding)\nConsole.WriteLine(asDog.Category());    // Dog\n```\n\nBoth objects have the same runtime type. Only the lookup rule changes: runtime type for `Speak`, compile-time reference type for `Category`.\n\n# Other Method Forms\n\n- **`ref return` and `ref readonly return`** return an alias to existing storage. The writable form lets a caller update that storage. The readonly form avoids a copy without granting mutation. Ref-safety rules prevent the alias from outliving its source.\n- **Local functions** name behavior inside another method. A `static` local function cannot capture outer state, and a direct call needs no delegate. A lambda is the natural form when the method must produce a `Func` or `Action` value.\n- **Extension methods** are static methods whose first parameter has the `this` modifier. They participate in normal static overload resolution and do not modify the extended type.\n- **Expression-bodied members** use shorter syntax for a single expression. Their call and dispatch semantics do not change.\n\nA method's signature does not include its generic constraints, and `object` and `dynamic` cannot distinguish signatures. Methods differing only in either respect are duplicate declarations, not ambiguous choices at a call site.\n\n**Overload resolution** compares the applicable candidates and their required conversions. Optional and named arguments affect applicability, while an unresolved tie is a compile error. Modern compilers can cache some static method-group conversions, but capturing lambdas and instance targets still need their own lifetime analysis.\n\n# Pitfalls\n\n- Optional defaults are copied into the caller at compile time. Changing a library's default does not affect an already compiled consumer, so a default-value change can create version-dependent behavior.\n- An `in` parameter does not guarantee zero copies. Conversions and non-variable arguments can require temporaries, and readonly access to a mutable struct may trigger defensive copies.\n- Member hiding with `new` makes the result depend on the reference's compile-time type. That split is hard to reason about in public APIs unless compatibility requires it.\n\n# Tradeoffs\n\n| Decision | Option A | Option B | When A | When B |\n| --- | --- | --- | --- | --- |\n| **By-value vs `in`** | By-value copies the value | `in` passes a readonly alias | Small values and ordinary APIs | Large readonly structs on a measured hot path |\n| **`in` vs `ref`** | `in` forbids reassignment through the parameter | `ref` permits it | The callee only reads | Mutation or rebinding is part of the contract |\n| **`override` vs `new`** | `override` uses runtime polymorphism | `new` uses compile-time hiding | Derived behavior must work through base references | A deliberate compatibility split requires a separate member |\n| **`params T[]` vs `params ReadOnlySpan<T>`** | Array form is broadly compatible and can be retained by the callee | Span form is stack-only and cannot escape | The method or caller needs array semantics | Synchronous processing benefits from span-based calls |\n\nBy-value parameters and ordinary virtual dispatch are the default. By-reference semantics fit when aliasing is part of the API or profiling shows that struct copies matter. `new` fits only when compile-time hiding is the intended contract.\n\n# Questions\n\n> [!qard]- How do `ref`, `out`, and `in` parameters differ?\n> All three pass the argument by reference instead of copying its value. For `ref` and `out`, the parameter always aliases the caller's variable. For `in`, it aliases the caller's variable when the argument is a variable of the parameter's type. An `in` argument that is not a variable, or that needs a conversion, can instead be copied into a temporary, and the parameter then refers to that temporary. The three modifiers differ in which direction data may flow through the reference.\n>\n> | Modifier | How data flows through the reference | Typical use |\n> |---|---|---|\n> | `ref` | Both ways. The caller must initialize the variable, and the method can read it and assign it. The caller sees any assignment | Updating or replacing the caller's variable |\n> | `out` | Outward. The caller can pass an unassigned variable. The method cannot read it before assigning it and must assign it before every normal return | Returning an extra result, as in `Try` methods such as `Dictionary.TryGetValue` |\n> | `in` | Inward and readonly. The caller must initialize the argument, and the method can read the parameter but cannot assign it | Avoiding copies of a large struct on a measured hot path |\n>\n> Without a modifier, the parameter is a copy, so assigning it never changes the caller's variable.\n>\n> [Microsoft: method parameters](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/method-parameters)\n\n<!-- qard-id: a16bf465-c1ae-4bca-909c-6f7462f37ca6 -->\n> [!qard]- Why would a method need `ref` when the argument is already a reference type?\n> A reference-type argument passes a copy of the reference. The method can mutate the shared object through that copy, but assigning a different object changes only its local copy. `ref` aliases the caller’s variable, allowing the method to replace the reference stored there. [Microsoft: method parameters](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/method-parameters)\n\n<!-- qard-id: 1fe4393b-4d8c-4e2c-9ae5-769106b13e65 -->\n> [!qard]- What does an `in` parameter prevent the callee from changing?\n> It prevents assignment through the readonly parameter alias. With a reference-type argument, the callee cannot replace the caller's reference through the parameter, but it can call methods that mutate the referenced object. Readonly passing does not make that object immutable. With a mutable struct receiver, calling a potentially mutating member can operate on a defensive copy instead.\n>\n> [Microsoft: method parameters](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/method-parameters)\n\n> [!qard]- When can an `in` parameter improve performance?\n> It can avoid copying a large readonly struct on a measured hot path. Conversions and non-variable arguments can still require temporaries, and readonly access to a mutable struct can trigger defensive copies. Indirection also has a cost, so a small value may be cheaper to pass by value.\n>\n> [Microsoft: method parameters](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/method-parameters)\n\n<!-- qard-id: 19ea3788-056c-4ed6-8bc6-2087ae866f65 -->\n> [!qard]- How does C# apply an optional parameter's default value, and why can already-compiled callers keep an old default?\n> The default is applied at the call site. When an ordinary compiled call omits an optional argument, the compiler inserts the declared default value into the caller's code, and the method receives it like any other argument.\n>\n> The declaration rules fit that mechanism:\n>\n> - **The default must be a compile-time value:** a constant expression, `default(S)`, or `new S()` where `S` is a value type. The compiler has to be able to write the value into each call.\n> - **Optional parameters come after all required parameters.** Named arguments let a call supply a later optional argument while omitting earlier ones.\n> \n> **Versioning consequence:** the default lives in each caller's compiled code. If a library changes a default, callers compiled against the old version keep passing the old value until they are recompiled. A public default value is therefore part of the library's compatibility contract.\n>\n> [Microsoft: named and optional arguments](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/named-and-optional-arguments) · [C#: 12.6.2.3 Run-time evaluation of argument lists](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#12623-run-time-evaluation-of-argument-lists)\n\n<!-- qard-id: ffd19d60-4643-4ede-92ff-83ba55b3f613 -->\n> [!qard]- Which modifiers on a base-class method and a same-named derived-class method make a call through a base-typed reference run the derived implementation?\n> The base method must be declared `virtual`, and the derived method must implement it with `override`. The call is then resolved by the runtime type of the object rather than by the declared type of the variable.\n>\n> Methods are non-virtual by default. If the base method is not virtual, a call through a base-typed variable binds to the base implementation, even when the derived class declares its own method with `new`.\n>\n> [Microsoft: virtual keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/virtual) · [Microsoft: new modifier](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/new-modifier)\n\n> [!qard]- What does declaring a base-class method `virtual` commit that API to?\n> A virtual member is an extension point. Derived classes can replace its behavior, unless an override along the hierarchy is marked `sealed`, which stops classes below it from overriding the member again. Ordinary calls to the member on such an object run the most-derived override, including calls made from code inside the base class. An explicit call through `base` in a derived class is the exception: it runs the base class's implementation rather than the most-derived override. The base class can therefore no longer assume that its own implementation of that member is the one that runs.\n>\n> [Microsoft: virtual keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/virtual) · [Microsoft: new modifier](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/new-modifier) · [Microsoft: base keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/base) · [Microsoft: sealed modifier](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/sealed)\n\n<!-- qard-id: 13e7573c-4ba4-4f2b-a316-4f2dcb52ccd6 -->\n> [!qard]- A base method is not virtual, but a derived class needs different behavior. What are the options, and which ones work through a base-class reference?\n> Only virtual dispatch makes a call through a base-class reference run derived code. Making the base member `virtual` and overriding it is therefore the only option that works through such a reference. Hiding with `new` affects only derived-typed references, and composition moves the variation out of inheritance.\n>\n> | Option | Call through a base reference | Fits when |\n> |---|---|---|\n> | Base member made `virtual`, derived member marked `override` | Runs the derived implementation, chosen by the object's runtime type | The base type can be changed and derived objects are meant to substitute for base objects |\n> | Derived member declared with `new` (hiding) | Still runs the base implementation. Only references typed as the derived class reach the new member | Hiding itself is the intended behavior, such as a deliberate compatibility split, not polymorphism |\n> | Composition | No inheritance dispatch is involved. The class delegates the varying step to an object it holds | The base cannot be changed, or the variation is not a natural subtype relationship |\n>\n> Hiding is the common trap. The same object behaves differently depending on whether it is referenced as the derived type or as the base type.\n>\n> [Microsoft: virtual keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/virtual) · [Microsoft: new modifier](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/new-modifier)\n\n> [!qard]- Can overloads differ only by `object` versus `dynamic`, or by generic constraints?\n> No. Neither distinction gives these methods different signatures. `M(object value)` and `M(dynamic value)` collide, as do two `M<T>(T value)` declarations distinguished only by `where T : class` versus `where T : struct`. The compiler rejects the duplicate declarations before resolving any call. `dynamic` still changes binding of operations that use it; sharing this signature representation does not make its behavior identical to `object`. [C# specification: signatures and overloading](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/basic-concepts#76-signatures-and-overloading)\n\n> [!qard]- Which receiver type controls extension-method lookup?\n> The compile-time type controls lookup. With `Base value = new Derived()`, a method declared only on `Derived` is not found through `value`; an applicable extension for `Base` can be selected instead. An applicable instance method found by ordinary lookup takes precedence over an extension. Generic constraints determine whether an extension candidate is applicable, not whether runtime dispatch replaces it. [Microsoft: extension methods](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/extension-methods)\n\n> [!qard]- Why can `Print<T>(T value)` beat `Print(Base value)` for an argument declared as `Derived`?\n> Type inference can infer `T` as `Derived`, giving the generic candidate an identity conversion. The non-generic candidate needs a conversion from `Derived` to `Base`, so it is a worse match. The generic candidate does not win merely because its constraints are satisfied; constraints must hold for applicability, and otherwise-equivalent candidates have additional tie-breakers. An argument declared as `object` is considered as `object`, even when its runtime value is a string. [C# specification: overload resolution](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#1264-overload-resolution)\n\n> [!qard]- Why can adding an applicable derived overload change a call that previously used a base overload?\n> Method lookup can find an applicable declaration on the derived type and exclude base declarations before the better-function-member comparison. For a derived `Process(double)` and inherited `Process(int)`, `derived.Process(5)` can select the derived member using the implicit int-to-double conversion. This is a lookup rule, not virtual dispatch or a blanket rule that every same-named derived method excludes every base member. Public overload additions can therefore change source behavior when callers recompile. [C# specification: method invocations](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#128103-method-invocations)\n\n> [!qard]- When does a returned `ref` let a caller change the original storage?\n> The caller must retain the alias with a `ref` local or another ref-aware operation. Ordinary assignment reads and copies the value instead:\n>\n> ```csharp\n> static ref int Larger(ref int first, ref int second)\n> {\n>     if (first > second)\n>     {\n>         return ref first;\n>     }\n>     return ref second;\n> }\n>\n> int a = 5;\n> int b = 10;\n> ref int selected = ref Larger(ref a, ref b);\n> // This changes b to 100.\n> selected = 100;\n> ```\n>\n> A separate `out` assignment copies a value into its own destination; it does not create another alias to the returned storage. Ref-safety rules prevent returning storage whose lifetime is too short, such as an ordinary local that disappears when the method returns. [Microsoft: ref returns and ref locals](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/jump-statements#ref-returns)\n\n# References\n\n- [Method parameters](https://learn.microsoft.com/dotnet/csharp/language-reference/keywords/method-parameters#reference-parameters)\n- [C# 13: Calling methods is easier and faster](https://devblogs.microsoft.com/dotnet/csharp13-calling-methods-is-easier-and-faster/)\n"
-            },
-            "edits": [
-              {
-                "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Methods.md",
-                "expected_hash": "192d71e76e9f6570921c5098668a2f578152bd98b0eb6025b18b2f2f13c34d9c",
-                "before": "<!-- qard-id: ffd19d60-4643-4ede-92ff-83ba55b3f613 -->\n> [!qard]- When `Animal a = new Dog();` calls `a.Category()`, what makes the call run `Dog`'s implementation?\n> `Animal.Category()` must be declared `virtual`, and `Dog` must implement `Category()` with `override`. The call is then resolved by the runtime type of the object, `Dog`, rather than by the declared type of the variable, `Animal`.\n>\n> Methods are non-virtual by default. A non-virtual `a.Category()` binds to `Animal.Category()` because `a` is declared as `Animal`, even when `Dog` declares its own `Category()` with `new`.\n>\n> [Microsoft: virtual keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/virtual) · [Microsoft: new modifier](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/new-modifier) · [Microsoft: base keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/base) · [Microsoft: sealed modifier](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/sealed)\n",
-                "after": "<!-- qard-id: ffd19d60-4643-4ede-92ff-83ba55b3f613 -->\n> [!qard]- Which modifiers on a base-class method and a same-named derived-class method make a call through a base-typed reference run the derived implementation?\n> The base method must be declared `virtual`, and the derived method must implement it with `override`. The call is then resolved by the runtime type of the object rather than by the declared type of the variable.\n>\n> Methods are non-virtual by default. If the base method is not virtual, a call through a base-typed variable binds to the base implementation, even when the derived class declares its own method with `new`.\n>\n> [Microsoft: virtual keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/virtual) · [Microsoft: new modifier](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/new-modifier)\n",
-                "reason": "Makes the question self-contained and removes unrelated base and sealed sources from the answer.",
-                "kind": "rewrite",
-                "learning_target": "same",
-                "essential_meanings": [
-                  "Base member must be virtual and derived member must use override",
-                  "Dispatch uses the runtime type, not the variable's declared type",
-                  "A non-virtual base method, even hidden with new, binds to the base implementation through a base reference"
-                ],
-                "sources": [
-                  {
-                    "url": "https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/virtual",
-                    "claim": "virtual members are overridden by derived classes and resolved by runtime type",
-                    "version": "not version-specific"
-                  },
-                  {
-                    "url": "https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/new-modifier",
-                    "claim": "new hides an inherited member and does not participate in virtual dispatch",
-                    "version": "not version-specific"
-                  }
-                ],
-                "feedback_keys": [],
-                "problem": "The Category card's question refers to Animal, Dog and Category without defining them, so it is not self-contained, and its answer cites base and sealed pages it never uses.",
-                "reader_benefit": "The question can be answered from its own text, and the answer carries only the sources that support it."
-              }
-            ],
-            "retired_ids": [],
-            "lineage": [],
-            "fingerprints": [
-              "06fb05cc8aec30228940647354ce82994f70c9f85c895f29c48f35307335ef5e"
-            ]
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "The edit makes the flagged card self-contained, trims unsupported sources, keeps the Qard ID, and the rest of the note is accurate and well ordered.",
-            "change_checks": [
-              {
-                "edit_index": 0,
-                "verdict": "WORTHWHILE",
-                "reason": "The old question depended on Animal, Dog and Category defined elsewhere, and its answer cited base and sealed pages it never used. The rewrite states the setup in the question, keeps the answer's mechanism and the non-virtual/new exception, and keeps only the virtual and new sources. The ID comment stays on the same primary task."
-              }
-            ],
-            "notes": [
-              {
-                "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Methods.md",
-                "verdict": "CLEAN",
-                "summary": "The note is accurate and coherent. The one defective card, whose question was not self-contained and whose answer carried irrelevant sources, is repaired with its ID kept. The other cards, code samples and prose were re-read and need no change.",
-                "page_type": "Concept note (publish: true) with optional Questions and References present. Qard IDs are protected metadata.",
-                "current_text_evidence": [
-                  {
-                    "quote": "Which modifiers on a base-class method and a same-named derived-class method make a call through a base-typed reference run the derived implementation?",
-                    "line_start": 270,
-                    "reason": "The question now states its own setup and has a finite answer, so the earlier self-containment defect is resolved."
-                  },
-                  {
-                    "quote": "The base method must be declared `virtual`, and the derived method must implement it with `override`.",
-                    "line_start": 271,
-                    "reason": "The answer matches the virtual and new documentation. It also keeps the exception that a non-virtual base binds to the base implementation even when the derived class uses `new`."
-                  },
-                  {
-                    "quote": "Both objects have the same runtime type. Only the lookup rule changes",
-                    "line_start": 196,
-                    "reason": "The prose is accurate and gives a clear whiteboard-style contrast of dispatch versus hiding. It needs no rewrite."
-                  },
-                  {
-                    "quote": "How does C# apply an optional parameter's default value, and why can already-compiled callers keep an old default?",
-                    "line_start": 257,
-                    "reason": "This card is one dependent mechanism-and-consequence explanation with an accurate answer. It stays together."
-                  }
-                ],
-                "target_resolution": "RESOLVED",
-                "split_suggestion": "No split: parameter modifiers, dispatch keywords and overload resolution form one coherent Methods topic, and length alone is not a reason to separate them.",
-                "findings": [],
-                "source_checks": [
-                  {
-                    "url": "https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/virtual",
-                    "claim": "virtual members are overridden by derived classes and resolved by runtime type",
-                    "result": "SUPPORTED",
-                    "reason": "The page says the runtime checks the object's type for an overriding member, calls the most derived one, and that methods are non-virtual by default."
-                  },
-                  {
-                    "url": "https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/new-modifier",
-                    "claim": "new hides an inherited member and does not participate in virtual dispatch",
-                    "result": "SUPPORTED",
-                    "reason": "The page says `new` creates a new member and hides the original. It calls `new` and `override` mutually exclusive, so a hiding member is not an override and does not join virtual dispatch."
-                  }
-                ],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ]
-          },
-          "decisions": [],
-          "review_evidence": null,
-          "source_hashes": {
-            "Vault/Home/Programming/NET/CSharp/Fundamentals/Methods.md": "192d71e76e9f6570921c5098668a2f578152bd98b0eb6025b18b2f2f13c34d9c"
-          },
-          "prepared_source_version": 1,
-          "prepared_at": "2026-11-03T19:50:44.499236Z",
-          "rules_hash": "264d16c1cdd0550e8de34525350fcc463d41b1c8095a38a38008f9f84304bb03",
-          "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-          "calls_reserved": 9,
-          "elapsed_seconds": 432.0154621000001,
-          "accepted_at": "2026-11-03T19:52:21.898405Z",
-          "phase": "accepted"
-        }
-      ],
       "base_note_hashes": {
         "Vault/Home/Programming/NET/ASP NET Web API/ASP NET Web API.md": "80a77805481a8a17a566f98debd65ceba8d69144cf9bc04bfdb031b521e28661",
         "Vault/Home/Programming/NET/ASP NET Web API/Authentication.md": "c91d99e05e39bf12460823773ff24dd0a6c07d3c7a91c0cbc09cfd5e71d95412",
@@ -2133,7 +1944,7 @@
       "diff_url": "https://github.com/grafanaKibana/devbook.zip/pull/209.diff",
       "patch_url": "https://github.com/grafanaKibana/devbook.zip/pull/209.patch",
       "issue_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/issues/209",
-      "state": "open",
+      "state": "closed",
       "locked": false,
       "title": "notes: improve Programming",
       "user": {
@@ -2157,27 +1968,27 @@
         "user_view_type": "public",
         "site_admin": false
       },
-      "body": "<!-- devbook-improvement:start topic=programming-e6aba2bd -->\n## 1. Note improvements\n\nReviewed 8 notes in Programming; improved 1. Calls: 19; elapsed: 843 seconds; stop: call_limit.\n\n- No prose-only note changes.\n\n## 2. Questions and answers\n\n- Added: 0\n- Rewritten: 1\n- Split: 0\n- Proposed for removal: 0\n- Replaced: 0\n\n## 3. Significant question changes\n\n- [`Programming/NET/CSharp/Fundamentals/Methods.md`](https://github.com/grafanaKibana/devbook.zip/blob/notes/automated-programming-e6aba2bd-g2/Vault/Home/Programming/NET/CSharp/Fundamentals/Methods.md)\n  - Before: “When `Animal a = new Dog();` calls `a.Category()`, what makes the call run `Dog`'s implementation?” — `Animal.Category()` must be declared `virtual`, and `Dog` must implement `Category()` with `override`. The call is then resolved by the runtime type of the object, `Dog`, rather th\n  - After: “Which modifiers on a base-class method and a same-named derived-class method make a call through a base-typed reference run the derived implementation?” — The base method must be declared `virtual`, and the derived method must implement it with `override`. The call is then resolved by the runtime type of the object rather than by the\n  - Rationale: The Category card's question refers to Animal, Dog and Category without defining them, so it is not self-contained, and its answer cites base and sealed pages it never uses. Makes the question self-contained and removes unrelated base and sealed sources from the answer. The question can be answered from its own text, and the answer carries only the sources that support it. [virtual members are overridden by derived classes and resolved by runtime type](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/virtual), [new hides an inherited member and does not participate in virtual dispatch](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/new-modifier)\n\n## 4. User feedback\n\n- No owner feedback in this workload.\n\n<!-- devbook-export-validation -->Quartz export: verified in `09602b2ff71b134549b94e00e662467b51c25c27`; required checks and full-vault validation passed on that exact head.\n<!-- devbook-improvement:end -->\n\n<!-- devbook-improvement:topic=programming-e6aba2bd;generation=2 -->\n",
+      "body": "<!-- devbook-improvement:start topic=programming-e6aba2bd -->\n## 1. Note improvements\n\nReviewed 8 notes in Programming; improved 1. Calls: 19; elapsed: 843 seconds; stop: call_limit.\n\n- No prose-only note changes.\n\n## 2. Questions and answers\n\n- Added: 0\n- Rewritten: 1\n- Split: 0\n- Proposed for removal: 0\n- Replaced: 0\n\n## 3. Significant question changes\n\n- [`Programming/NET/CSharp/Fundamentals/Methods.md`](https://github.com/grafanaKibana/devbook.zip/blob/notes/automated-programming-e6aba2bd-g2/Vault/Home/Programming/NET/CSharp/Fundamentals/Methods.md)\n  - Before: “When `Animal a = new Dog();` calls `a.Category()`, what makes the call run `Dog`'s implementation?” — `Animal.Category()` must be declared `virtual`, and `Dog` must implement `Category()` with `override`. The call is then resolved by the runtime type of the object, `Dog`, rather th\n  - After: “Which modifiers on a base-class method and a same-named derived-class method make a call through a base-typed reference run the derived implementation?” — The base method must be declared `virtual`, and the derived method must implement it with `override`. The call is then resolved by the runtime type of the object rather than by the\n  - Rationale: The Category card's question refers to Animal, Dog and Category without defining them, so it is not self-contained, and its answer cites base and sealed pages it never uses. Makes the question self-contained and removes unrelated base and sealed sources from the answer. The question can be answered from its own text, and the answer carries only the sources that support it. [virtual members are overridden by derived classes and resolved by runtime type](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/virtual), [new hides an inherited member and does not participate in virtual dispatch](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/new-modifier)\n\n## 4. User feedback\n\n- No owner feedback in this workload.\n\n<!-- devbook-export-validation -->Quartz export: regenerated and receipt verified at `66cf0a16d8448afbc0f5958b287660cb85fe2f51`; hosted required checks and full-vault validation passed on that exact head.\n<!-- devbook-improvement:end -->\n\n<!-- devbook-improvement:topic=programming-e6aba2bd;generation=2 -->\n",
       "created_at": "2026-11-03T19:59:50Z",
-      "updated_at": "2026-11-03T20:14:42Z",
-      "closed_at": null,
-      "merged_at": null,
-      "merge_commit_sha": "0ce4a62aba16523b3262091444898b75a7ee2492",
+      "updated_at": "2026-11-04T12:11:16Z",
+      "closed_at": "2026-11-04T12:11:12Z",
+      "merged_at": "2026-11-04T12:11:12Z",
+      "merge_commit_sha": "3f264f1726d902d3b8b5ceacf203c2b1cb122433",
       "assignees": [],
       "requested_reviewers": [],
       "requested_teams": [],
       "labels": [],
       "milestone": null,
-      "draft": true,
+      "draft": false,
       "commits_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/pulls/209/commits",
       "review_comments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/pulls/209/comments",
       "review_comment_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/pulls/comments{/number}",
       "comments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/issues/209/comments",
-      "statuses_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/statuses/09602b2ff71b134549b94e00e662467b51c25c27",
+      "statuses_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/statuses/66cf0a16d8448afbc0f5958b287660cb85fe2f51",
       "head": {
         "label": "grafanaKibana:notes/automated-programming-e6aba2bd-g2",
         "ref": "notes/automated-programming-e6aba2bd-g2",
-        "sha": "09602b2ff71b134549b94e00e662467b51c25c27",
+        "sha": "66cf0a16d8448afbc0f5958b287660cb85fe2f51",
         "user": {
           "login": "grafanaKibana",
           "id": 45916288,
@@ -2267,14 +2078,14 @@
           "releases_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/releases{/id}",
           "deployments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/deployments",
           "created_at": "2026-02-10T15:48:40Z",
-          "updated_at": "2026-11-03T12:49:06Z",
-          "pushed_at": "2026-11-04T06:53:29Z",
+          "updated_at": "2026-11-04T12:57:14Z",
+          "pushed_at": "2026-11-04T19:55:56Z",
           "git_url": "git://github.com/grafanaKibana/devbook.zip.git",
           "ssh_url": "git@github.com:grafanaKibana/devbook.zip.git",
           "clone_url": "https://github.com/grafanaKibana/devbook.zip.git",
           "svn_url": "https://github.com/grafanaKibana/devbook.zip",
           "homepage": "https://devbook.zip",
-          "size": 232349,
+          "size": 242566,
           "stargazers_count": 0,
           "watchers_count": 0,
           "language": "TypeScript",
@@ -2288,7 +2099,7 @@
           "mirror_url": null,
           "archived": false,
           "disabled": false,
-          "open_issues_count": 10,
+          "open_issues_count": 9,
           "license": {
             "key": "mit",
             "name": "MIT License",
@@ -2304,7 +2115,455 @@
           "topics": [],
           "visibility": "public",
           "forks": 0,
-          "open_issues": 10,
+          "open_issues": 9,
+          "watchers": 0,
+          "default_branch": "main"
+        }
+      },
+      "base": {
+        "label": "grafanaKibana:main",
+        "ref": "main",
+        "sha": "9b89e8d4b161ee50c0dc261e1c154af3b4301d7d",
+        "user": {
+          "login": "grafanaKibana",
+          "id": 45916288,
+          "node_id": "MDQ6VXNlcjQ1OTE2Mjg4",
+          "avatar_url": "https://avatars.githubusercontent.com/u/45916288?v=4",
+          "gravatar_id": "",
+          "url": "https://api.github.com/users/grafanaKibana",
+          "html_url": "https://github.com/grafanaKibana",
+          "followers_url": "https://api.github.com/users/grafanaKibana/followers",
+          "following_url": "https://api.github.com/users/grafanaKibana/following{/other_user}",
+          "gists_url": "https://api.github.com/users/grafanaKibana/gists{/gist_id}",
+          "starred_url": "https://api.github.com/users/grafanaKibana/starred{/owner}{/repo}",
+          "subscriptions_url": "https://api.github.com/users/grafanaKibana/subscriptions",
+          "organizations_url": "https://api.github.com/users/grafanaKibana/orgs",
+          "repos_url": "https://api.github.com/users/grafanaKibana/repos",
+          "events_url": "https://api.github.com/users/grafanaKibana/events{/privacy}",
+          "received_events_url": "https://api.github.com/users/grafanaKibana/received_events",
+          "type": "User",
+          "user_view_type": "public",
+          "site_admin": false
+        },
+        "repo": {
+          "id": 1154625390,
+          "node_id": "R_kgDORNIvbg",
+          "name": "devbook.zip",
+          "full_name": "grafanaKibana/devbook.zip",
+          "private": false,
+          "owner": {
+            "login": "grafanaKibana",
+            "id": 45916288,
+            "node_id": "MDQ6VXNlcjQ1OTE2Mjg4",
+            "avatar_url": "https://avatars.githubusercontent.com/u/45916288?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/grafanaKibana",
+            "html_url": "https://github.com/grafanaKibana",
+            "followers_url": "https://api.github.com/users/grafanaKibana/followers",
+            "following_url": "https://api.github.com/users/grafanaKibana/following{/other_user}",
+            "gists_url": "https://api.github.com/users/grafanaKibana/gists{/gist_id}",
+            "starred_url": "https://api.github.com/users/grafanaKibana/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/grafanaKibana/subscriptions",
+            "organizations_url": "https://api.github.com/users/grafanaKibana/orgs",
+            "repos_url": "https://api.github.com/users/grafanaKibana/repos",
+            "events_url": "https://api.github.com/users/grafanaKibana/events{/privacy}",
+            "received_events_url": "https://api.github.com/users/grafanaKibana/received_events",
+            "type": "User",
+            "user_view_type": "public",
+            "site_admin": false
+          },
+          "html_url": "https://github.com/grafanaKibana/devbook.zip",
+          "description": "Personal knowledge system with RAG Agent, linked to the Obsidian vault, rendered to the Static Web",
+          "fork": false,
+          "url": "https://api.github.com/repos/grafanaKibana/devbook.zip",
+          "forks_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/forks",
+          "keys_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/keys{/key_id}",
+          "collaborators_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/collaborators{/collaborator}",
+          "teams_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/teams",
+          "hooks_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/hooks",
+          "issue_events_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/issues/events{/number}",
+          "events_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/events",
+          "assignees_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/assignees{/user}",
+          "branches_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/branches{/branch}",
+          "tags_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/tags",
+          "blobs_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/git/blobs{/sha}",
+          "git_tags_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/git/tags{/sha}",
+          "git_refs_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/git/refs{/sha}",
+          "trees_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/git/trees{/sha}",
+          "statuses_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/statuses/{sha}",
+          "languages_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/languages",
+          "stargazers_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/stargazers",
+          "contributors_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/contributors",
+          "subscribers_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/subscribers",
+          "subscription_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/subscription",
+          "commits_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/commits{/sha}",
+          "git_commits_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/git/commits{/sha}",
+          "comments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/comments{/number}",
+          "issue_comment_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/issues/comments{/number}",
+          "contents_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/contents/{+path}",
+          "compare_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/compare/{base}...{head}",
+          "merges_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/merges",
+          "archive_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/{archive_format}{/ref}",
+          "downloads_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/downloads",
+          "issues_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/issues{/number}",
+          "pulls_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/pulls{/number}",
+          "milestones_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/milestones{/number}",
+          "notifications_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/notifications{?since,all,participating}",
+          "labels_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/labels{/name}",
+          "releases_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/releases{/id}",
+          "deployments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/deployments",
+          "created_at": "2026-02-10T15:48:40Z",
+          "updated_at": "2026-11-04T12:57:14Z",
+          "pushed_at": "2026-11-04T19:55:56Z",
+          "git_url": "git://github.com/grafanaKibana/devbook.zip.git",
+          "ssh_url": "git@github.com:grafanaKibana/devbook.zip.git",
+          "clone_url": "https://github.com/grafanaKibana/devbook.zip.git",
+          "svn_url": "https://github.com/grafanaKibana/devbook.zip",
+          "homepage": "https://devbook.zip",
+          "size": 242566,
+          "stargazers_count": 0,
+          "watchers_count": 0,
+          "language": "TypeScript",
+          "has_issues": true,
+          "has_projects": true,
+          "has_downloads": false,
+          "has_wiki": false,
+          "has_pages": true,
+          "has_discussions": true,
+          "forks_count": 0,
+          "mirror_url": null,
+          "archived": false,
+          "disabled": false,
+          "open_issues_count": 9,
+          "license": {
+            "key": "mit",
+            "name": "MIT License",
+            "spdx_id": "MIT",
+            "url": "https://api.github.com/licenses/mit",
+            "node_id": "MDc6TGljZW5zZTEz"
+          },
+          "allow_forking": true,
+          "is_template": false,
+          "web_commit_signoff_required": false,
+          "has_pull_requests": true,
+          "pull_request_creation_policy": "all",
+          "topics": [],
+          "visibility": "public",
+          "forks": 0,
+          "open_issues": 9,
+          "watchers": 0,
+          "default_branch": "main"
+        }
+      },
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/grafanaKibana/devbook.zip/pulls/209"
+        },
+        "html": {
+          "href": "https://github.com/grafanaKibana/devbook.zip/pull/209"
+        },
+        "issue": {
+          "href": "https://api.github.com/repos/grafanaKibana/devbook.zip/issues/209"
+        },
+        "comments": {
+          "href": "https://api.github.com/repos/grafanaKibana/devbook.zip/issues/209/comments"
+        },
+        "review_comments": {
+          "href": "https://api.github.com/repos/grafanaKibana/devbook.zip/pulls/209/comments"
+        },
+        "review_comment": {
+          "href": "https://api.github.com/repos/grafanaKibana/devbook.zip/pulls/comments{/number}"
+        },
+        "commits": {
+          "href": "https://api.github.com/repos/grafanaKibana/devbook.zip/pulls/209/commits"
+        },
+        "statuses": {
+          "href": "https://api.github.com/repos/grafanaKibana/devbook.zip/statuses/66cf0a16d8448afbc0f5958b287660cb85fe2f51"
+        }
+      },
+      "author_association": "OWNER",
+      "auto_merge": null,
+      "assignee": null,
+      "active_lock_reason": null,
+      "blocked_topic_ids": [],
+      "review_started_head_sha": null,
+      "base_conflict": false,
+      "pause_reason": null,
+      "changed_paths": [
+        "Vault/Home/Programming/NET/CSharp/Fundamentals/Methods.md"
+      ],
+      "terminal_audit": {
+        "status": "merged",
+        "record_count": 1,
+        "records": [
+          {
+            "batch_hash": "279a035a3effd1c70a5ba73d18a6e18f4fb57d5dbe14cca06d3ac7ac25baa4f8",
+            "proposal_hash": "ed46bbd6c51706367dd91a296d22298d983f012ace15a463b9ef6bd6f6724229",
+            "result_hash": "f86de7b1705b7a11456ba639cf002e369a6a0fc35b430ba4690d7d431ee94355"
+          }
+        ]
+      }
+    },
+    "ai-ml-4edf0823:1": {
+      "topic_id": "ai-ml-4edf0823",
+      "generation": 1,
+      "number": 210,
+      "branch": "notes/automated-ai-ml-4edf0823-g1",
+      "status": "merged",
+      "frozen": true,
+      "head_sha": "8dc06f61eccfa9fa94ed42182072d80933438446",
+      "export_required": false,
+      "export_operation_id": "8863af0d8e174629",
+      "automatic_export": true,
+      "base_note_hashes": {
+        "Vault/Home/AI & ML/AI & ML.md": "078f1c0f1256165849d90ca6382a5d6f6e580a12ea4e73870bf857b5cf31ea76",
+        "Vault/Home/AI & ML/LLM/Agents/Agents.md": "b81df751eb3f0c1a523bb5b499f744a23a7629b26032f8f5ee788a030feaaca5",
+        "Vault/Home/AI & ML/LLM/Agents/Evaluation/Agent Benchmarks.md": "0b5ed93a2279ebdc55c19dc8332487c2deb7fbee24634631b0707268ad31c304",
+        "Vault/Home/AI & ML/LLM/Agents/Evaluation/Evaluation.md": "336a8d3046fa95a9e107d70d280c95828535f82365025a198e7f924b89679a7d",
+        "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md": "89e9a05a6646ddca1de3348dfc2a1339384227be0fac28b5fcf3b35663503615",
+        "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md": "98621304f05662b55adae77c1bd4d7f7ef15ec72042d9685d8c7a1e48ea08769",
+        "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md": "ab4577f91860054d0afb62237699765289ea7081f39f8360c588451ee792933c",
+        "Vault/Home/AI & ML/LLM/Context Engineering/Context Engineering.md": "5720a0b709cec66798fb586b8d327df0ab4860a0e334eddf8c5eb6a4caae6af9",
+        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Chunking.md": "8fe52360a66f701d8dc9c99c606beb56b6489290e1d600610a7a4eeef41b1f9d",
+        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Component-Level Evaluation.md": "581bad4527c490b8e9656b39703deac0788a28f77fc0d1fe29fc9ae21ff83045",
+        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics.md": "2211056138eab71abd078b820e270fb66089888994458d9e871e820bd192b9ae",
+        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation.md": "17f2ae99a1da3e5194415426e9feff4bcd5419d0f7674aca43f85cf6354e753c",
+        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Retrieval Evaluation Sets.md": "08a7dd6e06bfa900545ca6a41864512c02510383da3d194f8030f8d4fcba926a",
+        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Monitoring.md": "9e6fb48acc946b1b09320ddc847d50b0ec4fa5d24cbdc9042ce0578b7476357b",
+        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Query Translation.md": "21f19a71a90f9b7f6fec4fb6f0cd090dcf524945057a5f2d51df4726bf9fb8cf",
+        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching.md": "38650d0ad47fd7b3bc61ff528e58e93ac9cf81d5cde1321407243f0e90c3762a",
+        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Patterns.md": "0c90622d67e24e2273cdc51087171ca3e4380522f94a86411a5c9d18b12f3e76",
+        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG.md": "53d7678e8d9feec3a627320f1b1f05c17e58bb016e05a87e7e9336b2ef040beb",
+        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md": "98de8dab6eed28cda952efd461624f3b7f9290fef7639388c7f35702ae5e4ab6",
+        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Retrieval.md": "af653647187264a9ebf166c370ef1be0948a5c867c58437a52bee3fa199272d2",
+        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md": "598df6fd793f70397d423e33fe955f5c430b3c760622cf7da9259ae78654a503",
+        "Vault/Home/AI & ML/LLM/Embeddings.md": "e502b3adf6230ba531935340c917f067d2d800b1cd9f439e403047dae3df26ca",
+        "Vault/Home/AI & ML/LLM/Evaluation/Building an Evaluation Set.md": "6bd09eca28a385b02f20c76bb84df1eadcaa271a8f4cd9f28a06c03b825523d9",
+        "Vault/Home/AI & ML/LLM/Evaluation/Deterministic Checks.md": "0edc916ae738c4619a6631bd33046ffc9967b622accc5586dd06dcaa7d87e83a",
+        "Vault/Home/AI & ML/LLM/Evaluation/Evaluation.md": "8682b4c8cb30c37e2b3995d76d08c5d3aa89ad6c63ade0d6e820d4e9c5046563",
+        "Vault/Home/AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs.md": "afef06e979fe10a8189fd8edaad4dc19d17097b8662cfdb3b0932f6067ebcc49",
+        "Vault/Home/AI & ML/LLM/Evaluation/LLM-as-a-Judge.md": "e459e5c3bc81a5d4e448108d68aa9403cc1c738a0bee8ccd11bf6d41d83bbd0d",
+        "Vault/Home/AI & ML/LLM/Evaluation/Online Evaluation and AB Tests.md": "6c2172069884fa98c3a42aab32f2a5bd901713aa5a023ebc0f0d7ad7492c2205",
+        "Vault/Home/AI & ML/LLM/Fine-tuning.md": "dc4476c738fb7c5c9d95aaa77b8f9f05251a9cb0f3dfc0ea39087b7ac0ef423e",
+        "Vault/Home/AI & ML/LLM/Generation.md": "b0a32bf860662ed60a141eff284b7907af457f2486d0c240643030f80369d3e3",
+        "Vault/Home/AI & ML/LLM/Graph Engineering.md": "ab8038f6a5d903220d1a014318620ddb1c4f16d3ecc7d15e5e9a589dcd636f85",
+        "Vault/Home/AI & ML/LLM/Harness Engineering/Harness Engineering.md": "c104a510fd6dad047c3de14c6bc2d28c93cf3f8c9456a9346f0af4908ad22047",
+        "Vault/Home/AI & ML/LLM/Harness Engineering/Model Context Protocol.md": "f26e5a5d8cf6bd3145da6c7f144223124638bec2b211d91332cde7c4de106876",
+        "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Agent Instructions.md": "3f2809f83289c31d4e9abb837194e68937c800f839d1aa9e1643b1cd053d7089",
+        "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Coding Agents.md": "6b7684d830a739524749b7d05b5a3c0430bf4d39280498293ef57e4d4de2e517",
+        "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Hooks.md": "0920998e6f0d18e4f35123da8828ad7b66894e7ef6d3caa90856c981c5680ab2",
+        "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Plugins.md": "0ab0bfd2f4e4a732dc7e5444a93a25484b41cfb2217695b5cfe73bc3540f9571",
+        "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Skills.md": "11f3c825d74d4694bbc857b70075be582257209e0e881158a460d83ab5c22856",
+        "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Tool Design.md": "73b36d45d1a0f8f9ed75a0a878398209a61417b2c8ea1615353cdddfed4bdf02",
+        "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Tooling.md": "c154f6ac9726d1b624ea83158ea6afc60160581a4ff68efb76c321da8a683322",
+        "Vault/Home/AI & ML/LLM/LLM Caching.md": "2d0403a025d43835d733d2308770779ff5dce999f3bf4c78cf2b2d08386032dd",
+        "Vault/Home/AI & ML/LLM/LLM.md": "5695e472a03b48c9cc62ab59896499b415e23c86f3fb835395a4af0c73634628",
+        "Vault/Home/AI & ML/LLM/Loop Engineering/Agent Loop.md": "2c0f6a7672583391d559ac5106ef28b3a777420bbd1ed147f7b8ee86b5f60302",
+        "Vault/Home/AI & ML/LLM/Loop Engineering/Loop Engineering.md": "a9420eaacdea7fec7df11e52307dde973447a591f944d9eceb36e1c96a1e5551",
+        "Vault/Home/AI & ML/LLM/Loop Engineering/Multi-Agentic Systems.md": "da9214a8a52b569fa72fc8293d78fe737cacee4b39d7f55ddab1a7e3c3b34d51",
+        "Vault/Home/AI & ML/LLM/Model Selection and Routing.md": "3e51413c28f29e6c7421d46a48fb43424f0cff8d5a51f23710cb2bdbb86ceef9",
+        "Vault/Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization.md": "d23946b92758ef556af7f5493b595808d1c38b24d0bfbda8e19043aae339361b",
+        "Vault/Home/AI & ML/LLM/Prompt Engineering/In-Context Learning.md": "cd5bc4e4b103d0ad33cae3f58af48752db34e8f2df461dd13186d817194069ff",
+        "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Composition.md": "aa65b22eca831e710352e79905a21eccfed34f0088c94f905ddc3e79f8bad672",
+        "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md": "e9fc0a0167616cd23b5fff0091853dc1cd7b5e7bd728a93e00a2dbb348fb9ac7",
+        "Vault/Home/AI & ML/LLM/Prompt Engineering/Reasoning Techniques.md": "70fd04fe4a52620fb001d01b6e5eab224db0dd507f4f9734efc418d215553ac8",
+        "Vault/Home/AI & ML/LLM/Safety/Guardrails.md": "588c6c647f8aae4ec3f1ca9bc16bda31b2cd97b9f89ec039bfb3892ca8d65ab1",
+        "Vault/Home/AI & ML/LLM/Safety/Hallucinations.md": "f11205ed76f275438f0580eb3bfef7db89b52343ca82a1f45b01acff30f40416",
+        "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md": "5d94f150c5123ccd96f162a2e49f2a2485ffdd707e80bba65ff536c0825036e5",
+        "Vault/Home/AI & ML/LLM/Safety/OWASP vulnerabilities on AI LLM.md": "cb1a6f16371edd2617734baa7a9535e9fbdfdbe6f20fae0eae8c2518032142ce",
+        "Vault/Home/AI & ML/LLM/Safety/Safety.md": "ecff01b86fea0767de5a02d05617ee59393f26e5c90a0803465148612a42d955",
+        "Vault/Home/AI & ML/Machine Learning/Data Drift.md": "21dee63dd039df53bf8f125164cfd0cb969d824aed5807b2a77c8224f3a56510",
+        "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md": "eb74fa915d8cd6d261ed969cbe28c937038a62f4edca8abd3e58b791442e14eb",
+        "Vault/Home/AI & ML/Machine Learning/Evaluation/Classification Evaluation.md": "dbce74a291c375531c459c90ee948aa668d253b0ed8795efe0f4fea835d573ee",
+        "Vault/Home/AI & ML/Machine Learning/Evaluation/Evaluation.md": "d67d8d102da4f9a57f583d7eca6c1bb0d2c47623b9885711b3e0fa971bfe08ee",
+        "Vault/Home/AI & ML/Machine Learning/Evaluation/ROC-AUC and PR-AUC.md": "1914832825fbf81d43abf8be640c17a2deff59b0cb0d9e5fdc5c5463273d0786",
+        "Vault/Home/AI & ML/Machine Learning/Machine Learning.md": "44a148e1fae2564ba7072981d097324d6a5f70ab69bc4ebc4fd1e3ed864cebf0",
+        "Vault/Home/AI & ML/Machine Learning/Natural Language Processing.md": "b6ab6ca5cb727cb20ac0e84315baf8d8fa09e4eab5c3e64551d8a1f6f37e2bd0",
+        "Vault/Home/AI & ML/Machine Learning/Spectrum Of Automations.md": "d4c75248027e930de108dae95a69cf0f0af8de09dfa0a6ac3d8a5cdfad1adb2c",
+        "Vault/Home/AI & ML/Machine Learning/Types/Types.md": "5197e684859afa076d231f1d681907c81875655b88c3370523b227e633e17ba1",
+        "Vault/Home/AI & ML/Responsible AI.md": "ee73fd3b78375d04d9ae40f2386fe029e5e161fc28ac0fa299e4cc714f213f6a"
+      },
+      "export_verified_head": "8dc06f61eccfa9fa94ed42182072d80933438446",
+      "export_check_status": "success",
+      "url": "https://api.github.com/repos/grafanaKibana/devbook.zip/pulls/210",
+      "id": 5150233488,
+      "node_id": "PR_kwDORNIvbs8AAAABMvpTkA",
+      "html_url": "https://github.com/grafanaKibana/devbook.zip/pull/210",
+      "diff_url": "https://github.com/grafanaKibana/devbook.zip/pull/210.diff",
+      "patch_url": "https://github.com/grafanaKibana/devbook.zip/pull/210.patch",
+      "issue_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/issues/210",
+      "state": "closed",
+      "locked": false,
+      "title": "notes: improve AI & ML",
+      "user": {
+        "login": "grafanaKibana",
+        "id": 45916288,
+        "node_id": "MDQ6VXNlcjQ1OTE2Mjg4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/45916288?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/grafanaKibana",
+        "html_url": "https://github.com/grafanaKibana",
+        "followers_url": "https://api.github.com/users/grafanaKibana/followers",
+        "following_url": "https://api.github.com/users/grafanaKibana/following{/other_user}",
+        "gists_url": "https://api.github.com/users/grafanaKibana/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/grafanaKibana/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/grafanaKibana/subscriptions",
+        "organizations_url": "https://api.github.com/users/grafanaKibana/orgs",
+        "repos_url": "https://api.github.com/users/grafanaKibana/repos",
+        "events_url": "https://api.github.com/users/grafanaKibana/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/grafanaKibana/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "body": "<!-- devbook-improvement:start topic=ai-ml-4edf0823 -->\n## 1. Note improvements\n\nReviewed 10 notes in AI & ML; improved 1. Calls: 20; elapsed: 719 seconds; stop: call_limit.\n\n- [`AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md`](https://github.com/grafanaKibana/devbook.zip/blob/notes/automated-ai-ml-4edf0823-g1/Vault/Home/AI%20%26%20ML/LLM/Agents/Evaluation/Tool-Call%20Evaluation.md) — The first reference bullet carries a long trailing annotation after a dash inside the link text, which the reference format disallows. Removes the trailing annotation from the reference bullet so it is a bare descriptive link, as the References contract requires. The reference list reads as clean, consistent descriptive links.\n\n## 2. Questions and answers\n\n- Added: 0\n- Rewritten: 0\n- Split: 0\n- Proposed for removal: 0\n- Replaced: 0\n\n## 3. Significant question changes\n\n- No significant question changes.\n\n## 4. User feedback\n\n- No owner feedback in this workload.\n\n<!-- devbook-export-validation -->Quartz export: verified in `8dc06f61eccfa9fa94ed42182072d80933438446`; required checks and full-vault validation passed on that exact head.\n<!-- devbook-improvement:end -->\n\n<!-- devbook-improvement:topic=ai-ml-4edf0823;generation=1 -->\n",
+      "created_at": "2026-11-04T06:54:52Z",
+      "updated_at": "2026-11-04T08:01:43Z",
+      "closed_at": "2026-11-04T08:01:37Z",
+      "merged_at": "2026-11-04T08:01:37Z",
+      "merge_commit_sha": "9b89e8d4b161ee50c0dc261e1c154af3b4301d7d",
+      "assignees": [],
+      "requested_reviewers": [],
+      "requested_teams": [],
+      "labels": [],
+      "milestone": null,
+      "draft": false,
+      "commits_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/pulls/210/commits",
+      "review_comments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/pulls/210/comments",
+      "review_comment_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/pulls/comments{/number}",
+      "comments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/issues/210/comments",
+      "statuses_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/statuses/8dc06f61eccfa9fa94ed42182072d80933438446",
+      "head": {
+        "label": "grafanaKibana:notes/automated-ai-ml-4edf0823-g1",
+        "ref": "notes/automated-ai-ml-4edf0823-g1",
+        "sha": "8dc06f61eccfa9fa94ed42182072d80933438446",
+        "user": {
+          "login": "grafanaKibana",
+          "id": 45916288,
+          "node_id": "MDQ6VXNlcjQ1OTE2Mjg4",
+          "avatar_url": "https://avatars.githubusercontent.com/u/45916288?v=4",
+          "gravatar_id": "",
+          "url": "https://api.github.com/users/grafanaKibana",
+          "html_url": "https://github.com/grafanaKibana",
+          "followers_url": "https://api.github.com/users/grafanaKibana/followers",
+          "following_url": "https://api.github.com/users/grafanaKibana/following{/other_user}",
+          "gists_url": "https://api.github.com/users/grafanaKibana/gists{/gist_id}",
+          "starred_url": "https://api.github.com/users/grafanaKibana/starred{/owner}{/repo}",
+          "subscriptions_url": "https://api.github.com/users/grafanaKibana/subscriptions",
+          "organizations_url": "https://api.github.com/users/grafanaKibana/orgs",
+          "repos_url": "https://api.github.com/users/grafanaKibana/repos",
+          "events_url": "https://api.github.com/users/grafanaKibana/events{/privacy}",
+          "received_events_url": "https://api.github.com/users/grafanaKibana/received_events",
+          "type": "User",
+          "user_view_type": "public",
+          "site_admin": false
+        },
+        "repo": {
+          "id": 1154625390,
+          "node_id": "R_kgDORNIvbg",
+          "name": "devbook.zip",
+          "full_name": "grafanaKibana/devbook.zip",
+          "private": false,
+          "owner": {
+            "login": "grafanaKibana",
+            "id": 45916288,
+            "node_id": "MDQ6VXNlcjQ1OTE2Mjg4",
+            "avatar_url": "https://avatars.githubusercontent.com/u/45916288?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/grafanaKibana",
+            "html_url": "https://github.com/grafanaKibana",
+            "followers_url": "https://api.github.com/users/grafanaKibana/followers",
+            "following_url": "https://api.github.com/users/grafanaKibana/following{/other_user}",
+            "gists_url": "https://api.github.com/users/grafanaKibana/gists{/gist_id}",
+            "starred_url": "https://api.github.com/users/grafanaKibana/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/grafanaKibana/subscriptions",
+            "organizations_url": "https://api.github.com/users/grafanaKibana/orgs",
+            "repos_url": "https://api.github.com/users/grafanaKibana/repos",
+            "events_url": "https://api.github.com/users/grafanaKibana/events{/privacy}",
+            "received_events_url": "https://api.github.com/users/grafanaKibana/received_events",
+            "type": "User",
+            "user_view_type": "public",
+            "site_admin": false
+          },
+          "html_url": "https://github.com/grafanaKibana/devbook.zip",
+          "description": "Personal knowledge system with RAG Agent, linked to the Obsidian vault, rendered to the Static Web",
+          "fork": false,
+          "url": "https://api.github.com/repos/grafanaKibana/devbook.zip",
+          "forks_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/forks",
+          "keys_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/keys{/key_id}",
+          "collaborators_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/collaborators{/collaborator}",
+          "teams_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/teams",
+          "hooks_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/hooks",
+          "issue_events_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/issues/events{/number}",
+          "events_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/events",
+          "assignees_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/assignees{/user}",
+          "branches_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/branches{/branch}",
+          "tags_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/tags",
+          "blobs_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/git/blobs{/sha}",
+          "git_tags_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/git/tags{/sha}",
+          "git_refs_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/git/refs{/sha}",
+          "trees_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/git/trees{/sha}",
+          "statuses_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/statuses/{sha}",
+          "languages_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/languages",
+          "stargazers_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/stargazers",
+          "contributors_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/contributors",
+          "subscribers_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/subscribers",
+          "subscription_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/subscription",
+          "commits_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/commits{/sha}",
+          "git_commits_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/git/commits{/sha}",
+          "comments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/comments{/number}",
+          "issue_comment_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/issues/comments{/number}",
+          "contents_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/contents/{+path}",
+          "compare_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/compare/{base}...{head}",
+          "merges_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/merges",
+          "archive_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/{archive_format}{/ref}",
+          "downloads_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/downloads",
+          "issues_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/issues{/number}",
+          "pulls_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/pulls{/number}",
+          "milestones_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/milestones{/number}",
+          "notifications_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/notifications{?since,all,participating}",
+          "labels_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/labels{/name}",
+          "releases_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/releases{/id}",
+          "deployments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/deployments",
+          "created_at": "2026-02-10T15:48:40Z",
+          "updated_at": "2026-11-04T12:57:14Z",
+          "pushed_at": "2026-11-04T19:55:56Z",
+          "git_url": "git://github.com/grafanaKibana/devbook.zip.git",
+          "ssh_url": "git@github.com:grafanaKibana/devbook.zip.git",
+          "clone_url": "https://github.com/grafanaKibana/devbook.zip.git",
+          "svn_url": "https://github.com/grafanaKibana/devbook.zip",
+          "homepage": "https://devbook.zip",
+          "size": 242566,
+          "stargazers_count": 0,
+          "watchers_count": 0,
+          "language": "TypeScript",
+          "has_issues": true,
+          "has_projects": true,
+          "has_downloads": false,
+          "has_wiki": false,
+          "has_pages": true,
+          "has_discussions": true,
+          "forks_count": 0,
+          "mirror_url": null,
+          "archived": false,
+          "disabled": false,
+          "open_issues_count": 9,
+          "license": {
+            "key": "mit",
+            "name": "MIT License",
+            "spdx_id": "MIT",
+            "url": "https://api.github.com/licenses/mit",
+            "node_id": "MDc6TGljZW5zZTEz"
+          },
+          "allow_forking": true,
+          "is_template": false,
+          "web_commit_signoff_required": false,
+          "has_pull_requests": true,
+          "pull_request_creation_policy": "all",
+          "topics": [],
+          "visibility": "public",
+          "forks": 0,
+          "open_issues": 9,
           "watchers": 0,
           "default_branch": "main"
         }
@@ -2402,14 +2661,14 @@
           "releases_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/releases{/id}",
           "deployments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/deployments",
           "created_at": "2026-02-10T15:48:40Z",
-          "updated_at": "2026-11-03T12:49:06Z",
-          "pushed_at": "2026-11-04T06:53:29Z",
+          "updated_at": "2026-11-04T12:57:14Z",
+          "pushed_at": "2026-11-04T19:55:56Z",
           "git_url": "git://github.com/grafanaKibana/devbook.zip.git",
           "ssh_url": "git@github.com:grafanaKibana/devbook.zip.git",
           "clone_url": "https://github.com/grafanaKibana/devbook.zip.git",
           "svn_url": "https://github.com/grafanaKibana/devbook.zip",
           "homepage": "https://devbook.zip",
-          "size": 232349,
+          "size": 242566,
           "stargazers_count": 0,
           "watchers_count": 0,
           "language": "TypeScript",
@@ -2423,7 +2682,7 @@
           "mirror_url": null,
           "archived": false,
           "disabled": false,
-          "open_issues_count": 10,
+          "open_issues_count": 9,
           "license": {
             "key": "mit",
             "name": "MIT License",
@@ -2439,35 +2698,35 @@
           "topics": [],
           "visibility": "public",
           "forks": 0,
-          "open_issues": 10,
+          "open_issues": 9,
           "watchers": 0,
           "default_branch": "main"
         }
       },
       "_links": {
         "self": {
-          "href": "https://api.github.com/repos/grafanaKibana/devbook.zip/pulls/209"
+          "href": "https://api.github.com/repos/grafanaKibana/devbook.zip/pulls/210"
         },
         "html": {
-          "href": "https://github.com/grafanaKibana/devbook.zip/pull/209"
+          "href": "https://github.com/grafanaKibana/devbook.zip/pull/210"
         },
         "issue": {
-          "href": "https://api.github.com/repos/grafanaKibana/devbook.zip/issues/209"
+          "href": "https://api.github.com/repos/grafanaKibana/devbook.zip/issues/210"
         },
         "comments": {
-          "href": "https://api.github.com/repos/grafanaKibana/devbook.zip/issues/209/comments"
+          "href": "https://api.github.com/repos/grafanaKibana/devbook.zip/issues/210/comments"
         },
         "review_comments": {
-          "href": "https://api.github.com/repos/grafanaKibana/devbook.zip/pulls/209/comments"
+          "href": "https://api.github.com/repos/grafanaKibana/devbook.zip/pulls/210/comments"
         },
         "review_comment": {
           "href": "https://api.github.com/repos/grafanaKibana/devbook.zip/pulls/comments{/number}"
         },
         "commits": {
-          "href": "https://api.github.com/repos/grafanaKibana/devbook.zip/pulls/209/commits"
+          "href": "https://api.github.com/repos/grafanaKibana/devbook.zip/pulls/210/commits"
         },
         "statuses": {
-          "href": "https://api.github.com/repos/grafanaKibana/devbook.zip/statuses/09602b2ff71b134549b94e00e662467b51c25c27"
+          "href": "https://api.github.com/repos/grafanaKibana/devbook.zip/statuses/8dc06f61eccfa9fa94ed42182072d80933438446"
         }
       },
       "author_association": "OWNER",
@@ -2476,253 +2735,17 @@
       "active_lock_reason": null,
       "blocked_topic_ids": [],
       "review_started_head_sha": null,
-      "base_conflict": false,
-      "pause_reason": null,
-      "changed_paths": [
-        "Vault/Home/Programming/NET/CSharp/Fundamentals/Methods.md"
-      ]
-    },
-    "ai-ml-4edf0823:1": {
-      "topic_id": "ai-ml-4edf0823",
-      "generation": 1,
-      "number": 210,
-      "branch": "notes/automated-ai-ml-4edf0823-g1",
-      "status": "open",
-      "frozen": false,
-      "head_sha": "8dc06f61eccfa9fa94ed42182072d80933438446",
-      "export_required": false,
-      "export_operation_id": "8863af0d8e174629",
-      "automatic_export": true,
-      "proposal_records": [
-        {
-          "record_id": "ab5fa25654a150eca35dc878218e945b6a6fb4e06382a53edd0cea64ab016aed",
-          "workload_id": "8863af0d8e1746298a05f54c5909b04b",
-          "batch": {
-            "topic": "AI & ML",
-            "topic_id": "ai-ml-4edf0823",
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md",
-                "content": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"Scoring each agent tool call on four axes: right tool, correct arguments, valid call, and necessity.\"\nlevel: [\"3\"]\npriority: High\nstatus: Done\npublish: true\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Agents/Evaluation/Tool-Call Evaluation\"\nflashcard_uid: \"1d83d54c\"\ncreated: \"2026-06-12T18:50:14.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\n---\n\nA tool call is where an agent stops describing an action and asks a system to perform it. Failures at this boundary are concrete: the agent can name the wrong tool, send the wrong value in valid JSON, invent a function, or repeat a call that changed nothing.\n\nFour properties are scored separately: validity, selection, arguments, and necessity. A combined \"tool accuracy\" number hides which decision failed. Separate scores suggest where to investigate: selection failures point toward routing or tool descriptions, and argument failures toward weak grounding or an unsafe schema. These are leads, not proven root causes.\n\nThis is the detailed version of tool-call correctness in [[Home/AI & ML/LLM/Agents/Evaluation/Evaluation|Agent Evaluation]]. A [[Deterministic Checks|deterministic check]] handles structure. An [[LLM-as-a-Judge|LLM judge]] or labeled reference handles decisions whose meaning depends on conversation state.\n\n# What a Tool Call Can Get Wrong\n\n```mermaid\nflowchart TD\n    S[Tool call] --> V[Valid?]\n    V -->|malformed / unknown tool / wrong arity| F1[Invalid call]\n    V -->|schema-valid| SEL[Right tool for this step?]\n    SEL -->|wrong tool / no call when needed / call when none needed| F2[Selection error]\n    SEL -->|correct tool| ARG[Arguments correct?]\n    ARG -->|schema-valid but wrong values| F3[Argument error]\n    ARG -->|correct| NEC[Necessary?]\n    NEC -->|duplicate / no progress| F4[Redundant call]\n    NEC -->|advances task| OK[Good call]\n```\n\n- **Validity** asks whether the tool exists and whether its arguments parse against the schema. This check is deterministic and can run before execution.\n- **Selection** asks whether the current state calls for this tool. It covers both needless calls and the opposite failure: answering from memory when fresh state was required.\n- **Arguments** checks meaning after structure has passed. `{\"order_id\": \"4851\"}` is valid JSON even when the conversation identifies order `4815`. Time zones and dropped search constraints fail the same way.\n- **Necessity** checks whether the call advances the task. Repeating the same read against unchanged state raises cost and often marks the start of a loop.\n\n# Metrics\n\n| Metric | What it measures | Scorer |\n| --- | --- | --- |\n| Invalid-call rate | Fraction of calls that are malformed, unknown, or schema-invalid | Deterministic |\n| Tool-selection accuracy | Right tool chosen for the step (incl. correctly choosing *no* call) | Reference or judge |\n| Argument match | Arguments equal the expected values — exact for ids/enums, semantic for free text | Reference (exact) + judge (semantic) |\n| Redundant-call rate | Duplicate or no-progress calls per task | Deterministic (hash of tool+args) + judge |\n| Calls-per-task | Total calls vs the minimum a clean solve needs | Counter |\n\nSelection and argument accuracy are scored separately. If selection is 95% and argument accuracy is 70%, argument handling is the first area to investigate. Averaging them to 82.5% destroys that diagnosis.\n\n# Ground Truth\n\nReference-based evaluation stores the expected `(tool, arguments)` for a step. Tool equality scores selection. Field comparison scores the arguments. Successful human or agent traces are usually better raw material than hand-written cases. This is the trace equivalent of deriving [[Retrieval Evaluation Sets|retrieval eval sets]] from known source evidence.\n\nReference-free evaluation starts with schema validation and exact-duplicate detection. A judge then reads the conversation and tool catalog to score selection or necessity. This works before labeled traces exist, but it is weak at catching a plausible value that differs from the real target by one digit.\n\n# Example\n\nPer-call scoring for one step of a support agent:\n\n```text\nState: user asked \"refund my order, it arrived broken\" (order #4815 in context)\nAgent call: issue_refund(order_id=\"4851\", amount=\"full\")\n\n- Valid:      yes (schema-valid, real tool)            [deterministic: PASS]\n- Selection:  issue_refund is correct here             [reference: PASS]\n- Arguments:  order_id 4851 != expected 4815           [reference: FAIL]\n- Necessary:  refund operation needed, not a repeat    [PASS]\n\nVerdict: schema-valid call, wrong target order — the failure deterministic\nchecks cannot see. Caught only because the reference pinned order_id=4815.\n```\n\n# Tradeoffs\n\n| Scorer | Catches | Cost | Blind to |\n| --- | --- | --- | --- |\n| Deterministic checks | Malformed calls and unknown tools via schema validation; exact duplicates via comparison with earlier calls | Lowest — runs pre-execution | Semantically wrong arguments, wrong tool choice |\n| Reference match | Wrong tool, wrong argument values | Medium — needs labeled traces | Valid alternate tools/paths the reference didn't list |\n| LLM judge | Tool-choice reasonableness, necessity, semantic args | Highest — a judge call per step, plus judge bias | Subtle value errors a reference would pin exactly |\n\nDeterministic validity checks fit every call: they are cheap and can block malformed requests before execution. Reference matching fits tools where a wrong value is expensive, such as payments or deletion. A judge fits open-ended selection and necessity decisions, provided its scores are calibrated against human labels. Otherwise it may reward a longer trace simply because the trace looks more thorough.\n\n# Pitfalls\n\n## Exact Argument Match Flags Semantically-equal Values\n\nString equality marks `\"refund the full amount\"` wrong against `\"full refund\"`, even though the action is identical. Exact matching belongs on identifiers, enums, and booleans. Natural-language fields need normalization or a semantic scorer.\n\n## Order-sensitive Scoring Punishes Valid Reorderings\n\nAn exact reference sequence penalizes harmless reordering of independent reads. Comparing those calls as a set avoids that penalty. Order becomes part of correctness only when one call establishes a precondition for the next, such as looking up an order before issuing its refund.\n\n## Schema-valid Hides Semantically Wrong\n\nThe riskiest call may be perfectly valid: real tool, valid schema, wrong account. Structural checks should be paired with reference or semantic argument checks. Irreversible actions also need confirmation or a dry run at the execution boundary.\n\n# Questions\n\n<!-- qard-id: 23f9e773-456c-4f3f-b85a-96dcd927918e -->\n> [!qard]- Why should tool selection and argument accuracy be measured separately?\n> Because they score different decisions that fail for different reasons. Tool selection asks whether the agent called the right tool for the current step, including recognizing when no call is needed. Argument accuracy asks whether a correctly chosen tool received the right values.\n>\n> A combined score hides which decision failed. For example, 95% selection accuracy and 70% argument accuracy average to 82.5%, and that single number no longer shows that arguments are the weak point. Separate scores point an investigation in a direction:\n>\n> - **Selection failures** often suggest unclear tool descriptions or a routing problem.\n> - **Argument failures** often suggest weak grounding in the conversation or a loosely constrained schema. A call can name the right tool in schema-valid form and still send order `4851` when the conversation identifies order `4815`.\n> \n> These patterns are leads to investigate, not proof of the root cause.\n>\n> How argument accuracy is scored also depends on the field. Exact matching fits identifiers, enums and booleans with one defined value. Free-text fields need normalization or a semantic check, which is valid only where the tool contract accepts equivalent wording.\n>\n> [Berkeley Function Calling Leaderboard](https://gorilla.cs.berkeley.edu/blogs/8_berkeley_function_calling_leaderboard.html)\n\n# References\n\n- [Berkeley Function-Calling Leaderboard -- AST and executable accuracy for tool/function calls, including irrelevance detection (Gorilla, UC Berkeley)](https://gorilla.cs.berkeley.edu/blogs/8_berkeley_function_calling_leaderboard.html)\n- [Tool use (function calling) overview (Anthropic Docs)](https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview)\n",
-                "hash": "89e9a05a6646ddca1de3348dfc2a1339384227be0fac28b5fcf3b35663503615",
-                "topic": "AI & ML",
-                "violations": [],
-                "needs_fixing_ids": [],
-                "repair_input_hash": "",
-                "selection_reason": "new"
-              }
-            ],
-            "feedback": [],
-            "rules_hash": "264d16c1cdd0550e8de34525350fcc463d41b1c8095a38a38008f9f84304bb03",
-            "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-            "review_process": "focused-whole-note-v1",
-            "pr": null
-          },
-          "proposal": {
-            "version": 1,
-            "edits": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md",
-                "expected_hash": "89e9a05a6646ddca1de3348dfc2a1339384227be0fac28b5fcf3b35663503615",
-                "before": "- [Berkeley Function-Calling Leaderboard -- AST and executable accuracy for tool/function calls, including irrelevance detection (Gorilla, UC Berkeley)](https://gorilla.cs.berkeley.edu/blogs/8_berkeley_function_calling_leaderboard.html)",
-                "after": "- [Berkeley Function-Calling Leaderboard (Gorilla, UC Berkeley)](https://gorilla.cs.berkeley.edu/blogs/8_berkeley_function_calling_leaderboard.html)",
-                "reason": "Removes the trailing annotation from the reference bullet so it is a bare descriptive link, as the References contract requires.",
-                "kind": "note",
-                "learning_target": "same",
-                "essential_meanings": [
-                  "Reference points to the Berkeley Function-Calling Leaderboard"
-                ],
-                "sources": [],
-                "feedback_keys": [],
-                "problem": "The first reference bullet carries a long trailing annotation after a dash inside the link text, which the reference format disallows.",
-                "reader_benefit": "The reference list reads as clean, consistent descriptive links."
-              }
-            ],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md",
-                "outcome": "changed",
-                "reason": "Audited the whole note: the four-axis model (validity, selection, arguments, necessity), the flowchart, metrics table, ground-truth section, worked refund example (4851 vs 4815), tradeoff table, pitfalls and the single card are mutually consistent and technically sound, and the card's arithmetic (95% and 70% average to 82.5%) is correct. The only defect found was the annotated reference bullet, now shortened to a bare descriptive link."
-              }
-            ],
-            "feedback": []
-          },
-          "result": {
-            "sources": {
-              "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"Scoring each agent tool call on four axes: right tool, correct arguments, valid call, and necessity.\"\nlevel: [\"3\"]\npriority: High\nstatus: Done\npublish: true\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Agents/Evaluation/Tool-Call Evaluation\"\nflashcard_uid: \"1d83d54c\"\ncreated: \"2026-06-12T18:50:14.000Z\"\nmodified: \"2026-11-04T06:47:28.050Z\"\n---\n\nA tool call is where an agent stops describing an action and asks a system to perform it. Failures at this boundary are concrete: the agent can name the wrong tool, send the wrong value in valid JSON, invent a function, or repeat a call that changed nothing.\n\nFour properties are scored separately: validity, selection, arguments, and necessity. A combined \"tool accuracy\" number hides which decision failed. Separate scores suggest where to investigate: selection failures point toward routing or tool descriptions, and argument failures toward weak grounding or an unsafe schema. These are leads, not proven root causes.\n\nThis is the detailed version of tool-call correctness in [[Home/AI & ML/LLM/Agents/Evaluation/Evaluation|Agent Evaluation]]. A [[Deterministic Checks|deterministic check]] handles structure. An [[LLM-as-a-Judge|LLM judge]] or labeled reference handles decisions whose meaning depends on conversation state.\n\n# What a Tool Call Can Get Wrong\n\n```mermaid\nflowchart TD\n    S[Tool call] --> V[Valid?]\n    V -->|malformed / unknown tool / wrong arity| F1[Invalid call]\n    V -->|schema-valid| SEL[Right tool for this step?]\n    SEL -->|wrong tool / no call when needed / call when none needed| F2[Selection error]\n    SEL -->|correct tool| ARG[Arguments correct?]\n    ARG -->|schema-valid but wrong values| F3[Argument error]\n    ARG -->|correct| NEC[Necessary?]\n    NEC -->|duplicate / no progress| F4[Redundant call]\n    NEC -->|advances task| OK[Good call]\n```\n\n- **Validity** asks whether the tool exists and whether its arguments parse against the schema. This check is deterministic and can run before execution.\n- **Selection** asks whether the current state calls for this tool. It covers both needless calls and the opposite failure: answering from memory when fresh state was required.\n- **Arguments** checks meaning after structure has passed. `{\"order_id\": \"4851\"}` is valid JSON even when the conversation identifies order `4815`. Time zones and dropped search constraints fail the same way.\n- **Necessity** checks whether the call advances the task. Repeating the same read against unchanged state raises cost and often marks the start of a loop.\n\n# Metrics\n\n| Metric | What it measures | Scorer |\n| --- | --- | --- |\n| Invalid-call rate | Fraction of calls that are malformed, unknown, or schema-invalid | Deterministic |\n| Tool-selection accuracy | Right tool chosen for the step (incl. correctly choosing *no* call) | Reference or judge |\n| Argument match | Arguments equal the expected values — exact for ids/enums, semantic for free text | Reference (exact) + judge (semantic) |\n| Redundant-call rate | Duplicate or no-progress calls per task | Deterministic (hash of tool+args) + judge |\n| Calls-per-task | Total calls vs the minimum a clean solve needs | Counter |\n\nSelection and argument accuracy are scored separately. If selection is 95% and argument accuracy is 70%, argument handling is the first area to investigate. Averaging them to 82.5% destroys that diagnosis.\n\n# Ground Truth\n\nReference-based evaluation stores the expected `(tool, arguments)` for a step. Tool equality scores selection. Field comparison scores the arguments. Successful human or agent traces are usually better raw material than hand-written cases. This is the trace equivalent of deriving [[Retrieval Evaluation Sets|retrieval eval sets]] from known source evidence.\n\nReference-free evaluation starts with schema validation and exact-duplicate detection. A judge then reads the conversation and tool catalog to score selection or necessity. This works before labeled traces exist, but it is weak at catching a plausible value that differs from the real target by one digit.\n\n# Example\n\nPer-call scoring for one step of a support agent:\n\n```text\nState: user asked \"refund my order, it arrived broken\" (order #4815 in context)\nAgent call: issue_refund(order_id=\"4851\", amount=\"full\")\n\n- Valid:      yes (schema-valid, real tool)            [deterministic: PASS]\n- Selection:  issue_refund is correct here             [reference: PASS]\n- Arguments:  order_id 4851 != expected 4815           [reference: FAIL]\n- Necessary:  refund operation needed, not a repeat    [PASS]\n\nVerdict: schema-valid call, wrong target order — the failure deterministic\nchecks cannot see. Caught only because the reference pinned order_id=4815.\n```\n\n# Tradeoffs\n\n| Scorer | Catches | Cost | Blind to |\n| --- | --- | --- | --- |\n| Deterministic checks | Malformed calls and unknown tools via schema validation; exact duplicates via comparison with earlier calls | Lowest — runs pre-execution | Semantically wrong arguments, wrong tool choice |\n| Reference match | Wrong tool, wrong argument values | Medium — needs labeled traces | Valid alternate tools/paths the reference didn't list |\n| LLM judge | Tool-choice reasonableness, necessity, semantic args | Highest — a judge call per step, plus judge bias | Subtle value errors a reference would pin exactly |\n\nDeterministic validity checks fit every call: they are cheap and can block malformed requests before execution. Reference matching fits tools where a wrong value is expensive, such as payments or deletion. A judge fits open-ended selection and necessity decisions, provided its scores are calibrated against human labels. Otherwise it may reward a longer trace simply because the trace looks more thorough.\n\n# Pitfalls\n\n## Exact Argument Match Flags Semantically-equal Values\n\nString equality marks `\"refund the full amount\"` wrong against `\"full refund\"`, even though the action is identical. Exact matching belongs on identifiers, enums, and booleans. Natural-language fields need normalization or a semantic scorer.\n\n## Order-sensitive Scoring Punishes Valid Reorderings\n\nAn exact reference sequence penalizes harmless reordering of independent reads. Comparing those calls as a set avoids that penalty. Order becomes part of correctness only when one call establishes a precondition for the next, such as looking up an order before issuing its refund.\n\n## Schema-valid Hides Semantically Wrong\n\nThe riskiest call may be perfectly valid: real tool, valid schema, wrong account. Structural checks should be paired with reference or semantic argument checks. Irreversible actions also need confirmation or a dry run at the execution boundary.\n\n# Questions\n\n<!-- qard-id: 23f9e773-456c-4f3f-b85a-96dcd927918e -->\n> [!qard]- Why should tool selection and argument accuracy be measured separately?\n> Because they score different decisions that fail for different reasons. Tool selection asks whether the agent called the right tool for the current step, including recognizing when no call is needed. Argument accuracy asks whether a correctly chosen tool received the right values.\n>\n> A combined score hides which decision failed. For example, 95% selection accuracy and 70% argument accuracy average to 82.5%, and that single number no longer shows that arguments are the weak point. Separate scores point an investigation in a direction:\n>\n> - **Selection failures** often suggest unclear tool descriptions or a routing problem.\n> - **Argument failures** often suggest weak grounding in the conversation or a loosely constrained schema. A call can name the right tool in schema-valid form and still send order `4851` when the conversation identifies order `4815`.\n> \n> These patterns are leads to investigate, not proof of the root cause.\n>\n> How argument accuracy is scored also depends on the field. Exact matching fits identifiers, enums and booleans with one defined value. Free-text fields need normalization or a semantic check, which is valid only where the tool contract accepts equivalent wording.\n>\n> [Berkeley Function Calling Leaderboard](https://gorilla.cs.berkeley.edu/blogs/8_berkeley_function_calling_leaderboard.html)\n\n# References\n\n- [Berkeley Function-Calling Leaderboard (Gorilla, UC Berkeley)](https://gorilla.cs.berkeley.edu/blogs/8_berkeley_function_calling_leaderboard.html)\n- [Tool use (function calling) overview (Anthropic Docs)](https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview)\n"
-            },
-            "edits": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md",
-                "expected_hash": "89e9a05a6646ddca1de3348dfc2a1339384227be0fac28b5fcf3b35663503615",
-                "before": "- [Berkeley Function-Calling Leaderboard -- AST and executable accuracy for tool/function calls, including irrelevance detection (Gorilla, UC Berkeley)](https://gorilla.cs.berkeley.edu/blogs/8_berkeley_function_calling_leaderboard.html)",
-                "after": "- [Berkeley Function-Calling Leaderboard (Gorilla, UC Berkeley)](https://gorilla.cs.berkeley.edu/blogs/8_berkeley_function_calling_leaderboard.html)",
-                "reason": "Removes the trailing annotation from the reference bullet so it is a bare descriptive link, as the References contract requires.",
-                "kind": "note",
-                "learning_target": "same",
-                "essential_meanings": [
-                  "Reference points to the Berkeley Function-Calling Leaderboard"
-                ],
-                "sources": [],
-                "feedback_keys": [],
-                "problem": "The first reference bullet carries a long trailing annotation after a dash inside the link text, which the reference format disallows.",
-                "reader_benefit": "The reference list reads as clean, consistent descriptive links."
-              }
-            ],
-            "retired_ids": [],
-            "lineage": [],
-            "fingerprints": [
-              "1d00ff4bcc2d98a53f75146c0f62204227521960da8dfc7150bdd8f4edc84d23"
-            ]
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md",
-                "verdict": "CLEAN",
-                "summary": "The whole note was read. It is accurate and coherent, and the four-axis model, metrics, example, tradeoffs and pitfalls agree with each other. The one defect was the annotated reference bullet, and the edit fixes it without touching content or the card ID.",
-                "page_type": "Concept — optional Questions and References present; a bare-link References contract applies; no Datacore content.",
-                "current_text_evidence": [
-                  {
-                    "quote": "Four properties are scored separately: validity, selection, arguments, and necessity.",
-                    "line_start": 18,
-                    "reason": "The opening states the operating idea and its boundary. It also explains why a combined score is misleading, and the rest of the note follows that structure."
-                  },
-                  {
-                    "quote": "Averaging them to 82.5% destroys that diagnosis.",
-                    "line_start": 52,
-                    "reason": "The arithmetic is correct: (95+70)/2 = 82.5. The point is consistent with the card."
-                  },
-                  {
-                    "quote": "Caught only because the reference pinned order_id=4815.",
-                    "line_start": 74,
-                    "reason": "The worked example is concrete, shows a schema-valid but wrong argument, and ties back to the earlier explanation."
-                  },
-                  {
-                    "quote": "Reference matching fits tools where a wrong value is expensive, such as payments or deletion.",
-                    "line_start": 85,
-                    "reason": "The tradeoff section ends in a decision condition, with the exceptions and caveats about judge calibration kept."
-                  },
-                  {
-                    "quote": "> [!qard]- Why should tool selection and argument accuracy be measured separately?",
-                    "line_start": 104,
-                    "reason": "The card tests one dependent explanation (why the scores are separated). It is self-contained, and its ID comment is intact."
-                  },
-                  {
-                    "quote": "- [Berkeley Function-Calling Leaderboard (Gorilla, UC Berkeley)](https://gorilla.cs.berkeley.edu/blogs/8_berkeley_function_calling_leaderboard.html)",
-                    "line_start": 120,
-                    "reason": "The reference is now a bare descriptive link, as the contract requires."
-                  }
-                ],
-                "target_resolution": "RESOLVED",
-                "split_suggestion": "No split: the note covers a single cohesive topic, scoring tool calls, and its sections depend on one another.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "overall_reason": "The only concrete defect was the annotated reference bullet, which broke the bare-link rule. The edit resolves it. The rest of the note was audited and is accurate and well organised, and the Qard ID and metadata are untouched.",
-            "change_checks": [
-              {
-                "edit_index": 0,
-                "verdict": "WORTHWHILE",
-                "reason": "The edit removes the trailing annotation from the link text. That annotation violated the bare-descriptive-link References contract. The URL is unchanged and the sources are still valid and non-duplicated. Nothing else in the note is affected."
-              }
-            ]
-          },
-          "decisions": [],
-          "review_evidence": null,
-          "source_hashes": {
-            "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md": "89e9a05a6646ddca1de3348dfc2a1339384227be0fac28b5fcf3b35663503615"
-          },
-          "prepared_source_version": 1,
-          "prepared_at": "2026-11-04T06:47:28.050771Z",
-          "rules_hash": "264d16c1cdd0550e8de34525350fcc463d41b1c8095a38a38008f9f84304bb03",
-          "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-          "calls_reserved": 10,
-          "elapsed_seconds": 376.70917060000016,
-          "accepted_at": "2026-11-04T06:48:41.603930Z",
-          "phase": "accepted"
-        }
-      ],
-      "base_note_hashes": {
-        "Vault/Home/AI & ML/AI & ML.md": "078f1c0f1256165849d90ca6382a5d6f6e580a12ea4e73870bf857b5cf31ea76",
-        "Vault/Home/AI & ML/LLM/Agents/Agents.md": "b81df751eb3f0c1a523bb5b499f744a23a7629b26032f8f5ee788a030feaaca5",
-        "Vault/Home/AI & ML/LLM/Agents/Evaluation/Agent Benchmarks.md": "0b5ed93a2279ebdc55c19dc8332487c2deb7fbee24634631b0707268ad31c304",
-        "Vault/Home/AI & ML/LLM/Agents/Evaluation/Evaluation.md": "336a8d3046fa95a9e107d70d280c95828535f82365025a198e7f924b89679a7d",
-        "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md": "89e9a05a6646ddca1de3348dfc2a1339384227be0fac28b5fcf3b35663503615",
-        "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md": "98621304f05662b55adae77c1bd4d7f7ef15ec72042d9685d8c7a1e48ea08769",
-        "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md": "ab4577f91860054d0afb62237699765289ea7081f39f8360c588451ee792933c",
-        "Vault/Home/AI & ML/LLM/Context Engineering/Context Engineering.md": "5720a0b709cec66798fb586b8d327df0ab4860a0e334eddf8c5eb6a4caae6af9",
-        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Chunking.md": "8fe52360a66f701d8dc9c99c606beb56b6489290e1d600610a7a4eeef41b1f9d",
-        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Component-Level Evaluation.md": "581bad4527c490b8e9656b39703deac0788a28f77fc0d1fe29fc9ae21ff83045",
-        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics.md": "2211056138eab71abd078b820e270fb66089888994458d9e871e820bd192b9ae",
-        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation.md": "17f2ae99a1da3e5194415426e9feff4bcd5419d0f7674aca43f85cf6354e753c",
-        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Retrieval Evaluation Sets.md": "08a7dd6e06bfa900545ca6a41864512c02510383da3d194f8030f8d4fcba926a",
-        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Monitoring.md": "9e6fb48acc946b1b09320ddc847d50b0ec4fa5d24cbdc9042ce0578b7476357b",
-        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Query Translation.md": "21f19a71a90f9b7f6fec4fb6f0cd090dcf524945057a5f2d51df4726bf9fb8cf",
-        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching.md": "38650d0ad47fd7b3bc61ff528e58e93ac9cf81d5cde1321407243f0e90c3762a",
-        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Patterns.md": "0c90622d67e24e2273cdc51087171ca3e4380522f94a86411a5c9d18b12f3e76",
-        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG.md": "53d7678e8d9feec3a627320f1b1f05c17e58bb016e05a87e7e9336b2ef040beb",
-        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md": "98de8dab6eed28cda952efd461624f3b7f9290fef7639388c7f35702ae5e4ab6",
-        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Retrieval.md": "af653647187264a9ebf166c370ef1be0948a5c867c58437a52bee3fa199272d2",
-        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md": "598df6fd793f70397d423e33fe955f5c430b3c760622cf7da9259ae78654a503",
-        "Vault/Home/AI & ML/LLM/Embeddings.md": "e502b3adf6230ba531935340c917f067d2d800b1cd9f439e403047dae3df26ca",
-        "Vault/Home/AI & ML/LLM/Evaluation/Building an Evaluation Set.md": "6bd09eca28a385b02f20c76bb84df1eadcaa271a8f4cd9f28a06c03b825523d9",
-        "Vault/Home/AI & ML/LLM/Evaluation/Deterministic Checks.md": "0edc916ae738c4619a6631bd33046ffc9967b622accc5586dd06dcaa7d87e83a",
-        "Vault/Home/AI & ML/LLM/Evaluation/Evaluation.md": "8682b4c8cb30c37e2b3995d76d08c5d3aa89ad6c63ade0d6e820d4e9c5046563",
-        "Vault/Home/AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs.md": "afef06e979fe10a8189fd8edaad4dc19d17097b8662cfdb3b0932f6067ebcc49",
-        "Vault/Home/AI & ML/LLM/Evaluation/LLM-as-a-Judge.md": "e459e5c3bc81a5d4e448108d68aa9403cc1c738a0bee8ccd11bf6d41d83bbd0d",
-        "Vault/Home/AI & ML/LLM/Evaluation/Online Evaluation and AB Tests.md": "6c2172069884fa98c3a42aab32f2a5bd901713aa5a023ebc0f0d7ad7492c2205",
-        "Vault/Home/AI & ML/LLM/Fine-tuning.md": "dc4476c738fb7c5c9d95aaa77b8f9f05251a9cb0f3dfc0ea39087b7ac0ef423e",
-        "Vault/Home/AI & ML/LLM/Generation.md": "b0a32bf860662ed60a141eff284b7907af457f2486d0c240643030f80369d3e3",
-        "Vault/Home/AI & ML/LLM/Graph Engineering.md": "ab8038f6a5d903220d1a014318620ddb1c4f16d3ecc7d15e5e9a589dcd636f85",
-        "Vault/Home/AI & ML/LLM/Harness Engineering/Harness Engineering.md": "c104a510fd6dad047c3de14c6bc2d28c93cf3f8c9456a9346f0af4908ad22047",
-        "Vault/Home/AI & ML/LLM/Harness Engineering/Model Context Protocol.md": "f26e5a5d8cf6bd3145da6c7f144223124638bec2b211d91332cde7c4de106876",
-        "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Agent Instructions.md": "3f2809f83289c31d4e9abb837194e68937c800f839d1aa9e1643b1cd053d7089",
-        "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Coding Agents.md": "6b7684d830a739524749b7d05b5a3c0430bf4d39280498293ef57e4d4de2e517",
-        "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Hooks.md": "0920998e6f0d18e4f35123da8828ad7b66894e7ef6d3caa90856c981c5680ab2",
-        "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Plugins.md": "0ab0bfd2f4e4a732dc7e5444a93a25484b41cfb2217695b5cfe73bc3540f9571",
-        "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Skills.md": "11f3c825d74d4694bbc857b70075be582257209e0e881158a460d83ab5c22856",
-        "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Tool Design.md": "73b36d45d1a0f8f9ed75a0a878398209a61417b2c8ea1615353cdddfed4bdf02",
-        "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Tooling.md": "c154f6ac9726d1b624ea83158ea6afc60160581a4ff68efb76c321da8a683322",
-        "Vault/Home/AI & ML/LLM/LLM Caching.md": "2d0403a025d43835d733d2308770779ff5dce999f3bf4c78cf2b2d08386032dd",
-        "Vault/Home/AI & ML/LLM/LLM.md": "5695e472a03b48c9cc62ab59896499b415e23c86f3fb835395a4af0c73634628",
-        "Vault/Home/AI & ML/LLM/Loop Engineering/Agent Loop.md": "2c0f6a7672583391d559ac5106ef28b3a777420bbd1ed147f7b8ee86b5f60302",
-        "Vault/Home/AI & ML/LLM/Loop Engineering/Loop Engineering.md": "a9420eaacdea7fec7df11e52307dde973447a591f944d9eceb36e1c96a1e5551",
-        "Vault/Home/AI & ML/LLM/Loop Engineering/Multi-Agentic Systems.md": "da9214a8a52b569fa72fc8293d78fe737cacee4b39d7f55ddab1a7e3c3b34d51",
-        "Vault/Home/AI & ML/LLM/Model Selection and Routing.md": "3e51413c28f29e6c7421d46a48fb43424f0cff8d5a51f23710cb2bdbb86ceef9",
-        "Vault/Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization.md": "d23946b92758ef556af7f5493b595808d1c38b24d0bfbda8e19043aae339361b",
-        "Vault/Home/AI & ML/LLM/Prompt Engineering/In-Context Learning.md": "cd5bc4e4b103d0ad33cae3f58af48752db34e8f2df461dd13186d817194069ff",
-        "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Composition.md": "aa65b22eca831e710352e79905a21eccfed34f0088c94f905ddc3e79f8bad672",
-        "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md": "e9fc0a0167616cd23b5fff0091853dc1cd7b5e7bd728a93e00a2dbb348fb9ac7",
-        "Vault/Home/AI & ML/LLM/Prompt Engineering/Reasoning Techniques.md": "70fd04fe4a52620fb001d01b6e5eab224db0dd507f4f9734efc418d215553ac8",
-        "Vault/Home/AI & ML/LLM/Safety/Guardrails.md": "588c6c647f8aae4ec3f1ca9bc16bda31b2cd97b9f89ec039bfb3892ca8d65ab1",
-        "Vault/Home/AI & ML/LLM/Safety/Hallucinations.md": "f11205ed76f275438f0580eb3bfef7db89b52343ca82a1f45b01acff30f40416",
-        "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md": "5d94f150c5123ccd96f162a2e49f2a2485ffdd707e80bba65ff536c0825036e5",
-        "Vault/Home/AI & ML/LLM/Safety/OWASP vulnerabilities on AI LLM.md": "cb1a6f16371edd2617734baa7a9535e9fbdfdbe6f20fae0eae8c2518032142ce",
-        "Vault/Home/AI & ML/LLM/Safety/Safety.md": "ecff01b86fea0767de5a02d05617ee59393f26e5c90a0803465148612a42d955",
-        "Vault/Home/AI & ML/Machine Learning/Data Drift.md": "21dee63dd039df53bf8f125164cfd0cb969d824aed5807b2a77c8224f3a56510",
-        "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md": "eb74fa915d8cd6d261ed969cbe28c937038a62f4edca8abd3e58b791442e14eb",
-        "Vault/Home/AI & ML/Machine Learning/Evaluation/Classification Evaluation.md": "dbce74a291c375531c459c90ee948aa668d253b0ed8795efe0f4fea835d573ee",
-        "Vault/Home/AI & ML/Machine Learning/Evaluation/Evaluation.md": "d67d8d102da4f9a57f583d7eca6c1bb0d2c47623b9885711b3e0fa971bfe08ee",
-        "Vault/Home/AI & ML/Machine Learning/Evaluation/ROC-AUC and PR-AUC.md": "1914832825fbf81d43abf8be640c17a2deff59b0cb0d9e5fdc5c5463273d0786",
-        "Vault/Home/AI & ML/Machine Learning/Machine Learning.md": "44a148e1fae2564ba7072981d097324d6a5f70ab69bc4ebc4fd1e3ed864cebf0",
-        "Vault/Home/AI & ML/Machine Learning/Natural Language Processing.md": "b6ab6ca5cb727cb20ac0e84315baf8d8fa09e4eab5c3e64551d8a1f6f37e2bd0",
-        "Vault/Home/AI & ML/Machine Learning/Spectrum Of Automations.md": "d4c75248027e930de108dae95a69cf0f0af8de09dfa0a6ac3d8a5cdfad1adb2c",
-        "Vault/Home/AI & ML/Machine Learning/Types/Types.md": "5197e684859afa076d231f1d681907c81875655b88c3370523b227e633e17ba1",
-        "Vault/Home/AI & ML/Responsible AI.md": "ee73fd3b78375d04d9ae40f2386fe029e5e161fc28ac0fa299e4cc714f213f6a"
-      },
-      "export_verified_head": "8dc06f61eccfa9fa94ed42182072d80933438446",
-      "export_check_status": "success"
+      "terminal_audit": {
+        "status": "merged",
+        "record_count": 1,
+        "records": [
+          {
+            "batch_hash": "50f05b9fbf95c1d1fe7db8465f6a79a63c8c40efd3f7b5f6dde6571b80965af2",
+            "proposal_hash": "0de4e8485921cd31f5f7291fc08aeb64adc955554aa42861fba7e7e052705f9c",
+            "result_hash": "ec48bab8eb402414cef3eb4e92516b925b6e595ab6afef17eab2f6c20f608c7c"
+          }
+        ]
+      }
     }
   },
   "feedback": {
@@ -2822,14 +2845,14 @@
     "status": "active",
     "phase": "selecting",
     "started_at": "2026-11-04T19:55:42.282235Z",
-    "elapsed_seconds": 10.0030778,
+    "elapsed_seconds": 20.5019317,
     "calls_reserved": 0,
     "responses_received": 0,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-04T19:55:52.284781Z"
+    "checkpoint_at": "2026-11-04T19:56:02.783635Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
