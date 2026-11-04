@@ -3002,9 +3002,9 @@
     "version": 1,
     "id": "792178af26484b3da828d4cea1e5f39f",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-04T19:55:42.282235Z",
-    "elapsed_seconds": 470.0143107,
+    "elapsed_seconds": 473.684661,
     "calls_reserved": 11,
     "responses_received": 11,
     "attempted_paths": [
@@ -3012,7 +3012,8 @@
       "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md",
       "Vault/Home/Programming/NET/CSharp/Fundamentals/Methods.md",
       "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Types.md",
-      "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Locking.md"
+      "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Locking.md",
+      "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Mutex.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -3190,10 +3191,83 @@
           "reason": "card edit must replace one complete active Qard block including adjacent metadata",
           "model_calls": 9
         }
+      },
+      {
+        "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Mutex.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Mutex.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against the current text and my knowledge of the .NET Mutex documentation. WaitHandle/SafeWaitHandle derivation, thread ownership, recursion count, ApplicationException on a non-owner ReleaseMutex, AbandonedMutexException granting ownership, and WaitAll being unsupported on STA threads are all accurate. The Global\\ and Local\\ prefix scope is correctly limited to Windows Terminal Services. The examples use try/finally release correctly. The Pitfalls and Tradeoffs sections are not repetitive and give the lock/SemaphoreSlim/Mutex decision rule. Both cards are single-task, self-contained, cite sources, and match the note. No known violations were reported, and no defect was found that justifies a change."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Mutex.md",
+                "verdict": "CLEAN",
+                "summary": "Independent whole-note audit found the note accurate, well ordered and free of repetition. The mechanism, examples, pitfalls, tradeoffs and both cards are sound, so no edit is warranted.",
+                "page_type": "Concept — typed frontmatter, optional Questions and References present. Qard IDs and metadata are protected.",
+                "current_text_evidence": [
+                  {
+                    "quote": "Its useful boundary is the process boundary: a named mutex can keep two local processes from entering the same critical section.",
+                    "line_start": 17,
+                    "reason": "The opening states the operating idea and the decision boundary against lock and SemaphoreSlim right away."
+                  },
+                  {
+                    "quote": "every successful wait increments a recursion count. Another thread cannot acquire the mutex until the owner has called `ReleaseMutex` the same number of times.",
+                    "line_start": 28,
+                    "reason": "Reentrancy mechanism is accurate and shown with a count walkthrough in the code block that follows."
+                  },
+                  {
+                    "quote": "`WaitAll` is unsupported on an STA thread, including the usual WinForms and WPF UI threads, and throws `NotSupportedException` there.",
+                    "line_start": 52,
+                    "reason": "Version- and thread-model-specific condition is stated correctly and placed as a warning."
+                  },
+                  {
+                    "quote": "**Abandonment transfers ownership, not correctness.**",
+                    "line_start": 100,
+                    "reason": "Pitfall correctly explains that the next waiter owns the mutex and must validate state; this agrees with the AbandonedMutexException card."
+                  },
+                  {
+                    "quote": "> [!qard]- What does `AbandonedMutexException` signal?",
+                    "line_start": 126,
+                    "reason": "Single-task card with a self-contained answer. Its ID is retained and the answer is technically correct."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the note is one cohesive topic. Mutex ownership, abandonment and the process boundary depend on each other, so a split would not help.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "Whole-note read found no concrete factual, structural, voice or question-quality defect. Keeping the note unchanged is justified, and no edits were proposed.",
+            "change_checks": []
+          },
+          "model_calls": 11
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-04T20:03:32.296018Z",
+    "checkpoint_at": "2026-11-04T20:03:35.966368Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
