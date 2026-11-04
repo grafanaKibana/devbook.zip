@@ -2339,9 +2339,9 @@
     "version": 1,
     "id": "8863af0d8e1746298a05f54c5909b04b",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-04T06:42:24.894668Z",
-    "elapsed_seconds": 438.0462197000001,
+    "elapsed_seconds": 441.4971803000001,
     "calls_reserved": 12,
     "responses_received": 12,
     "attempted_paths": [
@@ -2349,7 +2349,8 @@
       "Vault/Home/AI & ML/LLM/Agents/Agents.md",
       "Vault/Home/AI & ML/LLM/Agents/Evaluation/Agent Benchmarks.md",
       "Vault/Home/AI & ML/LLM/Agents/Evaluation/Evaluation.md",
-      "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md"
+      "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md",
+      "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md"
     ],
     "accepted_records": [
       {
@@ -3542,10 +3543,89 @@
             "prepared_at": "2026-11-04T06:47:28.050771Z"
           }
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against its text. The intro separates trajectory scoring from outcome and tool-call scoring. The four reference modes are correctly defined (subset = agent calls within the reference, superset = all reference calls present), and the example's superset/judge results are consistent. The tradeoff table, the pitfalls (brittleness, long traces, outcome leakage) and the step vs episode section are coherent and non-repetitive. The single Qard tests one focused comparison, and its answer matches the body and the cited LangSmith trajectory-evals page. Frontmatter, mermaid and text fences, references and wikilinks are valid, and there are no known violations. I found no factual or editorial defect that justifies a change."
+              }
+            ],
+            "feedback": [],
+            "decisions": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+                "verdict": "CLEAN",
+                "summary": "The note is accurate, well ordered and non-repetitive. It separates trajectory scoring from outcome and tool-call scoring, defines the four reference modes correctly, and its example, tradeoff table and pitfalls agree with each other. No concrete defect justifies an edit.",
+                "page_type": "Concept — authorable concept note with optional Questions and References present; Qard ID metadata is protected.",
+                "current_text_evidence": [
+                  {
+                    "quote": "Outcome scoring cannot distinguish a four-step solve from a lucky recovery after six wrong calls.",
+                    "line_start": 16,
+                    "reason": "The opening states the operating idea and why outcome scoring and tool-call scoring are insufficient."
+                  },
+                  {
+                    "quote": "**Subset** requires every agent call to belong to the allowed reference set (`agent ⊆ reference`).",
+                    "line_start": 26,
+                    "reason": "The subset and superset definitions are correct and match the LangSmith trajectory-evals modes. The note gives the safety-gate use for subset and the bloat limitation for superset."
+                  },
+                  {
+                    "quote": "Superset match: PASS (all required present)   <- match alone hides the waste",
+                    "line_start": 62,
+                    "reason": "The worked example shows concretely why the judge adds information that superset matching cannot."
+                  },
+                  {
+                    "quote": "A practical setup gates every run at episode level, then expands failed or high-risk traces into step-level analysis.",
+                    "line_start": 48,
+                    "reason": "The step-level versus episode-level section ends in a concrete engineering decision with the cost tradeoff."
+                  },
+                  {
+                    "quote": "Visible task success can make a judge rationalize a messy path.",
+                    "line_start": 90,
+                    "reason": "The pitfalls name concrete failure conditions (brittleness, long traces, outcome leakage) with mitigations."
+                  },
+                  {
+                    "quote": "> [!qard]- When is reference matching a better way to score an agent's trajectory than an LLM judge?",
+                    "line_start": 95,
+                    "reason": "The single card is one focused comparison with a bounded finite answer. Its hidden ID is retained, and the answer cites the primary source."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: reference matching, judge scoring and step/episode granularity are facets of one coherent evaluation topic, and the note is compact.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "The whole-note audit found no factual, editorial or question-quality defect. There are no edits, no known violations, and the keep rationale is supported by the current text.",
+            "change_checks": []
+          },
+          "model_calls": 12
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-04T06:49:42.940205Z",
+    "checkpoint_at": "2026-11-04T06:49:46.391166Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
