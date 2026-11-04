@@ -2942,11 +2942,11 @@
     "version": 1,
     "id": "792178af26484b3da828d4cea1e5f39f",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-04T19:55:42.282235Z",
-    "elapsed_seconds": 331.70687919999995,
+    "elapsed_seconds": 357.59280979999994,
     "calls_reserved": 8,
-    "responses_received": 7,
+    "responses_received": 8,
     "attempted_paths": [
       "Vault/Home/Programming/NET/ASP NET Web API/Filters.md",
       "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md",
@@ -3109,7 +3109,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-04T20:01:13.988585Z",
+    "checkpoint_at": "2026-11-04T20:01:39.874515Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
@@ -11587,12 +11587,70 @@
     },
     "proposal": {
       "version": 1,
-      "edits": [],
+      "edits": [
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Types.md",
+          "expected_hash": "763773309d95fb891c81c8c06abb8a83a82f23c9c9fa00c4526819957ce04d50",
+          "kind": "rewrite",
+          "learning_target": "same",
+          "before": "<!-- qard-id: d8eb59cf-ad2d-43be-954f-44db23f34d38 -->\n> [!qard]- Why might mutating a struct inside `foreach` fail to update the collection?\n> In an ordinary (non-`ref`) `foreach`, each struct element reaches the loop body as a copy held in a read-only iteration variable. Changes to the copy's own fields never reach the stored element.\n>\n> - Assigning the iteration variable, or one of its fields, is rejected by the compiler.\n> - Calling a mutating method on it compiles, but the method changes the copy's fields rather than the stored element's, so the update is silently lost.\n> \n> The copy is shallow. When a field of the struct refers to an object, such as a `List<T>`, the copy and the stored element refer to the same object. A change made to that object through the copy, such as adding an item, therefore remains visible through the collection. Only changes to the struct's own field values are lost.\n>\n>\n> An ordinary struct-valued property has a similar copy boundary: a mutating method call can change only the returned temporary. Direct field assignment through that property may instead be rejected. A property containing a struct enumerator can return a fresh copy on each access, so repeatedly calling MoveNext on the property does not advance one persistent enumerator.\n>",
+          "after": "<!-- qard-id: d8eb59cf-ad2d-43be-954f-44db23f34d38 -->\n> [!qard]- Why might mutating a struct inside `foreach` fail to update the collection?\n> In an ordinary (non-`ref`) `foreach`, each struct element reaches the loop body as a copy held in a read-only iteration variable. Changes to the copy's own fields never reach the stored element.\n>\n> - Assigning the iteration variable, or one of its fields, is rejected by the compiler.\n> - Calling a mutating method on it compiles, but the method changes the copy's fields rather than the stored element's, so the update is silently lost.\n>\n> The copy is shallow. When a field of the struct refers to an object, such as a `List<T>`, the copy and the stored element refer to the same object. A change made to that object through the copy, such as adding an item, therefore remains visible through the collection. Only changes to the struct's own field values are lost.\n>\n> An ordinary struct-valued property has a similar copy boundary: a mutating method call can change only the returned temporary, and direct field assignment through that property may be rejected.\n>",
+          "reason": "Removes the unrelated struct-enumerator aside so the answer tests only the foreach copy behavior.",
+          "essential_meanings": [
+            "foreach iteration variable is a read-only copy",
+            "mutating method changes only the copy",
+            "shallow copy keeps shared referenced objects visible"
+          ],
+          "sources": [],
+          "feedback_keys": [],
+          "problem": "The foreach answer ends with a struct-enumerator aside that is a separate topic and dilutes the recall target.",
+          "reader_benefit": "A tighter, gradeable answer focused on the copy boundary."
+        },
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Types.md",
+          "expected_hash": "763773309d95fb891c81c8c06abb8a83a82f23c9c9fa00c4526819957ce04d50",
+          "kind": "replace",
+          "learning_target": "same",
+          "before": "The generated `GetHashCode` compares nothing; it returns hash codes compatible with that equality, so equal records hash equally.",
+          "after": "The generated `GetHashCode` combines the member hash codes, so equal records hash equally.",
+          "reason": "Replaces the confusing 'compares nothing' wording with a plain statement of what the synthesized hash does.",
+          "essential_meanings": [
+            "generated hash is consistent with generated equality"
+          ],
+          "sources": [
+            {
+              "url": "https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record",
+              "claim": "Records synthesize value-based Equals and GetHashCode over members.",
+              "version": "C# 9+ / .NET 10 docs"
+            }
+          ],
+          "feedback_keys": [],
+          "problem": "'Compares nothing' misdescribes the synthesized GetHashCode.",
+          "reader_benefit": "Accurate, clear hash/equality relationship."
+        },
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Types.md",
+          "expected_hash": "763773309d95fb891c81c8c06abb8a83a82f23c9c9fa00c4526819957ce04d50",
+          "kind": "replace",
+          "learning_target": "same",
+          "before": "> Each box is a separate heap allocation that the garbage collector must later reclaim. The box also holds a copy, so later changes to the original value do not affect it.\n>\n>\n> Sources: [Microsoft Learn: Boxing and unboxing](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/types/boxing-and-unboxing) · [Microsoft Learn: Nullable value types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/nullable-value-types#boxing-and-unboxing) · [Microsoft Learn: Generic classes and methods](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/types/generics) · [Microsoft Learn: OpCodes.Constrained](https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.constrained?view=net-10.0)\n\n> [!qard]- How can boxing be reduced",
+          "after": "> Each box is a separate heap allocation that the garbage collector must later reclaim. The box also holds a copy, so later changes to the original value do not affect it.\n>\n> Sources: [Microsoft Learn: Boxing and unboxing](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/types/boxing-and-unboxing) · [Microsoft Learn: Nullable value types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/nullable-value-types#boxing-and-unboxing)\n\n> [!qard]- How can boxing be reduced",
+          "reason": "Drops generics and Constrained sources that this answer never discusses; they remain on the hot-path card.",
+          "essential_meanings": [
+            "boxing on object/interface conversion",
+            "nullable boxing rules"
+          ],
+          "sources": [],
+          "feedback_keys": [],
+          "problem": "Boxing card cites sources unrelated to its answer.",
+          "reader_benefit": "Source list matches the claims."
+        }
+      ],
       "dispositions": [
         {
           "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Types.md",
-          "outcome": "keep",
-          "reason": "I read the whole note against the current text and Microsoft's C# documentation, using my knowledge of those docs and not fetching them. The checks covered the prose sections, the CS1612 example, every card and the known_violations inventory, which is empty. The prose sections are Copy and Storage Boundaries, Pitfalls, Tradeoffs and Examples. They state value versus reference copy semantics accurately: shallow copies of reference fields, by-value argument passing, inline storage, and Nullable<T> boxing. The Counter example correctly shows that the property returns a copy and that a direct field write is rejected with CS1612. The foreach card correctly says that the iteration variable is a read-only copy, that assignment is rejected, that a mutating method call changes only the copy, and that foreach (ref var ...) over a Span<T> is the in-place option. The boxing cards correctly cover object and interface conversions, Nullable boxing and constrained generics. The struct, class and record class table is accurate on default equality, init-only positional properties, with-expression shallow copies, inheritance limits and allocation. The anonymous-type card correctly explains why == compares references while Equals and Intersect use generated value equality. Each card tests one gradeable task and has primary sources on the answer side. I found no factual error and no gap in how the note teaches. I judged the dense answers and the aside on struct enumerator properties to be acceptable. Rewriting them would be churn."
+          "outcome": "changed",
+          "reason": "Prose sections and the CS1612 example were verified accurate and left alone. Three card defects were repaired: the foreach answer lost an off-topic enumerator aside, the record GetHashCode wording was clarified, and the boxing card's sources now match its answer."
         }
       ],
       "feedback": []
@@ -11607,8 +11665,10 @@
       "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Types.md": "49bdb81af1dd624296bf7d1bfd6f18765be5d264b0e5212dbe55dffb71dcf10e"
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-04T19:59:59.148476Z",
-    "blocked_review": {
+    "prepared_at": "2026-11-04T20:01:39.874498Z",
+    "review_repair_key": "bd3ec5ecb043f96d504f5b1e0bdcd2ee7f1cd5e753e87abead798b567ef21e71",
+    "repair_reserved": true,
+    "repair_review": {
       "verdict": "CHANGES REQUIRED",
       "overall_reason": "The prose is accurate, but flagged cards still have unresolved defects. The foreach answer carries an off-topic enumerator aside, the record GetHashCode wording is misleading, and the boxing card cites sources that do not support its answer. The keep disposition does not address these, so the note is not a justified unchanged keep.",
       "notes": [
@@ -11687,76 +11747,6 @@
       ],
       "feedback": []
     },
-    "repair_review": {
-      "verdict": "CHANGES REQUIRED",
-      "overall_reason": "The prose is accurate, but flagged cards still have unresolved defects. The foreach answer carries an off-topic enumerator aside, the record GetHashCode wording is misleading, and the boxing card cites sources that do not support its answer. The keep disposition does not address these, so the note is not a justified unchanged keep.",
-      "notes": [
-        {
-          "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Types.md",
-          "verdict": "CHANGES REQUIRED",
-          "summary": "The prose sections and the CS1612 example are accurate and well ordered. Three flagged cards still have concrete weaknesses: an off-topic struct-enumerator aside in the foreach answer, a confusing GetHashCode claim in the record class table, and boxing-card sources that do not match the answer. The keep disposition addressed none of them.",
-          "page_type": "FolderNote: keeps tags [FolderNote], the protected datacorejsx map block, and optional Questions and References. Typed frontmatter and status Creation are valid.",
-          "current_text_evidence": [
-            {
-              "quote": "A property containing a struct enumerator can return a fresh copy on each access, so repeatedly calling MoveNext on the property does not advance one persistent enumerator.",
-              "line_start": 88,
-              "reason": "This is a separate topic, struct-enumerator properties. It sits in the answer to a question about foreach element mutation. It dilutes the recall target and is trivia beyond the question."
-            },
-            {
-              "quote": "The generated `GetHashCode` compares nothing; it returns hash codes compatible with that equality, so equal records hash equally.",
-              "line_start": 133,
-              "reason": "'Compares nothing' is confusing and arguably misleading. The synthesized GetHashCode combines member hash codes. A plain statement is that equal records produce equal hash codes."
-            },
-            {
-              "quote": "[Microsoft Learn: OpCodes.Constrained](https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.constrained?view=net-10.0)",
-              "line_start": 114,
-              "reason": "The 'Where does boxing commonly happen?' answer never discusses generics or constrained calls. Those sources belong to the hot-path card, so the source list does not match the answer."
-            }
-          ],
-          "target_resolution": "UNRESOLVED",
-          "split_suggestion": "No split: the note is one coherent topic, value versus reference semantics, and its sections support each other.",
-          "findings": [
-            {
-              "severity": "Medium",
-              "dimension": "Question quality",
-              "location": "First Questions card (foreach), final aside paragraph",
-              "evidence": "The answer ends with an aside on struct-valued properties and struct enumerators and MoveNext.",
-              "effect": "The answer carries an unrelated recall target. That makes it harder to grade and to retrieve under pressure.",
-              "fix": "Remove the enumerator aside from this answer. Keep only the foreach copy, the shallow-copy caveat, and the pointer to write-back."
-            },
-            {
-              "severity": "Medium",
-              "dimension": "Accuracy",
-              "location": "struct/class/record class card, Default equality row",
-              "evidence": "'The generated GetHashCode compares nothing'",
-              "effect": "The wording is confusing and misleading about what the synthesized hash does.",
-              "fix": "Reword to: the synthesized GetHashCode is consistent with the generated equality, so equal records hash equally."
-            },
-            {
-              "severity": "Medium",
-              "dimension": "Sources",
-              "location": "Boxing card 'Where does boxing commonly happen?'",
-              "evidence": "Sources include Generic classes and methods and OpCodes.Constrained.",
-              "effect": "The sources do not support the answer-side claims. They belong to the boxing-reduction card.",
-              "fix": "Keep the Boxing and unboxing and Nullable value types sources on this card. Leave generics and Constrained only on the hot-path card."
-            }
-          ],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "FAIL",
-            "clarity": "PASS",
-            "question_quality": "FAIL",
-            "identity_safety": "PASS",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "change_checks": []
-    },
-    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "review_repair_key": "bd3ec5ecb043f96d504f5b1e0bdcd2ee7f1cd5e753e87abead798b567ef21e71",
-    "author_repair_pending": true,
-    "repair_reserved": true
+    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
   }
 }
