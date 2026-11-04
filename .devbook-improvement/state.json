@@ -3187,11 +3187,11 @@
     "version": 1,
     "id": "792178af26484b3da828d4cea1e5f39f",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-04T19:55:42.282235Z",
-    "elapsed_seconds": 717.794947,
+    "elapsed_seconds": 739.1567359999999,
     "calls_reserved": 19,
-    "responses_received": 18,
+    "responses_received": 19,
     "attempted_paths": [
       "Vault/Home/Programming/NET/ASP NET Web API/Filters.md",
       "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md",
@@ -3680,7 +3680,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-04T20:07:40.076658Z",
+    "checkpoint_at": "2026-11-04T20:08:01.438447Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
@@ -12963,6 +12963,141 @@
       "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/ThreadPool.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-04T20:07:35.671301Z"
+    "prepared_at": "2026-11-04T20:07:35.671301Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "notes": [
+          {
+            "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/ThreadPool.md",
+            "verdict": "CLEAN",
+            "summary": "Independent whole-note audit found the note accurate, well ordered and free of repetition or card defects. The keep is justified; no edits were proposed and none are needed.",
+            "page_type": "Concept note (published; typed frontmatter, Questions and References present and valid)",
+            "current_text_evidence": [
+              {
+                "quote": "It is a threshold the pool can reach without the usual delay, not a request to start that many threads immediately.",
+                "line_start": 28,
+                "reason": "States the correct SetMinThreads mechanism (no preallocation), the key engineering condition, and it is reinforced consistently in later prose and the card."
+              },
+              {
+                "quote": "That mechanism is not a general detector for every synchronous wait, native call, lock, or `Thread.Sleep`.",
+                "line_start": 30,
+                "reason": "Bounds the modern blocking-compensation claim accurately instead of overstating it."
+              },
+              {
+                "quote": "That protects the dependency, though a very large input still allocates pending tasks.",
+                "line_start": 78,
+                "reason": "Example is explained with its limit and the alternative (channel or Parallel.ForEachAsync), preserving mechanism and tradeoff."
+              },
+              {
+                "quote": "If every core is busy, this is saturation rather than starvation, though queue-depth symptoms can look similar.",
+                "line_start": 101,
+                "reason": "Distinguishes starvation from CPU saturation, the central diagnostic boundary, consistent with the Microsoft starvation guidance."
+              },
+              {
+                "quote": "Its delegate is synchronous, so an `async` lambda is converted to `async void`.",
+                "line_start": 128,
+                "reason": "Technically correct pitfall for Parallel.ForEach (Action<T> delegate), concise and decided."
+              },
+              {
+                "quote": "Raising the minimum is appropriate only after measurements show that the pool's gradual thread injection is delaying work.",
+                "line_start": 168,
+                "reason": "SetMinThreads card is a single dependent decision task with conditions, costs and limits; self-contained and answer-side sourced."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: pool mechanics, starvation and pitfalls are one coherent topic; the starvation section is tightly dependent on the pool's injection behavior and is not independently separable without loss.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "overall_reason": "The complete note is accurate (minimum-thread semantics, platform-specific I/O completion, async-void in Parallel.ForEach, counter names), clearly ordered and free of repetition. Each card tests one gradeable task with answer-side Microsoft sources, and existing IDs are untouched. No edits are proposed and no concrete defect justifies one.",
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/ThreadPool.md",
+          "citation_index": 4,
+          "reported_line_start": 128,
+          "resolved_line_start": 135
+        },
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/ThreadPool.md",
+          "citation_index": 5,
+          "reported_line_start": 168,
+          "resolved_line_start": 176
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/ThreadPool.md": "f4e0a6dd0b87029ce98ae0b262df6f44dc90d4cf52ea1e5c6703b70eb6d65748"
+      },
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CLEAN",
+      "notes": [
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/ThreadPool.md",
+          "verdict": "CLEAN",
+          "summary": "Independent whole-note audit found the note accurate, well ordered and free of repetition or card defects. The keep is justified; no edits were proposed and none are needed.",
+          "page_type": "Concept note (published; typed frontmatter, Questions and References present and valid)",
+          "current_text_evidence": [
+            {
+              "quote": "It is a threshold the pool can reach without the usual delay, not a request to start that many threads immediately.",
+              "line_start": 28,
+              "reason": "States the correct SetMinThreads mechanism (no preallocation), the key engineering condition, and it is reinforced consistently in later prose and the card."
+            },
+            {
+              "quote": "That mechanism is not a general detector for every synchronous wait, native call, lock, or `Thread.Sleep`.",
+              "line_start": 30,
+              "reason": "Bounds the modern blocking-compensation claim accurately instead of overstating it."
+            },
+            {
+              "quote": "That protects the dependency, though a very large input still allocates pending tasks.",
+              "line_start": 78,
+              "reason": "Example is explained with its limit and the alternative (channel or Parallel.ForEachAsync), preserving mechanism and tradeoff."
+            },
+            {
+              "quote": "If every core is busy, this is saturation rather than starvation, though queue-depth symptoms can look similar.",
+              "line_start": 101,
+              "reason": "Distinguishes starvation from CPU saturation, the central diagnostic boundary, consistent with the Microsoft starvation guidance."
+            },
+            {
+              "quote": "Its delegate is synchronous, so an `async` lambda is converted to `async void`.",
+              "line_start": 135,
+              "reason": "Technically correct pitfall for Parallel.ForEach (Action<T> delegate), concise and decided."
+            },
+            {
+              "quote": "Raising the minimum is appropriate only after measurements show that the pool's gradual thread injection is delaying work.",
+              "line_start": 176,
+              "reason": "SetMinThreads card is a single dependent decision task with conditions, costs and limits; self-contained and answer-side sourced."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: pool mechanics, starvation and pitfalls are one coherent topic; the starvation section is tightly dependent on the pool's injection behavior and is not independently separable without loss.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "overall_reason": "The complete note is accurate (minimum-thread semantics, platform-specific I/O completion, async-void in Parallel.ForEach, counter names), clearly ordered and free of repetition. Each card tests one gradeable task with answer-side Microsoft sources, and existing IDs are untouched. No edits are proposed and no concrete defect justifies one.",
+      "change_checks": []
+    }
   }
 }
