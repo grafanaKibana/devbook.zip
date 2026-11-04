@@ -2,7 +2,7 @@
 
 const fs = require('node:fs/promises');
 const path = require('node:path');
-const { inspectCourse, sourceSnapshot, unassignedSources } = require('./core.cjs');
+const { inspectCourse, sourceSnapshot, unassignedSources, completedLessonProblems } = require('./core.cjs');
 
 async function insideVault(file, vault) {
   const [resolved, root] = await Promise.all([fs.realpath(file), fs.realpath(vault)]);
@@ -11,15 +11,15 @@ async function insideVault(file, vault) {
   return resolved;
 }
 
-async function markdownFiles(directory, vault) {
+async function filesWithExtension(directory, vault, extension = '.md') {
   let entries;
   try { await insideVault(directory, vault); entries = await fs.readdir(directory, { withFileTypes: true }); }
   catch (error) { if (error.code === 'ENOENT') return []; throw error; }
   const files = [];
   for (const entry of entries.sort((left, right) => left.name.localeCompare(right.name))) {
     const file = path.join(directory, entry.name);
-    if (entry.isDirectory()) files.push(...await markdownFiles(file, vault));
-    else if (entry.isFile() && entry.name.endsWith('.md')) files.push(file);
+    if (entry.isDirectory()) files.push(...await filesWithExtension(file, vault, extension));
+    else if (entry.isFile() && entry.name.endsWith(extension)) files.push(file);
   }
   return files;
 }
@@ -34,7 +34,7 @@ async function checkCoverage({ repoRoot = path.resolve(__dirname, '../..'), path
     return result;
   }
   try {
-    const sources = await markdownFiles(path.join(vault, 'Home'), vault);
+    const sources = await filesWithExtension(path.join(vault, 'Home'), vault);
     const relative = file => path.relative(vault, file).split(path.sep).join('/');
     const byPath = new Map(sources.map(file => [relative(file), file]));
     const resolveLink = link => {
@@ -44,7 +44,7 @@ async function checkCoverage({ repoRoot = path.resolve(__dirname, '../..'), path
       return matches.length === 1 ? matches[0] : undefined;
     };
     const courses = [];
-    for (const file of await markdownFiles(path.join(vault, 'Assets/Qard/Courses'), vault)) {
+    for (const file of await filesWithExtension(path.join(vault, 'Assets/Qard/Courses'), vault)) {
       try {
         const course = { path: relative(file), ...inspectCourse(await fs.readFile(await insideVault(file, vault), 'utf8')) };
         courses.push(course);
@@ -69,6 +69,11 @@ async function checkCoverage({ repoRoot = path.resolve(__dirname, '../..'), path
     }
     const unassigned = unassignedSources(courses, inventory, resolveLink);
     if (!result.problems.length) result.unassigned = unassigned;
+    const lessons = [];
+    for (const file of await filesWithExtension(path.join(vault, 'Assets/Qard/Lessons'), vault, '.json')) {
+      lessons.push({ path: relative(file), text: await fs.readFile(await insideVault(file, vault), 'utf8') });
+    }
+    result.problems.push(...completedLessonProblems(courses, lessons));
   } catch (error) { result.problems.push(error.message); }
   return result;
 }

@@ -298,23 +298,31 @@
       "mode": "100644"
     },
     "Vault/Assets/Qard/Checks/Programming/2026-10-31 generic-contracts.json": {
-      "sha": "a84e80ad8e002776c8671818b5e3573c3af02ea6",
+      "sha": "d752035af9463f59f85638d20984486001b5362f",
       "mode": "100644"
     },
     "Vault/Assets/Qard/Checks/Programming/2026-10-31 parameter-passing.json": {
-      "sha": "0c4929b3acf7b22ee64315c6cc8205cb747740eb",
+      "sha": "b85ba9281ca000af63494cf8ded757b8bbac7905",
       "mode": "100644"
     },
     "Vault/Assets/Qard/Checks/Programming/2026-10-31 value-semantics.json": {
-      "sha": "3222acc9d06808483b68ab3a125f881613c8dcf4",
+      "sha": "ee8f7f6b7959d47ec74833244bbd4b3228350277",
       "mode": "100644"
     },
     "Vault/Assets/Qard/Checks/Programming/2026-11-01 failure-contracts.json": {
-      "sha": "b89c00d011fd07111f2ea3e387d9da539b7dda47",
+      "sha": "307c7bacef627daf7f8ecd9905903a3718f93b3c",
       "mode": "100644"
     },
     "Vault/Assets/Qard/Checks/Programming/2026-11-03 type-shapes.json": {
       "sha": "f6a57d02c3c98d41dbc00f413bf9e8d81de7e424",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Checks/Programming/2026-11-04 parameter-passing.json": {
+      "sha": "d674870ef99d108e04db41dfb9fe2662ba4f19e1",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Checks/Programming/2026-11-04 value-semantics.json": {
+      "sha": "b4b1dc334db1bfac9ed753a6e6d56b9038f34394",
       "mode": "100644"
     },
     "Vault/Assets/Qard/Courses/AI & ML Mastery.md": {
@@ -342,7 +350,7 @@
       "mode": "100644"
     },
     "Vault/Assets/Qard/Courses/Programming Mastery.md": {
-      "sha": "8116a9a3c353815f6436d1656b02334d73159b36",
+      "sha": "3a1da37a731a93c26bab55718e3592fe716126ec",
       "mode": "100644"
     },
     "Vault/Assets/Qard/Courses/Security Mastery.md": {
@@ -3788,7 +3796,7 @@
       "mode": "100644"
     },
     "Web/content/Questions.md": {
-      "sha": "d250b73493098aeb30bcc8b8bf7a15aaf3cbeb0b",
+      "sha": "75145a459ed9f876b94de79f93d23de0178df76b",
       "mode": "100644"
     },
     "Web/content/Roadmap.canvas": {

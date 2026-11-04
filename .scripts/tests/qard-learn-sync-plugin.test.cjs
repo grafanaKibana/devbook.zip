@@ -60,7 +60,10 @@ function makeHost(contents = { [COURSE_PATH]: COURSE, [SOURCE_PATH]: SOURCE }, s
       const entry = files.get(p);
       entry.text = text;
       entry.file.stat = { mtime: tick++, size: Buffer.byteLength(text) };
-      if (emit) metadata.emit('changed', entry.file, text, {});
+      if (emit) {
+        if (p.endsWith('.md')) metadata.emit('changed', entry.file, text, {});
+        vaultEvents.emit('modify', entry.file);
+      }
     },
     rename(from, to) {
       const entries = [...files].filter(([p]) => p === from || p.startsWith(from + '/'));
@@ -91,6 +94,7 @@ function makeHost(contents = { [COURSE_PATH]: COURSE, [SOURCE_PATH]: SOURCE }, s
   const app = {
     vault: {
       on: vaultEvents.on.bind(vaultEvents),
+      getFiles: () => [...files.values()].map(entry => entry.file),
       getMarkdownFiles: () => [...files.values()].map(entry => entry.file).filter(file => file.path.endsWith('.md')),
       getAbstractFileByPath: p => files.get(p)?.file,
       async read(file) {
@@ -164,6 +168,86 @@ function progress(text) {
 }
 
 const newCard = '\n> [!qard]- Does a copied reference field clone its target?\n> No, it still points to the same target.\n';
+const LESSON_PATH = 'Assets/Qard/Lessons/Completed.json';
+const FINISHED_LESSON = JSON.stringify({ version: 1, mastery: COURSE_PATH, objective: 'copies',
+  accepted: true, finishedAt: 1793453076025, close: { nextCheck: '2026-11-03' } });
+const RESET_COURSE = COURSE.replace('| mastered | 2026-12-15 |', '| new | |')
+  .replace('2026-10-20 check 4/4 sure; 2026-10-24 check 4/4 sure', '');
+
+test('startup detects completed-lesson progress loss, acknowledgement cannot hide it, and verified course repair clears it', async t => {
+  const host = await makeHost({ [COURSE_PATH]: RESET_COURSE, [SOURCE_PATH]: SOURCE, [LESSON_PATH]: FINISHED_LESSON }).boot();
+  t.after(() => host.stop());
+  assert.match(host.plugin.problems.join('\n'), /progress.*loss/i);
+  assert.match(host.plugin.problems.join('\n'), /Completed\.json/);
+  assert.match(host.notices.at(-1), /copies/);
+  assert.equal(inspectCourse(host.text(COURSE_PATH)).rows[0].state, 'new', 'Guard never restores progress');
+  await host.plugin.acknowledge();
+  assert.match(host.plugin.problems.join('\n'), /progress.*loss/i);
+  const fixed = host.text(COURSE_PATH).replace('| new | |', '| taught | 2026-11-03 |');
+  host.edit(COURSE_PATH, fixed);
+  await host.flush();
+  assert.deepEqual(Array.from(host.plugin.problems), []);
+  host.edit(COURSE_PATH, fixed.replace('| taught | 2026-11-03 |', '| new | |'));
+  await host.flush();
+  assert.match(host.plugin.problems.join('\n'), /progress.*loss/i);
+});
+
+test('lesson JSON create, modify, delete and rename events refresh the read-only progress guard', async t => {
+  const host = await makeHost({ [COURSE_PATH]: RESET_COURSE, [SOURCE_PATH]: SOURCE }).boot();
+  t.after(() => host.stop());
+  const course = host.text(COURSE_PATH);
+  host.create(LESSON_PATH, FINISHED_LESSON);
+  await host.flush();
+  assert.match(host.plugin.problems.join('\n'), /progress.*loss/i);
+  host.edit(LESSON_PATH, JSON.stringify({ ...JSON.parse(FINISHED_LESSON), close: undefined }));
+  await host.flush();
+  assert.equal(host.plugin.problems.length, 0);
+  host.edit(LESSON_PATH, '{broken');
+  await host.flush();
+  assert.match(host.plugin.problems.join('\n'), /Completed\.json/);
+  host.edit(LESSON_PATH, FINISHED_LESSON);
+  await host.flush();
+  host.rename(LESSON_PATH, 'Assets/Archived Lesson.json');
+  await host.flush();
+  assert.equal(host.plugin.problems.length, 0);
+  host.rename('Assets/Archived Lesson.json', LESSON_PATH);
+  await host.flush();
+  assert.match(host.plugin.problems.join('\n'), /progress.*loss/i);
+  host.remove(LESSON_PATH);
+  await host.flush();
+  assert.equal(host.plugin.problems.length, 0);
+  host.create('Assets/Archive/Completed.json', FINISHED_LESSON);
+  host.rename('Assets/Archive', 'Assets/Qard/Lessons/Imported');
+  await host.flush();
+  assert.match(host.plugin.problems.join('\n'), /Lessons\/Imported\/Completed\.json/);
+  host.rename('Assets/Qard/Lessons/Imported', 'Assets/Archived');
+  await host.flush();
+  assert.equal(host.plugin.problems.length, 0);
+  assert.equal(host.text(COURSE_PATH), course);
+});
+
+test('source synchronization preserves a concurrent assessment and the progress guard reads its current result', async t => {
+  const host = await makeHost({ [COURSE_PATH]: RESET_COURSE, [SOURCE_PATH]: SOURCE, [LESSON_PATH]: FINISHED_LESSON }).boot();
+  t.after(() => host.stop());
+  host.edit(SOURCE_PATH, SOURCE + newCard, false);
+  host.beforeProcess = async file => {
+    host.beforeProcess = undefined;
+    host.edit(file.path, host.text(file.path).replace('| new | |', '| gap | 2026-11-05 |')
+      .replace('[[Home/Programming/Types#Copies\\|Types]] |  |', '[[Home/Programming/Types#Copies\\|Types]] | 2026-11-04 check 0/4 |'), false);
+  };
+  await host.plugin.sync();
+  await host.flush();
+  const assessed = inspectCourse(host.text(COURSE_PATH)).rows[0];
+  assert.equal(assessed.state, 'gap');
+  assert.equal(assessed.due, '2026-11-05');
+  assert.equal(assessed.evidence, '2026-11-04 check 0/4');
+  assert.equal(host.plugin.problems.length, 0);
+  host.edit(SOURCE_PATH, SOURCE + newCard + newCard);
+  await host.flush();
+  const updated = inspectCourse(host.text(COURSE_PATH)).rows[0];
+  for (const field of ['id', 'title', 'label', 'state', 'due', 'needs', 'evidence']) assert.deepEqual(updated[field], assessed[field]);
+  assert.equal(host.plugin.problems.length, 0);
+});
 
 test('new unassigned source warns automatically, cannot be acknowledged away, and clears after linking', async t => {
   const host = await makeHost().boot(); t.after(() => host.stop());

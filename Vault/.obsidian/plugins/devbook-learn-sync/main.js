@@ -100,6 +100,40 @@ ${body}`.replace(/^[ \t]*<!--[ \t]*qard-(?:id|location|siblings|reverse):[^\n]*?
       }
       return sources.filter((source) => source.cards > 0 && /^Home\/[^/]+\/.+\.md$/.test(source.path) && !assigned.has(source.path)).map((source) => ({ path: source.path, cards: source.cards, course: source.path.split("/")[1] })).sort((left, right) => left.path.localeCompare(right.path));
     }
+    function completedLessonProblems2(courses, lessons) {
+      const problems = [], byPath = new Map(courses.map((course) => [course.path, course]));
+      const validDay = (value) => typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value) && Number.isFinite(Date.parse(value + "T00:00:00Z")) && (/* @__PURE__ */ new Date(value + "T00:00:00Z")).toISOString().slice(0, 10) === value;
+      for (const record of lessons) {
+        const invalid = (reason) => problems.push(`${record.path}: cannot verify Learn progress (${reason}). Review the stored lesson evidence.`);
+        let lesson;
+        try {
+          lesson = JSON.parse(record.text);
+        } catch {
+          invalid("invalid lesson JSON");
+          continue;
+        }
+        if (!lesson || typeof lesson !== "object" || Array.isArray(lesson) || lesson.version !== 1) {
+          invalid("unsupported or invalid lesson format; expected version 1");
+          continue;
+        }
+        const row = byPath.get(lesson.mastery)?.rows.find((row2) => row2.id === lesson.objective);
+        if (!row) continue;
+        if (lesson.finishedAt === void 0 && lesson.close === void 0) continue;
+        if (!Number.isFinite(lesson.finishedAt)) {
+          invalid("invalid finishedAt timestamp");
+          continue;
+        }
+        if (lesson.close === void 0) continue;
+        if (lesson.accepted !== true || !lesson.close || typeof lesson.close !== "object" || Array.isArray(lesson.close) || !validDay(lesson.close.nextCheck)) {
+          invalid("invalid completed lesson acceptance, close result or nextCheck date");
+          continue;
+        }
+        if (row.state === "new" && !row.due && !row.evidence) {
+          problems.push(`Possible Learn progress loss: ${lesson.mastery}#${row.id} is new with no due date or evidence, but completed lesson ${record.path} records nextCheck ${lesson.close.nextCheck}. Review lesson/check evidence and recover verified progress.`);
+        }
+      }
+      return problems;
+    }
     function linesOf(text) {
       return [...text.matchAll(/([^\r\n]*)(\r\n|\n|$)/g)].filter((match) => match[0] !== "").map((match) => ({ text: match[1], ending: match[2] }));
     }
@@ -299,15 +333,16 @@ ${body}`.replace(/^[ \t]*<!--[ \t]*qard-(?:id|location|siblings|reverse):[^\n]*?
       parseCourse(merged);
       return { text: merged, ...result };
     }
-    module2.exports = { inspectCourse: inspectCourse2, reconcileCourse: reconcileCourse2, renameSourcePath: renamedPath, sourceSnapshot: sourceSnapshot2, unassignedSources: unassignedSources2 };
+    module2.exports = { inspectCourse: inspectCourse2, reconcileCourse: reconcileCourse2, renameSourcePath: renamedPath, sourceSnapshot: sourceSnapshot2, unassignedSources: unassignedSources2, completedLessonProblems: completedLessonProblems2 };
   }
 });
 
 // .scripts/qard-learn-sync/plugin.cjs
 var { Plugin, Notice, TFile } = require("obsidian");
-var { inspectCourse, reconcileCourse, renameSourcePath, sourceSnapshot, unassignedSources } = require_core();
+var { inspectCourse, reconcileCourse, renameSourcePath, sourceSnapshot, unassignedSources, completedLessonProblems } = require_core();
 var COURSE_ROOT = "Assets/Qard/Courses/";
 var SOURCE_ROOT = "Home/";
+var LESSON_ROOT = "Assets/Qard/Lessons/";
 var DEBOUNCE_MS = 1200;
 var dayOf = () => {
   const day = /* @__PURE__ */ new Date();
@@ -315,6 +350,8 @@ var dayOf = () => {
 };
 var isSource = (path) => path.startsWith(SOURCE_ROOT) && path.endsWith(".md");
 var isCourse = (path) => path.startsWith(COURSE_ROOT) && path.endsWith(".md");
+var isLesson = (path) => path.startsWith(LESSON_ROOT) && path.endsWith(".json");
+var inLessons = (path) => path === LESSON_ROOT.slice(0, -1) || path.startsWith(LESSON_ROOT);
 module.exports = class LearnSourceSync extends Plugin {
   async onload() {
     this.stopped = false;
@@ -357,22 +394,25 @@ module.exports = class LearnSourceSync extends Plugin {
       if (oldPath.startsWith(SOURCE_ROOT) || file.path.startsWith(SOURCE_ROOT)) {
         this.renames.push({ from: oldPath, to: file.path });
         void this.saveState().catch((error) => this.reportFailure("Could not save rename", error));
-      } else if (!(isCourse(oldPath) || isCourse(file.path) || oldPath === COURSE_ROOT.slice(0, -1))) return;
+      } else if (!(isCourse(oldPath) || isCourse(file.path) || oldPath === COURSE_ROOT.slice(0, -1) || inLessons(oldPath) || inLessons(file.path))) return;
       this.schedule();
     }));
     this.registerEvent(this.app.vault.on("create", (file) => {
-      if (isSource(file.path) || isCourse(file.path)) this.schedule();
+      if (isSource(file.path) || isCourse(file.path) || isLesson(file.path)) this.schedule();
+    }));
+    this.registerEvent(this.app.vault.on("modify", (file) => {
+      if (isLesson(file.path)) this.schedule();
     }));
     this.registerEvent(this.app.vault.on("delete", (file) => {
       this.sourceCache.delete(file.path);
-      if (isSource(file.path) || file.path.startsWith(SOURCE_ROOT) || isCourse(file.path)) this.schedule();
+      if (isSource(file.path) || file.path.startsWith(SOURCE_ROOT) || isCourse(file.path) || inLessons(file.path)) this.schedule();
     }));
     this.app.workspace.onLayoutReady(() => {
       if (!this.stopped) void this.sync();
     });
   }
   linkSignature(course) {
-    return JSON.stringify([course.course, course.rows.map((row) => [row.id, row.notes])]);
+    return JSON.stringify([course.course, course.rows.map((row) => [row.id, row.notes, row.state, row.due, row.evidence])]);
   }
   schedule() {
     if (this.stopped) return;
@@ -452,6 +492,18 @@ module.exports = class LearnSourceSync extends Plugin {
         }
       }
       if (!this.stopped) {
+        const lessons = [], progressProblems = [];
+        for (const file of this.app.vault.getFiles().filter((file2) => isLesson(file2.path))) {
+          if (this.stopped) break;
+          try {
+            lessons.push({ path: file.path, text: await this.app.vault.read(file) });
+          } catch (error) {
+            progressProblems.push(`${file.path}: could not read Learn lesson evidence: ${error.message}`);
+          }
+        }
+        if (this.stopped) return;
+        progressProblems.push(...completedLessonProblems(registry, lessons));
+        problems.push(...progressProblems);
         let unassigned = [];
         if (!failed) {
           try {
@@ -474,8 +526,8 @@ module.exports = class LearnSourceSync extends Plugin {
         this.unassigned = unassigned;
         this.coverageComplete = !failed;
         this.status.setText(problems.length ? `Learn sync: ${problems.length} issue(s)` : unassigned.length ? `Learn: ${unassigned.length} unassigned note(s)` : pending.length ? `Learn: ${pending.length} source update(s)` : "Learn sync: up to date");
-        const signature = JSON.stringify(unassigned);
-        const newWarning = unassigned.length && signature !== this.warningSignature;
+        const signature = JSON.stringify([unassigned, progressProblems]);
+        const newWarning = (unassigned.length || progressProblems.length) && signature !== this.warningSignature;
         if (!failed) this.warningSignature = signature;
         if (show || newWarning) this.showStatus();
       }
