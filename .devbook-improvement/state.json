@@ -2459,11 +2459,11 @@
     "version": 1,
     "id": "8863af0d8e1746298a05f54c5909b04b",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-04T06:42:24.894668Z",
-    "elapsed_seconds": 621.8954955000003,
+    "elapsed_seconds": 645.8669463000003,
     "calls_reserved": 18,
-    "responses_received": 17,
+    "responses_received": 18,
     "attempted_paths": [
       "Vault/Home/AI & ML/AI & ML.md",
       "Vault/Home/AI & ML/LLM/Agents/Agents.md",
@@ -3894,7 +3894,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-04T06:52:46.789484Z",
+    "checkpoint_at": "2026-11-04T06:53:10.760934Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -12278,6 +12278,105 @@
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Chunking.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-04T06:52:43.084793Z"
+    "prepared_at": "2026-11-04T06:52:43.084793Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Chunking.md",
+            "verdict": "CLEAN",
+            "summary": "I read the whole note, and it is accurate, well ordered and self-contained. The opening states the retrieval-unit trade-off with a concrete example. The selection table, six strategy sections, baselines and tradeoffs are consistent with each other, and the five Qards are focused. I found no concrete defect that would justify an edit.",
+            "page_type": "Concept — authorable prose with optional Questions and References present; frontmatter, Mermaid fences and qard callouts are intact.",
+            "current_text_evidence": [
+              {
+                "quote": "Chunking sets the unit of retrieval.",
+                "line_start": 16,
+                "reason": "The opening names the operating idea and its main trade-off (noise versus split meaning) in a few sentences."
+              },
+              {
+                "quote": "A policy might state, \"Keep logs for 90 days. Exception: security investigations require 365 days.\"",
+                "line_start": 18,
+                "reason": "A single concrete example shows the failure mode. The Mermaid diagram in the fixed-size section reuses it, which keeps the note easy to re-enter."
+              },
+              {
+                "quote": "**Tables and code blocks can still be split** when the separator hierarchy is text-centric.",
+                "line_start": 86,
+                "reason": "This passage gives the mechanism, the limit of custom separators, and the atomic-unit fix with its embedding-limit caveat. These are the conditions and exceptions the topic depends on, and it is correctly qualified."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: the strategies are a single comparison set for one decision (choosing a splitter), and each section is short enough to be useful on its own. Separate notes would break the Tradeoffs table and the selection table.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "overall_reason": "The whole-note audit found no concrete error, no rule violation (known_violations is empty), and no essential gap. Each Qard tests one dependent explanation and keeps its ID. The keep disposition is justified.",
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Chunking.md",
+          "citation_index": 2,
+          "reported_line_start": 86,
+          "resolved_line_start": 85
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Chunking.md": "8fe52360a66f701d8dc9c99c606beb56b6489290e1d600610a7a4eeef41b1f9d"
+      },
+      "rules_hash": "264d16c1cdd0550e8de34525350fcc463d41b1c8095a38a38008f9f84304bb03",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CLEAN",
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Chunking.md",
+          "verdict": "CLEAN",
+          "summary": "I read the whole note, and it is accurate, well ordered and self-contained. The opening states the retrieval-unit trade-off with a concrete example. The selection table, six strategy sections, baselines and tradeoffs are consistent with each other, and the five Qards are focused. I found no concrete defect that would justify an edit.",
+          "page_type": "Concept — authorable prose with optional Questions and References present; frontmatter, Mermaid fences and qard callouts are intact.",
+          "current_text_evidence": [
+            {
+              "quote": "Chunking sets the unit of retrieval.",
+              "line_start": 16,
+              "reason": "The opening names the operating idea and its main trade-off (noise versus split meaning) in a few sentences."
+            },
+            {
+              "quote": "A policy might state, \"Keep logs for 90 days. Exception: security investigations require 365 days.\"",
+              "line_start": 18,
+              "reason": "A single concrete example shows the failure mode. The Mermaid diagram in the fixed-size section reuses it, which keeps the note easy to re-enter."
+            },
+            {
+              "quote": "**Tables and code blocks can still be split** when the separator hierarchy is text-centric.",
+              "line_start": 85,
+              "reason": "This passage gives the mechanism, the limit of custom separators, and the atomic-unit fix with its embedding-limit caveat. These are the conditions and exceptions the topic depends on, and it is correctly qualified."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: the strategies are a single comparison set for one decision (choosing a splitter), and each section is short enough to be useful on its own. Separate notes would break the Tradeoffs table and the selection table.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "overall_reason": "The whole-note audit found no concrete error, no rule violation (known_violations is empty), and no essential gap. Each Qard tests one dependent explanation and keeps its ID. The keep disposition is justified.",
+      "change_checks": []
+    }
   }
 }
