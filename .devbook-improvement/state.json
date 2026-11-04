@@ -2509,9 +2509,9 @@
     "version": 1,
     "id": "8863af0d8e1746298a05f54c5909b04b",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-04T06:42:24.894668Z",
-    "elapsed_seconds": 649.3416821000003,
+    "elapsed_seconds": 653.6242431000003,
     "calls_reserved": 18,
     "responses_received": 18,
     "attempted_paths": [
@@ -2522,7 +2522,8 @@
       "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md",
       "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
       "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md",
-      "Vault/Home/AI & ML/LLM/Context Engineering/Context Engineering.md"
+      "Vault/Home/AI & ML/LLM/Context Engineering/Context Engineering.md",
+      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Chunking.md"
     ],
     "accepted_records": [
       {
@@ -3941,10 +3942,74 @@
           },
           "model_calls": 16
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Chunking.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Chunking.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against its text and general RAG practice. The opening states the retrieval-unit trade-off and gives a concrete retention-exception example. The strategy-selection table maps observed failures to strategies with upgrade triggers. Each of the six strategy sections gives mechanism, fit and failure modes: the recursive separator behavior, the table and code-block caveats, parent-child expansion by ID lookup, semantic threshold instability, and agentic non-determinism are all accurate and appropriately qualified. The Practical Baselines and Tradeoffs sections are consistent with those sections and say the ratings are tendencies, not guarantees. The five Qards each test one gradeable task, are self-contained, match the body, and cite relevant sources (Azure AI Search chunking docs, LangChain implementations). The questions do not reveal their answers. The known_violations list is empty, the code fences have language identifiers, and the References are topic-specific. No defect was found that justifies an edit."
+              }
+            ],
+            "feedback": [],
+            "decisions": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Chunking.md",
+                "verdict": "CLEAN",
+                "summary": "I read the whole note, and it is accurate, well ordered and self-contained. The opening states the retrieval-unit trade-off with a concrete example. The selection table, six strategy sections, baselines and tradeoffs are consistent with each other, and the five Qards are focused. I found no concrete defect that would justify an edit.",
+                "page_type": "Concept — authorable prose with optional Questions and References present; frontmatter, Mermaid fences and qard callouts are intact.",
+                "current_text_evidence": [
+                  {
+                    "quote": "Chunking sets the unit of retrieval.",
+                    "line_start": 16,
+                    "reason": "The opening names the operating idea and its main trade-off (noise versus split meaning) in a few sentences."
+                  },
+                  {
+                    "quote": "A policy might state, \"Keep logs for 90 days. Exception: security investigations require 365 days.\"",
+                    "line_start": 18,
+                    "reason": "A single concrete example shows the failure mode. The Mermaid diagram in the fixed-size section reuses it, which keeps the note easy to re-enter."
+                  },
+                  {
+                    "quote": "**Tables and code blocks can still be split** when the separator hierarchy is text-centric.",
+                    "line_start": 85,
+                    "reason": "This passage gives the mechanism, the limit of custom separators, and the atomic-unit fix with its embedding-limit caveat. These are the conditions and exceptions the topic depends on, and it is correctly qualified."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the strategies are a single comparison set for one decision (choosing a splitter), and each section is short enough to be useful on its own. Separate notes would break the Tradeoffs table and the selection table.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "The whole-note audit found no concrete error, no rule violation (known_violations is empty), and no essential gap. Each Qard tests one dependent explanation and keeps its ID. The keep disposition is justified.",
+            "change_checks": []
+          },
+          "model_calls": 18
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-04T06:53:14.235670Z",
+    "checkpoint_at": "2026-11-04T06:53:18.518232Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
