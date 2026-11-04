@@ -10,7 +10,7 @@ qard-deck: "Programming"
 qard-topic: "NET/CSharp/Fundamentals/Methods"
 flashcard_uid: "a3e803d0"
 created: "2026-02-15T16:27:13.000Z"
-modified: "2026-11-02T09:03:54.806Z"
+modified: "2026-11-03T19:50:44.499Z"
 published: "2026-07-08T13:14:17.325Z"
 ---
 
@@ -268,12 +268,12 @@ By-value parameters and ordinary virtual dispatch are the default. By-reference 
 > [Microsoft: named and optional arguments](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/named-and-optional-arguments) · [C#: 12.6.2.3 Run-time evaluation of argument lists](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#12623-run-time-evaluation-of-argument-lists)
 
 <!-- qard-id: ffd19d60-4643-4ede-92ff-83ba55b3f613 -->
-> [!qard]- When `Animal a = new Dog();` calls `a.Category()`, what makes the call run `Dog`'s implementation?
-> `Animal.Category()` must be declared `virtual`, and `Dog` must implement `Category()` with `override`. The call is then resolved by the runtime type of the object, `Dog`, rather than by the declared type of the variable, `Animal`.
+> [!qard]- Which modifiers on a base-class method and a same-named derived-class method make a call through a base-typed reference run the derived implementation?
+> The base method must be declared `virtual`, and the derived method must implement it with `override`. The call is then resolved by the runtime type of the object rather than by the declared type of the variable.
 >
-> Methods are non-virtual by default. A non-virtual `a.Category()` binds to `Animal.Category()` because `a` is declared as `Animal`, even when `Dog` declares its own `Category()` with `new`.
+> Methods are non-virtual by default. If the base method is not virtual, a call through a base-typed variable binds to the base implementation, even when the derived class declares its own method with `new`.
 >
-> [Microsoft: virtual keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/virtual) · [Microsoft: new modifier](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/new-modifier) · [Microsoft: base keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/base) · [Microsoft: sealed modifier](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/sealed)
+> [Microsoft: virtual keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/virtual) · [Microsoft: new modifier](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/new-modifier)
 
 > [!qard]- What does declaring a base-class method `virtual` commit that API to?
 > A virtual member is an extension point. Derived classes can replace its behavior, unless an override along the hierarchy is marked `sealed`, which stops classes below it from overriding the member again. Ordinary calls to the member on such an object run the most-derived override, including calls made from code inside the base class. An explicit call through `base` in a derived class is the exception: it runs the base class's implementation rather than the most-derived override. The base class can therefore no longer assume that its own implementation of that member is the one that runs.
