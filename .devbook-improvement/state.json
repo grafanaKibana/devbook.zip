@@ -2891,16 +2891,87 @@
     "version": 1,
     "id": "792178af26484b3da828d4cea1e5f39f",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-04T19:55:42.282235Z",
-    "elapsed_seconds": 77.04442,
+    "elapsed_seconds": 81.7482755,
     "calls_reserved": 2,
     "responses_received": 2,
-    "attempted_paths": [],
+    "attempted_paths": [
+      "Vault/Home/Programming/NET/ASP NET Web API/Filters.md"
+    ],
     "accepted_records": [],
-    "outcomes": [],
+    "outcomes": [
+      {
+        "path": "Vault/Home/Programming/NET/ASP NET Web API/Filters.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Programming/NET/ASP NET Web API/Filters.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against Microsoft's ASP.NET Core filters documentation (net 10). The stage order (authorization, resource, action, result, with exception filters outside the sequence) is correct. The exception-filter coverage is also correct: it includes controller creation, model binding, action filters and action methods, and excludes resource filters, result filters and result execution. A handled exception skips ordinary result filters and still runs IAlwaysRunResultFilter. When a filter implements both sync and async forms, only the async form runs. Scope nesting with the IOrderedFilter.Order override is accurate, as are the ServiceFilter, TypeFilter and IFilterFactory distinctions. The middleware, controller-filter and endpoint-filter tradeoff table is sound, and the examples compile conceptually and match the prose. The four cards (including the two flagged ones) each test one gradeable task, give mechanism-level answers, and are consistent with the note. I found no factual error, missing prerequisite or redundancy that would justify an edit."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "No edits proposed. Independent whole-note audit found no factual error, unsupported claim or concrete rule violation. The keep disposition is justified.",
+            "notes": [
+              {
+                "path": "Vault/Home/Programming/NET/ASP NET Web API/Filters.md",
+                "verdict": "CLEAN",
+                "summary": "The note is accurate and well ordered. It runs from scope, to stage order, to examples, to filter creation, to pitfalls and tradeoffs. The four cards each test one gradeable task with mechanism-level answers, so keeping it unchanged is justified.",
+                "page_type": "Concept — typed frontmatter and Qard IDs preserved; Questions and References optional but present and valid; code fences carry language identifiers.",
+                "current_text_evidence": [
+                  {
+                    "quote": "Exception filters observe unhandled exceptions from action execution.",
+                    "line_start": 28,
+                    "reason": "Correctly places exception filters outside the sequential stages and limits them to action execution."
+                  },
+                  {
+                    "quote": "If a filter implements both sync and async forms of the same stage, the runtime invokes only the async interface.",
+                    "line_start": 103,
+                    "reason": "Matches Microsoft's documented behavior and explains the practical consequence."
+                  },
+                  {
+                    "quote": "Because of these gaps, exception-handling middleware is the broader boundary for a uniform API error response.",
+                    "line_start": 154,
+                    "reason": "The card on handled exceptions closes with the decision that follows from its mechanism, and the coverage card lists the gaps. It reads acceptably."
+                  },
+                  {
+                    "quote": "An explicit `Order` value, exposed through `IOrderedFilter`, takes precedence over scope.",
+                    "line_start": 159,
+                    "reason": "Accurate ordering rule with a concrete worked example; each card tests a single task."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the middleware, controller-filter and endpoint-filter comparison, the stage order and the filter-creation details form one coherent topic and are short enough to stay together.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "identity_safety": "PASS",
+                  "question_quality": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "change_checks": []
+          },
+          "model_calls": 2
+        }
+      }
+    ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-04T19:56:59.326124Z",
+    "checkpoint_at": "2026-11-04T19:57:04.029983Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
