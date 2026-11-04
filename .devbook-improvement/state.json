@@ -2274,11 +2274,11 @@
     "version": 1,
     "id": "8863af0d8e1746298a05f54c5909b04b",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-04T06:42:24.894668Z",
-    "elapsed_seconds": 306.41489710000013,
+    "elapsed_seconds": 326.50250390000014,
     "calls_reserved": 10,
-    "responses_received": 9,
+    "responses_received": 10,
     "attempted_paths": [
       "Vault/Home/AI & ML/AI & ML.md",
       "Vault/Home/AI & ML/LLM/Agents/Agents.md",
@@ -2589,7 +2589,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-04T06:47:31.308881Z",
+    "checkpoint_at": "2026-11-04T06:47:51.396488Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -10349,6 +10349,69 @@
       "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-04T06:47:28.050771Z"
+    "prepared_at": "2026-11-04T06:47:28.050771Z",
+    "completed_review": {
+      "verdict": "CLEAN",
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md",
+          "verdict": "CLEAN",
+          "summary": "The whole note was read. It is accurate and coherent, and the four-axis model, metrics, example, tradeoffs and pitfalls agree with each other. The one defect was the annotated reference bullet, and the edit fixes it without touching content or the card ID.",
+          "page_type": "Concept — optional Questions and References present; a bare-link References contract applies; no Datacore content.",
+          "current_text_evidence": [
+            {
+              "quote": "Four properties are scored separately: validity, selection, arguments, and necessity.",
+              "line_start": 18,
+              "reason": "The opening states the operating idea and its boundary. It also explains why a combined score is misleading, and the rest of the note follows that structure."
+            },
+            {
+              "quote": "Averaging them to 82.5% destroys that diagnosis.",
+              "line_start": 52,
+              "reason": "The arithmetic is correct: (95+70)/2 = 82.5. The point is consistent with the card."
+            },
+            {
+              "quote": "Caught only because the reference pinned order_id=4815.",
+              "line_start": 74,
+              "reason": "The worked example is concrete, shows a schema-valid but wrong argument, and ties back to the earlier explanation."
+            },
+            {
+              "quote": "Reference matching fits tools where a wrong value is expensive, such as payments or deletion.",
+              "line_start": 85,
+              "reason": "The tradeoff section ends in a decision condition, with the exceptions and caveats about judge calibration kept."
+            },
+            {
+              "quote": "> [!qard]- Why should tool selection and argument accuracy be measured separately?",
+              "line_start": 104,
+              "reason": "The card tests one dependent explanation (why the scores are separated). It is self-contained, and its ID comment is intact."
+            },
+            {
+              "quote": "- [Berkeley Function-Calling Leaderboard (Gorilla, UC Berkeley)](https://gorilla.cs.berkeley.edu/blogs/8_berkeley_function_calling_leaderboard.html)",
+              "line_start": 120,
+              "reason": "The reference is now a bare descriptive link, as the contract requires."
+            }
+          ],
+          "target_resolution": "RESOLVED",
+          "split_suggestion": "No split: the note covers a single cohesive topic, scoring tool calls, and its sections depend on one another.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "overall_reason": "The only concrete defect was the annotated reference bullet, which broke the bare-link rule. The edit resolves it. The rest of the note was audited and is accurate and well organised, and the Qard ID and metadata are untouched.",
+      "change_checks": [
+        {
+          "edit_index": 0,
+          "verdict": "WORTHWHILE",
+          "reason": "The edit removes the trailing annotation from the link text. That annotation violated the bare-descriptive-link References contract. The URL is unchanged and the sources are still valid and non-duplicated. Nothing else in the note is affected."
+        }
+      ]
+    }
   }
 }
