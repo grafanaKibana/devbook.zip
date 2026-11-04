@@ -2089,16 +2089,92 @@
     "version": 1,
     "id": "8863af0d8e1746298a05f54c5909b04b",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-04T06:42:24.894668Z",
-    "elapsed_seconds": 56.654369200000005,
+    "elapsed_seconds": 60.233397800000006,
     "calls_reserved": 2,
     "responses_received": 2,
-    "attempted_paths": [],
+    "attempted_paths": [
+      "Vault/Home/AI & ML/AI & ML.md"
+    ],
     "accepted_records": [],
-    "outcomes": [],
+    "outcomes": [
+      {
+        "path": "Vault/Home/AI & ML/AI & ML.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/AI & ML.md",
+                "outcome": "keep",
+                "reason": "Audited the whole folder note. The intro states the scope (classic ML to LLM applications and tooling) and the key judgment that data, evaluation and operations usually matter more than model choice. The datacore folder map block is intact and protected. The single Qard tests one gradeable decision: when classic ML beats an LLM. Its answer correctly says task/data fit is necessary but measurement decides. That agrees with Google's ML problem framing and Rules of ML guidance, which favor simple, measurable approaches and say to measure rather than assume. Frontmatter is valid (status Creation, FolderNote tag, qard-id preserved). The References bullet is a bare link with no annotation. No known violations exist. No factual or editorial defect justifies a change."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/AI & ML.md",
+                "verdict": "CLEAN",
+                "summary": "The whole folder note was audited and no concrete defect was found. The intro gives scope and the key judgment, the folder map block is intact, and the single Qard tests one decision with a correct, conditioned answer. Keeping the note unchanged is justified.",
+                "page_type": "FolderNote: the Datacore folder map is protected. Questions and References are optional. The note keeps the FolderNote tag.",
+                "current_text_evidence": [
+                  {
+                    "quote": "an impressive model cannot rescue weak evidence or missing monitoring",
+                    "line_start": 20,
+                    "reason": "The intro states the operating idea of the section: data, evaluation and operations matter more than model choice. A reader can recover the topic quickly."
+                  },
+                  {
+                    "quote": "The first condition makes classic ML a strong candidate. Only the second decides.",
+                    "line_start": 31,
+                    "reason": "The answer states the decision rule directly. Task and data fit is necessary, and measurement on the real workload is what decides."
+                  },
+                  {
+                    "quote": "an LLM can be the stronger option for some text-classification tasks",
+                    "line_start": 34,
+                    "reason": "The answer names the exception that limits the rule, so it does not oversimplify classic ML versus LLM."
+                  },
+                  {
+                    "quote": "<!-- qard-id: c28d8736-4f09-48e3-9a55-a635b6e08875 -->",
+                    "line_start": 29,
+                    "reason": "The Qard identity comment is preserved directly above the callout."
+                  },
+                  {
+                    "quote": "- [Microsoft AI for Beginners](https://microsoft.github.io/AI-For-Beginners/)",
+                    "line_start": 43,
+                    "reason": "The reference is a bare descriptive link with no trailing annotation, which meets the References contract."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the folder note is a short hub whose map handles direct-child navigation. It contains no separable concept topics.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "identity_safety": "PASS",
+                  "question_quality": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "There are no edits. The independent whole-note review found no accuracy, clarity, question-quality, identity or rule defect. The answer is a bounded decision question that names its condition and its exception. The Qard ID and the Datacore block are intact, and the reference format is valid.",
+            "change_checks": []
+          },
+          "model_calls": 2
+        }
+      }
+    ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-04T06:43:21.548355Z",
+    "checkpoint_at": "2026-11-04T06:43:25.127384Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
