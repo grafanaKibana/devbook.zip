@@ -40,6 +40,18 @@ if [[ ${#STAGED_VAULT[@]} -eq 0 ]]; then
     exit 0
 fi
 
+# Refresh published releases under the export lock, after source/output guards.
+# Respect an explicitly staged deletion rather than recreating the page.
+CHANGELOG_FILE="Vault/Home/Changelog.md"
+if [[ -z "$(git diff --cached --name-only --diff-filter=D -- "$CHANGELOG_FILE")" ]]; then
+    echo "[pre-commit] Refreshing release changelog..."
+    python3 .scripts/generate-changelog.py
+    git add -- "$CHANGELOG_FILE"
+    if [[ ${#STAGED_MD[@]} -eq 0 ]] && ! git diff --cached --quiet -- "$CHANGELOG_FILE"; then
+        STAGED_MD+=("$CHANGELOG_FILE")
+    fi
+fi
+
 # Run vault maintenance automations in order
 echo "[pre-commit] Running vault automations..."
 
