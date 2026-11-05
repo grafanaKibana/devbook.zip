@@ -3612,9 +3612,9 @@
     "version": 1,
     "id": "4ce6dcd61eb74b9eafc6dcc2d27d9c9b",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-05T07:01:25.246564Z",
-    "elapsed_seconds": 379.62728260000017,
+    "elapsed_seconds": 383.53097010000016,
     "calls_reserved": 12,
     "responses_received": 12,
     "attempted_paths": [
@@ -3622,7 +3622,8 @@
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation.md",
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Retrieval Evaluation Sets.md",
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Monitoring.md",
-      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Query Translation.md"
+      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Query Translation.md",
+      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -3995,10 +3996,85 @@
           },
           "model_calls": 10
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against its text and the cited cache-aside guidance (pattern not version-specific). The opening motivates layered caches and permission-scoped keys. The request-identity paragraph is consistent with the per-layer sections: embedding keys use text hash plus model and config, retrieval keys add index version, filters, top-k and tenant, and response keys extend that with prompt, evidence and model. Both Mermaid diagrams are accurate, with correct hit and miss paths and the response lookup after context assembly. The failure modes (version drift, stale index, cross-tenant leakage, over-long response TTL) are explained with their mechanisms. The three Qards each test one gradeable task, with answers consistent with the body. The only repetition is the TTL and fast-changing-data point, which appears in both the response section and the pitfalls, and it is brief and reinforcing. References are valid and non-duplicated, and there are no known violations. Edits would be cosmetic."
+              }
+            ],
+            "feedback": [],
+            "decisions": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "Independent whole-note audit found no concrete defects. The note is accurate and coherent, the questions are gradeable, and the keep is justified.",
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching.md",
+                "verdict": "CLEAN",
+                "summary": "The note explains layered RAG caches, their keys and invalidation, and the authorization scoping. The mechanisms, conditions and failure modes are accurate and consistent across the prose, diagrams and cards. No edit is needed.",
+                "page_type": "Concept — frontmatter intact, Questions and References optional but present and valid; no fenced code without language (both mermaid).",
+                "current_text_evidence": [
+                  {
+                    "quote": "Caches remove that work only when their keys capture every input that affects the result.",
+                    "line_start": 17,
+                    "reason": "Opening states the operating idea quickly and sets the key-completeness condition used by the whole note."
+                  },
+                  {
+                    "quote": "This is a data breach, not a staleness bug.",
+                    "line_start": 114,
+                    "reason": "Cross-tenant leakage is distinguished from staleness, which is the key engineering boundary."
+                  },
+                  {
+                    "quote": "The diagrams place the response lookup after retrieval and context assembly so the key can include the actual evidence.",
+                    "line_start": 122,
+                    "reason": "Explains the design choice and the condition under which an earlier lookup would need extra versioning and permission checks."
+                  },
+                  {
+                    "quote": "A response TTL limits staleness, while source and permission changes that invalidate an answer require invalidation before that TTL expires.",
+                    "line_start": 124,
+                    "reason": "Gives the TTL limit with its exception. The pitfall bullet repeats it briefly, which is reinforcing rather than padding."
+                  },
+                  {
+                    "quote": "For protected content, a complete key is necessary but not sufficient.",
+                    "line_start": 147,
+                    "reason": "The retrieval-key card adds the current-access recheck beyond the key, consistent with the Pitfalls section; each card tests one focused task."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: embedding, retrieval and response caches are one coherent layered-design topic, and the response-cache detail is already delegated to LLM Caching.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "change_checks": [],
+            "decision_checks": []
+          },
+          "model_calls": 12
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-05T07:07:44.873394Z",
+    "checkpoint_at": "2026-11-05T07:07:48.777083Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
