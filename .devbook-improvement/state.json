@@ -3902,11 +3902,11 @@
     "version": 1,
     "id": "b98a816444094ceaa557c175133e1e93",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-05T20:07:51.294462Z",
-    "elapsed_seconds": 159.1374583,
+    "elapsed_seconds": 180.5664887,
     "calls_reserved": 5,
-    "responses_received": 4,
+    "responses_received": 5,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md"
     ],
@@ -3989,7 +3989,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-05T20:10:30.431291Z",
+    "checkpoint_at": "2026-11-05T20:10:51.860320Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -15440,12 +15440,58 @@
     },
     "proposal": {
       "version": 1,
-      "edits": [],
+      "edits": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Embeddings.md",
+          "expected_hash": "5fd5e002d4b4a5cf4a463fed95629b02c2a86d8a695ceb6915a7af26763acb49",
+          "before": "Cohere `embed-v3` distinguishes `search_document` from `search_query` through `input_type` and covers more than 100 languages.",
+          "after": "Cohere Embed v3 distinguishes `search_document` from `search_query` through `input_type`. The `embed-multilingual-v3.0` model covers more than 100 languages, while `embed-english-v3.0` handles English only.",
+          "reason": "Separates the English and multilingual Cohere v3 variants so the language-coverage claim applies only to the multilingual model.",
+          "kind": "note",
+          "learning_target": "same",
+          "essential_meanings": [
+            "Only the multilingual Cohere v3 model covers 100+ languages",
+            "The English v3 model is English-only"
+          ],
+          "sources": [
+            {
+              "url": "https://docs.cohere.com/docs/cohere-embed",
+              "claim": "embed-multilingual-v3.0 supports over 100 languages; embed-english-v3.0 is English-only.",
+              "version": "Embed v3"
+            }
+          ],
+          "feedback_keys": [],
+          "problem": "The note credits Cohere embed-v3 generically with 100+ language coverage, but only the multilingual variant has it.",
+          "reader_benefit": "Prevents choosing the English variant for a non-English corpus."
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Embeddings.md",
+          "expected_hash": "5fd5e002d4b4a5cf4a463fed95629b02c2a86d8a695ceb6915a7af26763acb49",
+          "before": "models with explicit multilingual training (Cohere `embed-v3`, SBERT multilingual variants)",
+          "after": "models with explicit multilingual training (Cohere `embed-multilingual-v3.0`, SBERT multilingual variants)",
+          "reason": "Names the multilingual variant in the mitigation so the English-only model is not implied to help.",
+          "kind": "note",
+          "learning_target": "same",
+          "essential_meanings": [
+            "The multilingual mitigation requires the multilingual Cohere variant"
+          ],
+          "sources": [
+            {
+              "url": "https://docs.cohere.com/docs/cohere-embed",
+              "claim": "embed-multilingual-v3.0 is the multilingual Embed v3 model; the English models handle English only.",
+              "version": "Embed v3"
+            }
+          ],
+          "feedback_keys": [],
+          "problem": "The multilingual mitigation names the Cohere v3 family generically, which includes English-only models.",
+          "reader_benefit": "Gives an accurate, actionable model choice for multilingual recall."
+        }
+      ],
       "dispositions": [
         {
           "path": "Vault/Home/AI & ML/LLM/Embeddings.md",
-          "outcome": "keep",
-          "reason": "I read the whole note and checked it against its claims. The contrastive-encoder explanation matches the diagram. The MRL claims are correctly hedged: OpenAI's MTEB result is presented as motivation to test shorter vectors, not as a guarantee, and the two-stage storage tradeoff is stated accurately. The metric section is right that squared L2 equals 2 − 2·cosine for normalized vectors, and it tells the reader to follow the model's documentation. The re-embedding cost of 10M chunks × 500 tokens × $0.02/1M comes to about $100, which matches the note. The pitfalls, tradeoffs table and three cards (retrieval, MRL storage, dimension validation, model-swap mismatch) each test one task, and their answers include the conditions and limits. known_violations is empty. The prose is direct and has no padding. I found no verified defect, so I made no edit."
+          "outcome": "changed",
+          "reason": "The review's Cohere finding was verified against Cohere's documentation. Two small edits now name the multilingual variant where the note claims 100+ language coverage and a multilingual mitigation. The rest of the note was rechecked and left alone: the contrastive-encoder explanation, the MRL hedging, the L2/cosine identity, the $100 re-embedding arithmetic and the three cards."
         }
       ],
       "feedback": [],
@@ -15461,8 +15507,10 @@
       "Vault/Home/AI & ML/LLM/Embeddings.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-05T20:09:33.140209Z",
-    "blocked_review": {
+    "prepared_at": "2026-11-05T20:10:51.860294Z",
+    "review_repair_key": "32b0cc5e2b5b37ba76914a79e69541c3fd46c313888d3723d36b691b2a871bdf",
+    "repair_reserved": true,
+    "repair_review": {
       "verdict": "CHANGES REQUIRED",
       "overall_reason": "The keep disposition is not justified. The note applies Cohere `embed-v3` to multilingual coverage without distinguishing the English and multilingual variants. The rest of the note is accurate, and no edit was proposed.",
       "notes": [
@@ -15526,60 +15574,6 @@
       "feedback": [],
       "decisions": []
     },
-    "repair_review": {
-      "verdict": "CHANGES REQUIRED",
-      "overall_reason": "The keep disposition is not justified. The note applies Cohere `embed-v3` to multilingual coverage without distinguishing the English and multilingual variants. The rest of the note is accurate, and no edit was proposed.",
-      "notes": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Embeddings.md",
-          "verdict": "CHANGES REQUIRED",
-          "summary": "The note is well structured and mostly accurate. The cost arithmetic, the L2/cosine identity and the MRL hedging all hold. One concrete factual imprecision remains: Cohere `embed-v3` is credited with 100+ language coverage and multilingual training. Only the `embed-multilingual-v3.0` variant has that coverage, while the English variant does not. The keep disposition missed this.",
-          "page_type": "Concept — frontmatter and Qard identity metadata are protected; Questions and References are present and optional.",
-          "current_text_evidence": [
-            {
-              "quote": "Cohere `embed-v3` distinguishes `search_document` from `search_query` through `input_type` and covers more than 100 languages.",
-              "line_start": 43,
-              "reason": "Cohere's v3 family has separate English and multilingual models. Only the multilingual model covers 100+ languages, so the sentence is imprecise."
-            },
-            {
-              "quote": "models with explicit multilingual training (Cohere `embed-v3`, SBERT multilingual variants)",
-              "line_start": 93,
-              "reason": "The multilingual mitigation names the family generically. An English-only v3 model would not mitigate the problem, so the variant must be named."
-            },
-            {
-              "quote": "for a 10M-chunk index at $0.02/1M tokens and 500 tokens/chunk average, that is ~$100",
-              "line_start": 83,
-              "reason": "The arithmetic is correct: 5B tokens at $0.02 per million tokens is $100."
-            }
-          ],
-          "target_resolution": "UNRESOLVED",
-          "split_suggestion": "No split: the model selection, dimensionality, metrics and pitfalls all serve one coherent selection decision.",
-          "findings": [
-            {
-              "severity": "Medium",
-              "dimension": "Accuracy",
-              "location": "Model Families (line 43) and Multilingual Embedding Collapse (line 93)",
-              "evidence": "\"Cohere `embed-v3` ... covers more than 100 languages\" and \"explicit multilingual training (Cohere `embed-v3`...)\"",
-              "effect": "A reader could assume every Cohere v3 model is multilingual. The English variant is not, so this can lead to a wrong model choice for non-English corpora.",
-              "fix": "Name `embed-multilingual-v3.0` for the 100+ language claim and the multilingual mitigation. Note that `embed-english-v3.0` is English-focused."
-            }
-          ],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "FAIL",
-            "clarity": "PASS",
-            "question_quality": "PASS",
-            "identity_safety": "PASS",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "change_checks": []
-    },
-    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "review_repair_key": "32b0cc5e2b5b37ba76914a79e69541c3fd46c313888d3723d36b691b2a871bdf",
-    "author_repair_pending": true,
-    "repair_reserved": true
+    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
   }
 }
