@@ -3902,13 +3902,14 @@
     "version": 1,
     "id": "b98a816444094ceaa557c175133e1e93",
     "status": "active",
-    "phase": "author_completed",
+    "phase": "selecting",
     "started_at": "2026-11-05T20:07:51.294462Z",
-    "elapsed_seconds": 184.10305680000002,
+    "elapsed_seconds": 187.91753760000003,
     "calls_reserved": 5,
     "responses_received": 5,
     "attempted_paths": [
-      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md"
+      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md",
+      "Vault/Home/AI & ML/LLM/Embeddings.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -3986,10 +3987,21 @@
           },
           "model_calls": 2
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/Embeddings.md",
+        "outcome": "proposal_blocked",
+        "reason": "source URL missing from owning note: https://docs.cohere.com/docs/cohere-embed",
+        "result": {
+          "status": "proposal_blocked",
+          "stage": "deterministic_application",
+          "reason": "source URL missing from owning note: https://docs.cohere.com/docs/cohere-embed",
+          "model_calls": 5
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-05T20:10:55.396889Z",
+    "checkpoint_at": "2026-11-05T20:10:59.211370Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
