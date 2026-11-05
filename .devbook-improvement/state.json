@@ -3667,9 +3667,9 @@
     "version": 1,
     "id": "4ce6dcd61eb74b9eafc6dcc2d27d9c9b",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-05T07:01:25.246564Z",
-    "elapsed_seconds": 442.73654510000017,
+    "elapsed_seconds": 446.80526380000015,
     "calls_reserved": 14,
     "responses_received": 14,
     "attempted_paths": [
@@ -3678,7 +3678,8 @@
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Retrieval Evaluation Sets.md",
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Monitoring.md",
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Query Translation.md",
-      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching.md"
+      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching.md",
+      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Patterns.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -4126,10 +4127,78 @@
           },
           "model_calls": 12
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Patterns.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Patterns.md",
+                "outcome": "keep",
+                "reason": "Read the whole note. The opening gives the adoption-order idea (repair observed failures, keep the cheaper design until evaluation shows otherwise). All 12 patterns follow a consistent mechanism, fit and failure-risk shape, and each has a flowchart with a language-tagged fence. The details match what I know of the primary literature: Self-RAG needs custom training, CRAG relies on an evaluator, GraphRAG builds entity graphs and community summaries, HyDE embeds a hypothetical answer, and contextual retrieval enriches chunks before indexing. The selection table agrees with the section prose, and the adoption-order paragraph adds no new claims. The single Qard asks one gradeable task, has a cited Microsoft Research source and a correct answer: GraphRAG targets corpus-wide, relationship-heavy questions, and its benefit elsewhere must be measured. The wikilinks use valid paths, the frontmatter is intact, and the References are bare and relevant. No known violations are open. I found no factual error, gap or defect worth an edit, so changes would be cosmetic."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Patterns.md",
+                "verdict": "CLEAN",
+                "summary": "The whole note was re-read independently. Each of the 12 patterns states its mechanism, when it fits and the failure it adds, and the table and adoption-order paragraph agree with the sections. I found no factual, structural or Qard defect that justifies an edit.",
+                "page_type": "Concept — optional Questions and References; mermaid fences are language-tagged; wikilinks use full paths with aliases.",
+                "current_text_evidence": [
+                  {
+                    "quote": "RAG patterns are repairs for observed retrieval failures.",
+                    "line_start": 17,
+                    "reason": "The opening states the operating idea and the adoption rule, so the topic is quick to re-enter."
+                  },
+                  {
+                    "quote": "Its ceiling is easy to find.",
+                    "line_start": 33,
+                    "reason": "The first pattern names its limit (exact identifiers, no second stage), which sets the fit-and-failure shape that the later patterns follow."
+                  },
+                  {
+                    "quote": "Self-RAG requires custom training, while CRAG-style correction depends on trustworthy evaluator thresholds.",
+                    "line_start": 246,
+                    "reason": "This claim matches the cited Self-RAG and CRAG papers and keeps the specialist-pattern boundary accurate."
+                  },
+                  {
+                    "quote": "The decision therefore rests on a comparison with a vector-retrieval baseline on representative questions.",
+                    "line_start": 276,
+                    "reason": "The single Qard tests one gradeable task and keeps its ID. Its answer is accurate, gives the condition and the cost, and cites the Microsoft Research paper on the answer side."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the 12 patterns share one decision frame (failure fixed versus risk added) and are used together for selection, so separating them would not make either part more useful.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "The note is accurate and readable, and the Qard tests a single task. There are no known violations, no edits and no open defects, so keeping it unchanged is justified.",
+            "change_checks": []
+          },
+          "model_calls": 14
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-05T07:08:47.982657Z",
+    "checkpoint_at": "2026-11-05T07:08:52.051377Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
