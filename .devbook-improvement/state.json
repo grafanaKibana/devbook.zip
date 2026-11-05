@@ -4027,11 +4027,11 @@
     "version": 1,
     "id": "b98a816444094ceaa557c175133e1e93",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-05T20:07:51.294462Z",
-    "elapsed_seconds": 331.9295770999999,
+    "elapsed_seconds": 340.8847542999999,
     "calls_reserved": 10,
-    "responses_received": 9,
+    "responses_received": 10,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md",
       "Vault/Home/AI & ML/LLM/Embeddings.md",
@@ -4280,7 +4280,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-05T20:13:23.223411Z",
+    "checkpoint_at": "2026-11-05T20:13:32.178587Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -16040,5 +16040,54 @@
       },
       "feedback_snapshot": []
     }
+  },
+  "pending_author_proposal": {
+    "workload_id": "b98a816444094ceaa557c175133e1e93",
+    "topic_id": "ai-ml-4edf0823",
+    "batch": {
+      "topic": "AI & ML",
+      "topic_id": "ai-ml-4edf0823",
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Evaluation/Evaluation.md",
+          "content": "---\ntitle: LLM Evaluation\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"Measuring LLM behavior with versioned cases, exact checks, semantic scoring, and production outcomes.\"\ntags: [FolderNote]\npublish: true\nlevel: [\"3\"]\nstatus: Done\npriority: High\ncreated: \"2026-02-16T18:33:57.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:28:37.407Z\"\n---\n\nEvaluation checks whether an LLM application behaves well enough to ship. Open-ended output may have several valid forms, so one assertion cannot represent the whole product contract. The practical system combines exact checks with rubric-based scoring, then compares both against a versioned set of cases and production outcomes.\n\nKeep the cases separate from the scorers. A [[Golden Test Set and Regression Runs|golden test set]] contains inputs, expected facts or invariants, rubrics, and slice metadata. [[Deterministic Checks]] and [[LLM-as-a-Judge|judges]] score outputs produced from those cases. The regression gate compares the result with a pinned baseline or threshold.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# Evaluation System\n\n```mermaid\nflowchart TD\n    G[Versioned golden corpus] --> R[Run candidate and baseline]\n    R --> O[Captured outputs and traces]\n    O --> X[Exact deterministic predicates]\n    O --> J[Rubric judge and human samples]\n    X --> S[Scores by case and slice]\n    J --> S\n    S --> C{Regression gate}\n    C -->|pass| P[Controlled production rollout]\n    C -->|fail| F[Block and diagnose]\n    P --> ON[Online outcomes and failures]\n    ON --> T[Triage and label]\n    T -->|new dataset version| G\n```\n\nCheap exact checks can reject a candidate before an expensive judge runs. The corpus itself is not a later pipeline stage. Every scorer starts from its cases and expectations.\n\nUse deterministic code for predicates with one mechanical answer:\n\n- JSON parses against a pinned schema.\n- A required field exists and has the expected type.\n- A tool name belongs to an allowed set.\n- A numeric value stays inside a declared range.\n\nSuch checks have no classification error when the implementation matches the product contract. But deterministic execution does not make every rule exact. A regex for PII or a keyword safety filter is repeatable and still wrong on some inputs. Calibrate heuristic detectors on labeled cases, record false positives and false negatives, and send uncertain results to a score or review path instead of treating them as infallible gates.\n\nCorrectness and groundedness need a rubric when several answers are acceptable. An LLM judge applies that rubric at scale. Blinded human samples then show whether the judge agrees with the intended standard or carries a systematic bias. Version the judge model and prompt with the rubric and sampling settings. Otherwise two score files may not mean the same thing.\n\n# Example\n\nOne support case can carry exact predicates alongside a semantic rubric:\n\n```text\ncase_id: damaged-refund-45-days\ninput: \"Can I return a damaged item after 45 days?\"\n\nexact predicates:\n- response matches the answer schema\n- cited_policy_sections contains at least one identifier\n- tool_calls use only policy_search\n\nrubric dimensions (0-2):\n- policy correctness\n- groundedness in the cited section\n- actionability of the escalation path\n\nheuristic signals:\n- possible payment-card number\n- possible unsupported promise\n```\n\nA schema either matches or it does not. “Possible payment-card number” remains a detector signal until its precision and recall are known for this traffic.\n\n# Dataset Lifecycle and Overfitting\n\nGive each case an immutable identifier, provenance, expected behavior, slice labels, and a reason for inclusion. Add production failures through triage rather than silently rewriting an old expectation. A development set supports iteration. A frozen holdout decides whether a release regressed.\n\nRepeated prompt or rubric tuning against the holdout turns it into training data. If that score rises while [[Online Evaluation and AB Tests|online outcomes]] stay flat, the evaluation has probably been overfit. Add independently sourced cases and inspect results by slice. Human review remains necessary where the automated signals disagree.\n\n# References\n\n- [OpenAI evaluation best practices](https://developers.openai.com/api/docs/guides/evaluation-best-practices)\n- [Anthropic: define success criteria](https://docs.anthropic.com/en/docs/test-and-evaluate/define-success)\n",
+          "hash": "8c0e88b768bb4d377785567aeb925ec5e9ceefa6817c8015be643b4cfad38bc6",
+          "topic": "AI & ML",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Evaluation/Evaluation.md",
+          "outcome": "keep",
+          "reason": "Audited the whole note against its text. The opening states the operating idea: exact checks plus rubric scoring over versioned cases. The mermaid flow correctly places the corpus ahead of the scorers, and the following prose explains why cheap deterministic checks run before an expensive judge. The deterministic-check section rightly notes that repeatable heuristic detectors (PII regex, keyword filters) are still fallible and need calibration. The judge paragraph covers calibration against blinded human samples and versioning of judge model, prompt, rubric and sampling settings, which is consistent with the LLM-as-a-Judge sibling cards. The example separates exact predicates, rubric dimensions and heuristic signals. The dataset lifecycle section covers dev vs frozen holdout and overfitting. The known-violations inventory is empty. Code fences carry language identifiers, wikilinks point to sibling notes, and the two references are bare descriptive links to authoritative vendor guidance. No factual error or readability defect was found, so any edit would be cosmetic churn."
+        }
+      ],
+      "feedback": [],
+      "decisions": []
+    },
+    "source_hashes": {
+      "Vault/Home/AI & ML/LLM/Evaluation/Evaluation.md": "8c0e88b768bb4d377785567aeb925ec5e9ceefa6817c8015be643b4cfad38bc6"
+    },
+    "feedback_keys": [],
+    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/AI & ML/LLM/Evaluation/Evaluation.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-05T20:13:32.178577Z"
   }
 }
