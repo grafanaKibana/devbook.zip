@@ -3902,11 +3902,11 @@
     "version": 1,
     "id": "b98a816444094ceaa557c175133e1e93",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-05T20:07:51.294462Z",
-    "elapsed_seconds": 209.9749758,
+    "elapsed_seconds": 218.2081843,
     "calls_reserved": 6,
-    "responses_received": 5,
+    "responses_received": 6,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md",
       "Vault/Home/AI & ML/LLM/Embeddings.md"
@@ -4001,7 +4001,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-05T20:11:21.268825Z",
+    "checkpoint_at": "2026-11-05T20:11:29.502015Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -15761,5 +15761,53 @@
       },
       "feedback_snapshot": []
     }
+  },
+  "pending_author_proposal": {
+    "workload_id": "b98a816444094ceaa557c175133e1e93",
+    "topic_id": "ai-ml-4edf0823",
+    "batch": {
+      "topic": "AI & ML",
+      "topic_id": "ai-ml-4edf0823",
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Evaluation/Building an Evaluation Set.md",
+          "content": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"How to structure, label, generate, and size the cases that every evaluation method relies on.\"\nlevel: [\"3\"]\npriority: High\nstatus: Done\npublish: true\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Evaluation/Building an Evaluation Set\"\nflashcard_uid: \"e5bc3ffc\"\ncreated: \"2026-06-12T18:21:46.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.474Z\"\n---\n\nAn evaluation set is the common input to [[LLM-as-a-Judge]], [[Deterministic Checks]], and regression gates. If its cases do not represent the workload, a precise scorer still produces a misleading result. The set defines what is measured before any metric assigns a number.\n\nTwo choices matter most. Labels describe acceptable behavior, which quickly becomes domain-specific: [[Retrieval Evaluation Sets]] shows how queries map to relevant evidence, while an agent may need correct tool choice and trajectory constraints. Sample size determines whether the set can distinguish a real change from sampling noise. A stable subset becomes the release gate described in [[Golden Test Set and Regression Runs]], and [[Online Evaluation and AB Tests]] carries the comparison into production traffic.\n\n# Structure\n\nEach case needs an input and a testable description of acceptable behavior. That description may be a reference answer, a rubric, hard constraints, or some combination. Supporting evidence is part of the case when the system is expected to ground its answer in a particular source.\n\nThe label determines which scorer is valid. Exact or structured expectations support deterministic checks. Open-ended criteria need rubric-based grading. Reference-free methods can measure properties such as faithfulness against supplied context, but they do not replace domain ground truth when correctness depends on facts outside that context. ARES combines synthetic data with a smaller human-labeled set and uses prediction-powered inference to estimate performance over more examples.\n\n# Synthetic Generation\n\nSynthetic generation is a practical bootstrap. It starts from source material with known provenance. A model writes plausible requests that the material can answer, and each generated case keeps its source identifier. This reverses the expensive part of labeling: the evidence is known before the input is written.\n\n```text\nfor item in sample(source_material, n=2000):\n    prompt = f\"\"\"You are a real user of this system. Read the material and\n    write 1-3 natural questions or tasks it fully satisfies. Paraphrase —\n    do not copy phrasing. Skip boilerplate.\n\n    Material:\n    {item.text}\"\"\"\n    for q in llm(prompt):\n        eval_set.append({\"input\": q, \"expected_source_id\": item.id})\n```\n\nThe weakness appears across the set rather than in one obvious bad case. Generated requests tend to share the model's phrasing and preferred difficulty, so ambiguous or adversarial production inputs disappear from view. Stratified source sampling helps. Prompt variants can widen the case shapes, and production examples should replace synthetic cases as real traffic becomes available. Retrieval-specific problems such as lexical leakage are covered in [[Retrieval Evaluation Sets]].\n\n# Size and Statistical Power\n\nAn evaluation result is an estimate over sampled cases. Its uncertainty depends on the metric, case distribution, correlation between observations, and the effect the gate is meant to detect. A small set may expose large failures while remaining unable to separate two close configurations.\n\nThe minimum detectable effect is chosen before the set is sized, and each result reports an interval around the observed difference. Paired evaluation, where baseline and candidate answer the same cases, often reduces variance because each case acts as its own control. End-to-end outcomes may still need many observations when user behavior or task difficulty varies widely.\n\n# Pitfalls\n\n## Eval Set Drift\n\nThe corpus or product changes while the evaluation set stays frozen. Cases begin to reference deleted material or obsolete behavior, yet the dashboard remains stable.\n\nThe set is versioned with the data and policy it describes. Referenced sources are checked to confirm they still exist, and cases are reviewed when the product contract changes. Otherwise a score change cannot be attributed cleanly to the system, the data, or the labels.\n\n## Threshold Cargo-Culting\n\nA threshold copied from another workload has no local meaning. The same score can represent different risks when the rubric, traffic, or cost of failure changes.\n\nThresholds are calibrated against human labels and product outcomes from the workload being shipped. Relative regression limits are useful when the measurement scale is stable, but they cannot make an unsafe baseline acceptable.\n\n# Questions\n\n<!-- qard-id: 7517de71-7dad-4890-bec0-b62b49a788f0 -->\n> [!qard]- When should a team add human-labeled evaluation cases instead of relying only on synthetic generation?\n> Human-labeled cases become necessary when synthetic cases can no longer be trusted to represent the workload or to label it correctly. That happens when correctness depends on expert judgment, when failures are costly, or when production inputs differ from the generated ones.\n>\n> - **What synthetic generation does well:** a model writes plausible requests from source material with known provenance. Coverage and a working evaluation harness therefore arrive quickly and cheaply.\n> - **Where it falls short:** generated cases share the generator's phrasing and preferred difficulty, so ambiguous, messy or adversarial real inputs are under-represented. Generated labels can also miss subtle domain distinctions.\n> - **What human labels add:** reviewed cases ground the evaluation in real inputs and expert judgment. They also show whether synthetic labels and automated judges agree with people. ARES, for example, pairs synthetic training data with a small human-annotated set that corrects its automated estimates.\n> \n> A practical evaluation set often combines synthetic breadth, human-reviewed cases and regression cases taken from real failures. The balance depends on the task's risk and on how closely synthetic cases match production traffic.\n>\n> [ARES: An Automated Evaluation Framework for Retrieval-Augmented Generation Systems (arXiv)](https://arxiv.org/abs/2311.09476) · [Evaluation best practices (OpenAI)](https://developers.openai.com/api/docs/guides/evaluation-best-practices)\n\n# References\n\n- [A statistical approach to model evaluations (Anthropic)](https://www.anthropic.com/research/statistical-approach-to-model-evals)\n- [ARES (Stanford)](https://arxiv.org/abs/2311.09476)\n",
+          "hash": "69f4ea3cd217023a8ab6f3af6a02cfe30c84243b36d13562a2402bda47d70957",
+          "topic": "AI & ML",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Evaluation/Building an Evaluation Set.md",
+          "outcome": "keep",
+          "reason": "Read the whole note against its claims. The opening states why representativeness precedes scoring. Structure ties label type to valid scorer. The ARES description (synthetic data plus a small human-labeled set, prediction-powered inference) matches the paper. Synthetic generation has a concrete example and names its weakness: shared phrasing and difficulty. The sizing section covers the minimum detectable effect, intervals and paired evaluation, which is consistent with Anthropic's statistical-evals guidance. The pitfalls (drift, threshold cargo-culting) are concise. The single Qard tests one dependent task, has sources on the answer side, and does not duplicate the neighbouring notes' cards. The code fence has a language identifier, wikilinks are used in explanatory prose, and References are bare links. No known violations exist, and no factual or editorial defect justifies an edit."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/AI & ML/LLM/Evaluation/Building an Evaluation Set.md": "69f4ea3cd217023a8ab6f3af6a02cfe30c84243b36d13562a2402bda47d70957"
+    },
+    "feedback_keys": [],
+    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/AI & ML/LLM/Evaluation/Building an Evaluation Set.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-05T20:11:29.502004Z"
   }
 }
