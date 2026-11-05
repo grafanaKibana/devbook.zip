@@ -4212,9 +4212,9 @@
     "version": 1,
     "id": "b98a816444094ceaa557c175133e1e93",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-05T20:07:51.294462Z",
-    "elapsed_seconds": 493.98479279999987,
+    "elapsed_seconds": 498.21117619999984,
     "calls_reserved": 15,
     "responses_received": 15,
     "attempted_paths": [
@@ -4223,7 +4223,8 @@
       "Vault/Home/AI & ML/LLM/Evaluation/Building an Evaluation Set.md",
       "Vault/Home/AI & ML/LLM/Evaluation/Deterministic Checks.md",
       "Vault/Home/AI & ML/LLM/Evaluation/Evaluation.md",
-      "Vault/Home/AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs.md"
+      "Vault/Home/AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs.md",
+      "Vault/Home/AI & ML/LLM/Evaluation/LLM-as-a-Judge.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -4606,10 +4607,93 @@
           },
           "model_calls": 13
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/Evaluation/LLM-as-a-Judge.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Evaluation/LLM-as-a-Judge.md",
+                "outcome": "keep",
+                "reason": "Read the whole note against its content and the cited Zheng et al. (MT-Bench) and OpenAI evals sources. The opening defines the judge and says its verdicts are model output, not ground truth. Absolute scoring versus pairwise preference is explained with the condition that decides between them. The rubric and scorecard sections are coherent. The pairwise prompt makes safety a gating condition ahead of the quality ordering. The bias section covers verbosity, position, prompt sensitivity, self-preference and drift, each with a mitigation. The mitigations are consistent with the cards: order-swap checks, calibration against human labels, and versioning the judge. The verbosity claim matches Zheng et al.'s repetitive-list attack. The two Qards each test one gradeable task, and their answers are consistent with the prose and carry sources. Code fences have language identifiers and the References are bare links. No factual error, structural gap or known violation found, so no edit is warranted."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "The note is accurate and coherent, and the keep is justified. The two Qards are single-task, no concrete rule violation was found, and no edit is needed.",
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Evaluation/LLM-as-a-Judge.md",
+                "verdict": "CLEAN",
+                "summary": "I read the whole note. It opens with the definition and the caveat that a judge's verdict is not ground truth. It explains when to use absolute scoring and when to use pairwise comparison. It then covers prompts, biases with mitigations, and two well-formed Qards. I found no factual error, repetition problem or structural defect that justifies an edit.",
+                "page_type": "Concept — frontmatter, optional Questions and References, MD040 language identifiers and Qard identity metadata apply.",
+                "current_text_evidence": [
+                  {
+                    "quote": "its verdict is another model output rather than ground truth",
+                    "line_start": 17,
+                    "reason": "The opening states the central boundary: judge output must be calibrated against human labels."
+                  },
+                  {
+                    "quote": "Absolute scoring** assigns anchored scores",
+                    "line_start": 19,
+                    "reason": "The note explains the two modes and the condition that decides between them (a stable release threshold versus iteration)."
+                  },
+                  {
+                    "quote": "An unsafe answer is ineligible to win.",
+                    "line_start": 78,
+                    "reason": "The pairwise prompt gates on safety before ranking by quality, which is a concrete and sound design."
+                  },
+                  {
+                    "quote": "Zheng et al. demonstrated this with repetitive-list attacks.",
+                    "line_start": 112,
+                    "reason": "The verbosity-bias claim matches the MT-Bench paper's repetitive-list attack."
+                  },
+                  {
+                    "quote": "A preference that does not survive the swap marks an abstention or human-review case",
+                    "line_start": 114,
+                    "reason": "The position-bias mitigation is a stated mechanism and matches the order-swap answer in the second Qard."
+                  },
+                  {
+                    "quote": "When does an LLM judge fit better than a deterministic check?",
+                    "line_start": 125,
+                    "reason": "The card tests one focused comparison with a decision rule and carries sources on the answer side."
+                  },
+                  {
+                    "quote": "What evidence supports trusting an LLM judge's verdicts?",
+                    "line_start": 140,
+                    "reason": "The card has a finite answer (human agreement, order-swap, bias probes, recalibration) that is consistent with the prose."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the note covers one coherent topic, LLM-as-a-judge evaluation, and its rubric, pairwise, prompt and bias sections depend on each other.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "change_checks": []
+          },
+          "model_calls": 15
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-05T20:16:05.278629Z",
+    "checkpoint_at": "2026-11-05T20:16:09.505012Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
