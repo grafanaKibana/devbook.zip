@@ -3487,10 +3487,10 @@
     "version": 1,
     "id": "4ce6dcd61eb74b9eafc6dcc2d27d9c9b",
     "status": "active",
-    "phase": "author_completed",
+    "phase": "review_reserved",
     "started_at": "2026-11-05T07:01:25.246564Z",
-    "elapsed_seconds": 284.328024,
-    "calls_reserved": 9,
+    "elapsed_seconds": 287.75852790000005,
+    "calls_reserved": 10,
     "responses_received": 9,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics.md",
@@ -3793,7 +3793,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-05T07:06:09.574134Z",
+    "checkpoint_at": "2026-11-05T07:06:13.004639Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -3818,7 +3818,7 @@
       "pr": null
     },
     "base_sha": "67caf2e374f53e8772b86b8ea0f881d74e784fa1",
-    "reservation_deadline": "2026-11-05T07:20:59.312121Z"
+    "reservation_deadline": "2026-11-05T07:21:12.762997Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
