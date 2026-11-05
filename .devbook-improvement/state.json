@@ -4082,11 +4082,11 @@
     "version": 1,
     "id": "b98a816444094ceaa557c175133e1e93",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-05T20:07:51.294462Z",
-    "elapsed_seconds": 406.1560369999999,
+    "elapsed_seconds": 424.9819796999999,
     "calls_reserved": 13,
-    "responses_received": 12,
+    "responses_received": 13,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md",
       "Vault/Home/AI & ML/LLM/Embeddings.md",
@@ -4405,7 +4405,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-05T20:14:37.449872Z",
+    "checkpoint_at": "2026-11-05T20:14:56.275815Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -16292,6 +16292,143 @@
       "Vault/Home/AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-05T20:14:33.669406Z"
+    "prepared_at": "2026-11-05T20:14:33.669406Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "overall_reason": "The note is accurate, well ordered and free of known violations. It has no cards, and no concrete defect justifies an edit, so keeping it unchanged is sound.",
+        "change_checks": [],
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs.md",
+            "verdict": "CLEAN",
+            "summary": "The note separates broad regression detection (golden set) from narrow boundary checks (targeted suites). It gives composition, versioning, holdout and case-level-diff guidance, pitfalls with remedies, and a decision table. The prose is direct and non-repetitive, and no edit is warranted.",
+            "page_type": "Concept — frontmatter is typed and valid (status Done is user-owned and untouched). Optional Questions are absent, and the single reference is a bare descriptive link. Code fences carry language identifiers.",
+            "current_text_evidence": [
+              {
+                "quote": "The golden set asks whether normal behavior moved. A targeted suite asks whether one known boundary still holds.",
+                "line_start": 16,
+                "reason": "The opening states the operating idea and the boundary between the two suite types. This makes the topic quick to re-enter."
+              },
+              {
+                "quote": "Keep a holdout slice for release validation. When both slices influence tuning, refresh the holdout from reviewed production cases",
+                "line_start": 71,
+                "reason": "The pitfall gives mechanism, condition and remedy. It keeps the contamination risk (tuning on the golden set) actionable."
+              },
+              {
+                "quote": "Binary gates are right for hard constraints and blunt for graded quality.",
+                "line_start": 81,
+                "reason": "This states the pass/fail tradeoff with its condition, and the next paragraph gives the remedy of comparing score distributions."
+              },
+              {
+                "quote": "Human reading is the bottleneck and measured judge agreement is sufficient",
+                "line_start": 92,
+                "reason": "The table row states the condition under which LLM-as-judge is preferred, so the comparison supports a decision."
+              },
+              {
+                "quote": "{\"id\":\"refund-045\",\"input\":{\"question\":\"Refund for damaged item after 45 days?\"",
+                "line_start": 40,
+                "reason": "The concrete JSONL case matches the described schema of input, references and reviewed expectations. Its fence is tagged json."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: golden sets and targeted suites are complementary parts of one regression-testing strategy, and the note is compact enough to stay together.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "NOT APPLICABLE",
+              "identity_safety": "NOT APPLICABLE",
+              "rules_compliance": "PASS"
+            }
+          }
+        ]
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs.md",
+          "citation_index": 1,
+          "reported_line_start": 71,
+          "resolved_line_start": 72
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs.md",
+          "citation_index": 2,
+          "reported_line_start": 81,
+          "resolved_line_start": 82
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs.md",
+          "citation_index": 3,
+          "reported_line_start": 92,
+          "resolved_line_start": 93
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs.md",
+          "citation_index": 4,
+          "reported_line_start": 40,
+          "resolved_line_start": 41
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs.md": "312c2be2bfa14beecd4c3d1553d3a6973b0cb3c779606b72b106a437424a552d"
+      },
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CLEAN",
+      "overall_reason": "The note is accurate, well ordered and free of known violations. It has no cards, and no concrete defect justifies an edit, so keeping it unchanged is sound.",
+      "change_checks": [],
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs.md",
+          "verdict": "CLEAN",
+          "summary": "The note separates broad regression detection (golden set) from narrow boundary checks (targeted suites). It gives composition, versioning, holdout and case-level-diff guidance, pitfalls with remedies, and a decision table. The prose is direct and non-repetitive, and no edit is warranted.",
+          "page_type": "Concept — frontmatter is typed and valid (status Done is user-owned and untouched). Optional Questions are absent, and the single reference is a bare descriptive link. Code fences carry language identifiers.",
+          "current_text_evidence": [
+            {
+              "quote": "The golden set asks whether normal behavior moved. A targeted suite asks whether one known boundary still holds.",
+              "line_start": 16,
+              "reason": "The opening states the operating idea and the boundary between the two suite types. This makes the topic quick to re-enter."
+            },
+            {
+              "quote": "Keep a holdout slice for release validation. When both slices influence tuning, refresh the holdout from reviewed production cases",
+              "line_start": 72,
+              "reason": "The pitfall gives mechanism, condition and remedy. It keeps the contamination risk (tuning on the golden set) actionable."
+            },
+            {
+              "quote": "Binary gates are right for hard constraints and blunt for graded quality.",
+              "line_start": 82,
+              "reason": "This states the pass/fail tradeoff with its condition, and the next paragraph gives the remedy of comparing score distributions."
+            },
+            {
+              "quote": "Human reading is the bottleneck and measured judge agreement is sufficient",
+              "line_start": 93,
+              "reason": "The table row states the condition under which LLM-as-judge is preferred, so the comparison supports a decision."
+            },
+            {
+              "quote": "{\"id\":\"refund-045\",\"input\":{\"question\":\"Refund for damaged item after 45 days?\"",
+              "line_start": 41,
+              "reason": "The concrete JSONL case matches the described schema of input, references and reviewed expectations. Its fence is tagged json."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: golden sets and targeted suites are complementary parts of one regression-testing strategy, and the note is compact enough to stay together.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "NOT APPLICABLE",
+            "identity_safety": "NOT APPLICABLE",
+            "rules_compliance": "PASS"
+          }
+        }
+      ]
+    }
   }
 }
