@@ -3902,11 +3902,11 @@
     "version": 1,
     "id": "b98a816444094ceaa557c175133e1e93",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-05T20:07:51.294462Z",
-    "elapsed_seconds": 105.77113679999998,
+    "elapsed_seconds": 127.87284279999997,
     "calls_reserved": 4,
-    "responses_received": 3,
+    "responses_received": 4,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md"
     ],
@@ -3989,7 +3989,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-05T20:09:37.064970Z",
+    "checkpoint_at": "2026-11-05T20:09:59.166675Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -15308,6 +15308,57 @@
       "Vault/Home/AI & ML/LLM/Embeddings.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-05T20:09:33.140209Z"
+    "prepared_at": "2026-11-05T20:09:33.140209Z",
+    "completed_review": {
+      "verdict": "CHANGES REQUIRED",
+      "overall_reason": "The keep disposition is not justified. The note applies Cohere `embed-v3` to multilingual coverage without distinguishing the English and multilingual variants. The rest of the note is accurate, and no edit was proposed.",
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Embeddings.md",
+          "verdict": "CHANGES REQUIRED",
+          "summary": "The note is well structured and mostly accurate. The cost arithmetic, the L2/cosine identity and the MRL hedging all hold. One concrete factual imprecision remains: Cohere `embed-v3` is credited with 100+ language coverage and multilingual training. Only the `embed-multilingual-v3.0` variant has that coverage, while the English variant does not. The keep disposition missed this.",
+          "page_type": "Concept — frontmatter and Qard identity metadata are protected; Questions and References are present and optional.",
+          "current_text_evidence": [
+            {
+              "quote": "Cohere `embed-v3` distinguishes `search_document` from `search_query` through `input_type` and covers more than 100 languages.",
+              "line_start": 43,
+              "reason": "Cohere's v3 family has separate English and multilingual models. Only the multilingual model covers 100+ languages, so the sentence is imprecise."
+            },
+            {
+              "quote": "models with explicit multilingual training (Cohere `embed-v3`, SBERT multilingual variants)",
+              "line_start": 93,
+              "reason": "The multilingual mitigation names the family generically. An English-only v3 model would not mitigate the problem, so the variant must be named."
+            },
+            {
+              "quote": "for a 10M-chunk index at $0.02/1M tokens and 500 tokens/chunk average, that is ~$100",
+              "line_start": 83,
+              "reason": "The arithmetic is correct: 5B tokens at $0.02 per million tokens is $100."
+            }
+          ],
+          "target_resolution": "UNRESOLVED",
+          "split_suggestion": "No split: the model selection, dimensionality, metrics and pitfalls all serve one coherent selection decision.",
+          "findings": [
+            {
+              "severity": "Medium",
+              "dimension": "Accuracy",
+              "location": "Model Families (line 43) and Multilingual Embedding Collapse (line 93)",
+              "evidence": "\"Cohere `embed-v3` ... covers more than 100 languages\" and \"explicit multilingual training (Cohere `embed-v3`...)\"",
+              "effect": "A reader could assume every Cohere v3 model is multilingual. The English variant is not, so this can lead to a wrong model choice for non-English corpora.",
+              "fix": "Name `embed-multilingual-v3.0` for the 100+ language claim and the multilingual mitigation. Note that `embed-english-v3.0` is English-focused."
+            }
+          ],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "FAIL",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "change_checks": []
+    }
   }
 }
