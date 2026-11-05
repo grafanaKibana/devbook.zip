@@ -3842,16 +3842,16 @@
     "version": 1,
     "id": "b98a816444094ceaa557c175133e1e93",
     "status": "active",
-    "phase": "evaluating",
+    "phase": "author_reserved",
     "started_at": "2026-11-05T20:07:51.294462Z",
-    "elapsed_seconds": 19.1330889,
-    "calls_reserved": 0,
+    "elapsed_seconds": 23.4393057,
+    "calls_reserved": 1,
     "responses_received": 0,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-05T20:08:10.426921Z",
+    "checkpoint_at": "2026-11-05T20:08:14.733139Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -3875,7 +3875,8 @@
       "review_process": "focused-whole-note-v1",
       "pr": null
     },
-    "base_sha": "67caf2e374f53e8772b86b8ea0f881d74e784fa1"
+    "base_sha": "67caf2e374f53e8772b86b8ea0f881d74e784fa1",
+    "reservation_deadline": "2026-11-05T20:23:14.386222Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
