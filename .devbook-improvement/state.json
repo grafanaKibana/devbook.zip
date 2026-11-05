@@ -4142,11 +4142,11 @@
     "version": 1,
     "id": "b98a816444094ceaa557c175133e1e93",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-05T20:07:51.294462Z",
-    "elapsed_seconds": 470.7278118999999,
+    "elapsed_seconds": 490.2430406999999,
     "calls_reserved": 15,
-    "responses_received": 14,
+    "responses_received": 15,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md",
       "Vault/Home/AI & ML/LLM/Embeddings.md",
@@ -4539,7 +4539,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-05T20:15:42.021648Z",
+    "checkpoint_at": "2026-11-05T20:16:01.536876Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -16511,6 +16511,169 @@
       "Vault/Home/AI & ML/LLM/Evaluation/LLM-as-a-Judge.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-05T20:15:37.648344Z"
+    "prepared_at": "2026-11-05T20:15:37.648344Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "overall_reason": "The note is accurate and coherent, and the keep is justified. The two Qards are single-task, no concrete rule violation was found, and no edit is needed.",
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Evaluation/LLM-as-a-Judge.md",
+            "verdict": "CLEAN",
+            "summary": "I read the whole note. It opens with the definition and the caveat that a judge's verdict is not ground truth. It explains when to use absolute scoring and when to use pairwise comparison. It then covers prompts, biases with mitigations, and two well-formed Qards. I found no factual error, repetition problem or structural defect that justifies an edit.",
+            "page_type": "Concept — frontmatter, optional Questions and References, MD040 language identifiers and Qard identity metadata apply.",
+            "current_text_evidence": [
+              {
+                "quote": "its verdict is another model output rather than ground truth",
+                "line_start": 17,
+                "reason": "The opening states the central boundary: judge output must be calibrated against human labels."
+              },
+              {
+                "quote": "Absolute scoring** assigns anchored scores",
+                "line_start": 19,
+                "reason": "The note explains the two modes and the condition that decides between them (a stable release threshold versus iteration)."
+              },
+              {
+                "quote": "An unsafe answer is ineligible to win.",
+                "line_start": 77,
+                "reason": "The pairwise prompt gates on safety before ranking by quality, which is a concrete and sound design."
+              },
+              {
+                "quote": "Zheng et al. demonstrated this with repetitive-list attacks.",
+                "line_start": 111,
+                "reason": "The verbosity-bias claim matches the MT-Bench paper's repetitive-list attack."
+              },
+              {
+                "quote": "A preference that does not survive the swap marks an abstention or human-review case",
+                "line_start": 113,
+                "reason": "The position-bias mitigation is a stated mechanism and matches the order-swap answer in the second Qard."
+              },
+              {
+                "quote": "When does an LLM judge fit better than a deterministic check?",
+                "line_start": 124,
+                "reason": "The card tests one focused comparison with a decision rule and carries sources on the answer side."
+              },
+              {
+                "quote": "What evidence supports trusting an LLM judge's verdicts?",
+                "line_start": 138,
+                "reason": "The card has a finite answer (human agreement, order-swap, bias probes, recalibration) that is consistent with the prose."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: the note covers one coherent topic, LLM-as-a-judge evaluation, and its rubric, pairwise, prompt and bias sections depend on each other.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Evaluation/LLM-as-a-Judge.md",
+          "citation_index": 2,
+          "reported_line_start": 77,
+          "resolved_line_start": 78
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Evaluation/LLM-as-a-Judge.md",
+          "citation_index": 3,
+          "reported_line_start": 111,
+          "resolved_line_start": 112
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Evaluation/LLM-as-a-Judge.md",
+          "citation_index": 4,
+          "reported_line_start": 113,
+          "resolved_line_start": 114
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Evaluation/LLM-as-a-Judge.md",
+          "citation_index": 5,
+          "reported_line_start": 124,
+          "resolved_line_start": 125
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Evaluation/LLM-as-a-Judge.md",
+          "citation_index": 6,
+          "reported_line_start": 138,
+          "resolved_line_start": 140
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/AI & ML/LLM/Evaluation/LLM-as-a-Judge.md": "3dabdbd64c62cde73884f4eb3b7150ae35e0a329095b66dfec1b4e79a25a12b5"
+      },
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CLEAN",
+      "overall_reason": "The note is accurate and coherent, and the keep is justified. The two Qards are single-task, no concrete rule violation was found, and no edit is needed.",
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Evaluation/LLM-as-a-Judge.md",
+          "verdict": "CLEAN",
+          "summary": "I read the whole note. It opens with the definition and the caveat that a judge's verdict is not ground truth. It explains when to use absolute scoring and when to use pairwise comparison. It then covers prompts, biases with mitigations, and two well-formed Qards. I found no factual error, repetition problem or structural defect that justifies an edit.",
+          "page_type": "Concept — frontmatter, optional Questions and References, MD040 language identifiers and Qard identity metadata apply.",
+          "current_text_evidence": [
+            {
+              "quote": "its verdict is another model output rather than ground truth",
+              "line_start": 17,
+              "reason": "The opening states the central boundary: judge output must be calibrated against human labels."
+            },
+            {
+              "quote": "Absolute scoring** assigns anchored scores",
+              "line_start": 19,
+              "reason": "The note explains the two modes and the condition that decides between them (a stable release threshold versus iteration)."
+            },
+            {
+              "quote": "An unsafe answer is ineligible to win.",
+              "line_start": 78,
+              "reason": "The pairwise prompt gates on safety before ranking by quality, which is a concrete and sound design."
+            },
+            {
+              "quote": "Zheng et al. demonstrated this with repetitive-list attacks.",
+              "line_start": 112,
+              "reason": "The verbosity-bias claim matches the MT-Bench paper's repetitive-list attack."
+            },
+            {
+              "quote": "A preference that does not survive the swap marks an abstention or human-review case",
+              "line_start": 114,
+              "reason": "The position-bias mitigation is a stated mechanism and matches the order-swap answer in the second Qard."
+            },
+            {
+              "quote": "When does an LLM judge fit better than a deterministic check?",
+              "line_start": 125,
+              "reason": "The card tests one focused comparison with a decision rule and carries sources on the answer side."
+            },
+            {
+              "quote": "What evidence supports trusting an LLM judge's verdicts?",
+              "line_start": 140,
+              "reason": "The card has a finite answer (human agreement, order-swap, bias probes, recalibration) that is consistent with the prose."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: the note covers one coherent topic, LLM-as-a-judge evaluation, and its rubric, pairwise, prompt and bias sections depend on each other.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "change_checks": []
+    }
   }
 }
