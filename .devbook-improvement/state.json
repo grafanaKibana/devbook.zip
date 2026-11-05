@@ -4142,9 +4142,9 @@
     "version": 1,
     "id": "b98a816444094ceaa557c175133e1e93",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-05T20:07:51.294462Z",
-    "elapsed_seconds": 429.1598127999999,
+    "elapsed_seconds": 434.2222670999999,
     "calls_reserved": 13,
     "responses_received": 13,
     "attempted_paths": [
@@ -4152,7 +4152,8 @@
       "Vault/Home/AI & ML/LLM/Embeddings.md",
       "Vault/Home/AI & ML/LLM/Evaluation/Building an Evaluation Set.md",
       "Vault/Home/AI & ML/LLM/Evaluation/Deterministic Checks.md",
-      "Vault/Home/AI & ML/LLM/Evaluation/Evaluation.md"
+      "Vault/Home/AI & ML/LLM/Evaluation/Evaluation.md",
+      "Vault/Home/AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -4462,10 +4463,83 @@
           },
           "model_calls": 11
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against current text. The opening separates the two questions (did normal behavior move vs. does a known boundary hold). The golden-set section covers composition, versioning, holdout and case-level diffs, and the JSONL example matches the described schema. The targeted-suite section gives concrete suites and incident-plus-variation guidance. The pitfalls (tuning on the golden set, staleness, pass/fail only) state mechanisms and remedies. The tradeoffs table is consistent with the neighboring LLM-as-a-Judge cards on calibration and human reference. The claims are general evaluation practice and not version-specific. They are consistent with the OpenAI evaluation best-practices reference. There are no known violations and no cards. The prose is direct and non-repetitive, so edits would be cosmetic churn."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "The note is accurate, well ordered and free of known violations. It has no cards, and no concrete defect justifies an edit, so keeping it unchanged is sound.",
+            "change_checks": [],
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs.md",
+                "verdict": "CLEAN",
+                "summary": "The note separates broad regression detection (golden set) from narrow boundary checks (targeted suites). It gives composition, versioning, holdout and case-level-diff guidance, pitfalls with remedies, and a decision table. The prose is direct and non-repetitive, and no edit is warranted.",
+                "page_type": "Concept — frontmatter is typed and valid (status Done is user-owned and untouched). Optional Questions are absent, and the single reference is a bare descriptive link. Code fences carry language identifiers.",
+                "current_text_evidence": [
+                  {
+                    "quote": "The golden set asks whether normal behavior moved. A targeted suite asks whether one known boundary still holds.",
+                    "line_start": 16,
+                    "reason": "The opening states the operating idea and the boundary between the two suite types. This makes the topic quick to re-enter."
+                  },
+                  {
+                    "quote": "Keep a holdout slice for release validation. When both slices influence tuning, refresh the holdout from reviewed production cases",
+                    "line_start": 72,
+                    "reason": "The pitfall gives mechanism, condition and remedy. It keeps the contamination risk (tuning on the golden set) actionable."
+                  },
+                  {
+                    "quote": "Binary gates are right for hard constraints and blunt for graded quality.",
+                    "line_start": 82,
+                    "reason": "This states the pass/fail tradeoff with its condition, and the next paragraph gives the remedy of comparing score distributions."
+                  },
+                  {
+                    "quote": "Human reading is the bottleneck and measured judge agreement is sufficient",
+                    "line_start": 93,
+                    "reason": "The table row states the condition under which LLM-as-judge is preferred, so the comparison supports a decision."
+                  },
+                  {
+                    "quote": "{\"id\":\"refund-045\",\"input\":{\"question\":\"Refund for damaged item after 45 days?\"",
+                    "line_start": 41,
+                    "reason": "The concrete JSONL case matches the described schema of input, references and reviewed expectations. Its fence is tagged json."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: golden sets and targeted suites are complementary parts of one regression-testing strategy, and the note is compact enough to stay together.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "NOT APPLICABLE",
+                  "identity_safety": "NOT APPLICABLE",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ]
+          },
+          "model_calls": 13
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-05T20:15:00.453647Z",
+    "checkpoint_at": "2026-11-05T20:15:05.516102Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
