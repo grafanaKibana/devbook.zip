@@ -3250,608 +3250,18 @@
   },
   "focused_workload": {
     "version": 1,
-    "id": "792178af26484b3da828d4cea1e5f39f",
-    "status": "sealed",
-    "phase": "sealed",
-    "started_at": "2026-11-04T19:55:42.282235Z",
-    "elapsed_seconds": 770.9837093000001,
-    "calls_reserved": 19,
-    "responses_received": 19,
-    "attempted_paths": [
-      "Vault/Home/Programming/NET/ASP NET Web API/Filters.md",
-      "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md",
-      "Vault/Home/Programming/NET/CSharp/Fundamentals/Methods.md",
-      "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Types.md",
-      "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Locking.md",
-      "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Mutex.md",
-      "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Parallelism.md",
-      "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Semaphore.md",
-      "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Tasks.md",
-      "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/ThreadPool.md"
-    ],
+    "id": "4ce6dcd61eb74b9eafc6dcc2d27d9c9b",
+    "status": "active",
+    "phase": "selecting",
+    "started_at": "2026-11-05T07:01:25.246564Z",
+    "elapsed_seconds": 0.0010806,
+    "calls_reserved": 0,
+    "responses_received": 0,
+    "attempted_paths": [],
     "accepted_records": [],
-    "outcomes": [
-      {
-        "path": "Vault/Home/Programming/NET/ASP NET Web API/Filters.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/Programming/NET/ASP NET Web API/Filters.md",
-                "outcome": "keep",
-                "reason": "Audited the whole note against Microsoft's ASP.NET Core filters documentation (net 10). The stage order (authorization, resource, action, result, with exception filters outside the sequence) is correct. The exception-filter coverage is also correct: it includes controller creation, model binding, action filters and action methods, and excludes resource filters, result filters and result execution. A handled exception skips ordinary result filters and still runs IAlwaysRunResultFilter. When a filter implements both sync and async forms, only the async form runs. Scope nesting with the IOrderedFilter.Order override is accurate, as are the ServiceFilter, TypeFilter and IFilterFactory distinctions. The middleware, controller-filter and endpoint-filter tradeoff table is sound, and the examples compile conceptually and match the prose. The four cards (including the two flagged ones) each test one gradeable task, give mechanism-level answers, and are consistent with the note. I found no factual error, missing prerequisite or redundancy that would justify an edit."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "No edits proposed. Independent whole-note audit found no factual error, unsupported claim or concrete rule violation. The keep disposition is justified.",
-            "notes": [
-              {
-                "path": "Vault/Home/Programming/NET/ASP NET Web API/Filters.md",
-                "verdict": "CLEAN",
-                "summary": "The note is accurate and well ordered. It runs from scope, to stage order, to examples, to filter creation, to pitfalls and tradeoffs. The four cards each test one gradeable task with mechanism-level answers, so keeping it unchanged is justified.",
-                "page_type": "Concept — typed frontmatter and Qard IDs preserved; Questions and References optional but present and valid; code fences carry language identifiers.",
-                "current_text_evidence": [
-                  {
-                    "quote": "Exception filters observe unhandled exceptions from action execution.",
-                    "line_start": 28,
-                    "reason": "Correctly places exception filters outside the sequential stages and limits them to action execution."
-                  },
-                  {
-                    "quote": "If a filter implements both sync and async forms of the same stage, the runtime invokes only the async interface.",
-                    "line_start": 103,
-                    "reason": "Matches Microsoft's documented behavior and explains the practical consequence."
-                  },
-                  {
-                    "quote": "Because of these gaps, exception-handling middleware is the broader boundary for a uniform API error response.",
-                    "line_start": 154,
-                    "reason": "The card on handled exceptions closes with the decision that follows from its mechanism, and the coverage card lists the gaps. It reads acceptably."
-                  },
-                  {
-                    "quote": "An explicit `Order` value, exposed through `IOrderedFilter`, takes precedence over scope.",
-                    "line_start": 159,
-                    "reason": "Accurate ordering rule with a concrete worked example; each card tests a single task."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the middleware, controller-filter and endpoint-filter comparison, the stage order and the filter-creation details form one coherent topic and are short enough to stay together.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "identity_safety": "PASS",
-                  "question_quality": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "change_checks": []
-          },
-          "model_calls": 2
-        }
-      },
-      {
-        "path": "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md",
-                "outcome": "keep",
-                "reason": "I read the whole note and checked it against Microsoft's middleware, filters, error-handling and authentication documentation. The sample pipeline order (exception handler, HSTS, HTTPS redirection, static files, routing, CORS, authentication, authorization) matches the documented order. The sequence diagram and the 401 explanation match how authentication and authorization behave: authentication continues, and authorization triggers the challenge. The scoped-service warning for conventional middleware, the Map/UseWhen/Run distinctions and the pitfalls list are correct. The flagged card's claim that endpoint filters can be attached to mapped controller actions is supported by a search: a dotnet test site calls AddEndpointFilterFactory on MapControllers(). The card is bounded and answerable, and its table makes the differences from controller action filters clear. The exception-handling and pipeline cards agree with the prose and do not repeat it unnecessarily. The note has no known violations, so no change is warranted."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "The complete note was audited and no concrete defect was found. The keep is justified, and the flagged card is accurate and bounded.",
-            "notes": [
-              {
-                "path": "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md",
-                "verdict": "CLEAN",
-                "summary": "The note explains the operating idea (an ordered chain that wraps the endpoint, with registration order acting as control flow) and covers the boundaries: short-circuiting, branching, started responses and middleware lifetimes. The flagged filter-comparison card is one focused comparison and its claims about endpoint filters are accurate. No edit is warranted.",
-                "page_type": "Concept — typed frontmatter, optional Questions and References present; Qard IDs are protected and unchanged.",
-                "current_text_evidence": [
-                  {
-                    "quote": "ASP.NET Core middleware forms an ordered chain around endpoint execution.",
-                    "line_start": 18,
-                    "reason": "The opening states the operating idea and the cross-cutting scope quickly."
-                  },
-                  {
-                    "quote": "Registration order is control flow.",
-                    "line_start": 55,
-                    "reason": "The explanation order moves from concept to diagram, ordered pipeline and then custom middleware, so the idea can be re-entered."
-                  },
-                  {
-                    "quote": "**Conventional middleware is constructed once.**",
-                    "line_start": 125,
-                    "reason": "The note gives the lifetime mechanism and its exception (IMiddleware), which is technically sound and non-trivial."
-                  },
-                  {
-                    "quote": "**Wrong registration order.**",
-                    "line_start": 143,
-                    "reason": "The pitfalls are concrete, with consequences and no padding, and they do not repeat the earlier prose."
-                  },
-                  {
-                    "quote": "How does middleware differ from an action filter in an ASP.NET Core controller-based Web API?",
-                    "line_start": 166,
-                    "reason": "This is one focused comparison with a self-contained question. The answer carries mechanism, conditions and primary Microsoft sources, and it is accurate on endpoint filters."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: pipeline order, custom middleware, branching and pitfalls are one coherent topic. Filters appear only as a decision contrast.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "change_checks": [],
-            "decision_checks": []
-          },
-          "model_calls": 4
-        }
-      },
-      {
-        "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Methods.md",
-        "outcome": "proposal_blocked",
-        "reason": "card edit must replace one complete active Qard block including adjacent metadata",
-        "result": {
-          "status": "proposal_blocked",
-          "stage": "deterministic_application",
-          "reason": "card edit must replace one complete active Qard block including adjacent metadata",
-          "model_calls": 5
-        }
-      },
-      {
-        "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Types.md",
-        "outcome": "proposal_blocked",
-        "reason": "card edit must replace one complete active Qard block including adjacent metadata",
-        "result": {
-          "status": "proposal_blocked",
-          "stage": "deterministic_application",
-          "reason": "card edit must replace one complete active Qard block including adjacent metadata",
-          "model_calls": 8
-        }
-      },
-      {
-        "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Locking.md",
-        "outcome": "proposal_blocked",
-        "reason": "card edit must replace one complete active Qard block including adjacent metadata",
-        "result": {
-          "status": "proposal_blocked",
-          "stage": "deterministic_application",
-          "reason": "card edit must replace one complete active Qard block including adjacent metadata",
-          "model_calls": 9
-        }
-      },
-      {
-        "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Mutex.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Mutex.md",
-                "outcome": "keep",
-                "reason": "Audited the whole note against the current text and my knowledge of the .NET Mutex documentation. WaitHandle/SafeWaitHandle derivation, thread ownership, recursion count, ApplicationException on a non-owner ReleaseMutex, AbandonedMutexException granting ownership, and WaitAll being unsupported on STA threads are all accurate. The Global\\ and Local\\ prefix scope is correctly limited to Windows Terminal Services. The examples use try/finally release correctly. The Pitfalls and Tradeoffs sections are not repetitive and give the lock/SemaphoreSlim/Mutex decision rule. Both cards are single-task, self-contained, cite sources, and match the note. No known violations were reported, and no defect was found that justifies a change."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "notes": [
-              {
-                "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Mutex.md",
-                "verdict": "CLEAN",
-                "summary": "Independent whole-note audit found the note accurate, well ordered and free of repetition. The mechanism, examples, pitfalls, tradeoffs and both cards are sound, so no edit is warranted.",
-                "page_type": "Concept — typed frontmatter, optional Questions and References present. Qard IDs and metadata are protected.",
-                "current_text_evidence": [
-                  {
-                    "quote": "Its useful boundary is the process boundary: a named mutex can keep two local processes from entering the same critical section.",
-                    "line_start": 17,
-                    "reason": "The opening states the operating idea and the decision boundary against lock and SemaphoreSlim right away."
-                  },
-                  {
-                    "quote": "every successful wait increments a recursion count. Another thread cannot acquire the mutex until the owner has called `ReleaseMutex` the same number of times.",
-                    "line_start": 28,
-                    "reason": "Reentrancy mechanism is accurate and shown with a count walkthrough in the code block that follows."
-                  },
-                  {
-                    "quote": "`WaitAll` is unsupported on an STA thread, including the usual WinForms and WPF UI threads, and throws `NotSupportedException` there.",
-                    "line_start": 52,
-                    "reason": "Version- and thread-model-specific condition is stated correctly and placed as a warning."
-                  },
-                  {
-                    "quote": "**Abandonment transfers ownership, not correctness.**",
-                    "line_start": 100,
-                    "reason": "Pitfall correctly explains that the next waiter owns the mutex and must validate state; this agrees with the AbandonedMutexException card."
-                  },
-                  {
-                    "quote": "> [!qard]- What does `AbandonedMutexException` signal?",
-                    "line_start": 126,
-                    "reason": "Single-task card with a self-contained answer. Its ID is retained and the answer is technically correct."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the note is one cohesive topic. Mutex ownership, abandonment and the process boundary depend on each other, so a split would not help.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "overall_reason": "Whole-note read found no concrete factual, structural, voice or question-quality defect. Keeping the note unchanged is justified, and no edits were proposed.",
-            "change_checks": []
-          },
-          "model_calls": 11
-        }
-      },
-      {
-        "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Parallelism.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Parallelism.md",
-                "outcome": "keep",
-                "reason": "Audited the whole note. The opening separates parallelism from async. The partitioning section correctly names range and dynamic partitioning, including Partitioner.Create(loadBalance: true). The Parallel.ForEachAsync example has the correct (item, token) => ValueTask body signature, and the note itself says ForEach would fit a synchronous body better. The PLINQ prime filter is correct at the edges: n=2 and n=3 give an empty range and count as prime, and n=4 is rejected. The localInit/localFinally Parallel.For overload is used correctly. The Amdahl figure is right: 20% serial caps speedup at 5x. The pitfalls, the tradeoff table and the AggregateException handling match the .NET documentation. All four cards are self-contained and each tests one task. They cover worker-count overhead, MaxDegreeOfParallelism, PLINQ fit and small-input overhead. Their sources are relevant Microsoft docs. No native violations are reported and the repeated phrases are acceptable, so rewrites would be cosmetic only."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "Independent whole-note audit found no accuracy, clarity, question-quality or rules defects. The keep is justified and no edits were proposed.",
-            "notes": [
-              {
-                "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Parallelism.md",
-                "verdict": "CLEAN",
-                "summary": "The note is accurate, well ordered and self-contained. It separates parallelism from async, explains partitioning, gives correct examples, and covers pitfalls and tradeoffs. Its four cards are each one task, with relevant Microsoft sources. Rewrites would be cosmetic only.",
-                "page_type": "Concept — frontmatter, Qard IDs and bare-link References are intact; Questions and References are optional and present; every code fence has a language.",
-                "current_text_evidence": [
-                  {
-                    "quote": "Async code is not automatically parallel.",
-                    "line_start": 19,
-                    "reason": "The opening separates async from parallelism, which sets the boundary of the topic."
-                  },
-                  {
-                    "quote": "Dynamic partitioning** (`Partitioner.Create(source, loadBalance: true)`)",
-                    "line_start": 35,
-                    "reason": "This is the correct API for load-balanced partitioning, and the trade-off is stated."
-                  },
-                  {
-                    "quote": "The body above completes synchronously, so `Parallel.ForEach` would usually express the CPU-bound intent more directly.",
-                    "line_start": 66,
-                    "reason": "The note admits the limits of its own example and states when ForEachAsync is the right choice."
-                  },
-                  {
-                    "quote": ".Where(n => n > 1 && Enumerable.Range(2, (int)Math.Sqrt(n) - 1)",
-                    "line_start": 77,
-                    "reason": "The prime filter is correct at the edges: n=2 and n=3 give an empty range, and n=4 is rejected."
-                  },
-                  {
-                    "quote": "infinite parallel capacity still cannot exceed a fivefold speedup",
-                    "line_start": 104,
-                    "reason": "A 20% serial fraction gives a 5x cap under Amdahl's law, so the arithmetic is right."
-                  },
-                  {
-                    "quote": "Why can a parallel query be slower than a sequential query for small inputs?",
-                    "line_start": 166,
-                    "reason": "This card tests one bounded task: fixed overhead against little work. It is distinct from the worker-count card."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the note covers one coherent topic, CPU-bound parallelism in .NET. Examples, pitfalls and tradeoffs all serve that topic.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "change_checks": []
-          },
-          "model_calls": 13
-        }
-      },
-      {
-        "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Semaphore.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Semaphore.md",
-                "outcome": "keep",
-                "reason": "Audited the whole note against the current text and my knowledge of the Microsoft SemaphoreSlim, Semaphore and lock documentation. I did not run new web searches. The opening, permit mechanics, both examples, pitfalls, tradeoffs, the single Qard and the reference are accurate. Specific checks: the examples release in finally, and WaitAsync takes the cancellation token. Named semaphores are Windows-only. Release throws SemaphoreFullException only when the count would exceed maxCount. Waiter order is not guaranteed. A semaphore has no owner. Task.WhenAll only composes the tasks it is given. The Qard tests one focused comparison with a consistent answer. The known_violations list is empty. The note has no concrete defect, and edits would be cosmetic churn."
-              }
-            ],
-            "feedback": [],
-            "decisions": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "The whole note was audited independently. It is accurate, well ordered and free of concrete rule violations. The keep disposition is justified, and no edits are needed.",
-            "change_checks": [],
-            "notes": [
-              {
-                "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Semaphore.md",
-                "verdict": "CLEAN",
-                "summary": "The note explains permits, the SemaphoreSlim and Semaphore split, both examples, concrete pitfalls and tradeoffs. The mechanisms, conditions and exceptions are all present, and the single Qard is one focused comparison. No concrete defect was found, so edits would be cosmetic churn.",
-                "page_type": "Concept — frontmatter intact; optional Questions and References present and valid; no generated navigation or special-page rules apply.",
-                "current_text_evidence": [
-                  {
-                    "quote": "A wait consumes one permit. `Release` puts it back:",
-                    "line_start": 21,
-                    "reason": "The mechanism is stated early and plainly, and the bullets that follow keep Semaphore and SemaphoreSlim distinct."
-                  },
-                  {
-                    "quote": "An extra release made while permits are still held stays within the maximum, succeeds, and silently admits one more caller than intended.",
-                    "line_start": 67,
-                    "reason": "This states the exact condition under which SemaphoreFullException is thrown and its exception, which is the subtle point that is easy to get wrong."
-                  },
-                  {
-                    "quote": "`Task.WhenAll` only composes the tasks supplied to it.",
-                    "line_start": 76,
-                    "reason": "The tradeoff is accurate and the reasoning is concrete: it explains why the semaphore must be acquired inside each operation."
-                  },
-                  {
-                    "quote": "> [!qard]- When is `SemaphoreSlim` a better fit than `lock`?",
-                    "line_start": 83,
-                    "reason": "This is one bounded comparison question. The answer carries the mechanism, the await restriction and release discipline, and cites Microsoft primary sources on the answer side. The ID comment is intact."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the note covers one cohesive primitive, and the Semaphore, SemaphoreSlim and channel comparisons all serve the same decision.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ]
-          },
-          "model_calls": 15
-        }
-      },
-      {
-        "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Tasks.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Tasks.md",
-                "outcome": "keep",
-                "reason": "Audited the whole note against current text and .NET behavior. The opening separates Task from threads. The mechanism section covers await's completed-awaiter fast path, creation and scheduling (StartNew uses TaskScheduler.Current, Unwrap for async lambdas, LongRunning as a hint), and completed-task factories. Both fan-out examples are correct: WhenAll enumerates the lazy Select, awaiting it rethrows only one exception, and the catch inspects all faults. WhenEach is correctly marked .NET 9+ with unspecified tie order. The pitfalls are accurate: the unobserved-exception policy in modern .NET, ValueTask single-consumption and AsTask, the Task.Run hop around async I/O, and unbounded fan-out. The cards each test one gradeable task and match the prose: WhenAll failure and result order, WhenAny re-await, ValueTask tradeoffs, Task versus thread, and Task.Run in ASP.NET Core. They carry primary Microsoft sources. No known violations are open. I found no factual defect, repetition or ordering problem that justifies an edit."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "Independent whole-note audit found no factual, ordering, wording or card-quality defect. The keep is justified and no edits were proposed.",
-            "change_checks": [],
-            "notes": [
-              {
-                "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Tasks.md",
-                "verdict": "CLEAN",
-                "summary": "The note is accurate and well ordered. It moves from the Task-versus-thread idea to the mechanism, fan-out and failure aggregation, composition, pitfalls and cards. The prose is direct and keeps the conditions and exceptions. Each card tests one gradeable task. I found no defect that justifies an edit.",
-                "page_type": "Concept — typed frontmatter, optional Questions and References. Qard callouts keep their hidden IDs.",
-                "current_text_evidence": [
-                  {
-                    "quote": "The abstraction says nothing about whether a thread is currently executing the operation.",
-                    "line_start": 17,
-                    "reason": "The opening states the central idea, that a Task is not a thread. Later sections and the first card build on it."
-                  },
-                  {
-                    "quote": "The default scheduler is `TaskScheduler.Current`, so behavior can depend on the caller's context.",
-                    "line_start": 35,
-                    "reason": "This is the correct StartNew caveat. It gives the condition that changes behavior."
-                  },
-                  {
-                    "quote": "Awaiting it propagates one exception, so code that needs the full set must inspect the combined task or the individual tasks after completion.",
-                    "line_start": 58,
-                    "reason": "This is accurate WhenAll semantics. The catch-when example that follows is consistent with it."
-                  },
-                  {
-                    "quote": "On .NET 9+, `Task.WhenEach` yields each task after it completes.",
-                    "line_start": 98,
-                    "reason": "The version condition is correct, and the tie order is correctly described as unspecified."
-                  },
-                  {
-                    "quote": "Modern .NET does not terminate the process by default after that event.",
-                    "line_start": 112,
-                    "reason": "This matches the post-.NET 4.5 unobserved-exception policy."
-                  },
-                  {
-                    "quote": "> [!qard]- Why must the task returned by `await Task.WhenAny(...)` usually be awaited again?",
-                    "line_start": 234,
-                    "reason": "This is a focused card with a mechanism-based answer and a primary Microsoft source. It tests one gradeable task."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: Task semantics, composition, failure handling and pitfalls are tightly coupled and cohere as one note.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ]
-          },
-          "model_calls": 17
-        }
-      },
-      {
-        "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/ThreadPool.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/ThreadPool.md",
-                "outcome": "keep",
-                "reason": "I read the whole note against the current text and Microsoft's managed thread pool and starvation guidance. The opening defines the pool and why reuse helps. How It Works separates worker and I/O completion capacity, and it states that the minimum thread count is a threshold, not a preallocation. It also says the blocking-compensation heuristics are not general. The SetMinThreads sample, the bounded fan-out example (it notes the pending-task allocation and the channel and Parallel.ForEachAsync alternatives) and the starvation causes are accurate. The dotnet-counters names threadpool-queue-length, threadpool-thread-count and monitor-lock-contention-count are correct. The pitfalls are technically right: blocking in Task.Run, Thread.Sleep, a too-high minimum, and async lambdas in Parallel.ForEach becoming async void. The cards cover purpose, poor-fit work, starvation, the blocking mechanism and SetMinThreads, each as one gradeable task with sources. There is no duplicated prose or terminology drift, and no known violations. Edits would be cosmetic."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "notes": [
-              {
-                "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/ThreadPool.md",
-                "verdict": "CLEAN",
-                "summary": "Independent whole-note audit found the note accurate, well ordered and free of repetition or card defects. The keep is justified; no edits were proposed and none are needed.",
-                "page_type": "Concept note (published; typed frontmatter, Questions and References present and valid)",
-                "current_text_evidence": [
-                  {
-                    "quote": "It is a threshold the pool can reach without the usual delay, not a request to start that many threads immediately.",
-                    "line_start": 28,
-                    "reason": "States the correct SetMinThreads mechanism (no preallocation), the key engineering condition, and it is reinforced consistently in later prose and the card."
-                  },
-                  {
-                    "quote": "That mechanism is not a general detector for every synchronous wait, native call, lock, or `Thread.Sleep`.",
-                    "line_start": 30,
-                    "reason": "Bounds the modern blocking-compensation claim accurately instead of overstating it."
-                  },
-                  {
-                    "quote": "That protects the dependency, though a very large input still allocates pending tasks.",
-                    "line_start": 78,
-                    "reason": "Example is explained with its limit and the alternative (channel or Parallel.ForEachAsync), preserving mechanism and tradeoff."
-                  },
-                  {
-                    "quote": "If every core is busy, this is saturation rather than starvation, though queue-depth symptoms can look similar.",
-                    "line_start": 101,
-                    "reason": "Distinguishes starvation from CPU saturation, the central diagnostic boundary, consistent with the Microsoft starvation guidance."
-                  },
-                  {
-                    "quote": "Its delegate is synchronous, so an `async` lambda is converted to `async void`.",
-                    "line_start": 135,
-                    "reason": "Technically correct pitfall for Parallel.ForEach (Action<T> delegate), concise and decided."
-                  },
-                  {
-                    "quote": "Raising the minimum is appropriate only after measurements show that the pool's gradual thread injection is delaying work.",
-                    "line_start": 176,
-                    "reason": "SetMinThreads card is a single dependent decision task with conditions, costs and limits; self-contained and answer-side sourced."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: pool mechanics, starvation and pitfalls are one coherent topic; the starvation section is tightly dependent on the pool's injection behavior and is not independently separable without loss.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "overall_reason": "The complete note is accurate (minimum-thread semantics, platform-specific I/O completion, async-void in Parallel.ForEach, counter names), clearly ordered and free of repetition. Each card tests one gradeable task with answer-side Microsoft sources, and existing IDs are untouched. No edits are proposed and no concrete defect justifies one.",
-            "change_checks": []
-          },
-          "model_calls": 19
-        }
-      }
-    ],
+    "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-04T20:08:33.265420Z",
-    "topic": "Programming",
-    "topic_id": "programming-e6aba2bd",
-    "current_batch": {
-      "topic": "Programming",
-      "topic_id": "programming-e6aba2bd",
-      "notes": [
-        {
-          "path": "Vault/Home/Programming/NET/CSharp/CSharp.md",
-          "content": "---\ntopic: [Programming]\nsubtopic: [NET]\nsummary: \"Statically typed, multi-paradigm .NET language pairing OOP, functional features, and first-class async.\"\ntags: [FolderNote]\npublish: true\nstatus: Creation\nlevel: [\"4\"]\npriority: High\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.320Z\"\n---\n\nC# is a statically typed language for .NET with object-oriented, functional, and low-level features in one type system. Its practical strength is not the number of paradigms. It is the ability to express a high-level domain model while keeping allocation, copying, asynchronous suspension, and interop costs visible when they matter.\n\nCompile-time analysis covers definite assignment, generic constraints, pattern compatibility, and nullable-reference warnings. Those checks reduce entire classes of mistakes, but they do not prove runtime nullability, thread safety, or domain correctness. `async` and `await` are language transformations over awaitable operations. They do not send work to the thread pool by definition.\n\nThis folder separates language fundamentals from concurrency and parallelism. The first group explains types, methods, generics, errors, and reflection. The second follows work across tasks, threads, synchronization, cancellation, and shared-state boundaries.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# References\n\n- [C# documentation](https://learn.microsoft.com/en-us/dotnet/csharp/)\n- [C# language specification](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/introduction)\n- [C# in Depth](https://csharpindepth.com/)\n",
-          "hash": "8a897e0231ca83573ddcb34905471e4685741c5d7fab1e3eb62208c131615107",
-          "topic": "Programming",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "new"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "base_sha": "67caf2e374f53e8772b86b8ea0f881d74e784fa1",
-    "reservation_deadline": "2026-11-04T20:22:39.747676Z",
-    "stop_reason": "call_limit",
-    "sealed_at": "2026-11-04T20:08:33.265422Z"
+    "checkpoint_at": "2026-11-05T07:01:25.247290Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
@@ -8222,6 +7632,611 @@
       "summary": "## 1. Note improvements\n\nReviewed 10 notes in AI & ML; improved 1. Calls: 20; elapsed: 719 seconds; stop: call_limit.\n\n- [`AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md`](https://github.com/grafanaKibana/devbook.zip/blob/notes/automated-ai-ml-4edf0823-g1/Vault/Home/AI%20%26%20ML/LLM/Agents/Evaluation/Tool-Call%20Evaluation.md) — The first reference bullet carries a long trailing annotation after a dash inside the link text, which the reference format disallows. Removes the trailing annotation from the reference bullet so it is a bare descriptive link, as the References contract requires. The reference list reads as clean, consistent descriptive links.\n\n## 2. Questions and answers\n\n- Added: 0\n- Rewritten: 0\n- Split: 0\n- Proposed for removal: 0\n- Replaced: 0\n\n## 3. Significant question changes\n\n- No significant question changes.\n\n## 4. User feedback\n\n- No owner feedback in this workload.\n\n<!-- devbook-export-validation -->Quartz export: awaiting the source-bound native export and checks.\n",
       "diff": "diff --git a/Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md b/Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md\nindex 263ec52..a958516 100644\n--- a/Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md\t\n+++ b/Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md\t\n@@ -10,7 +10,7 @@ qard-deck: \"AI & ML\"\n qard-topic: \"LLM/Agents/Evaluation/Tool-Call Evaluation\"\n flashcard_uid: \"1d83d54c\"\n created: \"2026-06-12T18:50:14.000Z\"\n-modified: \"2026-10-28T12:33:42.000Z\"\n+modified: \"2026-11-04T06:47:28.050Z\"\n ---\n \n A tool call is where an agent stops describing an action and asks a system to perform it. Failures at this boundary are concrete: the agent can name the wrong tool, send the wrong value in valid JSON, invent a function, or repeat a call that changed nothing.\n@@ -117,5 +117,5 @@ The riskiest call may be perfectly valid: real tool, valid schema, wrong account\n \n # References\n \n-- [Berkeley Function-Calling Leaderboard -- AST and executable accuracy for tool/function calls, including irrelevance detection (Gorilla, UC Berkeley)](https://gorilla.cs.berkeley.edu/blogs/8_berkeley_function_calling_leaderboard.html)\n+- [Berkeley Function-Calling Leaderboard (Gorilla, UC Berkeley)](https://gorilla.cs.berkeley.edu/blogs/8_berkeley_function_calling_leaderboard.html)\n - [Tool use (function calling) overview (Anthropic Docs)](https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview)\n",
       "question_changes": []
+    },
+    "792178af26484b3da828d4cea1e5f39f": {
+      "version": 1,
+      "id": "792178af26484b3da828d4cea1e5f39f",
+      "status": "sealed",
+      "phase": "sealed",
+      "started_at": "2026-11-04T19:55:42.282235Z",
+      "elapsed_seconds": 770.9837093000001,
+      "calls_reserved": 19,
+      "responses_received": 19,
+      "attempted_paths": [
+        "Vault/Home/Programming/NET/ASP NET Web API/Filters.md",
+        "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md",
+        "Vault/Home/Programming/NET/CSharp/Fundamentals/Methods.md",
+        "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Types.md",
+        "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Locking.md",
+        "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Mutex.md",
+        "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Parallelism.md",
+        "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Semaphore.md",
+        "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Tasks.md",
+        "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/ThreadPool.md"
+      ],
+      "accepted_records": [],
+      "outcomes": [
+        {
+          "path": "Vault/Home/Programming/NET/ASP NET Web API/Filters.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/Programming/NET/ASP NET Web API/Filters.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole note against Microsoft's ASP.NET Core filters documentation (net 10). The stage order (authorization, resource, action, result, with exception filters outside the sequence) is correct. The exception-filter coverage is also correct: it includes controller creation, model binding, action filters and action methods, and excludes resource filters, result filters and result execution. A handled exception skips ordinary result filters and still runs IAlwaysRunResultFilter. When a filter implements both sync and async forms, only the async form runs. Scope nesting with the IOrderedFilter.Order override is accurate, as are the ServiceFilter, TypeFilter and IFilterFactory distinctions. The middleware, controller-filter and endpoint-filter tradeoff table is sound, and the examples compile conceptually and match the prose. The four cards (including the two flagged ones) each test one gradeable task, give mechanism-level answers, and are consistent with the note. I found no factual error, missing prerequisite or redundancy that would justify an edit."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "No edits proposed. Independent whole-note audit found no factual error, unsupported claim or concrete rule violation. The keep disposition is justified.",
+              "notes": [
+                {
+                  "path": "Vault/Home/Programming/NET/ASP NET Web API/Filters.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note is accurate and well ordered. It runs from scope, to stage order, to examples, to filter creation, to pitfalls and tradeoffs. The four cards each test one gradeable task with mechanism-level answers, so keeping it unchanged is justified.",
+                  "page_type": "Concept — typed frontmatter and Qard IDs preserved; Questions and References optional but present and valid; code fences carry language identifiers.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "Exception filters observe unhandled exceptions from action execution.",
+                      "line_start": 28,
+                      "reason": "Correctly places exception filters outside the sequential stages and limits them to action execution."
+                    },
+                    {
+                      "quote": "If a filter implements both sync and async forms of the same stage, the runtime invokes only the async interface.",
+                      "line_start": 103,
+                      "reason": "Matches Microsoft's documented behavior and explains the practical consequence."
+                    },
+                    {
+                      "quote": "Because of these gaps, exception-handling middleware is the broader boundary for a uniform API error response.",
+                      "line_start": 154,
+                      "reason": "The card on handled exceptions closes with the decision that follows from its mechanism, and the coverage card lists the gaps. It reads acceptably."
+                    },
+                    {
+                      "quote": "An explicit `Order` value, exposed through `IOrderedFilter`, takes precedence over scope.",
+                      "line_start": 159,
+                      "reason": "Accurate ordering rule with a concrete worked example; each card tests a single task."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the middleware, controller-filter and endpoint-filter comparison, the stage order and the filter-creation details form one coherent topic and are short enough to stay together.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "identity_safety": "PASS",
+                    "question_quality": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "change_checks": []
+            },
+            "model_calls": 2
+          }
+        },
+        {
+          "path": "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md",
+                  "outcome": "keep",
+                  "reason": "I read the whole note and checked it against Microsoft's middleware, filters, error-handling and authentication documentation. The sample pipeline order (exception handler, HSTS, HTTPS redirection, static files, routing, CORS, authentication, authorization) matches the documented order. The sequence diagram and the 401 explanation match how authentication and authorization behave: authentication continues, and authorization triggers the challenge. The scoped-service warning for conventional middleware, the Map/UseWhen/Run distinctions and the pitfalls list are correct. The flagged card's claim that endpoint filters can be attached to mapped controller actions is supported by a search: a dotnet test site calls AddEndpointFilterFactory on MapControllers(). The card is bounded and answerable, and its table makes the differences from controller action filters clear. The exception-handling and pipeline cards agree with the prose and do not repeat it unnecessarily. The note has no known violations, so no change is warranted."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "The complete note was audited and no concrete defect was found. The keep is justified, and the flagged card is accurate and bounded.",
+              "notes": [
+                {
+                  "path": "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note explains the operating idea (an ordered chain that wraps the endpoint, with registration order acting as control flow) and covers the boundaries: short-circuiting, branching, started responses and middleware lifetimes. The flagged filter-comparison card is one focused comparison and its claims about endpoint filters are accurate. No edit is warranted.",
+                  "page_type": "Concept — typed frontmatter, optional Questions and References present; Qard IDs are protected and unchanged.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "ASP.NET Core middleware forms an ordered chain around endpoint execution.",
+                      "line_start": 18,
+                      "reason": "The opening states the operating idea and the cross-cutting scope quickly."
+                    },
+                    {
+                      "quote": "Registration order is control flow.",
+                      "line_start": 55,
+                      "reason": "The explanation order moves from concept to diagram, ordered pipeline and then custom middleware, so the idea can be re-entered."
+                    },
+                    {
+                      "quote": "**Conventional middleware is constructed once.**",
+                      "line_start": 125,
+                      "reason": "The note gives the lifetime mechanism and its exception (IMiddleware), which is technically sound and non-trivial."
+                    },
+                    {
+                      "quote": "**Wrong registration order.**",
+                      "line_start": 143,
+                      "reason": "The pitfalls are concrete, with consequences and no padding, and they do not repeat the earlier prose."
+                    },
+                    {
+                      "quote": "How does middleware differ from an action filter in an ASP.NET Core controller-based Web API?",
+                      "line_start": 166,
+                      "reason": "This is one focused comparison with a self-contained question. The answer carries mechanism, conditions and primary Microsoft sources, and it is accurate on endpoint filters."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: pipeline order, custom middleware, branching and pitfalls are one coherent topic. Filters appear only as a decision contrast.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "change_checks": [],
+              "decision_checks": []
+            },
+            "model_calls": 4
+          }
+        },
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Methods.md",
+          "outcome": "proposal_blocked",
+          "reason": "card edit must replace one complete active Qard block including adjacent metadata",
+          "result": {
+            "status": "proposal_blocked",
+            "stage": "deterministic_application",
+            "reason": "card edit must replace one complete active Qard block including adjacent metadata",
+            "model_calls": 5
+          }
+        },
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Types.md",
+          "outcome": "proposal_blocked",
+          "reason": "card edit must replace one complete active Qard block including adjacent metadata",
+          "result": {
+            "status": "proposal_blocked",
+            "stage": "deterministic_application",
+            "reason": "card edit must replace one complete active Qard block including adjacent metadata",
+            "model_calls": 8
+          }
+        },
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Locking.md",
+          "outcome": "proposal_blocked",
+          "reason": "card edit must replace one complete active Qard block including adjacent metadata",
+          "result": {
+            "status": "proposal_blocked",
+            "stage": "deterministic_application",
+            "reason": "card edit must replace one complete active Qard block including adjacent metadata",
+            "model_calls": 9
+          }
+        },
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Mutex.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Mutex.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole note against the current text and my knowledge of the .NET Mutex documentation. WaitHandle/SafeWaitHandle derivation, thread ownership, recursion count, ApplicationException on a non-owner ReleaseMutex, AbandonedMutexException granting ownership, and WaitAll being unsupported on STA threads are all accurate. The Global\\ and Local\\ prefix scope is correctly limited to Windows Terminal Services. The examples use try/finally release correctly. The Pitfalls and Tradeoffs sections are not repetitive and give the lock/SemaphoreSlim/Mutex decision rule. Both cards are single-task, self-contained, cite sources, and match the note. No known violations were reported, and no defect was found that justifies a change."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "notes": [
+                {
+                  "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Mutex.md",
+                  "verdict": "CLEAN",
+                  "summary": "Independent whole-note audit found the note accurate, well ordered and free of repetition. The mechanism, examples, pitfalls, tradeoffs and both cards are sound, so no edit is warranted.",
+                  "page_type": "Concept — typed frontmatter, optional Questions and References present. Qard IDs and metadata are protected.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "Its useful boundary is the process boundary: a named mutex can keep two local processes from entering the same critical section.",
+                      "line_start": 17,
+                      "reason": "The opening states the operating idea and the decision boundary against lock and SemaphoreSlim right away."
+                    },
+                    {
+                      "quote": "every successful wait increments a recursion count. Another thread cannot acquire the mutex until the owner has called `ReleaseMutex` the same number of times.",
+                      "line_start": 28,
+                      "reason": "Reentrancy mechanism is accurate and shown with a count walkthrough in the code block that follows."
+                    },
+                    {
+                      "quote": "`WaitAll` is unsupported on an STA thread, including the usual WinForms and WPF UI threads, and throws `NotSupportedException` there.",
+                      "line_start": 52,
+                      "reason": "Version- and thread-model-specific condition is stated correctly and placed as a warning."
+                    },
+                    {
+                      "quote": "**Abandonment transfers ownership, not correctness.**",
+                      "line_start": 100,
+                      "reason": "Pitfall correctly explains that the next waiter owns the mutex and must validate state; this agrees with the AbandonedMutexException card."
+                    },
+                    {
+                      "quote": "> [!qard]- What does `AbandonedMutexException` signal?",
+                      "line_start": 126,
+                      "reason": "Single-task card with a self-contained answer. Its ID is retained and the answer is technically correct."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the note is one cohesive topic. Mutex ownership, abandonment and the process boundary depend on each other, so a split would not help.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "overall_reason": "Whole-note read found no concrete factual, structural, voice or question-quality defect. Keeping the note unchanged is justified, and no edits were proposed.",
+              "change_checks": []
+            },
+            "model_calls": 11
+          }
+        },
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Parallelism.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Parallelism.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole note. The opening separates parallelism from async. The partitioning section correctly names range and dynamic partitioning, including Partitioner.Create(loadBalance: true). The Parallel.ForEachAsync example has the correct (item, token) => ValueTask body signature, and the note itself says ForEach would fit a synchronous body better. The PLINQ prime filter is correct at the edges: n=2 and n=3 give an empty range and count as prime, and n=4 is rejected. The localInit/localFinally Parallel.For overload is used correctly. The Amdahl figure is right: 20% serial caps speedup at 5x. The pitfalls, the tradeoff table and the AggregateException handling match the .NET documentation. All four cards are self-contained and each tests one task. They cover worker-count overhead, MaxDegreeOfParallelism, PLINQ fit and small-input overhead. Their sources are relevant Microsoft docs. No native violations are reported and the repeated phrases are acceptable, so rewrites would be cosmetic only."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "Independent whole-note audit found no accuracy, clarity, question-quality or rules defects. The keep is justified and no edits were proposed.",
+              "notes": [
+                {
+                  "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Parallelism.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note is accurate, well ordered and self-contained. It separates parallelism from async, explains partitioning, gives correct examples, and covers pitfalls and tradeoffs. Its four cards are each one task, with relevant Microsoft sources. Rewrites would be cosmetic only.",
+                  "page_type": "Concept — frontmatter, Qard IDs and bare-link References are intact; Questions and References are optional and present; every code fence has a language.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "Async code is not automatically parallel.",
+                      "line_start": 19,
+                      "reason": "The opening separates async from parallelism, which sets the boundary of the topic."
+                    },
+                    {
+                      "quote": "Dynamic partitioning** (`Partitioner.Create(source, loadBalance: true)`)",
+                      "line_start": 35,
+                      "reason": "This is the correct API for load-balanced partitioning, and the trade-off is stated."
+                    },
+                    {
+                      "quote": "The body above completes synchronously, so `Parallel.ForEach` would usually express the CPU-bound intent more directly.",
+                      "line_start": 66,
+                      "reason": "The note admits the limits of its own example and states when ForEachAsync is the right choice."
+                    },
+                    {
+                      "quote": ".Where(n => n > 1 && Enumerable.Range(2, (int)Math.Sqrt(n) - 1)",
+                      "line_start": 77,
+                      "reason": "The prime filter is correct at the edges: n=2 and n=3 give an empty range, and n=4 is rejected."
+                    },
+                    {
+                      "quote": "infinite parallel capacity still cannot exceed a fivefold speedup",
+                      "line_start": 104,
+                      "reason": "A 20% serial fraction gives a 5x cap under Amdahl's law, so the arithmetic is right."
+                    },
+                    {
+                      "quote": "Why can a parallel query be slower than a sequential query for small inputs?",
+                      "line_start": 166,
+                      "reason": "This card tests one bounded task: fixed overhead against little work. It is distinct from the worker-count card."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the note covers one coherent topic, CPU-bound parallelism in .NET. Examples, pitfalls and tradeoffs all serve that topic.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "change_checks": []
+            },
+            "model_calls": 13
+          }
+        },
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Semaphore.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Semaphore.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole note against the current text and my knowledge of the Microsoft SemaphoreSlim, Semaphore and lock documentation. I did not run new web searches. The opening, permit mechanics, both examples, pitfalls, tradeoffs, the single Qard and the reference are accurate. Specific checks: the examples release in finally, and WaitAsync takes the cancellation token. Named semaphores are Windows-only. Release throws SemaphoreFullException only when the count would exceed maxCount. Waiter order is not guaranteed. A semaphore has no owner. Task.WhenAll only composes the tasks it is given. The Qard tests one focused comparison with a consistent answer. The known_violations list is empty. The note has no concrete defect, and edits would be cosmetic churn."
+                }
+              ],
+              "feedback": [],
+              "decisions": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "The whole note was audited independently. It is accurate, well ordered and free of concrete rule violations. The keep disposition is justified, and no edits are needed.",
+              "change_checks": [],
+              "notes": [
+                {
+                  "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Semaphore.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note explains permits, the SemaphoreSlim and Semaphore split, both examples, concrete pitfalls and tradeoffs. The mechanisms, conditions and exceptions are all present, and the single Qard is one focused comparison. No concrete defect was found, so edits would be cosmetic churn.",
+                  "page_type": "Concept — frontmatter intact; optional Questions and References present and valid; no generated navigation or special-page rules apply.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "A wait consumes one permit. `Release` puts it back:",
+                      "line_start": 21,
+                      "reason": "The mechanism is stated early and plainly, and the bullets that follow keep Semaphore and SemaphoreSlim distinct."
+                    },
+                    {
+                      "quote": "An extra release made while permits are still held stays within the maximum, succeeds, and silently admits one more caller than intended.",
+                      "line_start": 67,
+                      "reason": "This states the exact condition under which SemaphoreFullException is thrown and its exception, which is the subtle point that is easy to get wrong."
+                    },
+                    {
+                      "quote": "`Task.WhenAll` only composes the tasks supplied to it.",
+                      "line_start": 76,
+                      "reason": "The tradeoff is accurate and the reasoning is concrete: it explains why the semaphore must be acquired inside each operation."
+                    },
+                    {
+                      "quote": "> [!qard]- When is `SemaphoreSlim` a better fit than `lock`?",
+                      "line_start": 83,
+                      "reason": "This is one bounded comparison question. The answer carries the mechanism, the await restriction and release discipline, and cites Microsoft primary sources on the answer side. The ID comment is intact."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the note covers one cohesive primitive, and the Semaphore, SemaphoreSlim and channel comparisons all serve the same decision.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ]
+            },
+            "model_calls": 15
+          }
+        },
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Tasks.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Tasks.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole note against current text and .NET behavior. The opening separates Task from threads. The mechanism section covers await's completed-awaiter fast path, creation and scheduling (StartNew uses TaskScheduler.Current, Unwrap for async lambdas, LongRunning as a hint), and completed-task factories. Both fan-out examples are correct: WhenAll enumerates the lazy Select, awaiting it rethrows only one exception, and the catch inspects all faults. WhenEach is correctly marked .NET 9+ with unspecified tie order. The pitfalls are accurate: the unobserved-exception policy in modern .NET, ValueTask single-consumption and AsTask, the Task.Run hop around async I/O, and unbounded fan-out. The cards each test one gradeable task and match the prose: WhenAll failure and result order, WhenAny re-await, ValueTask tradeoffs, Task versus thread, and Task.Run in ASP.NET Core. They carry primary Microsoft sources. No known violations are open. I found no factual defect, repetition or ordering problem that justifies an edit."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "Independent whole-note audit found no factual, ordering, wording or card-quality defect. The keep is justified and no edits were proposed.",
+              "change_checks": [],
+              "notes": [
+                {
+                  "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Tasks.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note is accurate and well ordered. It moves from the Task-versus-thread idea to the mechanism, fan-out and failure aggregation, composition, pitfalls and cards. The prose is direct and keeps the conditions and exceptions. Each card tests one gradeable task. I found no defect that justifies an edit.",
+                  "page_type": "Concept — typed frontmatter, optional Questions and References. Qard callouts keep their hidden IDs.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "The abstraction says nothing about whether a thread is currently executing the operation.",
+                      "line_start": 17,
+                      "reason": "The opening states the central idea, that a Task is not a thread. Later sections and the first card build on it."
+                    },
+                    {
+                      "quote": "The default scheduler is `TaskScheduler.Current`, so behavior can depend on the caller's context.",
+                      "line_start": 35,
+                      "reason": "This is the correct StartNew caveat. It gives the condition that changes behavior."
+                    },
+                    {
+                      "quote": "Awaiting it propagates one exception, so code that needs the full set must inspect the combined task or the individual tasks after completion.",
+                      "line_start": 58,
+                      "reason": "This is accurate WhenAll semantics. The catch-when example that follows is consistent with it."
+                    },
+                    {
+                      "quote": "On .NET 9+, `Task.WhenEach` yields each task after it completes.",
+                      "line_start": 98,
+                      "reason": "The version condition is correct, and the tie order is correctly described as unspecified."
+                    },
+                    {
+                      "quote": "Modern .NET does not terminate the process by default after that event.",
+                      "line_start": 112,
+                      "reason": "This matches the post-.NET 4.5 unobserved-exception policy."
+                    },
+                    {
+                      "quote": "> [!qard]- Why must the task returned by `await Task.WhenAny(...)` usually be awaited again?",
+                      "line_start": 234,
+                      "reason": "This is a focused card with a mechanism-based answer and a primary Microsoft source. It tests one gradeable task."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: Task semantics, composition, failure handling and pitfalls are tightly coupled and cohere as one note.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ]
+            },
+            "model_calls": 17
+          }
+        },
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/ThreadPool.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/ThreadPool.md",
+                  "outcome": "keep",
+                  "reason": "I read the whole note against the current text and Microsoft's managed thread pool and starvation guidance. The opening defines the pool and why reuse helps. How It Works separates worker and I/O completion capacity, and it states that the minimum thread count is a threshold, not a preallocation. It also says the blocking-compensation heuristics are not general. The SetMinThreads sample, the bounded fan-out example (it notes the pending-task allocation and the channel and Parallel.ForEachAsync alternatives) and the starvation causes are accurate. The dotnet-counters names threadpool-queue-length, threadpool-thread-count and monitor-lock-contention-count are correct. The pitfalls are technically right: blocking in Task.Run, Thread.Sleep, a too-high minimum, and async lambdas in Parallel.ForEach becoming async void. The cards cover purpose, poor-fit work, starvation, the blocking mechanism and SetMinThreads, each as one gradeable task with sources. There is no duplicated prose or terminology drift, and no known violations. Edits would be cosmetic."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "notes": [
+                {
+                  "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/ThreadPool.md",
+                  "verdict": "CLEAN",
+                  "summary": "Independent whole-note audit found the note accurate, well ordered and free of repetition or card defects. The keep is justified; no edits were proposed and none are needed.",
+                  "page_type": "Concept note (published; typed frontmatter, Questions and References present and valid)",
+                  "current_text_evidence": [
+                    {
+                      "quote": "It is a threshold the pool can reach without the usual delay, not a request to start that many threads immediately.",
+                      "line_start": 28,
+                      "reason": "States the correct SetMinThreads mechanism (no preallocation), the key engineering condition, and it is reinforced consistently in later prose and the card."
+                    },
+                    {
+                      "quote": "That mechanism is not a general detector for every synchronous wait, native call, lock, or `Thread.Sleep`.",
+                      "line_start": 30,
+                      "reason": "Bounds the modern blocking-compensation claim accurately instead of overstating it."
+                    },
+                    {
+                      "quote": "That protects the dependency, though a very large input still allocates pending tasks.",
+                      "line_start": 78,
+                      "reason": "Example is explained with its limit and the alternative (channel or Parallel.ForEachAsync), preserving mechanism and tradeoff."
+                    },
+                    {
+                      "quote": "If every core is busy, this is saturation rather than starvation, though queue-depth symptoms can look similar.",
+                      "line_start": 101,
+                      "reason": "Distinguishes starvation from CPU saturation, the central diagnostic boundary, consistent with the Microsoft starvation guidance."
+                    },
+                    {
+                      "quote": "Its delegate is synchronous, so an `async` lambda is converted to `async void`.",
+                      "line_start": 135,
+                      "reason": "Technically correct pitfall for Parallel.ForEach (Action<T> delegate), concise and decided."
+                    },
+                    {
+                      "quote": "Raising the minimum is appropriate only after measurements show that the pool's gradual thread injection is delaying work.",
+                      "line_start": 176,
+                      "reason": "SetMinThreads card is a single dependent decision task with conditions, costs and limits; self-contained and answer-side sourced."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: pool mechanics, starvation and pitfalls are one coherent topic; the starvation section is tightly dependent on the pool's injection behavior and is not independently separable without loss.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "overall_reason": "The complete note is accurate (minimum-thread semantics, platform-specific I/O completion, async-void in Parallel.ForEach, counter names), clearly ordered and free of repetition. Each card tests one gradeable task with answer-side Microsoft sources, and existing IDs are untouched. No edits are proposed and no concrete defect justifies one.",
+              "change_checks": []
+            },
+            "model_calls": 19
+          }
+        }
+      ],
+      "feedback_pr": 0,
+      "checkpoint_at": "2026-11-04T20:08:33.265420Z",
+      "topic": "Programming",
+      "topic_id": "programming-e6aba2bd",
+      "current_batch": {
+        "topic": "Programming",
+        "topic_id": "programming-e6aba2bd",
+        "notes": [
+          {
+            "path": "Vault/Home/Programming/NET/CSharp/CSharp.md",
+            "content": "---\ntopic: [Programming]\nsubtopic: [NET]\nsummary: \"Statically typed, multi-paradigm .NET language pairing OOP, functional features, and first-class async.\"\ntags: [FolderNote]\npublish: true\nstatus: Creation\nlevel: [\"4\"]\npriority: High\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.320Z\"\n---\n\nC# is a statically typed language for .NET with object-oriented, functional, and low-level features in one type system. Its practical strength is not the number of paradigms. It is the ability to express a high-level domain model while keeping allocation, copying, asynchronous suspension, and interop costs visible when they matter.\n\nCompile-time analysis covers definite assignment, generic constraints, pattern compatibility, and nullable-reference warnings. Those checks reduce entire classes of mistakes, but they do not prove runtime nullability, thread safety, or domain correctness. `async` and `await` are language transformations over awaitable operations. They do not send work to the thread pool by definition.\n\nThis folder separates language fundamentals from concurrency and parallelism. The first group explains types, methods, generics, errors, and reflection. The second follows work across tasks, threads, synchronization, cancellation, and shared-state boundaries.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# References\n\n- [C# documentation](https://learn.microsoft.com/en-us/dotnet/csharp/)\n- [C# language specification](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/introduction)\n- [C# in Depth](https://csharpindepth.com/)\n",
+            "hash": "8a897e0231ca83573ddcb34905471e4685741c5d7fab1e3eb62208c131615107",
+            "topic": "Programming",
+            "violations": [],
+            "needs_fixing_ids": [],
+            "repair_input_hash": "",
+            "selection_reason": "new"
+          }
+        ],
+        "feedback": [],
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review_process": "focused-whole-note-v1",
+        "pr": null
+      },
+      "base_sha": "67caf2e374f53e8772b86b8ea0f881d74e784fa1",
+      "reservation_deadline": "2026-11-04T20:22:39.747676Z",
+      "stop_reason": "call_limit",
+      "sealed_at": "2026-11-04T20:08:33.265422Z"
     }
   },
   "feedback_workloads": {
