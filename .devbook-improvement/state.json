@@ -4272,9 +4272,9 @@
     "version": 1,
     "id": "b98a816444094ceaa557c175133e1e93",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-05T20:07:51.294462Z",
-    "elapsed_seconds": 555.7930817999999,
+    "elapsed_seconds": 559.8268028999998,
     "calls_reserved": 17,
     "responses_received": 17,
     "attempted_paths": [
@@ -4284,7 +4284,8 @@
       "Vault/Home/AI & ML/LLM/Evaluation/Deterministic Checks.md",
       "Vault/Home/AI & ML/LLM/Evaluation/Evaluation.md",
       "Vault/Home/AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs.md",
-      "Vault/Home/AI & ML/LLM/Evaluation/LLM-as-a-Judge.md"
+      "Vault/Home/AI & ML/LLM/Evaluation/LLM-as-a-Judge.md",
+      "Vault/Home/AI & ML/LLM/Evaluation/Online Evaluation and AB Tests.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -4750,10 +4751,83 @@
           },
           "model_calls": 15
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/Evaluation/Online Evaluation and AB Tests.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Evaluation/Online Evaluation and AB Tests.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against current text and standard experimentation practice. The opening defines randomized assignment by independent unit. The metric table and metric-contract sentence are precise. The A/B plan correctly links assignment unit to the analysis unit, and the estimator guidance (difference in proportions, Welch with robustness checks, ratio metrics, clustering) is accurate. The power section correctly separates false-negative risk and exaggerated significant estimates from peeking inflation. The segmentation, monitoring-vs-experiment table and architecture sections (versioned definitions, deterministic hashing, exposure logging before variant behavior, sample-ratio mismatch) are consistent with the cited Kohavi and Microsoft SRM references and the ASA p-value statement. Frontmatter, MD040 fences and References format are valid, there are no cards, and no known violations exist. The prose is direct, non-repetitive and ordered well, so edits would be cosmetic."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "Independent full-note audit found no factual, structural, voice or reference defects; the keep is justified and no edits were proposed.",
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Evaluation/Online Evaluation and AB Tests.md",
+                "verdict": "CLEAN",
+                "summary": "The note is accurate and well ordered: it moves from the definition and metrics through design, analysis, power, segmentation and monitoring to platform architecture. Mechanisms, conditions and exceptions are preserved, and rewriting would be cosmetic.",
+                "page_type": "Concept — typed frontmatter, no cards, References as bare descriptive link bullets, text-fenced code blocks, no generated navigation.",
+                "current_text_evidence": [
+                  {
+                    "quote": "The assignment unit determines the independent analysis unit.",
+                    "line_start": 47,
+                    "reason": "Correctly ties the randomization unit to the analysis unit and explains the clustering consequence."
+                  },
+                  {
+                    "quote": "An underpowered experiment often misses a real effect.",
+                    "line_start": 60,
+                    "reason": "Accurately separates false-negative risk, exaggerated significant estimates and peeking inflation."
+                  },
+                  {
+                    "quote": "Welch’s t-test is often a reasonable large-sample default.",
+                    "line_start": 52,
+                    "reason": "Hedged correctly, with a heavy-tail and bootstrap caveat."
+                  },
+                  {
+                    "quote": "Stop interpreting the treatment effect until that sample-ratio mismatch is explained.",
+                    "line_start": 116,
+                    "reason": "Correct SRM handling, consistent with the cited Microsoft SRM reference."
+                  },
+                  {
+                    "quote": "Conditioning on an exposure caused by the treatment can bias the estimate.",
+                    "line_start": 110,
+                    "reason": "Precise statement of the triggered-analysis exception."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the platform architecture section supports the same A/B-testing topic, and the whole note stays coherent and self-contained.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "NOT APPLICABLE",
+                  "identity_safety": "NOT APPLICABLE",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "change_checks": []
+          },
+          "model_calls": 17
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-05T20:17:07.086918Z",
+    "checkpoint_at": "2026-11-05T20:17:11.120640Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
