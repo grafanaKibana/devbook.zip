@@ -3902,16 +3902,94 @@
     "version": 1,
     "id": "b98a816444094ceaa557c175133e1e93",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-05T20:07:51.294462Z",
-    "elapsed_seconds": 62.67589099999999,
+    "elapsed_seconds": 67.02071509999999,
     "calls_reserved": 2,
     "responses_received": 2,
-    "attempted_paths": [],
+    "attempted_paths": [
+      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md"
+    ],
     "accepted_records": [],
-    "outcomes": [],
+    "outcomes": [
+      {
+        "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md",
+                "outcome": "keep",
+                "reason": "I read the whole note against its text and known HNSW, IVF, PQ and DiskANN behavior. Flat search is the exact O(N) baseline. HNSW parameters (M, ef_construction, ef_search) and IVF parameters (nlist, nprobe) are correct, as are the PQ lossiness and DiskANN's SSD trade-off. The float32 memory estimate (N × dimensions × 4 bytes) is right. The filtering section correctly separates recall and cost from authorization. It also correctly warns that post-filtering with a selective filter collapses recall. The four pitfalls, the tradeoff table and the system-category table agree with each other and with the index section. The two cards each test one gradeable task and have answers that explain mechanism and limits. The cards' Faiss and Azure sources and the reference list are topic-specific. Known violations are empty. The prose is direct and has no padding. Rewording any of it would be churn."
+              }
+            ],
+            "feedback": [],
+            "decisions": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "Independent whole-note review found no factual, structural, voice or question-quality defect. The keep is justified and there are no edits.",
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md",
+                "verdict": "CLEAN",
+                "summary": "The note explains ANN search, index types, filtering, operations, system choice, pitfalls and tradeoffs accurately and in a consistent whiteboard voice. The two cards are single-task with mechanism-rich answers, and the references are relevant primary sources. No edit is warranted.",
+                "page_type": "Concept — typed frontmatter, optional Questions and References present and valid, MD040 satisfied by the mermaid fence, no generated navigation.",
+                "current_text_evidence": [
+                  {
+                    "quote": "The missing fraction is silent, so the recall-latency choice must be measured explicitly",
+                    "line_start": 19,
+                    "reason": "States the core ANN tradeoff and the measurement requirement early, so the operating idea is recoverable."
+                  },
+                  {
+                    "quote": "Raising `ef_search` explores more of the graph and trades latency for recall.",
+                    "line_start": 38,
+                    "reason": "Gives the correct HNSW parameter mechanism (M, ef_construction, ef_search), and the IVF nlist/nprobe line that follows it is also correct."
+                  },
+                  {
+                    "quote": "a selective filter may remove nearly all of top-k and collapse the effective recall",
+                    "line_start": 50,
+                    "reason": "Correctly states the post-filtering failure condition. It is kept separate from authorization, which the pre-filtering bullet covers."
+                  },
+                  {
+                    "quote": "Memory budgeting** starts with roughly `N × dimensions × 4 bytes` for float32 vectors",
+                    "line_start": 62,
+                    "reason": "The float32 estimate is correct and is linked to the decision to move to PQ or a disk-based index."
+                  },
+                  {
+                    "quote": "Why do vector indexes use approximate nearest-neighbor search instead of exact search?",
+                    "line_start": 128,
+                    "reason": "A direct, bounded question whose answer is one dependent explanation covering mechanism, cost and limits. It is not a bundle of independent tasks."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: index types, filtering, operations and pitfalls all serve one topic, and the content does not separate into independently useful notes.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "identity_safety": "PASS",
+                  "question_quality": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "change_checks": [],
+            "decision_checks": []
+          },
+          "model_calls": 2
+        }
+      }
+    ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-05T20:08:53.969725Z",
+    "checkpoint_at": "2026-11-05T20:08:58.314551Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
