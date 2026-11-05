@@ -3967,14 +3967,15 @@
     "version": 1,
     "id": "b98a816444094ceaa557c175133e1e93",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-05T20:07:51.294462Z",
-    "elapsed_seconds": 245.2455708,
+    "elapsed_seconds": 250.0225816,
     "calls_reserved": 7,
     "responses_received": 7,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md",
-      "Vault/Home/AI & ML/LLM/Embeddings.md"
+      "Vault/Home/AI & ML/LLM/Embeddings.md",
+      "Vault/Home/AI & ML/LLM/Evaluation/Building an Evaluation Set.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -4063,10 +4064,88 @@
           "reason": "source URL missing from owning note: https://docs.cohere.com/docs/cohere-embed",
           "model_calls": 5
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/Evaluation/Building an Evaluation Set.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Evaluation/Building an Evaluation Set.md",
+                "outcome": "keep",
+                "reason": "Read the whole note against its claims. The opening states why representativeness precedes scoring. Structure ties label type to valid scorer. The ARES description (synthetic data plus a small human-labeled set, prediction-powered inference) matches the paper. Synthetic generation has a concrete example and names its weakness: shared phrasing and difficulty. The sizing section covers the minimum detectable effect, intervals and paired evaluation, which is consistent with Anthropic's statistical-evals guidance. The pitfalls (drift, threshold cargo-culting) are concise. The single Qard tests one dependent task, has sources on the answer side, and does not duplicate the neighbouring notes' cards. The code fence has a language identifier, wikilinks are used in explanatory prose, and References are bare links. No known violations exist, and no factual or editorial defect justifies an edit."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "The single note was audited in full and the keep is justified. I found no factual, editorial, structural or Qard defect that warrants an edit.",
+            "change_checks": [],
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Evaluation/Building an Evaluation Set.md",
+                "verdict": "CLEAN",
+                "summary": "The note has a clear opening, a label-to-scorer mapping, a concrete synthetic-generation example with its main weakness, a conditions-based sizing section, concise pitfalls and one well-formed Qard. No concrete defect justifies an edit.",
+                "page_type": "Concept — authorable concept note; voice is impersonal and declarative, Questions and References are optional but present and valid.",
+                "current_text_evidence": [
+                  {
+                    "quote": "If its cases do not represent the workload, a precise scorer still produces a misleading result.",
+                    "line_start": 17,
+                    "reason": "The opening states the operating idea quickly: representativeness comes before scoring."
+                  },
+                  {
+                    "quote": "The label determines which scorer is valid.",
+                    "line_start": 25,
+                    "reason": "Ties label type to scorer choice and names the limit of reference-free methods. The ARES description (synthetic data plus a small human-labeled set, prediction-powered inference) is accurate."
+                  },
+                  {
+                    "quote": "Generated requests tend to share the model's phrasing and preferred difficulty",
+                    "line_start": 43,
+                    "reason": "Names the concrete weakness of synthetic generation and the mitigations, after a worked code example with a language identifier."
+                  },
+                  {
+                    "quote": "The minimum detectable effect is chosen before the set is sized",
+                    "line_start": 49,
+                    "reason": "The sizing section gives the mechanism and conditions (interval, paired evaluation, variance), not just a vague warning."
+                  },
+                  {
+                    "quote": "Thresholds are calibrated against human labels and product outcomes from the workload being shipped.",
+                    "line_start": 63,
+                    "reason": "The pitfalls are concise, decided, and keep the exception that relative limits cannot rescue an unsafe baseline."
+                  },
+                  {
+                    "quote": "> [!qard]- When should a team add human-labeled evaluation cases instead of relying only on synthetic generation?",
+                    "line_start": 68,
+                    "reason": "The card tests one dependent decision with its reasons, has answer-side sources, and keeps its hidden ID. It is a direct technical question, not a scenario."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: structure, synthetic generation, sizing and pitfalls form one coherent topic about building the evaluation set, and sibling notes already own retrieval, golden-set and online concerns.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ]
+          },
+          "model_calls": 7
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-05T20:11:56.539402Z",
+    "checkpoint_at": "2026-11-05T20:12:01.316413Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
