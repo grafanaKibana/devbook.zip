@@ -4271,10 +4271,10 @@
   "focused_workload": {
     "version": 1,
     "id": "b98a816444094ceaa557c175133e1e93",
-    "status": "active",
-    "phase": "author_reserved",
+    "status": "sealed",
+    "phase": "sealed",
     "started_at": "2026-11-05T20:07:51.294462Z",
-    "elapsed_seconds": 584.9651191999997,
+    "elapsed_seconds": 589.9176529999997,
     "calls_reserved": 18,
     "responses_received": 17,
     "attempted_paths": [
@@ -4827,7 +4827,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-05T20:17:36.258956Z",
+    "checkpoint_at": "2026-11-05T20:17:41.211490Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -4852,7 +4852,10 @@
       "pr": null
     },
     "base_sha": "67caf2e374f53e8772b86b8ea0f881d74e784fa1",
-    "reservation_deadline": "2026-11-05T20:32:35.946794Z"
+    "reservation_deadline": "2026-11-05T20:32:35.946794Z",
+    "error": "Claude author invocation failed with exit code 1 (category: unknown).",
+    "stop_reason": "provider_error",
+    "sealed_at": "2026-11-05T20:17:41.211496Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
