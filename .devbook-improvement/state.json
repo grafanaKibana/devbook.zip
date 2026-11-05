@@ -3432,11 +3432,11 @@
     "version": 1,
     "id": "4ce6dcd61eb74b9eafc6dcc2d27d9c9b",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-05T07:01:25.246564Z",
-    "elapsed_seconds": 226.14660350000003,
+    "elapsed_seconds": 246.5433145,
     "calls_reserved": 8,
-    "responses_received": 7,
+    "responses_received": 8,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics.md",
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation.md",
@@ -3668,7 +3668,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-05T07:05:11.392713Z",
+    "checkpoint_at": "2026-11-05T07:05:31.789424Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -13861,6 +13861,53 @@
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Monitoring.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-05T07:05:08.027648Z"
+    "prepared_at": "2026-11-05T07:05:08.027648Z",
+    "completed_review": {
+      "verdict": "CLEAN",
+      "overall_reason": "Whole-note audit found no concrete defect; the keep is justified and no edits are proposed.",
+      "change_checks": [],
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Monitoring.md",
+          "verdict": "CLEAN",
+          "summary": "The note is accurate, well ordered (offline vs. online framing, instrumentation, metrics, segmentation, alerting, pitfalls, tradeoffs) and keeps its mechanisms, conditions and caveats. Metric definitions are standard and thresholds are labeled as examples. The single Qard tests one coherent task, and the existing ID is untouched. No edit is warranted.",
+          "page_type": "Concept note (RAG monitoring); authorable prose with optional Questions and References, no special page rules.",
+          "current_text_evidence": [
+            {
+              "quote": "Offline [[Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation|Evaluation]] answers whether a version is safe to ship. Monitoring asks whether that version still works on today's traffic.",
+              "line_start": 17,
+              "reason": "The opening quickly states the topic and its boundary with offline evaluation in direct declarative prose."
+            },
+            {
+              "quote": "A global faithfulness score can hold at 0.91 while one tenant falls to 0.72",
+              "line_start": 21,
+              "reason": "A concrete example makes the segment-versus-aggregate decision rule recoverable."
+            },
+            {
+              "quote": "AP sums the precision at each rank where a relevant document appears and divides by the query's total number of relevant documents",
+              "line_start": 84,
+              "reason": "The MAP definition matches the standard formulation and states the missed-document consequence."
+            },
+            {
+              "quote": "Attribution locates which context supports a wrong claim but does not by itself prove that the chunk caused it.",
+              "line_start": 115,
+              "reason": "The Noise Sensitivity entry carries its mode and attribution caveat, so the condition is preserved."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: instrumentation, metrics, segmentation, alerting and pitfalls form one coherent operational topic, and the note already links to Evaluation, LLM-as-a-Judge and caching notes for adjacent concepts.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ]
+    }
   }
 }
