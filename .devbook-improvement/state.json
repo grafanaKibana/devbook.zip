@@ -3727,9 +3727,9 @@
     "version": 1,
     "id": "4ce6dcd61eb74b9eafc6dcc2d27d9c9b",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-05T07:01:25.246564Z",
-    "elapsed_seconds": 505.4741626000002,
+    "elapsed_seconds": 509.4132560000002,
     "calls_reserved": 16,
     "responses_received": 16,
     "attempted_paths": [
@@ -3739,7 +3739,8 @@
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Monitoring.md",
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Query Translation.md",
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching.md",
-      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Patterns.md"
+      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Patterns.md",
+      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -4255,10 +4256,84 @@
           },
           "model_calls": 14
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note. The opening defines RAG and states the pipeline boundary (query processing, retrieval, context assembly, evaluation). The Mermaid flow matches the 'each stage limits the next' explanation and the first card's stage list. Operational baselines (flagging, retry caps, drift, caching scoped to authorization, idempotency for mutating tools) are accurate and consistent with the linked notes. The RAG vs fine-tuning table and decision list are correct and keep facts in the corpus and behavior in the weights. All three cards each test one gradeable task, with answers that explain mechanisms and conditions. The experiment card correctly allows ablations and flags when single-variable changes are not feasible. The diagnosis card covers upstream loss, misuse by generation, and measurement faults. Cited sources (Lewis et al. 2020, Gao et al. survey, Rules of ML, Foundry RAG evaluators) support the claims. The frontmatter, the MD040 language tags, and the References format are valid, and there are no known violations. No defect found, so editing would only add churn."
+              }
+            ],
+            "feedback": [],
+            "decisions": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "The whole-note audit found no concrete defect. The keep is justified, and there are no edits or sources to check.",
+            "change_checks": [],
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG.md",
+                "verdict": "CLEAN",
+                "summary": "The note defines RAG, shows the pipeline, gives operational baselines, and compares RAG with fine-tuning. The terminology is consistent and the voice is impersonal and declarative. The three cards each test one task. No edit would add accuracy or clarity, so keeping it unchanged is justified.",
+                "page_type": "FolderNote: keeps tags [FolderNote] and the protected datacorejsx map block. Questions and References are optional and are present and valid.",
+                "current_text_evidence": [
+                  {
+                    "quote": "Each stage limits the next. When translation is used, retrieval cannot repair a rewrite that changed the intent",
+                    "line_start": 43,
+                    "reason": "The prose states the central pipeline constraint and matches the Mermaid flow and the first card's stage list."
+                  },
+                  {
+                    "quote": "Mutating tool calls need [[Home/Software Architecture/Distributed Systems/Idempotency|idempotency]], not response caching.",
+                    "line_start": 50,
+                    "reason": "This bullet states a precise caching boundary: read-only results scoped to the caller's authorization may be cached, while mutating calls need idempotency."
+                  },
+                  {
+                    "quote": "The boundary still holds: knowledge changes through reindexing, and behavior changes through retraining.",
+                    "line_start": 71,
+                    "reason": "The closing sentence states a decisive rule for choosing between RAG and fine-tuning and does not repeat the table."
+                  },
+                  {
+                    "quote": "Changing exactly one thing is not always feasible.",
+                    "line_start": 99,
+                    "reason": "The experiment card names an exception and the fallback methods (feature flag, controlled rollout, ablation) instead of oversimplifying."
+                  },
+                  {
+                    "quote": "Measurement itself:** citation handling and the reference answer or evaluator are checked too",
+                    "line_start": 110,
+                    "reason": "The diagnosis card covers retrieval loss, generation misuse, and evaluator faults, so the explanation of stage location is complete."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the folder hub covers one coherent topic (the RAG pipeline plus its fine-tuning boundary), and the detail belongs in child notes reached through the folder map.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "identity_safety": "PASS",
+                  "question_quality": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ]
+          },
+          "model_calls": 16
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-05T07:09:50.720276Z",
+    "checkpoint_at": "2026-11-05T07:09:54.659371Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
