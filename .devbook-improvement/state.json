@@ -3967,11 +3967,11 @@
     "version": 1,
     "id": "b98a816444094ceaa557c175133e1e93",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-05T20:07:51.294462Z",
-    "elapsed_seconds": 271.9489152,
+    "elapsed_seconds": 280.5361182,
     "calls_reserved": 8,
-    "responses_received": 7,
+    "responses_received": 8,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md",
       "Vault/Home/AI & ML/LLM/Embeddings.md",
@@ -4145,7 +4145,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-05T20:12:23.242748Z",
+    "checkpoint_at": "2026-11-05T20:12:31.829950Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -15905,5 +15905,54 @@
       },
       "feedback_snapshot": []
     }
+  },
+  "pending_author_proposal": {
+    "workload_id": "b98a816444094ceaa557c175133e1e93",
+    "topic_id": "ai-ml-4edf0823",
+    "batch": {
+      "topic": "AI & ML",
+      "topic_id": "ai-ml-4edf0823",
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Evaluation/Deterministic Checks.md",
+          "content": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"Executable checks that reject malformed or policy-violating output before semantic evaluation.\"\nlevel: [\"3\"]\npriority: Medium\nstatus: Done\npublish: true\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Evaluation/Deterministic Checks\"\nflashcard_uid: \"29dd80f1\"\ncreated: \"2026-02-16T21:15:26.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.474Z\"\n---\n\nDeterministic checks turn explicit requirements into executable pass/fail rules. They validate structure, required fields, tool permissions, and other contracts without asking another model for an opinion. They run before semantic scorers, so no judge call is paid for when the output is malformed or an agent called a forbidden tool.\n\nThe boundary is simple: deterministic checks enforce properties that can be stated exactly. They can judge correctness only where an explicit rule encodes it. Without such a rule, they cannot decide whether a valid action was the right action, whether an explanation is persuasive, or whether an answer captured the user's intent.\n\n# Types of Deterministic Checks\n\n| Check type | What it validates | Example |\n|-----------|------------------|---------|\n| **Schema validation** | Output is parseable and matches expected structure | JSON schema, required fields, no extra fields |\n| **Allowlist enforcement** | Only permitted actions/tools are invoked | `action` must be one of `[\"search\", \"escalate\"]` |\n| **Citation rules** | Factual answers must cite sources | Response contains at least one `[source]` reference |\n| **PII scanning** | Known personal-data patterns are blocked or flagged | Email, account, and phone-number detectors |\n| **Safe rendering** | Output cannot introduce active content | Escaped HTML and an allowlist for permitted elements |\n| **Length constraints** | Output is within expected bounds | Response is 10–500 characters |\n| **Language/encoding** | Output is in the expected language and encoding | UTF-8, English only |\n\n# Example — JSON Schema Contract\n\n```json\n{\n  \"type\": \"object\",\n  \"additionalProperties\": false,\n  \"properties\": {\n    \"action\": {\"type\": \"string\", \"enum\": [\"search\", \"escalate\"]},\n    \"reason\": {\"type\": \"string\", \"minLength\": 1},\n    \"citations\": {\"type\": \"array\", \"items\": {\"type\": \"string\"}}\n  },\n  \"required\": [\"action\", \"reason\"]\n}\n```\n\nAn output that fails this schema is rejected immediately. No judge is needed.\n\n# Where Deterministic Checks Fit in the Evaluation Pipeline\n\n```text\nLLM Output\n    │\n    ▼\n[1] Deterministic checks  ← fast, cheap, run first\n    │ FAIL → reject immediately\n    │ PASS\n    ▼\n[2] LLM-as-judge          ← slow, expensive, run only on valid outputs\n    │ FAIL → flag for review\n    │ PASS\n    ▼\n[3] Human review          ← for high-stakes or ambiguous cases\n```\n\nDeterministic checks run first because malformed JSON and disallowed actions are hard failures.\n\n# Deterministic Checks Vs LLM-as-Judge\n\n| Aspect | Deterministic checks | LLM-as-judge |\n|--------|---------------------|--------------|\n| Speed | Usually local and fast | Usually a model call |\n| Cost | Compute for parsing or scanning | Model inference per judgment |\n| Repeatability | Stable for the same rule and input | Can vary by model and sampling settings |\n| What it measures | Format, structure, hard rules | Semantic quality, relevance, tone |\n| Error boundary | Exact for schema and allowlist rules. Heuristic scanners can misclassify | Judge can misread the rubric or candidate |\n| Coverage | Only explicitly defined properties | Open-ended quality dimensions |\n\nThe two layers solve different problems. Hard contracts belong in code. Semantic quality belongs in a calibrated judge or human review.\n\n# Pitfalls\n\n## Over-Relying on Schema Validation Alone\n\nSchema validation can pass an output that is semantically wrong. The `action` field may contain `\"search\"` even when the case required `\"escalate\"`. Both values are valid under the contract.\n\nDeterministic business rules fit only where the expected behavior is explicit. Cases that require judgment belong with a rubric scorer, since brittle string matching would hide a semantic decision.\n\n## Treating Deterministic Failures as Soft Warnings\n\nA failed policy rule cannot be repaired by a favorable semantic score. If PII is detected or a disallowed action is invoked, the result fails even when the answer otherwise reads well.\n\nSome scanners are heuristic, so their operational response may be quarantine or human review rather than automatic rejection. That choice belongs in the policy attached to the check.\n\n## Forgetting to Check Tool Inputs, Not Just Outputs\n\nValidating only the final response misses the actions that produced it. An agent can call `delete_record`, receive a successful result, and then return perfectly valid JSON.\n\nPermission and argument checks belong at the tool boundary, before execution. Output validation comes later.\n\n# Questions\n\n<!-- qard-id: a37f0da1-2f80-49e2-90ed-6c7ef87f195f -->\n> [!qard]- Which deterministic checks should run before and after a tool-using agent calls a tool?\n> Before a tool runs, deterministic checks confirm that the caller is allowed to perform the requested action and validate the arguments against the tool's contract. After the call, they validate any returned data against the schema the next step expects.\n>\n> - **Before execution:** a permission or allowlist rule rejects an action the caller may not take. Argument validation rejects missing, malformed or out-of-range inputs. These checks must come first because later validation cannot undo a side effect: an agent can call `delete_record`, receive a success result and still return perfectly valid JSON.\n> - **After execution:** result validation stops malformed or unexpected data from reaching the next step.\n> \n> A strict function schema constrains the shape of arguments. Schema validity neither authorizes the action nor shows that it was the right action. A schema-valid request can still choose the wrong permitted action, such as `search` when the case required `escalate`. The product's risks determine which further checks are needed and whether a failure is rejected outright or routed to review.\n>\n> Sources: [OpenAI: Function calling](https://developers.openai.com/api/docs/guides/function-calling) · [OWASP: LLM06 Excessive Agency](https://genai.owasp.org/llmrisk/llm062025-excessive-agency/) · [JSON Schema Core](https://json-schema.org/draft/2020-12/json-schema-core)\n\n# References\n\n- [JSON Schema Core specification](https://json-schema.org/draft/2020-12/json-schema-core)\n",
+          "hash": "bfad5f0451f7843a1f1043c1bd27c8b213136eadc71ef1711aaa50de2da23e4f",
+          "topic": "AI & ML",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Evaluation/Deterministic Checks.md",
+          "outcome": "keep",
+          "reason": "Audited the whole note against its text and well-established sources (JSON Schema 2020-12, OpenAI function calling, OWASP LLM06). The opening states the operating idea and boundary: exact, rule-encodable properties only. The check-type table, JSON Schema example (additionalProperties false, enum, required) and pipeline diagram are consistent. The code fences have language identifiers. The comparison table matches the LLM-judge card in the sibling note, with no contradiction or needless repetition. The pitfalls are accurate and carry their conditions: schema-valid but wrong action, heuristic scanners routed to quarantine or review, and tool-boundary checks before execution. The single Qard tests one coherent before/after tool-check task and is accurate. References hold a real primary source. There are no known violations. No factual or editorial defect justifies an edit."
+        }
+      ],
+      "feedback": [],
+      "decisions": []
+    },
+    "source_hashes": {
+      "Vault/Home/AI & ML/LLM/Evaluation/Deterministic Checks.md": "bfad5f0451f7843a1f1043c1bd27c8b213136eadc71ef1711aaa50de2da23e4f"
+    },
+    "feedback_keys": [],
+    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/AI & ML/LLM/Evaluation/Deterministic Checks.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-05T20:12:31.829939Z"
   }
 }
