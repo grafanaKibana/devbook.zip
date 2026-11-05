@@ -3552,11 +3552,11 @@
     "version": 1,
     "id": "4ce6dcd61eb74b9eafc6dcc2d27d9c9b",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-05T07:01:25.246564Z",
-    "elapsed_seconds": 354.23919060000014,
+    "elapsed_seconds": 375.41571910000016,
     "calls_reserved": 12,
-    "responses_received": 11,
+    "responses_received": 12,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics.md",
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation.md",
@@ -3938,7 +3938,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-05T07:07:19.485303Z",
+    "checkpoint_at": "2026-11-05T07:07:40.661831Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -14203,6 +14203,127 @@
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-05T07:07:15.484338Z"
+    "prepared_at": "2026-11-05T07:07:15.484338Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "overall_reason": "Independent whole-note audit found no concrete defects. The note is accurate and coherent, the questions are gradeable, and the keep is justified.",
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching.md",
+            "verdict": "CLEAN",
+            "summary": "The note explains layered RAG caches, their keys and invalidation, and the authorization scoping. The mechanisms, conditions and failure modes are accurate and consistent across the prose, diagrams and cards. No edit is needed.",
+            "page_type": "Concept — frontmatter intact, Questions and References optional but present and valid; no fenced code without language (both mermaid).",
+            "current_text_evidence": [
+              {
+                "quote": "Caches remove that work only when their keys capture every input that affects the result.",
+                "line_start": 17,
+                "reason": "Opening states the operating idea quickly and sets the key-completeness condition used by the whole note."
+              },
+              {
+                "quote": "This is a data breach, not a staleness bug.",
+                "line_start": 114,
+                "reason": "Cross-tenant leakage is distinguished from staleness, which is the key engineering boundary."
+              },
+              {
+                "quote": "The diagrams place the response lookup after retrieval and context assembly so the key can include the actual evidence.",
+                "line_start": 122,
+                "reason": "Explains the design choice and the condition under which an earlier lookup would need extra versioning and permission checks."
+              },
+              {
+                "quote": "A response TTL limits staleness, while source and permission changes that invalidate an answer require invalidation before that TTL expires.",
+                "line_start": 124,
+                "reason": "Gives the TTL limit with its exception. The pitfall bullet repeats it briefly, which is reinforcing rather than padding."
+              },
+              {
+                "quote": "For protected content, a complete key is necessary but not sufficient.",
+                "line_start": 153,
+                "reason": "The retrieval-key card adds the current-access recheck beyond the key, consistent with the Pitfalls section; each card tests one focused task."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: embedding, retrieval and response caches are one coherent layered-design topic, and the response-cache detail is already delegated to LLM Caching.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "change_checks": [],
+        "decision_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching.md",
+          "citation_index": 4,
+          "reported_line_start": 153,
+          "resolved_line_start": 147
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching.md": "0b8738b6976efeb95c5426f504ba38ca5c71027bac62613cc13fbe117cf91df1"
+      },
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CLEAN",
+      "overall_reason": "Independent whole-note audit found no concrete defects. The note is accurate and coherent, the questions are gradeable, and the keep is justified.",
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching.md",
+          "verdict": "CLEAN",
+          "summary": "The note explains layered RAG caches, their keys and invalidation, and the authorization scoping. The mechanisms, conditions and failure modes are accurate and consistent across the prose, diagrams and cards. No edit is needed.",
+          "page_type": "Concept — frontmatter intact, Questions and References optional but present and valid; no fenced code without language (both mermaid).",
+          "current_text_evidence": [
+            {
+              "quote": "Caches remove that work only when their keys capture every input that affects the result.",
+              "line_start": 17,
+              "reason": "Opening states the operating idea quickly and sets the key-completeness condition used by the whole note."
+            },
+            {
+              "quote": "This is a data breach, not a staleness bug.",
+              "line_start": 114,
+              "reason": "Cross-tenant leakage is distinguished from staleness, which is the key engineering boundary."
+            },
+            {
+              "quote": "The diagrams place the response lookup after retrieval and context assembly so the key can include the actual evidence.",
+              "line_start": 122,
+              "reason": "Explains the design choice and the condition under which an earlier lookup would need extra versioning and permission checks."
+            },
+            {
+              "quote": "A response TTL limits staleness, while source and permission changes that invalidate an answer require invalidation before that TTL expires.",
+              "line_start": 124,
+              "reason": "Gives the TTL limit with its exception. The pitfall bullet repeats it briefly, which is reinforcing rather than padding."
+            },
+            {
+              "quote": "For protected content, a complete key is necessary but not sufficient.",
+              "line_start": 147,
+              "reason": "The retrieval-key card adds the current-access recheck beyond the key, consistent with the Pitfalls section; each card tests one focused task."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: embedding, retrieval and response caches are one coherent layered-design topic, and the response-cache detail is already delegated to LLM Caching.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "change_checks": [],
+      "decision_checks": []
+    }
   }
 }
