@@ -3487,11 +3487,11 @@
     "version": 1,
     "id": "4ce6dcd61eb74b9eafc6dcc2d27d9c9b",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-05T07:01:25.246564Z",
-    "elapsed_seconds": 287.75852790000005,
+    "elapsed_seconds": 311.78470920000007,
     "calls_reserved": 10,
-    "responses_received": 9,
+    "responses_received": 10,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics.md",
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation.md",
@@ -3793,7 +3793,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-05T07:06:13.004639Z",
+    "checkpoint_at": "2026-11-05T07:06:37.030820Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -13986,6 +13986,135 @@
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Query Translation.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-05T07:06:09.574124Z"
+    "prepared_at": "2026-11-05T07:06:09.574124Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "overall_reason": "Whole-note audit found no factual, structural, question-quality or rules defect. The keep is justified, and no edits are proposed.",
+        "change_checks": [],
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Query Translation.md",
+            "verdict": "CLEAN",
+            "summary": "The note opens with a concrete vocabulary-mismatch example, then a pipeline diagram, five technique sections, failure modes, and a comparison table that ties each technique to a decision condition. The mechanisms and limits (RRF does not remove drift, HyDE bakes hallucinated assumptions into the vector, decomposition loses constraints, latency is translator plus slowest search) are accurate and consistent with the cited papers. The four Qards each test one gradeable task and carry answer-side sources. No edit is warranted.",
+            "page_type": "Concept — authorable concept note with Questions and References; the whiteboard voice applies, and the fences are mermaid or have language identifiers.",
+            "current_text_evidence": [
+              {
+                "quote": "Translation searches more of that space without changing the corpus or the [[Embeddings|embedding model]].",
+                "line_start": 17,
+                "reason": "The opening states the operating idea and its boundary quickly, using a concrete mismatch example."
+              },
+              {
+                "quote": "RRF does not reject a drifted variant or its documents: a result ranked highly by one bad rewrite can still survive the cutoff.",
+                "line_start": 63,
+                "reason": "States the real limit of fusion precisely, a condition that changes the engineering decision."
+              },
+              {
+                "quote": "Four sequential 100 ms searches add roughly 400 ms.",
+                "line_start": 65,
+                "reason": "Gives a concrete latency calculation and separates sequential from concurrent execution."
+              },
+              {
+                "quote": "Once that constraint disappears, retrieval returns generic async guidance and the synthesis step cannot recover the lost specificity.",
+                "line_start": 95,
+                "reason": "Explains the decomposition failure mechanism and its mitigation."
+              },
+              {
+                "quote": "The recall column describes how each technique can find more evidence, not a workload-independent gain; any gain depends on the corpus and query class.",
+                "line_start": 131,
+                "reason": "The comparison table is hedged correctly and does not overclaim; call counts are separated per technique."
+              },
+              {
+                "quote": "A rise in Recall@20 with a fall in Precision@5 means more relevant candidates appear within 20 results while the top five carry more noise.",
+                "line_start": 165,
+                "reason": "The evaluation card gives a precise, bounded interpretation of cutoff-specific metrics."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: multi-query, RAG-Fusion, step-back, decomposition and HyDE share one pipeline position and one decision table, and the five techniques are compared against each other.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ]
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Query Translation.md",
+          "citation_index": 5,
+          "reported_line_start": 165,
+          "resolved_line_start": 182
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Query Translation.md": "3c9b85ab0817bebd7c080a80d07405d882033a2aa224e365da17035221644c05"
+      },
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CLEAN",
+      "overall_reason": "Whole-note audit found no factual, structural, question-quality or rules defect. The keep is justified, and no edits are proposed.",
+      "change_checks": [],
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Query Translation.md",
+          "verdict": "CLEAN",
+          "summary": "The note opens with a concrete vocabulary-mismatch example, then a pipeline diagram, five technique sections, failure modes, and a comparison table that ties each technique to a decision condition. The mechanisms and limits (RRF does not remove drift, HyDE bakes hallucinated assumptions into the vector, decomposition loses constraints, latency is translator plus slowest search) are accurate and consistent with the cited papers. The four Qards each test one gradeable task and carry answer-side sources. No edit is warranted.",
+          "page_type": "Concept — authorable concept note with Questions and References; the whiteboard voice applies, and the fences are mermaid or have language identifiers.",
+          "current_text_evidence": [
+            {
+              "quote": "Translation searches more of that space without changing the corpus or the [[Embeddings|embedding model]].",
+              "line_start": 17,
+              "reason": "The opening states the operating idea and its boundary quickly, using a concrete mismatch example."
+            },
+            {
+              "quote": "RRF does not reject a drifted variant or its documents: a result ranked highly by one bad rewrite can still survive the cutoff.",
+              "line_start": 63,
+              "reason": "States the real limit of fusion precisely, a condition that changes the engineering decision."
+            },
+            {
+              "quote": "Four sequential 100 ms searches add roughly 400 ms.",
+              "line_start": 65,
+              "reason": "Gives a concrete latency calculation and separates sequential from concurrent execution."
+            },
+            {
+              "quote": "Once that constraint disappears, retrieval returns generic async guidance and the synthesis step cannot recover the lost specificity.",
+              "line_start": 95,
+              "reason": "Explains the decomposition failure mechanism and its mitigation."
+            },
+            {
+              "quote": "The recall column describes how each technique can find more evidence, not a workload-independent gain; any gain depends on the corpus and query class.",
+              "line_start": 131,
+              "reason": "The comparison table is hedged correctly and does not overclaim; call counts are separated per technique."
+            },
+            {
+              "quote": "A rise in Recall@20 with a fall in Precision@5 means more relevant candidates appear within 20 results while the top five carry more noise.",
+              "line_start": 182,
+              "reason": "The evaluation card gives a precise, bounded interpretation of cutoff-specific metrics."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: multi-query, RAG-Fusion, step-back, decomposition and HyDE share one pipeline position and one decision table, and the five techniques are compared against each other.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ]
+    }
   }
 }
