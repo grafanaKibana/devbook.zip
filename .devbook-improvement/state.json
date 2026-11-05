@@ -4082,16 +4082,17 @@
     "version": 1,
     "id": "b98a816444094ceaa557c175133e1e93",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-05T20:07:51.294462Z",
-    "elapsed_seconds": 366.45234539999984,
+    "elapsed_seconds": 370.33195289999986,
     "calls_reserved": 11,
     "responses_received": 11,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md",
       "Vault/Home/AI & ML/LLM/Embeddings.md",
       "Vault/Home/AI & ML/LLM/Evaluation/Building an Evaluation Set.md",
-      "Vault/Home/AI & ML/LLM/Evaluation/Deterministic Checks.md"
+      "Vault/Home/AI & ML/LLM/Evaluation/Deterministic Checks.md",
+      "Vault/Home/AI & ML/LLM/Evaluation/Evaluation.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -4332,10 +4333,79 @@
           },
           "model_calls": 9
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/Evaluation/Evaluation.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Evaluation/Evaluation.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against its text. The opening states the operating idea: exact checks plus rubric scoring over versioned cases. The mermaid flow correctly places the corpus ahead of the scorers, and the following prose explains why cheap deterministic checks run before an expensive judge. The deterministic-check section rightly notes that repeatable heuristic detectors (PII regex, keyword filters) are still fallible and need calibration. The judge paragraph covers calibration against blinded human samples and versioning of judge model, prompt, rubric and sampling settings, which is consistent with the LLM-as-a-Judge sibling cards. The example separates exact predicates, rubric dimensions and heuristic signals. The dataset lifecycle section covers dev vs frozen holdout and overfitting. The known-violations inventory is empty. Code fences carry language identifiers, wikilinks point to sibling notes, and the two references are bare descriptive links to authoritative vendor guidance. No factual error or readability defect was found, so any edit would be cosmetic churn."
+              }
+            ],
+            "feedback": [],
+            "decisions": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Evaluation/Evaluation.md",
+                "verdict": "CLEAN",
+                "summary": "The note is accurate, well ordered and concise. It separates cases from scorers, explains why deterministic does not mean exact, covers judge calibration and versioning, and covers holdout overfitting. No defect justifies an edit, so keeping it unchanged is correct.",
+                "page_type": "FolderNote — keeps the Datacore folder map block, tags: [FolderNote], optional Questions absent (allowed), References present as bare links.",
+                "current_text_evidence": [
+                  {
+                    "quote": "Keep the cases separate from the scorers.",
+                    "line_start": 18,
+                    "reason": "The opening states the operating idea early: cases are distinct from scorers and from the gate."
+                  },
+                  {
+                    "quote": "A regex for PII or a keyword safety filter is repeatable and still wrong on some inputs.",
+                    "line_start": 52,
+                    "reason": "The note states the important boundary: deterministic execution is not the same as an exact classification. It also gives the calibration remedy."
+                  },
+                  {
+                    "quote": "Version the judge model and prompt with the rubric and sampling settings.",
+                    "line_start": 54,
+                    "reason": "The note names the condition that makes score files comparable."
+                  },
+                  {
+                    "quote": "Repeated prompt or rubric tuning against the holdout turns it into training data.",
+                    "line_start": 85,
+                    "reason": "The note explains the overfitting mechanism and the signal that exposes it."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the note has one coherent evaluation pipeline. Deterministic checks, judges, golden sets and online evaluation already have sibling notes it links to.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "NOT APPLICABLE",
+                  "identity_safety": "NOT APPLICABLE",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "The whole-note audit found no concrete error, rule violation or readability defect. The keep is justified and no edits were proposed.",
+            "change_checks": []
+          },
+          "model_calls": 11
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-05T20:13:57.746179Z",
+    "checkpoint_at": "2026-11-05T20:14:01.625787Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
