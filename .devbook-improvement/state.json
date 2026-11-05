@@ -3842,9 +3842,9 @@
     "version": 1,
     "id": "4ce6dcd61eb74b9eafc6dcc2d27d9c9b",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-05T07:01:25.246564Z",
-    "elapsed_seconds": 650.5380544000001,
+    "elapsed_seconds": 654.4369488000001,
     "calls_reserved": 20,
     "responses_received": 20,
     "attempted_paths": [
@@ -3856,7 +3856,8 @@
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching.md",
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Patterns.md",
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG.md",
-      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md"
+      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md",
+      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Retrieval.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -4515,10 +4516,83 @@
           },
           "model_calls": 18
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Retrieval.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Retrieval.md",
+                "outcome": "keep",
+                "reason": "Read the whole note against its text. The opening explains why retrieval caps answer quality. The Mermaid diagram and the 429 example make the dense/sparse/hybrid split concrete. Each mode section gives mechanism, fit and main risk. The BM25 versus PostgreSQL ts_rank distinction is stated correctly. RRF is described correctly: the sum of 1/(k+rank) with k=60. The pre/post-filtering section correctly keeps authorization separate from similarity. The pitfalls cover ANN operating-point drift, embedding migration, segment-hidden metrics and silent identifier misses, and each ends with a detection or mitigation step. The tradeoffs table matches the prose. The two existing cards each test one gradeable task, with accurate answers and Azure hybrid-search sources. The references are topic-specific bare links. known_violations is empty and there are no flagged cards or owner feedback. No factual defect or editorial weakness was found that would justify a change, so a forced edit would only add churn."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "I read the whole note independently. It is accurate and well ordered, and its cards are sound. I found no concrete defect that would justify an edit, so keeping it unchanged is justified.",
+            "change_checks": [],
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Retrieval.md",
+                "verdict": "CLEAN",
+                "summary": "The note opens with why retrieval caps answer quality. A diagram and a concrete 429 example then make the dense, sparse and hybrid split easy to recall. Each mode gives mechanism, fit and main risk. Technical claims are correct, the pitfalls end in detection or mitigation steps, and both Qards test one gradeable task each. Keeping it unchanged is justified.",
+                "page_type": "Concept note with Questions and References; the applicable rules are concept voice, one gradeable task per Qard, bare reference links and MD040.",
+                "current_text_evidence": [
+                  {
+                    "quote": "It does not provide BM25 as its built-in ranker.",
+                    "line_start": 56,
+                    "reason": "Correctly separates PostgreSQL full-text ranking (ts_rank, ts_rank_cd) from BM25, which avoids a common factual error."
+                  },
+                  {
+                    "quote": "sums `1 / (k + rank)` for each document across the input lists, with k=60 in the original method",
+                    "line_start": 80,
+                    "reason": "The RRF formula and the original k=60 are correct, and the point that rank positions remove the need for a shared score scale is stated."
+                  },
+                  {
+                    "quote": "Authorization is a separate requirement: semantic similarity cannot enforce it",
+                    "line_start": 101,
+                    "reason": "Keeps access control separate from the recall and cost tradeoff of filtering, which is the right engineering boundary."
+                  },
+                  {
+                    "quote": "Vector search recognizes the meaning around rate limiting, yet may lose the exact token `429`.",
+                    "line_start": 33,
+                    "reason": "A concrete example that makes the complementary failure modes of the two paths memorable."
+                  },
+                  {
+                    "quote": "Hybrid is therefore justified by measurement rather than assumed.",
+                    "line_start": 173,
+                    "reason": "The second card keeps a dependent mechanism-and-why explanation together, and its RRF rank-equivalence reasoning is correct."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: dense, sparse and hybrid retrieval, indexing and filtering, and the pitfalls form one coherent retrieval-stage explanation, and Re-ranking and Vector Databases already have their own notes.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ]
+          },
+          "model_calls": 20
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-05T07:12:15.784170Z",
+    "checkpoint_at": "2026-11-05T07:12:19.683065Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
