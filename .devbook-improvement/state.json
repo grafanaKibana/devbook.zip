@@ -3372,11 +3372,11 @@
     "version": 1,
     "id": "4ce6dcd61eb74b9eafc6dcc2d27d9c9b",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-05T07:01:25.246564Z",
-    "elapsed_seconds": 162.06147229999996,
+    "elapsed_seconds": 182.49704739999999,
     "calls_reserved": 6,
-    "responses_received": 5,
+    "responses_received": 6,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics.md",
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation.md"
@@ -3532,7 +3532,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-05T07:04:07.307583Z",
+    "checkpoint_at": "2026-11-05T07:04:27.743158Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -13657,6 +13657,127 @@
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Retrieval Evaluation Sets.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-05T07:04:03.828718Z"
+    "prepared_at": "2026-11-05T07:04:03.828718Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "overall_reason": "Whole-note audit found no concrete defect; the note is accurate, clear, and well-scoped, and the keep is justified with no edits proposed.",
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Retrieval Evaluation Sets.md",
+            "verdict": "CLEAN",
+            "summary": "The note maps relevance shapes (substitutable, complementary, graded) to HitRate/MRR, Recall/Context Recall and nDCG correctly, with a correct worked example, a sound cutoff rule, and honest caveats about synthetic labels. Prose is direct and ordered well; cards are focused. No edit is warranted.",
+            "page_type": "Concept — authorable prose with optional Questions and References; protected Qard IDs and fenced code (text language present).",
+            "current_text_evidence": [
+              {
+                "quote": "A result containing only plan A has `HitRate@5 = 1`, but complementary recall is `1/2`",
+                "line_start": 37,
+                "reason": "The arithmetic is correct and shows the verdict depends on label shape for a fixed retrieved list."
+              },
+              {
+                "quote": "Because it judges only a finite candidate list, it cannot prove that the labels are exhaustive",
+                "line_start": 61,
+                "reason": "States the limit of the second-pass check instead of overclaiming, preserving the condition that matters."
+              },
+              {
+                "quote": "**The cutoff follows the generator's real input.**",
+                "line_start": 39,
+                "reason": "Gives a decision rule with the condition (k at least the required set size) that changes the engineering outcome."
+              },
+              {
+                "quote": "> [!qard]- Which retrieval metric fits a query with several relevant chunks?",
+                "line_start": 67,
+                "reason": "One focused comparison task, answered by a table and example; the existing ID comment is retained above it."
+              },
+              {
+                "quote": "Both are risks to check, not certainties.",
+                "line_start": 104,
+                "reason": "The synthetic-label card keeps failures and their controls together as one dependent explanation with appropriate hedging."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: the two sections (multi-chunk relevance labeling and synthetic-question label distortion) are tightly coupled to one retrieval-labeling topic, and general dataset construction already lives in a sibling note.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "change_checks": [],
+        "decision_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Retrieval Evaluation Sets.md",
+          "citation_index": 4,
+          "reported_line_start": 104,
+          "resolved_line_start": 106
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Retrieval Evaluation Sets.md": "ea3ff8e520a9e53bd68b70a0ad1c8c4c3e5a0532aa135a876a5a8bd4e5ee5a57"
+      },
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CLEAN",
+      "overall_reason": "Whole-note audit found no concrete defect; the note is accurate, clear, and well-scoped, and the keep is justified with no edits proposed.",
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Retrieval Evaluation Sets.md",
+          "verdict": "CLEAN",
+          "summary": "The note maps relevance shapes (substitutable, complementary, graded) to HitRate/MRR, Recall/Context Recall and nDCG correctly, with a correct worked example, a sound cutoff rule, and honest caveats about synthetic labels. Prose is direct and ordered well; cards are focused. No edit is warranted.",
+          "page_type": "Concept — authorable prose with optional Questions and References; protected Qard IDs and fenced code (text language present).",
+          "current_text_evidence": [
+            {
+              "quote": "A result containing only plan A has `HitRate@5 = 1`, but complementary recall is `1/2`",
+              "line_start": 37,
+              "reason": "The arithmetic is correct and shows the verdict depends on label shape for a fixed retrieved list."
+            },
+            {
+              "quote": "Because it judges only a finite candidate list, it cannot prove that the labels are exhaustive",
+              "line_start": 61,
+              "reason": "States the limit of the second-pass check instead of overclaiming, preserving the condition that matters."
+            },
+            {
+              "quote": "**The cutoff follows the generator's real input.**",
+              "line_start": 39,
+              "reason": "Gives a decision rule with the condition (k at least the required set size) that changes the engineering outcome."
+            },
+            {
+              "quote": "> [!qard]- Which retrieval metric fits a query with several relevant chunks?",
+              "line_start": 67,
+              "reason": "One focused comparison task, answered by a table and example; the existing ID comment is retained above it."
+            },
+            {
+              "quote": "Both are risks to check, not certainties.",
+              "line_start": 106,
+              "reason": "The synthetic-label card keeps failures and their controls together as one dependent explanation with appropriate hedging."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: the two sections (multi-chunk relevance labeling and synthetic-question label distortion) are tightly coupled to one retrieval-labeling topic, and general dataset construction already lives in a sibling note.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "change_checks": [],
+      "decision_checks": []
+    }
   }
 }
