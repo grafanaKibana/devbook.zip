@@ -3667,11 +3667,11 @@
     "version": 1,
     "id": "4ce6dcd61eb74b9eafc6dcc2d27d9c9b",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-05T07:01:25.246564Z",
-    "elapsed_seconds": 469.86104090000015,
+    "elapsed_seconds": 479.94397500000014,
     "calls_reserved": 15,
-    "responses_received": 14,
+    "responses_received": 15,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics.md",
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation.md",
@@ -4198,7 +4198,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-05T07:09:15.107155Z",
+    "checkpoint_at": "2026-11-05T07:09:25.190088Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -14551,5 +14551,54 @@
       },
       "feedback_snapshot": []
     }
+  },
+  "pending_author_proposal": {
+    "workload_id": "4ce6dcd61eb74b9eafc6dcc2d27d9c9b",
+    "topic_id": "ai-ml-4edf0823",
+    "batch": {
+      "topic": "AI & ML",
+      "topic_id": "ai-ml-4edf0823",
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG.md",
+          "content": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"Retrieves evidence from a corpus, then generates an answer grounded in it, no retraining needed.\"\ntags: [FolderNote]\npriority: High\nlevel: [\"2\"]\npublish: true\nstatus: Done\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Context Engineering/RAG/RAG\"\nflashcard_uid: \"33e0a516\"\ncreated: \"2026-02-27T01:19:52.000Z\"\nmodified: \"2026-11-02T09:03:54.806Z\"\npublished: \"2026-07-13T18:39:40.459Z\"\n---\n\nRetrieval-Augmented Generation (RAG) retrieves evidence from a corpus and gives it to the model for generation. Knowledge can then change without retraining the model, and the answer can point back to the source that supported it.\n\nA useful RAG system is a pipeline. Query processing determines what search sees. Retrieval decides which evidence survives. Context assembly decides what the model receives. Evaluation and production controls keep those stages honest.\n\nFor a support question such as “What changed in API v2 rate limits?”, the system retrieves release notes and policy documents first. The model answers from those sections and cites them instead of relying on an old fact stored in its weights.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# Core Flow\n\n```mermaid\nflowchart LR\n    Q[User Query] --> D{Translate query?}\n    D -->|No| R[Retrieval and Fusion]\n    D -->|Yes| T[Query Translation]\n    T --> R\n    R --> RR[Optional Reranking]\n    RR --> C[Context Assembly]\n    C --> G[LLM Generation]\n    G --> V[Groundedness and Citation Checks]\n```\n\nEach stage limits the next. When translation is used, retrieval cannot repair a rewrite that changed the intent, and reranking cannot promote evidence that search never returned. A baseline can send the original query directly to retrieval. Treating RAG as one large prompt hides these boundaries.\n\n# Operational Baselines\n\n- Each added pattern sits behind a feature flag, so its [[Monitoring#Retrieval Quality Metrics|retrieval precision]] and [[Monitoring#LLM-as-Judge Metrics|generation faithfulness]] can be compared with latency p95 and cost per query.\n- Iterative and agentic retrieval run under a cap. A retry budget bounds latency. Unsupported output should fail closed instead of looping until it sounds plausible.\n- Query drift can accumulate between retrieval rounds. Semantic similarity to the original query makes gradual topic changes visible.\n- Expensive stable work is worth caching: query rewrites, multi-query results, contextual chunk enrichment, and read-only tool results scoped to the caller's authorization. Mutating tool calls need [[Home/Software Architecture/Distributed Systems/Idempotency|idempotency]], not response caching. [[Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching|Caching]] covers keys and invalidation.\n- Simple questions go through the cheapest path. Multi-hop retrieval is wasted work on a single-hop lookup.\n\n# RAG Vs Fine-Tuning\n\nRAG and [[Fine-tuning]] change different parts of the system. RAG supplies knowledge at request time. Fine-tuning changes behavior in the model weights. Retrieval is the safer place for facts that change.\n\nA weekly policy change can enter RAG through reindexing. Fine-tuning would bake in another snapshot and still give weak source traceability.\n\n| Axis | RAG | Fine-tuning |\n|---|---|---|\n| Knowledge freshness | Changes when the corpus is reindexed | Changes when the model is trained again |\n| Source traceability | Direct when citations are retained | Weak unless supplied separately |\n| Behavioral consistency | Depends on prompt and model behavior | Can improve through training examples |\n| Time to first value | Usually faster | Usually slower |\n| Operational complexity | Retrieval and index operations | Training, evaluation, and model release operations |\n\n1. RAG is the first choice when facts change often or answers need citations.\n2. Fine-tuning is added when format or policy behavior stays unstable after prompt work.\n3. Mutable facts stay in the corpus, and learned behavior stays in the weights.\n\nThe two techniques can work together. Fine-tuning can stabilize format or refusal behavior, while RAG supplies current facts. The boundary still holds: knowledge changes through reindexing, and behavior changes through retraining.\n\n# Questions\n\n> [!qard]- What is retrieval-augmented generation (RAG)?\n> Retrieval-augmented generation (RAG) answers a request in two steps. It first retrieves relevant evidence from an external corpus, then gives that evidence to a language model, which generates an answer grounded in it. Knowledge therefore comes from the corpus at request time, not only from what the model learned in its weights.\n>\n> A typical request passes through these stages:\n>\n> 1. **Query processing:** the question is used as is or rewritten into a better search query.\n> 2. **Retrieval:** a search over an index of document chunks returns candidate passages. The search can use vector similarity, keywords or both.\n> 3. **Reranking (optional):** a second stage reorders the candidates so the most relevant come first.\n> 4. **Context assembly:** the best passages are placed into the prompt within a token budget.\n> 5. **Generation:** the model answers from that context, ideally citing the passages it used.\n> \n> Compared with relying on the model's weights alone, RAG changes two things. Knowledge can be updated by changing the corpus and its index instead of retraining, and an answer can point back to its sources. Each stage also limits the next: generation cannot use evidence that retrieval never returned.\n>\n> [Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks (Lewis et al.)](https://arxiv.org/abs/2005.11401)\n\n<!-- qard-id: 19ad841c-2c3b-4042-aa7b-e7324d145b10 -->\n> [!qard]- What experiment justifies adding an advanced stage to a RAG pipeline?\n> An advanced stage is introduced as a controlled experiment. It targets a specific failure measured on the current pipeline, and it stays only if it beats that baseline by enough to justify its added latency, cost and maintenance.\n>\n> 1. **Baseline:** the current pipeline is measured on representative cases, and the failure the new stage should fix is identified. An example is relevant evidence ranked too low to reach the prompt.\n> 2. **Isolated change:** where practical, only that stage changes. A broad change to several stages can hide which component helped and which one regressed.\n> 3. **Same comparison:** baseline and candidate run on the same cases. They are measured on the targeted metric, on end-to-end answer quality and on operational measures such as p95 latency and cost per query.\n> 4. **Decision:** the stage is kept only when its quality gain outweighs its latency, cost and maintenance burden. Otherwise the simpler pipeline remains.\n>\n> Changing exactly one thing is not always feasible. A feature flag, a controlled rollout or an ablation that removes one component at a time can still attribute an effect to a specific stage.\n>\n> [Rules of Machine Learning (Google)](https://developers.google.com/machine-learning/guides/rules-of-ml)\n\n<!-- qard-id: 62a9172b-1f78-4656-8b17-50f8365f997d -->\n> [!qard]- When a RAG answer is wrong, how can the failing pipeline stage be located?\n> The diagnosis starts from the exact context and request the model received for that answer. Whether the needed evidence was there decides which part of the pipeline to examine, and tracing backward from there finds the stage that failed.\n>\n> 1. **Actual model input:** the logged prompt and assembled context for the failing request are inspected, rather than assumptions about what retrieval probably returned.\n> 2. **Evidence missing or unsuitable:** the fault is upstream of generation. Tracing back through context assembly, ranking, filtering, retrieval and query transformation shows where the evidence was lost. It may have been retrieved but cut by the final top-k, removed by a filter, or never retrieved because a rewritten query changed the intent.\n> 3. **Evidence present but misused:** the relevant evidence reached the model, but the answer ignored, contradicted or went beyond it. That points to generation: the prompt, the model or its settings.\n> 4. **Measurement itself:** citation handling and the reference answer or evaluator are checked too, because a broken citation mapping or a wrong label can make an answer look wrong.\n> \n> Component metrics, such as retrieval relevance and groundedness, narrow the hypotheses. End-to-end evaluation then confirms whether a fix improves the task outcome.\n>\n> [RAG evaluators (Microsoft Foundry)](https://learn.microsoft.com/en-us/azure/foundry/concepts/evaluation-evaluators/rag-evaluators?view=foundry)\n\n# References\n\n- [Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks](https://arxiv.org/abs/2005.11401)\n- [Retrieval-Augmented Generation for Large Language Models: A Survey (Gao et al., 2024)](https://arxiv.org/abs/2312.10997)\n",
+          "hash": "11db8c3ea927acf39ea3c54a45583a6bc5e76fc1037ba0fa9dac23dee639256b",
+          "topic": "AI & ML",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG.md",
+          "outcome": "keep",
+          "reason": "Audited the whole note. The opening defines RAG and states the pipeline boundary (query processing, retrieval, context assembly, evaluation). The Mermaid flow matches the 'each stage limits the next' explanation and the first card's stage list. Operational baselines (flagging, retry caps, drift, caching scoped to authorization, idempotency for mutating tools) are accurate and consistent with the linked notes. The RAG vs fine-tuning table and decision list are correct and keep facts in the corpus and behavior in the weights. All three cards each test one gradeable task, with answers that explain mechanisms and conditions. The experiment card correctly allows ablations and flags when single-variable changes are not feasible. The diagnosis card covers upstream loss, misuse by generation, and measurement faults. Cited sources (Lewis et al. 2020, Gao et al. survey, Rules of ML, Foundry RAG evaluators) support the claims. The frontmatter, the MD040 language tags, and the References format are valid, and there are no known violations. No defect found, so editing would only add churn."
+        }
+      ],
+      "feedback": [],
+      "decisions": []
+    },
+    "source_hashes": {
+      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG.md": "11db8c3ea927acf39ea3c54a45583a6bc5e76fc1037ba0fa9dac23dee639256b"
+    },
+    "feedback_keys": [],
+    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-05T07:09:25.190078Z"
   }
 }
