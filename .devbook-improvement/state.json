@@ -3312,16 +3312,93 @@
     "version": 1,
     "id": "4ce6dcd61eb74b9eafc6dcc2d27d9c9b",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-05T07:01:25.246564Z",
-    "elapsed_seconds": 62.14475209999999,
+    "elapsed_seconds": 65.5536449,
     "calls_reserved": 2,
     "responses_received": 2,
-    "attempted_paths": [],
+    "attempted_paths": [
+      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics.md"
+    ],
     "accepted_records": [],
-    "outcomes": [],
+    "outcomes": [
+      {
+        "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against its current text. The layered framing (retrieval, generation, end-to-end) is coherent. The retrieval metric table matches standard definitions. The RAGAS table correctly separates reference-free metrics (Faithfulness, Response Relevancy) from reference-dependent ones (Context Recall, variant-dependent Context Precision). The diagnostic combinations are hedged as hypotheses. The tradeoffs table and the judge-bias pitfalls are accurate. The existing cards each test one gradeable task: the metric comparison, why aggregates hide regressions, when a segment drop is actionable, and the faithfulness/recall diagnosis. Their answers agree with the note and cite primary sources. No known native violations are present. No factual error or editorial weakness justified an edit, so unchanged text is preferable to churn."
+              }
+            ],
+            "feedback": [],
+            "decisions": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics.md",
+                "verdict": "CLEAN",
+                "summary": "I read the whole note and found no factual, structural, or question-quality defect that justifies an edit. The layered retrieval, generation and end-to-end framing, the RAGAS reference requirements, the hedged diagnostic tables and the four existing cards are accurate and consistent. Leaving the note unchanged avoids cosmetic churn.",
+                "page_type": "Concept note, with a Questions section of Qard callouts and a References section. Qard ID comments are protected metadata.",
+                "current_text_evidence": [
+                  {
+                    "quote": "A support bot can retrieve the correct policy and still misread its date constraint.",
+                    "line_start": 21,
+                    "reason": "A concrete example restores the retrieval-versus-generation distinction quickly, and it appears before the metric tables."
+                  },
+                  {
+                    "quote": "so the evaluation record must name the variant rather than reporting an unqualified",
+                    "line_start": 59,
+                    "reason": "This states the version-specific condition for Context Precision. Current RAGAS has several variants with different reference requirements."
+                  },
+                  {
+                    "quote": "Attribution shows which context supports an incorrect claim, not that the chunk caused the error.",
+                    "line_start": 80,
+                    "reason": "This limit on Noise Sensitivity is precise and prevents over-interpreting the score."
+                  },
+                  {
+                    "quote": "Rerunning the same evaluation on the same queries does not satisfy the second condition.",
+                    "line_start": 158,
+                    "reason": "This answer explains why repeated runs cannot replace a larger or more representative query sample. Each card covers one gradeable task, and its answer is consistent with the body."
+                  },
+                  {
+                    "quote": "Recall@5 is `3/4 = 0.75`, because three of the four relevant documents appear.",
+                    "line_start": 126,
+                    "reason": "The worked example is arithmetically correct. The relevant documents sit at ranks 2, 3 and 5, so Precision@5 = 0.6 and reciprocal rank = 0.5."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the metrics layers, the RAGAS mapping and the pitfalls form one coherent evaluation topic. Definitions are already delegated to Monitoring.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "The whole-note audit found the note accurate, readable and correctly hedged, and no edits are proposed. The unchanged keep is justified by the current text, with no remaining defect.",
+            "change_checks": []
+          },
+          "model_calls": 2
+        }
+      }
+    ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-05T07:02:27.390863Z",
+    "checkpoint_at": "2026-11-05T07:02:30.799759Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
