@@ -2197,6 +2197,61 @@
         },
         "review_process": "focused-whole-note-v1"
       }
+    },
+    "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Patterns.md": {
+      "content_hash": "ad4889ae68e31851bae3780a97d241dd4f4318c424fdd3b157daa24516364b86",
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "outcome": "keep",
+      "repair_input_hash": "",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "violation_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "keep_review": {
+        "content_hash": "ad4889ae68e31851bae3780a97d241dd4f4318c424fdd3b157daa24516364b86",
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review": {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Patterns.md",
+          "verdict": "CLEAN",
+          "summary": "The whole note was re-read independently. Each of the 12 patterns states its mechanism, when it fits and the failure it adds, and the table and adoption-order paragraph agree with the sections. I found no factual, structural or Qard defect that justifies an edit.",
+          "page_type": "Concept — optional Questions and References; mermaid fences are language-tagged; wikilinks use full paths with aliases.",
+          "current_text_evidence": [
+            {
+              "quote": "RAG patterns are repairs for observed retrieval failures.",
+              "line_start": 17,
+              "reason": "The opening states the operating idea and the adoption rule, so the topic is quick to re-enter."
+            },
+            {
+              "quote": "Its ceiling is easy to find.",
+              "line_start": 33,
+              "reason": "The first pattern names its limit (exact identifiers, no second stage), which sets the fit-and-failure shape that the later patterns follow."
+            },
+            {
+              "quote": "Self-RAG requires custom training, while CRAG-style correction depends on trustworthy evaluator thresholds.",
+              "line_start": 246,
+              "reason": "This claim matches the cited Self-RAG and CRAG papers and keeps the specialist-pattern boundary accurate."
+            },
+            {
+              "quote": "The decision therefore rests on a comparison with a vector-retrieval baseline on representative questions.",
+              "line_start": 276,
+              "reason": "The single Qard tests one gradeable task and keeps its ID. Its answer is accurate, gives the condition and the cost, and cites the Microsoft Research paper on the answer side."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: the 12 patterns share one decision frame (failure fixed versus risk added) and are used together for selection, so separating them would not make either part more useful.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        },
+        "review_process": "focused-whole-note-v1"
+      }
     }
   },
   "topics": {
@@ -3614,7 +3669,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-05T07:01:25.246564Z",
-    "elapsed_seconds": 438.9517647000002,
+    "elapsed_seconds": 442.73654510000017,
     "calls_reserved": 14,
     "responses_received": 14,
     "attempted_paths": [
@@ -4074,7 +4129,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-05T07:08:44.197877Z",
+    "checkpoint_at": "2026-11-05T07:08:47.982657Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -5922,6 +5977,74 @@
       ],
       "source_hashes": {
         "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching.md": "0b8738b6976efeb95c5426f504ba38ca5c71027bac62613cc13fbe117cf91df1"
+      },
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "cad2ec7074f466160687cbdc2cf960b362b4b7c3176b22f1afa3e6094112afd3": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Patterns.md",
+            "verdict": "CLEAN",
+            "summary": "The whole note was re-read independently. Each of the 12 patterns states its mechanism, when it fits and the failure it adds, and the table and adoption-order paragraph agree with the sections. I found no factual, structural or Qard defect that justifies an edit.",
+            "page_type": "Concept — optional Questions and References; mermaid fences are language-tagged; wikilinks use full paths with aliases.",
+            "current_text_evidence": [
+              {
+                "quote": "RAG patterns are repairs for observed retrieval failures.",
+                "line_start": 17,
+                "reason": "The opening states the operating idea and the adoption rule, so the topic is quick to re-enter."
+              },
+              {
+                "quote": "Its ceiling is easy to find.",
+                "line_start": 33,
+                "reason": "The first pattern names its limit (exact identifiers, no second stage), which sets the fit-and-failure shape that the later patterns follow."
+              },
+              {
+                "quote": "Self-RAG requires custom training, while CRAG-style correction depends on trustworthy evaluator thresholds.",
+                "line_start": 233,
+                "reason": "This claim matches the cited Self-RAG and CRAG papers and keeps the specialist-pattern boundary accurate."
+              },
+              {
+                "quote": "The decision therefore rests on a comparison with a vector-retrieval baseline on representative questions.",
+                "line_start": 260,
+                "reason": "The single Qard tests one gradeable task and keeps its ID. Its answer is accurate, gives the condition and the cost, and cites the Microsoft Research paper on the answer side."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: the 12 patterns share one decision frame (failure fixed versus risk added) and are used together for selection, so separating them would not make either part more useful.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "overall_reason": "The note is accurate and readable, and the Qard tests a single task. There are no known violations, no edits and no open defects, so keeping it unchanged is justified.",
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Patterns.md",
+          "citation_index": 2,
+          "reported_line_start": 233,
+          "resolved_line_start": 246
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Patterns.md",
+          "citation_index": 3,
+          "reported_line_start": 260,
+          "resolved_line_start": 276
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Patterns.md": "ad4889ae68e31851bae3780a97d241dd4f4318c424fdd3b157daa24516364b86"
       },
       "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
@@ -14358,169 +14481,6 @@
         "change_checks": []
       },
       "feedback_snapshot": []
-    }
-  },
-  "pending_author_proposal": {
-    "workload_id": "4ce6dcd61eb74b9eafc6dcc2d27d9c9b",
-    "topic_id": "ai-ml-4edf0823",
-    "batch": {
-      "topic": "AI & ML",
-      "topic_id": "ai-ml-4edf0823",
-      "notes": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Patterns.md",
-          "content": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"A catalog of production RAG patterns, each naming the failure it fixes and the risk it adds.\"\nlevel: [\"2\"]\npriority: High\nstatus: Done\npublish: true\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Context Engineering/RAG/RAG Patterns\"\nflashcard_uid: \"fb2f007d\"\ncreated: \"2026-02-27T01:19:52.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:28:37.415Z\"\n---\n\nRAG patterns are repairs for observed retrieval failures. The order below is an adoption guide rather than a popularity ranking. The first working pipeline remains in place until [[Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation|evaluation]] identifies a failure that the cheaper design cannot fix. Each pattern buys something and creates a new way to fail. The surrounding pipeline is described in [[Home/AI & ML/LLM/Context Engineering/RAG/RAG|RAG]].\n\n# 1. Baseline Single-Pass RAG\n\nThe baseline embeds one query, retrieves the nearest chunks, and puts them in the generation prompt. One request, one search, one answer.\n\n```mermaid\nflowchart LR\n    Q[User query] --> E[Embed query]\n    E --> R[Retrieve chunks]\n    R --> C[Assemble context]\n    C --> G[Generate answer]\n```\n\nIt fits a first production release and small curated corpora with clean [[Chunking]]. More important, it establishes the control measurement for every later change.\n\nIts ceiling is easy to find. A single dense top-k search often misses exact identifiers or product codes, and it has no second stage to remove weak matches.\n\n# 2. Hybrid Search plus Reranking\n\nThe [[Retrieval#Sparse Retrieval — Keyword Search (BM25)|lexical search]] and [[Retrieval#Dense Retrieval — Vector Search|vector search]] paths produce separate candidate sets. The merged set passes through [[Re-ranking|reranking]] before generation. Lexical retrieval protects exact terms. Dense retrieval covers semantic matches.\n\n```mermaid\nflowchart LR\n    Q[User query] --> L[Keyword search]\n    Q --> V[Vector search]\n    L --> CC[Candidate chunks]\n    V --> CC\n    CC --> F[Fuse candidates]\n    F --> RR[Rerank evidence]\n    RR --> C[Assemble context]\n    C --> G[Generate answer]\n```\n\nThis is the usual production default for enterprise text, especially when names, error codes, or version numbers matter. It also helps when dense retrieval finds the answer but buries it among weak chunks.\n\nThe ranking stack becomes another system to tune. Fusion weights and reranker scores all affect the final order, so changes need a labeled query set rather than a few hand-picked examples.\n\n# 3. Query Rewriting and Routing\n\nA model or rules engine rewrites the request and chooses a retrieval path. A vague phrase may need a more precise search query. A simple request may need no retrieval at all, while another belongs in SQL or web search.\n\n```mermaid\nflowchart LR\n    Q[User query] --> A[Analyze intent]\n    A --> W[Rewrite query]\n    A --> RT[Choose route]\n    W --> R[Retrieve chunks]\n    RT --> R\n    R --> CC[Candidate chunks]\n    CC --> C[Assemble context]\n    C --> G[Generate answer]\n```\n\nThis fits vague requests such as \"does the new limit apply to partners\" when the corpus says \"external reseller quota.\" Routing also keeps high-volume systems from paying for multi-hop execution on every request.\n\nThe rewrite can silently change intent. The original and rewritten queries therefore share a trace, and retrieval effects are measured by query type.\n\n# 4. Parent-Document and Recursive Retrieval\n\nSmall chunks provide precise matching, while each match expands to its parent section before generation. Search stays selective while the model receives the local context needed to interpret a row, definition, or dependency.\n\n```mermaid\nflowchart LR\n    D[Document] --> P[Parent sections]\n    P --> S[Small chunks]\n    S --> I[Chunk index]\n    Q[User query] --> R[Retrieve small chunks]\n    I --> R\n    R --> M[Matched chunks]\n    M --> X[Expand to parents]\n    P --> X\n    X --> C[Assemble context]\n    C --> G[Generate answer]\n```\n\nIt works well for manuals and policies where a 300-token match is useless without its heading or surrounding table. The danger is context bloat. Parent windows still need token budgets, and large windows may need their own reranking pass.\n\n# 5. Multi-Query Fusion\n\nSeveral phrasings of the same question produce separate retrieval results. Deduplication and rank fusion combine those candidate sets. The pattern raises recall when one wording cannot cover the document vocabulary.\n\n```mermaid\nflowchart LR\n    Q[User query] --> M[Generate variants]\n    M --> R1[Retrieve variant one]\n    M --> R2[Retrieve variant two]\n    M --> R3[Retrieve variant three]\n    R1 --> CC[Candidate chunks]\n    R2 --> CC\n    R3 --> CC\n    CC --> F[Fuse and dedupe]\n    F --> C[Assemble context]\n    C --> G[Generate answer]\n```\n\nMulti-query fusion suits single-intent requests with uncertain phrasing or many aliases. Genuinely multipart requests belong to decomposition. Every variant costs another search, so a bounded count and concurrent execution keep the pattern practical. Precise fact lookups rarely benefit.\n\n# 6. Contextual Retrieval\n\nA short document-aware explanation is added to each chunk before indexing. The retriever sees the fragment together with enough local context to interpret it.\n\n```mermaid\nflowchart LR\n    D[Source document] --> CH[Raw chunk]\n    D --> CT[Chunk context]\n    CH --> EN[Enriched chunk]\n    CT --> EN\n    EN --> IDX[Index]\n    Q[User query] --> R[Retrieve enriched chunks]\n    IDX --> R\n    R --> C[Assemble context]\n    C --> G[Generate answer]\n```\n\nThis helps when chunks contain pronouns, shorthand, or isolated table rows. It is most practical for slowly changing corpora because enrichment may require a model call for every chunk.\n\nThe generated context becomes part of the index. If the source changes without re-enrichment, the search layer preserves an obsolete interpretation.\n\n# 7. Multimodal RAG\n\nMultimodal RAG retrieves evidence from prose as well as images, tables, and scanned pages. Some systems extract structured text before indexing. Others use vision-capable embeddings and generation models.\n\n```mermaid\nflowchart LR\n    Q[User query] --> RT[Modality router]\n    RT --> T[Text retrieval]\n    RT --> I[Image retrieval]\n    RT --> B[Table retrieval]\n    T --> E[Mixed evidence]\n    I --> E\n    B --> E\n    E --> C[Assemble context]\n    C --> G[Generate answer]\n```\n\nThis pattern belongs in document systems where the answer lives in a chart or page layout and OCR loses the structure. A retrieved image is useless if the final model receives only text, so every modality needs a complete path from indexing through generation.\n\n# 8. HyDE\n\nHyDE drafts a hypothetical answer and searches with that answer's embedding. The extra prose can bridge a vague user query to the richer language used in source documents.\n\n```mermaid\nflowchart LR\n    Q[User query] --> H[Draft hypothetical answer]\n    H --> E[Embed draft]\n    E --> R[Retrieve chunks]\n    Q --> C[Assemble context]\n    R --> C\n    C --> G[Generate answer]\n```\n\nHyDE can help with short, exploratory questions. It is dangerous for exact factual lookup because an invented detail becomes the retrieval anchor. Its value is measured against direct search on the query classes meant to justify it.\n\n# 9. Iterative Multi-Hop Retrieval\n\nIterative retrieval examines the first evidence set, identifies what is missing, and searches again. The loop stops after a small number of hops or when the evidence satisfies the request.\n\n```mermaid\nflowchart LR\n    Q[User query] --> R1[Retrieve chunks]\n    R1 --> EC[Evidence context]\n    EC --> RE[Reason gaps]\n    RE --> F[Follow up query]\n    F --> R2[Retrieve more chunks]\n    R2 --> EC\n    EC --> C[Assemble context]\n    C --> G[Generate answer]\n```\n\nIterative retrieval fits questions where a second search depends on an entity or fact discovered in the first. Each hop can drift and accumulate noise. The original query, a bounded loop, reranking, and per-hop traces constrain that failure mode.\n\n# 10. Agentic RAG\n\nAn [[Home/AI & ML/LLM/Agents/Agents|agent]] chooses a data tool, observes the result, and decides what to do next. The execution path can change for each query.\n\n```mermaid\nflowchart LR\n    Q[User query] --> A[Agent reasoning]\n    A --> T[Choose tool]\n    T --> O[Observe evidence]\n    O --> S[Update scratchpad]\n    S --> A\n    S --> C[Assemble context]\n    C --> G[Generate answer]\n```\n\nThis is justified when requests genuinely cross vector search, SQL, web sources, or calculation tools. A fixed pipeline is simpler when one source answers most questions.\n\nAgents can loop or spend heavily while following the wrong route. Structured tool calls, step limits, and cost budgets are part of the pattern, not optional hardening.\n\n# 11. GraphRAG\n\nGraphRAG extracts entities and relationships into a knowledge graph, then retrieves from graph neighborhoods or community summaries. It makes relationship structure explicit instead of hoping independent chunks imply it.\n\n```mermaid\nflowchart LR\n    D[Documents] --> ER[Extract entities]\n    ER --> KG[Knowledge graph]\n    KG --> CS[Community summaries]\n    Q[User query] --> GS[Graph search]\n    KG --> GS\n    CS --> GS\n    GS --> E[Graph evidence]\n    E --> C[Assemble context]\n    C --> G[Generate answer]\n```\n\nGraphRAG fits dependency-heavy domains and questions about impact or ownership across a corpus. Ordinary support lookup rarely needs it.\n\nThe index is expensive and brittle. Entity extraction and linking errors flow into graph edges, while community summaries add another model-produced layer that can go stale.\n\n# 12. Corrective and Self-Reflective RAG\n\nCorrective RAG evaluates the retrieved evidence before generation and may retry or switch sources. Self-reflective variants also inspect the generated answer for support.\n\n```mermaid\nflowchart LR\n    Q[User query] --> R[Retrieve]\n    R --> E[Evaluate evidence]\n    E --> P[Evidence passes]\n    E --> W[Evidence weak]\n    W --> X[Correct retrieval]\n    X --> R\n    P --> C[Assemble context]\n    C --> G[Generate answer]\n    G --> S[Check support]\n```\n\nThis family fits high-risk systems that can calibrate evidence evaluators or train specialized models. It is rarely a drop-in production feature. Self-RAG requires custom training, while CRAG-style correction depends on trustworthy evaluator thresholds. The added loop is justified only after reranking and ordinary evaluation show a remaining evidence-quality failure.\n\n# Pattern Selection Guide\n\n| Pattern | Best For | Runtime Cost | When to Skip |\n|---------|----------|--------------|--------------|\n| Baseline Single-Pass RAG | First version and simple factual lookup | Low | Retrieval metrics already show exact-term or precision failures |\n| Hybrid Search plus Reranking | Enterprise text with exact terms and semantic matches | Medium | Tiny curated corpus where dense retrieval is already excellent |\n| Query Rewriting and Routing | Vague queries and mixed complexity traffic | Low to medium | Users already write precise search queries |\n| Parent-Document and Recursive Retrieval | Long documents and structure-sensitive answers | Medium | Short standalone snippets answer most questions |\n| Multi-Query Fusion | Synonym-heavy or phrasing-sensitive questions | Medium | Simple single-intent lookup traffic |\n| Contextual Retrieval | Chunks that lose meaning outside the source document | Indexing cost high and runtime cost low | Fast-changing corpora where enrichment goes stale quickly |\n| Multimodal RAG | PDFs, tables, figures, scans, diagrams | Medium to high | Text-only corpus |\n| HyDE | Vocabulary mismatch and sparse queries | Medium | Queries are already specific and direct retrieval works |\n| Iterative Multi-Hop Retrieval | Multi-hop evidence chains | High | Single-hop answers dominate traffic |\n| Agentic RAG | Multiple tools and adaptive investigation | High | One data source and one retrieval path are enough |\n| GraphRAG | Entity relationships and global synthesis | High | Simple fact lookup or frequently changing data |\n| Corrective and Self-Reflective RAG | High-risk answers needing custom critique | High | Evaluator training or calibration is unavailable |\n\n**Adoption order**: the baseline is measured first. Hybrid search with reranking is the next step for most text corpora. Query rewriting, parent expansion, or multi-query fusion answers a measured recall problem. The heavier patterns belong to narrower failures: missing visual evidence, multi-hop dependencies, multiple tools, or graph-shaped questions. Self-RAG and CRAG remain specialist designs unless evaluator and training costs are already justified.\n\n# Questions\n\n<!-- qard-id: a2e5357e-483e-41e0-80be-f563d42cf86b -->\n> [!qard]- What kind of RAG question can justify adding a knowledge graph to vector retrieval?\n> A knowledge graph can be justified when the answer depends on explicit relationships between entities, or on synthesis across much of a corpus, rather than on a few passages that resemble the question. A question such as *What are the main themes across these documents?* is an example: no small set of similar chunks contains its answer.\n>\n> - **Vector retrieval** returns the top-k chunks closest to the query. That suits direct fact lookup, where one or a few passages hold the answer.\n> - **GraphRAG** uses a language model to extract entities and relationships into a graph, groups closely related entities into communities and pre-generates a summary of each community. Corpus-wide questions can then be answered from those summaries instead of from isolated chunks. Questions about dependencies or impact can follow explicit edges between entities.\n> \n> The graph adds model-driven extraction, indexing and maintenance cost, and extraction or linking errors become wrong edges. Microsoft Research evaluated GraphRAG on corpus-wide, query-focused summarization, so its benefit for other question types has to be measured. The decision therefore rests on a comparison with a vector-retrieval baseline on representative questions.\n>\n> [From Local to Global: A Graph RAG Approach to Query-Focused Summarization (Microsoft Research)](https://www.microsoft.com/en-us/research/publication/from-local-to-global-a-graph-rag-approach-to-query-focused-summarization/)\n\n# References\n\n- [Hybrid search in Azure AI Search](https://learn.microsoft.com/en-us/azure/search/hybrid-search-overview)\n- [Contextual Retrieval](https://www.anthropic.com/news/contextual-retrieval)\n- [From Local to Global: A Graph RAG Approach to Query-Focused Summarization](https://arxiv.org/abs/2404.16130)\n- [Self-RAG: Learning to Retrieve, Generate, and Critique Through Self-Reflection](https://arxiv.org/abs/2310.11511)\n- [Corrective Retrieval Augmented Generation](https://arxiv.org/abs/2401.15884)\n",
-          "hash": "ad4889ae68e31851bae3780a97d241dd4f4318c424fdd3b157daa24516364b86",
-          "topic": "AI & ML",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "new"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Patterns.md",
-          "outcome": "keep",
-          "reason": "Read the whole note. The opening gives the adoption-order idea (repair observed failures, keep the cheaper design until evaluation shows otherwise). All 12 patterns follow a consistent mechanism, fit and failure-risk shape, and each has a flowchart with a language-tagged fence. The details match what I know of the primary literature: Self-RAG needs custom training, CRAG relies on an evaluator, GraphRAG builds entity graphs and community summaries, HyDE embeds a hypothetical answer, and contextual retrieval enriches chunks before indexing. The selection table agrees with the section prose, and the adoption-order paragraph adds no new claims. The single Qard asks one gradeable task, has a cited Microsoft Research source and a correct answer: GraphRAG targets corpus-wide, relationship-heavy questions, and its benefit elsewhere must be measured. The wikilinks use valid paths, the frontmatter is intact, and the References are bare and relevant. No known violations are open. I found no factual error, gap or defect worth an edit, so changes would be cosmetic."
-        }
-      ],
-      "feedback": []
-    },
-    "source_hashes": {
-      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Patterns.md": "ad4889ae68e31851bae3780a97d241dd4f4318c424fdd3b157daa24516364b86"
-    },
-    "feedback_keys": [],
-    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Patterns.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-05T07:08:23.429809Z",
-    "review_evidence": {
-      "raw_review": {
-        "verdict": "CLEAN",
-        "notes": [
-          {
-            "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Patterns.md",
-            "verdict": "CLEAN",
-            "summary": "The whole note was re-read independently. Each of the 12 patterns states its mechanism, when it fits and the failure it adds, and the table and adoption-order paragraph agree with the sections. I found no factual, structural or Qard defect that justifies an edit.",
-            "page_type": "Concept — optional Questions and References; mermaid fences are language-tagged; wikilinks use full paths with aliases.",
-            "current_text_evidence": [
-              {
-                "quote": "RAG patterns are repairs for observed retrieval failures.",
-                "line_start": 17,
-                "reason": "The opening states the operating idea and the adoption rule, so the topic is quick to re-enter."
-              },
-              {
-                "quote": "Its ceiling is easy to find.",
-                "line_start": 33,
-                "reason": "The first pattern names its limit (exact identifiers, no second stage), which sets the fit-and-failure shape that the later patterns follow."
-              },
-              {
-                "quote": "Self-RAG requires custom training, while CRAG-style correction depends on trustworthy evaluator thresholds.",
-                "line_start": 233,
-                "reason": "This claim matches the cited Self-RAG and CRAG papers and keeps the specialist-pattern boundary accurate."
-              },
-              {
-                "quote": "The decision therefore rests on a comparison with a vector-retrieval baseline on representative questions.",
-                "line_start": 260,
-                "reason": "The single Qard tests one gradeable task and keeps its ID. Its answer is accurate, gives the condition and the cost, and cites the Microsoft Research paper on the answer side."
-              }
-            ],
-            "target_resolution": "JUSTIFIED UNCHANGED",
-            "split_suggestion": "No split: the 12 patterns share one decision frame (failure fixed versus risk added) and are used together for selection, so separating them would not make either part more useful.",
-            "findings": [],
-            "source_checks": [],
-            "rejection_equivalence": [],
-            "quality": {
-              "accuracy": "PASS",
-              "clarity": "PASS",
-              "question_quality": "PASS",
-              "identity_safety": "PASS",
-              "rules_compliance": "PASS"
-            }
-          }
-        ],
-        "overall_reason": "The note is accurate and readable, and the Qard tests a single task. There are no known violations, no edits and no open defects, so keeping it unchanged is justified.",
-        "change_checks": []
-      },
-      "bindings": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Patterns.md",
-          "citation_index": 2,
-          "reported_line_start": 233,
-          "resolved_line_start": 246
-        },
-        {
-          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Patterns.md",
-          "citation_index": 3,
-          "reported_line_start": 260,
-          "resolved_line_start": 276
-        }
-      ],
-      "source_hashes": {
-        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Patterns.md": "ad4889ae68e31851bae3780a97d241dd4f4318c424fdd3b157daa24516364b86"
-      },
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
-    },
-    "completed_review": {
-      "verdict": "CLEAN",
-      "notes": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Patterns.md",
-          "verdict": "CLEAN",
-          "summary": "The whole note was re-read independently. Each of the 12 patterns states its mechanism, when it fits and the failure it adds, and the table and adoption-order paragraph agree with the sections. I found no factual, structural or Qard defect that justifies an edit.",
-          "page_type": "Concept — optional Questions and References; mermaid fences are language-tagged; wikilinks use full paths with aliases.",
-          "current_text_evidence": [
-            {
-              "quote": "RAG patterns are repairs for observed retrieval failures.",
-              "line_start": 17,
-              "reason": "The opening states the operating idea and the adoption rule, so the topic is quick to re-enter."
-            },
-            {
-              "quote": "Its ceiling is easy to find.",
-              "line_start": 33,
-              "reason": "The first pattern names its limit (exact identifiers, no second stage), which sets the fit-and-failure shape that the later patterns follow."
-            },
-            {
-              "quote": "Self-RAG requires custom training, while CRAG-style correction depends on trustworthy evaluator thresholds.",
-              "line_start": 246,
-              "reason": "This claim matches the cited Self-RAG and CRAG papers and keeps the specialist-pattern boundary accurate."
-            },
-            {
-              "quote": "The decision therefore rests on a comparison with a vector-retrieval baseline on representative questions.",
-              "line_start": 276,
-              "reason": "The single Qard tests one gradeable task and keeps its ID. Its answer is accurate, gives the condition and the cost, and cites the Microsoft Research paper on the answer side."
-            }
-          ],
-          "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: the 12 patterns share one decision frame (failure fixed versus risk added) and are used together for selection, so separating them would not make either part more useful.",
-          "findings": [],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "PASS",
-            "question_quality": "PASS",
-            "identity_safety": "PASS",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "overall_reason": "The note is accurate and readable, and the Qard tests a single task. There are no known violations, no edits and no open defects, so keeping it unchanged is justified.",
-      "change_checks": []
     }
   }
 }
