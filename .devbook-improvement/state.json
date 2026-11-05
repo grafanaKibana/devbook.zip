@@ -2427,6 +2427,66 @@
         },
         "review_process": "focused-whole-note-v1"
       }
+    },
+    "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md": {
+      "content_hash": "9b6e800b15ba1de61f0f25cf46059393f3c08caa240e8aa835f56d1cddaf521e",
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "outcome": "keep",
+      "repair_input_hash": "",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "violation_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "keep_review": {
+        "content_hash": "9b6e800b15ba1de61f0f25cf46059393f3c08caa240e8aa835f56d1cddaf521e",
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review": {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md",
+          "verdict": "CLEAN",
+          "summary": "The note explains ANN search, index types, filtering, operations, system choice, pitfalls and tradeoffs accurately and in a consistent whiteboard voice. The two cards are single-task with mechanism-rich answers, and the references are relevant primary sources. No edit is warranted.",
+          "page_type": "Concept — typed frontmatter, optional Questions and References present and valid, MD040 satisfied by the mermaid fence, no generated navigation.",
+          "current_text_evidence": [
+            {
+              "quote": "The missing fraction is silent, so the recall-latency choice must be measured explicitly",
+              "line_start": 19,
+              "reason": "States the core ANN tradeoff and the measurement requirement early, so the operating idea is recoverable."
+            },
+            {
+              "quote": "Raising `ef_search` explores more of the graph and trades latency for recall.",
+              "line_start": 38,
+              "reason": "Gives the correct HNSW parameter mechanism (M, ef_construction, ef_search), and the IVF nlist/nprobe line that follows it is also correct."
+            },
+            {
+              "quote": "a selective filter may remove nearly all of top-k and collapse the effective recall",
+              "line_start": 50,
+              "reason": "Correctly states the post-filtering failure condition. It is kept separate from authorization, which the pre-filtering bullet covers."
+            },
+            {
+              "quote": "Memory budgeting** starts with roughly `N × dimensions × 4 bytes` for float32 vectors",
+              "line_start": 62,
+              "reason": "The float32 estimate is correct and is linked to the decision to move to PQ or a disk-based index."
+            },
+            {
+              "quote": "Why do vector indexes use approximate nearest-neighbor search instead of exact search?",
+              "line_start": 128,
+              "reason": "A direct, bounded question whose answer is one dependent explanation covering mechanism, cost and limits. It is not a bundle of independent tasks."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: index types, filtering, operations and pitfalls all serve one topic, and the content does not separate into independently useful notes.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "identity_safety": "PASS",
+            "question_quality": "PASS",
+            "rules_compliance": "PASS"
+          }
+        },
+        "review_process": "focused-whole-note-v1"
+      }
     }
   },
   "topics": {
@@ -3844,14 +3904,14 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-05T20:07:51.294462Z",
-    "elapsed_seconds": 58.32160869999999,
+    "elapsed_seconds": 62.67589099999999,
     "calls_reserved": 2,
     "responses_received": 2,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-05T20:08:49.615442Z",
+    "checkpoint_at": "2026-11-05T20:08:53.969725Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -5834,6 +5894,74 @@
       ],
       "source_hashes": {
         "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG.md": "11db8c3ea927acf39ea3c54a45583a6bc5e76fc1037ba0fa9dac23dee639256b"
+      },
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "adbc19fda48036ddf228cd1848228a28ca2e4077e941c19b33f2df065b0e5552": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "overall_reason": "Independent whole-note review found no factual, structural, voice or question-quality defect. The keep is justified and there are no edits.",
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md",
+            "verdict": "CLEAN",
+            "summary": "The note explains ANN search, index types, filtering, operations, system choice, pitfalls and tradeoffs accurately and in a consistent whiteboard voice. The two cards are single-task with mechanism-rich answers, and the references are relevant primary sources. No edit is warranted.",
+            "page_type": "Concept — typed frontmatter, optional Questions and References present and valid, MD040 satisfied by the mermaid fence, no generated navigation.",
+            "current_text_evidence": [
+              {
+                "quote": "The missing fraction is silent, so the recall-latency choice must be measured explicitly",
+                "line_start": 19,
+                "reason": "States the core ANN tradeoff and the measurement requirement early, so the operating idea is recoverable."
+              },
+              {
+                "quote": "Raising `ef_search` explores more of the graph and trades latency for recall.",
+                "line_start": 38,
+                "reason": "Gives the correct HNSW parameter mechanism (M, ef_construction, ef_search), and the IVF nlist/nprobe line that follows it is also correct."
+              },
+              {
+                "quote": "a selective filter may remove nearly all of top-k and collapse the effective recall",
+                "line_start": 50,
+                "reason": "Correctly states the post-filtering failure condition. It is kept separate from authorization, which the pre-filtering bullet covers."
+              },
+              {
+                "quote": "Memory budgeting** starts with roughly `N × dimensions × 4 bytes` for float32 vectors",
+                "line_start": 62,
+                "reason": "The float32 estimate is correct and is linked to the decision to move to PQ or a disk-based index."
+              },
+              {
+                "quote": "Why do vector indexes use approximate nearest-neighbor search instead of exact search?",
+                "line_start": 132,
+                "reason": "A direct, bounded question whose answer is one dependent explanation covering mechanism, cost and limits. It is not a bundle of independent tasks."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: index types, filtering, operations and pitfalls all serve one topic, and the content does not separate into independently useful notes.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "identity_safety": "PASS",
+              "question_quality": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "change_checks": [],
+        "decision_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md",
+          "citation_index": 4,
+          "reported_line_start": 132,
+          "resolved_line_start": 128
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md": "9b6e800b15ba1de61f0f25cf46059393f3c08caa240e8aa835f56d1cddaf521e"
       },
       "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
@@ -15053,176 +15181,6 @@
         "change_checks": []
       },
       "feedback_snapshot": []
-    }
-  },
-  "pending_author_proposal": {
-    "workload_id": "b98a816444094ceaa557c175133e1e93",
-    "topic_id": "ai-ml-4edf0823",
-    "batch": {
-      "topic": "AI & ML",
-      "topic_id": "ai-ml-4edf0823",
-      "notes": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md",
-          "content": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"Stores embeddings and serves fast approximate nearest-neighbor search, trading recall for speed.\"\nlevel: [\"2\"]\npriority: High\nstatus: Done\npublish: true\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Context Engineering/RAG/Vector Databases\"\nflashcard_uid: \"797606ed\"\ncreated: \"2026-06-11T07:39:53.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:28:37.417Z\"\n---\n\nA vector database stores [[Embeddings]] with metadata and searches them by proximity. It sits under dense [[Retrieval]], where the indexed [[Chunking|chunks]] must be searched in milliseconds even when the collection contains millions of vectors.\n\nThe central trick is **approximate** nearest-neighbor (ANN) search. Exact search compares the query with every stored vector. Its result is correct, but the O(N) scan becomes too slow at scale. ANN indexes inspect a much smaller search space and return most of the true neighbors. The missing fraction is silent, so the recall-latency choice must be measured explicitly with [[Component-Level Evaluation]].\n\n```mermaid\nflowchart LR\n    D[Documents] --> E[Embed]\n    E --> IDX[Build ANN index]\n    Q[Query] --> QE[Embed query]\n    QE --> F[Metadata filter]\n    F --> SR[ANN search over index]\n    IDX --> SR\n    SR --> K[Top-k by distance]\n    K --> G[Reranker or generator]\n```\n\n# Index Types\n\nThe index determines the search behavior and much of the operating cost.\n\n- **Flat (brute force)** compares against every vector. It has no recall loss, but each query costs O(N). Flat search works for small collections and provides the ground truth for ANN evaluation.\n- **HNSW (Hierarchical Navigable Small World)** builds a layered proximity graph. Search begins at a coarse layer, then walks toward closer neighbors as it descends. It usually gives high recall at low latency and is the common default. The graph and full vectors live in RAM, though. `M` controls connectivity, `ef_construction` controls build effort, and `ef_search` controls query effort. Raising `ef_search` explores more of the graph and trades latency for recall.\n- **IVF (Inverted File)** clusters vectors into `nlist` cells and searches only the nearest `nprobe` cells for each query. It often builds faster and uses less memory than HNSW. Increasing `nprobe` improves recall by examining more cells.\n- **PQ (Product Quantization)** represents vectors with compact codes learned from a codebook. **IVF-PQ** applies that compression inside IVF for collections where full vectors cost too much memory. The codes are lossy, so another layer of recall is sacrificed.\n- **Disk-based indexes such as DiskANN** keep most graph data on SSD. They make billion-scale collections affordable when an in-memory graph would be prohibitive, at the cost of storage latency.\n\nThe [[Embeddings|Distance metric]] must match the embedding model. Many text models use cosine similarity. Some use dot product when magnitude carries meaning. Euclidean distance is less common. Building or querying with the wrong metric produces the wrong neighbors even when the index itself is healthy.\n\n# Metadata Filtering\n\nProduction queries usually combine similarity with an authorization or business constraint: the same tenant, an allowed ACL, or a date range. ANN and filtering cannot be designed separately, and the index never substitutes for an authorization boundary.\n\n- **Pre-filtering** narrows the eligible vectors before search, so the returned results already satisfy the constraint instead of being discarded afterward. Choosing it over post-filtering is a recall and cost decision. Authorization is a separate requirement: semantic similarity cannot enforce it, so tenant and ACL boundaries hold only when disallowed vectors are excluded before any result reaches the model or the user, whichever stage performs the exclusion.\n- **Post-filtering** runs ANN first and discards disallowed results afterward. It is simpler, but a selective filter may remove nearly all of top-k and collapse the effective recall.\n- **Filtered indexes** preserve usable graph paths across filter boundaries. Narrow queries retain more recall, paid for with additional index structure.\n\n[[Retrieval]] covers how pre/post-filtering interacts with the rest of the retrieval pipeline.\n\n# Operations\n\nA vector database is a stateful service. The index changes with the corpus.\n\n- **Upserts and deletes** can degrade ANN structures under heavy churn, particularly HNSW. Deletes are often tombstones, and the remaining graph may fragment. Periodic rebuilds keep the search structure clean.\n- **Index rebuilds and zero-downtime swaps** become necessary after re-embedding or re-chunking. The replacement collection is built beside the old one and validated, then a **collection alias** switches to it. This is the shadow-index pattern from [[Component-Level Evaluation]].\n- **Sharding and replication** solve different problems. Shards extend capacity beyond one node. Replicas add read throughput and availability. Semantic clusters can still create hot shards.\n- **Memory budgeting** starts with roughly `N × dimensions × 4 bytes` for float32 vectors, plus graph overhead. That estimate often decides when PQ or a disk-based index becomes necessary.\n\n# Choosing a System\n\n| Category | Examples | When it fits |\n| --- | --- | --- |\n| Managed vector DB | Pinecone, Azure AI Search, Weaviate Cloud | Search as a managed service without infrastructure operations, paid for by usage |\n| Self-hosted vector DB | Qdrant, Milvus, Weaviate | Control over cost, versioning, and data residency, with operations capacity to run the system |\n| Add-on to existing store | pgvector (Postgres), OpenSearch/Elasticsearch kNN | An existing database that can hold vectors beside relational or lexical data, leaving one fewer system to operate |\n| Library, not a service | FAISS, hnswlib | Embedding search inside an application that owns persistence and serving |\n\nIf Postgres already owns the data and the corpus is modest, **pgvector** can keep vectors beside relational records and existing [[Retrieval|keyword search]]. One system is easier to operate than two. A dedicated vector database becomes worthwhile when collection size, filtered-search recall, or specialized indexes such as IVF-PQ and DiskANN exceed the add-on's practical limits.\n\n# Pitfalls\n\n## ANN Operating-Point Regression\n\n**What goes wrong**: after corpus growth or distribution change, an HNSW configuration can return fewer exact neighbors without raising an error.\n\n**Why it happens**: recall and latency depend on graph construction, filters, data distribution, implementation, and search parameters. A previously adequate `ef_search` can become inadequate, but neither flat latency nor a larger corpus proves that it did.\n\n**How to avoid it**: scheduled ANN recall checks against brute-force ground truth produce a fresh recall-versus-latency curve. `ef_search` is one tuning response; a rebuild or another parameter/index change may be needed. Infrastructure dashboards alone do not expose neighbor loss. [[Retrieval]] describes the explicit comparison.\n\n## Filtered-Search Recall Collapse\n\n**What goes wrong**: a selective metadata filter causes retrieval to return far fewer relevant results than the unfiltered query.\n\n**Why it happens**: post-filtering applies the filter after ANN, so under high selectivity most retrieved candidates are discarded. With graph indexes, narrow filters can also disconnect the search path.\n\n**How to avoid it**: pre-filtering or a filtered index avoids discarding candidates after search, and recall is tested at realistic selectivity levels, including 10% and 1%. An unfiltered benchmark misses the problem.\n\n## Memory Blowup from In-Memory Indexes\n\n**What goes wrong**: an HNSW collection fits at one million vectors and exhausts memory at ten million. The graph overhead makes the bill larger than a raw-vector estimate suggests.\n\n**Why it happens**: HNSW keeps full vectors plus the graph in RAM. Cost grows with `N × dimensions` plus graph overhead, and high dimensionality multiplies it.\n\n**How to avoid it**: memory is budgeted before ingestion. Shorter vectors help when [[Embeddings|Matryoshka truncation]] is supported, and IVF-PQ or a disk-based index takes over before the collection outgrows RAM.\n\n## Stale Index After Re-embedding\n\n**What goes wrong**: the embedding model changes without an index rebuild. New query vectors are then compared with document vectors from another space, making the ranking meaningless.\n\n**Why it happens**: different embedding models occupy different vector spaces. Their vectors are not comparable.\n\n**How to avoid it**: every model change requires re-embedding the full corpus. The [[Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching|embedding cache]] is keyed by model version, and the replacement index is validated before a collection alias cuts traffic over to it.\n\n# Tradeoffs\n\n| Index | Recall | Query latency | Memory | Build cost | Best for |\n| --- | --- | --- | --- | --- | --- |\n| Flat | Exact (100%) | High (O(N)) | High (raw vectors) | None | Small corpora. Ground truth for recall measurement |\n| HNSW | High | Low | High (graph in RAM) | Medium–high | The default for most production text RAG |\n| IVF | Tunable via `nprobe` | Low–medium | Medium | Low–medium | Large corpora where HNSW memory is too high |\n| IVF-PQ | Lower (lossy) | Low | Lowest | Medium | Very large corpora (10M+) where memory dominates |\n| DiskANN | High | Medium | Low (on SSD) | High | Billion-scale where in-memory is infeasible |\n\nHNSW is a practical starting point for a typical text corpus. IVF or IVF-PQ becomes attractive when memory is the binding constraint, while a disk-based index fits a collection that cannot live economically in RAM. Every choice still needs scheduled ANN recall checks against brute-force ground truth because lost neighbors leave no error behind.\n\n# Questions\n\n<!-- qard-id: dbb17797-a980-403c-a6f8-c90c5dbdf957 -->\n> [!qard]- What role does a vector database play in a RAG system?\n> An embedding model creates numeric representations; a vector database or search index stores and indexes them, then retrieves nearby vectors for a query. The service can return associated IDs or fields and apply metadata filters; application code resolves the results to source text and assembles prompt context. Vector similarity finds candidates, but does not prove relevance or replace an authorization check. [Vector search overview](https://learn.microsoft.com/en-us/azure/search/vector-search-overview)\n\n<!-- qard-id: 81dd4838-6663-4a61-8bbb-b11ffb11d8d8 -->\n> [!qard]- Why do vector indexes use approximate nearest-neighbor search instead of exact search?\n> Exact search must compare the query with every stored vector, so its work grows with the size of the collection. An approximate nearest-neighbor (ANN) index examines only a promising subset of vectors. This often cuts query work sharply, at the cost of sometimes missing true nearest neighbors.\n>\n> - **Exact (flat) search:** one distance computation per stored vector, about N × d arithmetic for N vectors of dimension d. The results are exact, and the cost is acceptable for small collections.\n> - **ANN search:** the index structure limits which vectors are compared. An IVF index clusters the vectors and searches only the clusters nearest the query. An HNSW index walks a proximity graph toward closer neighbors. Parameters such as `nprobe` for IVF or `efSearch` for HNSW control how much is examined, trading latency for recall.\n> \n> Missed neighbors raise no error. Recall is therefore measured against exact-search results as ground truth, on realistic queries and filters, and the index settings are chosen to meet both the recall and the latency targets. The N × d figure describes arithmetic work, not a guaranteed wall-clock time.\n>\n> [Faiss indexes (Faiss wiki)](https://github.com/facebookresearch/faiss/wiki/Faiss-indexes)\n\n# References\n\n- [Efficient and robust approximate nearest neighbor search using HNSW graphs (Malkov & Yashunin, 2016)](https://arxiv.org/abs/1603.09320)\n- [Product Quantization for Nearest Neighbor Search (Jégou et al., 2011)](https://pubmed.ncbi.nlm.nih.gov/21088323/)\n- [DiskANN: Fast Accurate Billion-point Nearest Neighbor Search on a Single Node (Subramanya et al., 2019)](https://proceedings.neurips.cc/paper/2019/hash/09853c7fb1d3f8ee67a61b6bf4a7f8e6-Abstract.html)\n- [ANN-Benchmarks — recall vs latency across ANN implementations](https://ann-benchmarks.com/)\n- [pgvector — open-source vector similarity search for Postgres](https://github.com/pgvector/pgvector)\n- [Vector search concepts (Azure AI Search)](https://learn.microsoft.com/en-us/azure/search/vector-search-overview)\n",
-          "hash": "9b6e800b15ba1de61f0f25cf46059393f3c08caa240e8aa835f56d1cddaf521e",
-          "topic": "AI & ML",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "new"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md",
-          "outcome": "keep",
-          "reason": "I read the whole note against its text and known HNSW, IVF, PQ and DiskANN behavior. Flat search is the exact O(N) baseline. HNSW parameters (M, ef_construction, ef_search) and IVF parameters (nlist, nprobe) are correct, as are the PQ lossiness and DiskANN's SSD trade-off. The float32 memory estimate (N × dimensions × 4 bytes) is right. The filtering section correctly separates recall and cost from authorization. It also correctly warns that post-filtering with a selective filter collapses recall. The four pitfalls, the tradeoff table and the system-category table agree with each other and with the index section. The two cards each test one gradeable task and have answers that explain mechanism and limits. The cards' Faiss and Azure sources and the reference list are topic-specific. Known violations are empty. The prose is direct and has no padding. Rewording any of it would be churn."
-        }
-      ],
-      "feedback": [],
-      "decisions": []
-    },
-    "source_hashes": {
-      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md": "9b6e800b15ba1de61f0f25cf46059393f3c08caa240e8aa835f56d1cddaf521e"
-    },
-    "feedback_keys": [],
-    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-05T20:08:27.126642Z",
-    "review_evidence": {
-      "raw_review": {
-        "verdict": "CLEAN",
-        "overall_reason": "Independent whole-note review found no factual, structural, voice or question-quality defect. The keep is justified and there are no edits.",
-        "notes": [
-          {
-            "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md",
-            "verdict": "CLEAN",
-            "summary": "The note explains ANN search, index types, filtering, operations, system choice, pitfalls and tradeoffs accurately and in a consistent whiteboard voice. The two cards are single-task with mechanism-rich answers, and the references are relevant primary sources. No edit is warranted.",
-            "page_type": "Concept — typed frontmatter, optional Questions and References present and valid, MD040 satisfied by the mermaid fence, no generated navigation.",
-            "current_text_evidence": [
-              {
-                "quote": "The missing fraction is silent, so the recall-latency choice must be measured explicitly",
-                "line_start": 19,
-                "reason": "States the core ANN tradeoff and the measurement requirement early, so the operating idea is recoverable."
-              },
-              {
-                "quote": "Raising `ef_search` explores more of the graph and trades latency for recall.",
-                "line_start": 38,
-                "reason": "Gives the correct HNSW parameter mechanism (M, ef_construction, ef_search), and the IVF nlist/nprobe line that follows it is also correct."
-              },
-              {
-                "quote": "a selective filter may remove nearly all of top-k and collapse the effective recall",
-                "line_start": 50,
-                "reason": "Correctly states the post-filtering failure condition. It is kept separate from authorization, which the pre-filtering bullet covers."
-              },
-              {
-                "quote": "Memory budgeting** starts with roughly `N × dimensions × 4 bytes` for float32 vectors",
-                "line_start": 62,
-                "reason": "The float32 estimate is correct and is linked to the decision to move to PQ or a disk-based index."
-              },
-              {
-                "quote": "Why do vector indexes use approximate nearest-neighbor search instead of exact search?",
-                "line_start": 132,
-                "reason": "A direct, bounded question whose answer is one dependent explanation covering mechanism, cost and limits. It is not a bundle of independent tasks."
-              }
-            ],
-            "target_resolution": "JUSTIFIED UNCHANGED",
-            "split_suggestion": "No split: index types, filtering, operations and pitfalls all serve one topic, and the content does not separate into independently useful notes.",
-            "findings": [],
-            "source_checks": [],
-            "rejection_equivalence": [],
-            "quality": {
-              "accuracy": "PASS",
-              "clarity": "PASS",
-              "identity_safety": "PASS",
-              "question_quality": "PASS",
-              "rules_compliance": "PASS"
-            }
-          }
-        ],
-        "change_checks": [],
-        "decision_checks": []
-      },
-      "bindings": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md",
-          "citation_index": 4,
-          "reported_line_start": 132,
-          "resolved_line_start": 128
-        }
-      ],
-      "source_hashes": {
-        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md": "9b6e800b15ba1de61f0f25cf46059393f3c08caa240e8aa835f56d1cddaf521e"
-      },
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
-    },
-    "completed_review": {
-      "verdict": "CLEAN",
-      "overall_reason": "Independent whole-note review found no factual, structural, voice or question-quality defect. The keep is justified and there are no edits.",
-      "notes": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md",
-          "verdict": "CLEAN",
-          "summary": "The note explains ANN search, index types, filtering, operations, system choice, pitfalls and tradeoffs accurately and in a consistent whiteboard voice. The two cards are single-task with mechanism-rich answers, and the references are relevant primary sources. No edit is warranted.",
-          "page_type": "Concept — typed frontmatter, optional Questions and References present and valid, MD040 satisfied by the mermaid fence, no generated navigation.",
-          "current_text_evidence": [
-            {
-              "quote": "The missing fraction is silent, so the recall-latency choice must be measured explicitly",
-              "line_start": 19,
-              "reason": "States the core ANN tradeoff and the measurement requirement early, so the operating idea is recoverable."
-            },
-            {
-              "quote": "Raising `ef_search` explores more of the graph and trades latency for recall.",
-              "line_start": 38,
-              "reason": "Gives the correct HNSW parameter mechanism (M, ef_construction, ef_search), and the IVF nlist/nprobe line that follows it is also correct."
-            },
-            {
-              "quote": "a selective filter may remove nearly all of top-k and collapse the effective recall",
-              "line_start": 50,
-              "reason": "Correctly states the post-filtering failure condition. It is kept separate from authorization, which the pre-filtering bullet covers."
-            },
-            {
-              "quote": "Memory budgeting** starts with roughly `N × dimensions × 4 bytes` for float32 vectors",
-              "line_start": 62,
-              "reason": "The float32 estimate is correct and is linked to the decision to move to PQ or a disk-based index."
-            },
-            {
-              "quote": "Why do vector indexes use approximate nearest-neighbor search instead of exact search?",
-              "line_start": 128,
-              "reason": "A direct, bounded question whose answer is one dependent explanation covering mechanism, cost and limits. It is not a bundle of independent tasks."
-            }
-          ],
-          "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: index types, filtering, operations and pitfalls all serve one topic, and the content does not separate into independently useful notes.",
-          "findings": [],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "PASS",
-            "identity_safety": "PASS",
-            "question_quality": "PASS",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "change_checks": [],
-      "decision_checks": []
     }
   }
 }
