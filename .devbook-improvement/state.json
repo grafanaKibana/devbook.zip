@@ -1897,6 +1897,66 @@
         },
         "review_process": "focused-whole-note-v1"
       }
+    },
+    "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation.md": {
+      "content_hash": "2b013c688070b0dfedf37dc7ed19493b46944ac0f6dca708849ca2e51cfb629d",
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "outcome": "keep",
+      "repair_input_hash": "",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "violation_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "keep_review": {
+        "content_hash": "2b013c688070b0dfedf37dc7ed19493b46944ac0f6dca708849ca2e51cfb629d",
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review": {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation.md",
+          "verdict": "CLEAN",
+          "summary": "Whole-note audit found no concrete defect. The opening explains why evaluation is split into retrieval, generation and end-to-end layers and what each points to. The diagram and example match the first card. Both cards are single comparison tasks with consistent, supported claims. An edit would be churn.",
+          "page_type": "FolderNote — keeps the FolderNote tag, the protected Datacore folder-map block and the Qard IDs. Questions and References are optional and are present here.",
+          "current_text_evidence": [
+            {
+              "quote": "One blended quality score cannot show which part needs repair.",
+              "line_start": 19,
+              "reason": "The opening states the operating idea and why the layers are separated, so the topic can be recovered quickly."
+            },
+            {
+              "quote": "prompt changes cannot recover a document that retrieval never found, while another embedding model will not fix a generator that ignores clear evidence",
+              "line_start": 21,
+              "reason": "States the engineering decision each layer informs, with a concrete mechanism and its limit."
+            },
+            {
+              "quote": "Retrieval passes. Generation fails.",
+              "line_start": 33,
+              "reason": "A concrete example consistent with the first card's table and the diagram; not redundant filler."
+            },
+            {
+              "quote": "Reference-free retrieval evaluation does not use such labels.",
+              "line_start": 61,
+              "reason": "Gives the condition on the label requirement, so the second card is not overstated. It matches the cited RAGAS and Foundry material."
+            },
+            {
+              "quote": "A judge reused from another task is not automatically valid for a new one.",
+              "line_start": 69,
+              "reason": "Gives the important caveat about reusing general LLM evaluation methods."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: the note covers one coherent topic, layered RAG evaluation, and its two cards are about that topic.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        },
+        "review_process": "focused-whole-note-v1"
+      }
     }
   },
   "topics": {
@@ -3314,7 +3374,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-05T07:01:25.246564Z",
-    "elapsed_seconds": 121.22267640000001,
+    "elapsed_seconds": 124.5487932,
     "calls_reserved": 4,
     "responses_received": 4,
     "attempted_paths": [
@@ -3398,7 +3458,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-05T07:03:26.468786Z",
+    "checkpoint_at": "2026-11-05T07:03:29.794903Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -4953,6 +5013,91 @@
       ],
       "source_hashes": {
         "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics.md": "45caaa8e133c5691ee48d43c800a326500c85d86312fcf5864c7acc61b0e203a"
+      },
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "4caf8bd1e70cc0240311b164860ca8bc69208de41c535a614c5b4d8f14dccb85": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation.md",
+            "verdict": "CLEAN",
+            "summary": "Whole-note audit found no concrete defect. The opening explains why evaluation is split into retrieval, generation and end-to-end layers and what each points to. The diagram and example match the first card. Both cards are single comparison tasks with consistent, supported claims. An edit would be churn.",
+            "page_type": "FolderNote — keeps the FolderNote tag, the protected Datacore folder-map block and the Qard IDs. Questions and References are optional and are present here.",
+            "current_text_evidence": [
+              {
+                "quote": "One blended quality score cannot show which part needs repair.",
+                "line_start": 18,
+                "reason": "The opening states the operating idea and why the layers are separated, so the topic can be recovered quickly."
+              },
+              {
+                "quote": "prompt changes cannot recover a document that retrieval never found, while another embedding model will not fix a generator that ignores clear evidence",
+                "line_start": 20,
+                "reason": "States the engineering decision each layer informs, with a concrete mechanism and its limit."
+              },
+              {
+                "quote": "Retrieval passes. Generation fails.",
+                "line_start": 32,
+                "reason": "A concrete example consistent with the first card's table and the diagram; not redundant filler."
+              },
+              {
+                "quote": "Reference-free retrieval evaluation does not use such labels.",
+                "line_start": 59,
+                "reason": "Gives the condition on the label requirement, so the second card is not overstated. It matches the cited RAGAS and Foundry material."
+              },
+              {
+                "quote": "A judge reused from another task is not automatically valid for a new one.",
+                "line_start": 69,
+                "reason": "Gives the important caveat about reusing general LLM evaluation methods."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: the note covers one coherent topic, layered RAG evaluation, and its two cards are about that topic.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "overall_reason": "The complete note is accurate, clear and compliant. Each card is a single focused comparison. IDs and metadata are intact, no concrete violation exists, and the keep is justified.",
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation.md",
+          "citation_index": 0,
+          "reported_line_start": 18,
+          "resolved_line_start": 19
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation.md",
+          "citation_index": 1,
+          "reported_line_start": 20,
+          "resolved_line_start": 21
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation.md",
+          "citation_index": 2,
+          "reported_line_start": 32,
+          "resolved_line_start": 33
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation.md",
+          "citation_index": 3,
+          "reported_line_start": 59,
+          "resolved_line_start": 61
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation.md": "2b013c688070b0dfedf37dc7ed19493b46944ac0f6dca708849ca2e51cfb629d"
       },
       "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
@@ -13389,191 +13534,6 @@
         "change_checks": []
       },
       "feedback_snapshot": []
-    }
-  },
-  "pending_author_proposal": {
-    "workload_id": "4ce6dcd61eb74b9eafc6dcc2d27d9c9b",
-    "topic_id": "ai-ml-4edf0823",
-    "batch": {
-      "topic": "AI & ML",
-      "topic_id": "ai-ml-4edf0823",
-      "notes": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation.md",
-          "content": "---\ntitle: RAG Evaluation\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"Decomposes into retrieval, generation, and end-to-end layers so regressions isolate to one layer.\"\nlevel: [\"2\"]\npriority: High\ntags: [FolderNote]\npublish: true\nstatus: Done\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Context Engineering/RAG/Evaluation/Evaluation\"\nflashcard_uid: \"4c492fb9\"\ncreated: \"2026-06-12T18:21:46.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-11T21:45:16.245Z\"\n---\n\nRAG can fail before generation starts. It can also retrieve the right evidence and still produce a bad answer. Evaluation therefore separates retrieval from generation, then checks the finished system against the user's task. One blended quality score cannot show which part needs repair.\n\nRetrieval metrics ask whether relevant chunks reached the model and whether they were ranked well. Generation metrics check that the answer uses those chunks faithfully. End-to-end evaluation looks at the actual outcome. The distinction matters because prompt changes cannot recover a document that retrieval never found, while another embedding model will not fix a generator that ignores clear evidence already in context.\n\n```mermaid\nflowchart LR\n    Q[Query + Ground Truth] --> RM[Retrieval Metrics]\n    Q --> GM[Generation Metrics]\n    Q --> EM[End-to-End Metrics]\n    RM --> D1[Did the right chunks arrive]\n    GM --> D2[Is the answer faithful and correct]\n    EM --> D3[Did the user task get solved]\n```\n\nA support bot may retrieve the correct policy and still misread its date constraint. Retrieval passes. Generation fails. Without separate scores, that defect looks like a search problem and sends work toward the wrong component.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# Questions\n\n<!-- qard-id: 03a585b9-616f-472a-a294-ac7bac300cb4 -->\n> [!qard]- What do retrieval, response, and end-to-end evaluations each show about a RAG system?\n> Each evaluation answers a different question, so separate results show where a RAG system failed rather than only that it failed.\n>\n> | Evaluation | Question it answers | A failure points toward | What it cannot show |\n> |---|---|---|---|\n> | Retrieval | Was relevant evidence found, ranked well and selected for the context? | Indexing, chunking, query handling, search or ranking | Whether the answer then used good evidence correctly |\n> | Response | Given the supplied evidence, is the answer grounded in it, relevant to the question and, when a reference exists, correct? | The prompt or the generator's use of the evidence | Whether better evidence existed and was missed |\n> | End-to-end | Did the complete system meet the task's outcome criteria? | A user-visible miss somewhere in the pipeline | Which stage caused the miss |\n>\n> Combined, the results localize a likely cause. A grounded answer built on poor or incomplete context points upstream to retrieval. Good context paired with a wrong answer points to generation.\n>\n> Example: a support bot retrieves the correct policy but misreads its date constraint. Retrieval passes and the response check fails, so more search tuning cannot fix that answer.\n>\n> Sources:\n> - [RAG evaluators (Microsoft Foundry)](https://learn.microsoft.com/en-us/azure/foundry/concepts/evaluation-evaluators/rag-evaluators?view=foundry)\n\n<!-- qard-id: c73e80bf-ab77-4bfc-b246-be9e3d11ce10 -->\n> [!qard]- Which evaluation concerns are specific to RAG, and which can reuse general LLM evaluation methods?\n> RAG adds retrieval to evaluation: whether relevant evidence was found, ranked well and supplied in sufficient quantity. Retrieval metrics that score against labeled relevance judgments need relevance labels that other LLM tasks do not. Reference-free retrieval evaluation does not use such labels. Answer-quality checks and the evaluation methods themselves are largely reusable.\n>\n> | Aspect | Specific to RAG | Reusable from general LLM evaluation |\n> |---|---|---|\n> | What is measured | Retrieval relevance, ranking quality and whether the context covers the evidence an answer needs | Correctness, relevance to the question, safety and format. Groundedness also applies to any answer constrained by supplied text, such as a summary of a given document. |\n> | Ground truth | For label-based retrieval metrics, relevance labels per query, which must allow several acceptable chunks or require a set of complementary ones | Reference answers and rubrics, built as for any task |\n> | Methods | Ranked-retrieval metrics, such as Recall@k or nDCG, over those labels | Golden datasets, deterministic checks, LLM judges, human review and online evaluation of production traces |\n>\n> Any evaluator must match the claim being measured. Its limits need checking, as do any labels it uses. A judge reused from another task is not automatically valid for a new one.\n>\n> Sources:\n> - [Built-in evaluators (Microsoft Foundry)](https://learn.microsoft.com/en-us/azure/foundry/concepts/built-in-evaluators)\n> - [RAGAS: Automated Evaluation of Retrieval Augmented Generation (EACL 2024)](https://aclanthology.org/2024.eacl-demo.16.pdf)\n> - [Evaluation types (LangSmith)](https://docs.langchain.com/langsmith/evaluation-types)\n\n# References\n\n- [RAGAS metrics reference](https://docs.ragas.io/en/stable/concepts/metrics/available_metrics/)\n- [RAG evaluators in Azure AI Foundry](https://learn.microsoft.com/en-us/azure/ai-foundry/concepts/evaluation-evaluators/rag-evaluators)\n",
-          "hash": "2b013c688070b0dfedf37dc7ed19493b46944ac0f6dca708849ca2e51cfb629d",
-          "topic": "AI & ML",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "new"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation.md",
-          "outcome": "keep",
-          "reason": "Audited the whole note. The opening explains why retrieval, generation and end-to-end evaluation are separated and which fix each points to. The mermaid diagram and the support-bot example (correct policy retrieved, date constraint misread) match the first card's table. Both cards are single gradeable tasks: the first compares three evaluation layers, and the second splits RAG-specific concerns from reusable general LLM evaluation. Their claims are consistent with the cited Foundry, RAGAS and LangSmith material: retrieval metrics need labels while reference-free variants do not, and groundedness applies to any answer constrained by supplied text. The frontmatter and the protected qard-ids and Datacore block are intact. The code fences have language identifiers. The two reference links are bare, relevant, from different providers, and there is no unsupported claim or repetition. The known_violations list is empty and nothing is flagged for fixing, so an edit would add churn without a concrete benefit."
-        }
-      ],
-      "feedback": []
-    },
-    "source_hashes": {
-      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation.md": "2b013c688070b0dfedf37dc7ed19493b46944ac0f6dca708849ca2e51cfb629d"
-    },
-    "feedback_keys": [],
-    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-05T07:03:07.230464Z",
-    "review_evidence": {
-      "raw_review": {
-        "verdict": "CLEAN",
-        "notes": [
-          {
-            "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation.md",
-            "verdict": "CLEAN",
-            "summary": "Whole-note audit found no concrete defect. The opening explains why evaluation is split into retrieval, generation and end-to-end layers and what each points to. The diagram and example match the first card. Both cards are single comparison tasks with consistent, supported claims. An edit would be churn.",
-            "page_type": "FolderNote — keeps the FolderNote tag, the protected Datacore folder-map block and the Qard IDs. Questions and References are optional and are present here.",
-            "current_text_evidence": [
-              {
-                "quote": "One blended quality score cannot show which part needs repair.",
-                "line_start": 18,
-                "reason": "The opening states the operating idea and why the layers are separated, so the topic can be recovered quickly."
-              },
-              {
-                "quote": "prompt changes cannot recover a document that retrieval never found, while another embedding model will not fix a generator that ignores clear evidence",
-                "line_start": 20,
-                "reason": "States the engineering decision each layer informs, with a concrete mechanism and its limit."
-              },
-              {
-                "quote": "Retrieval passes. Generation fails.",
-                "line_start": 32,
-                "reason": "A concrete example consistent with the first card's table and the diagram; not redundant filler."
-              },
-              {
-                "quote": "Reference-free retrieval evaluation does not use such labels.",
-                "line_start": 59,
-                "reason": "Gives the condition on the label requirement, so the second card is not overstated. It matches the cited RAGAS and Foundry material."
-              },
-              {
-                "quote": "A judge reused from another task is not automatically valid for a new one.",
-                "line_start": 69,
-                "reason": "Gives the important caveat about reusing general LLM evaluation methods."
-              }
-            ],
-            "target_resolution": "JUSTIFIED UNCHANGED",
-            "split_suggestion": "No split: the note covers one coherent topic, layered RAG evaluation, and its two cards are about that topic.",
-            "findings": [],
-            "source_checks": [],
-            "rejection_equivalence": [],
-            "quality": {
-              "accuracy": "PASS",
-              "clarity": "PASS",
-              "question_quality": "PASS",
-              "identity_safety": "PASS",
-              "rules_compliance": "PASS"
-            }
-          }
-        ],
-        "overall_reason": "The complete note is accurate, clear and compliant. Each card is a single focused comparison. IDs and metadata are intact, no concrete violation exists, and the keep is justified.",
-        "change_checks": []
-      },
-      "bindings": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation.md",
-          "citation_index": 0,
-          "reported_line_start": 18,
-          "resolved_line_start": 19
-        },
-        {
-          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation.md",
-          "citation_index": 1,
-          "reported_line_start": 20,
-          "resolved_line_start": 21
-        },
-        {
-          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation.md",
-          "citation_index": 2,
-          "reported_line_start": 32,
-          "resolved_line_start": 33
-        },
-        {
-          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation.md",
-          "citation_index": 3,
-          "reported_line_start": 59,
-          "resolved_line_start": 61
-        }
-      ],
-      "source_hashes": {
-        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation.md": "2b013c688070b0dfedf37dc7ed19493b46944ac0f6dca708849ca2e51cfb629d"
-      },
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
-    },
-    "completed_review": {
-      "verdict": "CLEAN",
-      "notes": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation.md",
-          "verdict": "CLEAN",
-          "summary": "Whole-note audit found no concrete defect. The opening explains why evaluation is split into retrieval, generation and end-to-end layers and what each points to. The diagram and example match the first card. Both cards are single comparison tasks with consistent, supported claims. An edit would be churn.",
-          "page_type": "FolderNote — keeps the FolderNote tag, the protected Datacore folder-map block and the Qard IDs. Questions and References are optional and are present here.",
-          "current_text_evidence": [
-            {
-              "quote": "One blended quality score cannot show which part needs repair.",
-              "line_start": 19,
-              "reason": "The opening states the operating idea and why the layers are separated, so the topic can be recovered quickly."
-            },
-            {
-              "quote": "prompt changes cannot recover a document that retrieval never found, while another embedding model will not fix a generator that ignores clear evidence",
-              "line_start": 21,
-              "reason": "States the engineering decision each layer informs, with a concrete mechanism and its limit."
-            },
-            {
-              "quote": "Retrieval passes. Generation fails.",
-              "line_start": 33,
-              "reason": "A concrete example consistent with the first card's table and the diagram; not redundant filler."
-            },
-            {
-              "quote": "Reference-free retrieval evaluation does not use such labels.",
-              "line_start": 61,
-              "reason": "Gives the condition on the label requirement, so the second card is not overstated. It matches the cited RAGAS and Foundry material."
-            },
-            {
-              "quote": "A judge reused from another task is not automatically valid for a new one.",
-              "line_start": 69,
-              "reason": "Gives the important caveat about reusing general LLM evaluation methods."
-            }
-          ],
-          "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: the note covers one coherent topic, layered RAG evaluation, and its two cards are about that topic.",
-          "findings": [],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "PASS",
-            "question_quality": "PASS",
-            "identity_safety": "PASS",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "overall_reason": "The complete note is accurate, clear and compliant. Each card is a single focused comparison. IDs and metadata are intact, no concrete violation exists, and the keep is justified.",
-      "change_checks": []
     }
   }
 }
