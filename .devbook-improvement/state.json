@@ -3614,7 +3614,7 @@
     "status": "active",
     "phase": "selecting",
     "started_at": "2026-11-05T07:01:25.246564Z",
-    "elapsed_seconds": 383.53097010000016,
+    "elapsed_seconds": 387.6984696000002,
     "calls_reserved": 12,
     "responses_received": 12,
     "attempted_paths": [
@@ -4074,7 +4074,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-05T07:07:48.777083Z",
+    "checkpoint_at": "2026-11-05T07:07:52.944583Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
