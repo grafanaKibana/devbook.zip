@@ -3902,9 +3902,9 @@
     "version": 1,
     "id": "b98a816444094ceaa557c175133e1e93",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "evaluating",
     "started_at": "2026-11-05T20:07:51.294462Z",
-    "elapsed_seconds": 147.31808289999998,
+    "elapsed_seconds": 151.38164139999998,
     "calls_reserved": 4,
     "responses_received": 4,
     "attempted_paths": [
@@ -3989,7 +3989,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-05T20:10:18.611915Z",
+    "checkpoint_at": "2026-11-05T20:10:22.675474Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
