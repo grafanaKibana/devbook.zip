@@ -3902,10 +3902,10 @@
     "version": 1,
     "id": "b98a816444094ceaa557c175133e1e93",
     "status": "active",
-    "phase": "author_completed",
+    "phase": "review_reserved",
     "started_at": "2026-11-05T20:07:51.294462Z",
-    "elapsed_seconds": 218.2081843,
-    "calls_reserved": 6,
+    "elapsed_seconds": 222.8807038,
+    "calls_reserved": 7,
     "responses_received": 6,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md",
@@ -4001,7 +4001,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-05T20:11:29.502015Z",
+    "checkpoint_at": "2026-11-05T20:11:34.174535Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -4026,7 +4026,7 @@
       "pr": null
     },
     "base_sha": "67caf2e374f53e8772b86b8ea0f881d74e784fa1",
-    "reservation_deadline": "2026-11-05T20:26:20.942915Z"
+    "reservation_deadline": "2026-11-05T20:26:33.804807Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
