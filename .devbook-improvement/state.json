@@ -3904,7 +3904,7 @@
     "status": "active",
     "phase": "evaluating",
     "started_at": "2026-11-05T20:07:51.294462Z",
-    "elapsed_seconds": 151.38164139999998,
+    "elapsed_seconds": 154.89686959999997,
     "calls_reserved": 4,
     "responses_received": 4,
     "attempted_paths": [
@@ -3989,7 +3989,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-05T20:10:22.675474Z",
+    "checkpoint_at": "2026-11-05T20:10:26.190702Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -13850,7 +13850,8 @@
   "review_repair_attempts": {
     "1cb12d9ccd7fcc8097d310914ca72601ee9b147e23bfcc588ab6255970079a9b": 1,
     "b93534e9526b699a34ace92b02c074d15f38edf1d0fec15a56733e9002742af2": 1,
-    "bd3ec5ecb043f96d504f5b1e0bdcd2ee7f1cd5e753e87abead798b567ef21e71": 1
+    "bd3ec5ecb043f96d504f5b1e0bdcd2ee7f1cd5e753e87abead798b567ef21e71": 1,
+    "32b0cc5e2b5b37ba76914a79e69541c3fd46c313888d3723d36b691b2a871bdf": 1
   },
   "invalid_proposals": {
     "9fee84ff84d9689d5dfad3c6fe703f665c86a6d2a18f6f2293d1638835cd347c": {
@@ -15578,6 +15579,7 @@
     },
     "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
     "review_repair_key": "32b0cc5e2b5b37ba76914a79e69541c3fd46c313888d3723d36b691b2a871bdf",
-    "author_repair_pending": true
+    "author_repair_pending": true,
+    "repair_reserved": true
   }
 }
