@@ -3840,786 +3840,18 @@
   },
   "focused_workload": {
     "version": 1,
-    "id": "4ce6dcd61eb74b9eafc6dcc2d27d9c9b",
-    "status": "sealed",
-    "phase": "sealed",
-    "started_at": "2026-11-05T07:01:25.246564Z",
-    "elapsed_seconds": 657.4849040000001,
-    "calls_reserved": 20,
-    "responses_received": 20,
-    "attempted_paths": [
-      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics.md",
-      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation.md",
-      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Retrieval Evaluation Sets.md",
-      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Monitoring.md",
-      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Query Translation.md",
-      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching.md",
-      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Patterns.md",
-      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG.md",
-      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md",
-      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Retrieval.md"
-    ],
+    "id": "b98a816444094ceaa557c175133e1e93",
+    "status": "active",
+    "phase": "selecting",
+    "started_at": "2026-11-05T20:07:51.294462Z",
+    "elapsed_seconds": 0.0012935,
+    "calls_reserved": 0,
+    "responses_received": 0,
+    "attempted_paths": [],
     "accepted_records": [],
-    "outcomes": [
-      {
-        "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics.md",
-                "outcome": "keep",
-                "reason": "Audited the whole note against its current text. The layered framing (retrieval, generation, end-to-end) is coherent. The retrieval metric table matches standard definitions. The RAGAS table correctly separates reference-free metrics (Faithfulness, Response Relevancy) from reference-dependent ones (Context Recall, variant-dependent Context Precision). The diagnostic combinations are hedged as hypotheses. The tradeoffs table and the judge-bias pitfalls are accurate. The existing cards each test one gradeable task: the metric comparison, why aggregates hide regressions, when a segment drop is actionable, and the faithfulness/recall diagnosis. Their answers agree with the note and cite primary sources. No known native violations are present. No factual error or editorial weakness justified an edit, so unchanged text is preferable to churn."
-              }
-            ],
-            "feedback": [],
-            "decisions": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics.md",
-                "verdict": "CLEAN",
-                "summary": "I read the whole note and found no factual, structural, or question-quality defect that justifies an edit. The layered retrieval, generation and end-to-end framing, the RAGAS reference requirements, the hedged diagnostic tables and the four existing cards are accurate and consistent. Leaving the note unchanged avoids cosmetic churn.",
-                "page_type": "Concept note, with a Questions section of Qard callouts and a References section. Qard ID comments are protected metadata.",
-                "current_text_evidence": [
-                  {
-                    "quote": "A support bot can retrieve the correct policy and still misread its date constraint.",
-                    "line_start": 21,
-                    "reason": "A concrete example restores the retrieval-versus-generation distinction quickly, and it appears before the metric tables."
-                  },
-                  {
-                    "quote": "so the evaluation record must name the variant rather than reporting an unqualified",
-                    "line_start": 59,
-                    "reason": "This states the version-specific condition for Context Precision. Current RAGAS has several variants with different reference requirements."
-                  },
-                  {
-                    "quote": "Attribution shows which context supports an incorrect claim, not that the chunk caused the error.",
-                    "line_start": 80,
-                    "reason": "This limit on Noise Sensitivity is precise and prevents over-interpreting the score."
-                  },
-                  {
-                    "quote": "Rerunning the same evaluation on the same queries does not satisfy the second condition.",
-                    "line_start": 158,
-                    "reason": "This answer explains why repeated runs cannot replace a larger or more representative query sample. Each card covers one gradeable task, and its answer is consistent with the body."
-                  },
-                  {
-                    "quote": "Recall@5 is `3/4 = 0.75`, because three of the four relevant documents appear.",
-                    "line_start": 126,
-                    "reason": "The worked example is arithmetically correct. The relevant documents sit at ranks 2, 3 and 5, so Precision@5 = 0.6 and reciprocal rank = 0.5."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the metrics layers, the RAGAS mapping and the pitfalls form one coherent evaluation topic. Definitions are already delegated to Monitoring.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "overall_reason": "The whole-note audit found the note accurate, readable and correctly hedged, and no edits are proposed. The unchanged keep is justified by the current text, with no remaining defect.",
-            "change_checks": []
-          },
-          "model_calls": 2
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation.md",
-                "outcome": "keep",
-                "reason": "Audited the whole note. The opening explains why retrieval, generation and end-to-end evaluation are separated and which fix each points to. The mermaid diagram and the support-bot example (correct policy retrieved, date constraint misread) match the first card's table. Both cards are single gradeable tasks: the first compares three evaluation layers, and the second splits RAG-specific concerns from reusable general LLM evaluation. Their claims are consistent with the cited Foundry, RAGAS and LangSmith material: retrieval metrics need labels while reference-free variants do not, and groundedness applies to any answer constrained by supplied text. The frontmatter and the protected qard-ids and Datacore block are intact. The code fences have language identifiers. The two reference links are bare, relevant, from different providers, and there is no unsupported claim or repetition. The known_violations list is empty and nothing is flagged for fixing, so an edit would add churn without a concrete benefit."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation.md",
-                "verdict": "CLEAN",
-                "summary": "Whole-note audit found no concrete defect. The opening explains why evaluation is split into retrieval, generation and end-to-end layers and what each points to. The diagram and example match the first card. Both cards are single comparison tasks with consistent, supported claims. An edit would be churn.",
-                "page_type": "FolderNote — keeps the FolderNote tag, the protected Datacore folder-map block and the Qard IDs. Questions and References are optional and are present here.",
-                "current_text_evidence": [
-                  {
-                    "quote": "One blended quality score cannot show which part needs repair.",
-                    "line_start": 19,
-                    "reason": "The opening states the operating idea and why the layers are separated, so the topic can be recovered quickly."
-                  },
-                  {
-                    "quote": "prompt changes cannot recover a document that retrieval never found, while another embedding model will not fix a generator that ignores clear evidence",
-                    "line_start": 21,
-                    "reason": "States the engineering decision each layer informs, with a concrete mechanism and its limit."
-                  },
-                  {
-                    "quote": "Retrieval passes. Generation fails.",
-                    "line_start": 33,
-                    "reason": "A concrete example consistent with the first card's table and the diagram; not redundant filler."
-                  },
-                  {
-                    "quote": "Reference-free retrieval evaluation does not use such labels.",
-                    "line_start": 61,
-                    "reason": "Gives the condition on the label requirement, so the second card is not overstated. It matches the cited RAGAS and Foundry material."
-                  },
-                  {
-                    "quote": "A judge reused from another task is not automatically valid for a new one.",
-                    "line_start": 69,
-                    "reason": "Gives the important caveat about reusing general LLM evaluation methods."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the note covers one coherent topic, layered RAG evaluation, and its two cards are about that topic.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "overall_reason": "The complete note is accurate, clear and compliant. Each card is a single focused comparison. IDs and metadata are intact, no concrete violation exists, and the keep is justified.",
-            "change_checks": []
-          },
-          "model_calls": 4
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Retrieval Evaluation Sets.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Retrieval Evaluation Sets.md",
-                "outcome": "keep",
-                "reason": "Audited the whole note against its text. The three relevance shapes (substitutable, complementary, graded) map correctly to HitRate/MRR, Recall/Context Recall and nDCG. The plan A/B worked example is arithmetically right (HitRate@5=1, recall 1/2). The cutoff guidance is sound. The synthetic-question section correctly presents false negatives and lexical leakage as risks to check and says the second pass cannot prove the labels are exhaustive. The three existing cards each test one task, and the first two are not bundled. Their answers match the prose and cite relevant Ragas, Sentence Transformers and Foundry documentation. Frontmatter and the text code fence are valid, and the wikilinks are plausible. The first two cards cite the note's own section, which is acceptable as a backlink. No verified defect, so a forced edit would be churn."
-              }
-            ],
-            "feedback": [],
-            "decisions": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "Whole-note audit found no concrete defect; the note is accurate, clear, and well-scoped, and the keep is justified with no edits proposed.",
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Retrieval Evaluation Sets.md",
-                "verdict": "CLEAN",
-                "summary": "The note maps relevance shapes (substitutable, complementary, graded) to HitRate/MRR, Recall/Context Recall and nDCG correctly, with a correct worked example, a sound cutoff rule, and honest caveats about synthetic labels. Prose is direct and ordered well; cards are focused. No edit is warranted.",
-                "page_type": "Concept — authorable prose with optional Questions and References; protected Qard IDs and fenced code (text language present).",
-                "current_text_evidence": [
-                  {
-                    "quote": "A result containing only plan A has `HitRate@5 = 1`, but complementary recall is `1/2`",
-                    "line_start": 37,
-                    "reason": "The arithmetic is correct and shows the verdict depends on label shape for a fixed retrieved list."
-                  },
-                  {
-                    "quote": "Because it judges only a finite candidate list, it cannot prove that the labels are exhaustive",
-                    "line_start": 61,
-                    "reason": "States the limit of the second-pass check instead of overclaiming, preserving the condition that matters."
-                  },
-                  {
-                    "quote": "**The cutoff follows the generator's real input.**",
-                    "line_start": 39,
-                    "reason": "Gives a decision rule with the condition (k at least the required set size) that changes the engineering outcome."
-                  },
-                  {
-                    "quote": "> [!qard]- Which retrieval metric fits a query with several relevant chunks?",
-                    "line_start": 67,
-                    "reason": "One focused comparison task, answered by a table and example; the existing ID comment is retained above it."
-                  },
-                  {
-                    "quote": "Both are risks to check, not certainties.",
-                    "line_start": 106,
-                    "reason": "The synthetic-label card keeps failures and their controls together as one dependent explanation with appropriate hedging."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the two sections (multi-chunk relevance labeling and synthetic-question label distortion) are tightly coupled to one retrieval-labeling topic, and general dataset construction already lives in a sibling note.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "change_checks": [],
-            "decision_checks": []
-          },
-          "model_calls": 6
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Monitoring.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Monitoring.md",
-                "outcome": "keep",
-                "reason": "Audited the whole note against its text. The opening separates offline evaluation from production monitoring, and the segmentation example explains why aggregates hide local failures. The instrumentation section matches OpenTelemetry GenAI conventions (gen_ai.operation.name, gen_ai.usage.* attributes, token usage metrics). The retrieval metric definitions are standard, including MAP dividing by total relevant documents and MRR averaging 1/rank. The judge metrics, including Noise Sensitivity modes, are accurately qualified. The alert thresholds are labeled as examples. The pitfalls and tradeoffs are coherent, and the single card tests one gradeable feedback-loop task with its own sources. No known violations are listed and no feedback was supplied. I found no verified defect, and edits would be cosmetic churn."
-              }
-            ],
-            "feedback": [],
-            "decisions": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "Whole-note audit found no concrete defect; the keep is justified and no edits are proposed.",
-            "change_checks": [],
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Monitoring.md",
-                "verdict": "CLEAN",
-                "summary": "The note is accurate, well ordered (offline vs. online framing, instrumentation, metrics, segmentation, alerting, pitfalls, tradeoffs) and keeps its mechanisms, conditions and caveats. Metric definitions are standard and thresholds are labeled as examples. The single Qard tests one coherent task, and the existing ID is untouched. No edit is warranted.",
-                "page_type": "Concept note (RAG monitoring); authorable prose with optional Questions and References, no special page rules.",
-                "current_text_evidence": [
-                  {
-                    "quote": "Offline [[Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation|Evaluation]] answers whether a version is safe to ship. Monitoring asks whether that version still works on today's traffic.",
-                    "line_start": 17,
-                    "reason": "The opening quickly states the topic and its boundary with offline evaluation in direct declarative prose."
-                  },
-                  {
-                    "quote": "A global faithfulness score can hold at 0.91 while one tenant falls to 0.72",
-                    "line_start": 21,
-                    "reason": "A concrete example makes the segment-versus-aggregate decision rule recoverable."
-                  },
-                  {
-                    "quote": "AP sums the precision at each rank where a relevant document appears and divides by the query's total number of relevant documents",
-                    "line_start": 84,
-                    "reason": "The MAP definition matches the standard formulation and states the missed-document consequence."
-                  },
-                  {
-                    "quote": "Attribution locates which context supports a wrong claim but does not by itself prove that the chunk caused it.",
-                    "line_start": 115,
-                    "reason": "The Noise Sensitivity entry carries its mode and attribution caveat, so the condition is preserved."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: instrumentation, metrics, segmentation, alerting and pitfalls form one coherent operational topic, and the note already links to Evaluation, LLM-as-a-Judge and caching notes for adjacent concepts.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ]
-          },
-          "model_calls": 8
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Query Translation.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Query Translation.md",
-                "outcome": "keep",
-                "reason": "Audited the whole note against its text and the cited primary sources (RAG-Fusion, HyDE, step-back and Rewrite-Retrieve-Read papers). The overview, the mermaid flow and the five technique sections are consistent with those sources. The RRF formula 1/(rank+k) with k=60 matches the RAG-Fusion description. Failure modes (drift, latency, HyDE amplification, constraint loss) are explained with mechanisms and mitigations. The comparison table separates latency counts correctly. The four Qards each test one gradeable task and carry sources on the answer side, and the existing qard-ids are preserved. The code fences have language identifiers, and the wikilinks and references are fine. No factual error or learning gap was found, so no edit is warranted."
-              }
-            ],
-            "feedback": [],
-            "decisions": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "Whole-note audit found no factual, structural, question-quality or rules defect. The keep is justified, and no edits are proposed.",
-            "change_checks": [],
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Query Translation.md",
-                "verdict": "CLEAN",
-                "summary": "The note opens with a concrete vocabulary-mismatch example, then a pipeline diagram, five technique sections, failure modes, and a comparison table that ties each technique to a decision condition. The mechanisms and limits (RRF does not remove drift, HyDE bakes hallucinated assumptions into the vector, decomposition loses constraints, latency is translator plus slowest search) are accurate and consistent with the cited papers. The four Qards each test one gradeable task and carry answer-side sources. No edit is warranted.",
-                "page_type": "Concept — authorable concept note with Questions and References; the whiteboard voice applies, and the fences are mermaid or have language identifiers.",
-                "current_text_evidence": [
-                  {
-                    "quote": "Translation searches more of that space without changing the corpus or the [[Embeddings|embedding model]].",
-                    "line_start": 17,
-                    "reason": "The opening states the operating idea and its boundary quickly, using a concrete mismatch example."
-                  },
-                  {
-                    "quote": "RRF does not reject a drifted variant or its documents: a result ranked highly by one bad rewrite can still survive the cutoff.",
-                    "line_start": 63,
-                    "reason": "States the real limit of fusion precisely, a condition that changes the engineering decision."
-                  },
-                  {
-                    "quote": "Four sequential 100 ms searches add roughly 400 ms.",
-                    "line_start": 65,
-                    "reason": "Gives a concrete latency calculation and separates sequential from concurrent execution."
-                  },
-                  {
-                    "quote": "Once that constraint disappears, retrieval returns generic async guidance and the synthesis step cannot recover the lost specificity.",
-                    "line_start": 95,
-                    "reason": "Explains the decomposition failure mechanism and its mitigation."
-                  },
-                  {
-                    "quote": "The recall column describes how each technique can find more evidence, not a workload-independent gain; any gain depends on the corpus and query class.",
-                    "line_start": 131,
-                    "reason": "The comparison table is hedged correctly and does not overclaim; call counts are separated per technique."
-                  },
-                  {
-                    "quote": "A rise in Recall@20 with a fall in Precision@5 means more relevant candidates appear within 20 results while the top five carry more noise.",
-                    "line_start": 182,
-                    "reason": "The evaluation card gives a precise, bounded interpretation of cutoff-specific metrics."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: multi-query, RAG-Fusion, step-back, decomposition and HyDE share one pipeline position and one decision table, and the five techniques are compared against each other.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ]
-          },
-          "model_calls": 10
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching.md",
-                "outcome": "keep",
-                "reason": "Audited the whole note against its text and the cited cache-aside guidance (pattern not version-specific). The opening motivates layered caches and permission-scoped keys. The request-identity paragraph is consistent with the per-layer sections: embedding keys use text hash plus model and config, retrieval keys add index version, filters, top-k and tenant, and response keys extend that with prompt, evidence and model. Both Mermaid diagrams are accurate, with correct hit and miss paths and the response lookup after context assembly. The failure modes (version drift, stale index, cross-tenant leakage, over-long response TTL) are explained with their mechanisms. The three Qards each test one gradeable task, with answers consistent with the body. The only repetition is the TTL and fast-changing-data point, which appears in both the response section and the pitfalls, and it is brief and reinforcing. References are valid and non-duplicated, and there are no known violations. Edits would be cosmetic."
-              }
-            ],
-            "feedback": [],
-            "decisions": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "Independent whole-note audit found no concrete defects. The note is accurate and coherent, the questions are gradeable, and the keep is justified.",
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching.md",
-                "verdict": "CLEAN",
-                "summary": "The note explains layered RAG caches, their keys and invalidation, and the authorization scoping. The mechanisms, conditions and failure modes are accurate and consistent across the prose, diagrams and cards. No edit is needed.",
-                "page_type": "Concept — frontmatter intact, Questions and References optional but present and valid; no fenced code without language (both mermaid).",
-                "current_text_evidence": [
-                  {
-                    "quote": "Caches remove that work only when their keys capture every input that affects the result.",
-                    "line_start": 17,
-                    "reason": "Opening states the operating idea quickly and sets the key-completeness condition used by the whole note."
-                  },
-                  {
-                    "quote": "This is a data breach, not a staleness bug.",
-                    "line_start": 114,
-                    "reason": "Cross-tenant leakage is distinguished from staleness, which is the key engineering boundary."
-                  },
-                  {
-                    "quote": "The diagrams place the response lookup after retrieval and context assembly so the key can include the actual evidence.",
-                    "line_start": 122,
-                    "reason": "Explains the design choice and the condition under which an earlier lookup would need extra versioning and permission checks."
-                  },
-                  {
-                    "quote": "A response TTL limits staleness, while source and permission changes that invalidate an answer require invalidation before that TTL expires.",
-                    "line_start": 124,
-                    "reason": "Gives the TTL limit with its exception. The pitfall bullet repeats it briefly, which is reinforcing rather than padding."
-                  },
-                  {
-                    "quote": "For protected content, a complete key is necessary but not sufficient.",
-                    "line_start": 147,
-                    "reason": "The retrieval-key card adds the current-access recheck beyond the key, consistent with the Pitfalls section; each card tests one focused task."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: embedding, retrieval and response caches are one coherent layered-design topic, and the response-cache detail is already delegated to LLM Caching.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "change_checks": [],
-            "decision_checks": []
-          },
-          "model_calls": 12
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Patterns.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Patterns.md",
-                "outcome": "keep",
-                "reason": "Read the whole note. The opening gives the adoption-order idea (repair observed failures, keep the cheaper design until evaluation shows otherwise). All 12 patterns follow a consistent mechanism, fit and failure-risk shape, and each has a flowchart with a language-tagged fence. The details match what I know of the primary literature: Self-RAG needs custom training, CRAG relies on an evaluator, GraphRAG builds entity graphs and community summaries, HyDE embeds a hypothetical answer, and contextual retrieval enriches chunks before indexing. The selection table agrees with the section prose, and the adoption-order paragraph adds no new claims. The single Qard asks one gradeable task, has a cited Microsoft Research source and a correct answer: GraphRAG targets corpus-wide, relationship-heavy questions, and its benefit elsewhere must be measured. The wikilinks use valid paths, the frontmatter is intact, and the References are bare and relevant. No known violations are open. I found no factual error, gap or defect worth an edit, so changes would be cosmetic."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Patterns.md",
-                "verdict": "CLEAN",
-                "summary": "The whole note was re-read independently. Each of the 12 patterns states its mechanism, when it fits and the failure it adds, and the table and adoption-order paragraph agree with the sections. I found no factual, structural or Qard defect that justifies an edit.",
-                "page_type": "Concept — optional Questions and References; mermaid fences are language-tagged; wikilinks use full paths with aliases.",
-                "current_text_evidence": [
-                  {
-                    "quote": "RAG patterns are repairs for observed retrieval failures.",
-                    "line_start": 17,
-                    "reason": "The opening states the operating idea and the adoption rule, so the topic is quick to re-enter."
-                  },
-                  {
-                    "quote": "Its ceiling is easy to find.",
-                    "line_start": 33,
-                    "reason": "The first pattern names its limit (exact identifiers, no second stage), which sets the fit-and-failure shape that the later patterns follow."
-                  },
-                  {
-                    "quote": "Self-RAG requires custom training, while CRAG-style correction depends on trustworthy evaluator thresholds.",
-                    "line_start": 246,
-                    "reason": "This claim matches the cited Self-RAG and CRAG papers and keeps the specialist-pattern boundary accurate."
-                  },
-                  {
-                    "quote": "The decision therefore rests on a comparison with a vector-retrieval baseline on representative questions.",
-                    "line_start": 276,
-                    "reason": "The single Qard tests one gradeable task and keeps its ID. Its answer is accurate, gives the condition and the cost, and cites the Microsoft Research paper on the answer side."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the 12 patterns share one decision frame (failure fixed versus risk added) and are used together for selection, so separating them would not make either part more useful.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "overall_reason": "The note is accurate and readable, and the Qard tests a single task. There are no known violations, no edits and no open defects, so keeping it unchanged is justified.",
-            "change_checks": []
-          },
-          "model_calls": 14
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG.md",
-                "outcome": "keep",
-                "reason": "Audited the whole note. The opening defines RAG and states the pipeline boundary (query processing, retrieval, context assembly, evaluation). The Mermaid flow matches the 'each stage limits the next' explanation and the first card's stage list. Operational baselines (flagging, retry caps, drift, caching scoped to authorization, idempotency for mutating tools) are accurate and consistent with the linked notes. The RAG vs fine-tuning table and decision list are correct and keep facts in the corpus and behavior in the weights. All three cards each test one gradeable task, with answers that explain mechanisms and conditions. The experiment card correctly allows ablations and flags when single-variable changes are not feasible. The diagnosis card covers upstream loss, misuse by generation, and measurement faults. Cited sources (Lewis et al. 2020, Gao et al. survey, Rules of ML, Foundry RAG evaluators) support the claims. The frontmatter, the MD040 language tags, and the References format are valid, and there are no known violations. No defect found, so editing would only add churn."
-              }
-            ],
-            "feedback": [],
-            "decisions": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "The whole-note audit found no concrete defect. The keep is justified, and there are no edits or sources to check.",
-            "change_checks": [],
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG.md",
-                "verdict": "CLEAN",
-                "summary": "The note defines RAG, shows the pipeline, gives operational baselines, and compares RAG with fine-tuning. The terminology is consistent and the voice is impersonal and declarative. The three cards each test one task. No edit would add accuracy or clarity, so keeping it unchanged is justified.",
-                "page_type": "FolderNote: keeps tags [FolderNote] and the protected datacorejsx map block. Questions and References are optional and are present and valid.",
-                "current_text_evidence": [
-                  {
-                    "quote": "Each stage limits the next. When translation is used, retrieval cannot repair a rewrite that changed the intent",
-                    "line_start": 43,
-                    "reason": "The prose states the central pipeline constraint and matches the Mermaid flow and the first card's stage list."
-                  },
-                  {
-                    "quote": "Mutating tool calls need [[Home/Software Architecture/Distributed Systems/Idempotency|idempotency]], not response caching.",
-                    "line_start": 50,
-                    "reason": "This bullet states a precise caching boundary: read-only results scoped to the caller's authorization may be cached, while mutating calls need idempotency."
-                  },
-                  {
-                    "quote": "The boundary still holds: knowledge changes through reindexing, and behavior changes through retraining.",
-                    "line_start": 71,
-                    "reason": "The closing sentence states a decisive rule for choosing between RAG and fine-tuning and does not repeat the table."
-                  },
-                  {
-                    "quote": "Changing exactly one thing is not always feasible.",
-                    "line_start": 99,
-                    "reason": "The experiment card names an exception and the fallback methods (feature flag, controlled rollout, ablation) instead of oversimplifying."
-                  },
-                  {
-                    "quote": "Measurement itself:** citation handling and the reference answer or evaluator are checked too",
-                    "line_start": 110,
-                    "reason": "The diagnosis card covers retrieval loss, generation misuse, and evaluator faults, so the explanation of stage location is complete."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the folder hub covers one coherent topic (the RAG pipeline plus its fine-tuning boundary), and the detail belongs in child notes reached through the folder map.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "identity_safety": "PASS",
-                  "question_quality": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ]
-          },
-          "model_calls": 16
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md",
-                "outcome": "keep",
-                "reason": "I read the whole note and found no verified defect. The opening states the second-stage role and the limit that reranking cannot recover missing evidence. Each approach section (cross-encoder, ColBERT, BM25, MMR, LLM, RRF) gives a mechanism, a cost and a boundary condition. The RRF arithmetic in the diagram is correct: 1/63 + 1/61 ≈ 0.032 with k=60. The MMR formula, the ColBERTv2 6–10x compression claim and the SBERT throughput framing match the cited sources and are properly qualified as hardware-dependent. The pitfalls and the tradeoff table agree with the prose, and the stage-by-stage diagnostics for first-stage ceiling versus demotion are coherent. The three cards each test one gradeable task, cite sources on the answer side, and match the note's content. Two existing cards cite SBERT URLs that differ from the one in References, but both are valid. The wikilinks and the code fences with language identifiers are fine. Rewriting would be cosmetic churn."
-              }
-            ],
-            "feedback": [],
-            "decisions": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "Independent whole-note audit found no concrete factual, structural, question-quality or rules defect. No edits were proposed and none are needed.",
-            "change_checks": [],
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md",
-                "verdict": "CLEAN",
-                "summary": "The note states the second-stage role and its ceiling, then covers each approach (cross-encoder, ColBERT, BM25, MMR, LLM, RRF) with its mechanism, cost and limit. Pitfalls and the tradeoff table agree with the prose. The three cards each test one gradeable task. Rewriting would be cosmetic churn.",
-                "page_type": "Concept — typed frontmatter, optional Questions/References present and useful, code fences have language identifiers, wikilinks point to sibling RAG notes.",
-                "current_text_evidence": [
-                  {
-                    "quote": "The second stage has a narrower job: improve the short list before context reaches the generator.",
-                    "line_start": 17,
-                    "reason": "The opening states the operating idea. The next paragraph states the boundary that reranking cannot recover missed evidence."
-                  },
-                  {
-                    "quote": "The formula is `RRF_score = sum of 1 / (k + rank_i)`, with k=60 in the original paper.",
-                    "line_start": 109,
-                    "reason": "The RRF formula and constant are correct, and the diagram arithmetic (1/63 + 1/61 ≈ 0.032) checks out."
-                  },
-                  {
-                    "quote": "Cross-encoders instead allow full token-level attention across the pair",
-                    "line_start": 41,
-                    "reason": "This gives the cross-encoder versus bi-encoder mechanism and why it affects negation and qualifiers."
-                  },
-                  {
-                    "quote": "Against a 500ms total SLA, that is 10–40% of the entire budget.",
-                    "line_start": 119,
-                    "reason": "The latency arithmetic is correct (50/500 to 200/500), and the pitfall includes a mitigation."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the approaches, pitfalls and tradeoffs all serve one second-stage reranking decision, and the note remains coherent at its current length.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ]
-          },
-          "model_calls": 18
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Retrieval.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Retrieval.md",
-                "outcome": "keep",
-                "reason": "Read the whole note against its text. The opening explains why retrieval caps answer quality. The Mermaid diagram and the 429 example make the dense/sparse/hybrid split concrete. Each mode section gives mechanism, fit and main risk. The BM25 versus PostgreSQL ts_rank distinction is stated correctly. RRF is described correctly: the sum of 1/(k+rank) with k=60. The pre/post-filtering section correctly keeps authorization separate from similarity. The pitfalls cover ANN operating-point drift, embedding migration, segment-hidden metrics and silent identifier misses, and each ends with a detection or mitigation step. The tradeoffs table matches the prose. The two existing cards each test one gradeable task, with accurate answers and Azure hybrid-search sources. The references are topic-specific bare links. known_violations is empty and there are no flagged cards or owner feedback. No factual defect or editorial weakness was found that would justify a change, so a forced edit would only add churn."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "I read the whole note independently. It is accurate and well ordered, and its cards are sound. I found no concrete defect that would justify an edit, so keeping it unchanged is justified.",
-            "change_checks": [],
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Retrieval.md",
-                "verdict": "CLEAN",
-                "summary": "The note opens with why retrieval caps answer quality. A diagram and a concrete 429 example then make the dense, sparse and hybrid split easy to recall. Each mode gives mechanism, fit and main risk. Technical claims are correct, the pitfalls end in detection or mitigation steps, and both Qards test one gradeable task each. Keeping it unchanged is justified.",
-                "page_type": "Concept note with Questions and References; the applicable rules are concept voice, one gradeable task per Qard, bare reference links and MD040.",
-                "current_text_evidence": [
-                  {
-                    "quote": "It does not provide BM25 as its built-in ranker.",
-                    "line_start": 56,
-                    "reason": "Correctly separates PostgreSQL full-text ranking (ts_rank, ts_rank_cd) from BM25, which avoids a common factual error."
-                  },
-                  {
-                    "quote": "sums `1 / (k + rank)` for each document across the input lists, with k=60 in the original method",
-                    "line_start": 80,
-                    "reason": "The RRF formula and the original k=60 are correct, and the point that rank positions remove the need for a shared score scale is stated."
-                  },
-                  {
-                    "quote": "Authorization is a separate requirement: semantic similarity cannot enforce it",
-                    "line_start": 101,
-                    "reason": "Keeps access control separate from the recall and cost tradeoff of filtering, which is the right engineering boundary."
-                  },
-                  {
-                    "quote": "Vector search recognizes the meaning around rate limiting, yet may lose the exact token `429`.",
-                    "line_start": 33,
-                    "reason": "A concrete example that makes the complementary failure modes of the two paths memorable."
-                  },
-                  {
-                    "quote": "Hybrid is therefore justified by measurement rather than assumed.",
-                    "line_start": 173,
-                    "reason": "The second card keeps a dependent mechanism-and-why explanation together, and its RRF rank-equivalence reasoning is correct."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: dense, sparse and hybrid retrieval, indexing and filtering, and the pitfalls form one coherent retrieval-stage explanation, and Re-ranking and Vector Databases already have their own notes.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ]
-          },
-          "model_calls": 20
-        }
-      }
-    ],
+    "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-05T07:12:22.731018Z",
-    "topic": "AI & ML",
-    "topic_id": "ai-ml-4edf0823",
-    "current_batch": {
-      "topic": "AI & ML",
-      "topic_id": "ai-ml-4edf0823",
-      "notes": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Retrieval.md",
-          "content": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"Decides what evidence enters the prompt, balancing recall, precision, and latency across search methods.\"\nlevel: [\"2\"]\npriority: High\nstatus: Done\npublish: true\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Context Engineering/RAG/Retrieval\"\nflashcard_uid: \"6dc71082\"\ncreated: \"2026-02-27T12:56:16.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.490Z\"\n---\n\nRetrieval decides which evidence reaches the prompt. Missing evidence caps what a grounded answer can claim, even though prompts and generation models can still improve how fixed evidence is used. The practical problem is to recover enough relevant material without filling the context window with noise or spending the entire latency budget on search.\n\nA query can become a vector for semantic search, weighted terms for keyword search, or both. Vector search compares it with pre-indexed chunk embeddings. BM25 searches a lexical index. The resulting candidates are fused into one ranked list and passed to [[Re-ranking|reranking]] or directly to the generator.\n\nBut no single search path handles every query shape well.\n\n```mermaid\nflowchart LR\n    Q[User query] --> D[Vector search]\n    Q --> S[Keyword search]\n    D --> F[Fuse results]\n    S --> F\n    F --> R[Top-k candidates]\n    R --> N[Reranker or generator]\n```\n\nAn example is the query \"rate limit error 429 behavior in partner tier.\" Vector search recognizes the meaning around rate limiting, yet may lose the exact token `429`. Keyword search catches `429` and `partner tier`, while missing related passages that use different wording. Running both paths covers those two failure modes. Hybrid search is a sensible default, though the added path can introduce noise on some corpora.\n\n# Retrieval Modes\n\n## Dense Retrieval — Vector Search\n\nThe index-time and query-time work split cleanly:\n\n- An embedding model maps each document chunk and the query into the same fixed-size vector space. Document vectors are computed once during indexing. Each request only needs a query vector.\n- The [[Vector Databases|vector database]] searches an approximate index, commonly HNSW or IVF, for nearby chunk vectors. Approximation gives up some recall to avoid scanning millions of vectors one by one.\n- Model choice shapes the result set. Dimensionality and training data differ, and a model that leads a general MTEB benchmark may fail on a specialized corpus or another language. Domain queries are the real test.\n\nDense retrieval fits:\n\n- Semantic paraphrases and natural-language questions where user wording differs from source text.\n- Multilingual corpora where the embedding model captures meaning across languages.\n\nThe main risk is specific:\n\n- **Misses exact identifiers.** Embedding models capture meaning better than literal tokens. Error codes, API paths, and version strings can disappear inside the vector representation. Returned chunks may look topically correct while describing the wrong operation, which is harder to catch than an obviously unrelated keyword result.\n\n## Sparse Retrieval — Keyword Search (BM25)\n\nBM25 is the default ranking model in search engines such as Elasticsearch. PostgreSQL's native full-text search uses `to_tsvector`/`to_tsquery` for lexeme matching and `ts_rank` or `ts_rank_cd` for ranking. It does not provide BM25 as its built-in ranker. Both behave like ranked `grep` at a high level, but their scoring functions differ. A search for `NullReferenceException` in a .NET codebase hits files containing that string. A focused source file can rank above a 10,000-line log that mentions it once.\n\nHow it works:\n\n- BM25 gives rare matching terms more weight. If only three documents contain `E4392`, they score strongly for that query. Common words contribute little.\n- Repetition has diminishing returns, and a length penalty stops large documents from winning through word count alone.\n- A standard keyword index is enough. No embedding model, GPU, or vector database is involved.\n\nWhere it fits:\n\n- Queries with exact keyword constraints: error codes, product names, version numbers, configuration keys.\n- Domains with specialized terminology where exact matches carry high signal.\n\nMain risk:\n\n- **Weak on paraphrases.** BM25 cannot connect \"authentication failure\" with \"credential validation errors\" when the words do not overlap. Stemming and synonym expansion help at the edges, but semantic variation remains its blind spot.\n\n## Hybrid Retrieval — Vector + Keyword\n\nHybrid retrieval runs full-text search, such as `WHERE body @@ to_tsquery('error & 429')`, beside vector similarity search and then merges the results. RRF works from rank positions. If document A is #2 in vector search and #5 in keyword search, while document B is #1 in keyword search but #200 in vector search, the agreement around A raises it in the fused list. Linear combination instead assigns an explicit weight to each score, closer to a weighted `UNION ALL`.\n\nHow it works:\n\n- Vector search and keyword search run in parallel against the same query, and the two ranked lists are fused into a single candidate set.\n- **[[Re-ranking|Reciprocal Rank Fusion (RRF)]]** sums `1 / (k + rank)` for each document across the input lists, with k=60 in the original method. Because it uses positions instead of scores, BM25 and vector similarity do not need a shared scale. Agreement across retrievers is rewarded.\n- **Linear combination** normalizes scores and computes `alpha * vector_score + (1 - alpha) * keyword_score`. It exposes more control, but alpha must be tuned for the domain. Identifier-heavy corpora may need more keyword weight. Conversational queries often favor the vector path.\n\nWhere it fits:\n\n- Production systems with mixed query patterns. This is a safe default for many RAG systems.\n\nMain risk:\n\n- **Can lose to one search mode.** A homogeneous corpus may strongly favor one retriever, leaving the other to inject noise. In one [published case study](https://huggingface.co/blog/charles-azam/rag) of 156 multilingual engineering and scientific queries, vector-only reached a 69.2% hit rate while hybrid reached 63.5%. The extra keyword path hurt. Hybrid must be tested against both single-mode baselines on the actual corpus.\n- **Large top-k values collect noise.** Fusing two long result lists pulls weak candidates into the tail. Without [[Re-ranking|reranking]] or deduplication, those candidates dilute the context sent to generation.\n\n# Indexing and Filtering\n\nThe vector index sets the latency-recall curve:\n\n- **HNSW** builds a layered graph between nearby vectors and searches from coarse connections down to local neighbors. Raising `ef_search` explores more of that graph, buying recall with latency. A value that works on a small collection may miss more neighbors after the corpus grows.\n- **IVF-PQ** clusters and compresses vectors, in some configurations using far less memory than HNSW. Aggressive compression loses recall more quickly. It suits collections around 10M+ vectors when an in-memory HNSW graph is too expensive.\n\nFiltering decides which vectors are eligible:\n\n- **Pre-filtering** narrows the search space by metadata before vector search, so the returned candidates already satisfy the filter. Choosing it over post-filtering is a recall and cost decision. Authorization is a separate requirement: semantic similarity cannot enforce it, so tenant and ACL boundaries hold only when unauthorized chunks are excluded before any result reaches the model or the user, whichever stage performs the exclusion.\n- **Post-filtering** removes candidates after ANN search. It is easier to bolt on, but selective filters may discard most of top-k and leave too little evidence.\n- Index versions stay explicit, and collection aliases enable instant rollback during index rebuilds.\n\n# Pitfalls\n\n## ANN Operating-Point Regression\n\nCorpus growth or distribution change can make an earlier HNSW `ef_search` setting miss more exact neighbors. The outcome depends on graph construction, filters, data distribution, implementation, and workload; latency can also move. Nothing in ordinary error-rate monitoring establishes that recall stayed stable.\n\nDetection: scheduled [[Monitoring#Retrieval Quality Metrics|Recall@k]] checks compare ANN results with exact search on a maintained set of representative queries. Whether the response is tuning `ef_search`, rebuilding, or changing index parameters follows from the measured recall-versus-latency curve; no single response is assumed to restore the old operating point.\n\n## Embedding Model Migration Debt\n\nEmbedding models produce incompatible vector spaces. An upgrade therefore requires re-embedding the corpus. New query vectors cannot be compared with an old index. At scale, the migration needs parallel storage and a controlled cutover, and benchmark gains do not guarantee better domain retrieval. Provider deprecations can compress that schedule.\n\nMitigation: embedding model selection is a long-term infrastructure decision. Each vector is stored with its model version, upgrade thresholds come from domain-specific metrics rather than MTEB deltas, and collection aliases with shadow traffic allow validation before cutover.\n\n## Aggregate Metrics Hiding Segment Failures\n\nAn overall recall of 70% can coexist with 5% recall on a small but valuable query segment. Multi-hop or date-filtered requests may be failing while the aggregate looks acceptable. Segmentation also separates missing inventory from a retriever that cannot surface material already present.\n\nDetection: retrieval metrics are segmented by query type, tenant, locale, and domain, and alerts fire on per-segment degradation, not just on the aggregate.\n\n## Vector Search Failing Silently on Identifiers\n\nFor identifier-heavy queries, vector search can return chunks that are topically related and operationally wrong. The evidence looks plausible enough for the model to assemble a confident answer from the wrong material.\n\nMitigation: identifier-heavy corpora are a strong case for hybrid retrieval, and their evaluation includes identifier queries. If the vector path causes most failures, the fusion weights are the first place to look, because these domains often need more keyword influence.\n\n# Tradeoffs\n\n| Mode | Recall profile | Latency | Operational complexity | Best for |\n| --- | --- | --- | --- | --- |\n| Vector only | Strong on semantic paraphrases -- weak on exact identifiers | Low -- single index lookup | Moderate -- embedding model and vector database required | Homogeneous semantic corpora with natural-language queries |\n| Keyword only -- BM25 | Strong on exact terms -- weak on paraphrases | Lowest -- keyword index lookup | Low -- no embedding model or vector database | Identifier-heavy domains with stable vocabulary |\n| Hybrid -- RRF | Broad -- covers semantic and lexical queries | Moderate -- two parallel searches plus fusion | Higher -- two indexes and fusion logic | Mixed query patterns -- default for most production systems |\n| Hybrid -- linear combination | Tunable -- weight toward dominant search mode | Moderate -- same as RRF | Highest -- requires alpha tuning per domain | When one search mode is consistently stronger and deserves explicit weighting |\n\nHybrid retrieval with RRF and a conservative top-k, often 5–20, is a reasonable first configuration. It is then compared with both single-mode baselines on real corpus queries, because hybrid is a good starting point, not a guaranteed winner. [[Re-ranking|Reranking]] fits after first-stage retrieval is stable and the remaining failures come from poor ordering near the top.\n\n# Questions\n\n> [!qard]- Why does hybrid retrieval combine keyword search and vector search?\n> Hybrid retrieval combines them because they fail in complementary ways. Keyword search matches the exact terms in a query, while vector search matches meaning even when the wording differs. Running both covers queries that either one alone would miss.\n>\n> | Aspect | Keyword search, such as BM25 | Vector search |\n> |---|---|---|\n> | What it matches | Documents that share the query's terms, with rarer terms counting more | Documents whose embeddings are close to the query's embedding, so related meanings match |\n> | Strong on | Exact identifiers such as error codes, product names and version numbers | Paraphrases and natural-language questions worded differently from the source |\n> | Weak on | Synonyms and rephrasing with no word overlap, such as *credential validation error* for *authentication failure* | Exact tokens, which can blur inside the embedding and surface topically similar but wrong chunks |\n> | What it needs | A lexical (inverted) index | An embedding model and a vector index |\n>\n> In a hybrid search, both queries run in parallel and their ranked lists are merged, commonly with Reciprocal Rank Fusion (RRF). RRF scores documents by their rank positions, so the two incompatible score scales never need to be normalized. For a query about *error 429 behavior for the partner tier*, keyword search can catch `429` while vector search finds rate-limiting passages phrased differently.\n>\n> Hybrid is a common starting point rather than a guaranteed improvement over either mode alone.\n>\n> [Hybrid search overview (Azure AI Search)](https://learn.microsoft.com/en-us/azure/search/hybrid-search-overview)\n\n<!-- qard-id: 3080dee6-c717-480c-b2ba-c0be9ba83120 -->\n> [!qard]- When can hybrid retrieval perform worse than single-mode retrieval?\n> Hybrid retrieval can perform worse when one retrieval path is much weaker on a particular corpus and query mix. Fusing its results pulls poor candidates into the top results. There they displace good results that the stronger path would have returned on its own.\n>\n> The mechanism:\n>\n> 1. Keyword search, such as BM25, and vector search run in parallel for the same query.\n> 2. Their ranked lists are merged, commonly with Reciprocal Rank Fusion (RRF), which scores each document from its rank positions rather than from raw scores.\n> 3. Standard RRF gives each list equal influence. For documents that appear in only one list, rank 1 in the weak list scores the same as rank 1 in the strong list, and higher than rank 3 in the strong list.\n> 4. With a small final cutoff, those weak candidates push relevant results out.\n> \n> Whether this happens depends on the workload. In a homogeneous corpus where one mode clearly dominates, the other mode has little useful to add. A large top-k can also carry weak tail candidates into the context when no reranking or deduplication follows.\n>\n> Hybrid is therefore justified by measurement rather than assumed. Keyword-only, vector-only and hybrid retrieval are compared on representative queries, using the retrieval or end-to-end metric that matches the product goal. When hybrid loses, the fusion can be weighted toward the stronger path, or the extra path can be dropped.\n>\n> [Hybrid search overview (Azure AI Search)](https://learn.microsoft.com/en-us/azure/search/hybrid-search-overview)\n\n# References\n\n- [RAG techniques — retrieval and ranking overview (Azure AI Search)](https://learn.microsoft.com/en-us/azure/search/retrieval-augmented-generation-overview)\n- [Introducing Contextual Retrieval — hybrid retrieval gains measured (Anthropic Engineering)](https://anthropic.com/engineering/contextual-retrieval)\n- [When good models go bad — embedding model migration and MTEB limitations (Weaviate)](https://weaviate.io/blog/when-good-models-go-bad)\n- [MTEB leaderboard — retrieval task benchmarks (Hugging Face)](https://huggingface.co/spaces/mteb/leaderboard)\n",
-          "hash": "4acbe793542d40d3e725b15999840ac50422e38bacf186aae8d3776ab2860351",
-          "topic": "AI & ML",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "new"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "base_sha": "67caf2e374f53e8772b86b8ea0f881d74e784fa1",
-    "reservation_deadline": "2026-11-05T07:26:43.948949Z",
-    "stop_reason": "call_limit",
-    "sealed_at": "2026-11-05T07:12:22.731019Z"
+    "checkpoint_at": "2026-11-05T20:07:51.295242Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
@@ -10096,6 +9328,789 @@
       "reservation_deadline": "2026-11-04T20:22:39.747676Z",
       "stop_reason": "call_limit",
       "sealed_at": "2026-11-04T20:08:33.265422Z"
+    },
+    "4ce6dcd61eb74b9eafc6dcc2d27d9c9b": {
+      "version": 1,
+      "id": "4ce6dcd61eb74b9eafc6dcc2d27d9c9b",
+      "status": "sealed",
+      "phase": "sealed",
+      "started_at": "2026-11-05T07:01:25.246564Z",
+      "elapsed_seconds": 657.4849040000001,
+      "calls_reserved": 20,
+      "responses_received": 20,
+      "attempted_paths": [
+        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics.md",
+        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation.md",
+        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Retrieval Evaluation Sets.md",
+        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Monitoring.md",
+        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Query Translation.md",
+        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching.md",
+        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Patterns.md",
+        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG.md",
+        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md",
+        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Retrieval.md"
+      ],
+      "accepted_records": [],
+      "outcomes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole note against its current text. The layered framing (retrieval, generation, end-to-end) is coherent. The retrieval metric table matches standard definitions. The RAGAS table correctly separates reference-free metrics (Faithfulness, Response Relevancy) from reference-dependent ones (Context Recall, variant-dependent Context Precision). The diagnostic combinations are hedged as hypotheses. The tradeoffs table and the judge-bias pitfalls are accurate. The existing cards each test one gradeable task: the metric comparison, why aggregates hide regressions, when a segment drop is actionable, and the faithfulness/recall diagnosis. Their answers agree with the note and cite primary sources. No known native violations are present. No factual error or editorial weakness justified an edit, so unchanged text is preferable to churn."
+                }
+              ],
+              "feedback": [],
+              "decisions": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics.md",
+                  "verdict": "CLEAN",
+                  "summary": "I read the whole note and found no factual, structural, or question-quality defect that justifies an edit. The layered retrieval, generation and end-to-end framing, the RAGAS reference requirements, the hedged diagnostic tables and the four existing cards are accurate and consistent. Leaving the note unchanged avoids cosmetic churn.",
+                  "page_type": "Concept note, with a Questions section of Qard callouts and a References section. Qard ID comments are protected metadata.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "A support bot can retrieve the correct policy and still misread its date constraint.",
+                      "line_start": 21,
+                      "reason": "A concrete example restores the retrieval-versus-generation distinction quickly, and it appears before the metric tables."
+                    },
+                    {
+                      "quote": "so the evaluation record must name the variant rather than reporting an unqualified",
+                      "line_start": 59,
+                      "reason": "This states the version-specific condition for Context Precision. Current RAGAS has several variants with different reference requirements."
+                    },
+                    {
+                      "quote": "Attribution shows which context supports an incorrect claim, not that the chunk caused the error.",
+                      "line_start": 80,
+                      "reason": "This limit on Noise Sensitivity is precise and prevents over-interpreting the score."
+                    },
+                    {
+                      "quote": "Rerunning the same evaluation on the same queries does not satisfy the second condition.",
+                      "line_start": 158,
+                      "reason": "This answer explains why repeated runs cannot replace a larger or more representative query sample. Each card covers one gradeable task, and its answer is consistent with the body."
+                    },
+                    {
+                      "quote": "Recall@5 is `3/4 = 0.75`, because three of the four relevant documents appear.",
+                      "line_start": 126,
+                      "reason": "The worked example is arithmetically correct. The relevant documents sit at ranks 2, 3 and 5, so Precision@5 = 0.6 and reciprocal rank = 0.5."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the metrics layers, the RAGAS mapping and the pitfalls form one coherent evaluation topic. Definitions are already delegated to Monitoring.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "overall_reason": "The whole-note audit found the note accurate, readable and correctly hedged, and no edits are proposed. The unchanged keep is justified by the current text, with no remaining defect.",
+              "change_checks": []
+            },
+            "model_calls": 2
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole note. The opening explains why retrieval, generation and end-to-end evaluation are separated and which fix each points to. The mermaid diagram and the support-bot example (correct policy retrieved, date constraint misread) match the first card's table. Both cards are single gradeable tasks: the first compares three evaluation layers, and the second splits RAG-specific concerns from reusable general LLM evaluation. Their claims are consistent with the cited Foundry, RAGAS and LangSmith material: retrieval metrics need labels while reference-free variants do not, and groundedness applies to any answer constrained by supplied text. The frontmatter and the protected qard-ids and Datacore block are intact. The code fences have language identifiers. The two reference links are bare, relevant, from different providers, and there is no unsupported claim or repetition. The known_violations list is empty and nothing is flagged for fixing, so an edit would add churn without a concrete benefit."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation.md",
+                  "verdict": "CLEAN",
+                  "summary": "Whole-note audit found no concrete defect. The opening explains why evaluation is split into retrieval, generation and end-to-end layers and what each points to. The diagram and example match the first card. Both cards are single comparison tasks with consistent, supported claims. An edit would be churn.",
+                  "page_type": "FolderNote — keeps the FolderNote tag, the protected Datacore folder-map block and the Qard IDs. Questions and References are optional and are present here.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "One blended quality score cannot show which part needs repair.",
+                      "line_start": 19,
+                      "reason": "The opening states the operating idea and why the layers are separated, so the topic can be recovered quickly."
+                    },
+                    {
+                      "quote": "prompt changes cannot recover a document that retrieval never found, while another embedding model will not fix a generator that ignores clear evidence",
+                      "line_start": 21,
+                      "reason": "States the engineering decision each layer informs, with a concrete mechanism and its limit."
+                    },
+                    {
+                      "quote": "Retrieval passes. Generation fails.",
+                      "line_start": 33,
+                      "reason": "A concrete example consistent with the first card's table and the diagram; not redundant filler."
+                    },
+                    {
+                      "quote": "Reference-free retrieval evaluation does not use such labels.",
+                      "line_start": 61,
+                      "reason": "Gives the condition on the label requirement, so the second card is not overstated. It matches the cited RAGAS and Foundry material."
+                    },
+                    {
+                      "quote": "A judge reused from another task is not automatically valid for a new one.",
+                      "line_start": 69,
+                      "reason": "Gives the important caveat about reusing general LLM evaluation methods."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the note covers one coherent topic, layered RAG evaluation, and its two cards are about that topic.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "overall_reason": "The complete note is accurate, clear and compliant. Each card is a single focused comparison. IDs and metadata are intact, no concrete violation exists, and the keep is justified.",
+              "change_checks": []
+            },
+            "model_calls": 4
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Retrieval Evaluation Sets.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Retrieval Evaluation Sets.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole note against its text. The three relevance shapes (substitutable, complementary, graded) map correctly to HitRate/MRR, Recall/Context Recall and nDCG. The plan A/B worked example is arithmetically right (HitRate@5=1, recall 1/2). The cutoff guidance is sound. The synthetic-question section correctly presents false negatives and lexical leakage as risks to check and says the second pass cannot prove the labels are exhaustive. The three existing cards each test one task, and the first two are not bundled. Their answers match the prose and cite relevant Ragas, Sentence Transformers and Foundry documentation. Frontmatter and the text code fence are valid, and the wikilinks are plausible. The first two cards cite the note's own section, which is acceptable as a backlink. No verified defect, so a forced edit would be churn."
+                }
+              ],
+              "feedback": [],
+              "decisions": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "Whole-note audit found no concrete defect; the note is accurate, clear, and well-scoped, and the keep is justified with no edits proposed.",
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Retrieval Evaluation Sets.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note maps relevance shapes (substitutable, complementary, graded) to HitRate/MRR, Recall/Context Recall and nDCG correctly, with a correct worked example, a sound cutoff rule, and honest caveats about synthetic labels. Prose is direct and ordered well; cards are focused. No edit is warranted.",
+                  "page_type": "Concept — authorable prose with optional Questions and References; protected Qard IDs and fenced code (text language present).",
+                  "current_text_evidence": [
+                    {
+                      "quote": "A result containing only plan A has `HitRate@5 = 1`, but complementary recall is `1/2`",
+                      "line_start": 37,
+                      "reason": "The arithmetic is correct and shows the verdict depends on label shape for a fixed retrieved list."
+                    },
+                    {
+                      "quote": "Because it judges only a finite candidate list, it cannot prove that the labels are exhaustive",
+                      "line_start": 61,
+                      "reason": "States the limit of the second-pass check instead of overclaiming, preserving the condition that matters."
+                    },
+                    {
+                      "quote": "**The cutoff follows the generator's real input.**",
+                      "line_start": 39,
+                      "reason": "Gives a decision rule with the condition (k at least the required set size) that changes the engineering outcome."
+                    },
+                    {
+                      "quote": "> [!qard]- Which retrieval metric fits a query with several relevant chunks?",
+                      "line_start": 67,
+                      "reason": "One focused comparison task, answered by a table and example; the existing ID comment is retained above it."
+                    },
+                    {
+                      "quote": "Both are risks to check, not certainties.",
+                      "line_start": 106,
+                      "reason": "The synthetic-label card keeps failures and their controls together as one dependent explanation with appropriate hedging."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the two sections (multi-chunk relevance labeling and synthetic-question label distortion) are tightly coupled to one retrieval-labeling topic, and general dataset construction already lives in a sibling note.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "change_checks": [],
+              "decision_checks": []
+            },
+            "model_calls": 6
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Monitoring.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Monitoring.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole note against its text. The opening separates offline evaluation from production monitoring, and the segmentation example explains why aggregates hide local failures. The instrumentation section matches OpenTelemetry GenAI conventions (gen_ai.operation.name, gen_ai.usage.* attributes, token usage metrics). The retrieval metric definitions are standard, including MAP dividing by total relevant documents and MRR averaging 1/rank. The judge metrics, including Noise Sensitivity modes, are accurately qualified. The alert thresholds are labeled as examples. The pitfalls and tradeoffs are coherent, and the single card tests one gradeable feedback-loop task with its own sources. No known violations are listed and no feedback was supplied. I found no verified defect, and edits would be cosmetic churn."
+                }
+              ],
+              "feedback": [],
+              "decisions": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "Whole-note audit found no concrete defect; the keep is justified and no edits are proposed.",
+              "change_checks": [],
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Monitoring.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note is accurate, well ordered (offline vs. online framing, instrumentation, metrics, segmentation, alerting, pitfalls, tradeoffs) and keeps its mechanisms, conditions and caveats. Metric definitions are standard and thresholds are labeled as examples. The single Qard tests one coherent task, and the existing ID is untouched. No edit is warranted.",
+                  "page_type": "Concept note (RAG monitoring); authorable prose with optional Questions and References, no special page rules.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "Offline [[Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation|Evaluation]] answers whether a version is safe to ship. Monitoring asks whether that version still works on today's traffic.",
+                      "line_start": 17,
+                      "reason": "The opening quickly states the topic and its boundary with offline evaluation in direct declarative prose."
+                    },
+                    {
+                      "quote": "A global faithfulness score can hold at 0.91 while one tenant falls to 0.72",
+                      "line_start": 21,
+                      "reason": "A concrete example makes the segment-versus-aggregate decision rule recoverable."
+                    },
+                    {
+                      "quote": "AP sums the precision at each rank where a relevant document appears and divides by the query's total number of relevant documents",
+                      "line_start": 84,
+                      "reason": "The MAP definition matches the standard formulation and states the missed-document consequence."
+                    },
+                    {
+                      "quote": "Attribution locates which context supports a wrong claim but does not by itself prove that the chunk caused it.",
+                      "line_start": 115,
+                      "reason": "The Noise Sensitivity entry carries its mode and attribution caveat, so the condition is preserved."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: instrumentation, metrics, segmentation, alerting and pitfalls form one coherent operational topic, and the note already links to Evaluation, LLM-as-a-Judge and caching notes for adjacent concepts.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ]
+            },
+            "model_calls": 8
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Query Translation.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Query Translation.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole note against its text and the cited primary sources (RAG-Fusion, HyDE, step-back and Rewrite-Retrieve-Read papers). The overview, the mermaid flow and the five technique sections are consistent with those sources. The RRF formula 1/(rank+k) with k=60 matches the RAG-Fusion description. Failure modes (drift, latency, HyDE amplification, constraint loss) are explained with mechanisms and mitigations. The comparison table separates latency counts correctly. The four Qards each test one gradeable task and carry sources on the answer side, and the existing qard-ids are preserved. The code fences have language identifiers, and the wikilinks and references are fine. No factual error or learning gap was found, so no edit is warranted."
+                }
+              ],
+              "feedback": [],
+              "decisions": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "Whole-note audit found no factual, structural, question-quality or rules defect. The keep is justified, and no edits are proposed.",
+              "change_checks": [],
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Query Translation.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note opens with a concrete vocabulary-mismatch example, then a pipeline diagram, five technique sections, failure modes, and a comparison table that ties each technique to a decision condition. The mechanisms and limits (RRF does not remove drift, HyDE bakes hallucinated assumptions into the vector, decomposition loses constraints, latency is translator plus slowest search) are accurate and consistent with the cited papers. The four Qards each test one gradeable task and carry answer-side sources. No edit is warranted.",
+                  "page_type": "Concept — authorable concept note with Questions and References; the whiteboard voice applies, and the fences are mermaid or have language identifiers.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "Translation searches more of that space without changing the corpus or the [[Embeddings|embedding model]].",
+                      "line_start": 17,
+                      "reason": "The opening states the operating idea and its boundary quickly, using a concrete mismatch example."
+                    },
+                    {
+                      "quote": "RRF does not reject a drifted variant or its documents: a result ranked highly by one bad rewrite can still survive the cutoff.",
+                      "line_start": 63,
+                      "reason": "States the real limit of fusion precisely, a condition that changes the engineering decision."
+                    },
+                    {
+                      "quote": "Four sequential 100 ms searches add roughly 400 ms.",
+                      "line_start": 65,
+                      "reason": "Gives a concrete latency calculation and separates sequential from concurrent execution."
+                    },
+                    {
+                      "quote": "Once that constraint disappears, retrieval returns generic async guidance and the synthesis step cannot recover the lost specificity.",
+                      "line_start": 95,
+                      "reason": "Explains the decomposition failure mechanism and its mitigation."
+                    },
+                    {
+                      "quote": "The recall column describes how each technique can find more evidence, not a workload-independent gain; any gain depends on the corpus and query class.",
+                      "line_start": 131,
+                      "reason": "The comparison table is hedged correctly and does not overclaim; call counts are separated per technique."
+                    },
+                    {
+                      "quote": "A rise in Recall@20 with a fall in Precision@5 means more relevant candidates appear within 20 results while the top five carry more noise.",
+                      "line_start": 182,
+                      "reason": "The evaluation card gives a precise, bounded interpretation of cutoff-specific metrics."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: multi-query, RAG-Fusion, step-back, decomposition and HyDE share one pipeline position and one decision table, and the five techniques are compared against each other.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ]
+            },
+            "model_calls": 10
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole note against its text and the cited cache-aside guidance (pattern not version-specific). The opening motivates layered caches and permission-scoped keys. The request-identity paragraph is consistent with the per-layer sections: embedding keys use text hash plus model and config, retrieval keys add index version, filters, top-k and tenant, and response keys extend that with prompt, evidence and model. Both Mermaid diagrams are accurate, with correct hit and miss paths and the response lookup after context assembly. The failure modes (version drift, stale index, cross-tenant leakage, over-long response TTL) are explained with their mechanisms. The three Qards each test one gradeable task, with answers consistent with the body. The only repetition is the TTL and fast-changing-data point, which appears in both the response section and the pitfalls, and it is brief and reinforcing. References are valid and non-duplicated, and there are no known violations. Edits would be cosmetic."
+                }
+              ],
+              "feedback": [],
+              "decisions": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "Independent whole-note audit found no concrete defects. The note is accurate and coherent, the questions are gradeable, and the keep is justified.",
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note explains layered RAG caches, their keys and invalidation, and the authorization scoping. The mechanisms, conditions and failure modes are accurate and consistent across the prose, diagrams and cards. No edit is needed.",
+                  "page_type": "Concept — frontmatter intact, Questions and References optional but present and valid; no fenced code without language (both mermaid).",
+                  "current_text_evidence": [
+                    {
+                      "quote": "Caches remove that work only when their keys capture every input that affects the result.",
+                      "line_start": 17,
+                      "reason": "Opening states the operating idea quickly and sets the key-completeness condition used by the whole note."
+                    },
+                    {
+                      "quote": "This is a data breach, not a staleness bug.",
+                      "line_start": 114,
+                      "reason": "Cross-tenant leakage is distinguished from staleness, which is the key engineering boundary."
+                    },
+                    {
+                      "quote": "The diagrams place the response lookup after retrieval and context assembly so the key can include the actual evidence.",
+                      "line_start": 122,
+                      "reason": "Explains the design choice and the condition under which an earlier lookup would need extra versioning and permission checks."
+                    },
+                    {
+                      "quote": "A response TTL limits staleness, while source and permission changes that invalidate an answer require invalidation before that TTL expires.",
+                      "line_start": 124,
+                      "reason": "Gives the TTL limit with its exception. The pitfall bullet repeats it briefly, which is reinforcing rather than padding."
+                    },
+                    {
+                      "quote": "For protected content, a complete key is necessary but not sufficient.",
+                      "line_start": 147,
+                      "reason": "The retrieval-key card adds the current-access recheck beyond the key, consistent with the Pitfalls section; each card tests one focused task."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: embedding, retrieval and response caches are one coherent layered-design topic, and the response-cache detail is already delegated to LLM Caching.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "change_checks": [],
+              "decision_checks": []
+            },
+            "model_calls": 12
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Patterns.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Patterns.md",
+                  "outcome": "keep",
+                  "reason": "Read the whole note. The opening gives the adoption-order idea (repair observed failures, keep the cheaper design until evaluation shows otherwise). All 12 patterns follow a consistent mechanism, fit and failure-risk shape, and each has a flowchart with a language-tagged fence. The details match what I know of the primary literature: Self-RAG needs custom training, CRAG relies on an evaluator, GraphRAG builds entity graphs and community summaries, HyDE embeds a hypothetical answer, and contextual retrieval enriches chunks before indexing. The selection table agrees with the section prose, and the adoption-order paragraph adds no new claims. The single Qard asks one gradeable task, has a cited Microsoft Research source and a correct answer: GraphRAG targets corpus-wide, relationship-heavy questions, and its benefit elsewhere must be measured. The wikilinks use valid paths, the frontmatter is intact, and the References are bare and relevant. No known violations are open. I found no factual error, gap or defect worth an edit, so changes would be cosmetic."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Patterns.md",
+                  "verdict": "CLEAN",
+                  "summary": "The whole note was re-read independently. Each of the 12 patterns states its mechanism, when it fits and the failure it adds, and the table and adoption-order paragraph agree with the sections. I found no factual, structural or Qard defect that justifies an edit.",
+                  "page_type": "Concept — optional Questions and References; mermaid fences are language-tagged; wikilinks use full paths with aliases.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "RAG patterns are repairs for observed retrieval failures.",
+                      "line_start": 17,
+                      "reason": "The opening states the operating idea and the adoption rule, so the topic is quick to re-enter."
+                    },
+                    {
+                      "quote": "Its ceiling is easy to find.",
+                      "line_start": 33,
+                      "reason": "The first pattern names its limit (exact identifiers, no second stage), which sets the fit-and-failure shape that the later patterns follow."
+                    },
+                    {
+                      "quote": "Self-RAG requires custom training, while CRAG-style correction depends on trustworthy evaluator thresholds.",
+                      "line_start": 246,
+                      "reason": "This claim matches the cited Self-RAG and CRAG papers and keeps the specialist-pattern boundary accurate."
+                    },
+                    {
+                      "quote": "The decision therefore rests on a comparison with a vector-retrieval baseline on representative questions.",
+                      "line_start": 276,
+                      "reason": "The single Qard tests one gradeable task and keeps its ID. Its answer is accurate, gives the condition and the cost, and cites the Microsoft Research paper on the answer side."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the 12 patterns share one decision frame (failure fixed versus risk added) and are used together for selection, so separating them would not make either part more useful.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "overall_reason": "The note is accurate and readable, and the Qard tests a single task. There are no known violations, no edits and no open defects, so keeping it unchanged is justified.",
+              "change_checks": []
+            },
+            "model_calls": 14
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole note. The opening defines RAG and states the pipeline boundary (query processing, retrieval, context assembly, evaluation). The Mermaid flow matches the 'each stage limits the next' explanation and the first card's stage list. Operational baselines (flagging, retry caps, drift, caching scoped to authorization, idempotency for mutating tools) are accurate and consistent with the linked notes. The RAG vs fine-tuning table and decision list are correct and keep facts in the corpus and behavior in the weights. All three cards each test one gradeable task, with answers that explain mechanisms and conditions. The experiment card correctly allows ablations and flags when single-variable changes are not feasible. The diagnosis card covers upstream loss, misuse by generation, and measurement faults. Cited sources (Lewis et al. 2020, Gao et al. survey, Rules of ML, Foundry RAG evaluators) support the claims. The frontmatter, the MD040 language tags, and the References format are valid, and there are no known violations. No defect found, so editing would only add churn."
+                }
+              ],
+              "feedback": [],
+              "decisions": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "The whole-note audit found no concrete defect. The keep is justified, and there are no edits or sources to check.",
+              "change_checks": [],
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note defines RAG, shows the pipeline, gives operational baselines, and compares RAG with fine-tuning. The terminology is consistent and the voice is impersonal and declarative. The three cards each test one task. No edit would add accuracy or clarity, so keeping it unchanged is justified.",
+                  "page_type": "FolderNote: keeps tags [FolderNote] and the protected datacorejsx map block. Questions and References are optional and are present and valid.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "Each stage limits the next. When translation is used, retrieval cannot repair a rewrite that changed the intent",
+                      "line_start": 43,
+                      "reason": "The prose states the central pipeline constraint and matches the Mermaid flow and the first card's stage list."
+                    },
+                    {
+                      "quote": "Mutating tool calls need [[Home/Software Architecture/Distributed Systems/Idempotency|idempotency]], not response caching.",
+                      "line_start": 50,
+                      "reason": "This bullet states a precise caching boundary: read-only results scoped to the caller's authorization may be cached, while mutating calls need idempotency."
+                    },
+                    {
+                      "quote": "The boundary still holds: knowledge changes through reindexing, and behavior changes through retraining.",
+                      "line_start": 71,
+                      "reason": "The closing sentence states a decisive rule for choosing between RAG and fine-tuning and does not repeat the table."
+                    },
+                    {
+                      "quote": "Changing exactly one thing is not always feasible.",
+                      "line_start": 99,
+                      "reason": "The experiment card names an exception and the fallback methods (feature flag, controlled rollout, ablation) instead of oversimplifying."
+                    },
+                    {
+                      "quote": "Measurement itself:** citation handling and the reference answer or evaluator are checked too",
+                      "line_start": 110,
+                      "reason": "The diagnosis card covers retrieval loss, generation misuse, and evaluator faults, so the explanation of stage location is complete."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the folder hub covers one coherent topic (the RAG pipeline plus its fine-tuning boundary), and the detail belongs in child notes reached through the folder map.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "identity_safety": "PASS",
+                    "question_quality": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ]
+            },
+            "model_calls": 16
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md",
+                  "outcome": "keep",
+                  "reason": "I read the whole note and found no verified defect. The opening states the second-stage role and the limit that reranking cannot recover missing evidence. Each approach section (cross-encoder, ColBERT, BM25, MMR, LLM, RRF) gives a mechanism, a cost and a boundary condition. The RRF arithmetic in the diagram is correct: 1/63 + 1/61 ≈ 0.032 with k=60. The MMR formula, the ColBERTv2 6–10x compression claim and the SBERT throughput framing match the cited sources and are properly qualified as hardware-dependent. The pitfalls and the tradeoff table agree with the prose, and the stage-by-stage diagnostics for first-stage ceiling versus demotion are coherent. The three cards each test one gradeable task, cite sources on the answer side, and match the note's content. Two existing cards cite SBERT URLs that differ from the one in References, but both are valid. The wikilinks and the code fences with language identifiers are fine. Rewriting would be cosmetic churn."
+                }
+              ],
+              "feedback": [],
+              "decisions": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "Independent whole-note audit found no concrete factual, structural, question-quality or rules defect. No edits were proposed and none are needed.",
+              "change_checks": [],
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note states the second-stage role and its ceiling, then covers each approach (cross-encoder, ColBERT, BM25, MMR, LLM, RRF) with its mechanism, cost and limit. Pitfalls and the tradeoff table agree with the prose. The three cards each test one gradeable task. Rewriting would be cosmetic churn.",
+                  "page_type": "Concept — typed frontmatter, optional Questions/References present and useful, code fences have language identifiers, wikilinks point to sibling RAG notes.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "The second stage has a narrower job: improve the short list before context reaches the generator.",
+                      "line_start": 17,
+                      "reason": "The opening states the operating idea. The next paragraph states the boundary that reranking cannot recover missed evidence."
+                    },
+                    {
+                      "quote": "The formula is `RRF_score = sum of 1 / (k + rank_i)`, with k=60 in the original paper.",
+                      "line_start": 109,
+                      "reason": "The RRF formula and constant are correct, and the diagram arithmetic (1/63 + 1/61 ≈ 0.032) checks out."
+                    },
+                    {
+                      "quote": "Cross-encoders instead allow full token-level attention across the pair",
+                      "line_start": 41,
+                      "reason": "This gives the cross-encoder versus bi-encoder mechanism and why it affects negation and qualifiers."
+                    },
+                    {
+                      "quote": "Against a 500ms total SLA, that is 10–40% of the entire budget.",
+                      "line_start": 119,
+                      "reason": "The latency arithmetic is correct (50/500 to 200/500), and the pitfall includes a mitigation."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the approaches, pitfalls and tradeoffs all serve one second-stage reranking decision, and the note remains coherent at its current length.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ]
+            },
+            "model_calls": 18
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Retrieval.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Retrieval.md",
+                  "outcome": "keep",
+                  "reason": "Read the whole note against its text. The opening explains why retrieval caps answer quality. The Mermaid diagram and the 429 example make the dense/sparse/hybrid split concrete. Each mode section gives mechanism, fit and main risk. The BM25 versus PostgreSQL ts_rank distinction is stated correctly. RRF is described correctly: the sum of 1/(k+rank) with k=60. The pre/post-filtering section correctly keeps authorization separate from similarity. The pitfalls cover ANN operating-point drift, embedding migration, segment-hidden metrics and silent identifier misses, and each ends with a detection or mitigation step. The tradeoffs table matches the prose. The two existing cards each test one gradeable task, with accurate answers and Azure hybrid-search sources. The references are topic-specific bare links. known_violations is empty and there are no flagged cards or owner feedback. No factual defect or editorial weakness was found that would justify a change, so a forced edit would only add churn."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "I read the whole note independently. It is accurate and well ordered, and its cards are sound. I found no concrete defect that would justify an edit, so keeping it unchanged is justified.",
+              "change_checks": [],
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Retrieval.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note opens with why retrieval caps answer quality. A diagram and a concrete 429 example then make the dense, sparse and hybrid split easy to recall. Each mode gives mechanism, fit and main risk. Technical claims are correct, the pitfalls end in detection or mitigation steps, and both Qards test one gradeable task each. Keeping it unchanged is justified.",
+                  "page_type": "Concept note with Questions and References; the applicable rules are concept voice, one gradeable task per Qard, bare reference links and MD040.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "It does not provide BM25 as its built-in ranker.",
+                      "line_start": 56,
+                      "reason": "Correctly separates PostgreSQL full-text ranking (ts_rank, ts_rank_cd) from BM25, which avoids a common factual error."
+                    },
+                    {
+                      "quote": "sums `1 / (k + rank)` for each document across the input lists, with k=60 in the original method",
+                      "line_start": 80,
+                      "reason": "The RRF formula and the original k=60 are correct, and the point that rank positions remove the need for a shared score scale is stated."
+                    },
+                    {
+                      "quote": "Authorization is a separate requirement: semantic similarity cannot enforce it",
+                      "line_start": 101,
+                      "reason": "Keeps access control separate from the recall and cost tradeoff of filtering, which is the right engineering boundary."
+                    },
+                    {
+                      "quote": "Vector search recognizes the meaning around rate limiting, yet may lose the exact token `429`.",
+                      "line_start": 33,
+                      "reason": "A concrete example that makes the complementary failure modes of the two paths memorable."
+                    },
+                    {
+                      "quote": "Hybrid is therefore justified by measurement rather than assumed.",
+                      "line_start": 173,
+                      "reason": "The second card keeps a dependent mechanism-and-why explanation together, and its RRF rank-equivalence reasoning is correct."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: dense, sparse and hybrid retrieval, indexing and filtering, and the pitfalls form one coherent retrieval-stage explanation, and Re-ranking and Vector Databases already have their own notes.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ]
+            },
+            "model_calls": 20
+          }
+        }
+      ],
+      "feedback_pr": 0,
+      "checkpoint_at": "2026-11-05T07:12:22.731018Z",
+      "topic": "AI & ML",
+      "topic_id": "ai-ml-4edf0823",
+      "current_batch": {
+        "topic": "AI & ML",
+        "topic_id": "ai-ml-4edf0823",
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Retrieval.md",
+            "content": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"Decides what evidence enters the prompt, balancing recall, precision, and latency across search methods.\"\nlevel: [\"2\"]\npriority: High\nstatus: Done\npublish: true\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Context Engineering/RAG/Retrieval\"\nflashcard_uid: \"6dc71082\"\ncreated: \"2026-02-27T12:56:16.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.490Z\"\n---\n\nRetrieval decides which evidence reaches the prompt. Missing evidence caps what a grounded answer can claim, even though prompts and generation models can still improve how fixed evidence is used. The practical problem is to recover enough relevant material without filling the context window with noise or spending the entire latency budget on search.\n\nA query can become a vector for semantic search, weighted terms for keyword search, or both. Vector search compares it with pre-indexed chunk embeddings. BM25 searches a lexical index. The resulting candidates are fused into one ranked list and passed to [[Re-ranking|reranking]] or directly to the generator.\n\nBut no single search path handles every query shape well.\n\n```mermaid\nflowchart LR\n    Q[User query] --> D[Vector search]\n    Q --> S[Keyword search]\n    D --> F[Fuse results]\n    S --> F\n    F --> R[Top-k candidates]\n    R --> N[Reranker or generator]\n```\n\nAn example is the query \"rate limit error 429 behavior in partner tier.\" Vector search recognizes the meaning around rate limiting, yet may lose the exact token `429`. Keyword search catches `429` and `partner tier`, while missing related passages that use different wording. Running both paths covers those two failure modes. Hybrid search is a sensible default, though the added path can introduce noise on some corpora.\n\n# Retrieval Modes\n\n## Dense Retrieval — Vector Search\n\nThe index-time and query-time work split cleanly:\n\n- An embedding model maps each document chunk and the query into the same fixed-size vector space. Document vectors are computed once during indexing. Each request only needs a query vector.\n- The [[Vector Databases|vector database]] searches an approximate index, commonly HNSW or IVF, for nearby chunk vectors. Approximation gives up some recall to avoid scanning millions of vectors one by one.\n- Model choice shapes the result set. Dimensionality and training data differ, and a model that leads a general MTEB benchmark may fail on a specialized corpus or another language. Domain queries are the real test.\n\nDense retrieval fits:\n\n- Semantic paraphrases and natural-language questions where user wording differs from source text.\n- Multilingual corpora where the embedding model captures meaning across languages.\n\nThe main risk is specific:\n\n- **Misses exact identifiers.** Embedding models capture meaning better than literal tokens. Error codes, API paths, and version strings can disappear inside the vector representation. Returned chunks may look topically correct while describing the wrong operation, which is harder to catch than an obviously unrelated keyword result.\n\n## Sparse Retrieval — Keyword Search (BM25)\n\nBM25 is the default ranking model in search engines such as Elasticsearch. PostgreSQL's native full-text search uses `to_tsvector`/`to_tsquery` for lexeme matching and `ts_rank` or `ts_rank_cd` for ranking. It does not provide BM25 as its built-in ranker. Both behave like ranked `grep` at a high level, but their scoring functions differ. A search for `NullReferenceException` in a .NET codebase hits files containing that string. A focused source file can rank above a 10,000-line log that mentions it once.\n\nHow it works:\n\n- BM25 gives rare matching terms more weight. If only three documents contain `E4392`, they score strongly for that query. Common words contribute little.\n- Repetition has diminishing returns, and a length penalty stops large documents from winning through word count alone.\n- A standard keyword index is enough. No embedding model, GPU, or vector database is involved.\n\nWhere it fits:\n\n- Queries with exact keyword constraints: error codes, product names, version numbers, configuration keys.\n- Domains with specialized terminology where exact matches carry high signal.\n\nMain risk:\n\n- **Weak on paraphrases.** BM25 cannot connect \"authentication failure\" with \"credential validation errors\" when the words do not overlap. Stemming and synonym expansion help at the edges, but semantic variation remains its blind spot.\n\n## Hybrid Retrieval — Vector + Keyword\n\nHybrid retrieval runs full-text search, such as `WHERE body @@ to_tsquery('error & 429')`, beside vector similarity search and then merges the results. RRF works from rank positions. If document A is #2 in vector search and #5 in keyword search, while document B is #1 in keyword search but #200 in vector search, the agreement around A raises it in the fused list. Linear combination instead assigns an explicit weight to each score, closer to a weighted `UNION ALL`.\n\nHow it works:\n\n- Vector search and keyword search run in parallel against the same query, and the two ranked lists are fused into a single candidate set.\n- **[[Re-ranking|Reciprocal Rank Fusion (RRF)]]** sums `1 / (k + rank)` for each document across the input lists, with k=60 in the original method. Because it uses positions instead of scores, BM25 and vector similarity do not need a shared scale. Agreement across retrievers is rewarded.\n- **Linear combination** normalizes scores and computes `alpha * vector_score + (1 - alpha) * keyword_score`. It exposes more control, but alpha must be tuned for the domain. Identifier-heavy corpora may need more keyword weight. Conversational queries often favor the vector path.\n\nWhere it fits:\n\n- Production systems with mixed query patterns. This is a safe default for many RAG systems.\n\nMain risk:\n\n- **Can lose to one search mode.** A homogeneous corpus may strongly favor one retriever, leaving the other to inject noise. In one [published case study](https://huggingface.co/blog/charles-azam/rag) of 156 multilingual engineering and scientific queries, vector-only reached a 69.2% hit rate while hybrid reached 63.5%. The extra keyword path hurt. Hybrid must be tested against both single-mode baselines on the actual corpus.\n- **Large top-k values collect noise.** Fusing two long result lists pulls weak candidates into the tail. Without [[Re-ranking|reranking]] or deduplication, those candidates dilute the context sent to generation.\n\n# Indexing and Filtering\n\nThe vector index sets the latency-recall curve:\n\n- **HNSW** builds a layered graph between nearby vectors and searches from coarse connections down to local neighbors. Raising `ef_search` explores more of that graph, buying recall with latency. A value that works on a small collection may miss more neighbors after the corpus grows.\n- **IVF-PQ** clusters and compresses vectors, in some configurations using far less memory than HNSW. Aggressive compression loses recall more quickly. It suits collections around 10M+ vectors when an in-memory HNSW graph is too expensive.\n\nFiltering decides which vectors are eligible:\n\n- **Pre-filtering** narrows the search space by metadata before vector search, so the returned candidates already satisfy the filter. Choosing it over post-filtering is a recall and cost decision. Authorization is a separate requirement: semantic similarity cannot enforce it, so tenant and ACL boundaries hold only when unauthorized chunks are excluded before any result reaches the model or the user, whichever stage performs the exclusion.\n- **Post-filtering** removes candidates after ANN search. It is easier to bolt on, but selective filters may discard most of top-k and leave too little evidence.\n- Index versions stay explicit, and collection aliases enable instant rollback during index rebuilds.\n\n# Pitfalls\n\n## ANN Operating-Point Regression\n\nCorpus growth or distribution change can make an earlier HNSW `ef_search` setting miss more exact neighbors. The outcome depends on graph construction, filters, data distribution, implementation, and workload; latency can also move. Nothing in ordinary error-rate monitoring establishes that recall stayed stable.\n\nDetection: scheduled [[Monitoring#Retrieval Quality Metrics|Recall@k]] checks compare ANN results with exact search on a maintained set of representative queries. Whether the response is tuning `ef_search`, rebuilding, or changing index parameters follows from the measured recall-versus-latency curve; no single response is assumed to restore the old operating point.\n\n## Embedding Model Migration Debt\n\nEmbedding models produce incompatible vector spaces. An upgrade therefore requires re-embedding the corpus. New query vectors cannot be compared with an old index. At scale, the migration needs parallel storage and a controlled cutover, and benchmark gains do not guarantee better domain retrieval. Provider deprecations can compress that schedule.\n\nMitigation: embedding model selection is a long-term infrastructure decision. Each vector is stored with its model version, upgrade thresholds come from domain-specific metrics rather than MTEB deltas, and collection aliases with shadow traffic allow validation before cutover.\n\n## Aggregate Metrics Hiding Segment Failures\n\nAn overall recall of 70% can coexist with 5% recall on a small but valuable query segment. Multi-hop or date-filtered requests may be failing while the aggregate looks acceptable. Segmentation also separates missing inventory from a retriever that cannot surface material already present.\n\nDetection: retrieval metrics are segmented by query type, tenant, locale, and domain, and alerts fire on per-segment degradation, not just on the aggregate.\n\n## Vector Search Failing Silently on Identifiers\n\nFor identifier-heavy queries, vector search can return chunks that are topically related and operationally wrong. The evidence looks plausible enough for the model to assemble a confident answer from the wrong material.\n\nMitigation: identifier-heavy corpora are a strong case for hybrid retrieval, and their evaluation includes identifier queries. If the vector path causes most failures, the fusion weights are the first place to look, because these domains often need more keyword influence.\n\n# Tradeoffs\n\n| Mode | Recall profile | Latency | Operational complexity | Best for |\n| --- | --- | --- | --- | --- |\n| Vector only | Strong on semantic paraphrases -- weak on exact identifiers | Low -- single index lookup | Moderate -- embedding model and vector database required | Homogeneous semantic corpora with natural-language queries |\n| Keyword only -- BM25 | Strong on exact terms -- weak on paraphrases | Lowest -- keyword index lookup | Low -- no embedding model or vector database | Identifier-heavy domains with stable vocabulary |\n| Hybrid -- RRF | Broad -- covers semantic and lexical queries | Moderate -- two parallel searches plus fusion | Higher -- two indexes and fusion logic | Mixed query patterns -- default for most production systems |\n| Hybrid -- linear combination | Tunable -- weight toward dominant search mode | Moderate -- same as RRF | Highest -- requires alpha tuning per domain | When one search mode is consistently stronger and deserves explicit weighting |\n\nHybrid retrieval with RRF and a conservative top-k, often 5–20, is a reasonable first configuration. It is then compared with both single-mode baselines on real corpus queries, because hybrid is a good starting point, not a guaranteed winner. [[Re-ranking|Reranking]] fits after first-stage retrieval is stable and the remaining failures come from poor ordering near the top.\n\n# Questions\n\n> [!qard]- Why does hybrid retrieval combine keyword search and vector search?\n> Hybrid retrieval combines them because they fail in complementary ways. Keyword search matches the exact terms in a query, while vector search matches meaning even when the wording differs. Running both covers queries that either one alone would miss.\n>\n> | Aspect | Keyword search, such as BM25 | Vector search |\n> |---|---|---|\n> | What it matches | Documents that share the query's terms, with rarer terms counting more | Documents whose embeddings are close to the query's embedding, so related meanings match |\n> | Strong on | Exact identifiers such as error codes, product names and version numbers | Paraphrases and natural-language questions worded differently from the source |\n> | Weak on | Synonyms and rephrasing with no word overlap, such as *credential validation error* for *authentication failure* | Exact tokens, which can blur inside the embedding and surface topically similar but wrong chunks |\n> | What it needs | A lexical (inverted) index | An embedding model and a vector index |\n>\n> In a hybrid search, both queries run in parallel and their ranked lists are merged, commonly with Reciprocal Rank Fusion (RRF). RRF scores documents by their rank positions, so the two incompatible score scales never need to be normalized. For a query about *error 429 behavior for the partner tier*, keyword search can catch `429` while vector search finds rate-limiting passages phrased differently.\n>\n> Hybrid is a common starting point rather than a guaranteed improvement over either mode alone.\n>\n> [Hybrid search overview (Azure AI Search)](https://learn.microsoft.com/en-us/azure/search/hybrid-search-overview)\n\n<!-- qard-id: 3080dee6-c717-480c-b2ba-c0be9ba83120 -->\n> [!qard]- When can hybrid retrieval perform worse than single-mode retrieval?\n> Hybrid retrieval can perform worse when one retrieval path is much weaker on a particular corpus and query mix. Fusing its results pulls poor candidates into the top results. There they displace good results that the stronger path would have returned on its own.\n>\n> The mechanism:\n>\n> 1. Keyword search, such as BM25, and vector search run in parallel for the same query.\n> 2. Their ranked lists are merged, commonly with Reciprocal Rank Fusion (RRF), which scores each document from its rank positions rather than from raw scores.\n> 3. Standard RRF gives each list equal influence. For documents that appear in only one list, rank 1 in the weak list scores the same as rank 1 in the strong list, and higher than rank 3 in the strong list.\n> 4. With a small final cutoff, those weak candidates push relevant results out.\n> \n> Whether this happens depends on the workload. In a homogeneous corpus where one mode clearly dominates, the other mode has little useful to add. A large top-k can also carry weak tail candidates into the context when no reranking or deduplication follows.\n>\n> Hybrid is therefore justified by measurement rather than assumed. Keyword-only, vector-only and hybrid retrieval are compared on representative queries, using the retrieval or end-to-end metric that matches the product goal. When hybrid loses, the fusion can be weighted toward the stronger path, or the extra path can be dropped.\n>\n> [Hybrid search overview (Azure AI Search)](https://learn.microsoft.com/en-us/azure/search/hybrid-search-overview)\n\n# References\n\n- [RAG techniques — retrieval and ranking overview (Azure AI Search)](https://learn.microsoft.com/en-us/azure/search/retrieval-augmented-generation-overview)\n- [Introducing Contextual Retrieval — hybrid retrieval gains measured (Anthropic Engineering)](https://anthropic.com/engineering/contextual-retrieval)\n- [When good models go bad — embedding model migration and MTEB limitations (Weaviate)](https://weaviate.io/blog/when-good-models-go-bad)\n- [MTEB leaderboard — retrieval task benchmarks (Hugging Face)](https://huggingface.co/spaces/mteb/leaderboard)\n",
+            "hash": "4acbe793542d40d3e725b15999840ac50422e38bacf186aae8d3776ab2860351",
+            "topic": "AI & ML",
+            "violations": [],
+            "needs_fixing_ids": [],
+            "repair_input_hash": "",
+            "selection_reason": "new"
+          }
+        ],
+        "feedback": [],
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review_process": "focused-whole-note-v1",
+        "pr": null
+      },
+      "base_sha": "67caf2e374f53e8772b86b8ea0f881d74e784fa1",
+      "reservation_deadline": "2026-11-05T07:26:43.948949Z",
+      "stop_reason": "call_limit",
+      "sealed_at": "2026-11-05T07:12:22.731019Z"
     }
   },
   "feedback_workloads": {
