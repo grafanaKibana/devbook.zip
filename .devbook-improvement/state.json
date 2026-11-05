@@ -4212,11 +4212,11 @@
     "version": 1,
     "id": "b98a816444094ceaa557c175133e1e93",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-05T20:07:51.294462Z",
-    "elapsed_seconds": 520.8632785999998,
+    "elapsed_seconds": 529.3616183999999,
     "calls_reserved": 16,
-    "responses_received": 15,
+    "responses_received": 16,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md",
       "Vault/Home/AI & ML/LLM/Embeddings.md",
@@ -4693,7 +4693,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-05T20:16:32.157115Z",
+    "checkpoint_at": "2026-11-05T20:16:40.655454Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -16719,5 +16719,53 @@
       },
       "feedback_snapshot": []
     }
+  },
+  "pending_author_proposal": {
+    "workload_id": "b98a816444094ceaa557c175133e1e93",
+    "topic_id": "ai-ml-4edf0823",
+    "batch": {
+      "topic": "AI & ML",
+      "topic_id": "ai-ml-4edf0823",
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Evaluation/Online Evaluation and AB Tests.md",
+          "content": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"Measuring LLM changes on live traffic with outcome metrics, randomized assignment, and uncertainty.\"\nlevel: [\"3\"]\npriority: Medium\nstatus: Ready to Repeat\npublish: true\ncreated: \"2026-02-16T21:15:26.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.476Z\"\n---\n\nOnline evaluation measures an LLM application under real traffic. In an A/B test, independent units such as users or accounts are randomly assigned to control or treatment. The observed difference estimates the effect of a prompt, model, retrieval, or tool change.\n\nThis catches behavior a fixed offline set misses, including distribution shifts and long conversations. The estimate is credible only when assignment, exposure, metric definitions, and analysis refer to the same experiment. [[#Experiment platform architecture]] describes the machinery that holds those contracts together.\n\nDefine the primary outcome and abort conditions before traffic starts. Longer responses are not a win when resolution falls. A resolution lift is still unshippable when safety incidents or p95 latency cross the guardrail.\n\n# What to Measure\n\n| Metric type | Examples | Role |\n| --- | --- | --- |\n| Task outcome | Resolution rate, escalation rate, completion | Primary product effect |\n| User outcome | CSAT, re-contact rate, corrected-answer rate | Quality from user behavior |\n| Safety | PII leak rate, policy violation rate | Guardrail and abort condition |\n| Efficiency | Cost per resolved case, p95 latency | Operational guardrail or secondary metric |\n| Engagement | Follow-up rate, session length | Diagnostic proxy, not success by itself |\n\nA metric contract names its numerator and denominator, attribution window, exclusions, and aggregation unit. “Resolution rate” remains ambiguous until one user, conversation, or message is chosen as the observation.\n\n# Running a Safe A/B Test\n\n```text\nHypothesis: prompt v2 improves account-level resolution rate.\n\nAssignment unit: account\nPrimary metric: resolved_accounts / exposed_accounts\nGuardrails: pii_incident_rate, latency_p95\nMinimum detectable effect: +2 percentage points\nPower: 80%\nSignificance level: 5%\nRuntime: long enough to reach sample size and cover weekly seasonality\nRamp: 1% → 10% → 50%, with guardrail aborts at every stage\n```\n\nThe assignment unit determines the independent analysis unit. If treatment is assigned per account, ten conversations from that account remain correlated. They are not ten independent samples. Analyze account-level outcomes or use an estimator that models the clustering. Message-level randomization can also create carryover when one user sees both variants.\n\nChoose the estimator from the metric and design:\n\n- For a binary user-level outcome, estimate a difference in proportions and its confidence interval.\n- For a continuous user-level outcome, Welch’s t-test is often a reasonable large-sample default. Inspect heavy tails and use a robust or bootstrap estimator when a few users dominate the mean.\n- For ratio metrics such as cost per resolved case, preserve the joint numerator/denominator structure rather than treating per-event ratios as independent values.\n- For clustered, repeated, or triggered observations, use unit-aware methods. Changing the test name does not repair a mismatched assignment and analysis unit.\n\nPre-register the minimum detectable effect, sample size, stopping rule, and segmentation plan. A `p < 0.05` result can still be operationally irrelevant. Report the effect estimate and confidence interval, not only the threshold crossing.\n\n# Power and Uncertainty\n\nAn underpowered experiment often misses a real effect. It does not inherently create more false positives when the significance level and stopping rule are respected. The subtler problem appears among the few underpowered experiments that do reach significance: unusually large estimates are the ones most likely to cross the threshold. That selection exaggerates the apparent effect.\n\nRepeatedly peeking and stopping on the first significant result does inflate false positives. Use the predeclared fixed horizon or a valid sequential design when continuous monitoring is required.\n\n# Segmentation\n\nDefine decision-driving segments before analysis. An average improvement can hide harm to one language, plan, geography, or device class. Post-hoc slices are useful for finding hypotheses, but many comparisons also produce false discoveries. Label them exploratory and confirm consequential findings in another test.\n\n# Monitoring versus Experimentation\n\n| Aspect | Continuous monitoring | A/B test |\n| --- | --- | --- |\n| Purpose | Detect degradation | Estimate the effect of a specific change |\n| Traffic | Current production behavior | Randomized control and treatment |\n| Duration | Ongoing | Planned sample and stopping rule |\n| Decision | Alert on a threshold | Ship, reject, or gather more evidence |\n\nMonitoring catches drift and outages, including provider-side changes. Randomization estimates the causal effect of an intentional change. One does not substitute for the other.\n\n# Experiment Platform Architecture\n\nAn experiment platform makes a randomized decision reproducible. Its control plane binds the hypothesis and eligibility rules to assignment, exposure, metrics, and analysis under one immutable experiment version. Without that record, a dashboard can compare unexposed users or recompute the primary metric under rules introduced after traffic ran.\n\n![[AI & ML/AI & ML-Online Evaluation and AB Tests-18120000.jpg|theme-aware]]\n\n## Configuration Lifecycle\n\nAn experiment definition records the hypothesis, owner, eligibility rule, variants, assignment unit, metrics, ramp, and stop policy. Once traffic starts, changing the definition creates a new version. Exposures collected under different rules must remain distinguishable.\n\n```text\ndraft → approved → running → stopped → analyzed → archived\n```\n\nA kill switch can stop new assignments immediately, but it must not delete the historical definition or exposure log needed for audit and analysis.\n\n## Deterministic Assignment\n\nHashing a stable identifier gives the same unit the same variant on every service instance:\n\n```text\nbucket = Hash(experimentId, version, accountId, salt) mod 10_000\n\n0..4_999     → control\n5_000..9_999 → treatment\n```\n\nThe assignment unit is a product decision. An account is appropriate when its users influence one another. A device works only when stable identity is unavailable and cross-device inconsistency is acceptable. Salt and version keep a new experiment from accidentally reusing an old allocation.\n\n## Exposure, Not Eligibility\n\nAssignment records intent. It does not prove the treatment affected a response. Record exposure where the selected variant can first change behavior, with the experiment version, unit ID, variant, timestamp, and attribution context. Join outcomes through that event, but preserve randomization: the trigger rule must be evaluated before variant-specific behavior. Conditioning on an exposure caused by the treatment can bias the estimate.\n\nLog exposure idempotently or deduplicate it in analysis. Duplicate events must not turn one account into several independent observations.\n\n## Metric and Analysis Contracts\n\nAnalysis must use the metric definition approved at launch. Data quality comes first. A material 62/38 allocation in a planned 50/50 split points to a defect in eligibility, hashing, logging, or filtering. Stop interpreting the treatment effect until that sample-ratio mismatch is explained. Missing exposure fields, duplicate units, delayed outcomes, and stale guardrails need the same treatment.\n\nThe result should include an effect estimate, confidence interval, sample counts at the assignment unit, and the predefined decision criteria. A dashboard visualizes that record. It should not invent a new analysis after launch.\n\nCentralization adds schema governance and launch ceremony. It pays off when several teams run experiments or decisions affect safety, revenue, or policy. A small product can start with versioned configuration, stable hashing, an exposure table, and a reviewed analysis notebook. Those contracts still need one owner.\n\n# References\n\n- [Practical Guide to Controlled Experiments on the Web](https://exp-platform.com/Documents/GuideControlledExperiments.pdf)\n- [Diagnosing sample-ratio mismatch in online controlled experiments](https://www.microsoft.com/en-us/research/publication/diagnosing-sample-ratio-mismatch-in-online-controlled-experiments-a-taxonomy-and-rules-of-thumb-for-practitioners/)\n- [The ASA statement on p-values](https://doi.org/10.1080/00031305.2016.1154108)\n",
+          "hash": "fc830bffd307b372462ac1b57a28f565d92318a62ebad295c38a9daa287de3d5",
+          "topic": "AI & ML",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Evaluation/Online Evaluation and AB Tests.md",
+          "outcome": "keep",
+          "reason": "Audited the whole note against current text and standard experimentation practice. The opening defines randomized assignment by independent unit. The metric table and metric-contract sentence are precise. The A/B plan correctly links assignment unit to the analysis unit, and the estimator guidance (difference in proportions, Welch with robustness checks, ratio metrics, clustering) is accurate. The power section correctly separates false-negative risk and exaggerated significant estimates from peeking inflation. The segmentation, monitoring-vs-experiment table and architecture sections (versioned definitions, deterministic hashing, exposure logging before variant behavior, sample-ratio mismatch) are consistent with the cited Kohavi and Microsoft SRM references and the ASA p-value statement. Frontmatter, MD040 fences and References format are valid, there are no cards, and no known violations exist. The prose is direct, non-repetitive and ordered well, so edits would be cosmetic."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/AI & ML/LLM/Evaluation/Online Evaluation and AB Tests.md": "fc830bffd307b372462ac1b57a28f565d92318a62ebad295c38a9daa287de3d5"
+    },
+    "feedback_keys": [],
+    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/AI & ML/LLM/Evaluation/Online Evaluation and AB Tests.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-05T20:16:40.655443Z"
   }
 }
