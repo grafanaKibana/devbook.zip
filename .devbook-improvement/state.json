@@ -4027,11 +4027,11 @@
     "version": 1,
     "id": "b98a816444094ceaa557c175133e1e93",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-05T20:07:51.294462Z",
-    "elapsed_seconds": 345.8936761999999,
+    "elapsed_seconds": 361.81901109999984,
     "calls_reserved": 11,
-    "responses_received": 10,
+    "responses_received": 11,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md",
       "Vault/Home/AI & ML/LLM/Embeddings.md",
@@ -4280,7 +4280,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-05T20:13:37.187510Z",
+    "checkpoint_at": "2026-11-05T20:13:53.112845Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -16088,6 +16088,133 @@
       "Vault/Home/AI & ML/LLM/Evaluation/Evaluation.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-05T20:13:32.178577Z"
+    "prepared_at": "2026-11-05T20:13:32.178577Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Evaluation/Evaluation.md",
+            "verdict": "CLEAN",
+            "summary": "The note is accurate, well ordered and concise. It separates cases from scorers, explains why deterministic does not mean exact, covers judge calibration and versioning, and covers holdout overfitting. No defect justifies an edit, so keeping it unchanged is correct.",
+            "page_type": "FolderNote — keeps the Datacore folder map block, tags: [FolderNote], optional Questions absent (allowed), References present as bare links.",
+            "current_text_evidence": [
+              {
+                "quote": "Keep the cases separate from the scorers.",
+                "line_start": 15,
+                "reason": "The opening states the operating idea early: cases are distinct from scorers and from the gate."
+              },
+              {
+                "quote": "A regex for PII or a keyword safety filter is repeatable and still wrong on some inputs.",
+                "line_start": 43,
+                "reason": "The note states the important boundary: deterministic execution is not the same as an exact classification. It also gives the calibration remedy."
+              },
+              {
+                "quote": "Version the judge model and prompt with the rubric and sampling settings.",
+                "line_start": 45,
+                "reason": "The note names the condition that makes score files comparable."
+              },
+              {
+                "quote": "Repeated prompt or rubric tuning against the holdout turns it into training data.",
+                "line_start": 71,
+                "reason": "The note explains the overfitting mechanism and the signal that exposes it."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: the note has one coherent evaluation pipeline. Deterministic checks, judges, golden sets and online evaluation already have sibling notes it links to.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "NOT APPLICABLE",
+              "identity_safety": "NOT APPLICABLE",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "overall_reason": "The whole-note audit found no concrete error, rule violation or readability defect. The keep is justified and no edits were proposed.",
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Evaluation/Evaluation.md",
+          "citation_index": 0,
+          "reported_line_start": 15,
+          "resolved_line_start": 18
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Evaluation/Evaluation.md",
+          "citation_index": 1,
+          "reported_line_start": 43,
+          "resolved_line_start": 52
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Evaluation/Evaluation.md",
+          "citation_index": 2,
+          "reported_line_start": 45,
+          "resolved_line_start": 54
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Evaluation/Evaluation.md",
+          "citation_index": 3,
+          "reported_line_start": 71,
+          "resolved_line_start": 85
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/AI & ML/LLM/Evaluation/Evaluation.md": "8c0e88b768bb4d377785567aeb925ec5e9ceefa6817c8015be643b4cfad38bc6"
+      },
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CLEAN",
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Evaluation/Evaluation.md",
+          "verdict": "CLEAN",
+          "summary": "The note is accurate, well ordered and concise. It separates cases from scorers, explains why deterministic does not mean exact, covers judge calibration and versioning, and covers holdout overfitting. No defect justifies an edit, so keeping it unchanged is correct.",
+          "page_type": "FolderNote — keeps the Datacore folder map block, tags: [FolderNote], optional Questions absent (allowed), References present as bare links.",
+          "current_text_evidence": [
+            {
+              "quote": "Keep the cases separate from the scorers.",
+              "line_start": 18,
+              "reason": "The opening states the operating idea early: cases are distinct from scorers and from the gate."
+            },
+            {
+              "quote": "A regex for PII or a keyword safety filter is repeatable and still wrong on some inputs.",
+              "line_start": 52,
+              "reason": "The note states the important boundary: deterministic execution is not the same as an exact classification. It also gives the calibration remedy."
+            },
+            {
+              "quote": "Version the judge model and prompt with the rubric and sampling settings.",
+              "line_start": 54,
+              "reason": "The note names the condition that makes score files comparable."
+            },
+            {
+              "quote": "Repeated prompt or rubric tuning against the holdout turns it into training data.",
+              "line_start": 85,
+              "reason": "The note explains the overfitting mechanism and the signal that exposes it."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: the note has one coherent evaluation pipeline. Deterministic checks, judges, golden sets and online evaluation already have sibling notes it links to.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "NOT APPLICABLE",
+            "identity_safety": "NOT APPLICABLE",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "overall_reason": "The whole-note audit found no concrete error, rule violation or readability defect. The keep is justified and no edits were proposed.",
+      "change_checks": []
+    }
   }
 }
