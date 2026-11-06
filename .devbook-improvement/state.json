@@ -4809,11 +4809,11 @@
     "version": 1,
     "id": "e2d7c0a337c54d12aea6f8b9022cec0e",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-06T07:00:46.855761Z",
-    "elapsed_seconds": 605.9770995000002,
+    "elapsed_seconds": 614.6631958000003,
     "calls_reserved": 19,
-    "responses_received": 18,
+    "responses_received": 19,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Fine-tuning.md",
       "Vault/Home/AI & ML/LLM/Generation.md",
@@ -5490,7 +5490,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-06T07:10:52.832282Z",
+    "checkpoint_at": "2026-11-06T07:11:01.518377Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -18564,5 +18564,54 @@
       },
       "feedback_snapshot": []
     }
+  },
+  "pending_author_proposal": {
+    "workload_id": "e2d7c0a337c54d12aea6f8b9022cec0e",
+    "topic_id": "ai-ml-4edf0823",
+    "batch": {
+      "topic": "AI & ML",
+      "topic_id": "ai-ml-4edf0823",
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Skills.md",
+          "content": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"Reusable instruction packages that give a coding agent specialized domain expertise on demand.\"\npublish: true\nstatus: Done\nlevel: [\"2\"]\npriority: Medium\ncreated: \"2026-08-16T07:07:41.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-08-20T20:41:15.495Z\"\n---\n\nSkills package instructions for a recurring task. The runtime advertises a short name and description, then loads the full body only when the skill is selected. This keeps a review checklist or release procedure out of every prompt without hiding it in a private convention.\n\nMost implementations use a `SKILL.md` file with frontmatter for discovery and Markdown for the procedure. Loading a skill changes the context available to the model. It does not create a new executable tool by itself. Permissions remain runtime-specific. Claude Code can pre-approve tools through `allowed-tools`, while OpenCode controls access to the skill tool in `opencode.json`.\n\n# Discovery and Scope\n\nClaude Code, OpenCode, and GitHub Copilot all discover `SKILL.md` packages from project and user directories. OpenCode searches `.opencode/skills`, `.claude/skills`, and `.agents/skills` along the worktree path, then exposes matching definitions through its `skill` tool. Claude Code can select a skill from its description or run one explicitly as a slash command.\n\nGitHub Copilot recognizes project skills under `.github/skills`, `.claude/skills`, and `.agents/skills`, plus personal skills under `~/.copilot/skills` and `~/.agents/skills`. Agent skills are available across Copilot's cloud agent, code review, CLI, app, and agent modes in Visual Studio Code and JetBrains IDEs. Custom instructions remain a separate, mostly always-on surface.\n\nProject skills belong with the repository when every contributor should get the same procedure. User skills hold personal workflows. This is different from always-on project instructions: [[Agent Instructions]] state facts that should shape most work, while a skill earns its context cost only when its procedure applies. And [[Plugins]] add executable capabilities rather than prose alone.\n\n# Minimal Skill Structure\n\nClaude Code example (`allowed-tools` is Claude-specific frontmatter):\n\n```markdown\n---\nname: company-api-conventions\ndescription: Enforce internal API conventions for controllers, errors, and telemetry\nallowed-tools: Read, Grep, Glob\n---\n\n## When to use\nUse when creating or modifying HTTP endpoints and integration handlers.\n\n## Instructions\n1. Return RFC 7807 problem details for errors.\n2. Use correlation IDs in logs and response headers.\n3. Prefer idempotent POST handlers with idempotency keys.\n\n## Tool configuration\n- If an MCP API-catalog server is available, read endpoint contracts before writing code.\n```\n\nOpenCode note: OpenCode requires `name` and `description`, and supports `license`, `compatibility`, and `metadata`. Unknown frontmatter fields are ignored.\n\nFrontmatter makes the skill discoverable. The body contains the procedure a reviewer can inspect as ordinary Markdown. `allowed-tools` is a Claude Code permission convenience, not a portable restriction across every runtime.\n\n# Practical Example\n\nSuppose an API has a fixed error contract. A task-specific skill can tell the agent to read the schema, use the expected error shape, and run the focused contract test. The skill does not guarantee compliance. It makes the right procedure available at the moment the agent chooses how to work.\n\n# Pitfalls\n\n## Skills That Are Too Broad\n\nA `coding-conventions` skill that covers every kind of engineering work becomes another root instruction file with worse discoverability. Split only at real activation boundaries. `api-error-contracts` is useful when endpoint work needs a procedure. A tiny naming rule belongs in always-on project guidance.\n\n## Stale Skills\n\nA skill can preserve an obsolete SDK call long after the application moves on. Keep project skills in version control and update them in the change that invalidates the procedure. A review date does not repair stale instructions. An executable check is stronger evidence.\n\n## Conflicting Scopes\n\nA personal skill that prefers `var` can collide with a repository rule requiring explicit types. Team policy belongs in the repository. Personal skills should avoid restating it, and no assumed precedence should replace the runtime's documented resolution rules.\n\n# Tradeoffs\n\n| Choice | Option A | Option B | Decision criteria |\n|---|---|---|---|\n| Scope | Project-specific skills | User-global skills | Put shared procedures with the repository. Keep personal shortcuts global only when they cannot override team policy. |\n| Detail level | Detailed procedure | Short guidance | Use a procedure when order and verification matter. A small fact usually belongs in project instructions instead. |\n\n# References\n\n- [Extend Claude with skills (Claude Code Docs)](https://code.claude.com/docs/en/skills)\n- [Agent Skills (OpenCode Docs)](https://opencode.ai/docs/skills/)\n- [About agent skills (GitHub Docs)](https://docs.github.com/en/copilot/concepts/agents/about-agent-skills)\n",
+          "hash": "191bdccc14f916510af558eea60c3e08a83359ee5491b47509cd36d17d40da93",
+          "topic": "AI & ML",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Skills.md",
+          "outcome": "keep",
+          "reason": "Read the whole note against its text: it opens with the operating idea (short advertised name and description, body loaded on selection), states the key boundary that a skill adds context and not an executable tool, and separates discovery paths, a concrete SKILL.md example, pitfalls and a scope tradeoff table. Runtime-specific claims are scoped correctly (allowed-tools as Claude Code frontmatter, OpenCode's name/description requirements and skill-tool permissions, Copilot's project and personal skill directories) and match the cited official docs as I know them. No known native violations exist, there are no cards, the code fence has a language, wikilinks point to sibling concepts with a stated reason, and references are bare descriptive links. Prose is direct and non-repetitive. Edits would be cosmetic churn, so I made none."
+        }
+      ],
+      "feedback": [],
+      "decisions": []
+    },
+    "source_hashes": {
+      "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Skills.md": "191bdccc14f916510af558eea60c3e08a83359ee5491b47509cd36d17d40da93"
+    },
+    "feedback_keys": [],
+    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Skills.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-06T07:11:01.518367Z"
   }
 }
