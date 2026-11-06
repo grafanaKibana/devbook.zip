@@ -4332,11 +4332,11 @@
     "version": 1,
     "id": "e2d7c0a337c54d12aea6f8b9022cec0e",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-06T07:00:46.855761Z",
-    "elapsed_seconds": 108.74365299999998,
+    "elapsed_seconds": 127.64665299999999,
     "calls_reserved": 4,
-    "responses_received": 3,
+    "responses_received": 4,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Fine-tuning.md"
     ],
@@ -4418,7 +4418,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-06T07:02:35.598830Z",
+    "checkpoint_at": "2026-11-06T07:02:54.501829Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -17081,6 +17081,125 @@
       "Vault/Home/AI & ML/LLM/Generation.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-06T07:02:32.071961Z"
+    "prepared_at": "2026-11-06T07:02:32.071961Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "overall_reason": "Independent whole-note audit found no verified factual, editorial, question-quality or reference defect; keeping the note unchanged is justified and no edits were proposed.",
+        "change_checks": [],
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Generation.md",
+            "verdict": "CLEAN",
+            "summary": "The note explains sampling, grounding, context assembly and structured output in a logical order, with accurate and hedged parameter semantics and mechanisms. No concrete defect was found, so leaving it unchanged is justified.",
+            "page_type": "Concept — LLM generation note; Questions and References are optional and present; Qard IDs are protected.",
+            "current_text_evidence": [
+              {
+                "quote": "The prompt and context shape the distribution before any of those controls apply.",
+                "line_start": 19,
+                "reason": "The opening mechanism paragraph and the mermaid flow place the prompt, distribution, sampler and structure mask in the correct order before the details, so the note is easy to re-enter."
+              },
+              {
+                "quote": "For o-series reasoning models, `max_completion_tokens` covers internal reasoning tokens as well as visible output.",
+                "line_start": 42,
+                "reason": "Version-specific condition kept precise and consistent with OpenAI documentation."
+              },
+              {
+                "quote": "They are signals from the model's distribution, not calibrated confidence in factual truth.",
+                "line_start": 48,
+                "reason": "A correct limit on logprobs that prevents a common misuse."
+              },
+              {
+                "quote": "Schema compliance proves shape. It does not prove meaning.",
+                "line_start": 119,
+                "reason": "The pitfall is consistent with the structured-output section and the tradeoffs table, so the note has no internal contradictions."
+              },
+              {
+                "quote": "Why can a response with valid citation markers still contain unsupported claims?",
+                "line_start": 149,
+                "reason": "Each card tests one dependent behavior-and-why task, keeps its qard ID, and has primary sources on the answer side. Neither card bundles independent tasks."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: the sections (sampling, grounding, context assembly, structured output) are facets of one generation-reliability topic and are cross-linked to the RAG and Context Engineering notes.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ]
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Generation.md",
+          "citation_index": 4,
+          "reported_line_start": 149,
+          "resolved_line_start": 147
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/AI & ML/LLM/Generation.md": "a9aa2045e2ec4375375ad59d0836c3e452b64086fd2f4cdae42a4608f5c1444c"
+      },
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CLEAN",
+      "overall_reason": "Independent whole-note audit found no verified factual, editorial, question-quality or reference defect; keeping the note unchanged is justified and no edits were proposed.",
+      "change_checks": [],
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Generation.md",
+          "verdict": "CLEAN",
+          "summary": "The note explains sampling, grounding, context assembly and structured output in a logical order, with accurate and hedged parameter semantics and mechanisms. No concrete defect was found, so leaving it unchanged is justified.",
+          "page_type": "Concept — LLM generation note; Questions and References are optional and present; Qard IDs are protected.",
+          "current_text_evidence": [
+            {
+              "quote": "The prompt and context shape the distribution before any of those controls apply.",
+              "line_start": 19,
+              "reason": "The opening mechanism paragraph and the mermaid flow place the prompt, distribution, sampler and structure mask in the correct order before the details, so the note is easy to re-enter."
+            },
+            {
+              "quote": "For o-series reasoning models, `max_completion_tokens` covers internal reasoning tokens as well as visible output.",
+              "line_start": 42,
+              "reason": "Version-specific condition kept precise and consistent with OpenAI documentation."
+            },
+            {
+              "quote": "They are signals from the model's distribution, not calibrated confidence in factual truth.",
+              "line_start": 48,
+              "reason": "A correct limit on logprobs that prevents a common misuse."
+            },
+            {
+              "quote": "Schema compliance proves shape. It does not prove meaning.",
+              "line_start": 119,
+              "reason": "The pitfall is consistent with the structured-output section and the tradeoffs table, so the note has no internal contradictions."
+            },
+            {
+              "quote": "Why can a response with valid citation markers still contain unsupported claims?",
+              "line_start": 147,
+              "reason": "Each card tests one dependent behavior-and-why task, keeps its qard ID, and has primary sources on the answer side. Neither card bundles independent tasks."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: the sections (sampling, grounding, context assembly, structured output) are facets of one generation-reliability topic and are cross-linked to the RAG and Context Engineering notes.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ]
+    }
   }
 }
