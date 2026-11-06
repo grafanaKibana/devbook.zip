@@ -4924,16 +4924,92 @@
     "version": 1,
     "id": "236350876fc543f98c4ebc7094742d69",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-06T19:33:51.179749Z",
-    "elapsed_seconds": 68.96043759999999,
+    "elapsed_seconds": 73.72637339999999,
     "calls_reserved": 2,
     "responses_received": 2,
-    "attempted_paths": [],
+    "attempted_paths": [
+      "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Tool Design.md"
+    ],
     "accepted_records": [],
-    "outcomes": [],
+    "outcomes": [
+      {
+        "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Tool Design.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Tool Design.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against its current text. The opening, the function-calling sequence diagram and the runtime-versus-model execution boundary are accurate. Naming, descriptions, parameters, return values and errors are explained with concrete examples. The C# Agent Framework example is coherent: it uses AIFunctionFactory and ChatOptions.Tools. Versatility, fault tolerance and caching correctly separate normalization from validation, require idempotency for retries, and key caches on tenant and authorization context. The MCPGauge figures are properly hedged as MCP-integration and workload-specific results, and the mitigation table states the conditions under which each technique applies. Both Qards each test one dependent task, have answers that explain mechanism and condition, and cite Anthropic sources. The known_violations list is empty and the frontmatter and fenced code languages are valid. I found no factual error or editorial weakness that justifies an edit, and I did not re-fetch the cited sources."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Tool Design.md",
+                "verdict": "CLEAN",
+                "summary": "The whole note was audited independently. The model/runtime execution split, tool-design principles, fault tolerance, caching, the hedged MCPGauge figures and the mitigation table are accurate and coherent. Both Qards are single bounded tasks with mechanism-rich answers. No concrete defect justifies an edit.",
+                "page_type": "Concept — authorable prose with optional Questions and References. Typed frontmatter, Qard IDs and MD040 language identifiers are all valid.",
+                "current_text_evidence": [
+                  {
+                    "quote": "The model requests an operation. It does not execute the function.",
+                    "line_start": 39,
+                    "reason": "States the key boundary: the runtime holds execution authority, and a schema alone is not security."
+                  },
+                  {
+                    "quote": "Normalization changes representation, not trust",
+                    "line_start": 93,
+                    "reason": "Separates normalization from validation, and the point is applied consistently in the Tradeoffs table."
+                  },
+                  {
+                    "quote": "These measurements cover MCP integration as a whole, including the context it brought into the window, rather than tool schemas in isolation.",
+                    "line_start": 141,
+                    "reason": "The 9.5% average drop and the 3.25× to 236.5× token overhead match the MCPGauge abstract. The caveat keeps the claim from being overstated."
+                  },
+                  {
+                    "quote": "the cache key must include tenant and authorization context or it can leak data between callers",
+                    "line_start": 123,
+                    "reason": "Gives the condition and failure mode for caching reads, and separates mutations from reads."
+                  },
+                  {
+                    "quote": "What determines whether related operations should use one broad tool or several narrower tools?",
+                    "line_start": 192,
+                    "reason": "A single focused comparison card whose answer gives the deciding condition and says to measure rather than assume."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the note covers one coherent topic, designing callable tools. Its sections (principles, fault tolerance, caching, pitfalls and tradeoffs) depend on each other.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "Independent full-note audit found no factual, editorial or question-quality defect. MCPGauge figures were verified against the arXiv abstract. No edits were proposed, and the keep is justified by current-text evidence.",
+            "change_checks": []
+          },
+          "model_calls": 2
+        }
+      }
+    ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-06T19:35:00.139683Z",
+    "checkpoint_at": "2026-11-06T19:35:04.905632Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
