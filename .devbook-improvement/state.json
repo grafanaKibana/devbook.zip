@@ -4634,9 +4634,9 @@
     "version": 1,
     "id": "e2d7c0a337c54d12aea6f8b9022cec0e",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-06T07:00:46.855761Z",
-    "elapsed_seconds": 392.14188970000004,
+    "elapsed_seconds": 395.6990915,
     "calls_reserved": 12,
     "responses_received": 12,
     "attempted_paths": [
@@ -4644,7 +4644,8 @@
       "Vault/Home/AI & ML/LLM/Generation.md",
       "Vault/Home/AI & ML/LLM/Graph Engineering.md",
       "Vault/Home/AI & ML/LLM/Harness Engineering/Harness Engineering.md",
-      "Vault/Home/AI & ML/LLM/Harness Engineering/Model Context Protocol.md"
+      "Vault/Home/AI & ML/LLM/Harness Engineering/Model Context Protocol.md",
+      "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Agent Instructions.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -5018,10 +5019,83 @@
           },
           "model_calls": 10
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Agent Instructions.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Agent Instructions.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against its text. The opening explains what instruction files hold and how runtimes load them. The tool table, the checklist, the AGENTS.md example, the pitfalls and the tradeoffs are coherent and consistent with each other. The claims about Claude Code, Cursor, Copilot, Cline, Windsurf and OpenCode match known documented behavior, and the note correctly says precedence is tool-specific. The two cards each test one gradeable task and cite the Copilot CLI docs. The note has no known violations, and the references are valid. I found no defect that justifies an edit."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "The note is accurate, readable and internally consistent. No edits were proposed, and I found no defect that justifies one.",
+            "change_checks": [],
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Agent Instructions.md",
+                "verdict": "CLEAN",
+                "summary": "The whole note was read and holds together. The opening gives the idea and the tool-specific precedence caveat, the table covers the main tools, and the example, pitfalls and tradeoffs follow from one thesis: short, accurate, current guidance. The two Qards each test one task. No edit is warranted.",
+                "page_type": "Concept note. Optional Questions and References are present and valid, with no generated navigation and no code-fence issues (the nested ````markdown fence has a language).",
+                "current_text_evidence": [
+                  {
+                    "quote": "The exact precedence is tool-specific, but the engineering rule is stable.",
+                    "line_start": 19,
+                    "reason": "Gives the key boundary early and avoids claiming a portable precedence order, which matches the second card's answer."
+                  },
+                  {
+                    "quote": "Configuration is not automatically an instruction surface.",
+                    "line_start": 32,
+                    "reason": "States a useful boundary between config files and prose policy, using the Aider example."
+                  },
+                  {
+                    "quote": "The file gives the agent a tested command, a data boundary, and a clear definition of done.",
+                    "line_start": 60,
+                    "reason": "Ties the example to the checklist, so the example teaches something concrete."
+                  },
+                  {
+                    "quote": "**Aspirational guidance:** an agent follows the documented architecture even when the code has not reached it.",
+                    "line_start": 68,
+                    "reason": "Concrete pitfall with a stated mechanism and a fix. Voice is direct and impersonal."
+                  },
+                  {
+                    "quote": "This is a maintenance discipline, not a portable precedence guarantee.",
+                    "line_start": 92,
+                    "reason": "The answer limits its own claim, so it does not overstate what the Copilot documentation establishes."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the landscape table, checklist, example, pitfalls and tradeoffs are facets of one topic. Skills is already a separate linked note.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ]
+          },
+          "model_calls": 12
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-06T07:07:18.997068Z",
+    "checkpoint_at": "2026-11-06T07:07:22.554271Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
