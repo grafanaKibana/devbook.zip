@@ -4989,13 +4989,14 @@
     "version": 1,
     "id": "236350876fc543f98c4ebc7094742d69",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-06T19:33:51.179749Z",
-    "elapsed_seconds": 128.9363128,
+    "elapsed_seconds": 132.628892,
     "calls_reserved": 4,
     "responses_received": 4,
     "attempted_paths": [
-      "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Tool Design.md"
+      "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Tool Design.md",
+      "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Tooling.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -5071,10 +5072,88 @@
           },
           "model_calls": 2
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Tooling.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Tooling.md",
+                "outcome": "keep",
+                "reason": "Audited the whole folder note. The opening defines tooling as the developer-facing harness layer and separates it from the API-level [[Tool Design]]. The wikilinks to Skills, Plugins, MCP, Hooks, Agent Instructions and Coding Agents each carry a stated reason. The three categories (coding agents, review agents, IDE extensions) are explained by authority, independence and visibility tradeoffs. The note has no cards, so there is no question-quality or ID issue. The Datacore folder map block is intact, and the note has no standalone Links section. References are two bare descriptive links, CodeRabbit and Aider. The CodeRabbit claim (GitHub and GitLab review workflows) is consistent with its public docs, and the note makes no version-sensitive claims. known_violations is empty. Any edit would be cosmetic churn."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Tooling.md",
+                "verdict": "CLEAN",
+                "summary": "The folder note introduces developer-facing harness tooling, separates it from API-level Tool Design, and explains the three categories by authority, independence and visibility. The prose is accurate, non-repetitive and in the right voice, so no edit is warranted.",
+                "page_type": "FolderNote — keeps the FolderNote tag and the protected Datacore folder-map block. It has no standalone Links section and no cards. References are bare descriptive links.",
+                "current_text_evidence": [
+                  {
+                    "quote": "[[Tool Design]] covers the lower-level API contract between the model and each callable operation.",
+                    "line_start": 15,
+                    "reason": "Sets the scope boundary against the sibling note, so the topic is recoverable quickly."
+                  },
+                  {
+                    "quote": "The interface matters less than what the agent can read, change, and run.",
+                    "line_start": 19,
+                    "reason": "States the operating idea. The wikilinks that follow each carry a stated reason, and the paragraph ends with the autonomy decision."
+                  },
+                  {
+                    "quote": "the useful distinction is the authority they receive and the evidence they return",
+                    "line_start": 30,
+                    "reason": "Gives a concrete engineering criterion instead of a tool list."
+                  },
+                  {
+                    "quote": "Letting the writer approve its own change removes the check that matters.",
+                    "line_start": 34,
+                    "reason": "States the independence tradeoff for review agents."
+                  },
+                  {
+                    "quote": "A useful IDE agent still needs a readable action log and clear approval before sensitive actions.",
+                    "line_start": 38,
+                    "reason": "Names the visibility cost and its mitigation."
+                  },
+                  {
+                    "quote": "```datacorejsx",
+                    "line_start": 21,
+                    "reason": "The protected folder-map block is intact and has a language identifier, so MD040 is satisfied."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the three categories are short and share one purpose. Each deeper topic already has its own sibling note (Coding Agents, Skills, Plugins, Hooks).",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "NOT APPLICABLE",
+                  "identity_safety": "NOT APPLICABLE",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "The whole-note audit found no accuracy, clarity, structure or rule defects. The keep disposition is justified, and any edit would be cosmetic churn.",
+            "change_checks": []
+          },
+          "model_calls": 4
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-06T19:36:00.115556Z",
+    "checkpoint_at": "2026-11-06T19:36:03.808136Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
