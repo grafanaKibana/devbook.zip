@@ -4272,16 +4272,16 @@
     "version": 1,
     "id": "e2d7c0a337c54d12aea6f8b9022cec0e",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-06T07:00:46.855761Z",
-    "elapsed_seconds": 44.6115241,
+    "elapsed_seconds": 63.95541969999999,
     "calls_reserved": 2,
-    "responses_received": 1,
+    "responses_received": 2,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-06T07:01:31.466702Z",
+    "checkpoint_at": "2026-11-06T07:01:50.810597Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -16944,6 +16944,58 @@
       "Vault/Home/AI & ML/LLM/Fine-tuning.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-06T07:01:27.699628Z"
+    "prepared_at": "2026-11-06T07:01:27.699628Z",
+    "completed_review": {
+      "verdict": "CLEAN",
+      "overall_reason": "Independent audit of the full note found no factual, editorial, question-quality or rule defects. No edits are proposed and the keep is justified.",
+      "change_checks": [],
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Fine-tuning.md",
+          "verdict": "CLEAN",
+          "summary": "The note is accurate, well ordered and appropriately scoped. It separates behavior from knowledge, covers GRPO, preference methods, PEFT and full-tuning memory with conditions, and its two cards are single-task and sourced. No edit is warranted.",
+          "page_type": "Concept — typed frontmatter retained, optional Questions and References present and useful, fenced blocks carry language identifiers.",
+          "current_text_evidence": [
+            {
+              "quote": "It makes a poor knowledge store. Facts learned during training have no citation boundary and start aging immediately.",
+              "line_start": 17,
+              "reason": "The opening states the operating idea and the key boundary against RAG, which makes the topic quickly recoverable."
+            },
+            {
+              "quote": "GRPO removes the learned value model used by PPO-style training.",
+              "line_start": 23,
+              "reason": "This is a correct statement of the GRPO mechanism, and the same paragraph names the remaining costs (on-policy sampling, KL control, reward hacking)."
+            },
+            {
+              "quote": "Its memory footprint is not a fixed multiple of the published model size.",
+              "line_start": 94,
+              "reason": "The component-level treatment of training memory is accurate and decision-relevant, and the Pitfalls section reinforces it without padding."
+            },
+            {
+              "quote": "“Frozen base” describes storage and update mechanics. It does not promise unchanged behavior while the adapter is active.",
+              "line_start": 104,
+              "reason": "This correctly scopes the LoRA regression risk, and it matches the second card's explanation of W0·x + B·A·x and of adapter-disable versus merge rollback."
+            },
+            {
+              "quote": "That is evidence for those experiments, not a promise that any large model fits any consumer GPU.",
+              "line_start": 108,
+              "reason": "The QLoRA 65B/48 GB claim is correctly attributed to the paper's configurations and conditioned on the actual setup."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: GRPO, preference alignment, PEFT and evaluation all serve one decision about when and how to fine-tune. Splitting would fragment the comparison across approaches.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ]
+    }
   }
 }
