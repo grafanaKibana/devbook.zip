@@ -5229,9 +5229,9 @@
     "version": 1,
     "id": "236350876fc543f98c4ebc7094742d69",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-06T19:33:51.179749Z",
-    "elapsed_seconds": 383.1488801,
+    "elapsed_seconds": 387.441483,
     "calls_reserved": 12,
     "responses_received": 12,
     "attempted_paths": [
@@ -5239,7 +5239,8 @@
       "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Tooling.md",
       "Vault/Home/AI & ML/LLM/LLM Caching.md",
       "Vault/Home/AI & ML/LLM/LLM.md",
-      "Vault/Home/AI & ML/LLM/Loop Engineering/Agent Loop.md"
+      "Vault/Home/AI & ML/LLM/Loop Engineering/Agent Loop.md",
+      "Vault/Home/AI & ML/LLM/Loop Engineering/Loop Engineering.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -5612,10 +5613,83 @@
           },
           "model_calls": 10
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/Loop Engineering/Loop Engineering.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Loop Engineering/Loop Engineering.md",
+                "outcome": "keep",
+                "reason": "I read the whole note against its text. The opening defines loop engineering and places it after prompt, context and harness engineering, with links to Agent Loop and Multi-Agentic Systems. The three sections (termination and budgets, verification inside the loop, state across iterations) follow a logical order. Each one states a mechanism and a condition. Examples are the stop-versus-success distinction, the budget fallback, ground-truth checks, and the compaction timing versus content split. The three cards each test one dependent task. The first covers the runtime role in a tool loop. The second covers reporting at budget expiry and notes that platform behavior differs. The third covers how compaction decisions are split and says plainly that the split is a convention and not an API boundary. The claims about OpenAI max_turns handling, Anthropic task budgets and Responses API compaction are hedged and match the cited documentation as I know it. The known-violations inventory is empty, no cards are flagged, and the frontmatter, code fence language and references are valid. I found no concrete defect, so edits would only add churn."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "Whole-note audit found no concrete defect. The note is accurate, ordered logically and free of padding. Its three cards each test one dependent task. No edits are proposed, none are needed, and no sources or rejections require checking.",
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Loop Engineering/Loop Engineering.md",
+                "verdict": "CLEAN",
+                "summary": "I read the whole note. The opening defines loop engineering and places it in the prompt, context, harness and loop stack. The sections run termination, verification, state, and each gives mechanisms with conditions. The cards are focused, and the platform claims are hedged and match the vendors' documented behavior. No edit would add concrete value.",
+                "page_type": "FolderNote — keeps tags: [FolderNote] and the protected datacorejsx folder map; Questions and References are optional and valid as present.",
+                "current_text_evidence": [
+                  {
+                    "quote": "A single call is bounded. A loop carries each result into the next iteration, so mistakes can accumulate just as easily as useful progress.",
+                    "line_start": 20,
+                    "reason": "States the core reason loops need engineering. The wording is direct and whiteboard-style."
+                  },
+                  {
+                    "quote": "A turn with no remaining tool calls shows only that the model has stopped requesting actions; completion needs task-specific evidence the runtime can verify",
+                    "line_start": 35,
+                    "reason": "Separates stopping from success and names the mechanism and its limit, so the note supports engineering judgment."
+                  },
+                  {
+                    "quote": "Loop engineering decides when to compact, offload, or stop.",
+                    "line_start": 49,
+                    "reason": "Draws the boundary with Context Engineering clearly. The later compaction card repeats the split for recall, not as filler."
+                  },
+                  {
+                    "quote": "What should a runtime report when its loop budget expires before the task is complete?",
+                    "line_start": 62,
+                    "reason": "This question is self-contained and has a finite answer. Its answer is hedged on platform differences and cites primary sources on the answer side."
+                  },
+                  {
+                    "quote": "This split is a convention for assigning responsibility, not a boundary defined by an API.",
+                    "line_start": 83,
+                    "reason": "Prevents a misleading claim by marking the content/timing split as a convention."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: termination, verification and state are facets of one loop-control topic. The note is short, and the sections depend on each other and on the opening.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "change_checks": []
+          },
+          "model_calls": 12
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-06T19:40:14.328125Z",
+    "checkpoint_at": "2026-11-06T19:40:18.620729Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
