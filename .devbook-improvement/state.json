@@ -4574,16 +4574,17 @@
     "version": 1,
     "id": "e2d7c0a337c54d12aea6f8b9022cec0e",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-06T07:00:46.855761Z",
-    "elapsed_seconds": 330.65021090000016,
+    "elapsed_seconds": 334.01390110000017,
     "calls_reserved": 10,
     "responses_received": 10,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Fine-tuning.md",
       "Vault/Home/AI & ML/LLM/Generation.md",
       "Vault/Home/AI & ML/LLM/Graph Engineering.md",
-      "Vault/Home/AI & ML/LLM/Harness Engineering/Harness Engineering.md"
+      "Vault/Home/AI & ML/LLM/Harness Engineering/Harness Engineering.md",
+      "Vault/Home/AI & ML/LLM/Harness Engineering/Model Context Protocol.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -4876,10 +4877,91 @@
           },
           "model_calls": 8
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Model Context Protocol.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Model Context Protocol.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against its text: the N×M vs N+M framing carries its conditions, and the host/client/server roles and three primitives with their control model are consistent with each other. The version-specific statements are internally consistent: 2026-07-28 stateless requests, optional server/discover, and earlier handshake/sessions. The transport section correctly separates stdio's local-process trust from Streamable HTTP's OAuth. The function-calling comparison and tradeoff table agree. The pitfalls hedge MCPGauge's run-level figures properly and do not attribute them to schema count. The two Qards each test one gradeable task, with sources on the answer side and IDs preserved. The known-violation inventory is empty. References are topic-specific. I did not re-fetch sources in this pass. No verified defect justifies an edit, and extra changes would only add churn."
+              }
+            ],
+            "feedback": [],
+            "decisions": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "The note is accurate, coherent and well hedged. The author's keep is supported, and no concrete defect or rule violation remains.",
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Model Context Protocol.md",
+                "verdict": "CLEAN",
+                "summary": "The whole note holds up on a full read. The N×M versus N+M framing is conditioned on compatible versions and capabilities. The 2026-07-28 changes match the official update post: no handshake or sessions, optional server/discover, and cache hints on list results. The pitfalls hedge the MCPGauge figures correctly. The two Qards are each a single gradeable task, carry answer-side sources, and keep their IDs. Keeping the note unchanged is justified.",
+                "page_type": "Concept — authorable prose; Questions and References are optional and present. Qard IDs are protected metadata.",
+                "current_text_evidence": [
+                  {
+                    "quote": "The rough shape becomes N+M, provided both sides implement compatible versions and capabilities.",
+                    "line_start": 18,
+                    "reason": "The N×M to N+M claim carries its condition, so it does not overstate the benefit."
+                  },
+                  {
+                    "quote": "A client may call `server/discover` to inspect server capabilities first, but discovery is optional.",
+                    "line_start": 46,
+                    "reason": "This matches the 2026-07-28 post, which describes server/discover as optional. The line also notes the removed handshake, and the post confirms the cache hints."
+                  },
+                  {
+                    "quote": "Those run-level figures do not isolate schema count as the cause, and the exact cost depends on the client and workload.",
+                    "line_start": 85,
+                    "reason": "The note limits the benchmark figures to what they measured and does not attribute them to schema count."
+                  },
+                  {
+                    "quote": "Model choice is a proposal, not permission.",
+                    "line_start": 44,
+                    "reason": "This states the decision rule directly and keeps authorization with the host."
+                  },
+                  {
+                    "quote": "<!-- qard-id: 59308422-df66-4bad-b9ce-ca18c5608606 -->",
+                    "line_start": 123,
+                    "reason": "The Qard ID is preserved, and the card tests one task: the checks the server still owes after HTTP authorization."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the note covers one coherent topic. Architecture, transports, tradeoffs and pitfalls all support the same MCP decision, and none would be useful on its own.",
+                "findings": [],
+                "source_checks": [
+                  {
+                    "url": "https://blog.modelcontextprotocol.io/posts/2026-07-28/",
+                    "claim": "2026-07-28 removes the handshake and sessions, makes server/discover optional, and adds cache hints to list results",
+                    "result": "SUPPORTED",
+                    "reason": "The fetched post states all three."
+                  }
+                ],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "change_checks": []
+          },
+          "model_calls": 10
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-06T07:06:17.505388Z",
+    "checkpoint_at": "2026-11-06T07:06:20.869079Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
