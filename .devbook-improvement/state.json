@@ -5109,15 +5109,16 @@
     "version": 1,
     "id": "236350876fc543f98c4ebc7094742d69",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-06T19:33:51.179749Z",
-    "elapsed_seconds": 254.02693670000002,
+    "elapsed_seconds": 257.8333713,
     "calls_reserved": 8,
     "responses_received": 8,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Tool Design.md",
       "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Tooling.md",
-      "Vault/Home/AI & ML/LLM/LLM Caching.md"
+      "Vault/Home/AI & ML/LLM/LLM Caching.md",
+      "Vault/Home/AI & ML/LLM/LLM.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -5344,10 +5345,83 @@
           },
           "model_calls": 6
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/LLM.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/LLM.md",
+                "outcome": "keep",
+                "reason": "I read the whole hub note against its prose and its three cards. The opening separates the LLM definition from architecture families, and the Engineering Routes table with its diagram maps each route to a distinct design question. The transformer-family table matches the BERT, T5 and GPT papers: BERT is bidirectional with masked-token prediction, T5 is an encoder-decoder with span corruption, and GPT-style models are causal decoder-only. The checkpoint-contract section teaches a real failure mechanism: tensor shapes can match while the tokenizer is wrong. The MoE sections correctly separate total parameters, active parameters and measured latency, and they cover capacity factors, dropping or rerouting tokens, and communication cost, consistent with the Switch Transformers paper. The note also correctly says DeepSeek-R1 reuses the V3 base architecture while GRPO belongs to post-training. The cards each test one gradeable task and carry sources on the answer side. The prompting, RAG and fine-tuning card matches OpenAI's accuracy-optimization guidance. The note has no known violations, no unclear claims and no redundancy worth fixing, so any edit would be cosmetic churn."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "I read the whole note and found no concrete defect. The factual claims I checked against my own knowledge of the primary papers are sound, and the cards are well formed. A keep is justified, and any edit would be cosmetic churn.",
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/LLM.md",
+                "verdict": "CLEAN",
+                "summary": "The hub note separates what an LLM is from its architecture families, routes the four runtime disciplines in a table with a diagram, and explains checkpoint contracts and MoE cost accurately. The note is coherent, correctly scoped and free of padding, so leaving it unchanged is justified.",
+                "page_type": "FolderNote: the Datacore folder-map block is protected, and Questions and References are optional but present and well formed.",
+                "current_text_evidence": [
+                  {
+                    "quote": "A large language model (LLM) is a neural language model trained at enough scale to handle a broad range of language tasks.",
+                    "line_start": 18,
+                    "reason": "The opening defines an LLM quickly and separates the definition from architecture families, so the topic is recoverable."
+                  },
+                  {
+                    "quote": "A wrong tokenizer is harder to spot: tensor dimensions still match while the same text maps to different IDs, silently changing behavior.",
+                    "line_start": 79,
+                    "reason": "This states a concrete failure mechanism with its condition, which supports engineering judgment."
+                  },
+                  {
+                    "quote": "**T5** is a generative encoder-decoder. It pretrains with a span-corruption text-to-text objective",
+                    "line_start": 65,
+                    "reason": "This matches the T5 paper. BERT is described as masked-token and encoder-only, and GPT-style models as causal decoder-only, which is also accurate."
+                  },
+                  {
+                    "quote": "A dense model can beat a sparse model with a similar advertised active count when expert traffic is communication-bound.",
+                    "line_start": 132,
+                    "reason": "This states the condition that changes the MoE cost decision and agrees with the Switch Transformers discussion."
+                  },
+                  {
+                    "quote": "> [!qard]- How should prompting, RAG, and fine-tuning be chosen for an LLM system?",
+                    "line_start": 168,
+                    "reason": "This card is one focused comparison with a decision path and the conditions that change it. It carries an answer-side source and keeps its existing ID."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the foundations, training and MoE sections all serve the hub's purpose of explaining model internals before routing to the sibling topics. The MoE section could become its own note later, but it is not independently needed now.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "change_checks": []
+          },
+          "model_calls": 8
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-06T19:38:05.206180Z",
+    "checkpoint_at": "2026-11-06T19:38:09.012615Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
