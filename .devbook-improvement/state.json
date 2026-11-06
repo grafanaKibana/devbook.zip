@@ -5049,14 +5049,15 @@
     "version": 1,
     "id": "236350876fc543f98c4ebc7094742d69",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-06T19:33:51.179749Z",
-    "elapsed_seconds": 190.0373709,
+    "elapsed_seconds": 193.7539917,
     "calls_reserved": 6,
     "responses_received": 6,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Tool Design.md",
-      "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Tooling.md"
+      "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Tooling.md",
+      "Vault/Home/AI & ML/LLM/LLM Caching.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -5210,10 +5211,83 @@
           },
           "model_calls": 4
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/LLM Caching.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/LLM Caching.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against its current text. The opening table separates prompt/prefix, exact response and semantic response caches by what is reused, what counts as a hit and what work remains. The prompt-caching section covers prefill versus decode, the KV cache, exact-prefix matching, breakpoints, ordering, deterministic construction, history compaction, retention, concurrent cold requests, and a symptom/cause/diagnostic table. The response-caching section covers key composition, tenant and permission scoping, TTL versus invalidation, the semantic false-hit example, threshold calibration, and index versioning. The measurement section keeps the layers separate. These claims are consistent with the OpenAI and Anthropic prompt-caching documentation as I know it. The note makes no unsupported absolute claims and carries hedges where behavior is provider-specific. References are bare descriptive links. The note has no Qard cards, there are no known violations, and no feedback is open. I found no verified defect, so an edit would be cosmetic churn."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "No edits proposed. The complete note has no concrete defect, no known violations, no cards and no open feedback. The keep is justified.",
+            "change_checks": [],
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/LLM Caching.md",
+                "verdict": "CLEAN",
+                "summary": "The note separates prompt/prefix, exact response and semantic response caches. It gives the mechanism (prefill versus decode, exact-prefix matching), the conditions that break reuse, and how to measure each layer. The keep is justified, and an edit would be cosmetic churn.",
+                "page_type": "Concept — frontmatter is typed. Questions are optional and absent. References are bare descriptive links. Code fences carry a language identifier. Wikilinks use full paths with aliases.",
+                "current_text_evidence": [
+                  {
+                    "quote": "| Prompt/prefix | Computed state for an input prefix |",
+                    "line_start": 18,
+                    "reason": "The opening table contrasts what each cache reuses, what counts as a hit and what work remains, so the topic is recoverable quickly."
+                  },
+                  {
+                    "quote": "A hit therefore reduces repeated prefill work; it does not remove output generation or guarantee identical answers.",
+                    "line_start": 37,
+                    "reason": "States the mechanism and its limit, with prefill and decode explained in order before the failure analysis."
+                  },
+                  {
+                    "quote": "Concurrent cold requests may arrive before the first write is available.",
+                    "line_start": 95,
+                    "reason": "Covers a real condition (a warm-up race) and is attributed to Anthropic's documentation, which does describe availability after the first response begins."
+                  },
+                  {
+                    "quote": "| Serial calls hit, parallel cold calls miss | Fan-out outran cache creation |",
+                    "line_start": 106,
+                    "reason": "The symptom/cause/diagnostic table gives concrete debugging judgment instead of generic advice."
+                  },
+                  {
+                    "quote": "are close in meaning but require different answers.",
+                    "line_start": 129,
+                    "reason": "The largest versus second-largest lake example shows why similarity is a weak correctness test. Tenant and permission scoping and index versioning are also covered."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: prompt caching, response caching and combined measurement are tightly coupled. The opening table and the final measurement section compare them, so separate notes would lose that comparison.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "NOT APPLICABLE",
+                  "identity_safety": "NOT APPLICABLE",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ]
+          },
+          "model_calls": 6
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-06T19:37:01.216614Z",
+    "checkpoint_at": "2026-11-06T19:37:04.933236Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
