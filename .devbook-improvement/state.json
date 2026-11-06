@@ -4754,9 +4754,9 @@
     "version": 1,
     "id": "e2d7c0a337c54d12aea6f8b9022cec0e",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-06T07:00:46.855761Z",
-    "elapsed_seconds": 511.64730739999993,
+    "elapsed_seconds": 515.4136434,
     "calls_reserved": 16,
     "responses_received": 16,
     "attempted_paths": [
@@ -4766,7 +4766,8 @@
       "Vault/Home/AI & ML/LLM/Harness Engineering/Harness Engineering.md",
       "Vault/Home/AI & ML/LLM/Harness Engineering/Model Context Protocol.md",
       "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Agent Instructions.md",
-      "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Coding Agents.md"
+      "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Coding Agents.md",
+      "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Hooks.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -5287,10 +5288,84 @@
           },
           "model_calls": 14
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Hooks.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Hooks.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against its text: the opening defines hooks and the Git-hook analogy; the events/matchers/handlers model, handler types, exit-code semantics (0 = JSON decision, 2 = blocking on supported events, other non-zero = failure) and the note that post-hooks cannot undo side effects are consistent with Claude Code's hooks documentation. The JSON example is internally coherent: `jq -er` fails on a missing path, and the final command's status preserves exit 2. The pitfalls, tradeoffs table and cross-tool section (Cursor, Git hooks) are accurate, version-hedged and not repetitive. There are no Qard cards, no known violations, wikilinks to Skills and Plugins are valid, the code fences have language identifiers, and the single reference is a real primary source. No concrete defect or learning gap was found, so an edit would be cosmetic churn."
+              }
+            ],
+            "feedback": [],
+            "decisions": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "Whole-note audit found no concrete defect or essential gap. The keep disposition is justified and no edits are proposed.",
+            "change_checks": [],
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Hooks.md",
+                "verdict": "CLEAN",
+                "summary": "The note defines hooks, explains the events, matchers and handlers model, and hedges version-specific exit-code and event behavior. The example is coherent, the pitfalls and tradeoffs support engineering decisions, and there is no repetition or padding. No edit is warranted.",
+                "page_type": "Concept - optional Questions absent; one real primary-source reference; wikilinks and code fence languages valid.",
+                "current_text_evidence": [
+                  {
+                    "quote": "They turn a written policy into an event-bound check",
+                    "line_start": 14,
+                    "reason": "The opening states the operating idea quickly and concretely."
+                  },
+                  {
+                    "quote": "Exit code `2` is a blocking signal on supported events. The exact effect depends on the event.",
+                    "line_start": 54,
+                    "reason": "The exit-code semantics carry the right condition and hedge, and match Claude Code's documented behavior."
+                  },
+                  {
+                    "quote": "The event list is versioned product behavior, so configuration should target the installed runtime rather than a remembered event count.",
+                    "line_start": 58,
+                    "reason": "This handles version-specific facts correctly instead of asserting a fragile count."
+                  },
+                  {
+                    "quote": "`jq -e` makes a missing path a hook failure rather than passing an empty argument.",
+                    "line_start": 97,
+                    "reason": "The example explanation is accurate and teaches the mechanism behind the command."
+                  },
+                  {
+                    "quote": "A hook that prints an error but exits successfully may allow the operation.",
+                    "line_start": 107,
+                    "reason": "The pitfall is concrete and gives a testable remedy, with a CI fallback; the prose is direct and impersonal."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: events, matchers, handlers, an example, pitfalls and tradeoffs form one coherent small topic.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "identity_safety": "NOT APPLICABLE",
+                  "question_quality": "NOT APPLICABLE",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ]
+          },
+          "model_calls": 16
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-06T07:09:18.502487Z",
+    "checkpoint_at": "2026-11-06T07:09:22.268824Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
