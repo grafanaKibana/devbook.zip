@@ -4694,11 +4694,11 @@
     "version": 1,
     "id": "e2d7c0a337c54d12aea6f8b9022cec0e",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-06T07:00:46.855761Z",
-    "elapsed_seconds": 475.217393,
+    "elapsed_seconds": 483.3691688,
     "calls_reserved": 15,
-    "responses_received": 14,
+    "responses_received": 15,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Fine-tuning.md",
       "Vault/Home/AI & ML/LLM/Generation.md",
@@ -5230,7 +5230,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-06T07:08:42.072573Z",
+    "checkpoint_at": "2026-11-06T07:08:50.224348Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -18224,5 +18224,54 @@
       },
       "feedback_snapshot": []
     }
+  },
+  "pending_author_proposal": {
+    "workload_id": "e2d7c0a337c54d12aea6f8b9022cec0e",
+    "topic_id": "ai-ml-4edf0823",
+    "batch": {
+      "topic": "AI & ML",
+      "topic_id": "ai-ml-4edf0823",
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Hooks.md",
+          "content": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"Lifecycle callbacks that run custom logic at defined agent execution points.\"\npublish: true\nstatus: Done\nlevel: [\"2\"]\npriority: Medium\ncreated: \"2026-08-16T07:07:41.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-08-20T20:41:15.495Z\"\n---\n\nHooks run configured logic at named points in an agent session. They turn a written policy into an event-bound check: inspect a tool call before it runs, format a file after an edit, or record which instructions were loaded.\n\nThe runtime fires an event and passes structured context to a matching handler. Depending on the event, the handler can add context, return a decision, or perform a side effect. This is close to Git hooks, except the boundary is an agent turn or tool call rather than a commit.\n\n```mermaid\nflowchart LR\n    A[Agent loop] --> B[Event fires]\n    B --> C[Matcher checks]\n    C --> D[Handler runs]\n    D --> E{Decision}\n    E -->|Allow| F[Agent resumes]\n    E -->|Deny| G[Tool call blocked]\n```\n\nFor reusable instruction bundles that shape agent behavior, see [[Skills]]. For MCP tool extensions, see [[Plugins]].\n\n# How Hooks Work\n\nThe model has three parts. **Events** say when to run, **matchers** narrow the event, and **handlers** do the work.\n\n**Events** are lifecycle moments grouped by purpose:\n\n| Category | Examples | Purpose |\n| --- | --- | --- |\n| Tool events | `PreToolUse`, `PostToolUse`, `PostToolUseFailure` | Decide before execution or inspect its result |\n| Session events | `SessionStart`, `Stop`, `SessionEnd` | Prepare, check completion, or clean up |\n| Context events | `UserPromptSubmit`, `InstructionsLoaded`, `PreCompact` | Validate input or observe context changes |\n| Agent events | `SubagentStart`, `SubagentStop`, `TaskCompleted` | Observe delegated work and task state |\n| Operational events | `Notification`, `ConfigChange`, `FileChanged` | Connect the session to local automation |\n\n**Matchers** filter events before a handler starts. Tool-event matchers commonly target tool names, so `Edit|Write` selects file edits and `mcp__.*` selects MCP tools. Matcher syntax and availability depend on the event.\n\nClaude Code currently documents several handler types:\n\n- **Command:** a process receives JSON on stdin and returns an exit code or JSON result.\n- **HTTP:** the runtime posts the event payload to an endpoint.\n- **Prompt:** a model evaluates a bounded condition.\n- **Agent:** a subagent investigates before returning a decision.\n- **MCP tool:** a configured MCP capability handles the event.\n\nFor command hooks, exit code `0` means the process completed and any decision comes from its JSON output. Exit code `2` is a blocking signal on supported events. The exact effect depends on the event. Other non-zero codes report hook failure. A post-execution hook cannot undo an external side effect that already happened.\n\n# Hooks Across Tools\n\nClaude Code has a broad hook lifecycle across sessions, prompts, tools, subagents, configuration, and worktrees. Its settings can be personal, project-owned, managed, or packaged with extensions. The event list is versioned product behavior, so configuration should target the installed runtime rather than a remembered event count.\n\nCursor also exposes agent lifecycle hooks through `.cursor/hooks.json`, but names and decision semantics are its own contract. Similar labels across products do not guarantee compatible payloads.\n\nGit hooks remain the portable fallback at the repository boundary. `pre-commit` and `commit-msg` can stop bad history regardless of which agent edited the files. They cannot govern a database call or shell command that happened earlier in the session.\n\n# Concrete Example\n\nA two-stage Claude Code policy can block protected writes before execution and format accepted writes afterward:\n\n```json\n{\n  \"hooks\": {\n    \"PreToolUse\": [\n      {\n        \"matcher\": \"Edit|Write\",\n        \"hooks\": [\n          {\n            \"type\": \"command\",\n            \"command\": \"path=$(jq -er '.tool_input.file_path') && check-protected-files.sh \\\"$path\\\"\"\n          }\n        ]\n      }\n    ],\n    \"PostToolUse\": [\n      {\n        \"matcher\": \"Edit|Write\",\n        \"hooks\": [\n          {\n            \"type\": \"command\",\n            \"command\": \"path=$(jq -er '.tool_input.file_path') && npx prettier --write \\\"$path\\\"\"\n          }\n        ]\n      }\n    ]\n  }\n}\n```\n\nThe shell returns the exit status of the final command, so a `2` from `check-protected-files.sh` remains a blocking signal instead of being remapped by a pipeline helper. `jq -e` makes a missing path a hook failure rather than passing an empty argument. The example shows the control points, not a portable schema. Another runtime may use different event names, input fields, and decision output.\n\n# Pitfalls\n\n## Slow Hooks Stall the Loop\n\nA full test suite after every edit makes even a correct agent unusable. Match the narrowest event and run the cheapest check that can reject the operation. Move broad validation to a commit, pull-request, or asynchronous boundary when blocking the current tool call adds no safety.\n\n## Silent Failure Opens the Gate\n\nA hook that prints an error but exits successfully may allow the operation. Test both an accepted and a known-bad payload, then assert the decision channel the runtime actually reads. Critical repository checks still belong in CI because local hooks can be disabled or misconfigured.\n\n## Post-Hooks Create Concurrent Edits\n\nA formatter can rewrite a file between the agent's write and its next read. Keep post-hooks deterministic, avoid semantic rewrites, and make the agent re-read files that a hook may have touched.\n\n# Tradeoffs\n\n| Choice | Option A | Option B | Decision criteria |\n| --- | --- | --- | --- |\n| Validation posture | Block before execution | Observe after execution | Block side effects that cannot be repaired cheaply. Use post-hooks for formatting, evidence, and advisory feedback. |\n| Hook scope | Broad matcher | Targeted matcher | Broad coverage is easier to state but expensive to run. Target the tool or path that carries the risk. |\n| Handler type | Deterministic command | Prompt or agent evaluation | Scripts fit rules with stable inputs. Model-based handlers fit judgment calls but add cost and variable decisions. |\n\n# References\n\n- [Automate workflows with hooks -- quickstart guide with practical examples (Claude Code Docs)](https://docs.anthropic.com/en/docs/claude-code/hooks-guide)\n",
+          "hash": "22dd134db04126e4b0e9870106676427665767b780988b5b59b695290df284bb",
+          "topic": "AI & ML",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Hooks.md",
+          "outcome": "keep",
+          "reason": "Audited the whole note against its text: the opening defines hooks and the Git-hook analogy; the events/matchers/handlers model, handler types, exit-code semantics (0 = JSON decision, 2 = blocking on supported events, other non-zero = failure) and the note that post-hooks cannot undo side effects are consistent with Claude Code's hooks documentation. The JSON example is internally coherent: `jq -er` fails on a missing path, and the final command's status preserves exit 2. The pitfalls, tradeoffs table and cross-tool section (Cursor, Git hooks) are accurate, version-hedged and not repetitive. There are no Qard cards, no known violations, wikilinks to Skills and Plugins are valid, the code fences have language identifiers, and the single reference is a real primary source. No concrete defect or learning gap was found, so an edit would be cosmetic churn."
+        }
+      ],
+      "feedback": [],
+      "decisions": []
+    },
+    "source_hashes": {
+      "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Hooks.md": "22dd134db04126e4b0e9870106676427665767b780988b5b59b695290df284bb"
+    },
+    "feedback_keys": [],
+    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Hooks.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-06T07:08:50.224338Z"
   }
 }
