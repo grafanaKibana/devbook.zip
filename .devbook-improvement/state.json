@@ -4332,16 +4332,93 @@
     "version": 1,
     "id": "e2d7c0a337c54d12aea6f8b9022cec0e",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-06T07:00:46.855761Z",
-    "elapsed_seconds": 67.11643289999999,
+    "elapsed_seconds": 70.8512545,
     "calls_reserved": 2,
     "responses_received": 2,
-    "attempted_paths": [],
+    "attempted_paths": [
+      "Vault/Home/AI & ML/LLM/Fine-tuning.md"
+    ],
     "accepted_records": [],
-    "outcomes": [],
+    "outcomes": [
+      {
+        "path": "Vault/Home/AI & ML/LLM/Fine-tuning.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Fine-tuning.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against its current text. The opening separates fine-tuning (behavior) from RAG (knowledge). GRPO is described correctly: group sampling, normalized advantages, no critic, KL control and reward-hacking validation, with a credible DeepSeekMath/R1 history. Preference alignment correctly covers RLHF and DPO tradeoffs. Full fine-tuning memory is described by component, not a fixed multiplier. LoRA and QLoRA claims are appropriately scoped (the QLoRA 65B/48GB figure is attributed to the paper's configurations). The data, evaluation, pitfalls and tradeoffs sections are consistent and not redundant. Both cards (LoRA mechanism, regressions despite frozen weights) are single-task, accurate (W0·x + B·A·x, adapter disable vs merge rollback) and sourced. The references are real, relevant and unannotated. No native violations are listed. No factual or editorial defect justifies an edit."
+              }
+            ],
+            "feedback": [],
+            "decisions": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "Independent audit of the full note found no factual, editorial, question-quality or rule defects. No edits are proposed and the keep is justified.",
+            "change_checks": [],
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Fine-tuning.md",
+                "verdict": "CLEAN",
+                "summary": "The note is accurate, well ordered and appropriately scoped. It separates behavior from knowledge, covers GRPO, preference methods, PEFT and full-tuning memory with conditions, and its two cards are single-task and sourced. No edit is warranted.",
+                "page_type": "Concept — typed frontmatter retained, optional Questions and References present and useful, fenced blocks carry language identifiers.",
+                "current_text_evidence": [
+                  {
+                    "quote": "It makes a poor knowledge store. Facts learned during training have no citation boundary and start aging immediately.",
+                    "line_start": 17,
+                    "reason": "The opening states the operating idea and the key boundary against RAG, which makes the topic quickly recoverable."
+                  },
+                  {
+                    "quote": "GRPO removes the learned value model used by PPO-style training.",
+                    "line_start": 23,
+                    "reason": "This is a correct statement of the GRPO mechanism, and the same paragraph names the remaining costs (on-policy sampling, KL control, reward hacking)."
+                  },
+                  {
+                    "quote": "Its memory footprint is not a fixed multiple of the published model size.",
+                    "line_start": 94,
+                    "reason": "The component-level treatment of training memory is accurate and decision-relevant, and the Pitfalls section reinforces it without padding."
+                  },
+                  {
+                    "quote": "“Frozen base” describes storage and update mechanics. It does not promise unchanged behavior while the adapter is active.",
+                    "line_start": 104,
+                    "reason": "This correctly scopes the LoRA regression risk, and it matches the second card's explanation of W0·x + B·A·x and of adapter-disable versus merge rollback."
+                  },
+                  {
+                    "quote": "That is evidence for those experiments, not a promise that any large model fits any consumer GPU.",
+                    "line_start": 108,
+                    "reason": "The QLoRA 65B/48 GB claim is correctly attributed to the paper's configurations and conditioned on the actual setup."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: GRPO, preference alignment, PEFT and evaluation all serve one decision about when and how to fine-tune. Splitting would fragment the comparison across approaches.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ]
+          },
+          "model_calls": 2
+        }
+      }
+    ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-06T07:01:53.971610Z",
+    "checkpoint_at": "2026-11-06T07:01:57.706436Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
