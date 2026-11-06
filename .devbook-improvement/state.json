@@ -4507,15 +4507,16 @@
     "version": 1,
     "id": "e2d7c0a337c54d12aea6f8b9022cec0e",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-06T07:00:46.855761Z",
-    "elapsed_seconds": 261.91784630000006,
+    "elapsed_seconds": 265.8419377000001,
     "calls_reserved": 8,
     "responses_received": 8,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Fine-tuning.md",
       "Vault/Home/AI & ML/LLM/Generation.md",
-      "Vault/Home/AI & ML/LLM/Graph Engineering.md"
+      "Vault/Home/AI & ML/LLM/Graph Engineering.md",
+      "Vault/Home/AI & ML/LLM/Harness Engineering/Harness Engineering.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -4739,10 +4740,79 @@
           },
           "model_calls": 6
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Harness Engineering.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Harness Engineering.md",
+                "outcome": "keep",
+                "reason": "Read the whole folder note against its own text. The opening defines the harness boundary (model proposes, harness decides reach and effects) and separates it from prompt, context and loop engineering. The tool-surface, execution-environment and reliability sections state mechanisms and conditions: small surface with the caveat that MCPGauge shows run-level rather than per-schema effects, sandboxing, risk-based gating, and human approval trade-offs. They delegate details to Tool Design, Tooling, Model Context Protocol, Guardrails and Agent Loop without duplicating them. The single Qard tests one gradeable comparison, is consistent with the note's prose, and its answer matches the definitions in the cited Anthropic context-engineering source. The Datacore map block, frontmatter and the two References links are intact. No factual error, duplication or readability defect warranted an edit, and known_violations is empty."
+              }
+            ],
+            "feedback": [],
+            "decisions": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "Independent whole-note read found no factual, structural, voice or question-quality defect. The keep is justified and no edits are proposed.",
+            "change_checks": [],
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Harness Engineering.md",
+                "verdict": "CLEAN",
+                "summary": "The folder note states the harness boundary (the model proposes, the harness decides reach and effects) and separates it from prompt, context and loop engineering. Its sections give mechanisms and conditions: the MCPGauge run-level caveat, sandboxing, risk-based gating and the approval tradeoff. The single Qard is one focused comparison with a sourced answer. No edit is warranted.",
+                "page_type": "FolderNote. It keeps the FolderNote tag and the Datacore card-map block. Questions and References are optional and both are valid. Voice is impersonal and declarative.",
+                "current_text_evidence": [
+                  {
+                    "quote": "The model proposes a call. The harness decides what that call can reach and what happens when it runs.",
+                    "line_start": 18,
+                    "reason": "The operating idea is stated quickly and is recoverable."
+                  },
+                  {
+                    "quote": "so they show run-level token and accuracy effects rather than isolating the number of schemas",
+                    "line_start": 33,
+                    "reason": "This keeps a precise limit on the evidence and avoids overclaiming."
+                  },
+                  {
+                    "quote": "Too many pauses turn the agent into a form filler.",
+                    "line_start": 44,
+                    "reason": "The approval tradeoff is concrete and states the condition that changes the decision."
+                  },
+                  {
+                    "quote": "Whether a tool such as `delete_branch` exists at all, and which policy approves its use, remains a harness decision.",
+                    "line_start": 66,
+                    "reason": "The Qard answer is consistent with the prose and states the boundary case. It tests one dependent comparison, so it does not need splitting."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the note is a compact hub. Detail is already delegated to Tool Design, Tooling, Model Context Protocol and Guardrails, and the sections form one coherent boundary topic.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ]
+          },
+          "model_calls": 8
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-06T07:05:08.773022Z",
+    "checkpoint_at": "2026-11-06T07:05:12.697114Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
