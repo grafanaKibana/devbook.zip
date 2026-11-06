@@ -4694,9 +4694,9 @@
     "version": 1,
     "id": "e2d7c0a337c54d12aea6f8b9022cec0e",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-06T07:00:46.855761Z",
-    "elapsed_seconds": 452.0091177,
+    "elapsed_seconds": 455.4289812,
     "calls_reserved": 14,
     "responses_received": 14,
     "attempted_paths": [
@@ -4705,7 +4705,8 @@
       "Vault/Home/AI & ML/LLM/Graph Engineering.md",
       "Vault/Home/AI & ML/LLM/Harness Engineering/Harness Engineering.md",
       "Vault/Home/AI & ML/LLM/Harness Engineering/Model Context Protocol.md",
-      "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Agent Instructions.md"
+      "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Agent Instructions.md",
+      "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Coding Agents.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -5152,10 +5153,84 @@
           },
           "model_calls": 12
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Coding Agents.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Coding Agents.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against its text. The opening and loop section explain the mechanism (tool loop, observed output, stop conditions) and the mermaid diagram matches the prose. Tool sections correctly separate each product's instruction surface (CLAUDE.md, .cursor/rules with legacy .cursorrules, copilot-instructions.md and AGENTS.md, .clinerules, .aider.conf.yml, .windsurf/rules, AGENTS.md for OpenCode), and the Amazon Q CLI to Kiro note is hedged appropriately. Pitfalls and tradeoffs carry conditions rather than slogans. The single Qard tests one coherent task, with a table, an explicit caveat that tests and review do not prove safety, and a Copilot hooks source for the hook-deny claim. References are real primary sources. There are no known violations, no needs-fixing flags and no structural problems, so edits would be cosmetic churn."
+              }
+            ],
+            "feedback": [],
+            "decisions": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "The whole-note audit found no accuracy, clarity, structure or question-quality defect. The keep is justified and no edits are proposed.",
+            "change_checks": [],
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Coding Agents.md",
+                "verdict": "CLEAN",
+                "summary": "The note is accurate, readable and well ordered. It moves from the tool loop to the products, then to pitfalls, tradeoffs and one coherent Qard. The conditions and caveats are kept, and no concrete defect justifies an edit.",
+                "page_type": "Concept — standard concept-note rules apply. Optional Questions and References are present and sound, the mermaid fence has a language identifier, and the Qard ID is intact.",
+                "current_text_evidence": [
+                  {
+                    "quote": "It still has no independent definition of correctness.",
+                    "line_start": 19,
+                    "reason": "States the key boundary early. The agent loop is not a source of truth, so instructions, permissions and validation have to supply one."
+                  },
+                  {
+                    "quote": "Iteration is not progress by itself.",
+                    "line_start": 36,
+                    "reason": "Gives the loop a stop condition (step limits, acceptance criteria, stopping on repeated evidence) instead of a slogan."
+                  },
+                  {
+                    "quote": "Its command-line assistant has been rebranded as Kiro",
+                    "line_start": 70,
+                    "reason": "The version-specific product-status claim is hedged and consistent with AWS's move from the Amazon Q Developer CLI to Kiro."
+                  },
+                  {
+                    "quote": "autonomous retry loops can trigger 50+ model calls during a debugging spiral",
+                    "line_start": 76,
+                    "reason": "The figure is illustrative and carries a condition. The following sentences explain what drives cost, so the number is not misleading."
+                  },
+                  {
+                    "quote": "> [!qard]- What controls reduce risk when a coding agent can change a repository?",
+                    "line_start": 90,
+                    "reason": "One coherent, self-contained question. The answer is a single control-versus-risk explanation with a caveat and an answer-side primary source, so it needs no split."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the loop, the product surfaces, the pitfalls and the tradeoffs are all part of one coherent overview of coding agents. A separate per-tool page would only duplicate this summary.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ]
+          },
+          "model_calls": 14
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-06T07:08:18.864297Z",
+    "checkpoint_at": "2026-11-06T07:08:22.284161Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
