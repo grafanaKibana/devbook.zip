@@ -4809,10 +4809,10 @@
     "version": 1,
     "id": "e2d7c0a337c54d12aea6f8b9022cec0e",
     "status": "active",
-    "phase": "evaluating",
+    "phase": "author_reserved",
     "started_at": "2026-11-06T07:00:46.855761Z",
-    "elapsed_seconds": 602.6045169000001,
-    "calls_reserved": 18,
+    "elapsed_seconds": 605.9770995000002,
+    "calls_reserved": 19,
     "responses_received": 18,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Fine-tuning.md",
@@ -5490,7 +5490,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-06T07:10:49.459698Z",
+    "checkpoint_at": "2026-11-06T07:10:52.832282Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -5515,7 +5515,7 @@
       "pr": null
     },
     "base_sha": "67caf2e374f53e8772b86b8ea0f881d74e784fa1",
-    "reservation_deadline": "2026-11-06T07:24:56.899579Z"
+    "reservation_deadline": "2026-11-06T07:25:52.555432Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
