@@ -5049,10 +5049,10 @@
     "version": 1,
     "id": "236350876fc543f98c4ebc7094742d69",
     "status": "active",
-    "phase": "evaluating",
+    "phase": "author_reserved",
     "started_at": "2026-11-06T19:33:51.179749Z",
-    "elapsed_seconds": 209.7154528,
-    "calls_reserved": 6,
+    "elapsed_seconds": 213.1498975,
+    "calls_reserved": 7,
     "responses_received": 6,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Tool Design.md",
@@ -5287,7 +5287,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-06T19:37:20.894695Z",
+    "checkpoint_at": "2026-11-06T19:37:24.329141Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -5312,7 +5312,7 @@
       "pr": null
     },
     "base_sha": "67caf2e374f53e8772b86b8ea0f881d74e784fa1",
-    "reservation_deadline": "2026-11-06T19:51:37.495774Z"
+    "reservation_deadline": "2026-11-06T19:52:24.064477Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
