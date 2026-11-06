@@ -4862,787 +4862,18 @@
   },
   "focused_workload": {
     "version": 1,
-    "id": "e2d7c0a337c54d12aea6f8b9022cec0e",
-    "status": "sealed",
-    "phase": "sealed",
-    "started_at": "2026-11-06T07:00:46.855761Z",
-    "elapsed_seconds": 644.2098723000004,
-    "calls_reserved": 20,
-    "responses_received": 20,
-    "attempted_paths": [
-      "Vault/Home/AI & ML/LLM/Fine-tuning.md",
-      "Vault/Home/AI & ML/LLM/Generation.md",
-      "Vault/Home/AI & ML/LLM/Graph Engineering.md",
-      "Vault/Home/AI & ML/LLM/Harness Engineering/Harness Engineering.md",
-      "Vault/Home/AI & ML/LLM/Harness Engineering/Model Context Protocol.md",
-      "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Agent Instructions.md",
-      "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Coding Agents.md",
-      "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Hooks.md",
-      "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Plugins.md",
-      "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Skills.md"
-    ],
+    "id": "236350876fc543f98c4ebc7094742d69",
+    "status": "active",
+    "phase": "selecting",
+    "started_at": "2026-11-06T19:33:51.179749Z",
+    "elapsed_seconds": 0.001095,
+    "calls_reserved": 0,
+    "responses_received": 0,
+    "attempted_paths": [],
     "accepted_records": [],
-    "outcomes": [
-      {
-        "path": "Vault/Home/AI & ML/LLM/Fine-tuning.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Fine-tuning.md",
-                "outcome": "keep",
-                "reason": "Audited the whole note against its current text. The opening separates fine-tuning (behavior) from RAG (knowledge). GRPO is described correctly: group sampling, normalized advantages, no critic, KL control and reward-hacking validation, with a credible DeepSeekMath/R1 history. Preference alignment correctly covers RLHF and DPO tradeoffs. Full fine-tuning memory is described by component, not a fixed multiplier. LoRA and QLoRA claims are appropriately scoped (the QLoRA 65B/48GB figure is attributed to the paper's configurations). The data, evaluation, pitfalls and tradeoffs sections are consistent and not redundant. Both cards (LoRA mechanism, regressions despite frozen weights) are single-task, accurate (W0·x + B·A·x, adapter disable vs merge rollback) and sourced. The references are real, relevant and unannotated. No native violations are listed. No factual or editorial defect justifies an edit."
-              }
-            ],
-            "feedback": [],
-            "decisions": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "Independent audit of the full note found no factual, editorial, question-quality or rule defects. No edits are proposed and the keep is justified.",
-            "change_checks": [],
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Fine-tuning.md",
-                "verdict": "CLEAN",
-                "summary": "The note is accurate, well ordered and appropriately scoped. It separates behavior from knowledge, covers GRPO, preference methods, PEFT and full-tuning memory with conditions, and its two cards are single-task and sourced. No edit is warranted.",
-                "page_type": "Concept — typed frontmatter retained, optional Questions and References present and useful, fenced blocks carry language identifiers.",
-                "current_text_evidence": [
-                  {
-                    "quote": "It makes a poor knowledge store. Facts learned during training have no citation boundary and start aging immediately.",
-                    "line_start": 17,
-                    "reason": "The opening states the operating idea and the key boundary against RAG, which makes the topic quickly recoverable."
-                  },
-                  {
-                    "quote": "GRPO removes the learned value model used by PPO-style training.",
-                    "line_start": 23,
-                    "reason": "This is a correct statement of the GRPO mechanism, and the same paragraph names the remaining costs (on-policy sampling, KL control, reward hacking)."
-                  },
-                  {
-                    "quote": "Its memory footprint is not a fixed multiple of the published model size.",
-                    "line_start": 94,
-                    "reason": "The component-level treatment of training memory is accurate and decision-relevant, and the Pitfalls section reinforces it without padding."
-                  },
-                  {
-                    "quote": "“Frozen base” describes storage and update mechanics. It does not promise unchanged behavior while the adapter is active.",
-                    "line_start": 104,
-                    "reason": "This correctly scopes the LoRA regression risk, and it matches the second card's explanation of W0·x + B·A·x and of adapter-disable versus merge rollback."
-                  },
-                  {
-                    "quote": "That is evidence for those experiments, not a promise that any large model fits any consumer GPU.",
-                    "line_start": 108,
-                    "reason": "The QLoRA 65B/48 GB claim is correctly attributed to the paper's configurations and conditioned on the actual setup."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: GRPO, preference alignment, PEFT and evaluation all serve one decision about when and how to fine-tune. Splitting would fragment the comparison across approaches.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ]
-          },
-          "model_calls": 2
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/LLM/Generation.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Generation.md",
-                "outcome": "keep",
-                "reason": "Audited the whole note against current text: the sampling pipeline (distribution, temperature, top-p, structure mask) is explained in order, and parameter semantics (temperature scaling, nucleus sampling, top_k availability, frequency vs presence penalty, max_completion_tokens covering reasoning tokens, best-effort seed) are accurate and appropriately hedged. Grounding, context assembly (Lost in the Middle U-shape), structured output (constrained decoding vs JSON mode vs function calling) and pitfalls are consistent, with correct caveats that schema validity does not prove semantic correctness. The tradeoffs table is carefully qualified. Both existing cards test one gradeable task each, with sources on the answer side and no unresolved known violations. References are relevant and deduplicated. No defect was verified, so no edits are warranted."
-              }
-            ],
-            "feedback": [],
-            "decisions": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "Independent whole-note audit found no verified factual, editorial, question-quality or reference defect; keeping the note unchanged is justified and no edits were proposed.",
-            "change_checks": [],
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Generation.md",
-                "verdict": "CLEAN",
-                "summary": "The note explains sampling, grounding, context assembly and structured output in a logical order, with accurate and hedged parameter semantics and mechanisms. No concrete defect was found, so leaving it unchanged is justified.",
-                "page_type": "Concept — LLM generation note; Questions and References are optional and present; Qard IDs are protected.",
-                "current_text_evidence": [
-                  {
-                    "quote": "The prompt and context shape the distribution before any of those controls apply.",
-                    "line_start": 19,
-                    "reason": "The opening mechanism paragraph and the mermaid flow place the prompt, distribution, sampler and structure mask in the correct order before the details, so the note is easy to re-enter."
-                  },
-                  {
-                    "quote": "For o-series reasoning models, `max_completion_tokens` covers internal reasoning tokens as well as visible output.",
-                    "line_start": 42,
-                    "reason": "Version-specific condition kept precise and consistent with OpenAI documentation."
-                  },
-                  {
-                    "quote": "They are signals from the model's distribution, not calibrated confidence in factual truth.",
-                    "line_start": 48,
-                    "reason": "A correct limit on logprobs that prevents a common misuse."
-                  },
-                  {
-                    "quote": "Schema compliance proves shape. It does not prove meaning.",
-                    "line_start": 119,
-                    "reason": "The pitfall is consistent with the structured-output section and the tradeoffs table, so the note has no internal contradictions."
-                  },
-                  {
-                    "quote": "Why can a response with valid citation markers still contain unsupported claims?",
-                    "line_start": 147,
-                    "reason": "Each card tests one dependent behavior-and-why task, keeps its qard ID, and has primary sources on the answer side. Neither card bundles independent tasks."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the sections (sampling, grounding, context assembly, structured output) are facets of one generation-reliability topic and are cross-linked to the RAG and Context Engineering notes.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ]
-          },
-          "model_calls": 4
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/LLM/Graph Engineering.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Graph Engineering.md",
-                "outcome": "keep",
-                "reason": "Read the whole note against its text. The intro separates execution graphs from knowledge graphs and states the boundary with adjacent disciplines. The graph contract, state merge rules, superstep semantics, checkpoint and idempotency caveats, and the human-in-the-loop resume protocol are scoped to LangGraph and Microsoft Agent Framework, with the claim that bulk-synchronous scheduling is a framework choice. The 'when a graph earns its cost' and testing sections hold up, and the Anthropic workflow-versus-agent distinction is accurate. The three cards each test one gradeable task, with sources on the answer side and existing IDs intact. The idempotency card keeps its mechanism and a dependent explanation together. The references are topic-specific bare links. No native violations are listed. I found no verified defect, and edits would be cosmetic churn."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "No edits were proposed. The whole-note audit found no concrete factual, structural, question-quality or rule defect. The keep is justified.",
-            "change_checks": [],
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Graph Engineering.md",
-                "verdict": "CLEAN",
-                "summary": "The note explains the operating idea, the mechanism and the limits in a sensible order. It states the execution-graph versus knowledge-graph boundary, and it scopes superstep and checkpoint claims to named frameworks. It states the idempotency caveat precisely and explains when a graph is not worth its cost. The three Qards are single-task, have intact IDs, and carry answer-side sources. Rewriting would be cosmetic churn.",
-                "page_type": "Concept — authored concept note. Optional Questions and References are present and valid; the Qards are protected identity metadata.",
-                "current_text_evidence": [
-                  {
-                    "quote": "This is an **execution graph**, not a knowledge graph.",
-                    "line_start": 19,
-                    "reason": "The intro fixes the main terminology boundary early, so the topic is quickly recoverable."
-                  },
-                  {
-                    "quote": "bulk-synchronous execution is a framework choice, not a property of graphs in general.",
-                    "line_start": 51,
-                    "reason": "The superstep claim is scoped to LangGraph and Microsoft Agent Framework and carries an explicit exception, which keeps it factually safe."
-                  },
-                  {
-                    "quote": "a separate read-before-write check alone is insufficient.",
-                    "line_start": 59,
-                    "reason": "The checkpoint section states the idempotency condition and its failure mode, and it matches the Qard answer."
-                  },
-                  {
-                    "quote": "is probably just a function wearing a box in a diagram.",
-                    "line_start": 78,
-                    "reason": "The cost section gives a decided, whiteboard-style judgment test in direct voice."
-                  },
-                  {
-                    "quote": "What does an explicit execution graph define in an agent workflow?",
-                    "line_start": 96,
-                    "reason": "The card is self-contained and bounded. Its answer is one coherent definition with nodes, edges and state, and it cites answer-side sources."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the topology, state, recovery, cost and testing sections form one coherent topic and are not independently useful on their own.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ]
-          },
-          "model_calls": 6
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Harness Engineering.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Harness Engineering.md",
-                "outcome": "keep",
-                "reason": "Read the whole folder note against its own text. The opening defines the harness boundary (model proposes, harness decides reach and effects) and separates it from prompt, context and loop engineering. The tool-surface, execution-environment and reliability sections state mechanisms and conditions: small surface with the caveat that MCPGauge shows run-level rather than per-schema effects, sandboxing, risk-based gating, and human approval trade-offs. They delegate details to Tool Design, Tooling, Model Context Protocol, Guardrails and Agent Loop without duplicating them. The single Qard tests one gradeable comparison, is consistent with the note's prose, and its answer matches the definitions in the cited Anthropic context-engineering source. The Datacore map block, frontmatter and the two References links are intact. No factual error, duplication or readability defect warranted an edit, and known_violations is empty."
-              }
-            ],
-            "feedback": [],
-            "decisions": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "Independent whole-note read found no factual, structural, voice or question-quality defect. The keep is justified and no edits are proposed.",
-            "change_checks": [],
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Harness Engineering.md",
-                "verdict": "CLEAN",
-                "summary": "The folder note states the harness boundary (the model proposes, the harness decides reach and effects) and separates it from prompt, context and loop engineering. Its sections give mechanisms and conditions: the MCPGauge run-level caveat, sandboxing, risk-based gating and the approval tradeoff. The single Qard is one focused comparison with a sourced answer. No edit is warranted.",
-                "page_type": "FolderNote. It keeps the FolderNote tag and the Datacore card-map block. Questions and References are optional and both are valid. Voice is impersonal and declarative.",
-                "current_text_evidence": [
-                  {
-                    "quote": "The model proposes a call. The harness decides what that call can reach and what happens when it runs.",
-                    "line_start": 18,
-                    "reason": "The operating idea is stated quickly and is recoverable."
-                  },
-                  {
-                    "quote": "so they show run-level token and accuracy effects rather than isolating the number of schemas",
-                    "line_start": 33,
-                    "reason": "This keeps a precise limit on the evidence and avoids overclaiming."
-                  },
-                  {
-                    "quote": "Too many pauses turn the agent into a form filler.",
-                    "line_start": 44,
-                    "reason": "The approval tradeoff is concrete and states the condition that changes the decision."
-                  },
-                  {
-                    "quote": "Whether a tool such as `delete_branch` exists at all, and which policy approves its use, remains a harness decision.",
-                    "line_start": 66,
-                    "reason": "The Qard answer is consistent with the prose and states the boundary case. It tests one dependent comparison, so it does not need splitting."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the note is a compact hub. Detail is already delegated to Tool Design, Tooling, Model Context Protocol and Guardrails, and the sections form one coherent boundary topic.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ]
-          },
-          "model_calls": 8
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Model Context Protocol.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Model Context Protocol.md",
-                "outcome": "keep",
-                "reason": "Audited the whole note against its text: the N×M vs N+M framing carries its conditions, and the host/client/server roles and three primitives with their control model are consistent with each other. The version-specific statements are internally consistent: 2026-07-28 stateless requests, optional server/discover, and earlier handshake/sessions. The transport section correctly separates stdio's local-process trust from Streamable HTTP's OAuth. The function-calling comparison and tradeoff table agree. The pitfalls hedge MCPGauge's run-level figures properly and do not attribute them to schema count. The two Qards each test one gradeable task, with sources on the answer side and IDs preserved. The known-violation inventory is empty. References are topic-specific. I did not re-fetch sources in this pass. No verified defect justifies an edit, and extra changes would only add churn."
-              }
-            ],
-            "feedback": [],
-            "decisions": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "The note is accurate, coherent and well hedged. The author's keep is supported, and no concrete defect or rule violation remains.",
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Model Context Protocol.md",
-                "verdict": "CLEAN",
-                "summary": "The whole note holds up on a full read. The N×M versus N+M framing is conditioned on compatible versions and capabilities. The 2026-07-28 changes match the official update post: no handshake or sessions, optional server/discover, and cache hints on list results. The pitfalls hedge the MCPGauge figures correctly. The two Qards are each a single gradeable task, carry answer-side sources, and keep their IDs. Keeping the note unchanged is justified.",
-                "page_type": "Concept — authorable prose; Questions and References are optional and present. Qard IDs are protected metadata.",
-                "current_text_evidence": [
-                  {
-                    "quote": "The rough shape becomes N+M, provided both sides implement compatible versions and capabilities.",
-                    "line_start": 18,
-                    "reason": "The N×M to N+M claim carries its condition, so it does not overstate the benefit."
-                  },
-                  {
-                    "quote": "A client may call `server/discover` to inspect server capabilities first, but discovery is optional.",
-                    "line_start": 46,
-                    "reason": "This matches the 2026-07-28 post, which describes server/discover as optional. The line also notes the removed handshake, and the post confirms the cache hints."
-                  },
-                  {
-                    "quote": "Those run-level figures do not isolate schema count as the cause, and the exact cost depends on the client and workload.",
-                    "line_start": 85,
-                    "reason": "The note limits the benchmark figures to what they measured and does not attribute them to schema count."
-                  },
-                  {
-                    "quote": "Model choice is a proposal, not permission.",
-                    "line_start": 44,
-                    "reason": "This states the decision rule directly and keeps authorization with the host."
-                  },
-                  {
-                    "quote": "<!-- qard-id: 59308422-df66-4bad-b9ce-ca18c5608606 -->",
-                    "line_start": 123,
-                    "reason": "The Qard ID is preserved, and the card tests one task: the checks the server still owes after HTTP authorization."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the note covers one coherent topic. Architecture, transports, tradeoffs and pitfalls all support the same MCP decision, and none would be useful on its own.",
-                "findings": [],
-                "source_checks": [
-                  {
-                    "url": "https://blog.modelcontextprotocol.io/posts/2026-07-28/",
-                    "claim": "2026-07-28 removes the handshake and sessions, makes server/discover optional, and adds cache hints to list results",
-                    "result": "SUPPORTED",
-                    "reason": "The fetched post states all three."
-                  }
-                ],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "change_checks": []
-          },
-          "model_calls": 10
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Agent Instructions.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Agent Instructions.md",
-                "outcome": "keep",
-                "reason": "Audited the whole note against its text. The opening explains what instruction files hold and how runtimes load them. The tool table, the checklist, the AGENTS.md example, the pitfalls and the tradeoffs are coherent and consistent with each other. The claims about Claude Code, Cursor, Copilot, Cline, Windsurf and OpenCode match known documented behavior, and the note correctly says precedence is tool-specific. The two cards each test one gradeable task and cite the Copilot CLI docs. The note has no known violations, and the references are valid. I found no defect that justifies an edit."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "The note is accurate, readable and internally consistent. No edits were proposed, and I found no defect that justifies one.",
-            "change_checks": [],
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Agent Instructions.md",
-                "verdict": "CLEAN",
-                "summary": "The whole note was read and holds together. The opening gives the idea and the tool-specific precedence caveat, the table covers the main tools, and the example, pitfalls and tradeoffs follow from one thesis: short, accurate, current guidance. The two Qards each test one task. No edit is warranted.",
-                "page_type": "Concept note. Optional Questions and References are present and valid, with no generated navigation and no code-fence issues (the nested ````markdown fence has a language).",
-                "current_text_evidence": [
-                  {
-                    "quote": "The exact precedence is tool-specific, but the engineering rule is stable.",
-                    "line_start": 19,
-                    "reason": "Gives the key boundary early and avoids claiming a portable precedence order, which matches the second card's answer."
-                  },
-                  {
-                    "quote": "Configuration is not automatically an instruction surface.",
-                    "line_start": 32,
-                    "reason": "States a useful boundary between config files and prose policy, using the Aider example."
-                  },
-                  {
-                    "quote": "The file gives the agent a tested command, a data boundary, and a clear definition of done.",
-                    "line_start": 60,
-                    "reason": "Ties the example to the checklist, so the example teaches something concrete."
-                  },
-                  {
-                    "quote": "**Aspirational guidance:** an agent follows the documented architecture even when the code has not reached it.",
-                    "line_start": 68,
-                    "reason": "Concrete pitfall with a stated mechanism and a fix. Voice is direct and impersonal."
-                  },
-                  {
-                    "quote": "This is a maintenance discipline, not a portable precedence guarantee.",
-                    "line_start": 92,
-                    "reason": "The answer limits its own claim, so it does not overstate what the Copilot documentation establishes."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the landscape table, checklist, example, pitfalls and tradeoffs are facets of one topic. Skills is already a separate linked note.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ]
-          },
-          "model_calls": 12
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Coding Agents.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Coding Agents.md",
-                "outcome": "keep",
-                "reason": "Audited the whole note against its text. The opening and loop section explain the mechanism (tool loop, observed output, stop conditions) and the mermaid diagram matches the prose. Tool sections correctly separate each product's instruction surface (CLAUDE.md, .cursor/rules with legacy .cursorrules, copilot-instructions.md and AGENTS.md, .clinerules, .aider.conf.yml, .windsurf/rules, AGENTS.md for OpenCode), and the Amazon Q CLI to Kiro note is hedged appropriately. Pitfalls and tradeoffs carry conditions rather than slogans. The single Qard tests one coherent task, with a table, an explicit caveat that tests and review do not prove safety, and a Copilot hooks source for the hook-deny claim. References are real primary sources. There are no known violations, no needs-fixing flags and no structural problems, so edits would be cosmetic churn."
-              }
-            ],
-            "feedback": [],
-            "decisions": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "The whole-note audit found no accuracy, clarity, structure or question-quality defect. The keep is justified and no edits are proposed.",
-            "change_checks": [],
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Coding Agents.md",
-                "verdict": "CLEAN",
-                "summary": "The note is accurate, readable and well ordered. It moves from the tool loop to the products, then to pitfalls, tradeoffs and one coherent Qard. The conditions and caveats are kept, and no concrete defect justifies an edit.",
-                "page_type": "Concept — standard concept-note rules apply. Optional Questions and References are present and sound, the mermaid fence has a language identifier, and the Qard ID is intact.",
-                "current_text_evidence": [
-                  {
-                    "quote": "It still has no independent definition of correctness.",
-                    "line_start": 19,
-                    "reason": "States the key boundary early. The agent loop is not a source of truth, so instructions, permissions and validation have to supply one."
-                  },
-                  {
-                    "quote": "Iteration is not progress by itself.",
-                    "line_start": 36,
-                    "reason": "Gives the loop a stop condition (step limits, acceptance criteria, stopping on repeated evidence) instead of a slogan."
-                  },
-                  {
-                    "quote": "Its command-line assistant has been rebranded as Kiro",
-                    "line_start": 70,
-                    "reason": "The version-specific product-status claim is hedged and consistent with AWS's move from the Amazon Q Developer CLI to Kiro."
-                  },
-                  {
-                    "quote": "autonomous retry loops can trigger 50+ model calls during a debugging spiral",
-                    "line_start": 76,
-                    "reason": "The figure is illustrative and carries a condition. The following sentences explain what drives cost, so the number is not misleading."
-                  },
-                  {
-                    "quote": "> [!qard]- What controls reduce risk when a coding agent can change a repository?",
-                    "line_start": 90,
-                    "reason": "One coherent, self-contained question. The answer is a single control-versus-risk explanation with a caveat and an answer-side primary source, so it needs no split."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the loop, the product surfaces, the pitfalls and the tradeoffs are all part of one coherent overview of coding agents. A separate per-tool page would only duplicate this summary.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ]
-          },
-          "model_calls": 14
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Hooks.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Hooks.md",
-                "outcome": "keep",
-                "reason": "Audited the whole note against its text: the opening defines hooks and the Git-hook analogy; the events/matchers/handlers model, handler types, exit-code semantics (0 = JSON decision, 2 = blocking on supported events, other non-zero = failure) and the note that post-hooks cannot undo side effects are consistent with Claude Code's hooks documentation. The JSON example is internally coherent: `jq -er` fails on a missing path, and the final command's status preserves exit 2. The pitfalls, tradeoffs table and cross-tool section (Cursor, Git hooks) are accurate, version-hedged and not repetitive. There are no Qard cards, no known violations, wikilinks to Skills and Plugins are valid, the code fences have language identifiers, and the single reference is a real primary source. No concrete defect or learning gap was found, so an edit would be cosmetic churn."
-              }
-            ],
-            "feedback": [],
-            "decisions": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "Whole-note audit found no concrete defect or essential gap. The keep disposition is justified and no edits are proposed.",
-            "change_checks": [],
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Hooks.md",
-                "verdict": "CLEAN",
-                "summary": "The note defines hooks, explains the events, matchers and handlers model, and hedges version-specific exit-code and event behavior. The example is coherent, the pitfalls and tradeoffs support engineering decisions, and there is no repetition or padding. No edit is warranted.",
-                "page_type": "Concept - optional Questions absent; one real primary-source reference; wikilinks and code fence languages valid.",
-                "current_text_evidence": [
-                  {
-                    "quote": "They turn a written policy into an event-bound check",
-                    "line_start": 14,
-                    "reason": "The opening states the operating idea quickly and concretely."
-                  },
-                  {
-                    "quote": "Exit code `2` is a blocking signal on supported events. The exact effect depends on the event.",
-                    "line_start": 54,
-                    "reason": "The exit-code semantics carry the right condition and hedge, and match Claude Code's documented behavior."
-                  },
-                  {
-                    "quote": "The event list is versioned product behavior, so configuration should target the installed runtime rather than a remembered event count.",
-                    "line_start": 58,
-                    "reason": "This handles version-specific facts correctly instead of asserting a fragile count."
-                  },
-                  {
-                    "quote": "`jq -e` makes a missing path a hook failure rather than passing an empty argument.",
-                    "line_start": 97,
-                    "reason": "The example explanation is accurate and teaches the mechanism behind the command."
-                  },
-                  {
-                    "quote": "A hook that prints an error but exits successfully may allow the operation.",
-                    "line_start": 107,
-                    "reason": "The pitfall is concrete and gives a testable remedy, with a CI fallback; the prose is direct and impersonal."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: events, matchers, handlers, an example, pitfalls and tradeoffs form one coherent small topic.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "identity_safety": "NOT APPLICABLE",
-                  "question_quality": "NOT APPLICABLE",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ]
-          },
-          "model_calls": 16
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Plugins.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Plugins.md",
-                "outcome": "keep",
-                "reason": "Read the whole note against its purpose. The opening defines the overloaded term and the MCP host/server split. It names the three server features (tools, resources, prompts) and says the host decides exposure, approval and credentials, which matches the MCP specification. The sections on MCP servers, VS Code and Cursor are compact and consistent with the opening. The JSON example is labelled illustrative and historical, and its mcpServers shape matches common client configs. The note ties secrets and boundaries to the example and links to Skills for instruction workflows. The pitfalls cover untrusted execution, tool noise (the MCPGauge figures are hedged as benchmark-specific) and package provenance, and the tradeoffs table supports a decision. The one reference is topic-relevant and a bare link bullet. The note has no cards, and none are needed. Code fences have language identifiers, and no known violations are listed. No factual or editorial defect justifies an edit."
-              }
-            ],
-            "feedback": [],
-            "decisions": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "The only note is a justified keep. I found no unfixed factual or editorial defect, no known violations, and no edits to check.",
-            "change_checks": [],
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Plugins.md",
-                "verdict": "CLEAN",
-                "summary": "The note defines the overloaded term, separates MCP's protocol role from the host's responsibilities, and gives a labelled illustrative config. The pitfalls and tradeoffs table support engineering judgment, and the MCPGauge claim is hedged. No edits are needed.",
-                "page_type": "Concept — frontmatter intact; Questions section optional and absent; References are a bare link bullet; code fence has a language identifier.",
-                "current_text_evidence": [
-                  {
-                    "quote": "The host still decides which capabilities reach the model, when approval is required, and how credentials are isolated.",
-                    "line_start": 16,
-                    "reason": "States the key MCP boundary (protocol versus host policy) correctly and concisely."
-                  },
-                  {
-                    "quote": "The package names and credential style are illustrative. Registries and server packages change.",
-                    "line_start": 58,
-                    "reason": "Flags the config example as time-sensitive and keeps the durable lesson."
-                  },
-                  {
-                    "quote": "This is evidence that tool access can hurt, not a universal estimate for every model or server.",
-                    "line_start": 63,
-                    "reason": "Hedges the MCPGauge figures properly. The 9.5% average drop was confirmed in the paper's abstract; the 17% code-generation figure was not independently confirmed."
-                  },
-                  {
-                    "quote": "| Minimal toolset | Easier review and clearer tool choice | Some work stays manual | Narrow workflows or environments with strict trust boundaries |",
-                    "line_start": 71,
-                    "reason": "The tradeoff comparison names the condition that changes the decision."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the note covers one coherent topic (plugin mechanisms and MCP) at a compact length.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "NOT APPLICABLE",
-                  "identity_safety": "NOT APPLICABLE",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ]
-          },
-          "model_calls": 18
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Skills.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Skills.md",
-                "outcome": "keep",
-                "reason": "Read the whole note against its text: it opens with the operating idea (short advertised name and description, body loaded on selection), states the key boundary that a skill adds context and not an executable tool, and separates discovery paths, a concrete SKILL.md example, pitfalls and a scope tradeoff table. Runtime-specific claims are scoped correctly (allowed-tools as Claude Code frontmatter, OpenCode's name/description requirements and skill-tool permissions, Copilot's project and personal skill directories) and match the cited official docs as I know them. No known native violations exist, there are no cards, the code fence has a language, wikilinks point to sibling concepts with a stated reason, and references are bare descriptive links. Prose is direct and non-repetitive. Edits would be cosmetic churn, so I made none."
-              }
-            ],
-            "feedback": [],
-            "decisions": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Skills.md",
-                "verdict": "CLEAN",
-                "summary": "The note is accurate, compact and well ordered: operating idea, runtime-specific discovery, a concrete example, pitfalls and a decision table. No concrete defect justifies an edit, so a keep is correct.",
-                "page_type": "Concept note. It has no Questions section, which is optional. It has a References section with bare descriptive links and a fenced code block that has a language identifier.",
-                "current_text_evidence": [
-                  {
-                    "quote": "Loading a skill changes the context available to the model. It does not create a new executable tool by itself.",
-                    "line_start": 16,
-                    "reason": "States the key boundary: a skill adds context, not a tool. It also scopes permissions to the runtime, so the claim is accurate and decided."
-                  },
-                  {
-                    "quote": "`allowed-tools` is a Claude Code permission convenience, not a portable restriction across every runtime.",
-                    "line_start": 51,
-                    "reason": "Version- and runtime-specific condition is stated explicitly and matches the Claude-specific frontmatter label in the example."
-                  },
-                  {
-                    "quote": "a skill earns its context cost only when its procedure applies",
-                    "line_start": 24,
-                    "reason": "Separates skills from always-on instructions and plugins, with a stated reason for the wikilinks."
-                  },
-                  {
-                    "quote": "A review date does not repair stale instructions. An executable check is stronger evidence.",
-                    "line_start": 65,
-                    "reason": "Gives a technically decided judgment, so the pitfalls section carries engineering judgment instead of padding."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the note covers one coherent topic (skill packages), and the discovery, structure and pitfalls sections depend on each other.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "NOT APPLICABLE",
-                  "identity_safety": "NOT APPLICABLE",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "overall_reason": "The whole-note audit found no concrete defect in accuracy, order, terminology, repetition, structure or references. The keep disposition is justified, and no edits were proposed.",
-            "change_checks": []
-          },
-          "model_calls": 20
-        }
-      }
-    ],
+    "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-06T07:11:31.065053Z",
-    "topic": "AI & ML",
-    "topic_id": "ai-ml-4edf0823",
-    "current_batch": {
-      "topic": "AI & ML",
-      "topic_id": "ai-ml-4edf0823",
-      "notes": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Skills.md",
-          "content": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"Reusable instruction packages that give a coding agent specialized domain expertise on demand.\"\npublish: true\nstatus: Done\nlevel: [\"2\"]\npriority: Medium\ncreated: \"2026-08-16T07:07:41.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-08-20T20:41:15.495Z\"\n---\n\nSkills package instructions for a recurring task. The runtime advertises a short name and description, then loads the full body only when the skill is selected. This keeps a review checklist or release procedure out of every prompt without hiding it in a private convention.\n\nMost implementations use a `SKILL.md` file with frontmatter for discovery and Markdown for the procedure. Loading a skill changes the context available to the model. It does not create a new executable tool by itself. Permissions remain runtime-specific. Claude Code can pre-approve tools through `allowed-tools`, while OpenCode controls access to the skill tool in `opencode.json`.\n\n# Discovery and Scope\n\nClaude Code, OpenCode, and GitHub Copilot all discover `SKILL.md` packages from project and user directories. OpenCode searches `.opencode/skills`, `.claude/skills`, and `.agents/skills` along the worktree path, then exposes matching definitions through its `skill` tool. Claude Code can select a skill from its description or run one explicitly as a slash command.\n\nGitHub Copilot recognizes project skills under `.github/skills`, `.claude/skills`, and `.agents/skills`, plus personal skills under `~/.copilot/skills` and `~/.agents/skills`. Agent skills are available across Copilot's cloud agent, code review, CLI, app, and agent modes in Visual Studio Code and JetBrains IDEs. Custom instructions remain a separate, mostly always-on surface.\n\nProject skills belong with the repository when every contributor should get the same procedure. User skills hold personal workflows. This is different from always-on project instructions: [[Agent Instructions]] state facts that should shape most work, while a skill earns its context cost only when its procedure applies. And [[Plugins]] add executable capabilities rather than prose alone.\n\n# Minimal Skill Structure\n\nClaude Code example (`allowed-tools` is Claude-specific frontmatter):\n\n```markdown\n---\nname: company-api-conventions\ndescription: Enforce internal API conventions for controllers, errors, and telemetry\nallowed-tools: Read, Grep, Glob\n---\n\n## When to use\nUse when creating or modifying HTTP endpoints and integration handlers.\n\n## Instructions\n1. Return RFC 7807 problem details for errors.\n2. Use correlation IDs in logs and response headers.\n3. Prefer idempotent POST handlers with idempotency keys.\n\n## Tool configuration\n- If an MCP API-catalog server is available, read endpoint contracts before writing code.\n```\n\nOpenCode note: OpenCode requires `name` and `description`, and supports `license`, `compatibility`, and `metadata`. Unknown frontmatter fields are ignored.\n\nFrontmatter makes the skill discoverable. The body contains the procedure a reviewer can inspect as ordinary Markdown. `allowed-tools` is a Claude Code permission convenience, not a portable restriction across every runtime.\n\n# Practical Example\n\nSuppose an API has a fixed error contract. A task-specific skill can tell the agent to read the schema, use the expected error shape, and run the focused contract test. The skill does not guarantee compliance. It makes the right procedure available at the moment the agent chooses how to work.\n\n# Pitfalls\n\n## Skills That Are Too Broad\n\nA `coding-conventions` skill that covers every kind of engineering work becomes another root instruction file with worse discoverability. Split only at real activation boundaries. `api-error-contracts` is useful when endpoint work needs a procedure. A tiny naming rule belongs in always-on project guidance.\n\n## Stale Skills\n\nA skill can preserve an obsolete SDK call long after the application moves on. Keep project skills in version control and update them in the change that invalidates the procedure. A review date does not repair stale instructions. An executable check is stronger evidence.\n\n## Conflicting Scopes\n\nA personal skill that prefers `var` can collide with a repository rule requiring explicit types. Team policy belongs in the repository. Personal skills should avoid restating it, and no assumed precedence should replace the runtime's documented resolution rules.\n\n# Tradeoffs\n\n| Choice | Option A | Option B | Decision criteria |\n|---|---|---|---|\n| Scope | Project-specific skills | User-global skills | Put shared procedures with the repository. Keep personal shortcuts global only when they cannot override team policy. |\n| Detail level | Detailed procedure | Short guidance | Use a procedure when order and verification matter. A small fact usually belongs in project instructions instead. |\n\n# References\n\n- [Extend Claude with skills (Claude Code Docs)](https://code.claude.com/docs/en/skills)\n- [Agent Skills (OpenCode Docs)](https://opencode.ai/docs/skills/)\n- [About agent skills (GitHub Docs)](https://docs.github.com/en/copilot/concepts/agents/about-agent-skills)\n",
-          "hash": "191bdccc14f916510af558eea60c3e08a83359ee5491b47509cd36d17d40da93",
-          "topic": "AI & ML",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "new"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "base_sha": "67caf2e374f53e8772b86b8ea0f881d74e784fa1",
-    "reservation_deadline": "2026-11-06T07:26:04.610147Z",
-    "stop_reason": "call_limit",
-    "sealed_at": "2026-11-06T07:11:31.065054Z"
+    "checkpoint_at": "2026-11-06T19:33:51.180452Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
@@ -13346,6 +12577,790 @@
       "error": "Claude author invocation failed with exit code 1 (category: unknown).",
       "stop_reason": "provider_error",
       "sealed_at": "2026-11-05T20:17:41.211496Z"
+    },
+    "e2d7c0a337c54d12aea6f8b9022cec0e": {
+      "version": 1,
+      "id": "e2d7c0a337c54d12aea6f8b9022cec0e",
+      "status": "sealed",
+      "phase": "sealed",
+      "started_at": "2026-11-06T07:00:46.855761Z",
+      "elapsed_seconds": 644.2098723000004,
+      "calls_reserved": 20,
+      "responses_received": 20,
+      "attempted_paths": [
+        "Vault/Home/AI & ML/LLM/Fine-tuning.md",
+        "Vault/Home/AI & ML/LLM/Generation.md",
+        "Vault/Home/AI & ML/LLM/Graph Engineering.md",
+        "Vault/Home/AI & ML/LLM/Harness Engineering/Harness Engineering.md",
+        "Vault/Home/AI & ML/LLM/Harness Engineering/Model Context Protocol.md",
+        "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Agent Instructions.md",
+        "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Coding Agents.md",
+        "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Hooks.md",
+        "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Plugins.md",
+        "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Skills.md"
+      ],
+      "accepted_records": [],
+      "outcomes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Fine-tuning.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Fine-tuning.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole note against its current text. The opening separates fine-tuning (behavior) from RAG (knowledge). GRPO is described correctly: group sampling, normalized advantages, no critic, KL control and reward-hacking validation, with a credible DeepSeekMath/R1 history. Preference alignment correctly covers RLHF and DPO tradeoffs. Full fine-tuning memory is described by component, not a fixed multiplier. LoRA and QLoRA claims are appropriately scoped (the QLoRA 65B/48GB figure is attributed to the paper's configurations). The data, evaluation, pitfalls and tradeoffs sections are consistent and not redundant. Both cards (LoRA mechanism, regressions despite frozen weights) are single-task, accurate (W0·x + B·A·x, adapter disable vs merge rollback) and sourced. The references are real, relevant and unannotated. No native violations are listed. No factual or editorial defect justifies an edit."
+                }
+              ],
+              "feedback": [],
+              "decisions": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "Independent audit of the full note found no factual, editorial, question-quality or rule defects. No edits are proposed and the keep is justified.",
+              "change_checks": [],
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Fine-tuning.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note is accurate, well ordered and appropriately scoped. It separates behavior from knowledge, covers GRPO, preference methods, PEFT and full-tuning memory with conditions, and its two cards are single-task and sourced. No edit is warranted.",
+                  "page_type": "Concept — typed frontmatter retained, optional Questions and References present and useful, fenced blocks carry language identifiers.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "It makes a poor knowledge store. Facts learned during training have no citation boundary and start aging immediately.",
+                      "line_start": 17,
+                      "reason": "The opening states the operating idea and the key boundary against RAG, which makes the topic quickly recoverable."
+                    },
+                    {
+                      "quote": "GRPO removes the learned value model used by PPO-style training.",
+                      "line_start": 23,
+                      "reason": "This is a correct statement of the GRPO mechanism, and the same paragraph names the remaining costs (on-policy sampling, KL control, reward hacking)."
+                    },
+                    {
+                      "quote": "Its memory footprint is not a fixed multiple of the published model size.",
+                      "line_start": 94,
+                      "reason": "The component-level treatment of training memory is accurate and decision-relevant, and the Pitfalls section reinforces it without padding."
+                    },
+                    {
+                      "quote": "“Frozen base” describes storage and update mechanics. It does not promise unchanged behavior while the adapter is active.",
+                      "line_start": 104,
+                      "reason": "This correctly scopes the LoRA regression risk, and it matches the second card's explanation of W0·x + B·A·x and of adapter-disable versus merge rollback."
+                    },
+                    {
+                      "quote": "That is evidence for those experiments, not a promise that any large model fits any consumer GPU.",
+                      "line_start": 108,
+                      "reason": "The QLoRA 65B/48 GB claim is correctly attributed to the paper's configurations and conditioned on the actual setup."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: GRPO, preference alignment, PEFT and evaluation all serve one decision about when and how to fine-tune. Splitting would fragment the comparison across approaches.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ]
+            },
+            "model_calls": 2
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Generation.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Generation.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole note against current text: the sampling pipeline (distribution, temperature, top-p, structure mask) is explained in order, and parameter semantics (temperature scaling, nucleus sampling, top_k availability, frequency vs presence penalty, max_completion_tokens covering reasoning tokens, best-effort seed) are accurate and appropriately hedged. Grounding, context assembly (Lost in the Middle U-shape), structured output (constrained decoding vs JSON mode vs function calling) and pitfalls are consistent, with correct caveats that schema validity does not prove semantic correctness. The tradeoffs table is carefully qualified. Both existing cards test one gradeable task each, with sources on the answer side and no unresolved known violations. References are relevant and deduplicated. No defect was verified, so no edits are warranted."
+                }
+              ],
+              "feedback": [],
+              "decisions": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "Independent whole-note audit found no verified factual, editorial, question-quality or reference defect; keeping the note unchanged is justified and no edits were proposed.",
+              "change_checks": [],
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Generation.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note explains sampling, grounding, context assembly and structured output in a logical order, with accurate and hedged parameter semantics and mechanisms. No concrete defect was found, so leaving it unchanged is justified.",
+                  "page_type": "Concept — LLM generation note; Questions and References are optional and present; Qard IDs are protected.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "The prompt and context shape the distribution before any of those controls apply.",
+                      "line_start": 19,
+                      "reason": "The opening mechanism paragraph and the mermaid flow place the prompt, distribution, sampler and structure mask in the correct order before the details, so the note is easy to re-enter."
+                    },
+                    {
+                      "quote": "For o-series reasoning models, `max_completion_tokens` covers internal reasoning tokens as well as visible output.",
+                      "line_start": 42,
+                      "reason": "Version-specific condition kept precise and consistent with OpenAI documentation."
+                    },
+                    {
+                      "quote": "They are signals from the model's distribution, not calibrated confidence in factual truth.",
+                      "line_start": 48,
+                      "reason": "A correct limit on logprobs that prevents a common misuse."
+                    },
+                    {
+                      "quote": "Schema compliance proves shape. It does not prove meaning.",
+                      "line_start": 119,
+                      "reason": "The pitfall is consistent with the structured-output section and the tradeoffs table, so the note has no internal contradictions."
+                    },
+                    {
+                      "quote": "Why can a response with valid citation markers still contain unsupported claims?",
+                      "line_start": 147,
+                      "reason": "Each card tests one dependent behavior-and-why task, keeps its qard ID, and has primary sources on the answer side. Neither card bundles independent tasks."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the sections (sampling, grounding, context assembly, structured output) are facets of one generation-reliability topic and are cross-linked to the RAG and Context Engineering notes.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ]
+            },
+            "model_calls": 4
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Graph Engineering.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Graph Engineering.md",
+                  "outcome": "keep",
+                  "reason": "Read the whole note against its text. The intro separates execution graphs from knowledge graphs and states the boundary with adjacent disciplines. The graph contract, state merge rules, superstep semantics, checkpoint and idempotency caveats, and the human-in-the-loop resume protocol are scoped to LangGraph and Microsoft Agent Framework, with the claim that bulk-synchronous scheduling is a framework choice. The 'when a graph earns its cost' and testing sections hold up, and the Anthropic workflow-versus-agent distinction is accurate. The three cards each test one gradeable task, with sources on the answer side and existing IDs intact. The idempotency card keeps its mechanism and a dependent explanation together. The references are topic-specific bare links. No native violations are listed. I found no verified defect, and edits would be cosmetic churn."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "No edits were proposed. The whole-note audit found no concrete factual, structural, question-quality or rule defect. The keep is justified.",
+              "change_checks": [],
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Graph Engineering.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note explains the operating idea, the mechanism and the limits in a sensible order. It states the execution-graph versus knowledge-graph boundary, and it scopes superstep and checkpoint claims to named frameworks. It states the idempotency caveat precisely and explains when a graph is not worth its cost. The three Qards are single-task, have intact IDs, and carry answer-side sources. Rewriting would be cosmetic churn.",
+                  "page_type": "Concept — authored concept note. Optional Questions and References are present and valid; the Qards are protected identity metadata.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "This is an **execution graph**, not a knowledge graph.",
+                      "line_start": 19,
+                      "reason": "The intro fixes the main terminology boundary early, so the topic is quickly recoverable."
+                    },
+                    {
+                      "quote": "bulk-synchronous execution is a framework choice, not a property of graphs in general.",
+                      "line_start": 51,
+                      "reason": "The superstep claim is scoped to LangGraph and Microsoft Agent Framework and carries an explicit exception, which keeps it factually safe."
+                    },
+                    {
+                      "quote": "a separate read-before-write check alone is insufficient.",
+                      "line_start": 59,
+                      "reason": "The checkpoint section states the idempotency condition and its failure mode, and it matches the Qard answer."
+                    },
+                    {
+                      "quote": "is probably just a function wearing a box in a diagram.",
+                      "line_start": 78,
+                      "reason": "The cost section gives a decided, whiteboard-style judgment test in direct voice."
+                    },
+                    {
+                      "quote": "What does an explicit execution graph define in an agent workflow?",
+                      "line_start": 96,
+                      "reason": "The card is self-contained and bounded. Its answer is one coherent definition with nodes, edges and state, and it cites answer-side sources."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the topology, state, recovery, cost and testing sections form one coherent topic and are not independently useful on their own.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ]
+            },
+            "model_calls": 6
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Harness Engineering.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Harness Engineering.md",
+                  "outcome": "keep",
+                  "reason": "Read the whole folder note against its own text. The opening defines the harness boundary (model proposes, harness decides reach and effects) and separates it from prompt, context and loop engineering. The tool-surface, execution-environment and reliability sections state mechanisms and conditions: small surface with the caveat that MCPGauge shows run-level rather than per-schema effects, sandboxing, risk-based gating, and human approval trade-offs. They delegate details to Tool Design, Tooling, Model Context Protocol, Guardrails and Agent Loop without duplicating them. The single Qard tests one gradeable comparison, is consistent with the note's prose, and its answer matches the definitions in the cited Anthropic context-engineering source. The Datacore map block, frontmatter and the two References links are intact. No factual error, duplication or readability defect warranted an edit, and known_violations is empty."
+                }
+              ],
+              "feedback": [],
+              "decisions": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "Independent whole-note read found no factual, structural, voice or question-quality defect. The keep is justified and no edits are proposed.",
+              "change_checks": [],
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Harness Engineering.md",
+                  "verdict": "CLEAN",
+                  "summary": "The folder note states the harness boundary (the model proposes, the harness decides reach and effects) and separates it from prompt, context and loop engineering. Its sections give mechanisms and conditions: the MCPGauge run-level caveat, sandboxing, risk-based gating and the approval tradeoff. The single Qard is one focused comparison with a sourced answer. No edit is warranted.",
+                  "page_type": "FolderNote. It keeps the FolderNote tag and the Datacore card-map block. Questions and References are optional and both are valid. Voice is impersonal and declarative.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "The model proposes a call. The harness decides what that call can reach and what happens when it runs.",
+                      "line_start": 18,
+                      "reason": "The operating idea is stated quickly and is recoverable."
+                    },
+                    {
+                      "quote": "so they show run-level token and accuracy effects rather than isolating the number of schemas",
+                      "line_start": 33,
+                      "reason": "This keeps a precise limit on the evidence and avoids overclaiming."
+                    },
+                    {
+                      "quote": "Too many pauses turn the agent into a form filler.",
+                      "line_start": 44,
+                      "reason": "The approval tradeoff is concrete and states the condition that changes the decision."
+                    },
+                    {
+                      "quote": "Whether a tool such as `delete_branch` exists at all, and which policy approves its use, remains a harness decision.",
+                      "line_start": 66,
+                      "reason": "The Qard answer is consistent with the prose and states the boundary case. It tests one dependent comparison, so it does not need splitting."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the note is a compact hub. Detail is already delegated to Tool Design, Tooling, Model Context Protocol and Guardrails, and the sections form one coherent boundary topic.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ]
+            },
+            "model_calls": 8
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Model Context Protocol.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Model Context Protocol.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole note against its text: the N×M vs N+M framing carries its conditions, and the host/client/server roles and three primitives with their control model are consistent with each other. The version-specific statements are internally consistent: 2026-07-28 stateless requests, optional server/discover, and earlier handshake/sessions. The transport section correctly separates stdio's local-process trust from Streamable HTTP's OAuth. The function-calling comparison and tradeoff table agree. The pitfalls hedge MCPGauge's run-level figures properly and do not attribute them to schema count. The two Qards each test one gradeable task, with sources on the answer side and IDs preserved. The known-violation inventory is empty. References are topic-specific. I did not re-fetch sources in this pass. No verified defect justifies an edit, and extra changes would only add churn."
+                }
+              ],
+              "feedback": [],
+              "decisions": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "The note is accurate, coherent and well hedged. The author's keep is supported, and no concrete defect or rule violation remains.",
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Model Context Protocol.md",
+                  "verdict": "CLEAN",
+                  "summary": "The whole note holds up on a full read. The N×M versus N+M framing is conditioned on compatible versions and capabilities. The 2026-07-28 changes match the official update post: no handshake or sessions, optional server/discover, and cache hints on list results. The pitfalls hedge the MCPGauge figures correctly. The two Qards are each a single gradeable task, carry answer-side sources, and keep their IDs. Keeping the note unchanged is justified.",
+                  "page_type": "Concept — authorable prose; Questions and References are optional and present. Qard IDs are protected metadata.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "The rough shape becomes N+M, provided both sides implement compatible versions and capabilities.",
+                      "line_start": 18,
+                      "reason": "The N×M to N+M claim carries its condition, so it does not overstate the benefit."
+                    },
+                    {
+                      "quote": "A client may call `server/discover` to inspect server capabilities first, but discovery is optional.",
+                      "line_start": 46,
+                      "reason": "This matches the 2026-07-28 post, which describes server/discover as optional. The line also notes the removed handshake, and the post confirms the cache hints."
+                    },
+                    {
+                      "quote": "Those run-level figures do not isolate schema count as the cause, and the exact cost depends on the client and workload.",
+                      "line_start": 85,
+                      "reason": "The note limits the benchmark figures to what they measured and does not attribute them to schema count."
+                    },
+                    {
+                      "quote": "Model choice is a proposal, not permission.",
+                      "line_start": 44,
+                      "reason": "This states the decision rule directly and keeps authorization with the host."
+                    },
+                    {
+                      "quote": "<!-- qard-id: 59308422-df66-4bad-b9ce-ca18c5608606 -->",
+                      "line_start": 123,
+                      "reason": "The Qard ID is preserved, and the card tests one task: the checks the server still owes after HTTP authorization."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the note covers one coherent topic. Architecture, transports, tradeoffs and pitfalls all support the same MCP decision, and none would be useful on its own.",
+                  "findings": [],
+                  "source_checks": [
+                    {
+                      "url": "https://blog.modelcontextprotocol.io/posts/2026-07-28/",
+                      "claim": "2026-07-28 removes the handshake and sessions, makes server/discover optional, and adds cache hints to list results",
+                      "result": "SUPPORTED",
+                      "reason": "The fetched post states all three."
+                    }
+                  ],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "change_checks": []
+            },
+            "model_calls": 10
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Agent Instructions.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Agent Instructions.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole note against its text. The opening explains what instruction files hold and how runtimes load them. The tool table, the checklist, the AGENTS.md example, the pitfalls and the tradeoffs are coherent and consistent with each other. The claims about Claude Code, Cursor, Copilot, Cline, Windsurf and OpenCode match known documented behavior, and the note correctly says precedence is tool-specific. The two cards each test one gradeable task and cite the Copilot CLI docs. The note has no known violations, and the references are valid. I found no defect that justifies an edit."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "The note is accurate, readable and internally consistent. No edits were proposed, and I found no defect that justifies one.",
+              "change_checks": [],
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Agent Instructions.md",
+                  "verdict": "CLEAN",
+                  "summary": "The whole note was read and holds together. The opening gives the idea and the tool-specific precedence caveat, the table covers the main tools, and the example, pitfalls and tradeoffs follow from one thesis: short, accurate, current guidance. The two Qards each test one task. No edit is warranted.",
+                  "page_type": "Concept note. Optional Questions and References are present and valid, with no generated navigation and no code-fence issues (the nested ````markdown fence has a language).",
+                  "current_text_evidence": [
+                    {
+                      "quote": "The exact precedence is tool-specific, but the engineering rule is stable.",
+                      "line_start": 19,
+                      "reason": "Gives the key boundary early and avoids claiming a portable precedence order, which matches the second card's answer."
+                    },
+                    {
+                      "quote": "Configuration is not automatically an instruction surface.",
+                      "line_start": 32,
+                      "reason": "States a useful boundary between config files and prose policy, using the Aider example."
+                    },
+                    {
+                      "quote": "The file gives the agent a tested command, a data boundary, and a clear definition of done.",
+                      "line_start": 60,
+                      "reason": "Ties the example to the checklist, so the example teaches something concrete."
+                    },
+                    {
+                      "quote": "**Aspirational guidance:** an agent follows the documented architecture even when the code has not reached it.",
+                      "line_start": 68,
+                      "reason": "Concrete pitfall with a stated mechanism and a fix. Voice is direct and impersonal."
+                    },
+                    {
+                      "quote": "This is a maintenance discipline, not a portable precedence guarantee.",
+                      "line_start": 92,
+                      "reason": "The answer limits its own claim, so it does not overstate what the Copilot documentation establishes."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the landscape table, checklist, example, pitfalls and tradeoffs are facets of one topic. Skills is already a separate linked note.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ]
+            },
+            "model_calls": 12
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Coding Agents.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Coding Agents.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole note against its text. The opening and loop section explain the mechanism (tool loop, observed output, stop conditions) and the mermaid diagram matches the prose. Tool sections correctly separate each product's instruction surface (CLAUDE.md, .cursor/rules with legacy .cursorrules, copilot-instructions.md and AGENTS.md, .clinerules, .aider.conf.yml, .windsurf/rules, AGENTS.md for OpenCode), and the Amazon Q CLI to Kiro note is hedged appropriately. Pitfalls and tradeoffs carry conditions rather than slogans. The single Qard tests one coherent task, with a table, an explicit caveat that tests and review do not prove safety, and a Copilot hooks source for the hook-deny claim. References are real primary sources. There are no known violations, no needs-fixing flags and no structural problems, so edits would be cosmetic churn."
+                }
+              ],
+              "feedback": [],
+              "decisions": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "The whole-note audit found no accuracy, clarity, structure or question-quality defect. The keep is justified and no edits are proposed.",
+              "change_checks": [],
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Coding Agents.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note is accurate, readable and well ordered. It moves from the tool loop to the products, then to pitfalls, tradeoffs and one coherent Qard. The conditions and caveats are kept, and no concrete defect justifies an edit.",
+                  "page_type": "Concept — standard concept-note rules apply. Optional Questions and References are present and sound, the mermaid fence has a language identifier, and the Qard ID is intact.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "It still has no independent definition of correctness.",
+                      "line_start": 19,
+                      "reason": "States the key boundary early. The agent loop is not a source of truth, so instructions, permissions and validation have to supply one."
+                    },
+                    {
+                      "quote": "Iteration is not progress by itself.",
+                      "line_start": 36,
+                      "reason": "Gives the loop a stop condition (step limits, acceptance criteria, stopping on repeated evidence) instead of a slogan."
+                    },
+                    {
+                      "quote": "Its command-line assistant has been rebranded as Kiro",
+                      "line_start": 70,
+                      "reason": "The version-specific product-status claim is hedged and consistent with AWS's move from the Amazon Q Developer CLI to Kiro."
+                    },
+                    {
+                      "quote": "autonomous retry loops can trigger 50+ model calls during a debugging spiral",
+                      "line_start": 76,
+                      "reason": "The figure is illustrative and carries a condition. The following sentences explain what drives cost, so the number is not misleading."
+                    },
+                    {
+                      "quote": "> [!qard]- What controls reduce risk when a coding agent can change a repository?",
+                      "line_start": 90,
+                      "reason": "One coherent, self-contained question. The answer is a single control-versus-risk explanation with a caveat and an answer-side primary source, so it needs no split."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the loop, the product surfaces, the pitfalls and the tradeoffs are all part of one coherent overview of coding agents. A separate per-tool page would only duplicate this summary.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ]
+            },
+            "model_calls": 14
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Hooks.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Hooks.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole note against its text: the opening defines hooks and the Git-hook analogy; the events/matchers/handlers model, handler types, exit-code semantics (0 = JSON decision, 2 = blocking on supported events, other non-zero = failure) and the note that post-hooks cannot undo side effects are consistent with Claude Code's hooks documentation. The JSON example is internally coherent: `jq -er` fails on a missing path, and the final command's status preserves exit 2. The pitfalls, tradeoffs table and cross-tool section (Cursor, Git hooks) are accurate, version-hedged and not repetitive. There are no Qard cards, no known violations, wikilinks to Skills and Plugins are valid, the code fences have language identifiers, and the single reference is a real primary source. No concrete defect or learning gap was found, so an edit would be cosmetic churn."
+                }
+              ],
+              "feedback": [],
+              "decisions": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "Whole-note audit found no concrete defect or essential gap. The keep disposition is justified and no edits are proposed.",
+              "change_checks": [],
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Hooks.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note defines hooks, explains the events, matchers and handlers model, and hedges version-specific exit-code and event behavior. The example is coherent, the pitfalls and tradeoffs support engineering decisions, and there is no repetition or padding. No edit is warranted.",
+                  "page_type": "Concept - optional Questions absent; one real primary-source reference; wikilinks and code fence languages valid.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "They turn a written policy into an event-bound check",
+                      "line_start": 14,
+                      "reason": "The opening states the operating idea quickly and concretely."
+                    },
+                    {
+                      "quote": "Exit code `2` is a blocking signal on supported events. The exact effect depends on the event.",
+                      "line_start": 54,
+                      "reason": "The exit-code semantics carry the right condition and hedge, and match Claude Code's documented behavior."
+                    },
+                    {
+                      "quote": "The event list is versioned product behavior, so configuration should target the installed runtime rather than a remembered event count.",
+                      "line_start": 58,
+                      "reason": "This handles version-specific facts correctly instead of asserting a fragile count."
+                    },
+                    {
+                      "quote": "`jq -e` makes a missing path a hook failure rather than passing an empty argument.",
+                      "line_start": 97,
+                      "reason": "The example explanation is accurate and teaches the mechanism behind the command."
+                    },
+                    {
+                      "quote": "A hook that prints an error but exits successfully may allow the operation.",
+                      "line_start": 107,
+                      "reason": "The pitfall is concrete and gives a testable remedy, with a CI fallback; the prose is direct and impersonal."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: events, matchers, handlers, an example, pitfalls and tradeoffs form one coherent small topic.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "identity_safety": "NOT APPLICABLE",
+                    "question_quality": "NOT APPLICABLE",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ]
+            },
+            "model_calls": 16
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Plugins.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Plugins.md",
+                  "outcome": "keep",
+                  "reason": "Read the whole note against its purpose. The opening defines the overloaded term and the MCP host/server split. It names the three server features (tools, resources, prompts) and says the host decides exposure, approval and credentials, which matches the MCP specification. The sections on MCP servers, VS Code and Cursor are compact and consistent with the opening. The JSON example is labelled illustrative and historical, and its mcpServers shape matches common client configs. The note ties secrets and boundaries to the example and links to Skills for instruction workflows. The pitfalls cover untrusted execution, tool noise (the MCPGauge figures are hedged as benchmark-specific) and package provenance, and the tradeoffs table supports a decision. The one reference is topic-relevant and a bare link bullet. The note has no cards, and none are needed. Code fences have language identifiers, and no known violations are listed. No factual or editorial defect justifies an edit."
+                }
+              ],
+              "feedback": [],
+              "decisions": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "The only note is a justified keep. I found no unfixed factual or editorial defect, no known violations, and no edits to check.",
+              "change_checks": [],
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Plugins.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note defines the overloaded term, separates MCP's protocol role from the host's responsibilities, and gives a labelled illustrative config. The pitfalls and tradeoffs table support engineering judgment, and the MCPGauge claim is hedged. No edits are needed.",
+                  "page_type": "Concept — frontmatter intact; Questions section optional and absent; References are a bare link bullet; code fence has a language identifier.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "The host still decides which capabilities reach the model, when approval is required, and how credentials are isolated.",
+                      "line_start": 16,
+                      "reason": "States the key MCP boundary (protocol versus host policy) correctly and concisely."
+                    },
+                    {
+                      "quote": "The package names and credential style are illustrative. Registries and server packages change.",
+                      "line_start": 58,
+                      "reason": "Flags the config example as time-sensitive and keeps the durable lesson."
+                    },
+                    {
+                      "quote": "This is evidence that tool access can hurt, not a universal estimate for every model or server.",
+                      "line_start": 63,
+                      "reason": "Hedges the MCPGauge figures properly. The 9.5% average drop was confirmed in the paper's abstract; the 17% code-generation figure was not independently confirmed."
+                    },
+                    {
+                      "quote": "| Minimal toolset | Easier review and clearer tool choice | Some work stays manual | Narrow workflows or environments with strict trust boundaries |",
+                      "line_start": 71,
+                      "reason": "The tradeoff comparison names the condition that changes the decision."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the note covers one coherent topic (plugin mechanisms and MCP) at a compact length.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "NOT APPLICABLE",
+                    "identity_safety": "NOT APPLICABLE",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ]
+            },
+            "model_calls": 18
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Skills.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Skills.md",
+                  "outcome": "keep",
+                  "reason": "Read the whole note against its text: it opens with the operating idea (short advertised name and description, body loaded on selection), states the key boundary that a skill adds context and not an executable tool, and separates discovery paths, a concrete SKILL.md example, pitfalls and a scope tradeoff table. Runtime-specific claims are scoped correctly (allowed-tools as Claude Code frontmatter, OpenCode's name/description requirements and skill-tool permissions, Copilot's project and personal skill directories) and match the cited official docs as I know them. No known native violations exist, there are no cards, the code fence has a language, wikilinks point to sibling concepts with a stated reason, and references are bare descriptive links. Prose is direct and non-repetitive. Edits would be cosmetic churn, so I made none."
+                }
+              ],
+              "feedback": [],
+              "decisions": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Skills.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note is accurate, compact and well ordered: operating idea, runtime-specific discovery, a concrete example, pitfalls and a decision table. No concrete defect justifies an edit, so a keep is correct.",
+                  "page_type": "Concept note. It has no Questions section, which is optional. It has a References section with bare descriptive links and a fenced code block that has a language identifier.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "Loading a skill changes the context available to the model. It does not create a new executable tool by itself.",
+                      "line_start": 16,
+                      "reason": "States the key boundary: a skill adds context, not a tool. It also scopes permissions to the runtime, so the claim is accurate and decided."
+                    },
+                    {
+                      "quote": "`allowed-tools` is a Claude Code permission convenience, not a portable restriction across every runtime.",
+                      "line_start": 51,
+                      "reason": "Version- and runtime-specific condition is stated explicitly and matches the Claude-specific frontmatter label in the example."
+                    },
+                    {
+                      "quote": "a skill earns its context cost only when its procedure applies",
+                      "line_start": 24,
+                      "reason": "Separates skills from always-on instructions and plugins, with a stated reason for the wikilinks."
+                    },
+                    {
+                      "quote": "A review date does not repair stale instructions. An executable check is stronger evidence.",
+                      "line_start": 65,
+                      "reason": "Gives a technically decided judgment, so the pitfalls section carries engineering judgment instead of padding."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the note covers one coherent topic (skill packages), and the discovery, structure and pitfalls sections depend on each other.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "NOT APPLICABLE",
+                    "identity_safety": "NOT APPLICABLE",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "overall_reason": "The whole-note audit found no concrete defect in accuracy, order, terminology, repetition, structure or references. The keep disposition is justified, and no edits were proposed.",
+              "change_checks": []
+            },
+            "model_calls": 20
+          }
+        }
+      ],
+      "feedback_pr": 0,
+      "checkpoint_at": "2026-11-06T07:11:31.065053Z",
+      "topic": "AI & ML",
+      "topic_id": "ai-ml-4edf0823",
+      "current_batch": {
+        "topic": "AI & ML",
+        "topic_id": "ai-ml-4edf0823",
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Skills.md",
+            "content": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"Reusable instruction packages that give a coding agent specialized domain expertise on demand.\"\npublish: true\nstatus: Done\nlevel: [\"2\"]\npriority: Medium\ncreated: \"2026-08-16T07:07:41.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-08-20T20:41:15.495Z\"\n---\n\nSkills package instructions for a recurring task. The runtime advertises a short name and description, then loads the full body only when the skill is selected. This keeps a review checklist or release procedure out of every prompt without hiding it in a private convention.\n\nMost implementations use a `SKILL.md` file with frontmatter for discovery and Markdown for the procedure. Loading a skill changes the context available to the model. It does not create a new executable tool by itself. Permissions remain runtime-specific. Claude Code can pre-approve tools through `allowed-tools`, while OpenCode controls access to the skill tool in `opencode.json`.\n\n# Discovery and Scope\n\nClaude Code, OpenCode, and GitHub Copilot all discover `SKILL.md` packages from project and user directories. OpenCode searches `.opencode/skills`, `.claude/skills`, and `.agents/skills` along the worktree path, then exposes matching definitions through its `skill` tool. Claude Code can select a skill from its description or run one explicitly as a slash command.\n\nGitHub Copilot recognizes project skills under `.github/skills`, `.claude/skills`, and `.agents/skills`, plus personal skills under `~/.copilot/skills` and `~/.agents/skills`. Agent skills are available across Copilot's cloud agent, code review, CLI, app, and agent modes in Visual Studio Code and JetBrains IDEs. Custom instructions remain a separate, mostly always-on surface.\n\nProject skills belong with the repository when every contributor should get the same procedure. User skills hold personal workflows. This is different from always-on project instructions: [[Agent Instructions]] state facts that should shape most work, while a skill earns its context cost only when its procedure applies. And [[Plugins]] add executable capabilities rather than prose alone.\n\n# Minimal Skill Structure\n\nClaude Code example (`allowed-tools` is Claude-specific frontmatter):\n\n```markdown\n---\nname: company-api-conventions\ndescription: Enforce internal API conventions for controllers, errors, and telemetry\nallowed-tools: Read, Grep, Glob\n---\n\n## When to use\nUse when creating or modifying HTTP endpoints and integration handlers.\n\n## Instructions\n1. Return RFC 7807 problem details for errors.\n2. Use correlation IDs in logs and response headers.\n3. Prefer idempotent POST handlers with idempotency keys.\n\n## Tool configuration\n- If an MCP API-catalog server is available, read endpoint contracts before writing code.\n```\n\nOpenCode note: OpenCode requires `name` and `description`, and supports `license`, `compatibility`, and `metadata`. Unknown frontmatter fields are ignored.\n\nFrontmatter makes the skill discoverable. The body contains the procedure a reviewer can inspect as ordinary Markdown. `allowed-tools` is a Claude Code permission convenience, not a portable restriction across every runtime.\n\n# Practical Example\n\nSuppose an API has a fixed error contract. A task-specific skill can tell the agent to read the schema, use the expected error shape, and run the focused contract test. The skill does not guarantee compliance. It makes the right procedure available at the moment the agent chooses how to work.\n\n# Pitfalls\n\n## Skills That Are Too Broad\n\nA `coding-conventions` skill that covers every kind of engineering work becomes another root instruction file with worse discoverability. Split only at real activation boundaries. `api-error-contracts` is useful when endpoint work needs a procedure. A tiny naming rule belongs in always-on project guidance.\n\n## Stale Skills\n\nA skill can preserve an obsolete SDK call long after the application moves on. Keep project skills in version control and update them in the change that invalidates the procedure. A review date does not repair stale instructions. An executable check is stronger evidence.\n\n## Conflicting Scopes\n\nA personal skill that prefers `var` can collide with a repository rule requiring explicit types. Team policy belongs in the repository. Personal skills should avoid restating it, and no assumed precedence should replace the runtime's documented resolution rules.\n\n# Tradeoffs\n\n| Choice | Option A | Option B | Decision criteria |\n|---|---|---|---|\n| Scope | Project-specific skills | User-global skills | Put shared procedures with the repository. Keep personal shortcuts global only when they cannot override team policy. |\n| Detail level | Detailed procedure | Short guidance | Use a procedure when order and verification matter. A small fact usually belongs in project instructions instead. |\n\n# References\n\n- [Extend Claude with skills (Claude Code Docs)](https://code.claude.com/docs/en/skills)\n- [Agent Skills (OpenCode Docs)](https://opencode.ai/docs/skills/)\n- [About agent skills (GitHub Docs)](https://docs.github.com/en/copilot/concepts/agents/about-agent-skills)\n",
+            "hash": "191bdccc14f916510af558eea60c3e08a83359ee5491b47509cd36d17d40da93",
+            "topic": "AI & ML",
+            "violations": [],
+            "needs_fixing_ids": [],
+            "repair_input_hash": "",
+            "selection_reason": "new"
+          }
+        ],
+        "feedback": [],
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review_process": "focused-whole-note-v1",
+        "pr": null
+      },
+      "base_sha": "67caf2e374f53e8772b86b8ea0f881d74e784fa1",
+      "reservation_deadline": "2026-11-06T07:26:04.610147Z",
+      "stop_reason": "call_limit",
+      "sealed_at": "2026-11-06T07:11:31.065054Z"
     }
   },
   "feedback_workloads": {
