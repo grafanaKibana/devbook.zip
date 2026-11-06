@@ -3339,6 +3339,61 @@
         },
         "review_process": "focused-whole-note-v1"
       }
+    },
+    "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Plugins.md": {
+      "content_hash": "ac130a6743ad5a5c8ba8409467350542e887cd024d356666628d4f4456790e9a",
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "outcome": "keep",
+      "repair_input_hash": "",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "violation_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "keep_review": {
+        "content_hash": "ac130a6743ad5a5c8ba8409467350542e887cd024d356666628d4f4456790e9a",
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review": {
+          "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Plugins.md",
+          "verdict": "CLEAN",
+          "summary": "The note defines the overloaded term, separates MCP's protocol role from the host's responsibilities, and gives a labelled illustrative config. The pitfalls and tradeoffs table support engineering judgment, and the MCPGauge claim is hedged. No edits are needed.",
+          "page_type": "Concept — frontmatter intact; Questions section optional and absent; References are a bare link bullet; code fence has a language identifier.",
+          "current_text_evidence": [
+            {
+              "quote": "The host still decides which capabilities reach the model, when approval is required, and how credentials are isolated.",
+              "line_start": 16,
+              "reason": "States the key MCP boundary (protocol versus host policy) correctly and concisely."
+            },
+            {
+              "quote": "The package names and credential style are illustrative. Registries and server packages change.",
+              "line_start": 58,
+              "reason": "Flags the config example as time-sensitive and keeps the durable lesson."
+            },
+            {
+              "quote": "This is evidence that tool access can hurt, not a universal estimate for every model or server.",
+              "line_start": 63,
+              "reason": "Hedges the MCPGauge figures properly. The 9.5% average drop was confirmed in the paper's abstract; the 17% code-generation figure was not independently confirmed."
+            },
+            {
+              "quote": "| Minimal toolset | Easier review and clearer tool choice | Some work stays manual | Narrow workflows or environments with strict trust boundaries |",
+              "line_start": 71,
+              "reason": "The tradeoff comparison names the condition that changes the decision."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: the note covers one coherent topic (plugin mechanisms and MCP) at a compact length.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "NOT APPLICABLE",
+            "identity_safety": "NOT APPLICABLE",
+            "rules_compliance": "PASS"
+          }
+        },
+        "review_process": "focused-whole-note-v1"
+      }
     }
   },
   "topics": {
@@ -4756,7 +4811,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-06T07:00:46.855761Z",
-    "elapsed_seconds": 578.7116049,
+    "elapsed_seconds": 582.4952173,
     "calls_reserved": 18,
     "responses_received": 18,
     "attempted_paths": [
@@ -5365,7 +5420,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-06T07:10:25.566786Z",
+    "checkpoint_at": "2026-11-06T07:10:29.350398Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -8061,6 +8116,86 @@
       ],
       "source_hashes": {
         "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Coding Agents.md": "c80d02cb6168d48a202af40f1f8b7c0feda8ee4fc09309ebe9bbf90359a73d93"
+      },
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "97bf678224fd38d5b0fce899a7dd5d1ab3ed397dd67a46a640cec439f5a23176": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "overall_reason": "The only note is a justified keep. I found no unfixed factual or editorial defect, no known violations, and no edits to check.",
+        "change_checks": [],
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Plugins.md",
+            "verdict": "CLEAN",
+            "summary": "The note defines the overloaded term, separates MCP's protocol role from the host's responsibilities, and gives a labelled illustrative config. The pitfalls and tradeoffs table support engineering judgment, and the MCPGauge claim is hedged. No edits are needed.",
+            "page_type": "Concept — frontmatter intact; Questions section optional and absent; References are a bare link bullet; code fence has a language identifier.",
+            "current_text_evidence": [
+              {
+                "quote": "The host still decides which capabilities reach the model, when approval is required, and how credentials are isolated.",
+                "line_start": 15,
+                "reason": "States the key MCP boundary (protocol versus host policy) correctly and concisely."
+              },
+              {
+                "quote": "The package names and credential style are illustrative. Registries and server packages change.",
+                "line_start": 55,
+                "reason": "Flags the config example as time-sensitive and keeps the durable lesson."
+              },
+              {
+                "quote": "This is evidence that tool access can hurt, not a universal estimate for every model or server.",
+                "line_start": 60,
+                "reason": "Hedges the MCPGauge figures properly. The 9.5% average drop was confirmed in the paper's abstract; the 17% code-generation figure was not independently confirmed."
+              },
+              {
+                "quote": "| Minimal toolset | Easier review and clearer tool choice | Some work stays manual | Narrow workflows or environments with strict trust boundaries |",
+                "line_start": 68,
+                "reason": "The tradeoff comparison names the condition that changes the decision."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: the note covers one coherent topic (plugin mechanisms and MCP) at a compact length.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "NOT APPLICABLE",
+              "identity_safety": "NOT APPLICABLE",
+              "rules_compliance": "PASS"
+            }
+          }
+        ]
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Plugins.md",
+          "citation_index": 0,
+          "reported_line_start": 15,
+          "resolved_line_start": 16
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Plugins.md",
+          "citation_index": 1,
+          "reported_line_start": 55,
+          "resolved_line_start": 58
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Plugins.md",
+          "citation_index": 2,
+          "reported_line_start": 60,
+          "resolved_line_start": 63
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Plugins.md",
+          "citation_index": 3,
+          "reported_line_start": 68,
+          "resolved_line_start": 71
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Plugins.md": "ac130a6743ad5a5c8ba8409467350542e887cd024d356666628d4f4456790e9a"
       },
       "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
@@ -18358,182 +18493,6 @@
         "change_checks": []
       },
       "feedback_snapshot": []
-    }
-  },
-  "pending_author_proposal": {
-    "workload_id": "e2d7c0a337c54d12aea6f8b9022cec0e",
-    "topic_id": "ai-ml-4edf0823",
-    "batch": {
-      "topic": "AI & ML",
-      "topic_id": "ai-ml-4edf0823",
-      "notes": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Plugins.md",
-          "content": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"Extension mechanisms that add tools, data, and workflows to coding agents. MCP standardizes server connectivity and capability exchange.\"\npublish: true\nstatus: Done\nlevel: [\"2\"]\npriority: Medium\ncreated: \"2026-08-16T07:07:41.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-08-20T20:41:15.495Z\"\n---\n\n\"Plugin\" is an overloaded word in coding agents. It can mean an installable bundle for one product, an editor extension, or an external server connected through [[Model Context Protocol]]. The common idea is simple: the runtime gains a capability the model did not have in its original tool set.\n\nMCP standardizes one part of that picture. A host connects to servers and discovers three server features: **tools** for actions, **resources** for context, and **prompts** for user-invoked templates. The protocol defines the exchange. The host still decides which capabilities reach the model, when approval is required, and how credentials are isolated.\n\n# Plugin Ecosystems\n\n## MCP Servers\n\nMCP servers let several compatible clients reuse the same integration. A server can expose:\n\n- **Tools** for actions such as file operations, API calls, and database queries\n- **Resources** for structured context such as docs, schemas, and config files\n- **Prompts** for reusable task templates and workflows\n\nFilesystem, source-control, database, and search integrations are common examples. Portability is the main gain, although client support and approval behavior still differ.\n\n## VS Code Extensions\n\nGitHub Copilot and Cline run inside VS Code-compatible extension hosts. That gives them editor context and platform APIs that an MCP server does not replace. Copilot's extension APIs can also add domain-specific chat behavior inside the IDE.\n\n## Cursor Extensions\n\nCursor supports MCP alongside its own rules and extension surfaces. The separation is useful: rules shape behavior, while a server exposes something the runtime can call.\n\n# Example\n\nThis historical configuration shows the host/server shape:\n\n```json\n{\n  \"mcpServers\": {\n    \"github\": {\n      \"command\": \"npx\",\n      \"args\": [\"-y\", \"@modelcontextprotocol/server-github\"],\n      \"env\": { \"GITHUB_TOKEN\": \"...\" }\n    },\n    \"postgres\": {\n      \"command\": \"npx\",\n      \"args\": [\"-y\", \"@modelcontextprotocol/server-postgres\", \"postgresql://...\"]\n    }\n  }\n}\n```\n\nThe package names and credential style are illustrative. Registries and server packages change. The durable part is the boundary: connection details live in configuration, secrets stay outside committed files, and prompts do not hardcode service logic. For reusable instruction workflows that teach the agent when to call those tools, see [[Skills]].\n\n# Pitfalls\n\n- **Untrusted execution:** a server may read files, run commands, or call an external system. Give it the smallest credential and filesystem scope that works, and keep approval in front of sensitive actions.\n- **Tool noise:** schemas consume context and can make selection harder. In MCPGauge's 2025 experiment with six commercial models and 30 tool suites, MCP use reduced average task performance by 9.5% in that benchmark. Code generation fell 17%. This is evidence that tool access can hurt, not a universal estimate for every model or server. Load the smallest relevant set.\n- **Package provenance:** community servers often arrive through public registries. Pin reviewed versions and treat a server with filesystem or production credentials as executable supply-chain code.\n\n# Tradeoffs\n\n| Strategy | Benefits | Costs | Best fit |\n|---|---|---|---|\n| Rich plugin ecosystem | More tasks can be completed without bespoke adapters | More schemas, credentials, and supply-chain exposure | Repeated cross-system work with owners for each integration |\n| Minimal toolset | Easier review and clearer tool choice | Some work stays manual | Narrow workflows or environments with strict trust boundaries |\n\n# References\n\n- [GitHub Copilot Extension API - chat participants (Microsoft)](https://code.visualstudio.com/api/extension-guides/ai/chat)\n",
-          "hash": "ac130a6743ad5a5c8ba8409467350542e887cd024d356666628d4f4456790e9a",
-          "topic": "AI & ML",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "new"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Plugins.md",
-          "outcome": "keep",
-          "reason": "Read the whole note against its purpose. The opening defines the overloaded term and the MCP host/server split. It names the three server features (tools, resources, prompts) and says the host decides exposure, approval and credentials, which matches the MCP specification. The sections on MCP servers, VS Code and Cursor are compact and consistent with the opening. The JSON example is labelled illustrative and historical, and its mcpServers shape matches common client configs. The note ties secrets and boundaries to the example and links to Skills for instruction workflows. The pitfalls cover untrusted execution, tool noise (the MCPGauge figures are hedged as benchmark-specific) and package provenance, and the tradeoffs table supports a decision. The one reference is topic-relevant and a bare link bullet. The note has no cards, and none are needed. Code fences have language identifiers, and no known violations are listed. No factual or editorial defect justifies an edit."
-        }
-      ],
-      "feedback": [],
-      "decisions": []
-    },
-    "source_hashes": {
-      "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Plugins.md": "ac130a6743ad5a5c8ba8409467350542e887cd024d356666628d4f4456790e9a"
-    },
-    "feedback_keys": [],
-    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Plugins.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-06T07:09:53.336713Z",
-    "review_evidence": {
-      "raw_review": {
-        "verdict": "CLEAN",
-        "overall_reason": "The only note is a justified keep. I found no unfixed factual or editorial defect, no known violations, and no edits to check.",
-        "change_checks": [],
-        "notes": [
-          {
-            "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Plugins.md",
-            "verdict": "CLEAN",
-            "summary": "The note defines the overloaded term, separates MCP's protocol role from the host's responsibilities, and gives a labelled illustrative config. The pitfalls and tradeoffs table support engineering judgment, and the MCPGauge claim is hedged. No edits are needed.",
-            "page_type": "Concept — frontmatter intact; Questions section optional and absent; References are a bare link bullet; code fence has a language identifier.",
-            "current_text_evidence": [
-              {
-                "quote": "The host still decides which capabilities reach the model, when approval is required, and how credentials are isolated.",
-                "line_start": 15,
-                "reason": "States the key MCP boundary (protocol versus host policy) correctly and concisely."
-              },
-              {
-                "quote": "The package names and credential style are illustrative. Registries and server packages change.",
-                "line_start": 55,
-                "reason": "Flags the config example as time-sensitive and keeps the durable lesson."
-              },
-              {
-                "quote": "This is evidence that tool access can hurt, not a universal estimate for every model or server.",
-                "line_start": 60,
-                "reason": "Hedges the MCPGauge figures properly. The 9.5% average drop was confirmed in the paper's abstract; the 17% code-generation figure was not independently confirmed."
-              },
-              {
-                "quote": "| Minimal toolset | Easier review and clearer tool choice | Some work stays manual | Narrow workflows or environments with strict trust boundaries |",
-                "line_start": 68,
-                "reason": "The tradeoff comparison names the condition that changes the decision."
-              }
-            ],
-            "target_resolution": "JUSTIFIED UNCHANGED",
-            "split_suggestion": "No split: the note covers one coherent topic (plugin mechanisms and MCP) at a compact length.",
-            "findings": [],
-            "source_checks": [],
-            "rejection_equivalence": [],
-            "quality": {
-              "accuracy": "PASS",
-              "clarity": "PASS",
-              "question_quality": "NOT APPLICABLE",
-              "identity_safety": "NOT APPLICABLE",
-              "rules_compliance": "PASS"
-            }
-          }
-        ]
-      },
-      "bindings": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Plugins.md",
-          "citation_index": 0,
-          "reported_line_start": 15,
-          "resolved_line_start": 16
-        },
-        {
-          "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Plugins.md",
-          "citation_index": 1,
-          "reported_line_start": 55,
-          "resolved_line_start": 58
-        },
-        {
-          "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Plugins.md",
-          "citation_index": 2,
-          "reported_line_start": 60,
-          "resolved_line_start": 63
-        },
-        {
-          "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Plugins.md",
-          "citation_index": 3,
-          "reported_line_start": 68,
-          "resolved_line_start": 71
-        }
-      ],
-      "source_hashes": {
-        "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Plugins.md": "ac130a6743ad5a5c8ba8409467350542e887cd024d356666628d4f4456790e9a"
-      },
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
-    },
-    "completed_review": {
-      "verdict": "CLEAN",
-      "overall_reason": "The only note is a justified keep. I found no unfixed factual or editorial defect, no known violations, and no edits to check.",
-      "change_checks": [],
-      "notes": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Plugins.md",
-          "verdict": "CLEAN",
-          "summary": "The note defines the overloaded term, separates MCP's protocol role from the host's responsibilities, and gives a labelled illustrative config. The pitfalls and tradeoffs table support engineering judgment, and the MCPGauge claim is hedged. No edits are needed.",
-          "page_type": "Concept — frontmatter intact; Questions section optional and absent; References are a bare link bullet; code fence has a language identifier.",
-          "current_text_evidence": [
-            {
-              "quote": "The host still decides which capabilities reach the model, when approval is required, and how credentials are isolated.",
-              "line_start": 16,
-              "reason": "States the key MCP boundary (protocol versus host policy) correctly and concisely."
-            },
-            {
-              "quote": "The package names and credential style are illustrative. Registries and server packages change.",
-              "line_start": 58,
-              "reason": "Flags the config example as time-sensitive and keeps the durable lesson."
-            },
-            {
-              "quote": "This is evidence that tool access can hurt, not a universal estimate for every model or server.",
-              "line_start": 63,
-              "reason": "Hedges the MCPGauge figures properly. The 9.5% average drop was confirmed in the paper's abstract; the 17% code-generation figure was not independently confirmed."
-            },
-            {
-              "quote": "| Minimal toolset | Easier review and clearer tool choice | Some work stays manual | Narrow workflows or environments with strict trust boundaries |",
-              "line_start": 71,
-              "reason": "The tradeoff comparison names the condition that changes the decision."
-            }
-          ],
-          "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: the note covers one coherent topic (plugin mechanisms and MCP) at a compact length.",
-          "findings": [],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "PASS",
-            "question_quality": "NOT APPLICABLE",
-            "identity_safety": "NOT APPLICABLE",
-            "rules_compliance": "PASS"
-          }
-        }
-      ]
     }
   }
 }
