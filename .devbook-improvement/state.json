@@ -4392,13 +4392,14 @@
     "version": 1,
     "id": "e2d7c0a337c54d12aea6f8b9022cec0e",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-06T07:00:46.855761Z",
-    "elapsed_seconds": 131.0272705,
+    "elapsed_seconds": 134.6833328,
     "calls_reserved": 4,
     "responses_received": 4,
     "attempted_paths": [
-      "Vault/Home/AI & ML/LLM/Fine-tuning.md"
+      "Vault/Home/AI & ML/LLM/Fine-tuning.md",
+      "Vault/Home/AI & ML/LLM/Generation.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -4475,10 +4476,84 @@
           },
           "model_calls": 2
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/Generation.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Generation.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against current text: the sampling pipeline (distribution, temperature, top-p, structure mask) is explained in order, and parameter semantics (temperature scaling, nucleus sampling, top_k availability, frequency vs presence penalty, max_completion_tokens covering reasoning tokens, best-effort seed) are accurate and appropriately hedged. Grounding, context assembly (Lost in the Middle U-shape), structured output (constrained decoding vs JSON mode vs function calling) and pitfalls are consistent, with correct caveats that schema validity does not prove semantic correctness. The tradeoffs table is carefully qualified. Both existing cards test one gradeable task each, with sources on the answer side and no unresolved known violations. References are relevant and deduplicated. No defect was verified, so no edits are warranted."
+              }
+            ],
+            "feedback": [],
+            "decisions": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "Independent whole-note audit found no verified factual, editorial, question-quality or reference defect; keeping the note unchanged is justified and no edits were proposed.",
+            "change_checks": [],
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Generation.md",
+                "verdict": "CLEAN",
+                "summary": "The note explains sampling, grounding, context assembly and structured output in a logical order, with accurate and hedged parameter semantics and mechanisms. No concrete defect was found, so leaving it unchanged is justified.",
+                "page_type": "Concept — LLM generation note; Questions and References are optional and present; Qard IDs are protected.",
+                "current_text_evidence": [
+                  {
+                    "quote": "The prompt and context shape the distribution before any of those controls apply.",
+                    "line_start": 19,
+                    "reason": "The opening mechanism paragraph and the mermaid flow place the prompt, distribution, sampler and structure mask in the correct order before the details, so the note is easy to re-enter."
+                  },
+                  {
+                    "quote": "For o-series reasoning models, `max_completion_tokens` covers internal reasoning tokens as well as visible output.",
+                    "line_start": 42,
+                    "reason": "Version-specific condition kept precise and consistent with OpenAI documentation."
+                  },
+                  {
+                    "quote": "They are signals from the model's distribution, not calibrated confidence in factual truth.",
+                    "line_start": 48,
+                    "reason": "A correct limit on logprobs that prevents a common misuse."
+                  },
+                  {
+                    "quote": "Schema compliance proves shape. It does not prove meaning.",
+                    "line_start": 119,
+                    "reason": "The pitfall is consistent with the structured-output section and the tradeoffs table, so the note has no internal contradictions."
+                  },
+                  {
+                    "quote": "Why can a response with valid citation markers still contain unsupported claims?",
+                    "line_start": 147,
+                    "reason": "Each card tests one dependent behavior-and-why task, keeps its qard ID, and has primary sources on the answer side. Neither card bundles independent tasks."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the sections (sampling, grounding, context assembly, structured output) are facets of one generation-reliability topic and are cross-linked to the RAG and Context Engineering notes.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ]
+          },
+          "model_calls": 4
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-06T07:02:57.882446Z",
+    "checkpoint_at": "2026-11-06T07:03:01.538510Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
