@@ -4634,11 +4634,11 @@
     "version": 1,
     "id": "e2d7c0a337c54d12aea6f8b9022cec0e",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-06T07:00:46.855761Z",
-    "elapsed_seconds": 417.1144678,
+    "elapsed_seconds": 426.0639888,
     "calls_reserved": 13,
-    "responses_received": 12,
+    "responses_received": 13,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Fine-tuning.md",
       "Vault/Home/AI & ML/LLM/Generation.md",
@@ -5095,7 +5095,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-06T07:07:43.969666Z",
+    "checkpoint_at": "2026-11-06T07:07:52.919167Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -18004,5 +18004,54 @@
       },
       "feedback_snapshot": []
     }
+  },
+  "pending_author_proposal": {
+    "workload_id": "e2d7c0a337c54d12aea6f8b9022cec0e",
+    "topic_id": "ai-ml-4edf0823",
+    "batch": {
+      "topic": "AI & ML",
+      "topic_id": "ai-ml-4edf0823",
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Coding Agents.md",
+          "content": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"An LLM running in an action loop to complete engineering tasks end to end.\"\npublish: true\nstatus: Done\nlevel: [\"2\"]\npriority: Medium\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Harness Engineering/Tooling/Coding Agents\"\nflashcard_uid: \"4e540b65\"\ncreated: \"2026-08-16T07:07:41.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-08-20T20:41:15.495Z\"\n---\n\nCoding agents put a language model inside a tool loop. The model reads repository state, chooses an action, observes the result, and decides what to do next. That turns code generation into an execution process rather than a one-shot answer.\n\nThe distinction matters. Autocomplete predicts local text. Chat explains or proposes a change. An agent can edit several files, run `dotnet test`, read the failure, repair the implementation, and run the check again. It still has no independent definition of correctness. Repository instructions, bounded permissions, and fresh validation supply that boundary.\n\n# How the Agent Loop Works\n\n```mermaid\nflowchart TD\n    U[User prompt] --> P[Plan task and choose actions]\n    P --> R[Read repo files and context]\n    R --> E[Edit code and configs]\n    E --> V[Run checks tests or build]\n    V --> D{Pass criteria met}\n    D -->|No| P\n    D -->|Yes| O[Return result and rationale]\n```\n\nObserved output closes the loop. A failing test can change the next action. A permission denial can force a safer plan. Execution logs and approval gates make that process inspectable before a bad assumption spreads across the repository.\n\nIteration is not progress by itself. An agent that keeps rewriting code without reducing a known failure is stuck. Step limits, explicit acceptance criteria, and a rule to stop on repeated evidence keep the loop useful.\n\n# Major Tools\n\n## Claude Code (Anthropic)\n\nClaude Code is a terminal-first agent that also runs in IDE, desktop, and web surfaces. Its extension model separates concerns: `CLAUDE.md` and rules provide persistent context, skills hold reusable procedures, MCP adds external tools, and hooks run at lifecycle events.\n\n## Cursor\n\nCursor combines completion, chat, and an agent inside a VS Code-derived editor. Its agent can inspect the workspace, edit files, and use terminal tools. Repository behavior belongs in `.cursor/rules/`. `.cursorrules` remains a legacy format.\n\n## GitHub Copilot\n\nGitHub Copilot spans editor, CLI, code-review, and cloud-agent workflows. The supported instruction surface depends on the client. Repository-wide instructions use `.github/copilot-instructions.md`. Supported agent workflows can also read `AGENTS.md` and path-specific instruction files.\n\n## Cline\n\nCline is an open-source VS Code extension with visible, approval-oriented tool execution. It supports several model providers and stores project guidance under `.clinerules/`.\n\n## Aider\n\nAider is a terminal coding assistant built around git-aware edits. It works with multiple model providers and can keep defaults in `.aider.conf.yml`.\n\n## Windsurf (Codeium)\n\nWindsurf is an IDE-centered agent workflow built around Cascade. Current workspace guidance lives under `.windsurf/rules/`. `.windsurfrules` is the older single-file convention.\n\n## Opencode\n\nOpenCode is an open-source agent for terminal and application workflows. It supports multiple providers, MCP servers, on-demand skills, and `AGENTS.md` project instructions.\n\n## Amazon Q Developer\n\nAmazon Q Developer provides IDE assistance with AWS-oriented development and transformation workflows. Its fit is strongest when repository work is coupled to AWS services or modernization tasks. Its command-line assistant has been rebranded as Kiro, where AWS places future updates; the original open-source Amazon Q Developer CLI receives only critical security fixes.\n\n# Pitfalls\n\n- **Plausible diffs:** a change can pass tests and still violate an architectural boundary the suite does not encode. Narrow tasks keep diffs reviewable, and repository instructions can make hidden boundaries explicit.\n- **Stale context:** long sessions make old reads dangerous. A file needs a fresh read before editing when another tool, hook, or agent may have changed it.\n- **Cost drift:** autonomous retry loops can trigger 50+ model calls during a debugging spiral. Cost grows with cumulative input, output, tool calls, and retries rather than wall-clock time alone. A step bound and a rule to stop when the same failure repeats without new evidence keep that cost contained.\n- **Invented APIs:** weak context produces convincing methods and configuration keys that do not exist. The installed SDK or official docs are the first check, and the compiler and targeted tests settle the claim.\n\n# Tradeoffs\n\n| Decision | Option A | Option B | Practical tradeoff |\n|---|---|---|---|\n| Interaction model | Terminal agents | IDE agents | Terminal gives scriptability and explicit command logs. IDE keeps navigation and diffs close to the editor |\n| Product model | Open-source tools | Commercial tools | Open-source exposes implementation and provider choice. Commercial tools usually reduce setup and support burden |\n| Model strategy | Single-model stack | Multi-model stack | One model reduces routing choices. Several models can fit tasks and budgets better but make behavior less uniform |\n\n# Questions\n\n<!-- qard-id: 83f1e938-9d0a-4efd-90e5-34f6a6534159 -->\n> [!qard]- What controls reduce risk when a coding agent can change a repository?\n> The main controls are a bounded task and budget, restricted permissions, runtime-enforced approval or denial of consequential actions, and CI plus review of the resulting change. They work because the runtime and delivery process enforce them; instructions alone depend on the model complying.\n>\n> | Control | What it does | Risk it reduces |\n> |---|---|---|\n> | Narrow task, limited tools, step or iteration budget | Restricts what the agent attempts and how long it can keep retrying | Broad diffs that are hard to review, and costly retry loops that repeat the same failure |\n> | Sandbox and permissions | Limits filesystem, network and command access, where the platform provides these controls | Actions outside the intended workspace or network reach |\n> | Runtime approval or denial | Requires approval for consequential actions or blocks them before execution; in GitHub Copilot, a hook that runs before a tool call can deny that call | Dangerous actions that the model was only told to avoid |\n> | CI and code review | Check the resulting change before it merges | Defects and boundary violations in the produced code |\n>\n> Each control covers specific paths and failure modes. Passing tests and review reduce risk but do not prove that every tool call or behavior was safe. A change can pass the suite and still violate an architectural boundary that the tests do not encode.\n>\n> Source: [GitHub Copilot hooks reference](https://docs.github.com/en/copilot/reference/hooks-reference)\n\n# References\n\n- [Claude Code overview (Anthropic Docs)](https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview)\n- [Cursor Documentation](https://docs.cursor.com/)\n- [GitHub Copilot documentation](https://docs.github.com/en/copilot)\n",
+          "hash": "c80d02cb6168d48a202af40f1f8b7c0feda8ee4fc09309ebe9bbf90359a73d93",
+          "topic": "AI & ML",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Coding Agents.md",
+          "outcome": "keep",
+          "reason": "Audited the whole note against its text. The opening and loop section explain the mechanism (tool loop, observed output, stop conditions) and the mermaid diagram matches the prose. Tool sections correctly separate each product's instruction surface (CLAUDE.md, .cursor/rules with legacy .cursorrules, copilot-instructions.md and AGENTS.md, .clinerules, .aider.conf.yml, .windsurf/rules, AGENTS.md for OpenCode), and the Amazon Q CLI to Kiro note is hedged appropriately. Pitfalls and tradeoffs carry conditions rather than slogans. The single Qard tests one coherent task, with a table, an explicit caveat that tests and review do not prove safety, and a Copilot hooks source for the hook-deny claim. References are real primary sources. There are no known violations, no needs-fixing flags and no structural problems, so edits would be cosmetic churn."
+        }
+      ],
+      "feedback": [],
+      "decisions": []
+    },
+    "source_hashes": {
+      "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Coding Agents.md": "c80d02cb6168d48a202af40f1f8b7c0feda8ee4fc09309ebe9bbf90359a73d93"
+    },
+    "feedback_keys": [],
+    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Coding Agents.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-06T07:07:52.919157Z"
   }
 }
