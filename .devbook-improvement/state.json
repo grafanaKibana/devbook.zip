@@ -5229,11 +5229,11 @@
     "version": 1,
     "id": "236350876fc543f98c4ebc7094742d69",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-06T19:33:51.179749Z",
-    "elapsed_seconds": 422.4174710999999,
+    "elapsed_seconds": 445.8700696999999,
     "calls_reserved": 14,
-    "responses_received": 13,
+    "responses_received": 14,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Tool Design.md",
       "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Tooling.md",
@@ -5689,7 +5689,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-06T19:40:53.596718Z",
+    "checkpoint_at": "2026-11-06T19:41:17.049316Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -19972,6 +19972,167 @@
       "Vault/Home/AI & ML/LLM/Loop Engineering/Multi-Agentic Systems.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-06T19:40:49.773136Z"
+    "prepared_at": "2026-11-06T19:40:49.773136Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "overall_reason": "Independent whole-note read found no concrete defect. The key claims (15x token figure scoped to one workload, OpenAI handoff default history and input_filter, tracing spans, Microsoft Agent Framework handoff builder) are accurate. The Qards are single-task with answer-side primary sources, and no edits are proposed.",
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Loop Engineering/Multi-Agentic Systems.md",
+            "verdict": "CLEAN",
+            "summary": "The note separates multi-agent systems from single agents and workflow patterns. It gives three conditions that justify the cost and walks through communication patterns, coordination topologies, pitfalls with mitigations, and a tradeoff table. A keep is justified because the explanation order is sound, the terminology is consistent, and the claims are accurate and appropriately hedged. Repetition between the intro and the first Qard is deliberate recall reinforcement. The three Qards each test one gradeable task with answer-side sources.",
+            "page_type": "Concept — typed frontmatter, optional Questions/References present and valid; MD040 satisfied (csharp fence); status Done is owner-set and untouched; Qard IDs preserved.",
+            "current_text_evidence": [
+              {
+                "quote": "That number belongs to one workload.",
+                "line_start": 19,
+                "reason": "The 15x token figure is correctly scoped to one workload, matching Anthropic's multi-agent research post."
+              },
+              {
+                "quote": "The useful unit of decomposition is context.",
+                "line_start": 27,
+                "reason": "A clear organizing idea with a concrete example (implementation and tests staying together) that supports engineering judgment."
+              },
+              {
+                "quote": "OpenAI's SDK offers `input_filter` callbacks, including filters that remove prior tool calls.",
+                "line_start": 35,
+                "reason": "Matches the OpenAI Agents SDK handoff documentation: history is passed by default and input_filter can alter it."
+              },
+              {
+                "quote": "The model chooses when to transfer, while the workflow restricts where it may go.",
+                "line_start": 85,
+                "reason": "Explains the mechanism of the handoff builder's routing graph after the C# example."
+              },
+              {
+                "quote": "Every conversation needs a bound: `max_turns`, a token budget, and a completion signal the runtime can check.",
+                "line_start": 107,
+                "reason": "Concrete mitigation that pairs with the named failure (politeness loops)."
+              },
+              {
+                "quote": "The smallest team that produces a verified improvement is enough.",
+                "line_start": 143,
+                "reason": "Gives a decided engineering conclusion that closes the tradeoff section."
+              },
+              {
+                "quote": "When one agent hands work to another, how much prior context should the receiving agent get?",
+                "line_start": 160,
+                "reason": "Question is a single focused comparison with a table of benefits and risks, not a bundle of independent tasks."
+              },
+              {
+                "quote": "What evidence makes failures across multi-agent handoffs traceable?",
+                "line_start": 173,
+                "reason": "One dependent explanation of trace evidence with an answer-side primary source on OpenAI tracing."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: communication patterns, coordination topologies and failure modes all serve one question, when and how to coordinate several agents, and they are more useful together.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Loop Engineering/Multi-Agentic Systems.md",
+          "citation_index": 5,
+          "reported_line_start": 143,
+          "resolved_line_start": 136
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Loop Engineering/Multi-Agentic Systems.md",
+          "citation_index": 6,
+          "reported_line_start": 160,
+          "resolved_line_start": 154
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Loop Engineering/Multi-Agentic Systems.md",
+          "citation_index": 7,
+          "reported_line_start": 173,
+          "resolved_line_start": 168
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/AI & ML/LLM/Loop Engineering/Multi-Agentic Systems.md": "58122138fef42f8e0052f91167ecc0ffd7a0a6ddee7f52ef8c547e21428a1d21"
+      },
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CLEAN",
+      "overall_reason": "Independent whole-note read found no concrete defect. The key claims (15x token figure scoped to one workload, OpenAI handoff default history and input_filter, tracing spans, Microsoft Agent Framework handoff builder) are accurate. The Qards are single-task with answer-side primary sources, and no edits are proposed.",
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Loop Engineering/Multi-Agentic Systems.md",
+          "verdict": "CLEAN",
+          "summary": "The note separates multi-agent systems from single agents and workflow patterns. It gives three conditions that justify the cost and walks through communication patterns, coordination topologies, pitfalls with mitigations, and a tradeoff table. A keep is justified because the explanation order is sound, the terminology is consistent, and the claims are accurate and appropriately hedged. Repetition between the intro and the first Qard is deliberate recall reinforcement. The three Qards each test one gradeable task with answer-side sources.",
+          "page_type": "Concept — typed frontmatter, optional Questions/References present and valid; MD040 satisfied (csharp fence); status Done is owner-set and untouched; Qard IDs preserved.",
+          "current_text_evidence": [
+            {
+              "quote": "That number belongs to one workload.",
+              "line_start": 19,
+              "reason": "The 15x token figure is correctly scoped to one workload, matching Anthropic's multi-agent research post."
+            },
+            {
+              "quote": "The useful unit of decomposition is context.",
+              "line_start": 27,
+              "reason": "A clear organizing idea with a concrete example (implementation and tests staying together) that supports engineering judgment."
+            },
+            {
+              "quote": "OpenAI's SDK offers `input_filter` callbacks, including filters that remove prior tool calls.",
+              "line_start": 35,
+              "reason": "Matches the OpenAI Agents SDK handoff documentation: history is passed by default and input_filter can alter it."
+            },
+            {
+              "quote": "The model chooses when to transfer, while the workflow restricts where it may go.",
+              "line_start": 85,
+              "reason": "Explains the mechanism of the handoff builder's routing graph after the C# example."
+            },
+            {
+              "quote": "Every conversation needs a bound: `max_turns`, a token budget, and a completion signal the runtime can check.",
+              "line_start": 107,
+              "reason": "Concrete mitigation that pairs with the named failure (politeness loops)."
+            },
+            {
+              "quote": "The smallest team that produces a verified improvement is enough.",
+              "line_start": 136,
+              "reason": "Gives a decided engineering conclusion that closes the tradeoff section."
+            },
+            {
+              "quote": "When one agent hands work to another, how much prior context should the receiving agent get?",
+              "line_start": 154,
+              "reason": "Question is a single focused comparison with a table of benefits and risks, not a bundle of independent tasks."
+            },
+            {
+              "quote": "What evidence makes failures across multi-agent handoffs traceable?",
+              "line_start": 168,
+              "reason": "One dependent explanation of trace evidence with an answer-side primary source on OpenAI tracing."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: communication patterns, coordination topologies and failure modes all serve one question, when and how to coordinate several agents, and they are more useful together.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "change_checks": []
+    }
   }
 }
