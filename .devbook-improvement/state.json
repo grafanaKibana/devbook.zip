@@ -5169,11 +5169,11 @@
     "version": 1,
     "id": "236350876fc543f98c4ebc7094742d69",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-06T19:33:51.179749Z",
-    "elapsed_seconds": 361.3559047,
+    "elapsed_seconds": 379.72322679999996,
     "calls_reserved": 12,
-    "responses_received": 11,
+    "responses_received": 12,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Tool Design.md",
       "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Tooling.md",
@@ -5555,7 +5555,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-06T19:39:52.535151Z",
+    "checkpoint_at": "2026-11-06T19:40:10.902472Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -19771,6 +19771,125 @@
       "Vault/Home/AI & ML/LLM/Loop Engineering/Loop Engineering.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-06T19:39:48.572367Z"
+    "prepared_at": "2026-11-06T19:39:48.572367Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "overall_reason": "Whole-note audit found no concrete defect. The note is accurate, ordered logically and free of padding. Its three cards each test one dependent task. No edits are proposed, none are needed, and no sources or rejections require checking.",
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Loop Engineering/Loop Engineering.md",
+            "verdict": "CLEAN",
+            "summary": "I read the whole note. The opening defines loop engineering and places it in the prompt, context, harness and loop stack. The sections run termination, verification, state, and each gives mechanisms with conditions. The cards are focused, and the platform claims are hedged and match the vendors' documented behavior. No edit would add concrete value.",
+            "page_type": "FolderNote — keeps tags: [FolderNote] and the protected datacorejsx folder map; Questions and References are optional and valid as present.",
+            "current_text_evidence": [
+              {
+                "quote": "A single call is bounded. A loop carries each result into the next iteration, so mistakes can accumulate just as easily as useful progress.",
+                "line_start": 20,
+                "reason": "States the core reason loops need engineering. The wording is direct and whiteboard-style."
+              },
+              {
+                "quote": "A turn with no remaining tool calls shows only that the model has stopped requesting actions; completion needs task-specific evidence the runtime can verify",
+                "line_start": 35,
+                "reason": "Separates stopping from success and names the mechanism and its limit, so the note supports engineering judgment."
+              },
+              {
+                "quote": "Loop engineering decides when to compact, offload, or stop.",
+                "line_start": 49,
+                "reason": "Draws the boundary with Context Engineering clearly. The later compaction card repeats the split for recall, not as filler."
+              },
+              {
+                "quote": "What should a runtime report when its loop budget expires before the task is complete?",
+                "line_start": 62,
+                "reason": "This question is self-contained and has a finite answer. Its answer is hedged on platform differences and cites primary sources on the answer side."
+              },
+              {
+                "quote": "This split is a convention for assigning responsibility, not a boundary defined by an API.",
+                "line_start": 78,
+                "reason": "Prevents a misleading claim by marking the content/timing split as a convention."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: termination, verification and state are facets of one loop-control topic. The note is short, and the sections depend on each other and on the opening.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Loop Engineering/Loop Engineering.md",
+          "citation_index": 4,
+          "reported_line_start": 78,
+          "resolved_line_start": 83
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/AI & ML/LLM/Loop Engineering/Loop Engineering.md": "45e5b184349951c95bf821ca7f93e2e17bd9f6d7a1fe2e6c65e65e65e3116791"
+      },
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CLEAN",
+      "overall_reason": "Whole-note audit found no concrete defect. The note is accurate, ordered logically and free of padding. Its three cards each test one dependent task. No edits are proposed, none are needed, and no sources or rejections require checking.",
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Loop Engineering/Loop Engineering.md",
+          "verdict": "CLEAN",
+          "summary": "I read the whole note. The opening defines loop engineering and places it in the prompt, context, harness and loop stack. The sections run termination, verification, state, and each gives mechanisms with conditions. The cards are focused, and the platform claims are hedged and match the vendors' documented behavior. No edit would add concrete value.",
+          "page_type": "FolderNote — keeps tags: [FolderNote] and the protected datacorejsx folder map; Questions and References are optional and valid as present.",
+          "current_text_evidence": [
+            {
+              "quote": "A single call is bounded. A loop carries each result into the next iteration, so mistakes can accumulate just as easily as useful progress.",
+              "line_start": 20,
+              "reason": "States the core reason loops need engineering. The wording is direct and whiteboard-style."
+            },
+            {
+              "quote": "A turn with no remaining tool calls shows only that the model has stopped requesting actions; completion needs task-specific evidence the runtime can verify",
+              "line_start": 35,
+              "reason": "Separates stopping from success and names the mechanism and its limit, so the note supports engineering judgment."
+            },
+            {
+              "quote": "Loop engineering decides when to compact, offload, or stop.",
+              "line_start": 49,
+              "reason": "Draws the boundary with Context Engineering clearly. The later compaction card repeats the split for recall, not as filler."
+            },
+            {
+              "quote": "What should a runtime report when its loop budget expires before the task is complete?",
+              "line_start": 62,
+              "reason": "This question is self-contained and has a finite answer. Its answer is hedged on platform differences and cites primary sources on the answer side."
+            },
+            {
+              "quote": "This split is a convention for assigning responsibility, not a boundary defined by an API.",
+              "line_start": 83,
+              "reason": "Prevents a misleading claim by marking the content/timing split as a convention."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: termination, verification and state are facets of one loop-control topic. The note is short, and the sections depend on each other and on the opening.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "change_checks": []
+    }
   }
 }
