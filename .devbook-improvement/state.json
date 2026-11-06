@@ -5109,11 +5109,11 @@
     "version": 1,
     "id": "236350876fc543f98c4ebc7094742d69",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-06T19:33:51.179749Z",
-    "elapsed_seconds": 298.86705300000006,
+    "elapsed_seconds": 317.86809200000005,
     "calls_reserved": 10,
-    "responses_received": 9,
+    "responses_received": 10,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Tool Design.md",
       "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Tooling.md",
@@ -5421,7 +5421,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-06T19:38:50.046298Z",
+    "checkpoint_at": "2026-11-06T19:39:09.047336Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -19546,6 +19546,149 @@
       "Vault/Home/AI & ML/LLM/Loop Engineering/Agent Loop.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-06T19:38:39.395455Z"
+    "prepared_at": "2026-11-06T19:38:39.395455Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "overall_reason": "The note is accurate, well ordered and free of known violations, and the keep is justified. I found no concrete defect that warrants an edit.",
+        "change_checks": [],
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Loop Engineering/Agent Loop.md",
+            "verdict": "CLEAN",
+            "summary": "The note explains the loop, the split between model and harness, and the failure controls, in a sensible order. I checked the specific figures (ALFWorld 34 points, the 369-call production run) against sources and found them accurate. The two cards each test one task. No edit is needed.",
+            "page_type": "Concept — authorable prose; Questions and References are present and valid; frontmatter and qard IDs are protected.",
+            "current_text_evidence": [
+              {
+                "quote": "A failure in tool execution, permissions, termination, or state handling therefore belongs to harness engineering rather than model reasoning.",
+                "line_start": 18,
+                "reason": "States the model/harness boundary clearly and decisively, which supports engineering judgment."
+              },
+              {
+                "quote": "Plain text with no tool calls normally ends the current turn, but it does not prove that the user's goal is satisfied.",
+                "line_start": 53,
+                "reason": "States an important condition: ending a turn is not the same as completing the goal. It prevents a common misconception."
+              },
+              {
+                "quote": "one run made 369 tool calls, consumed 9.7 million tokens, and produced 30 structured documents",
+                "line_start": 113,
+                "reason": "The cited article confirms these figures. The example backs the pitfall with concrete numbers."
+              },
+              {
+                "quote": "Tool schemas are model input, not an enforcement mechanism.",
+                "line_start": 137,
+                "reason": "Gives the key reason validation must be done in code, and leads into the validation advice that follows."
+              },
+              {
+                "quote": "Time limit | A slow or hanging call that never finishes its iteration, so an iteration cap alone would never trigger",
+                "line_start": 156,
+                "reason": "The card answer explains the mechanism behind each safeguard, not only its name."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: the note covers one coherent topic (the agent loop, its code and its failure modes), and separating them would weaken it.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ]
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Loop Engineering/Agent Loop.md",
+          "citation_index": 0,
+          "reported_line_start": 18,
+          "resolved_line_start": 19
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Loop Engineering/Agent Loop.md",
+          "citation_index": 1,
+          "reported_line_start": 53,
+          "resolved_line_start": 54
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Loop Engineering/Agent Loop.md",
+          "citation_index": 2,
+          "reported_line_start": 113,
+          "resolved_line_start": 124
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Loop Engineering/Agent Loop.md",
+          "citation_index": 3,
+          "reported_line_start": 137,
+          "resolved_line_start": 144
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Loop Engineering/Agent Loop.md",
+          "citation_index": 4,
+          "reported_line_start": 156,
+          "resolved_line_start": 172
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/AI & ML/LLM/Loop Engineering/Agent Loop.md": "692746802131f87417cbb4d192d3d3241f9d8e644a82aba5b1fd34d4b3247eb6"
+      },
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CLEAN",
+      "overall_reason": "The note is accurate, well ordered and free of known violations, and the keep is justified. I found no concrete defect that warrants an edit.",
+      "change_checks": [],
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Loop Engineering/Agent Loop.md",
+          "verdict": "CLEAN",
+          "summary": "The note explains the loop, the split between model and harness, and the failure controls, in a sensible order. I checked the specific figures (ALFWorld 34 points, the 369-call production run) against sources and found them accurate. The two cards each test one task. No edit is needed.",
+          "page_type": "Concept — authorable prose; Questions and References are present and valid; frontmatter and qard IDs are protected.",
+          "current_text_evidence": [
+            {
+              "quote": "A failure in tool execution, permissions, termination, or state handling therefore belongs to harness engineering rather than model reasoning.",
+              "line_start": 19,
+              "reason": "States the model/harness boundary clearly and decisively, which supports engineering judgment."
+            },
+            {
+              "quote": "Plain text with no tool calls normally ends the current turn, but it does not prove that the user's goal is satisfied.",
+              "line_start": 54,
+              "reason": "States an important condition: ending a turn is not the same as completing the goal. It prevents a common misconception."
+            },
+            {
+              "quote": "one run made 369 tool calls, consumed 9.7 million tokens, and produced 30 structured documents",
+              "line_start": 124,
+              "reason": "The cited article confirms these figures. The example backs the pitfall with concrete numbers."
+            },
+            {
+              "quote": "Tool schemas are model input, not an enforcement mechanism.",
+              "line_start": 144,
+              "reason": "Gives the key reason validation must be done in code, and leads into the validation advice that follows."
+            },
+            {
+              "quote": "Time limit | A slow or hanging call that never finishes its iteration, so an iteration cap alone would never trigger",
+              "line_start": 172,
+              "reason": "The card answer explains the mechanism behind each safeguard, not only its name."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: the note covers one coherent topic (the agent loop, its code and its failure modes), and separating them would weaken it.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ]
+    }
   }
 }
