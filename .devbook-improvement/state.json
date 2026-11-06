@@ -4574,11 +4574,11 @@
     "version": 1,
     "id": "e2d7c0a337c54d12aea6f8b9022cec0e",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-06T07:00:46.855761Z",
-    "elapsed_seconds": 367.83020050000005,
+    "elapsed_seconds": 388.91213360000006,
     "calls_reserved": 12,
-    "responses_received": 11,
+    "responses_received": 12,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Fine-tuning.md",
       "Vault/Home/AI & ML/LLM/Generation.md",
@@ -4961,7 +4961,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-06T07:06:54.685379Z",
+    "checkpoint_at": "2026-11-06T07:07:15.767312Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -17850,6 +17850,125 @@
       "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Agent Instructions.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-06T07:06:50.847745Z"
+    "prepared_at": "2026-11-06T07:06:50.847745Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "overall_reason": "The note is accurate, readable and internally consistent. No edits were proposed, and I found no defect that justifies one.",
+        "change_checks": [],
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Agent Instructions.md",
+            "verdict": "CLEAN",
+            "summary": "The whole note was read and holds together. The opening gives the idea and the tool-specific precedence caveat, the table covers the main tools, and the example, pitfalls and tradeoffs follow from one thesis: short, accurate, current guidance. The two Qards each test one task. No edit is warranted.",
+            "page_type": "Concept note. Optional Questions and References are present and valid, with no generated navigation and no code-fence issues (the nested ````markdown fence has a language).",
+            "current_text_evidence": [
+              {
+                "quote": "The exact precedence is tool-specific, but the engineering rule is stable.",
+                "line_start": 19,
+                "reason": "Gives the key boundary early and avoids claiming a portable precedence order, which matches the second card's answer."
+              },
+              {
+                "quote": "Configuration is not automatically an instruction surface.",
+                "line_start": 32,
+                "reason": "States a useful boundary between config files and prose policy, using the Aider example."
+              },
+              {
+                "quote": "The file gives the agent a tested command, a data boundary, and a clear definition of done.",
+                "line_start": 60,
+                "reason": "Ties the example to the checklist, so the example teaches something concrete."
+              },
+              {
+                "quote": "**Aspirational guidance:** an agent follows the documented architecture even when the code has not reached it.",
+                "line_start": 68,
+                "reason": "Concrete pitfall with a stated mechanism and a fix. Voice is direct and impersonal."
+              },
+              {
+                "quote": "This is a maintenance discipline, not a portable precedence guarantee.",
+                "line_start": 88,
+                "reason": "The answer limits its own claim, so it does not overstate what the Copilot documentation establishes."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: the landscape table, checklist, example, pitfalls and tradeoffs are facets of one topic. Skills is already a separate linked note.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ]
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Agent Instructions.md",
+          "citation_index": 4,
+          "reported_line_start": 88,
+          "resolved_line_start": 92
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Agent Instructions.md": "a2fe0d192e109233e41a8a22e9e68368e885516b2fcd02e2c801d23de5b737ff"
+      },
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CLEAN",
+      "overall_reason": "The note is accurate, readable and internally consistent. No edits were proposed, and I found no defect that justifies one.",
+      "change_checks": [],
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Agent Instructions.md",
+          "verdict": "CLEAN",
+          "summary": "The whole note was read and holds together. The opening gives the idea and the tool-specific precedence caveat, the table covers the main tools, and the example, pitfalls and tradeoffs follow from one thesis: short, accurate, current guidance. The two Qards each test one task. No edit is warranted.",
+          "page_type": "Concept note. Optional Questions and References are present and valid, with no generated navigation and no code-fence issues (the nested ````markdown fence has a language).",
+          "current_text_evidence": [
+            {
+              "quote": "The exact precedence is tool-specific, but the engineering rule is stable.",
+              "line_start": 19,
+              "reason": "Gives the key boundary early and avoids claiming a portable precedence order, which matches the second card's answer."
+            },
+            {
+              "quote": "Configuration is not automatically an instruction surface.",
+              "line_start": 32,
+              "reason": "States a useful boundary between config files and prose policy, using the Aider example."
+            },
+            {
+              "quote": "The file gives the agent a tested command, a data boundary, and a clear definition of done.",
+              "line_start": 60,
+              "reason": "Ties the example to the checklist, so the example teaches something concrete."
+            },
+            {
+              "quote": "**Aspirational guidance:** an agent follows the documented architecture even when the code has not reached it.",
+              "line_start": 68,
+              "reason": "Concrete pitfall with a stated mechanism and a fix. Voice is direct and impersonal."
+            },
+            {
+              "quote": "This is a maintenance discipline, not a portable precedence guarantee.",
+              "line_start": 92,
+              "reason": "The answer limits its own claim, so it does not overstate what the Copilot documentation establishes."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: the landscape table, checklist, example, pitfalls and tradeoffs are facets of one topic. Skills is already a separate linked note.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ]
+    }
   }
 }
