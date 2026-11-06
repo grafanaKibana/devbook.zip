@@ -3092,6 +3092,73 @@
         },
         "review_process": "focused-whole-note-v1"
       }
+    },
+    "Vault/Home/AI & ML/LLM/Harness Engineering/Model Context Protocol.md": {
+      "content_hash": "e2346468c2528ebad3595bb3cb3e321c012349fcc56160ba536a0ffeaba8212d",
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "outcome": "keep",
+      "repair_input_hash": "",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "violation_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "keep_review": {
+        "content_hash": "e2346468c2528ebad3595bb3cb3e321c012349fcc56160ba536a0ffeaba8212d",
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review": {
+          "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Model Context Protocol.md",
+          "verdict": "CLEAN",
+          "summary": "The whole note holds up on a full read. The N×M versus N+M framing is conditioned on compatible versions and capabilities. The 2026-07-28 changes match the official update post: no handshake or sessions, optional server/discover, and cache hints on list results. The pitfalls hedge the MCPGauge figures correctly. The two Qards are each a single gradeable task, carry answer-side sources, and keep their IDs. Keeping the note unchanged is justified.",
+          "page_type": "Concept — authorable prose; Questions and References are optional and present. Qard IDs are protected metadata.",
+          "current_text_evidence": [
+            {
+              "quote": "The rough shape becomes N+M, provided both sides implement compatible versions and capabilities.",
+              "line_start": 18,
+              "reason": "The N×M to N+M claim carries its condition, so it does not overstate the benefit."
+            },
+            {
+              "quote": "A client may call `server/discover` to inspect server capabilities first, but discovery is optional.",
+              "line_start": 46,
+              "reason": "This matches the 2026-07-28 post, which describes server/discover as optional. The line also notes the removed handshake, and the post confirms the cache hints."
+            },
+            {
+              "quote": "Those run-level figures do not isolate schema count as the cause, and the exact cost depends on the client and workload.",
+              "line_start": 85,
+              "reason": "The note limits the benchmark figures to what they measured and does not attribute them to schema count."
+            },
+            {
+              "quote": "Model choice is a proposal, not permission.",
+              "line_start": 44,
+              "reason": "This states the decision rule directly and keeps authorization with the host."
+            },
+            {
+              "quote": "<!-- qard-id: 59308422-df66-4bad-b9ce-ca18c5608606 -->",
+              "line_start": 123,
+              "reason": "The Qard ID is preserved, and the card tests one task: the checks the server still owes after HTTP authorization."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: the note covers one coherent topic. Architecture, transports, tradeoffs and pitfalls all support the same MCP decision, and none would be useful on its own.",
+          "findings": [],
+          "source_checks": [
+            {
+              "url": "https://blog.modelcontextprotocol.io/posts/2026-07-28/",
+              "claim": "2026-07-28 removes the handshake and sessions, makes server/discover optional, and adds cache hints to list results",
+              "result": "SUPPORTED",
+              "reason": "The fetched post states all three."
+            }
+          ],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        },
+        "review_process": "focused-whole-note-v1"
+      }
     }
   },
   "topics": {
@@ -4509,7 +4576,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-06T07:00:46.855761Z",
-    "elapsed_seconds": 327.3812732000002,
+    "elapsed_seconds": 330.65021090000016,
     "calls_reserved": 10,
     "responses_received": 10,
     "attempted_paths": [
@@ -4812,7 +4879,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-06T07:06:14.236450Z",
+    "checkpoint_at": "2026-11-06T07:06:17.505388Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -7258,6 +7325,104 @@
       ],
       "source_hashes": {
         "Vault/Home/AI & ML/LLM/Harness Engineering/Harness Engineering.md": "817f89c633ea6423421f8677f4c23d6355b51b54754304e4a0ad5f0f9a3be104"
+      },
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "9c912b1a9b3ed31622ffd04c6b0a8545bf10bc8e023e93a1fb9d9bc31f367e1e": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "overall_reason": "The note is accurate, coherent and well hedged. The author's keep is supported, and no concrete defect or rule violation remains.",
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Model Context Protocol.md",
+            "verdict": "CLEAN",
+            "summary": "The whole note holds up on a full read. The N×M versus N+M framing is conditioned on compatible versions and capabilities. The 2026-07-28 changes match the official update post: no handshake or sessions, optional server/discover, and cache hints on list results. The pitfalls hedge the MCPGauge figures correctly. The two Qards are each a single gradeable task, carry answer-side sources, and keep their IDs. Keeping the note unchanged is justified.",
+            "page_type": "Concept — authorable prose; Questions and References are optional and present. Qard IDs are protected metadata.",
+            "current_text_evidence": [
+              {
+                "quote": "The rough shape becomes N+M, provided both sides implement compatible versions and capabilities.",
+                "line_start": 16,
+                "reason": "The N×M to N+M claim carries its condition, so it does not overstate the benefit."
+              },
+              {
+                "quote": "A client may call `server/discover` to inspect server capabilities first, but discovery is optional.",
+                "line_start": 38,
+                "reason": "This matches the 2026-07-28 post, which describes server/discover as optional. The line also notes the removed handshake, and the post confirms the cache hints."
+              },
+              {
+                "quote": "Those run-level figures do not isolate schema count as the cause, and the exact cost depends on the client and workload.",
+                "line_start": 78,
+                "reason": "The note limits the benchmark figures to what they measured and does not attribute them to schema count."
+              },
+              {
+                "quote": "Model choice is a proposal, not permission.",
+                "line_start": 34,
+                "reason": "This states the decision rule directly and keeps authorization with the host."
+              },
+              {
+                "quote": "<!-- qard-id: 59308422-df66-4bad-b9ce-ca18c5608606 -->",
+                "line_start": 108,
+                "reason": "The Qard ID is preserved, and the card tests one task: the checks the server still owes after HTTP authorization."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: the note covers one coherent topic. Architecture, transports, tradeoffs and pitfalls all support the same MCP decision, and none would be useful on its own.",
+            "findings": [],
+            "source_checks": [
+              {
+                "url": "https://blog.modelcontextprotocol.io/posts/2026-07-28/",
+                "claim": "2026-07-28 removes the handshake and sessions, makes server/discover optional, and adds cache hints to list results",
+                "result": "SUPPORTED",
+                "reason": "The fetched post states all three."
+              }
+            ],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Model Context Protocol.md",
+          "citation_index": 0,
+          "reported_line_start": 16,
+          "resolved_line_start": 18
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Model Context Protocol.md",
+          "citation_index": 1,
+          "reported_line_start": 38,
+          "resolved_line_start": 46
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Model Context Protocol.md",
+          "citation_index": 2,
+          "reported_line_start": 78,
+          "resolved_line_start": 85
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Model Context Protocol.md",
+          "citation_index": 3,
+          "reported_line_start": 34,
+          "resolved_line_start": 44
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Model Context Protocol.md",
+          "citation_index": 4,
+          "reported_line_start": 108,
+          "resolved_line_start": 123
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/AI & ML/LLM/Harness Engineering/Model Context Protocol.md": "e2346468c2528ebad3595bb3cb3e321c012349fcc56160ba536a0ffeaba8212d"
       },
       "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
@@ -17555,212 +17720,6 @@
         "change_checks": []
       },
       "feedback_snapshot": []
-    }
-  },
-  "pending_author_proposal": {
-    "workload_id": "e2d7c0a337c54d12aea6f8b9022cec0e",
-    "topic_id": "ai-ml-4edf0823",
-    "batch": {
-      "topic": "AI & ML",
-      "topic_id": "ai-ml-4edf0823",
-      "notes": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Model Context Protocol.md",
-          "content": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"An open protocol standardizing how LLM apps connect to external tools and data.\"\nlevel: [\"3\"]\npriority: Low\nstatus: Done\n\npublish: true\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Harness Engineering/Model Context Protocol\"\nflashcard_uid: \"5e1d5abd\"\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.471Z\"\n---\n\nModel Context Protocol (MCP) gives LLM applications a common way to connect to tools and external data. Without a shared protocol, every client-service pairing needs its own adapter. In the ideal case, that produces N×M integrations for N clients and M services. MCP moves the integration boundary: clients implement the protocol once, while each service exposes an MCP server. The rough shape becomes N+M, provided both sides implement compatible versions and capabilities.\n\nA **host** application, such as an IDE or agent, uses an **MCP client** to communicate with each **MCP server**. A server wraps a capability, perhaps a database or a SaaS API. Under the `2026-07-28` protocol, every request is self-contained. Applications that need continuity pass an explicit handle as an ordinary tool argument. Earlier revisions used an initialization handshake and protocol-level sessions. Servers expose **tools** for actions, **resources** for contextual data, and **prompts** for reusable interaction templates. The host chooses what reaches the model. That mediation point is where approval rules and access policy belong.\n\n```mermaid\nflowchart LR\n    H[Host App] --> C1[MCP Client 1]\n    H --> C2[MCP Client 2]\n    H --> C3[MCP Client 3]\n    C1 <-->|stdio or HTTP| S1[MCP Server - Database]\n    C2 <-->|stdio or HTTP| S2[MCP Server - GitHub]\n    C3 <-->|stdio or HTTP| S3[MCP Server - File System]\n```\n\nFor example, a desktop host might connect to PostgreSQL and GitHub servers. A request to find open issues and inspect tables referencing the customers schema may lead the host to invoke `github.list_issues` and `postgres.query` through separate clients. Neither server needs to know that the other exists. A Slack server can be added without changing those two integrations, although the host still needs to configure and trust the new server.\n\n# Architecture\n\n## Three Server Primitives\n\n| Primitive | Controlled by | Purpose | Example |\n| --- | --- | --- | --- |\n| **Tools** | Model decides when to call | Actions with side effects or computation | `run_query`, `create_issue`, `send_message` |\n| **Resources** | Application decides when to fetch | Read-only data exposure — like GET endpoints | `file://config.yaml`, `db://schema/tables` |\n| **Prompts** | User selects explicitly | Reusable prompt templates with parameters | \"Summarize this PR\", \"Review code for security\" |\n\nThe control boundary differs by primitive. A model may request a tool call, the application decides when to fetch a resource, and a user can select a prompt. None of this removes the host's responsibility to authorize the resulting operation. Model choice is a proposal, not permission.\n\nThe `2026-07-28` core removed the required initialization handshake and protocol-managed sessions. Each request carries the protocol version, client information, and capabilities needed to process it. A client may call `server/discover` to inspect server capabilities first, but discovery is optional. Tools, resources, and prompts still have their own list methods, and the results include cache hints.\n\n## Transports\n\nMCP commonly uses two transports:\n\n- **stdio.** The host starts the server as a child process and exchanges JSON-RPC messages over standard input and output. This fits local file, database, or CLI integrations. It needs no MCP network listener. The child process can still inherit operating-system permissions and make outbound network calls unless a separate sandbox prevents them.\n- **Streamable HTTP.** The server runs behind an HTTP endpoint and may serve multiple clients. Responses may be streamed with Server-Sent Events. Remote deployments need transport security and authentication. The MCP authorization specification defines an OAuth-based flow for protected servers.\n\nThe stdio transport fits a local process owned by one host. Streamable HTTP fits a capability that is remote or shared across clients.\n\n# When to Use MCP Vs Function Calling\n\nFunction calling is the model-facing mechanism for requesting a structured operation. MCP packages capabilities behind a reusable client-server protocol. An application may use both: it discovers a tool through MCP, then presents that tool to the model through function calling.\n\n| | Function Calling | MCP |\n| --- | --- | --- |\n| Best for | App-specific business logic used by one agent | Shared integrations used across multiple clients |\n| Tool definitions live in | Application code | Standalone MCP server |\n| Reusability | Application-managed; shared code or services can reuse it | Any MCP-compatible client |\n| Discovery | Application supplies or loads tools at runtime | Dynamic — server advertises capabilities at runtime |\n| Infrastructure | None extra — part of the application's LLM API call | Server process per integration |\n\nA useful first question is whether the integration must work across clients. Shared integrations are a good MCP fit. App-specific business logic is usually simpler as an in-process function tool. The security boundary matters too: moving a function into an MCP server adds process or network communication and a separately managed trust relationship.\n\n# SDK Ecosystem\n\nThe MCP project groups SDKs by support tier. Tier assignment can change, so the current SDK page is the authority for language coverage and maintenance status. In .NET, the `ModelContextProtocol` packages provide client and server APIs, including ASP.NET Core integration.\n\n# Pitfalls\n\n## Tool Poisoning and Injection\n\nTool descriptions are untrusted text supplied by the server, yet clients often place that text in the model's context. A malicious description can try to redirect the model or induce calls to another connected server. Invariant Labs demonstrated this tool-poisoning pattern against clients that exposed powerful tools without adequate review or approval.\n\nEach server carries the risk of a third-party dependency, so its source and published tool descriptions are reviewed before it receives sensitive access. High-impact calls need explicit policy checks or human approval. A blanket auto-approval setting turns a model mistake into an executed action.\n\n## Token Inflation\n\nSome clients place every connected tool schema in each model request, so irrelevant schemas consume context and complicate selection. MCPGauge measured whole MCP-assisted runs, including retrieved content, and observed input-token overhead as high as 236× in its benchmark and an average 9.5% accuracy drop when tool context was present. Those run-level figures do not isolate schema count as the cause, and the exact cost depends on the client and workload.\n\nA small active tool set limits this cost. Client-side filtering or on-demand discovery can load only the definitions relevant to the current task.\n\n## Security Model Gaps\n\nMCP transport authorization does not, by itself, enforce per-tool permissions or validate tool inputs. Those controls remain server responsibilities. Reported server flaws have included injection, path traversal, and tenant-isolation failures. CVE-2025-49596 in MCP Inspector showed that even development tooling can become a remote-code-execution boundary.\n\nServers get the smallest useful set of credentials and file permissions. Every argument is validated at the server boundary, and local server processes are isolated where practical. The client schema improves model behavior. It is not a substitute for server-side validation.\n\n# Tradeoffs\n\n| Approach | Reusability | Setup Cost | Security Surface | Best for |\n| --- | --- | --- | --- | --- |\n| Direct function calling | Application-managed reuse | Lowest — inline with application code | Smallest — controlled by the application | App-specific tools and business logic |\n| MCP with stdio transport | Any local MCP client | Moderate — write or install a server | Local transport — no MCP network listener | Local tools shared across editors and agents |\n| MCP with HTTP transport | Any MCP client anywhere | Highest — server infra plus auth | Largest — network exposed with OAuth | Remote services and multi-user deployments |\n| REST API wrapper without MCP | Any HTTP client | Moderate — standard API design | Standard web security model | When consumers are not LLM clients |\n\nMCP earns its overhead when several clients need the same integration or when capabilities must be discovered at runtime. One application calling one internal API usually needs only function calling.\n\n# Questions\n\n<!-- qard-id: 45986407-9c75-4603-8105-a328b9997416 -->\n> [!qard]- When should a tool remain an in-process function instead of being exposed through an MCP server?\n> A tool should stay an in-process function when only one application uses it, especially when it works directly on that application's private state or business logic. An MCP server is worth its extra moving parts when several compatible clients need the same capability, managed and secured separately from any one application.\n>\n> The choice concerns where the tool lives, not how the model calls it. With function calling, the model returns a structured request and the application executes it. MCP is a client/server protocol through which a server advertises tools and other capabilities to any compatible client. A host can discover an MCP tool and present it to its model as a function definition. That translation is done by the host or its SDK, not by function calling itself.\n>\n> | Aspect | In-process function tool | Tool behind an MCP server |\n> |---|---|---|\n> | Reuse | Belongs to one application; other applications reuse it only through shared code or services | Any compatible MCP client can discover and call it |\n> | Application state | Reads the application's in-memory state directly | Cannot see the host application's memory; needed context arrives in each request, for example as an explicit handle that the server must authorize |\n> | Runtime cost | A local method call | A separate process or network hop, plus deployment and lifecycle for the server |\n> | Trust | Runs inside the application's own security context | Runs as a separate server that each host must configure and trust |\n>\n> Sources: [OpenAI: Function calling](https://developers.openai.com/api/docs/guides/function-calling) · [MCP specification 2026-07-28: Tools](https://modelcontextprotocol.io/specification/2026-07-28/server/tools) · [MCP 2026-07-28 update](https://blog.modelcontextprotocol.io/posts/2026-07-28/)\n\n<!-- qard-id: 59308422-df66-4bad-b9ce-ca18c5608606 -->\n> [!qard]- Which security checks must an MCP server still perform after HTTP authorization admits a caller?\n> HTTP authorization admits a caller only as far as its access token allows: the token must be issued for this MCP server and carry the scopes the request requires. The server still decides, in its own code, whether that caller may perform the operation on the specific object and tenant involved. It also validates every tool input before using it.\n>\n> - **Covered by MCP authorization for HTTP-based transports:** the server accepts only an OAuth access token issued for itself as the intended audience, and it can require particular scopes, such as a write scope for a tool that changes data. Audience and scopes decide who may reach the server and which kinds of operation the token permits.\n> - **Left to application-defined authorization:** whether this caller may act on this particular object or tenant, such as deleting a specific record or reading another tenant's data. A write scope permits writing in general but does not say which records. The server also validates tool arguments, rate-limits tool calls and sanitizes tool output.\n> \n> Tool names, descriptions and results are text placed in the model's context. They can influence what the model requests, but they enforce nothing, so permission checks belong in server code.\n>\n> Sources: [MCP specification 2026-07-28: Authorization](https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization) · [MCP specification 2026-07-28: Tools](https://modelcontextprotocol.io/specification/2026-07-28/server/tools)\n\n# References\n\n- [MCP Architecture — host, client, server, and capability discovery (Official)](https://modelcontextprotocol.io/docs/learn/architecture)\n- [MCPGauge — benchmarking token overhead and accuracy effects of MCP-assisted LLM runs (arXiv 2508.12566)](https://arxiv.org/abs/2508.12566)\n- [Invariant Labs — MCP security analysis and tool poisoning attack surface](https://invariantlabs.ai/blog/mcp-security-notification-tool-poisoning-attacks)\n- [Using MCP tools with an agent — Microsoft Agent Framework (Microsoft Learn)](https://learn.microsoft.com/en-us/agent-framework/agents/tools/local-mcp-tools)\n",
-          "hash": "e2346468c2528ebad3595bb3cb3e321c012349fcc56160ba536a0ffeaba8212d",
-          "topic": "AI & ML",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "new"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Model Context Protocol.md",
-          "outcome": "keep",
-          "reason": "Audited the whole note against its text: the N×M vs N+M framing carries its conditions, and the host/client/server roles and three primitives with their control model are consistent with each other. The version-specific statements are internally consistent: 2026-07-28 stateless requests, optional server/discover, and earlier handshake/sessions. The transport section correctly separates stdio's local-process trust from Streamable HTTP's OAuth. The function-calling comparison and tradeoff table agree. The pitfalls hedge MCPGauge's run-level figures properly and do not attribute them to schema count. The two Qards each test one gradeable task, with sources on the answer side and IDs preserved. The known-violation inventory is empty. References are topic-specific. I did not re-fetch sources in this pass. No verified defect justifies an edit, and extra changes would only add churn."
-        }
-      ],
-      "feedback": [],
-      "decisions": []
-    },
-    "source_hashes": {
-      "Vault/Home/AI & ML/LLM/Harness Engineering/Model Context Protocol.md": "e2346468c2528ebad3595bb3cb3e321c012349fcc56160ba536a0ffeaba8212d"
-    },
-    "feedback_keys": [],
-    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/AI & ML/LLM/Harness Engineering/Model Context Protocol.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-06T07:05:43.050095Z",
-    "review_evidence": {
-      "raw_review": {
-        "verdict": "CLEAN",
-        "overall_reason": "The note is accurate, coherent and well hedged. The author's keep is supported, and no concrete defect or rule violation remains.",
-        "notes": [
-          {
-            "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Model Context Protocol.md",
-            "verdict": "CLEAN",
-            "summary": "The whole note holds up on a full read. The N×M versus N+M framing is conditioned on compatible versions and capabilities. The 2026-07-28 changes match the official update post: no handshake or sessions, optional server/discover, and cache hints on list results. The pitfalls hedge the MCPGauge figures correctly. The two Qards are each a single gradeable task, carry answer-side sources, and keep their IDs. Keeping the note unchanged is justified.",
-            "page_type": "Concept — authorable prose; Questions and References are optional and present. Qard IDs are protected metadata.",
-            "current_text_evidence": [
-              {
-                "quote": "The rough shape becomes N+M, provided both sides implement compatible versions and capabilities.",
-                "line_start": 16,
-                "reason": "The N×M to N+M claim carries its condition, so it does not overstate the benefit."
-              },
-              {
-                "quote": "A client may call `server/discover` to inspect server capabilities first, but discovery is optional.",
-                "line_start": 38,
-                "reason": "This matches the 2026-07-28 post, which describes server/discover as optional. The line also notes the removed handshake, and the post confirms the cache hints."
-              },
-              {
-                "quote": "Those run-level figures do not isolate schema count as the cause, and the exact cost depends on the client and workload.",
-                "line_start": 78,
-                "reason": "The note limits the benchmark figures to what they measured and does not attribute them to schema count."
-              },
-              {
-                "quote": "Model choice is a proposal, not permission.",
-                "line_start": 34,
-                "reason": "This states the decision rule directly and keeps authorization with the host."
-              },
-              {
-                "quote": "<!-- qard-id: 59308422-df66-4bad-b9ce-ca18c5608606 -->",
-                "line_start": 108,
-                "reason": "The Qard ID is preserved, and the card tests one task: the checks the server still owes after HTTP authorization."
-              }
-            ],
-            "target_resolution": "JUSTIFIED UNCHANGED",
-            "split_suggestion": "No split: the note covers one coherent topic. Architecture, transports, tradeoffs and pitfalls all support the same MCP decision, and none would be useful on its own.",
-            "findings": [],
-            "source_checks": [
-              {
-                "url": "https://blog.modelcontextprotocol.io/posts/2026-07-28/",
-                "claim": "2026-07-28 removes the handshake and sessions, makes server/discover optional, and adds cache hints to list results",
-                "result": "SUPPORTED",
-                "reason": "The fetched post states all three."
-              }
-            ],
-            "rejection_equivalence": [],
-            "quality": {
-              "accuracy": "PASS",
-              "clarity": "PASS",
-              "question_quality": "PASS",
-              "identity_safety": "PASS",
-              "rules_compliance": "PASS"
-            }
-          }
-        ],
-        "change_checks": []
-      },
-      "bindings": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Model Context Protocol.md",
-          "citation_index": 0,
-          "reported_line_start": 16,
-          "resolved_line_start": 18
-        },
-        {
-          "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Model Context Protocol.md",
-          "citation_index": 1,
-          "reported_line_start": 38,
-          "resolved_line_start": 46
-        },
-        {
-          "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Model Context Protocol.md",
-          "citation_index": 2,
-          "reported_line_start": 78,
-          "resolved_line_start": 85
-        },
-        {
-          "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Model Context Protocol.md",
-          "citation_index": 3,
-          "reported_line_start": 34,
-          "resolved_line_start": 44
-        },
-        {
-          "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Model Context Protocol.md",
-          "citation_index": 4,
-          "reported_line_start": 108,
-          "resolved_line_start": 123
-        }
-      ],
-      "source_hashes": {
-        "Vault/Home/AI & ML/LLM/Harness Engineering/Model Context Protocol.md": "e2346468c2528ebad3595bb3cb3e321c012349fcc56160ba536a0ffeaba8212d"
-      },
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
-    },
-    "completed_review": {
-      "verdict": "CLEAN",
-      "overall_reason": "The note is accurate, coherent and well hedged. The author's keep is supported, and no concrete defect or rule violation remains.",
-      "notes": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Model Context Protocol.md",
-          "verdict": "CLEAN",
-          "summary": "The whole note holds up on a full read. The N×M versus N+M framing is conditioned on compatible versions and capabilities. The 2026-07-28 changes match the official update post: no handshake or sessions, optional server/discover, and cache hints on list results. The pitfalls hedge the MCPGauge figures correctly. The two Qards are each a single gradeable task, carry answer-side sources, and keep their IDs. Keeping the note unchanged is justified.",
-          "page_type": "Concept — authorable prose; Questions and References are optional and present. Qard IDs are protected metadata.",
-          "current_text_evidence": [
-            {
-              "quote": "The rough shape becomes N+M, provided both sides implement compatible versions and capabilities.",
-              "line_start": 18,
-              "reason": "The N×M to N+M claim carries its condition, so it does not overstate the benefit."
-            },
-            {
-              "quote": "A client may call `server/discover` to inspect server capabilities first, but discovery is optional.",
-              "line_start": 46,
-              "reason": "This matches the 2026-07-28 post, which describes server/discover as optional. The line also notes the removed handshake, and the post confirms the cache hints."
-            },
-            {
-              "quote": "Those run-level figures do not isolate schema count as the cause, and the exact cost depends on the client and workload.",
-              "line_start": 85,
-              "reason": "The note limits the benchmark figures to what they measured and does not attribute them to schema count."
-            },
-            {
-              "quote": "Model choice is a proposal, not permission.",
-              "line_start": 44,
-              "reason": "This states the decision rule directly and keeps authorization with the host."
-            },
-            {
-              "quote": "<!-- qard-id: 59308422-df66-4bad-b9ce-ca18c5608606 -->",
-              "line_start": 123,
-              "reason": "The Qard ID is preserved, and the card tests one task: the checks the server still owes after HTTP authorization."
-            }
-          ],
-          "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: the note covers one coherent topic. Architecture, transports, tradeoffs and pitfalls all support the same MCP decision, and none would be useful on its own.",
-          "findings": [],
-          "source_checks": [
-            {
-              "url": "https://blog.modelcontextprotocol.io/posts/2026-07-28/",
-              "claim": "2026-07-28 removes the handshake and sessions, makes server/discover optional, and adds cache hints to list results",
-              "result": "SUPPORTED",
-              "reason": "The fetched post states all three."
-            }
-          ],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "PASS",
-            "question_quality": "PASS",
-            "identity_safety": "PASS",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "change_checks": []
     }
   }
 }
