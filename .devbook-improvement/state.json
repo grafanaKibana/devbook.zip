@@ -4270,592 +4270,18 @@
   },
   "focused_workload": {
     "version": 1,
-    "id": "b98a816444094ceaa557c175133e1e93",
-    "status": "sealed",
-    "phase": "sealed",
-    "started_at": "2026-11-05T20:07:51.294462Z",
-    "elapsed_seconds": 589.9176529999997,
-    "calls_reserved": 18,
-    "responses_received": 17,
-    "attempted_paths": [
-      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md",
-      "Vault/Home/AI & ML/LLM/Embeddings.md",
-      "Vault/Home/AI & ML/LLM/Evaluation/Building an Evaluation Set.md",
-      "Vault/Home/AI & ML/LLM/Evaluation/Deterministic Checks.md",
-      "Vault/Home/AI & ML/LLM/Evaluation/Evaluation.md",
-      "Vault/Home/AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs.md",
-      "Vault/Home/AI & ML/LLM/Evaluation/LLM-as-a-Judge.md",
-      "Vault/Home/AI & ML/LLM/Evaluation/Online Evaluation and AB Tests.md"
-    ],
+    "id": "e2d7c0a337c54d12aea6f8b9022cec0e",
+    "status": "active",
+    "phase": "selecting",
+    "started_at": "2026-11-06T07:00:46.855761Z",
+    "elapsed_seconds": 0.001234,
+    "calls_reserved": 0,
+    "responses_received": 0,
+    "attempted_paths": [],
     "accepted_records": [],
-    "outcomes": [
-      {
-        "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md",
-                "outcome": "keep",
-                "reason": "I read the whole note against its text and known HNSW, IVF, PQ and DiskANN behavior. Flat search is the exact O(N) baseline. HNSW parameters (M, ef_construction, ef_search) and IVF parameters (nlist, nprobe) are correct, as are the PQ lossiness and DiskANN's SSD trade-off. The float32 memory estimate (N × dimensions × 4 bytes) is right. The filtering section correctly separates recall and cost from authorization. It also correctly warns that post-filtering with a selective filter collapses recall. The four pitfalls, the tradeoff table and the system-category table agree with each other and with the index section. The two cards each test one gradeable task and have answers that explain mechanism and limits. The cards' Faiss and Azure sources and the reference list are topic-specific. Known violations are empty. The prose is direct and has no padding. Rewording any of it would be churn."
-              }
-            ],
-            "feedback": [],
-            "decisions": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "Independent whole-note review found no factual, structural, voice or question-quality defect. The keep is justified and there are no edits.",
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md",
-                "verdict": "CLEAN",
-                "summary": "The note explains ANN search, index types, filtering, operations, system choice, pitfalls and tradeoffs accurately and in a consistent whiteboard voice. The two cards are single-task with mechanism-rich answers, and the references are relevant primary sources. No edit is warranted.",
-                "page_type": "Concept — typed frontmatter, optional Questions and References present and valid, MD040 satisfied by the mermaid fence, no generated navigation.",
-                "current_text_evidence": [
-                  {
-                    "quote": "The missing fraction is silent, so the recall-latency choice must be measured explicitly",
-                    "line_start": 19,
-                    "reason": "States the core ANN tradeoff and the measurement requirement early, so the operating idea is recoverable."
-                  },
-                  {
-                    "quote": "Raising `ef_search` explores more of the graph and trades latency for recall.",
-                    "line_start": 38,
-                    "reason": "Gives the correct HNSW parameter mechanism (M, ef_construction, ef_search), and the IVF nlist/nprobe line that follows it is also correct."
-                  },
-                  {
-                    "quote": "a selective filter may remove nearly all of top-k and collapse the effective recall",
-                    "line_start": 50,
-                    "reason": "Correctly states the post-filtering failure condition. It is kept separate from authorization, which the pre-filtering bullet covers."
-                  },
-                  {
-                    "quote": "Memory budgeting** starts with roughly `N × dimensions × 4 bytes` for float32 vectors",
-                    "line_start": 62,
-                    "reason": "The float32 estimate is correct and is linked to the decision to move to PQ or a disk-based index."
-                  },
-                  {
-                    "quote": "Why do vector indexes use approximate nearest-neighbor search instead of exact search?",
-                    "line_start": 128,
-                    "reason": "A direct, bounded question whose answer is one dependent explanation covering mechanism, cost and limits. It is not a bundle of independent tasks."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: index types, filtering, operations and pitfalls all serve one topic, and the content does not separate into independently useful notes.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "identity_safety": "PASS",
-                  "question_quality": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "change_checks": [],
-            "decision_checks": []
-          },
-          "model_calls": 2
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/LLM/Embeddings.md",
-        "outcome": "proposal_blocked",
-        "reason": "source URL missing from owning note: https://docs.cohere.com/docs/cohere-embed",
-        "result": {
-          "status": "proposal_blocked",
-          "stage": "deterministic_application",
-          "reason": "source URL missing from owning note: https://docs.cohere.com/docs/cohere-embed",
-          "model_calls": 5
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/LLM/Evaluation/Building an Evaluation Set.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Evaluation/Building an Evaluation Set.md",
-                "outcome": "keep",
-                "reason": "Read the whole note against its claims. The opening states why representativeness precedes scoring. Structure ties label type to valid scorer. The ARES description (synthetic data plus a small human-labeled set, prediction-powered inference) matches the paper. Synthetic generation has a concrete example and names its weakness: shared phrasing and difficulty. The sizing section covers the minimum detectable effect, intervals and paired evaluation, which is consistent with Anthropic's statistical-evals guidance. The pitfalls (drift, threshold cargo-culting) are concise. The single Qard tests one dependent task, has sources on the answer side, and does not duplicate the neighbouring notes' cards. The code fence has a language identifier, wikilinks are used in explanatory prose, and References are bare links. No known violations exist, and no factual or editorial defect justifies an edit."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "The single note was audited in full and the keep is justified. I found no factual, editorial, structural or Qard defect that warrants an edit.",
-            "change_checks": [],
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Evaluation/Building an Evaluation Set.md",
-                "verdict": "CLEAN",
-                "summary": "The note has a clear opening, a label-to-scorer mapping, a concrete synthetic-generation example with its main weakness, a conditions-based sizing section, concise pitfalls and one well-formed Qard. No concrete defect justifies an edit.",
-                "page_type": "Concept — authorable concept note; voice is impersonal and declarative, Questions and References are optional but present and valid.",
-                "current_text_evidence": [
-                  {
-                    "quote": "If its cases do not represent the workload, a precise scorer still produces a misleading result.",
-                    "line_start": 17,
-                    "reason": "The opening states the operating idea quickly: representativeness comes before scoring."
-                  },
-                  {
-                    "quote": "The label determines which scorer is valid.",
-                    "line_start": 25,
-                    "reason": "Ties label type to scorer choice and names the limit of reference-free methods. The ARES description (synthetic data plus a small human-labeled set, prediction-powered inference) is accurate."
-                  },
-                  {
-                    "quote": "Generated requests tend to share the model's phrasing and preferred difficulty",
-                    "line_start": 43,
-                    "reason": "Names the concrete weakness of synthetic generation and the mitigations, after a worked code example with a language identifier."
-                  },
-                  {
-                    "quote": "The minimum detectable effect is chosen before the set is sized",
-                    "line_start": 49,
-                    "reason": "The sizing section gives the mechanism and conditions (interval, paired evaluation, variance), not just a vague warning."
-                  },
-                  {
-                    "quote": "Thresholds are calibrated against human labels and product outcomes from the workload being shipped.",
-                    "line_start": 63,
-                    "reason": "The pitfalls are concise, decided, and keep the exception that relative limits cannot rescue an unsafe baseline."
-                  },
-                  {
-                    "quote": "> [!qard]- When should a team add human-labeled evaluation cases instead of relying only on synthetic generation?",
-                    "line_start": 68,
-                    "reason": "The card tests one dependent decision with its reasons, has answer-side sources, and keeps its hidden ID. It is a direct technical question, not a scenario."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: structure, synthetic generation, sizing and pitfalls form one coherent topic about building the evaluation set, and sibling notes already own retrieval, golden-set and online concerns.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ]
-          },
-          "model_calls": 7
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/LLM/Evaluation/Deterministic Checks.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Evaluation/Deterministic Checks.md",
-                "outcome": "keep",
-                "reason": "Audited the whole note against its text and well-established sources (JSON Schema 2020-12, OpenAI function calling, OWASP LLM06). The opening states the operating idea and boundary: exact, rule-encodable properties only. The check-type table, JSON Schema example (additionalProperties false, enum, required) and pipeline diagram are consistent. The code fences have language identifiers. The comparison table matches the LLM-judge card in the sibling note, with no contradiction or needless repetition. The pitfalls are accurate and carry their conditions: schema-valid but wrong action, heuristic scanners routed to quarantine or review, and tool-boundary checks before execution. The single Qard tests one coherent before/after tool-check task and is accurate. References hold a real primary source. There are no known violations. No factual or editorial defect justifies an edit."
-              }
-            ],
-            "feedback": [],
-            "decisions": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "The note is accurate, coherent and well-bounded. The keep is justified and no concrete defect was found.",
-            "change_checks": [],
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Evaluation/Deterministic Checks.md",
-                "verdict": "CLEAN",
-                "summary": "The whole note was read independently. The opening gives the idea and its limit, the table, schema example and pipeline diagram agree with each other, and the pitfalls carry their conditions. The single Qard tests one coherent task and keeps its ID. No edit is needed.",
-                "page_type": "Concept — optional Questions and References present; code fences have language identifiers; no Links section or hand-rolled navigation.",
-                "current_text_evidence": [
-                  {
-                    "quote": "deterministic checks enforce properties that can be stated exactly",
-                    "line_start": 19,
-                    "reason": "The opening states the operating idea and its limit, so the topic can be reconstructed from it."
-                  },
-                  {
-                    "quote": "\"additionalProperties\": false,",
-                    "line_start": 38,
-                    "reason": "The schema example is valid JSON Schema and matches the 'no extra fields' row in the table."
-                  },
-                  {
-                    "quote": "Some scanners are heuristic, so their operational response may be quarantine or human review rather than automatic rejection.",
-                    "line_start": 94,
-                    "reason": "This qualifies the 'reject immediately' pipeline step accurately, so the note does not contradict itself."
-                  },
-                  {
-                    "quote": "Permission and argument checks belong at the tool boundary, before execution.",
-                    "line_start": 100,
-                    "reason": "The pitfall gives the mechanism and the ordering condition, and it agrees with the Qard answer."
-                  },
-                  {
-                    "quote": "Which deterministic checks should run before and after a tool-using agent calls a tool?",
-                    "line_start": 105,
-                    "reason": "This is one bounded, dependent before/after task. The answer carries primary sources and the existing ID is retained."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the topic is compact and coherent. Checks, their limits, and their place in the evaluation pipeline belong together.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ]
-          },
-          "model_calls": 9
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/LLM/Evaluation/Evaluation.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Evaluation/Evaluation.md",
-                "outcome": "keep",
-                "reason": "Audited the whole note against its text. The opening states the operating idea: exact checks plus rubric scoring over versioned cases. The mermaid flow correctly places the corpus ahead of the scorers, and the following prose explains why cheap deterministic checks run before an expensive judge. The deterministic-check section rightly notes that repeatable heuristic detectors (PII regex, keyword filters) are still fallible and need calibration. The judge paragraph covers calibration against blinded human samples and versioning of judge model, prompt, rubric and sampling settings, which is consistent with the LLM-as-a-Judge sibling cards. The example separates exact predicates, rubric dimensions and heuristic signals. The dataset lifecycle section covers dev vs frozen holdout and overfitting. The known-violations inventory is empty. Code fences carry language identifiers, wikilinks point to sibling notes, and the two references are bare descriptive links to authoritative vendor guidance. No factual error or readability defect was found, so any edit would be cosmetic churn."
-              }
-            ],
-            "feedback": [],
-            "decisions": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Evaluation/Evaluation.md",
-                "verdict": "CLEAN",
-                "summary": "The note is accurate, well ordered and concise. It separates cases from scorers, explains why deterministic does not mean exact, covers judge calibration and versioning, and covers holdout overfitting. No defect justifies an edit, so keeping it unchanged is correct.",
-                "page_type": "FolderNote — keeps the Datacore folder map block, tags: [FolderNote], optional Questions absent (allowed), References present as bare links.",
-                "current_text_evidence": [
-                  {
-                    "quote": "Keep the cases separate from the scorers.",
-                    "line_start": 18,
-                    "reason": "The opening states the operating idea early: cases are distinct from scorers and from the gate."
-                  },
-                  {
-                    "quote": "A regex for PII or a keyword safety filter is repeatable and still wrong on some inputs.",
-                    "line_start": 52,
-                    "reason": "The note states the important boundary: deterministic execution is not the same as an exact classification. It also gives the calibration remedy."
-                  },
-                  {
-                    "quote": "Version the judge model and prompt with the rubric and sampling settings.",
-                    "line_start": 54,
-                    "reason": "The note names the condition that makes score files comparable."
-                  },
-                  {
-                    "quote": "Repeated prompt or rubric tuning against the holdout turns it into training data.",
-                    "line_start": 85,
-                    "reason": "The note explains the overfitting mechanism and the signal that exposes it."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the note has one coherent evaluation pipeline. Deterministic checks, judges, golden sets and online evaluation already have sibling notes it links to.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "NOT APPLICABLE",
-                  "identity_safety": "NOT APPLICABLE",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "overall_reason": "The whole-note audit found no concrete error, rule violation or readability defect. The keep is justified and no edits were proposed.",
-            "change_checks": []
-          },
-          "model_calls": 11
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs.md",
-                "outcome": "keep",
-                "reason": "Audited the whole note against current text. The opening separates the two questions (did normal behavior move vs. does a known boundary hold). The golden-set section covers composition, versioning, holdout and case-level diffs, and the JSONL example matches the described schema. The targeted-suite section gives concrete suites and incident-plus-variation guidance. The pitfalls (tuning on the golden set, staleness, pass/fail only) state mechanisms and remedies. The tradeoffs table is consistent with the neighboring LLM-as-a-Judge cards on calibration and human reference. The claims are general evaluation practice and not version-specific. They are consistent with the OpenAI evaluation best-practices reference. There are no known violations and no cards. The prose is direct and non-repetitive, so edits would be cosmetic churn."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "The note is accurate, well ordered and free of known violations. It has no cards, and no concrete defect justifies an edit, so keeping it unchanged is sound.",
-            "change_checks": [],
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs.md",
-                "verdict": "CLEAN",
-                "summary": "The note separates broad regression detection (golden set) from narrow boundary checks (targeted suites). It gives composition, versioning, holdout and case-level-diff guidance, pitfalls with remedies, and a decision table. The prose is direct and non-repetitive, and no edit is warranted.",
-                "page_type": "Concept — frontmatter is typed and valid (status Done is user-owned and untouched). Optional Questions are absent, and the single reference is a bare descriptive link. Code fences carry language identifiers.",
-                "current_text_evidence": [
-                  {
-                    "quote": "The golden set asks whether normal behavior moved. A targeted suite asks whether one known boundary still holds.",
-                    "line_start": 16,
-                    "reason": "The opening states the operating idea and the boundary between the two suite types. This makes the topic quick to re-enter."
-                  },
-                  {
-                    "quote": "Keep a holdout slice for release validation. When both slices influence tuning, refresh the holdout from reviewed production cases",
-                    "line_start": 72,
-                    "reason": "The pitfall gives mechanism, condition and remedy. It keeps the contamination risk (tuning on the golden set) actionable."
-                  },
-                  {
-                    "quote": "Binary gates are right for hard constraints and blunt for graded quality.",
-                    "line_start": 82,
-                    "reason": "This states the pass/fail tradeoff with its condition, and the next paragraph gives the remedy of comparing score distributions."
-                  },
-                  {
-                    "quote": "Human reading is the bottleneck and measured judge agreement is sufficient",
-                    "line_start": 93,
-                    "reason": "The table row states the condition under which LLM-as-judge is preferred, so the comparison supports a decision."
-                  },
-                  {
-                    "quote": "{\"id\":\"refund-045\",\"input\":{\"question\":\"Refund for damaged item after 45 days?\"",
-                    "line_start": 41,
-                    "reason": "The concrete JSONL case matches the described schema of input, references and reviewed expectations. Its fence is tagged json."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: golden sets and targeted suites are complementary parts of one regression-testing strategy, and the note is compact enough to stay together.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "NOT APPLICABLE",
-                  "identity_safety": "NOT APPLICABLE",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ]
-          },
-          "model_calls": 13
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/LLM/Evaluation/LLM-as-a-Judge.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Evaluation/LLM-as-a-Judge.md",
-                "outcome": "keep",
-                "reason": "Read the whole note against its content and the cited Zheng et al. (MT-Bench) and OpenAI evals sources. The opening defines the judge and says its verdicts are model output, not ground truth. Absolute scoring versus pairwise preference is explained with the condition that decides between them. The rubric and scorecard sections are coherent. The pairwise prompt makes safety a gating condition ahead of the quality ordering. The bias section covers verbosity, position, prompt sensitivity, self-preference and drift, each with a mitigation. The mitigations are consistent with the cards: order-swap checks, calibration against human labels, and versioning the judge. The verbosity claim matches Zheng et al.'s repetitive-list attack. The two Qards each test one gradeable task, and their answers are consistent with the prose and carry sources. Code fences have language identifiers and the References are bare links. No factual error, structural gap or known violation found, so no edit is warranted."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "The note is accurate and coherent, and the keep is justified. The two Qards are single-task, no concrete rule violation was found, and no edit is needed.",
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Evaluation/LLM-as-a-Judge.md",
-                "verdict": "CLEAN",
-                "summary": "I read the whole note. It opens with the definition and the caveat that a judge's verdict is not ground truth. It explains when to use absolute scoring and when to use pairwise comparison. It then covers prompts, biases with mitigations, and two well-formed Qards. I found no factual error, repetition problem or structural defect that justifies an edit.",
-                "page_type": "Concept — frontmatter, optional Questions and References, MD040 language identifiers and Qard identity metadata apply.",
-                "current_text_evidence": [
-                  {
-                    "quote": "its verdict is another model output rather than ground truth",
-                    "line_start": 17,
-                    "reason": "The opening states the central boundary: judge output must be calibrated against human labels."
-                  },
-                  {
-                    "quote": "Absolute scoring** assigns anchored scores",
-                    "line_start": 19,
-                    "reason": "The note explains the two modes and the condition that decides between them (a stable release threshold versus iteration)."
-                  },
-                  {
-                    "quote": "An unsafe answer is ineligible to win.",
-                    "line_start": 78,
-                    "reason": "The pairwise prompt gates on safety before ranking by quality, which is a concrete and sound design."
-                  },
-                  {
-                    "quote": "Zheng et al. demonstrated this with repetitive-list attacks.",
-                    "line_start": 112,
-                    "reason": "The verbosity-bias claim matches the MT-Bench paper's repetitive-list attack."
-                  },
-                  {
-                    "quote": "A preference that does not survive the swap marks an abstention or human-review case",
-                    "line_start": 114,
-                    "reason": "The position-bias mitigation is a stated mechanism and matches the order-swap answer in the second Qard."
-                  },
-                  {
-                    "quote": "When does an LLM judge fit better than a deterministic check?",
-                    "line_start": 125,
-                    "reason": "The card tests one focused comparison with a decision rule and carries sources on the answer side."
-                  },
-                  {
-                    "quote": "What evidence supports trusting an LLM judge's verdicts?",
-                    "line_start": 140,
-                    "reason": "The card has a finite answer (human agreement, order-swap, bias probes, recalibration) that is consistent with the prose."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the note covers one coherent topic, LLM-as-a-judge evaluation, and its rubric, pairwise, prompt and bias sections depend on each other.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "change_checks": []
-          },
-          "model_calls": 15
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/LLM/Evaluation/Online Evaluation and AB Tests.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Evaluation/Online Evaluation and AB Tests.md",
-                "outcome": "keep",
-                "reason": "Audited the whole note against current text and standard experimentation practice. The opening defines randomized assignment by independent unit. The metric table and metric-contract sentence are precise. The A/B plan correctly links assignment unit to the analysis unit, and the estimator guidance (difference in proportions, Welch with robustness checks, ratio metrics, clustering) is accurate. The power section correctly separates false-negative risk and exaggerated significant estimates from peeking inflation. The segmentation, monitoring-vs-experiment table and architecture sections (versioned definitions, deterministic hashing, exposure logging before variant behavior, sample-ratio mismatch) are consistent with the cited Kohavi and Microsoft SRM references and the ASA p-value statement. Frontmatter, MD040 fences and References format are valid, there are no cards, and no known violations exist. The prose is direct, non-repetitive and ordered well, so edits would be cosmetic."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "Independent full-note audit found no factual, structural, voice or reference defects; the keep is justified and no edits were proposed.",
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Evaluation/Online Evaluation and AB Tests.md",
-                "verdict": "CLEAN",
-                "summary": "The note is accurate and well ordered: it moves from the definition and metrics through design, analysis, power, segmentation and monitoring to platform architecture. Mechanisms, conditions and exceptions are preserved, and rewriting would be cosmetic.",
-                "page_type": "Concept — typed frontmatter, no cards, References as bare descriptive link bullets, text-fenced code blocks, no generated navigation.",
-                "current_text_evidence": [
-                  {
-                    "quote": "The assignment unit determines the independent analysis unit.",
-                    "line_start": 47,
-                    "reason": "Correctly ties the randomization unit to the analysis unit and explains the clustering consequence."
-                  },
-                  {
-                    "quote": "An underpowered experiment often misses a real effect.",
-                    "line_start": 60,
-                    "reason": "Accurately separates false-negative risk, exaggerated significant estimates and peeking inflation."
-                  },
-                  {
-                    "quote": "Welch’s t-test is often a reasonable large-sample default.",
-                    "line_start": 52,
-                    "reason": "Hedged correctly, with a heavy-tail and bootstrap caveat."
-                  },
-                  {
-                    "quote": "Stop interpreting the treatment effect until that sample-ratio mismatch is explained.",
-                    "line_start": 116,
-                    "reason": "Correct SRM handling, consistent with the cited Microsoft SRM reference."
-                  },
-                  {
-                    "quote": "Conditioning on an exposure caused by the treatment can bias the estimate.",
-                    "line_start": 110,
-                    "reason": "Precise statement of the triggered-analysis exception."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the platform architecture section supports the same A/B-testing topic, and the whole note stays coherent and self-contained.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "NOT APPLICABLE",
-                  "identity_safety": "NOT APPLICABLE",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "change_checks": []
-          },
-          "model_calls": 17
-        }
-      }
-    ],
+    "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-05T20:17:41.211490Z",
-    "topic": "AI & ML",
-    "topic_id": "ai-ml-4edf0823",
-    "current_batch": {
-      "topic": "AI & ML",
-      "topic_id": "ai-ml-4edf0823",
-      "notes": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Fine-tuning.md",
-          "content": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"Adapting model behavior with supervised training, parameter-efficient updates, and held-out evaluation.\"\nlevel: [\"2\"]\npriority: High\nstatus: Ready to Repeat\npublish: true\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Fine-tuning\"\nflashcard_uid: \"b36582e5\"\ncreated: \"2026-06-11T07:39:53.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:28:37.409Z\"\n---\n\nFine-tuning continues a pretrained model's training on task-specific examples. The resulting behavior lives in the weights, so the same instructions do not need to travel with every request. It works well for stable output conventions, classification boundaries, tool-call reliability, and narrow-task distillation. It makes a poor knowledge store. Facts learned during training have no citation boundary and start aging immediately.\n\nPrompting is the usual starting point. [[Home/AI & ML/LLM/Context Engineering/RAG/RAG|RAG]] addresses gaps in current or private knowledge, and fine-tuning is justified only when a measured behavior gap remains. [[#Preference alignment]] covers preference-pair methods after supervised fine-tuning, and [[#GRPO]] covers group-relative online reinforcement learning.\n\n# GRPO\n\nGroup Relative Policy Optimization (GRPO) is an online reinforcement-learning method for language-model post-training. For each prompt, the current policy samples a group of completions. A rule-based or model-based verifier scores them, and the update favors completions that perform better than others in that group. GRPO removes the learned value model used by PPO-style training. On-policy sampling, reward design, KL control, and reward-hacking risk remain.\n\n## Group-relative Update\n\n```text\nprompt\n  → sample G completions from current policy\n  → score each completion\n  → normalize rewards inside the group\n  → update with clipped objective and reference-policy constraint\n```\n\nA math prompt might produce eight completions. Six fail the final-answer check. Another reaches the right answer with invalid formatting, while the last is correct and well formed. Outcome and format rewards rank this sampled group. The normalized advantage identifies trajectories that beat their peers. It is not a calibrated probability that a response is globally correct.\n\nThe absence of a critic reduces model-state memory and one source of estimation error. But group estimates can still be noisy, especially when every sampled completion receives nearly the same reward. More samples improve comparison and increase generation cost.\n\n## Rewards the Model Cannot Cheaply Game\n\nGRPO works best with rewards that are cheap to verify and hard to game, such as exact math answers, executable tests, schema checks, or constrained simulators. A vague style judge can reward verbosity or shortcuts that fail outside the training setup.\n\nValidation checks that the reward still predicts useful behavior:\n\n- Held-out prompts are kept and run through target, general-capability, and safety evaluations.\n- Examples with high reward but poor human judgment are inspected.\n- Reward distribution and group variance are measured alongside average training reward.\n- The final policy is tested outside the environment and formatting assumptions used by the verifier.\n\n## Where GRPO Came From\n\nDeepSeekMath introduced GRPO with group-relative advantages, a clipped policy objective, and KL regularization. DeepSeek-R1 later reported a GRPO-based reasoning post-training pipeline. The method fits problems with a stable verifier and a repeatable rollout environment. A release still depends on trustworthy data, held-out evaluation, and deployment checks.\n\n# Preference Alignment\n\nPreference alignment trains a model to favor one completion over another for the same prompt. The labels show which responses the model should prefer. A weak rubric therefore puts its bias directly into training.\n\n## Preference Data\n\n```text\nprompt: user asks for a refund outside policy\nchosen: explains limits and escalation\nrejected: invents an exception and promises a refund\nrubric: correctness, actionability, tone\n```\n\nEvaluation holds out complete prompts as well as response pairs, so it tests generalization to new situations.\n\n## RLHF\n\nIn the InstructGPT-style pipeline, human comparisons train a reward model. Reinforcement learning then updates the language-model policy to increase that learned reward while constraining drift from a reference policy. This supports online sampling from the current policy, but adds a reward-model lifecycle and reinforcement-learning instability.\n\nReward increases are only a training signal. A policy can exploit blind spots in the reward model, so held-out human evaluation and safety checks must still pass before release.\n\n## DPO\n\nDirect Preference Optimization derives a classification-style objective from preference pairs and a reference policy. It removes the separate reward model and online RL loop, which makes the pipeline simpler. Pair quality, reference choice, loss settings, and coverage still determine whether that simpler pipeline generalizes.\n\nDPO fits a fixed preference set that is already available and stable. Online methods such as [[#GRPO]] fit when a verifier can score newly sampled candidates and remains reliable as outputs change.\n\nEvaluation measures pairwise win rate with blinded raters alongside task correctness, refusal behavior, calibration, and safety slices. A separate set catches general-capability regressions. Response length needs explicit control or reporting because raters and judges can favor longer answers that are no more correct.\n\n# When Fine-tuning Earns Its Cost\n\n- The model understands the task but inconsistently follows a format or policy after good prompting and few-shot examples.\n- The target behavior is easier to demonstrate than specify, and representative examples can be labeled consistently.\n- A high-volume narrow task justifies distilling a larger model’s behavior into a smaller one.\n- Long repeated instructions dominate context and inference cost, and training can encode that stable behavior.\n\nA held-out evaluation set and a baseline from the exact base model must exist before training starts. Training loss shows fit to the examples. It says nothing by itself about production behavior.\n\n# Full Fine-tuning\n\nFull fine-tuning updates every model weight. Its memory footprint is not a fixed multiple of the published model size. A run may hold weights, gradients, optimizer states, activations, temporary buffers, and communication shards at different precisions. Adam-style optimizers keep several state tensors. Activation memory moves with batch size, sequence length, layer shape, and checkpointing policy. Quantization, mixed precision, ZeRO/FSDP sharding, CPU offload, and optimizer choice change the total again.\n\nCapacity planning starts from a component-level estimate for the exact model and training stack, followed by a measured short run. Full tuning is justified only when broader weight updates beat PEFT on held-out quality by enough to pay for distributed compute and a full derived checkpoint.\n\n# Parameter-efficient Fine-tuning\n\n## LoRA\n\nLow-Rank Adaptation freezes the base weights and trains low-rank update matrices in selected layers. The small adapter can stay separate, be swapped, or be merged for serving. Keeping it separate makes rollback straightforward: disabling the adapter restores the original base weights.\n\nAn active LoRA adapter can still cause catastrophic forgetting or other regressions. It changes the effective computation and can pull the deployed model away from instruction following, safety behavior, or capabilities missing from narrow training data. Evaluation must cover the complete base-plus-adapter system on target and broad holdouts. “Frozen base” describes storage and update mechanics. It does not promise unchanged behavior while the adapter is active.\n\n## QLoRA\n\nQLoRA stores the frozen base in 4-bit NormalFloat form and trains LoRA adapters through that quantized representation. The QLoRA paper reports fine-tuning models up to 65B parameters on a single 48 GB GPU under its stated configurations. That is evidence for those experiments, not a promise that any large model fits any consumer GPU.\n\nFeasibility still depends on the model architecture and the actual training configuration: sequence length, batching, adapter targets, optimizer state, checkpointing, attention kernels, and device memory. Quality must be measured for the chosen base, quantization settings, task, and evaluation set. A memory estimate followed by a short run is safer than committing hardware from a headline number.\n\n# Data\n\nData quality and coverage matter more than raw count.\n\n- Training examples match the production chat template, system role, tool schema, and output format exactly.\n- Contradictory labels and near-duplicate examples that over-weight one phrasing are removed.\n- Ordinary cases, boundary cases, refusals, and negative examples appear in the proportions expected at inference.\n- A held-out split is never used for training or prompt iteration.\n- The base checkpoint, tokenizer, data version, hyperparameters, and adapter targets are recorded so the run is reproducible.\n\n# Evaluation\n\nThe base and fine-tuned candidates are compared on the same target set, broad capability holdouts, and safety checks. Effect sizes are reported by slice instead of hidden inside one average. A format gain that causes a reasoning or refusal regression is a trade, not a free improvement.\n\nDuring training, validation loss and early stopping detect memorization, but shipping still depends on task metrics and production confirmation through [[Home/AI & ML/LLM/Evaluation/Online Evaluation and AB Tests|online evaluation and A/B tests]]. A deployable base checkpoint keeps rollback an operational action, not a retraining project.\n\n# Pitfalls\n\n**Injecting knowledge:** a model trained on a document corpus may reproduce facts, yet cannot guarantee retrieval, freshness, or citation. Changing facts belong in RAG. Fine-tuning can teach the behavior for using them.\n\n**Format mismatch:** different chat templates or tool schemas between training and serving teach a distribution the runtime never presents.\n\n**Narrow-only evaluation:** target gains can hide losses in general reasoning, multilingual behavior, or safety. The active adapter belongs in every deployment candidate being evaluated.\n\n**Capacity estimates from one multiplier:** model-file size is not training memory. A usable estimate accounts for weights, gradients, optimizer states, activations, and sharding in the actual configuration.\n\n# Tradeoffs\n\n| Approach | Main benefit | Main cost | Best fit |\n| --- | --- | --- | --- |\n| Prompting | Fast iteration, no training | Repeated context and inconsistent behavior | Most new tasks |\n| RAG | Fresh, attributable knowledge | Retrieval and indexing system | Changing or private facts |\n| LoRA | Small separable updates | Active adapter can still regress capabilities | Stable behavior on limited compute |\n| QLoRA | Lower base-weight memory during tuning | Hardware fit and quality are configuration-specific | PEFT when full-precision base storage is the constraint |\n| Full tuning | Broadest update capacity | Highest memory, compute, and checkpoint cost | Proven quality gap that PEFT cannot close |\n\n# Questions\n\n> [!qard]- What is LoRA, and why is it cheaper than full fine-tuning?\n> LoRA (Low-Rank Adaptation) fine-tunes a pretrained model by freezing its weights and training only a small low-rank update for selected layers. Because the trainable part is a tiny fraction of the model, training needs gradients and optimizer state only for that update, and the result is a small adapter instead of a full model copy.\n>\n> 1. A chosen weight matrix `W0` stays frozen.\n> 2. Its change is represented as the product of two small matrices, `B·A`. Their shared inner dimension, the rank `r`, is much smaller than the layer's dimensions.\n> 3. Only `A` and `B` are trained.\n> 4. The adapted layer computes `W0·x + B·A·x`.\n> \n> The small trainable set lowers training memory compared with updating every weight. Adapters for different tasks can share one base model and be swapped. An adapter can also be merged into `W0`, so serving needs no extra computation. Whether a LoRA adapter matches full fine-tuning on a particular task depends on its configuration, such as rank and target layers, and held-out evaluation establishes it.\n>\n> Sources: [Hu et al.: LoRA](https://arxiv.org/abs/2106.09685) · [Hugging Face PEFT: LoRA](https://huggingface.co/docs/peft/en/developer_guides/lora)\n\n<!-- qard-id: d65b682a-c207-4ffc-87d5-1839b2d5ba54 -->\n> [!qard]- Why can LoRA still cause capability regressions if the base weights are frozen?\n> Freezing the base weights fixes what is stored and updated during training, not what the deployed model computes. LoRA adds a trainable low-rank update to selected layers. While the adapter is active, each adapted layer computes the frozen weight's output plus the adapter's contribution: `W0·x + B·A·x`.\n>\n> That added term applies to every input passing through those layers, not only to inputs that resemble the training data. Training optimizes it for the target examples alone, so it can also shift behavior the data never covered, such as instruction following, safety behavior or general reasoning. Frozen base weights therefore do not guarantee unchanged outputs. The full base-plus-adapter model needs evaluation on both the target task and broad held-out sets.\n>\n> Freezing does make rollback easier. A separate adapter can be disabled, which returns the model to the base behavior. Merging folds the update into the weights, so rollback after a merge depends on a supported unmerge or an unmodified copy of the base checkpoint.\n>\n> Sources: [Hu et al.: LoRA](https://arxiv.org/abs/2106.09685) · [Hugging Face PEFT: LoRA](https://huggingface.co/docs/peft/en/developer_guides/lora) · [More Than Catastrophic Forgetting](https://arxiv.org/abs/2405.17830)\n\n# References\n\n- [LoRA: Low-Rank Adaptation of Large Language Models](https://arxiv.org/abs/2106.09685)\n- [QLoRA: Efficient Finetuning of Quantized LLMs](https://arxiv.org/abs/2305.14314)\n- [DeepSeekMath](https://arxiv.org/abs/2402.03300)\n- [Proximal Policy Optimization Algorithms](https://arxiv.org/abs/1707.06347)\n- [Direct Preference Optimization](https://arxiv.org/abs/2305.18290)\n- [Training language models to follow instructions with human feedback](https://arxiv.org/abs/2203.02155)\n- [Fine-tuning guide](https://platform.openai.com/docs/guides/fine-tuning)\n",
-          "hash": "529e24900679958496e7dd6faae8725d159451d2bde245fd2f44dad532fa4f83",
-          "topic": "AI & ML",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "new"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "base_sha": "67caf2e374f53e8772b86b8ea0f881d74e784fa1",
-    "reservation_deadline": "2026-11-05T20:32:35.946794Z",
-    "error": "Claude author invocation failed with exit code 1 (category: unknown).",
-    "stop_reason": "provider_error",
-    "sealed_at": "2026-11-05T20:17:41.211496Z"
+    "checkpoint_at": "2026-11-06T07:00:46.856526Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
@@ -11449,6 +10875,595 @@
       "reservation_deadline": "2026-11-05T07:26:43.948949Z",
       "stop_reason": "call_limit",
       "sealed_at": "2026-11-05T07:12:22.731019Z"
+    },
+    "b98a816444094ceaa557c175133e1e93": {
+      "version": 1,
+      "id": "b98a816444094ceaa557c175133e1e93",
+      "status": "sealed",
+      "phase": "sealed",
+      "started_at": "2026-11-05T20:07:51.294462Z",
+      "elapsed_seconds": 589.9176529999997,
+      "calls_reserved": 18,
+      "responses_received": 17,
+      "attempted_paths": [
+        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md",
+        "Vault/Home/AI & ML/LLM/Embeddings.md",
+        "Vault/Home/AI & ML/LLM/Evaluation/Building an Evaluation Set.md",
+        "Vault/Home/AI & ML/LLM/Evaluation/Deterministic Checks.md",
+        "Vault/Home/AI & ML/LLM/Evaluation/Evaluation.md",
+        "Vault/Home/AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs.md",
+        "Vault/Home/AI & ML/LLM/Evaluation/LLM-as-a-Judge.md",
+        "Vault/Home/AI & ML/LLM/Evaluation/Online Evaluation and AB Tests.md"
+      ],
+      "accepted_records": [],
+      "outcomes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md",
+                  "outcome": "keep",
+                  "reason": "I read the whole note against its text and known HNSW, IVF, PQ and DiskANN behavior. Flat search is the exact O(N) baseline. HNSW parameters (M, ef_construction, ef_search) and IVF parameters (nlist, nprobe) are correct, as are the PQ lossiness and DiskANN's SSD trade-off. The float32 memory estimate (N × dimensions × 4 bytes) is right. The filtering section correctly separates recall and cost from authorization. It also correctly warns that post-filtering with a selective filter collapses recall. The four pitfalls, the tradeoff table and the system-category table agree with each other and with the index section. The two cards each test one gradeable task and have answers that explain mechanism and limits. The cards' Faiss and Azure sources and the reference list are topic-specific. Known violations are empty. The prose is direct and has no padding. Rewording any of it would be churn."
+                }
+              ],
+              "feedback": [],
+              "decisions": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "Independent whole-note review found no factual, structural, voice or question-quality defect. The keep is justified and there are no edits.",
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note explains ANN search, index types, filtering, operations, system choice, pitfalls and tradeoffs accurately and in a consistent whiteboard voice. The two cards are single-task with mechanism-rich answers, and the references are relevant primary sources. No edit is warranted.",
+                  "page_type": "Concept — typed frontmatter, optional Questions and References present and valid, MD040 satisfied by the mermaid fence, no generated navigation.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "The missing fraction is silent, so the recall-latency choice must be measured explicitly",
+                      "line_start": 19,
+                      "reason": "States the core ANN tradeoff and the measurement requirement early, so the operating idea is recoverable."
+                    },
+                    {
+                      "quote": "Raising `ef_search` explores more of the graph and trades latency for recall.",
+                      "line_start": 38,
+                      "reason": "Gives the correct HNSW parameter mechanism (M, ef_construction, ef_search), and the IVF nlist/nprobe line that follows it is also correct."
+                    },
+                    {
+                      "quote": "a selective filter may remove nearly all of top-k and collapse the effective recall",
+                      "line_start": 50,
+                      "reason": "Correctly states the post-filtering failure condition. It is kept separate from authorization, which the pre-filtering bullet covers."
+                    },
+                    {
+                      "quote": "Memory budgeting** starts with roughly `N × dimensions × 4 bytes` for float32 vectors",
+                      "line_start": 62,
+                      "reason": "The float32 estimate is correct and is linked to the decision to move to PQ or a disk-based index."
+                    },
+                    {
+                      "quote": "Why do vector indexes use approximate nearest-neighbor search instead of exact search?",
+                      "line_start": 128,
+                      "reason": "A direct, bounded question whose answer is one dependent explanation covering mechanism, cost and limits. It is not a bundle of independent tasks."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: index types, filtering, operations and pitfalls all serve one topic, and the content does not separate into independently useful notes.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "identity_safety": "PASS",
+                    "question_quality": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "change_checks": [],
+              "decision_checks": []
+            },
+            "model_calls": 2
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Embeddings.md",
+          "outcome": "proposal_blocked",
+          "reason": "source URL missing from owning note: https://docs.cohere.com/docs/cohere-embed",
+          "result": {
+            "status": "proposal_blocked",
+            "stage": "deterministic_application",
+            "reason": "source URL missing from owning note: https://docs.cohere.com/docs/cohere-embed",
+            "model_calls": 5
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Evaluation/Building an Evaluation Set.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Evaluation/Building an Evaluation Set.md",
+                  "outcome": "keep",
+                  "reason": "Read the whole note against its claims. The opening states why representativeness precedes scoring. Structure ties label type to valid scorer. The ARES description (synthetic data plus a small human-labeled set, prediction-powered inference) matches the paper. Synthetic generation has a concrete example and names its weakness: shared phrasing and difficulty. The sizing section covers the minimum detectable effect, intervals and paired evaluation, which is consistent with Anthropic's statistical-evals guidance. The pitfalls (drift, threshold cargo-culting) are concise. The single Qard tests one dependent task, has sources on the answer side, and does not duplicate the neighbouring notes' cards. The code fence has a language identifier, wikilinks are used in explanatory prose, and References are bare links. No known violations exist, and no factual or editorial defect justifies an edit."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "The single note was audited in full and the keep is justified. I found no factual, editorial, structural or Qard defect that warrants an edit.",
+              "change_checks": [],
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Evaluation/Building an Evaluation Set.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note has a clear opening, a label-to-scorer mapping, a concrete synthetic-generation example with its main weakness, a conditions-based sizing section, concise pitfalls and one well-formed Qard. No concrete defect justifies an edit.",
+                  "page_type": "Concept — authorable concept note; voice is impersonal and declarative, Questions and References are optional but present and valid.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "If its cases do not represent the workload, a precise scorer still produces a misleading result.",
+                      "line_start": 17,
+                      "reason": "The opening states the operating idea quickly: representativeness comes before scoring."
+                    },
+                    {
+                      "quote": "The label determines which scorer is valid.",
+                      "line_start": 25,
+                      "reason": "Ties label type to scorer choice and names the limit of reference-free methods. The ARES description (synthetic data plus a small human-labeled set, prediction-powered inference) is accurate."
+                    },
+                    {
+                      "quote": "Generated requests tend to share the model's phrasing and preferred difficulty",
+                      "line_start": 43,
+                      "reason": "Names the concrete weakness of synthetic generation and the mitigations, after a worked code example with a language identifier."
+                    },
+                    {
+                      "quote": "The minimum detectable effect is chosen before the set is sized",
+                      "line_start": 49,
+                      "reason": "The sizing section gives the mechanism and conditions (interval, paired evaluation, variance), not just a vague warning."
+                    },
+                    {
+                      "quote": "Thresholds are calibrated against human labels and product outcomes from the workload being shipped.",
+                      "line_start": 63,
+                      "reason": "The pitfalls are concise, decided, and keep the exception that relative limits cannot rescue an unsafe baseline."
+                    },
+                    {
+                      "quote": "> [!qard]- When should a team add human-labeled evaluation cases instead of relying only on synthetic generation?",
+                      "line_start": 68,
+                      "reason": "The card tests one dependent decision with its reasons, has answer-side sources, and keeps its hidden ID. It is a direct technical question, not a scenario."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: structure, synthetic generation, sizing and pitfalls form one coherent topic about building the evaluation set, and sibling notes already own retrieval, golden-set and online concerns.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ]
+            },
+            "model_calls": 7
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Evaluation/Deterministic Checks.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Evaluation/Deterministic Checks.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole note against its text and well-established sources (JSON Schema 2020-12, OpenAI function calling, OWASP LLM06). The opening states the operating idea and boundary: exact, rule-encodable properties only. The check-type table, JSON Schema example (additionalProperties false, enum, required) and pipeline diagram are consistent. The code fences have language identifiers. The comparison table matches the LLM-judge card in the sibling note, with no contradiction or needless repetition. The pitfalls are accurate and carry their conditions: schema-valid but wrong action, heuristic scanners routed to quarantine or review, and tool-boundary checks before execution. The single Qard tests one coherent before/after tool-check task and is accurate. References hold a real primary source. There are no known violations. No factual or editorial defect justifies an edit."
+                }
+              ],
+              "feedback": [],
+              "decisions": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "The note is accurate, coherent and well-bounded. The keep is justified and no concrete defect was found.",
+              "change_checks": [],
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Evaluation/Deterministic Checks.md",
+                  "verdict": "CLEAN",
+                  "summary": "The whole note was read independently. The opening gives the idea and its limit, the table, schema example and pipeline diagram agree with each other, and the pitfalls carry their conditions. The single Qard tests one coherent task and keeps its ID. No edit is needed.",
+                  "page_type": "Concept — optional Questions and References present; code fences have language identifiers; no Links section or hand-rolled navigation.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "deterministic checks enforce properties that can be stated exactly",
+                      "line_start": 19,
+                      "reason": "The opening states the operating idea and its limit, so the topic can be reconstructed from it."
+                    },
+                    {
+                      "quote": "\"additionalProperties\": false,",
+                      "line_start": 38,
+                      "reason": "The schema example is valid JSON Schema and matches the 'no extra fields' row in the table."
+                    },
+                    {
+                      "quote": "Some scanners are heuristic, so their operational response may be quarantine or human review rather than automatic rejection.",
+                      "line_start": 94,
+                      "reason": "This qualifies the 'reject immediately' pipeline step accurately, so the note does not contradict itself."
+                    },
+                    {
+                      "quote": "Permission and argument checks belong at the tool boundary, before execution.",
+                      "line_start": 100,
+                      "reason": "The pitfall gives the mechanism and the ordering condition, and it agrees with the Qard answer."
+                    },
+                    {
+                      "quote": "Which deterministic checks should run before and after a tool-using agent calls a tool?",
+                      "line_start": 105,
+                      "reason": "This is one bounded, dependent before/after task. The answer carries primary sources and the existing ID is retained."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the topic is compact and coherent. Checks, their limits, and their place in the evaluation pipeline belong together.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ]
+            },
+            "model_calls": 9
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Evaluation/Evaluation.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Evaluation/Evaluation.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole note against its text. The opening states the operating idea: exact checks plus rubric scoring over versioned cases. The mermaid flow correctly places the corpus ahead of the scorers, and the following prose explains why cheap deterministic checks run before an expensive judge. The deterministic-check section rightly notes that repeatable heuristic detectors (PII regex, keyword filters) are still fallible and need calibration. The judge paragraph covers calibration against blinded human samples and versioning of judge model, prompt, rubric and sampling settings, which is consistent with the LLM-as-a-Judge sibling cards. The example separates exact predicates, rubric dimensions and heuristic signals. The dataset lifecycle section covers dev vs frozen holdout and overfitting. The known-violations inventory is empty. Code fences carry language identifiers, wikilinks point to sibling notes, and the two references are bare descriptive links to authoritative vendor guidance. No factual error or readability defect was found, so any edit would be cosmetic churn."
+                }
+              ],
+              "feedback": [],
+              "decisions": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Evaluation/Evaluation.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note is accurate, well ordered and concise. It separates cases from scorers, explains why deterministic does not mean exact, covers judge calibration and versioning, and covers holdout overfitting. No defect justifies an edit, so keeping it unchanged is correct.",
+                  "page_type": "FolderNote — keeps the Datacore folder map block, tags: [FolderNote], optional Questions absent (allowed), References present as bare links.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "Keep the cases separate from the scorers.",
+                      "line_start": 18,
+                      "reason": "The opening states the operating idea early: cases are distinct from scorers and from the gate."
+                    },
+                    {
+                      "quote": "A regex for PII or a keyword safety filter is repeatable and still wrong on some inputs.",
+                      "line_start": 52,
+                      "reason": "The note states the important boundary: deterministic execution is not the same as an exact classification. It also gives the calibration remedy."
+                    },
+                    {
+                      "quote": "Version the judge model and prompt with the rubric and sampling settings.",
+                      "line_start": 54,
+                      "reason": "The note names the condition that makes score files comparable."
+                    },
+                    {
+                      "quote": "Repeated prompt or rubric tuning against the holdout turns it into training data.",
+                      "line_start": 85,
+                      "reason": "The note explains the overfitting mechanism and the signal that exposes it."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the note has one coherent evaluation pipeline. Deterministic checks, judges, golden sets and online evaluation already have sibling notes it links to.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "NOT APPLICABLE",
+                    "identity_safety": "NOT APPLICABLE",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "overall_reason": "The whole-note audit found no concrete error, rule violation or readability defect. The keep is justified and no edits were proposed.",
+              "change_checks": []
+            },
+            "model_calls": 11
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole note against current text. The opening separates the two questions (did normal behavior move vs. does a known boundary hold). The golden-set section covers composition, versioning, holdout and case-level diffs, and the JSONL example matches the described schema. The targeted-suite section gives concrete suites and incident-plus-variation guidance. The pitfalls (tuning on the golden set, staleness, pass/fail only) state mechanisms and remedies. The tradeoffs table is consistent with the neighboring LLM-as-a-Judge cards on calibration and human reference. The claims are general evaluation practice and not version-specific. They are consistent with the OpenAI evaluation best-practices reference. There are no known violations and no cards. The prose is direct and non-repetitive, so edits would be cosmetic churn."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "The note is accurate, well ordered and free of known violations. It has no cards, and no concrete defect justifies an edit, so keeping it unchanged is sound.",
+              "change_checks": [],
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note separates broad regression detection (golden set) from narrow boundary checks (targeted suites). It gives composition, versioning, holdout and case-level-diff guidance, pitfalls with remedies, and a decision table. The prose is direct and non-repetitive, and no edit is warranted.",
+                  "page_type": "Concept — frontmatter is typed and valid (status Done is user-owned and untouched). Optional Questions are absent, and the single reference is a bare descriptive link. Code fences carry language identifiers.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "The golden set asks whether normal behavior moved. A targeted suite asks whether one known boundary still holds.",
+                      "line_start": 16,
+                      "reason": "The opening states the operating idea and the boundary between the two suite types. This makes the topic quick to re-enter."
+                    },
+                    {
+                      "quote": "Keep a holdout slice for release validation. When both slices influence tuning, refresh the holdout from reviewed production cases",
+                      "line_start": 72,
+                      "reason": "The pitfall gives mechanism, condition and remedy. It keeps the contamination risk (tuning on the golden set) actionable."
+                    },
+                    {
+                      "quote": "Binary gates are right for hard constraints and blunt for graded quality.",
+                      "line_start": 82,
+                      "reason": "This states the pass/fail tradeoff with its condition, and the next paragraph gives the remedy of comparing score distributions."
+                    },
+                    {
+                      "quote": "Human reading is the bottleneck and measured judge agreement is sufficient",
+                      "line_start": 93,
+                      "reason": "The table row states the condition under which LLM-as-judge is preferred, so the comparison supports a decision."
+                    },
+                    {
+                      "quote": "{\"id\":\"refund-045\",\"input\":{\"question\":\"Refund for damaged item after 45 days?\"",
+                      "line_start": 41,
+                      "reason": "The concrete JSONL case matches the described schema of input, references and reviewed expectations. Its fence is tagged json."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: golden sets and targeted suites are complementary parts of one regression-testing strategy, and the note is compact enough to stay together.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "NOT APPLICABLE",
+                    "identity_safety": "NOT APPLICABLE",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ]
+            },
+            "model_calls": 13
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Evaluation/LLM-as-a-Judge.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Evaluation/LLM-as-a-Judge.md",
+                  "outcome": "keep",
+                  "reason": "Read the whole note against its content and the cited Zheng et al. (MT-Bench) and OpenAI evals sources. The opening defines the judge and says its verdicts are model output, not ground truth. Absolute scoring versus pairwise preference is explained with the condition that decides between them. The rubric and scorecard sections are coherent. The pairwise prompt makes safety a gating condition ahead of the quality ordering. The bias section covers verbosity, position, prompt sensitivity, self-preference and drift, each with a mitigation. The mitigations are consistent with the cards: order-swap checks, calibration against human labels, and versioning the judge. The verbosity claim matches Zheng et al.'s repetitive-list attack. The two Qards each test one gradeable task, and their answers are consistent with the prose and carry sources. Code fences have language identifiers and the References are bare links. No factual error, structural gap or known violation found, so no edit is warranted."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "The note is accurate and coherent, and the keep is justified. The two Qards are single-task, no concrete rule violation was found, and no edit is needed.",
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Evaluation/LLM-as-a-Judge.md",
+                  "verdict": "CLEAN",
+                  "summary": "I read the whole note. It opens with the definition and the caveat that a judge's verdict is not ground truth. It explains when to use absolute scoring and when to use pairwise comparison. It then covers prompts, biases with mitigations, and two well-formed Qards. I found no factual error, repetition problem or structural defect that justifies an edit.",
+                  "page_type": "Concept — frontmatter, optional Questions and References, MD040 language identifiers and Qard identity metadata apply.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "its verdict is another model output rather than ground truth",
+                      "line_start": 17,
+                      "reason": "The opening states the central boundary: judge output must be calibrated against human labels."
+                    },
+                    {
+                      "quote": "Absolute scoring** assigns anchored scores",
+                      "line_start": 19,
+                      "reason": "The note explains the two modes and the condition that decides between them (a stable release threshold versus iteration)."
+                    },
+                    {
+                      "quote": "An unsafe answer is ineligible to win.",
+                      "line_start": 78,
+                      "reason": "The pairwise prompt gates on safety before ranking by quality, which is a concrete and sound design."
+                    },
+                    {
+                      "quote": "Zheng et al. demonstrated this with repetitive-list attacks.",
+                      "line_start": 112,
+                      "reason": "The verbosity-bias claim matches the MT-Bench paper's repetitive-list attack."
+                    },
+                    {
+                      "quote": "A preference that does not survive the swap marks an abstention or human-review case",
+                      "line_start": 114,
+                      "reason": "The position-bias mitigation is a stated mechanism and matches the order-swap answer in the second Qard."
+                    },
+                    {
+                      "quote": "When does an LLM judge fit better than a deterministic check?",
+                      "line_start": 125,
+                      "reason": "The card tests one focused comparison with a decision rule and carries sources on the answer side."
+                    },
+                    {
+                      "quote": "What evidence supports trusting an LLM judge's verdicts?",
+                      "line_start": 140,
+                      "reason": "The card has a finite answer (human agreement, order-swap, bias probes, recalibration) that is consistent with the prose."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the note covers one coherent topic, LLM-as-a-judge evaluation, and its rubric, pairwise, prompt and bias sections depend on each other.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "change_checks": []
+            },
+            "model_calls": 15
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Evaluation/Online Evaluation and AB Tests.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Evaluation/Online Evaluation and AB Tests.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole note against current text and standard experimentation practice. The opening defines randomized assignment by independent unit. The metric table and metric-contract sentence are precise. The A/B plan correctly links assignment unit to the analysis unit, and the estimator guidance (difference in proportions, Welch with robustness checks, ratio metrics, clustering) is accurate. The power section correctly separates false-negative risk and exaggerated significant estimates from peeking inflation. The segmentation, monitoring-vs-experiment table and architecture sections (versioned definitions, deterministic hashing, exposure logging before variant behavior, sample-ratio mismatch) are consistent with the cited Kohavi and Microsoft SRM references and the ASA p-value statement. Frontmatter, MD040 fences and References format are valid, there are no cards, and no known violations exist. The prose is direct, non-repetitive and ordered well, so edits would be cosmetic."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "Independent full-note audit found no factual, structural, voice or reference defects; the keep is justified and no edits were proposed.",
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Evaluation/Online Evaluation and AB Tests.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note is accurate and well ordered: it moves from the definition and metrics through design, analysis, power, segmentation and monitoring to platform architecture. Mechanisms, conditions and exceptions are preserved, and rewriting would be cosmetic.",
+                  "page_type": "Concept — typed frontmatter, no cards, References as bare descriptive link bullets, text-fenced code blocks, no generated navigation.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "The assignment unit determines the independent analysis unit.",
+                      "line_start": 47,
+                      "reason": "Correctly ties the randomization unit to the analysis unit and explains the clustering consequence."
+                    },
+                    {
+                      "quote": "An underpowered experiment often misses a real effect.",
+                      "line_start": 60,
+                      "reason": "Accurately separates false-negative risk, exaggerated significant estimates and peeking inflation."
+                    },
+                    {
+                      "quote": "Welch’s t-test is often a reasonable large-sample default.",
+                      "line_start": 52,
+                      "reason": "Hedged correctly, with a heavy-tail and bootstrap caveat."
+                    },
+                    {
+                      "quote": "Stop interpreting the treatment effect until that sample-ratio mismatch is explained.",
+                      "line_start": 116,
+                      "reason": "Correct SRM handling, consistent with the cited Microsoft SRM reference."
+                    },
+                    {
+                      "quote": "Conditioning on an exposure caused by the treatment can bias the estimate.",
+                      "line_start": 110,
+                      "reason": "Precise statement of the triggered-analysis exception."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the platform architecture section supports the same A/B-testing topic, and the whole note stays coherent and self-contained.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "NOT APPLICABLE",
+                    "identity_safety": "NOT APPLICABLE",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "change_checks": []
+            },
+            "model_calls": 17
+          }
+        }
+      ],
+      "feedback_pr": 0,
+      "checkpoint_at": "2026-11-05T20:17:41.211490Z",
+      "topic": "AI & ML",
+      "topic_id": "ai-ml-4edf0823",
+      "current_batch": {
+        "topic": "AI & ML",
+        "topic_id": "ai-ml-4edf0823",
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Fine-tuning.md",
+            "content": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"Adapting model behavior with supervised training, parameter-efficient updates, and held-out evaluation.\"\nlevel: [\"2\"]\npriority: High\nstatus: Ready to Repeat\npublish: true\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Fine-tuning\"\nflashcard_uid: \"b36582e5\"\ncreated: \"2026-06-11T07:39:53.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:28:37.409Z\"\n---\n\nFine-tuning continues a pretrained model's training on task-specific examples. The resulting behavior lives in the weights, so the same instructions do not need to travel with every request. It works well for stable output conventions, classification boundaries, tool-call reliability, and narrow-task distillation. It makes a poor knowledge store. Facts learned during training have no citation boundary and start aging immediately.\n\nPrompting is the usual starting point. [[Home/AI & ML/LLM/Context Engineering/RAG/RAG|RAG]] addresses gaps in current or private knowledge, and fine-tuning is justified only when a measured behavior gap remains. [[#Preference alignment]] covers preference-pair methods after supervised fine-tuning, and [[#GRPO]] covers group-relative online reinforcement learning.\n\n# GRPO\n\nGroup Relative Policy Optimization (GRPO) is an online reinforcement-learning method for language-model post-training. For each prompt, the current policy samples a group of completions. A rule-based or model-based verifier scores them, and the update favors completions that perform better than others in that group. GRPO removes the learned value model used by PPO-style training. On-policy sampling, reward design, KL control, and reward-hacking risk remain.\n\n## Group-relative Update\n\n```text\nprompt\n  → sample G completions from current policy\n  → score each completion\n  → normalize rewards inside the group\n  → update with clipped objective and reference-policy constraint\n```\n\nA math prompt might produce eight completions. Six fail the final-answer check. Another reaches the right answer with invalid formatting, while the last is correct and well formed. Outcome and format rewards rank this sampled group. The normalized advantage identifies trajectories that beat their peers. It is not a calibrated probability that a response is globally correct.\n\nThe absence of a critic reduces model-state memory and one source of estimation error. But group estimates can still be noisy, especially when every sampled completion receives nearly the same reward. More samples improve comparison and increase generation cost.\n\n## Rewards the Model Cannot Cheaply Game\n\nGRPO works best with rewards that are cheap to verify and hard to game, such as exact math answers, executable tests, schema checks, or constrained simulators. A vague style judge can reward verbosity or shortcuts that fail outside the training setup.\n\nValidation checks that the reward still predicts useful behavior:\n\n- Held-out prompts are kept and run through target, general-capability, and safety evaluations.\n- Examples with high reward but poor human judgment are inspected.\n- Reward distribution and group variance are measured alongside average training reward.\n- The final policy is tested outside the environment and formatting assumptions used by the verifier.\n\n## Where GRPO Came From\n\nDeepSeekMath introduced GRPO with group-relative advantages, a clipped policy objective, and KL regularization. DeepSeek-R1 later reported a GRPO-based reasoning post-training pipeline. The method fits problems with a stable verifier and a repeatable rollout environment. A release still depends on trustworthy data, held-out evaluation, and deployment checks.\n\n# Preference Alignment\n\nPreference alignment trains a model to favor one completion over another for the same prompt. The labels show which responses the model should prefer. A weak rubric therefore puts its bias directly into training.\n\n## Preference Data\n\n```text\nprompt: user asks for a refund outside policy\nchosen: explains limits and escalation\nrejected: invents an exception and promises a refund\nrubric: correctness, actionability, tone\n```\n\nEvaluation holds out complete prompts as well as response pairs, so it tests generalization to new situations.\n\n## RLHF\n\nIn the InstructGPT-style pipeline, human comparisons train a reward model. Reinforcement learning then updates the language-model policy to increase that learned reward while constraining drift from a reference policy. This supports online sampling from the current policy, but adds a reward-model lifecycle and reinforcement-learning instability.\n\nReward increases are only a training signal. A policy can exploit blind spots in the reward model, so held-out human evaluation and safety checks must still pass before release.\n\n## DPO\n\nDirect Preference Optimization derives a classification-style objective from preference pairs and a reference policy. It removes the separate reward model and online RL loop, which makes the pipeline simpler. Pair quality, reference choice, loss settings, and coverage still determine whether that simpler pipeline generalizes.\n\nDPO fits a fixed preference set that is already available and stable. Online methods such as [[#GRPO]] fit when a verifier can score newly sampled candidates and remains reliable as outputs change.\n\nEvaluation measures pairwise win rate with blinded raters alongside task correctness, refusal behavior, calibration, and safety slices. A separate set catches general-capability regressions. Response length needs explicit control or reporting because raters and judges can favor longer answers that are no more correct.\n\n# When Fine-tuning Earns Its Cost\n\n- The model understands the task but inconsistently follows a format or policy after good prompting and few-shot examples.\n- The target behavior is easier to demonstrate than specify, and representative examples can be labeled consistently.\n- A high-volume narrow task justifies distilling a larger model’s behavior into a smaller one.\n- Long repeated instructions dominate context and inference cost, and training can encode that stable behavior.\n\nA held-out evaluation set and a baseline from the exact base model must exist before training starts. Training loss shows fit to the examples. It says nothing by itself about production behavior.\n\n# Full Fine-tuning\n\nFull fine-tuning updates every model weight. Its memory footprint is not a fixed multiple of the published model size. A run may hold weights, gradients, optimizer states, activations, temporary buffers, and communication shards at different precisions. Adam-style optimizers keep several state tensors. Activation memory moves with batch size, sequence length, layer shape, and checkpointing policy. Quantization, mixed precision, ZeRO/FSDP sharding, CPU offload, and optimizer choice change the total again.\n\nCapacity planning starts from a component-level estimate for the exact model and training stack, followed by a measured short run. Full tuning is justified only when broader weight updates beat PEFT on held-out quality by enough to pay for distributed compute and a full derived checkpoint.\n\n# Parameter-efficient Fine-tuning\n\n## LoRA\n\nLow-Rank Adaptation freezes the base weights and trains low-rank update matrices in selected layers. The small adapter can stay separate, be swapped, or be merged for serving. Keeping it separate makes rollback straightforward: disabling the adapter restores the original base weights.\n\nAn active LoRA adapter can still cause catastrophic forgetting or other regressions. It changes the effective computation and can pull the deployed model away from instruction following, safety behavior, or capabilities missing from narrow training data. Evaluation must cover the complete base-plus-adapter system on target and broad holdouts. “Frozen base” describes storage and update mechanics. It does not promise unchanged behavior while the adapter is active.\n\n## QLoRA\n\nQLoRA stores the frozen base in 4-bit NormalFloat form and trains LoRA adapters through that quantized representation. The QLoRA paper reports fine-tuning models up to 65B parameters on a single 48 GB GPU under its stated configurations. That is evidence for those experiments, not a promise that any large model fits any consumer GPU.\n\nFeasibility still depends on the model architecture and the actual training configuration: sequence length, batching, adapter targets, optimizer state, checkpointing, attention kernels, and device memory. Quality must be measured for the chosen base, quantization settings, task, and evaluation set. A memory estimate followed by a short run is safer than committing hardware from a headline number.\n\n# Data\n\nData quality and coverage matter more than raw count.\n\n- Training examples match the production chat template, system role, tool schema, and output format exactly.\n- Contradictory labels and near-duplicate examples that over-weight one phrasing are removed.\n- Ordinary cases, boundary cases, refusals, and negative examples appear in the proportions expected at inference.\n- A held-out split is never used for training or prompt iteration.\n- The base checkpoint, tokenizer, data version, hyperparameters, and adapter targets are recorded so the run is reproducible.\n\n# Evaluation\n\nThe base and fine-tuned candidates are compared on the same target set, broad capability holdouts, and safety checks. Effect sizes are reported by slice instead of hidden inside one average. A format gain that causes a reasoning or refusal regression is a trade, not a free improvement.\n\nDuring training, validation loss and early stopping detect memorization, but shipping still depends on task metrics and production confirmation through [[Home/AI & ML/LLM/Evaluation/Online Evaluation and AB Tests|online evaluation and A/B tests]]. A deployable base checkpoint keeps rollback an operational action, not a retraining project.\n\n# Pitfalls\n\n**Injecting knowledge:** a model trained on a document corpus may reproduce facts, yet cannot guarantee retrieval, freshness, or citation. Changing facts belong in RAG. Fine-tuning can teach the behavior for using them.\n\n**Format mismatch:** different chat templates or tool schemas between training and serving teach a distribution the runtime never presents.\n\n**Narrow-only evaluation:** target gains can hide losses in general reasoning, multilingual behavior, or safety. The active adapter belongs in every deployment candidate being evaluated.\n\n**Capacity estimates from one multiplier:** model-file size is not training memory. A usable estimate accounts for weights, gradients, optimizer states, activations, and sharding in the actual configuration.\n\n# Tradeoffs\n\n| Approach | Main benefit | Main cost | Best fit |\n| --- | --- | --- | --- |\n| Prompting | Fast iteration, no training | Repeated context and inconsistent behavior | Most new tasks |\n| RAG | Fresh, attributable knowledge | Retrieval and indexing system | Changing or private facts |\n| LoRA | Small separable updates | Active adapter can still regress capabilities | Stable behavior on limited compute |\n| QLoRA | Lower base-weight memory during tuning | Hardware fit and quality are configuration-specific | PEFT when full-precision base storage is the constraint |\n| Full tuning | Broadest update capacity | Highest memory, compute, and checkpoint cost | Proven quality gap that PEFT cannot close |\n\n# Questions\n\n> [!qard]- What is LoRA, and why is it cheaper than full fine-tuning?\n> LoRA (Low-Rank Adaptation) fine-tunes a pretrained model by freezing its weights and training only a small low-rank update for selected layers. Because the trainable part is a tiny fraction of the model, training needs gradients and optimizer state only for that update, and the result is a small adapter instead of a full model copy.\n>\n> 1. A chosen weight matrix `W0` stays frozen.\n> 2. Its change is represented as the product of two small matrices, `B·A`. Their shared inner dimension, the rank `r`, is much smaller than the layer's dimensions.\n> 3. Only `A` and `B` are trained.\n> 4. The adapted layer computes `W0·x + B·A·x`.\n> \n> The small trainable set lowers training memory compared with updating every weight. Adapters for different tasks can share one base model and be swapped. An adapter can also be merged into `W0`, so serving needs no extra computation. Whether a LoRA adapter matches full fine-tuning on a particular task depends on its configuration, such as rank and target layers, and held-out evaluation establishes it.\n>\n> Sources: [Hu et al.: LoRA](https://arxiv.org/abs/2106.09685) · [Hugging Face PEFT: LoRA](https://huggingface.co/docs/peft/en/developer_guides/lora)\n\n<!-- qard-id: d65b682a-c207-4ffc-87d5-1839b2d5ba54 -->\n> [!qard]- Why can LoRA still cause capability regressions if the base weights are frozen?\n> Freezing the base weights fixes what is stored and updated during training, not what the deployed model computes. LoRA adds a trainable low-rank update to selected layers. While the adapter is active, each adapted layer computes the frozen weight's output plus the adapter's contribution: `W0·x + B·A·x`.\n>\n> That added term applies to every input passing through those layers, not only to inputs that resemble the training data. Training optimizes it for the target examples alone, so it can also shift behavior the data never covered, such as instruction following, safety behavior or general reasoning. Frozen base weights therefore do not guarantee unchanged outputs. The full base-plus-adapter model needs evaluation on both the target task and broad held-out sets.\n>\n> Freezing does make rollback easier. A separate adapter can be disabled, which returns the model to the base behavior. Merging folds the update into the weights, so rollback after a merge depends on a supported unmerge or an unmodified copy of the base checkpoint.\n>\n> Sources: [Hu et al.: LoRA](https://arxiv.org/abs/2106.09685) · [Hugging Face PEFT: LoRA](https://huggingface.co/docs/peft/en/developer_guides/lora) · [More Than Catastrophic Forgetting](https://arxiv.org/abs/2405.17830)\n\n# References\n\n- [LoRA: Low-Rank Adaptation of Large Language Models](https://arxiv.org/abs/2106.09685)\n- [QLoRA: Efficient Finetuning of Quantized LLMs](https://arxiv.org/abs/2305.14314)\n- [DeepSeekMath](https://arxiv.org/abs/2402.03300)\n- [Proximal Policy Optimization Algorithms](https://arxiv.org/abs/1707.06347)\n- [Direct Preference Optimization](https://arxiv.org/abs/2305.18290)\n- [Training language models to follow instructions with human feedback](https://arxiv.org/abs/2203.02155)\n- [Fine-tuning guide](https://platform.openai.com/docs/guides/fine-tuning)\n",
+            "hash": "529e24900679958496e7dd6faae8725d159451d2bde245fd2f44dad532fa4f83",
+            "topic": "AI & ML",
+            "violations": [],
+            "needs_fixing_ids": [],
+            "repair_input_hash": "",
+            "selection_reason": "new"
+          }
+        ],
+        "feedback": [],
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review_process": "focused-whole-note-v1",
+        "pr": null
+      },
+      "base_sha": "67caf2e374f53e8772b86b8ea0f881d74e784fa1",
+      "reservation_deadline": "2026-11-05T20:32:35.946794Z",
+      "error": "Claude author invocation failed with exit code 1 (category: unknown).",
+      "stop_reason": "provider_error",
+      "sealed_at": "2026-11-05T20:17:41.211496Z"
     }
   },
   "feedback_workloads": {
