@@ -4924,11 +4924,11 @@
     "version": 1,
     "id": "236350876fc543f98c4ebc7094742d69",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-06T19:33:51.179749Z",
-    "elapsed_seconds": 95.91555969999999,
+    "elapsed_seconds": 107.16530949999998,
     "calls_reserved": 3,
-    "responses_received": 2,
+    "responses_received": 3,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Tool Design.md"
     ],
@@ -5009,7 +5009,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-06T19:35:27.094805Z",
+    "checkpoint_at": "2026-11-06T19:35:38.344560Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -19020,5 +19020,53 @@
       },
       "feedback_snapshot": []
     }
+  },
+  "pending_author_proposal": {
+    "workload_id": "236350876fc543f98c4ebc7094742d69",
+    "topic_id": "ai-ml-4edf0823",
+    "batch": {
+      "topic": "AI & ML",
+      "topic_id": "ai-ml-4edf0823",
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Tooling.md",
+          "content": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: The developer-facing tools and extension points that make an agent useful inside a repository.\ntags: [FolderNote]\npublish: true\nstatus: Done\nlevel: [\"3\"]\npriority: Medium\ncreated: \"2026-08-16T07:07:41.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-08-20T20:41:15.496Z\"\n---\n\nTooling is the developer-facing part of an agent harness: coding agents, repository instructions, reusable skills, plugins, and lifecycle hooks. These surfaces connect a model to repository context, file edits, commands, and verification. [[Tool Design]] covers the lower-level API contract between the model and each callable operation.\n\nThe tools fall into three broad groups. Coding agents execute changes across multiple steps. Review agents inspect proposed changes. IDE extensions keep completion and chat close to the editor, sometimes with a smaller execution loop.\n\nThe interface matters less than what the agent can read, change, and run. [[Skills]] package repeatable workflows. [[Plugins]] bundle and install capabilities, while [[Model Context Protocol|MCP]] servers, apps, and integrations connect agents to external systems. [[Hooks]] run checks around actions. [[Agent Instructions|Repository instructions]] such as `AGENTS.md` or `CLAUDE.md` carry local rules into every task. Together, those controls decide how much autonomy is safe.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# Categories\n\n## Coding Agents\n\nCoding agents own an edit-test loop. They inspect the repository, change files, run commands, and react to failures. Some operate from a terminal and others from an editor, but the useful distinction is the authority they receive and the evidence they return. [[Coding Agents]] covers the execution model and its tradeoffs.\n\n## Code Review Agents\n\nReview agents work on a narrower target: a diff, pull request, or proposed patch. They look for regressions and missing tests, then report findings without owning the implementation. CodeRabbit is one example of this model in GitHub and GitLab workflows. A review agent is most useful when it stays independent. Letting the writer approve its own change removes the check that matters.\n\n## IDE Extensions\n\nIDE extensions keep suggestions and conversation inside the editor. That reduces context switching for small edits. The cost can be weaker visibility into commands or changed files, depending on the extension. A useful IDE agent still needs a readable action log and clear approval before sensitive actions.\n\n# References\n\n- [CodeRabbit Docs](https://docs.coderabbit.ai/)\n- [Aider documentation](https://aider.chat/docs/)\n",
+          "hash": "65f2d18f3ddc0a2ba9fc1df3249a6cff5da480bd2765958366b4a7041da56ef4",
+          "topic": "AI & ML",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Tooling.md",
+          "outcome": "keep",
+          "reason": "Audited the whole folder note. The opening defines tooling as the developer-facing harness layer and separates it from the API-level [[Tool Design]]. The wikilinks to Skills, Plugins, MCP, Hooks, Agent Instructions and Coding Agents each carry a stated reason. The three categories (coding agents, review agents, IDE extensions) are explained by authority, independence and visibility tradeoffs. The note has no cards, so there is no question-quality or ID issue. The Datacore folder map block is intact, and the note has no standalone Links section. References are two bare descriptive links, CodeRabbit and Aider. The CodeRabbit claim (GitHub and GitLab review workflows) is consistent with its public docs, and the note makes no version-sensitive claims. known_violations is empty. Any edit would be cosmetic churn."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Tooling.md": "65f2d18f3ddc0a2ba9fc1df3249a6cff5da480bd2765958366b4a7041da56ef4"
+    },
+    "feedback_keys": [],
+    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Tooling.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-06T19:35:38.344534Z"
   }
 }
