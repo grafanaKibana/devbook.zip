@@ -6139,10 +6139,10 @@
     "version": 1,
     "id": "b9235098cfe341bd98cce55faa026472",
     "status": "active",
-    "phase": "evaluating",
+    "phase": "author_reserved",
     "started_at": "2026-11-07T13:18:06.384851Z",
-    "elapsed_seconds": 389.53059119999995,
-    "calls_reserved": 11,
+    "elapsed_seconds": 393.97149579999996,
+    "calls_reserved": 12,
     "responses_received": 11,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Safety/Safety.md",
@@ -6533,7 +6533,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-07T13:24:35.914950Z",
+    "checkpoint_at": "2026-11-07T13:24:40.355856Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -6558,7 +6558,7 @@
       "pr": null
     },
     "base_sha": "67caf2e374f53e8772b86b8ea0f881d74e784fa1",
-    "reservation_deadline": "2026-11-07T13:38:46.770540Z"
+    "reservation_deadline": "2026-11-07T13:39:40.067114Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
