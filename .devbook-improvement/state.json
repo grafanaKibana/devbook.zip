@@ -5779,9 +5779,9 @@
     "version": 1,
     "id": "f57944c05f7944ee8610e2bd6384fd74",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-07T06:14:05.879571Z",
-    "elapsed_seconds": 452.07875969999975,
+    "elapsed_seconds": 455.3718292999998,
     "calls_reserved": 16,
     "responses_received": 16,
     "attempted_paths": [
@@ -5791,7 +5791,8 @@
       "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Composition.md",
       "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md",
       "Vault/Home/AI & ML/LLM/Prompt Engineering/Reasoning Techniques.md",
-      "Vault/Home/AI & ML/LLM/Safety/Guardrails.md"
+      "Vault/Home/AI & ML/LLM/Safety/Guardrails.md",
+      "Vault/Home/AI & ML/LLM/Safety/Hallucinations.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -6305,10 +6306,78 @@
           },
           "model_calls": 14
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/Safety/Hallucinations.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Safety/Hallucinations.md",
+                "outcome": "keep",
+                "reason": "I audited the whole note against its current text. The definition is correct and defines the term before the mechanisms, and the intrinsic/extrinsic split matches Ji et al. The detection methods (NLI, SelfCheckGPT, LLM-as-judge, FActScore) are described correctly, including the limit that stable repetition does not prove truth. The mitigations (RAG, CoVe, constrained output, abstention, tools) each name a limitation, and the pitfalls and tradeoffs table agree with them. The sycophancy claim is properly hedged: the note does not say all RLHF models are less factual. The three Qards each test one dependent task, have source links on the answer side, and match the body. The Mermaid fence has a language identifier, the wikilinks are plausible, and the references are bare primary-source links. No known violations are open. I found no factual or editorial defect, so an edit would be churn."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "No edits were proposed. My independent read of the whole note found no factual or editorial defect, so keeping it unchanged is justified.",
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Safety/Hallucinations.md",
+                "verdict": "CLEAN",
+                "summary": "The note defines hallucination as unsupported content, separates intrinsic from extrinsic cases, and ties each detection and mitigation method to its limit. The pitfalls, tradeoffs table and three cards agree with the body. A whole-note audit found no accuracy, clarity or question-quality defect, so no edit is warranted.",
+                "page_type": "Concept — no mandatory sections. Mermaid fence has a language identifier. Qard IDs are protected metadata. References are bare links.",
+                "current_text_evidence": [
+                  {
+                    "quote": "An **extrinsic hallucination** adds a claim the source does not contain.",
+                    "line_start": 33,
+                    "reason": "The intrinsic/extrinsic split matches Ji et al. and includes the point that an unsupported claim may still be true."
+                  },
+                  {
+                    "quote": "But stable repetition still does not prove truth",
+                    "line_start": 40,
+                    "reason": "Self-consistency is stated with its real limit, which keeps the detection section accurate."
+                  },
+                  {
+                    "quote": "The legal-system study in the references still found hallucinations above 17% across evaluated tools.",
+                    "line_start": 50,
+                    "reason": "This is consistent with Magesh et al., who report 17% to 33% for the evaluated legal RAG tools. It also keeps the claim that RAG reduces hallucination from being overstated."
+                  },
+                  {
+                    "quote": "Separate measurement does not mean the failures are independent",
+                    "line_start": 118,
+                    "reason": "The RAG card explains the dependent mechanism between retrieval defects and unsupported generation. It stays one coherent explanation."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: definition, taxonomy, detection, mitigation and tradeoffs form one coherent topic. RAG and Guardrails are already linked as separate notes.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "change_checks": []
+          },
+          "model_calls": 16
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-07T06:21:37.957793Z",
+    "checkpoint_at": "2026-11-07T06:21:41.250863Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
