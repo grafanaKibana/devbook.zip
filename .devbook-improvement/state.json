@@ -5837,777 +5837,18 @@
   },
   "focused_workload": {
     "version": 1,
-    "id": "f57944c05f7944ee8610e2bd6384fd74",
-    "status": "sealed",
-    "phase": "sealed",
-    "started_at": "2026-11-07T06:14:05.879571Z",
-    "elapsed_seconds": 582.1937905999997,
-    "calls_reserved": 20,
-    "responses_received": 20,
-    "attempted_paths": [
-      "Vault/Home/AI & ML/LLM/Model Selection and Routing.md",
-      "Vault/Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization.md",
-      "Vault/Home/AI & ML/LLM/Prompt Engineering/In-Context Learning.md",
-      "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Composition.md",
-      "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md",
-      "Vault/Home/AI & ML/LLM/Prompt Engineering/Reasoning Techniques.md",
-      "Vault/Home/AI & ML/LLM/Safety/Guardrails.md",
-      "Vault/Home/AI & ML/LLM/Safety/Hallucinations.md",
-      "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
-      "Vault/Home/AI & ML/LLM/Safety/OWASP vulnerabilities on AI LLM.md"
-    ],
+    "id": "b9235098cfe341bd98cce55faa026472",
+    "status": "active",
+    "phase": "selecting",
+    "started_at": "2026-11-07T13:18:06.384851Z",
+    "elapsed_seconds": 0.0010859,
+    "calls_reserved": 0,
+    "responses_received": 0,
+    "attempted_paths": [],
     "accepted_records": [],
-    "outcomes": [
-      {
-        "path": "Vault/Home/AI & ML/LLM/Model Selection and Routing.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Model Selection and Routing.md",
-                "outcome": "keep",
-                "reason": "Audited the whole note against its text. The opening separates selection from routing and states the empirical rule that the cheapest candidate clearing all gates wins. It also separates application-level routing from mixture-of-experts routing, which is the right boundary. The criteria list, the three routing patterns, the cascade diagram, the router-evaluation signals, the operations and pitfalls sections and the tradeoff table are consistent with each other. They state the correct conditions: a cascade saves money only when first-attempt plus escalation cost is below always using the strong model, and false-easy misroutes need per-route recall. These claims match the FrugalGPT cascade idea and the Foundry Model Router documentation cited in the cards. The three cards each test one gradeable task: the comparison method, the classifier-versus-cascade comparison, and the combination of the two. Their answers do not duplicate the prose in a way that needs trimming, and their sources are on the answer side. The note has no known violations, no flagged cards and no owner feedback. I found no factual error or learning gap, so I made no edits."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "The note is accurate, coherent and well ordered, and its three cards each test one gradeable task. I found no concrete defect, so keeping it unchanged is justified.",
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Model Selection and Routing.md",
-                "verdict": "CLEAN",
-                "summary": "I read the whole note and found no concrete error or learning gap, so no edits are warranted. The opening separates selection from routing and sets the empirical rule. The pattern sections state the conditions that matter, and the cards are bounded.",
-                "page_type": "Concept — frontmatter is intact, Questions and References are optional and present, and the voice is impersonal and declarative.",
-                "current_text_evidence": [
-                  {
-                    "quote": "Production selection is empirical: the least expensive candidate that clears the workload's quality, safety, reliability, and latency gates wins.",
-                    "line_start": 17,
-                    "reason": "States the operating decision rule up front, with the condition that changes the choice."
-                  },
-                  {
-                    "quote": "But a false “easy” decision can silently lower quality.",
-                    "line_start": 42,
-                    "reason": "Names the failure mode of classifier routing and the evaluation that follows from it (per-route recall)."
-                  },
-                  {
-                    "quote": "A cascade saves money only when the first attempt plus its escalations cost less than sending every request to the stronger model.",
-                    "line_start": 57,
-                    "reason": "States the cost condition and the tail-latency consequence, which matches the FrugalGPT cascade idea."
-                  },
-                  {
-                    "quote": "That supports comparison against an oracle that always selects the cheapest passing model.",
-                    "line_start": 61,
-                    "reason": "Router evaluation is concrete and measurable, with a stated baseline for comparison."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: selection criteria, routing patterns and router evaluation form one tightly coupled topic. Mixture-of-experts routing is already separated by a link to the LLM note.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "change_checks": []
-          },
-          "model_calls": 2
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization.md",
-                "outcome": "keep",
-                "reason": "Read the whole note against the cited papers (APE, Active-Prompt, DSP, PAL). The APE loop, the Active-Prompt uncertainty-based annotation, DSP's small trainable policy model steering a frozen LLM, and PAL's program generation with interpreter execution are all described accurately. The note limits claims to the tested benchmarks. The pitfalls cover evaluator quality, overfitting and benchmark transfer, and the tradeoff table separates PAL as an adjacent technique. The code samples are labeled and fenced with languages. The note has no Questions section, so there are no cards to audit. References are bare descriptive links. Prose is direct and has little repetition, and no known violations exist. An edit would be cosmetic churn."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "The note is accurate, well ordered and self-contained. It has no concrete rule violations and no Questions cards. Its references are bare descriptive primary-source links. Keeping it unchanged is justified, and an edit would be cosmetic churn.",
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization.md",
-                "verdict": "CLEAN",
-                "summary": "I read the whole note. It explains APE, Active-Prompt, DSP and PAL accurately, keeps claims scoped to what the papers tested, and separates PAL as an adjacent technique. The prose is direct and has little repetition. The code fences carry language identifiers, and the pitfalls and tradeoffs support engineering judgment. No edit is warranted.",
-                "page_type": "Concept — authorable prose. Questions are optional and absent. References are bare descriptive links. Frontmatter is typed, and status Done was not set by an agent.",
-                "current_text_evidence": [
-                  {
-                    "quote": "The method does not remove judgment. It moves judgment into the objective, dataset, and acceptance threshold.",
-                    "line_start": 16,
-                    "reason": "States the operating idea and its key limit early, in whiteboard voice."
-                  },
-                  {
-                    "quote": "That result is evidence that small wording changes can matter. It is not evidence that one discovered phrase transfers unchanged to every model or task.",
-                    "line_start": 22,
-                    "reason": "Scopes the APE claim to what the paper tested, so it does not overgeneralize."
-                  },
-                  {
-                    "quote": "Human time goes to cases that reveal a decision boundary instead of another easy example.",
-                    "line_start": 35,
-                    "reason": "Gives the Active-Prompt mechanism and its rationale accurately, as active learning over demonstrations."
-                  },
-                  {
-                    "quote": "The operational boundary is clear: DSP is no longer prompt search alone.",
-                    "line_start": 41,
-                    "reason": "Names the concrete cost of DSP: a trainable controller, its data, and another model in the serving path."
-                  },
-                  {
-                    "quote": "execution removes calculation errors without removing specification errors.",
-                    "line_start": 47,
-                    "reason": "Names the PAL limit precisely, and the arithmetic example (17*24+39=447) is correct."
-                  },
-                  {
-                    "quote": "There is no universal minimum sample count.",
-                    "line_start": 85,
-                    "reason": "Pitfalls avoid false precision and name the conditions that matter."
-                  },
-                  {
-                    "quote": "Manual tuning remains the cheaper choice for a small number of stable prompts.",
-                    "line_start": 104,
-                    "reason": "Closes with a decision condition for when automation earns its cost."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the note is one coherent topic. PAL is explicitly framed as an adjacent contrast, and the length is justified by the four-method comparison.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "NOT APPLICABLE",
-                  "identity_safety": "NOT APPLICABLE",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "change_checks": []
-          },
-          "model_calls": 4
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/In-Context Learning.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/In-Context Learning.md",
-                "outcome": "keep",
-                "reason": "I read the whole note against its text and the cited primary works. The opening defines in-context learning as prompt-conditioned next-token prediction with no weight updates, which matches Brown et al. 2020. The Min et al. 2022 passage is appropriately hedged: it says demonstration format, label space and input distribution explain much of the performance, and that corrupted labels hurt less than expected. It also says correct labels remain the right production choice. The zero-shot, one-shot and few-shot sections use consistent JSON and sentiment examples, and the code fences all carry language identifiers. The demonstration-set, limitations and pitfalls sections cover ordering effects, context pressure and root-cause fixes without repeating each other. The tradeoffs table is qualified: format control is labeled a heuristic, the facts column is scoped, and schema enforcement is routed to structured outputs. The three cards each test one gradeable task, with a decision, a comparison and a scope question. They are accurate and cite sources. Known violations are empty. No defect is verified, so edits would only be cosmetic."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "Independent whole-note read found no concrete defect. The note is accurate, hedged where the evidence is mixed, and has no known violations. The cards test single dependent tasks. No edits were proposed, and a keep is justified.",
-            "change_checks": [],
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/In-Context Learning.md",
-                "verdict": "CLEAN",
-                "summary": "The note explains in-context learning as prompt-conditioned next-token prediction with no weight updates, then moves through zero-shot, one-shot and few-shot with consistent examples. Its claims are hedged where the evidence is mixed. Limitations, pitfalls and the tradeoff table add judgment without repeating each other. The three cards each test a single task. The keep is justified and no defect was invented.",
-                "page_type": "Concept — authorable prose with optional Questions and References present; all code fences carry language identifiers; the wikilink [[Reasoning Techniques]] is the only internal link and is explained in prose.",
-                "current_text_evidence": [
-                  {
-                    "quote": "The model still predicts the next token at inference time.",
-                    "line_start": 17,
-                    "reason": "The opening states the mechanism: no weight updates, with demonstrations shifting next-token prediction. This matches Brown et al. 2020."
-                  },
-                  {
-                    "quote": "Corrupting labels did less damage than a simple input-label mapping account would predict.",
-                    "line_start": 69,
-                    "reason": "This is an appropriately hedged statement of Min et al. 2022. It is followed by the production caveat that correct labels remain the right choice."
-                  },
-                  {
-                    "quote": "The facts column describes only the evidence that each technique supplies automatically.",
-                    "line_start": 138,
-                    "reason": "This scopes the table correctly. It also says schema enforcement needs structured outputs or validation, which avoids overclaiming format control."
-                  },
-                  {
-                    "quote": "> [!qard]- When should a prompt move from zero-shot to one-shot or few-shot?",
-                    "line_start": 145,
-                    "reason": "This is a single decision question. The answer is gated on evaluation, covers the mechanism and conditions, and cites sources on the answer side."
-                  },
-                  {
-                    "quote": "> [!qard]- How does in-context learning differ from fine-tuning and retrieval?",
-                    "line_start": 159,
-                    "reason": "This is one focused comparison. The table covers what changes, what is supplied, how long the effect lasts and the cost, so it is a single gradeable task."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: zero-shot, one-shot and few-shot prompting share one mechanism and one decision path. Separating them would fragment the shot-count comparison.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ]
-          },
-          "model_calls": 6
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Composition.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Composition.md",
-                "outcome": "keep",
-                "reason": "Audited the whole note against its current text. The opening states when a single prompt suffices and when composition is justified. Chaining requires real boundaries: schema, validation and branching. The support-chain example and the mermaid diagram match the prose, and the code fences have language tags. Generated knowledge prompting is attributed correctly to Liu et al. 2022 and caveated as unverified model output. Meta prompting is separated from the automated optimization note by a wikilink. The pitfalls are sound: error propagation with a required-field check, delimiters not being a security boundary, and held-out evaluation with rollback for overfitting. The tradeoff table supports decisions. The two cards each test one dependent task, their answers match the note, and they cite relevant sources. The references are real and topic-specific. I found no factual or editorial defect, and no known violations are unresolved, so edits would be cosmetic churn."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "Independent whole-note audit found no factual, editorial, structural or card-quality defect. The keep is justified and no edits are proposed.",
-            "change_checks": [],
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Composition.md",
-                "verdict": "CLEAN",
-                "summary": "The note opens with when composition is justified and its cost. Chaining, generated knowledge and meta prompting each have a concrete mechanism, example and caveat. Pitfalls and the tradeoff table support engineering decisions. Both Qards test one dependent task. Keeping the note unchanged is correct, since edits would be cosmetic.",
-                "page_type": "Concept — frontmatter, MD040 language tags, optional Questions and References, wikilink to Automated Prompt Optimization and generated navigation ownership checked. Voice is impersonal and declarative.",
-                "current_text_evidence": [
-                  {
-                    "quote": "Splitting one vague prompt into three vague prompts merely triples the failure surface.",
-                    "line_start": 23,
-                    "reason": "States the key boundary condition for chaining: stages need schemas and validation, or the chain only adds failure points."
-                  },
-                  {
-                    "quote": "But generated knowledge is still model output. It is neither a citation nor verification.",
-                    "line_start": 75,
-                    "reason": "Correctly caveats Liu et al. 2022 generated knowledge prompting and points to trusted retrieved context for high-stakes use."
-                  },
-                  {
-                    "quote": "Delimiters help the model distinguish data from control text, but they are not a security boundary.",
-                    "line_start": 100,
-                    "reason": "Accurate and decisive prompt-injection guidance, with concrete mitigations in the following sentence."
-                  },
-                  {
-                    "quote": "A model-drafted revision is a hypothesis to test, not a reliability guarantee.",
-                    "line_start": 140,
-                    "reason": "The meta-prompting card answer keeps held-out evaluation and rollback together as one dependent workflow, including its limits."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: chaining, generated knowledge and meta prompting are three techniques of one composition theme. They are short and cross-referenced by shared pitfalls and the tradeoff table. Automated optimization is already a separate note.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ]
-          },
-          "model_calls": 8
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md",
-                "outcome": "keep",
-                "reason": "I read the whole note against its current text. The opening ties prompts to sampling and to the system interface. The four-element anatomy has a worked example that uses all four elements. The settings section correctly separates temperature, top-p, max tokens and stop sequences, and it labels its ranges as heuristics that need evaluation. The instruction and role examples are concrete. The Mermaid flow agrees with the prose, and the Pitfalls cover injection, schema-valid but wrong content, and token-budget collapse. The two existing Qards each test one gradeable task. Their answers cover conditions and exceptions, such as parameter support varying by model and reasoning tokens counting toward output limits. Their cited OpenAI claims match the vendor's documented behavior. The code fences have language identifiers, and the note has no unresolved known violations. I found no factual error or learning gap, so I made no edits."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "Independent whole-note read found no factual, structural, voice or question-quality defect. No edits were proposed, so keeping the note unchanged is justified.",
-            "change_checks": [],
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md",
-                "verdict": "CLEAN",
-                "summary": "The note explains prompt anatomy, settings, instruction and role prompting, technique selection and pitfalls accurately and in a whiteboard voice. Both Qards each test one dependent task and carry answer-side primary sources, and no edit is warranted.",
-                "page_type": "FolderNote — keeps tags FolderNote and the protected datacorejsx map; Questions and References are optional and present; MD040 satisfied.",
-                "current_text_evidence": [
-                  {
-                    "quote": "These starting ranges are heuristics. Production values need task-specific evaluation on the chosen model.",
-                    "line_start": 56,
-                    "reason": "The settings table is correctly hedged, so the numeric ranges are not presented as facts."
-                  },
-                  {
-                    "quote": "Strict output shape needs structured output or schema validation.",
-                    "line_start": 135,
-                    "reason": "The prose is consistent with the Mermaid flow above it and states the boundary that examples cover semantics a schema cannot."
-                  },
-                  {
-                    "quote": "**Correct shape, wrong content.**",
-                    "line_start": 140,
-                    "reason": "The pitfall names a concrete failure, schema-valid but invented values, and its mitigation."
-                  },
-                  {
-                    "quote": "Why must prompt instructions and generation settings be evaluated together?",
-                    "line_start": 146,
-                    "reason": "This is a single dependent why-explanation with conditions, such as model and endpoint parameter support, and an answer-side source."
-                  },
-                  {
-                    "quote": "How can an output-token cap limit cost without truncating valid answers?",
-                    "line_start": 157,
-                    "reason": "This is one coherent sizing and truncation task. The answer covers reasoning tokens, context sharing, truncation detection and the endpoint-specific parameter names."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the note is a compact hub, and its child notes already cover in-context learning, reasoning, composition and optimization separately.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ]
-          },
-          "model_calls": 10
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Reasoning Techniques.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Reasoning Techniques.md",
-                "outcome": "keep",
-                "reason": "Audited the whole note against the current text and the primary papers it cites. The CoT, zero-shot CoT, Self-Consistency and ToT attributions (Wei 2022, Kojima 2022, Wang 2022, Yao 2023) match the papers. Both worked examples are arithmetically correct: the apple example gives 10, and the sister example gives 70-3=67. The ToT description of proposing, evaluating and searching with backtracking is accurate, and the diagram matches it. The cost-ladder framing and the tradeoffs table are consistent with the prose, and the cheapest-method-first guidance is sound. The three Qards each test one dependent task, such as when a technique helps and why or how it fails. Their answers carry conditions, limits and primary sources, with no bundled independent questions. The prose reads clearly, with no repetition or terminology drift. No known violations are open. Any edit would be cosmetic."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Reasoning Techniques.md",
-                "verdict": "CLEAN",
-                "summary": "Independent full read found accurate attributions, correct worked examples, a coherent cost-ladder order, and three single-task Qards with conditions and primary sources. No concrete defect justifies an edit, so a keep is right.",
-                "page_type": "Concept — typed frontmatter retained; optional Questions and References present and well formed; Qard IDs protected; language-tagged fences.",
-                "current_text_evidence": [
-                  {
-                    "quote": "The methods form a cost ladder.",
-                    "line_start": 19,
-                    "reason": "The opening frames CoT, Self-Consistency and ToT as escalating cost, and the later sections and table follow that order."
-                  },
-                  {
-                    "quote": "It also creates more tokens in which an early mistake can spread, so the trace needs verification rather than trust.",
-                    "line_start": 28,
-                    "reason": "Keeps the key CoT limit, error propagation, instead of overclaiming benefit."
-                  },
-                  {
-                    "quote": "Visible reasoning also has a product boundary.",
-                    "line_start": 45,
-                    "reason": "Adds a practical engineering boundary beyond the papers and is stated concisely."
-                  },
-                  {
-                    "quote": "The method helps when independent samples fail differently and the final answer can be compared mechanically.",
-                    "line_start": 51,
-                    "reason": "States the condition and failure mode for Self-Consistency, which the card then tests without duplicating it."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: CoT, Self-Consistency and ToT form one compact comparison and the cost ladder is clearer kept together.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "overall_reason": "The note is accurate, readable and well ordered. Its Qards each test one dependent task, and no proposed edits exist to reject. The keep is justified.",
-            "change_checks": []
-          },
-          "model_calls": 12
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/LLM/Safety/Guardrails.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Safety/Guardrails.md",
-                "outcome": "keep",
-                "reason": "Audited the whole note against its text and known OWASP/Azure guidance. The four-boundary model (input, context, output, runtime) is consistent with the diagram and sections. The note states that classifiers and regex screens are fallible and that authorization stays in application code, which matches OWASP LLM01/LLM05/LLM06. The schema example is correct, and the note says outright that the schema does not grant permission. The injection mitigations are ordered sensibly and carry their limits (structural separation is guidance, regexes catch only familiar wording, and privilege separation has a stated data-reach condition). The pitfalls section adds distinct points. Every fenced block has a language identifier. The single Qard tests one coherent task (which controls stop output becoming action), has a preserved ID and primary-source citations, and its answer agrees with the body. There were no known violations and no owner feedback. No defect was found that would justify an edit."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Safety/Guardrails.md",
-                "verdict": "CLEAN",
-                "summary": "Independent whole-note audit found no accuracy, clarity, structure or question-quality defect. The four-boundary model, the diagram, the section order, the stated limits of each control and the single Qard are consistent and technically sound. No edit is warranted.",
-                "page_type": "Concept — typed frontmatter, optional Questions and References present and valid, MD040 satisfied, no hand-rolled navigation.",
-                "current_text_evidence": [
-                  {
-                    "quote": "One filter cannot cover all four boundaries.",
-                    "line_start": 17,
-                    "reason": "The opening names the four boundaries (input, context, output, runtime) and the reason for layering. The diagram and the H2 sections follow the same split."
-                  },
-                  {
-                    "quote": "This helps the model interpret provenance, but it is guidance rather than a security boundary.",
-                    "line_start": 90,
-                    "reason": "Structural separation is stated with its limit, which avoids overclaiming and matches OWASP guidance."
-                  },
-                  {
-                    "quote": "But the regular expressions only catch familiar wording.",
-                    "line_start": 107,
-                    "reason": "The regex example is immediately qualified, so it works as an illustration and is not presented as a defense."
-                  },
-                  {
-                    "quote": "The schema narrows the command surface. It does not grant permission by itself.",
-                    "line_start": 141,
-                    "reason": "The output-contract example states the key boundary: schema validity is not authorization."
-                  },
-                  {
-                    "quote": "**Overly broad tool access.**",
-                    "line_start": 147,
-                    "reason": "The pitfalls add distinct engineering judgment about per-task tool exposure, not a repeat of earlier sections."
-                  },
-                  {
-                    "quote": "> [!qard]- Which guardrails keep unsafe model output from becoming an unsafe action?",
-                    "line_start": 156,
-                    "reason": "The card tests one coherent task. It is self-contained, keeps its ID comment, and its answer agrees with the body and cites primary sources."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: input, context, output and runtime controls plus prompt-injection defense form one coherent layered-defense topic, and separating them would remove the defense-in-depth reasoning.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "overall_reason": "The complete note was read independently and holds up on accuracy, ordering, terminology, voice and the single Qard. There are no known violations, owner feedback, edits or rejected proposals, so keeping it unchanged is justified.",
-            "change_checks": []
-          },
-          "model_calls": 14
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/LLM/Safety/Hallucinations.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Safety/Hallucinations.md",
-                "outcome": "keep",
-                "reason": "I audited the whole note against its current text. The definition is correct and defines the term before the mechanisms, and the intrinsic/extrinsic split matches Ji et al. The detection methods (NLI, SelfCheckGPT, LLM-as-judge, FActScore) are described correctly, including the limit that stable repetition does not prove truth. The mitigations (RAG, CoVe, constrained output, abstention, tools) each name a limitation, and the pitfalls and tradeoffs table agree with them. The sycophancy claim is properly hedged: the note does not say all RLHF models are less factual. The three Qards each test one dependent task, have source links on the answer side, and match the body. The Mermaid fence has a language identifier, the wikilinks are plausible, and the references are bare primary-source links. No known violations are open. I found no factual or editorial defect, so an edit would be churn."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "No edits were proposed. My independent read of the whole note found no factual or editorial defect, so keeping it unchanged is justified.",
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Safety/Hallucinations.md",
-                "verdict": "CLEAN",
-                "summary": "The note defines hallucination as unsupported content, separates intrinsic from extrinsic cases, and ties each detection and mitigation method to its limit. The pitfalls, tradeoffs table and three cards agree with the body. A whole-note audit found no accuracy, clarity or question-quality defect, so no edit is warranted.",
-                "page_type": "Concept — no mandatory sections. Mermaid fence has a language identifier. Qard IDs are protected metadata. References are bare links.",
-                "current_text_evidence": [
-                  {
-                    "quote": "An **extrinsic hallucination** adds a claim the source does not contain.",
-                    "line_start": 33,
-                    "reason": "The intrinsic/extrinsic split matches Ji et al. and includes the point that an unsupported claim may still be true."
-                  },
-                  {
-                    "quote": "But stable repetition still does not prove truth",
-                    "line_start": 40,
-                    "reason": "Self-consistency is stated with its real limit, which keeps the detection section accurate."
-                  },
-                  {
-                    "quote": "The legal-system study in the references still found hallucinations above 17% across evaluated tools.",
-                    "line_start": 50,
-                    "reason": "This is consistent with Magesh et al., who report 17% to 33% for the evaluated legal RAG tools. It also keeps the claim that RAG reduces hallucination from being overstated."
-                  },
-                  {
-                    "quote": "Separate measurement does not mean the failures are independent",
-                    "line_start": 118,
-                    "reason": "The RAG card explains the dependent mechanism between retrieval defects and unsupported generation. It stays one coherent explanation."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: definition, taxonomy, detection, mitigation and tradeoffs form one coherent topic. RAG and Guardrails are already linked as separate notes.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "change_checks": []
-          },
-          "model_calls": 16
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
-        "outcome": "review_blocked",
-        "reason": "",
-        "result": {
-          "status": "review_blocked",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
-                "outcome": "keep",
-                "reason": "Audited the whole note. The opening separates a keyed watermark from a general AI-text classifier. The sampling steps and the Tournament sampling and score formula match the SynthID-Text description. The quality and detectability section keeps the non-distortionary versus distortionary trade-off. The limits list is consistent with itself. I fetched the Anthropic article, which confirms the note's claims that the watermark is a SynthID-Text variant, adds no characters or tokens, carries no identity, is weak on short text and on factual or exact-code output, and is removed by heavy rewriting. It also states that Claude translations are watermarked, which supports the note's comment on translations. The Nature reference is the primary SynthID-Text paper. The References section is two bare descriptive links, with no frontmatter or lifecycle issues, no code fences and no cards. I found no defect that justifies an edit."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
-                "verdict": "CLEAN",
-                "summary": "The note explains the mechanism, the quality/detectability trade-off and the limits accurately and in order. I found no concrete defect, so keeping it unchanged is justified.",
-                "page_type": "Concept — frontmatter, optional References (two bare descriptive links), no cards, no code fences.",
-                "current_text_evidence": [
-                  {
-                    "quote": "The detector instead asks whether the sequence of choices is unusually consistent with the sampling decisions produced by a particular watermark key.",
-                    "line_start": 14,
-                    "reason": "The opening states the operating idea and separates a watermark from a classifier in the next paragraph."
-                  },
-                  {
-                    "quote": "Synth ID-Text implements this with **Tournament sampling**.",
-                    "line_start": 28,
-                    "reason": "Placeholder"
-                  },
-                  {
-                    "quote": "The signal is therefore weak in short passages and low-entropy output.",
-                    "line_start": 47,
-                    "reason": "The note derives the weakness from the two detection factors stated just before it, which makes the explanation order sound."
-                  },
-                  {
-                    "quote": "A threshold trades false positives against false negatives.",
-                    "line_start": 55,
-                    "reason": "The limits are specific and consistent, and they carry the engineering judgment about thresholds and abstention."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: one coherent topic (generative text watermarking); the sections are interdependent.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "NOT APPLICABLE",
-                  "identity_safety": "NOT APPLICABLE",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "overall_reason": "The whole note was audited independently. The Anthropic article confirms the SynthID-Text variant, weakness on short and factual text, translations being watermarked, and the absence of identity. The Nature reference is the primary paper. No concrete defect was found, and no edits were proposed.",
-            "change_checks": []
-          },
-          "model_calls": 18
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/LLM/Safety/OWASP vulnerabilities on AI LLM.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Safety/OWASP vulnerabilities on AI LLM.md",
-                "outcome": "keep",
-                "reason": "Audited the whole note against the OWASP Top 10 for LLM Applications 2025. The ID/name table (LLM01–LLM10) matches the 2025 list. The mechanism sections for LLM01, 02, 05 and 06 and the shorter sections for LLM03, 04, 07, 08, 09 and 10 are accurate. Their controls follow OWASP guidance: least privilege, authorization outside the model, output encoding, and parameterized queries. The traditional-analog table, pitfalls and defense-tradeoff table are consistent with those sections and add little repetition. The four existing cards each test one gradeable task and cite appropriate OWASP sources. Their claims agree with the body text, including the hedged statement about prevention of prompt injection. The question-card IDs are preserved. There are no known violations, no owner feedback and no open proposals. The references are real, primary or reputable, and appear as bare links. A rewrite would be churn."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Safety/OWASP vulnerabilities on AI LLM.md",
-                "verdict": "CLEAN",
-                "summary": "The note is accurate against the OWASP 2025 list and has a sound explanation order. It opens with the trust boundary, then gives the list table, the architecture-shaping risks, the remaining risks, the traditional analogs, pitfalls and tradeoffs. The four Qards each test one gradeable task, and the hedged claim about prevention is correct. No edit would give a concrete benefit, so keeping the note unchanged is justified.",
-                "page_type": "Concept — typed frontmatter, optional Questions and References present, whiteboard voice. Qard IDs are protected.",
-                "current_text_evidence": [
-                  {
-                    "quote": "The list also names System Prompt Leakage, Vector and Embedding Weaknesses, and Misinformation as separate risks.",
-                    "line_start": 19,
-                    "reason": "The 2025 list does contain these as separate entries (LLM07, LLM08, LLM09). The claim is accurate and sets the scope."
-                  },
-                  {
-                    "quote": "Samsung's internal-data incident shows the input side of the risk: confidential code was pasted into an external service.",
-                    "line_start": 50,
-                    "reason": "The 2023 incident was engineers pasting confidential code into ChatGPT. It is a correct, concrete example, and the RAG output-side contrast follows directly."
-                  },
-                  {
-                    "quote": "A sound design assumes the prompt can be observed. Secrets and authorization decisions belong outside it.",
-                    "line_start": 82,
-                    "reason": "The LLM07 guidance matches OWASP: do not treat the system prompt as a secret or as a security control. It is consistent with the cards."
-                  },
-                  {
-                    "quote": "Natural-language interpretation has no parameterization mechanism equivalent to a prepared SQL statement.",
-                    "line_start": 114,
-                    "reason": "The note states the key mechanism behind the injection pitfall precisely. The matching SQL-versus-prompt card is consistent with it and is not redundant."
-                  },
-                  {
-                    "quote": "That statement describes current techniques. It does not prove that a stronger boundary can never be built.",
-                    "line_start": 171,
-                    "reason": "The card attributes the hedged claim correctly to OWASP and keeps the limit that applies. The answer-side sources are primary OWASP pages."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the note is one coherent catalog with its architectural risks, the remaining entries and the defense tradeoffs. Its parts depend on each other.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "overall_reason": "I read the whole note against the OWASP 2025 list. The IDs, names, controls and examples are accurate, and the explanation order works. The cards are single-task with preserved IDs and OWASP sources. No concrete defect was found, so the keep is justified.",
-            "change_checks": []
-          },
-          "model_calls": 20
-        }
-      }
-    ],
+    "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-07T06:23:48.072824Z",
-    "topic": "AI & ML",
-    "topic_id": "ai-ml-4edf0823",
-    "current_batch": {
-      "topic": "AI & ML",
-      "topic_id": "ai-ml-4edf0823",
-      "notes": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Safety/OWASP vulnerabilities on AI LLM.md",
-          "content": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"The OWASP Top 10 for LLM Applications, the highest-impact security failures in LLM systems.\"\nlevel: [\"3\"]\npriority: Medium\nstatus: Done\npublish: true\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Safety/OWASP vulnerabilities on AI LLM\"\nflashcard_uid: \"c24fd7d3\"\ncreated: \"2026-02-15T15:01:57.000Z\"\nmodified: \"2026-11-02T09:03:54.806Z\"\npublished: \"2026-07-08T13:28:37.411Z\"\n---\n\nThe OWASP Top 10 for LLM Applications (2025 edition) is a risk catalog for systems that embed language models. Its central boundary is awkward: untrusted natural language influences a probabilistic model, and the result may drive deterministic code, retrieval, or tool calls. Prompts can mix data with instructions. Model output is therefore untrusted input to the next component.\n\nThe 2025 list keeps Prompt Injection at LLM01, covering direct or indirect input that unexpectedly changes model behavior or output. The input may be malicious or accidental, and multimodal systems widen the possible sources. The list also names System Prompt Leakage, Vector and Embedding Weaknesses, and Misinformation as separate risks. But it is a threat-modeling aid rather than a complete control set. Severity still depends on the data and authority attached to a particular application.\n\n# The 2025 List\n\n| ID | Vulnerability | One-line description |\n| --- | --- | --- |\n| LLM01 | Prompt Injection | Direct or indirect input unexpectedly alters model behavior or output |\n| LLM02 | Sensitive Information Disclosure | Model leaks PII, credentials, or proprietary data in responses |\n| LLM03 | Supply Chain | Compromised models, training data, plugins, or dependencies |\n| LLM04 | Data and Model Poisoning | Manipulated training or fine-tuning data degrades model behavior |\n| LLM05 | Improper Output Handling | LLM output trusted as safe input to downstream systems |\n| LLM06 | Excessive Agency | Model granted too many permissions, tools, or autonomy |\n| LLM07 | System Prompt Leakage | System prompt exposed through adversarial queries |\n| LLM08 | Vector and Embedding Weaknesses | RAG retrieval manipulated via poisoned or adversarial embeddings |\n| LLM09 | Misinformation | Model generates false content that passes through without verification |\n| LLM10 | Unbounded Consumption | Denial-of-wallet or resource exhaustion via crafted queries |\n\n# Risks That Shape the Architecture\n\n## Prompt Injection (LLM01)\n\n**Mechanism.** Untrusted input changes model behavior or output in an unintended way. It may be a malicious attempt to bypass instructions or an accidental conflict in ordinary content. Direct injection arrives in a user message. Indirect injection comes from material loaded through [[Home/AI & ML/LLM/Context Engineering/RAG/RAG|RAG]], browsing, or another connector. Multimodal systems add images and audio to the same trust problem.\n\nThe dangerous step is usually downstream. A manipulated answer most often becomes a data leak or destructive action when the model can reach protected context or invoke an overpowered tool. Downstream code that executes or renders the output without validation is another path.\n\n**Controls.** Clear marking of untrusted content, screening for known attack patterns, and strict tool-call schemas reduce the risk. The real boundary is privilege: retrieval must enforce the caller's authorization, and application code must approve every consequential action.\n\n## Sensitive Information Disclosure (LLM02)\n\n**Mechanism.** Sensitive data may enter a response from training artifacts, prompt assembly, logs, or an overly broad retrieval scope. The model cannot repair an authorization mistake made before context was built.\n\nSamsung's internal-data incident shows the input side of the risk: confidential code was pasted into an external service. RAG creates an output-side version when authorization exists only in the UI and retrieval returns documents the caller should never receive.\n\n**Controls.** Secrets stay out of prompts, retrieval enforces access control, and protected data is redacted at the output boundary. A system-prompt instruction not to reveal credentials is useful guidance, never the enforcement mechanism.\n\n## Excessive Agency (LLM06)\n\n**Mechanism.** The model receives tools with broader permissions than its task requires. Prompt injection can then steer the model into using that borrowed authority.\n\nAn assistant with unrestricted production-database access turns a generated mistake into a real write. The same model behind a read-only, tenant-scoped API has a much smaller blast radius.\n\n**Controls.** Tools are scoped per task, reads are separated from writes, and irreversible operations require approval. Rate and budget limits stop a single failure from repeating without bound.\n\n## Improper Output Handling (LLM05)\n\n**Mechanism.** Model output is passed into a shell, SQL statement, HTML renderer, or external API without validation. Classic injection bugs return because attacker-influenced text crosses into an interpreter.\n\nThe source looks internal, but the content is still influenced by users and retrieved documents. Trusting it because \"our AI\" produced it moves the attack one hop without removing it.\n\n**Controls.** Structured responses are parsed, database access is parameterized, and text is encoded for its rendering context. Risky execution belongs in a sandbox with a narrow interface. [[Guardrails]] covers the surrounding runtime checks.\n\n# Remaining Vulnerabilities\n\n## Supply Chain (LLM03)\n\nCompromise can enter through model weights, fine-tuning data, plugins, or ordinary dependencies. The controls are recorded provenance, pinned reviewed versions, and the same handling for a model update as for a code dependency change.\n\n## Data and Model Poisoning (LLM04)\n\nPoisoned training or fine-tuning data changes model behavior at its source. Public and federated data need explicit provenance and quality gates, followed by behavioral evaluation on security-sensitive cases.\n\n## System Prompt Leakage (LLM07)\n\nThis risk covers disclosure of system instructions, business rules, and tool descriptions. A sound design assumes the prompt can be observed. Secrets and authorization decisions belong outside it.\n\n## Vector and Embedding Weaknesses (LLM08)\n\nThis risk sits in retrieval. Poisoned documents or manipulated representations can make hostile content rank highly. Controls include document provenance validation, enforced tenant boundaries, and tests of the [[Home/AI & ML/LLM/Context Engineering/RAG/RAG|RAG]] pipeline with adversarial corpus entries.\n\n## Misinformation (LLM09)\n\nPlausible false content becomes a security problem when it drives a decision or can be exploited at scale. [[Hallucinations]] covers the correctness mechanism. LLM09 focuses on the harm caused when false output is accepted.\n\n## Unbounded Consumption (LLM10)\n\nLong contexts and repeated tool calls can exhaust money or capacity. Hard token budgets and loop limits must be enforced outside the model.\n\n# What Is New Vs Familiar\n\n| LLM Risk | Traditional Analog | What is Genuinely New |\n| --- | --- | --- |\n| Prompt Injection | SQL Injection, XSS | Instructions and data share a probabilistic interpretation. Indirect and multimodal vectors |\n| Sensitive Info Disclosure | Information Leakage | Model memorization and RAG context windows become exfiltration channels |\n| Supply Chain | Dependency Confusion | Model weights and training data add artifacts whose behavior is hard to inspect |\n| Improper Output Handling | Output Encoding failures | Teams trust model output they would never trust from users |\n| Excessive Agency | Broken Access Control | A probabilistic model triggers deterministic tool actions |\n| System Prompt Leakage | Source Code Disclosure | Prompt secrecy cannot serve as an authorization control |\n| Vector and Embedding Weaknesses | Search poisoning | Retrieval ranking influences which untrusted content enters the model context |\n\n# Pitfalls\n\n## Prompt Injection Has No Complete Fix\n\n**Failure.** A single input filter is treated as a complete defense.\n\n**Cause.** Natural-language interpretation has no parameterization mechanism equivalent to a prepared SQL statement. Delimiters help, but the model may still follow text inside them.\n\n**Control.** The design assumes bypass is possible. Filtering catches cheap attacks, and privilege separation contains the ones that pass.\n\n## LLM Output Treated as Trusted\n\n**Failure.** Model output reaches shells, SQL, or HTML without validation.\n\n**Cause.** The response is mistaken for trusted internal data even though untrusted prompts and documents shaped it.\n\n**Control.** Model output goes through the same parser, parameterization, and encoding rules used at any external boundary.\n\n## Security by System Prompt Instruction\n\n**Failure.** A prompt sentence such as \"never reveal secrets\" is expected to enforce policy.\n\n**Cause.** Instruction following is probabilistic, and the prompt itself may be disclosed.\n\n**Control.** Authorization lives in code, and tool permissions stay outside the model's discretion.\n\n# Tradeoffs\n\n| Defense Layer | Coverage | Cost | Risk |\n| --- | --- | --- | --- |\n| Input/output filtering | Medium for known patterns | Low | Novel phrasing bypasses filters. False positives block valid use |\n| Privilege separation (least privilege tools) | High for blast-radius reduction | Medium | Does not stop injection itself |\n| Human approval | High for a narrow set of consequential actions | High | Approval fatigue turns the control into ceremony |\n| Output sanitization (parameterized queries, encoding) | High for classic injection vectors | Low | Does not catch broader semantic manipulation |\n| Monitoring and anomaly detection | Medium for visible abuse | Medium | Detection is reactive and noisy |\n\nPrivilege separation is the baseline because it limits harm even when the model is manipulated. Every downstream interpreter still needs ordinary secure coding controls. Filters catch familiar attacks, while human approval is reserved for actions where a mistaken execution is expensive or irreversible.\n\n# Questions\n\n> [!qard]- How do direct and indirect prompt injection enter an LLM's context?\n> Prompt injection is input that changes a language model's behavior or output in a way the application did not intend. Direct and indirect injection differ in where that input enters the model's context.\n>\n> | Aspect | Direct injection | Indirect injection |\n> |---|---|---|\n> | Entry point | The user's own message to the model. | External content that the model processes, such as web pages, files, retrieved documents or tool results. |\n> | Who can supply it | The person interacting with the system. | Anyone who can influence that content, without access to the conversation. |\n> | Example | A chat message telling the model to ignore its instructions and reveal hidden rules. | A web page with hidden instructions that make a summarizing assistant leak the conversation through a link. |\n>\n> The input can be deliberate or accidental, because ordinary content can also conflict with instructions. Injected text does not have to be visible to people as long as the model parses it, and multimodal systems can receive it through images or other media. Its impact depends largely on what the manipulated model can reach. Access to protected context, or to tools that act, is what turns a manipulated answer into a data leak or a damaging action.\n>\n> [OWASP LLM01:2025 Prompt Injection](https://genai.owasp.org/llmrisk/llm01-prompt-injection/)\n\n<!-- qard-id: e41e3af4-2925-4cbe-859c-d58567d74dfb -->\n> [!qard]- Why is prompt injection harder to prevent than SQL injection?\n> Prompt injection is harder to prevent because SQL has a code/data boundary that the database enforces, and language models have no established equivalent. A model receives its instructions and untrusted text through the same natural-language input, so untrusted text can still act as instructions.\n>\n> | Aspect | SQL injection | Prompt injection |\n> |---|---|---|\n> | How code and data reach the interpreter | A parameterized query defines the SQL code first and passes values separately. The database treats each bound value as data, whatever it contains. | System instructions, user messages, retrieved documents and tool results all enter the same model context. No mechanism forces the model to treat any part of that context only as data. |\n> | Effect of marking the data | Binding a value stops it from changing the query's structure. | Delimiters, labels on untrusted content and input filters lower the risk. The model may still follow instructions inside the marked content, and new phrasings can slip past filters. |\n> | Resulting defense | Prevention: a correctly bound value cannot become SQL code. | Containment: bypass is assumed possible, so controls outside the model limit what a manipulated model can do. These controls include least-privilege tools, validation of model output, authorization of each consequential action and human approval for high-risk actions. |\n>\n> OWASP's 2025 guidance states that it is unclear whether foolproof prevention methods for prompt injection exist. That statement describes current techniques. It does not prove that a stronger boundary can never be built.\n>\n> [OWASP SQL Injection Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html) · [OWASP LLM01:2025 Prompt Injection](https://genai.owasp.org/llmrisk/llm01-prompt-injection/)\n\n<!-- qard-id: 4c869882-dbf3-4b42-99ec-760b65df4849 -->\n> [!qard]- Why must secrets stay out of system prompts?\n> A system prompt can be disclosed.\n>\n> - **Not a secret:** adversarial queries can reveal the prompt. Any API keys, database credentials or other sensitive data placed in it can leak with it. Revealed internal rules, filtering criteria or role descriptions can also help an attacker plan further attacks.\n>\n> Secure designs keep credentials outside the prompt and assume that the prompt may be exposed. That assumption does not make every prompt harmless to publish. It means that the system stays protected if the prompt leaks.\n>\n> [OWASP LLM07:2025 System Prompt Leakage](https://genai.owasp.org/llmrisk/llm072025-system-prompt-leakage/) · [OWASP LLM06:2025 Excessive Agency](https://genai.owasp.org/llmrisk/llm062025-excessive-agency/)\n\n> [!qard]- Why can't system-prompt instructions enforce authorization?\n> The model follows prompt instructions only probabilistically, so those instructions cannot reliably decide what a caller is allowed to do.\n>\n> - **Not an authorization boundary:** an instruction such as \"only administrators may delete records\" does not stop a manipulated or mistaken model from requesting a deletion. Enforcement belongs in deterministic code or the downstream service, which checks each requested action against the caller's actual permissions.\n>\n> Authorization decisions remain in deterministic application code or the downstream service.\n>\n> [OWASP LLM07:2025 System Prompt Leakage](https://genai.owasp.org/llmrisk/llm072025-system-prompt-leakage/) · [OWASP LLM06:2025 Excessive Agency](https://genai.owasp.org/llmrisk/llm062025-excessive-agency/)\n\n# References\n\n- [OWASP Top 10 for LLM Applications 2025: official risk descriptions (OWASP Foundation)](https://genai.owasp.org/resource/owasp-top-10-for-llm-applications-2025/)\n- [Not what you have signed up for: indirect prompt injection (Greshake et al., 2023)](https://arxiv.org/abs/2302.12173)\n- [Lessons From Red Teaming 100 Generative AI Products (Microsoft Research)](https://www.microsoft.com/en-us/research/publication/lessons-from-red-teaming-100-generative-ai-products/)\n",
-          "hash": "669576539bc6bc1fca2cb3632368961850aa913d81951f51dafeab7ae929e850",
-          "topic": "AI & ML",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "new"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "base_sha": "67caf2e374f53e8772b86b8ea0f881d74e784fa1",
-    "reservation_deadline": "2026-11-07T06:38:16.547271Z",
-    "stop_reason": "call_limit",
-    "sealed_at": "2026-11-07T06:23:48.072825Z"
+    "checkpoint_at": "2026-11-07T13:18:06.385566Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
@@ -16556,6 +15797,780 @@
       "error": "GitHub request failed (1): gh: Server Error (HTTP 502)",
       "stop_reason": "provider_error",
       "sealed_at": "2026-11-06T19:42:08.707287Z"
+    },
+    "f57944c05f7944ee8610e2bd6384fd74": {
+      "version": 1,
+      "id": "f57944c05f7944ee8610e2bd6384fd74",
+      "status": "sealed",
+      "phase": "sealed",
+      "started_at": "2026-11-07T06:14:05.879571Z",
+      "elapsed_seconds": 582.1937905999997,
+      "calls_reserved": 20,
+      "responses_received": 20,
+      "attempted_paths": [
+        "Vault/Home/AI & ML/LLM/Model Selection and Routing.md",
+        "Vault/Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization.md",
+        "Vault/Home/AI & ML/LLM/Prompt Engineering/In-Context Learning.md",
+        "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Composition.md",
+        "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md",
+        "Vault/Home/AI & ML/LLM/Prompt Engineering/Reasoning Techniques.md",
+        "Vault/Home/AI & ML/LLM/Safety/Guardrails.md",
+        "Vault/Home/AI & ML/LLM/Safety/Hallucinations.md",
+        "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
+        "Vault/Home/AI & ML/LLM/Safety/OWASP vulnerabilities on AI LLM.md"
+      ],
+      "accepted_records": [],
+      "outcomes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Model Selection and Routing.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Model Selection and Routing.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole note against its text. The opening separates selection from routing and states the empirical rule that the cheapest candidate clearing all gates wins. It also separates application-level routing from mixture-of-experts routing, which is the right boundary. The criteria list, the three routing patterns, the cascade diagram, the router-evaluation signals, the operations and pitfalls sections and the tradeoff table are consistent with each other. They state the correct conditions: a cascade saves money only when first-attempt plus escalation cost is below always using the strong model, and false-easy misroutes need per-route recall. These claims match the FrugalGPT cascade idea and the Foundry Model Router documentation cited in the cards. The three cards each test one gradeable task: the comparison method, the classifier-versus-cascade comparison, and the combination of the two. Their answers do not duplicate the prose in a way that needs trimming, and their sources are on the answer side. The note has no known violations, no flagged cards and no owner feedback. I found no factual error or learning gap, so I made no edits."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "The note is accurate, coherent and well ordered, and its three cards each test one gradeable task. I found no concrete defect, so keeping it unchanged is justified.",
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Model Selection and Routing.md",
+                  "verdict": "CLEAN",
+                  "summary": "I read the whole note and found no concrete error or learning gap, so no edits are warranted. The opening separates selection from routing and sets the empirical rule. The pattern sections state the conditions that matter, and the cards are bounded.",
+                  "page_type": "Concept — frontmatter is intact, Questions and References are optional and present, and the voice is impersonal and declarative.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "Production selection is empirical: the least expensive candidate that clears the workload's quality, safety, reliability, and latency gates wins.",
+                      "line_start": 17,
+                      "reason": "States the operating decision rule up front, with the condition that changes the choice."
+                    },
+                    {
+                      "quote": "But a false “easy” decision can silently lower quality.",
+                      "line_start": 42,
+                      "reason": "Names the failure mode of classifier routing and the evaluation that follows from it (per-route recall)."
+                    },
+                    {
+                      "quote": "A cascade saves money only when the first attempt plus its escalations cost less than sending every request to the stronger model.",
+                      "line_start": 57,
+                      "reason": "States the cost condition and the tail-latency consequence, which matches the FrugalGPT cascade idea."
+                    },
+                    {
+                      "quote": "That supports comparison against an oracle that always selects the cheapest passing model.",
+                      "line_start": 61,
+                      "reason": "Router evaluation is concrete and measurable, with a stated baseline for comparison."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: selection criteria, routing patterns and router evaluation form one tightly coupled topic. Mixture-of-experts routing is already separated by a link to the LLM note.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "change_checks": []
+            },
+            "model_calls": 2
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization.md",
+                  "outcome": "keep",
+                  "reason": "Read the whole note against the cited papers (APE, Active-Prompt, DSP, PAL). The APE loop, the Active-Prompt uncertainty-based annotation, DSP's small trainable policy model steering a frozen LLM, and PAL's program generation with interpreter execution are all described accurately. The note limits claims to the tested benchmarks. The pitfalls cover evaluator quality, overfitting and benchmark transfer, and the tradeoff table separates PAL as an adjacent technique. The code samples are labeled and fenced with languages. The note has no Questions section, so there are no cards to audit. References are bare descriptive links. Prose is direct and has little repetition, and no known violations exist. An edit would be cosmetic churn."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "The note is accurate, well ordered and self-contained. It has no concrete rule violations and no Questions cards. Its references are bare descriptive primary-source links. Keeping it unchanged is justified, and an edit would be cosmetic churn.",
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization.md",
+                  "verdict": "CLEAN",
+                  "summary": "I read the whole note. It explains APE, Active-Prompt, DSP and PAL accurately, keeps claims scoped to what the papers tested, and separates PAL as an adjacent technique. The prose is direct and has little repetition. The code fences carry language identifiers, and the pitfalls and tradeoffs support engineering judgment. No edit is warranted.",
+                  "page_type": "Concept — authorable prose. Questions are optional and absent. References are bare descriptive links. Frontmatter is typed, and status Done was not set by an agent.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "The method does not remove judgment. It moves judgment into the objective, dataset, and acceptance threshold.",
+                      "line_start": 16,
+                      "reason": "States the operating idea and its key limit early, in whiteboard voice."
+                    },
+                    {
+                      "quote": "That result is evidence that small wording changes can matter. It is not evidence that one discovered phrase transfers unchanged to every model or task.",
+                      "line_start": 22,
+                      "reason": "Scopes the APE claim to what the paper tested, so it does not overgeneralize."
+                    },
+                    {
+                      "quote": "Human time goes to cases that reveal a decision boundary instead of another easy example.",
+                      "line_start": 35,
+                      "reason": "Gives the Active-Prompt mechanism and its rationale accurately, as active learning over demonstrations."
+                    },
+                    {
+                      "quote": "The operational boundary is clear: DSP is no longer prompt search alone.",
+                      "line_start": 41,
+                      "reason": "Names the concrete cost of DSP: a trainable controller, its data, and another model in the serving path."
+                    },
+                    {
+                      "quote": "execution removes calculation errors without removing specification errors.",
+                      "line_start": 47,
+                      "reason": "Names the PAL limit precisely, and the arithmetic example (17*24+39=447) is correct."
+                    },
+                    {
+                      "quote": "There is no universal minimum sample count.",
+                      "line_start": 85,
+                      "reason": "Pitfalls avoid false precision and name the conditions that matter."
+                    },
+                    {
+                      "quote": "Manual tuning remains the cheaper choice for a small number of stable prompts.",
+                      "line_start": 104,
+                      "reason": "Closes with a decision condition for when automation earns its cost."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the note is one coherent topic. PAL is explicitly framed as an adjacent contrast, and the length is justified by the four-method comparison.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "NOT APPLICABLE",
+                    "identity_safety": "NOT APPLICABLE",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "change_checks": []
+            },
+            "model_calls": 4
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/In-Context Learning.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/In-Context Learning.md",
+                  "outcome": "keep",
+                  "reason": "I read the whole note against its text and the cited primary works. The opening defines in-context learning as prompt-conditioned next-token prediction with no weight updates, which matches Brown et al. 2020. The Min et al. 2022 passage is appropriately hedged: it says demonstration format, label space and input distribution explain much of the performance, and that corrupted labels hurt less than expected. It also says correct labels remain the right production choice. The zero-shot, one-shot and few-shot sections use consistent JSON and sentiment examples, and the code fences all carry language identifiers. The demonstration-set, limitations and pitfalls sections cover ordering effects, context pressure and root-cause fixes without repeating each other. The tradeoffs table is qualified: format control is labeled a heuristic, the facts column is scoped, and schema enforcement is routed to structured outputs. The three cards each test one gradeable task, with a decision, a comparison and a scope question. They are accurate and cite sources. Known violations are empty. No defect is verified, so edits would only be cosmetic."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "Independent whole-note read found no concrete defect. The note is accurate, hedged where the evidence is mixed, and has no known violations. The cards test single dependent tasks. No edits were proposed, and a keep is justified.",
+              "change_checks": [],
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/In-Context Learning.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note explains in-context learning as prompt-conditioned next-token prediction with no weight updates, then moves through zero-shot, one-shot and few-shot with consistent examples. Its claims are hedged where the evidence is mixed. Limitations, pitfalls and the tradeoff table add judgment without repeating each other. The three cards each test a single task. The keep is justified and no defect was invented.",
+                  "page_type": "Concept — authorable prose with optional Questions and References present; all code fences carry language identifiers; the wikilink [[Reasoning Techniques]] is the only internal link and is explained in prose.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "The model still predicts the next token at inference time.",
+                      "line_start": 17,
+                      "reason": "The opening states the mechanism: no weight updates, with demonstrations shifting next-token prediction. This matches Brown et al. 2020."
+                    },
+                    {
+                      "quote": "Corrupting labels did less damage than a simple input-label mapping account would predict.",
+                      "line_start": 69,
+                      "reason": "This is an appropriately hedged statement of Min et al. 2022. It is followed by the production caveat that correct labels remain the right choice."
+                    },
+                    {
+                      "quote": "The facts column describes only the evidence that each technique supplies automatically.",
+                      "line_start": 138,
+                      "reason": "This scopes the table correctly. It also says schema enforcement needs structured outputs or validation, which avoids overclaiming format control."
+                    },
+                    {
+                      "quote": "> [!qard]- When should a prompt move from zero-shot to one-shot or few-shot?",
+                      "line_start": 145,
+                      "reason": "This is a single decision question. The answer is gated on evaluation, covers the mechanism and conditions, and cites sources on the answer side."
+                    },
+                    {
+                      "quote": "> [!qard]- How does in-context learning differ from fine-tuning and retrieval?",
+                      "line_start": 159,
+                      "reason": "This is one focused comparison. The table covers what changes, what is supplied, how long the effect lasts and the cost, so it is a single gradeable task."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: zero-shot, one-shot and few-shot prompting share one mechanism and one decision path. Separating them would fragment the shot-count comparison.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ]
+            },
+            "model_calls": 6
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Composition.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Composition.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole note against its current text. The opening states when a single prompt suffices and when composition is justified. Chaining requires real boundaries: schema, validation and branching. The support-chain example and the mermaid diagram match the prose, and the code fences have language tags. Generated knowledge prompting is attributed correctly to Liu et al. 2022 and caveated as unverified model output. Meta prompting is separated from the automated optimization note by a wikilink. The pitfalls are sound: error propagation with a required-field check, delimiters not being a security boundary, and held-out evaluation with rollback for overfitting. The tradeoff table supports decisions. The two cards each test one dependent task, their answers match the note, and they cite relevant sources. The references are real and topic-specific. I found no factual or editorial defect, and no known violations are unresolved, so edits would be cosmetic churn."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "Independent whole-note audit found no factual, editorial, structural or card-quality defect. The keep is justified and no edits are proposed.",
+              "change_checks": [],
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Composition.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note opens with when composition is justified and its cost. Chaining, generated knowledge and meta prompting each have a concrete mechanism, example and caveat. Pitfalls and the tradeoff table support engineering decisions. Both Qards test one dependent task. Keeping the note unchanged is correct, since edits would be cosmetic.",
+                  "page_type": "Concept — frontmatter, MD040 language tags, optional Questions and References, wikilink to Automated Prompt Optimization and generated navigation ownership checked. Voice is impersonal and declarative.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "Splitting one vague prompt into three vague prompts merely triples the failure surface.",
+                      "line_start": 23,
+                      "reason": "States the key boundary condition for chaining: stages need schemas and validation, or the chain only adds failure points."
+                    },
+                    {
+                      "quote": "But generated knowledge is still model output. It is neither a citation nor verification.",
+                      "line_start": 75,
+                      "reason": "Correctly caveats Liu et al. 2022 generated knowledge prompting and points to trusted retrieved context for high-stakes use."
+                    },
+                    {
+                      "quote": "Delimiters help the model distinguish data from control text, but they are not a security boundary.",
+                      "line_start": 100,
+                      "reason": "Accurate and decisive prompt-injection guidance, with concrete mitigations in the following sentence."
+                    },
+                    {
+                      "quote": "A model-drafted revision is a hypothesis to test, not a reliability guarantee.",
+                      "line_start": 140,
+                      "reason": "The meta-prompting card answer keeps held-out evaluation and rollback together as one dependent workflow, including its limits."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: chaining, generated knowledge and meta prompting are three techniques of one composition theme. They are short and cross-referenced by shared pitfalls and the tradeoff table. Automated optimization is already a separate note.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ]
+            },
+            "model_calls": 8
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md",
+                  "outcome": "keep",
+                  "reason": "I read the whole note against its current text. The opening ties prompts to sampling and to the system interface. The four-element anatomy has a worked example that uses all four elements. The settings section correctly separates temperature, top-p, max tokens and stop sequences, and it labels its ranges as heuristics that need evaluation. The instruction and role examples are concrete. The Mermaid flow agrees with the prose, and the Pitfalls cover injection, schema-valid but wrong content, and token-budget collapse. The two existing Qards each test one gradeable task. Their answers cover conditions and exceptions, such as parameter support varying by model and reasoning tokens counting toward output limits. Their cited OpenAI claims match the vendor's documented behavior. The code fences have language identifiers, and the note has no unresolved known violations. I found no factual error or learning gap, so I made no edits."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "Independent whole-note read found no factual, structural, voice or question-quality defect. No edits were proposed, so keeping the note unchanged is justified.",
+              "change_checks": [],
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note explains prompt anatomy, settings, instruction and role prompting, technique selection and pitfalls accurately and in a whiteboard voice. Both Qards each test one dependent task and carry answer-side primary sources, and no edit is warranted.",
+                  "page_type": "FolderNote — keeps tags FolderNote and the protected datacorejsx map; Questions and References are optional and present; MD040 satisfied.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "These starting ranges are heuristics. Production values need task-specific evaluation on the chosen model.",
+                      "line_start": 56,
+                      "reason": "The settings table is correctly hedged, so the numeric ranges are not presented as facts."
+                    },
+                    {
+                      "quote": "Strict output shape needs structured output or schema validation.",
+                      "line_start": 135,
+                      "reason": "The prose is consistent with the Mermaid flow above it and states the boundary that examples cover semantics a schema cannot."
+                    },
+                    {
+                      "quote": "**Correct shape, wrong content.**",
+                      "line_start": 140,
+                      "reason": "The pitfall names a concrete failure, schema-valid but invented values, and its mitigation."
+                    },
+                    {
+                      "quote": "Why must prompt instructions and generation settings be evaluated together?",
+                      "line_start": 146,
+                      "reason": "This is a single dependent why-explanation with conditions, such as model and endpoint parameter support, and an answer-side source."
+                    },
+                    {
+                      "quote": "How can an output-token cap limit cost without truncating valid answers?",
+                      "line_start": 157,
+                      "reason": "This is one coherent sizing and truncation task. The answer covers reasoning tokens, context sharing, truncation detection and the endpoint-specific parameter names."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the note is a compact hub, and its child notes already cover in-context learning, reasoning, composition and optimization separately.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ]
+            },
+            "model_calls": 10
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Reasoning Techniques.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Reasoning Techniques.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole note against the current text and the primary papers it cites. The CoT, zero-shot CoT, Self-Consistency and ToT attributions (Wei 2022, Kojima 2022, Wang 2022, Yao 2023) match the papers. Both worked examples are arithmetically correct: the apple example gives 10, and the sister example gives 70-3=67. The ToT description of proposing, evaluating and searching with backtracking is accurate, and the diagram matches it. The cost-ladder framing and the tradeoffs table are consistent with the prose, and the cheapest-method-first guidance is sound. The three Qards each test one dependent task, such as when a technique helps and why or how it fails. Their answers carry conditions, limits and primary sources, with no bundled independent questions. The prose reads clearly, with no repetition or terminology drift. No known violations are open. Any edit would be cosmetic."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Reasoning Techniques.md",
+                  "verdict": "CLEAN",
+                  "summary": "Independent full read found accurate attributions, correct worked examples, a coherent cost-ladder order, and three single-task Qards with conditions and primary sources. No concrete defect justifies an edit, so a keep is right.",
+                  "page_type": "Concept — typed frontmatter retained; optional Questions and References present and well formed; Qard IDs protected; language-tagged fences.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "The methods form a cost ladder.",
+                      "line_start": 19,
+                      "reason": "The opening frames CoT, Self-Consistency and ToT as escalating cost, and the later sections and table follow that order."
+                    },
+                    {
+                      "quote": "It also creates more tokens in which an early mistake can spread, so the trace needs verification rather than trust.",
+                      "line_start": 28,
+                      "reason": "Keeps the key CoT limit, error propagation, instead of overclaiming benefit."
+                    },
+                    {
+                      "quote": "Visible reasoning also has a product boundary.",
+                      "line_start": 45,
+                      "reason": "Adds a practical engineering boundary beyond the papers and is stated concisely."
+                    },
+                    {
+                      "quote": "The method helps when independent samples fail differently and the final answer can be compared mechanically.",
+                      "line_start": 51,
+                      "reason": "States the condition and failure mode for Self-Consistency, which the card then tests without duplicating it."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: CoT, Self-Consistency and ToT form one compact comparison and the cost ladder is clearer kept together.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "overall_reason": "The note is accurate, readable and well ordered. Its Qards each test one dependent task, and no proposed edits exist to reject. The keep is justified.",
+              "change_checks": []
+            },
+            "model_calls": 12
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Safety/Guardrails.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Safety/Guardrails.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole note against its text and known OWASP/Azure guidance. The four-boundary model (input, context, output, runtime) is consistent with the diagram and sections. The note states that classifiers and regex screens are fallible and that authorization stays in application code, which matches OWASP LLM01/LLM05/LLM06. The schema example is correct, and the note says outright that the schema does not grant permission. The injection mitigations are ordered sensibly and carry their limits (structural separation is guidance, regexes catch only familiar wording, and privilege separation has a stated data-reach condition). The pitfalls section adds distinct points. Every fenced block has a language identifier. The single Qard tests one coherent task (which controls stop output becoming action), has a preserved ID and primary-source citations, and its answer agrees with the body. There were no known violations and no owner feedback. No defect was found that would justify an edit."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Safety/Guardrails.md",
+                  "verdict": "CLEAN",
+                  "summary": "Independent whole-note audit found no accuracy, clarity, structure or question-quality defect. The four-boundary model, the diagram, the section order, the stated limits of each control and the single Qard are consistent and technically sound. No edit is warranted.",
+                  "page_type": "Concept — typed frontmatter, optional Questions and References present and valid, MD040 satisfied, no hand-rolled navigation.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "One filter cannot cover all four boundaries.",
+                      "line_start": 17,
+                      "reason": "The opening names the four boundaries (input, context, output, runtime) and the reason for layering. The diagram and the H2 sections follow the same split."
+                    },
+                    {
+                      "quote": "This helps the model interpret provenance, but it is guidance rather than a security boundary.",
+                      "line_start": 90,
+                      "reason": "Structural separation is stated with its limit, which avoids overclaiming and matches OWASP guidance."
+                    },
+                    {
+                      "quote": "But the regular expressions only catch familiar wording.",
+                      "line_start": 107,
+                      "reason": "The regex example is immediately qualified, so it works as an illustration and is not presented as a defense."
+                    },
+                    {
+                      "quote": "The schema narrows the command surface. It does not grant permission by itself.",
+                      "line_start": 141,
+                      "reason": "The output-contract example states the key boundary: schema validity is not authorization."
+                    },
+                    {
+                      "quote": "**Overly broad tool access.**",
+                      "line_start": 147,
+                      "reason": "The pitfalls add distinct engineering judgment about per-task tool exposure, not a repeat of earlier sections."
+                    },
+                    {
+                      "quote": "> [!qard]- Which guardrails keep unsafe model output from becoming an unsafe action?",
+                      "line_start": 156,
+                      "reason": "The card tests one coherent task. It is self-contained, keeps its ID comment, and its answer agrees with the body and cites primary sources."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: input, context, output and runtime controls plus prompt-injection defense form one coherent layered-defense topic, and separating them would remove the defense-in-depth reasoning.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "overall_reason": "The complete note was read independently and holds up on accuracy, ordering, terminology, voice and the single Qard. There are no known violations, owner feedback, edits or rejected proposals, so keeping it unchanged is justified.",
+              "change_checks": []
+            },
+            "model_calls": 14
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Safety/Hallucinations.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Safety/Hallucinations.md",
+                  "outcome": "keep",
+                  "reason": "I audited the whole note against its current text. The definition is correct and defines the term before the mechanisms, and the intrinsic/extrinsic split matches Ji et al. The detection methods (NLI, SelfCheckGPT, LLM-as-judge, FActScore) are described correctly, including the limit that stable repetition does not prove truth. The mitigations (RAG, CoVe, constrained output, abstention, tools) each name a limitation, and the pitfalls and tradeoffs table agree with them. The sycophancy claim is properly hedged: the note does not say all RLHF models are less factual. The three Qards each test one dependent task, have source links on the answer side, and match the body. The Mermaid fence has a language identifier, the wikilinks are plausible, and the references are bare primary-source links. No known violations are open. I found no factual or editorial defect, so an edit would be churn."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "No edits were proposed. My independent read of the whole note found no factual or editorial defect, so keeping it unchanged is justified.",
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Safety/Hallucinations.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note defines hallucination as unsupported content, separates intrinsic from extrinsic cases, and ties each detection and mitigation method to its limit. The pitfalls, tradeoffs table and three cards agree with the body. A whole-note audit found no accuracy, clarity or question-quality defect, so no edit is warranted.",
+                  "page_type": "Concept — no mandatory sections. Mermaid fence has a language identifier. Qard IDs are protected metadata. References are bare links.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "An **extrinsic hallucination** adds a claim the source does not contain.",
+                      "line_start": 33,
+                      "reason": "The intrinsic/extrinsic split matches Ji et al. and includes the point that an unsupported claim may still be true."
+                    },
+                    {
+                      "quote": "But stable repetition still does not prove truth",
+                      "line_start": 40,
+                      "reason": "Self-consistency is stated with its real limit, which keeps the detection section accurate."
+                    },
+                    {
+                      "quote": "The legal-system study in the references still found hallucinations above 17% across evaluated tools.",
+                      "line_start": 50,
+                      "reason": "This is consistent with Magesh et al., who report 17% to 33% for the evaluated legal RAG tools. It also keeps the claim that RAG reduces hallucination from being overstated."
+                    },
+                    {
+                      "quote": "Separate measurement does not mean the failures are independent",
+                      "line_start": 118,
+                      "reason": "The RAG card explains the dependent mechanism between retrieval defects and unsupported generation. It stays one coherent explanation."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: definition, taxonomy, detection, mitigation and tradeoffs form one coherent topic. RAG and Guardrails are already linked as separate notes.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "change_checks": []
+            },
+            "model_calls": 16
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
+          "outcome": "review_blocked",
+          "reason": "",
+          "result": {
+            "status": "review_blocked",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole note. The opening separates a keyed watermark from a general AI-text classifier. The sampling steps and the Tournament sampling and score formula match the SynthID-Text description. The quality and detectability section keeps the non-distortionary versus distortionary trade-off. The limits list is consistent with itself. I fetched the Anthropic article, which confirms the note's claims that the watermark is a SynthID-Text variant, adds no characters or tokens, carries no identity, is weak on short text and on factual or exact-code output, and is removed by heavy rewriting. It also states that Claude translations are watermarked, which supports the note's comment on translations. The Nature reference is the primary SynthID-Text paper. The References section is two bare descriptive links, with no frontmatter or lifecycle issues, no code fences and no cards. I found no defect that justifies an edit."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note explains the mechanism, the quality/detectability trade-off and the limits accurately and in order. I found no concrete defect, so keeping it unchanged is justified.",
+                  "page_type": "Concept — frontmatter, optional References (two bare descriptive links), no cards, no code fences.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "The detector instead asks whether the sequence of choices is unusually consistent with the sampling decisions produced by a particular watermark key.",
+                      "line_start": 14,
+                      "reason": "The opening states the operating idea and separates a watermark from a classifier in the next paragraph."
+                    },
+                    {
+                      "quote": "Synth ID-Text implements this with **Tournament sampling**.",
+                      "line_start": 28,
+                      "reason": "Placeholder"
+                    },
+                    {
+                      "quote": "The signal is therefore weak in short passages and low-entropy output.",
+                      "line_start": 47,
+                      "reason": "The note derives the weakness from the two detection factors stated just before it, which makes the explanation order sound."
+                    },
+                    {
+                      "quote": "A threshold trades false positives against false negatives.",
+                      "line_start": 55,
+                      "reason": "The limits are specific and consistent, and they carry the engineering judgment about thresholds and abstention."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: one coherent topic (generative text watermarking); the sections are interdependent.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "NOT APPLICABLE",
+                    "identity_safety": "NOT APPLICABLE",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "overall_reason": "The whole note was audited independently. The Anthropic article confirms the SynthID-Text variant, weakness on short and factual text, translations being watermarked, and the absence of identity. The Nature reference is the primary paper. No concrete defect was found, and no edits were proposed.",
+              "change_checks": []
+            },
+            "model_calls": 18
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Safety/OWASP vulnerabilities on AI LLM.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Safety/OWASP vulnerabilities on AI LLM.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole note against the OWASP Top 10 for LLM Applications 2025. The ID/name table (LLM01–LLM10) matches the 2025 list. The mechanism sections for LLM01, 02, 05 and 06 and the shorter sections for LLM03, 04, 07, 08, 09 and 10 are accurate. Their controls follow OWASP guidance: least privilege, authorization outside the model, output encoding, and parameterized queries. The traditional-analog table, pitfalls and defense-tradeoff table are consistent with those sections and add little repetition. The four existing cards each test one gradeable task and cite appropriate OWASP sources. Their claims agree with the body text, including the hedged statement about prevention of prompt injection. The question-card IDs are preserved. There are no known violations, no owner feedback and no open proposals. The references are real, primary or reputable, and appear as bare links. A rewrite would be churn."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Safety/OWASP vulnerabilities on AI LLM.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note is accurate against the OWASP 2025 list and has a sound explanation order. It opens with the trust boundary, then gives the list table, the architecture-shaping risks, the remaining risks, the traditional analogs, pitfalls and tradeoffs. The four Qards each test one gradeable task, and the hedged claim about prevention is correct. No edit would give a concrete benefit, so keeping the note unchanged is justified.",
+                  "page_type": "Concept — typed frontmatter, optional Questions and References present, whiteboard voice. Qard IDs are protected.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "The list also names System Prompt Leakage, Vector and Embedding Weaknesses, and Misinformation as separate risks.",
+                      "line_start": 19,
+                      "reason": "The 2025 list does contain these as separate entries (LLM07, LLM08, LLM09). The claim is accurate and sets the scope."
+                    },
+                    {
+                      "quote": "Samsung's internal-data incident shows the input side of the risk: confidential code was pasted into an external service.",
+                      "line_start": 50,
+                      "reason": "The 2023 incident was engineers pasting confidential code into ChatGPT. It is a correct, concrete example, and the RAG output-side contrast follows directly."
+                    },
+                    {
+                      "quote": "A sound design assumes the prompt can be observed. Secrets and authorization decisions belong outside it.",
+                      "line_start": 82,
+                      "reason": "The LLM07 guidance matches OWASP: do not treat the system prompt as a secret or as a security control. It is consistent with the cards."
+                    },
+                    {
+                      "quote": "Natural-language interpretation has no parameterization mechanism equivalent to a prepared SQL statement.",
+                      "line_start": 114,
+                      "reason": "The note states the key mechanism behind the injection pitfall precisely. The matching SQL-versus-prompt card is consistent with it and is not redundant."
+                    },
+                    {
+                      "quote": "That statement describes current techniques. It does not prove that a stronger boundary can never be built.",
+                      "line_start": 171,
+                      "reason": "The card attributes the hedged claim correctly to OWASP and keeps the limit that applies. The answer-side sources are primary OWASP pages."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the note is one coherent catalog with its architectural risks, the remaining entries and the defense tradeoffs. Its parts depend on each other.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "overall_reason": "I read the whole note against the OWASP 2025 list. The IDs, names, controls and examples are accurate, and the explanation order works. The cards are single-task with preserved IDs and OWASP sources. No concrete defect was found, so the keep is justified.",
+              "change_checks": []
+            },
+            "model_calls": 20
+          }
+        }
+      ],
+      "feedback_pr": 0,
+      "checkpoint_at": "2026-11-07T06:23:48.072824Z",
+      "topic": "AI & ML",
+      "topic_id": "ai-ml-4edf0823",
+      "current_batch": {
+        "topic": "AI & ML",
+        "topic_id": "ai-ml-4edf0823",
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Safety/OWASP vulnerabilities on AI LLM.md",
+            "content": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"The OWASP Top 10 for LLM Applications, the highest-impact security failures in LLM systems.\"\nlevel: [\"3\"]\npriority: Medium\nstatus: Done\npublish: true\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Safety/OWASP vulnerabilities on AI LLM\"\nflashcard_uid: \"c24fd7d3\"\ncreated: \"2026-02-15T15:01:57.000Z\"\nmodified: \"2026-11-02T09:03:54.806Z\"\npublished: \"2026-07-08T13:28:37.411Z\"\n---\n\nThe OWASP Top 10 for LLM Applications (2025 edition) is a risk catalog for systems that embed language models. Its central boundary is awkward: untrusted natural language influences a probabilistic model, and the result may drive deterministic code, retrieval, or tool calls. Prompts can mix data with instructions. Model output is therefore untrusted input to the next component.\n\nThe 2025 list keeps Prompt Injection at LLM01, covering direct or indirect input that unexpectedly changes model behavior or output. The input may be malicious or accidental, and multimodal systems widen the possible sources. The list also names System Prompt Leakage, Vector and Embedding Weaknesses, and Misinformation as separate risks. But it is a threat-modeling aid rather than a complete control set. Severity still depends on the data and authority attached to a particular application.\n\n# The 2025 List\n\n| ID | Vulnerability | One-line description |\n| --- | --- | --- |\n| LLM01 | Prompt Injection | Direct or indirect input unexpectedly alters model behavior or output |\n| LLM02 | Sensitive Information Disclosure | Model leaks PII, credentials, or proprietary data in responses |\n| LLM03 | Supply Chain | Compromised models, training data, plugins, or dependencies |\n| LLM04 | Data and Model Poisoning | Manipulated training or fine-tuning data degrades model behavior |\n| LLM05 | Improper Output Handling | LLM output trusted as safe input to downstream systems |\n| LLM06 | Excessive Agency | Model granted too many permissions, tools, or autonomy |\n| LLM07 | System Prompt Leakage | System prompt exposed through adversarial queries |\n| LLM08 | Vector and Embedding Weaknesses | RAG retrieval manipulated via poisoned or adversarial embeddings |\n| LLM09 | Misinformation | Model generates false content that passes through without verification |\n| LLM10 | Unbounded Consumption | Denial-of-wallet or resource exhaustion via crafted queries |\n\n# Risks That Shape the Architecture\n\n## Prompt Injection (LLM01)\n\n**Mechanism.** Untrusted input changes model behavior or output in an unintended way. It may be a malicious attempt to bypass instructions or an accidental conflict in ordinary content. Direct injection arrives in a user message. Indirect injection comes from material loaded through [[Home/AI & ML/LLM/Context Engineering/RAG/RAG|RAG]], browsing, or another connector. Multimodal systems add images and audio to the same trust problem.\n\nThe dangerous step is usually downstream. A manipulated answer most often becomes a data leak or destructive action when the model can reach protected context or invoke an overpowered tool. Downstream code that executes or renders the output without validation is another path.\n\n**Controls.** Clear marking of untrusted content, screening for known attack patterns, and strict tool-call schemas reduce the risk. The real boundary is privilege: retrieval must enforce the caller's authorization, and application code must approve every consequential action.\n\n## Sensitive Information Disclosure (LLM02)\n\n**Mechanism.** Sensitive data may enter a response from training artifacts, prompt assembly, logs, or an overly broad retrieval scope. The model cannot repair an authorization mistake made before context was built.\n\nSamsung's internal-data incident shows the input side of the risk: confidential code was pasted into an external service. RAG creates an output-side version when authorization exists only in the UI and retrieval returns documents the caller should never receive.\n\n**Controls.** Secrets stay out of prompts, retrieval enforces access control, and protected data is redacted at the output boundary. A system-prompt instruction not to reveal credentials is useful guidance, never the enforcement mechanism.\n\n## Excessive Agency (LLM06)\n\n**Mechanism.** The model receives tools with broader permissions than its task requires. Prompt injection can then steer the model into using that borrowed authority.\n\nAn assistant with unrestricted production-database access turns a generated mistake into a real write. The same model behind a read-only, tenant-scoped API has a much smaller blast radius.\n\n**Controls.** Tools are scoped per task, reads are separated from writes, and irreversible operations require approval. Rate and budget limits stop a single failure from repeating without bound.\n\n## Improper Output Handling (LLM05)\n\n**Mechanism.** Model output is passed into a shell, SQL statement, HTML renderer, or external API without validation. Classic injection bugs return because attacker-influenced text crosses into an interpreter.\n\nThe source looks internal, but the content is still influenced by users and retrieved documents. Trusting it because \"our AI\" produced it moves the attack one hop without removing it.\n\n**Controls.** Structured responses are parsed, database access is parameterized, and text is encoded for its rendering context. Risky execution belongs in a sandbox with a narrow interface. [[Guardrails]] covers the surrounding runtime checks.\n\n# Remaining Vulnerabilities\n\n## Supply Chain (LLM03)\n\nCompromise can enter through model weights, fine-tuning data, plugins, or ordinary dependencies. The controls are recorded provenance, pinned reviewed versions, and the same handling for a model update as for a code dependency change.\n\n## Data and Model Poisoning (LLM04)\n\nPoisoned training or fine-tuning data changes model behavior at its source. Public and federated data need explicit provenance and quality gates, followed by behavioral evaluation on security-sensitive cases.\n\n## System Prompt Leakage (LLM07)\n\nThis risk covers disclosure of system instructions, business rules, and tool descriptions. A sound design assumes the prompt can be observed. Secrets and authorization decisions belong outside it.\n\n## Vector and Embedding Weaknesses (LLM08)\n\nThis risk sits in retrieval. Poisoned documents or manipulated representations can make hostile content rank highly. Controls include document provenance validation, enforced tenant boundaries, and tests of the [[Home/AI & ML/LLM/Context Engineering/RAG/RAG|RAG]] pipeline with adversarial corpus entries.\n\n## Misinformation (LLM09)\n\nPlausible false content becomes a security problem when it drives a decision or can be exploited at scale. [[Hallucinations]] covers the correctness mechanism. LLM09 focuses on the harm caused when false output is accepted.\n\n## Unbounded Consumption (LLM10)\n\nLong contexts and repeated tool calls can exhaust money or capacity. Hard token budgets and loop limits must be enforced outside the model.\n\n# What Is New Vs Familiar\n\n| LLM Risk | Traditional Analog | What is Genuinely New |\n| --- | --- | --- |\n| Prompt Injection | SQL Injection, XSS | Instructions and data share a probabilistic interpretation. Indirect and multimodal vectors |\n| Sensitive Info Disclosure | Information Leakage | Model memorization and RAG context windows become exfiltration channels |\n| Supply Chain | Dependency Confusion | Model weights and training data add artifacts whose behavior is hard to inspect |\n| Improper Output Handling | Output Encoding failures | Teams trust model output they would never trust from users |\n| Excessive Agency | Broken Access Control | A probabilistic model triggers deterministic tool actions |\n| System Prompt Leakage | Source Code Disclosure | Prompt secrecy cannot serve as an authorization control |\n| Vector and Embedding Weaknesses | Search poisoning | Retrieval ranking influences which untrusted content enters the model context |\n\n# Pitfalls\n\n## Prompt Injection Has No Complete Fix\n\n**Failure.** A single input filter is treated as a complete defense.\n\n**Cause.** Natural-language interpretation has no parameterization mechanism equivalent to a prepared SQL statement. Delimiters help, but the model may still follow text inside them.\n\n**Control.** The design assumes bypass is possible. Filtering catches cheap attacks, and privilege separation contains the ones that pass.\n\n## LLM Output Treated as Trusted\n\n**Failure.** Model output reaches shells, SQL, or HTML without validation.\n\n**Cause.** The response is mistaken for trusted internal data even though untrusted prompts and documents shaped it.\n\n**Control.** Model output goes through the same parser, parameterization, and encoding rules used at any external boundary.\n\n## Security by System Prompt Instruction\n\n**Failure.** A prompt sentence such as \"never reveal secrets\" is expected to enforce policy.\n\n**Cause.** Instruction following is probabilistic, and the prompt itself may be disclosed.\n\n**Control.** Authorization lives in code, and tool permissions stay outside the model's discretion.\n\n# Tradeoffs\n\n| Defense Layer | Coverage | Cost | Risk |\n| --- | --- | --- | --- |\n| Input/output filtering | Medium for known patterns | Low | Novel phrasing bypasses filters. False positives block valid use |\n| Privilege separation (least privilege tools) | High for blast-radius reduction | Medium | Does not stop injection itself |\n| Human approval | High for a narrow set of consequential actions | High | Approval fatigue turns the control into ceremony |\n| Output sanitization (parameterized queries, encoding) | High for classic injection vectors | Low | Does not catch broader semantic manipulation |\n| Monitoring and anomaly detection | Medium for visible abuse | Medium | Detection is reactive and noisy |\n\nPrivilege separation is the baseline because it limits harm even when the model is manipulated. Every downstream interpreter still needs ordinary secure coding controls. Filters catch familiar attacks, while human approval is reserved for actions where a mistaken execution is expensive or irreversible.\n\n# Questions\n\n> [!qard]- How do direct and indirect prompt injection enter an LLM's context?\n> Prompt injection is input that changes a language model's behavior or output in a way the application did not intend. Direct and indirect injection differ in where that input enters the model's context.\n>\n> | Aspect | Direct injection | Indirect injection |\n> |---|---|---|\n> | Entry point | The user's own message to the model. | External content that the model processes, such as web pages, files, retrieved documents or tool results. |\n> | Who can supply it | The person interacting with the system. | Anyone who can influence that content, without access to the conversation. |\n> | Example | A chat message telling the model to ignore its instructions and reveal hidden rules. | A web page with hidden instructions that make a summarizing assistant leak the conversation through a link. |\n>\n> The input can be deliberate or accidental, because ordinary content can also conflict with instructions. Injected text does not have to be visible to people as long as the model parses it, and multimodal systems can receive it through images or other media. Its impact depends largely on what the manipulated model can reach. Access to protected context, or to tools that act, is what turns a manipulated answer into a data leak or a damaging action.\n>\n> [OWASP LLM01:2025 Prompt Injection](https://genai.owasp.org/llmrisk/llm01-prompt-injection/)\n\n<!-- qard-id: e41e3af4-2925-4cbe-859c-d58567d74dfb -->\n> [!qard]- Why is prompt injection harder to prevent than SQL injection?\n> Prompt injection is harder to prevent because SQL has a code/data boundary that the database enforces, and language models have no established equivalent. A model receives its instructions and untrusted text through the same natural-language input, so untrusted text can still act as instructions.\n>\n> | Aspect | SQL injection | Prompt injection |\n> |---|---|---|\n> | How code and data reach the interpreter | A parameterized query defines the SQL code first and passes values separately. The database treats each bound value as data, whatever it contains. | System instructions, user messages, retrieved documents and tool results all enter the same model context. No mechanism forces the model to treat any part of that context only as data. |\n> | Effect of marking the data | Binding a value stops it from changing the query's structure. | Delimiters, labels on untrusted content and input filters lower the risk. The model may still follow instructions inside the marked content, and new phrasings can slip past filters. |\n> | Resulting defense | Prevention: a correctly bound value cannot become SQL code. | Containment: bypass is assumed possible, so controls outside the model limit what a manipulated model can do. These controls include least-privilege tools, validation of model output, authorization of each consequential action and human approval for high-risk actions. |\n>\n> OWASP's 2025 guidance states that it is unclear whether foolproof prevention methods for prompt injection exist. That statement describes current techniques. It does not prove that a stronger boundary can never be built.\n>\n> [OWASP SQL Injection Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html) · [OWASP LLM01:2025 Prompt Injection](https://genai.owasp.org/llmrisk/llm01-prompt-injection/)\n\n<!-- qard-id: 4c869882-dbf3-4b42-99ec-760b65df4849 -->\n> [!qard]- Why must secrets stay out of system prompts?\n> A system prompt can be disclosed.\n>\n> - **Not a secret:** adversarial queries can reveal the prompt. Any API keys, database credentials or other sensitive data placed in it can leak with it. Revealed internal rules, filtering criteria or role descriptions can also help an attacker plan further attacks.\n>\n> Secure designs keep credentials outside the prompt and assume that the prompt may be exposed. That assumption does not make every prompt harmless to publish. It means that the system stays protected if the prompt leaks.\n>\n> [OWASP LLM07:2025 System Prompt Leakage](https://genai.owasp.org/llmrisk/llm072025-system-prompt-leakage/) · [OWASP LLM06:2025 Excessive Agency](https://genai.owasp.org/llmrisk/llm062025-excessive-agency/)\n\n> [!qard]- Why can't system-prompt instructions enforce authorization?\n> The model follows prompt instructions only probabilistically, so those instructions cannot reliably decide what a caller is allowed to do.\n>\n> - **Not an authorization boundary:** an instruction such as \"only administrators may delete records\" does not stop a manipulated or mistaken model from requesting a deletion. Enforcement belongs in deterministic code or the downstream service, which checks each requested action against the caller's actual permissions.\n>\n> Authorization decisions remain in deterministic application code or the downstream service.\n>\n> [OWASP LLM07:2025 System Prompt Leakage](https://genai.owasp.org/llmrisk/llm072025-system-prompt-leakage/) · [OWASP LLM06:2025 Excessive Agency](https://genai.owasp.org/llmrisk/llm062025-excessive-agency/)\n\n# References\n\n- [OWASP Top 10 for LLM Applications 2025: official risk descriptions (OWASP Foundation)](https://genai.owasp.org/resource/owasp-top-10-for-llm-applications-2025/)\n- [Not what you have signed up for: indirect prompt injection (Greshake et al., 2023)](https://arxiv.org/abs/2302.12173)\n- [Lessons From Red Teaming 100 Generative AI Products (Microsoft Research)](https://www.microsoft.com/en-us/research/publication/lessons-from-red-teaming-100-generative-ai-products/)\n",
+            "hash": "669576539bc6bc1fca2cb3632368961850aa913d81951f51dafeab7ae929e850",
+            "topic": "AI & ML",
+            "violations": [],
+            "needs_fixing_ids": [],
+            "repair_input_hash": "",
+            "selection_reason": "new"
+          }
+        ],
+        "feedback": [],
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review_process": "focused-whole-note-v1",
+        "pr": null
+      },
+      "base_sha": "67caf2e374f53e8772b86b8ea0f881d74e784fa1",
+      "reservation_deadline": "2026-11-07T06:38:16.547271Z",
+      "stop_reason": "call_limit",
+      "sealed_at": "2026-11-07T06:23:48.072825Z"
     }
   },
   "feedback_workloads": {
