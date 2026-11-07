@@ -5302,586 +5302,18 @@
   },
   "focused_workload": {
     "version": 1,
-    "id": "236350876fc543f98c4ebc7094742d69",
-    "status": "sealed",
-    "phase": "sealed",
-    "started_at": "2026-11-06T19:33:51.179749Z",
-    "elapsed_seconds": 497.5280341999999,
-    "calls_reserved": 15,
-    "responses_received": 15,
-    "attempted_paths": [
-      "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Tool Design.md",
-      "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Tooling.md",
-      "Vault/Home/AI & ML/LLM/LLM Caching.md",
-      "Vault/Home/AI & ML/LLM/LLM.md",
-      "Vault/Home/AI & ML/LLM/Loop Engineering/Agent Loop.md",
-      "Vault/Home/AI & ML/LLM/Loop Engineering/Loop Engineering.md",
-      "Vault/Home/AI & ML/LLM/Loop Engineering/Multi-Agentic Systems.md"
-    ],
+    "id": "f57944c05f7944ee8610e2bd6384fd74",
+    "status": "active",
+    "phase": "selecting",
+    "started_at": "2026-11-07T06:14:05.879571Z",
+    "elapsed_seconds": 0.0012194,
+    "calls_reserved": 0,
+    "responses_received": 0,
+    "attempted_paths": [],
     "accepted_records": [],
-    "outcomes": [
-      {
-        "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Tool Design.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Tool Design.md",
-                "outcome": "keep",
-                "reason": "Audited the whole note against its current text. The opening, the function-calling sequence diagram and the runtime-versus-model execution boundary are accurate. Naming, descriptions, parameters, return values and errors are explained with concrete examples. The C# Agent Framework example is coherent: it uses AIFunctionFactory and ChatOptions.Tools. Versatility, fault tolerance and caching correctly separate normalization from validation, require idempotency for retries, and key caches on tenant and authorization context. The MCPGauge figures are properly hedged as MCP-integration and workload-specific results, and the mitigation table states the conditions under which each technique applies. Both Qards each test one dependent task, have answers that explain mechanism and condition, and cite Anthropic sources. The known_violations list is empty and the frontmatter and fenced code languages are valid. I found no factual error or editorial weakness that justifies an edit, and I did not re-fetch the cited sources."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Tool Design.md",
-                "verdict": "CLEAN",
-                "summary": "The whole note was audited independently. The model/runtime execution split, tool-design principles, fault tolerance, caching, the hedged MCPGauge figures and the mitigation table are accurate and coherent. Both Qards are single bounded tasks with mechanism-rich answers. No concrete defect justifies an edit.",
-                "page_type": "Concept — authorable prose with optional Questions and References. Typed frontmatter, Qard IDs and MD040 language identifiers are all valid.",
-                "current_text_evidence": [
-                  {
-                    "quote": "The model requests an operation. It does not execute the function.",
-                    "line_start": 39,
-                    "reason": "States the key boundary: the runtime holds execution authority, and a schema alone is not security."
-                  },
-                  {
-                    "quote": "Normalization changes representation, not trust",
-                    "line_start": 93,
-                    "reason": "Separates normalization from validation, and the point is applied consistently in the Tradeoffs table."
-                  },
-                  {
-                    "quote": "These measurements cover MCP integration as a whole, including the context it brought into the window, rather than tool schemas in isolation.",
-                    "line_start": 141,
-                    "reason": "The 9.5% average drop and the 3.25× to 236.5× token overhead match the MCPGauge abstract. The caveat keeps the claim from being overstated."
-                  },
-                  {
-                    "quote": "the cache key must include tenant and authorization context or it can leak data between callers",
-                    "line_start": 123,
-                    "reason": "Gives the condition and failure mode for caching reads, and separates mutations from reads."
-                  },
-                  {
-                    "quote": "What determines whether related operations should use one broad tool or several narrower tools?",
-                    "line_start": 192,
-                    "reason": "A single focused comparison card whose answer gives the deciding condition and says to measure rather than assume."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the note covers one coherent topic, designing callable tools. Its sections (principles, fault tolerance, caching, pitfalls and tradeoffs) depend on each other.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "overall_reason": "Independent full-note audit found no factual, editorial or question-quality defect. MCPGauge figures were verified against the arXiv abstract. No edits were proposed, and the keep is justified by current-text evidence.",
-            "change_checks": []
-          },
-          "model_calls": 2
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Tooling.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Tooling.md",
-                "outcome": "keep",
-                "reason": "Audited the whole folder note. The opening defines tooling as the developer-facing harness layer and separates it from the API-level [[Tool Design]]. The wikilinks to Skills, Plugins, MCP, Hooks, Agent Instructions and Coding Agents each carry a stated reason. The three categories (coding agents, review agents, IDE extensions) are explained by authority, independence and visibility tradeoffs. The note has no cards, so there is no question-quality or ID issue. The Datacore folder map block is intact, and the note has no standalone Links section. References are two bare descriptive links, CodeRabbit and Aider. The CodeRabbit claim (GitHub and GitLab review workflows) is consistent with its public docs, and the note makes no version-sensitive claims. known_violations is empty. Any edit would be cosmetic churn."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Tooling.md",
-                "verdict": "CLEAN",
-                "summary": "The folder note introduces developer-facing harness tooling, separates it from API-level Tool Design, and explains the three categories by authority, independence and visibility. The prose is accurate, non-repetitive and in the right voice, so no edit is warranted.",
-                "page_type": "FolderNote — keeps the FolderNote tag and the protected Datacore folder-map block. It has no standalone Links section and no cards. References are bare descriptive links.",
-                "current_text_evidence": [
-                  {
-                    "quote": "[[Tool Design]] covers the lower-level API contract between the model and each callable operation.",
-                    "line_start": 15,
-                    "reason": "Sets the scope boundary against the sibling note, so the topic is recoverable quickly."
-                  },
-                  {
-                    "quote": "The interface matters less than what the agent can read, change, and run.",
-                    "line_start": 19,
-                    "reason": "States the operating idea. The wikilinks that follow each carry a stated reason, and the paragraph ends with the autonomy decision."
-                  },
-                  {
-                    "quote": "the useful distinction is the authority they receive and the evidence they return",
-                    "line_start": 30,
-                    "reason": "Gives a concrete engineering criterion instead of a tool list."
-                  },
-                  {
-                    "quote": "Letting the writer approve its own change removes the check that matters.",
-                    "line_start": 34,
-                    "reason": "States the independence tradeoff for review agents."
-                  },
-                  {
-                    "quote": "A useful IDE agent still needs a readable action log and clear approval before sensitive actions.",
-                    "line_start": 38,
-                    "reason": "Names the visibility cost and its mitigation."
-                  },
-                  {
-                    "quote": "```datacorejsx",
-                    "line_start": 21,
-                    "reason": "The protected folder-map block is intact and has a language identifier, so MD040 is satisfied."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the three categories are short and share one purpose. Each deeper topic already has its own sibling note (Coding Agents, Skills, Plugins, Hooks).",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "NOT APPLICABLE",
-                  "identity_safety": "NOT APPLICABLE",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "overall_reason": "The whole-note audit found no accuracy, clarity, structure or rule defects. The keep disposition is justified, and any edit would be cosmetic churn.",
-            "change_checks": []
-          },
-          "model_calls": 4
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/LLM/LLM Caching.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/LLM Caching.md",
-                "outcome": "keep",
-                "reason": "Audited the whole note against its current text. The opening table separates prompt/prefix, exact response and semantic response caches by what is reused, what counts as a hit and what work remains. The prompt-caching section covers prefill versus decode, the KV cache, exact-prefix matching, breakpoints, ordering, deterministic construction, history compaction, retention, concurrent cold requests, and a symptom/cause/diagnostic table. The response-caching section covers key composition, tenant and permission scoping, TTL versus invalidation, the semantic false-hit example, threshold calibration, and index versioning. The measurement section keeps the layers separate. These claims are consistent with the OpenAI and Anthropic prompt-caching documentation as I know it. The note makes no unsupported absolute claims and carries hedges where behavior is provider-specific. References are bare descriptive links. The note has no Qard cards, there are no known violations, and no feedback is open. I found no verified defect, so an edit would be cosmetic churn."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "No edits proposed. The complete note has no concrete defect, no known violations, no cards and no open feedback. The keep is justified.",
-            "change_checks": [],
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/LLM Caching.md",
-                "verdict": "CLEAN",
-                "summary": "The note separates prompt/prefix, exact response and semantic response caches. It gives the mechanism (prefill versus decode, exact-prefix matching), the conditions that break reuse, and how to measure each layer. The keep is justified, and an edit would be cosmetic churn.",
-                "page_type": "Concept — frontmatter is typed. Questions are optional and absent. References are bare descriptive links. Code fences carry a language identifier. Wikilinks use full paths with aliases.",
-                "current_text_evidence": [
-                  {
-                    "quote": "| Prompt/prefix | Computed state for an input prefix |",
-                    "line_start": 18,
-                    "reason": "The opening table contrasts what each cache reuses, what counts as a hit and what work remains, so the topic is recoverable quickly."
-                  },
-                  {
-                    "quote": "A hit therefore reduces repeated prefill work; it does not remove output generation or guarantee identical answers.",
-                    "line_start": 37,
-                    "reason": "States the mechanism and its limit, with prefill and decode explained in order before the failure analysis."
-                  },
-                  {
-                    "quote": "Concurrent cold requests may arrive before the first write is available.",
-                    "line_start": 95,
-                    "reason": "Covers a real condition (a warm-up race) and is attributed to Anthropic's documentation, which does describe availability after the first response begins."
-                  },
-                  {
-                    "quote": "| Serial calls hit, parallel cold calls miss | Fan-out outran cache creation |",
-                    "line_start": 106,
-                    "reason": "The symptom/cause/diagnostic table gives concrete debugging judgment instead of generic advice."
-                  },
-                  {
-                    "quote": "are close in meaning but require different answers.",
-                    "line_start": 129,
-                    "reason": "The largest versus second-largest lake example shows why similarity is a weak correctness test. Tenant and permission scoping and index versioning are also covered."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: prompt caching, response caching and combined measurement are tightly coupled. The opening table and the final measurement section compare them, so separate notes would lose that comparison.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "NOT APPLICABLE",
-                  "identity_safety": "NOT APPLICABLE",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ]
-          },
-          "model_calls": 6
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/LLM/LLM.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/LLM.md",
-                "outcome": "keep",
-                "reason": "I read the whole hub note against its prose and its three cards. The opening separates the LLM definition from architecture families, and the Engineering Routes table with its diagram maps each route to a distinct design question. The transformer-family table matches the BERT, T5 and GPT papers: BERT is bidirectional with masked-token prediction, T5 is an encoder-decoder with span corruption, and GPT-style models are causal decoder-only. The checkpoint-contract section teaches a real failure mechanism: tensor shapes can match while the tokenizer is wrong. The MoE sections correctly separate total parameters, active parameters and measured latency, and they cover capacity factors, dropping or rerouting tokens, and communication cost, consistent with the Switch Transformers paper. The note also correctly says DeepSeek-R1 reuses the V3 base architecture while GRPO belongs to post-training. The cards each test one gradeable task and carry sources on the answer side. The prompting, RAG and fine-tuning card matches OpenAI's accuracy-optimization guidance. The note has no known violations, no unclear claims and no redundancy worth fixing, so any edit would be cosmetic churn."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "I read the whole note and found no concrete defect. The factual claims I checked against my own knowledge of the primary papers are sound, and the cards are well formed. A keep is justified, and any edit would be cosmetic churn.",
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/LLM.md",
-                "verdict": "CLEAN",
-                "summary": "The hub note separates what an LLM is from its architecture families, routes the four runtime disciplines in a table with a diagram, and explains checkpoint contracts and MoE cost accurately. The note is coherent, correctly scoped and free of padding, so leaving it unchanged is justified.",
-                "page_type": "FolderNote: the Datacore folder-map block is protected, and Questions and References are optional but present and well formed.",
-                "current_text_evidence": [
-                  {
-                    "quote": "A large language model (LLM) is a neural language model trained at enough scale to handle a broad range of language tasks.",
-                    "line_start": 18,
-                    "reason": "The opening defines an LLM quickly and separates the definition from architecture families, so the topic is recoverable."
-                  },
-                  {
-                    "quote": "A wrong tokenizer is harder to spot: tensor dimensions still match while the same text maps to different IDs, silently changing behavior.",
-                    "line_start": 79,
-                    "reason": "This states a concrete failure mechanism with its condition, which supports engineering judgment."
-                  },
-                  {
-                    "quote": "**T5** is a generative encoder-decoder. It pretrains with a span-corruption text-to-text objective",
-                    "line_start": 65,
-                    "reason": "This matches the T5 paper. BERT is described as masked-token and encoder-only, and GPT-style models as causal decoder-only, which is also accurate."
-                  },
-                  {
-                    "quote": "A dense model can beat a sparse model with a similar advertised active count when expert traffic is communication-bound.",
-                    "line_start": 132,
-                    "reason": "This states the condition that changes the MoE cost decision and agrees with the Switch Transformers discussion."
-                  },
-                  {
-                    "quote": "> [!qard]- How should prompting, RAG, and fine-tuning be chosen for an LLM system?",
-                    "line_start": 168,
-                    "reason": "This card is one focused comparison with a decision path and the conditions that change it. It carries an answer-side source and keeps its existing ID."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the foundations, training and MoE sections all serve the hub's purpose of explaining model internals before routing to the sibling topics. The MoE section could become its own note later, but it is not independently needed now.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "change_checks": []
-          },
-          "model_calls": 8
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/LLM/Loop Engineering/Agent Loop.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Loop Engineering/Agent Loop.md",
-                "outcome": "keep",
-                "reason": "I read the whole note against its text and the sources it cites. The opening separates model and harness responsibilities. The four-step ReAct cycle matches the state diagram, the API walkthrough and both code examples. The note says plain text does not prove completion, so it correctly calls for a separate completion predicate. The pitfalls section pairs each failure (runaway calls, token growth, invalid tool calls) with a specific control: an iteration cap, compaction of tool results, or validation in code. The two existing cards each test one task, and their answers are mechanism-based and cite sources. The frontmatter and the callout metadata are intact. I found no factual error or teaching gap that justifies an edit, so a keep is better than churn."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "The note is accurate, well ordered and free of known violations, and the keep is justified. I found no concrete defect that warrants an edit.",
-            "change_checks": [],
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Loop Engineering/Agent Loop.md",
-                "verdict": "CLEAN",
-                "summary": "The note explains the loop, the split between model and harness, and the failure controls, in a sensible order. I checked the specific figures (ALFWorld 34 points, the 369-call production run) against sources and found them accurate. The two cards each test one task. No edit is needed.",
-                "page_type": "Concept — authorable prose; Questions and References are present and valid; frontmatter and qard IDs are protected.",
-                "current_text_evidence": [
-                  {
-                    "quote": "A failure in tool execution, permissions, termination, or state handling therefore belongs to harness engineering rather than model reasoning.",
-                    "line_start": 19,
-                    "reason": "States the model/harness boundary clearly and decisively, which supports engineering judgment."
-                  },
-                  {
-                    "quote": "Plain text with no tool calls normally ends the current turn, but it does not prove that the user's goal is satisfied.",
-                    "line_start": 54,
-                    "reason": "States an important condition: ending a turn is not the same as completing the goal. It prevents a common misconception."
-                  },
-                  {
-                    "quote": "one run made 369 tool calls, consumed 9.7 million tokens, and produced 30 structured documents",
-                    "line_start": 124,
-                    "reason": "The cited article confirms these figures. The example backs the pitfall with concrete numbers."
-                  },
-                  {
-                    "quote": "Tool schemas are model input, not an enforcement mechanism.",
-                    "line_start": 144,
-                    "reason": "Gives the key reason validation must be done in code, and leads into the validation advice that follows."
-                  },
-                  {
-                    "quote": "Time limit | A slow or hanging call that never finishes its iteration, so an iteration cap alone would never trigger",
-                    "line_start": 172,
-                    "reason": "The card answer explains the mechanism behind each safeguard, not only its name."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the note covers one coherent topic (the agent loop, its code and its failure modes), and separating them would weaken it.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ]
-          },
-          "model_calls": 10
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/LLM/Loop Engineering/Loop Engineering.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Loop Engineering/Loop Engineering.md",
-                "outcome": "keep",
-                "reason": "I read the whole note against its text. The opening defines loop engineering and places it after prompt, context and harness engineering, with links to Agent Loop and Multi-Agentic Systems. The three sections (termination and budgets, verification inside the loop, state across iterations) follow a logical order. Each one states a mechanism and a condition. Examples are the stop-versus-success distinction, the budget fallback, ground-truth checks, and the compaction timing versus content split. The three cards each test one dependent task. The first covers the runtime role in a tool loop. The second covers reporting at budget expiry and notes that platform behavior differs. The third covers how compaction decisions are split and says plainly that the split is a convention and not an API boundary. The claims about OpenAI max_turns handling, Anthropic task budgets and Responses API compaction are hedged and match the cited documentation as I know it. The known-violations inventory is empty, no cards are flagged, and the frontmatter, code fence language and references are valid. I found no concrete defect, so edits would only add churn."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "Whole-note audit found no concrete defect. The note is accurate, ordered logically and free of padding. Its three cards each test one dependent task. No edits are proposed, none are needed, and no sources or rejections require checking.",
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Loop Engineering/Loop Engineering.md",
-                "verdict": "CLEAN",
-                "summary": "I read the whole note. The opening defines loop engineering and places it in the prompt, context, harness and loop stack. The sections run termination, verification, state, and each gives mechanisms with conditions. The cards are focused, and the platform claims are hedged and match the vendors' documented behavior. No edit would add concrete value.",
-                "page_type": "FolderNote — keeps tags: [FolderNote] and the protected datacorejsx folder map; Questions and References are optional and valid as present.",
-                "current_text_evidence": [
-                  {
-                    "quote": "A single call is bounded. A loop carries each result into the next iteration, so mistakes can accumulate just as easily as useful progress.",
-                    "line_start": 20,
-                    "reason": "States the core reason loops need engineering. The wording is direct and whiteboard-style."
-                  },
-                  {
-                    "quote": "A turn with no remaining tool calls shows only that the model has stopped requesting actions; completion needs task-specific evidence the runtime can verify",
-                    "line_start": 35,
-                    "reason": "Separates stopping from success and names the mechanism and its limit, so the note supports engineering judgment."
-                  },
-                  {
-                    "quote": "Loop engineering decides when to compact, offload, or stop.",
-                    "line_start": 49,
-                    "reason": "Draws the boundary with Context Engineering clearly. The later compaction card repeats the split for recall, not as filler."
-                  },
-                  {
-                    "quote": "What should a runtime report when its loop budget expires before the task is complete?",
-                    "line_start": 62,
-                    "reason": "This question is self-contained and has a finite answer. Its answer is hedged on platform differences and cites primary sources on the answer side."
-                  },
-                  {
-                    "quote": "This split is a convention for assigning responsibility, not a boundary defined by an API.",
-                    "line_start": 83,
-                    "reason": "Prevents a misleading claim by marking the content/timing split as a convention."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: termination, verification and state are facets of one loop-control topic. The note is short, and the sections depend on each other and on the opening.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "change_checks": []
-          },
-          "model_calls": 12
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/LLM/Loop Engineering/Multi-Agentic Systems.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Loop Engineering/Multi-Agentic Systems.md",
-                "outcome": "keep",
-                "reason": "I read the whole note and found no verified defect that justifies an edit. The opening separates multi-agent systems from single agents and workflow patterns. The three justifying conditions (context isolation, parallelism, specialization) match Anthropic's multi-agent research guidance, including the roughly 15x token figure, which the note correctly scopes to one workload. The communication section matches the OpenAI Agents SDK handoff behavior: the previous history is passed by default and `input_filter` can change it. The C# sample uses the Microsoft Agent Framework handoff builder, with the routing graph declared explicitly. The pitfalls explain mechanisms and mitigations. The tradeoff table is hedged appropriately. The three Qards each test one gradeable task and carry answer-side primary sources. The References are relevant and have no trailing annotations. I made no edit because I found no concrete error or learning gap, and the note's length is justified by its content."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "Independent whole-note read found no concrete defect. The key claims (15x token figure scoped to one workload, OpenAI handoff default history and input_filter, tracing spans, Microsoft Agent Framework handoff builder) are accurate. The Qards are single-task with answer-side primary sources, and no edits are proposed.",
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Loop Engineering/Multi-Agentic Systems.md",
-                "verdict": "CLEAN",
-                "summary": "The note separates multi-agent systems from single agents and workflow patterns. It gives three conditions that justify the cost and walks through communication patterns, coordination topologies, pitfalls with mitigations, and a tradeoff table. A keep is justified because the explanation order is sound, the terminology is consistent, and the claims are accurate and appropriately hedged. Repetition between the intro and the first Qard is deliberate recall reinforcement. The three Qards each test one gradeable task with answer-side sources.",
-                "page_type": "Concept — typed frontmatter, optional Questions/References present and valid; MD040 satisfied (csharp fence); status Done is owner-set and untouched; Qard IDs preserved.",
-                "current_text_evidence": [
-                  {
-                    "quote": "That number belongs to one workload.",
-                    "line_start": 19,
-                    "reason": "The 15x token figure is correctly scoped to one workload, matching Anthropic's multi-agent research post."
-                  },
-                  {
-                    "quote": "The useful unit of decomposition is context.",
-                    "line_start": 27,
-                    "reason": "A clear organizing idea with a concrete example (implementation and tests staying together) that supports engineering judgment."
-                  },
-                  {
-                    "quote": "OpenAI's SDK offers `input_filter` callbacks, including filters that remove prior tool calls.",
-                    "line_start": 35,
-                    "reason": "Matches the OpenAI Agents SDK handoff documentation: history is passed by default and input_filter can alter it."
-                  },
-                  {
-                    "quote": "The model chooses when to transfer, while the workflow restricts where it may go.",
-                    "line_start": 85,
-                    "reason": "Explains the mechanism of the handoff builder's routing graph after the C# example."
-                  },
-                  {
-                    "quote": "Every conversation needs a bound: `max_turns`, a token budget, and a completion signal the runtime can check.",
-                    "line_start": 107,
-                    "reason": "Concrete mitigation that pairs with the named failure (politeness loops)."
-                  },
-                  {
-                    "quote": "The smallest team that produces a verified improvement is enough.",
-                    "line_start": 136,
-                    "reason": "Gives a decided engineering conclusion that closes the tradeoff section."
-                  },
-                  {
-                    "quote": "When one agent hands work to another, how much prior context should the receiving agent get?",
-                    "line_start": 154,
-                    "reason": "Question is a single focused comparison with a table of benefits and risks, not a bundle of independent tasks."
-                  },
-                  {
-                    "quote": "What evidence makes failures across multi-agent handoffs traceable?",
-                    "line_start": 168,
-                    "reason": "One dependent explanation of trace evidence with an answer-side primary source on OpenAI tracing."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: communication patterns, coordination topologies and failure modes all serve one question, when and how to coordinate several agents, and they are more useful together.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "change_checks": []
-          },
-          "model_calls": 14
-        }
-      }
-    ],
+    "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-06T19:42:08.707282Z",
-    "topic": "AI & ML",
-    "topic_id": "ai-ml-4edf0823",
-    "current_batch": {
-      "topic": "AI & ML",
-      "topic_id": "ai-ml-4edf0823",
-      "notes": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Model Selection and Routing.md",
-          "content": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"Selecting and routing models from measured task quality, latency, reliability, and cost.\"\nlevel: [\"2\"]\npriority: Medium\nstatus: Ready to Repeat\npublish: true\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Model Selection and Routing\"\nflashcard_uid: \"776eda2e\"\ncreated: \"2026-06-11T07:39:53.000Z\"\nmodified: \"2026-11-02T09:03:54.806Z\"\npublished: \"2026-07-08T13:28:37.410Z\"\n---\n\nModel selection decides which models are allowed to serve a workload. Routing makes the per-request choice among them. Frontier models often handle difficult tasks well. Smaller models are usually cheaper and faster. Neither tendency is a contract. A specialized model can win on a narrow task, while a frontier model can miss a latency SLA or regress after a provider update. Production selection is empirical: the least expensive candidate that clears the workload's quality, safety, reliability, and latency gates wins.\n\nApplication-level routing chooses between complete model deployments for each request. [[Home/AI & ML/LLM/LLM#Mixture-of-experts|Mixture-of-experts routing]] happens inside one sparse model and selects internal expert parameters token by token. The two mechanisms solve different cost and capacity problems.\n\n# Selection Criteria\n\nEvery candidate needs the same versioned workload and constraints:\n\n- **Task quality** — correctness, groundedness, tool-call success, and failure slices on the labeled set.\n- **Latency** — p50 and p95 under the expected prompt size, output length, concurrency, and region.\n- **Cost** — input, cached input, output, tool calls, and retry or escalation cost per successful task.\n- **Capabilities** — required context, structured outputs, tools, modalities, and language coverage.\n- **Safety and policy** — refusal behavior, data handling, residency, and provider terms.\n- **Operations** — rate limits, uptime, version pinning, observability, and fallback behavior.\n\nPublic leaderboards are useful for shortlisting. Release evidence still comes from [[Home/AI & ML/LLM/Evaluation/Evaluation|evaluation]] on the distribution and rubric that define the product.\n\n# Routing Patterns\n\n## Deterministic Task Mapping\n\nKnown task classes can map to models in configuration: extraction goes to one candidate, complex synthesis to another, and image work to a multimodal model. Explicit task boundaries keep the policy auditable.\n\n## Classifier Routing\n\nA cheap classifier predicts task type or difficulty before generation, avoiding the cost of a failed first attempt. But a false “easy” decision can silently lower quality. Router evaluation therefore needs overall classification accuracy plus per-route recall for hard and safety-sensitive cases.\n\n## Cascade\n\nA cascade starts with a lower-cost model and escalates when an observable gate fails, such as schema validation, a groundedness check, calibrated confidence, or an explicit unsupported result.\n\n```mermaid\nflowchart LR\n    Q[Request] --> S[Lower-cost model]\n    S --> V{Quality gate passes?}\n    V -->|Yes| O[Return result]\n    V -->|No| F[Escalate to stronger model]\n    F --> O\n```\n\nA cascade saves money only when the first attempt plus its escalations cost less than sending every request to the stronger model. Escalated traffic also pays extra latency. End-to-end p95 matters more than either model's isolated number.\n\n# Router Evaluation\n\nA labeled routing set starts with real traffic. Each request records which candidates pass the task rubric along with latency and full cost. That supports comparison against an oracle that always selects the cheapest passing model.\n\nRouter evaluation tracks these signals:\n\n- End-to-end task success together with classifier accuracy.\n- Hard-query miss rate and safety-sensitive miss rate.\n- Escalation frequency and the cost of duplicate generation.\n- p95 latency by route and after fallback.\n- Drift when traffic, prompts, provider versions, or prices change.\n\nShadow evaluation runs alternative candidates without serving their answers. It provides fresh routing evidence before user-visible assignments change.\n\n# Operations\n\nOne gateway boundary should own provider calls. Model identifiers, fallbacks, timeouts, and routing policy then stay in configuration instead of leaking into scattered conditionals. Operational records need the route decision, candidate version, gate result, latency, and safe token or cost metadata. Sensitive prompts and responses stay out by default.\n\nVersions should be pinned where the provider allows it. A model change behind an alias invalidates earlier evidence and triggers evaluation again. Fallbacks carry the same capability and policy requirements. Availability alone does not make a model safe if it cannot honor the output contract.\n\n# Pitfalls\n\n**Frontier by default:** this hides missing task thresholds and can spend the most on traffic a smaller candidate already passes.\n\n**Small by assumption:** low advertised cost means little when retries or human escalation raise the cost per successful task.\n\n**Router accuracy as the goal:** a class label is only a proxy. The real objective is end-to-end task success within cost and latency constraints.\n\n**Unmeasured cascade tails:** escalated requests pay for two generations and can dominate p95 latency.\n\n**Provider aliases without regression gates:** silent model changes invalidate earlier routing evidence.\n\n# Tradeoffs\n\n| Strategy | Main benefit | Main cost | Good fit |\n| --- | --- | --- | --- |\n| One approved model | Simple operations | Pays one model’s tradeoffs for all traffic | Uniform workload or early product |\n| Deterministic mapping | Auditable decisions | Rules drift as traffic changes | Clear task categories |\n| Classifier router | One generation per request | Misrouting risk and calibration work | Predictable difficulty signals |\n| Cascade | Observable second chance | Duplicate cost and tail latency | Cheap reliable failure gate |\n| Fine-tuned specialist | Low serving cost on one task | Training and model lifecycle | Stable, high-volume narrow task |\n\n# Questions\n\n<!-- qard-id: ff4e82a3-bf2c-40e8-b0b3-e27753258ec9 -->\n> [!qard]- How should candidate LLMs be compared for a production workload?\n> Candidate LLMs are compared empirically. Every candidate runs on the same representative, versioned workload and is judged against the same gates for task quality, safety, latency and cost. A common decision rule then selects the least expensive candidate that clears every required gate.\n>\n> What the comparison measures:\n>\n> - **Task quality:** correctness, groundedness, tool-call success and failure slices, measured on a labeled set drawn from the product's own traffic and rubric.\n> - **Safety and policy:** refusal behavior, data handling and provider terms.\n> - **Latency:** p50 and p95 at the expected prompt size, output length and concurrency.\n> - **Cost per successful task:** input, output and tool usage, plus retries and escalations. A model with a low price per token can still cost more per completed task if it often needs a retry or a human.\n> - **Capabilities and operations:** required context length, structured outputs, tools, rate limits and version pinning.\n> \n> Public leaderboards help build a shortlist, but they measure a different distribution and rubric. The evidence also expires. A change in traffic, prompts or prices invalidates earlier results, as does a new model version behind a provider alias, so the comparison is rerun when any of these occur.\n>\n> Sources: [OpenAI evals](https://developers.openai.com/api/docs/guides/evals) · [OpenAI model optimization](https://developers.openai.com/api/docs/guides/model-optimization)\n\n<!-- qard-id: d37397ec-330a-4742-a8ef-22a28b395047 -->\n> [!qard]- How do classifier routing and cascading differ when selecting an LLM?\n> A classifier router predicts which model should handle a request before anything is generated. A cascade generates with a lower-cost model first and escalates to a stronger model only when an observable check on that output fails.\n>\n> | Aspect | Classifier routing | Cascade |\n> |---|---|---|\n> | When the decision is made | Before generation, from request features such as task type or predicted difficulty. | After a first generation, from a gate on the output such as schema validation, a groundedness check, calibrated confidence or an explicit unsupported result. |\n> | Generations per request | One, so no request pays for a discarded attempt. | One when the gate passes; at least two when the request escalates. |\n> | Typical failure | A false “easy” prediction sends a hard request to a weaker model. Quality drops silently unless something downstream checks the answer. | Escalated requests pay for duplicate generation and extra latency, which can dominate p95. If many requests escalate, the cascade can cost more than always using the stronger model. |\n> | What it depends on | Predictable difficulty signals, and a classifier evaluated on per-route recall for hard and safety-sensitive requests. | A cheap, reliable gate. A weak gate escalates too often or lets bad answers through. |\n>\n> Sources: [FrugalGPT (Chen et al.)](https://arxiv.org/abs/2305.05176) · [Microsoft Foundry Model Router](https://learn.microsoft.com/en-us/azure/ai-foundry/openai/concepts/model-router?view=foundry) · [OpenAI evals](https://developers.openai.com/api/docs/guides/evals)\n\n> [!qard]- How can classifier routing and cascading be combined?\n> **Combining them:** the classifier chooses the starting model, and a cascade gate checks that model's output. Requests predicted to be hard go straight to the stronger model. Requests predicted to be easy start on the cheaper model with the gate behind it. The gate then catches some misroutes that classifier routing alone would serve unnoticed.\n>\n> The combined policy is judged on end-to-end task success, cost per successful task and tail latency, not on classifier accuracy alone. Managed routers such as Microsoft Foundry Model Router package per-request model selection as a product feature, and they still need the same evaluation on the target workload.\n>\n> Sources: [FrugalGPT (Chen et al.)](https://arxiv.org/abs/2305.05176) · [Microsoft Foundry Model Router](https://learn.microsoft.com/en-us/azure/ai-foundry/openai/concepts/model-router?view=foundry) · [OpenAI evals](https://developers.openai.com/api/docs/guides/evals)\n\n# References\n\n- [LiteLLM](https://docs.litellm.ai/)\n",
-          "hash": "71657e262f624e2786f23d722549c199671a15f452d7b4a94ce51e58c86c60c5",
-          "topic": "AI & ML",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "new"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "base_sha": "67caf2e374f53e8772b86b8ea0f881d74e784fa1",
-    "reservation_deadline": "2026-11-06T19:56:47.970428Z",
-    "error": "GitHub request failed (1): gh: Server Error (HTTP 502)",
-    "stop_reason": "provider_error",
-    "sealed_at": "2026-11-06T19:42:08.707287Z"
+    "checkpoint_at": "2026-11-07T06:14:05.880351Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
@@ -14779,6 +14211,589 @@
       "reservation_deadline": "2026-11-06T07:26:04.610147Z",
       "stop_reason": "call_limit",
       "sealed_at": "2026-11-06T07:11:31.065054Z"
+    },
+    "236350876fc543f98c4ebc7094742d69": {
+      "version": 1,
+      "id": "236350876fc543f98c4ebc7094742d69",
+      "status": "sealed",
+      "phase": "sealed",
+      "started_at": "2026-11-06T19:33:51.179749Z",
+      "elapsed_seconds": 497.5280341999999,
+      "calls_reserved": 15,
+      "responses_received": 15,
+      "attempted_paths": [
+        "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Tool Design.md",
+        "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Tooling.md",
+        "Vault/Home/AI & ML/LLM/LLM Caching.md",
+        "Vault/Home/AI & ML/LLM/LLM.md",
+        "Vault/Home/AI & ML/LLM/Loop Engineering/Agent Loop.md",
+        "Vault/Home/AI & ML/LLM/Loop Engineering/Loop Engineering.md",
+        "Vault/Home/AI & ML/LLM/Loop Engineering/Multi-Agentic Systems.md"
+      ],
+      "accepted_records": [],
+      "outcomes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Tool Design.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Tool Design.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole note against its current text. The opening, the function-calling sequence diagram and the runtime-versus-model execution boundary are accurate. Naming, descriptions, parameters, return values and errors are explained with concrete examples. The C# Agent Framework example is coherent: it uses AIFunctionFactory and ChatOptions.Tools. Versatility, fault tolerance and caching correctly separate normalization from validation, require idempotency for retries, and key caches on tenant and authorization context. The MCPGauge figures are properly hedged as MCP-integration and workload-specific results, and the mitigation table states the conditions under which each technique applies. Both Qards each test one dependent task, have answers that explain mechanism and condition, and cite Anthropic sources. The known_violations list is empty and the frontmatter and fenced code languages are valid. I found no factual error or editorial weakness that justifies an edit, and I did not re-fetch the cited sources."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Tool Design.md",
+                  "verdict": "CLEAN",
+                  "summary": "The whole note was audited independently. The model/runtime execution split, tool-design principles, fault tolerance, caching, the hedged MCPGauge figures and the mitigation table are accurate and coherent. Both Qards are single bounded tasks with mechanism-rich answers. No concrete defect justifies an edit.",
+                  "page_type": "Concept — authorable prose with optional Questions and References. Typed frontmatter, Qard IDs and MD040 language identifiers are all valid.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "The model requests an operation. It does not execute the function.",
+                      "line_start": 39,
+                      "reason": "States the key boundary: the runtime holds execution authority, and a schema alone is not security."
+                    },
+                    {
+                      "quote": "Normalization changes representation, not trust",
+                      "line_start": 93,
+                      "reason": "Separates normalization from validation, and the point is applied consistently in the Tradeoffs table."
+                    },
+                    {
+                      "quote": "These measurements cover MCP integration as a whole, including the context it brought into the window, rather than tool schemas in isolation.",
+                      "line_start": 141,
+                      "reason": "The 9.5% average drop and the 3.25× to 236.5× token overhead match the MCPGauge abstract. The caveat keeps the claim from being overstated."
+                    },
+                    {
+                      "quote": "the cache key must include tenant and authorization context or it can leak data between callers",
+                      "line_start": 123,
+                      "reason": "Gives the condition and failure mode for caching reads, and separates mutations from reads."
+                    },
+                    {
+                      "quote": "What determines whether related operations should use one broad tool or several narrower tools?",
+                      "line_start": 192,
+                      "reason": "A single focused comparison card whose answer gives the deciding condition and says to measure rather than assume."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the note covers one coherent topic, designing callable tools. Its sections (principles, fault tolerance, caching, pitfalls and tradeoffs) depend on each other.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "overall_reason": "Independent full-note audit found no factual, editorial or question-quality defect. MCPGauge figures were verified against the arXiv abstract. No edits were proposed, and the keep is justified by current-text evidence.",
+              "change_checks": []
+            },
+            "model_calls": 2
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Tooling.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Tooling.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole folder note. The opening defines tooling as the developer-facing harness layer and separates it from the API-level [[Tool Design]]. The wikilinks to Skills, Plugins, MCP, Hooks, Agent Instructions and Coding Agents each carry a stated reason. The three categories (coding agents, review agents, IDE extensions) are explained by authority, independence and visibility tradeoffs. The note has no cards, so there is no question-quality or ID issue. The Datacore folder map block is intact, and the note has no standalone Links section. References are two bare descriptive links, CodeRabbit and Aider. The CodeRabbit claim (GitHub and GitLab review workflows) is consistent with its public docs, and the note makes no version-sensitive claims. known_violations is empty. Any edit would be cosmetic churn."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Tooling.md",
+                  "verdict": "CLEAN",
+                  "summary": "The folder note introduces developer-facing harness tooling, separates it from API-level Tool Design, and explains the three categories by authority, independence and visibility. The prose is accurate, non-repetitive and in the right voice, so no edit is warranted.",
+                  "page_type": "FolderNote — keeps the FolderNote tag and the protected Datacore folder-map block. It has no standalone Links section and no cards. References are bare descriptive links.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "[[Tool Design]] covers the lower-level API contract between the model and each callable operation.",
+                      "line_start": 15,
+                      "reason": "Sets the scope boundary against the sibling note, so the topic is recoverable quickly."
+                    },
+                    {
+                      "quote": "The interface matters less than what the agent can read, change, and run.",
+                      "line_start": 19,
+                      "reason": "States the operating idea. The wikilinks that follow each carry a stated reason, and the paragraph ends with the autonomy decision."
+                    },
+                    {
+                      "quote": "the useful distinction is the authority they receive and the evidence they return",
+                      "line_start": 30,
+                      "reason": "Gives a concrete engineering criterion instead of a tool list."
+                    },
+                    {
+                      "quote": "Letting the writer approve its own change removes the check that matters.",
+                      "line_start": 34,
+                      "reason": "States the independence tradeoff for review agents."
+                    },
+                    {
+                      "quote": "A useful IDE agent still needs a readable action log and clear approval before sensitive actions.",
+                      "line_start": 38,
+                      "reason": "Names the visibility cost and its mitigation."
+                    },
+                    {
+                      "quote": "```datacorejsx",
+                      "line_start": 21,
+                      "reason": "The protected folder-map block is intact and has a language identifier, so MD040 is satisfied."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the three categories are short and share one purpose. Each deeper topic already has its own sibling note (Coding Agents, Skills, Plugins, Hooks).",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "NOT APPLICABLE",
+                    "identity_safety": "NOT APPLICABLE",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "overall_reason": "The whole-note audit found no accuracy, clarity, structure or rule defects. The keep disposition is justified, and any edit would be cosmetic churn.",
+              "change_checks": []
+            },
+            "model_calls": 4
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/LLM Caching.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/LLM Caching.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole note against its current text. The opening table separates prompt/prefix, exact response and semantic response caches by what is reused, what counts as a hit and what work remains. The prompt-caching section covers prefill versus decode, the KV cache, exact-prefix matching, breakpoints, ordering, deterministic construction, history compaction, retention, concurrent cold requests, and a symptom/cause/diagnostic table. The response-caching section covers key composition, tenant and permission scoping, TTL versus invalidation, the semantic false-hit example, threshold calibration, and index versioning. The measurement section keeps the layers separate. These claims are consistent with the OpenAI and Anthropic prompt-caching documentation as I know it. The note makes no unsupported absolute claims and carries hedges where behavior is provider-specific. References are bare descriptive links. The note has no Qard cards, there are no known violations, and no feedback is open. I found no verified defect, so an edit would be cosmetic churn."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "No edits proposed. The complete note has no concrete defect, no known violations, no cards and no open feedback. The keep is justified.",
+              "change_checks": [],
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/LLM Caching.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note separates prompt/prefix, exact response and semantic response caches. It gives the mechanism (prefill versus decode, exact-prefix matching), the conditions that break reuse, and how to measure each layer. The keep is justified, and an edit would be cosmetic churn.",
+                  "page_type": "Concept — frontmatter is typed. Questions are optional and absent. References are bare descriptive links. Code fences carry a language identifier. Wikilinks use full paths with aliases.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "| Prompt/prefix | Computed state for an input prefix |",
+                      "line_start": 18,
+                      "reason": "The opening table contrasts what each cache reuses, what counts as a hit and what work remains, so the topic is recoverable quickly."
+                    },
+                    {
+                      "quote": "A hit therefore reduces repeated prefill work; it does not remove output generation or guarantee identical answers.",
+                      "line_start": 37,
+                      "reason": "States the mechanism and its limit, with prefill and decode explained in order before the failure analysis."
+                    },
+                    {
+                      "quote": "Concurrent cold requests may arrive before the first write is available.",
+                      "line_start": 95,
+                      "reason": "Covers a real condition (a warm-up race) and is attributed to Anthropic's documentation, which does describe availability after the first response begins."
+                    },
+                    {
+                      "quote": "| Serial calls hit, parallel cold calls miss | Fan-out outran cache creation |",
+                      "line_start": 106,
+                      "reason": "The symptom/cause/diagnostic table gives concrete debugging judgment instead of generic advice."
+                    },
+                    {
+                      "quote": "are close in meaning but require different answers.",
+                      "line_start": 129,
+                      "reason": "The largest versus second-largest lake example shows why similarity is a weak correctness test. Tenant and permission scoping and index versioning are also covered."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: prompt caching, response caching and combined measurement are tightly coupled. The opening table and the final measurement section compare them, so separate notes would lose that comparison.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "NOT APPLICABLE",
+                    "identity_safety": "NOT APPLICABLE",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ]
+            },
+            "model_calls": 6
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/LLM.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/LLM.md",
+                  "outcome": "keep",
+                  "reason": "I read the whole hub note against its prose and its three cards. The opening separates the LLM definition from architecture families, and the Engineering Routes table with its diagram maps each route to a distinct design question. The transformer-family table matches the BERT, T5 and GPT papers: BERT is bidirectional with masked-token prediction, T5 is an encoder-decoder with span corruption, and GPT-style models are causal decoder-only. The checkpoint-contract section teaches a real failure mechanism: tensor shapes can match while the tokenizer is wrong. The MoE sections correctly separate total parameters, active parameters and measured latency, and they cover capacity factors, dropping or rerouting tokens, and communication cost, consistent with the Switch Transformers paper. The note also correctly says DeepSeek-R1 reuses the V3 base architecture while GRPO belongs to post-training. The cards each test one gradeable task and carry sources on the answer side. The prompting, RAG and fine-tuning card matches OpenAI's accuracy-optimization guidance. The note has no known violations, no unclear claims and no redundancy worth fixing, so any edit would be cosmetic churn."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "I read the whole note and found no concrete defect. The factual claims I checked against my own knowledge of the primary papers are sound, and the cards are well formed. A keep is justified, and any edit would be cosmetic churn.",
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/LLM.md",
+                  "verdict": "CLEAN",
+                  "summary": "The hub note separates what an LLM is from its architecture families, routes the four runtime disciplines in a table with a diagram, and explains checkpoint contracts and MoE cost accurately. The note is coherent, correctly scoped and free of padding, so leaving it unchanged is justified.",
+                  "page_type": "FolderNote: the Datacore folder-map block is protected, and Questions and References are optional but present and well formed.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "A large language model (LLM) is a neural language model trained at enough scale to handle a broad range of language tasks.",
+                      "line_start": 18,
+                      "reason": "The opening defines an LLM quickly and separates the definition from architecture families, so the topic is recoverable."
+                    },
+                    {
+                      "quote": "A wrong tokenizer is harder to spot: tensor dimensions still match while the same text maps to different IDs, silently changing behavior.",
+                      "line_start": 79,
+                      "reason": "This states a concrete failure mechanism with its condition, which supports engineering judgment."
+                    },
+                    {
+                      "quote": "**T5** is a generative encoder-decoder. It pretrains with a span-corruption text-to-text objective",
+                      "line_start": 65,
+                      "reason": "This matches the T5 paper. BERT is described as masked-token and encoder-only, and GPT-style models as causal decoder-only, which is also accurate."
+                    },
+                    {
+                      "quote": "A dense model can beat a sparse model with a similar advertised active count when expert traffic is communication-bound.",
+                      "line_start": 132,
+                      "reason": "This states the condition that changes the MoE cost decision and agrees with the Switch Transformers discussion."
+                    },
+                    {
+                      "quote": "> [!qard]- How should prompting, RAG, and fine-tuning be chosen for an LLM system?",
+                      "line_start": 168,
+                      "reason": "This card is one focused comparison with a decision path and the conditions that change it. It carries an answer-side source and keeps its existing ID."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the foundations, training and MoE sections all serve the hub's purpose of explaining model internals before routing to the sibling topics. The MoE section could become its own note later, but it is not independently needed now.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "change_checks": []
+            },
+            "model_calls": 8
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Loop Engineering/Agent Loop.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Loop Engineering/Agent Loop.md",
+                  "outcome": "keep",
+                  "reason": "I read the whole note against its text and the sources it cites. The opening separates model and harness responsibilities. The four-step ReAct cycle matches the state diagram, the API walkthrough and both code examples. The note says plain text does not prove completion, so it correctly calls for a separate completion predicate. The pitfalls section pairs each failure (runaway calls, token growth, invalid tool calls) with a specific control: an iteration cap, compaction of tool results, or validation in code. The two existing cards each test one task, and their answers are mechanism-based and cite sources. The frontmatter and the callout metadata are intact. I found no factual error or teaching gap that justifies an edit, so a keep is better than churn."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "The note is accurate, well ordered and free of known violations, and the keep is justified. I found no concrete defect that warrants an edit.",
+              "change_checks": [],
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Loop Engineering/Agent Loop.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note explains the loop, the split between model and harness, and the failure controls, in a sensible order. I checked the specific figures (ALFWorld 34 points, the 369-call production run) against sources and found them accurate. The two cards each test one task. No edit is needed.",
+                  "page_type": "Concept — authorable prose; Questions and References are present and valid; frontmatter and qard IDs are protected.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "A failure in tool execution, permissions, termination, or state handling therefore belongs to harness engineering rather than model reasoning.",
+                      "line_start": 19,
+                      "reason": "States the model/harness boundary clearly and decisively, which supports engineering judgment."
+                    },
+                    {
+                      "quote": "Plain text with no tool calls normally ends the current turn, but it does not prove that the user's goal is satisfied.",
+                      "line_start": 54,
+                      "reason": "States an important condition: ending a turn is not the same as completing the goal. It prevents a common misconception."
+                    },
+                    {
+                      "quote": "one run made 369 tool calls, consumed 9.7 million tokens, and produced 30 structured documents",
+                      "line_start": 124,
+                      "reason": "The cited article confirms these figures. The example backs the pitfall with concrete numbers."
+                    },
+                    {
+                      "quote": "Tool schemas are model input, not an enforcement mechanism.",
+                      "line_start": 144,
+                      "reason": "Gives the key reason validation must be done in code, and leads into the validation advice that follows."
+                    },
+                    {
+                      "quote": "Time limit | A slow or hanging call that never finishes its iteration, so an iteration cap alone would never trigger",
+                      "line_start": 172,
+                      "reason": "The card answer explains the mechanism behind each safeguard, not only its name."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the note covers one coherent topic (the agent loop, its code and its failure modes), and separating them would weaken it.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ]
+            },
+            "model_calls": 10
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Loop Engineering/Loop Engineering.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Loop Engineering/Loop Engineering.md",
+                  "outcome": "keep",
+                  "reason": "I read the whole note against its text. The opening defines loop engineering and places it after prompt, context and harness engineering, with links to Agent Loop and Multi-Agentic Systems. The three sections (termination and budgets, verification inside the loop, state across iterations) follow a logical order. Each one states a mechanism and a condition. Examples are the stop-versus-success distinction, the budget fallback, ground-truth checks, and the compaction timing versus content split. The three cards each test one dependent task. The first covers the runtime role in a tool loop. The second covers reporting at budget expiry and notes that platform behavior differs. The third covers how compaction decisions are split and says plainly that the split is a convention and not an API boundary. The claims about OpenAI max_turns handling, Anthropic task budgets and Responses API compaction are hedged and match the cited documentation as I know it. The known-violations inventory is empty, no cards are flagged, and the frontmatter, code fence language and references are valid. I found no concrete defect, so edits would only add churn."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "Whole-note audit found no concrete defect. The note is accurate, ordered logically and free of padding. Its three cards each test one dependent task. No edits are proposed, none are needed, and no sources or rejections require checking.",
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Loop Engineering/Loop Engineering.md",
+                  "verdict": "CLEAN",
+                  "summary": "I read the whole note. The opening defines loop engineering and places it in the prompt, context, harness and loop stack. The sections run termination, verification, state, and each gives mechanisms with conditions. The cards are focused, and the platform claims are hedged and match the vendors' documented behavior. No edit would add concrete value.",
+                  "page_type": "FolderNote — keeps tags: [FolderNote] and the protected datacorejsx folder map; Questions and References are optional and valid as present.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "A single call is bounded. A loop carries each result into the next iteration, so mistakes can accumulate just as easily as useful progress.",
+                      "line_start": 20,
+                      "reason": "States the core reason loops need engineering. The wording is direct and whiteboard-style."
+                    },
+                    {
+                      "quote": "A turn with no remaining tool calls shows only that the model has stopped requesting actions; completion needs task-specific evidence the runtime can verify",
+                      "line_start": 35,
+                      "reason": "Separates stopping from success and names the mechanism and its limit, so the note supports engineering judgment."
+                    },
+                    {
+                      "quote": "Loop engineering decides when to compact, offload, or stop.",
+                      "line_start": 49,
+                      "reason": "Draws the boundary with Context Engineering clearly. The later compaction card repeats the split for recall, not as filler."
+                    },
+                    {
+                      "quote": "What should a runtime report when its loop budget expires before the task is complete?",
+                      "line_start": 62,
+                      "reason": "This question is self-contained and has a finite answer. Its answer is hedged on platform differences and cites primary sources on the answer side."
+                    },
+                    {
+                      "quote": "This split is a convention for assigning responsibility, not a boundary defined by an API.",
+                      "line_start": 83,
+                      "reason": "Prevents a misleading claim by marking the content/timing split as a convention."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: termination, verification and state are facets of one loop-control topic. The note is short, and the sections depend on each other and on the opening.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "change_checks": []
+            },
+            "model_calls": 12
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Loop Engineering/Multi-Agentic Systems.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Loop Engineering/Multi-Agentic Systems.md",
+                  "outcome": "keep",
+                  "reason": "I read the whole note and found no verified defect that justifies an edit. The opening separates multi-agent systems from single agents and workflow patterns. The three justifying conditions (context isolation, parallelism, specialization) match Anthropic's multi-agent research guidance, including the roughly 15x token figure, which the note correctly scopes to one workload. The communication section matches the OpenAI Agents SDK handoff behavior: the previous history is passed by default and `input_filter` can change it. The C# sample uses the Microsoft Agent Framework handoff builder, with the routing graph declared explicitly. The pitfalls explain mechanisms and mitigations. The tradeoff table is hedged appropriately. The three Qards each test one gradeable task and carry answer-side primary sources. The References are relevant and have no trailing annotations. I made no edit because I found no concrete error or learning gap, and the note's length is justified by its content."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "Independent whole-note read found no concrete defect. The key claims (15x token figure scoped to one workload, OpenAI handoff default history and input_filter, tracing spans, Microsoft Agent Framework handoff builder) are accurate. The Qards are single-task with answer-side primary sources, and no edits are proposed.",
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Loop Engineering/Multi-Agentic Systems.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note separates multi-agent systems from single agents and workflow patterns. It gives three conditions that justify the cost and walks through communication patterns, coordination topologies, pitfalls with mitigations, and a tradeoff table. A keep is justified because the explanation order is sound, the terminology is consistent, and the claims are accurate and appropriately hedged. Repetition between the intro and the first Qard is deliberate recall reinforcement. The three Qards each test one gradeable task with answer-side sources.",
+                  "page_type": "Concept — typed frontmatter, optional Questions/References present and valid; MD040 satisfied (csharp fence); status Done is owner-set and untouched; Qard IDs preserved.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "That number belongs to one workload.",
+                      "line_start": 19,
+                      "reason": "The 15x token figure is correctly scoped to one workload, matching Anthropic's multi-agent research post."
+                    },
+                    {
+                      "quote": "The useful unit of decomposition is context.",
+                      "line_start": 27,
+                      "reason": "A clear organizing idea with a concrete example (implementation and tests staying together) that supports engineering judgment."
+                    },
+                    {
+                      "quote": "OpenAI's SDK offers `input_filter` callbacks, including filters that remove prior tool calls.",
+                      "line_start": 35,
+                      "reason": "Matches the OpenAI Agents SDK handoff documentation: history is passed by default and input_filter can alter it."
+                    },
+                    {
+                      "quote": "The model chooses when to transfer, while the workflow restricts where it may go.",
+                      "line_start": 85,
+                      "reason": "Explains the mechanism of the handoff builder's routing graph after the C# example."
+                    },
+                    {
+                      "quote": "Every conversation needs a bound: `max_turns`, a token budget, and a completion signal the runtime can check.",
+                      "line_start": 107,
+                      "reason": "Concrete mitigation that pairs with the named failure (politeness loops)."
+                    },
+                    {
+                      "quote": "The smallest team that produces a verified improvement is enough.",
+                      "line_start": 136,
+                      "reason": "Gives a decided engineering conclusion that closes the tradeoff section."
+                    },
+                    {
+                      "quote": "When one agent hands work to another, how much prior context should the receiving agent get?",
+                      "line_start": 154,
+                      "reason": "Question is a single focused comparison with a table of benefits and risks, not a bundle of independent tasks."
+                    },
+                    {
+                      "quote": "What evidence makes failures across multi-agent handoffs traceable?",
+                      "line_start": 168,
+                      "reason": "One dependent explanation of trace evidence with an answer-side primary source on OpenAI tracing."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: communication patterns, coordination topologies and failure modes all serve one question, when and how to coordinate several agents, and they are more useful together.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "change_checks": []
+            },
+            "model_calls": 14
+          }
+        }
+      ],
+      "feedback_pr": 0,
+      "checkpoint_at": "2026-11-06T19:42:08.707282Z",
+      "topic": "AI & ML",
+      "topic_id": "ai-ml-4edf0823",
+      "current_batch": {
+        "topic": "AI & ML",
+        "topic_id": "ai-ml-4edf0823",
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Model Selection and Routing.md",
+            "content": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"Selecting and routing models from measured task quality, latency, reliability, and cost.\"\nlevel: [\"2\"]\npriority: Medium\nstatus: Ready to Repeat\npublish: true\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Model Selection and Routing\"\nflashcard_uid: \"776eda2e\"\ncreated: \"2026-06-11T07:39:53.000Z\"\nmodified: \"2026-11-02T09:03:54.806Z\"\npublished: \"2026-07-08T13:28:37.410Z\"\n---\n\nModel selection decides which models are allowed to serve a workload. Routing makes the per-request choice among them. Frontier models often handle difficult tasks well. Smaller models are usually cheaper and faster. Neither tendency is a contract. A specialized model can win on a narrow task, while a frontier model can miss a latency SLA or regress after a provider update. Production selection is empirical: the least expensive candidate that clears the workload's quality, safety, reliability, and latency gates wins.\n\nApplication-level routing chooses between complete model deployments for each request. [[Home/AI & ML/LLM/LLM#Mixture-of-experts|Mixture-of-experts routing]] happens inside one sparse model and selects internal expert parameters token by token. The two mechanisms solve different cost and capacity problems.\n\n# Selection Criteria\n\nEvery candidate needs the same versioned workload and constraints:\n\n- **Task quality** — correctness, groundedness, tool-call success, and failure slices on the labeled set.\n- **Latency** — p50 and p95 under the expected prompt size, output length, concurrency, and region.\n- **Cost** — input, cached input, output, tool calls, and retry or escalation cost per successful task.\n- **Capabilities** — required context, structured outputs, tools, modalities, and language coverage.\n- **Safety and policy** — refusal behavior, data handling, residency, and provider terms.\n- **Operations** — rate limits, uptime, version pinning, observability, and fallback behavior.\n\nPublic leaderboards are useful for shortlisting. Release evidence still comes from [[Home/AI & ML/LLM/Evaluation/Evaluation|evaluation]] on the distribution and rubric that define the product.\n\n# Routing Patterns\n\n## Deterministic Task Mapping\n\nKnown task classes can map to models in configuration: extraction goes to one candidate, complex synthesis to another, and image work to a multimodal model. Explicit task boundaries keep the policy auditable.\n\n## Classifier Routing\n\nA cheap classifier predicts task type or difficulty before generation, avoiding the cost of a failed first attempt. But a false “easy” decision can silently lower quality. Router evaluation therefore needs overall classification accuracy plus per-route recall for hard and safety-sensitive cases.\n\n## Cascade\n\nA cascade starts with a lower-cost model and escalates when an observable gate fails, such as schema validation, a groundedness check, calibrated confidence, or an explicit unsupported result.\n\n```mermaid\nflowchart LR\n    Q[Request] --> S[Lower-cost model]\n    S --> V{Quality gate passes?}\n    V -->|Yes| O[Return result]\n    V -->|No| F[Escalate to stronger model]\n    F --> O\n```\n\nA cascade saves money only when the first attempt plus its escalations cost less than sending every request to the stronger model. Escalated traffic also pays extra latency. End-to-end p95 matters more than either model's isolated number.\n\n# Router Evaluation\n\nA labeled routing set starts with real traffic. Each request records which candidates pass the task rubric along with latency and full cost. That supports comparison against an oracle that always selects the cheapest passing model.\n\nRouter evaluation tracks these signals:\n\n- End-to-end task success together with classifier accuracy.\n- Hard-query miss rate and safety-sensitive miss rate.\n- Escalation frequency and the cost of duplicate generation.\n- p95 latency by route and after fallback.\n- Drift when traffic, prompts, provider versions, or prices change.\n\nShadow evaluation runs alternative candidates without serving their answers. It provides fresh routing evidence before user-visible assignments change.\n\n# Operations\n\nOne gateway boundary should own provider calls. Model identifiers, fallbacks, timeouts, and routing policy then stay in configuration instead of leaking into scattered conditionals. Operational records need the route decision, candidate version, gate result, latency, and safe token or cost metadata. Sensitive prompts and responses stay out by default.\n\nVersions should be pinned where the provider allows it. A model change behind an alias invalidates earlier evidence and triggers evaluation again. Fallbacks carry the same capability and policy requirements. Availability alone does not make a model safe if it cannot honor the output contract.\n\n# Pitfalls\n\n**Frontier by default:** this hides missing task thresholds and can spend the most on traffic a smaller candidate already passes.\n\n**Small by assumption:** low advertised cost means little when retries or human escalation raise the cost per successful task.\n\n**Router accuracy as the goal:** a class label is only a proxy. The real objective is end-to-end task success within cost and latency constraints.\n\n**Unmeasured cascade tails:** escalated requests pay for two generations and can dominate p95 latency.\n\n**Provider aliases without regression gates:** silent model changes invalidate earlier routing evidence.\n\n# Tradeoffs\n\n| Strategy | Main benefit | Main cost | Good fit |\n| --- | --- | --- | --- |\n| One approved model | Simple operations | Pays one model’s tradeoffs for all traffic | Uniform workload or early product |\n| Deterministic mapping | Auditable decisions | Rules drift as traffic changes | Clear task categories |\n| Classifier router | One generation per request | Misrouting risk and calibration work | Predictable difficulty signals |\n| Cascade | Observable second chance | Duplicate cost and tail latency | Cheap reliable failure gate |\n| Fine-tuned specialist | Low serving cost on one task | Training and model lifecycle | Stable, high-volume narrow task |\n\n# Questions\n\n<!-- qard-id: ff4e82a3-bf2c-40e8-b0b3-e27753258ec9 -->\n> [!qard]- How should candidate LLMs be compared for a production workload?\n> Candidate LLMs are compared empirically. Every candidate runs on the same representative, versioned workload and is judged against the same gates for task quality, safety, latency and cost. A common decision rule then selects the least expensive candidate that clears every required gate.\n>\n> What the comparison measures:\n>\n> - **Task quality:** correctness, groundedness, tool-call success and failure slices, measured on a labeled set drawn from the product's own traffic and rubric.\n> - **Safety and policy:** refusal behavior, data handling and provider terms.\n> - **Latency:** p50 and p95 at the expected prompt size, output length and concurrency.\n> - **Cost per successful task:** input, output and tool usage, plus retries and escalations. A model with a low price per token can still cost more per completed task if it often needs a retry or a human.\n> - **Capabilities and operations:** required context length, structured outputs, tools, rate limits and version pinning.\n> \n> Public leaderboards help build a shortlist, but they measure a different distribution and rubric. The evidence also expires. A change in traffic, prompts or prices invalidates earlier results, as does a new model version behind a provider alias, so the comparison is rerun when any of these occur.\n>\n> Sources: [OpenAI evals](https://developers.openai.com/api/docs/guides/evals) · [OpenAI model optimization](https://developers.openai.com/api/docs/guides/model-optimization)\n\n<!-- qard-id: d37397ec-330a-4742-a8ef-22a28b395047 -->\n> [!qard]- How do classifier routing and cascading differ when selecting an LLM?\n> A classifier router predicts which model should handle a request before anything is generated. A cascade generates with a lower-cost model first and escalates to a stronger model only when an observable check on that output fails.\n>\n> | Aspect | Classifier routing | Cascade |\n> |---|---|---|\n> | When the decision is made | Before generation, from request features such as task type or predicted difficulty. | After a first generation, from a gate on the output such as schema validation, a groundedness check, calibrated confidence or an explicit unsupported result. |\n> | Generations per request | One, so no request pays for a discarded attempt. | One when the gate passes; at least two when the request escalates. |\n> | Typical failure | A false “easy” prediction sends a hard request to a weaker model. Quality drops silently unless something downstream checks the answer. | Escalated requests pay for duplicate generation and extra latency, which can dominate p95. If many requests escalate, the cascade can cost more than always using the stronger model. |\n> | What it depends on | Predictable difficulty signals, and a classifier evaluated on per-route recall for hard and safety-sensitive requests. | A cheap, reliable gate. A weak gate escalates too often or lets bad answers through. |\n>\n> Sources: [FrugalGPT (Chen et al.)](https://arxiv.org/abs/2305.05176) · [Microsoft Foundry Model Router](https://learn.microsoft.com/en-us/azure/ai-foundry/openai/concepts/model-router?view=foundry) · [OpenAI evals](https://developers.openai.com/api/docs/guides/evals)\n\n> [!qard]- How can classifier routing and cascading be combined?\n> **Combining them:** the classifier chooses the starting model, and a cascade gate checks that model's output. Requests predicted to be hard go straight to the stronger model. Requests predicted to be easy start on the cheaper model with the gate behind it. The gate then catches some misroutes that classifier routing alone would serve unnoticed.\n>\n> The combined policy is judged on end-to-end task success, cost per successful task and tail latency, not on classifier accuracy alone. Managed routers such as Microsoft Foundry Model Router package per-request model selection as a product feature, and they still need the same evaluation on the target workload.\n>\n> Sources: [FrugalGPT (Chen et al.)](https://arxiv.org/abs/2305.05176) · [Microsoft Foundry Model Router](https://learn.microsoft.com/en-us/azure/ai-foundry/openai/concepts/model-router?view=foundry) · [OpenAI evals](https://developers.openai.com/api/docs/guides/evals)\n\n# References\n\n- [LiteLLM](https://docs.litellm.ai/)\n",
+            "hash": "71657e262f624e2786f23d722549c199671a15f452d7b4a94ce51e58c86c60c5",
+            "topic": "AI & ML",
+            "violations": [],
+            "needs_fixing_ids": [],
+            "repair_input_hash": "",
+            "selection_reason": "new"
+          }
+        ],
+        "feedback": [],
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review_process": "focused-whole-note-v1",
+        "pr": null
+      },
+      "base_sha": "67caf2e374f53e8772b86b8ea0f881d74e784fa1",
+      "reservation_deadline": "2026-11-06T19:56:47.970428Z",
+      "error": "GitHub request failed (1): gh: Server Error (HTTP 502)",
+      "stop_reason": "provider_error",
+      "sealed_at": "2026-11-06T19:42:08.707287Z"
     }
   },
   "feedback_workloads": {
