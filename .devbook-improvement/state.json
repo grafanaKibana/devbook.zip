@@ -6254,9 +6254,9 @@
     "version": 1,
     "id": "b9235098cfe341bd98cce55faa026472",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-07T13:18:06.384851Z",
-    "elapsed_seconds": 485.07498389999995,
+    "elapsed_seconds": 489.3523493999999,
     "calls_reserved": 15,
     "responses_received": 15,
     "attempted_paths": [
@@ -6266,7 +6266,8 @@
       "Vault/Home/AI & ML/Machine Learning/Evaluation/Classification Evaluation.md",
       "Vault/Home/AI & ML/Machine Learning/Evaluation/Evaluation.md",
       "Vault/Home/AI & ML/Machine Learning/Evaluation/ROC-AUC and PR-AUC.md",
-      "Vault/Home/AI & ML/Machine Learning/Machine Learning.md"
+      "Vault/Home/AI & ML/Machine Learning/Machine Learning.md",
+      "Vault/Home/AI & ML/Machine Learning/Natural Language Processing.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -6719,10 +6720,79 @@
           },
           "model_calls": 13
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/Machine Learning/Natural Language Processing.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/Machine Learning/Natural Language Processing.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against its text and general knowledge of NLP. The opening is accurate: it defines NLP and states the limit that models learn statistical structure rather than understanding language. The tokenization section correctly flags its example as illustrative and notes that WordPiece uses ## markers and byte-level BPE keeps leading spaces. The NER, sentiment, extractive vs generative QA, and transformer-reuse explanations are correct and carry the conditions that matter, such as NER not being a PII detector and token counts depending on the tokenizer. The .NET section uses the real TextAnalyticsClient API with AnalyzeSentimentAsync, which returns the Sentiment and ConfidenceScores properties shown. The tradeoff tables name the condition that changes each decision. The note has no Qard cards, so there is no question-quality issue, and the three references are relevant, bare links. No violations are known or flagged. The prose is direct and non-repetitive, so any edit would be cosmetic churn."
+              }
+            ],
+            "feedback": [],
+            "decisions": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/Machine Learning/Natural Language Processing.md",
+                "verdict": "CLEAN",
+                "summary": "Independent whole-note audit found no accuracy, clarity, structure or rules defects. The note has no Qard cards, bare reference links, correct code, and decision-oriented tradeoff tables, so keeping it unchanged is justified.",
+                "page_type": "Concept — typed frontmatter retained; optional Questions absent (allowed); References are bare descriptive links; fenced blocks have language identifiers (text, csharp).",
+                "current_text_evidence": [
+                  {
+                    "quote": "The token list is illustrative rather than the output of one specific tokenizer",
+                    "line_start": 29,
+                    "reason": "Explicitly qualifies the tokenization example, so WordPiece versus byte-level BPE conventions are not misrepresented."
+                  },
+                  {
+                    "quote": "A generic NER label set is not automatically a PII detector.",
+                    "line_start": 42,
+                    "reason": "States a real boundary and the condition for production compliance use, giving engineering judgment instead of definition alone."
+                  },
+                  {
+                    "quote": "Multilingual support in a model card does not guarantee equal quality.",
+                    "line_start": 101,
+                    "reason": "Pitfall carries mechanism (training mix, tokenizer coverage) and a decision condition; prose is direct and non-repetitive."
+                  },
+                  {
+                    "quote": "var result = await client.AnalyzeSentimentAsync(\"The product quality was excellent.\");",
+                    "line_start": 86,
+                    "reason": "Matches the real Azure.AI.TextAnalytics API: Value.Sentiment and ConfidenceScores.Positive exist."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: tasks, transformer shift, .NET options, pitfalls and tradeoffs form one coherent introductory NLP overview; sections are not independently large enough to warrant separate notes.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "NOT APPLICABLE",
+                  "identity_safety": "NOT APPLICABLE",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "The only note was independently read in full. The keep is supported: the content is accurate, whiteboard-voiced, free of repetition, compliant with the rules, and has no known violations or cards. Any edit would be cosmetic.",
+            "change_checks": []
+          },
+          "model_calls": 15
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-07T13:26:11.459344Z",
+    "checkpoint_at": "2026-11-07T13:26:15.736710Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
