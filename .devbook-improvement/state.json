@@ -6139,9 +6139,9 @@
     "version": 1,
     "id": "b9235098cfe341bd98cce55faa026472",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-07T13:18:06.384851Z",
-    "elapsed_seconds": 368.1949581999999,
+    "elapsed_seconds": 372.31924359999994,
     "calls_reserved": 11,
     "responses_received": 11,
     "attempted_paths": [
@@ -6149,7 +6149,8 @@
       "Vault/Home/AI & ML/Machine Learning/Data Drift.md",
       "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md",
       "Vault/Home/AI & ML/Machine Learning/Evaluation/Classification Evaluation.md",
-      "Vault/Home/AI & ML/Machine Learning/Evaluation/Evaluation.md"
+      "Vault/Home/AI & ML/Machine Learning/Evaluation/Evaluation.md",
+      "Vault/Home/AI & ML/Machine Learning/Evaluation/ROC-AUC and PR-AUC.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -6460,10 +6461,79 @@
           },
           "model_calls": 9
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/ROC-AUC and PR-AUC.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/ROC-AUC and PR-AUC.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against standard metric definitions. The ROC and PR construction is correct. The AUC probabilistic interpretation, including ties counted as half, is correct. The fixed 0.5 ROC baseline and the prevalence-dependent PR baseline are correct. The caveat that PR-AUC implementations differ matches scikit-learn's average_precision_score documentation. The ML.NET properties AreaUnderRocCurve and AreaUnderPrecisionRecallCurve exist on BinaryClassificationMetrics, and the code example is coherent. The 100 positives / 100,000 negatives example checks out: 1,000/100,000 = 1% FPR, and 80/1,080 ≈ 7% precision. Both Qards test one gradeable task each, and their answers carry sources. The tradeoff table, pitfalls and references are accurate, non-redundant and in a consistent voice. No violations are known. I found no factual or editorial defect that justifies a change."
+              }
+            ],
+            "feedback": [],
+            "decisions": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/ROC-AUC and PR-AUC.md",
+                "verdict": "CLEAN",
+                "summary": "Independent whole-note audit found the definitions, baselines, probabilistic interpretation, worked 100/100,000 example, ML.NET property names and tradeoff table accurate and well ordered. The keep is justified. The only issues are minor and non-blocking: `ROC AUC` and ROC-AUC are used inconsistently, and the prevalence baseline appears several times, which suits recall.",
+                "page_type": "Concept — authorable prose with optional Questions and References; frontmatter and Qard IDs protected; mermaid and csharp fences have language identifiers.",
+                "current_text_evidence": [
+                  {
+                    "quote": "PR-AUC puts the positive class in the foreground, making false positives visible when positives are rare.",
+                    "line_start": 19,
+                    "reason": "The opening states the operating idea and the key boundary, the prevalence-dependent PR baseline, before the mechanics."
+                  },
+                  {
+                    "quote": "it is the chance that a randomly chosen positive receives a higher score than a randomly chosen negative, with a tie counted as half.",
+                    "line_start": 63,
+                    "reason": "This is the correct probabilistic interpretation of ROC-AUC. It also correctly says PR-AUC has no equally simple interpretation and that implementations differ."
+                  },
+                  {
+                    "quote": "catching 80 positives while flagging 1,000 negatives gives a false-positive rate of 1%, yet only 80 of the 1,080 alerts, about 7%, are correct.",
+                    "line_start": 158,
+                    "reason": "The arithmetic is verified (1,000/100,000 = 1%; 80/1,080 ≈ 7.4%). It shows concretely why ROC can look strong while the positive queue stays noisy."
+                  },
+                  {
+                    "quote": "The threshold is swept on validation data, a point that satisfies the constraint is chosen, and the frozen point is then evaluated on separate test data.",
+                    "line_start": 118,
+                    "reason": "This gives a sound, decided procedure for threshold selection that avoids test-set leakage, so the note covers the boundary that AUC does not pick a threshold."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: ROC-AUC and PR-AUC are one comparison topic, and the curves, interpretation, choice and pitfalls are best read together.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "No concrete defect found. Facts are correct and the structure is coherent. The Qards are bounded, each answer is a dependent explanation, and both carry sources. IDs are intact and there are no edits to evaluate.",
+            "change_checks": []
+          },
+          "model_calls": 11
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-07T13:24:14.579316Z",
+    "checkpoint_at": "2026-11-07T13:24:18.703603Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
