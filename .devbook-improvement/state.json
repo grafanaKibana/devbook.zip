@@ -5959,14 +5959,15 @@
     "version": 1,
     "id": "b9235098cfe341bd98cce55faa026472",
     "status": "active",
-    "phase": "author_completed",
+    "phase": "selecting",
     "started_at": "2026-11-07T13:18:06.384851Z",
-    "elapsed_seconds": 166.90042869999996,
+    "elapsed_seconds": 171.04321539999995,
     "calls_reserved": 5,
     "responses_received": 5,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Safety/Safety.md",
-      "Vault/Home/AI & ML/Machine Learning/Data Drift.md"
+      "Vault/Home/AI & ML/Machine Learning/Data Drift.md",
+      "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -6115,10 +6116,21 @@
           },
           "model_calls": 4
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md",
+        "outcome": "proposal_blocked",
+        "reason": "wikilink removal requires explicit target-specific semantic rationale",
+        "result": {
+          "status": "proposal_blocked",
+          "stage": "deterministic_application",
+          "reason": "wikilink removal requires explicit target-specific semantic rationale",
+          "model_calls": 5
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-07T13:20:53.284785Z",
+    "checkpoint_at": "2026-11-07T13:20:57.427573Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
