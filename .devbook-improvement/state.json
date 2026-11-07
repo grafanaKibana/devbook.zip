@@ -6024,11 +6024,11 @@
     "version": 1,
     "id": "b9235098cfe341bd98cce55faa026472",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-07T13:18:06.384851Z",
-    "elapsed_seconds": 258.14137449999987,
+    "elapsed_seconds": 268.80552169999993,
     "calls_reserved": 8,
-    "responses_received": 7,
+    "responses_received": 8,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Safety/Safety.md",
       "Vault/Home/AI & ML/Machine Learning/Data Drift.md",
@@ -6274,7 +6274,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-07T13:22:24.525732Z",
+    "checkpoint_at": "2026-11-07T13:22:35.189879Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -22939,5 +22939,53 @@
       },
       "feedback_snapshot": []
     }
+  },
+  "pending_author_proposal": {
+    "workload_id": "b9235098cfe341bd98cce55faa026472",
+    "topic_id": "ai-ml-4edf0823",
+    "batch": {
+      "topic": "AI & ML",
+      "topic_id": "ai-ml-4edf0823",
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Evaluation.md",
+          "content": "---\ntitle: Machine Learning Evaluation\ntopic: [AI & ML]\nsubtopic: [Machine Learning]\nsummary: \"Measuring whether a model solves its real problem in production by picking the right metric.\"\ntags: [FolderNote]\npublish: true\npriority: Medium\nlevel: [\"3\"]\nstatus: Done\ncreated: \"2026-02-17T23:29:46.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:28:37.417Z\"\n---\n\nEvaluation asks a plain question: does the model solve the problem it was built for under production conditions? An offline score is only a proxy for that answer. The work is choosing a metric that matches the decision, knowing what the score hides, and setting a release gate that reflects the cost of mistakes. The dedicated pages on [[Classification Evaluation]], [[ROC-AUC and PR-AUC]], and [[Calibration]] cover the individual metric families in more depth.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# The Evaluation Discipline\n\nMetric choice comes after four decisions:\n\n- **Start with the decision cost.** A metric should represent what a wrong answer costs. Accuracy says little on a fraud dataset with a 0.1% positive rate. The choice to block or allow a transaction, and the cost of each error, determines whether precision, recall, or expected value matters.\n- **Make the split resemble the future.** Random splits suit independent, identically distributed records. Time-based or group-based splits are safer when events share a user, session, or time window. Keep a holdout set outside the tuning loop.\n- **Use enough metrics to expose the tradeoff.** A single score can hide the operating threshold or poor probability estimates. Pair threshold and ranking metrics, then check calibration when downstream logic consumes probabilities.\n- **Inspect operational slices.** Aggregate results smooth over the cohorts and time windows where regressions tend to appear. A weak critical slice is still a defect when the global score looks healthy.\n\nAll four decisions feed the same risk: the **offline-online gap**. A change can improve a frozen test score while doing nothing for live traffic, or even making the outcome worse. Offline evaluation can block a bad release. Production monitoring and controlled experiments establish whether the release was actually better.\n\n# Metric Families\n\nThreshold metrics such as precision, recall, and F1 describe a chosen operating point. ROC-AUC and PR-AUC compare ranking quality across thresholds. Brier score and expected calibration error test whether predicted probabilities deserve their numerical meaning. Retrieval ranking has a separate set of measures, including NDCG, MAP, and MRR, covered in [[Home/AI & ML/LLM/Context Engineering/RAG/Monitoring#Retrieval Quality Metrics\\|RAG Monitoring]].\n\n## Regression Metrics\n\nContinuous targets need a different family:\n\n- **RMSE** squares each error before averaging, so a few large misses dominate the result. It fits decisions where a large miss is much more expensive than several small ones.\n- **MAE** weights error linearly. It is easier to interpret and less sensitive to outliers.\n- **MAPE** expresses error relative to the true value. It breaks at zero and behaves poorly when targets span several orders of magnitude.\n- **Quantile loss** estimates a chosen conditional quantile. It fits prediction intervals and decisions with different costs for overprediction and underprediction.\n\nRMSE and MAE are worth reporting together. A wide gap between them often points to a heavy-tailed error distribution. MAPE is useful only for strictly positive targets where percentage error is meaningful. Quantile loss belongs in systems that need a range or an asymmetric decision, rather than one point estimate.\n\n# Pitfalls\n\n**Optimizing the proxy.** A recommender tuned only for click-through rate can learn to surface clickbait and reduce retention. Guardrail metrics need to cover the outcome the optimization target can damage.\n\n**Leakage making every score look excellent.** A post-event timestamp or label-correlated identifier can reveal the answer during training. That information disappears at inference time. Suspiciously strong results call for an audit of feature availability, especially around time-based joins.\n\n**Choosing and reporting a threshold on the same data.** This makes precision and recall optimistic. Select the operating point on validation data, then report it once on the untouched test set.\n\n# References\n\n- [scikit-learn model evaluation](https://scikit-learn.org/stable/modules/model_evaluation.html)\n- [ML.NET model evaluation metrics](https://learn.microsoft.com/dotnet/machine-learning/resources/metrics)\n",
+          "hash": "c9c82846acdd4ede17553b1a9eefa54359442930e6eeb9a9daeb27fce64a1a21",
+          "topic": "AI & ML",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Evaluation.md",
+          "outcome": "keep",
+          "reason": "I read the whole folder note against its current text and found no defect that needs an edit. The opening frames offline score as a proxy and links the detailed pages. The four-decision section covers decision cost, splits that resemble the future, tradeoff-exposing metric sets and slices. It then ties them to the offline-online gap, and that tie is sound. The metric-family summary correctly separates threshold metrics, ranking metrics, calibration metrics and retrieval metrics. The regression section's claims match the standard definitions in the scikit-learn and ML.NET references: RMSE penalizes large errors, MAE is linear, MAPE fails at zero, and quantile loss targets a conditional quantile. The pitfalls section on proxy optimization, leakage and threshold selection on the test set is accurate. The datacorejsx block is a protected FolderNote map, and the note has no cards. The References section has two relevant bare link bullets, and the code fence has a language identifier. No known violations are listed. The note is compact and has no repetition worth cutting, so a forced rewrite would be cosmetic."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/AI & ML/Machine Learning/Evaluation/Evaluation.md": "c9c82846acdd4ede17553b1a9eefa54359442930e6eeb9a9daeb27fce64a1a21"
+    },
+    "feedback_keys": [],
+    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/AI & ML/Machine Learning/Evaluation/Evaluation.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-07T13:22:35.189867Z"
   }
 }
