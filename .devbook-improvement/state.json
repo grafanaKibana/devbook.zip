@@ -6084,16 +6084,17 @@
     "version": 1,
     "id": "b9235098cfe341bd98cce55faa026472",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-07T13:18:06.384851Z",
-    "elapsed_seconds": 301.0798869999999,
+    "elapsed_seconds": 304.82138189999995,
     "calls_reserved": 9,
     "responses_received": 9,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Safety/Safety.md",
       "Vault/Home/AI & ML/Machine Learning/Data Drift.md",
       "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md",
-      "Vault/Home/AI & ML/Machine Learning/Evaluation/Classification Evaluation.md"
+      "Vault/Home/AI & ML/Machine Learning/Evaluation/Classification Evaluation.md",
+      "Vault/Home/AI & ML/Machine Learning/Evaluation/Evaluation.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -6331,10 +6332,83 @@
           },
           "model_calls": 7
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Evaluation.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Evaluation.md",
+                "outcome": "keep",
+                "reason": "I read the whole folder note against its current text and found no defect that needs an edit. The opening frames offline score as a proxy and links the detailed pages. The four-decision section covers decision cost, splits that resemble the future, tradeoff-exposing metric sets and slices. It then ties them to the offline-online gap, and that tie is sound. The metric-family summary correctly separates threshold metrics, ranking metrics, calibration metrics and retrieval metrics. The regression section's claims match the standard definitions in the scikit-learn and ML.NET references: RMSE penalizes large errors, MAE is linear, MAPE fails at zero, and quantile loss targets a conditional quantile. The pitfalls section on proxy optimization, leakage and threshold selection on the test set is accurate. The datacorejsx block is a protected FolderNote map, and the note has no cards. The References section has two relevant bare link bullets, and the code fence has a language identifier. No known violations are listed. The note is compact and has no repetition worth cutting, so a forced rewrite would be cosmetic."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "The single FolderNote was audited in full and has no concrete defect. The keep is justified: content is accurate and compact, the protected map block is intact, the References are valid, and there are no cards or rule violations.",
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Evaluation.md",
+                "verdict": "CLEAN",
+                "summary": "The note frames offline score as a proxy and links the detailed pages. It then covers decision cost, splits, metric pairing and slices, and ties them to the offline-online gap. The metric and regression definitions are standard and accurate, and the pitfalls are correct. No edit is needed, since any rewrite would be cosmetic.",
+                "page_type": "FolderNote. It keeps tags: [FolderNote], the datacorejsx folder map is protected, and Questions and References are optional. There are no cards, and the References are two bare relevant links.",
+                "current_text_evidence": [
+                  {
+                    "quote": "An offline score is only a proxy for that answer.",
+                    "line_start": 16,
+                    "reason": "The opening states the operating idea quickly and links the detailed metric pages."
+                  },
+                  {
+                    "quote": "Accuracy says little on a fraud dataset with a 0.1% positive rate.",
+                    "line_start": 27,
+                    "reason": "A concrete example shows why metric choice follows decision cost."
+                  },
+                  {
+                    "quote": "Offline evaluation can block a bad release.",
+                    "line_start": 32,
+                    "reason": "The offline-online gap is stated with its practical limit."
+                  },
+                  {
+                    "quote": "**RMSE** squares each error before averaging, so a few large misses dominate the result.",
+                    "line_start": 42,
+                    "reason": "The regression definitions are accurate and each states when it fits."
+                  },
+                  {
+                    "quote": "Select the operating point on validation data, then report it once on the untouched test set.",
+                    "line_start": 55,
+                    "reason": "The pitfall gives the correct remedy for threshold selection leakage."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the note is a compact hub, and the detailed metric families already live in dedicated pages.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "NOT APPLICABLE",
+                  "identity_safety": "NOT APPLICABLE",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "change_checks": []
+          },
+          "model_calls": 9
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-07T13:23:07.464244Z",
+    "checkpoint_at": "2026-11-07T13:23:11.205740Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
