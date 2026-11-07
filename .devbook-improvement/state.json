@@ -5779,9 +5779,9 @@
     "version": 1,
     "id": "f57944c05f7944ee8610e2bd6384fd74",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-07T06:14:05.879571Z",
-    "elapsed_seconds": 515.4674633999997,
+    "elapsed_seconds": 518.7065063999997,
     "calls_reserved": 18,
     "responses_received": 18,
     "attempted_paths": [
@@ -5792,7 +5792,8 @@
       "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md",
       "Vault/Home/AI & ML/LLM/Prompt Engineering/Reasoning Techniques.md",
       "Vault/Home/AI & ML/LLM/Safety/Guardrails.md",
-      "Vault/Home/AI & ML/LLM/Safety/Hallucinations.md"
+      "Vault/Home/AI & ML/LLM/Safety/Hallucinations.md",
+      "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -6374,10 +6375,78 @@
           },
           "model_calls": 16
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
+        "outcome": "review_blocked",
+        "reason": "",
+        "result": {
+          "status": "review_blocked",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note. The opening separates a keyed watermark from a general AI-text classifier. The sampling steps and the Tournament sampling and score formula match the SynthID-Text description. The quality and detectability section keeps the non-distortionary versus distortionary trade-off. The limits list is consistent with itself. I fetched the Anthropic article, which confirms the note's claims that the watermark is a SynthID-Text variant, adds no characters or tokens, carries no identity, is weak on short text and on factual or exact-code output, and is removed by heavy rewriting. It also states that Claude translations are watermarked, which supports the note's comment on translations. The Nature reference is the primary SynthID-Text paper. The References section is two bare descriptive links, with no frontmatter or lifecycle issues, no code fences and no cards. I found no defect that justifies an edit."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
+                "verdict": "CLEAN",
+                "summary": "The note explains the mechanism, the quality/detectability trade-off and the limits accurately and in order. I found no concrete defect, so keeping it unchanged is justified.",
+                "page_type": "Concept — frontmatter, optional References (two bare descriptive links), no cards, no code fences.",
+                "current_text_evidence": [
+                  {
+                    "quote": "The detector instead asks whether the sequence of choices is unusually consistent with the sampling decisions produced by a particular watermark key.",
+                    "line_start": 14,
+                    "reason": "The opening states the operating idea and separates a watermark from a classifier in the next paragraph."
+                  },
+                  {
+                    "quote": "Synth ID-Text implements this with **Tournament sampling**.",
+                    "line_start": 28,
+                    "reason": "Placeholder"
+                  },
+                  {
+                    "quote": "The signal is therefore weak in short passages and low-entropy output.",
+                    "line_start": 47,
+                    "reason": "The note derives the weakness from the two detection factors stated just before it, which makes the explanation order sound."
+                  },
+                  {
+                    "quote": "A threshold trades false positives against false negatives.",
+                    "line_start": 55,
+                    "reason": "The limits are specific and consistent, and they carry the engineering judgment about thresholds and abstention."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: one coherent topic (generative text watermarking); the sections are interdependent.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "NOT APPLICABLE",
+                  "identity_safety": "NOT APPLICABLE",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "The whole note was audited independently. The Anthropic article confirms the SynthID-Text variant, weakness on short and factual text, translations being watermarked, and the absence of identity. The Nature reference is the primary paper. No concrete defect was found, and no edits were proposed.",
+            "change_checks": []
+          },
+          "model_calls": 18
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-07T06:22:41.346497Z",
+    "checkpoint_at": "2026-11-07T06:22:44.585541Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
