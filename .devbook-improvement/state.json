@@ -5544,15 +5544,16 @@
     "version": 1,
     "id": "f57944c05f7944ee8610e2bd6384fd74",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-07T06:14:05.879571Z",
-    "elapsed_seconds": 229.3137852999999,
+    "elapsed_seconds": 232.69008909999988,
     "calls_reserved": 8,
     "responses_received": 8,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Model Selection and Routing.md",
       "Vault/Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization.md",
-      "Vault/Home/AI & ML/LLM/Prompt Engineering/In-Context Learning.md"
+      "Vault/Home/AI & ML/LLM/Prompt Engineering/In-Context Learning.md",
+      "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Composition.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -5779,10 +5780,78 @@
           },
           "model_calls": 6
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Composition.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Composition.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against its current text. The opening states when a single prompt suffices and when composition is justified. Chaining requires real boundaries: schema, validation and branching. The support-chain example and the mermaid diagram match the prose, and the code fences have language tags. Generated knowledge prompting is attributed correctly to Liu et al. 2022 and caveated as unverified model output. Meta prompting is separated from the automated optimization note by a wikilink. The pitfalls are sound: error propagation with a required-field check, delimiters not being a security boundary, and held-out evaluation with rollback for overfitting. The tradeoff table supports decisions. The two cards each test one dependent task, their answers match the note, and they cite relevant sources. The references are real and topic-specific. I found no factual or editorial defect, and no known violations are unresolved, so edits would be cosmetic churn."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "Independent whole-note audit found no factual, editorial, structural or card-quality defect. The keep is justified and no edits are proposed.",
+            "change_checks": [],
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Composition.md",
+                "verdict": "CLEAN",
+                "summary": "The note opens with when composition is justified and its cost. Chaining, generated knowledge and meta prompting each have a concrete mechanism, example and caveat. Pitfalls and the tradeoff table support engineering decisions. Both Qards test one dependent task. Keeping the note unchanged is correct, since edits would be cosmetic.",
+                "page_type": "Concept — frontmatter, MD040 language tags, optional Questions and References, wikilink to Automated Prompt Optimization and generated navigation ownership checked. Voice is impersonal and declarative.",
+                "current_text_evidence": [
+                  {
+                    "quote": "Splitting one vague prompt into three vague prompts merely triples the failure surface.",
+                    "line_start": 23,
+                    "reason": "States the key boundary condition for chaining: stages need schemas and validation, or the chain only adds failure points."
+                  },
+                  {
+                    "quote": "But generated knowledge is still model output. It is neither a citation nor verification.",
+                    "line_start": 75,
+                    "reason": "Correctly caveats Liu et al. 2022 generated knowledge prompting and points to trusted retrieved context for high-stakes use."
+                  },
+                  {
+                    "quote": "Delimiters help the model distinguish data from control text, but they are not a security boundary.",
+                    "line_start": 100,
+                    "reason": "Accurate and decisive prompt-injection guidance, with concrete mitigations in the following sentence."
+                  },
+                  {
+                    "quote": "A model-drafted revision is a hypothesis to test, not a reliability guarantee.",
+                    "line_start": 140,
+                    "reason": "The meta-prompting card answer keeps held-out evaluation and rollback together as one dependent workflow, including its limits."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: chaining, generated knowledge and meta prompting are three techniques of one composition theme. They are short and cross-referenced by shared pitfalls and the tradeoff table. Automated optimization is already a separate note.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ]
+          },
+          "model_calls": 8
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-07T06:17:55.192814Z",
+    "checkpoint_at": "2026-11-07T06:17:58.569118Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
