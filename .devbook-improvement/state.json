@@ -4544,6 +4544,71 @@
         },
         "review_process": "focused-whole-note-v1"
       }
+    },
+    "Vault/Home/AI & ML/Machine Learning/Evaluation/Classification Evaluation.md": {
+      "content_hash": "83901229e0b522c839e5acf8257f4990429d6178e45ca80c674f5a41c75ae33b",
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "outcome": "keep",
+      "repair_input_hash": "",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "violation_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "keep_review": {
+        "content_hash": "83901229e0b522c839e5acf8257f4990429d6178e45ca80c674f5a41c75ae33b",
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review": {
+          "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Classification Evaluation.md",
+          "verdict": "CLEAN",
+          "summary": "The note is accurate and ordered well: matrix, metrics, threshold effect, worked numbers, multi-class averaging, then pitfalls. I recomputed every number and found no errors. The prose is direct and has no padding, so leaving it unchanged is justified.",
+          "page_type": "Concept — typed frontmatter, optional Questions absent (allowed), References present as bare link bullets, code fences carry language identifiers.",
+          "current_text_evidence": [
+            {
+              "quote": "A release decision then compares models at the same constraint, such as maximizing precision while keeping recall above 0.95.",
+              "line_start": 14,
+              "reason": "The opening states the operating idea and the decision condition right away."
+            },
+            {
+              "quote": "The diagram describes the usual direction, not a guarantee for every finite sample.",
+              "line_start": 56,
+              "reason": "Hedges the threshold effect correctly, so the note does not overclaim monotonic behaviour."
+            },
+            {
+              "quote": "| 0.80 | 55 | 10 | 45 | 0.85 | 0.55 |",
+              "line_start": 84,
+              "reason": "55/65 = 0.846 and 55/100 = 0.55 are correct. The row shows the precision/recall trade-off at a second threshold."
+            },
+            {
+              "quote": "F1        = 2 * (0.80 * 0.76) / (0.80 + 0.76) = 0.78",
+              "line_start": 76,
+              "reason": "The worked example sums to 100 cases. F1 is about 0.78 whether it is computed from the rounded or the exact recall."
+            },
+            {
+              "quote": "for single-label multi-class classification, micro precision and recall equal accuracy",
+              "line_start": 96,
+              "reason": "The claim is correct and carries the condition (single-label) it depends on."
+            },
+            {
+              "quote": "Always predicting \"not fraud\" yields 99.9% accuracy when fraud prevalence is 0.1%",
+              "line_start": 106,
+              "reason": "The imbalance arithmetic is correct and makes the pitfall concrete."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: binary metrics, thresholds and multi-class averaging are one coherent evaluation topic, and the note is compact.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "NOT APPLICABLE",
+            "identity_safety": "NOT APPLICABLE",
+            "rules_compliance": "PASS"
+          }
+        },
+        "review_process": "focused-whole-note-v1"
+      }
     }
   },
   "topics": {
@@ -5961,7 +6026,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-07T13:18:06.384851Z",
-    "elapsed_seconds": 228.10401479999993,
+    "elapsed_seconds": 232.27991889999993,
     "calls_reserved": 7,
     "responses_received": 7,
     "attempted_paths": [
@@ -6130,7 +6195,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-07T13:21:54.488372Z",
+    "checkpoint_at": "2026-11-07T13:21:58.664275Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -9913,6 +9978,102 @@
       ],
       "source_hashes": {
         "Vault/Home/AI & ML/LLM/Safety/Safety.md": "ea085780c5b58c124edc2975470faa3e040e75644bee82abc1819ec22e5d2da5"
+      },
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "6776a8e29ab732ed3d4251126fe0340f4a7dd20640db1c508df9033554ed1948": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "overall_reason": "Independent whole-note audit found no factual, editorial, structural or rule defects. The keep is justified and no edits were proposed.",
+        "change_checks": [],
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Classification Evaluation.md",
+            "verdict": "CLEAN",
+            "summary": "The note is accurate and ordered well: matrix, metrics, threshold effect, worked numbers, multi-class averaging, then pitfalls. I recomputed every number and found no errors. The prose is direct and has no padding, so leaving it unchanged is justified.",
+            "page_type": "Concept — typed frontmatter, optional Questions absent (allowed), References present as bare link bullets, code fences carry language identifiers.",
+            "current_text_evidence": [
+              {
+                "quote": "A release decision then compares models at the same constraint, such as maximizing precision while keeping recall above 0.95.",
+                "line_start": 14,
+                "reason": "The opening states the operating idea and the decision condition right away."
+              },
+              {
+                "quote": "The diagram describes the usual direction, not a guarantee for every finite sample.",
+                "line_start": 58,
+                "reason": "Hedges the threshold effect correctly, so the note does not overclaim monotonic behaviour."
+              },
+              {
+                "quote": "| 0.80 | 55 | 10 | 45 | 0.85 | 0.55 |",
+                "line_start": 86,
+                "reason": "55/65 = 0.846 and 55/100 = 0.55 are correct. The row shows the precision/recall trade-off at a second threshold."
+              },
+              {
+                "quote": "F1        = 2 * (0.80 * 0.76) / (0.80 + 0.76) = 0.78",
+                "line_start": 78,
+                "reason": "The worked example sums to 100 cases. F1 is about 0.78 whether it is computed from the rounded or the exact recall."
+              },
+              {
+                "quote": "for single-label multi-class classification, micro precision and recall equal accuracy",
+                "line_start": 98,
+                "reason": "The claim is correct and carries the condition (single-label) it depends on."
+              },
+              {
+                "quote": "Always predicting \"not fraud\" yields 99.9% accuracy when fraud prevalence is 0.1%",
+                "line_start": 108,
+                "reason": "The imbalance arithmetic is correct and makes the pitfall concrete."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: binary metrics, thresholds and multi-class averaging are one coherent evaluation topic, and the note is compact.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "NOT APPLICABLE",
+              "identity_safety": "NOT APPLICABLE",
+              "rules_compliance": "PASS"
+            }
+          }
+        ]
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Classification Evaluation.md",
+          "citation_index": 1,
+          "reported_line_start": 58,
+          "resolved_line_start": 56
+        },
+        {
+          "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Classification Evaluation.md",
+          "citation_index": 2,
+          "reported_line_start": 86,
+          "resolved_line_start": 84
+        },
+        {
+          "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Classification Evaluation.md",
+          "citation_index": 3,
+          "reported_line_start": 78,
+          "resolved_line_start": 76
+        },
+        {
+          "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Classification Evaluation.md",
+          "citation_index": 4,
+          "reported_line_start": 98,
+          "resolved_line_start": 96
+        },
+        {
+          "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Classification Evaluation.md",
+          "citation_index": 5,
+          "reported_line_start": 108,
+          "resolved_line_start": 106
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/AI & ML/Machine Learning/Evaluation/Classification Evaluation.md": "83901229e0b522c839e5acf8257f4990429d6178e45ca80c674f5a41c75ae33b"
       },
       "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
@@ -22698,207 +22859,6 @@
         "change_checks": []
       },
       "feedback_snapshot": []
-    }
-  },
-  "pending_author_proposal": {
-    "workload_id": "b9235098cfe341bd98cce55faa026472",
-    "topic_id": "ai-ml-4edf0823",
-    "batch": {
-      "topic": "AI & ML",
-      "topic_id": "ai-ml-4edf0823",
-      "notes": [
-        {
-          "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Classification Evaluation.md",
-          "content": "---\ntopic: [AI & ML]\nsubtopic: [Machine Learning]\nsummary: \"Measuring whether a model assigns the right label: false alarms versus misses at a chosen threshold.\"\nlevel: [\"3\"]\npriority: Medium\nstatus: Done\npublish: true\ncreated: \"2026-02-16T22:45:34.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.493Z\"\n---\n\nClassification evaluation turns model errors into operating costs. The confusion matrix shows which mistakes occur. The threshold decides how many of each kind the system accepts. A release decision then compares models at the same constraint, such as maximizing precision while keeping recall above 0.95.\n\n# Binary Classification\n\n## Start with the Confusion Matrix\n\nA binary classifier produces four counts at a chosen threshold:\n\n| | Actual positive | Actual negative |\n|---|---:|---:|\n| Predicted positive | TP | FP |\n| Predicted negative | FN | TN |\n\n- `TP`: predicted positive, actually positive.\n- `FP`: predicted positive, actually negative. A false alarm.\n- `FN`: predicted negative, actually positive. A miss.\n- `TN`: predicted negative, actually negative.\n\n## Precision, Recall, and F1\n\n```text\nprecision = TP / (TP + FP)\nrecall    = TP / (TP + FN)\nF1        = 2 * (precision * recall) / (precision + recall)\n```\n\n- **Precision** answers how many predicted positives were correct. False positives pull it down.\n- **Recall** answers how many real positives were found. False negatives pull it down.\n- **F1** is their harmonic mean. It is useful as a compact comparison only when false alarms and misses deserve similar weight.\n\n## The Threshold Moves the Cost\n\n```mermaid\nflowchart LR\n  L[Low threshold] --> M[More predicted positives]\n  M --> R1[Recall usually up]\n  M --> P1[Precision usually down]\n  H[High threshold] --> F[Fewer predicted positives]\n  F --> R2[Recall usually down]\n  F --> P2[Precision usually up]\n```\n\nLowering the threshold usually finds more positives and creates more false alarms. Raising it does the reverse. The exact movement depends on the score distribution. The diagram describes the usual direction, not a guarantee for every finite sample.\n\n## Content Moderation and Fraud Detection\n\nIn content moderation, a lower threshold catches more unsafe posts but blocks more safe ones. Fraud detection has the same mechanics with different costs: recall protects against missed fraud, while precision keeps legitimate customers out of the review queue.\n\n## Worked Example\n\nFor 100 cases, suppose the threshold produces:\n\n```text\nTP = 32\nFP = 8\nTN = 50\nFN = 10\n```\n\n```text\nprecision = 32 / (32 + 8)  = 0.80\nrecall    = 32 / (32 + 10) = 0.76\nF1        = 2 * (0.80 * 0.76) / (0.80 + 0.76) = 0.78\n```\n\nThe same scoring model can report very different metrics at two thresholds:\n\n| Threshold | TP | FP | FN | Precision | Recall |\n|---|---:|---:|---:|---:|---:|\n| 0.30 | 90 | 60 | 10 | 0.60 | 0.90 |\n| 0.80 | 55 | 10 | 45 | 0.85 | 0.55 |\n\n# Multi-class Averaging\n\nMulti-class metrics require a choice about whose errors count most:\n\n| Method | Formula | When to Use |\n| --- | --- | --- |\n| **Macro** | Average the per-class metric equally | Minority classes must count as much as common classes |\n| **Micro** | Aggregate TP/FP/FN globally, then compute | Overall instance-level performance matters. Frequent classes may dominate |\n| **Weighted** | Average per-class metrics by support | A per-class view is wanted, but class frequency should determine influence |\n\nMacro averaging exposes weak minority-class performance. Micro averaging emphasizes total decisions and, for single-label multi-class classification, micro precision and recall equal accuracy. Weighted averaging can still hide a bad rare class because support controls its influence. Report the per-class values whenever one class carries disproportionate risk.\n\n# Pitfalls\n\n**F1 hides asymmetric failures.** An F1 near 0.78 can come from high precision with weak recall or the reverse. Those systems have different queues and losses. Keep precision and recall beside F1, and use an explicit cost constraint when one error matters more.\n\n**Comparing arbitrary thresholds.** Precision at 0.3 for one model and at 0.7 for another says little. Compare both under the same policy, for example precision at recall ≥ 0.95. PR-AUC or ROC-AUC can compare ranking across thresholds, but neither chooses the production operating point.\n\n**Optimizing one metric without a constraint.** A spam filter can raise precision by flagging only obvious cases, leaving most spam untouched. Pushing recall alone blocks legitimate mail. The deployable objective includes both the benefit and the limit, such as maximizing recall while keeping the false-positive rate below 1%.\n\n**Class imbalance distorts accuracy.** Always predicting \"not fraud\" yields 99.9% accuracy when fraud prevalence is 0.1%, with zero useful detections. Precision, recall, PR-AUC, balanced accuracy, and per-class results reveal different parts of that failure.\n\n# References\n\n- [Scikit-learn: Classification metrics](https://scikit-learn.org/stable/modules/model_evaluation.html#classification-metrics)\n- [Google ML Crash Course: Accuracy, precision, recall](https://developers.google.com/machine-learning/crash-course/classification/accuracy-precision-recall)\n- [Beyond Accuracy: Behavioral Testing of NLP Models (Ribeiro et al., ACL 2020)](https://aclanthology.org/2020.acl-main.442/)\n",
-          "hash": "83901229e0b522c839e5acf8257f4990429d6178e45ca80c674f5a41c75ae33b",
-          "topic": "AI & ML",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "new"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Classification Evaluation.md",
-          "outcome": "keep",
-          "reason": "Audited the whole note. The confusion-matrix definitions and the precision, recall and F1 formulas are correct. The worked example sums to 100 cases and gives precision 0.80, recall 0.762 (shown as 0.76) and F1 0.78. The two-threshold table values also check out: 90/150 = 0.60, 90/100 = 0.90, 55/65 = 0.85 and 55/100 = 0.55. The multi-class averaging claims are accurate, including that micro precision and recall equal accuracy for single-label multi-class classification. The threshold diagram is hedged correctly as the usual direction, not a guarantee. The pitfalls (F1 hiding asymmetric failures, comparing arbitrary thresholds, optimizing one metric without a constraint, accuracy under imbalance) are sound and consistent with the PR-AUC and ROC-AUC sibling cards. Code fences have language identifiers, and the references are relevant. There are no cards in this note and no known violations. The prose reads direct and in order, so no edit would add value."
-        }
-      ],
-      "feedback": []
-    },
-    "source_hashes": {
-      "Vault/Home/AI & ML/Machine Learning/Evaluation/Classification Evaluation.md": "83901229e0b522c839e5acf8257f4990429d6178e45ca80c674f5a41c75ae33b"
-    },
-    "feedback_keys": [],
-    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/AI & ML/Machine Learning/Evaluation/Classification Evaluation.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-07T13:21:31.402656Z",
-    "review_evidence": {
-      "raw_review": {
-        "verdict": "CLEAN",
-        "overall_reason": "Independent whole-note audit found no factual, editorial, structural or rule defects. The keep is justified and no edits were proposed.",
-        "change_checks": [],
-        "notes": [
-          {
-            "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Classification Evaluation.md",
-            "verdict": "CLEAN",
-            "summary": "The note is accurate and ordered well: matrix, metrics, threshold effect, worked numbers, multi-class averaging, then pitfalls. I recomputed every number and found no errors. The prose is direct and has no padding, so leaving it unchanged is justified.",
-            "page_type": "Concept — typed frontmatter, optional Questions absent (allowed), References present as bare link bullets, code fences carry language identifiers.",
-            "current_text_evidence": [
-              {
-                "quote": "A release decision then compares models at the same constraint, such as maximizing precision while keeping recall above 0.95.",
-                "line_start": 14,
-                "reason": "The opening states the operating idea and the decision condition right away."
-              },
-              {
-                "quote": "The diagram describes the usual direction, not a guarantee for every finite sample.",
-                "line_start": 58,
-                "reason": "Hedges the threshold effect correctly, so the note does not overclaim monotonic behaviour."
-              },
-              {
-                "quote": "| 0.80 | 55 | 10 | 45 | 0.85 | 0.55 |",
-                "line_start": 86,
-                "reason": "55/65 = 0.846 and 55/100 = 0.55 are correct. The row shows the precision/recall trade-off at a second threshold."
-              },
-              {
-                "quote": "F1        = 2 * (0.80 * 0.76) / (0.80 + 0.76) = 0.78",
-                "line_start": 78,
-                "reason": "The worked example sums to 100 cases. F1 is about 0.78 whether it is computed from the rounded or the exact recall."
-              },
-              {
-                "quote": "for single-label multi-class classification, micro precision and recall equal accuracy",
-                "line_start": 98,
-                "reason": "The claim is correct and carries the condition (single-label) it depends on."
-              },
-              {
-                "quote": "Always predicting \"not fraud\" yields 99.9% accuracy when fraud prevalence is 0.1%",
-                "line_start": 108,
-                "reason": "The imbalance arithmetic is correct and makes the pitfall concrete."
-              }
-            ],
-            "target_resolution": "JUSTIFIED UNCHANGED",
-            "split_suggestion": "No split: binary metrics, thresholds and multi-class averaging are one coherent evaluation topic, and the note is compact.",
-            "findings": [],
-            "source_checks": [],
-            "rejection_equivalence": [],
-            "quality": {
-              "accuracy": "PASS",
-              "clarity": "PASS",
-              "question_quality": "NOT APPLICABLE",
-              "identity_safety": "NOT APPLICABLE",
-              "rules_compliance": "PASS"
-            }
-          }
-        ]
-      },
-      "bindings": [
-        {
-          "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Classification Evaluation.md",
-          "citation_index": 1,
-          "reported_line_start": 58,
-          "resolved_line_start": 56
-        },
-        {
-          "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Classification Evaluation.md",
-          "citation_index": 2,
-          "reported_line_start": 86,
-          "resolved_line_start": 84
-        },
-        {
-          "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Classification Evaluation.md",
-          "citation_index": 3,
-          "reported_line_start": 78,
-          "resolved_line_start": 76
-        },
-        {
-          "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Classification Evaluation.md",
-          "citation_index": 4,
-          "reported_line_start": 98,
-          "resolved_line_start": 96
-        },
-        {
-          "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Classification Evaluation.md",
-          "citation_index": 5,
-          "reported_line_start": 108,
-          "resolved_line_start": 106
-        }
-      ],
-      "source_hashes": {
-        "Vault/Home/AI & ML/Machine Learning/Evaluation/Classification Evaluation.md": "83901229e0b522c839e5acf8257f4990429d6178e45ca80c674f5a41c75ae33b"
-      },
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
-    },
-    "completed_review": {
-      "verdict": "CLEAN",
-      "overall_reason": "Independent whole-note audit found no factual, editorial, structural or rule defects. The keep is justified and no edits were proposed.",
-      "change_checks": [],
-      "notes": [
-        {
-          "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Classification Evaluation.md",
-          "verdict": "CLEAN",
-          "summary": "The note is accurate and ordered well: matrix, metrics, threshold effect, worked numbers, multi-class averaging, then pitfalls. I recomputed every number and found no errors. The prose is direct and has no padding, so leaving it unchanged is justified.",
-          "page_type": "Concept — typed frontmatter, optional Questions absent (allowed), References present as bare link bullets, code fences carry language identifiers.",
-          "current_text_evidence": [
-            {
-              "quote": "A release decision then compares models at the same constraint, such as maximizing precision while keeping recall above 0.95.",
-              "line_start": 14,
-              "reason": "The opening states the operating idea and the decision condition right away."
-            },
-            {
-              "quote": "The diagram describes the usual direction, not a guarantee for every finite sample.",
-              "line_start": 56,
-              "reason": "Hedges the threshold effect correctly, so the note does not overclaim monotonic behaviour."
-            },
-            {
-              "quote": "| 0.80 | 55 | 10 | 45 | 0.85 | 0.55 |",
-              "line_start": 84,
-              "reason": "55/65 = 0.846 and 55/100 = 0.55 are correct. The row shows the precision/recall trade-off at a second threshold."
-            },
-            {
-              "quote": "F1        = 2 * (0.80 * 0.76) / (0.80 + 0.76) = 0.78",
-              "line_start": 76,
-              "reason": "The worked example sums to 100 cases. F1 is about 0.78 whether it is computed from the rounded or the exact recall."
-            },
-            {
-              "quote": "for single-label multi-class classification, micro precision and recall equal accuracy",
-              "line_start": 96,
-              "reason": "The claim is correct and carries the condition (single-label) it depends on."
-            },
-            {
-              "quote": "Always predicting \"not fraud\" yields 99.9% accuracy when fraud prevalence is 0.1%",
-              "line_start": 106,
-              "reason": "The imbalance arithmetic is correct and makes the pitfall concrete."
-            }
-          ],
-          "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: binary metrics, thresholds and multi-class averaging are one coherent evaluation topic, and the note is compact.",
-          "findings": [],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "PASS",
-            "question_quality": "NOT APPLICABLE",
-            "identity_safety": "NOT APPLICABLE",
-            "rules_compliance": "PASS"
-          }
-        }
-      ]
     }
   }
 }
