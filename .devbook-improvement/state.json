@@ -6755,11 +6755,11 @@
     "version": 1,
     "id": "b75e350f352448edb997b51c2cb9ee03",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-07T22:00:53.128724Z",
-    "elapsed_seconds": 406.5796777000002,
+    "elapsed_seconds": 428.4187633000002,
     "calls_reserved": 16,
-    "responses_received": 15,
+    "responses_received": 16,
     "attempted_paths": [
       "Vault/Home/AI & ML/Responsible AI.md",
       "Vault/Home/AI & ML/AI & ML.md",
@@ -7286,7 +7286,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-07T22:07:39.707940Z",
+    "checkpoint_at": "2026-11-07T22:08:01.547025Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -25408,6 +25408,137 @@
       "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-07T22:07:36.918824Z"
+    "prepared_at": "2026-11-07T22:07:36.918824Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "overall_reason": "The single note is accurate, readable and well scoped. It has no known violations, no edits are proposed, and the keep is justified. The two Qards each test one dependent comparison, and their IDs are retained.",
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md",
+            "verdict": "CLEAN",
+            "summary": "The note covers five workflow patterns. Each has a diagram, a mechanism and a limit. The whole-note read found no factual error, ordering problem or terminology problem. The 90.2% Research-system figure is scoped to that system and evaluation. The two Qards are single-task comparisons.",
+            "page_type": "Concept — no required headings, optional Questions and References present. The Qard callouts and their IDs are protected identity metadata.",
+            "current_text_evidence": [
+              {
+                "quote": "Application code still owns the outer control flow. The model handles bounded decisions inside it.",
+                "line_start": 17,
+                "reason": "The opening states the operating idea and the boundary against autonomous agents. The note stays on this framing throughout."
+              },
+              {
+                "quote": "The number belongs to that system and evaluation, not to the pattern in general.",
+                "line_start": 76,
+                "reason": "The statistic is scoped correctly. It matches Anthropic's multi-agent Research system write-up, where a lead agent runs 3–5 parallel subagents and beat a single agent by 90.2% on an internal evaluation."
+              },
+              {
+                "quote": "A vague rubric produces a confident loop with no stable stopping condition",
+                "line_start": 92,
+                "reason": "The evaluator-optimizer section states a concrete failure condition, so it explains more than the pattern's definition."
+              },
+              {
+                "quote": "a perfect specialist cannot recover a request sent to the wrong branch",
+                "line_start": 44,
+                "reason": "The routing section names the router as a failure point, which is useful for engineering judgment."
+              },
+              {
+                "quote": "Why is the orchestrator-workers pattern harder to operate than ordinary parallelization, even though both fan out work to several calls?",
+                "line_start": 113,
+                "reason": "The card is self-contained and tests one dependent behavior-and-why explanation. It is not a bundle of independent tasks, and its ID is retained."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: the five patterns form one coherent comparison along a single axis, which is where the next step is decided. Splitting would fragment that comparison.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md",
+          "citation_index": 1,
+          "reported_line_start": 76,
+          "resolved_line_start": 75
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md",
+          "citation_index": 2,
+          "reported_line_start": 92,
+          "resolved_line_start": 90
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md",
+          "citation_index": 4,
+          "reported_line_start": 113,
+          "resolved_line_start": 111
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md": "6ce5f39ff264a6b1a5b9fe9579c2d80c8e0b57a4ccd7f3ef446c8efe61405732"
+      },
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CLEAN",
+      "overall_reason": "The single note is accurate, readable and well scoped. It has no known violations, no edits are proposed, and the keep is justified. The two Qards each test one dependent comparison, and their IDs are retained.",
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md",
+          "verdict": "CLEAN",
+          "summary": "The note covers five workflow patterns. Each has a diagram, a mechanism and a limit. The whole-note read found no factual error, ordering problem or terminology problem. The 90.2% Research-system figure is scoped to that system and evaluation. The two Qards are single-task comparisons.",
+          "page_type": "Concept — no required headings, optional Questions and References present. The Qard callouts and their IDs are protected identity metadata.",
+          "current_text_evidence": [
+            {
+              "quote": "Application code still owns the outer control flow. The model handles bounded decisions inside it.",
+              "line_start": 17,
+              "reason": "The opening states the operating idea and the boundary against autonomous agents. The note stays on this framing throughout."
+            },
+            {
+              "quote": "The number belongs to that system and evaluation, not to the pattern in general.",
+              "line_start": 75,
+              "reason": "The statistic is scoped correctly. It matches Anthropic's multi-agent Research system write-up, where a lead agent runs 3–5 parallel subagents and beat a single agent by 90.2% on an internal evaluation."
+            },
+            {
+              "quote": "A vague rubric produces a confident loop with no stable stopping condition",
+              "line_start": 90,
+              "reason": "The evaluator-optimizer section states a concrete failure condition, so it explains more than the pattern's definition."
+            },
+            {
+              "quote": "a perfect specialist cannot recover a request sent to the wrong branch",
+              "line_start": 44,
+              "reason": "The routing section names the router as a failure point, which is useful for engineering judgment."
+            },
+            {
+              "quote": "Why is the orchestrator-workers pattern harder to operate than ordinary parallelization, even though both fan out work to several calls?",
+              "line_start": 111,
+              "reason": "The card is self-contained and tests one dependent behavior-and-why explanation. It is not a bundle of independent tasks, and its ID is retained."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: the five patterns form one coherent comparison along a single axis, which is where the next step is decided. Splitting would fragment that comparison.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "change_checks": []
+    }
   }
 }
