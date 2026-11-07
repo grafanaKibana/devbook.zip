@@ -5489,11 +5489,11 @@
     "version": 1,
     "id": "f57944c05f7944ee8610e2bd6384fd74",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-07T06:14:05.879571Z",
-    "elapsed_seconds": 194.42032049999992,
+    "elapsed_seconds": 202.42354709999992,
     "calls_reserved": 7,
-    "responses_received": 6,
+    "responses_received": 7,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Model Selection and Routing.md",
       "Vault/Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization.md",
@@ -5727,7 +5727,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-07T06:17:20.299349Z",
+    "checkpoint_at": "2026-11-07T06:17:28.302576Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -20876,5 +20876,53 @@
       },
       "feedback_snapshot": []
     }
+  },
+  "pending_author_proposal": {
+    "workload_id": "f57944c05f7944ee8610e2bd6384fd74",
+    "topic_id": "ai-ml-4edf0823",
+    "batch": {
+      "topic": "AI & ML",
+      "topic_id": "ai-ml-4edf0823",
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Composition.md",
+          "content": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"Decomposing complex tasks into multiple LLM calls for reliability and debuggability.\"\nlevel: [\"3\"]\npriority: Medium\nstatus: Done\npublish: true\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Prompt Engineering/Prompt Composition\"\nflashcard_uid: \"a52de874\"\ncreated: \"2026-02-28T13:40:02.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.481Z\"\n---\n\nA single prompt is often the right design. It becomes the wrong one when a task contains intermediate decisions that must be checked before later work can trust them. Prompt composition splits those decisions across calls, adds context before an answer, or uses a model to revise the prompt itself.\n\nThe gain is control. A support workflow can expose whether extraction, classification, or response generation failed. The cost is another distributed system in miniature: more calls, more latency, and more boundaries where bad data or instructions can propagate.\n\n# Prompt Chaining\n\nPrompt chaining gives each call one narrow job and passes its output to the next. The chain becomes useful only when the boundaries are real: an intermediate result has a schema, can be validated, and changes what happens next. Splitting one vague prompt into three vague prompts merely triples the failure surface.\n\nA support assistant might use three stages:\n\n1. Extract key entities from the user message (product, error code, account tier).\n2. Classify intent (billing issue, technical issue, account request).\n3. Generate a response using validated entities and intent.\n\nDeterministic checks belong between the calls. Extracted fields can be schema-validated, and an intent label can be rejected unless it belongs to a closed set.\n\n```text\nStep 1 prompt:\nExtract entities from this message into JSON with keys product, error_code, account_tier.\nMessage: \"My ProPlan account shows ERR-42 when exporting invoices.\"\n\nStep 2 prompt:\nClassify intent as one of: billing_issue, technical_issue, account_request.\nUse only the extracted entity JSON.\n\nStep 3 prompt:\nWrite a support response using the intent label and entities.\nConstraints: 4-6 sentences, include one next action.\n```\n\n```mermaid\nflowchart LR\n    A[User message] --> B[Step one extract entities]\n    B --> C[Deterministic check entity schema]\n    C --> D[Step two classify intent]\n    D --> E[Deterministic check allowed labels]\n    E --> F[Step three generate response]\n```\n\n# Generated Knowledge Prompting\n\nGenerated knowledge prompting asks the model to state relevant background knowledge before answering. Liu et al. (2022) feed those generated statements into a second prompt. Making the candidate facts explicit can help the final call use them consistently.\n\nA commonsense question can be composed like this:\n\n- Question: \"In golf, does the winner usually have the highest total strokes?\"\n- Knowledge generation step: \"List short facts about how golf scoring works.\"\n- Final answer step: answer the question using only generated knowledge.\n\n```text\nKnowledge generation prompt:\nList 5 short factual statements about golf scoring.\n\nFinal answer prompt:\nQuestion: In golf, does the winner usually have the highest total strokes?\nUse only the statements you generated above. Answer yes or no, then explain in 2 sentences.\n```\n\nThe first call might surface the fact that fewer strokes is better, giving the second call a useful scaffold. But generated knowledge is still model output. It is neither a citation nor verification. High-stakes workflows need trusted retrieved context or an external check.\n\n# Meta Prompting\n\nMeta prompting uses a model to draft or critique prompts. It is cheap search over a text artifact, especially when real failures show what the current prompt gets wrong.\n\nThree uses recur:\n\n1. Prompt generation: a model drafts a first prompt from a task description.\n2. Prompt refinement: a model receives the current prompt plus failure cases and proposes an improved version.\n3. Prompt evaluation: a model identifies weaknesses and likely failure modes in a prompt.\n\nA refinement pass might start from this evidence:\n\n- Initial prompt: \"Summarize this incident report.\"\n- Failure case: output misses timeline and root cause.\n- Meta prompt request: \"Rewrite this prompt so output must include timeline, root cause, and actions in JSON with required keys.\"\n- Refined prompt outcome: required timeline and root-cause fields in a machine-checkable schema.\n\nMeta prompting keeps a person in the revision loop. [[Automated Prompt Optimization]] turns the same candidate-and-evaluator idea into a search process that proposes and scores prompt variants without a manual edit at each step.\n\n# Pitfalls\n\n**Error propagation.** A bad extraction can corrupt every later step. If ERR-42 becomes `error_code: null`, the classifier may route the request as a general inquiry. A required-field check rejects the missing value and stops the chain when an intermediate contract fails. A confidence score is useful only when it has been calibrated against observed errors.\n\n**Cross-step instruction smuggling.** A chain can copy hostile text into a later call where it is mistaken for an instruction. Delimiters help the model distinguish data from control text, but they are not a security boundary. System rules stay outside untrusted content, later calls receive the smallest structured fields possible, and downstream actions are constrained by ordinary authorization and validation.\n\n**Meta-prompt overfitting.** A revision that fixes five remembered failures can break ordinary inputs. Evaluating every candidate on held-out examples can reveal that regression before release. The prompt is versioned with its evaluator, and a rollback threshold limits the impact of regressions the evaluation misses.\n\n# Tradeoffs\n\n| Choice | Prefer Option A | Prefer Option B |\n| --- | --- | --- |\n| Single prompt vs prompt chaining | Single prompt for low-risk tasks where latency and cost matter most | Prompt chaining for high-stakes tasks that need step-level control and debuggability |\n| Generated knowledge prompting vs direct answer prompting | Generated knowledge for evaluated, low-risk tasks where an explicit scaffold helps | Direct answer prompting when the task is simple or facts must come from trusted context |\n| Manual prompt edits vs meta prompting | Manual edits for stable prompts with clear, isolated issues | Meta prompting for fast iteration with concrete failure examples to optimize against |\n\n# Questions\n\n<!-- qard-id: 891d3fd3-1b89-4b8c-a92d-679c7e978ad5 -->\n> [!qard]- When is prompt chaining a better fit than one large prompt?\n> Prompt chaining fits better when a task has real stages and an intermediate result must be checked before later work can trust it, or when that result determines what happens next. One prompt fits better when no intermediate result needs separate treatment. Each extra call adds latency, token cost and another boundary where errors can propagate.\n>\n> A chain earns its cost only when its boundaries are real:\n>\n> - Each stage has one narrow job and an explicit output contract, such as entities as JSON or an intent label from a closed set.\n> - A deterministic check runs before the next stage uses that output. A missing required field or an unknown label stops the chain instead of corrupting later steps.\n> - Failures can be localized, because each stage's input and output can be inspected separately.\n> \n> For example, a support assistant extracts entities, validates them against a schema, classifies intent into an allowed set and only then writes the reply. If the error code `ERR-42` comes back as `error_code: null`, a required-field check stops the chain. Without that check, the classifier may route the request as a general inquiry.\n>\n> Splitting one vague prompt into several vague prompts adds failure points without adding control. For that reason, the complete chain is evaluated end to end against a simpler single-prompt baseline.\n>\n> Sources: [Anthropic, Building effective agents](https://www.anthropic.com/engineering/building-effective-agents) · [OpenAI evals](https://developers.openai.com/api/docs/guides/evals)\n\n<!-- qard-id: 637042dc-8641-4fbe-9f1a-25620b16a717 -->\n> [!qard]- What is a practical meta-prompting workflow for improving a weak prompt?\n> A practical workflow treats a model-drafted prompt revision as a candidate that must beat the current prompt on held-out cases before it ships.\n>\n> 1. **Collect failures:** the starting evidence is observed failures from real outputs, such as incident summaries that omit the timeline and root cause.\n> 2. **Group by cause:** failures are grouped by likely cause, such as a missing output requirement or an ambiguous instruction. One revision then targets a cause instead of patching single cases.\n> 3. **Draft a candidate:** a model receives the current prompt, the grouped failures and the required output contract, and proposes a revision. In the incident example, the revision can require `timeline`, `root_cause` and `actions` as mandatory JSON keys.\n> 4. **Compare on held-out cases:** the candidate and the current prompt are both scored on the known failures and on representative cases that were not used to write the revision.\n> 5. **Version and gate:** the prompt is versioned together with its evaluator, and a rollback threshold is set before deployment.\n> \n> The held-out comparison is the check for meta-prompt overfitting, where a revision fixes the remembered failures but silently breaks ordinary inputs. It can reveal that regression before release, which reduces the risk without ruling it out. Inputs that the evaluation set does not represent can still regress, so the rollback threshold limits the damage after deployment. A model-drafted revision is a hypothesis to test, not a reliability guarantee.\n>\n> Sources: [OpenAI model optimization](https://developers.openai.com/api/docs/guides/model-optimization) · [OpenAI evals](https://developers.openai.com/api/docs/guides/evals)\n\n# References\n\n- [Prompt Chaining - Prompt Engineering Guide](https://www.promptingguide.ai/techniques/prompt_chaining)\n- [Generated Knowledge Prompting for Commonsense Reasoning (Liu et al., 2022)](https://arxiv.org/abs/2110.08387)\n",
+          "hash": "83dd1cb760308591244841fc0eada13f4711643d3d2fed8239ebd4b57c51748b",
+          "topic": "AI & ML",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Composition.md",
+          "outcome": "keep",
+          "reason": "Audited the whole note against its current text. The opening states when a single prompt suffices and when composition is justified. Chaining requires real boundaries: schema, validation and branching. The support-chain example and the mermaid diagram match the prose, and the code fences have language tags. Generated knowledge prompting is attributed correctly to Liu et al. 2022 and caveated as unverified model output. Meta prompting is separated from the automated optimization note by a wikilink. The pitfalls are sound: error propagation with a required-field check, delimiters not being a security boundary, and held-out evaluation with rollback for overfitting. The tradeoff table supports decisions. The two cards each test one dependent task, their answers match the note, and they cite relevant sources. The references are real and topic-specific. I found no factual or editorial defect, and no known violations are unresolved, so edits would be cosmetic churn."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Composition.md": "83dd1cb760308591244841fc0eada13f4711643d3d2fed8239ebd4b57c51748b"
+    },
+    "feedback_keys": [],
+    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Composition.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-07T06:17:28.302565Z"
   }
 }
