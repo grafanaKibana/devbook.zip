@@ -6139,11 +6139,11 @@
     "version": 1,
     "id": "b9235098cfe341bd98cce55faa026472",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-07T13:18:06.384851Z",
-    "elapsed_seconds": 407.9326253,
+    "elapsed_seconds": 420.9198123,
     "calls_reserved": 13,
-    "responses_received": 12,
+    "responses_received": 13,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Safety/Safety.md",
       "Vault/Home/AI & ML/Machine Learning/Data Drift.md",
@@ -6533,7 +6533,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-07T13:24:54.316985Z",
+    "checkpoint_at": "2026-11-07T13:25:07.304172Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -23307,6 +23307,143 @@
       "Vault/Home/AI & ML/Machine Learning/Machine Learning.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-07T13:24:50.687077Z"
+    "prepared_at": "2026-11-07T13:24:50.687077Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/Machine Learning/Machine Learning.md",
+            "verdict": "CLEAN",
+            "summary": "Whole-note read of the FolderNote hub. The opening gives when ML fits versus rules. The pipeline diagram matches the eleven stage sections in order. Each stage states mechanisms and conditions: leakage, train/inference parity, group or time splits, holdout discipline, immutable registry artifacts, tail-latency budgets, and drift as a signal rather than proof. No factual, terminology, ordering or repetition defect was found, so keeping it unchanged is justified.",
+            "page_type": "FolderNote — hub with protected Datacore folder-map block; Questions optional and absent; References are bare topic-specific links.",
+            "current_text_evidence": [
+              {
+                "quote": "Machine learning fits problems where useful behavior can be learned from examples more cheaply than it can be expressed as rules.",
+                "line_start": 14,
+                "reason": "Opens by saying when ML applies, which introduces the topic quickly. The next paragraph states the rules boundary."
+              },
+              {
+                "quote": "a feature built with future information can make every offline result look convincing while guaranteeing a production failure",
+                "line_start": 49,
+                "reason": "Concrete leakage mechanism with its consequence, in a direct whiteboard voice."
+              },
+              {
+                "quote": "Repeated inspection quietly turns a test set into another validation set.",
+                "line_start": 63,
+                "reason": "States the condition that changes the evaluation decision."
+              },
+              {
+                "quote": "Track input quality and [[Data Drift]] while waiting, but do not confuse drift with proof that predictions became worse.",
+                "line_start": 95,
+                "reason": "Gives the important boundary between drift and quality loss. The wikilink is purposeful."
+              },
+              {
+                "quote": "Promotion changes the stage of an existing version rather than overwriting the artifact.",
+                "line_start": 79,
+                "reason": "Explains the registry mechanism and why rollback becomes mechanical."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: the stages form one coherent pipeline that depends on shared concepts such as leakage, the holdout and train/inference parity. Separate notes would break that flow.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "NOT APPLICABLE",
+              "identity_safety": "NOT APPLICABLE",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "overall_reason": "The single note was independently read in full. It is accurate, clear and compliant: code fences have languages, the Datacore block is intact, and the references are bare topic-specific links. No concrete defect was found, and the keep is justified.",
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/AI & ML/Machine Learning/Machine Learning.md",
+          "citation_index": 0,
+          "reported_line_start": 14,
+          "resolved_line_start": 15
+        },
+        {
+          "path": "Vault/Home/AI & ML/Machine Learning/Machine Learning.md",
+          "citation_index": 2,
+          "reported_line_start": 63,
+          "resolved_line_start": 55
+        },
+        {
+          "path": "Vault/Home/AI & ML/Machine Learning/Machine Learning.md",
+          "citation_index": 3,
+          "reported_line_start": 95,
+          "resolved_line_start": 76
+        },
+        {
+          "path": "Vault/Home/AI & ML/Machine Learning/Machine Learning.md",
+          "citation_index": 4,
+          "reported_line_start": 79,
+          "resolved_line_start": 67
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/AI & ML/Machine Learning/Machine Learning.md": "9f45ca90abde313dbbb69bbcb4d54d4f0554adc09afa0334e3955eedf91c2d53"
+      },
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CLEAN",
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/Machine Learning/Machine Learning.md",
+          "verdict": "CLEAN",
+          "summary": "Whole-note read of the FolderNote hub. The opening gives when ML fits versus rules. The pipeline diagram matches the eleven stage sections in order. Each stage states mechanisms and conditions: leakage, train/inference parity, group or time splits, holdout discipline, immutable registry artifacts, tail-latency budgets, and drift as a signal rather than proof. No factual, terminology, ordering or repetition defect was found, so keeping it unchanged is justified.",
+          "page_type": "FolderNote — hub with protected Datacore folder-map block; Questions optional and absent; References are bare topic-specific links.",
+          "current_text_evidence": [
+            {
+              "quote": "Machine learning fits problems where useful behavior can be learned from examples more cheaply than it can be expressed as rules.",
+              "line_start": 15,
+              "reason": "Opens by saying when ML applies, which introduces the topic quickly. The next paragraph states the rules boundary."
+            },
+            {
+              "quote": "a feature built with future information can make every offline result look convincing while guaranteeing a production failure",
+              "line_start": 49,
+              "reason": "Concrete leakage mechanism with its consequence, in a direct whiteboard voice."
+            },
+            {
+              "quote": "Repeated inspection quietly turns a test set into another validation set.",
+              "line_start": 55,
+              "reason": "States the condition that changes the evaluation decision."
+            },
+            {
+              "quote": "Track input quality and [[Data Drift]] while waiting, but do not confuse drift with proof that predictions became worse.",
+              "line_start": 76,
+              "reason": "Gives the important boundary between drift and quality loss. The wikilink is purposeful."
+            },
+            {
+              "quote": "Promotion changes the stage of an existing version rather than overwriting the artifact.",
+              "line_start": 67,
+              "reason": "Explains the registry mechanism and why rollback becomes mechanical."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: the stages form one coherent pipeline that depends on shared concepts such as leakage, the holdout and train/inference parity. Separate notes would break that flow.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "NOT APPLICABLE",
+            "identity_safety": "NOT APPLICABLE",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "overall_reason": "The single note was independently read in full. It is accurate, clear and compliant: code fences have languages, the Datacore block is intact, and the references are bare topic-specific links. No concrete defect was found, and the keep is justified.",
+      "change_checks": []
+    }
   }
 }
