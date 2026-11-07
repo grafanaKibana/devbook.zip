@@ -5544,11 +5544,11 @@
     "version": 1,
     "id": "f57944c05f7944ee8610e2bd6384fd74",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-07T06:14:05.879571Z",
-    "elapsed_seconds": 263.13343899999984,
+    "elapsed_seconds": 281.6321348999998,
     "calls_reserved": 10,
-    "responses_received": 9,
+    "responses_received": 10,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Model Selection and Routing.md",
       "Vault/Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization.md",
@@ -5851,7 +5851,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-07T06:18:29.012469Z",
+    "checkpoint_at": "2026-11-07T06:18:47.511165Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -21047,6 +21047,143 @@
       "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-07T06:18:25.674343Z"
+    "prepared_at": "2026-11-07T06:18:25.674343Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "overall_reason": "Independent whole-note read found no factual, structural, voice or question-quality defect. No edits were proposed, so keeping the note unchanged is justified.",
+        "change_checks": [],
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md",
+            "verdict": "CLEAN",
+            "summary": "The note explains prompt anatomy, settings, instruction and role prompting, technique selection and pitfalls accurately and in a whiteboard voice. Both Qards each test one dependent task and carry answer-side primary sources, and no edit is warranted.",
+            "page_type": "FolderNote — keeps tags FolderNote and the protected datacorejsx map; Questions and References are optional and present; MD040 satisfied.",
+            "current_text_evidence": [
+              {
+                "quote": "These starting ranges are heuristics. Production values need task-specific evaluation on the chosen model.",
+                "line_start": 56,
+                "reason": "The settings table is correctly hedged, so the numeric ranges are not presented as facts."
+              },
+              {
+                "quote": "Strict output shape needs structured output or schema validation.",
+                "line_start": 136,
+                "reason": "The prose is consistent with the Mermaid flow above it and states the boundary that examples cover semantics a schema cannot."
+              },
+              {
+                "quote": "**Correct shape, wrong content.**",
+                "line_start": 141,
+                "reason": "The pitfall names a concrete failure, schema-valid but invented values, and its mitigation."
+              },
+              {
+                "quote": "Why must prompt instructions and generation settings be evaluated together?",
+                "line_start": 147,
+                "reason": "This is a single dependent why-explanation with conditions, such as model and endpoint parameter support, and an answer-side source."
+              },
+              {
+                "quote": "How can an output-token cap limit cost without truncating valid answers?",
+                "line_start": 158,
+                "reason": "This is one coherent sizing and truncation task. The answer covers reasoning tokens, context sharing, truncation detection and the endpoint-specific parameter names."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: the note is a compact hub, and its child notes already cover in-context learning, reasoning, composition and optimization separately.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ]
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md",
+          "citation_index": 1,
+          "reported_line_start": 136,
+          "resolved_line_start": 135
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md",
+          "citation_index": 2,
+          "reported_line_start": 141,
+          "resolved_line_start": 140
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md",
+          "citation_index": 3,
+          "reported_line_start": 147,
+          "resolved_line_start": 146
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md",
+          "citation_index": 4,
+          "reported_line_start": 158,
+          "resolved_line_start": 157
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md": "848673ffdf77c37fb16590e242781ec160c908bb04f8b9b4730190393cde5436"
+      },
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CLEAN",
+      "overall_reason": "Independent whole-note read found no factual, structural, voice or question-quality defect. No edits were proposed, so keeping the note unchanged is justified.",
+      "change_checks": [],
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md",
+          "verdict": "CLEAN",
+          "summary": "The note explains prompt anatomy, settings, instruction and role prompting, technique selection and pitfalls accurately and in a whiteboard voice. Both Qards each test one dependent task and carry answer-side primary sources, and no edit is warranted.",
+          "page_type": "FolderNote — keeps tags FolderNote and the protected datacorejsx map; Questions and References are optional and present; MD040 satisfied.",
+          "current_text_evidence": [
+            {
+              "quote": "These starting ranges are heuristics. Production values need task-specific evaluation on the chosen model.",
+              "line_start": 56,
+              "reason": "The settings table is correctly hedged, so the numeric ranges are not presented as facts."
+            },
+            {
+              "quote": "Strict output shape needs structured output or schema validation.",
+              "line_start": 135,
+              "reason": "The prose is consistent with the Mermaid flow above it and states the boundary that examples cover semantics a schema cannot."
+            },
+            {
+              "quote": "**Correct shape, wrong content.**",
+              "line_start": 140,
+              "reason": "The pitfall names a concrete failure, schema-valid but invented values, and its mitigation."
+            },
+            {
+              "quote": "Why must prompt instructions and generation settings be evaluated together?",
+              "line_start": 146,
+              "reason": "This is a single dependent why-explanation with conditions, such as model and endpoint parameter support, and an answer-side source."
+            },
+            {
+              "quote": "How can an output-token cap limit cost without truncating valid answers?",
+              "line_start": 157,
+              "reason": "This is one coherent sizing and truncation task. The answer covers reasoning tokens, context sharing, truncation detection and the endpoint-specific parameter names."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: the note is a compact hub, and its child notes already cover in-context learning, reasoning, composition and optimization separately.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ]
+    }
   }
 }
