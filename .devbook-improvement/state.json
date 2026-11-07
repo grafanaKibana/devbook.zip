@@ -6540,14 +6540,15 @@
     "version": 1,
     "id": "b75e350f352448edb997b51c2cb9ee03",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-07T22:00:53.128724Z",
-    "elapsed_seconds": 158.81746339999998,
+    "elapsed_seconds": 161.89342279999997,
     "calls_reserved": 6,
     "responses_received": 6,
     "attempted_paths": [
       "Vault/Home/AI & ML/Responsible AI.md",
-      "Vault/Home/AI & ML/AI & ML.md"
+      "Vault/Home/AI & ML/AI & ML.md",
+      "Vault/Home/AI & ML/LLM/Agents/Agents.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -6692,10 +6693,83 @@
           },
           "model_calls": 4
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/Agents/Agents.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Agents/Agents.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against the current text and Anthropic's Building Effective Agents. The workflow/agent distinction matches the source. The augmented-LLM, workflow-pattern and autonomous-agent sections give a sound order: simplest design first, then workflows, then agents. The mermaid loop, the three design principles, and the observable-progress condition are accurate and clear. The memory section is explicitly labelled an architectural choice, and its read paths, scope-before-ranking rule and embeddings-as-projection point are technically sound. Wikilinks use full paths with aliases, and the code fences have languages. The cards are each single, gradeable tasks: workflow versus agent, error compounding, controls, and task fit. Their answers cite primary sources, and the existing IDs are preserved. I found no factual error, repetition or learning gap that an edit would fix, and no known violations are unresolved. Any change would be cosmetic churn."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Agents/Agents.md",
+                "verdict": "CLEAN",
+                "summary": "Independent whole-note read finds no factual error, repetition, or question-quality defect. The workflow/agent distinction, the simplest-design-first order, and the memory section's hedged architecture all hold. No edit is warranted.",
+                "page_type": "FolderNote — hub with datacorejsx folder map (protected), optional Questions and References present and well-formed.",
+                "current_text_evidence": [
+                  {
+                    "quote": "**Workflows** are systems where LLMs and tools are orchestrated through predefined code paths.",
+                    "line_start": 20,
+                    "reason": "Matches Anthropic's Building Effective Agents definition of workflows versus agents; the opening states the operating boundary quickly."
+                  },
+                  {
+                    "quote": "This is an architectural choice, not a universal standard.",
+                    "line_start": 74,
+                    "reason": "The memory taxonomy is honestly scoped, and the read-path table keeps the mechanism visible."
+                  },
+                  {
+                    "quote": "Authorization scope must be checked before ranking. Relevance metadata cannot enforce access.",
+                    "line_start": 84,
+                    "reason": "A sound, concrete boundary condition for memory retrieval."
+                  },
+                  {
+                    "quote": "These controls reduce risk; they do not guarantee that the agent recovers or reaches a correct result.",
+                    "line_start": 119,
+                    "reason": "The card answer states its limits and is a separate, gradeable task from the compounding-mechanism card."
+                  },
+                  {
+                    "quote": "The outcome still needs criteria that can eventually determine success or failure",
+                    "line_start": 125,
+                    "reason": "The task-fit card answer carries the condition and the exception (delayed feedback), with a primary-source link."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the sections (augmented LLM, workflow patterns, autonomous agents, memory) form one coherent hub. Workflow Patterns and Evaluation already have their own notes.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "The note was read in full and independently. It is accurate, well ordered, and free of concrete violations. Each Qard tests one gradeable task, original IDs are intact, and the one ID-less card is acceptable. No edits were proposed, so no edit or source checks are needed.",
+            "change_checks": []
+          },
+          "model_calls": 6
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-07T22:03:31.945722Z",
+    "checkpoint_at": "2026-11-07T22:03:35.021685Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
