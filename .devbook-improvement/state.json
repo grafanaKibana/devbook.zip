@@ -4129,6 +4129,66 @@
         },
         "review_process": "focused-whole-note-v1"
       }
+    },
+    "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md": {
+      "content_hash": "848673ffdf77c37fb16590e242781ec160c908bb04f8b9b4730190393cde5436",
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "outcome": "keep",
+      "repair_input_hash": "",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "violation_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "keep_review": {
+        "content_hash": "848673ffdf77c37fb16590e242781ec160c908bb04f8b9b4730190393cde5436",
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review": {
+          "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md",
+          "verdict": "CLEAN",
+          "summary": "The note explains prompt anatomy, settings, instruction and role prompting, technique selection and pitfalls accurately and in a whiteboard voice. Both Qards each test one dependent task and carry answer-side primary sources, and no edit is warranted.",
+          "page_type": "FolderNote — keeps tags FolderNote and the protected datacorejsx map; Questions and References are optional and present; MD040 satisfied.",
+          "current_text_evidence": [
+            {
+              "quote": "These starting ranges are heuristics. Production values need task-specific evaluation on the chosen model.",
+              "line_start": 56,
+              "reason": "The settings table is correctly hedged, so the numeric ranges are not presented as facts."
+            },
+            {
+              "quote": "Strict output shape needs structured output or schema validation.",
+              "line_start": 135,
+              "reason": "The prose is consistent with the Mermaid flow above it and states the boundary that examples cover semantics a schema cannot."
+            },
+            {
+              "quote": "**Correct shape, wrong content.**",
+              "line_start": 140,
+              "reason": "The pitfall names a concrete failure, schema-valid but invented values, and its mitigation."
+            },
+            {
+              "quote": "Why must prompt instructions and generation settings be evaluated together?",
+              "line_start": 146,
+              "reason": "This is a single dependent why-explanation with conditions, such as model and endpoint parameter support, and an answer-side source."
+            },
+            {
+              "quote": "How can an output-token cap limit cost without truncating valid answers?",
+              "line_start": 157,
+              "reason": "This is one coherent sizing and truncation task. The answer covers reasoning tokens, context sharing, truncation detection and the endpoint-specific parameter names."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: the note is a compact hub, and its child notes already cover in-context learning, reasoning, composition and optimization separately.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        },
+        "review_process": "focused-whole-note-v1"
+      }
     }
   },
   "topics": {
@@ -5546,7 +5606,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-07T06:14:05.879571Z",
-    "elapsed_seconds": 281.6321348999998,
+    "elapsed_seconds": 284.8415608999998,
     "calls_reserved": 10,
     "responses_received": 10,
     "attempted_paths": [
@@ -5851,7 +5911,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-07T06:18:47.511165Z",
+    "checkpoint_at": "2026-11-07T06:18:50.720591Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -9335,6 +9395,91 @@
       ],
       "source_hashes": {
         "Vault/Home/AI & ML/LLM/Prompt Engineering/In-Context Learning.md": "af5469383583e5542bdf7caf58d5954b9a5387fd140c01c08ee3fb0a799a7493"
+      },
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "7d3e5e0ffaaec894adb14d28df50b099760aed343e737aecb06222eb08a6dabd": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "overall_reason": "Independent whole-note read found no factual, structural, voice or question-quality defect. No edits were proposed, so keeping the note unchanged is justified.",
+        "change_checks": [],
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md",
+            "verdict": "CLEAN",
+            "summary": "The note explains prompt anatomy, settings, instruction and role prompting, technique selection and pitfalls accurately and in a whiteboard voice. Both Qards each test one dependent task and carry answer-side primary sources, and no edit is warranted.",
+            "page_type": "FolderNote — keeps tags FolderNote and the protected datacorejsx map; Questions and References are optional and present; MD040 satisfied.",
+            "current_text_evidence": [
+              {
+                "quote": "These starting ranges are heuristics. Production values need task-specific evaluation on the chosen model.",
+                "line_start": 56,
+                "reason": "The settings table is correctly hedged, so the numeric ranges are not presented as facts."
+              },
+              {
+                "quote": "Strict output shape needs structured output or schema validation.",
+                "line_start": 136,
+                "reason": "The prose is consistent with the Mermaid flow above it and states the boundary that examples cover semantics a schema cannot."
+              },
+              {
+                "quote": "**Correct shape, wrong content.**",
+                "line_start": 141,
+                "reason": "The pitfall names a concrete failure, schema-valid but invented values, and its mitigation."
+              },
+              {
+                "quote": "Why must prompt instructions and generation settings be evaluated together?",
+                "line_start": 147,
+                "reason": "This is a single dependent why-explanation with conditions, such as model and endpoint parameter support, and an answer-side source."
+              },
+              {
+                "quote": "How can an output-token cap limit cost without truncating valid answers?",
+                "line_start": 158,
+                "reason": "This is one coherent sizing and truncation task. The answer covers reasoning tokens, context sharing, truncation detection and the endpoint-specific parameter names."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: the note is a compact hub, and its child notes already cover in-context learning, reasoning, composition and optimization separately.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ]
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md",
+          "citation_index": 1,
+          "reported_line_start": 136,
+          "resolved_line_start": 135
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md",
+          "citation_index": 2,
+          "reported_line_start": 141,
+          "resolved_line_start": 140
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md",
+          "citation_index": 3,
+          "reported_line_start": 147,
+          "resolved_line_start": 146
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md",
+          "citation_index": 4,
+          "reported_line_start": 158,
+          "resolved_line_start": 157
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md": "848673ffdf77c37fb16590e242781ec160c908bb04f8b9b4730190393cde5436"
       },
       "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
@@ -20999,191 +21144,6 @@
         "change_checks": []
       },
       "feedback_snapshot": []
-    }
-  },
-  "pending_author_proposal": {
-    "workload_id": "f57944c05f7944ee8610e2bd6384fd74",
-    "topic_id": "ai-ml-4edf0823",
-    "batch": {
-      "topic": "AI & ML",
-      "topic_id": "ai-ml-4edf0823",
-      "notes": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md",
-          "content": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"Turning vague intentions into precise, testable model tasks: anatomy, settings, and role prompting.\"\nlevel: [\"3\"]\nstatus: Done\ntags: [FolderNote]\npublish: true\npriority: Medium\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Prompt Engineering/Prompt Engineering\"\nflashcard_uid: \"008ceb7e\"\ncreated: \"2026-02-10T16:03:55.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.482Z\"\n---\n\nPrompt engineering turns an intention into a task the model can execute and the system can test. Small changes in wording or generation settings can shift output quality because an LLM samples from a probability distribution rather than following a fixed program.\n\nIn production, the prompt is part of the system interface. It needs explicit behavior, version control, and evaluation like any other executable contract. This hub covers the basic mechanics. Its child notes handle in-context learning, reasoning, prompt composition, and automated optimization in more depth.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# Prompt Anatomy\n\nFour elements cover most prompt contracts:\n\n- **Instruction** names the exact task.\n- **Context** supplies domain facts or constraints.\n- **Input data** contains the material to process now.\n- **Output indicator** defines the required answer shape.\n\nThe following prompt uses all four:\n\n```text\nInstruction: Extract security risks from the incident note.\nContext: You are helping a SOC analyst. Keep findings actionable and concise.\nInput data: \"API keys were stored in plain text logs for 3 days in staging.\"\nOutput indicator: Return JSON with fields risk, impact, mitigation.\n```\n\nEach element removes a different ambiguity. The instruction narrows behavior, context guides interpretation, input anchors the current case, and the output indicator constrains the result.\n\n# LLM Settings\n\nPrompt text describes the task. Generation settings control sampling and output limits.\n\n- **Temperature** raises or lowers sampling randomness.\n- **Top-p** restricts candidate tokens to a cumulative probability mass. Lower values narrow the set.\n- **Max tokens** caps generated length and therefore limits part of the cost and latency.\n- **Stop sequences** terminate output when the model emits a specified string.\n\nThese starting ranges are heuristics. Production values need task-specific evaluation on the chosen model.\n\n| Task type | Temperature | Top-p | Max tokens | Stop sequences |\n|---|---:|---:|---:|---|\n| Creative writing | 0.8-1.0 | 0.9-1.0 | 600-1200 | Optional section markers |\n| Classification | 0.0-0.2 | 0.1-0.4 | 20-80 | Label boundary, newline |\n| Code generation | 0.1-0.3 | 0.8-1.0 | 200-800 | ``` or custom delimiter |\n\nA simple starting policy is to tune `temperature` first and leave `top-p` near its default until an evaluation shows that both need adjustment.\n\n# Instruction Prompting\n\nInstruction prompting states the task and result format directly. It works when the requested behavior is specific enough to observe and test.\n\nA useful instruction usually contains:\n\n- A task verb such as classify, extract, summarize, or transform.\n- An explicit format such as a JSON schema, table columns, or a fixed label set.\n- Relevant constraints on length, forbidden content, confidence, or tone.\n\nExample 1 (name normalization):\n\n```text\nConvert the person name to this format: <Last name>, <First name>.\nIf suffix exists, keep it after first name.\nInput: \"Nikita Reshetnik\"\nOutput:\n```\n\nExample 2 (PII redaction):\n\n```text\nRedact all personal data from the email.\nReplace names with [NAME], phones with [PHONE], and emails with [EMAIL].\nReturn only redacted text.\nInput: \"Hi John, call me at 410-805-2345.\"\n```\n\nWhen outputs drift, tightening the output indicator is usually cheaper than adding another prompting technique.\n\n# Role Prompting\n\nRole prompting supplies a perspective that changes style, depth, or framing. The role modifies task execution. It does not replace the task.\n\n- It fits tasks where voice or audience matters.\n- Accuracy boundaries still need to be explicit.\n- Concrete roles work better than vague personas.\n\nIllustrative contrast:\n\n```text\nStandard: Write a review of this pizza place.\nRole-based: You are a food critic writing for a city newspaper. Write a review of this pizza place in 120-150 words, focusing on crust texture, sauce balance, and service.\n```\n\nThe second version gives the model a concrete perspective and observable review criteria. The role alone would not provide those constraints.\n\n# Choosing a Technique\n\nThis flow is a useful first pass:\n\n```mermaid\nflowchart TD\n    A[Start with task goal] --> B{Simple direct task}\n    B -->|Yes| C[Use instruction or zero shot]\n    B -->|No| D{Need strict output shape}\n    D -->|Yes| E[Use structured output or schema; add examples for semantics]\n    D -->|No| F{Needs deeper reasoning}\n    F -->|Yes| G[Use reasoning scaffolding plus verification]\n    F -->|No| H{Multiple dependent steps}\n    H -->|Yes| I[Use prompt chaining]\n    H -->|No| J[Use role plus instruction]\n    C --> K[Evaluate and iterate]\n    E --> K\n    G --> K\n    I --> K\n    J --> K\n```\n\nStrict output shape needs structured output or schema validation. Examples can clarify semantics that the schema cannot express. A task that cannot fit one instruction may need [[Prompt Composition]]. In both cases, representative evaluation matters more than eliciting hidden reasoning traces; meta prompting is only one way to generate candidate instructions.\n\n# Pitfalls\n\n- **Indirect prompt injection from retrieved content.** A document, web page, or tool result may contain malicious instructions that the model mistakes for trusted guidance. Mitigations keep trusted instructions separate from untrusted data, restrict tools by policy, and validate outputs.\n- **Correct shape, wrong content.** JSON can pass schema validation while carrying invented values. Semantic checks for ranges, required relationships, and source-grounded claims catch what the schema cannot.\n- **Token budget collapse.** Long context and verbose generations can crowd out critical instructions or examples. Input and output budgets are controlled together, and truncation is monitored instead of assuming the model saw everything.\n\n# Questions\n\n<!-- qard-id: 15c3b707-bc20-4a2a-8db8-5a3198d20844 -->\n> [!qard]- Why must prompt instructions and generation settings be evaluated together?\n> The prompt and the generation settings control different parts of the result, and neither can compensate for a defect in the other. The prompt defines the task, context, constraints and requested output. Where the selected model and endpoint support them, generation settings control sampling and output limits.\n>\n> - A low-randomness setting, such as a low temperature, makes output more repeatable but cannot resolve an ambiguous instruction. It can just produce the same misreading more consistently.\n> - A clear prompt cannot make an unsupported setting take effect. Parameter support differs across models and endpoints, so values tuned on one model may not carry over to another.\n> \n> Because the result depends on the combination, prompt and settings are evaluated together on a task-specific set for the selected model and endpoint. A change to either one, or a switch to another model, calls for reevaluation.\n>\n> Sources: [OpenAI prompt engineering](https://developers.openai.com/api/docs/guides/prompt-engineering) · [OpenAI reasoning best practices](https://developers.openai.com/api/docs/guides/reasoning-best-practices)\n\n<!-- qard-id: b6902cab-7ab7-4955-ac30-1916ef9fbccc -->\n> [!qard]- How can an output-token cap limit cost without truncating valid answers?\n> An output-token cap limits cost as a hard ceiling against runaway generation, not as a way to shorten normal answers. Normal length and cost are reduced through the prompt. The cap is sized from the measured total of generated tokens plus headroom, within the room the context window leaves after the input.\n>\n> - **Prompt first:** repeated instructions, irrelevant context and redundant examples are removed, and the desired answer shape is stated directly, such as a label, a fixed set of fields or a length limit. This lowers cost without risking a cut-off answer.\n> - **Cap as a ceiling:** generation stops when the cap is reached, whether or not the answer is complete. A cap is not a reliable request for concise wording, so a cap set near typical length truncates longer valid answers. A truncated JSON object, for example, no longer parses.\n> - **Total generated tokens:** the cap is sized from the generated-token counts of valid responses on the evaluation set, plus headroom. Where a model's reasoning or other non-visible tokens count toward the output limit, they belong in that total. Hidden reasoning can then use up the cap before a short visible answer is finished, or before any visible output appears.\n> - **Context capacity:** input and generated tokens share the model's context window. A long input leaves less room for output, so generation can stop at the context limit before it reaches the cap.\n> - **Detecting truncation:** a response that stopped at a limit is identified from the stop or incomplete reason that the API returns. It is handled as truncated rather than complete.\n> \n> Parameter names and limit reporting are endpoint- and model-specific. In OpenAI's APIs, Responses uses `max_output_tokens` and Chat Completions uses `max_completion_tokens`. On OpenAI reasoning models, reasoning tokens count toward that limit and are billed as output tokens. A Responses call that hits the limit returns an `incomplete` status with the reason `max_output_tokens`.\n>\n> Sources: [OpenAI token counting](https://developers.openai.com/api/docs/guides/token-counting) · [OpenAI reasoning models](https://developers.openai.com/api/docs/guides/reasoning)\n\n# References\n\n- [Prompt Engineering Guide](https://www.promptingguide.ai/)\n- [OpenAI Prompt Engineering Guide](https://platform.openai.com/docs/guides/prompt-engineering)\n- [Anthropic Prompt Engineering Overview](https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/overview)\n",
-          "hash": "848673ffdf77c37fb16590e242781ec160c908bb04f8b9b4730190393cde5436",
-          "topic": "AI & ML",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "new"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md",
-          "outcome": "keep",
-          "reason": "I read the whole note against its current text. The opening ties prompts to sampling and to the system interface. The four-element anatomy has a worked example that uses all four elements. The settings section correctly separates temperature, top-p, max tokens and stop sequences, and it labels its ranges as heuristics that need evaluation. The instruction and role examples are concrete. The Mermaid flow agrees with the prose, and the Pitfalls cover injection, schema-valid but wrong content, and token-budget collapse. The two existing Qards each test one gradeable task. Their answers cover conditions and exceptions, such as parameter support varying by model and reasoning tokens counting toward output limits. Their cited OpenAI claims match the vendor's documented behavior. The code fences have language identifiers, and the note has no unresolved known violations. I found no factual error or learning gap, so I made no edits."
-        }
-      ],
-      "feedback": []
-    },
-    "source_hashes": {
-      "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md": "848673ffdf77c37fb16590e242781ec160c908bb04f8b9b4730190393cde5436"
-    },
-    "feedback_keys": [],
-    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-07T06:18:25.674343Z",
-    "review_evidence": {
-      "raw_review": {
-        "verdict": "CLEAN",
-        "overall_reason": "Independent whole-note read found no factual, structural, voice or question-quality defect. No edits were proposed, so keeping the note unchanged is justified.",
-        "change_checks": [],
-        "notes": [
-          {
-            "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md",
-            "verdict": "CLEAN",
-            "summary": "The note explains prompt anatomy, settings, instruction and role prompting, technique selection and pitfalls accurately and in a whiteboard voice. Both Qards each test one dependent task and carry answer-side primary sources, and no edit is warranted.",
-            "page_type": "FolderNote — keeps tags FolderNote and the protected datacorejsx map; Questions and References are optional and present; MD040 satisfied.",
-            "current_text_evidence": [
-              {
-                "quote": "These starting ranges are heuristics. Production values need task-specific evaluation on the chosen model.",
-                "line_start": 56,
-                "reason": "The settings table is correctly hedged, so the numeric ranges are not presented as facts."
-              },
-              {
-                "quote": "Strict output shape needs structured output or schema validation.",
-                "line_start": 136,
-                "reason": "The prose is consistent with the Mermaid flow above it and states the boundary that examples cover semantics a schema cannot."
-              },
-              {
-                "quote": "**Correct shape, wrong content.**",
-                "line_start": 141,
-                "reason": "The pitfall names a concrete failure, schema-valid but invented values, and its mitigation."
-              },
-              {
-                "quote": "Why must prompt instructions and generation settings be evaluated together?",
-                "line_start": 147,
-                "reason": "This is a single dependent why-explanation with conditions, such as model and endpoint parameter support, and an answer-side source."
-              },
-              {
-                "quote": "How can an output-token cap limit cost without truncating valid answers?",
-                "line_start": 158,
-                "reason": "This is one coherent sizing and truncation task. The answer covers reasoning tokens, context sharing, truncation detection and the endpoint-specific parameter names."
-              }
-            ],
-            "target_resolution": "JUSTIFIED UNCHANGED",
-            "split_suggestion": "No split: the note is a compact hub, and its child notes already cover in-context learning, reasoning, composition and optimization separately.",
-            "findings": [],
-            "source_checks": [],
-            "rejection_equivalence": [],
-            "quality": {
-              "accuracy": "PASS",
-              "clarity": "PASS",
-              "question_quality": "PASS",
-              "identity_safety": "PASS",
-              "rules_compliance": "PASS"
-            }
-          }
-        ]
-      },
-      "bindings": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md",
-          "citation_index": 1,
-          "reported_line_start": 136,
-          "resolved_line_start": 135
-        },
-        {
-          "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md",
-          "citation_index": 2,
-          "reported_line_start": 141,
-          "resolved_line_start": 140
-        },
-        {
-          "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md",
-          "citation_index": 3,
-          "reported_line_start": 147,
-          "resolved_line_start": 146
-        },
-        {
-          "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md",
-          "citation_index": 4,
-          "reported_line_start": 158,
-          "resolved_line_start": 157
-        }
-      ],
-      "source_hashes": {
-        "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md": "848673ffdf77c37fb16590e242781ec160c908bb04f8b9b4730190393cde5436"
-      },
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
-    },
-    "completed_review": {
-      "verdict": "CLEAN",
-      "overall_reason": "Independent whole-note read found no factual, structural, voice or question-quality defect. No edits were proposed, so keeping the note unchanged is justified.",
-      "change_checks": [],
-      "notes": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md",
-          "verdict": "CLEAN",
-          "summary": "The note explains prompt anatomy, settings, instruction and role prompting, technique selection and pitfalls accurately and in a whiteboard voice. Both Qards each test one dependent task and carry answer-side primary sources, and no edit is warranted.",
-          "page_type": "FolderNote — keeps tags FolderNote and the protected datacorejsx map; Questions and References are optional and present; MD040 satisfied.",
-          "current_text_evidence": [
-            {
-              "quote": "These starting ranges are heuristics. Production values need task-specific evaluation on the chosen model.",
-              "line_start": 56,
-              "reason": "The settings table is correctly hedged, so the numeric ranges are not presented as facts."
-            },
-            {
-              "quote": "Strict output shape needs structured output or schema validation.",
-              "line_start": 135,
-              "reason": "The prose is consistent with the Mermaid flow above it and states the boundary that examples cover semantics a schema cannot."
-            },
-            {
-              "quote": "**Correct shape, wrong content.**",
-              "line_start": 140,
-              "reason": "The pitfall names a concrete failure, schema-valid but invented values, and its mitigation."
-            },
-            {
-              "quote": "Why must prompt instructions and generation settings be evaluated together?",
-              "line_start": 146,
-              "reason": "This is a single dependent why-explanation with conditions, such as model and endpoint parameter support, and an answer-side source."
-            },
-            {
-              "quote": "How can an output-token cap limit cost without truncating valid answers?",
-              "line_start": 157,
-              "reason": "This is one coherent sizing and truncation task. The answer covers reasoning tokens, context sharing, truncation detection and the endpoint-specific parameter names."
-            }
-          ],
-          "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: the note is a compact hub, and its child notes already cover in-context learning, reasoning, composition and optimization separately.",
-          "findings": [],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "PASS",
-            "question_quality": "PASS",
-            "identity_safety": "PASS",
-            "rules_compliance": "PASS"
-          }
-        }
-      ]
     }
   }
 }
